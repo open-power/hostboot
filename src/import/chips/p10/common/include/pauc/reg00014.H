@@ -5811,12 +5811,1272 @@ fapi_try_exit:
 #endif
 }
 
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_49(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_49,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_49 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_49(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_49,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_49 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_49(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.setBit<EPS_FIR_LOCAL_ACTION1_49>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_49 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EPS_FIR_LOCAL_ACTION1_49(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.clearBit<EPS_FIR_LOCAL_ACTION1_49>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_49 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EPS_FIR_LOCAL_ACTION1_49(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.extractToRight<EPS_FIR_LOCAL_ACTION1_49,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_49 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_EPS_FIR_LOCAL_ACTION1_49(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.getBit<EPS_FIR_LOCAL_ACTION1_49>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_49 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_50(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_50,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_50 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_50(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_50,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_50 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_50(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.setBit<EPS_FIR_LOCAL_ACTION1_50>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_50 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EPS_FIR_LOCAL_ACTION1_50(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.clearBit<EPS_FIR_LOCAL_ACTION1_50>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_50 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EPS_FIR_LOCAL_ACTION1_50(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.extractToRight<EPS_FIR_LOCAL_ACTION1_50,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_50 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_EPS_FIR_LOCAL_ACTION1_50(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.getBit<EPS_FIR_LOCAL_ACTION1_50>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_50 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_51(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_51,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_51 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_51(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_51,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_51 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_51(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.setBit<EPS_FIR_LOCAL_ACTION1_51>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_51 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EPS_FIR_LOCAL_ACTION1_51(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.clearBit<EPS_FIR_LOCAL_ACTION1_51>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_51 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EPS_FIR_LOCAL_ACTION1_51(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.extractToRight<EPS_FIR_LOCAL_ACTION1_51,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_51 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_EPS_FIR_LOCAL_ACTION1_51(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.getBit<EPS_FIR_LOCAL_ACTION1_51>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_51 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_52(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_52,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_52 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_52(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_52,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_52 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_52(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.setBit<EPS_FIR_LOCAL_ACTION1_52>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_52 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EPS_FIR_LOCAL_ACTION1_52(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.clearBit<EPS_FIR_LOCAL_ACTION1_52>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_52 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EPS_FIR_LOCAL_ACTION1_52(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.extractToRight<EPS_FIR_LOCAL_ACTION1_52,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_52 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_EPS_FIR_LOCAL_ACTION1_52(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.getBit<EPS_FIR_LOCAL_ACTION1_52>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_52 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_53(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_53,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_53 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_53(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_53,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_53 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_53(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.setBit<EPS_FIR_LOCAL_ACTION1_53>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_53 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EPS_FIR_LOCAL_ACTION1_53(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.clearBit<EPS_FIR_LOCAL_ACTION1_53>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_53 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EPS_FIR_LOCAL_ACTION1_53(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.extractToRight<EPS_FIR_LOCAL_ACTION1_53,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_53 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_EPS_FIR_LOCAL_ACTION1_53(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.getBit<EPS_FIR_LOCAL_ACTION1_53>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_53 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_54(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_54,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_54 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_54(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_54,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_54 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_54(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.setBit<EPS_FIR_LOCAL_ACTION1_54>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_54 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EPS_FIR_LOCAL_ACTION1_54(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.clearBit<EPS_FIR_LOCAL_ACTION1_54>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_54 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EPS_FIR_LOCAL_ACTION1_54(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.extractToRight<EPS_FIR_LOCAL_ACTION1_54,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_54 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_EPS_FIR_LOCAL_ACTION1_54(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.getBit<EPS_FIR_LOCAL_ACTION1_54>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_54 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_55(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_55,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_55 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_55(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_55,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_55 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_55(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.setBit<EPS_FIR_LOCAL_ACTION1_55>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_55 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EPS_FIR_LOCAL_ACTION1_55(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.clearBit<EPS_FIR_LOCAL_ACTION1_55>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_55 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EPS_FIR_LOCAL_ACTION1_55(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.extractToRight<EPS_FIR_LOCAL_ACTION1_55,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_55 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_EPS_FIR_LOCAL_ACTION1_55(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.getBit<EPS_FIR_LOCAL_ACTION1_55>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_55 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_56(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_56,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_56 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_56(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_56,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_56 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_56(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.setBit<EPS_FIR_LOCAL_ACTION1_56>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_56 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EPS_FIR_LOCAL_ACTION1_56(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.clearBit<EPS_FIR_LOCAL_ACTION1_56>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_56 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EPS_FIR_LOCAL_ACTION1_56(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.extractToRight<EPS_FIR_LOCAL_ACTION1_56,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_56 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_EPS_FIR_LOCAL_ACTION1_56(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.getBit<EPS_FIR_LOCAL_ACTION1_56>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_56 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_57(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_57,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_57 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_57(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_57,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_57 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_57(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.setBit<EPS_FIR_LOCAL_ACTION1_57>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_57 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EPS_FIR_LOCAL_ACTION1_57(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.clearBit<EPS_FIR_LOCAL_ACTION1_57>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_57 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EPS_FIR_LOCAL_ACTION1_57(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.extractToRight<EPS_FIR_LOCAL_ACTION1_57,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_57 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_EPS_FIR_LOCAL_ACTION1_57(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.getBit<EPS_FIR_LOCAL_ACTION1_57>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_57 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_58(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_58,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_58 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_58(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_58,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_58 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_58(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.setBit<EPS_FIR_LOCAL_ACTION1_58>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_58 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EPS_FIR_LOCAL_ACTION1_58(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.clearBit<EPS_FIR_LOCAL_ACTION1_58>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_58 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EPS_FIR_LOCAL_ACTION1_58(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.extractToRight<EPS_FIR_LOCAL_ACTION1_58,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_58 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_EPS_FIR_LOCAL_ACTION1_58(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.getBit<EPS_FIR_LOCAL_ACTION1_58>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_58 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_59(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_59,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_59 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_59(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_59,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_59 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_59(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.setBit<EPS_FIR_LOCAL_ACTION1_59>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_59 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EPS_FIR_LOCAL_ACTION1_59(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.clearBit<EPS_FIR_LOCAL_ACTION1_59>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_59 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EPS_FIR_LOCAL_ACTION1_59(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.extractToRight<EPS_FIR_LOCAL_ACTION1_59,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_59 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_EPS_FIR_LOCAL_ACTION1_59(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.getBit<EPS_FIR_LOCAL_ACTION1_59>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_59 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_60(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_60,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_60 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_60(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_60,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_60 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_60(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.setBit<EPS_FIR_LOCAL_ACTION1_60>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_60 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EPS_FIR_LOCAL_ACTION1_60(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.clearBit<EPS_FIR_LOCAL_ACTION1_60>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_60 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EPS_FIR_LOCAL_ACTION1_60(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.extractToRight<EPS_FIR_LOCAL_ACTION1_60,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_60 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_EPS_FIR_LOCAL_ACTION1_60(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.getBit<EPS_FIR_LOCAL_ACTION1_60>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_60 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_61(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_61,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_61 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_61(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_61,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_61 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_61(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.setBit<EPS_FIR_LOCAL_ACTION1_61>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_61 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EPS_FIR_LOCAL_ACTION1_61(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.clearBit<EPS_FIR_LOCAL_ACTION1_61>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_61 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EPS_FIR_LOCAL_ACTION1_61(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.extractToRight<EPS_FIR_LOCAL_ACTION1_61,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_61 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_EPS_FIR_LOCAL_ACTION1_61(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.getBit<EPS_FIR_LOCAL_ACTION1_61>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_61 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_62(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_62,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_62 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_62(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_62,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_62 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_62(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.setBit<EPS_FIR_LOCAL_ACTION1_62>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_62 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EPS_FIR_LOCAL_ACTION1_62(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.clearBit<EPS_FIR_LOCAL_ACTION1_62>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_62 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EPS_FIR_LOCAL_ACTION1_62(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.extractToRight<EPS_FIR_LOCAL_ACTION1_62,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_62 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_EPS_FIR_LOCAL_ACTION1_62(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.getBit<EPS_FIR_LOCAL_ACTION1_62>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_62 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_63(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_63,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_63 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_63(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_63,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_63 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_63(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.setBit<EPS_FIR_LOCAL_ACTION1_63>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_63 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EPS_FIR_LOCAL_ACTION1_63(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.clearBit<EPS_FIR_LOCAL_ACTION1_63>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_63 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EPS_FIR_LOCAL_ACTION1_63(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.extractToRight<EPS_FIR_LOCAL_ACTION1_63,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_63 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_EPS_FIR_LOCAL_ACTION1_63(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.getBit<EPS_FIR_LOCAL_ACTION1_63>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_63 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FIR_MASK_REG_RWX(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_FIR_MASK_REG_RW(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FIR_MASK_REG_RWX;
+    scomt::last_scom = FIR_MASK_REG_RW;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -5826,14 +7086,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FIR_MASK_REG_RWX(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_FIR_MASK_REG_RW(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FIR_MASK_REG_RWX;
+    scomt::last_scom = FIR_MASK_REG_RW;
 #endif
-    return fapi2::getScom(i_target, FIR_MASK_REG_RWX, o_data);
+    return fapi2::getScom(i_target, FIR_MASK_REG_RW, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -5841,13 +7101,13 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FIR_MASK_REG_RWX(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+static inline fapi2::ReturnCode PUT_FIR_MASK_REG_RW(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
-    return fapi2::putScom(i_target, FIR_MASK_REG_RWX, i_data);
+    return fapi2::putScom(i_target, FIR_MASK_REG_RW, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -5855,11 +7115,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FIR_MASK_REG_WOX_AND(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_FIR_MASK_REG_WO_AND(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FIR_MASK_REG_WOX_AND;
+    scomt::last_scom = FIR_MASK_REG_WO_AND;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -5869,14 +7129,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FIR_MASK_REG_WOX_AND(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_FIR_MASK_REG_WO_AND(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FIR_MASK_REG_WOX_AND;
+    scomt::last_scom = FIR_MASK_REG_WO_AND;
 #endif
-    return fapi2::getScom(i_target, FIR_MASK_REG_WOX_AND, o_data);
+    return fapi2::getScom(i_target, FIR_MASK_REG_WO_AND, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -5884,13 +7144,13 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FIR_MASK_REG_WOX_AND(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+static inline fapi2::ReturnCode PUT_FIR_MASK_REG_WO_AND(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
-    return fapi2::putScom(i_target, FIR_MASK_REG_WOX_AND, i_data);
+    return fapi2::putScom(i_target, FIR_MASK_REG_WO_AND, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -5898,11 +7158,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FIR_MASK_REG_WOX_OR(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_FIR_MASK_REG_WO_OR(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FIR_MASK_REG_WOX_OR;
+    scomt::last_scom = FIR_MASK_REG_WO_OR;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -5912,14 +7172,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FIR_MASK_REG_WOX_OR(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_FIR_MASK_REG_WO_OR(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FIR_MASK_REG_WOX_OR;
+    scomt::last_scom = FIR_MASK_REG_WO_OR;
 #endif
-    return fapi2::getScom(i_target, FIR_MASK_REG_WOX_OR, o_data);
+    return fapi2::getScom(i_target, FIR_MASK_REG_WO_OR, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -5927,13 +7187,13 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FIR_MASK_REG_WOX_OR(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+static inline fapi2::ReturnCode PUT_FIR_MASK_REG_WO_OR(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
-    return fapi2::putScom(i_target, FIR_MASK_REG_WOX_OR, i_data);
+    return fapi2::putScom(i_target, FIR_MASK_REG_WO_OR, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -5946,7 +7206,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_IOO0_RX_INVALID_STATE_OR
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_IOO0_RX_INVALID_STATE_OR_PARITY_ERROR_MASK,
            1>(i_data);
@@ -5963,7 +7223,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_IOO0_RX_INVALID_STATE_OR
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_IOO0_RX_INVALID_STATE_OR_PARITY_ERROR_MASK,
            1>(i_data);
@@ -5979,7 +7239,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_IOO0_RX_INVALID_STATE_OR
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<FIR_MASK_REG_IOO0_RX_INVALID_STATE_OR_PARITY_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -5994,7 +7254,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FIR_MASK_REG_IOO0_RX_INVALID_STATE_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<FIR_MASK_REG_IOO0_RX_INVALID_STATE_OR_PARITY_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -6010,7 +7270,7 @@ static inline fapi2::buffer<uint64_t>& GET_FIR_MASK_REG_IOO0_RX_INVALID_STATE_OR
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<FIR_MASK_REG_IOO0_RX_INVALID_STATE_OR_PARITY_ERROR_MASK,
            1>(o_data);
@@ -6025,7 +7285,7 @@ fapi_try_exit:
 static inline bool GET_FIR_MASK_REG_IOO0_RX_INVALID_STATE_OR_PARITY_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<FIR_MASK_REG_IOO0_RX_INVALID_STATE_OR_PARITY_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -6041,7 +7301,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_IOO1_RX_INVALID_STATE_OR
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_IOO1_RX_INVALID_STATE_OR_PARITY_ERROR_MASK,
            1>(i_data);
@@ -6058,7 +7318,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_IOO1_RX_INVALID_STATE_OR
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_IOO1_RX_INVALID_STATE_OR_PARITY_ERROR_MASK,
            1>(i_data);
@@ -6074,7 +7334,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_IOO1_RX_INVALID_STATE_OR
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<FIR_MASK_REG_IOO1_RX_INVALID_STATE_OR_PARITY_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -6089,7 +7349,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FIR_MASK_REG_IOO1_RX_INVALID_STATE_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<FIR_MASK_REG_IOO1_RX_INVALID_STATE_OR_PARITY_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -6105,7 +7365,7 @@ static inline fapi2::buffer<uint64_t>& GET_FIR_MASK_REG_IOO1_RX_INVALID_STATE_OR
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<FIR_MASK_REG_IOO1_RX_INVALID_STATE_OR_PARITY_ERROR_MASK,
            1>(o_data);
@@ -6120,7 +7380,7 @@ fapi_try_exit:
 static inline bool GET_FIR_MASK_REG_IOO1_RX_INVALID_STATE_OR_PARITY_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<FIR_MASK_REG_IOO1_RX_INVALID_STATE_OR_PARITY_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -6136,7 +7396,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_OMI0_RX_INVALID_STATE_OR
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_OMI0_RX_INVALID_STATE_OR_PARITY_ERROR_MASK,
            1>(i_data);
@@ -6153,7 +7413,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_OMI0_RX_INVALID_STATE_OR
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_OMI0_RX_INVALID_STATE_OR_PARITY_ERROR_MASK,
            1>(i_data);
@@ -6169,7 +7429,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_OMI0_RX_INVALID_STATE_OR
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<FIR_MASK_REG_OMI0_RX_INVALID_STATE_OR_PARITY_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -6184,7 +7444,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FIR_MASK_REG_OMI0_RX_INVALID_STATE_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<FIR_MASK_REG_OMI0_RX_INVALID_STATE_OR_PARITY_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -6200,7 +7460,7 @@ static inline fapi2::buffer<uint64_t>& GET_FIR_MASK_REG_OMI0_RX_INVALID_STATE_OR
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<FIR_MASK_REG_OMI0_RX_INVALID_STATE_OR_PARITY_ERROR_MASK,
            1>(o_data);
@@ -6215,7 +7475,7 @@ fapi_try_exit:
 static inline bool GET_FIR_MASK_REG_OMI0_RX_INVALID_STATE_OR_PARITY_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<FIR_MASK_REG_OMI0_RX_INVALID_STATE_OR_PARITY_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -6231,7 +7491,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_OMI1_RX_INVALID_STATE_OR
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_OMI1_RX_INVALID_STATE_OR_PARITY_ERROR_MASK,
            1>(i_data);
@@ -6248,7 +7508,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_OMI1_RX_INVALID_STATE_OR
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_OMI1_RX_INVALID_STATE_OR_PARITY_ERROR_MASK,
            1>(i_data);
@@ -6264,7 +7524,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_OMI1_RX_INVALID_STATE_OR
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<FIR_MASK_REG_OMI1_RX_INVALID_STATE_OR_PARITY_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -6279,7 +7539,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FIR_MASK_REG_OMI1_RX_INVALID_STATE_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<FIR_MASK_REG_OMI1_RX_INVALID_STATE_OR_PARITY_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -6295,7 +7555,7 @@ static inline fapi2::buffer<uint64_t>& GET_FIR_MASK_REG_OMI1_RX_INVALID_STATE_OR
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<FIR_MASK_REG_OMI1_RX_INVALID_STATE_OR_PARITY_ERROR_MASK,
            1>(o_data);
@@ -6310,7 +7570,7 @@ fapi_try_exit:
 static inline bool GET_FIR_MASK_REG_OMI1_RX_INVALID_STATE_OR_PARITY_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<FIR_MASK_REG_OMI1_RX_INVALID_STATE_OR_PARITY_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -6326,7 +7586,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_IOO0_TX_INVALID_STATE_OR
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_IOO0_TX_INVALID_STATE_OR_PARITY_ERROR_MASK,
            1>(i_data);
@@ -6343,7 +7603,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_IOO0_TX_INVALID_STATE_OR
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_IOO0_TX_INVALID_STATE_OR_PARITY_ERROR_MASK,
            1>(i_data);
@@ -6359,7 +7619,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_IOO0_TX_INVALID_STATE_OR
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<FIR_MASK_REG_IOO0_TX_INVALID_STATE_OR_PARITY_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -6374,7 +7634,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FIR_MASK_REG_IOO0_TX_INVALID_STATE_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<FIR_MASK_REG_IOO0_TX_INVALID_STATE_OR_PARITY_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -6390,7 +7650,7 @@ static inline fapi2::buffer<uint64_t>& GET_FIR_MASK_REG_IOO0_TX_INVALID_STATE_OR
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<FIR_MASK_REG_IOO0_TX_INVALID_STATE_OR_PARITY_ERROR_MASK,
            1>(o_data);
@@ -6405,7 +7665,7 @@ fapi_try_exit:
 static inline bool GET_FIR_MASK_REG_IOO0_TX_INVALID_STATE_OR_PARITY_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<FIR_MASK_REG_IOO0_TX_INVALID_STATE_OR_PARITY_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -6421,7 +7681,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_IOO1_TX_INVALID_STATE_OR
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_IOO1_TX_INVALID_STATE_OR_PARITY_ERROR_MASK,
            1>(i_data);
@@ -6438,7 +7698,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_IOO1_TX_INVALID_STATE_OR
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_IOO1_TX_INVALID_STATE_OR_PARITY_ERROR_MASK,
            1>(i_data);
@@ -6454,7 +7714,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_IOO1_TX_INVALID_STATE_OR
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<FIR_MASK_REG_IOO1_TX_INVALID_STATE_OR_PARITY_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -6469,7 +7729,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FIR_MASK_REG_IOO1_TX_INVALID_STATE_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<FIR_MASK_REG_IOO1_TX_INVALID_STATE_OR_PARITY_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -6485,7 +7745,7 @@ static inline fapi2::buffer<uint64_t>& GET_FIR_MASK_REG_IOO1_TX_INVALID_STATE_OR
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<FIR_MASK_REG_IOO1_TX_INVALID_STATE_OR_PARITY_ERROR_MASK,
            1>(o_data);
@@ -6500,7 +7760,7 @@ fapi_try_exit:
 static inline bool GET_FIR_MASK_REG_IOO1_TX_INVALID_STATE_OR_PARITY_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<FIR_MASK_REG_IOO1_TX_INVALID_STATE_OR_PARITY_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -6516,7 +7776,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_OMI0_TX_INVALID_STATE_OR
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_OMI0_TX_INVALID_STATE_OR_PARITY_ERROR_MASK,
            1>(i_data);
@@ -6533,7 +7793,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_OMI0_TX_INVALID_STATE_OR
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_OMI0_TX_INVALID_STATE_OR_PARITY_ERROR_MASK,
            1>(i_data);
@@ -6549,7 +7809,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_OMI0_TX_INVALID_STATE_OR
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<FIR_MASK_REG_OMI0_TX_INVALID_STATE_OR_PARITY_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -6564,7 +7824,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FIR_MASK_REG_OMI0_TX_INVALID_STATE_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<FIR_MASK_REG_OMI0_TX_INVALID_STATE_OR_PARITY_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -6580,7 +7840,7 @@ static inline fapi2::buffer<uint64_t>& GET_FIR_MASK_REG_OMI0_TX_INVALID_STATE_OR
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<FIR_MASK_REG_OMI0_TX_INVALID_STATE_OR_PARITY_ERROR_MASK,
            1>(o_data);
@@ -6595,7 +7855,7 @@ fapi_try_exit:
 static inline bool GET_FIR_MASK_REG_OMI0_TX_INVALID_STATE_OR_PARITY_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<FIR_MASK_REG_OMI0_TX_INVALID_STATE_OR_PARITY_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -6611,7 +7871,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_OMI1_TX_INVALID_STATE_OR
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_OMI1_TX_INVALID_STATE_OR_PARITY_ERROR_MASK,
            1>(i_data);
@@ -6628,7 +7888,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_OMI1_TX_INVALID_STATE_OR
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_OMI1_TX_INVALID_STATE_OR_PARITY_ERROR_MASK,
            1>(i_data);
@@ -6644,7 +7904,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_OMI1_TX_INVALID_STATE_OR
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<FIR_MASK_REG_OMI1_TX_INVALID_STATE_OR_PARITY_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -6659,7 +7919,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FIR_MASK_REG_OMI1_TX_INVALID_STATE_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<FIR_MASK_REG_OMI1_TX_INVALID_STATE_OR_PARITY_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -6675,7 +7935,7 @@ static inline fapi2::buffer<uint64_t>& GET_FIR_MASK_REG_OMI1_TX_INVALID_STATE_OR
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<FIR_MASK_REG_OMI1_TX_INVALID_STATE_OR_PARITY_ERROR_MASK,
            1>(o_data);
@@ -6690,7 +7950,7 @@ fapi_try_exit:
 static inline bool GET_FIR_MASK_REG_OMI1_TX_INVALID_STATE_OR_PARITY_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<FIR_MASK_REG_OMI1_TX_INVALID_STATE_OR_PARITY_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -6706,7 +7966,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_ZCAL_INVALID_STATE_OR_PA
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_ZCAL_INVALID_STATE_OR_PARITY_ERROR_MASK,
            1>(i_data);
@@ -6722,7 +7982,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_ZCAL_INVALID_STATE_OR_PA
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_ZCAL_INVALID_STATE_OR_PARITY_ERROR_MASK,
            1>(i_data);
@@ -6738,7 +7998,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_ZCAL_INVALID_STATE_OR_PA
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<FIR_MASK_REG_ZCAL_INVALID_STATE_OR_PARITY_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -6753,7 +8013,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FIR_MASK_REG_ZCAL_INVALID_STATE_OR_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<FIR_MASK_REG_ZCAL_INVALID_STATE_OR_PARITY_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -6769,7 +8029,7 @@ static inline fapi2::buffer<uint64_t>& GET_FIR_MASK_REG_ZCAL_INVALID_STATE_OR_PA
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<FIR_MASK_REG_ZCAL_INVALID_STATE_OR_PARITY_ERROR_MASK,
            1>(o_data);
@@ -6784,7 +8044,7 @@ fapi_try_exit:
 static inline bool GET_FIR_MASK_REG_ZCAL_INVALID_STATE_OR_PARITY_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<FIR_MASK_REG_ZCAL_INVALID_STATE_OR_PARITY_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -6799,7 +8059,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_INT_HWERROR_MASK(fap
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_PPE_INT_HWERROR_MASK,
            1>(i_data);
@@ -6814,7 +8074,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_INT_HWERROR_MASK(con
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_PPE_INT_HWERROR_MASK,
            1>(i_data);
@@ -6828,7 +8088,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_INT_HWERROR_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<FIR_MASK_REG_PPE_INT_HWERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -6841,7 +8101,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_FIR_MASK_REG_PPE_INT_HWERROR_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<FIR_MASK_REG_PPE_INT_HWERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -6855,7 +8115,7 @@ static inline fapi2::buffer<uint64_t>& GET_FIR_MASK_REG_PPE_INT_HWERROR_MASK(fap
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<FIR_MASK_REG_PPE_INT_HWERROR_MASK,
            1>(o_data);
@@ -6869,7 +8129,7 @@ fapi_try_exit:
 static inline bool GET_FIR_MASK_REG_PPE_INT_HWERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<FIR_MASK_REG_PPE_INT_HWERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -6883,7 +8143,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_EXT_HWERROR_MASK(fap
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_PPE_EXT_HWERROR_MASK,
            1>(i_data);
@@ -6898,7 +8158,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_EXT_HWERROR_MASK(con
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_PPE_EXT_HWERROR_MASK,
            1>(i_data);
@@ -6912,7 +8172,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_EXT_HWERROR_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<FIR_MASK_REG_PPE_EXT_HWERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -6925,7 +8185,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_FIR_MASK_REG_PPE_EXT_HWERROR_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<FIR_MASK_REG_PPE_EXT_HWERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -6939,7 +8199,7 @@ static inline fapi2::buffer<uint64_t>& GET_FIR_MASK_REG_PPE_EXT_HWERROR_MASK(fap
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<FIR_MASK_REG_PPE_EXT_HWERROR_MASK,
            1>(o_data);
@@ -6953,7 +8213,7 @@ fapi_try_exit:
 static inline bool GET_FIR_MASK_REG_PPE_EXT_HWERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<FIR_MASK_REG_PPE_EXT_HWERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -6968,7 +8228,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_HALT_WATCHDOG_OR_INT
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_PPE_HALT_WATCHDOG_OR_INTERRUPT_MASK,
            1>(i_data);
@@ -6984,7 +8244,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_HALT_WATCHDOG_OR_INT
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_PPE_HALT_WATCHDOG_OR_INTERRUPT_MASK,
            1>(i_data);
@@ -7000,7 +8260,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_HALT_WATCHDOG_OR_INT
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<FIR_MASK_REG_PPE_HALT_WATCHDOG_OR_INTERRUPT_MASK>();
 #ifdef SCOM_CHECKING
@@ -7015,7 +8275,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FIR_MASK_REG_PPE_HALT_WATCHDOG_OR_I
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<FIR_MASK_REG_PPE_HALT_WATCHDOG_OR_INTERRUPT_MASK>();
 #ifdef SCOM_CHECKING
@@ -7031,7 +8291,7 @@ static inline fapi2::buffer<uint64_t>& GET_FIR_MASK_REG_PPE_HALT_WATCHDOG_OR_INT
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<FIR_MASK_REG_PPE_HALT_WATCHDOG_OR_INTERRUPT_MASK,
            1>(o_data);
@@ -7046,7 +8306,7 @@ fapi_try_exit:
 static inline bool GET_FIR_MASK_REG_PPE_HALT_WATCHDOG_OR_INTERRUPT_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<FIR_MASK_REG_PPE_HALT_WATCHDOG_OR_INTERRUPT_MASK>();
 #ifdef SCOM_CHECKING
@@ -7061,7 +8321,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_HALT_DEBUG_MASK(fapi
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_PPE_HALT_DEBUG_MASK,
            1>(i_data);
@@ -7076,7 +8336,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_HALT_DEBUG_MASK(cons
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_PPE_HALT_DEBUG_MASK,
            1>(i_data);
@@ -7090,7 +8350,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_HALT_DEBUG_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<FIR_MASK_REG_PPE_HALT_DEBUG_MASK>();
 #ifdef SCOM_CHECKING
@@ -7103,7 +8363,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_FIR_MASK_REG_PPE_HALT_DEBUG_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<FIR_MASK_REG_PPE_HALT_DEBUG_MASK>();
 #ifdef SCOM_CHECKING
@@ -7117,7 +8377,7 @@ static inline fapi2::buffer<uint64_t>& GET_FIR_MASK_REG_PPE_HALT_DEBUG_MASK(fapi
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<FIR_MASK_REG_PPE_HALT_DEBUG_MASK,
            1>(o_data);
@@ -7131,7 +8391,7 @@ fapi_try_exit:
 static inline bool GET_FIR_MASK_REG_PPE_HALT_DEBUG_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<FIR_MASK_REG_PPE_HALT_DEBUG_MASK>();
 #ifdef SCOM_CHECKING
@@ -7145,7 +8405,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_HALTED_MASK(fapi2::b
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_PPE_HALTED_MASK,
            1>(i_data);
@@ -7160,7 +8420,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_HALTED_MASK(const ui
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_PPE_HALTED_MASK,
            1>(i_data);
@@ -7174,7 +8434,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_HALTED_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<FIR_MASK_REG_PPE_HALTED_MASK>();
 #ifdef SCOM_CHECKING
@@ -7187,7 +8447,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_FIR_MASK_REG_PPE_HALTED_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<FIR_MASK_REG_PPE_HALTED_MASK>();
 #ifdef SCOM_CHECKING
@@ -7201,7 +8461,7 @@ static inline fapi2::buffer<uint64_t>& GET_FIR_MASK_REG_PPE_HALTED_MASK(fapi2::b
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<FIR_MASK_REG_PPE_HALTED_MASK,
            1>(o_data);
@@ -7215,7 +8475,7 @@ fapi_try_exit:
 static inline bool GET_FIR_MASK_REG_PPE_HALTED_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<FIR_MASK_REG_PPE_HALTED_MASK>();
 #ifdef SCOM_CHECKING
@@ -7229,7 +8489,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_WATCHDOG_TIMEOUT_MAS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_PPE_WATCHDOG_TIMEOUT_MASK,
            1>(i_data);
@@ -7244,7 +8504,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_WATCHDOG_TIMEOUT_MAS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_PPE_WATCHDOG_TIMEOUT_MASK,
            1>(i_data);
@@ -7258,7 +8518,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_WATCHDOG_TIMEOUT_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<FIR_MASK_REG_PPE_WATCHDOG_TIMEOUT_MASK>();
 #ifdef SCOM_CHECKING
@@ -7271,7 +8531,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_FIR_MASK_REG_PPE_WATCHDOG_TIMEOUT_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<FIR_MASK_REG_PPE_WATCHDOG_TIMEOUT_MASK>();
 #ifdef SCOM_CHECKING
@@ -7285,7 +8545,7 @@ static inline fapi2::buffer<uint64_t>& GET_FIR_MASK_REG_PPE_WATCHDOG_TIMEOUT_MAS
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<FIR_MASK_REG_PPE_WATCHDOG_TIMEOUT_MASK,
            1>(o_data);
@@ -7299,7 +8559,7 @@ fapi_try_exit:
 static inline bool GET_FIR_MASK_REG_PPE_WATCHDOG_TIMEOUT_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<FIR_MASK_REG_PPE_WATCHDOG_TIMEOUT_MASK>();
 #ifdef SCOM_CHECKING
@@ -7313,7 +8573,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_ARB_MISSED_SCRUB_TIC
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_PPE_ARB_MISSED_SCRUB_TICK_MASK,
            1>(i_data);
@@ -7328,7 +8588,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_ARB_MISSED_SCRUB_TIC
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_PPE_ARB_MISSED_SCRUB_TICK_MASK,
            1>(i_data);
@@ -7342,7 +8602,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_ARB_MISSED_SCRUB_TICK_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<FIR_MASK_REG_PPE_ARB_MISSED_SCRUB_TICK_MASK>();
 #ifdef SCOM_CHECKING
@@ -7356,7 +8616,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FIR_MASK_REG_PPE_ARB_MISSED_SCRUB_T
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<FIR_MASK_REG_PPE_ARB_MISSED_SCRUB_TICK_MASK>();
 #ifdef SCOM_CHECKING
@@ -7370,7 +8630,7 @@ static inline fapi2::buffer<uint64_t>& GET_FIR_MASK_REG_PPE_ARB_MISSED_SCRUB_TIC
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<FIR_MASK_REG_PPE_ARB_MISSED_SCRUB_TICK_MASK,
            1>(o_data);
@@ -7384,7 +8644,7 @@ fapi_try_exit:
 static inline bool GET_FIR_MASK_REG_PPE_ARB_MISSED_SCRUB_TICK_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<FIR_MASK_REG_PPE_ARB_MISSED_SCRUB_TICK_MASK>();
 #ifdef SCOM_CHECKING
@@ -7399,7 +8659,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_ARB_ARRAY_UNCORRECTA
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_PPE_ARB_ARRAY_UNCORRECTABLE_ERROR_MASK,
            1>(i_data);
@@ -7415,7 +8675,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_ARB_ARRAY_UNCORRECTA
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_PPE_ARB_ARRAY_UNCORRECTABLE_ERROR_MASK,
            1>(i_data);
@@ -7431,7 +8691,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_ARB_ARRAY_UNCORRECTA
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<FIR_MASK_REG_PPE_ARB_ARRAY_UNCORRECTABLE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -7446,7 +8706,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FIR_MASK_REG_PPE_ARB_ARRAY_UNCORREC
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<FIR_MASK_REG_PPE_ARB_ARRAY_UNCORRECTABLE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -7462,7 +8722,7 @@ static inline fapi2::buffer<uint64_t>& GET_FIR_MASK_REG_PPE_ARB_ARRAY_UNCORRECTA
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<FIR_MASK_REG_PPE_ARB_ARRAY_UNCORRECTABLE_ERROR_MASK,
            1>(o_data);
@@ -7477,7 +8737,7 @@ fapi_try_exit:
 static inline bool GET_FIR_MASK_REG_PPE_ARB_ARRAY_UNCORRECTABLE_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<FIR_MASK_REG_PPE_ARB_ARRAY_UNCORRECTABLE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -7493,7 +8753,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_ARB_ARRAY_CORRECTABL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_PPE_ARB_ARRAY_CORRECTABLE_ERROR_MASK,
            1>(i_data);
@@ -7509,7 +8769,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_ARB_ARRAY_CORRECTABL
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_PPE_ARB_ARRAY_CORRECTABLE_ERROR_MASK,
            1>(i_data);
@@ -7525,7 +8785,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_ARB_ARRAY_CORRECTABL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<FIR_MASK_REG_PPE_ARB_ARRAY_CORRECTABLE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -7540,7 +8800,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FIR_MASK_REG_PPE_ARB_ARRAY_CORRECTA
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<FIR_MASK_REG_PPE_ARB_ARRAY_CORRECTABLE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -7556,7 +8816,7 @@ static inline fapi2::buffer<uint64_t>& GET_FIR_MASK_REG_PPE_ARB_ARRAY_CORRECTABL
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<FIR_MASK_REG_PPE_ARB_ARRAY_CORRECTABLE_ERROR_MASK,
            1>(o_data);
@@ -7571,7 +8831,7 @@ fapi_try_exit:
 static inline bool GET_FIR_MASK_REG_PPE_ARB_ARRAY_CORRECTABLE_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<FIR_MASK_REG_PPE_ARB_ARRAY_CORRECTABLE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -7586,7 +8846,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_CODE_RECAL_ABORT_MAS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_PPE_CODE_RECAL_ABORT_MASK,
            1>(i_data);
@@ -7601,7 +8861,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_CODE_RECAL_ABORT_MAS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_PPE_CODE_RECAL_ABORT_MASK,
            1>(i_data);
@@ -7615,7 +8875,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_CODE_RECAL_ABORT_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<FIR_MASK_REG_PPE_CODE_RECAL_ABORT_MASK>();
 #ifdef SCOM_CHECKING
@@ -7628,7 +8888,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_FIR_MASK_REG_PPE_CODE_RECAL_ABORT_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<FIR_MASK_REG_PPE_CODE_RECAL_ABORT_MASK>();
 #ifdef SCOM_CHECKING
@@ -7642,7 +8902,7 @@ static inline fapi2::buffer<uint64_t>& GET_FIR_MASK_REG_PPE_CODE_RECAL_ABORT_MAS
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<FIR_MASK_REG_PPE_CODE_RECAL_ABORT_MASK,
            1>(o_data);
@@ -7656,7 +8916,7 @@ fapi_try_exit:
 static inline bool GET_FIR_MASK_REG_PPE_CODE_RECAL_ABORT_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<FIR_MASK_REG_PPE_CODE_RECAL_ABORT_MASK>();
 #ifdef SCOM_CHECKING
@@ -7670,7 +8930,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_CODE_FATAL_ERROR_MAS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_PPE_CODE_FATAL_ERROR_MASK,
            1>(i_data);
@@ -7685,7 +8945,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_CODE_FATAL_ERROR_MAS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_PPE_CODE_FATAL_ERROR_MASK,
            1>(i_data);
@@ -7699,7 +8959,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_CODE_FATAL_ERROR_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<FIR_MASK_REG_PPE_CODE_FATAL_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -7712,7 +8972,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_FIR_MASK_REG_PPE_CODE_FATAL_ERROR_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<FIR_MASK_REG_PPE_CODE_FATAL_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -7726,7 +8986,7 @@ static inline fapi2::buffer<uint64_t>& GET_FIR_MASK_REG_PPE_CODE_FATAL_ERROR_MAS
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<FIR_MASK_REG_PPE_CODE_FATAL_ERROR_MASK,
            1>(o_data);
@@ -7740,7 +9000,7 @@ fapi_try_exit:
 static inline bool GET_FIR_MASK_REG_PPE_CODE_FATAL_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<FIR_MASK_REG_PPE_CODE_FATAL_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -7754,7 +9014,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_CODE_WARNING_MASK(fa
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_PPE_CODE_WARNING_MASK,
            1>(i_data);
@@ -7769,7 +9029,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_CODE_WARNING_MASK(co
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_PPE_CODE_WARNING_MASK,
            1>(i_data);
@@ -7783,7 +9043,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_CODE_WARNING_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<FIR_MASK_REG_PPE_CODE_WARNING_MASK>();
 #ifdef SCOM_CHECKING
@@ -7796,7 +9056,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_FIR_MASK_REG_PPE_CODE_WARNING_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<FIR_MASK_REG_PPE_CODE_WARNING_MASK>();
 #ifdef SCOM_CHECKING
@@ -7810,7 +9070,7 @@ static inline fapi2::buffer<uint64_t>& GET_FIR_MASK_REG_PPE_CODE_WARNING_MASK(fa
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<FIR_MASK_REG_PPE_CODE_WARNING_MASK,
            1>(o_data);
@@ -7824,7 +9084,7 @@ fapi_try_exit:
 static inline bool GET_FIR_MASK_REG_PPE_CODE_WARNING_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<FIR_MASK_REG_PPE_CODE_WARNING_MASK>();
 #ifdef SCOM_CHECKING
@@ -7838,7 +9098,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_CODE_DFT_ERROR_MASK(
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_PPE_CODE_DFT_ERROR_MASK,
            1>(i_data);
@@ -7853,7 +9113,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_CODE_DFT_ERROR_MASK(
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_PPE_CODE_DFT_ERROR_MASK,
            1>(i_data);
@@ -7867,7 +9127,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_CODE_DFT_ERROR_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<FIR_MASK_REG_PPE_CODE_DFT_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -7880,7 +9140,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_FIR_MASK_REG_PPE_CODE_DFT_ERROR_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<FIR_MASK_REG_PPE_CODE_DFT_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -7894,7 +9154,7 @@ static inline fapi2::buffer<uint64_t>& GET_FIR_MASK_REG_PPE_CODE_DFT_ERROR_MASK(
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<FIR_MASK_REG_PPE_CODE_DFT_ERROR_MASK,
            1>(o_data);
@@ -7908,7 +9168,7 @@ fapi_try_exit:
 static inline bool GET_FIR_MASK_REG_PPE_CODE_DFT_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<FIR_MASK_REG_PPE_CODE_DFT_ERROR_MASK>();
 #ifdef SCOM_CHECKING
@@ -7922,7 +9182,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_CODE_RECAL_NOT_RUN_M
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_PPE_CODE_RECAL_NOT_RUN_MASK,
            1>(i_data);
@@ -7937,7 +9197,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_CODE_RECAL_NOT_RUN_M
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_PPE_CODE_RECAL_NOT_RUN_MASK,
            1>(i_data);
@@ -7951,7 +9211,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_CODE_RECAL_NOT_RUN_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<FIR_MASK_REG_PPE_CODE_RECAL_NOT_RUN_MASK>();
 #ifdef SCOM_CHECKING
@@ -7964,7 +9224,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_FIR_MASK_REG_PPE_CODE_RECAL_NOT_RUN_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<FIR_MASK_REG_PPE_CODE_RECAL_NOT_RUN_MASK>();
 #ifdef SCOM_CHECKING
@@ -7978,7 +9238,7 @@ static inline fapi2::buffer<uint64_t>& GET_FIR_MASK_REG_PPE_CODE_RECAL_NOT_RUN_M
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<FIR_MASK_REG_PPE_CODE_RECAL_NOT_RUN_MASK,
            1>(o_data);
@@ -7992,7 +9252,7 @@ fapi_try_exit:
 static inline bool GET_FIR_MASK_REG_PPE_CODE_RECAL_NOT_RUN_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<FIR_MASK_REG_PPE_CODE_RECAL_NOT_RUN_MASK>();
 #ifdef SCOM_CHECKING
@@ -8006,7 +9266,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_CODE_THREAD_LOCKED_M
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_PPE_CODE_THREAD_LOCKED_MASK,
            1>(i_data);
@@ -8021,7 +9281,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_CODE_THREAD_LOCKED_M
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_PPE_CODE_THREAD_LOCKED_MASK,
            1>(i_data);
@@ -8035,7 +9295,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_CODE_THREAD_LOCKED_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<FIR_MASK_REG_PPE_CODE_THREAD_LOCKED_MASK>();
 #ifdef SCOM_CHECKING
@@ -8048,7 +9308,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_FIR_MASK_REG_PPE_CODE_THREAD_LOCKED_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<FIR_MASK_REG_PPE_CODE_THREAD_LOCKED_MASK>();
 #ifdef SCOM_CHECKING
@@ -8062,7 +9322,7 @@ static inline fapi2::buffer<uint64_t>& GET_FIR_MASK_REG_PPE_CODE_THREAD_LOCKED_M
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<FIR_MASK_REG_PPE_CODE_THREAD_LOCKED_MASK,
            1>(o_data);
@@ -8076,7 +9336,7 @@ fapi_try_exit:
 static inline bool GET_FIR_MASK_REG_PPE_CODE_THREAD_LOCKED_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<FIR_MASK_REG_PPE_CODE_THREAD_LOCKED_MASK>();
 #ifdef SCOM_CHECKING
@@ -8090,7 +9350,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_CODE_6_MASK(fapi2::b
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_PPE_CODE_6_MASK,
            1>(i_data);
@@ -8105,7 +9365,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_CODE_6_MASK(const ui
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_PPE_CODE_6_MASK,
            1>(i_data);
@@ -8119,7 +9379,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_CODE_6_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<FIR_MASK_REG_PPE_CODE_6_MASK>();
 #ifdef SCOM_CHECKING
@@ -8132,7 +9392,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_FIR_MASK_REG_PPE_CODE_6_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<FIR_MASK_REG_PPE_CODE_6_MASK>();
 #ifdef SCOM_CHECKING
@@ -8146,7 +9406,7 @@ static inline fapi2::buffer<uint64_t>& GET_FIR_MASK_REG_PPE_CODE_6_MASK(fapi2::b
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<FIR_MASK_REG_PPE_CODE_6_MASK,
            1>(o_data);
@@ -8160,7 +9420,7 @@ fapi_try_exit:
 static inline bool GET_FIR_MASK_REG_PPE_CODE_6_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<FIR_MASK_REG_PPE_CODE_6_MASK>();
 #ifdef SCOM_CHECKING
@@ -8174,7 +9434,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_CODE_7_MASK(fapi2::b
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_PPE_CODE_7_MASK,
            1>(i_data);
@@ -8189,7 +9449,7 @@ static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_CODE_7_MASK(const ui
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FIR_MASK_REG_PPE_CODE_7_MASK,
            1>(i_data);
@@ -8203,7 +9463,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_FIR_MASK_REG_PPE_CODE_7_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<FIR_MASK_REG_PPE_CODE_7_MASK>();
 #ifdef SCOM_CHECKING
@@ -8216,7 +9476,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_FIR_MASK_REG_PPE_CODE_7_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<FIR_MASK_REG_PPE_CODE_7_MASK>();
 #ifdef SCOM_CHECKING
@@ -8230,7 +9490,7 @@ static inline fapi2::buffer<uint64_t>& GET_FIR_MASK_REG_PPE_CODE_7_MASK(fapi2::b
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<FIR_MASK_REG_PPE_CODE_7_MASK,
            1>(o_data);
@@ -8244,7 +9504,7 @@ fapi_try_exit:
 static inline bool GET_FIR_MASK_REG_PPE_CODE_7_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RWX, FIR_MASK_REG_WOX_AND, FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FIR_MASK_REG_RW, FIR_MASK_REG_WO_AND, FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<FIR_MASK_REG_PPE_CODE_7_MASK>();
 #ifdef SCOM_CHECKING
@@ -9249,11 +10509,11 @@ fapi_try_exit:
 
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_PB_PTL_FIR_MASK_REG_RWX(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_PB_PTL_FIR_MASK_REG_RW(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = PB_PTL_FIR_MASK_REG_RWX;
+    scomt::last_scom = PB_PTL_FIR_MASK_REG_RW;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -9263,14 +10523,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_PB_PTL_FIR_MASK_REG_RWX(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_PB_PTL_FIR_MASK_REG_RW(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = PB_PTL_FIR_MASK_REG_RWX;
+    scomt::last_scom = PB_PTL_FIR_MASK_REG_RW;
 #endif
-    return fapi2::getScom(i_target, PB_PTL_FIR_MASK_REG_RWX, o_data);
+    return fapi2::getScom(i_target, PB_PTL_FIR_MASK_REG_RW, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -9278,14 +10538,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_PB_PTL_FIR_MASK_REG_RWX(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_PB_PTL_FIR_MASK_REG_RW(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
-    return fapi2::putScom(i_target, PB_PTL_FIR_MASK_REG_RWX, i_data);
+    return fapi2::putScom(i_target, PB_PTL_FIR_MASK_REG_RW, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -9293,11 +10553,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_PB_PTL_FIR_MASK_REG_WOX_AND(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_PB_PTL_FIR_MASK_REG_WO_AND(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = PB_PTL_FIR_MASK_REG_WOX_AND;
+    scomt::last_scom = PB_PTL_FIR_MASK_REG_WO_AND;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -9307,14 +10567,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_PB_PTL_FIR_MASK_REG_WOX_AND(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_PB_PTL_FIR_MASK_REG_WO_AND(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = PB_PTL_FIR_MASK_REG_WOX_AND;
+    scomt::last_scom = PB_PTL_FIR_MASK_REG_WO_AND;
 #endif
-    return fapi2::getScom(i_target, PB_PTL_FIR_MASK_REG_WOX_AND, o_data);
+    return fapi2::getScom(i_target, PB_PTL_FIR_MASK_REG_WO_AND, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -9322,14 +10582,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_PB_PTL_FIR_MASK_REG_WOX_AND(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_PB_PTL_FIR_MASK_REG_WO_AND(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
-    return fapi2::putScom(i_target, PB_PTL_FIR_MASK_REG_WOX_AND, i_data);
+    return fapi2::putScom(i_target, PB_PTL_FIR_MASK_REG_WO_AND, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -9337,11 +10597,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_PB_PTL_FIR_MASK_REG_WOX_OR(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_PB_PTL_FIR_MASK_REG_WO_OR(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = PB_PTL_FIR_MASK_REG_WOX_OR;
+    scomt::last_scom = PB_PTL_FIR_MASK_REG_WO_OR;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -9351,14 +10611,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_PB_PTL_FIR_MASK_REG_WOX_OR(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_PB_PTL_FIR_MASK_REG_WO_OR(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = PB_PTL_FIR_MASK_REG_WOX_OR;
+    scomt::last_scom = PB_PTL_FIR_MASK_REG_WO_OR;
 #endif
-    return fapi2::getScom(i_target, PB_PTL_FIR_MASK_REG_WOX_OR, o_data);
+    return fapi2::getScom(i_target, PB_PTL_FIR_MASK_REG_WO_OR, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -9366,14 +10626,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_PB_PTL_FIR_MASK_REG_WOX_OR(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_PB_PTL_FIR_MASK_REG_WO_OR(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
-    return fapi2::putScom(i_target, PB_PTL_FIR_MASK_REG_WOX_OR, i_data);
+    return fapi2::putScom(i_target, PB_PTL_FIR_MASK_REG_WO_OR, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -9385,7 +10645,7 @@ static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FMR00_TRAINED_MAS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_FMR00_TRAINED_MASK,
            1>(i_data);
@@ -9400,7 +10660,7 @@ static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FMR00_TRAINED_MAS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_FMR00_TRAINED_MASK,
            1>(i_data);
@@ -9414,7 +10674,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FMR00_TRAINED_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<PB_PTL_FIR_MASK_REG_FMR00_TRAINED_MASK>();
 #ifdef SCOM_CHECKING
@@ -9427,7 +10687,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_FMR00_TRAINED_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<PB_PTL_FIR_MASK_REG_FMR00_TRAINED_MASK>();
 #ifdef SCOM_CHECKING
@@ -9441,7 +10701,7 @@ static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_FMR00_TRAINED_MAS
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<PB_PTL_FIR_MASK_REG_FMR00_TRAINED_MASK,
            1>(o_data);
@@ -9455,7 +10715,7 @@ fapi_try_exit:
 static inline bool GET_PB_PTL_FIR_MASK_REG_FMR00_TRAINED_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<PB_PTL_FIR_MASK_REG_FMR00_TRAINED_MASK>();
 #ifdef SCOM_CHECKING
@@ -9469,7 +10729,7 @@ static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FMR01_TRAINED_MAS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_FMR01_TRAINED_MASK,
            1>(i_data);
@@ -9484,7 +10744,7 @@ static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FMR01_TRAINED_MAS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_FMR01_TRAINED_MASK,
            1>(i_data);
@@ -9498,7 +10758,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FMR01_TRAINED_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<PB_PTL_FIR_MASK_REG_FMR01_TRAINED_MASK>();
 #ifdef SCOM_CHECKING
@@ -9511,7 +10771,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_FMR01_TRAINED_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<PB_PTL_FIR_MASK_REG_FMR01_TRAINED_MASK>();
 #ifdef SCOM_CHECKING
@@ -9525,7 +10785,7 @@ static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_FMR01_TRAINED_MAS
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<PB_PTL_FIR_MASK_REG_FMR01_TRAINED_MASK,
            1>(o_data);
@@ -9539,7 +10799,7 @@ fapi_try_exit:
 static inline bool GET_PB_PTL_FIR_MASK_REG_FMR01_TRAINED_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<PB_PTL_FIR_MASK_REG_FMR01_TRAINED_MASK>();
 #ifdef SCOM_CHECKING
@@ -9553,7 +10813,7 @@ static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FMR02_TRAINED_MAS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_FMR02_TRAINED_MASK,
            1>(i_data);
@@ -9568,7 +10828,7 @@ static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FMR02_TRAINED_MAS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_FMR02_TRAINED_MASK,
            1>(i_data);
@@ -9582,7 +10842,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FMR02_TRAINED_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<PB_PTL_FIR_MASK_REG_FMR02_TRAINED_MASK>();
 #ifdef SCOM_CHECKING
@@ -9595,7 +10855,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_FMR02_TRAINED_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<PB_PTL_FIR_MASK_REG_FMR02_TRAINED_MASK>();
 #ifdef SCOM_CHECKING
@@ -9609,7 +10869,7 @@ static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_FMR02_TRAINED_MAS
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<PB_PTL_FIR_MASK_REG_FMR02_TRAINED_MASK,
            1>(o_data);
@@ -9623,7 +10883,7 @@ fapi_try_exit:
 static inline bool GET_PB_PTL_FIR_MASK_REG_FMR02_TRAINED_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<PB_PTL_FIR_MASK_REG_FMR02_TRAINED_MASK>();
 #ifdef SCOM_CHECKING
@@ -9637,7 +10897,7 @@ static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FMR03_TRAINED_MAS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_FMR03_TRAINED_MASK,
            1>(i_data);
@@ -9652,7 +10912,7 @@ static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FMR03_TRAINED_MAS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_FMR03_TRAINED_MASK,
            1>(i_data);
@@ -9666,7 +10926,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FMR03_TRAINED_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<PB_PTL_FIR_MASK_REG_FMR03_TRAINED_MASK>();
 #ifdef SCOM_CHECKING
@@ -9679,7 +10939,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_FMR03_TRAINED_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<PB_PTL_FIR_MASK_REG_FMR03_TRAINED_MASK>();
 #ifdef SCOM_CHECKING
@@ -9693,7 +10953,7 @@ static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_FMR03_TRAINED_MAS
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<PB_PTL_FIR_MASK_REG_FMR03_TRAINED_MASK,
            1>(o_data);
@@ -9707,7 +10967,7 @@ fapi_try_exit:
 static inline bool GET_PB_PTL_FIR_MASK_REG_FMR03_TRAINED_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<PB_PTL_FIR_MASK_REG_FMR03_TRAINED_MASK>();
 #ifdef SCOM_CHECKING
@@ -9721,7 +10981,7 @@ static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DOB01_UE_MASK(fap
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_DOB01_UE_MASK,
            1>(i_data);
@@ -9736,7 +10996,7 @@ static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DOB01_UE_MASK(con
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_DOB01_UE_MASK,
            1>(i_data);
@@ -9750,7 +11010,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DOB01_UE_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<PB_PTL_FIR_MASK_REG_DOB01_UE_MASK>();
 #ifdef SCOM_CHECKING
@@ -9763,7 +11023,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_DOB01_UE_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<PB_PTL_FIR_MASK_REG_DOB01_UE_MASK>();
 #ifdef SCOM_CHECKING
@@ -9777,7 +11037,7 @@ static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_DOB01_UE_MASK(fap
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<PB_PTL_FIR_MASK_REG_DOB01_UE_MASK,
            1>(o_data);
@@ -9791,7 +11051,7 @@ fapi_try_exit:
 static inline bool GET_PB_PTL_FIR_MASK_REG_DOB01_UE_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<PB_PTL_FIR_MASK_REG_DOB01_UE_MASK>();
 #ifdef SCOM_CHECKING
@@ -9805,7 +11065,7 @@ static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DOB01_CE_MASK(fap
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_DOB01_CE_MASK,
            1>(i_data);
@@ -9820,7 +11080,7 @@ static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DOB01_CE_MASK(con
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_DOB01_CE_MASK,
            1>(i_data);
@@ -9834,7 +11094,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DOB01_CE_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<PB_PTL_FIR_MASK_REG_DOB01_CE_MASK>();
 #ifdef SCOM_CHECKING
@@ -9847,7 +11107,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_DOB01_CE_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<PB_PTL_FIR_MASK_REG_DOB01_CE_MASK>();
 #ifdef SCOM_CHECKING
@@ -9861,7 +11121,7 @@ static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_DOB01_CE_MASK(fap
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<PB_PTL_FIR_MASK_REG_DOB01_CE_MASK,
            1>(o_data);
@@ -9875,7 +11135,7 @@ fapi_try_exit:
 static inline bool GET_PB_PTL_FIR_MASK_REG_DOB01_CE_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<PB_PTL_FIR_MASK_REG_DOB01_CE_MASK>();
 #ifdef SCOM_CHECKING
@@ -9889,7 +11149,7 @@ static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DOB01_SUE_MASK(fa
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_DOB01_SUE_MASK,
            1>(i_data);
@@ -9904,7 +11164,7 @@ static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DOB01_SUE_MASK(co
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_DOB01_SUE_MASK,
            1>(i_data);
@@ -9918,7 +11178,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DOB01_SUE_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<PB_PTL_FIR_MASK_REG_DOB01_SUE_MASK>();
 #ifdef SCOM_CHECKING
@@ -9931,7 +11191,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_DOB01_SUE_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<PB_PTL_FIR_MASK_REG_DOB01_SUE_MASK>();
 #ifdef SCOM_CHECKING
@@ -9945,7 +11205,7 @@ static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_DOB01_SUE_MASK(fa
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<PB_PTL_FIR_MASK_REG_DOB01_SUE_MASK,
            1>(o_data);
@@ -9959,7 +11219,7 @@ fapi_try_exit:
 static inline bool GET_PB_PTL_FIR_MASK_REG_DOB01_SUE_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<PB_PTL_FIR_MASK_REG_DOB01_SUE_MASK>();
 #ifdef SCOM_CHECKING
@@ -9969,1607 +11229,11 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DOB23_UE_MASK(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_DOB23_UE_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_UE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DOB23_UE_MASK(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_DOB23_UE_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_UE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DOB23_UE_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.setBit<PB_PTL_FIR_MASK_REG_DOB23_UE_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_UE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_DOB23_UE_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.clearBit<PB_PTL_FIR_MASK_REG_DOB23_UE_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_UE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_DOB23_UE_MASK(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_DOB23_UE_MASK,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_UE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_PB_PTL_FIR_MASK_REG_DOB23_UE_MASK(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.getBit<PB_PTL_FIR_MASK_REG_DOB23_UE_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_UE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DOB23_CE_MASK(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_DOB23_CE_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_CE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DOB23_CE_MASK(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_DOB23_CE_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_CE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DOB23_CE_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.setBit<PB_PTL_FIR_MASK_REG_DOB23_CE_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_CE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_DOB23_CE_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.clearBit<PB_PTL_FIR_MASK_REG_DOB23_CE_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_CE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_DOB23_CE_MASK(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_DOB23_CE_MASK,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_CE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_PB_PTL_FIR_MASK_REG_DOB23_CE_MASK(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.getBit<PB_PTL_FIR_MASK_REG_DOB23_CE_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_CE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.setBit<PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.clearBit<PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.getBit<PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.setBit<PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.clearBit<PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.getBit<PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.setBit<PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.clearBit<PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.getBit<PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.setBit<PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.clearBit<PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.getBit<PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.setBit<PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.clearBit<PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.getBit<PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.setBit<PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.clearBit<PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.getBit<PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.setBit<PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.clearBit<PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.getBit<PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.setBit<PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.clearBit<PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.getBit<PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.setBit<PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.clearBit<PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.getBit<PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.setBit<PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.clearBit<PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.getBit<PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.setBit<PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.clearBit<PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.getBit<PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.setBit<PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.clearBit<PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.getBit<PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.setBit<PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.clearBit<PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.getBit<PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.setBit<PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.clearBit<PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.getBit<PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.setBit<PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.clearBit<PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.getBit<PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.setBit<PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.clearBit<PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.getBit<PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.setBit<PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return o_data.clearBit<PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
-#endif
-    return i_data.getBit<PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
 static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DOB01_ERR_MASK(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_DOB01_ERR_MASK,
            1>(i_data);
@@ -11584,7 +11248,7 @@ static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DOB01_ERR_MASK(co
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_DOB01_ERR_MASK,
            1>(i_data);
@@ -11598,7 +11262,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DOB01_ERR_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<PB_PTL_FIR_MASK_REG_DOB01_ERR_MASK>();
 #ifdef SCOM_CHECKING
@@ -11611,7 +11275,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_DOB01_ERR_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<PB_PTL_FIR_MASK_REG_DOB01_ERR_MASK>();
 #ifdef SCOM_CHECKING
@@ -11625,7 +11289,7 @@ static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_DOB01_ERR_MASK(fa
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<PB_PTL_FIR_MASK_REG_DOB01_ERR_MASK,
            1>(o_data);
@@ -11639,7 +11303,7 @@ fapi_try_exit:
 static inline bool GET_PB_PTL_FIR_MASK_REG_DOB01_ERR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<PB_PTL_FIR_MASK_REG_DOB01_ERR_MASK>();
 #ifdef SCOM_CHECKING
@@ -11649,11 +11313,263 @@ fapi_try_exit:
 #endif
 }
 
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DOB23_UE_MASK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_DOB23_UE_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_UE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DOB23_UE_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_DOB23_UE_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_UE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DOB23_UE_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_PTL_FIR_MASK_REG_DOB23_UE_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_UE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_DOB23_UE_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_PTL_FIR_MASK_REG_DOB23_UE_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_UE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_DOB23_UE_MASK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_DOB23_UE_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_UE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_PB_PTL_FIR_MASK_REG_DOB23_UE_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_PTL_FIR_MASK_REG_DOB23_UE_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_UE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DOB23_CE_MASK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_DOB23_CE_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_CE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DOB23_CE_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_DOB23_CE_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_CE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DOB23_CE_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_PTL_FIR_MASK_REG_DOB23_CE_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_CE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_DOB23_CE_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_PTL_FIR_MASK_REG_DOB23_CE_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_CE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_DOB23_CE_MASK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_DOB23_CE_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_CE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_PB_PTL_FIR_MASK_REG_DOB23_CE_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_PTL_FIR_MASK_REG_DOB23_CE_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_CE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
 static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DOB23_ERR_MASK(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_DOB23_ERR_MASK,
            1>(i_data);
@@ -11668,7 +11584,7 @@ static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DOB23_ERR_MASK(co
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_DOB23_ERR_MASK,
            1>(i_data);
@@ -11682,7 +11598,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DOB23_ERR_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<PB_PTL_FIR_MASK_REG_DOB23_ERR_MASK>();
 #ifdef SCOM_CHECKING
@@ -11695,7 +11611,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_DOB23_ERR_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<PB_PTL_FIR_MASK_REG_DOB23_ERR_MASK>();
 #ifdef SCOM_CHECKING
@@ -11709,7 +11625,7 @@ static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_DOB23_ERR_MASK(fa
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<PB_PTL_FIR_MASK_REG_DOB23_ERR_MASK,
            1>(o_data);
@@ -11723,7 +11639,7 @@ fapi_try_exit:
 static inline bool GET_PB_PTL_FIR_MASK_REG_DOB23_ERR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<PB_PTL_FIR_MASK_REG_DOB23_ERR_MASK>();
 #ifdef SCOM_CHECKING
@@ -11733,11 +11649,1187 @@ fapi_try_exit:
 #endif
 }
 
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_CROB01_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_CROB01_ATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_CROB01_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_CROB01_ATTN_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_CROB01_ATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_CROB01_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_CROB01_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_PTL_FIR_MASK_REG_CROB01_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_CROB01_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_CROB01_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_PTL_FIR_MASK_REG_CROB01_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_CROB01_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_CROB01_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_CROB01_ATTN_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_CROB01_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_PB_PTL_FIR_MASK_REG_CROB01_ATTN_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_PTL_FIR_MASK_REG_CROB01_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_CROB01_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_CROB23_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_CROB23_ATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_CROB23_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_CROB23_ATTN_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_CROB23_ATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_CROB23_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_CROB23_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_PTL_FIR_MASK_REG_CROB23_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_CROB23_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_CROB23_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_PTL_FIR_MASK_REG_CROB23_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_CROB23_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_CROB23_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_CROB23_ATTN_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_CROB23_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_PB_PTL_FIR_MASK_REG_CROB23_ATTN_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_PTL_FIR_MASK_REG_CROB23_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_CROB23_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_LINK_DOWN_0_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_LINK_DOWN_0_ATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_LINK_DOWN_0_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_LINK_DOWN_0_ATTN_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_LINK_DOWN_0_ATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_LINK_DOWN_0_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_LINK_DOWN_0_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_PTL_FIR_MASK_REG_LINK_DOWN_0_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_LINK_DOWN_0_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_LINK_DOWN_0_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_PTL_FIR_MASK_REG_LINK_DOWN_0_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_LINK_DOWN_0_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_LINK_DOWN_0_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_LINK_DOWN_0_ATTN_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_LINK_DOWN_0_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_PB_PTL_FIR_MASK_REG_LINK_DOWN_0_ATTN_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_PTL_FIR_MASK_REG_LINK_DOWN_0_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_LINK_DOWN_0_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_LINK_DOWN_1_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_LINK_DOWN_1_ATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_LINK_DOWN_1_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_LINK_DOWN_1_ATTN_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_LINK_DOWN_1_ATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_LINK_DOWN_1_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_LINK_DOWN_1_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_PTL_FIR_MASK_REG_LINK_DOWN_1_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_LINK_DOWN_1_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_LINK_DOWN_1_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_PTL_FIR_MASK_REG_LINK_DOWN_1_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_LINK_DOWN_1_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_LINK_DOWN_1_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_LINK_DOWN_1_ATTN_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_LINK_DOWN_1_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_PB_PTL_FIR_MASK_REG_LINK_DOWN_1_ATTN_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_PTL_FIR_MASK_REG_LINK_DOWN_1_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_LINK_DOWN_1_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_LINK_DOWN_2_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_LINK_DOWN_2_ATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_LINK_DOWN_2_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_LINK_DOWN_2_ATTN_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_LINK_DOWN_2_ATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_LINK_DOWN_2_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_LINK_DOWN_2_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_PTL_FIR_MASK_REG_LINK_DOWN_2_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_LINK_DOWN_2_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_LINK_DOWN_2_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_PTL_FIR_MASK_REG_LINK_DOWN_2_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_LINK_DOWN_2_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_LINK_DOWN_2_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_LINK_DOWN_2_ATTN_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_LINK_DOWN_2_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_PB_PTL_FIR_MASK_REG_LINK_DOWN_2_ATTN_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_PTL_FIR_MASK_REG_LINK_DOWN_2_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_LINK_DOWN_2_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_LINK_DOWN_3_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_LINK_DOWN_3_ATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_LINK_DOWN_3_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_LINK_DOWN_3_ATTN_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_LINK_DOWN_3_ATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_LINK_DOWN_3_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_LINK_DOWN_3_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_PTL_FIR_MASK_REG_LINK_DOWN_3_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_LINK_DOWN_3_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_LINK_DOWN_3_ATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_PTL_FIR_MASK_REG_LINK_DOWN_3_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_LINK_DOWN_3_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_LINK_DOWN_3_ATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_LINK_DOWN_3_ATTN_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_LINK_DOWN_3_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_PB_PTL_FIR_MASK_REG_LINK_DOWN_3_ATTN_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_PTL_FIR_MASK_REG_LINK_DOWN_3_ATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_LINK_DOWN_3_ATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
 static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DIB01_ERR_MASK(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_DIB01_ERR_MASK,
            1>(i_data);
@@ -11752,7 +12844,7 @@ static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DIB01_ERR_MASK(co
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_DIB01_ERR_MASK,
            1>(i_data);
@@ -11766,7 +12858,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DIB01_ERR_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<PB_PTL_FIR_MASK_REG_DIB01_ERR_MASK>();
 #ifdef SCOM_CHECKING
@@ -11779,7 +12871,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_DIB01_ERR_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<PB_PTL_FIR_MASK_REG_DIB01_ERR_MASK>();
 #ifdef SCOM_CHECKING
@@ -11793,7 +12885,7 @@ static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_DIB01_ERR_MASK(fa
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<PB_PTL_FIR_MASK_REG_DIB01_ERR_MASK,
            1>(o_data);
@@ -11807,7 +12899,7 @@ fapi_try_exit:
 static inline bool GET_PB_PTL_FIR_MASK_REG_DIB01_ERR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<PB_PTL_FIR_MASK_REG_DIB01_ERR_MASK>();
 #ifdef SCOM_CHECKING
@@ -11821,7 +12913,7 @@ static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DIB23_ERR_MASK(fa
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_DIB23_ERR_MASK,
            1>(i_data);
@@ -11836,7 +12928,7 @@ static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DIB23_ERR_MASK(co
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_DIB23_ERR_MASK,
            1>(i_data);
@@ -11850,7 +12942,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_DIB23_ERR_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<PB_PTL_FIR_MASK_REG_DIB23_ERR_MASK>();
 #ifdef SCOM_CHECKING
@@ -11863,7 +12955,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_DIB23_ERR_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<PB_PTL_FIR_MASK_REG_DIB23_ERR_MASK>();
 #ifdef SCOM_CHECKING
@@ -11877,7 +12969,7 @@ static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_DIB23_ERR_MASK(fa
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<PB_PTL_FIR_MASK_REG_DIB23_ERR_MASK,
            1>(o_data);
@@ -11891,12 +12983,1020 @@ fapi_try_exit:
 static inline bool GET_PB_PTL_FIR_MASK_REG_DIB23_ERR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RWX, PB_PTL_FIR_MASK_REG_WOX_AND, PB_PTL_FIR_MASK_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<PB_PTL_FIR_MASK_REG_DIB23_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_DIB23_ERR_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PTL0_SPARE_MASK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_PTL0_SPARE_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PTL0_SPARE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PTL0_SPARE_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_PTL0_SPARE_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PTL0_SPARE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PTL0_SPARE_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_PTL_FIR_MASK_REG_PTL0_SPARE_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PTL0_SPARE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_PTL0_SPARE_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_PTL_FIR_MASK_REG_PTL0_SPARE_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PTL0_SPARE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_PTL0_SPARE_MASK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_PTL0_SPARE_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PTL0_SPARE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_PB_PTL_FIR_MASK_REG_PTL0_SPARE_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_PTL_FIR_MASK_REG_PTL0_SPARE_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PTL0_SPARE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PTL1_SPARE_MASK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_PTL1_SPARE_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PTL1_SPARE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PTL1_SPARE_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_PTL1_SPARE_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PTL1_SPARE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PTL1_SPARE_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_PTL_FIR_MASK_REG_PTL1_SPARE_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PTL1_SPARE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_PTL1_SPARE_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_PTL_FIR_MASK_REG_PTL1_SPARE_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PTL1_SPARE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_PTL1_SPARE_MASK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_PTL1_SPARE_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PTL1_SPARE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_PB_PTL_FIR_MASK_REG_PTL1_SPARE_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_PTL_FIR_MASK_REG_PTL1_SPARE_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PTL1_SPARE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PTL2_SPARE_MASK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_PTL2_SPARE_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PTL2_SPARE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PTL2_SPARE_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_PTL2_SPARE_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PTL2_SPARE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PTL2_SPARE_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_PTL_FIR_MASK_REG_PTL2_SPARE_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PTL2_SPARE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_PTL2_SPARE_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_PTL_FIR_MASK_REG_PTL2_SPARE_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PTL2_SPARE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_PTL2_SPARE_MASK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_PTL2_SPARE_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PTL2_SPARE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_PB_PTL_FIR_MASK_REG_PTL2_SPARE_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_PTL_FIR_MASK_REG_PTL2_SPARE_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PTL2_SPARE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PTL3_SPARE_MASK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_PTL3_SPARE_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PTL3_SPARE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PTL3_SPARE_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_PTL_FIR_MASK_REG_PTL3_SPARE_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PTL3_SPARE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PTL_FIR_MASK_REG_PTL3_SPARE_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_PTL_FIR_MASK_REG_PTL3_SPARE_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PTL3_SPARE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_PTL_FIR_MASK_REG_PTL3_SPARE_MASK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_PTL_FIR_MASK_REG_PTL3_SPARE_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PTL3_SPARE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PTL_FIR_MASK_REG_PTL3_SPARE_MASK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_PTL_FIR_MASK_REG_PTL3_SPARE_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PTL3_SPARE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_PB_PTL_FIR_MASK_REG_PTL3_SPARE_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PTL_FIR_MASK_REG_RW, PB_PTL_FIR_MASK_REG_WO_AND, PB_PTL_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_PTL_FIR_MASK_REG_PTL3_SPARE_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PTL_FIR_MASK_REG_PTL3_SPARE_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -12121,6 +14221,264 @@ static inline fapi2::buffer<uint64_t>& GET_RCMD_RATE_CFG_Y_RCMD_RATE_ADDER(fapi2
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     FAPI_ERR("Invalid dial access RCMD_RATE_CFG_Y_RCMD_RATE_ADDER chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RCMD_RATE_CFG_X_DISABLE_TURBO(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.insertFromRight<RCMD_RATE_CFG_X_DISABLE_TURBO,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_X_DISABLE_TURBO chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RCMD_RATE_CFG_X_DISABLE_TURBO(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.insertFromRight<RCMD_RATE_CFG_X_DISABLE_TURBO,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_X_DISABLE_TURBO chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RCMD_RATE_CFG_X_DISABLE_TURBO(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.setBit<RCMD_RATE_CFG_X_DISABLE_TURBO>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_X_DISABLE_TURBO chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_RCMD_RATE_CFG_X_DISABLE_TURBO(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.clearBit<RCMD_RATE_CFG_X_DISABLE_TURBO>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_X_DISABLE_TURBO chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_RCMD_RATE_CFG_X_DISABLE_TURBO(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return i_data.extractToRight<RCMD_RATE_CFG_X_DISABLE_TURBO,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_X_DISABLE_TURBO chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_RCMD_RATE_CFG_X_DISABLE_TURBO(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return i_data.getBit<RCMD_RATE_CFG_X_DISABLE_TURBO>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_X_DISABLE_TURBO chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RCMD_RATE_CFG_X_CMD_GAP_CFG(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.insertFromRight<RCMD_RATE_CFG_X_CMD_GAP_CFG,
+           RCMD_RATE_CFG_X_CMD_GAP_CFG_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_X_CMD_GAP_CFG chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RCMD_RATE_CFG_X_CMD_GAP_CFG(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.insertFromRight<RCMD_RATE_CFG_X_CMD_GAP_CFG,
+           RCMD_RATE_CFG_X_CMD_GAP_CFG_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_X_CMD_GAP_CFG chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_RCMD_RATE_CFG_X_CMD_GAP_CFG(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return i_data.extractToRight<RCMD_RATE_CFG_X_CMD_GAP_CFG,
+           RCMD_RATE_CFG_X_CMD_GAP_CFG_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_X_CMD_GAP_CFG chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RCMD_RATE_CFG_Y_DISABLE_TURBO(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.insertFromRight<RCMD_RATE_CFG_Y_DISABLE_TURBO,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_Y_DISABLE_TURBO chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RCMD_RATE_CFG_Y_DISABLE_TURBO(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.insertFromRight<RCMD_RATE_CFG_Y_DISABLE_TURBO,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_Y_DISABLE_TURBO chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RCMD_RATE_CFG_Y_DISABLE_TURBO(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.setBit<RCMD_RATE_CFG_Y_DISABLE_TURBO>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_Y_DISABLE_TURBO chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_RCMD_RATE_CFG_Y_DISABLE_TURBO(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.clearBit<RCMD_RATE_CFG_Y_DISABLE_TURBO>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_Y_DISABLE_TURBO chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_RCMD_RATE_CFG_Y_DISABLE_TURBO(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return i_data.extractToRight<RCMD_RATE_CFG_Y_DISABLE_TURBO,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_Y_DISABLE_TURBO chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_RCMD_RATE_CFG_Y_DISABLE_TURBO(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return i_data.getBit<RCMD_RATE_CFG_Y_DISABLE_TURBO>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_Y_DISABLE_TURBO chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RCMD_RATE_CFG_Y_CMD_GAP_CFG(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.insertFromRight<RCMD_RATE_CFG_Y_CMD_GAP_CFG,
+           RCMD_RATE_CFG_Y_CMD_GAP_CFG_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_Y_CMD_GAP_CFG chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RCMD_RATE_CFG_Y_CMD_GAP_CFG(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.insertFromRight<RCMD_RATE_CFG_Y_CMD_GAP_CFG,
+           RCMD_RATE_CFG_Y_CMD_GAP_CFG_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_Y_CMD_GAP_CFG chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_RCMD_RATE_CFG_Y_CMD_GAP_CFG(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return i_data.extractToRight<RCMD_RATE_CFG_Y_CMD_GAP_CFG,
+           RCMD_RATE_CFG_Y_CMD_GAP_CFG_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_Y_CMD_GAP_CFG chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -13218,6 +15576,174 @@ static inline fapi2::buffer<uint64_t>& GET_SLAVE_CONFIG_REG_MASK_PLL_ERRS(fapi2:
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     FAPI_ERR("Invalid dial access SLAVE_CONFIG_REG_MASK_PLL_ERRS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_QME_PAR_DIS(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return o_data.insertFromRight<SLAVE_CONFIG_REG_QME_PAR_DIS,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SLAVE_CONFIG_REG_QME_PAR_DIS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_QME_PAR_DIS(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return o_data.insertFromRight<SLAVE_CONFIG_REG_QME_PAR_DIS,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SLAVE_CONFIG_REG_QME_PAR_DIS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_QME_PAR_DIS(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return o_data.setBit<SLAVE_CONFIG_REG_QME_PAR_DIS>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SLAVE_CONFIG_REG_QME_PAR_DIS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_SLAVE_CONFIG_REG_QME_PAR_DIS(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return o_data.clearBit<SLAVE_CONFIG_REG_QME_PAR_DIS>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SLAVE_CONFIG_REG_QME_PAR_DIS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_SLAVE_CONFIG_REG_QME_PAR_DIS(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return i_data.extractToRight<SLAVE_CONFIG_REG_QME_PAR_DIS,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SLAVE_CONFIG_REG_QME_PAR_DIS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_SLAVE_CONFIG_REG_QME_PAR_DIS(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return i_data.getBit<SLAVE_CONFIG_REG_QME_PAR_DIS>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SLAVE_CONFIG_REG_QME_PAR_DIS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_FORCE_0_QME(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return o_data.insertFromRight<SLAVE_CONFIG_REG_FORCE_0_QME,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SLAVE_CONFIG_REG_FORCE_0_QME chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_FORCE_0_QME(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return o_data.insertFromRight<SLAVE_CONFIG_REG_FORCE_0_QME,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SLAVE_CONFIG_REG_FORCE_0_QME chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_FORCE_0_QME(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return o_data.setBit<SLAVE_CONFIG_REG_FORCE_0_QME>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SLAVE_CONFIG_REG_FORCE_0_QME chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_SLAVE_CONFIG_REG_FORCE_0_QME(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return o_data.clearBit<SLAVE_CONFIG_REG_FORCE_0_QME>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SLAVE_CONFIG_REG_FORCE_0_QME chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_SLAVE_CONFIG_REG_FORCE_0_QME(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return i_data.extractToRight<SLAVE_CONFIG_REG_FORCE_0_QME,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SLAVE_CONFIG_REG_FORCE_0_QME chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_SLAVE_CONFIG_REG_FORCE_0_QME(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return i_data.getBit<SLAVE_CONFIG_REG_FORCE_0_QME>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SLAVE_CONFIG_REG_FORCE_0_QME chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
