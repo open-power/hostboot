@@ -270,20 +270,6 @@
         <mssAccessorName>exp_spd_taa_min</mssAccessorName>
     </attribute>
 
-    <attribute>
-        <id>ATTR_MEM_EXP_FIRMWARE_EMULATION_MODE</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-            Enable Special mode for Emulation Support
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <mssUnits>bool</mssUnits>
-        <enum>NORMAL = 0, EMULATION = 1</enum>
-        <writeable/>
-        <mssAccessorName>exp_firmware_emulation_mode</mssAccessorName>
-    </attribute>
-
   <attribute>
       <id>ATTR_MSS_EXP_REORDER_QUEUE_SETTING</id>
       <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
@@ -298,6 +284,20 @@
       <writeable/>
       <mssAccessorName>exp_reorder_queue_setting</mssAccessorName>
   </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EXP_FIRMWARE_EMULATION_MODE</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Enable Special mode for Emulation Support
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <mssUnits>bool</mssUnits>
+        <enum>NORMAL = 0, EMULATION = 1</enum>
+        <writeable/>
+        <mssAccessorName>exp_firmware_emulation_mode</mssAccessorName>
+    </attribute>
 
     <attribute>
         <id>ATTR_MSS_OCMB_EXP_STRUCT_MMIO_ENDIAN_CTRL</id>
@@ -344,6 +344,60 @@
         <array>14</array>
         <writeable/>
         <mssAccessorName>ocmb_ecid</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EXP_DFIMRL_CLK</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            timing parameter for the DFIMRL clock
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>exp_dfimrl_clk</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_ATXDLY_A</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          ARRAY[ADDRESS INDEX]
+          ATxDly_A/B[0]: ODT[1],ODT[0],CS_N[0],CS_N[1]
+          ATxDly_A/B[1]: ADDR[13],ADDR[5],BG[0],CKE[1]
+          ATxDly_A/B[2]: ADDR[17],ADDR[7],BA[0],ADDR[16]
+          ATxDly_A/B[3]: ADDR[8],BG[1],CID[1],CID[0]
+          ATxDly_A/B[4]: ADDR[1],ADDR[9],ADDR[2],CAPARITY
+          ATxDly_A/B[5]: ADDR[12],ADDR[3],ADDR[4],ADDR[0]
+          ATxDly_A/B[6]: CKE[0],ADDR[15],ACT_N,ADDR[10]
+          ATxDly_A/B[7]: ADDR[11],ADDR[6],BA[1],ADDR[14]
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>8</array>
+        <mssAccessorName>exp_atxdly_a</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_ATXDLY_B</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          ARRAY[ADDRESS INDEX]
+          ATxDly_A/B[0]: ODT[1],ODT[0],CS_N[0],CS_N[1]
+          ATxDly_A/B[1]: ADDR[13],ADDR[5],BG[0],CKE[1]
+          ATxDly_A/B[2]: ADDR[17],ADDR[7],BA[0],ADDR[16]
+          ATxDly_A/B[3]: ADDR[8],BG[1],CID[1],CID[0]
+          ATxDly_A/B[4]: ADDR[1],ADDR[9],ADDR[2],CAPARITY
+          ATxDly_A/B[5]: ADDR[12],ADDR[3],ADDR[4],ADDR[0]
+          ATxDly_A/B[6]: CKE[0],ADDR[15],ACT_N,ADDR[10]
+          ATxDly_A/B[7]: ADDR[11],ADDR[6],BA[1],ADDR[14]
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>8</array>
+        <mssAccessorName>exp_atxdly_b</mssAccessorName>
     </attribute>
 
 </attributes>

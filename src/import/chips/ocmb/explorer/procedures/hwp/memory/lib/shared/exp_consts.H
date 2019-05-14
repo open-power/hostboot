@@ -47,6 +47,46 @@ namespace exp
 constexpr uint32_t OCMB_ADDR_SHIFT = 3;
 
 ///
+/// @brief enum list for the indexes for the address delays
+/// @note Taken from 07-MAY-19 firwmare document
+///
+enum attr_delay_index
+{
+    ODT1 = 0,
+    ODT0 = 0,
+    CS_N0 = 0,
+    CS_N1 = 0,
+    ADDR13 = 1,
+    ADDR5 = 1,
+    BG0 = 1,
+    CKE1 = 1,
+    ADDR17 = 2,
+    ADDR7 = 2,
+    BA0 = 2,
+    ADDR16 = 2,
+    ADDR8 = 3,
+    BG1 = 3,
+    CID1 = 3,
+    CID0 = 3,
+    ADDR1 = 4,
+    ADDR9 = 4,
+    ADDR2 = 4,
+    CAPARITY = 4,
+    ADDR12 = 5,
+    ADDR3 = 5,
+    ADDR4 = 5,
+    ADDR0 = 5,
+    CKE0 = 6,
+    ADDR15 = 6,
+    ACT_N = 6,
+    ADDR10 = 6,
+    ADDR11 = 7,
+    ADDR6 = 7,
+    BA1 = 7,
+    ADDR14 = 7,
+};
+
+///
 /// @brief enum list of explorer SPD derived attributes to set
 /// @note these attrs are strictly derived from SPD
 /// @warning wrapped in exp namesapce to be distinguished from
