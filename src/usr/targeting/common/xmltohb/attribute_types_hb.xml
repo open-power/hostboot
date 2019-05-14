@@ -995,7 +995,7 @@
     <description>The part number for a particular FRU target</description>
     <simpleType>
       <uint8_t/>
-      <array>20</array>
+      <array>48</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>

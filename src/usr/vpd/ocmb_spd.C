@@ -28,6 +28,7 @@
 #include <errl/errlentry.H>
 #include <vpd/vpdreasoncodes.H>
 
+#include "ocmb_spd.H"
 #include "spd.H"
 #include "errlud_vpd.H"
 
@@ -44,9 +45,6 @@ namespace SPD
 
 /**
  * @brief Handle SPD READ deviceOp to OCMB_CHIP targets
- * This function performs read operations on OCMBs by in turn performing
- * an EEPROM deviceOp on this target, reading the first 2 KB of the OCMB's
- * Primary VPD eeprom and returning it via a buffer
  *
  * @param[in]     i_opType    Operation type, see driverif.H
  * @param[in]     i_target    MMIO target
@@ -59,8 +57,6 @@ namespace SPD
  *                            In this function, there is one argument,
  *                            the l_keyword, so far we only support ENTIRE_SPD
  * @return  errlHndl_t
- *
- * NOTE: ONLY ENTIRE_SPD READ SUPPORTED CURRENTLY
  */
 errlHndl_t ocmbSPDPerformOp(DeviceFW::OperationType i_opType,
                             T::TargetHandle_t       i_target,
@@ -68,28 +64,6 @@ errlHndl_t ocmbSPDPerformOp(DeviceFW::OperationType i_opType,
                             size_t&                 io_buflen,
                             int64_t                 i_accessType,
                             va_list                 i_args);
-
-/**
- * @param This function is a wrapper for reading the correct keyword.
- *
- * @param[in]  i_target     The target DDIMM to access.
- *
- * @param[in]  i_byteAddr   The offset into the JEDEC SPD layout.
- *
- * @param[in]  i_numbytes   Number of bytes to read.
- *
- * @param[out] o_data       The data buffer that will return the data read.
- *
- * @param[in]  i_location   The SPD source (PNOR/SEEPROM).
- *
- * @return     errlHndl_t   nullptr if successful, otherwise a pointer to the
- *                          error log.
- */
-errlHndl_t ocmbFetchData(T::TargetHandle_t    i_target,
-                        uint64_t              i_byteAddr,
-                        size_t                i_numBytes,
-                        void*                 o_data,
-                        EEPROM::EEPROM_SOURCE i_location);
 
 // Register the perform Op with the routing code for OCMBs.
 DEVICE_REGISTER_ROUTE(DeviceFW::READ,
@@ -133,7 +107,7 @@ errlHndl_t ocmbGetSPD(T::TargetHandle_t        i_target,
                                  i_memType,
                                  i_target,
                                  entry);
-        if (l_errl)
+        if (l_errl != nullptr)
         {
             break;
         }
@@ -171,31 +145,28 @@ errlHndl_t ocmbGetSPD(T::TargetHandle_t        i_target,
             break;
         }
 
-        // For now only support DDIMM, NA keywords with offset less than 128,
-        // and the ENTIRE_SPD keyword.
-        if (  ((entry->modSpec != DDIMM)
-           && (entry->modSpec == NA && entry->offset >= 0x80))
-           && (i_keyword != ENTIRE_SPD))
+        // Only allow keywords supported by DDIMM
+        l_errl = checkModSpecificKeyword(*entry,
+                                         i_memType,
+                                         i_target,
+                                         VPD::SEEPROM);
+
+        if (l_errl != nullptr)
         {
-            TRACFCOMP(g_trac_spd,
-                      "ocmbGetSPD() keyword 0x%X is not supported",
-                      i_keyword);
-            /*@
-            * @errortype
-            * @moduleid     VPD::VPD_OCMB_GET_SPD
-            * @reasoncode   VPD::VPD_NOT_SUPPORTED
-            * @userdata1    Keyword Enum
-            * @userdata2    Target huid
-            * @devdesc      Attempted to lookup SPD keyword not supported
-            * @custdesc     Firmware error during system IPL
-            */
-            l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                      VPD::VPD_OCMB_GET_SPD,
-                                      VPD::VPD_NOT_SUPPORTED,
-                                      i_keyword,
-                                      i_target->getAttr<TARGETING::ATTR_HUID>(),
-                                      ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             break;
+        }
+
+        if (entry->isSpecialCase)
+        {
+            l_errl = spdSpecialCases(*entry,
+                                     io_buffer,
+                                     i_target,
+                                     i_memType,
+                                     VPD::SEEPROM);
+            if (l_errl != nullptr)
+            {
+                break;
+            }
         }
 
         // For ENTIRE_SPD, we must read OCMB SPD and EFD combined size.
@@ -382,14 +353,16 @@ errlHndl_t ocmbSPDPerformOp(DeviceFW::OperationType i_opType,
             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
             * @moduleid         VPD::VPD_OCMB_SPD_PERFORM_OP
             * @reasoncode       VPD::VPD_INVALID_BASIC_MEMORY_TYPE
-            * @userdata1        Basic Memory Type (Byte 2)
+            * @userdata1[00:31] Basic Memory Type (Byte 2)
+            * @userdata1[32:63] Target HUID
             * @userdata2        Keyword Requested
             * @devdesc          Invalid Basic Memory Type
             */
             errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            VPD::VPD_OCMB_SPD_PERFORM_OP,
                                            VPD::VPD_INVALID_BASIC_MEMORY_TYPE,
-                                           memType,
+                                           TWO_UINT32_TO_UINT64(memType,
+                                               T::get_huid(i_target)),
                                            keyword);
 
             // User could have installed a bad/unsupported dimm

@@ -94,13 +94,13 @@ enum
  */
 typedef enum
 {
-    NA      = 0x00,
-    UMM     = 0x01, // Unbuffered Memory Modules
-    RMM     = 0x02, // Registered Memory Modules
-    CMM     = 0x04, // Clocked Memory Modules
-    LRMM    = 0x08, // Load Reduction Memory Modules
-    DDIMM   = 0x0A,
-    ALL     = 0xFFFF,
+    NA        = 0x00, // Invalid Type
+    UMM       = 0x01, // Unbuffered Memory Modules
+    RMM       = 0x02, // Registered Memory Modules
+    CMM       = 0x04, // Clocked Memory Modules
+    LRMM      = 0x08, // Load Reduction Memory Modules
+    DDIMM     = 0x10, // Differential DIMM
+    ALL       = 0xFFFF,
 } modSpecTypes_t;
 
 
@@ -391,6 +391,27 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
                                size_t & io_buflen,
                                int64_t i_accessType,
                                va_list i_args );
+
+
+/**
+ * @brief This function will read the DIMM module type.
+ *
+ * @param[out] o_modType - The module type value to return.
+ *
+ * @param[in] i_target - The target to read data from.
+ *
+ * @param[in] i_memType - The memory type
+ *
+ * @param[in] i_location - The SPD source (PNOR/SEEPROM).
+ *
+ * @return errlHndl_t - NULL if successful, otherwise a pointer
+ *      to the error log.
+ */
+errlHndl_t getModType ( modSpecTypes_t & o_modType,
+                        TARGETING::Target * i_target,
+                        uint64_t i_memType,
+                        VPD::vpdCmdTarget i_location );
+
 /**
  * @brief This function will scan the table and return the entry
  *      corresponding to the keyword being requested.

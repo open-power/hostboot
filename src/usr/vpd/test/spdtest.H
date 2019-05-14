@@ -43,6 +43,7 @@
 #include <vpd/spdenums.H>
 #include "../spdDDR3.H"
 #include "../spdDDR4.H"
+#include "../spdDDR4_DDIMM.H"
 #include "../spd.H"
 
 extern trace_desc_t* g_trac_spd;
@@ -117,15 +118,30 @@ class SPDTest: public CxxTest::TestSuite
                 uint8_t memType = 0x0;
                 err = getMemType( theTarget,
                                   memType );
-
                 if( err )
                 {
                     fails++;
-                    TS_FAIL( "testSpdRead- Failure reading Basic memory type!" );
+                    TS_FAIL("testSpdRead- Failure reading Basic memory type!" );
                     errlCommit( err,
                                 VPD_COMP_ID );
-                    break;;
+                    break;
                 }
+
+                // Get the module type.
+                modSpecTypes_t modType = NA;
+                err = getModType(modType,
+                                 theTarget,
+                                 memType,
+                                 VPD::AUTOSELECT);
+                if( err )
+                {
+                    fails++;
+                    TS_FAIL("testSpdRead- Failure reading memory module type!");
+                    errlCommit( err,
+                                VPD_COMP_ID );
+                    break;
+                }
+
 
                 for( uint64_t keyword = SPD::SPD_FIRST_NORM_KEYWORD;
                      keyword <= SPD::SPD_LAST_NORM_KEYWORD; keyword++ )
@@ -154,14 +170,29 @@ class SPDTest: public CxxTest::TestSuite
                     }
                     else if( SPD_DDR4_TYPE == memType )
                     {
+                        size_t dataSize = (modType == DDIMM)
+                            ? (sizeof(ddr4DDIMMData)/sizeof(ddr4DDIMMData[0]))
+                            : (sizeof(ddr4Data)/sizeof(ddr4Data[0]));
+
                         for( entry = 0;
-                             entry < (sizeof(ddr4Data)/sizeof(ddr4Data[0]));
+                             entry < dataSize;
                              entry++ )
                         {
-                            if( keyword == ddr4Data[entry].keyword )
+                            if (modType == DDIMM)
                             {
-                                theSize = ddr4Data[entry].length;
-                                break;
+                                if( keyword == ddr4DDIMMData[entry].keyword )
+                                {
+                                    theSize = ddr4DDIMMData[entry].length;
+                                    break;
+                                }
+                            }
+                            else
+                            {
+                                if( keyword == ddr4Data[entry].keyword )
+                                {
+                                    theSize = ddr4Data[entry].length;
+                                    break;
+                                }
                             }
                         }
                     }
@@ -304,6 +335,21 @@ class SPDTest: public CxxTest::TestSuite
                     break;
                 }
 
+                // Get the module type.
+                modSpecTypes_t modType = NA;
+                err = getModType(modType,
+                                 theTarget,
+                                 memType,
+                                 VPD::AUTOSELECT);
+                if( err )
+                {
+                    fails++;
+                    TS_FAIL("testSpdRead- Failure reading memory module type!");
+                    errlCommit( err,
+                                VPD_COMP_ID );
+                    break;
+                }
+
                 // Get the size
                 if( SPD_DDR3_TYPE == memType )
                 {
@@ -320,14 +366,29 @@ class SPDTest: public CxxTest::TestSuite
                 }
                 else if( SPD_DDR4_TYPE == memType )
                 {
+                    size_t dataSize = (modType == DDIMM)
+                        ? (sizeof(ddr4DDIMMData)/sizeof(ddr4DDIMMData[0]))
+                        : (sizeof(ddr4Data)/sizeof(ddr4Data[0]));
+
                     for( uint32_t entry = 0;
-                         entry < (sizeof(ddr4Data)/sizeof(ddr4Data[0]));
+                         entry < dataSize;
                          entry++ )
                     {
-                        if( SPD::DIMM_BAD_DQ_DATA == ddr4Data[entry].keyword )
+                        if (modType == DDIMM)
                         {
-                            theSize = ddr4Data[entry].length;
-                            break;
+                            if( SPD::DIMM_BAD_DQ_DATA == ddr4DDIMMData[entry].keyword )
+                            {
+                                theSize = ddr4DDIMMData[entry].length;
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            if( SPD::DIMM_BAD_DQ_DATA == ddr4Data[entry].keyword )
+                            {
+                                theSize = ddr4Data[entry].length;
+                                break;
+                            }
                         }
                     }
                 }
@@ -340,6 +401,14 @@ class SPDTest: public CxxTest::TestSuite
                     TS_FAIL( "testSpdWriteDQ - Unsupported Memory Type!" );
                     errlCommit( err,
                                 VPD_COMP_ID );
+                    break;
+                }
+
+                if( 0 == theSize )
+                {
+                    // memType not supported or Keyword not supported on
+                    // this memType
+                    cmds++;
                     break;
                 }
 
@@ -892,6 +961,21 @@ class SPDTest: public CxxTest::TestSuite
                     break;
                 }
 
+                // Get the module type.
+                modSpecTypes_t modType = NA;
+                err = getModType(modType,
+                                 theTarget,
+                                 memType,
+                                 VPD::AUTOSELECT);
+                if( err )
+                {
+                    fails++;
+                    TS_FAIL("testSpdRead- Failure reading memory module type!");
+                    errlCommit( err,
+                                VPD_COMP_ID );
+                    break;
+                }
+
                 // The real Keyword read testing
                 for( uint64_t keyword = SPD::SPD_FIRST_MOD_SPEC;
                      keyword <= SPD::SPD_LAST_MOD_SPEC; keyword++ )
@@ -922,15 +1006,31 @@ class SPDTest: public CxxTest::TestSuite
                     }
                     else if( SPD_DDR4_TYPE == memType )
                     {
+                        size_t dataSize = (modType == DDIMM)
+                            ? (sizeof(ddr4DDIMMData)/sizeof(ddr4DDIMMData[0]))
+                            : (sizeof(ddr4Data)/sizeof(ddr4Data[0]));
+
                         for( entry = 0;
-                             entry < (sizeof(ddr4Data)/sizeof(ddr4Data[0]));
+                             entry < dataSize;
                              entry++ )
                         {
-                            if( keyword == ddr4Data[entry].keyword )
+                            if (modType == DDIMM)
                             {
-                                kwdData = ddr4Data[entry];
-                                theSize = ddr4Data[entry].length;
-                                break;
+                                if( keyword == ddr4DDIMMData[entry].keyword )
+                                {
+                                    kwdData = ddr4DDIMMData[entry];
+                                    theSize = ddr4DDIMMData[entry].length;
+                                    break;
+                                }
+                            }
+                            else
+                            {
+                                if( keyword == ddr4Data[entry].keyword )
+                                {
+                                    kwdData = ddr4Data[entry];
+                                    theSize = ddr4Data[entry].length;
+                                    break;
+                                }
                             }
                         }
                     }
