@@ -82,6 +82,7 @@ void display_lane_results(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_t
     }
 
     // If we failed, display the information as INF
+    else
     {
         FAPI_INF("%s lane: %u FAILING R0:%u R1:%u R2:%u R3:%u",
                  mss::c_str(i_target), i_lane,

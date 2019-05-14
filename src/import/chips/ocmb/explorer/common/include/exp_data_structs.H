@@ -56,6 +56,10 @@ enum exp_struct_sizes
     SENSOR_CACHE_PADDING_SIZE_0 = 3,
     SENSOR_CACHE_PADDING_SIZE_1 = 15,
 
+    // Constants for draminit
+    DRAMINIT_NUM_ADDR_DELAYS = 8,
+    DRAMINIT_STRUCTURE_VERSION = 2,
+
     // Training response constants
     TIMING_RESPONSE_2D_ARRAY_SIZE = 16,
     TRAINING_RESPONSE_NUM_RANKS = 4,
@@ -113,6 +117,8 @@ typedef struct
 ///
 typedef struct user_input_msdg
 {
+    uint32_t version_number;
+
     // Choose the Dimm type from one of below:
     // 0 = UDIMM
     // 1 = RDIMM
@@ -187,6 +193,16 @@ typedef struct user_input_msdg
     // 0 = Normal mode (2-rank);
     uint16_t Rank4Mode;
 
+    // Operate PHY in Encoded QuadCs Mode (only valid for
+    // RDIMM/RLDIMM) (NOT Supported in Explorer) when enabled,
+    // each CA bus drives one RCD in Encoded QuadCs mode.
+    // {cid_a/b[0],csn_a/b[1:0]} are connected to {DC0,DCS1_n,DCS0_n}
+    // to select master ranks. cid_a/b[1] is connected to DC2 to
+    // select up to 2 logic ranks (2H 3DStack)
+    // 1 = Encoded QuadCs Mode
+    // 0 = Direct DualCs Mod
+    uint16_t EncodedQuadCs;
+
     // Support 1rank 3DS Device in
     // 1 = 1 rank 3DS in DDP board
     // PHY are connected to c[0],c[1],c[2] of DRAM);
@@ -206,6 +222,12 @@ typedef struct user_input_msdg
     // 1 = Support Everspin DDR4 MRAM;
     // 0 = Normal DDR4 DRAM;
     uint16_t MRAMSupport;
+
+
+    // 1 = Support MDS 8H DRAM (odt[1] is connected to c[2] of
+    // MDS DRAM);
+    // 0 = Normal Mode;
+    uint16_t MDSSupport;
 
     // Number of p-states used
     // Always set NumPStates to 1 for Explorer.
@@ -426,7 +448,7 @@ typedef struct user_input_msdg
     // Disable Receiver DFE
     // PhyEqualization[1] = 0: Enable Driver FFE; = 0:
     // Disable Driver FFE
-    uint16_t PhyEqualization;
+    uint16_t PhyEqualization[MSDG_MAX_PSTATE];
 
     // Initial VrefDQ (MR6)
     // InitVrefDQ[6] = VrefDQ training range (same as MR6[6])
@@ -528,14 +550,14 @@ typedef struct user_input_msdg
     // RcdIBTCtrl[1:0] CA Input Bus Termination
     // RcdIBTCtrl[3:2] DCS[3:0]_n Input Bus Termination // RcdIBTCtrl[5:4] DCKE Input Bus Termination
     // RcdIBTCtrl[7:6] DODT Input Bus Termination
-    uint16_t RcdIBTCtrl;
+    uint16_t RcdIBTCtrl[MSDG_MAX_PSTATE];
 
     // RCD Data Buffer Interface Driver Characteristics (F1RC00)
     // RcdDBDic[0] BCOM[3:0],BODT,BCKE, driver strength
     // RcdDBDic[1] Reserved
     // RcdDBDic[2] BCK_t/BCK_c driver strength
     // RcdDBDic[3] Reserved
-    uint16_t RcdDBDic;
+    uint16_t RcdDBDic[MSDG_MAX_PSTATE];
 
     // RCD slew rate control (F1RC02,F1RC03,F1RC04,F1RC05)
     // RcdSlewRate[1:0] slew rate control of address/command
@@ -545,12 +567,27 @@ typedef struct user_input_msdg
     // RcdSlewRate[9:8] slew rate control of Y1_t/c, Y3_t/c
     // RcdSlewRate[11:10] slew rate control of Y0_t/c, Y2_t/c
     // RcdSlewRate[13:12] slew rate control of BCOM[3:0], BODT, BCKE // RcdSlewRate[15:14] slew rate control of BCK_t/c
-    uint16_t RcdSlewRate;
+    uint16_t RcdSlewRate[MSDG_MAX_PSTATE];
 
-    // Enable Special mode for Emulation Support
-    // [0] = 0 Normal firmware mode
-    // [0] = 1 Emulation firmware mode
-    uint16_t EmulationSupport;
+    // DFIMRL_DDRCLK: Max Read Latency counted by DDR Clock.
+    // dfi_rddata is returned (14 + DFIMRL_DDRCLK) cycles after
+    // dfi_rddata_en is asserted.
+    uint16_t DFIMRL_DDRCLK;
+
+    //ATxDly_A/B[0]: ODT[1],ODT[0],CS_N[0],CS_N[1]
+    //ATxDly_A/B[1]: ADDR[13],ADDR[5],BG[0],CKE[1]
+    //ATxDly_A/B[2]: ADDR[17],ADDR[7],BA[0],ADDR[16]
+    //ATxDly_A/B[3]: ADDR[8],BG[1],CID[1],CID[0]
+    //ATxDly_A/B[4]: ADDR[1],ADDR[9],ADDR[2],CAPARITY
+    //ATxDly_A/B[5]: ADDR[12],ADDR[3],ADDR[4],ADDR[0]
+    //ATxDly_A/B[6]: CKE[0],ADDR[15],ACT_N,ADDR[10]
+    //ATxDly_A/B[7]: ADDR[11],ADDR[6],BA[1],ADDR[14]
+    //7bit A-side AC Delay
+    //ATxDly_A[pstate][NumAnib]
+    uint8_t  ATxDly_A[MSDG_MAX_PSTATE][DRAMINIT_NUM_ADDR_DELAYS];
+    //7bit B-side AC Delay
+    //ATxDly_B[pstate][NumAnib]
+    uint8_t  ATxDly_B[MSDG_MAX_PSTATE][DRAMINIT_NUM_ADDR_DELAYS];
 } user_input_msdg_t;
 
 ///

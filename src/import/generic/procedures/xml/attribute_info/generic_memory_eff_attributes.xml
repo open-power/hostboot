@@ -752,6 +752,18 @@
   </attribute>
 
   <attribute>
+    <id>ATTR_MEM_EFF_DRAM_MDS</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Controls if the given target has an MDS (managed DRAM solution)
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssAccessorName>dram_mds</mssAccessorName>
+  </attribute>
+
+  <attribute>
     <id>ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM</id>
     <targetType>TARGET_TYPE_MEM_PORT</targetType>
     <description>

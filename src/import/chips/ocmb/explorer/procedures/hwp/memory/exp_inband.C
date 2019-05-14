@@ -139,6 +139,8 @@ fapi2::ReturnCode putOCCfg(
 fapi2::ReturnCode user_input_msdg_to_little_endian(const user_input_msdg& i_input, std::vector<uint8_t>& o_data,
         uint32_t& o_crc)
 {
+    o_data.clear();
+    FAPI_TRY(forceCrctEndian(i_input.version_number, o_data));
     FAPI_TRY(forceCrctEndian(i_input.DimmType, o_data));
     FAPI_TRY(forceCrctEndian(i_input.CsPresent, o_data));
     FAPI_TRY(forceCrctEndian(i_input.DramDataWidth, o_data));
@@ -151,9 +153,11 @@ fapi2::ReturnCode user_input_msdg_to_little_endian(const user_input_msdg& i_inpu
     FAPI_TRY(forceCrctEndian(i_input.SpdCLSupported, o_data));
     FAPI_TRY(forceCrctEndian(i_input.SpdtAAmin, o_data));
     FAPI_TRY(forceCrctEndian(i_input.Rank4Mode, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.EncodedQuadCs, o_data));
     FAPI_TRY(forceCrctEndian(i_input.DDPCompatible, o_data));
     FAPI_TRY(forceCrctEndian(i_input.TSV8HSupport, o_data));
     FAPI_TRY(forceCrctEndian(i_input.MRAMSupport, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.MDSSupport, o_data));
     FAPI_TRY(forceCrctEndian(i_input.NumPStates, o_data));
     FAPI_TRY(forceCrctEndianArray(i_input.Frequency, MSDG_MAX_PSTATE, o_data));
     FAPI_TRY(forceCrctEndianArray(i_input.PhyOdtImpedance, MSDG_MAX_PSTATE, o_data));
@@ -180,7 +184,7 @@ fapi2::ReturnCode user_input_msdg_to_little_endian(const user_input_msdg& i_inpu
     FAPI_TRY(forceCrctEndianArray(i_input.DramDic, MSDG_MAX_PSTATE, o_data));
     FAPI_TRY(forceCrctEndianArray(i_input.DramWritePreamble, MSDG_MAX_PSTATE, o_data));
     FAPI_TRY(forceCrctEndianArray(i_input.DramReadPreamble, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndian(i_input.PhyEqualization, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.PhyEqualization, MSDG_MAX_PSTATE, o_data));
     FAPI_TRY(forceCrctEndianArray(i_input.InitVrefDQ, MSDG_MAX_PSTATE, o_data));
     FAPI_TRY(forceCrctEndianArray(i_input.InitPhyVref, MSDG_MAX_PSTATE, o_data));
     FAPI_TRY(forceCrctEndianArray(i_input.OdtWrMapCs, MSDG_MAX_PSTATE, o_data));
@@ -191,10 +195,20 @@ fapi2::ReturnCode user_input_msdg_to_little_endian(const user_input_msdg& i_inpu
     FAPI_TRY(forceCrctEndianArray(i_input.BistCAParityLatency, MSDG_MAX_PSTATE, o_data));
     FAPI_TRY(forceCrctEndianArray(i_input.RcdDic, MSDG_MAX_PSTATE, o_data));
     FAPI_TRY(forceCrctEndianArray(i_input.RcdVoltageCtrl, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndian(i_input.RcdIBTCtrl, o_data));
-    FAPI_TRY(forceCrctEndian(i_input.RcdDBDic, o_data));
-    FAPI_TRY(forceCrctEndian(i_input.RcdSlewRate, o_data));
-    FAPI_TRY(forceCrctEndian(i_input.EmulationSupport, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.RcdIBTCtrl, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.RcdDBDic, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.RcdSlewRate, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.DFIMRL_DDRCLK, o_data));
+
+    for(uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
+    {
+        FAPI_TRY(forceCrctEndianArray(i_input.ATxDly_A[l_pstate], DRAMINIT_NUM_ADDR_DELAYS, o_data));
+    }
+
+    for(uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
+    {
+        FAPI_TRY(forceCrctEndianArray(i_input.ATxDly_B[l_pstate], DRAMINIT_NUM_ADDR_DELAYS, o_data));
+    }
 
     o_crc = crc32_gen(o_data);
 

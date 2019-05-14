@@ -44,6 +44,7 @@
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/mss_buffer_utils.H>
+#include <stdio.h>
 
 namespace mss
 {
@@ -69,6 +70,15 @@ enum msdg_dram_data_width
     MSDG_X4 = 0x0004,
     MSDG_X8 = 0x0008,
     MSDG_X16 = 0x0010,
+};
+
+///
+/// @brief Defines CS encoding mode
+///
+enum msdg_cs_encode_mode
+{
+    MSDG_QUAD_ENCODE_MODE = 1,
+    MSDG_DUAL_DIRECT_MODE = 0,
 };
 
 ///
@@ -149,6 +159,7 @@ struct phy_params_t
     ///
     /// Declare variables to be used
     ///
+    uint32_t iv_version_number;
     uint8_t iv_dimm_type[MAX_DIMM_PER_PORT];
     uint16_t iv_chip_select;
     uint8_t iv_dram_data_width[MAX_DIMM_PER_PORT];
@@ -161,9 +172,11 @@ struct phy_params_t
     uint32_t iv_spdcl_support;
     uint16_t iv_taa_min;
     uint8_t iv_rank4_mode[MAX_DIMM_PER_PORT];
+    uint16_t iv_encoded_quadcs;
     uint8_t iv_ddp_compatible[MAX_DIMM_PER_PORT];
     uint8_t iv_tsv8h[MAX_DIMM_PER_PORT];
     uint8_t iv_mram_support[MAX_DIMM_PER_PORT];
+    uint8_t iv_mdssupport;
     uint8_t iv_num_pstate[MAX_DIMM_PER_PORT];
     uint64_t iv_frequency;
     uint8_t iv_odt_impedance[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
@@ -194,7 +207,9 @@ struct phy_params_t
     uint8_t iv_f0rc7x[MAX_DIMM_PER_PORT];
     uint8_t iv_f1rc00[MAX_DIMM_PER_PORT];
     uint16_t iv_rcd_slew_rate;
-    uint8_t iv_firmware_mode;
+    uint8_t iv_dfimrl_ddrclk;
+    uint8_t iv_atxdly_a[DRAMINIT_NUM_ADDR_DELAYS];
+    uint8_t iv_atxdly_b[DRAMINIT_NUM_ADDR_DELAYS];
 };
 
 ///
@@ -223,9 +238,10 @@ class phy_params
         /// @param[in,out] o_rc the fapi2 output
         ///
         phy_params(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-                   fapi2::ReturnCode o_rc):
+                   fapi2::ReturnCode& o_rc):
             iv_target(i_target)
         {
+            uint8_t l_master_ranks[MAX_DIMM_PER_PORT] = {};
             // Fetch attributes and populate the member variables
             FAPI_TRY(mss::attr::get_dimm_type(i_target, iv_params.iv_dimm_type));
             FAPI_TRY(mss::attr::get_exp_cs_present(i_target, iv_params.iv_chip_select));
@@ -242,6 +258,7 @@ class phy_params
             FAPI_TRY(mss::attr::get_ddp_compatibility(i_target, iv_params.iv_ddp_compatible));
             FAPI_TRY(mss::attr::get_tsv_8h_support(i_target, iv_params.iv_tsv8h));
             FAPI_TRY(mss::attr::get_mram_support(i_target, iv_params.iv_mram_support));
+            FAPI_TRY(mss::attr::get_dram_mds(i_target, iv_params.iv_mdssupport));
             FAPI_TRY(mss::attr::get_pstates(i_target, iv_params.iv_num_pstate));
             FAPI_TRY(mss::attr::get_freq(i_target, iv_params.iv_frequency));
             FAPI_TRY(mss::attr::get_si_mc_rcv_imp_dq_dqs(i_target, iv_params.iv_odt_impedance));
@@ -272,7 +289,23 @@ class phy_params
             FAPI_TRY(mss::attr::get_dimm_ddr4_f0rc7x(i_target, iv_params.iv_f0rc7x));
             FAPI_TRY(mss::attr::get_dimm_ddr4_f1rc00(i_target, iv_params.iv_f1rc00));
             FAPI_TRY(mss::attr::get_exp_rcd_slew_rate(i_target, iv_params.iv_rcd_slew_rate));
-            FAPI_TRY(mss::attr::get_exp_firmware_emulation_mode(i_target, iv_params.iv_firmware_mode));
+            FAPI_TRY(mss::attr::get_exp_dfimrl_clk(i_target, iv_params.iv_dfimrl_ddrclk));
+            FAPI_TRY(mss::attr::get_exp_atxdly_a(i_target, iv_params.iv_atxdly_a));
+            FAPI_TRY(mss::attr::get_exp_atxdly_b(i_target, iv_params.iv_atxdly_b));
+
+            // TK update this if/when Microchip responds
+            iv_params.iv_version_number = DRAMINIT_STRUCTURE_VERSION;
+
+            // We're in quad encoded mode IF
+            // 1) 4R per DIMM
+            // 2) we have an RDIMM
+            FAPI_TRY(mss::attr::get_num_master_ranks_per_dimm(i_target, l_master_ranks));
+            {
+                const bool l_has_rcd = iv_params.iv_dimm_type[0] == fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_RDIMM ||
+                                       iv_params.iv_dimm_type[0] == fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_LRDIMM;
+                const bool l_4r = l_master_ranks[0] == fapi2::ENUM_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM_4R;
+                iv_params.iv_encoded_quadcs = (l_has_rcd && l_4r) ? MSDG_QUAD_ENCODE_MODE : MSDG_DUAL_DIRECT_MODE;
+            }
 
         fapi_try_exit:
             o_rc = fapi2::current_err;
@@ -309,16 +342,15 @@ class phy_params
                     io_phy_params.DimmType = MSDG_RDIMM;
                     break;
 
+                // TK this will need to be updated for the 4U explorer card
+                // For 1U/2U (what we're working on now), the DDIMM means an unregistered MC to DRAM interface
+                case fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM:
                 case fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_UDIMM:
                     io_phy_params.DimmType = MSDG_UDIMM;
                     break;
 
                 case fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_LRDIMM:
                     io_phy_params.DimmType = MSDG_LRDIMM;
-                    break;
-
-                case fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM:
-                    io_phy_params.DimmType = MSDG_DDIMM;
                     break;
 
                 default:
@@ -761,7 +793,7 @@ class phy_params
         ///
         fapi2::ReturnCode set_PhyEqualization(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.PhyEqualization = iv_params.iv_phy_equalization[0][0];
+            io_phy_params.PhyEqualization[0] = iv_params.iv_phy_equalization[0][0];
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -886,7 +918,7 @@ class phy_params
         ///
         fapi2::ReturnCode set_RcdIBTCtrl(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.RcdIBTCtrl = iv_params.iv_f0rc7x[0];
+            io_phy_params.RcdIBTCtrl[0] = iv_params.iv_f0rc7x[0];
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -897,7 +929,7 @@ class phy_params
         ///
         fapi2::ReturnCode set_RcdDBDic(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.RcdDBDic = iv_params.iv_f1rc00[0];
+            io_phy_params.RcdDBDic[0] = iv_params.iv_f1rc00[0];
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -908,18 +940,75 @@ class phy_params
         ///
         fapi2::ReturnCode set_RcdSlewRate(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.RcdSlewRate = iv_params.iv_rcd_slew_rate;
+            io_phy_params.RcdSlewRate[0] = iv_params.iv_rcd_slew_rate;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        // Version 2 updates
+
+        ///
+        /// @brief Get the value for parameter version_number
+        /// @param[in,out] io_phy_params the phy params data struct
+        /// @return FAPI2_RC_SUCCESS
+        ///
+        fapi2::ReturnCode set_version_number(user_input_msdg& io_phy_params) const
+        {
+            io_phy_params.version_number = iv_params.iv_version_number;
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
         ///
-        /// @brief Get the value for parameter EmulationSupport
+        /// @brief Get the value for parameter version_number
         /// @param[in,out] io_phy_params the phy params data struct
         /// @return FAPI2_RC_SUCCESS
         ///
-        fapi2::ReturnCode set_EmulationSupport(user_input_msdg& io_phy_params) const
+        fapi2::ReturnCode set_EncodedQuadCs(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.EmulationSupport = iv_params.iv_firmware_mode;
+            io_phy_params.EncodedQuadCs = iv_params.iv_encoded_quadcs;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Get the value for parameter MDSSupport
+        /// @param[in,out] io_phy_params the phy params data struct
+        /// @return FAPI2_RC_SUCCESS
+        ///
+        fapi2::ReturnCode set_MDSSupport(user_input_msdg& io_phy_params) const
+        {
+            io_phy_params.MDSSupport = iv_params.iv_mdssupport;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Get the value for parameter DFIMRL_DDRCLK
+        /// @param[in,out] io_phy_params the phy params data struct
+        /// @return FAPI2_RC_SUCCESS
+        ///
+        fapi2::ReturnCode set_DFIMRL_DDRCLK(user_input_msdg& io_phy_params) const
+        {
+            io_phy_params.DFIMRL_DDRCLK = iv_params.iv_dfimrl_ddrclk;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Get the value for parameter DFIMRL_DDRCLK
+        /// @param[in,out] io_phy_params the phy params data struct
+        /// @return FAPI2_RC_SUCCESS
+        ///
+        fapi2::ReturnCode set_ATxDly_A(user_input_msdg& io_phy_params) const
+        {
+            memcpy(&io_phy_params.ATxDly_A[0][0], &iv_params.iv_atxdly_a[0], DRAMINIT_NUM_ADDR_DELAYS);
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Get the value for parameter DFIMRL_DDRCLK
+        /// @param[in,out] io_phy_params the phy params data struct
+        /// @return FAPI2_RC_SUCCESS
+        ///
+        fapi2::ReturnCode set_ATxDly_B(user_input_msdg& io_phy_params) const
+        {
+            memcpy(&io_phy_params.ATxDly_B[0][0], &iv_params.iv_atxdly_b[0], DRAMINIT_NUM_ADDR_DELAYS);
             return fapi2::FAPI2_RC_SUCCESS;
         }
 };

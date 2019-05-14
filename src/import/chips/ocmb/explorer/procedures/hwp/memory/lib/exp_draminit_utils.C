@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -77,6 +77,7 @@ fapi2::ReturnCode setup_phy_params(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
         FAPI_TRY(l_rc, "Unable to instantiate phy_params for target %s", mss::c_str(i_target));
 
         // Set the params by fetching them from the attributes
+        FAPI_TRY(l_set_phy_params.set_version_number(o_phy_params));
         FAPI_TRY(l_set_phy_params.setup_DimmType(o_phy_params));
         FAPI_TRY(l_set_phy_params.setup_CsPresent(o_phy_params));
         FAPI_TRY(l_set_phy_params.setup_DramDataWidth(o_phy_params));
@@ -89,9 +90,11 @@ fapi2::ReturnCode setup_phy_params(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
         FAPI_TRY(l_set_phy_params.set_SpdCLSupported(o_phy_params));
         FAPI_TRY(l_set_phy_params.set_SpdtAAmin(o_phy_params));
         FAPI_TRY(l_set_phy_params.set_Rank4Mode(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_EncodedQuadCs(o_phy_params));
         FAPI_TRY(l_set_phy_params.set_DDPCompatible(o_phy_params));
         FAPI_TRY(l_set_phy_params.set_TSV8HSupport(o_phy_params));
         FAPI_TRY(l_set_phy_params.set_MRAMSupport(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_MDSSupport(o_phy_params));
         FAPI_TRY(l_set_phy_params.set_NumPStates(o_phy_params));
         FAPI_TRY(l_set_phy_params.set_Frequency(o_phy_params));
         FAPI_TRY(l_set_phy_params.set_PhyOdtImpedance(o_phy_params));
@@ -133,7 +136,10 @@ fapi2::ReturnCode setup_phy_params(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
         FAPI_TRY(l_set_phy_params.set_RcdDBDic(o_phy_params));
 
         FAPI_TRY(l_set_phy_params.set_RcdSlewRate(o_phy_params));
-        FAPI_TRY(l_set_phy_params.set_EmulationSupport(o_phy_params));
+
+        FAPI_TRY(l_set_phy_params.set_DFIMRL_DDRCLK(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_ATxDly_A(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_ATxDly_B(o_phy_params));
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
