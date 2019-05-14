@@ -31,10 +31,12 @@
 #include <errl/errlmanager.H>              // errlCommit
 #include <errl/hberrltypes.H>              // TWO_UINT32_TO_UINT64
 #include <targeting/common/target.H>       // TargetHandle_t, getTargetFromHuid
+#include <runtime/rt_targeting.H>          // RT_TARG::getHbTarget
 #include <attributeenums.H>                // ATTRIBUTE_ID
 
 #ifdef CONFIG_NVDIMM
-#include <isteps/nvdimm/nvdimm.H>  // notify NVDIMM protection change
+#include <isteps/nvdimm/nvdimm.H>          // NVDIMM related activities
+using namespace NVDIMM;
 #endif
 
 using namespace TARGETING;
@@ -42,6 +44,7 @@ using namespace RUNTIME;
 using namespace ERRORLOG;
 using namespace MBOX;
 using namespace SBEIO;
+
 
 // Trace definition
 extern trace_desc_t* g_trac_runtime;
@@ -51,7 +54,7 @@ extern trace_desc_t* g_trac_hbrt;
  * @brief The lower and upper bounds for the sequence ID.
  **/
 const uint16_t SEQ_ID_MIN = 0x0000;
-const uint16_t SEQ_ID_MAX =  0x7FFF;
+const uint16_t SEQ_ID_MAX = 0x7FFF;
 
 /**
  * @brief Set the sequence ID to the minimum value
@@ -85,7 +88,7 @@ uint16_t SeqId_t::getNextSeqId()
  **/
 uint16_t SeqId_t::getCurrentSeqId()
 {
-  return SeqId_t::SEQ_ID;
+    return SeqId_t::SEQ_ID;
 }
 
 /**
@@ -96,12 +99,12 @@ uint16_t SeqId_t::getCurrentSeqId()
  **/
 void sbeAttemptRecovery(uint64_t i_data)
 {
-   // Create a useful struct to get to the data
-   // The data is expected to be a HUID (in the first 4 bytes)
-   // followed by a PLID (in the last 4 bytes).
-   SbeRetryReqData_t *l_sbeRetryData = reinterpret_cast<SbeRetryReqData_t*>(&i_data);
+    // Create a useful struct to get to the data
+    // The data is expected to be a HUID (in the first 4 bytes)
+    // followed by a PLID (in the last 4 bytes).
+    SbeRetryReqData_t *l_sbeRetryData = reinterpret_cast<SbeRetryReqData_t*>(&i_data);
 
-   TRACFCOMP(g_trac_runtime, ENTER_MRK"sbeAttemptRecovery: plid:0x%X, "
+    TRACFCOMP(g_trac_runtime, ENTER_MRK"sbeAttemptRecovery: plid:0x%X, "
              "HUID:0x%X", l_sbeRetryData->plid, l_sbeRetryData->huid);
 
     errlHndl_t l_err = nullptr;
@@ -115,7 +118,7 @@ void sbeAttemptRecovery(uint64_t i_data)
         // If HUID invalid, log error and quit
         if (nullptr == l_target)
         {
-             TRACFCOMP(g_trac_runtime, ERR_MRK"sbeAttemptRecovery: "
+            TRACFCOMP(g_trac_runtime, ERR_MRK"sbeAttemptRecovery: "
                        "No target associated with HUID:0x%.8X",
                        l_sbeRetryData->huid);
 
@@ -149,7 +152,7 @@ void sbeAttemptRecovery(uint64_t i_data)
         if (nullptr == g_hostInterfaces ||
             nullptr == g_hostInterfaces->firmware_request)
         {
-             TRACFCOMP(g_trac_runtime, ERR_MRK"sbeAttemptRecovery: "
+            TRACFCOMP(g_trac_runtime, ERR_MRK"sbeAttemptRecovery: "
                        "Hypervisor firmware_request interface not linked");
 
             /*@
@@ -294,12 +297,12 @@ void attrSyncRequest( void * i_data)
     HbrtAttrSyncData_t * l_hbrtAttrData =
                                 reinterpret_cast<HbrtAttrSyncData_t*>(i_data);
     TRACFCOMP(g_trac_runtime, ENTER_MRK"attrSyncRequest: Target HUID 0x%0X "
-            "for AttrID: 0x%0X with AttrSize: %lld", l_hbrtAttrData->huid,
-            l_hbrtAttrData->attrID, l_hbrtAttrData->sizeOfAttrData);
+             "for AttrID: 0x%0X with AttrSize: %lld", l_hbrtAttrData->huid,
+             l_hbrtAttrData->attrID, l_hbrtAttrData->sizeOfAttrData);
 
     TRACFBIN(g_trac_runtime, "Attribute data: ",
-            &(l_hbrtAttrData->attrDataStart),
-            l_hbrtAttrData->sizeOfAttrData);
+             &(l_hbrtAttrData->attrDataStart),
+             l_hbrtAttrData->sizeOfAttrData);
 
     // extract the target from the given HUID
     TargetHandle_t l_target = Target::getTargetFromHuid(l_hbrtAttrData->huid);
@@ -325,36 +328,210 @@ void attrSyncRequest( void * i_data)
         memcpy(&l_attrData, &(l_hbrtAttrData->attrDataStart), l_attrSize);
 
         /*@
-        * @errortype
-        * @severity     ERRL_SEV_PREDICTIVE
-        * @moduleid     MOD_RT_ATTR_SYNC_REQUEST
-        * @reasoncode   RC_ATTR_UPDATE_FAILED
-        * @userdata1[0:31]  Target HUID
-        * @userdata1[32:63] Attribute ID
-        * @userdata2[0:31]  Data Size
-        * @userdata2[32:63] Up to 4 bytes of attribute data
-        * @devdesc      Attribute failed to update on HBRT side
-        */
-       errlHndl_t l_err = new ErrlEntry(ERRL_SEV_PREDICTIVE,
-                                        MOD_RT_ATTR_SYNC_REQUEST,
-                                        RC_ATTR_UPDATE_FAILED,
-                                        TWO_UINT32_TO_UINT64(
+         * @errortype
+         * @severity     ERRL_SEV_PREDICTIVE
+         * @moduleid     MOD_RT_ATTR_SYNC_REQUEST
+         * @reasoncode   RC_ATTR_UPDATE_FAILED
+         * @userdata1[0:31]  Target HUID
+         * @userdata1[32:63] Attribute ID
+         * @userdata2[0:31]  Data Size
+         * @userdata2[32:63] Up to 4 bytes of attribute data
+         * @devdesc      Attribute failed to update on HBRT side
+         */
+        errlHndl_t l_err = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                                         MOD_RT_ATTR_SYNC_REQUEST,
+                                         RC_ATTR_UPDATE_FAILED,
+                                         TWO_UINT32_TO_UINT64(
                                             l_hbrtAttrData->huid,
                                             l_hbrtAttrData->attrID),
-                                        TWO_UINT32_TO_UINT64(
+                                         TWO_UINT32_TO_UINT64(
                                             l_hbrtAttrData->sizeOfAttrData,
                                             l_attrData),
-                                        true);
+                                         true);
 
-       l_err->collectTrace(RUNTIME_COMP_NAME, 256);
+        l_err->collectTrace(RUNTIME_COMP_NAME, 256);
 
-       //Commit the error
-       errlCommit(l_err, RUNTIME_COMP_ID);
+        //Commit the error
+        errlCommit(l_err, RUNTIME_COMP_ID);
     }
 
     TRACFCOMP(g_trac_runtime, EXIT_MRK"attrSyncRequest");
 }
 
+/**
+ *  @brief Perform an NVDIMM operation
+ *  @param[in] nvDimmOp - A struct that contains the operation(s) to perform
+ *                        and a flag indicating whether to perform operation
+ *                        on all processors or a given single processor.
+ *  @Note The operations below are in the order of which they should be
+ *        performed.  If a new operation is added, make sure it inserted in the
+ *        correct order.
+ *        The current order is: disarm -> disable encryption -> remove keys ->
+ *                              enable encryption -> arm
+ **/
+void doNvDimmOperation(const hostInterfaces::nvdimm_operation_t& nvDimmOp)
+{
+#ifndef CONFIG_NVDIMM
+    TRACFCOMP(g_trac_runtime, ENTER_MRK"doNvDimmOperation: not an "
+              "NVDIMM configuration, this call becomes a noop.");
+
+#else
+    TRACFCOMP(g_trac_runtime, ENTER_MRK"doNvDimmOperation: Operation(s) "
+              "0x%0X, processor ID  0x%0X",
+              nvDimmOp.opType,
+              nvDimmOp.procId);
+
+    // Error log handle for capturing any errors
+    errlHndl_t       l_err{nullptr};
+    // List of NVDIMM Targets to execute NVDIMM operation on
+    TargetHandleList l_nvDimmTargetList;
+
+    do
+    {
+        /// Populate the NVDIMM target list
+        // If requesting to perform operation on all NVDIMMs, then
+        // retrieve all NVDIMMs from system
+        if (HBRT_NVDIMM_OPERATION_APPLY_TO_ALL_NVDIMMS == nvDimmOp.procId)
+        {
+            nvdimm_getNvdimmList(l_nvDimmTargetList);
+        }
+        // Else retrieve only the NVDIMMs from given processor ID
+        else
+        {
+            /// Get the NVDIMMs associated with procId
+            // Convert the procId to a real boy, uh, I mean target
+            TARGETING::TargetHandle_t l_procTarget;
+            l_err = RT_TARG::getHbTarget(nvDimmOp.procId, l_procTarget);
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_runtime, "doNvDimmOperation: Error getting "
+                                          "HB Target from processor ID 0x%0X, "
+                                          "exiting ...",
+                                          nvDimmOp.procId);
+
+                break;
+            }
+
+            // Get the list of NVDIMMs associated with processor target
+            l_nvDimmTargetList = TARGETING::getProcNVDIMMs(l_procTarget);
+        }
+
+        // No point in continuing if the list of NVDIMM Targets is empty
+        if (!l_nvDimmTargetList.size())
+        {
+            TRACFCOMP(g_trac_runtime, "doNvDimmOperation: No NVDIMMs found, "
+                                      "exiting ...");
+            break;
+        }
+
+        /// Perform the operation(s) requested
+        // Disarm the NV logic
+        if (nvDimmOp.opType & hostInterfaces::HBRT_FW_NVDIMM_DISARM)
+        {
+            // Make call to disarm
+            if (!nvdimmDisarm(l_nvDimmTargetList))
+            {
+                TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
+                                          "Call to disarm failed, exiting ...");
+                break;
+            }
+            else
+            {
+                TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
+                                          "Call to disarm succeeded");
+            }
+        }
+
+        // Disable encryption on the NVDIMM and clear saved values from FW
+        if (nvDimmOp.opType & hostInterfaces::HBRT_FW_NVDIMM_DISABLE_ENCRYPTION)
+        {
+            // Make call to disable encryption
+            if (!nvdimm_crypto_erase(l_nvDimmTargetList))
+            {
+                TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
+                              "Call to disable encryption failed, exiting ...");
+                break;
+            }
+            else
+            {
+                TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
+                                       "Call to disable encryption succeeded.");
+            }
+        }
+
+        // Remove keys
+        if (nvDimmOp.opType & hostInterfaces::HBRT_FW_NVDIMM_REMOVE_KEYS)
+        {
+            // Make call to remove keys
+            if (!nvdimm_remove_keys())
+            {
+                TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
+                                     "Call to remove keys failed, exiting ...");
+                break;
+            }
+            else
+            {
+                TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
+                                          "Call to remove keys succeeded.");
+            }
+        }
+
+        // Enable encryption on the NVDIMM
+        if (nvDimmOp.opType & hostInterfaces::HBRT_FW_NVDIMM_ENABLE_ENCRYPTION)
+        {
+            // Make call to generate keys before enabling encryption
+            if(!nvdimm_gen_keys())
+            {
+                TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
+                                          "Call to generate keys failed, unable"
+                                          " to enable encryption, exiting ...");
+                break;
+            }
+            else
+            {
+                // Make call to enable encryption
+                if (!nvdimm_encrypt_enable(l_nvDimmTargetList))
+                {
+                    TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
+                               "Call to enable encryption failed, exiting ...");
+                    break;
+                }
+                else
+                {
+                    TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
+                                        "Call to enable encryption succeeded.");
+                }
+            } // end if(!nvdimm_gen_keys()) ... else ...
+        }
+
+        // Arm the NV logic
+        if (nvDimmOp.opType & hostInterfaces::HBRT_FW_NVDIMM_ARM)
+        {
+            // Make call to arm
+            if (!nvdimmArm(l_nvDimmTargetList))
+            {
+                TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
+                                          "Call to arm failed, exiting ...");
+                break;
+            }
+            else
+            {
+                TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
+                                          "Call to arm succeeded.");
+            }
+        }  // end if (nvDimmOp.opType & hostInterfaces::HBRT_FW_NVDIMM_ARM)
+    } while(0);
+
+    if (l_err)
+    {
+       //Commit the error if it exists
+       errlCommit(l_err, RUNTIME_COMP_ID);
+    }
+
+#endif
+
+    TRACFCOMP(g_trac_runtime, EXIT_MRK"doNvDimmOperation")
+}
 
 /**
  * @see  src/include/runtime/interface.h for definition of call
@@ -362,12 +539,12 @@ void attrSyncRequest( void * i_data)
  */
 void firmware_notify( uint64_t i_len, void *i_data )
 {
-   TRACFCOMP(g_trac_hbrt, ENTER_MRK"firmware_notify: "
+    TRACFCOMP(g_trac_hbrt, ENTER_MRK"firmware_notify: "
              "i_len:%d", i_len );
 
-   TRACFBIN(g_trac_runtime, "firmware_notify: i_data", i_data, i_len);
+    TRACFBIN(g_trac_runtime, "firmware_notify: i_data", i_data, i_len);
 
-   errlHndl_t l_err = nullptr;
+    errlHndl_t l_err = nullptr;
 
     // Flag to detect an invalid/unknown/not used message
     bool l_badMessage = false;
@@ -381,12 +558,12 @@ void firmware_notify( uint64_t i_len, void *i_data )
         // data necessary to determine type of message
         if (i_len < hostInterfaces::HBRT_FW_MSG_BASE_SIZE)
         {
-           l_badMessage = true;
+            l_badMessage = true;
 
-           TRACFCOMP(g_trac_runtime, ERR_MRK"firmware_notify: "
-               "Received a non hostInterfaces::hbrt_fw_msg data stream" );
+            TRACFCOMP(g_trac_runtime, ERR_MRK"firmware_notify: Received "
+                      "a non hostInterfaces::hbrt_fw_msg data stream" );
 
-           break;
+            break;
         }
 
         // Cast the data to an hbrt_fw_msg to extract the input type
@@ -394,68 +571,91 @@ void firmware_notify( uint64_t i_len, void *i_data )
                        static_cast<hostInterfaces::hbrt_fw_msg*>(i_data);
         switch (l_hbrt_fw_msg->io_type)
         {
-           case hostInterfaces::HBRT_FW_MSG_HBRT_FSP_REQ:
-           {
-              // Distinguish based on msgType and msgq
-              if ( (l_hbrt_fw_msg->generic_msg.msgType ==
+            case hostInterfaces::HBRT_FW_MSG_HBRT_FSP_REQ:
+            {
+                // Distinguish based on msgType and msgq
+                if ( (l_hbrt_fw_msg->generic_msg.msgType ==
                          GenericFspMboxMessage_t::MSG_ATTR_SYNC_REQUEST) &&
                         (l_hbrt_fw_msg->generic_msg.msgq ==
                          MBOX::HB_ATTR_SYNC_MSGQ) )
-              {
-                attrSyncRequest((void*)&(l_hbrt_fw_msg->generic_msg.data));
-              }
-              else if ((l_hbrt_fw_msg->generic_msg.msgType ==
-                         GenericFspMboxMessage_t::MSG_OCC_ACTIVE) &&
-                        (l_hbrt_fw_msg->generic_msg.msgq ==
-                         MBOX::FSP_OCC_MSGQ_ID) )
-              {
-                occActiveNotification((void*)&(l_hbrt_fw_msg->generic_msg.data));
-              }
-              // Placing this at end as it does not have a msgq specified
-              // Want to match msgType & msgq combos first
-              else if (l_hbrt_fw_msg->generic_msg.msgType ==
-                       GenericFspMboxMessage_t::MSG_SBE_ERROR)
-              {
-                sbeAttemptRecovery(l_hbrt_fw_msg->generic_msg.data);
-              }
-              else
-              {
+                {
+                    attrSyncRequest((void*)&(l_hbrt_fw_msg->generic_msg.data));
+                }
+                else if ((l_hbrt_fw_msg->generic_msg.msgType ==
+                          GenericFspMboxMessage_t::MSG_OCC_ACTIVE) &&
+                         (l_hbrt_fw_msg->generic_msg.msgq ==
+                          MBOX::FSP_OCC_MSGQ_ID) )
+                {
+                    occActiveNotification((void*)&(l_hbrt_fw_msg->generic_msg.data));
+                }
+                // Placing this at end as it does not have a msgq specified
+                // Want to match msgType & msgq combos first
+                else if (l_hbrt_fw_msg->generic_msg.msgType ==
+                         GenericFspMboxMessage_t::MSG_SBE_ERROR)
+                {
+                    sbeAttemptRecovery(l_hbrt_fw_msg->generic_msg.data);
+                }
+                else
+                {
+                    l_badMessage = true;
+
+                    TRACFCOMP(g_trac_runtime, ERR_MRK"firmware_notify: "
+                              "Unknown FSP message type:0x%.8X, "
+                              "message queue id:0x%.8X, seqNum:%d ",
+                              l_hbrt_fw_msg->generic_msg.msgType,
+                              l_hbrt_fw_msg->generic_msg.msgq,
+                              l_hbrt_fw_msg->generic_msg.seqnum);
+
+                    // Pack user data 1 with message input type and
+                    // firmware request message sequence number
+                    l_userData1 = TWO_UINT32_TO_UINT64(
+                                    l_hbrt_fw_msg->io_type,
+                                    l_hbrt_fw_msg->generic_msg.seqnum);
+
+                    // Pack user data 2 with message queue and message type
+                    l_userData2 = TWO_UINT32_TO_UINT64(
+                                    l_hbrt_fw_msg->generic_msg.msgq,
+                                    l_hbrt_fw_msg->generic_msg.msgType);
+                } // END if ( (l_hbrt_fw_msg->generic_msg.msgType ... else ...
+            } // END case hostInterfaces::HBRT_FW_MSG_HBRT_FSP_REQ:
+            break;
+
+            case hostInterfaces::HBRT_FW_MSG_TYPE_NVDIMM_OPERATION:
+            {
+                uint64_t l_minMsgSize = hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
+                sizeof(hostInterfaces::hbrt_fw_msg::nvdimm_operation);
+                if (i_len < l_minMsgSize)
+                {
+                    l_badMessage = true;
+
+                    TRACFCOMP(g_trac_runtime, ERR_MRK"firmware_notify: "
+                     "Received message HBRT_FW_MSG_TYPE_NVDIMM_OPERATION, "
+                     "but size of message data(%d) is not adequate for a "
+                     "complete message of this type, with size requirement of "
+                     "%d", i_len, l_minMsgSize );
+
+                    // Pack user data 1 with the message input type, the only
+                    // data that can be safely retrieved
+                    l_userData1 = l_hbrt_fw_msg->io_type;
+
+                    break;
+                }
+
+                doNvDimmOperation(l_hbrt_fw_msg->nvdimm_operation);
+            } // END case hostInterfaces::HBRT_FW_MSG_TYPE_NVDIMM_OPERATION:
+            break;
+
+            default:
+            {
                 l_badMessage = true;
 
                 TRACFCOMP(g_trac_runtime, ERR_MRK"firmware_notify: "
-                    "Unknown FSP message type:0x%.8X, "
-                    "message queue id:0x%.8X, seqNum:%d ",
-                    l_hbrt_fw_msg->generic_msg.msgType,
-                    l_hbrt_fw_msg->generic_msg.msgq,
-                    l_hbrt_fw_msg->generic_msg.seqnum);
+                          "Unknown firmware request input type:0x%.8X ",
+                          l_hbrt_fw_msg->io_type);
 
-                // Pack user data 1 with message input type and
-                // firmware request message sequence number
-                l_userData1 = TWO_UINT32_TO_UINT64(
-                                l_hbrt_fw_msg->io_type,
-                                l_hbrt_fw_msg->generic_msg.seqnum);
-
-                // Pack user data 2 with message queue and message type
-                l_userData2 = TWO_UINT32_TO_UINT64(
-                                l_hbrt_fw_msg->generic_msg.msgq,
-                                l_hbrt_fw_msg->generic_msg.msgType);
-              }
-           } // END case HBRT_FW_MSG_HBRT_FSP_REQ:
-
-           break;
-
-           default:
-               {
-                  l_badMessage = true;
-
-                  TRACFCOMP(g_trac_runtime, ERR_MRK"firmware_notify: "
-                            "Unknown firmware request input type:0x%.8X ",
-                            l_hbrt_fw_msg->io_type);
-
-                  l_userData1 = l_hbrt_fw_msg->io_type;
-               }  // END default
-
-               break;
+                l_userData1 = l_hbrt_fw_msg->io_type;
+            }  // END default
+            break;
 
         };  // END switch (l_hbrt_fw_msg->io_type)
 
@@ -463,42 +663,42 @@ void firmware_notify( uint64_t i_len, void *i_data )
 
     if (l_badMessage)
     {
-       /*@
-        * @errortype
-        * @severity     ERRL_SEV_PREDICTIVE
-        * @moduleid     MOD_RT_FIRMWARE_NOTIFY
-        * @reasoncode   RC_FW_NOTIFY_RT_INVALID_MSG
-        * @userdata1[0:31]  Firmware Request type
-        * @userdata1[32:63] Sequence number (FSP msg)
-        * @userdata2[0:31]  MBOX message type (FSP msg)
-        * @userdata2[32:63] Message Type (FSP msg)
-        * @devdesc      Error with Firmware Notify request
-        */
-       l_err = new ErrlEntry(ERRL_SEV_PREDICTIVE,
-                             MOD_RT_FIRMWARE_NOTIFY,
-                             RC_FW_NOTIFY_RT_INVALID_MSG,
-                             l_userData1,
-                             l_userData2,
-                             true);
+        /*@
+         * @errortype
+         * @severity     ERRL_SEV_PREDICTIVE
+         * @moduleid     MOD_RT_FIRMWARE_NOTIFY
+         * @reasoncode   RC_FW_NOTIFY_RT_INVALID_MSG
+         * @userdata1[0:31]  Firmware Request type
+         * @userdata1[32:63] Sequence number (FSP msg)
+         * @userdata2[0:31]  MBOX message type (FSP msg)
+         * @userdata2[32:63] Message Type (FSP msg)
+         * @devdesc      Error with Firmware Notify request
+         */
+        l_err = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                              MOD_RT_FIRMWARE_NOTIFY,
+                              RC_FW_NOTIFY_RT_INVALID_MSG,
+                              l_userData1,
+                              l_userData2,
+                              true);
 
-      if (i_len > 0)
-      {
-         l_err->addFFDC(RUNTIME_COMP_ID,
-                        i_data,
-                        i_len,
-                        0, 0, false );
-      }
+        if (i_len > 0)
+        {
+            l_err->addFFDC(RUNTIME_COMP_ID,
+                           i_data,
+                           i_len,
+                           0, 0, false );
+        }
 
-      l_err->collectTrace( "FW_REQ", 256);
+        l_err->collectTrace( "FW_REQ", 256);
     }
 
     if (l_err)
     {
-       //Commit the error if it exists
-       errlCommit(l_err, RUNTIME_COMP_ID);
+        //Commit the error if it exists
+        errlCommit(l_err, RUNTIME_COMP_ID);
     }
 
-   TRACFCOMP(g_trac_hbrt, EXIT_MRK"firmware_notify");
+    TRACFCOMP(g_trac_hbrt, EXIT_MRK"firmware_notify");
 };
 
 struct registerFwNotify

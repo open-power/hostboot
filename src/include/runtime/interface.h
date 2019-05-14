@@ -193,6 +193,10 @@ enum MemoryError_t
 /* Defined Return Codes for wakeup() */
 #define HBRT_RC_WAKEUP_INVALID_ON_CORE_XSTOP      -12289   /* -0x3001 */
 
+/* Define a const, for hostInterfaces::nvdimm_operation_t::procId,
+ * that will flag when to apply the NVDIMM operation(s) to all NVDIMMs
+ */
+const uint64_t HBRT_NVDIMM_OPERATION_APPLY_TO_ALL_NVDIMMS = 0xFFFFFFFFFFFFFFFF;
 
 /** @typedef hostInterfaces_t
  *  @brief Interfaces provided by the underlying environment (ex. Sapphire).
@@ -549,15 +553,16 @@ typedef struct hostInterfaces
     enum  // hbrt_fw_msg::io_type             the struct associated with io_type
     {
        HBRT_FW_MSG_TYPE_REQ_NOP = 0,
-       HBRT_FW_MSG_TYPE_RESP_NOP = 1,          // struct resp_generic
-       HBRT_FW_MSG_TYPE_RESP_GENERIC = 2,      // struct resp_generic
-       HBRT_FW_MSG_TYPE_REQ_HCODE_UPDATE = 3,  // struct req_hcode_update
-       HBRT_FW_MSG_HBRT_FSP_REQ = 4,           // struct GenericFspMboxMessage_t
-       HBRT_FW_MSG_TYPE_ERROR_LOG = 5,         // struct error_log
-       HBRT_FW_MSG_HBRT_FSP_RESP = 6,          // struct GenericFspMboxMessage_t
-       HBRT_FW_MSG_TYPE_I2C_LOCK = 7,          // struct req_i2c_lock
-       HBRT_FW_MSG_TYPE_SBE_STATE = 8,         // struct sbe_state
-       HBRT_FW_MSG_TYPE_NVDIMM_PROTECTION = 9, // struct nvdimm_protection_state
+       HBRT_FW_MSG_TYPE_RESP_NOP = 1,           // struct resp_generic
+       HBRT_FW_MSG_TYPE_RESP_GENERIC = 2,       // struct resp_generic
+       HBRT_FW_MSG_TYPE_REQ_HCODE_UPDATE = 3,   // struct req_hcode_update
+       HBRT_FW_MSG_HBRT_FSP_REQ = 4,            // struct GenericFspMboxMessage_t
+       HBRT_FW_MSG_TYPE_ERROR_LOG = 5,          // struct error_log
+       HBRT_FW_MSG_HBRT_FSP_RESP = 6,           // struct GenericFspMboxMessage_t
+       HBRT_FW_MSG_TYPE_I2C_LOCK = 7,           // struct req_i2c_lock
+       HBRT_FW_MSG_TYPE_SBE_STATE = 8,          // struct sbe_state
+       HBRT_FW_MSG_TYPE_NVDIMM_PROTECTION = 9,  // struct nvdimm_protection_state
+       HBRT_FW_MSG_TYPE_NVDIMM_OPERATION  = 10, // struct nvdimm_operation_t
     };
 
     // NVDIMM protection state enum
@@ -566,6 +571,37 @@ typedef struct hostInterfaces
         HBRT_FW_NVDIMM_NOT_PROTECTED = 0,
         HBRT_FW_NVDIMM_PROTECTED     = 1
     };
+
+    // NVDIMM valid operations
+    // @note Multiple operations can be triggered at the same time using
+    //       a single NVDIMM operation call.  Having said that, operation
+    //       combinations should be sensical. Nonsensical operations will
+    //       error out.
+    enum NVDIMM_Op_t: uint16_t
+    {
+        // Disarm the NV logic such that the next save attempt is a NOOP
+        HBRT_FW_NVDIMM_DISARM             = 0x0001,
+        // Disable encryption on the NVDIMM and clear saved values from FW
+        HBRT_FW_NVDIMM_DISABLE_ENCRYPTION = 0x0002,
+        // Remove keys
+        HBRT_FW_NVDIMM_REMOVE_KEYS        = 0x0004,
+        // Enable encryption on the NVDIMM
+        HBRT_FW_NVDIMM_ENABLE_ENCRYPTION  = 0x0008,
+        // Arm the NV logic
+        HBRT_FW_NVDIMM_ARM                = 0x0010,
+    };
+
+    // NVDIMM (PHYP -> HBRT) message to request NVDIMM operation(s)
+    struct nvdimm_operation_t
+    {
+        uint64_t    procId;  // Retrieve all NVDIMMs under the processor ID, all
+                             // FFs (HBRT_NVDIMM_OPERATION_APPLY_TO_ALL_NVDIMMS)
+                             // means operate on all NVDIMMs in the system
+        uint32_t    rsvd1;   // reserved
+        uint16_t    rsvd2;   // reserved
+        NVDIMM_Op_t opType;  // NVDIMM operation(s) to perform,
+                             // see @note associated with NVDIMM_Op_t above
+    } __attribute__ ((packed));
 
     struct hbrt_fw_msg   // define struct hbrt_fw_msg
     {
@@ -636,6 +672,10 @@ typedef struct hostInterfaces
              uint64_t i_procId; // processor ID of the NVDIMM with/without OCC protection
              uint64_t i_state;  // NVDIMM protection state enum
           } __attribute__ ((packed)) nvdimm_protection_state;
+
+          // This struct is sent from PHYP to HBRT with
+          // io_type set to HBRT_FW_MSG_TYPE_NVDIMM_OPERATION
+          struct nvdimm_operation_t nvdimm_operation;
 
           // This struct is sent from HBRT with
           // io_type set to HBRT_FW_MSG_HBRT_FSP_REQ or
