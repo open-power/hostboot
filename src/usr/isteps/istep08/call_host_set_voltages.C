@@ -46,7 +46,10 @@
 #include <p9_setup_evid.H>
 #include <nest/nestHwpHelperFuncs.H>   // fapiHWPCallWrapperForChip
 #include <hbToHwsvVoltageMsg.H>        // platform_set_nest_voltages
-
+#ifdef CONFIG_AXONE
+#include <chipids.H> // for EXPLORER ID
+#include <pmic_enable.H>
+#endif
 //  Init Service support
 #include <initservice/initserviceif.H> // INITSERVICE::spBaseServicesEnabled
 
@@ -156,8 +159,43 @@ void* call_host_set_voltages(void *io_pArgs)
             fapiHWPCallWrapperHandler(P9_IO_XBUS_IMAGE_BUILD, l_stepError,
                                       HWPF_COMP_ID, TYPE_PROC);
         }
-    }while( 0 );
 
+#ifdef CONFIG_AXONE
+        // Create a vector of TARGETING::Target pointers
+        TargetHandleList l_chipList;
+
+        // Get a list of all of the functioning ocmb chips
+        TARGETING::getAllChips(l_chipList, TARGETING::TYPE_OCMB_CHIP, true);
+
+        for (const auto & l_ocmb: l_chipList)
+        {
+            // PMICs are not present on Gemini, so skip this enable call
+            // check EXPLORER first as this is most likely the configuration
+            uint32_t chipId = l_ocmb->getAttr< TARGETING::ATTR_CHIP_ID>();
+            if (chipId == POWER_CHIPID::EXPLORER_16)
+            {
+                TRACFCOMP( g_trac_isteps_trace, "call_host_set_voltages: "
+                    "calling pmic_enable on OCMB 0x%.8X", get_huid(l_ocmb) );
+
+                fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>l_fapi2_target(l_ocmb);
+
+                // Invoke procedure
+                FAPI_INVOKE_HWP(l_err, pmic_enable, l_fapi2_target);
+            }
+
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_isteps_trace,
+                    "Error from pmic_enable for 0x%.8X target",
+                    TARGETING::get_huid(l_ocmb));
+
+                // Capture error and continue to next OCMB
+                captureError(l_err, l_stepError, HWPF_COMP_ID, l_ocmb);
+            }
+        }
+#endif
+
+    }while( 0 );
 
     TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_host_set_voltages exit");
 
