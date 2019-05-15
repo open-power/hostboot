@@ -34,10 +34,8 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
+#include <p10_scom_proc.H>
 #include <p10_fbc_utils.H>
-#include <p10_pba_utils_TEMP_DEFINES.H> // FIXME
-// FIXME @RTC206386 #include <p10_misc_scom_addresses.H>
-// FIXME @RTC206386 #include <p10_misc_scom_addresses_fld.H>
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -51,35 +49,24 @@ fapi2::ReturnCode p10_fbc_utils_get_fbc_state(
     bool& o_is_initialized,
     bool& o_is_running)
 {
+    using namespace scomt::proc;
+
     FAPI_DBG("Start");
 
     fapi2::buffer<uint64_t> l_fbc_mode_data;
     fapi2::buffer<uint64_t> l_pmisc_mode_data;
 
-#if 0 // FIXME TODO Enable when scom defs are ready (RTC 205268)
-    {
-        // read PB ES3 Mode Register state
-        FAPI_TRY(fapi2::getScom(i_target, PU_PB_ES3_MODE, l_fbc_mode_data),
-                 "Error reading pb_init from Powerbus ES3 Mode Config Register");
-
-        // fabric is initialized if PB_INITIALIZED bit is one/set
-        o_is_initialized = l_fbc_mode_data.getBit<PB_ES3_MODE_PB_CENT_PBIXXX_INIT>();
-    }
-#endif
-
     // read PB ES3 Mode Register state
-    FAPI_TRY(getScom(i_target, 0x301100A, l_fbc_mode_data),
-             "Error reading pb_init from Powerbus ES3 Mode Config Register");
+    FAPI_TRY(GET_PB_COM_SCOM_ES3_STATION_MODE(i_target, l_fbc_mode_data));
 
     // fabric is initialized if PB_INITIALIZED bit is one/set
-    o_is_initialized = l_fbc_mode_data & 0x8000000000000000;
+    o_is_initialized = GET_PB_COM_SCOM_ES3_STATION_MODE_ES3_PBIXXX_INIT(l_fbc_mode_data);
 
     // read ADU PMisc Mode Register state
-    FAPI_TRY(fapi2::getScom(i_target, PU_SND_MODE_REG, l_pmisc_mode_data),
-             "Error reading pb_stop from ADU pMisc Mode Register");
+    FAPI_TRY(GET_TP_TPBR_AD_SND_MODE_REG(i_target, l_pmisc_mode_data));
 
     // fabric is running if FBC_STOP bit is zero/clear
-    o_is_running = !(l_pmisc_mode_data.getBit<PU_SND_MODE_REG_PB_STOP>());
+    o_is_running = !GET_TP_TPBR_AD_SND_MODE_REG_PB_STOP(l_pmisc_mode_data);
 
 fapi_try_exit:
     FAPI_DBG("End");
@@ -92,23 +79,22 @@ fapi_try_exit:
 fapi2::ReturnCode p10_fbc_utils_override_fbc_stop(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
+    using namespace scomt::proc;
+
     FAPI_DBG("Start");
 
     fapi2::buffer<uint64_t> l_pmisc_mode_data;
 
     // read ADU PMisc Mode Register state
-    FAPI_TRY(fapi2::getScom(i_target, PU_SND_MODE_REG, l_pmisc_mode_data),
-             "Error reading ADU PMisc Mode register");
+    FAPI_TRY(GET_TP_TPBR_AD_SND_MODE_REG(i_target, l_pmisc_mode_data));
 
     // set bit to disable checkstop forwarding and write back
-    l_pmisc_mode_data.setBit<PU_SND_MODE_REG_DISABLE_CHECKSTOP>();
-    FAPI_TRY(fapi2::putScom(i_target, PU_SND_MODE_REG, l_pmisc_mode_data),
-             "Error writing ADU PMisc Mode register to disable checkstop forwarding to FBC");
+    SET_TP_TPBR_AD_SND_MODE_REG_DISABLE_CHECKSTOP(l_pmisc_mode_data);
+    FAPI_TRY(PUT_TP_TPBR_AD_SND_MODE_REG(i_target, l_pmisc_mode_data));
 
     // set bit to manually clear stop control and write back
-    l_pmisc_mode_data.setBit<PU_SND_MODE_REG_MANUAL_CLR_PB_STOP>();
-    FAPI_TRY(fapi2::putScom(i_target, PU_SND_MODE_REG, l_pmisc_mode_data),
-             "Error writing ADU PMisc Mode register to manually clear FBC stop control");
+    SET_TP_TPBR_AD_SND_MODE_REG_MANUAL_CLR_PB_STOP(l_pmisc_mode_data);
+    FAPI_TRY(PUT_TP_TPBR_AD_SND_MODE_REG(i_target, l_pmisc_mode_data));
 
 fapi_try_exit:
     FAPI_DBG("End");
