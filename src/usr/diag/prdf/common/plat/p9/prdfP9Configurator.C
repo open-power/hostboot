@@ -286,7 +286,7 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
                             { TYPE_MCC,    axone_mcc      },
                             { TYPE_OMIC,   axone_omic     }, } },
         #ifdef __HOSTBOOT_MODULE
-        { POWER_CHIPID::EXPLORER, { { TYPE_OCMB_CHIP, explorer_ocmb }, } },
+        { POWER_CHIPID::EXPLORER_16, { { TYPE_OCMB_CHIP, explorer_ocmb }, } },
         #endif
     };
 
@@ -314,7 +314,7 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
             model = getChipId( trgt );
 
             // Skip Gemini OCMBs. They can exist, but PRD won't support them.
-            if ( POWER_CHIPID::GEMINI == model ) continue;
+            if ( POWER_CHIPID::GEMINI_16 == model ) continue;
         }
         #endif
 

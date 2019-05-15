@@ -950,15 +950,15 @@ errlHndl_t getHwConfig( std::vector<HOMER_ChipInfo_t> & o_chipInfVector,
             HOMER_ChipType_t ocmbType = HOMER_CHIP_INVALID;
             switch ( getChipId(ocmb) )
             {
-                case POWER_CHIPID::GEMINI:
+                case POWER_CHIPID::GEMINI_16:
                     // Skip Gemini OCMBs. They can exist, but PRD won't support
                     // them (set invalid).
                     ocmbType = HOMER_CHIP_INVALID; break;
-                case POWER_CHIPID::EXPLORER:
+                case POWER_CHIPID::EXPLORER_16:
                     ocmbType = HOMER_CHIP_EXPLORER; break;
                 default:
-                    PRDF_ERR( FUNC "Unsupported chip model %d on 0x%08x",
-                              ocmbType, getHuid(ocmb) );
+                    PRDF_ERR( FUNC "Unsupported chip ID 0x%08x on 0x%08x",
+                              getChipId(ocmb), getHuid(ocmb) );
                     PRDF_ASSERT( false );
             }
             if ( HOMER_CHIP_INVALID == ocmbType ) continue;
