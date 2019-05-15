@@ -40,7 +40,8 @@ if [ ! "$HOSTBOOT_PROFILE" ] ; then
 fi
 
 make_path_abs () {
-    local ABSPATH=$(readlink -f "$1")
+    local ABSPATH
+    ABSPATH=$(readlink -f "$1")
 
     if [ $? -ne 0 ] ; then
         ABSPATH="$1"

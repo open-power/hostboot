@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -76,5 +76,6 @@ SECTIONS
 
     /DISCARD/ : {
         *(.dtors)
+        *(.dtors.*)
     }
 }
