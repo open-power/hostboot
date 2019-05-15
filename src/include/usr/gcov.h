@@ -114,8 +114,10 @@ static_assert(sizeof(gcov_type) == 8, "gcov_type isn't 64 bits for some reason")
 
 #if __GNUC__ == 4 && __GNUC_MINOR__ == 9
 #define GCOV_COUNTERS 9
+#elif __GNUC__ == 8 && __GNUC_MINOR__ <= 3
+#define GCOV_COUNTERS 9
 #else
-#error We dont support this compiler yet
+#error GCOV implementation does not support this compiler yet
 #endif
 
 /* Structures embedded in coveraged program.  The structures generated
@@ -332,7 +334,7 @@ void __gcov_module_copychain(gcov_info** const chain_ptr)
 }
 #endif
 
-/** Unneeded function but must be defined to compile.
+/** Unneeded function but must be defined to link.
  *
  *  This function appears to be typically used by libgcov.so when instrumented
  *  on a real linux-based system.  It can be used to merge counters across
@@ -344,6 +346,15 @@ extern "C"
 void __gcov_merge_add()
 {
     while(1);
+}
+
+/** Unneeded function but must be defined to link. */
+
+extern "C"
+void __gcov_exit()
+{
+    MAGIC_INSTRUCTION(MAGIC_BREAK);
+    while (1);
 }
 
 #endif
