@@ -74,6 +74,7 @@ class mcbistTraits< mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>
 
         // ATTN support
         static constexpr mss::states CFG_ENABLE_ATTN_SUPPORT = mss::states::NO;
+        static constexpr mss::states BROADCAST_CAPABLE = mss::states::NO;
 
         // Multi-ports, dimms
         static constexpr mss::states MULTI_PORTS = mss::states::NO;
@@ -89,7 +90,10 @@ class mcbistTraits< mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>
         static constexpr uint64_t LARGEST_ADDRESS = ~0 >> (mss::mcbist::address::MAGIC_PAD + 2);
 
         // Size
-        static constexpr size_t PORTS_PER_MCBIST = 1;
+        static constexpr size_t PORTS_PER_MCBIST = mss::exp::MAX_PORT_PER_OCMB;
+        static constexpr size_t MAX_DIMM_PER_PORT = mss::exp::MAX_DIMM_PER_PORT;
+        // Closest we've got to primary rank
+        static constexpr size_t MAX_PRIMARY_RANKS_PER_PORT = mss::exp::MAX_RANK_PER_DIMM;
         static constexpr size_t MAX_DQ_BITS = 80;
         static constexpr size_t MAX_DQ_NIBBLES = MAX_DQ_BITS / BITS_PER_NIBBLE;
         static constexpr size_t MAX_DRAMS_X8 = MAX_DQ_BITS / BITS_PER_BYTE;

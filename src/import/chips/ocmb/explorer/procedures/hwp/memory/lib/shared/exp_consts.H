@@ -118,6 +118,7 @@ enum attr_eff_engine_fields
 ///
 enum sizes
 {
+    MAX_PORT_PER_OCMB = 1,
     MAX_DIMM_PER_PORT = 2,
     MAX_RANK_PER_DIMM = 4,
     MAX_BITS_PER_PORT = 80,
