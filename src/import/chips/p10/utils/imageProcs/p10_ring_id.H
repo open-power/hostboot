@@ -112,6 +112,8 @@ enum RingID
     ec_cl2_repr = 53, //0x35
     ec_cl2_time = 54, //0x36
     ec_cl2_bndy = 55, //0x37
+    ec_mma_fure = 56, //0x38
+    ec_l3_fure  = 57, //0x39
 
     NUM_RING_IDS
 
