@@ -91,6 +91,9 @@ inline OpModes getOpMode(void);
 /// result in error.
 /// i_mappings may contain an arbitrary amount of abstract/HW pairs, but the
 /// function may return an error if too many mappings are specified.
+/// If the hardware supports a "broadcast" group, that must also be mapped
+/// explicitly via this function - platforms are not expected to map the
+/// broadcast group implicitly.
 template< MulticastType M, typename V >
 inline ReturnCode setMulticastGroupMap(const Target<TARGET_TYPE_PROC_CHIP, M, V>& i_chip,
                                        const std::vector< MulticastGroupMapping >& i_mappings);
