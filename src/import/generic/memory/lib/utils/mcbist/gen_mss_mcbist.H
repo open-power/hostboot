@@ -103,7 +103,7 @@ inline fapi2::ReturnCode read_mcbfirmask( const fapi2::Target<T>& i_target, fapi
 {
     o_data = 0;
 
-    FAPI_TRY( mss::getScom(i_target, TT::MCBFIRMASK_REG, o_data ), "%s failed to read MCBISTFIRMASK regiser",
+    FAPI_TRY( fapi2::getScom(i_target, TT::MCBFIRMASK_REG, o_data ), "%s failed to read MCBISTFIRMASK regiser",
               mss::c_str(i_target));
     FAPI_DBG("%s MCBISTFIRMASK has data 0x%016lx", mss::c_str(i_target), o_data);
 
@@ -123,7 +123,7 @@ fapi_try_exit:
 template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode write_mcbfirmask( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
-    FAPI_TRY( mss::putScom(i_target, TT::MCBFIRMASK_REG, i_data ), "%s failed to write MCBISTFIRMASK regiser",
+    FAPI_TRY( fapi2::putScom(i_target, TT::MCBFIRMASK_REG, i_data ), "%s failed to write MCBISTFIRMASK regiser",
               mss::c_str(i_target));
     FAPI_DBG("%s MCBISTFIRMASK has data 0x%016lx", mss::c_str(i_target), i_data);
 
@@ -145,7 +145,7 @@ inline fapi2::ReturnCode read_mcbfirq( const fapi2::Target<T>& i_target, fapi2::
 {
     o_data = 0;
 
-    FAPI_TRY( mss::getScom(i_target, TT::MCBFIRQ_REG, o_data ), "%s failed to read MCBISTFIRQ regiser",
+    FAPI_TRY( fapi2::getScom(i_target, TT::MCBFIRQ_REG, o_data ), "%s failed to read MCBISTFIRQ regiser",
               mss::c_str(i_target));
     FAPI_DBG("%s MCBISTFIRQ has data 0x%016lx", mss::c_str(i_target), o_data);
 
@@ -165,7 +165,7 @@ fapi_try_exit:
 template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode write_mcbfirq( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
-    FAPI_TRY( mss::putScom(i_target, TT::MCBFIRQ_REG, i_data ), "%s failed to write MCBISTFIRQ regiser",
+    FAPI_TRY( fapi2::putScom(i_target, TT::MCBFIRQ_REG, i_data ), "%s failed to write MCBISTFIRQ regiser",
               mss::c_str(i_target));
     FAPI_DBG("%s MCBISTFIRQ has data 0x%016lx", mss::c_str(i_target), i_data);
 
@@ -881,6 +881,97 @@ inline subtest_t<MC, T, TT> init_subtest()
 template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE , typename TT = mcbistTraits<MC, T> >
 class program
 {
+    private:
+
+        ///
+        /// @class broadcast_helper
+        /// @brief Nested class to help specialize broadcast mode functionality
+        /// @tparam mss::states BC - YES if broadcast mode capable
+        /// @tparam B = true - here for a little compiler magic to allow some partial specializations
+        ///
+        template< mss::states BC, bool B = true >
+        struct broadcast_helper;
+
+        ///
+        /// @class broadcast_helper - BC mode capable specialization
+        /// @tparam B = true - here for a little compiler magic to allow some partial specializations
+        ///
+        template<bool B >
+        struct broadcast_helper<mss::states::YES, B>
+        {
+
+            ///
+            /// @brief Change the broadcast sync enable bit - broadcast capable specialization
+            /// @param[in] i_state mss::ON to enable the sync pulse, mss::OFF to disable
+            /// @param[in,out] io_config configuration register
+            ///
+            static inline void broadcast_sync_enable( const mss::states i_state, fapi2::buffer<uint64_t>& io_config )
+            {
+                io_config.writeBit<TT::SYNC_EN>(i_state);
+            }
+
+            ///
+            /// @brief Change the broadcast mode sync timbase count - broadcast capable specialization
+            /// @param[in] i_broadcast_timebase
+            /// @param[in,out] io_config configuration register
+            ///
+            static inline void change_broadcast_timebase( const mss::mcbist::broadcast_timebase i_broadcast_timebase,
+                    fapi2::buffer<uint64_t>& io_config )
+            {
+                io_config.insertFromRight<TT::SYNC_WAIT, TT::SYNC_WAIT_LEN>(i_broadcast_timebase);
+            }
+
+            ///
+            /// @brief Enable or disable broadcast mode - broadcast capable specialization
+            /// @param[in] i_mode true if broadcast should be enabled
+            /// @param[in,out] io_addr_gen address generation register
+            /// @warn Maint address mode must be enabled for this to work
+            /// @return void
+            ///
+            static inline void change_maint_broadcast_mode( const bool i_mode, fapi2::buffer<uint64_t>& io_addr_gen )
+            {
+                io_addr_gen.writeBit<TT::MAINT_BROADCAST_MODE_EN>(i_mode);
+            }
+        };
+
+
+        ///
+        /// @class broadcast_helper - BC mode incapable specialization
+        /// @tparam B = true - here for a little compiler magic to allow some partial specializations
+        /// @note all functions here should be empty - if we don't have broadcast mode, we don't want to do anything for it
+        ///
+        template<bool B >
+        struct broadcast_helper<mss::states::NO, B>
+        {
+
+            ///
+            /// @brief Change the broadcast sync enable bit - broadcast incapable specialization
+            /// @param[in] i_state mss::ON to enable the sync pulse, mss::OFF to disable
+            /// @param[in,out] io_config configuration register
+            ///
+            static inline void broadcast_sync_enable( const mss::states i_state, fapi2::buffer<uint64_t>& io_config )
+            {}
+
+            ///
+            /// @brief Change the broadcast mode sync timbase count - broadcast incapable specialization
+            /// @param[in] i_broadcast_timebase
+            /// @param[in,out] io_config configuration register
+            ///
+            static inline void change_broadcast_timebase( const mss::mcbist::broadcast_timebase i_broadcast_timebase,
+                    fapi2::buffer<uint64_t>& io_config )
+            {}
+
+            ///
+            /// @brief Enable or disable broadcast mode - broadcast incapable specialization
+            /// @param[in] i_mode true if broadcast should be enabled
+            /// @param[in,out] io_addr_gen address generation register
+            /// @warn Maint address mode must be enabled for this to work
+            /// @return void
+            ///
+            static inline void change_maint_broadcast_mode( const bool i_mode, fapi2::buffer<uint64_t>& io_addr_gen )
+            {}
+        };
+
     public:
         // Setup our poll parameters so the MCBIST executer can see
         // whether to use the delays in the instruction stream or not
@@ -1391,8 +1482,7 @@ class program
         ///
         inline void broadcast_sync_enable( const mss::states i_state )
         {
-            iv_config.writeBit<TT::SYNC_EN>(i_state);
-            return;
+            broadcast_helper<TT::BROADCAST_CAPABLE>::broadcast_sync_enable(i_state, iv_config);
         }
 
         ///
@@ -1401,9 +1491,9 @@ class program
         /// @note Assumes data is right-aligned
         /// @return void
         ///
-        inline void change_broadcast_timebase( mss::mcbist::broadcast_timebase i_broadcast_timebase )
+        inline void change_broadcast_timebase( const mss::mcbist::broadcast_timebase i_broadcast_timebase )
         {
-            iv_config.insertFromRight<TT::SYNC_WAIT, TT::SYNC_WAIT_LEN>(i_broadcast_timebase);
+            broadcast_helper<TT::BROADCAST_CAPABLE>::change_broadcast_timebase(i_broadcast_timebase, iv_config);
             return;
         }
 
@@ -1987,7 +2077,7 @@ class program
         ///
         inline void change_maint_broadcast_mode( const bool i_mode )
         {
-            iv_addr_gen.writeBit<TT::MAINT_BROADCAST_MODE_EN>(i_mode);
+            broadcast_helper<TT::BROADCAST_CAPABLE>::change_maint_broadcast_mode(i_mode, iv_addr_gen);
             return;
         }
 
@@ -2050,7 +2140,7 @@ class program
                 fapi2::buffer<uint64_t> l_data;
                 uint64_t l_port = 0;
                 uint64_t l_subtest = 0;
-                FAPI_TRY( mss::getScom(i_target, TT::MCBSTATQ_REG, l_data), "%s Failed getScom", mss::c_str(i_target) );
+                FAPI_TRY( fapi2::getScom(i_target, TT::MCBSTATQ_REG, l_data), "%s Failed getScom", mss::c_str(i_target) );
 
                 if (TT::MULTI_PORTS == mss::states::YES)
                 {
@@ -2072,8 +2162,8 @@ class program
                 fapi2::buffer<uint64_t> l_read0;
                 fapi2::buffer<uint64_t> l_read1;
 
-                FAPI_TRY( mss::getScom(i_target, TT::SRERR0_REG, l_read0), "%s Failed getScom", mss::c_str(i_target) );
-                FAPI_TRY( mss::getScom(i_target, TT::SRERR1_REG, l_read1), "%s Failed getScom", mss::c_str(i_target) );
+                FAPI_TRY( fapi2::getScom(i_target, TT::SRERR0_REG, l_read0), "%s Failed getScom", mss::c_str(i_target) );
+                FAPI_TRY( fapi2::getScom(i_target, TT::SRERR1_REG, l_read1), "%s Failed getScom", mss::c_str(i_target) );
 
                 FAPI_ASSERT( ((l_read0 == 0) && (l_read1 == 0)),
                              fapi2::MSS_MEMDIAGS_ERROR_IN_LAST_PATTERN()
@@ -2269,9 +2359,6 @@ class program
         stop_conditions<MC>             iv_thresholds;
 };
 
-
-
-
 ///
 /// @brief Load the mcbist config register
 /// @tparam MC the mc type of the T
@@ -2302,7 +2389,7 @@ inline fapi2::ReturnCode load_config( const fapi2::Target<T>& i_target, const mc
 
 #endif
 
-    FAPI_TRY( mss::putScom(i_target, TT::CFGQ_REG, l_config) );
+    FAPI_TRY( fapi2::putScom(i_target, TT::CFGQ_REG, l_config) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -2322,7 +2409,7 @@ template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = 
 inline fapi2::ReturnCode load_control( const fapi2::Target<T>& i_target, const mcbist::program<MC>& i_program )
 {
     FAPI_INF("loading MCBIST Control 0x%016lx for %s", i_program.iv_control, mss::c_str(i_target));
-    return mss::putScom(i_target, TT::CNTLQ_REG, i_program.iv_control);
+    return fapi2::putScom(i_target, TT::CNTLQ_REG, i_program.iv_control);
 }
 
 
@@ -2339,7 +2426,7 @@ template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = 
 inline fapi2::ReturnCode load_addr_gen( const fapi2::Target<T>& i_target, const mcbist::program<MC>& i_program )
 {
     FAPI_INF("loading MCBIST Address Generation 0x%016lx for %s", i_program.iv_addr_gen, mss::c_str(i_target));
-    return mss::putScom(i_target, TT::MCBAGRAQ_REG, i_program.iv_addr_gen);
+    return fapi2::putScom(i_target, TT::MCBAGRAQ_REG, i_program.iv_addr_gen);
 }
 
 ///
@@ -2372,8 +2459,8 @@ inline fapi2::ReturnCode config_address_range( const fapi2::Target<T>& i_target,
                  set_MC_TYPE(MC).
                  set_TARGET(i_target),
                  "An invalid address pair index %d for %s", i_index, mss::c_str(i_target));
-    FAPI_TRY( mss::putScom(i_target, TT::address_pairs[i_index].first, i_start << mss::mcbist::address::MAGIC_PAD) );
-    FAPI_TRY( mss::putScom(i_target, TT::address_pairs[i_index].second, i_end << mss::mcbist::address::MAGIC_PAD) );
+    FAPI_TRY( fapi2::putScom(i_target, TT::address_pairs[i_index].first, i_start << mss::mcbist::address::MAGIC_PAD) );
+    FAPI_TRY( fapi2::putScom(i_target, TT::address_pairs[i_index].second, i_end << mss::mcbist::address::MAGIC_PAD) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -2476,10 +2563,10 @@ inline fapi2::ReturnCode start_stop( const fapi2::Target<T>& i_target, const boo
     // This is the same as the CCS start_stop ... perhaps we need one template for all
     // 'engine' control functions? BRS
     fapi2::buffer<uint64_t> l_buf;
-    FAPI_TRY(mss::getScom(i_target, TT::CNTLQ_REG, l_buf));
+    FAPI_TRY(fapi2::getScom(i_target, TT::CNTLQ_REG, l_buf));
 
-    FAPI_TRY( mss::putScom(i_target, TT::CNTLQ_REG,
-                           i_start_stop ? l_buf.setBit<TT::MCBIST_START>() : l_buf.setBit<TT::MCBIST_STOP>()) );
+    FAPI_TRY( fapi2::putScom(i_target, TT::CNTLQ_REG,
+                             i_start_stop ? l_buf.setBit<TT::MCBIST_START>() : l_buf.setBit<TT::MCBIST_STOP>()) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -2498,8 +2585,8 @@ inline fapi2::ReturnCode resume( const fapi2::Target<T>& i_target )
 {
     fapi2::buffer<uint64_t> l_buf;
 
-    FAPI_TRY( mss::getScom(i_target, TT::CNTLQ_REG, l_buf) );
-    FAPI_TRY( mss::putScom(i_target, TT::CNTLQ_REG, l_buf.setBit<TT::MCBIST_RESUME>()) );
+    FAPI_TRY( fapi2::getScom(i_target, TT::CNTLQ_REG, l_buf) );
+    FAPI_TRY( fapi2::putScom(i_target, TT::CNTLQ_REG, l_buf.setBit<TT::MCBIST_RESUME>()) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -2518,8 +2605,8 @@ inline fapi2::ReturnCode reset_errors( const fapi2::Target<T>& i_target )
 {
     fapi2::buffer<uint64_t> l_buf;
 
-    FAPI_TRY( mss::getScom(i_target, TT::CNTLQ_REG, l_buf) );
-    FAPI_TRY( mss::putScom(i_target, TT::CNTLQ_REG, l_buf.setBit<TT::MCBIST_RESET_ERRORS>()) );
+    FAPI_TRY( fapi2::getScom(i_target, TT::CNTLQ_REG, l_buf) );
+    FAPI_TRY( fapi2::putScom(i_target, TT::CNTLQ_REG, l_buf.setBit<TT::MCBIST_RESET_ERRORS>()) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -2539,7 +2626,7 @@ inline fapi2::ReturnCode in_progress( const fapi2::Target<T>& i_target, bool& o_
 {
     fapi2::buffer<uint64_t> l_buf;
 
-    FAPI_TRY(mss::getScom(i_target, TT::STATQ_REG, l_buf));
+    FAPI_TRY(fapi2::getScom(i_target, TT::STATQ_REG, l_buf));
     o_in_progress = l_buf.getBit<TT::MCBIST_IN_PROGRESS>();
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -2620,7 +2707,7 @@ fapi2::ReturnCode load_mcbmr( const fapi2::Target<T>& i_target, const mcbist::pr
     // Could just decrement l_bin, but that scoms the subtests in backwards and is confusing
     for (auto l_index = 0; l_index <= l_bin; ++l_index)
     {
-        FAPI_TRY( mss::putScom(i_target, l_memory_registers[l_index], l_memory_register_buffers[l_index]) );
+        FAPI_TRY( fapi2::putScom(i_target, l_memory_registers[l_index], l_memory_register_buffers[l_index]) );
     }
 
 fapi_try_exit:
@@ -2641,16 +2728,16 @@ fapi2::ReturnCode load_mcbamr( const fapi2::Target<T>& i_target, const mcbist::p
 {
     // Vector? Can decide when we fully understand the methods to twiddle the maps themselves. BRS
     FAPI_INF("load MCBIST address map register 0: 0x%016lx for %s", i_program.iv_addr_map0, mss::c_str(i_target));
-    FAPI_TRY( mss::putScom(i_target, TT::MCBAMR0A0Q_REG, i_program.iv_addr_map0) );
+    FAPI_TRY( fapi2::putScom(i_target, TT::MCBAMR0A0Q_REG, i_program.iv_addr_map0) );
 
     FAPI_INF("load MCBIST address map register 1: 0x%016lx for %s", i_program.iv_addr_map1, mss::c_str(i_target));
-    FAPI_TRY( mss::putScom(i_target, TT::MCBAMR1A0Q_REG, i_program.iv_addr_map1) );
+    FAPI_TRY( fapi2::putScom(i_target, TT::MCBAMR1A0Q_REG, i_program.iv_addr_map1) );
 
     FAPI_INF("load MCBIST address map register 2: 0x%016lx for %s", i_program.iv_addr_map2, mss::c_str(i_target));
-    FAPI_TRY( mss::putScom(i_target, TT::MCBAMR2A0Q_REG, i_program.iv_addr_map2) );
+    FAPI_TRY( fapi2::putScom(i_target, TT::MCBAMR2A0Q_REG, i_program.iv_addr_map2) );
 
     FAPI_INF("load MCBIST address map register 3: 0x%016lx for %s", i_program.iv_addr_map3, mss::c_str(i_target));
-    FAPI_TRY( mss::putScom(i_target, TT::MCBAMR3A0Q_REG, i_program.iv_addr_map3) );
+    FAPI_TRY( fapi2::putScom(i_target, TT::MCBAMR3A0Q_REG, i_program.iv_addr_map3) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -2670,7 +2757,7 @@ template<  mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT =
 inline fapi2::ReturnCode load_mcbparm( const fapi2::Target<T>& i_target, const mcbist::program<MC>& i_program )
 {
     FAPI_INF("load MCBIST parameter register: 0x%016lx for %s", i_program.iv_parameters, mss::c_str(i_target));
-    return mss::putScom(i_target, TT::MCBPARMQ_REG, i_program.iv_parameters);
+    return fapi2::putScom(i_target, TT::MCBPARMQ_REG, i_program.iv_parameters);
 }
 
 ///
@@ -2686,10 +2773,10 @@ inline fapi2::ReturnCode clear_errors( const fapi2::Target<T> i_target )
 {
     // TK: Clear the more detailed errors checked above
     FAPI_INF("Clear MCBIST error state for %s", mss::c_str(i_target));
-    FAPI_TRY( mss::putScom(i_target, TT::MCBSTATQ_REG, 0) );
-    FAPI_TRY( mss::putScom(i_target, TT::SRERR0_REG, 0) );
-    FAPI_TRY( mss::putScom(i_target, TT::SRERR1_REG, 0) );
-    FAPI_TRY( mss::putScom(i_target, TT::FIRQ_REG, 0) );
+    FAPI_TRY( fapi2::putScom(i_target, TT::MCBSTATQ_REG, 0) );
+    FAPI_TRY( fapi2::putScom(i_target, TT::SRERR0_REG, 0) );
+    FAPI_TRY( fapi2::putScom(i_target, TT::SRERR1_REG, 0) );
+    FAPI_TRY( fapi2::putScom(i_target, TT::FIRQ_REG, 0) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -2721,8 +2808,8 @@ inline fapi2::ReturnCode load_pattern( const fapi2::Target<T>& i_target, const p
         const fapi2::buffer<uint64_t> l_value_first  = i_invert ? ~l_cache_line.first : l_cache_line.first;
         const fapi2::buffer<uint64_t> l_value_second = i_invert ? ~l_cache_line.second : l_cache_line.second;
         FAPI_INF("Loading cache line pattern 0x%016lx 0x%016lx for %s", l_value_first, l_value_second, mss::c_str(i_target));
-        FAPI_TRY( mss::putScom(i_target, l_address, l_value_first) );
-        FAPI_TRY( mss::putScom(i_target, ++l_address, l_value_second) );
+        FAPI_TRY( fapi2::putScom(i_target, l_address, l_value_first) );
+        FAPI_TRY( fapi2::putScom(i_target, ++l_address, l_value_second) );
         ++l_address;
     }
 
@@ -2858,27 +2945,27 @@ fapi2::ReturnCode load_maint_pattern( const fapi2::Target<T>& i_target, const pa
         for (auto l_num_writes = 0; l_num_writes < 2; ++l_num_writes)
         {
             FAPI_INF("Setting the array access control register for %s.", mss::c_str(p));
-            FAPI_TRY( mss::putScom(p, PT::RMW_WRT_BUF_CTL_REG, l_aacr) );
+            FAPI_TRY( fapi2::putScom(p, PT::RMW_WRT_BUF_CTL_REG, l_aacr) );
 
             for (const auto& l_cache_line : i_pattern)
             {
                 fapi2::buffer<uint64_t> l_value_first  = i_invert ? ~l_cache_line.first : l_cache_line.first;
                 fapi2::buffer<uint64_t> l_value_second = i_invert ? ~l_cache_line.second : l_cache_line.second;
                 FAPI_INF("Loading cache line pattern 0x%016lx 0x%016lx for %s", l_value_first, l_value_second, mss::c_str(i_target));
-                FAPI_TRY( mss::putScom(p, PT::RMW_WRT_BUF_DATA_REG, l_value_first));
+                FAPI_TRY( fapi2::putScom(p, PT::RMW_WRT_BUF_DATA_REG, l_value_first));
 
                 // In order for the data to actually be written into the RMW buffer, we must issue a putscom to the MCA_AAER register
                 // This register is used for the ECC, we will just write all zero to this register.  The ECC will be auto generated
                 // when the aacr MCA_WREITE_AACR_ECCGEN bit is set
-                FAPI_TRY( mss::putScom(p, PT::RMW_WRT_BUF_ECC_REG, 0) );
+                FAPI_TRY( fapi2::putScom(p, PT::RMW_WRT_BUF_ECC_REG, 0) );
 
                 // No need to increment the address because the logic does it automatically when MCA_WREITE_AACR_AUTOINC is set
-                FAPI_TRY( mss::putScom(p, PT::RMW_WRT_BUF_DATA_REG, l_value_second) );
+                FAPI_TRY( fapi2::putScom(p, PT::RMW_WRT_BUF_DATA_REG, l_value_second) );
 
                 // In order for the data to actually be written into the RMW buffer, we must issue a putscom to the MCA_AAER register
                 // This register is used for the ECC, we will just write all zero to this register.  The ECC will be auto generated
                 // when the aacr MCA_WREITE_AACR_ECCGEN bit is set
-                FAPI_TRY( mss::putScom(p, PT::RMW_WRT_BUF_ECC_REG, 0) );
+                FAPI_TRY( fapi2::putScom(p, PT::RMW_WRT_BUF_ECC_REG, 0) );
             }
 
             l_aacr.template insertFromRight<PT::RMW_WRT_ADDRESS, PT::RMW_WRT_ADDRESS_LEN>(mss::mcbist::rmw_address::DW8);
@@ -2990,7 +3077,7 @@ fapi2::ReturnCode load_random24b_seeds( const fapi2::Target<T>& i_target,
         {
             l_mcbrsd0q.insertFromRight<TT::CFG_DGEN_RNDD_SEED1, TT::CFG_DGEN_RNDD_SEED1_LEN>(l_value);
             FAPI_INF("Loading 24b random seeds 0 and 1 0x%016lx for %s", l_mcbrsd0q, mss::c_str(i_target));
-            FAPI_TRY( mss::putScom(i_target, l_random_addr0, l_mcbrsd0q) );
+            FAPI_TRY( fapi2::putScom(i_target, l_random_addr0, l_mcbrsd0q) );
         }
         // The third 24b random data seed occupies the same register as the random data byte maps.  Therefore we first
         // add the third random 24b data seed to the register and then loop through all of the byte mappings a total of
@@ -3013,7 +3100,7 @@ fapi2::ReturnCode load_random24b_seeds( const fapi2::Target<T>& i_target,
                 ++l_map_index;
             }
 
-            FAPI_TRY( mss::putScom(i_target, l_random_addr1, l_mcbrsd1q) );
+            FAPI_TRY( fapi2::putScom(i_target, l_random_addr1, l_mcbrsd1q) );
         }
 
         FAPI_ASSERT( l_index < MAX_NUM_RANDOM24_SEEDS,
@@ -3158,8 +3245,8 @@ inline fapi2::ReturnCode load_data_config( const fapi2::Target<T>& i_target, con
     FAPI_TRY( mss::mcbist::load_maint_pattern(i_target, i_program.iv_pattern) );
 
     FAPI_INF("Loading the data rotate config and seeds for %s!", mss::c_str(i_target));
-    FAPI_TRY( mss::putScom(i_target, l_data_rotate_cnfg_addr, i_program.iv_data_rotate_cnfg) );
-    FAPI_TRY( mss::putScom(i_target, l_data_rotate_seed_addr, i_program.iv_data_rotate_seed) );
+    FAPI_TRY( fapi2::putScom(i_target, l_data_rotate_cnfg_addr, i_program.iv_data_rotate_cnfg) );
+    FAPI_TRY( fapi2::putScom(i_target, l_data_rotate_seed_addr, i_program.iv_data_rotate_seed) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -3188,7 +3275,7 @@ fapi2::ReturnCode load_data_compare_mask( const fapi2::Target<T>& i_target,
 
     for (const auto& p : l_ports)
     {
-        FAPI_TRY( mss::putScom(p, TT::COMPARE_MASK, i_program.iv_compare_mask) );
+        FAPI_TRY( fapi2::putScom(p, TT::COMPARE_MASK, i_program.iv_compare_mask) );
     }
 
 fapi_try_exit:
@@ -3209,7 +3296,7 @@ template<  mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT =
 inline fapi2::ReturnCode load_thresholds( const fapi2::Target<T>& i_target, const uint64_t i_thresholds )
 {
     FAPI_INF("load MCBIST threshold register: 0x%016lx for %s", i_thresholds, mss::c_str(i_target) );
-    return mss::putScom(i_target, TT::THRESHOLD_REG, i_thresholds);
+    return fapi2::putScom(i_target, TT::THRESHOLD_REG, i_thresholds);
 }
 
 ///
@@ -3270,20 +3357,20 @@ fapi2::ReturnCode read_rmw_array(const fapi2::Target<T>& i_target,
     .template clearBit<TT::RMW_WRT_ECCGEN>();
 
     FAPI_INF("Setting the RMW array access control register for %s.", mss::c_str(i_target));
-    FAPI_TRY( mss::putScom(i_target, TT::RMW_WRT_BUF_CTL_REG, l_control_value) );
+    FAPI_TRY( fapi2::putScom(i_target, TT::RMW_WRT_BUF_CTL_REG, l_control_value) );
 
     for (uint8_t l_index = 0; l_index < i_num_entries; ++l_index)
     {
         // Read info out of RMW array and put into output vector
         // Note that since we enabled AUTOINC above, reading ECC_REG will increment
         // the array pointer so the next DATA_REG read will read the next array entry
-        FAPI_TRY( mss::getScom(i_target, TT::RMW_WRT_BUF_DATA_REG, l_data) );
+        FAPI_TRY( fapi2::getScom(i_target, TT::RMW_WRT_BUF_DATA_REG, l_data) );
 
         FAPI_INF("RMW data index %d is: %016lx for %s", l_array_addr, l_data, mss::c_str(i_target));
         o_data.push_back(l_data);
 
         // Need to read ecc register to increment array index
-        FAPI_TRY( mss::getScom(i_target, TT::RMW_WRT_BUF_ECC_REG, l_data) );
+        FAPI_TRY( fapi2::getScom(i_target, TT::RMW_WRT_BUF_ECC_REG, l_data) );
         o_ecc_data.push_back(l_data);
         ++l_array_addr;
 
@@ -3295,7 +3382,7 @@ fapi2::ReturnCode read_rmw_array(const fapi2::Target<T>& i_target,
             FAPI_INF("Rolling over the RMW array access control register address from %d to %d for %s.", (i_start_addr + l_index),
                      0, mss::c_str(i_target));
             l_control_value.clearBit<TT::RMW_WRT_ADDRESS, TT::RMW_WRT_ADDRESS_LEN>();
-            FAPI_TRY( mss::putScom(i_target, TT::RMW_WRT_BUF_CTL_REG, l_control_value) );
+            FAPI_TRY( fapi2::putScom(i_target, TT::RMW_WRT_BUF_CTL_REG, l_control_value) );
             l_array_addr = 0;
         }
     }

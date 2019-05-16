@@ -38,6 +38,7 @@
 
 #include <fapi2.H>
 
+#include <lib/shared/mss_const.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/mcbist/gen_address.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_traits.H>
@@ -73,6 +74,7 @@ class mcbistTraits<mss::mc_type::NIMBUS, fapi2::TARGET_TYPE_MCBIST>
 
         // ATTN support
         static constexpr mss::states CFG_ENABLE_ATTN_SUPPORT = mss::states::YES;
+        static constexpr mss::states BROADCAST_CAPABLE = mss::states::YES;
 
         // Multi-ports, dimms
         static constexpr mss::states MULTI_PORTS = mss::states::YES;
@@ -88,7 +90,9 @@ class mcbistTraits<mss::mc_type::NIMBUS, fapi2::TARGET_TYPE_MCBIST>
         static constexpr uint64_t LARGEST_ADDRESS = ~0 >> mss::mcbist::address::MAGIC_PAD;
 
         // Size
-        static constexpr size_t PORTS_PER_MCBIST = 4;
+        static constexpr size_t PORTS_PER_MCBIST = mss::PORTS_PER_MCBIST;
+        static constexpr size_t MAX_DIMM_PER_PORT = mss::MAX_DIMM_PER_PORT;
+        static constexpr size_t MAX_PRIMARY_RANKS_PER_PORT = mss::MAX_PRIMARY_RANKS_PER_PORT;
         static constexpr size_t MAX_DQ_BITS = 72;
         static constexpr size_t MAX_DQ_NIBBLES = MAX_DQ_BITS /
                 BITS_PER_NIBBLE; ///< For ISDIMMs are 18 DQ nibbles for DQ 72 bits
