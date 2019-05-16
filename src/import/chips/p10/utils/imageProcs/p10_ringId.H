@@ -218,6 +218,8 @@ enum RingOffset
     ec_cl2_abst     = 9,
     ec_cl2_time     = 10,
     ec_cl2_bndy     = 11,
+    ec_mma_fure     = 12,
+    ec_l3_fure      = 13,
     // Instance Rings
     eq_repr         = (0 | INSTANCE_RING_MARK),
     ec_cl2_repr     = (1 | INSTANCE_RING_MARK),
@@ -294,6 +296,8 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { "ec_cl2_repr"             , 0x20032006, EQ::ec_cl2_repr             , EQ_TYPE  , RCLS_ROOT_RING | RCLS_MVPD_PDR_RING  }, // 53
     { "ec_cl2_time"             , 0x20032007, EQ::ec_cl2_time             , EQ_TYPE  , RCLS_ROOT_RING | RCLS_MVPD_PDG_RING  }, // 54
     { "ec_cl2_bndy"             , 0x20032008, EQ::ec_cl2_bndy             , EQ_TYPE  , RCLS_ROOT_RING | RCLS_EKB_FLUSH_RING }, // 55
+    { "ec_mma_fure"             , 0x2083000F, EQ::ec_mma_fure             , EQ_TYPE  , RCLS_ROOT_RING | RCLS_EKB_FLUSH_RING }, // 56
+    { "ec_l3_fure"              , 0x2003020F, EQ::ec_l3_fure              , EQ_TYPE  , RCLS_ROOT_RING | RCLS_EKB_FLUSH_RING }, // 57
 };
 #endif
 
@@ -356,6 +360,8 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { EQ::ec_cl2_repr             , EQ_TYPE   }, // 53
     { EQ::ec_cl2_time             , EQ_TYPE   }, // 54
     { EQ::ec_cl2_bndy             , EQ_TYPE   }, // 55
+    { EQ::ec_mma_fure             , EQ_TYPE   }, // 56
+    { EQ::ec_l3_fure              , EQ_TYPE   }, // 57
 };
 #endif
 
