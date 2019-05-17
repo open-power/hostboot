@@ -241,6 +241,13 @@ export KEY_TRANSITION_PARAMS
 if [ -n "$KEY_TRANSITION_PARAMS" ]; then
     echo "Key transition options = $KEY_TRANSITION_PARAMS"
 fi
+
+if [[ $HB_STANDALONE -eq 1 ]]; then
+    if [ $PNOR_LAYOUT_SELECTED != "FSP" ];then
+        build-ffs-tools
+    fi
+fi
+
 cd $REPO_ROOT/src/build/mkrules
 make -rR ${DEBUG:=} -f dist.targets.mk $TARGET
 

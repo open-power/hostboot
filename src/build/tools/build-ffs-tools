@@ -1,0 +1,77 @@
+#!/bin/bash -e
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/build/tools/build-ffs-tools $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2012,2019
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+# This script will download and build ffs for standalone hostboot
+
+source $PROJECT_ROOT/src/build/citest/etc/ffs
+
+update_toolconfig(){
+    echo "commit: $FFS_COMMIT"
+    echo "gcc version: $(gcc -dumpversion)"
+    echo "OS: $(uname -o)"
+    echo "arch: $(uname -m)"
+    echo "$(lsb_release -i)"
+    echo "$(lsb_release -r)"
+}
+
+cd $PROJECT_ROOT
+if [[ ! -d "standalone" ]];then
+    mkdir standalone
+fi
+
+cd standalone
+if [[ ! -d "ffs" ]];then
+    git clone https://github.com/open-power/ffs.git
+    cd ffs
+    git reset --hard $FFS_COMMIT #update to ffs commit
+    update_toolconfig >toolsconfig
+else
+    cd ffs
+    if ! cmp -s toolsconfig <(update_toolconfig) ; then
+        if ! git fetch origin; then
+            cd $PROJECT_ROOT
+            rm -rf ffs
+            git clone https://github.com/open-power/ffs.git
+            cd ffs
+        fi
+        git reset --hard $FFS_COMMIT
+        update_toolconfig >toolsconfig
+    fi
+fi
+
+# AM_PROG_AR was intrduced in Automake 1.11.2 and required starting Automake 1.12
+# RHEL 6 have Automake verstion 1.11.1 and RHEL 7 have Automake version 1.13.4
+# replacing AM_PROG_AR with m4_ifdef([AM_PROG_AR], [AM_PROG_AR]) in configure.ac
+# enables us to use both RHEL 6 and RHEL 7 with no error.
+sed -i -e 's/^AM_PROG_AR/m4_ifdef([AM_PROG_AR], [AM_PROG_AR])/' configure.ac
+
+# Automake 1.13.4 requires the definition of AM_PROG_CC_C_O
+if ! grep -q AM_PROG_CC_C_O configure.ac; then
+    echo "AM_PROG_CC_C_O" >> configure.ac
+fi
+
+make -f $PROJECT_ROOT/src/build/mkrules/hostboot-ffs.mk all-ffs-tools
+cd $PROJECT_ROOT

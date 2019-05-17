@@ -21,3 +21,4 @@ hbsandboxrc
 _SYNCAPP/
 gcov_report
 lcov_data
+standalone/
