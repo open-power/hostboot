@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,9 +40,7 @@
 #include <targeting/common/utilFilter.H>
 #include <errl/errlmanager.H>
 #include <devicefw/userif.H>
-
-#include "sbeiotestRtConstants.H"
-
+#include <initservice/mboxRegs.H>
 
 //trace
 extern trace_desc_t* g_trac_sbeio;
@@ -306,14 +304,15 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
          * @brief checkResetSbeMessagePassingCFAM.
          *
          * @param[in]  i_procChipId   Processor target chip ID
-         * @param[in]  i_checkMask    Mask to check CFAM register against
-         *                            defaults to 0xC0000000
+         * @param[in]  i_state        Mask to check CFAM register against
          *
-         * @return Return Code    O if Successful, otherwise not 0.
+         * @return Return Code    0 if Successful, otherwise not 0.
          */
         int checkResetSbeMessagePassingCFAM(RT_TARG::rtChipId_t i_procChipId,
-                                            uint32_t i_checkMask = SBE_MSG_MASK)
+                                            const sbe_msg_processing_state_t i_state)
         {
+            using namespace INITSERVICE::SPLESS;
+
             // Test check / reset CFAM entry
             TRACDCOMP(g_trac_sbeio, ENTER_MRK "SbeMessagePassingRtTest::"
                                     "checkResetSbeMessagePassingCFAM");
@@ -323,12 +322,8 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
 
             TARGETING::Target *l_proc;
 
-            uint32_t l_read_reg;
+            MboxScratch4_t l_read_reg { };
             size_t l_size = sizeof(uint64_t);
-            // CFAM register SBE Message Passing bits
-            //    bit 0 - Pass-through command complete
-            //    bit 1 - Pass-through command in progress
-            const uint32_t l_mask = SBE_MSG_MASK;
 
             do{
                 // Get TARGETING::Target for runtime chip_id (target)
@@ -343,42 +338,48 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                     break;
                 }
 
-                // Read SCOM_ADDR_5003B for target proc
+                // Read mailbox scratch reg 4 for target proc
                 errl = deviceRead(l_proc,
-                                  &l_read_reg,
+                                  &l_read_reg.data32,
                                   l_size,
-                                  DEVICE_SCOM_ADDRESS(SCOM_ADDR_5003B));
+                                  DEVICE_SCOM_ADDRESS(MboxScratch4_t::REG_ADDR));
 
                 if(errl)
                 {
-                    TS_FAIL("Not able to read CFAM SCOM_ADDR_5003B");
+                    TS_FAIL("Not able to read Mailbox Scratch Register 4");
 
                     break;
                 }
 
+                const bool l_wantComplete = i_state & SBE_MSG_COMPLETE;
+                const bool l_wantInProgress = i_state & SBE_MSG_IN_PROGRESS;
+
                 // Check CFAM register
-                if((l_read_reg & l_mask) != i_checkMask)
+                if (l_read_reg.sbeMsgProc.sbeMsgProcessingComplete != l_wantComplete
+                    || l_read_reg.sbeMsgProc.sbeMsgProcessingInProgress != l_wantInProgress)
                 {
-                    TS_FAIL("CFAM SCOM_ADDR_5003B set incorrectly, expected "
-                            "0x%08x, but read 0x%08x",
-                            (l_read_reg & ~l_mask) | i_checkMask,
-                            l_read_reg);
+                    TS_FAIL("Mailbox Scratch Register 4 set incorrectly, expected "
+                            "%d,%d but read %d,%d",
+                            l_wantComplete, l_wantInProgress,
+                            l_read_reg.sbeMsgProc.sbeMsgProcessingComplete,
+                            l_read_reg.sbeMsgProc.sbeMsgProcessingInProgress);
                     rc = 1;
                     break;
                 }
 
-                // Clear mask bit(s) in CFAM reg SCOM_ADDR_5003B
-                l_read_reg &= ~l_mask;
+                // Clear mask bit(s) in mbox scratch reg 4
+                l_read_reg.sbeMsgProc.sbeMsgProcessingComplete = false;
+                l_read_reg.sbeMsgProc.sbeMsgProcessingInProgress = false;
 
                 // Write SCOM_ADDR_5003B for target proc
                 errl = deviceWrite(l_proc,
                                    &l_read_reg,
                                    l_size,
-                                   DEVICE_SCOM_ADDRESS(SCOM_ADDR_5003B));
+                                   DEVICE_SCOM_ADDRESS(MboxScratch4_t::REG_ADDR));
 
                 if(errl)
                 {
-                    TS_FAIL("Not able to write CFAM SCOM_ADDR_5003B");
+                    TS_FAIL("Not able to write Mailbox Scratch Register 4");
 
                     break;
                 }
@@ -879,7 +880,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
 
                 // Check setting of bits in CFAM register
                 rc = checkResetSbeMessagePassingCFAM(chipId,
-                                                     0x40000000);
+                                                     SBE_MSG_IN_PROGRESS);
                 if(0 != rc)
                 {
                     TS_FAIL("Unexpected error during RT SBE message passing. "

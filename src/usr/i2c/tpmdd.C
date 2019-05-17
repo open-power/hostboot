@@ -265,25 +265,6 @@ errlHndl_t tpmPerformOp( DeviceFW::OperationType i_opType,
             {
                 break;
             }
-
-
-#ifdef CONFIG_DRTM
-        // TPM_OP_DRTMRESET
-        }
-        else if (TPMDD::TPM_OP_DRTMRESET == tpmInfo.operation )
-        {
-
-            assert(locality == TPM_LOCALITY_4,
-                   "DRTMReset only available from locality 4, actual %d",
-                   locality);
-            err = tpmDrtmReset(tpmInfo);
-
-            if ( err )
-            {
-                break;
-            }
-
-#endif
         }
         else
         {
@@ -1445,50 +1426,6 @@ errlHndl_t tpmTransmit ( void * io_buffer,
     return err;
 
 } // end tpmTransmit
-
-#ifdef CONFIG_DRTM
-// ------------------------------------------------------------------
-// tpmDrtmReset
-// ------------------------------------------------------------------
-errlHndl_t tpmDrtmReset (tpm_info_t i_tpmInfo)
-{
-    errlHndl_t err = nullptr;
-    uint8_t regData = 0;
-
-    TRACDCOMP( g_trac_tpmdd,
-               ENTER_MRK"tpmDrtmReset()" );
-    do
-    {
-        i_tpmInfo.offset = TPM_REG_TPM_HASH;
-
-        regData = TPM_HASH_START;
-        err =  tpmWrite ( &regData,
-                          sizeof(regData),
-                          i_tpmInfo );
-        if (err)
-        {
-            break;
-        }
-
-        regData = TPM_HASH_END;
-        err =  tpmWrite ( &regData,
-                          sizeof(regData),
-                          i_tpmInfo );
-        if (err)
-        {
-            break;
-        }
-
-
-    } while( 0 );
-
-    TRACDCOMP( g_trac_tpmdd,
-               EXIT_MRK"tpmDrtmReset()" );
-    return err;
-
-} // end tpmDrtmReset
-#endif
-
 
 // ------------------------------------------------------------------
 // tpmPrepareAddress
@@ -2831,4 +2768,3 @@ errlHndl_t tpmReadFifo( const tpm_info_t & i_tpmInfo,
 
 
 } // end namespace TPMDD
-

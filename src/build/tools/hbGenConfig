@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2015
+# Contributors Listed Below - COPYRIGHT 2014,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -376,4 +376,3 @@ In C[++] files you should use:
 In makefiles you should use:
     OBJS += $(if $(CONFIG_EXAMPLE),example.o)
     OBJS += $(if $(CONFIG_EXAMPLE),,notexample.o)
-

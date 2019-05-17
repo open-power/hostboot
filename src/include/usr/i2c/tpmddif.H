@@ -37,8 +37,7 @@ enum tpm_op_types_t
 {
     TPM_OP_READVENDORID = 0,   ///< Read Vendor/Dev ID from device, max 4 bytes
     TPM_OP_TRANSMIT     = 1,   ///< Transmit/Receive command block to TPM
-    TPM_OP_DRTMRESET    = 2,   ///< Perform a DRTM PCR reset
-    TPM_OP_LASTOP,
+    TPM_OP_LASTOP       = 2,
     TPM_OP_FIRSTOP      = TPM_OP_READVENDORID
 };
 
@@ -175,4 +174,3 @@ errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
 };  // end namespace TPMDD
 
 #endif  // end __TPMDDIF_H
-

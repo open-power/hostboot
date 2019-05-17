@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,8 @@
 #include    <targeting/common/utilFilter.H>
 #include    <runtime/rt_targeting.H>
 
+//  mailbox register definitions
+#include <initservice/mboxRegs.H>
 
 using namespace TARGETING;
 using namespace ERRORLOG;
@@ -552,9 +554,8 @@ namespace RT_SBEIO
             // Set CFAM register - processing in progress
             TRACFCOMP(g_trac_sbeio, "process_sbe_msg: set CFAM register - "
                                     "processing in progress");
-            errl = process_sbe_msg_update_cfam(l_proc,
-                                            SBE_MESSAGE_PROCESSING_IN_PROGRESS,
-                                            SBE_MESSAGE_PROCESSING_COMPLETE);
+            errl = process_sbe_msg_update_cfam(l_proc, SBE_MSG_IN_PROGRESS);
+
             if(errl)
             {
                 break;
@@ -631,9 +632,8 @@ namespace RT_SBEIO
             // Set CFAM register - processing complete
             TRACFCOMP(g_trac_sbeio, "process_sbe_msg: set CFAM register - "
                                     "processing complete");
-            errl = process_sbe_msg_update_cfam(l_proc,
-                                            SBE_MESSAGE_PROCESSING_COMPLETE,
-                                            SBE_MESSAGE_PROCESSING_IN_PROGRESS);
+            errl = process_sbe_msg_update_cfam(l_proc, SBE_MSG_COMPLETE);
+
             if(errl)
             {
                 break;
@@ -846,38 +846,38 @@ namespace SBE_MSG
     /**
      *  @brief SBE message update bit(s) in CFAM register
      *
-     *  @details  This is a call that will update bit(s) in CFAM register 0x283B
-     *            or SCOM_ADDR_5003B.
+     *  @details This is a call that will update bit(s) in Mailbox
+     *           Scratch register 4.
      *
      *  @param[in]  i_proc        HB processor target
-     *  @param[in]  i_set_mask    CFAM register mask (mark bits to set)
-     *  @param[in]  i_clear_mask  CFAM register mask (mark bits to clear)
+     *  @param[in]  i_state       New state of the SBE message
      *
      *  @returns  errlHndl_t  NULL on success
      */
     errlHndl_t process_sbe_msg_update_cfam(TargetHandle_t i_proc,
-                                        const uint32_t i_set_mask,
-                                        const uint32_t i_clear_mask)
+                                           const sbe_msg_processing_state_t i_state)
     {
+        using namespace INITSERVICE::SPLESS;
+
         errlHndl_t errl = nullptr;
 
-
-        uint32_t l_read_reg = 0;
-        size_t l_size = sizeof(uint64_t);
-
         do{
-            // Read SCOM_ADDR_5003B for target proc
+            MboxScratch4_t l_mbox4 { };
+
+            size_t l_size = sizeof(uint64_t);
+
+            // Read mailbox scratch reg 4 for target proc
             errl = deviceRead(i_proc,
-                              &l_read_reg,
+                              &l_mbox4.data32,
                               l_size,
-                              DEVICE_SCOM_ADDRESS(SCOM_ADDR_5003B));
+                              DEVICE_SCOM_ADDRESS(MboxScratch4_t::REG_ADDR));
 
             if(errl)
             {
                 TRACFCOMP(g_trac_sbeio, ERR_MRK"process_sbe_msg_update_cfam: "
-                    "CFAM read failed for target 0x%llX SCOM addr 0x%llX",
-                    get_huid(i_proc),
-                    SCOM_ADDR_5003B);
+                          "CFAM read failed for target 0x%llX SCOM addr 0x%llX",
+                          get_huid(i_proc),
+                          MboxScratch4_t::REG_ADDR);
 
                 errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                           HWAS::SRCI_PRIORITY_HIGH);
@@ -887,29 +887,33 @@ namespace SBE_MSG
             }
 
             TRACFCOMP(g_trac_sbeio, "process_sbe_msg_update_cfam: CFAM read "
-                "returned 0x%llX for target 0x%llX",
-                l_read_reg, get_huid(i_proc) );
+                      "returned 0x%llX for target 0x%llX",
+                      l_mbox4.data32, get_huid(i_proc) );
 
-            // Set/clear bit(s) in CFAM reg SCOM_ADDR_5003B based on masks
-            l_read_reg |= i_set_mask;
-            l_read_reg &= (~i_clear_mask);
+            l_mbox4.sbeMsgProc.sbeMsgProcessingComplete
+                = (i_state & SBE_MSG_COMPLETE) != 0;
+
+            l_mbox4.sbeMsgProc.sbeMsgProcessingInProgress
+                = (i_state & SBE_MSG_IN_PROGRESS) != 0;
 
             TRACFCOMP(g_trac_sbeio, "process_sbe_msg_update_cfam: "
-                "CFAM write 0x%llX to SCOM addr 0x%llX for target 0x%llX",
-                l_read_reg, SCOM_ADDR_5003B, get_huid(i_proc) );
+                      "CFAM write 0x%llX to SCOM addr 0x%llX for target 0x%llX",
+                      l_mbox4.data32,
+                      MboxScratch4_t::REG_ADDR,
+                      get_huid(i_proc) );
 
-            // Write SCOM_ADDR_5003B for target proc
+            // Write mailbox scratch reg 4 for target proc
             errl = deviceWrite(i_proc,
-                               &l_read_reg,
+                               &l_mbox4.data32,
                                l_size,
-                               DEVICE_SCOM_ADDRESS(SCOM_ADDR_5003B));
+                               DEVICE_SCOM_ADDRESS(MboxScratch4_t::REG_ADDR));
 
             if(errl)
             {
                 TRACFCOMP(g_trac_sbeio, ERR_MRK"process_sbe_msg_update_cfam: "
-                    "write CFAM failed for target 0x%llX SCOM addr 0x%llX",
-                    get_huid(i_proc),
-                    SCOM_ADDR_5003B);
+                          "write CFAM failed for target 0x%llX SCOM addr 0x%llX",
+                          get_huid(i_proc),
+                          MboxScratch4_t::REG_ADDR);
 
                 errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                           HWAS::SRCI_PRIORITY_HIGH);

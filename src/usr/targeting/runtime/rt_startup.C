@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -72,10 +72,12 @@ void clearPendingSbeMsgs()
 
         for( const auto & l_procTarget : l_procList )
         {
-            // clear out the two bits for this processor target
-            l_errl = SBE_MSG::process_sbe_msg_update_cfam( l_procTarget, 0x0,
-                (SBE_MSG::SBE_MESSAGE_PROCESSING_IN_PROGRESS |
-                SBE_MSG::SBE_MESSAGE_PROCESSING_COMPLETE) );
+            // clear out the two bits (in-progress, complete) for this
+            // processor target
+            l_errl = SBE_MSG::process_sbe_msg_update_cfam(
+                l_procTarget,
+                SBE_MSG::SBE_MSG_NONE
+            );
 
             if (l_errl)
             {

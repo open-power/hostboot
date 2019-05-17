@@ -5568,13 +5568,17 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
             assert(l_sys->tryGetAttr
                       <TARGETING::ATTR_MASTER_MBOX_SCRATCH>(l_scratchRegs),
                    "getBootMcSyncMode() failed to get MASTER_MBOX_SCRATCH");
-            l_scratch5.data32 = l_scratchRegs[INITSERVICE::SPLESS::SCRATCH_5];
+            l_scratch5.data32 = l_scratchRegs[INITSERVICE::SPLESS::MboxScratch5_t::REG_IDX];
+
+            // @TODO RTC: 210612
+            // mcSyncMode is removed in P10, need to find a
+            // replacement here
 
             TRACFCOMP(g_trac_sbe,
                       "The MC Sync Bit is %d",
-                      l_scratch5.mcSyncMode );
+                      l_scratch5.deprecated.mcSyncMode );
 
-            o_mcSyncMode = l_scratch5.mcSyncMode;
+            o_mcSyncMode = l_scratch5.deprecated.mcSyncMode;
 
         } while( 0 );
         TRACUCOMP(g_trac_sbe,EXIT_MRK "Exit getBootMcSyncMode()");
@@ -6403,4 +6407,3 @@ errlHndl_t querySbeSeepromVersions()
 
 
 } //end SBE Namespace
-

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,11 +37,10 @@
 #include <targeting/common/utilFilter.H>
 #include <errl/errlmanager.H>
 #include <devicefw/userif.H>
+#include <initservice/mboxRegs.H>
 
 #include <string.h>
 #include <stdio.h>
-
-#include "sbeiotestRtConstants.H"
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -1020,6 +1019,8 @@ private:
     //-----------------------------------------------------------
     TestResult ensureClearToSend(TARGETING::TargetHandle_t i_proc)
     {
+        using namespace INITSERVICE::SPLESS;
+
         TestResult retval{TestResult::OK};
 
         do
@@ -1036,14 +1037,14 @@ private:
                 break;
             }
 
-            uint32_t l_register{};
+            MboxScratch4_t l_register { };
             size_t l_size = sizeof(uint64_t);
 
             errlHndl_t errl =
             deviceRead(i_proc,
-                       &l_register,
+                       &l_register.data32,
                        l_size,
-                       DEVICE_SCOM_ADDRESS(SCOM_ADDR_5003B)
+                       DEVICE_SCOM_ADDRESS(MboxScratch4_t::REG_ADDR)
                       );
 
             if(nullptr != errl)
@@ -1060,7 +1061,7 @@ private:
                 break;
             }
 
-            if((l_register & SBE_MSG_IN_PROGRESS) != 0)
+            if(l_register.sbeMsgProc.sbeMsgProcessingInProgress)
             {
                TS_WARN("SCOM_ADDR_5003B SBE_MSG_IN_PROGRESS set!");
 
@@ -1076,6 +1077,8 @@ private:
     //-----------------------------------------------------------
     bool clearControlRegister(TARGETING::TargetHandle_t i_proc)
     {
+        using namespace INITSERVICE::SPLESS;
+
         bool retval{true};
 
         do
@@ -1092,14 +1095,14 @@ private:
                 break;
             }
 
-            uint32_t l_register{};
+            MboxScratch4_t l_register{};
             size_t l_size = sizeof(uint64_t);
 
             errlHndl_t errl =
             deviceRead(i_proc,
-                       &l_register,
+                       &l_register.data32,
                        l_size,
-                       DEVICE_SCOM_ADDRESS(SCOM_ADDR_5003B)
+                       DEVICE_SCOM_ADDRESS(MboxScratch4_t::REG_ADDR)
                       );
 
             if(nullptr != errl)
@@ -1116,13 +1119,14 @@ private:
                 break;
             }
 
-            l_register &= ~(SBE_MSG_COMPLETE | SBE_MSG_IN_PROGRESS);
+            l_register.sbeMsgProc.sbeMsgProcessingComplete = false;
+            l_register.sbeMsgProc.sbeMsgProcessingInProgress = false;
 
             errl = deviceWrite(i_proc,
-                              &l_register,
-                              l_size,
-                              DEVICE_SCOM_ADDRESS(SCOM_ADDR_5003B)
-                             );
+                               &l_register.data32,
+                               l_size,
+                               DEVICE_SCOM_ADDRESS(MboxScratch4_t::REG_ADDR)
+                              );
 
            if(nullptr != errl)
             {

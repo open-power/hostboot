@@ -53,10 +53,6 @@
 // Custom compile configs
 #include <config.h>
 
-#ifdef CONFIG_DRTM
-#include <secureboot/drtm.H>
-#endif
-
 #ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
   #include <diag/attn/attn.H>
 #endif
@@ -249,22 +245,6 @@ void* host_gard( void *io_pArgs )
             msg_free(core_msg);
             break;
         }
-
-#ifdef CONFIG_DRTM
-        bool drtmMpipl = false;
-        SECUREBOOT::DRTM::isDrtmMpipl(drtmMpipl);
-        if(drtmMpipl)
-        {
-            l_err = SECUREBOOT::DRTM::validateDrtmHwSignature();
-            if(l_err)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
-                    "host_gard: Failed in call to validateDrtmHwSignature");
-                break;
-            }
-        }
-#endif
-
     } while (0);
 
     if (l_err)

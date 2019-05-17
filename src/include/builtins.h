@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -72,6 +74,13 @@ extern "C"
  * Use of this macro will ensure a data structure is not padded
  */
 #define PACKED __attribute__((packed))
+
+/**
+ * Variable/function declaration macro that causes a warning to be
+ * emitted whenever it's used in source code. (We use the deprecated
+ * attribute because it accomplishes the goal, even though
+ * semantically it's meant for something else.)  */
+#define DONOTUSE(MSG) __attribute__((deprecated(MSG)))
 
 /**
  * Use of this macro will hide compile errors when a variable is not used,

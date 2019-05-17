@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -124,8 +124,8 @@ namespace TRACEDAEMON
                                            INITSERVICE::LOWEST_PRIORITY);
 
         // Clear scratch register.
-        Util::writeScratchReg(INITSERVICE::SPLESS::MBOX_SCRATCH_REG1, 0);
-        Util::writeScratchReg(INITSERVICE::SPLESS::MBOX_SCRATCH_REG2, 0);
+        Util::writeScratchReg(INITSERVICE::SPLESS::MboxScratch1_t::REG_ADDR, 0);
+        Util::writeScratchReg(INITSERVICE::SPLESS::MboxScratch2_t::REG_ADDR, 0);
 
         // Loop handling messages.
         while (msg_t* msg = iv_service->iv_daemon->wait())

@@ -63,9 +63,6 @@
 #include "tpmLogMgr.H"
 #include "base/trustedbootMsg.H"
 #include <secureboot/settings.H>
-#ifdef CONFIG_DRTM
-#include <secureboot/drtm.H>
-#endif
 #include <fapi2.H>
 #include <plat_hwp_invoker.H>
 #include <p9_update_security_ctrl.H>
@@ -342,8 +339,6 @@ void* host_update_master_tpm( void *io_pArgs )
                && hwasState.functional
                && nullptr == pTpmLogMgr)
             {
-                // @todo RTC:145689 For DRTM we locate the previous SRTM log
-                // and reuse.  We must also allocate a DRTM log to be used
                 pTpmLogMgr = new TpmLogMgr;
                 setTpmLogMgr(pPrimaryTpm,pTpmLogMgr);
                 err = TpmLogMgr_initialize(pTpmLogMgr);
@@ -504,26 +499,11 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget* const i_pTpm)
         i_pTpm->setAttr<
             TARGETING::ATTR_HWAS_STATE>(hwasState);
 
-        // read + write
-        bool sendStartup = true;
-
-#ifdef CONFIG_DRTM
-        bool drtmMpipl = false;
-        (void)SECUREBOOT::DRTM::isDrtmMpipl(drtmMpipl);
-        if(drtmMpipl)
+        // TPM_STARTUP
+        err = tpmCmdStartup(i_pTpm);
+        if (nullptr != err)
         {
-            sendStartup = false;
-        }
-#endif
-        // Don't run STARTUP during DRTM
-        if (sendStartup)
-        {
-            // TPM_STARTUP
-            err = tpmCmdStartup(i_pTpm);
-            if (nullptr != err)
-            {
-                break;
-            }
+            break;
         }
 
         // TPM_GETCAPABILITY to read FW Version
@@ -553,19 +533,6 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget* const i_pTpm)
             }
         }
 #endif
-
-#ifdef CONFIG_DRTM
-        // For a DRTM we need to reset PCRs 17-22
-        if (drtmMpipl)
-        {
-            err = tpmDrtmReset(i_pTpm);
-            if (nullptr != err)
-            {
-                break;
-            }
-        }
-#endif
-
     } while ( 0 );
 
 
@@ -822,23 +789,6 @@ void pcrExtendSingleTpm(TpmTarget* const i_pTpm,
     TPM_Pcr pcr = i_pcr;
     bool useStaticLog = true;
 
-#ifdef CONFIG_DRTM
-    // In a DRTM flow, all extensions must be re-rerouted to PCR 17
-    // (which will end up using locality 2).
-    bool drtmMpipl = false;
-    (void)SECUREBOOT::DRTM::isDrtmMpipl(drtmMpipl);
-    if(drtmMpipl)
-    {
-        TRACFCOMP(g_trac_trustedboot,
-            INFO_MRK " pcrExtendSingleTpm(): DRTM active; re-routing PCR %d "
-            "extend to PCR 17",
-            i_pcr);
-
-        pcr = PCR_DRTM_17;
-        useStaticLog = false;
-    }
-#endif
-
     memset(&eventLog, 0, sizeof(eventLog));
     do
     {
@@ -872,10 +822,6 @@ void pcrExtendSingleTpm(TpmTarget* const i_pTpm,
                     }
                 }
             }
-
-            // TODO: RTC 145689: Add DRTM support for using dynamic
-            // log instead of static log; until then, inhibit DRTM logging
-            // entirely
 
             // Perform the requested extension and also force into the
             // SHA1 bank
@@ -940,22 +886,6 @@ void pcrExtendSeparator(TpmTarget* const i_pTpm)
             {PCR_0,PCR_1,PCR_2,PCR_3,PCR_4,PCR_5,PCR_6,PCR_7};
         bool useStaticLog = true;
 
-#ifdef CONFIG_DRTM
-        // In a DRTM flow, all extensions must be re-rerouted to PCR 17
-        // (which will end up using locality 2).
-        bool drtmMpipl = false;
-        (void)SECUREBOOT::DRTM::isDrtmMpipl(drtmMpipl);
-        if(drtmMpipl)
-        {
-            TRACFCOMP(g_trac_trustedboot,
-                INFO_MRK " pcrExtendSeparator(): DRTM active; extending "
-                "separator to PCR 17 instead of PCR 0..7.");
-
-            pcrs = { PCR_DRTM_17 };
-            useStaticLog = false;
-        }
-#endif
-
         for (const auto &pcr : pcrs)
         {
             auto hwasState = i_pTpm->getAttr<
@@ -986,11 +916,6 @@ void pcrExtendSeparator(TpmTarget* const i_pTpm)
                         break;
                     }
                 }
-
-                // TODO: RTC 145689: Add DRTM support for using dynamic
-                // log (which will happen any time useStaticLog is false).
-                // Until then, we cannot log DRTM events, since they are only
-                // allowed to go to the dynamic log
 
                 // Perform the requested extension
                 err = tpmCmdPcrExtend2Hash(i_pTpm,
@@ -2127,34 +2052,6 @@ bool getTpmRequiredSensorValue(bool& o_isTpmRequired)
     return retVal;
 }
 
-
-#ifdef CONFIG_DRTM
-errlHndl_t tpmDrtmReset(TpmTarget* const i_pTpm)
-{
-    assert(i_pTpm != nullptr,"tpmDrtmReset: BUG! i_pTpm was nullptr");
-    assert(i_pTpm->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_TPM,
-           "tpmDrtmReset: BUG! Expected target to be of TPM type, but "
-           "it was of type 0x%08X",i_pTpm->getAttr<TARGETING::ATTR_TYPE>());
-
-    errlHndl_t err = nullptr;
-
-    // Send to the TPM
-    size_t len = 0;
-    err = deviceRead(i_pTpm,
-                     nullptr,
-                     len,
-                     DEVICE_TPM_ADDRESS(TPMDD::TPM_OP_DRTMRESET,
-                                        0,
-                                        TPM_LOCALITY_4));
-
-    if (nullptr == err)
-    {
-        /// @todo RTC: 145689 reset the dynamic tpm log
-    }
-
-    return err;
-}
-#endif
 
 #ifdef CONFIG_TPMDD
 errlHndl_t GetRandom(const TpmTarget* i_pTpm,

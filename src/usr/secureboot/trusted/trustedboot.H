@@ -177,20 +177,6 @@ void pcrExtendSeparator(TpmTarget* i_pTpm);
  */
 void* tpmDaemon(void* unused);
 
-#ifdef CONFIG_DRTM
-/**
- *  @brief Initiate a DRTM PCR reset on the given TPM
- *
- *  @param[in] i_pTpm TPM targeting target handle referring to TPM to DRTM
- *      reset. Function will assert if value is nullptr or is
- *      not of TPM type.
- *
- *  @return errlHndl_t nullptr if successful, otherwise a pointer to the
- *       error log.
- */
-errlHndl_t tpmDrtmReset(TpmTarget* i_pTpm);
-#endif
-
 /**
  *  @brief Returns a pointer to the TPM's log manger
  *

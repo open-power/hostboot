@@ -79,10 +79,6 @@
 #include <ipmi/ipmiif.H>
 #endif
 
-#ifdef CONFIG_DRTM
-#include <secureboot/drtm.H>
-#endif
-
 #include <targeting/common/associationmanager.H>
 
 using namespace INITSERVICE::SPLESS;
@@ -109,7 +105,7 @@ namespace TARGETING
 static void initializeAttributes(TargetService& i_targetService,
                                  bool i_isMpipl,
                                  bool i_istepMode,
-                                 ATTR_MASTER_MBOX_SCRATCH_type& i_masterScratch);
+                                 ATTR_MASTER_MBOX_SCRATCH_typeStdArr& i_masterScratch);
 
 /**
  *  @brief Check that at least one processor of our cpu type is being targeted
@@ -142,20 +138,40 @@ static void initTargeting(errlHndl_t& io_pError)
     //be overwritten
     bool l_isMpipl = false;
     bool l_isIstepMode = false;
-    ATTR_MASTER_MBOX_SCRATCH_type l_scratch = {0,0,0,0,0,0,0,0};
+    ATTR_MASTER_MBOX_SCRATCH_typeStdArr l_scratch { };
 
-    for(size_t i=0; i< sizeof(l_scratch)/sizeof(l_scratch[0]); i++)
     {
-        l_scratch[i] =
-        Util::readScratchReg(MBOX_SCRATCH_REG1+i);
+        using namespace INITSERVICE::SPLESS;
+
+        const std::array<uint32_t, l_scratch.size()> l_regs {
+            MboxScratch1_t::REG_ADDR,
+            MboxScratch2_t::REG_ADDR,
+            MboxScratch3_t::REG_ADDR,
+            MboxScratch4_t::REG_ADDR,
+            MboxScratch5_t::REG_ADDR,
+            MboxScratch6_t::REG_ADDR,
+            MboxScratch7_t::REG_ADDR,
+            MboxScratch8_t::REG_ADDR,
+            MboxScratch9_t::REG_ADDR,
+            MboxScratch10_t::REG_ADDR,
+            MboxScratch11_t::REG_ADDR,
+            MboxScratch12_t::REG_ADDR,
+            MboxScratch13_t::REG_ADDR,
+            MboxScratch14_t::REG_ADDR,
+            MboxScratch15_t::REG_ADDR,
+            MboxScratch16_t::REG_ADDR,
+        };
+
+        std::transform(l_regs.cbegin(), l_regs.cend(),
+                       l_scratch.begin(), Util::readScratchReg);
     }
 
     // Check mbox scratch reg 3 for IPL boot options
     // Specifically istep mode (bit 0) and MPIPL (bit 2)
     INITSERVICE::SPLESS::MboxScratch3_t l_scratch3;
-    l_scratch3.data32 = l_scratch[SCRATCH_3];
+    l_scratch3.data32 = l_scratch[INITSERVICE::SPLESS::MboxScratch3_t::REG_IDX];
 
-    if(l_scratch3.isMpipl)
+    if(l_scratch3.fwModeCtlFlags.isMpipl)
     {
         TARG_INF("We are running MPIPL mode");
         l_isMpipl = true;
@@ -170,16 +186,16 @@ static void initTargeting(errlHndl_t& io_pError)
         mm_extend(MM_EXTEND_FULL_CACHE);
 #endif
     }
-    if(l_scratch3.istepMode)
+    if(l_scratch3.fwModeCtlFlags.istepMode)
     {
         l_isIstepMode = true;
     }
-    if(l_scratch3.overrideSecurity)
+    if(l_scratch3.fwModeCtlFlags.overrideSecurity)
     {
         TARG_INF("WARNING: External tool asked master proc to disable "
             "security.");
     }
-    if(l_scratch3.allowAttrOverrides)
+    if(l_scratch3.fwModeCtlFlags.allowAttrOverrides)
     {
         TARG_INF("WARNING: External tool asked master proc to allow "
             "attribute overrides even in secure mode.");
@@ -293,23 +309,6 @@ static void initTargeting(errlHndl_t& io_pError)
             TARG_INF("Initialized targeting for model: %s",
                      l_pTopLevel->getAttrAsString<ATTR_MODEL>());
         }
-
-#ifdef CONFIG_DRTM
-        const INITSERVICE::SPLESS::MboxScratch7_t scratch7 =
-            {.data32 = l_scratch[SCRATCH_7] };
-        const INITSERVICE::SPLESS::MboxScratch8_t scratch8 =
-            {.data32 = l_scratch[SCRATCH_8] };
-
-        errlHndl_t pError = SECUREBOOT::DRTM::discoverDrtmState(
-            scratch7,scratch8);
-        if(pError)
-        {
-            auto plid = pError->plid();
-            errlCommit(pError,SECURE_COMP_ID);
-            // TODO: RTC 167205: Better GA error handling
-            INITSERVICE::doShutdown(plid, true);
-        }
-#endif
 
         // Handle possibility of Attribute Overrides allowed in secure mode
         bool l_allow_attr_overrides =
@@ -435,7 +434,7 @@ static void checkProcessorTargeting(TargetService& i_targetService)
 static void initializeAttributes(TargetService& i_targetService,
                                  bool i_isMpipl,
                                  bool i_istepMode,
-                                 ATTR_MASTER_MBOX_SCRATCH_type& i_masterScratch)
+                                 ATTR_MASTER_MBOX_SCRATCH_typeStdArr& i_masterScratch)
 {
     #define TARG_FN "initializeAttributes()...)"
     TARG_ENTER();
@@ -482,7 +481,7 @@ static void initializeAttributes(TargetService& i_targetService,
             l_pMasterProcChip->setAttr<ATTR_SBE_IS_STARTED>(1);
 
 
-            l_pTopLevel->setAttr<ATTR_MASTER_MBOX_SCRATCH>(i_masterScratch);
+            l_pTopLevel->setAttrFromStdArr<ATTR_MASTER_MBOX_SCRATCH>(i_masterScratch);
 
             // Targeting data defaults to non istep, only turn "on" if bit
             // is set so we don't tromp default setting
@@ -504,23 +503,31 @@ static void initializeAttributes(TargetService& i_targetService,
 
             INITSERVICE::SPLESS::MboxScratch8_t l_scratch8;
             l_scratch8.data32 =
-              i_masterScratch[INITSERVICE::SPLESS::SCRATCH_8];
+              i_masterScratch[INITSERVICE::SPLESS::MboxScratch8_t::REG_IDX];
 
             // Scratch5:bit2 is legacy risk level bit for backward compatibility
             INITSERVICE::SPLESS::MboxScratch5_t l_scratch5;
             l_scratch5.data32 =
-              i_masterScratch[INITSERVICE::SPLESS::SCRATCH_5];
-            if( l_scratch5.oldRiskLevel  && l_scratch8.validHwpControlFlags)
+              i_masterScratch[INITSERVICE::SPLESS::MboxScratch5_t::REG_IDX];
+
+            // @TODO RTC: 210612
+            // risk level is going away in P10, we need to figure out
+            // what to do with this
+            if( l_scratch5.deprecated.oldRiskLevel && l_scratch8.scratchRegValid.validHwpCtlFlags)
             {
                 l_riskLevel = 1;
             }
             // Scratch3 has the real risk level if the valid bit is on
-            else if (l_scratch8.validFwMode)
+            else if (l_scratch8.scratchRegValid.validFwMode)
             {
                 INITSERVICE::SPLESS::MboxScratch3_t l_scratch3;
                 l_scratch3.data32 =
-                  i_masterScratch[INITSERVICE::SPLESS::SCRATCH_3];
-                l_riskLevel = l_scratch3.riskLevel;
+                    i_masterScratch[INITSERVICE::SPLESS::MboxScratch3_t::REG_IDX];
+
+                // @TODO RTC: 210612
+                // risk level is going away in P10, need to find a
+                // replacement here
+                l_riskLevel = l_scratch3.fwModeCtlFlags.riskLevel;
             }
             else
             {
@@ -1017,4 +1024,3 @@ static void adjustMemoryMap( TargetService& i_targetService )
 #undef TARG_NAMESPACE
 
 } // End namespace TARGETING
-

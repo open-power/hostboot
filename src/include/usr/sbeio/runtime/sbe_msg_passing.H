@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -170,27 +170,28 @@ namespace SBE_MSG
     int eraseProcessCmdFunction(enum passThruCmds i_command);
 
     //------------------------------------------------------------------------
-    // Constants for setting/clearing bits in SCOM_ADDR_5003B
+    // Constants for setting/clearing status in SBE message update register
     //------------------------------------------------------------------------
-    const uint32_t SCOM_ADDR_5003B = 0x0005003B; // CFAM Reg 0x283B
-    const uint32_t SBE_MESSAGE_PROCESSING_IN_PROGRESS = 0x40000000;
-    const uint32_t SBE_MESSAGE_PROCESSING_COMPLETE = 0x80000000;
+    enum sbe_msg_processing_state_t
+    {
+        SBE_MSG_NONE          = 0,
+        SBE_MSG_IN_PROGRESS   = 1 << 0,
+        SBE_MSG_COMPLETE      = 1 << 1
+    };
 
     /**
      *  @brief SBE message update bit(s) in CFAM register
      *
-     *  @details  This is a call that will update bit(s) in CFAM register 0x283B
-     *            or SCOM_ADDR_5003B.
+     *  @details This is a call that will update bit(s) in Mailbox
+     *           Scratch register 4.
      *
      *  @param[in]  i_proc        HB processor target
-     *  @param[in]  i_set_mask    CFAM register mask (mark bits to set)
-     *  @param[in]  i_clear_mask  CFAM register mask (mark bits to clear)
+     *  @param[in]  i_state       New state of the SBE message
      *
      *  @returns  errlHndl_t  NULL on success
      */
     errlHndl_t process_sbe_msg_update_cfam(TARGETING::TargetHandle_t i_proc,
-                                           const uint32_t i_set_mask,
-                                           const uint32_t i_clear_mask);
+                                           sbe_msg_processing_state_t i_state);
 
 } // namespace SBE_MSG
 

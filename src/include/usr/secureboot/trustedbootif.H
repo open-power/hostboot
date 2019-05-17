@@ -103,12 +103,14 @@ namespace TRUSTEDBOOT
         PCR_7              = 7,
         FW_USED_PCR_COUNT  = 8,
         PCR_DEBUG          = 16,
+        /* DRTM range; not supported by Hostboot
         PCR_DRTM_17        = 17,
         PCR_DRTM_18        = 18,
         PCR_DRTM_19        = 19,
         PCR_DRTM_20        = 20,
         PCR_DRTM_21        = 21,
         PCR_DRTM_22        = 22,
+        */
         PLATFORM_PCR       = 24, ///< The number of PCR required by the platform spec
         IMPLEMENTATION_PCR = 24, ///< The number of PCRs implemented by TPM
     } TPM_Pcr;

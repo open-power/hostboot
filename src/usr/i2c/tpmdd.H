@@ -227,20 +227,6 @@ errlHndl_t tpmTransmit ( void * io_buffer,
                          size_t i_commandlen,
                          const tpm_info_t & i_tpmInfo );
 
-#ifdef CONFIG_DRTM
-/**
- * @brief This function peforms the sequencing to do a reset of the
- *      dynamic PCRs 17-22
- *
- * @param[in] i_tpmInfo Structure of I2C parameters needed to execute
- *      the command to the I2C device driver.
- *
- * @return errlHndl_t nullptr if successful, otherwise a pointer to the
- *      error log.
- */
-errlHndl_t tpmDrtmReset (tpm_info_t i_tpmInfo);
-#endif
-
 /**
  * @brief This function prepares the I2C byte address for adding to the
  *      existing buffer (for Writes), or as a separate write operation

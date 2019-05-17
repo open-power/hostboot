@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,10 +45,6 @@
 #include <dump/dumpif.H>
 
 #include <config.h>
-
-#ifdef CONFIG_DRTM
-#include <secureboot/drtm.H>
-#endif
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -104,40 +100,6 @@ void* call_host_mpipl_service (void *io_pArgs)
             }
 
         }
-
-#ifdef CONFIG_DRTM
-
-        if(!l_err)
-        {
-            do {
-
-            bool drtmMpipl = false;
-            SECUREBOOT::DRTM::isDrtmMpipl(drtmMpipl);
-            if(drtmMpipl)
-            {
-                l_err = SECUREBOOT::DRTM::validateDrtmPayload();
-                if(l_err)
-                {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
-                        "call_host_mpipl_service: Failed in call to "
-                        "validateDrtmPayload()");
-                    break;
-                }
-
-                l_err = SECUREBOOT::DRTM::completeDrtm();
-                if(l_err)
-                {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
-                        "call_host_mpipl_service: Failed in call to "
-                        "completeDrtm()" );
-                    break;
-                }
-            }
-
-            } while(0);
-        }
-
-#endif
 
         // No error on the procedure.. proceed to collect the dump.
         if (!l_err)

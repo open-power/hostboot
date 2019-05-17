@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -120,14 +120,7 @@ namespace TRACEDAEMON
 
                 /** Current size of trace entries pruned. */
             size_t iv_totalPruned;
-
-                /** Address of scratch register. */
-            static const uint32_t MB_SCRATCH_REGISTER_1 = 0x00050038;
-            static const uint32_t MB_SCRATCH_REGISTER_2 = 0x00050039;
-
     };
-
-
 }
 
 #endif

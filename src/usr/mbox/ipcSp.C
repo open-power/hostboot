@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -85,9 +85,9 @@ void IpcSp::distributeLocalNodeAddr( void )
     uint64_t l_remoteAddr;
     qryLocalIpcInfo( l_localNode, l_remoteAddr );
 
-    Util::writeScratchReg (INITSERVICE::SPLESS::MBOX_SCRATCH_REG7,
+    Util::writeScratchReg (INITSERVICE::SPLESS::MboxScratch7_t::REG_ADDR,
                            l_remoteAddr>>32);
-    Util::writeScratchReg (INITSERVICE::SPLESS::MBOX_SCRATCH_REG8,
+    Util::writeScratchReg (INITSERVICE::SPLESS::MboxScratch8_t::REG_ADDR,
                            l_remoteAddr);
 }
 
@@ -665,11 +665,11 @@ void IpcSp::_acquireRemoteNodeAddrs( void )
                             // read scoms for remote node
                             uint64_t l_remoteAddrHighBits =
                                     XSCOM::readRemoteScom(i,
-                                    INITSERVICE::SPLESS::MBOX_SCRATCH_REG7);
+                                    INITSERVICE::SPLESS::MboxScratch7_t::REG_ADDR);
 
                             uint64_t l_remoteAddrLowBits =
                                     XSCOM::readRemoteScom(i,
-                                    INITSERVICE::SPLESS::MBOX_SCRATCH_REG8);
+                                    INITSERVICE::SPLESS::MboxScratch8_t::REG_ADDR);
 
                             l_RemoteAddr = (l_remoteAddrHighBits ) |
                                            (l_remoteAddrLowBits >> 32);
@@ -714,5 +714,3 @@ void IpcSp::_acquireRemoteNodeAddrs( void )
 
     return;
 }
-
-

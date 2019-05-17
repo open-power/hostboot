@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -91,24 +91,23 @@ void* call_host_slave_sbe_config(void *io_pArgs)
     //  from the master proc
     INITSERVICE::SPLESS::MboxScratch3_t l_scratch3;
     TARGETING::ATTR_MASTER_MBOX_SCRATCH_type l_scratchRegs;
-    assert(l_sys->tryGetAttr
-             <TARGETING::ATTR_MASTER_MBOX_SCRATCH>(l_scratchRegs),
+    assert(l_sys->tryGetAttr<TARGETING::ATTR_MASTER_MBOX_SCRATCH>(l_scratchRegs),
            "call_host_slave_sbe_config() failed to get MASTER_MBOX_SCRATCH");
-    l_scratch3.data32 = l_scratchRegs[INITSERVICE::SPLESS::SCRATCH_3];
+    l_scratch3.data32 = l_scratchRegs[INITSERVICE::SPLESS::MboxScratch3_t::REG_IDX];
 
     // turn off the istep bit
-    l_scratch3.istepMode = 0;
+    l_scratch3.fwModeCtlFlags.istepMode = 0;
 
     // write the attribute
     l_sys->setAttr<ATTR_BOOT_FLAGS>(l_scratch3.data32);
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "ATTR_BOOT_FLAGS=%.8X", l_scratch3.data32 );
-    if(l_scratch3.overrideSecurity)
+    if(l_scratch3.fwModeCtlFlags.overrideSecurity)
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
             "WARNING: Requesting security disable on non-master processors.");
     }
-    if(l_scratch3.allowAttrOverrides)
+    if(l_scratch3.fwModeCtlFlags.allowAttrOverrides)
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
             "WARNING: Requesting allowing Attribute Overrides on "
@@ -117,8 +116,8 @@ void* call_host_slave_sbe_config(void *io_pArgs)
 
     // grab the boot flags from the master proc
     INITSERVICE::SPLESS::MboxScratch5_t l_scratch5;
-    l_scratch5.data32 = l_scratchRegs[INITSERVICE::SPLESS::SCRATCH_5];
-    
+    l_scratch5.data32 = l_scratchRegs[INITSERVICE::SPLESS::MboxScratch5_t::REG_IDX];
+
 
     // execute p9_setup_sbe_config.C for non-primary processor targets
     TARGETING::TargetHandleList l_cpuTargetList;
@@ -135,7 +134,10 @@ void* call_host_slave_sbe_config(void *io_pArgs)
             const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                 l_fapi2_proc_target (l_cpu_target);
 
-            l_cpu_target->setAttr<ATTR_MC_SYNC_MODE>(l_scratch5.mcSyncMode);
+            // @TODO RTC: 210612
+            // mcSyncMode is removed in P10, need to find a
+            // replacement here
+            l_cpu_target->setAttr<ATTR_MC_SYNC_MODE>(l_scratch5.deprecated.mcSyncMode);
 
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                      "Running p9_setup_sbe_config HWP on processor target %.8X",

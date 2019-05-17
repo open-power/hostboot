@@ -1108,12 +1108,12 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
 
 
         //--- Mark we have finished the istep in the scratch reg
-        SPLESS::MboxScratch5_HB_t l_scratch5;
-        l_scratch5.magic = SPLESS::ISTEP_PROGRESS_MAGIC;
-        l_scratch5.stepFinish = 1;
-        l_scratch5.majorStep = iv_curIStep;
-        l_scratch5.minorStep = iv_curSubStep;
-        Util::writeScratchReg( SPLESS::MBOX_SCRATCH_REG5,
+        SPLESS::MboxScratch5_t l_scratch5;
+        l_scratch5.debug.magic = SPLESS::MboxScratch5_t::ISTEP_PROGRESS_MAGIC;
+        l_scratch5.debug.stepFinish = 1;
+        l_scratch5.debug.majorStep = iv_curIStep;
+        l_scratch5.debug.minorStep = iv_curSubStep;
+        Util::writeScratchReg( SPLESS::MboxScratch5_t::REG_ADDR,
                                l_scratch5.data32 );
 
         TRACFCOMP(g_trac_initsvc, EXIT_MRK"doIstep: step %d, substep %d",
@@ -2499,13 +2499,13 @@ errlHndl_t IStepDispatcher::sendProgressCode(bool i_needsLock)
     }
 
     //--- Save step to a scratch reg
-    SPLESS::MboxScratch5_HB_t l_scratch5;
-    l_scratch5.magic = SPLESS::ISTEP_PROGRESS_MAGIC;
-    l_scratch5.stepStart = 1;
-    l_scratch5.internalStep = internalStep++; //increment on each call
-    l_scratch5.majorStep = iv_curIStep;
-    l_scratch5.minorStep = iv_curSubStep;
-    Util::writeScratchReg( SPLESS::MBOX_SCRATCH_REG5,
+    SPLESS::MboxScratch5_t l_scratch5;
+    l_scratch5.debug.magic = SPLESS::MboxScratch5_t::ISTEP_PROGRESS_MAGIC;
+    l_scratch5.debug.stepStart = 1;
+    l_scratch5.debug.internalStep = internalStep++; //increment on each call
+    l_scratch5.debug.majorStep = iv_curIStep;
+    l_scratch5.debug.minorStep = iv_curSubStep;
+    Util::writeScratchReg( SPLESS::MboxScratch5_t::REG_ADDR,
                            l_scratch5.data32 );
 
 #ifdef CONFIG_ISTEP_LPC_PORT80_DEBUG

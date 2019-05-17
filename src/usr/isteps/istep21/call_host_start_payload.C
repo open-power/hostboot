@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -63,11 +63,6 @@
 #include <kernel/memstate.H>
 #include "../hdat/hdattpmdata.H"
 #include "hdatstructs.H"
-
-#ifdef CONFIG_DRTM_TRIGGERING
-#include <secureboot/drtm.H>
-#endif
-
 
 using namespace ERRORLOG;
 using namespace ISTEP;
@@ -357,36 +352,6 @@ void* call_host_start_payload (void *io_pArgs)
             break;
         }
 
-
-#ifdef CONFIG_DRTM_TRIGGERING
-        bool drtmMpipl = false;
-        SECUREBOOT::DRTM::isDrtmMpipl(drtmMpipl);
-        if(!drtmMpipl)
-        {
-            TARGETING::Target* pSysTarget = nullptr;
-            TARGETING::targetService().getTopLevelTarget(pSysTarget);
-            if(pSysTarget == nullptr)
-            {
-                assert(false,"call_host_start_payload: BUG! System target was "
-                    "nullptr.");
-            }
-
-            auto forceDrtm = pSysTarget->getAttr<
-                TARGETING::ATTR_FORCE_PRE_PAYLOAD_DRTM>();
-
-            if(forceDrtm)
-            {
-                l_errl = SECUREBOOT::DRTM::initiateDrtm();
-                if(l_errl)
-                {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
-                        "call_host_start_payload: Failed in call to "
-                        "initiateDrtm()");
-                    break;
-                }
-            }
-        }
-#endif
 
         // calculate lowest addressable memory location to be used as COMM base
         uint64_t l_commBase = cpu_spr_value(CPU_SPR_HRMOR) - VMM_HRMOR_OFFSET;

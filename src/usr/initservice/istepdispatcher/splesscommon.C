@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -123,7 +123,7 @@ void    readCmdSts( SPLessCmd   &io_rcmd )
               g_SPLess_pMasterProcChip,
               &(op),
               op_size,
-              DEVICE_SCOM_ADDRESS( MBOX_SCRATCH_REG4 )  );
+              DEVICE_SCOM_ADDRESS(MboxScratch4_t::REG_ADDR));
 
     io_rcmd.word = (op >>32);
 #endif
@@ -169,7 +169,7 @@ void    writeCmdSts( SPLessCmd    i_rcmd )
                g_SPLess_pMasterProcChip,
                &(op),
                op_size,
-               DEVICE_SCOM_ADDRESS( MBOX_SCRATCH_REG4 )  );
+               DEVICE_SCOM_ADDRESS(MboxScratch4_t::REG_ADDR));
 #endif
 
 #ifdef  SPLESS_DEBUG
@@ -179,4 +179,3 @@ void    writeCmdSts( SPLessCmd    i_rcmd )
 
 };   // namespace
 };   // end namespace    INITSERVICE
-
