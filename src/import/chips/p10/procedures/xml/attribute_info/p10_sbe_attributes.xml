@@ -275,4 +275,36 @@
       <name>ATTR_PROC_FABRIC_TOPOLOGY_MODE</name>
       <value>0x0</value>
   </entry>
+  <entry>
+      <name>ATTR_ACTIVE_CORES_VEC</name>
+      <value>0x0</value>
+  </entry>
+  <entry>
+      <name>ATTR_FUSED_CORE_MODE</name>
+      <value>0x0</value>
+  </entry>
+  <entry>
+      <name>ATTR_ACTIVE_CORES_NUM</name>
+      <value>0x0</value>
+  </entry>
+  <entry>
+      <name>ATTR_BACKING_CACHES_NUM</name>
+      <value>0x0</value>
+  </entry>
+  <entry>
+      <name>ATTR_MASTER_CORE</name>
+      <value>0x0</value>
+  </entry>
+  <entry>
+      <name>ATTR_BACKING_CACHES_VEC</name>
+      <value>0x0</value>
+  </entry>
+  <entry>
+      <name>ATTR_IOHS_PLL_BUCKET</name>
+      <value>0x0</value>
+  </entry>
+  <entry>
+      <name>ATTR_MC_PLL_BUCKET</name>
+      <value>0x0</value>
+  </entry>
 </entries>
