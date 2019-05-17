@@ -646,6 +646,61 @@ extern "C"
 
                     break;
 
+                case PU_NPU_CHIPUNIT:
+
+                    // NPU0 and NPU1 exist on the N3 chiplet, NPU2 exists on the N1 chiplet instead
+                    l_chiplet_id = ( 2 == i_chipUnitNum ) ? N1_CHIPLET_ID : N3_CHIPLET_ID ;
+                    l_scom.set_chiplet_id( l_chiplet_id );
+
+                    // Covers the following addresses:
+                    // NPU0: 05011000 to 050113FF
+                    // NPU1: 05011400 to 050117FF
+                    // NPU2: 03011C00 to 03011FFF
+                    if ( N3_NPU_0_RING_ID == l_ring )
+                    {
+                        // NPU0/NPU1
+                        if ( N3_CHIPLET_ID == l_chiplet_id )
+                        {
+                            l_scom.set_ring( N3_NPU_0_RING_ID + i_chipUnitNum );
+                        }
+                        // NPU2
+                        else if ( N1_CHIPLET_ID == l_chiplet_id )
+                        {
+                            l_scom.set_ring( P9A_NPU_2_RING_ID );
+                        }
+                        else
+                        {
+                            l_scom.set_addr( FAILED_TRANSLATION );
+                        }
+                    }
+                    // Covers the following addresses:
+                    // NPU0: 05013C00 to 05013C8F
+                    // NPU1: 05013CC0 to 05013D4F
+                    // NPU2: 03012000 to 0301208F
+                    else if ( P9A_NPU_0_FIR_RING_ID == l_ring )
+                    {
+                        // NPU0/NPU1
+                        if ( N3_CHIPLET_ID == l_chiplet_id )
+                        {
+                            l_scom.set_sat_id( l_sat_id + (3 * i_chipUnitNum) );
+                        }
+                        // NPU2
+                        else if ( N1_CHIPLET_ID == l_chiplet_id )
+                        {
+                            l_scom.set_ring( P9A_NPU_2_FIR_RING_ID );
+                        }
+                        else
+                        {
+                            l_scom.set_addr( FAILED_TRANSLATION );
+                        }
+                    }
+                    else
+                    {
+                        l_scom.set_addr( FAILED_TRANSLATION );
+                    }
+
+                    break;
+
                 default:
                     l_scom.set_addr(FAILED_TRANSLATION);
                     break;
@@ -1498,6 +1553,37 @@ extern "C"
                 o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_PPE_CHIPUNIT,
                                             (l_chiplet_id - OB0_CHIPLET_ID) + PPE_IO_OB0_CHIPUNIT_NUM));
             }
+
+            // PU_NPU_CHIPUNIT
+            // npu: 0..1
+            if ( (l_port == UNIT_PORT_ID) &&
+                 (l_chiplet_id == N3_CHIPLET_ID) &&
+                 (N3_NPU_0_RING_ID <= l_ring && l_ring <= N3_NPU_1_RING_ID) )
+            {
+                o_chipUnitRelated = true;
+                o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_NPU_CHIPUNIT,
+                                            (l_ring - N3_NPU_0_RING_ID)));
+            }
+
+            if ( (l_port == UNIT_PORT_ID) &&
+                 (l_chiplet_id == N3_CHIPLET_ID) &&
+                 (l_ring == P9A_NPU_0_FIR_RING_ID) )
+            {
+                o_chipUnitRelated = true;
+                o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_NPU_CHIPUNIT,
+                                            (l_sat_id / 3)));
+            }
+
+            // PU_NPU_CHIPUNIT
+            // npu: 2
+            if ( (l_port == UNIT_PORT_ID) &&
+                 (l_chiplet_id == N1_CHIPLET_ID) &&
+                 (l_ring == P9A_NPU_2_RING_ID || l_ring == P9A_NPU_2_FIR_RING_ID) )
+            {
+                o_chipUnitRelated = true;
+                o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_NPU_CHIPUNIT, 2));
+            }
+
         }
 
         return (!l_scom.is_valid());

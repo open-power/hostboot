@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -68,7 +68,8 @@ extern "C"
         PU_PPE_CHIPUNIT,     ///< PPE
         PU_SBE_CHIPUNIT,     ///< SBE
         PU_CAPP_CHIPUNIT,    ///< CAPP
-        PU_MC_CHIPUNIT,    ///< mc
+        PU_MC_CHIPUNIT,      ///< mc
+        PU_NPU_CHIPUNIT,     ///< NPU
         NONE,                ///< None/Invalid
     } p9ChipUnits_t;
 

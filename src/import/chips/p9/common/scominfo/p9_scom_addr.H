@@ -452,6 +452,13 @@ extern "C"
         P9A_MC_OMI2_FRST_LANE = 0x10,     ///< First lane of OMI % 3 = 2
     } p9a_mc_lane_t;
 
+    typedef enum
+    {
+        P9A_NPU_2_RING_ID     = 0x7,
+        P9A_NPU_2_FIR_RING_ID = 0x8,
+        P9A_NPU_0_FIR_RING_ID = 0xF,
+    } p9a_npu_ring_id_t;
+
 //        8             7             6             5             4             3          2         1
 //
 //  |0 1 2 3| |4 5 6 7| |8 9 10 11| |12 13 14 15| |16 17 18 19| |20 21 22 23| |24 25 26 27| |28 29 30 31|
