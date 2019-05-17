@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,9 +40,11 @@ constexpr uint64_t literal_0b1111 = 0b1111;
 constexpr uint64_t literal_0b011 = 0b011;
 constexpr uint64_t literal_0b010 = 0b010;
 constexpr uint64_t literal_0b11111110 = 0b11111110;
+constexpr uint64_t literal_0 = 0;
+constexpr uint64_t literal_0b10 = 0b10;
+constexpr uint64_t literal_0b000000 = 0b000000;
 constexpr uint64_t literal_0b01 = 0b01;
 constexpr uint64_t literal_0b00 = 0b00;
-constexpr uint64_t literal_0b10 = 0b10;
 
 fapi2::ReturnCode p9_fbc_cd_hp2_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT0,
                                      const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT1)
@@ -59,6 +61,10 @@ fapi2::ReturnCode p9_fbc_cd_hp2_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
         fapi2::ATTR_PROC_FABRIC_X_LINKS_CNFG_Type l_TGT0_ATTR_PROC_FABRIC_X_LINKS_CNFG;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_LINKS_CNFG, TGT0, l_TGT0_ATTR_PROC_FABRIC_X_LINKS_CNFG));
         uint64_t l_def_NUM_X_LINKS_CFG = l_TGT0_ATTR_PROC_FABRIC_X_LINKS_CNFG;
+        fapi2::ATTR_CHIP_EC_FEATURE_AXONE_FBC_SETTINGS_Type l_TGT0_ATTR_CHIP_EC_FEATURE_AXONE_FBC_SETTINGS;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_AXONE_FBC_SETTINGS, TGT0,
+                               l_TGT0_ATTR_CHIP_EC_FEATURE_AXONE_FBC_SETTINGS));
+        uint64_t l_def_IS_AXONE = (l_TGT0_ATTR_CHIP_EC_FEATURE_AXONE_FBC_SETTINGS != literal_0);
         fapi2::buffer<uint64_t> l_scom_buffer;
         {
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5)
@@ -184,9 +190,19 @@ fapi2::ReturnCode p9_fbc_cd_hp2_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                     l_scom_buffer.insert<34, 8, 56, uint64_t>(literal_0b11111110 );
                 }
 
-                if (literal_1)
+                if (l_def_IS_AXONE)
+                {
+                    l_scom_buffer.insert<42, 2, 62, uint64_t>(literal_0b10 );
+                }
+
+                if (( ! l_def_IS_AXONE))
                 {
                     l_scom_buffer.insert<42, 8, 56, uint64_t>(literal_0b11111110 );
+                }
+
+                if (l_def_IS_AXONE)
+                {
+                    l_scom_buffer.insert<44, 6, 58, uint64_t>(literal_0b000000 );
                 }
 
                 if (literal_1)
