@@ -2147,7 +2147,6 @@ void grouping_group8PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
             o_groupData.iv_data[g][MEMBER_IDX(5)] = MCPORTID_5;
             o_groupData.iv_data[g][MEMBER_IDX(6)] = MCPORTID_3;
             o_groupData.iv_data[g][MEMBER_IDX(7)] = MCPORTID_7;
-            g++; // increase o_groupData.iv_numGroups
 
             // Record which MC ports were grouped
             // Check if OMI mirrorable
@@ -2162,6 +2161,8 @@ void grouping_group8PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
                     o_groupData.iv_OMIMirrorable[g] = false;
                 }
             }
+
+            g++; // increase o_groupData.iv_numGroups
 
             FAPI_INF("grouping_group8PortsPerGroup: Successfully grouped 8 "
                      "MC ports.");
