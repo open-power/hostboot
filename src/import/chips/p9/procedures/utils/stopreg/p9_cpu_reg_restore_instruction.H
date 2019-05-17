@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,7 +76,8 @@ enum
     SKIP_SPR_REST_INST  =   0x4800001c, //b . +0x01c
     MFLR_R30            =   0x7fc802a6,
     SKIP_SPR_SELF_SAVE  =   0x3bff0020, //addi r31 r31, 0x20
-    MTLR_INST           =   0x7fc803a6  //mtlr r30
+    MTLR_INST           =   0x7fc803a6,  //mtlr r30
+    BRANCH_BE_INST      =   0x48000020,
 };
 
 #ifdef __cplusplus

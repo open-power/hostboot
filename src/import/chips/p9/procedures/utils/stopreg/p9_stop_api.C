@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1829,7 +1829,68 @@ StopReturnCode_t proc_stop_init_self_save(  void* const i_pImage, const uint32_t
 }
 
 //-----------------------------------------------------------------------------------------------------
+
+StopReturnCode_t proc_stop_api_discover_capability( void* const i_pImage, uint64_t * o_inCompVector )
+{
+    StopReturnCode_t l_rc       =   STOP_SAVE_SUCCESS;
+    uint64_t l_incompVector     =   0;
+    uint32_t l_tempWord         =   0;
+    *o_inCompVector             =   0;
+
+    do
+    {
+        if( !i_pImage )
+        {
+            l_rc    =   STOP_SAVE_ARG_INVALID_IMG;
+            break;
+        }
+
+        l_tempWord      =
+                *(uint32_t*)((uint8_t*)i_pImage + CPMR_HOMER_OFFSET + SMF_SUPPORT_SIGNATURE_OFFSET);
+
+        if( l_tempWord != SWIZZLE_4_BYTE(SMF_SELF_SIGNATURE) )
+        {
+            l_incompVector  |=  SMF_SUPPORT_MISSING_IN_HOMER;
+        }
+
+        l_tempWord      =   *(uint32_t *)((uint8_t *)i_pImage + CPMR_HOMER_OFFSET + CPMR_HEADER_SIZE );
+
+        if( l_tempWord != SWIZZLE_4_BYTE(BRANCH_BE_INST) )
+        {
+            l_incompVector  |=  SELF_SUPPORT_MISSING_FOR_LE_HYP;
+        }
+
+        l_tempWord      =   *(uint8_t *)((uint8_t *)i_pImage + CPMR_HOMER_OFFSET + CPMR_SELF_RESTORE_VER_BYTE );
+
+        if( l_tempWord < SELF_SAVE_RESTORE_VER )
+        {
+            l_incompVector  |=  SELF_RESTORE_VER_MISMATCH;
+        }
+
+        l_tempWord      =   *(uint8_t *)((uint8_t *)i_pImage + CPMR_HOMER_OFFSET + CPMR_STOP_API_VER_BYTE );
+
+        if( l_tempWord < STOP_API_CPU_SAVE_VER )
+        {
+            l_incompVector  |=  IPL_RUNTIME_CPU_SAVE_VER_MISMATCH;
+        }
+
+        *o_inCompVector     =   l_incompVector;
+
+        if( l_incompVector )
+        {
+            l_rc    =  STOP_SAVE_API_IMG_INCOMPATIBLE;
+        }
+
+    }while(0);
+
+    return l_rc;
+}
+
+}  //extern "C"
+
 #ifdef __cplusplus
 } //namespace stopImageSection ends
-}  //extern "C"
+
+//-----------------------------------------------------------------------------------------------------
+
 #endif

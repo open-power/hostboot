@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -114,6 +114,7 @@ typedef enum
     STOP_SAVE_FAIL                       =  14,  // for internal failure within firmware.
     STOP_SAVE_SPR_ENTRY_MISSING          =  15,
     STOP_SAVE_SPR_BIT_POS_RESERVE        =  16,
+    STOP_SAVE_API_IMG_INCOMPATIBLE       =  18,
 } StopReturnCode_t;
 
 /**
@@ -197,6 +198,21 @@ typedef enum
     BIT_POS_USPRG0      =   29,
     BIT_POS_USPRG1      =   30,
 } SprBitPositionList_t;
+
+/**
+ * @brief   List of major incompatibilities between API version.
+ * @note    STOP APIs assumes a specific HOMER layout, certain
+ * level of CME-SGPE hcode and certain version of self-save restore
+ * binary. A mismatch can break STOP function.
+ */
+
+typedef enum
+{
+    SMF_SUPPORT_MISSING_IN_HOMER         =   0x01,
+    SELF_SUPPORT_MISSING_FOR_LE_HYP      =   0x02,
+    IPL_RUNTIME_CPU_SAVE_VER_MISMATCH    =   0x04,
+    SELF_RESTORE_VER_MISMATCH            =   0x08,
+} VersionIncompList_t;
 
 
 #ifdef __cplusplus
@@ -340,6 +356,14 @@ StopReturnCode_t proc_stop_save_cpureg(  void* const i_pImage,
  *              There is no explicit effort to support any other use case.
  */
 StopReturnCode_t proc_stop_init_self_save(  void* const i_pImage, const uint32_t i_corePos );
+
+/**
+ * @brief       verifies if API is compatible of current HOMER image.
+ * @param[in]   i_pImage        points to the start of HOMER image of P9 chip.
+ * @param[out]  o_inCompVector  list of incompatibilities found.
+ * @return      STOP_SAVE_SUCCESS if if API succeeds, error code otherwise.
+ */
+StopReturnCode_t proc_stop_api_discover_capability( void* const i_pImage, uint64_t* o_inCompVector );
 
 #ifdef __cplusplus
 } // extern "C"
