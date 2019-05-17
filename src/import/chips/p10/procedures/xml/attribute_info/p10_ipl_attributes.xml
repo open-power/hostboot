@@ -32,9 +32,26 @@
   <enum>
     HB_IPL          = 0x1,
     HB_RUNTIME      = 0x2,
-    CACHE_CONTAINED = 0x4,
-    CHIP_CONTAINED  = 0x8
+    CONTAINED_IPL   = 0x4
   </enum>
+  <default>HB_IPL</default>
+  <writeable/>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CONTAINED_IPL_TYPE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>Indicate if performing a contained system IPL and if so the type
+               of contained IPL.</description>
+  <valueType>uint8</valueType>
+  <enum>
+    NONE  = 0x0,
+    CACHE = 0x1,
+    CHIP  = 0x2
+  </enum>
+  <initToZero/>
   <writeable/>
   <platInit/>
   <mrwHide/>
