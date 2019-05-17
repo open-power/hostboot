@@ -45,7 +45,11 @@
     #define CPMS_CUCR_WO_CLEAR           0xC000E3E0
     #define CPMS_CUCR_WO_OR              0xC000E3F0
 
-    #define CPMS_CGCSR_RW                CPMS_CGCSR_SCOM
+    #define CPMS_PFETDLY_RW              CPMS_PFETDLY
+
+    #define CPMS_CGCSR_RW                CPMS_CGCSR
+
+    #define CPMS_RVCSR_RW                CPMS_RVCSR
 
     #define QME_SCSR_RW                  QME_SCSR_SCOM
     #define QME_SCSR_WO_CLEAR            QME_SCSR_SCOM1
