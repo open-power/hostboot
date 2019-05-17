@@ -34,11 +34,11 @@ namespace c
 
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_CPMS_CL2_PFETSTAT_PPE(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_CPMS_CL2_PFETSTAT(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = CPMS_CL2_PFETSTAT_PPE;
+    scomt::last_scom = CPMS_CL2_PFETSTAT;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -48,14 +48,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_CPMS_CL2_PFETSTAT_PPE(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_CPMS_CL2_PFETSTAT(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = CPMS_CL2_PFETSTAT_PPE;
+    scomt::last_scom = CPMS_CL2_PFETSTAT;
 #endif
-    return fapi2::getScom(i_target, CPMS_CL2_PFETSTAT_PPE, o_data);
+    return fapi2::getScom(i_target, CPMS_CL2_PFETSTAT, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -63,56 +63,13 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_CPMS_CL2_PFETSTAT_PPE(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+static inline fapi2::ReturnCode PUT_CPMS_CL2_PFETSTAT(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
-    return fapi2::putScom(i_target, CPMS_CL2_PFETSTAT_PPE, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_CPMS_CL2_PFETSTAT_RO(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = CPMS_CL2_PFETSTAT_RO;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_CPMS_CL2_PFETSTAT_RO(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = CPMS_CL2_PFETSTAT_RO;
-#endif
-    return fapi2::getScom(i_target, CPMS_CL2_PFETSTAT_RO, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_CPMS_CL2_PFETSTAT_RO(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
-#endif
-    return fapi2::putScom(i_target, CPMS_CL2_PFETSTAT_RO, i_data);
+    return fapi2::putScom(i_target, CPMS_CL2_PFETSTAT, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -124,7 +81,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CL2_PFETSTAT_VDD_PFETS_ENABLED_S
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return o_data.insertFromRight<CPMS_CL2_PFETSTAT_VDD_PFETS_ENABLED_SENSE,
            1>(i_data);
@@ -139,7 +96,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CL2_PFETSTAT_VDD_PFETS_ENABLED_S
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return o_data.insertFromRight<CPMS_CL2_PFETSTAT_VDD_PFETS_ENABLED_SENSE,
            1>(i_data);
@@ -153,7 +110,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_CL2_PFETSTAT_VDD_PFETS_ENABLED_SENSE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return o_data.setBit<CPMS_CL2_PFETSTAT_VDD_PFETS_ENABLED_SENSE>();
 #ifdef SCOM_CHECKING
@@ -166,7 +123,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_CL2_PFETSTAT_VDD_PFETS_ENABLED_SENSE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return o_data.clearBit<CPMS_CL2_PFETSTAT_VDD_PFETS_ENABLED_SENSE>();
 #ifdef SCOM_CHECKING
@@ -180,7 +137,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CL2_PFETSTAT_VDD_PFETS_ENABLED_S
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return i_data.extractToRight<CPMS_CL2_PFETSTAT_VDD_PFETS_ENABLED_SENSE,
            1>(o_data);
@@ -194,7 +151,7 @@ fapi_try_exit:
 static inline bool GET_CPMS_CL2_PFETSTAT_VDD_PFETS_ENABLED_SENSE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return i_data.getBit<CPMS_CL2_PFETSTAT_VDD_PFETS_ENABLED_SENSE>();
 #ifdef SCOM_CHECKING
@@ -208,7 +165,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CL2_PFETSTAT_VDD_PFETS_DISABLED_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return o_data.insertFromRight<CPMS_CL2_PFETSTAT_VDD_PFETS_DISABLED_SENSE,
            1>(i_data);
@@ -223,7 +180,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CL2_PFETSTAT_VDD_PFETS_DISABLED_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return o_data.insertFromRight<CPMS_CL2_PFETSTAT_VDD_PFETS_DISABLED_SENSE,
            1>(i_data);
@@ -237,7 +194,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_CL2_PFETSTAT_VDD_PFETS_DISABLED_SENSE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return o_data.setBit<CPMS_CL2_PFETSTAT_VDD_PFETS_DISABLED_SENSE>();
 #ifdef SCOM_CHECKING
@@ -250,7 +207,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_CL2_PFETSTAT_VDD_PFETS_DISABLED_SENSE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return o_data.clearBit<CPMS_CL2_PFETSTAT_VDD_PFETS_DISABLED_SENSE>();
 #ifdef SCOM_CHECKING
@@ -264,7 +221,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CL2_PFETSTAT_VDD_PFETS_DISABLED_
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return i_data.extractToRight<CPMS_CL2_PFETSTAT_VDD_PFETS_DISABLED_SENSE,
            1>(o_data);
@@ -278,7 +235,7 @@ fapi_try_exit:
 static inline bool GET_CPMS_CL2_PFETSTAT_VDD_PFETS_DISABLED_SENSE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return i_data.getBit<CPMS_CL2_PFETSTAT_VDD_PFETS_DISABLED_SENSE>();
 #ifdef SCOM_CHECKING
@@ -292,7 +249,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CL2_PFETSTAT_VCS_PFETS_ENABLED_S
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return o_data.insertFromRight<CPMS_CL2_PFETSTAT_VCS_PFETS_ENABLED_SENSE,
            1>(i_data);
@@ -307,7 +264,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CL2_PFETSTAT_VCS_PFETS_ENABLED_S
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return o_data.insertFromRight<CPMS_CL2_PFETSTAT_VCS_PFETS_ENABLED_SENSE,
            1>(i_data);
@@ -321,7 +278,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_CL2_PFETSTAT_VCS_PFETS_ENABLED_SENSE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return o_data.setBit<CPMS_CL2_PFETSTAT_VCS_PFETS_ENABLED_SENSE>();
 #ifdef SCOM_CHECKING
@@ -334,7 +291,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_CL2_PFETSTAT_VCS_PFETS_ENABLED_SENSE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return o_data.clearBit<CPMS_CL2_PFETSTAT_VCS_PFETS_ENABLED_SENSE>();
 #ifdef SCOM_CHECKING
@@ -348,7 +305,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CL2_PFETSTAT_VCS_PFETS_ENABLED_S
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return i_data.extractToRight<CPMS_CL2_PFETSTAT_VCS_PFETS_ENABLED_SENSE,
            1>(o_data);
@@ -362,7 +319,7 @@ fapi_try_exit:
 static inline bool GET_CPMS_CL2_PFETSTAT_VCS_PFETS_ENABLED_SENSE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return i_data.getBit<CPMS_CL2_PFETSTAT_VCS_PFETS_ENABLED_SENSE>();
 #ifdef SCOM_CHECKING
@@ -376,7 +333,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CL2_PFETSTAT_VCS_PFETS_DISABLED_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return o_data.insertFromRight<CPMS_CL2_PFETSTAT_VCS_PFETS_DISABLED_SENSE,
            1>(i_data);
@@ -391,7 +348,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CL2_PFETSTAT_VCS_PFETS_DISABLED_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return o_data.insertFromRight<CPMS_CL2_PFETSTAT_VCS_PFETS_DISABLED_SENSE,
            1>(i_data);
@@ -405,7 +362,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_CL2_PFETSTAT_VCS_PFETS_DISABLED_SENSE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return o_data.setBit<CPMS_CL2_PFETSTAT_VCS_PFETS_DISABLED_SENSE>();
 #ifdef SCOM_CHECKING
@@ -418,7 +375,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_CL2_PFETSTAT_VCS_PFETS_DISABLED_SENSE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return o_data.clearBit<CPMS_CL2_PFETSTAT_VCS_PFETS_DISABLED_SENSE>();
 #ifdef SCOM_CHECKING
@@ -432,7 +389,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CL2_PFETSTAT_VCS_PFETS_DISABLED_
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return i_data.extractToRight<CPMS_CL2_PFETSTAT_VCS_PFETS_DISABLED_SENSE,
            1>(o_data);
@@ -446,7 +403,7 @@ fapi_try_exit:
 static inline bool GET_CPMS_CL2_PFETSTAT_VCS_PFETS_DISABLED_SENSE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return i_data.getBit<CPMS_CL2_PFETSTAT_VCS_PFETS_DISABLED_SENSE>();
 #ifdef SCOM_CHECKING
@@ -460,7 +417,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CL2_PFETSTAT_VDD_PFET_ENABLE_ACT
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return o_data.insertFromRight<CPMS_CL2_PFETSTAT_VDD_PFET_ENABLE_ACTUAL,
            CPMS_CL2_PFETSTAT_VDD_PFET_ENABLE_ACTUAL_LEN>(i_data);
@@ -475,7 +432,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CL2_PFETSTAT_VDD_PFET_ENABLE_ACT
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return o_data.insertFromRight<CPMS_CL2_PFETSTAT_VDD_PFET_ENABLE_ACTUAL,
            CPMS_CL2_PFETSTAT_VDD_PFET_ENABLE_ACTUAL_LEN>(i_data);
@@ -490,7 +447,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CL2_PFETSTAT_VDD_PFET_ENABLE_ACT
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return i_data.extractToRight<CPMS_CL2_PFETSTAT_VDD_PFET_ENABLE_ACTUAL,
            CPMS_CL2_PFETSTAT_VDD_PFET_ENABLE_ACTUAL_LEN>(o_data);
@@ -505,7 +462,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CL2_PFETSTAT_VCS_PFET_ENABLE_ACT
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return o_data.insertFromRight<CPMS_CL2_PFETSTAT_VCS_PFET_ENABLE_ACTUAL,
            CPMS_CL2_PFETSTAT_VCS_PFET_ENABLE_ACTUAL_LEN>(i_data);
@@ -520,7 +477,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CL2_PFETSTAT_VCS_PFET_ENABLE_ACT
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return o_data.insertFromRight<CPMS_CL2_PFETSTAT_VCS_PFET_ENABLE_ACTUAL,
            CPMS_CL2_PFETSTAT_VCS_PFET_ENABLE_ACTUAL_LEN>(i_data);
@@ -535,7 +492,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CL2_PFETSTAT_VCS_PFET_ENABLE_ACT
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return i_data.extractToRight<CPMS_CL2_PFETSTAT_VCS_PFET_ENABLE_ACTUAL,
            CPMS_CL2_PFETSTAT_VCS_PFET_ENABLE_ACTUAL_LEN>(o_data);
@@ -550,7 +507,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CL2_PFETSTAT_SRAM_ENABLE_ACTUAL(
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return o_data.insertFromRight<CPMS_CL2_PFETSTAT_SRAM_ENABLE_ACTUAL,
            1>(i_data);
@@ -565,7 +522,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CL2_PFETSTAT_SRAM_ENABLE_ACTUAL(
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return o_data.insertFromRight<CPMS_CL2_PFETSTAT_SRAM_ENABLE_ACTUAL,
            1>(i_data);
@@ -579,7 +536,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_CL2_PFETSTAT_SRAM_ENABLE_ACTUAL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return o_data.setBit<CPMS_CL2_PFETSTAT_SRAM_ENABLE_ACTUAL>();
 #ifdef SCOM_CHECKING
@@ -592,7 +549,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_CL2_PFETSTAT_SRAM_ENABLE_ACTUAL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return o_data.clearBit<CPMS_CL2_PFETSTAT_SRAM_ENABLE_ACTUAL>();
 #ifdef SCOM_CHECKING
@@ -606,7 +563,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CL2_PFETSTAT_SRAM_ENABLE_ACTUAL(
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return i_data.extractToRight<CPMS_CL2_PFETSTAT_SRAM_ENABLE_ACTUAL,
            1>(o_data);
@@ -620,7 +577,7 @@ fapi_try_exit:
 static inline bool GET_CPMS_CL2_PFETSTAT_SRAM_ENABLE_ACTUAL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT_PPE, CPMS_CL2_PFETSTAT_RO));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
     return i_data.getBit<CPMS_CL2_PFETSTAT_SRAM_ENABLE_ACTUAL>();
 #ifdef SCOM_CHECKING

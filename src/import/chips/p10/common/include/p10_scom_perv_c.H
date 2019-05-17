@@ -150,9 +150,9 @@ static const uint32_t EPS_PSC_WRITE_PROTECT_ENABLE_REG_RESERVED_RING_LOCKING = 1
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
+static const uint32_t FSXCOMP_FSXLOG_CBS_CS = 0x00050001ull;
 static const uint32_t FSXCOMP_FSXLOG_CBS_CS_FSI = 0x00002801ull;
 static const uint32_t FSXCOMP_FSXLOG_CBS_CS_FSI_BYTE = 0x00002804ull;
-static const uint32_t FSXCOMP_FSXLOG_CBS_CS_SCOM = 0x00050001ull;
 
 static const uint32_t FSXCOMP_FSXLOG_CBS_CS_START_BOOT_SEQUENCER = 0;
 static const uint32_t FSXCOMP_FSXLOG_CBS_CS_OPTION_SKIP_SCAN0_CLOCKSTART = 2;
@@ -211,9 +211,9 @@ static const uint32_t FSXCOMP_FSXLOG_CBS_TRANS_DELAY_LEN = 10;
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
+static const uint32_t FSXCOMP_FSXLOG_CBS_HIST = 0x00050005ull;
 static const uint32_t FSXCOMP_FSXLOG_CBS_HIST_FSI = 0x00002805ull;
 static const uint32_t FSXCOMP_FSXLOG_CBS_HIST_FSI_BYTE = 0x00002814ull;
-static const uint32_t FSXCOMP_FSXLOG_CBS_HIST_SCOM = 0x00050005ull;
 // perv/reg00017.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.

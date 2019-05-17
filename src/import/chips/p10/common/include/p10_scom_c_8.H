@@ -35,8 +35,7 @@ namespace c
 {
 
 
-static const uint64_t CPMS_CL2_PFETSTAT_PPE = 0x00000006c001e2c0ull;
-static const uint64_t CPMS_CL2_PFETSTAT_RO = 0x200e0e2cull;
+static const uint64_t CPMS_CL2_PFETSTAT = 0x200e0e2cull;
 
 static const uint32_t CPMS_CL2_PFETSTAT_VDD_PFETS_ENABLED_SENSE = 0;
 static const uint32_t CPMS_CL2_PFETSTAT_VDD_PFETS_DISABLED_SENSE = 1;

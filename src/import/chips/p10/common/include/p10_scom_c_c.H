@@ -35,10 +35,7 @@ namespace c
 {
 
 
-static const uint64_t CPMS_CGCSR_PPE = 0x00000006c001e000ull;
-static const uint64_t CPMS_CGCSR_PPE1 = 0x00000006c001e020ull;
-static const uint64_t CPMS_CGCSR_PPE2 = 0x00000006c001e030ull;
-static const uint64_t CPMS_CGCSR_SCOM = 0x200e0e00ull;
+static const uint64_t CPMS_CGCSR = 0x200e0e00ull;
 static const uint64_t CPMS_CGCSR_WO_CLEAR = 0x200e0e02ull;
 static const uint64_t CPMS_CGCSR_WO_OR = 0x200e0e03ull;
 

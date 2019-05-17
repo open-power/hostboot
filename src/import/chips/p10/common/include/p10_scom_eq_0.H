@@ -444,10 +444,7 @@ static const uint32_t OPCG_ALIGN_OPCG_WAIT_CYCLES = 52;
 static const uint32_t OPCG_ALIGN_OPCG_WAIT_CYCLES_LEN = 12;
 // eq/reg00000.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_BCECSR_PPE = 0x00000006c0000680ull;
-static const uint64_t QME_BCECSR_SCOM = 0x200e0068ull;
+static const uint64_t QME_BCECSR = 0x200e0068ull;
 
 static const uint32_t QME_BCECSR_BUSY = 0;
 static const uint32_t QME_BCECSR_ERROR = 1;
@@ -465,10 +462,7 @@ static const uint32_t QME_BCECSR_MBASE = 42;
 static const uint32_t QME_BCECSR_MBASE_LEN = 22;
 // eq/reg00000.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_PSREQ_PPE = 0x00000006c0001300ull;
-static const uint64_t QME_PSREQ_SCOM = 0x200e0130ull;
+static const uint64_t QME_PSREQ = 0x200e0130ull;
 
 static const uint32_t QME_PSREQ_CORE_PARTIAL_GOOD = 48;
 static const uint32_t QME_PSREQ_CORE_PARTIAL_GOOD_LEN = 4;
@@ -476,10 +470,7 @@ static const uint32_t QME_PSREQ_AUTO_PMCR_UPDATE = 52;
 static const uint32_t QME_PSREQ_PMCR_RECENT_MODE = 53;
 // eq/reg00000.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_RCOCR_PPE = 0x00000006c00017c0ull;
-static const uint64_t QME_RCOCR_SCOM = 0x200e017cull;
+static const uint64_t QME_RCOCR = 0x200e017cull;
 
 static const uint32_t QME_RCOCR_0_RESCLK_CONTROL = 0;
 static const uint32_t QME_RCOCR_0_RESCLK_CONTROL_LEN = 8;
@@ -499,19 +490,13 @@ static const uint32_t QME_RCOCR_3_RESCLK_ACTUAL = 56;
 static const uint32_t QME_RCOCR_3_RESCLK_ACTUAL_LEN = 8;
 // eq/reg00000.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_RCTAR3_PPE = 0x00000006c00019c0ull;
-static const uint64_t QME_RCTAR3_RW = 0x200e019cull;
+static const uint64_t QME_RCTAR3 = 0x200e019cull;
 
 static const uint32_t QME_RCTAR3_QME_RCTAR3_DATA = 0;
 static const uint32_t QME_RCTAR3_QME_RCTAR3_DATA_LEN = 64;
 // eq/reg00000.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_RS4CSR_PPE = 0x00000006c0001680ull;
-static const uint64_t QME_RS4CSR_SCOM = 0x200e0168ull;
+static const uint64_t QME_RS4CSR = 0x200e0168ull;
 
 static const uint32_t QME_RS4CSR_BUSY = 0;
 static const uint32_t QME_RS4CSR_ERROR = 1;
@@ -526,10 +511,7 @@ static const uint32_t QME_RS4CSR_BAD_SCOM_RC = 13;
 static const uint32_t QME_RS4CSR_BAD_SCOM_RC_LEN = 3;
 // eq/reg00000.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_SCOM_PBTXTR2_PPE = 0x00000006c0000420ull;
-static const uint64_t QME_SCOM_PBTXTR2_RW = 0x200e0042ull;
+static const uint64_t QME_SCOM_PBTXTR2 = 0x200e0042ull;
 
 static const uint32_t QME_SCOM_PBTXTR2__VALID = 0;
 static const uint32_t QME_SCOM_PBTXTR2__VALID_LEN = 8;
@@ -551,10 +533,7 @@ static const uint32_t QME_SCOM_PBTXTR2_7 = 36;
 static const uint32_t QME_SCOM_PBTXTR2_7_LEN = 4;
 // eq/reg00000.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_SCOM_XIVDRX_PPE = 0x00000006c0002940ull;
-static const uint64_t QME_SCOM_XIVDRX_RO = 0x200e0294ull;
+static const uint64_t QME_SCOM_XIVDRX = 0x200e0294ull;
 
 static const uint32_t QME_SCOM_XIVDRX_0 = 0;
 static const uint32_t QME_SCOM_XIVDRX_0_LEN = 32;

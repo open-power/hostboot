@@ -273,10 +273,7 @@ static const uint32_t PHASE_COUNTER_RESET_PHASECOUNTER_RESET = 0;
 static const uint64_t PLL_LOCK_REG = 0x200f0019ull;
 // eq/reg00003.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_DB1_PPE = 0x00000006c0001040ull;
-static const uint64_t QME_DB1_RW = 0x200e0104ull;
+static const uint64_t QME_DB1 = 0x200e0104ull;
 
 static const uint32_t QME_DB1_NUMBER = 0;
 static const uint32_t QME_DB1_NUMBER_LEN = 8;
@@ -284,16 +281,10 @@ static const uint32_t QME_DB1_DATA = 8;
 static const uint32_t QME_DB1_DATA_LEN = 56;
 // eq/reg00003.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_PCBSID_PPE = 0x00000006c0000340ull;
-static const uint64_t QME_PCBSID_RO = 0x200e0034ull;
+static const uint64_t QME_PCBSID = 0x200e0034ull;
 // eq/reg00003.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_RS4DBGS_PPE = 0x00000006c00015c0ull;
-static const uint64_t QME_RS4DBGS_RO = 0x200e015cull;
+static const uint64_t QME_RS4DBGS = 0x200e015cull;
 
 static const uint32_t QME_RS4DBGS_ACTUAL_BITS = 16;
 static const uint32_t QME_RS4DBGS_ACTUAL_BITS_LEN = 16;
@@ -312,10 +303,7 @@ static const uint32_t QME_RS4DBGS_SCAN_COUNT = 58;
 static const uint32_t QME_RS4DBGS_SCAN_COUNT_LEN = 6;
 // eq/reg00003.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_SCOM_XIVDR4_PPE = 0x00000006c0002880ull;
-static const uint64_t QME_SCOM_XIVDR4_RO = 0x200e0288ull;
+static const uint64_t QME_SCOM_XIVDR4 = 0x200e0288ull;
 
 static const uint32_t QME_SCOM_XIVDR4_4 = 0;
 static const uint32_t QME_SCOM_XIVDR4_4_LEN = 32;
@@ -323,10 +311,7 @@ static const uint32_t QME_SCOM_XIVDR4_5 = 32;
 static const uint32_t QME_SCOM_XIVDR4_5_LEN = 32;
 // eq/reg00003.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_SCOM_XIXCR_PPE = 0x00000006c0002000ull;
-static const uint64_t QME_SCOM_XIXCR_RO = 0x200e0200ull;
+static const uint64_t QME_SCOM_XIXCR = 0x200e0200ull;
 
 static const uint32_t QME_SCOM_XIXCR_QME_SCOM_XIXCR_CTR = 32;
 static const uint32_t QME_SCOM_XIXCR_QME_SCOM_XIXCR_CTR_LEN = 32;

@@ -203,26 +203,15 @@ static const uint32_t PROTECT_MODE_REG_READ_PROTECT_ENABLE = 0;
 static const uint32_t PROTECT_MODE_REG_WRITE_PROTECT_ENABLE = 1;
 // eq/reg00015.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_PBCR_PPE = 0x00000006c0000440ull;
-static const uint64_t QME_PBCR_PPE1 = 0x00000006c0000470ull;
-static const uint64_t QME_PBCR_PPE2 = 0x00000006c0000460ull;
 static const uint64_t QME_PBCR_RW = 0x200e0044ull;
 static const uint64_t QME_PBCR_WO_CLEAR = 0x200e0047ull;
 static const uint64_t QME_PBCR_WO_OR = 0x200e0046ull;
 // eq/reg00015.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_QSAR_PPE = 0x00000006c0000740ull;
-static const uint64_t QME_QSAR_SCOM = 0x200e0074ull;
+static const uint64_t QME_QSAR = 0x200e0074ull;
 // eq/reg00015.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_SCOM_XIVDR6_PPE = 0x00000006c00028c0ull;
-static const uint64_t QME_SCOM_XIVDR6_RO = 0x200e028cull;
+static const uint64_t QME_SCOM_XIVDR6 = 0x200e028cull;
 
 static const uint32_t QME_SCOM_XIVDR6_6 = 0;
 static const uint32_t QME_SCOM_XIVDR6_6_LEN = 32;

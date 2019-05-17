@@ -3203,11 +3203,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_QME_CDBB_PPE(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_QME_CDBB(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = QME_CDBB_PPE;
+    scomt::last_scom = QME_CDBB;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -3217,14 +3217,13 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_QME_CDBB_PPE(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::ReturnCode GET_QME_CDBB(const fapi2::Target<K, M, V>& i_target, fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = QME_CDBB_PPE;
+    scomt::last_scom = QME_CDBB;
 #endif
-    return fapi2::getScom(i_target, QME_CDBB_PPE, o_data);
+    return fapi2::getScom(i_target, QME_CDBB, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -3232,55 +3231,13 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_QME_CDBB_PPE(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+static inline fapi2::ReturnCode PUT_QME_CDBB(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(QME_CDBB_PPE, QME_CDBB_RW));
+    FAPI_TRY(scomt::chkReg(QME_CDBB));
 #endif
-    return fapi2::putScom(i_target, QME_CDBB_PPE, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_QME_CDBB_RW(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = QME_CDBB_RW;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_QME_CDBB_RW(const fapi2::Target<K, M, V>& i_target, fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = QME_CDBB_RW;
-#endif
-    return fapi2::getScom(i_target, QME_CDBB_RW, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_QME_CDBB_RW(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(QME_CDBB_PPE, QME_CDBB_RW));
-#endif
-    return fapi2::putScom(i_target, QME_CDBB_RW, i_data);
+    return fapi2::putScom(i_target, QME_CDBB, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -3292,7 +3249,7 @@ static inline fapi2::buffer<uint64_t>& SET_QME_CDBB_QME_CDBB_MESSAGE_NUMBER(fapi
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(QME_CDBB_PPE, QME_CDBB_RW));
+    FAPI_TRY(scomt::chkReg(QME_CDBB));
 #endif
     return o_data.insertFromRight<QME_CDBB_QME_CDBB_MESSAGE_NUMBER,
            QME_CDBB_QME_CDBB_MESSAGE_NUMBER_LEN>(i_data);
@@ -3307,7 +3264,7 @@ static inline fapi2::buffer<uint64_t>& SET_QME_CDBB_QME_CDBB_MESSAGE_NUMBER(cons
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(QME_CDBB_PPE, QME_CDBB_RW));
+    FAPI_TRY(scomt::chkReg(QME_CDBB));
 #endif
     return o_data.insertFromRight<QME_CDBB_QME_CDBB_MESSAGE_NUMBER,
            QME_CDBB_QME_CDBB_MESSAGE_NUMBER_LEN>(i_data);
@@ -3322,7 +3279,7 @@ static inline fapi2::buffer<uint64_t>& GET_QME_CDBB_QME_CDBB_MESSAGE_NUMBER(fapi
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(QME_CDBB_PPE, QME_CDBB_RW));
+    FAPI_TRY(scomt::chkReg(QME_CDBB));
 #endif
     return i_data.extractToRight<QME_CDBB_QME_CDBB_MESSAGE_NUMBER,
            QME_CDBB_QME_CDBB_MESSAGE_NUMBER_LEN>(o_data);

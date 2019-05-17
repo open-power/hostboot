@@ -8192,135 +8192,6 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_QME_PBCR_PPE(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = QME_PBCR_PPE;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_QME_PBCR_PPE(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = QME_PBCR_PPE;
-#endif
-    return fapi2::getScom(i_target, QME_PBCR_PPE, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_QME_PBCR_PPE(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(QME_PBCR_PPE, QME_PBCR_PPE1, QME_PBCR_PPE2, QME_PBCR_RW, QME_PBCR_WO_CLEAR, QME_PBCR_WO_OR));
-#endif
-    return fapi2::putScom(i_target, QME_PBCR_PPE, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_QME_PBCR_PPE1(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = QME_PBCR_PPE1;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_QME_PBCR_PPE1(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = QME_PBCR_PPE1;
-#endif
-    return fapi2::getScom(i_target, QME_PBCR_PPE1, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_QME_PBCR_PPE1(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(QME_PBCR_PPE, QME_PBCR_PPE1, QME_PBCR_PPE2, QME_PBCR_RW, QME_PBCR_WO_CLEAR, QME_PBCR_WO_OR));
-#endif
-    return fapi2::putScom(i_target, QME_PBCR_PPE1, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_QME_PBCR_PPE2(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = QME_PBCR_PPE2;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_QME_PBCR_PPE2(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = QME_PBCR_PPE2;
-#endif
-    return fapi2::getScom(i_target, QME_PBCR_PPE2, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_QME_PBCR_PPE2(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(QME_PBCR_PPE, QME_PBCR_PPE1, QME_PBCR_PPE2, QME_PBCR_RW, QME_PBCR_WO_CLEAR, QME_PBCR_WO_OR));
-#endif
-    return fapi2::putScom(i_target, QME_PBCR_PPE2, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_QME_PBCR_RW(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
@@ -8353,7 +8224,7 @@ static inline fapi2::ReturnCode PUT_QME_PBCR_RW(const fapi2::Target<K, M, V>& i_
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(QME_PBCR_PPE, QME_PBCR_PPE1, QME_PBCR_PPE2, QME_PBCR_RW, QME_PBCR_WO_CLEAR, QME_PBCR_WO_OR));
+    FAPI_TRY(scomt::chkReg(QME_PBCR_RW, QME_PBCR_WO_CLEAR, QME_PBCR_WO_OR));
 #endif
     return fapi2::putScom(i_target, QME_PBCR_RW, i_data);
 #ifdef SCOM_CHECKING
@@ -8396,7 +8267,7 @@ static inline fapi2::ReturnCode PUT_QME_PBCR_WO_CLEAR(const fapi2::Target<K, M, 
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(QME_PBCR_PPE, QME_PBCR_PPE1, QME_PBCR_PPE2, QME_PBCR_RW, QME_PBCR_WO_CLEAR, QME_PBCR_WO_OR));
+    FAPI_TRY(scomt::chkReg(QME_PBCR_RW, QME_PBCR_WO_CLEAR, QME_PBCR_WO_OR));
 #endif
     return fapi2::putScom(i_target, QME_PBCR_WO_CLEAR, i_data);
 #ifdef SCOM_CHECKING
@@ -8439,7 +8310,7 @@ static inline fapi2::ReturnCode PUT_QME_PBCR_WO_OR(const fapi2::Target<K, M, V>&
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(QME_PBCR_PPE, QME_PBCR_PPE1, QME_PBCR_PPE2, QME_PBCR_RW, QME_PBCR_WO_CLEAR, QME_PBCR_WO_OR));
+    FAPI_TRY(scomt::chkReg(QME_PBCR_RW, QME_PBCR_WO_CLEAR, QME_PBCR_WO_OR));
 #endif
     return fapi2::putScom(i_target, QME_PBCR_WO_OR, i_data);
 #ifdef SCOM_CHECKING
@@ -8450,11 +8321,11 @@ fapi_try_exit:
 
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_QME_QSAR_PPE(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_QME_QSAR(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = QME_QSAR_PPE;
+    scomt::last_scom = QME_QSAR;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -8464,14 +8335,57 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_QME_QSAR_PPE(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_QME_QSAR(const fapi2::Target<K, M, V>& i_target, fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = QME_QSAR;
+#endif
+    return fapi2::getScom(i_target, QME_QSAR, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_QME_QSAR(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(QME_QSAR));
+#endif
+    return fapi2::putScom(i_target, QME_QSAR, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_QME_SCOM_XIVDR6(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = QME_SCOM_XIVDR6;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_QME_SCOM_XIVDR6(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = QME_QSAR_PPE;
+    scomt::last_scom = QME_SCOM_XIVDR6;
 #endif
-    return fapi2::getScom(i_target, QME_QSAR_PPE, o_data);
+    return fapi2::getScom(i_target, QME_SCOM_XIVDR6, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -8479,143 +8393,13 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_QME_QSAR_PPE(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+static inline fapi2::ReturnCode PUT_QME_SCOM_XIVDR6(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(QME_QSAR_PPE, QME_QSAR_SCOM));
+    FAPI_TRY(scomt::chkReg(QME_SCOM_XIVDR6));
 #endif
-    return fapi2::putScom(i_target, QME_QSAR_PPE, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_QME_QSAR_SCOM(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = QME_QSAR_SCOM;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_QME_QSAR_SCOM(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = QME_QSAR_SCOM;
-#endif
-    return fapi2::getScom(i_target, QME_QSAR_SCOM, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_QME_QSAR_SCOM(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(QME_QSAR_PPE, QME_QSAR_SCOM));
-#endif
-    return fapi2::putScom(i_target, QME_QSAR_SCOM, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_QME_SCOM_XIVDR6_PPE(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = QME_SCOM_XIVDR6_PPE;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_QME_SCOM_XIVDR6_PPE(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = QME_SCOM_XIVDR6_PPE;
-#endif
-    return fapi2::getScom(i_target, QME_SCOM_XIVDR6_PPE, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_QME_SCOM_XIVDR6_PPE(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(QME_SCOM_XIVDR6_PPE, QME_SCOM_XIVDR6_RO));
-#endif
-    return fapi2::putScom(i_target, QME_SCOM_XIVDR6_PPE, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_QME_SCOM_XIVDR6_RO(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = QME_SCOM_XIVDR6_RO;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_QME_SCOM_XIVDR6_RO(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = QME_SCOM_XIVDR6_RO;
-#endif
-    return fapi2::getScom(i_target, QME_SCOM_XIVDR6_RO, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_QME_SCOM_XIVDR6_RO(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(QME_SCOM_XIVDR6_PPE, QME_SCOM_XIVDR6_RO));
-#endif
-    return fapi2::putScom(i_target, QME_SCOM_XIVDR6_RO, i_data);
+    return fapi2::putScom(i_target, QME_SCOM_XIVDR6, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -8627,7 +8411,7 @@ static inline fapi2::buffer<uint64_t>& SET_QME_SCOM_XIVDR6_6(fapi2::buffer<uint6
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(QME_SCOM_XIVDR6_PPE, QME_SCOM_XIVDR6_RO));
+    FAPI_TRY(scomt::chkReg(QME_SCOM_XIVDR6));
 #endif
     return o_data.insertFromRight<QME_SCOM_XIVDR6_6,
            QME_SCOM_XIVDR6_6_LEN>(i_data);
@@ -8642,7 +8426,7 @@ static inline fapi2::buffer<uint64_t>& SET_QME_SCOM_XIVDR6_6(const uint64_t i_da
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(QME_SCOM_XIVDR6_PPE, QME_SCOM_XIVDR6_RO));
+    FAPI_TRY(scomt::chkReg(QME_SCOM_XIVDR6));
 #endif
     return o_data.insertFromRight<QME_SCOM_XIVDR6_6,
            QME_SCOM_XIVDR6_6_LEN>(i_data);
@@ -8657,7 +8441,7 @@ static inline fapi2::buffer<uint64_t>& GET_QME_SCOM_XIVDR6_6(fapi2::buffer<uint6
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(QME_SCOM_XIVDR6_PPE, QME_SCOM_XIVDR6_RO));
+    FAPI_TRY(scomt::chkReg(QME_SCOM_XIVDR6));
 #endif
     return i_data.extractToRight<QME_SCOM_XIVDR6_6,
            QME_SCOM_XIVDR6_6_LEN>(o_data);
@@ -8672,7 +8456,7 @@ static inline fapi2::buffer<uint64_t>& SET_QME_SCOM_XIVDR6_7(fapi2::buffer<uint6
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(QME_SCOM_XIVDR6_PPE, QME_SCOM_XIVDR6_RO));
+    FAPI_TRY(scomt::chkReg(QME_SCOM_XIVDR6));
 #endif
     return o_data.insertFromRight<QME_SCOM_XIVDR6_7,
            QME_SCOM_XIVDR6_7_LEN>(i_data);
@@ -8687,7 +8471,7 @@ static inline fapi2::buffer<uint64_t>& SET_QME_SCOM_XIVDR6_7(const uint64_t i_da
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(QME_SCOM_XIVDR6_PPE, QME_SCOM_XIVDR6_RO));
+    FAPI_TRY(scomt::chkReg(QME_SCOM_XIVDR6));
 #endif
     return o_data.insertFromRight<QME_SCOM_XIVDR6_7,
            QME_SCOM_XIVDR6_7_LEN>(i_data);
@@ -8702,7 +8486,7 @@ static inline fapi2::buffer<uint64_t>& GET_QME_SCOM_XIVDR6_7(fapi2::buffer<uint6
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(QME_SCOM_XIVDR6_PPE, QME_SCOM_XIVDR6_RO));
+    FAPI_TRY(scomt::chkReg(QME_SCOM_XIVDR6));
 #endif
     return i_data.extractToRight<QME_SCOM_XIVDR6_7,
            QME_SCOM_XIVDR6_7_LEN>(o_data);

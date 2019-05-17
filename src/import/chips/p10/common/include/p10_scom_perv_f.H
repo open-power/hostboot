@@ -150,9 +150,9 @@ static const uint32_t EPS_THERM_WSUB2_DTS_RESULT2_DTS_8_RESULT_LEN = 16;
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
+static const uint32_t FSXCOMP_FSXLOG_CBS_EL = 0x00050003ull;
 static const uint32_t FSXCOMP_FSXLOG_CBS_EL_FSI = 0x00002803ull;
 static const uint32_t FSXCOMP_FSXLOG_CBS_EL_FSI_BYTE = 0x0000280cull;
-static const uint32_t FSXCOMP_FSXLOG_CBS_EL_SCOM = 0x00050003ull;
 
 static const uint32_t FSXCOMP_FSXLOG_CBS_EL_ENVSTAT_CHANGE = 0;
 static const uint32_t FSXCOMP_FSXLOG_CBS_EL_ENVSTAT_CHANGE_LEN = 16;

@@ -35,10 +35,7 @@ namespace c
 {
 
 
-static const uint64_t CPMS_CL2_PFETCNTL_PPE = 0x00000006c001e280ull;
-static const uint64_t CPMS_CL2_PFETCNTL_PPE1 = 0x00000006c001e2a0ull;
-static const uint64_t CPMS_CL2_PFETCNTL_PPE2 = 0x00000006c001e2b0ull;
-static const uint64_t CPMS_CL2_PFETCNTL_SCOM = 0x200e0e28ull;
+static const uint64_t CPMS_CL2_PFETCNTL = 0x200e0e28ull;
 static const uint64_t CPMS_CL2_PFETCNTL_WO_CLEAR = 0x200e0e2aull;
 static const uint64_t CPMS_CL2_PFETCNTL_WO_OR = 0x200e0e2bull;
 
@@ -354,15 +351,13 @@ static const uint32_t PSCOM_ERROR_MASK_SATELLITE_ACKNOWLEDGE_ACCESS_VIOLATION = 
 static const uint32_t PSCOM_ERROR_MASK_SATELLITE_ACKNOWLEDGE_INVALID_REGISTER = 17;
 // c/reg00003.H
 
-static const uint64_t QME_CDBA_PPE = 0x00000006c0018000ull;
-static const uint64_t QME_CDBA_RW = 0x200e0800ull;
+static const uint64_t QME_CDBA = 0x200e0800ull;
 
 static const uint32_t QME_CDBA_QME_CDBA_MESSAGE_NUMBER = 0;
 static const uint32_t QME_CDBA_QME_CDBA_MESSAGE_NUMBER_LEN = 8;
 // c/reg00003.H
 
-static const uint64_t QME_CSIR_PPE = 0x00000006c00187c0ull;
-static const uint64_t QME_CSIR_RW = 0x200e087cull;
+static const uint64_t QME_CSIR = 0x200e087cull;
 
 static const uint32_t QME_CSIR_QME_CSIR_DATA = 0;
 static const uint32_t QME_CSIR_QME_CSIR_DATA_LEN = 64;

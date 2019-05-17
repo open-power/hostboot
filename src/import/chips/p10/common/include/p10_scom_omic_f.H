@@ -122,9 +122,9 @@ static const uint32_t DATASM_REGS_RX_SPARE_MODE_PG_6 = 54;
 static const uint32_t DATASM_REGS_RX_SPARE_MODE_PG_7 = 55;
 // omic/reg00015.H
 
-static const uint64_t MC_OMI_FIR_REG_SCOM = 0x0c011740ull;
-static const uint64_t MC_OMI_FIR_REG_SCOM1 = 0x0c011741ull;
-static const uint64_t MC_OMI_FIR_REG_SCOM2 = 0x0c011742ull;
+static const uint64_t MC_OMI_FIR_REG_RW = 0x0c011740ull;
+static const uint64_t MC_OMI_FIR_REG_WO_AND = 0x0c011741ull;
+static const uint64_t MC_OMI_FIR_REG_WO_OR = 0x0c011742ull;
 
 static const uint32_t MC_OMI_FIR_REG_DL0_FATAL_ERROR = 0;
 static const uint32_t MC_OMI_FIR_REG_DL0_DATA_UE = 1;

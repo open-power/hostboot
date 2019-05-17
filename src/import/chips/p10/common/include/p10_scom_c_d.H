@@ -35,8 +35,7 @@ namespace c
 {
 
 
-static const uint64_t CPMS_MMA_PFETSTAT_PPE = 0x00000006c001e340ull;
-static const uint64_t CPMS_MMA_PFETSTAT_RO = 0x200e0e34ull;
+static const uint64_t CPMS_MMA_PFETSTAT = 0x200e0e34ull;
 
 static const uint32_t CPMS_MMA_PFETSTAT_S_ENABLED_SENSE = 0;
 static const uint32_t CPMS_MMA_PFETSTAT_S_DISABLED_SENSE = 1;
@@ -44,8 +43,7 @@ static const uint32_t CPMS_MMA_PFETSTAT__ENABLE_ACTUAL = 16;
 static const uint32_t CPMS_MMA_PFETSTAT__ENABLE_ACTUAL_LEN = 8;
 // c/reg00013.H
 
-static const uint64_t CPMS_PFETDLY_PPE = 0x00000006c001e1c0ull;
-static const uint64_t CPMS_PFETDLY_RW = 0x200e0e1cull;
+static const uint64_t CPMS_PFETDLY = 0x200e0e1cull;
 
 static const uint32_t CPMS_PFETDLY_POWDN_DLY = 0;
 static const uint32_t CPMS_PFETDLY_POWDN_DLY_LEN = 4;
@@ -204,8 +202,7 @@ static const uint32_t PSCOM_MODE_REG_RESERVED_PSCOM_MODE_LT = 9;
 static const uint32_t PSCOM_MODE_REG_RESERVED_PSCOM_MODE_LT_LEN = 3;
 // c/reg00013.H
 
-static const uint64_t QME_PSCRS0_PPE = 0x00000006c0018500ull;
-static const uint64_t QME_PSCRS0_RW = 0x200e0850ull;
+static const uint64_t QME_PSCRS0 = 0x200e0850ull;
 
 static const uint32_t QME_PSCRS0_DPDES_EXIT_ENABLE = 0;
 static const uint32_t QME_PSCRS0_SD = 1;

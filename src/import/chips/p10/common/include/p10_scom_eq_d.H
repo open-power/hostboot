@@ -175,11 +175,6 @@ static const uint32_t OPCG_CAPT1_SEQ_12_LEN = 5;
 static const uint64_t PRIMARY_ADDRESS_REG = 0x200f0000ull;
 // eq/reg00013.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_EIMR_PPE = 0x00000006c0002640ull;
-static const uint64_t QME_EIMR_PPE1 = 0x00000006c0002670ull;
-static const uint64_t QME_EIMR_PPE2 = 0x00000006c0002660ull;
 static const uint64_t QME_EIMR_RW = 0x200e0264ull;
 static const uint64_t QME_EIMR_WO_CLEAR = 0x200e0267ull;
 static const uint64_t QME_EIMR_WO_OR = 0x200e0266ull;
@@ -188,10 +183,7 @@ static const uint32_t QME_EIMR_QME_EIMR_INTERRUPT_MASK = 0;
 static const uint32_t QME_EIMR_QME_EIMR_INTERRUPT_MASK_LEN = 64;
 // eq/reg00013.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_PIG_PPE = 0x00000006c0000300ull;
-static const uint64_t QME_PIG_SCOM = 0x200e0030ull;
+static const uint64_t QME_PIG = 0x200e0030ull;
 
 static const uint32_t QME_PIG_REQ_INTR_TYPE = 1;
 static const uint32_t QME_PIG_REQ_INTR_TYPE_LEN = 4;
@@ -208,22 +200,12 @@ static const uint32_t QME_PIG_GRANTED_PACKET = 40;
 static const uint32_t QME_PIG_GRANTED_PACKET_LEN = 24;
 // eq/reg00013.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_QSCR_PPE = 0x00000006c0000700ull;
-static const uint64_t QME_QSCR_PPE1 = 0x00000006c0000730ull;
-static const uint64_t QME_QSCR_PPE2 = 0x00000006c0000720ull;
 static const uint64_t QME_QSCR_RW = 0x200e0070ull;
 static const uint64_t QME_QSCR_WO_CLEAR = 0x200e0073ull;
 static const uint64_t QME_QSCR_WO_OR = 0x200e0072ull;
 // eq/reg00013.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_RCMR_PPE = 0x00000006c0001800ull;
-static const uint64_t QME_RCMR_PPE1 = 0x00000006c0001830ull;
-static const uint64_t QME_RCMR_PPE2 = 0x00000006c0001820ull;
-static const uint64_t QME_RCMR_SCOM = 0x200e0180ull;
+static const uint64_t QME_RCMR = 0x200e0180ull;
 static const uint64_t QME_RCMR_WO_CLEAR = 0x200e0183ull;
 static const uint64_t QME_RCMR_WO_OR = 0x200e0182ull;
 

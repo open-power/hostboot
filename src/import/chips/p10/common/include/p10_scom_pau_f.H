@@ -623,9 +623,9 @@ static const uint32_t CS_SM3_SNP_MISC_PERF_MATCH_CONFIG_ALLOC = 34;
 static const uint32_t CS_SM3_SNP_MISC_PERF_MATCH_CONFIG_ALLOC_LEN = 6;
 // pau/reg00021.H
 
-static const uint64_t FIR_REG_0_SCOM = 0x10010c00ull;
-static const uint64_t FIR_REG_0_SCOM1 = 0x10010c01ull;
-static const uint64_t FIR_REG_0_SCOM2 = 0x10010c02ull;
+static const uint64_t FIR_REG_0_RW = 0x10010c00ull;
+static const uint64_t FIR_REG_0_WO_AND = 0x10010c01ull;
+static const uint64_t FIR_REG_0_WO_OR = 0x10010c02ull;
 
 static const uint32_t FIR_REG_0_NTL_ARRAY_CE = 0;
 static const uint32_t FIR_REG_0_NTL_ARRAY_HDR_UE = 1;

@@ -668,9 +668,9 @@ static const uint32_t DAT_MISC_DEBUG0_CONFIG_RESERVED1_LEN = 8;
 static const uint32_t DAT_MISC_DEBUG0_CONFIG_ACT = 63;
 // pau/reg00004.H
 
-static const uint64_t FIR_REG_2_SCOM = 0x10010c80ull;
-static const uint64_t FIR_REG_2_SCOM1 = 0x10010c81ull;
-static const uint64_t FIR_REG_2_SCOM2 = 0x10010c82ull;
+static const uint64_t FIR_REG_2_RW = 0x10010c80ull;
+static const uint64_t FIR_REG_2_WO_AND = 0x10010c81ull;
+static const uint64_t FIR_REG_2_WO_OR = 0x10010c82ull;
 
 static const uint32_t FIR_REG_2_OTL_BRK2_XLAT_FAULT = 0;
 static const uint32_t FIR_REG_2_OTL_BRK3_XLAT_FAULT = 1;

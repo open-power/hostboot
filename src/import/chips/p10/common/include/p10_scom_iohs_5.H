@@ -143,6 +143,40 @@ static const uint32_t AXON_TRA0_TR0_CONFIG_5_D = 24;
 static const uint32_t AXON_TRA0_TR0_CONFIG_5_D_LEN = 24;
 // iohs/reg00020.H
 
+static const uint64_t DLP_ERR_INJ_LFSR = 0x1801101bull;
+
+static const uint32_t DLP_ERR_INJ_LFSR_ERR_INJ_LFSR = 0;
+static const uint32_t DLP_ERR_INJ_LFSR_ERR_INJ_LFSR_LEN = 61;
+// iohs/reg00020.H
+
+static const uint64_t DLP_FIR_WOF_REG = 0x18011008ull;
+
+static const uint32_t DLP_FIR_WOF_REG_DLP_FIR_WOF = 0;
+static const uint32_t DLP_FIR_WOF_REG_DLP_FIR_WOF_LEN = 62;
+// iohs/reg00020.H
+
+static const uint64_t DLP_LINK0_INFO = 0x18011014ull;
+
+static const uint32_t DLP_LINK0_INFO_MAX_TIMEOUT = 0;
+static const uint32_t DLP_LINK0_INFO_MAX_TIMEOUT_LEN = 16;
+static const uint32_t DLP_LINK0_INFO_FRAME_CAP_VALID = 16;
+static const uint32_t DLP_LINK0_INFO_FRAME_CAP_INST = 17;
+static const uint32_t DLP_LINK0_INFO_FRAME_CAP_ADDR = 18;
+static const uint32_t DLP_LINK0_INFO_FRAME_CAP_ADDR_LEN = 6;
+static const uint32_t DLP_LINK0_INFO_FRAME_CAP_SYN = 24;
+static const uint32_t DLP_LINK0_INFO_FRAME_CAP_SYN_LEN = 8;
+static const uint32_t DLP_LINK0_INFO_REPLAY_CAP_VALID = 32;
+static const uint32_t DLP_LINK0_INFO_REPLAY_CAP_INST = 33;
+static const uint32_t DLP_LINK0_INFO_REPLAY_CAP_INST_LEN = 2;
+static const uint32_t DLP_LINK0_INFO_REPLAY_CAP_ADDR = 35;
+static const uint32_t DLP_LINK0_INFO_REPLAY_CAP_ADDR_LEN = 9;
+static const uint32_t DLP_LINK0_INFO_REPLAY_CAP_SYN = 44;
+static const uint32_t DLP_LINK0_INFO_REPLAY_CAP_SYN_LEN = 8;
+static const uint32_t DLP_LINK0_INFO_ACK_FIFO_CAP_VALID = 52;
+static const uint32_t DLP_LINK0_INFO_ACK_FIFO_CAP_ADDR = 55;
+static const uint32_t DLP_LINK0_INFO_ACK_FIFO_CAP_ADDR_LEN = 9;
+// iohs/reg00020.H
+
 static const uint64_t IOO_RX0_RXCTL_CTL_REGS_RX_MODE15_PG = 0x8008780010012c3full;
 
 static const uint32_t IOO_RX0_RXCTL_CTL_REGS_RX_MODE15_PG_0 = 48;
@@ -367,7 +401,7 @@ static const uint32_t IOO_RX0_0_RD_2_RX_DAC_REGS_CNTL6_PL_COARSE = 48;
 static const uint32_t IOO_RX0_0_RD_2_RX_DAC_REGS_CNTL6_PL_COARSE_LEN = 6;
 static const uint32_t IOO_RX0_0_RD_2_RX_DAC_REGS_CNTL6_PL_GAIN = 54;
 static const uint32_t IOO_RX0_0_RD_2_RX_DAC_REGS_CNTL6_PL_GAIN_LEN = 4;
-// iohs/reg00020.H
+// iohs/reg00021.H
 
 static const uint64_t IOO_RX0_0_RD_3_RX_BIT_REGS_CNTL3_PL = 0x8003700310012c3full;
 
@@ -383,7 +417,7 @@ static const uint32_t IOO_RX0_0_RD_3_RX_BIT_REGS_CNTL3_PL_ERR_TRAP_MASK = 57;
 static const uint32_t IOO_RX0_0_RD_3_RX_BIT_REGS_CNTL3_PL_ERR_TRAP_MASK_LEN = 4;
 static const uint32_t IOO_RX0_0_RD_3_RX_BIT_REGS_CNTL3_PL_BIAS_COUNTER_AGING_FACTOR = 61;
 static const uint32_t IOO_RX0_0_RD_3_RX_BIT_REGS_CNTL3_PL_BIAS_COUNTER_AGING_FACTOR_LEN = 3;
-// iohs/reg00020.H
+// iohs/reg00021.H
 
 static const uint64_t IOO_RX0_0_RD_3_RX_BIT_REGS_MODE5_PL = 0x8003400310012c3full;
 
@@ -391,7 +425,7 @@ static const uint32_t IOO_RX0_0_RD_3_RX_BIT_REGS_MODE5_PL_FW_INERTIA_AMT_COARSE 
 static const uint32_t IOO_RX0_0_RD_3_RX_BIT_REGS_MODE5_PL_FW_INERTIA_AMT_COARSE_LEN = 4;
 static const uint32_t IOO_RX0_0_RD_3_RX_BIT_REGS_MODE5_PL_PHASE_STEP_COARSE = 56;
 static const uint32_t IOO_RX0_0_RD_3_RX_BIT_REGS_MODE5_PL_PHASE_STEP_COARSE_LEN = 7;
-// iohs/reg00020.H
+// iohs/reg00021.H
 
 static const uint64_t IOO_RX0_0_RD_3_RX_BIT_REGS_STAT3_PL = 0x8003a00310012c3full;
 // iohs/reg00021.H
@@ -715,19 +749,19 @@ static const uint64_t IOO_RX0_1_RD_4_RX_DAC_REGS_LOFF_A_CNTLX21_PL = 0x8000a8101
 
 static const uint32_t IOO_RX0_1_RD_4_RX_DAC_REGS_LOFF_A_CNTLX21_PL_RX_AE_LATCH_DAC_S = 55;
 static const uint32_t IOO_RX0_1_RD_4_RX_DAC_REGS_LOFF_A_CNTLX21_PL_RX_AE_LATCH_DAC_S_LEN = 9;
-// iohs/reg00021.H
+// iohs/reg00022.H
 
 static const uint64_t IOO_RX0_1_RD_4_RX_DAC_REGS_LOFF_A_CNTLX31_PL = 0x8000f81010012c3full;
 
 static const uint32_t IOO_RX0_1_RD_4_RX_DAC_REGS_LOFF_A_CNTLX31_PL_RX_AD_LATCH_DAC_N100 = 55;
 static const uint32_t IOO_RX0_1_RD_4_RX_DAC_REGS_LOFF_A_CNTLX31_PL_RX_AD_LATCH_DAC_N100_LEN = 9;
-// iohs/reg00021.H
+// iohs/reg00022.H
 
 static const uint64_t IOO_RX0_1_RD_4_RX_DAC_REGS_LOFF_A_CNTLX41_PL = 0x8001481010012c3full;
 
 static const uint32_t IOO_RX0_1_RD_4_RX_DAC_REGS_LOFF_A_CNTLX41_PL_RX_AD_LATCH_DAC_E110 = 55;
 static const uint32_t IOO_RX0_1_RD_4_RX_DAC_REGS_LOFF_A_CNTLX41_PL_RX_AD_LATCH_DAC_E110_LEN = 9;
-// iohs/reg00021.H
+// iohs/reg00022.H
 
 static const uint64_t IOO_RX0_1_RD_4_RX_DAC_REGS_LOFF_A_CNTLX51_PL = 0x8001981010012c3full;
 
@@ -1036,7 +1070,7 @@ static const uint64_t IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL8_PG = 0x800cfc0010
 
 static const uint32_t IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL8_PG_TX_PSAVE_FORCE_STS_16_23 = 48;
 static const uint32_t IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL8_PG_TX_PSAVE_FORCE_STS_16_23_LEN = 8;
-// iohs/reg00022.H
+// iohs/reg00023.H
 
 static const uint64_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL17_PL = 0x8004b40010012c3full;
 
@@ -1048,7 +1082,7 @@ static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL17_PL_DCC_IQ_TUNE_LEN = 5;
 static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL17_PL_DCC_PAT = 57;
 static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL17_PL_DCC_PAT_LEN = 4;
 static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL17_PL_DCC_AZ = 61;
-// iohs/reg00022.H
+// iohs/reg00023.H
 
 static const uint64_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL27_PL = 0x8005040010012c3full;
 
@@ -1056,7 +1090,7 @@ static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL27_PL_EN = 49;
 static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL27_PL_EN_LEN = 7;
 static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL27_PL_SEL = 56;
 static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL27_PL_SEL_LEN = 7;
-// iohs/reg00022.H
+// iohs/reg00023.H
 
 static const uint64_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL3_PL = 0x8004440010012c3full;
 
@@ -1365,28 +1399,6 @@ static const uint32_t IOO_TX0_2_DD_4_TX_BIT_REGS_FIR_ERROR_INJECT_PL_TX_PL_FIR_E
 static const uint32_t IOO_TX0_2_DD_4_TX_BIT_REGS_FIR_ERROR_INJECT_PL_TX_PL_FIR_ERR_INJ_LEN = 2;
 // iohs/reg00023.H
 
-static const uint64_t LINK1_INFO = 0x18011015ull;
-
-static const uint32_t LINK1_INFO_MAX_TIMEOUT = 0;
-static const uint32_t LINK1_INFO_MAX_TIMEOUT_LEN = 16;
-static const uint32_t LINK1_INFO_FRAME_CAP_VALID = 16;
-static const uint32_t LINK1_INFO_FRAME_CAP_INST = 17;
-static const uint32_t LINK1_INFO_FRAME_CAP_ADDR = 18;
-static const uint32_t LINK1_INFO_FRAME_CAP_ADDR_LEN = 6;
-static const uint32_t LINK1_INFO_FRAME_CAP_SYN = 24;
-static const uint32_t LINK1_INFO_FRAME_CAP_SYN_LEN = 8;
-static const uint32_t LINK1_INFO_REPLAY_CAP_VALID = 32;
-static const uint32_t LINK1_INFO_REPLAY_CAP_INST = 33;
-static const uint32_t LINK1_INFO_REPLAY_CAP_INST_LEN = 2;
-static const uint32_t LINK1_INFO_REPLAY_CAP_ADDR = 35;
-static const uint32_t LINK1_INFO_REPLAY_CAP_ADDR_LEN = 9;
-static const uint32_t LINK1_INFO_REPLAY_CAP_SYN = 44;
-static const uint32_t LINK1_INFO_REPLAY_CAP_SYN_LEN = 8;
-static const uint32_t LINK1_INFO_ACK_FIFO_CAP_VALID = 52;
-static const uint32_t LINK1_INFO_ACK_FIFO_CAP_ADDR = 55;
-static const uint32_t LINK1_INFO_ACK_FIFO_CAP_ADDR_LEN = 9;
-// iohs/reg00023.H
-
 static const uint64_t NET_CTRL1_RW = 0x180f0044ull;
 static const uint64_t NET_CTRL1_RW_WAND = 0x180f0045ull;
 static const uint64_t NET_CTRL1_RW_WOR = 0x180f0046ull;
@@ -1415,44 +1427,6 @@ static const uint32_t NET_CTRL1_ORE0_CLK_DCADJUST_RESET_DC = 20;
 static const uint32_t NET_CTRL1_ORE1_CLK_DCADJUST_RESET_DC = 21;
 static const uint32_t NET_CTRL1_ORE2_CLK_DCADJUST_RESET_DC = 22;
 static const uint32_t NET_CTRL1_ORE3_CLK_DCADJUST_RESET_DC = 23;
-// iohs/reg00023.H
-
-static const uint64_t REPLAY_THRESHOLD = 0x18011018ull;
-
-static const uint32_t REPLAY_THRESHOLD_TB_SEL = 0;
-static const uint32_t REPLAY_THRESHOLD_TB_SEL_LEN = 4;
-static const uint32_t REPLAY_THRESHOLD_TAP_SEL = 4;
-static const uint32_t REPLAY_THRESHOLD_TAP_SEL_LEN = 4;
-static const uint32_t REPLAY_THRESHOLD_ENABLE = 8;
-static const uint32_t REPLAY_THRESHOLD_ENABLE_LEN = 3;
-static const uint32_t REPLAY_THRESHOLD_LINK0_CLEAR = 26;
-static const uint32_t REPLAY_THRESHOLD_LINK1_CLEAR = 27;
-static const uint32_t REPLAY_THRESHOLD_DIS_TB_CLEAR = 28;
-static const uint32_t REPLAY_THRESHOLD_DIS_TAP_CLEAR = 29;
-static const uint32_t REPLAY_THRESHOLD_DIS_TAP_STOP = 30;
-static const uint32_t REPLAY_THRESHOLD_LINK0_COUNT = 32;
-static const uint32_t REPLAY_THRESHOLD_LINK0_COUNT_LEN = 16;
-static const uint32_t REPLAY_THRESHOLD_LINK1_COUNT = 48;
-static const uint32_t REPLAY_THRESHOLD_LINK1_COUNT_LEN = 16;
-// iohs/reg00023.H
-
-static const uint64_t SL_ECC_THRESHOLD = 0x18011019ull;
-
-static const uint32_t SL_ECC_THRESHOLD_TB_SEL = 0;
-static const uint32_t SL_ECC_THRESHOLD_TB_SEL_LEN = 4;
-static const uint32_t SL_ECC_THRESHOLD_TAP_SEL = 4;
-static const uint32_t SL_ECC_THRESHOLD_TAP_SEL_LEN = 4;
-static const uint32_t SL_ECC_THRESHOLD_ENABLE = 8;
-static const uint32_t SL_ECC_THRESHOLD_ENABLE_LEN = 2;
-static const uint32_t SL_ECC_THRESHOLD_LINK0_CLEAR = 26;
-static const uint32_t SL_ECC_THRESHOLD_LINK1_CLEAR = 27;
-static const uint32_t SL_ECC_THRESHOLD_DIS_TB_CLEAR = 28;
-static const uint32_t SL_ECC_THRESHOLD_DIS_TAP_CLEAR = 29;
-static const uint32_t SL_ECC_THRESHOLD_DIS_TAP_STOP = 30;
-static const uint32_t SL_ECC_THRESHOLD_LINK0_COUNT = 32;
-static const uint32_t SL_ECC_THRESHOLD_LINK0_COUNT_LEN = 16;
-static const uint32_t SL_ECC_THRESHOLD_LINK1_COUNT = 48;
-static const uint32_t SL_ECC_THRESHOLD_LINK1_COUNT_LEN = 16;
 // iohs/reg00023.H
 
 }

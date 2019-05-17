@@ -90,9 +90,9 @@ static const uint64_t DATASM_REGS_RX_STAT28_PG = 0x800b684010012c3full;
 static const uint64_t DATASM_REGS_RX_STAT6_PG = 0x800ab84010012c3full;
 // omic/reg00003.H
 
-static const uint64_t MC_OMI_FIR_MASK_REG_SCOM = 0x0c011743ull;
-static const uint64_t MC_OMI_FIR_MASK_REG_SCOM1 = 0x0c011744ull;
-static const uint64_t MC_OMI_FIR_MASK_REG_SCOM2 = 0x0c011745ull;
+static const uint64_t MC_OMI_FIR_MASK_REG_RW = 0x0c011743ull;
+static const uint64_t MC_OMI_FIR_MASK_REG_WO_AND = 0x0c011744ull;
+static const uint64_t MC_OMI_FIR_MASK_REG_WO_OR = 0x0c011745ull;
 
 static const uint32_t MC_OMI_FIR_MASK_REG_DL0_FIR_ERROR_MASK = 0;
 static const uint32_t MC_OMI_FIR_MASK_REG_DL0_FIR_ERROR_MASK_LEN = 20;

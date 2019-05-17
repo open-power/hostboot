@@ -247,28 +247,28 @@ static const uint32_t CONFIG_CFG_SPARE = 52;
 static const uint32_t CONFIG_CFG_SPARE_LEN = 12;
 // iohs/reg00042.H
 
-static const uint64_t DLL_STATUS = 0x18011028ull;
+static const uint64_t DLP_LINK0_TX_LANE_CONTROL = 0x18011010ull;
 
-static const uint32_t DLL_STATUS_0_CURRENT_STATE = 4;
-static const uint32_t DLL_STATUS_0_CURRENT_STATE_LEN = 4;
-static const uint32_t DLL_STATUS_0_PRIOR_STATE = 12;
-static const uint32_t DLL_STATUS_0_PRIOR_STATE_LEN = 4;
-static const uint32_t DLL_STATUS_0_OPTICS_RST_B = 16;
-static const uint32_t DLL_STATUS_0_OPTICS_IRQ = 17;
-static const uint32_t DLL_STATUS_0_TRAINING = 18;
-static const uint32_t DLL_STATUS_0_MAX_PKT_TIMER = 19;
-static const uint32_t DLL_STATUS_0_MAX_PKT_TIMER_LEN = 5;
-static const uint32_t DLL_STATUS_1_CURRENT_STATE = 28;
-static const uint32_t DLL_STATUS_1_CURRENT_STATE_LEN = 4;
-static const uint32_t DLL_STATUS_1_PRIOR_STATE = 36;
-static const uint32_t DLL_STATUS_1_PRIOR_STATE_LEN = 4;
-static const uint32_t DLL_STATUS_1_OPTICS_RST_B = 40;
-static const uint32_t DLL_STATUS_1_OPTICS_IRQ = 41;
-static const uint32_t DLL_STATUS_1_TRAINING = 42;
-static const uint32_t DLL_STATUS_1_MAX_PKT_TIMER = 43;
-static const uint32_t DLL_STATUS_1_MAX_PKT_TIMER_LEN = 5;
-static const uint32_t DLL_STATUS_0_LINK_CAP_VALID = 62;
-static const uint32_t DLL_STATUS_1_LINK_CAP_VALID = 63;
+static const uint32_t DLP_LINK0_TX_LANE_CONTROL_00_CONTROL = 0;
+static const uint32_t DLP_LINK0_TX_LANE_CONTROL_00_CONTROL_LEN = 4;
+static const uint32_t DLP_LINK0_TX_LANE_CONTROL_01_CONTROL = 4;
+static const uint32_t DLP_LINK0_TX_LANE_CONTROL_01_CONTROL_LEN = 4;
+static const uint32_t DLP_LINK0_TX_LANE_CONTROL_02_CONTROL = 8;
+static const uint32_t DLP_LINK0_TX_LANE_CONTROL_02_CONTROL_LEN = 4;
+static const uint32_t DLP_LINK0_TX_LANE_CONTROL_03_CONTROL = 12;
+static const uint32_t DLP_LINK0_TX_LANE_CONTROL_03_CONTROL_LEN = 4;
+static const uint32_t DLP_LINK0_TX_LANE_CONTROL_04_CONTROL = 16;
+static const uint32_t DLP_LINK0_TX_LANE_CONTROL_04_CONTROL_LEN = 4;
+static const uint32_t DLP_LINK0_TX_LANE_CONTROL_05_CONTROL = 20;
+static const uint32_t DLP_LINK0_TX_LANE_CONTROL_05_CONTROL_LEN = 4;
+static const uint32_t DLP_LINK0_TX_LANE_CONTROL_06_CONTROL = 24;
+static const uint32_t DLP_LINK0_TX_LANE_CONTROL_06_CONTROL_LEN = 4;
+static const uint32_t DLP_LINK0_TX_LANE_CONTROL_07_CONTROL = 28;
+static const uint32_t DLP_LINK0_TX_LANE_CONTROL_07_CONTROL_LEN = 4;
+static const uint32_t DLP_LINK0_TX_LANE_CONTROL_SP_CONTROL = 32;
+static const uint32_t DLP_LINK0_TX_LANE_CONTROL_SP_CONTROL_LEN = 4;
+static const uint32_t DLP_LINK0_TX_LANE_CONTROL__FAILED = 48;
+static const uint32_t DLP_LINK0_TX_LANE_CONTROL__FAILED_LEN = 9;
 // iohs/reg00042.H
 
 static const uint64_t IOO_RX0_RXCTL_DATASM_REGS_RX_STAT19_PG = 0x800b200010012c3full;
@@ -1443,58 +1443,6 @@ static const uint64_t IOO_TX0_2_DD_5_TX_BIT_REGS_FIR_MASK_PL = 0x80040c0910012c3
 
 static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_FIR_MASK_PL_TX_PL_FIR_ERRS_MASK = 48;
 static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_FIR_MASK_PL_TX_PL_FIR_ERRS_MASK_LEN = 2;
-// iohs/reg00045.H
-
-static const uint64_t OPTICAL_CONFIG = 0x1801100full;
-
-static const uint32_t OPTICAL_CONFIG_CONFIG_DISABLE_BAD_LANE_COUNT = 0;
-static const uint32_t OPTICAL_CONFIG_CONFIG_DISABLE_CLEAR_BAD_LANE_COUNT = 1;
-static const uint32_t OPTICAL_CONFIG_CONFIG_LINK_FAIL_NO_SPARE = 2;
-static const uint32_t OPTICAL_CONFIG_CONFIG_LINK_FAIL_CRC_ERROR = 3;
-static const uint32_t OPTICAL_CONFIG_CONFIG_BAD_LANE_DURATION = 4;
-static const uint32_t OPTICAL_CONFIG_CONFIG_BAD_LANE_DURATION_LEN = 4;
-static const uint32_t OPTICAL_CONFIG_CONFIG_BAD_LANE_MAX = 9;
-static const uint32_t OPTICAL_CONFIG_CONFIG_BAD_LANE_MAX_LEN = 7;
-static const uint32_t OPTICAL_CONFIG_CONFIG_DISABLE_LINK_FAIL_COUNT = 16;
-static const uint32_t OPTICAL_CONFIG_CONFIG_LINK_FAIL_DURATION = 20;
-static const uint32_t OPTICAL_CONFIG_CONFIG_LINK_FAIL_DURATION_LEN = 4;
-static const uint32_t OPTICAL_CONFIG_CONFIG_LINK_FAIL_MAX = 25;
-static const uint32_t OPTICAL_CONFIG_CONFIG_LINK_FAIL_MAX_LEN = 7;
-static const uint32_t OPTICAL_CONFIG_CLEAR_LINK_FAIL_COUNTER = 32;
-static const uint32_t OPTICAL_CONFIG_CLEAR_BAD_LANE_COUNTER = 33;
-static const uint32_t OPTICAL_CONFIG_FULL_18_TX_LANE_SWAP = 39;
-static const uint32_t OPTICAL_CONFIG_LINK0_RX_LANE_SWAP = 40;
-static const uint32_t OPTICAL_CONFIG_LINK0_TX_LANE_SWAP = 41;
-static const uint32_t OPTICAL_CONFIG_LINK1_RX_LANE_SWAP = 42;
-static const uint32_t OPTICAL_CONFIG_LINK1_TX_LANE_SWAP = 43;
-static const uint32_t OPTICAL_CONFIG_CONFIG_ACK_QUEUE_LOW = 44;
-static const uint32_t OPTICAL_CONFIG_CONFIG_ACK_QUEUE_LOW_LEN = 4;
-static const uint32_t OPTICAL_CONFIG_CONFIG_ACK_QUEUE_START = 48;
-static const uint32_t OPTICAL_CONFIG_CONFIG_ACK_QUEUE_START_LEN = 4;
-static const uint32_t OPTICAL_CONFIG_CONFIG_ACK_QUEUE_HIGH = 52;
-static const uint32_t OPTICAL_CONFIG_CONFIG_ACK_QUEUE_HIGH_LEN = 4;
-static const uint32_t OPTICAL_CONFIG_CONFIG_FAST_ASYNC_CROSS = 59;
-static const uint32_t OPTICAL_CONFIG_CONFIG_RECAL_ABORT_TIMEOUT = 60;
-static const uint32_t OPTICAL_CONFIG_CONFIG_RECAL_ABORT_TIMEOUT_LEN = 4;
-// iohs/reg00045.H
-
-static const uint64_t RETRAIN_THRESHOLD = 0x1801101aull;
-
-static const uint32_t RETRAIN_THRESHOLD_TB_SEL = 0;
-static const uint32_t RETRAIN_THRESHOLD_TB_SEL_LEN = 4;
-static const uint32_t RETRAIN_THRESHOLD_TAP_SEL = 4;
-static const uint32_t RETRAIN_THRESHOLD_TAP_SEL_LEN = 4;
-static const uint32_t RETRAIN_THRESHOLD_ENABLE = 8;
-static const uint32_t RETRAIN_THRESHOLD_ENABLE_LEN = 9;
-static const uint32_t RETRAIN_THRESHOLD_LINK0_CLEAR = 26;
-static const uint32_t RETRAIN_THRESHOLD_LINK1_CLEAR = 27;
-static const uint32_t RETRAIN_THRESHOLD_DIS_TB_CLEAR = 28;
-static const uint32_t RETRAIN_THRESHOLD_DIS_TAP_CLEAR = 29;
-static const uint32_t RETRAIN_THRESHOLD_DIS_TAP_STOP = 30;
-static const uint32_t RETRAIN_THRESHOLD_LINK0_COUNT = 32;
-static const uint32_t RETRAIN_THRESHOLD_LINK0_COUNT_LEN = 16;
-static const uint32_t RETRAIN_THRESHOLD_LINK1_COUNT = 48;
-static const uint32_t RETRAIN_THRESHOLD_LINK1_COUNT_LEN = 16;
 // iohs/reg00045.H
 
 }

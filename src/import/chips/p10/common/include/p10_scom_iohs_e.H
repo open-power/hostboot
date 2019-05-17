@@ -361,71 +361,90 @@ static const uint32_t AXON_XSTOP_MASK_52 = 52;
 static const uint32_t AXON_XSTOP_MASK_53 = 53;
 // iohs/reg00059.H
 
-static const uint64_t FIR_MASK_REG_SCOM = 0x18011003ull;
-static const uint64_t FIR_MASK_REG_SCOM1 = 0x18011004ull;
-static const uint64_t FIR_MASK_REG_SCOM2 = 0x18011005ull;
+static const uint64_t DLP_CONFIG = 0x1801100aull;
 
-static const uint32_t FIR_MASK_REG_LINK0_TRAINED_MASK = 0;
-static const uint32_t FIR_MASK_REG_LINK1_TRAINED_MASK = 1;
-static const uint32_t FIR_MASK_REG_LINK0_OP_IRQ_MASK = 2;
-static const uint32_t FIR_MASK_REG_LINK1_OP_IRQ_MASK = 3;
-static const uint32_t FIR_MASK_REG_LINK0_REPLAY_THRESHOLD_MASK = 4;
-static const uint32_t FIR_MASK_REG_LINK1_REPLAY_THRESHOLD_MASK = 5;
-static const uint32_t FIR_MASK_REG_LINK0_CRC_ERROR_MASK = 6;
-static const uint32_t FIR_MASK_REG_LINK1_CRC_ERROR_MASK = 7;
-static const uint32_t FIR_MASK_REG_LINK0_NAK_RECEIVED_MASK = 8;
-static const uint32_t FIR_MASK_REG_LINK1_NAK_RECEIVED_MASK = 9;
-static const uint32_t FIR_MASK_REG_LINK0_REPLAY_BUFFER_FULL_MASK = 10;
-static const uint32_t FIR_MASK_REG_LINK1_REPLAY_BUFFER_FULL_MASK = 11;
-static const uint32_t FIR_MASK_REG_LINK0_SL_ECC_THRESHOLD_MASK = 12;
-static const uint32_t FIR_MASK_REG_LINK1_SL_ECC_THRESHOLD_MASK = 13;
-static const uint32_t FIR_MASK_REG_LINK0_SL_ECC_CORRECTABLE_MASK = 14;
-static const uint32_t FIR_MASK_REG_LINK1_SL_ECC_CORRECTABLE_MASK = 15;
-static const uint32_t FIR_MASK_REG_LINK0_SL_ECC_UE_MASK = 16;
-static const uint32_t FIR_MASK_REG_LINK1_SL_ECC_UE_MASK = 17;
-static const uint32_t FIR_MASK_REG_LINK0_RETRAIN_THRESHOLD_MASK = 18;
-static const uint32_t FIR_MASK_REG_LINK1_RETRAIN_THRESHOLD_MASK = 19;
-static const uint32_t FIR_MASK_REG_LINK0_LOSS_BLOCK_ALIGN_MASK = 20;
-static const uint32_t FIR_MASK_REG_LINK1_LOSS_BLOCK_ALIGN_MASK = 21;
-static const uint32_t FIR_MASK_REG_LINK0_INVALID_BLOCK_MASK = 22;
-static const uint32_t FIR_MASK_REG_LINK1_INVALID_BLOCK_MASK = 23;
-static const uint32_t FIR_MASK_REG_LINK0_DESKEW_ERROR_MASK = 24;
-static const uint32_t FIR_MASK_REG_LINK1_DESKEW_ERROR_MASK = 25;
-static const uint32_t FIR_MASK_REG_LINK0_DESKEW_OVERFLOW_MASK = 26;
-static const uint32_t FIR_MASK_REG_LINK1_DESKEW_OVERFLOW_MASK = 27;
-static const uint32_t FIR_MASK_REG_LINK0_SW_RETRAIN_MASK = 28;
-static const uint32_t FIR_MASK_REG_LINK1_SW_RETRAIN_MASK = 29;
-static const uint32_t FIR_MASK_REG_LINK0_ACK_QUEUE_OVERFLOW_MASK = 30;
-static const uint32_t FIR_MASK_REG_LINK1_ACK_QUEUE_OVERFLOW_MASK = 31;
-static const uint32_t FIR_MASK_REG_LINK0_ACK_QUEUE_UNDERFLOW_MASK = 32;
-static const uint32_t FIR_MASK_REG_LINK1_ACK_QUEUE_UNDERFLOW_MASK = 33;
-static const uint32_t FIR_MASK_REG_LINK0_NUM_REPLAY_MASK = 34;
-static const uint32_t FIR_MASK_REG_LINK1_NUM_REPLAY_MASK = 35;
-static const uint32_t FIR_MASK_REG_LINK0_TRAINING_SET_RECEIVED_MASK = 36;
-static const uint32_t FIR_MASK_REG_LINK1_TRAINING_SET_RECEIVED_MASK = 37;
-static const uint32_t FIR_MASK_REG_LINK0_PRBS_SELECT_ERROR_MASK = 38;
-static const uint32_t FIR_MASK_REG_LINK1_PRBS_SELECT_ERROR_MASK = 39;
-static const uint32_t FIR_MASK_REG_LINK0_TCOMPLETE_BAD_MASK = 40;
-static const uint32_t FIR_MASK_REG_LINK1_TCOMPLETE_BAD_MASK = 41;
-static const uint32_t FIR_MASK_REG_LINK0_NO_SPARE_MASK = 42;
-static const uint32_t FIR_MASK_REG_LINK1_NO_SPARE_MASK = 43;
-static const uint32_t FIR_MASK_REG_LINK0_SPARE_DONE_MASK = 44;
-static const uint32_t FIR_MASK_REG_LINK1_SPARE_DONE_MASK = 45;
-static const uint32_t FIR_MASK_REG_LINK0_TOO_MANY_CRC_ERRORS_MASK = 46;
-static const uint32_t FIR_MASK_REG_LINK1_TOO_MANY_CRC_ERRORS_MASK = 47;
-static const uint32_t FIR_MASK_REG_LINK0_NPU_DLX_ERROR_MASK = 48;
-static const uint32_t FIR_MASK_REG_LINK1_NPU_DLX_ERROR_MASK = 49;
-static const uint32_t FIR_MASK_REG_OSC_SWITCH_MASK = 51;
-static const uint32_t FIR_MASK_REG_LINK0_CORRECTABLE_ARRAY_ERROR_MASK = 52;
-static const uint32_t FIR_MASK_REG_LINK1_CORRECTABLE_ARRAY_ERROR_MASK = 53;
-static const uint32_t FIR_MASK_REG_LINK0_UNCORRECTABLE_ARRAY_ERROR_MASK = 54;
-static const uint32_t FIR_MASK_REG_LINK1_UNCORRECTABLE_ARRAY_ERROR_MASK = 55;
-static const uint32_t FIR_MASK_REG_LINK0_TRAINING_FAILED_MASK = 56;
-static const uint32_t FIR_MASK_REG_LINK1_TRAINING_FAILED_MASK = 57;
-static const uint32_t FIR_MASK_REG_LINK0_UNRECOVERABLE_ERROR_MASK = 58;
-static const uint32_t FIR_MASK_REG_LINK1_UNRECOVERABLE_ERROR_MASK = 59;
-static const uint32_t FIR_MASK_REG_LINK0_INTERNAL_ERROR_MASK = 60;
-static const uint32_t FIR_MASK_REG_LINK1_INTERNAL_ERROR_MASK = 61;
+static const uint32_t DLP_CONFIG_LINK_PAIR = 0;
+static const uint32_t DLP_CONFIG_DISABLE_SL_ECC = 1;
+static const uint32_t DLP_CONFIG_SL_UE_CRC_ERR = 4;
+static const uint32_t DLP_CONFIG_REPORT_SL_CHKBIT_ERR = 5;
+static const uint32_t DLP_CONFIG_BW_SAMPLE_SIZE = 6;
+static const uint32_t DLP_CONFIG_BW_WINDOW_SIZE = 7;
+static const uint32_t DLP_CONFIG_PACKET_DELAY_LIMIT = 11;
+static const uint32_t DLP_CONFIG_PACKET_DELAY_LIMIT_LEN = 5;
+static const uint32_t DLP_CONFIG_TDM_DELAY = 16;
+static const uint32_t DLP_CONFIG_TDM_DELAY_LEN = 4;
+static const uint32_t DLP_CONFIG_RECAL_TIMER = 29;
+static const uint32_t DLP_CONFIG_RECAL_TIMER_LEN = 15;
+static const uint32_t DLP_CONFIG_PSAVE_TIMEOUT = 44;
+static const uint32_t DLP_CONFIG_PSAVE_TIMEOUT_LEN = 4;
+static const uint32_t DLP_CONFIG_TIMEOUT = 48;
+static const uint32_t DLP_CONFIG_TIMEOUT_LEN = 4;
+static const uint32_t DLP_CONFIG_TIMER_1US = 52;
+static const uint32_t DLP_CONFIG_TIMER_1US_LEN = 12;
+// iohs/reg00059.H
+
+static const uint64_t DLP_LAT_MEASURE = 0x1801100eull;
+
+static const uint32_t DLP_LAT_MEASURE_LINK0_ROUND_TRIP_VALID = 0;
+static const uint32_t DLP_LAT_MEASURE_LINK0_ROUND_TRIP = 2;
+static const uint32_t DLP_LAT_MEASURE_LINK0_ROUND_TRIP_LEN = 10;
+static const uint32_t DLP_LAT_MEASURE_LINK1_ROUND_TRIP_VALID = 12;
+static const uint32_t DLP_LAT_MEASURE_LINK1_ROUND_TRIP = 14;
+static const uint32_t DLP_LAT_MEASURE_LINK1_ROUND_TRIP_LEN = 10;
+static const uint32_t DLP_LAT_MEASURE_LOCAL_LATENCY_DIFFERENCE_VALID = 24;
+static const uint32_t DLP_LAT_MEASURE_LOCAL_LATENCY_LONGER_LINK = 25;
+static const uint32_t DLP_LAT_MEASURE_LOCAL_LATENCY_DIFFERENCE = 29;
+static const uint32_t DLP_LAT_MEASURE_LOCAL_LATENCY_DIFFERENCE_LEN = 7;
+static const uint32_t DLP_LAT_MEASURE_REMOTE_LATENCY_DIFFERENCE_VALID = 36;
+static const uint32_t DLP_LAT_MEASURE_REMOTE_LATENCY_LONGER_LINK = 37;
+static const uint32_t DLP_LAT_MEASURE_REMOTE_LATENCY_DIFFERENCE = 41;
+static const uint32_t DLP_LAT_MEASURE_REMOTE_LATENCY_DIFFERENCE_LEN = 7;
+static const uint32_t DLP_LAT_MEASURE_LINK0_TOD_LATENCY = 49;
+static const uint32_t DLP_LAT_MEASURE_LINK0_TOD_LATENCY_LEN = 7;
+static const uint32_t DLP_LAT_MEASURE_LINK1_TOD_LATENCY = 57;
+static const uint32_t DLP_LAT_MEASURE_LINK1_TOD_LATENCY_LEN = 7;
+// iohs/reg00059.H
+
+static const uint64_t DLP_LINK0_QUALITY = 0x18011026ull;
+
+static const uint32_t DLP_LINK0_QUALITY_TX_BW = 1;
+static const uint32_t DLP_LINK0_QUALITY_TX_BW_LEN = 11;
+static const uint32_t DLP_LINK0_QUALITY_RX_BW = 13;
+static const uint32_t DLP_LINK0_QUALITY_RX_BW_LEN = 11;
+static const uint32_t DLP_LINK0_QUALITY_ERROR_RATE = 25;
+static const uint32_t DLP_LINK0_QUALITY_ERROR_RATE_LEN = 23;
+static const uint32_t DLP_LINK0_QUALITY_SPARE_COUNTER_1 = 49;
+static const uint32_t DLP_LINK0_QUALITY_SPARE_COUNTER_1_LEN = 7;
+static const uint32_t DLP_LINK0_QUALITY_SPARE_COUNTER_2 = 57;
+static const uint32_t DLP_LINK0_QUALITY_SPARE_COUNTER_2_LEN = 7;
+// iohs/reg00059.H
+
+static const uint64_t DLP_PERF_COUNT_LSB_0 = 0x18011020ull;
+// iohs/reg00059.H
+
+static const uint64_t DLP_PHY_CONFIG = 0x1801100cull;
+
+static const uint32_t DLP_PHY_CONFIG_PHY_TRAIN_A_ADJ = 0;
+static const uint32_t DLP_PHY_CONFIG_PHY_TRAIN_A_ADJ_LEN = 2;
+static const uint32_t DLP_PHY_CONFIG_PHY_TRAIN_B_ADJ = 2;
+static const uint32_t DLP_PHY_CONFIG_PHY_TRAIN_B_ADJ_LEN = 2;
+static const uint32_t DLP_PHY_CONFIG_PHY_TRAIN_TIME = 4;
+static const uint32_t DLP_PHY_CONFIG_PHY_TRAIN_TIME_LEN = 4;
+static const uint32_t DLP_PHY_CONFIG_PHY_TRAIN_A_HYST = 8;
+static const uint32_t DLP_PHY_CONFIG_PHY_TRAIN_A_HYST_LEN = 4;
+static const uint32_t DLP_PHY_CONFIG_PHY_TRAIN_B_HYST = 12;
+static const uint32_t DLP_PHY_CONFIG_PHY_TRAIN_B_HYST_LEN = 4;
+static const uint32_t DLP_PHY_CONFIG_PRBS_PHASE_SELECT = 16;
+static const uint32_t DLP_PHY_CONFIG_PRBS_PHASE_SELECT_LEN = 24;
+static const uint32_t DLP_PHY_CONFIG_PRBS_CONFIG = 40;
+static const uint32_t DLP_PHY_CONFIG_PRBS_CONFIG_LEN = 10;
+static const uint32_t DLP_PHY_CONFIG_PRBS_INVERT = 50;
+static const uint32_t DLP_PHY_CONFIG_LINK0_SELECT = 56;
+static const uint32_t DLP_PHY_CONFIG_LINK1_SELECT = 57;
+static const uint32_t DLP_PHY_CONFIG_PRECODER_ENABLE = 60;
+static const uint32_t DLP_PHY_CONFIG_50G_MODE = 61;
+static const uint32_t DLP_PHY_CONFIG_DL_SELECT = 62;
+static const uint32_t DLP_PHY_CONFIG_DL_SELECT_LEN = 2;
 // iohs/reg00059.H
 
 static const uint64_t IOO_RX0_RXCTL_CTL_REGS_RX_CNTL2_PG = 0x8009080010012c3full;
@@ -650,7 +669,7 @@ static const uint32_t IOO_RX0_0_RD_2_RX_DAC_REGS_CNTL4_PL_GAIN = 48;
 static const uint32_t IOO_RX0_0_RD_2_RX_DAC_REGS_CNTL4_PL_GAIN_LEN = 3;
 static const uint32_t IOO_RX0_0_RD_2_RX_DAC_REGS_CNTL4_PL_FREQ = 51;
 static const uint32_t IOO_RX0_0_RD_2_RX_DAC_REGS_CNTL4_PL_FREQ_LEN = 3;
-// iohs/reg00059.H
+// iohs/reg00060.H
 
 static const uint64_t IOO_RX0_0_RD_3_RX_BIT_REGS_MODE7_PL = 0x8003500310012c3full;
 
@@ -658,16 +677,16 @@ static const uint32_t IOO_RX0_0_RD_3_RX_BIT_REGS_MODE7_PL_SAVE_CDRLOCK_MODE_SEL 
 static const uint32_t IOO_RX0_0_RD_3_RX_BIT_REGS_MODE7_PL_SAVE_CDRLOCK_MODE_SEL_LEN = 2;
 static const uint32_t IOO_RX0_0_RD_3_RX_BIT_REGS_MODE7_PL_R_UNLOCK_RATIO = 50;
 static const uint32_t IOO_RX0_0_RD_3_RX_BIT_REGS_MODE7_PL_R_UNLOCK_RATIO_LEN = 10;
-// iohs/reg00059.H
+// iohs/reg00060.H
 
 static const uint64_t IOO_RX0_0_RD_3_RX_BIT_REGS_STAT1_PL = 0x8003900310012c3full;
-// iohs/reg00059.H
+// iohs/reg00060.H
 
 static const uint64_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_A_CNTLX20_PL = 0x8000a00310012c3full;
 
 static const uint32_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_A_CNTLX20_PL_RX_AE_LATCH_DAC_E = 55;
 static const uint32_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_A_CNTLX20_PL_RX_AE_LATCH_DAC_E_LEN = 9;
-// iohs/reg00059.H
+// iohs/reg00060.H
 
 static const uint64_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_A_CNTLX30_PL = 0x8000f00310012c3full;
 
@@ -982,7 +1001,7 @@ static const uint64_t IOO_RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX70_PL = 0x800230111
 
 static const uint32_t IOO_RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX70_PL_RX_BD_LATCH_DAC_E011 = 55;
 static const uint32_t IOO_RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX70_PL_RX_BD_LATCH_DAC_E011_LEN = 9;
-// iohs/reg00060.H
+// iohs/reg00061.H
 
 static const uint64_t IOO_RX0_1_RD_3_RX_DAC_REGS_CNTL17_PL = 0x8000881110012c3full;
 
@@ -990,7 +1009,7 @@ static const uint32_t IOO_RX0_1_RD_3_RX_DAC_REGS_CNTL17_PL_DATA = 48;
 static const uint32_t IOO_RX0_1_RD_3_RX_DAC_REGS_CNTL17_PL_DATA_LEN = 5;
 static const uint32_t IOO_RX0_1_RD_3_RX_DAC_REGS_CNTL17_PL_EDGE = 54;
 static const uint32_t IOO_RX0_1_RD_3_RX_DAC_REGS_CNTL17_PL_EDGE_LEN = 5;
-// iohs/reg00060.H
+// iohs/reg00061.H
 
 static const uint64_t IOO_RX0_1_RD_3_RX_DAC_REGS_CNTL1_PL = 0x8000081110012c3full;
 
@@ -1001,10 +1020,10 @@ static const uint32_t IOO_RX0_1_RD_3_RX_DAC_REGS_CNTL1_PL_PRBS_TEST_DATA = 55;
 static const uint32_t IOO_RX0_1_RD_3_RX_DAC_REGS_CNTL1_PL_PRBS_TEST_DATA_LEN = 3;
 static const uint32_t IOO_RX0_1_RD_3_RX_DAC_REGS_CNTL1_PL_B_BANK_CONTROLS = 58;
 static const uint32_t IOO_RX0_1_RD_3_RX_DAC_REGS_CNTL1_PL_B_BANK_CONTROLS_LEN = 6;
-// iohs/reg00060.H
+// iohs/reg00061.H
 
 static const uint64_t IOO_RX0_1_RD_4_RX_BIT_REGS_CNTLX5_PL = 0x8003801010012c3full;
-// iohs/reg00060.H
+// iohs/reg00061.H
 
 static const uint64_t IOO_RX0_1_RD_4_RX_DAC_REGS_LOFF_A_CNTLX33_PL = 0x8001081010012c3full;
 
@@ -1316,25 +1335,25 @@ static const uint64_t IOO_RX0_2_RD_4_RX_DAC_REGS_LOFF_B_CNTLX68_PL = 0x8002200a1
 
 static const uint32_t IOO_RX0_2_RD_4_RX_DAC_REGS_LOFF_B_CNTLX68_PL_RX_BD_LATCH_DAC_E001 = 55;
 static const uint32_t IOO_RX0_2_RD_4_RX_DAC_REGS_LOFF_B_CNTLX68_PL_RX_BD_LATCH_DAC_E001_LEN = 9;
-// iohs/reg00061.H
+// iohs/reg00062.H
 
 static const uint64_t IOO_RX0_2_RD_4_RX_DAC_REGS_LOFF_B_CNTLX78_PL = 0x8002700a10012c3full;
 
 static const uint32_t IOO_RX0_2_RD_4_RX_DAC_REGS_LOFF_B_CNTLX78_PL_RX_BD_LATCH_DAC_S011 = 55;
 static const uint32_t IOO_RX0_2_RD_4_RX_DAC_REGS_LOFF_B_CNTLX78_PL_RX_BD_LATCH_DAC_S011_LEN = 9;
-// iohs/reg00061.H
+// iohs/reg00062.H
 
 static const uint64_t IOO_RX0_2_RD_4_RX_DAC_REGS_LOFF_B_CNTLX83_PL = 0x8002980a10012c3full;
 
 static const uint32_t IOO_RX0_2_RD_4_RX_DAC_REGS_LOFF_B_CNTLX83_PL_RX_BD_LATCH_DAC_W000 = 55;
 static const uint32_t IOO_RX0_2_RD_4_RX_DAC_REGS_LOFF_B_CNTLX83_PL_RX_BD_LATCH_DAC_W000_LEN = 9;
-// iohs/reg00061.H
+// iohs/reg00062.H
 
 static const uint64_t IOO_RX0_2_RD_5_RX_DAC_REGS_LOFF_B_CNTLX23_PL = 0x8000b80910012c3full;
 
 static const uint32_t IOO_RX0_2_RD_5_RX_DAC_REGS_LOFF_B_CNTLX23_PL_RX_BE_LATCH_DAC_N = 55;
 static const uint32_t IOO_RX0_2_RD_5_RX_DAC_REGS_LOFF_B_CNTLX23_PL_RX_BE_LATCH_DAC_N_LEN = 9;
-// iohs/reg00061.H
+// iohs/reg00062.H
 
 static const uint64_t IOO_RX0_2_RD_5_RX_DAC_REGS_LOFF_B_CNTLX63_PL = 0x8001f80910012c3full;
 
@@ -1688,7 +1707,7 @@ static const uint64_t IOO_TX0_2_DD_5_TX_BIT_REGS_CNTL9_PL = 0x8004740910012c3ful
 
 static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_CNTL9_PL_TX_PSEG_MAIN_16_18_HS_EN = 48;
 static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_CNTL9_PL_TX_PSEG_MAIN_16_18_HS_EN_LEN = 3;
-// iohs/reg00062.H
+// iohs/reg00063.H
 
 static const uint64_t REGS_PRX0_DLR_APOR = 0x1801103aull;
 
@@ -1696,7 +1715,7 @@ static const uint32_t REGS_PRX0_DLR_APOR_ACTIVITY_ACCUM = 0;
 static const uint32_t REGS_PRX0_DLR_APOR_ACTIVITY_ACCUM_LEN = 32;
 static const uint32_t REGS_PRX0_DLR_APOR_BASE_ACCUM = 32;
 static const uint32_t REGS_PRX0_DLR_APOR_BASE_ACCUM_LEN = 32;
-// iohs/reg00062.H
+// iohs/reg00063.H
 
 static const uint64_t SLAVE_CONFIG_REG = 0x180f001eull;
 
@@ -1716,7 +1735,7 @@ static const uint32_t SLAVE_CONFIG_REG_MASK_PLL_ERRS = 12;
 static const uint32_t SLAVE_CONFIG_REG_MASK_PLL_ERRS_LEN = 8;
 static const uint32_t SLAVE_CONFIG_REG_QME_PAR_DIS = 20;
 static const uint32_t SLAVE_CONFIG_REG_FORCE_0_QME = 21;
-// iohs/reg00062.H
+// iohs/reg00063.H
 
 }
 }
@@ -1724,4 +1743,5 @@ static const uint32_t SLAVE_CONFIG_REG_FORCE_0_QME = 21;
 #include "iohs/reg00060.H"
 #include "iohs/reg00061.H"
 #include "iohs/reg00062.H"
+#include "iohs/reg00063.H"
 #endif

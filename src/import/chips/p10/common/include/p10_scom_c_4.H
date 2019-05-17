@@ -35,10 +35,7 @@ namespace c
 {
 
 
-static const uint64_t CPMS_RVCSR_PPE = 0x00000006c001e040ull;
-static const uint64_t CPMS_RVCSR_PPE1 = 0x00000006c001e060ull;
-static const uint64_t CPMS_RVCSR_PPE2 = 0x00000006c001e070ull;
-static const uint64_t CPMS_RVCSR_SCOM = 0x200e0e04ull;
+static const uint64_t CPMS_RVCSR = 0x200e0e04ull;
 static const uint64_t CPMS_RVCSR_WO_CLEAR = 0x200e0e06ull;
 static const uint64_t CPMS_RVCSR_WO_OR = 0x200e0e07ull;
 
@@ -297,29 +294,25 @@ static const uint32_t NC_NCMISC_NCSCOMS_FIR_ACTION1_REG_FIR_ACTION1 = 0;
 static const uint32_t NC_NCMISC_NCSCOMS_FIR_ACTION1_REG_FIR_ACTION1_LEN = 29;
 // c/reg00004.H
 
-static const uint64_t QME_SPWU_FSP_PPE = 0x00000006c0018340ull;
-static const uint64_t QME_SPWU_FSP_SCOM = 0x200e0834ull;
+static const uint64_t QME_SPWU_FSP = 0x200e0834ull;
 
 static const uint32_t QME_SPWU_FSP_REQ = 0;
 static const uint32_t QME_SPWU_FSP_DONE = 4;
 // c/reg00004.H
 
-static const uint64_t QME_SPWU_HYP_PPE = 0x00000006c00183c0ull;
-static const uint64_t QME_SPWU_HYP_SCOM = 0x200e083cull;
+static const uint64_t QME_SPWU_HYP = 0x200e083cull;
 
 static const uint32_t QME_SPWU_HYP_REQ = 0;
 static const uint32_t QME_SPWU_HYP_DONE = 4;
 // c/reg00004.H
 
-static const uint64_t QME_SPWU_OCC_PPE = 0x00000006c0018380ull;
-static const uint64_t QME_SPWU_OCC_SCOM = 0x200e0838ull;
+static const uint64_t QME_SPWU_OCC = 0x200e0838ull;
 
 static const uint32_t QME_SPWU_OCC_REQ = 0;
 static const uint32_t QME_SPWU_OCC_DONE = 4;
 // c/reg00004.H
 
-static const uint64_t QME_SSH_FSP_PPE = 0x00000006c0018240ull;
-static const uint64_t QME_SSH_FSP_SCOM = 0x200e0824ull;
+static const uint64_t QME_SSH_FSP = 0x200e0824ull;
 
 static const uint32_t QME_SSH_FSP_STOP_GATED = 0;
 static const uint32_t QME_SSH_FSP_SPECIAL_WKUP_DONE = 1;
@@ -335,8 +328,7 @@ static const uint32_t QME_SSH_FSP_DEEPEST_ACT_STOP_LEVEL = 16;
 static const uint32_t QME_SSH_FSP_DEEPEST_ACT_STOP_LEVEL_LEN = 4;
 // c/reg00004.H
 
-static const uint64_t QME_SSH_HYP_PPE = 0x00000006c00182c0ull;
-static const uint64_t QME_SSH_HYP_SCOM = 0x200e082cull;
+static const uint64_t QME_SSH_HYP = 0x200e082cull;
 
 static const uint32_t QME_SSH_HYP_STOP_GATED = 0;
 static const uint32_t QME_SSH_HYP_SPECIAL_WKUP_DONE = 1;
@@ -352,8 +344,7 @@ static const uint32_t QME_SSH_HYP_DEEPEST_ACT_STOP_LEVEL = 16;
 static const uint32_t QME_SSH_HYP_DEEPEST_ACT_STOP_LEVEL_LEN = 4;
 // c/reg00004.H
 
-static const uint64_t QME_SSH_OCC_PPE = 0x00000006c0018280ull;
-static const uint64_t QME_SSH_OCC_SCOM = 0x200e0828ull;
+static const uint64_t QME_SSH_OCC = 0x200e0828ull;
 
 static const uint32_t QME_SSH_OCC_STOP_GATED = 0;
 static const uint32_t QME_SSH_OCC_SPECIAL_WKUP_DONE = 1;

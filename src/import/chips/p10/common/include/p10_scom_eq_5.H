@@ -183,10 +183,7 @@ static const uint32_t NET_CTRL1_ORE2_CLK_DCADJUST_RESET_DC = 22;
 static const uint32_t NET_CTRL1_ORE3_CLK_DCADJUST_RESET_DC = 23;
 // eq/reg00005.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_DB0_PPE = 0x00000006c0001000ull;
-static const uint64_t QME_DB0_RW = 0x200e0100ull;
+static const uint64_t QME_DB0 = 0x200e0100ull;
 
 static const uint32_t QME_DB0_NUMBER = 0;
 static const uint32_t QME_DB0_NUMBER_LEN = 8;
@@ -194,11 +191,6 @@ static const uint32_t QME_DB0_DATA = 8;
 static const uint32_t QME_DB0_DATA_LEN = 56;
 // eq/reg00005.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_EITR_PPE = 0x00000006c00026c0ull;
-static const uint64_t QME_EITR_PPE1 = 0x00000006c00026f0ull;
-static const uint64_t QME_EITR_PPE2 = 0x00000006c00026e0ull;
 static const uint64_t QME_EITR_RW = 0x200e026cull;
 static const uint64_t QME_EITR_WO_CLEAR = 0x200e026full;
 static const uint64_t QME_EITR_WO_OR = 0x200e026eull;

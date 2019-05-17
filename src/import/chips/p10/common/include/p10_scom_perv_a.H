@@ -324,9 +324,9 @@ static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL3_CLEAR_TP_NEST_DPLL_FUNC_CLKSEL_D
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
+static const uint32_t FSXCOMP_FSXLOG_SB_CS = 0x00050008ull;
 static const uint32_t FSXCOMP_FSXLOG_SB_CS_FSI = 0x00002808ull;
 static const uint32_t FSXCOMP_FSXLOG_SB_CS_FSI_BYTE = 0x00002820ull;
-static const uint32_t FSXCOMP_FSXLOG_SB_CS_SCOM = 0x00050008ull;
 
 static const uint32_t FSXCOMP_FSXLOG_SB_CS_SECURE_DEBUG_MODE = 0;
 static const uint32_t FSXCOMP_FSXLOG_SB_CS_START_RESTART_VECTOR0 = 12;

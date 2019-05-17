@@ -253,6 +253,38 @@ static const uint32_t AXON_XSTOP3_XSTOP3_WAIT_CYCLES = 48;
 static const uint32_t AXON_XSTOP3_XSTOP3_WAIT_CYCLES_LEN = 12;
 // iohs/reg00051.H
 
+static const uint64_t DLP_CONTROL = 0x1801100bull;
+
+static const uint32_t DLP_CONTROL_0_PHY_TRAINING = 0;
+static const uint32_t DLP_CONTROL_0_STARTUP = 1;
+static const uint32_t DLP_CONTROL_0_HOLD_PATT_A = 2;
+static const uint32_t DLP_CONTROL_0_HOLD_PATT_B = 3;
+static const uint32_t DLP_CONTROL_0_RUN_LANE_DISABLE = 4;
+static const uint32_t DLP_CONTROL_0_RUN_LANE_OVERRIDE = 5;
+static const uint32_t DLP_CONTROL_0_IGNORE_PHY = 6;
+static const uint32_t DLP_CONTROL_0_IGNORE_FENCE = 7;
+static const uint32_t DLP_CONTROL_0_ERR_INJ_COMMAND = 8;
+static const uint32_t DLP_CONTROL_0_ERR_INJ_COMMAND_LEN = 4;
+static const uint32_t DLP_CONTROL_0_ERR_INJ_COMMAND_LANES = 12;
+static const uint32_t DLP_CONTROL_0_ERR_INJ_COMMAND_LANES_LEN = 9;
+static const uint32_t DLP_CONTROL_0_COMMAND = 28;
+static const uint32_t DLP_CONTROL_0_COMMAND_LEN = 4;
+static const uint32_t DLP_CONTROL_1_PHY_TRAINING = 32;
+static const uint32_t DLP_CONTROL_1_STARTUP = 33;
+static const uint32_t DLP_CONTROL_1_HOLD_PATT_A = 34;
+static const uint32_t DLP_CONTROL_1_HOLD_PATT_B = 35;
+static const uint32_t DLP_CONTROL_1_RUN_LANE_DISABLE = 36;
+static const uint32_t DLP_CONTROL_1_RUN_LANE_OVERRIDE = 37;
+static const uint32_t DLP_CONTROL_1_IGNORE_PHY = 38;
+static const uint32_t DLP_CONTROL_1_IGNORE_FENCE = 39;
+static const uint32_t DLP_CONTROL_1_ERR_INJ_COMMAND = 40;
+static const uint32_t DLP_CONTROL_1_ERR_INJ_COMMAND_LEN = 4;
+static const uint32_t DLP_CONTROL_1_ERR_INJ_COMMAND_LANES = 44;
+static const uint32_t DLP_CONTROL_1_ERR_INJ_COMMAND_LANES_LEN = 9;
+static const uint32_t DLP_CONTROL_1_COMMAND = 60;
+static const uint32_t DLP_CONTROL_1_COMMAND_LEN = 4;
+// iohs/reg00051.H
+
 static const uint64_t IOO_RX0_RXCTL_CTL_REGS_RX_MODE12_PG = 0x8008600010012c3full;
 
 static const uint32_t IOO_RX0_RXCTL_CTL_REGS_RX_MODE12_PG_RES_DAC = 50;
@@ -548,7 +580,7 @@ static const uint64_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX82_PL = 0x800290031
 
 static const uint32_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX82_PL_RX_BD_LATCH_DAC_S111 = 55;
 static const uint32_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX82_PL_RX_BD_LATCH_DAC_S111_LEN = 9;
-// iohs/reg00051.H
+// iohs/reg00052.H
 
 static const uint64_t IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL14_PL = 0x8000700310012c3full;
 
@@ -878,7 +910,7 @@ static const uint64_t IOO_RX0_1_RD_4_RX_DAC_REGS_LOFF_A_CNTLX36_PL = 0x800120101
 
 static const uint32_t IOO_RX0_1_RD_4_RX_DAC_REGS_LOFF_A_CNTLX36_PL_RX_AD_LATCH_DAC_E001 = 55;
 static const uint32_t IOO_RX0_1_RD_4_RX_DAC_REGS_LOFF_A_CNTLX36_PL_RX_AD_LATCH_DAC_E001_LEN = 9;
-// iohs/reg00052.H
+// iohs/reg00053.H
 
 static const uint64_t IOO_RX0_1_RD_4_RX_DAC_REGS_LOFF_A_CNTLX46_PL = 0x8001701010012c3full;
 
@@ -1221,7 +1253,7 @@ static const uint64_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL10_PL = 0x80047c0010012c3full
 
 static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL10_PL_TX_NSEG_MAIN_0_15_HS_EN = 48;
 static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL10_PL_TX_NSEG_MAIN_0_15_HS_EN_LEN = 16;
-// iohs/reg00053.H
+// iohs/reg00054.H
 
 static const uint64_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL20_PL = 0x8004cc0010012c3full;
 
@@ -1521,54 +1553,6 @@ static const uint32_t MULTICAST_GROUP_4_MULTICAST4_GROUP = 3;
 static const uint32_t MULTICAST_GROUP_4_MULTICAST4_GROUP_LEN = 3;
 // iohs/reg00054.H
 
-static const uint64_t PERF_TRACE_CONFIG = 0x1801101cull;
-
-static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_0 = 0;
-static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_0_LEN = 2;
-static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_1 = 2;
-static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_1_LEN = 2;
-static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_2 = 4;
-static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_2_LEN = 2;
-static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_3 = 6;
-static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_3_LEN = 2;
-static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_4 = 8;
-static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_4_LEN = 2;
-static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_5 = 10;
-static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_5_LEN = 2;
-static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_6 = 12;
-static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_6_LEN = 2;
-static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_7 = 14;
-static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_7_LEN = 2;
-static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_0 = 16;
-static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_0_LEN = 2;
-static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_1 = 18;
-static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_1_LEN = 2;
-static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_2 = 20;
-static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_2_LEN = 2;
-static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_3 = 22;
-static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_3_LEN = 2;
-static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_4 = 24;
-static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_4_LEN = 2;
-static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_5 = 26;
-static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_5_LEN = 2;
-static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_6 = 28;
-static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_6_LEN = 2;
-static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_7 = 30;
-static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_7_LEN = 2;
-static const uint32_t PERF_TRACE_CONFIG_PMULET_FREEZE_MODE = 32;
-static const uint32_t PERF_TRACE_CONFIG_COMMON_FREEZE_MODE = 33;
-static const uint32_t PERF_TRACE_CONFIG_PERF_RESET_MODE = 34;
-static const uint32_t PERF_TRACE_CONFIG_PERFTRACE_ENABLE = 35;
-static const uint32_t PERF_TRACE_CONFIG_PERFTRACE_FIXED_WINDOW = 36;
-static const uint32_t PERF_TRACE_CONFIG_PERFTRACE_PRESCALE = 37;
-static const uint32_t PERF_TRACE_CONFIG_PERFTRACE_MODE = 38;
-static const uint32_t PERF_TRACE_CONFIG_PERFTRACE_MODE_LEN = 2;
-static const uint32_t PERF_TRACE_CONFIG_TRACE_CONFIG_0 = 40;
-static const uint32_t PERF_TRACE_CONFIG_TRACE_CONFIG_0_LEN = 12;
-static const uint32_t PERF_TRACE_CONFIG_TRACE_CONFIG_1 = 52;
-static const uint32_t PERF_TRACE_CONFIG_TRACE_CONFIG_1_LEN = 12;
-// iohs/reg00054.H
-
 static const uint64_t PRE_COUNTER_REG = 0x180f0028ull;
 
 static const uint32_t PRE_COUNTER_REG_PRE_COUNTER = 0;
@@ -1576,27 +1560,6 @@ static const uint32_t PRE_COUNTER_REG_PRE_COUNTER_LEN = 8;
 // iohs/reg00054.H
 
 static const uint64_t REGS_PRX1_DLR_APCR = 0x1801103cull;
-// iohs/reg00054.H
-
-static const uint64_t SEC_CONFIG = 0x1801100dull;
-
-static const uint32_t SEC_CONFIG_ENABLE_ERR_INJ = 0;
-static const uint32_t SEC_CONFIG_ENABLE_TRACE = 1;
-static const uint32_t SEC_CONFIG_RESET_INJ = 2;
-static const uint32_t SEC_CONFIG_LINK0_PSAVE_OVERRIDE = 12;
-static const uint32_t SEC_CONFIG_LINK0_PSAVE_OVERRIDE_LEN = 2;
-static const uint32_t SEC_CONFIG_LINK1_PSAVE_OVERRIDE = 14;
-static const uint32_t SEC_CONFIG_LINK1_PSAVE_OVERRIDE_LEN = 2;
-static const uint32_t SEC_CONFIG_SBE_ERROR_RATE = 16;
-static const uint32_t SEC_CONFIG_SBE_ERROR_RATE_LEN = 2;
-static const uint32_t SEC_CONFIG_RAND_ERROR_RATE = 18;
-static const uint32_t SEC_CONFIG_RAND_ERROR_RATE_LEN = 6;
-static const uint32_t SEC_CONFIG_INV_SH_ERROR_RATE = 24;
-static const uint32_t SEC_CONFIG_INV_SH_ERROR_RATE_LEN = 2;
-static const uint32_t SEC_CONFIG_SYNC_HEADER_ERROR_RATE = 26;
-static const uint32_t SEC_CONFIG_SYNC_HEADER_ERROR_RATE_LEN = 6;
-static const uint32_t SEC_CONFIG_EDPL_RATE = 48;
-static const uint32_t SEC_CONFIG_EDPL_RATE_LEN = 16;
 // iohs/reg00054.H
 
 static const uint64_t XSTOP_INTERRUPT_REG = 0x180f001cull;

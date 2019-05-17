@@ -123,6 +123,76 @@ static const uint32_t AXON_XSTOP_UNMASKED_XSTOP_UNMASKED_IN = 1;
 static const uint32_t AXON_XSTOP_UNMASKED_XSTOP_UNMASKED_IN_LEN = 53;
 // iohs/reg00034.H
 
+static const uint64_t DLP_LINK0_RX_LANE_CONTROL = 0x18011012ull;
+
+static const uint32_t DLP_LINK0_RX_LANE_CONTROL_DISABLED = 0;
+static const uint32_t DLP_LINK0_RX_LANE_CONTROL_DISABLED_LEN = 9;
+static const uint32_t DLP_LINK0_RX_LANE_CONTROL_BRINGUP = 12;
+static const uint32_t DLP_LINK0_RX_LANE_CONTROL_BRINGUP_LEN = 9;
+static const uint32_t DLP_LINK0_RX_LANE_CONTROL_SPARED = 24;
+static const uint32_t DLP_LINK0_RX_LANE_CONTROL_SPARED_LEN = 9;
+static const uint32_t DLP_LINK0_RX_LANE_CONTROL_LOCKED = 36;
+static const uint32_t DLP_LINK0_RX_LANE_CONTROL_LOCKED_LEN = 9;
+static const uint32_t DLP_LINK0_RX_LANE_CONTROL_FAILED = 48;
+static const uint32_t DLP_LINK0_RX_LANE_CONTROL_FAILED_LEN = 9;
+// iohs/reg00034.H
+
+static const uint64_t DLP_OPTICAL_CONFIG = 0x1801100full;
+
+static const uint32_t DLP_OPTICAL_CONFIG_CONFIG_DISABLE_BAD_LANE_COUNT = 0;
+static const uint32_t DLP_OPTICAL_CONFIG_CONFIG_DISABLE_CLEAR_BAD_LANE_COUNT = 1;
+static const uint32_t DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_NO_SPARE = 2;
+static const uint32_t DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_CRC_ERROR = 3;
+static const uint32_t DLP_OPTICAL_CONFIG_CONFIG_BAD_LANE_DURATION = 4;
+static const uint32_t DLP_OPTICAL_CONFIG_CONFIG_BAD_LANE_DURATION_LEN = 4;
+static const uint32_t DLP_OPTICAL_CONFIG_CONFIG_BAD_LANE_MAX = 9;
+static const uint32_t DLP_OPTICAL_CONFIG_CONFIG_BAD_LANE_MAX_LEN = 7;
+static const uint32_t DLP_OPTICAL_CONFIG_CONFIG_DISABLE_LINK_FAIL_COUNT = 16;
+static const uint32_t DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_DURATION = 20;
+static const uint32_t DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_DURATION_LEN = 4;
+static const uint32_t DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_MAX = 25;
+static const uint32_t DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_MAX_LEN = 7;
+static const uint32_t DLP_OPTICAL_CONFIG_CLEAR_LINK_FAIL_COUNTER = 32;
+static const uint32_t DLP_OPTICAL_CONFIG_CLEAR_BAD_LANE_COUNTER = 33;
+static const uint32_t DLP_OPTICAL_CONFIG_FULL_18_TX_LANE_SWAP = 39;
+static const uint32_t DLP_OPTICAL_CONFIG_LINK0_RX_LANE_SWAP = 40;
+static const uint32_t DLP_OPTICAL_CONFIG_LINK0_TX_LANE_SWAP = 41;
+static const uint32_t DLP_OPTICAL_CONFIG_LINK1_RX_LANE_SWAP = 42;
+static const uint32_t DLP_OPTICAL_CONFIG_LINK1_TX_LANE_SWAP = 43;
+static const uint32_t DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_LOW = 44;
+static const uint32_t DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_LOW_LEN = 4;
+static const uint32_t DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_START = 48;
+static const uint32_t DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_START_LEN = 4;
+static const uint32_t DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_HIGH = 52;
+static const uint32_t DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_HIGH_LEN = 4;
+static const uint32_t DLP_OPTICAL_CONFIG_CONFIG_FAST_ASYNC_CROSS = 59;
+static const uint32_t DLP_OPTICAL_CONFIG_CONFIG_RECAL_ABORT_TIMEOUT = 60;
+static const uint32_t DLP_OPTICAL_CONFIG_CONFIG_RECAL_ABORT_TIMEOUT_LEN = 4;
+// iohs/reg00034.H
+
+static const uint64_t DLP_PERF_COUNT_LSB_1 = 0x18011021ull;
+// iohs/reg00034.H
+
+static const uint64_t DLP_PERF_SEL_CONFIG = 0x1801101dull;
+
+static const uint32_t DLP_PERF_SEL_CONFIG_0 = 0;
+static const uint32_t DLP_PERF_SEL_CONFIG_0_LEN = 8;
+static const uint32_t DLP_PERF_SEL_CONFIG_1 = 8;
+static const uint32_t DLP_PERF_SEL_CONFIG_1_LEN = 8;
+static const uint32_t DLP_PERF_SEL_CONFIG_2 = 16;
+static const uint32_t DLP_PERF_SEL_CONFIG_2_LEN = 8;
+static const uint32_t DLP_PERF_SEL_CONFIG_3 = 24;
+static const uint32_t DLP_PERF_SEL_CONFIG_3_LEN = 8;
+static const uint32_t DLP_PERF_SEL_CONFIG_4 = 32;
+static const uint32_t DLP_PERF_SEL_CONFIG_4_LEN = 8;
+static const uint32_t DLP_PERF_SEL_CONFIG_5 = 40;
+static const uint32_t DLP_PERF_SEL_CONFIG_5_LEN = 8;
+static const uint32_t DLP_PERF_SEL_CONFIG_6 = 48;
+static const uint32_t DLP_PERF_SEL_CONFIG_6_LEN = 8;
+static const uint32_t DLP_PERF_SEL_CONFIG_7 = 56;
+static const uint32_t DLP_PERF_SEL_CONFIG_7_LEN = 8;
+// iohs/reg00034.H
+
 static const uint64_t EDRAM_STATUS = 0x180f0029ull;
 
 static const uint32_t EDRAM_STATUS_EDRAM_STAT = 0;
@@ -414,22 +484,22 @@ static const uint64_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX63_PL = 0x8001f8031
 
 static const uint32_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX63_PL_RX_BD_LATCH_DAC_N100 = 55;
 static const uint32_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX63_PL_RX_BD_LATCH_DAC_N100_LEN = 9;
-// iohs/reg00034.H
+// iohs/reg00035.H
 
 static const uint64_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX73_PL = 0x8002480310012c3full;
 
 static const uint32_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX73_PL_RX_BD_LATCH_DAC_E110 = 55;
 static const uint32_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX73_PL_RX_BD_LATCH_DAC_E110_LEN = 9;
-// iohs/reg00034.H
+// iohs/reg00035.H
 
 static const uint64_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX88_PL = 0x8002c00310012c3full;
 
 static const uint32_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX88_PL_RX_BD_LATCH_DAC_W101 = 55;
 static const uint32_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX88_PL_RX_BD_LATCH_DAC_W101_LEN = 9;
-// iohs/reg00034.H
+// iohs/reg00035.H
 
 static const uint64_t IOO_RX0_0_RD_4_RX_BIT_REGS_CNTLX5_PL = 0x8003800410012c3full;
-// iohs/reg00034.H
+// iohs/reg00035.H
 
 static const uint64_t IOO_RX0_0_RD_4_RX_DAC_REGS_LOFF_A_CNTLX20_PL = 0x8000a00410012c3full;
 
@@ -732,25 +802,25 @@ static const uint64_t IOO_RX0_1_RD_5_RX_DAC_REGS_LOFF_A_CNTLX47_PL = 0x8001780f1
 
 static const uint32_t IOO_RX0_1_RD_5_RX_DAC_REGS_LOFF_A_CNTLX47_PL_RX_AD_LATCH_DAC_S100 = 55;
 static const uint32_t IOO_RX0_1_RD_5_RX_DAC_REGS_LOFF_A_CNTLX47_PL_RX_AD_LATCH_DAC_S100_LEN = 9;
-// iohs/reg00035.H
+// iohs/reg00036.H
 
 static const uint64_t IOO_RX0_1_RD_5_RX_DAC_REGS_LOFF_A_CNTLX57_PL = 0x8001c80f10012c3full;
 
 static const uint32_t IOO_RX0_1_RD_5_RX_DAC_REGS_LOFF_A_CNTLX57_PL_RX_AD_LATCH_DAC_W110 = 55;
 static const uint32_t IOO_RX0_1_RD_5_RX_DAC_REGS_LOFF_A_CNTLX57_PL_RX_AD_LATCH_DAC_W110_LEN = 9;
-// iohs/reg00035.H
+// iohs/reg00036.H
 
 static const uint64_t IOO_RX0_1_RD_5_RX_DAC_REGS_LOFF_B_CNTLX80_PL = 0x8002800f10012c3full;
 
 static const uint32_t IOO_RX0_1_RD_5_RX_DAC_REGS_LOFF_B_CNTLX80_PL_RX_BD_LATCH_DAC_S101 = 55;
 static const uint32_t IOO_RX0_1_RD_5_RX_DAC_REGS_LOFF_B_CNTLX80_PL_RX_BD_LATCH_DAC_S101_LEN = 9;
-// iohs/reg00035.H
+// iohs/reg00036.H
 
 static const uint64_t IOO_RX0_1_RD_5_RX_DAC_REGS_LOFF_B_CNTLX90_PL = 0x8002d00f10012c3full;
 
 static const uint32_t IOO_RX0_1_RD_5_RX_DAC_REGS_LOFF_B_CNTLX90_PL_RX_BD_LATCH_DAC_W111 = 55;
 static const uint32_t IOO_RX0_1_RD_5_RX_DAC_REGS_LOFF_B_CNTLX90_PL_RX_BD_LATCH_DAC_W111_LEN = 9;
-// iohs/reg00035.H
+// iohs/reg00036.H
 
 static const uint64_t IOO_RX0_1_RD_5_RX_DAC_REGS_CNTL8_PL = 0x8000400f10012c3full;
 
@@ -1048,7 +1118,7 @@ static const uint32_t IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL3_PL_BIST_PRBS_ENABLE = 50;
 static const uint32_t IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL3_PL_BIST_PRBS_CLEAR = 51;
 static const uint32_t IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL3_PL_RXDET_ENABLE = 52;
 static const uint32_t IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL3_PL_RXDET_PULSE = 53;
-// iohs/reg00036.H
+// iohs/reg00037.H
 
 static const uint64_t IOO_TX0_0_DD_2_TX_BIT_REGS_CNTL16_PL = 0x8004ac0210012c3full;
 
@@ -1056,13 +1126,13 @@ static const uint32_t IOO_TX0_0_DD_2_TX_BIT_REGS_CNTL16_PL_I_TUNE = 48;
 static const uint32_t IOO_TX0_0_DD_2_TX_BIT_REGS_CNTL16_PL_I_TUNE_LEN = 6;
 static const uint32_t IOO_TX0_0_DD_2_TX_BIT_REGS_CNTL16_PL_Q_TUNE = 54;
 static const uint32_t IOO_TX0_0_DD_2_TX_BIT_REGS_CNTL16_PL_Q_TUNE_LEN = 6;
-// iohs/reg00036.H
+// iohs/reg00037.H
 
 static const uint64_t IOO_TX0_0_DD_2_TX_BIT_REGS_CNTL26_PL = 0x8004fc0210012c3full;
 
 static const uint32_t IOO_TX0_0_DD_2_TX_BIT_REGS_CNTL26_PL_TX_NSEG_MAIN_16_18_SAFE_EN = 48;
 static const uint32_t IOO_TX0_0_DD_2_TX_BIT_REGS_CNTL26_PL_TX_NSEG_MAIN_16_18_SAFE_EN_LEN = 3;
-// iohs/reg00036.H
+// iohs/reg00037.H
 
 static const uint64_t IOO_TX0_0_DD_2_TX_BIT_REGS_CNTL7_PL = 0x8004640210012c3full;
 
@@ -1070,7 +1140,7 @@ static const uint32_t IOO_TX0_0_DD_2_TX_BIT_REGS_CNTL7_PL_EN = 51;
 static const uint32_t IOO_TX0_0_DD_2_TX_BIT_REGS_CNTL7_PL_EN_LEN = 5;
 static const uint32_t IOO_TX0_0_DD_2_TX_BIT_REGS_CNTL7_PL_SEL = 56;
 static const uint32_t IOO_TX0_0_DD_2_TX_BIT_REGS_CNTL7_PL_SEL_LEN = 5;
-// iohs/reg00036.H
+// iohs/reg00037.H
 
 static const uint64_t IOO_TX0_0_DD_2_TX_BIT_REGS_MODE1_PL = 0x80041c0210012c3full;
 

@@ -29748,11 +29748,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_PB_BRIDGE_HCA_FIR_MASK_SCOM(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_PB_BRIDGE_HCA_FIR_MASK_RW(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = PB_BRIDGE_HCA_FIR_MASK_SCOM;
+    scomt::last_scom = PB_BRIDGE_HCA_FIR_MASK_RW;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -29762,14 +29762,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_PB_BRIDGE_HCA_FIR_MASK_SCOM(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_PB_BRIDGE_HCA_FIR_MASK_RW(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = PB_BRIDGE_HCA_FIR_MASK_SCOM;
+    scomt::last_scom = PB_BRIDGE_HCA_FIR_MASK_RW;
 #endif
-    return fapi2::getScom(i_target, PB_BRIDGE_HCA_FIR_MASK_SCOM, o_data);
+    return fapi2::getScom(i_target, PB_BRIDGE_HCA_FIR_MASK_RW, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -29777,14 +29777,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_PB_BRIDGE_HCA_FIR_MASK_SCOM(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_PB_BRIDGE_HCA_FIR_MASK_RW(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_FIR_MASK_SCOM, PB_BRIDGE_HCA_FIR_MASK_SCOM1, PB_BRIDGE_HCA_FIR_MASK_SCOM2));
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_FIR_MASK_RW, PB_BRIDGE_HCA_FIR_MASK_WO_AND, PB_BRIDGE_HCA_FIR_MASK_WO_OR));
 #endif
-    return fapi2::putScom(i_target, PB_BRIDGE_HCA_FIR_MASK_SCOM, i_data);
+    return fapi2::putScom(i_target, PB_BRIDGE_HCA_FIR_MASK_RW, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -29792,11 +29792,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_PB_BRIDGE_HCA_FIR_MASK_SCOM1(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_PB_BRIDGE_HCA_FIR_MASK_WO_AND(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = PB_BRIDGE_HCA_FIR_MASK_SCOM1;
+    scomt::last_scom = PB_BRIDGE_HCA_FIR_MASK_WO_AND;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -29806,14 +29806,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_PB_BRIDGE_HCA_FIR_MASK_SCOM1(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_PB_BRIDGE_HCA_FIR_MASK_WO_AND(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = PB_BRIDGE_HCA_FIR_MASK_SCOM1;
+    scomt::last_scom = PB_BRIDGE_HCA_FIR_MASK_WO_AND;
 #endif
-    return fapi2::getScom(i_target, PB_BRIDGE_HCA_FIR_MASK_SCOM1, o_data);
+    return fapi2::getScom(i_target, PB_BRIDGE_HCA_FIR_MASK_WO_AND, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -29821,14 +29821,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_PB_BRIDGE_HCA_FIR_MASK_SCOM1(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_PB_BRIDGE_HCA_FIR_MASK_WO_AND(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_FIR_MASK_SCOM, PB_BRIDGE_HCA_FIR_MASK_SCOM1, PB_BRIDGE_HCA_FIR_MASK_SCOM2));
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_FIR_MASK_RW, PB_BRIDGE_HCA_FIR_MASK_WO_AND, PB_BRIDGE_HCA_FIR_MASK_WO_OR));
 #endif
-    return fapi2::putScom(i_target, PB_BRIDGE_HCA_FIR_MASK_SCOM1, i_data);
+    return fapi2::putScom(i_target, PB_BRIDGE_HCA_FIR_MASK_WO_AND, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -29836,11 +29836,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_PB_BRIDGE_HCA_FIR_MASK_SCOM2(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_PB_BRIDGE_HCA_FIR_MASK_WO_OR(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = PB_BRIDGE_HCA_FIR_MASK_SCOM2;
+    scomt::last_scom = PB_BRIDGE_HCA_FIR_MASK_WO_OR;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -29850,14 +29850,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_PB_BRIDGE_HCA_FIR_MASK_SCOM2(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_PB_BRIDGE_HCA_FIR_MASK_WO_OR(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = PB_BRIDGE_HCA_FIR_MASK_SCOM2;
+    scomt::last_scom = PB_BRIDGE_HCA_FIR_MASK_WO_OR;
 #endif
-    return fapi2::getScom(i_target, PB_BRIDGE_HCA_FIR_MASK_SCOM2, o_data);
+    return fapi2::getScom(i_target, PB_BRIDGE_HCA_FIR_MASK_WO_OR, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -29865,14 +29865,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_PB_BRIDGE_HCA_FIR_MASK_SCOM2(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_PB_BRIDGE_HCA_FIR_MASK_WO_OR(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_FIR_MASK_SCOM, PB_BRIDGE_HCA_FIR_MASK_SCOM1, PB_BRIDGE_HCA_FIR_MASK_SCOM2));
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_FIR_MASK_RW, PB_BRIDGE_HCA_FIR_MASK_WO_AND, PB_BRIDGE_HCA_FIR_MASK_WO_OR));
 #endif
-    return fapi2::putScom(i_target, PB_BRIDGE_HCA_FIR_MASK_SCOM2, i_data);
+    return fapi2::putScom(i_target, PB_BRIDGE_HCA_FIR_MASK_WO_OR, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -29884,7 +29884,7 @@ static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_HCA_FIR_MASK_FIR_MASK_BITS(
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_FIR_MASK_SCOM, PB_BRIDGE_HCA_FIR_MASK_SCOM1, PB_BRIDGE_HCA_FIR_MASK_SCOM2));
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_FIR_MASK_RW, PB_BRIDGE_HCA_FIR_MASK_WO_AND, PB_BRIDGE_HCA_FIR_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<PB_BRIDGE_HCA_FIR_MASK_FIR_MASK_BITS,
            PB_BRIDGE_HCA_FIR_MASK_FIR_MASK_BITS_LEN>(i_data);
@@ -29899,7 +29899,7 @@ static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_HCA_FIR_MASK_FIR_MASK_BITS(
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_FIR_MASK_SCOM, PB_BRIDGE_HCA_FIR_MASK_SCOM1, PB_BRIDGE_HCA_FIR_MASK_SCOM2));
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_FIR_MASK_RW, PB_BRIDGE_HCA_FIR_MASK_WO_AND, PB_BRIDGE_HCA_FIR_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<PB_BRIDGE_HCA_FIR_MASK_FIR_MASK_BITS,
            PB_BRIDGE_HCA_FIR_MASK_FIR_MASK_BITS_LEN>(i_data);
@@ -29914,7 +29914,7 @@ static inline fapi2::buffer<uint64_t>& GET_PB_BRIDGE_HCA_FIR_MASK_FIR_MASK_BITS(
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_FIR_MASK_SCOM, PB_BRIDGE_HCA_FIR_MASK_SCOM1, PB_BRIDGE_HCA_FIR_MASK_SCOM2));
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_FIR_MASK_RW, PB_BRIDGE_HCA_FIR_MASK_WO_AND, PB_BRIDGE_HCA_FIR_MASK_WO_OR));
 #endif
     return i_data.extractToRight<PB_BRIDGE_HCA_FIR_MASK_FIR_MASK_BITS,
            PB_BRIDGE_HCA_FIR_MASK_FIR_MASK_BITS_LEN>(o_data);

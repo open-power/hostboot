@@ -138,17 +138,9 @@ static const uint32_t L3TRA3_TR1_CONFIG_2_B = 24;
 static const uint32_t L3TRA3_TR1_CONFIG_2_B_LEN = 24;
 // eq/reg00002.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_DUCR_PPE = 0x00000006c0001700ull;
-static const uint64_t QME_DUCR_SCOM = 0x200e0170ull;
+static const uint64_t QME_DUCR = 0x200e0170ull;
 // eq/reg00002.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_EISR_PPE = 0x00000006c0002600ull;
-static const uint64_t QME_EISR_PPE1 = 0x00000006c0002630ull;
-static const uint64_t QME_EISR_PPE2 = 0x00000006c0002620ull;
 static const uint64_t QME_EISR_RW = 0x200e0260ull;
 static const uint64_t QME_EISR_WO_CLEAR = 0x200e0263ull;
 static const uint64_t QME_EISR_WO_OR = 0x200e0262ull;
@@ -197,28 +189,19 @@ static const uint32_t QME_EISR_CPMS_INTERRUPT1 = 60;
 static const uint32_t QME_EISR_CPMS_INTERRUPT1_LEN = 4;
 // eq/reg00002.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_LFIRACT1_PPE = 0x00000006c00000c0ull;
-static const uint64_t QME_LFIRACT1_RW = 0x200e000cull;
+static const uint64_t QME_LFIRACT1 = 0x200e000cull;
 
 static const uint32_t QME_LFIRACT1_QME_LFIRACT1_FIR_ACTION1 = 0;
 static const uint32_t QME_LFIRACT1_QME_LFIRACT1_FIR_ACTION1_LEN = 28;
 // eq/reg00002.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_SCOM_XIICAC_PPE = 0x00000006c0002240ull;
-static const uint64_t QME_SCOM_XIICAC_RO = 0x200e0224ull;
+static const uint64_t QME_SCOM_XIICAC = 0x200e0224ull;
 
 static const uint32_t QME_SCOM_XIICAC_SIB_PIB_IFETCH_PENDING = 34;
 static const uint32_t QME_SCOM_XIICAC_MEM_IFETCH_PENDING = 35;
 // eq/reg00002.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_SCOM_XISGB_PPE = 0x00000006c0002200ull;
-static const uint64_t QME_SCOM_XISGB_RO = 0x200e0220ull;
+static const uint64_t QME_SCOM_XISGB = 0x200e0220ull;
 
 static const uint32_t QME_SCOM_XISGB_TORE_ADDRESS = 0;
 static const uint32_t QME_SCOM_XISGB_TORE_ADDRESS_LEN = 32;
@@ -227,11 +210,6 @@ static const uint32_t QME_SCOM_XISGB_GB_BYTE_VALID_LEN = 4;
 static const uint32_t QME_SCOM_XISGB_GB_FLUSH_PENDING = 63;
 // eq/reg00002.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_SCRB_PPE = 0x00000006c0001280ull;
-static const uint64_t QME_SCRB_PPE1 = 0x00000006c00012b0ull;
-static const uint64_t QME_SCRB_PPE2 = 0x00000006c00012a0ull;
 static const uint64_t QME_SCRB_RW = 0x200e0128ull;
 static const uint64_t QME_SCRB_WO_CLEAR = 0x200e012bull;
 static const uint64_t QME_SCRB_WO_OR = 0x200e012aull;

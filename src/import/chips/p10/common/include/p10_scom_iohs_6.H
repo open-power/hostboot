@@ -139,6 +139,73 @@ static const uint32_t AXON_TRA0_TR0_CONFIG_2_B = 24;
 static const uint32_t AXON_TRA0_TR0_CONFIG_2_B_LEN = 24;
 // iohs/reg00024.H
 
+static const uint64_t DLP_FIR_REG_RW = 0x18011000ull;
+static const uint64_t DLP_FIR_REG_WO_AND = 0x18011001ull;
+static const uint64_t DLP_FIR_REG_WO_OR = 0x18011002ull;
+
+static const uint32_t DLP_FIR_REG_LINK0_TRAINED = 0;
+static const uint32_t DLP_FIR_REG_LINK1_TRAINED = 1;
+static const uint32_t DLP_FIR_REG_LINK0_OP_IRQ = 2;
+static const uint32_t DLP_FIR_REG_LINK1_OP_IRQ = 3;
+static const uint32_t DLP_FIR_REG_LINK0_REPLAY_THRESHOLD = 4;
+static const uint32_t DLP_FIR_REG_LINK1_REPLAY_THRESHOLD = 5;
+static const uint32_t DLP_FIR_REG_LINK0_CRC_ERROR = 6;
+static const uint32_t DLP_FIR_REG_LINK1_CRC_ERROR = 7;
+static const uint32_t DLP_FIR_REG_LINK0_NAK_RECEIVED = 8;
+static const uint32_t DLP_FIR_REG_LINK1_NAK_RECEIVED = 9;
+static const uint32_t DLP_FIR_REG_LINK0_REPLAY_BUFFER_FULL = 10;
+static const uint32_t DLP_FIR_REG_LINK1_REPLAY_BUFFER_FULL = 11;
+static const uint32_t DLP_FIR_REG_LINK0_SL_ECC_THRESHOLD = 12;
+static const uint32_t DLP_FIR_REG_LINK1_SL_ECC_THRESHOLD = 13;
+static const uint32_t DLP_FIR_REG_LINK0_SL_ECC_CORRECTABLE = 14;
+static const uint32_t DLP_FIR_REG_LINK1_SL_ECC_CORRECTABLE = 15;
+static const uint32_t DLP_FIR_REG_LINK0_SL_ECC_UE = 16;
+static const uint32_t DLP_FIR_REG_LINK1_SL_ECC_UE = 17;
+static const uint32_t DLP_FIR_REG_LINK0_RETRAIN_THRESHOLD = 18;
+static const uint32_t DLP_FIR_REG_LINK1_RETRAIN_THRESHOLD = 19;
+static const uint32_t DLP_FIR_REG_LINK0_LOSS_BLOCK_ALIGN = 20;
+static const uint32_t DLP_FIR_REG_LINK1_LOSS_BLOCK_ALIGN = 21;
+static const uint32_t DLP_FIR_REG_LINK0_INVALID_BLOCK = 22;
+static const uint32_t DLP_FIR_REG_LINK1_INVALID_BLOCK = 23;
+static const uint32_t DLP_FIR_REG_LINK0_DESKEW_ERROR = 24;
+static const uint32_t DLP_FIR_REG_LINK1_DESKEW_ERROR = 25;
+static const uint32_t DLP_FIR_REG_LINK0_DESKEW_OVERFLOW = 26;
+static const uint32_t DLP_FIR_REG_LINK1_DESKEW_OVERFLOW = 27;
+static const uint32_t DLP_FIR_REG_LINK0_SW_RETRAIN = 28;
+static const uint32_t DLP_FIR_REG_LINK1_SW_RETRAIN = 29;
+static const uint32_t DLP_FIR_REG_LINK0_ACK_QUEUE_OVERFLOW = 30;
+static const uint32_t DLP_FIR_REG_LINK1_ACK_QUEUE_OVERFLOW = 31;
+static const uint32_t DLP_FIR_REG_LINK0_ACK_QUEUE_UNDERFLOW = 32;
+static const uint32_t DLP_FIR_REG_LINK1_ACK_QUEUE_UNDERFLOW = 33;
+static const uint32_t DLP_FIR_REG_LINK0_NUM_REPLAY = 34;
+static const uint32_t DLP_FIR_REG_LINK1_NUM_REPLAY = 35;
+static const uint32_t DLP_FIR_REG_LINK0_TRAINING_SET_RECEIVED = 36;
+static const uint32_t DLP_FIR_REG_LINK1_TRAINING_SET_RECEIVED = 37;
+static const uint32_t DLP_FIR_REG_LINK0_PRBS_SELECT_ERROR = 38;
+static const uint32_t DLP_FIR_REG_LINK1_PRBS_SELECT_ERROR = 39;
+static const uint32_t DLP_FIR_REG_LINK0_TCOMPLETE_BAD = 40;
+static const uint32_t DLP_FIR_REG_LINK1_TCOMPLETE_BAD = 41;
+static const uint32_t DLP_FIR_REG_LINK0_NO_SPARE = 42;
+static const uint32_t DLP_FIR_REG_LINK1_NO_SPARE = 43;
+static const uint32_t DLP_FIR_REG_LINK0_SPARE_DONE = 44;
+static const uint32_t DLP_FIR_REG_LINK1_SPARE_DONE = 45;
+static const uint32_t DLP_FIR_REG_LINK0_TOO_MANY_CRC_ERRORS = 46;
+static const uint32_t DLP_FIR_REG_LINK1_TOO_MANY_CRC_ERRORS = 47;
+static const uint32_t DLP_FIR_REG_LINK0_NPU_DLX_ERROR = 48;
+static const uint32_t DLP_FIR_REG_LINK1_NPU_DLX_ERROR = 49;
+static const uint32_t DLP_FIR_REG_OSC_SWITCH = 51;
+static const uint32_t DLP_FIR_REG_LINK0_CORRECTABLE_ARRAY_ERROR = 52;
+static const uint32_t DLP_FIR_REG_LINK1_CORRECTABLE_ARRAY_ERROR = 53;
+static const uint32_t DLP_FIR_REG_LINK0_UNCORRECTABLE_ARRAY_ERROR = 54;
+static const uint32_t DLP_FIR_REG_LINK1_UNCORRECTABLE_ARRAY_ERROR = 55;
+static const uint32_t DLP_FIR_REG_LINK0_TRAINING_FAILED = 56;
+static const uint32_t DLP_FIR_REG_LINK1_TRAINING_FAILED = 57;
+static const uint32_t DLP_FIR_REG_LINK0_UNRECOVERABLE_ERROR = 58;
+static const uint32_t DLP_FIR_REG_LINK1_UNRECOVERABLE_ERROR = 59;
+static const uint32_t DLP_FIR_REG_LINK0_INTERNAL_ERROR = 60;
+static const uint32_t DLP_FIR_REG_LINK1_INTERNAL_ERROR = 61;
+// iohs/reg00024.H
+
 static const uint64_t IOO_RX0_RXCTL_CTL_REGS_RX_MODE8_PG = 0x8008400010012c3full;
 
 static const uint32_t IOO_RX0_RXCTL_CTL_REGS_RX_MODE8_PG_RX_BO_TIME = 48;
@@ -413,7 +480,7 @@ static const uint64_t IOO_RX0_0_RD_4_RX_DAC_REGS_LOFF_A_CNTLX53_PL = 0x8001a8041
 
 static const uint32_t IOO_RX0_0_RD_4_RX_DAC_REGS_LOFF_A_CNTLX53_PL_RX_AD_LATCH_DAC_W010 = 55;
 static const uint32_t IOO_RX0_0_RD_4_RX_DAC_REGS_LOFF_A_CNTLX53_PL_RX_AD_LATCH_DAC_W010_LEN = 9;
-// iohs/reg00024.H
+// iohs/reg00025.H
 
 static const uint64_t IOO_RX0_0_RD_4_RX_DAC_REGS_LOFF_B_CNTLX84_PL = 0x8002a00410012c3full;
 
@@ -754,7 +821,7 @@ static const uint64_t IOO_RX0_1_RD_5_RX_DAC_REGS_LOFF_A_CNTLX54_PL = 0x8001b00f1
 
 static const uint32_t IOO_RX0_1_RD_5_RX_DAC_REGS_LOFF_A_CNTLX54_PL_RX_AD_LATCH_DAC_W011 = 55;
 static const uint32_t IOO_RX0_1_RD_5_RX_DAC_REGS_LOFF_A_CNTLX54_PL_RX_AD_LATCH_DAC_W011_LEN = 9;
-// iohs/reg00025.H
+// iohs/reg00026.H
 
 static const uint64_t IOO_RX0_1_RD_5_RX_DAC_REGS_LOFF_B_CNTLX68_PL = 0x8002200f10012c3full;
 
@@ -1077,7 +1144,7 @@ static const uint64_t IOO_RX0_2_RD_5_RX_DAC_REGS_LOFF_A_CNTLX53_PL = 0x8001a8091
 
 static const uint32_t IOO_RX0_2_RD_5_RX_DAC_REGS_LOFF_A_CNTLX53_PL_RX_AD_LATCH_DAC_W010 = 55;
 static const uint32_t IOO_RX0_2_RD_5_RX_DAC_REGS_LOFF_A_CNTLX53_PL_RX_AD_LATCH_DAC_W010_LEN = 9;
-// iohs/reg00026.H
+// iohs/reg00027.H
 
 static const uint64_t IOO_RX0_2_RD_5_RX_DAC_REGS_LOFF_B_CNTLX84_PL = 0x8002a00910012c3full;
 
@@ -1458,7 +1525,7 @@ static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_CNTL5_PL_EN = 51;
 static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_CNTL5_PL_EN_LEN = 5;
 static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_CNTL5_PL_SEL = 56;
 static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_CNTL5_PL_SEL_LEN = 5;
-// iohs/reg00027.H
+// iohs/reg00028.H
 
 static const uint64_t IOO_TX0_2_DD_5_TX_BIT_REGS_MODE3_PL = 0x80042c0910012c3full;
 
@@ -1469,23 +1536,6 @@ static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_MODE3_PL_D2_DIV_CTRL_LEN = 2;
 static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_MODE3_PL_FFE_BOOST_TST_EN = 52;
 static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_MODE3_PL_FFE_BOOST_EN = 53;
 static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_MODE3_PL_SEG_TEST_LEAKAGE_CTRL = 54;
-// iohs/reg00028.H
-
-static const uint64_t LINK0_ERROR_STATUS = 0x18011016ull;
-
-static const uint32_t LINK0_ERROR_STATUS_RESET_KEEPER = 0;
-static const uint32_t LINK0_ERROR_STATUS_ERROR_STATUS_CE = 1;
-static const uint32_t LINK0_ERROR_STATUS_ERROR_STATUS_CE_LEN = 7;
-static const uint32_t LINK0_ERROR_STATUS_ERROR_STATUS_UE = 8;
-static const uint32_t LINK0_ERROR_STATUS_ERROR_STATUS_UE_LEN = 4;
-static const uint32_t LINK0_ERROR_STATUS_ERROR_STATUS_OSC = 12;
-static const uint32_t LINK0_ERROR_STATUS_ERROR_STATUS_OSC_LEN = 2;
-static const uint32_t LINK0_ERROR_STATUS_ERROR_STATUS_TRAIN = 16;
-static const uint32_t LINK0_ERROR_STATUS_ERROR_STATUS_TRAIN_LEN = 5;
-static const uint32_t LINK0_ERROR_STATUS_ERROR_STATUS_UNRECOV = 24;
-static const uint32_t LINK0_ERROR_STATUS_ERROR_STATUS_UNRECOV_LEN = 14;
-static const uint32_t LINK0_ERROR_STATUS_ERROR_STATUS_INTERNAL = 40;
-static const uint32_t LINK0_ERROR_STATUS_ERROR_STATUS_INTERNAL_LEN = 24;
 // iohs/reg00028.H
 
 static const uint64_t REGS_PRX0_DLR_APST = 0x1801103bull;

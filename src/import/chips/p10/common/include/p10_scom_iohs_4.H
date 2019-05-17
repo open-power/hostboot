@@ -78,6 +78,18 @@ static const uint32_t AXON_CPLT_CTRL3_14_PSCOM_EN = 18;
 static const uint64_t AXON_EPS_THERM_WSUB_SKITTER_DATA0 = 0x18050019ull;
 // iohs/reg00016.H
 
+static const uint64_t DLP_PERF_COUNTERS_1 = 0x1801101full;
+
+static const uint32_t DLP_PERF_COUNTERS_1_4 = 0;
+static const uint32_t DLP_PERF_COUNTERS_1_4_LEN = 16;
+static const uint32_t DLP_PERF_COUNTERS_1_5 = 16;
+static const uint32_t DLP_PERF_COUNTERS_1_5_LEN = 16;
+static const uint32_t DLP_PERF_COUNTERS_1_6 = 32;
+static const uint32_t DLP_PERF_COUNTERS_1_6_LEN = 16;
+static const uint32_t DLP_PERF_COUNTERS_1_7 = 48;
+static const uint32_t DLP_PERF_COUNTERS_1_7_LEN = 16;
+// iohs/reg00016.H
+
 static const uint64_t IOO_RX0_RXCTL_DATASM_0_PLREGS_RX_CNTL2_PL = 0x8003c80010012c3full;
 // iohs/reg00016.H
 
@@ -379,7 +391,7 @@ static const uint32_t IOO_RX0_0_RD_4_RX_DAC_REGS_CNTL17_PL_DATA = 48;
 static const uint32_t IOO_RX0_0_RD_4_RX_DAC_REGS_CNTL17_PL_DATA_LEN = 5;
 static const uint32_t IOO_RX0_0_RD_4_RX_DAC_REGS_CNTL17_PL_EDGE = 54;
 static const uint32_t IOO_RX0_0_RD_4_RX_DAC_REGS_CNTL17_PL_EDGE_LEN = 5;
-// iohs/reg00016.H
+// iohs/reg00017.H
 
 static const uint64_t IOO_RX0_0_RD_5_RX_BIT_REGS_CNTL6_PL = 0x8003880510012c3full;
 
@@ -724,7 +736,7 @@ static const uint32_t IOO_RX0_2_RD_1_RX_BIT_REGS_CNTL6_PL_SAVE_FW_VAL_SEL = 48;
 static const uint32_t IOO_RX0_2_RD_1_RX_BIT_REGS_CNTL6_PL_SAVE_FW_VAL_SEL_LEN = 2;
 static const uint32_t IOO_RX0_2_RD_1_RX_BIT_REGS_CNTL6_PL_R_PSAVE_PH_FORCE_A = 50;
 static const uint32_t IOO_RX0_2_RD_1_RX_BIT_REGS_CNTL6_PL_R_PSAVE_PH_FORCE_B = 51;
-// iohs/reg00017.H
+// iohs/reg00018.H
 
 static const uint64_t IOO_RX0_2_RD_1_RX_BIT_REGS_STAT6_PL = 0x8003b80d10012c3full;
 // iohs/reg00018.H
@@ -1056,7 +1068,7 @@ static const uint32_t IOO_TX0_0_DD_4_TX_BIT_REGS_CNTL27_PL_EN = 49;
 static const uint32_t IOO_TX0_0_DD_4_TX_BIT_REGS_CNTL27_PL_EN_LEN = 7;
 static const uint32_t IOO_TX0_0_DD_4_TX_BIT_REGS_CNTL27_PL_SEL = 56;
 static const uint32_t IOO_TX0_0_DD_4_TX_BIT_REGS_CNTL27_PL_SEL_LEN = 7;
-// iohs/reg00018.H
+// iohs/reg00019.H
 
 static const uint64_t IOO_TX0_0_DD_4_TX_BIT_REGS_CNTL2_PL = 0x80043c0410012c3full;
 
@@ -1234,9 +1246,6 @@ static const uint64_t IOO_TX0_2_DD_5_TX_BIT_REGS_CNTL24_PL = 0x8004ec0910012c3fu
 
 static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_CNTL24_PL_TX_PSEG_MAIN_16_18_SAFE_EN = 48;
 static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_CNTL24_PL_TX_PSEG_MAIN_16_18_SAFE_EN_LEN = 3;
-// iohs/reg00019.H
-
-static const uint64_t PERF_COUNT_LSB_1 = 0x18011021ull;
 // iohs/reg00019.H
 
 }

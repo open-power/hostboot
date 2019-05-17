@@ -259,19 +259,13 @@ static const uint32_t OPCG_REG1_NSL_FILL_COUNT = 59;
 static const uint32_t OPCG_REG1_NSL_FILL_COUNT_LEN = 5;
 // eq/reg00014.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_CRCR_PPE = 0x00000006c0003000ull;
-static const uint64_t QME_CRCR_RW = 0x200e0300ull;
+static const uint64_t QME_CRCR = 0x200e0300ull;
 
 static const uint32_t QME_CRCR_QME_CRCR_CYCLE_REPRO_COMPARE_VALUE = 1;
 static const uint32_t QME_CRCR_QME_CRCR_CYCLE_REPRO_COMPARE_VALUE_LEN = 7;
 // eq/reg00014.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_DERP_PPE = 0x00000006c0002500ull;
-static const uint64_t QME_DERP_RW = 0x200e0250ull;
+static const uint64_t QME_DERP = 0x200e0250ull;
 
 static const uint32_t QME_DERP_DEND = 0;
 static const uint32_t QME_DERP_DEND_LEN = 32;
@@ -279,20 +273,12 @@ static const uint32_t QME_DERP_SOR = 32;
 static const uint32_t QME_DERP_SOR_LEN = 32;
 // eq/reg00014.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_EINR_PPE = 0x00000006c0002740ull;
-static const uint64_t QME_EINR_RO = 0x200e0274ull;
+static const uint64_t QME_EINR = 0x200e0274ull;
 
 static const uint32_t QME_EINR_QME_EINR_INTERRUPT_INPUT = 0;
 static const uint32_t QME_EINR_QME_EINR_INTERRUPT_INPUT_LEN = 64;
 // eq/reg00014.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_LFIR_PPE = 0x00000006c0000000ull;
-static const uint64_t QME_LFIR_PPE1 = 0x00000006c0000010ull;
-static const uint64_t QME_LFIR_PPE2 = 0x00000006c0000020ull;
 static const uint64_t QME_LFIR_RW = 0x200e0000ull;
 static const uint64_t QME_LFIR_WO_AND = 0x200e0001ull;
 static const uint64_t QME_LFIR_WO_OR = 0x200e0002ull;
@@ -327,10 +313,7 @@ static const uint32_t QME_LFIR_SPARE26 = 26;
 static const uint32_t QME_LFIR_SPARE27 = 27;
 // eq/reg00014.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_PCBSII_PPE = 0x00000006c0000380ull;
-static const uint64_t QME_PCBSII_RO = 0x200e0038ull;
+static const uint64_t QME_PCBSII = 0x200e0038ull;
 // eq/reg00014.H
 
 static const uint64_t SLAVE_CONFIG_REG = 0x200f001eull;

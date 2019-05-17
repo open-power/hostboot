@@ -3918,6 +3918,2257 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_DLP_LINK0_RX_LANE_CONTROL(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = DLP_LINK0_RX_LANE_CONTROL;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_DLP_LINK0_RX_LANE_CONTROL(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = DLP_LINK0_RX_LANE_CONTROL;
+#endif
+    return fapi2::getScom(i_target, DLP_LINK0_RX_LANE_CONTROL, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_DLP_LINK0_RX_LANE_CONTROL(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_RX_LANE_CONTROL));
+#endif
+    return fapi2::putScom(i_target, DLP_LINK0_RX_LANE_CONTROL, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_RX_LANE_CONTROL_DISABLED(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_RX_LANE_CONTROL));
+#endif
+    return o_data.insertFromRight<DLP_LINK0_RX_LANE_CONTROL_DISABLED,
+           DLP_LINK0_RX_LANE_CONTROL_DISABLED_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_LINK0_RX_LANE_CONTROL_DISABLED chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_RX_LANE_CONTROL_DISABLED(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_RX_LANE_CONTROL));
+#endif
+    return o_data.insertFromRight<DLP_LINK0_RX_LANE_CONTROL_DISABLED,
+           DLP_LINK0_RX_LANE_CONTROL_DISABLED_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_LINK0_RX_LANE_CONTROL_DISABLED chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_RX_LANE_CONTROL_DISABLED(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_RX_LANE_CONTROL));
+#endif
+    return i_data.extractToRight<DLP_LINK0_RX_LANE_CONTROL_DISABLED,
+           DLP_LINK0_RX_LANE_CONTROL_DISABLED_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_LINK0_RX_LANE_CONTROL_DISABLED chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_RX_LANE_CONTROL_BRINGUP(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_RX_LANE_CONTROL));
+#endif
+    return o_data.insertFromRight<DLP_LINK0_RX_LANE_CONTROL_BRINGUP,
+           DLP_LINK0_RX_LANE_CONTROL_BRINGUP_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_LINK0_RX_LANE_CONTROL_BRINGUP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_RX_LANE_CONTROL_BRINGUP(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_RX_LANE_CONTROL));
+#endif
+    return o_data.insertFromRight<DLP_LINK0_RX_LANE_CONTROL_BRINGUP,
+           DLP_LINK0_RX_LANE_CONTROL_BRINGUP_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_LINK0_RX_LANE_CONTROL_BRINGUP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_RX_LANE_CONTROL_BRINGUP(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_RX_LANE_CONTROL));
+#endif
+    return i_data.extractToRight<DLP_LINK0_RX_LANE_CONTROL_BRINGUP,
+           DLP_LINK0_RX_LANE_CONTROL_BRINGUP_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_LINK0_RX_LANE_CONTROL_BRINGUP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_RX_LANE_CONTROL_SPARED(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_RX_LANE_CONTROL));
+#endif
+    return o_data.insertFromRight<DLP_LINK0_RX_LANE_CONTROL_SPARED,
+           DLP_LINK0_RX_LANE_CONTROL_SPARED_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_LINK0_RX_LANE_CONTROL_SPARED chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_RX_LANE_CONTROL_SPARED(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_RX_LANE_CONTROL));
+#endif
+    return o_data.insertFromRight<DLP_LINK0_RX_LANE_CONTROL_SPARED,
+           DLP_LINK0_RX_LANE_CONTROL_SPARED_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_LINK0_RX_LANE_CONTROL_SPARED chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_RX_LANE_CONTROL_SPARED(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_RX_LANE_CONTROL));
+#endif
+    return i_data.extractToRight<DLP_LINK0_RX_LANE_CONTROL_SPARED,
+           DLP_LINK0_RX_LANE_CONTROL_SPARED_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_LINK0_RX_LANE_CONTROL_SPARED chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_RX_LANE_CONTROL_LOCKED(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_RX_LANE_CONTROL));
+#endif
+    return o_data.insertFromRight<DLP_LINK0_RX_LANE_CONTROL_LOCKED,
+           DLP_LINK0_RX_LANE_CONTROL_LOCKED_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_LINK0_RX_LANE_CONTROL_LOCKED chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_RX_LANE_CONTROL_LOCKED(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_RX_LANE_CONTROL));
+#endif
+    return o_data.insertFromRight<DLP_LINK0_RX_LANE_CONTROL_LOCKED,
+           DLP_LINK0_RX_LANE_CONTROL_LOCKED_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_LINK0_RX_LANE_CONTROL_LOCKED chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_RX_LANE_CONTROL_LOCKED(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_RX_LANE_CONTROL));
+#endif
+    return i_data.extractToRight<DLP_LINK0_RX_LANE_CONTROL_LOCKED,
+           DLP_LINK0_RX_LANE_CONTROL_LOCKED_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_LINK0_RX_LANE_CONTROL_LOCKED chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_RX_LANE_CONTROL_FAILED(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_RX_LANE_CONTROL));
+#endif
+    return o_data.insertFromRight<DLP_LINK0_RX_LANE_CONTROL_FAILED,
+           DLP_LINK0_RX_LANE_CONTROL_FAILED_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_LINK0_RX_LANE_CONTROL_FAILED chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_RX_LANE_CONTROL_FAILED(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_RX_LANE_CONTROL));
+#endif
+    return o_data.insertFromRight<DLP_LINK0_RX_LANE_CONTROL_FAILED,
+           DLP_LINK0_RX_LANE_CONTROL_FAILED_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_LINK0_RX_LANE_CONTROL_FAILED chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_RX_LANE_CONTROL_FAILED(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_RX_LANE_CONTROL));
+#endif
+    return i_data.extractToRight<DLP_LINK0_RX_LANE_CONTROL_FAILED,
+           DLP_LINK0_RX_LANE_CONTROL_FAILED_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_LINK0_RX_LANE_CONTROL_FAILED chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_DLP_OPTICAL_CONFIG(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = DLP_OPTICAL_CONFIG;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_DLP_OPTICAL_CONFIG(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = DLP_OPTICAL_CONFIG;
+#endif
+    return fapi2::getScom(i_target, DLP_OPTICAL_CONFIG, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_DLP_OPTICAL_CONFIG(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return fapi2::putScom(i_target, DLP_OPTICAL_CONFIG, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CONFIG_DISABLE_BAD_LANE_COUNT(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_CONFIG_DISABLE_BAD_LANE_COUNT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_DISABLE_BAD_LANE_COUNT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CONFIG_DISABLE_BAD_LANE_COUNT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_CONFIG_DISABLE_BAD_LANE_COUNT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_DISABLE_BAD_LANE_COUNT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CONFIG_DISABLE_BAD_LANE_COUNT(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.setBit<DLP_OPTICAL_CONFIG_CONFIG_DISABLE_BAD_LANE_COUNT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_DISABLE_BAD_LANE_COUNT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_DLP_OPTICAL_CONFIG_CONFIG_DISABLE_BAD_LANE_COUNT(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.clearBit<DLP_OPTICAL_CONFIG_CONFIG_DISABLE_BAD_LANE_COUNT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_DISABLE_BAD_LANE_COUNT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_OPTICAL_CONFIG_CONFIG_DISABLE_BAD_LANE_COUNT(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return i_data.extractToRight<DLP_OPTICAL_CONFIG_CONFIG_DISABLE_BAD_LANE_COUNT,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_DISABLE_BAD_LANE_COUNT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_DLP_OPTICAL_CONFIG_CONFIG_DISABLE_BAD_LANE_COUNT(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return i_data.getBit<DLP_OPTICAL_CONFIG_CONFIG_DISABLE_BAD_LANE_COUNT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_DISABLE_BAD_LANE_COUNT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CONFIG_DISABLE_CLEAR_BAD_LANE_COUNT(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_CONFIG_DISABLE_CLEAR_BAD_LANE_COUNT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_DISABLE_CLEAR_BAD_LANE_COUNT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CONFIG_DISABLE_CLEAR_BAD_LANE_COUNT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_CONFIG_DISABLE_CLEAR_BAD_LANE_COUNT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_DISABLE_CLEAR_BAD_LANE_COUNT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CONFIG_DISABLE_CLEAR_BAD_LANE_COUNT(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.setBit<DLP_OPTICAL_CONFIG_CONFIG_DISABLE_CLEAR_BAD_LANE_COUNT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_DISABLE_CLEAR_BAD_LANE_COUNT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_DLP_OPTICAL_CONFIG_CONFIG_DISABLE_CLEAR_BAD_LANE_COUNT(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.clearBit<DLP_OPTICAL_CONFIG_CONFIG_DISABLE_CLEAR_BAD_LANE_COUNT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_DISABLE_CLEAR_BAD_LANE_COUNT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_OPTICAL_CONFIG_CONFIG_DISABLE_CLEAR_BAD_LANE_COUNT(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return i_data.extractToRight<DLP_OPTICAL_CONFIG_CONFIG_DISABLE_CLEAR_BAD_LANE_COUNT,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_DISABLE_CLEAR_BAD_LANE_COUNT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_DLP_OPTICAL_CONFIG_CONFIG_DISABLE_CLEAR_BAD_LANE_COUNT(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return i_data.getBit<DLP_OPTICAL_CONFIG_CONFIG_DISABLE_CLEAR_BAD_LANE_COUNT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_DISABLE_CLEAR_BAD_LANE_COUNT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_NO_SPARE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_NO_SPARE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_NO_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_NO_SPARE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_NO_SPARE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_NO_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_NO_SPARE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.setBit<DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_NO_SPARE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_NO_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_NO_SPARE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.clearBit<DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_NO_SPARE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_NO_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_NO_SPARE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return i_data.extractToRight<DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_NO_SPARE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_NO_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_NO_SPARE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return i_data.getBit<DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_NO_SPARE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_NO_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_CRC_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_CRC_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_CRC_ERROR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_CRC_ERROR(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_CRC_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_CRC_ERROR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_CRC_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.setBit<DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_CRC_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_CRC_ERROR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_CRC_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.clearBit<DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_CRC_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_CRC_ERROR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_CRC_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return i_data.extractToRight<DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_CRC_ERROR,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_CRC_ERROR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_CRC_ERROR(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return i_data.getBit<DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_CRC_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_CRC_ERROR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CONFIG_BAD_LANE_DURATION(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_CONFIG_BAD_LANE_DURATION,
+           DLP_OPTICAL_CONFIG_CONFIG_BAD_LANE_DURATION_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_BAD_LANE_DURATION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CONFIG_BAD_LANE_DURATION(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_CONFIG_BAD_LANE_DURATION,
+           DLP_OPTICAL_CONFIG_CONFIG_BAD_LANE_DURATION_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_BAD_LANE_DURATION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_OPTICAL_CONFIG_CONFIG_BAD_LANE_DURATION(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return i_data.extractToRight<DLP_OPTICAL_CONFIG_CONFIG_BAD_LANE_DURATION,
+           DLP_OPTICAL_CONFIG_CONFIG_BAD_LANE_DURATION_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_BAD_LANE_DURATION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CONFIG_BAD_LANE_MAX(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_CONFIG_BAD_LANE_MAX,
+           DLP_OPTICAL_CONFIG_CONFIG_BAD_LANE_MAX_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_BAD_LANE_MAX chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CONFIG_BAD_LANE_MAX(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_CONFIG_BAD_LANE_MAX,
+           DLP_OPTICAL_CONFIG_CONFIG_BAD_LANE_MAX_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_BAD_LANE_MAX chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_OPTICAL_CONFIG_CONFIG_BAD_LANE_MAX(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return i_data.extractToRight<DLP_OPTICAL_CONFIG_CONFIG_BAD_LANE_MAX,
+           DLP_OPTICAL_CONFIG_CONFIG_BAD_LANE_MAX_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_BAD_LANE_MAX chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CONFIG_DISABLE_LINK_FAIL_COUNT(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_CONFIG_DISABLE_LINK_FAIL_COUNT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_DISABLE_LINK_FAIL_COUNT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CONFIG_DISABLE_LINK_FAIL_COUNT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_CONFIG_DISABLE_LINK_FAIL_COUNT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_DISABLE_LINK_FAIL_COUNT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CONFIG_DISABLE_LINK_FAIL_COUNT(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.setBit<DLP_OPTICAL_CONFIG_CONFIG_DISABLE_LINK_FAIL_COUNT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_DISABLE_LINK_FAIL_COUNT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_DLP_OPTICAL_CONFIG_CONFIG_DISABLE_LINK_FAIL_COUNT(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.clearBit<DLP_OPTICAL_CONFIG_CONFIG_DISABLE_LINK_FAIL_COUNT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_DISABLE_LINK_FAIL_COUNT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_OPTICAL_CONFIG_CONFIG_DISABLE_LINK_FAIL_COUNT(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return i_data.extractToRight<DLP_OPTICAL_CONFIG_CONFIG_DISABLE_LINK_FAIL_COUNT,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_DISABLE_LINK_FAIL_COUNT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_DLP_OPTICAL_CONFIG_CONFIG_DISABLE_LINK_FAIL_COUNT(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return i_data.getBit<DLP_OPTICAL_CONFIG_CONFIG_DISABLE_LINK_FAIL_COUNT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_DISABLE_LINK_FAIL_COUNT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_DURATION(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_DURATION,
+           DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_DURATION_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_DURATION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_DURATION(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_DURATION,
+           DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_DURATION_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_DURATION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_DURATION(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return i_data.extractToRight<DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_DURATION,
+           DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_DURATION_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_DURATION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_MAX(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_MAX,
+           DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_MAX_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_MAX chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_MAX(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_MAX,
+           DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_MAX_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_MAX chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_MAX(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return i_data.extractToRight<DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_MAX,
+           DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_MAX_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_LINK_FAIL_MAX chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CLEAR_LINK_FAIL_COUNTER(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_CLEAR_LINK_FAIL_COUNTER,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CLEAR_LINK_FAIL_COUNTER chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CLEAR_LINK_FAIL_COUNTER(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_CLEAR_LINK_FAIL_COUNTER,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CLEAR_LINK_FAIL_COUNTER chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CLEAR_LINK_FAIL_COUNTER(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.setBit<DLP_OPTICAL_CONFIG_CLEAR_LINK_FAIL_COUNTER>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CLEAR_LINK_FAIL_COUNTER chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_DLP_OPTICAL_CONFIG_CLEAR_LINK_FAIL_COUNTER(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.clearBit<DLP_OPTICAL_CONFIG_CLEAR_LINK_FAIL_COUNTER>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CLEAR_LINK_FAIL_COUNTER chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_OPTICAL_CONFIG_CLEAR_LINK_FAIL_COUNTER(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return i_data.extractToRight<DLP_OPTICAL_CONFIG_CLEAR_LINK_FAIL_COUNTER,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CLEAR_LINK_FAIL_COUNTER chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_DLP_OPTICAL_CONFIG_CLEAR_LINK_FAIL_COUNTER(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return i_data.getBit<DLP_OPTICAL_CONFIG_CLEAR_LINK_FAIL_COUNTER>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CLEAR_LINK_FAIL_COUNTER chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CLEAR_BAD_LANE_COUNTER(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_CLEAR_BAD_LANE_COUNTER,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CLEAR_BAD_LANE_COUNTER chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CLEAR_BAD_LANE_COUNTER(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_CLEAR_BAD_LANE_COUNTER,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CLEAR_BAD_LANE_COUNTER chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CLEAR_BAD_LANE_COUNTER(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.setBit<DLP_OPTICAL_CONFIG_CLEAR_BAD_LANE_COUNTER>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CLEAR_BAD_LANE_COUNTER chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_DLP_OPTICAL_CONFIG_CLEAR_BAD_LANE_COUNTER(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.clearBit<DLP_OPTICAL_CONFIG_CLEAR_BAD_LANE_COUNTER>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CLEAR_BAD_LANE_COUNTER chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_OPTICAL_CONFIG_CLEAR_BAD_LANE_COUNTER(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return i_data.extractToRight<DLP_OPTICAL_CONFIG_CLEAR_BAD_LANE_COUNTER,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CLEAR_BAD_LANE_COUNTER chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_DLP_OPTICAL_CONFIG_CLEAR_BAD_LANE_COUNTER(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return i_data.getBit<DLP_OPTICAL_CONFIG_CLEAR_BAD_LANE_COUNTER>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CLEAR_BAD_LANE_COUNTER chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_FULL_18_TX_LANE_SWAP(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_FULL_18_TX_LANE_SWAP,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_FULL_18_TX_LANE_SWAP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_FULL_18_TX_LANE_SWAP(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_FULL_18_TX_LANE_SWAP,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_FULL_18_TX_LANE_SWAP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_FULL_18_TX_LANE_SWAP(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.setBit<DLP_OPTICAL_CONFIG_FULL_18_TX_LANE_SWAP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_FULL_18_TX_LANE_SWAP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_DLP_OPTICAL_CONFIG_FULL_18_TX_LANE_SWAP(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.clearBit<DLP_OPTICAL_CONFIG_FULL_18_TX_LANE_SWAP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_FULL_18_TX_LANE_SWAP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_OPTICAL_CONFIG_FULL_18_TX_LANE_SWAP(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return i_data.extractToRight<DLP_OPTICAL_CONFIG_FULL_18_TX_LANE_SWAP,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_FULL_18_TX_LANE_SWAP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_DLP_OPTICAL_CONFIG_FULL_18_TX_LANE_SWAP(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return i_data.getBit<DLP_OPTICAL_CONFIG_FULL_18_TX_LANE_SWAP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_FULL_18_TX_LANE_SWAP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_LINK0_RX_LANE_SWAP(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_LINK0_RX_LANE_SWAP,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_LINK0_RX_LANE_SWAP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_LINK0_RX_LANE_SWAP(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_LINK0_RX_LANE_SWAP,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_LINK0_RX_LANE_SWAP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_LINK0_RX_LANE_SWAP(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.setBit<DLP_OPTICAL_CONFIG_LINK0_RX_LANE_SWAP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_LINK0_RX_LANE_SWAP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_DLP_OPTICAL_CONFIG_LINK0_RX_LANE_SWAP(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.clearBit<DLP_OPTICAL_CONFIG_LINK0_RX_LANE_SWAP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_LINK0_RX_LANE_SWAP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_OPTICAL_CONFIG_LINK0_RX_LANE_SWAP(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return i_data.extractToRight<DLP_OPTICAL_CONFIG_LINK0_RX_LANE_SWAP,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_LINK0_RX_LANE_SWAP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_DLP_OPTICAL_CONFIG_LINK0_RX_LANE_SWAP(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return i_data.getBit<DLP_OPTICAL_CONFIG_LINK0_RX_LANE_SWAP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_LINK0_RX_LANE_SWAP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_LINK0_TX_LANE_SWAP(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_LINK0_TX_LANE_SWAP,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_LINK0_TX_LANE_SWAP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_LINK0_TX_LANE_SWAP(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_LINK0_TX_LANE_SWAP,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_LINK0_TX_LANE_SWAP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_LINK0_TX_LANE_SWAP(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.setBit<DLP_OPTICAL_CONFIG_LINK0_TX_LANE_SWAP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_LINK0_TX_LANE_SWAP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_DLP_OPTICAL_CONFIG_LINK0_TX_LANE_SWAP(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.clearBit<DLP_OPTICAL_CONFIG_LINK0_TX_LANE_SWAP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_LINK0_TX_LANE_SWAP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_OPTICAL_CONFIG_LINK0_TX_LANE_SWAP(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return i_data.extractToRight<DLP_OPTICAL_CONFIG_LINK0_TX_LANE_SWAP,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_LINK0_TX_LANE_SWAP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_DLP_OPTICAL_CONFIG_LINK0_TX_LANE_SWAP(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return i_data.getBit<DLP_OPTICAL_CONFIG_LINK0_TX_LANE_SWAP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_LINK0_TX_LANE_SWAP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_LINK1_RX_LANE_SWAP(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_LINK1_RX_LANE_SWAP,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_LINK1_RX_LANE_SWAP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_LINK1_RX_LANE_SWAP(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_LINK1_RX_LANE_SWAP,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_LINK1_RX_LANE_SWAP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_LINK1_RX_LANE_SWAP(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.setBit<DLP_OPTICAL_CONFIG_LINK1_RX_LANE_SWAP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_LINK1_RX_LANE_SWAP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_DLP_OPTICAL_CONFIG_LINK1_RX_LANE_SWAP(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.clearBit<DLP_OPTICAL_CONFIG_LINK1_RX_LANE_SWAP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_LINK1_RX_LANE_SWAP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_OPTICAL_CONFIG_LINK1_RX_LANE_SWAP(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return i_data.extractToRight<DLP_OPTICAL_CONFIG_LINK1_RX_LANE_SWAP,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_LINK1_RX_LANE_SWAP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_DLP_OPTICAL_CONFIG_LINK1_RX_LANE_SWAP(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return i_data.getBit<DLP_OPTICAL_CONFIG_LINK1_RX_LANE_SWAP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_LINK1_RX_LANE_SWAP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_LINK1_TX_LANE_SWAP(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_LINK1_TX_LANE_SWAP,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_LINK1_TX_LANE_SWAP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_LINK1_TX_LANE_SWAP(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_LINK1_TX_LANE_SWAP,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_LINK1_TX_LANE_SWAP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_LINK1_TX_LANE_SWAP(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.setBit<DLP_OPTICAL_CONFIG_LINK1_TX_LANE_SWAP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_LINK1_TX_LANE_SWAP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_DLP_OPTICAL_CONFIG_LINK1_TX_LANE_SWAP(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.clearBit<DLP_OPTICAL_CONFIG_LINK1_TX_LANE_SWAP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_LINK1_TX_LANE_SWAP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_OPTICAL_CONFIG_LINK1_TX_LANE_SWAP(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return i_data.extractToRight<DLP_OPTICAL_CONFIG_LINK1_TX_LANE_SWAP,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_LINK1_TX_LANE_SWAP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_DLP_OPTICAL_CONFIG_LINK1_TX_LANE_SWAP(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return i_data.getBit<DLP_OPTICAL_CONFIG_LINK1_TX_LANE_SWAP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_LINK1_TX_LANE_SWAP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_LOW(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_LOW,
+           DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_LOW_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_LOW chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_LOW(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_LOW,
+           DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_LOW_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_LOW chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_LOW(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return i_data.extractToRight<DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_LOW,
+           DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_LOW_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_LOW chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_START(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_START,
+           DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_START_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_START chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_START(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_START,
+           DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_START_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_START chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_START(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return i_data.extractToRight<DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_START,
+           DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_START_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_START chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_HIGH(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_HIGH,
+           DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_HIGH_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_HIGH chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_HIGH(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_HIGH,
+           DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_HIGH_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_HIGH chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_HIGH(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return i_data.extractToRight<DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_HIGH,
+           DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_HIGH_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_ACK_QUEUE_HIGH chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CONFIG_FAST_ASYNC_CROSS(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_CONFIG_FAST_ASYNC_CROSS,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_FAST_ASYNC_CROSS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CONFIG_FAST_ASYNC_CROSS(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_CONFIG_FAST_ASYNC_CROSS,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_FAST_ASYNC_CROSS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CONFIG_FAST_ASYNC_CROSS(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.setBit<DLP_OPTICAL_CONFIG_CONFIG_FAST_ASYNC_CROSS>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_FAST_ASYNC_CROSS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_DLP_OPTICAL_CONFIG_CONFIG_FAST_ASYNC_CROSS(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.clearBit<DLP_OPTICAL_CONFIG_CONFIG_FAST_ASYNC_CROSS>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_FAST_ASYNC_CROSS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_OPTICAL_CONFIG_CONFIG_FAST_ASYNC_CROSS(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return i_data.extractToRight<DLP_OPTICAL_CONFIG_CONFIG_FAST_ASYNC_CROSS,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_FAST_ASYNC_CROSS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_DLP_OPTICAL_CONFIG_CONFIG_FAST_ASYNC_CROSS(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return i_data.getBit<DLP_OPTICAL_CONFIG_CONFIG_FAST_ASYNC_CROSS>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_FAST_ASYNC_CROSS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CONFIG_RECAL_ABORT_TIMEOUT(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_CONFIG_RECAL_ABORT_TIMEOUT,
+           DLP_OPTICAL_CONFIG_CONFIG_RECAL_ABORT_TIMEOUT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_RECAL_ABORT_TIMEOUT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_OPTICAL_CONFIG_CONFIG_RECAL_ABORT_TIMEOUT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_OPTICAL_CONFIG_CONFIG_RECAL_ABORT_TIMEOUT,
+           DLP_OPTICAL_CONFIG_CONFIG_RECAL_ABORT_TIMEOUT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_RECAL_ABORT_TIMEOUT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_OPTICAL_CONFIG_CONFIG_RECAL_ABORT_TIMEOUT(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_OPTICAL_CONFIG));
+#endif
+    return i_data.extractToRight<DLP_OPTICAL_CONFIG_CONFIG_RECAL_ABORT_TIMEOUT,
+           DLP_OPTICAL_CONFIG_CONFIG_RECAL_ABORT_TIMEOUT_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_OPTICAL_CONFIG_CONFIG_RECAL_ABORT_TIMEOUT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_DLP_PERF_COUNT_LSB_1(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = DLP_PERF_COUNT_LSB_1;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_DLP_PERF_COUNT_LSB_1(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = DLP_PERF_COUNT_LSB_1;
+#endif
+    return fapi2::getScom(i_target, DLP_PERF_COUNT_LSB_1, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_DLP_PERF_COUNT_LSB_1(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(DLP_PERF_COUNT_LSB_1));
+#endif
+    return fapi2::putScom(i_target, DLP_PERF_COUNT_LSB_1, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_DLP_PERF_SEL_CONFIG(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = DLP_PERF_SEL_CONFIG;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_DLP_PERF_SEL_CONFIG(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = DLP_PERF_SEL_CONFIG;
+#endif
+    return fapi2::getScom(i_target, DLP_PERF_SEL_CONFIG, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_DLP_PERF_SEL_CONFIG(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(DLP_PERF_SEL_CONFIG));
+#endif
+    return fapi2::putScom(i_target, DLP_PERF_SEL_CONFIG, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_PERF_SEL_CONFIG_0(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_PERF_SEL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_PERF_SEL_CONFIG_0,
+           DLP_PERF_SEL_CONFIG_0_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_PERF_SEL_CONFIG_0 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_PERF_SEL_CONFIG_0(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_PERF_SEL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_PERF_SEL_CONFIG_0,
+           DLP_PERF_SEL_CONFIG_0_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_PERF_SEL_CONFIG_0 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_PERF_SEL_CONFIG_0(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_PERF_SEL_CONFIG));
+#endif
+    return i_data.extractToRight<DLP_PERF_SEL_CONFIG_0,
+           DLP_PERF_SEL_CONFIG_0_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_PERF_SEL_CONFIG_0 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_PERF_SEL_CONFIG_1(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_PERF_SEL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_PERF_SEL_CONFIG_1,
+           DLP_PERF_SEL_CONFIG_1_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_PERF_SEL_CONFIG_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_PERF_SEL_CONFIG_1(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_PERF_SEL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_PERF_SEL_CONFIG_1,
+           DLP_PERF_SEL_CONFIG_1_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_PERF_SEL_CONFIG_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_PERF_SEL_CONFIG_1(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_PERF_SEL_CONFIG));
+#endif
+    return i_data.extractToRight<DLP_PERF_SEL_CONFIG_1,
+           DLP_PERF_SEL_CONFIG_1_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_PERF_SEL_CONFIG_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_PERF_SEL_CONFIG_2(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_PERF_SEL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_PERF_SEL_CONFIG_2,
+           DLP_PERF_SEL_CONFIG_2_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_PERF_SEL_CONFIG_2 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_PERF_SEL_CONFIG_2(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_PERF_SEL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_PERF_SEL_CONFIG_2,
+           DLP_PERF_SEL_CONFIG_2_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_PERF_SEL_CONFIG_2 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_PERF_SEL_CONFIG_2(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_PERF_SEL_CONFIG));
+#endif
+    return i_data.extractToRight<DLP_PERF_SEL_CONFIG_2,
+           DLP_PERF_SEL_CONFIG_2_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_PERF_SEL_CONFIG_2 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_PERF_SEL_CONFIG_3(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_PERF_SEL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_PERF_SEL_CONFIG_3,
+           DLP_PERF_SEL_CONFIG_3_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_PERF_SEL_CONFIG_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_PERF_SEL_CONFIG_3(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_PERF_SEL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_PERF_SEL_CONFIG_3,
+           DLP_PERF_SEL_CONFIG_3_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_PERF_SEL_CONFIG_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_PERF_SEL_CONFIG_3(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_PERF_SEL_CONFIG));
+#endif
+    return i_data.extractToRight<DLP_PERF_SEL_CONFIG_3,
+           DLP_PERF_SEL_CONFIG_3_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_PERF_SEL_CONFIG_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_PERF_SEL_CONFIG_4(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_PERF_SEL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_PERF_SEL_CONFIG_4,
+           DLP_PERF_SEL_CONFIG_4_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_PERF_SEL_CONFIG_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_PERF_SEL_CONFIG_4(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_PERF_SEL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_PERF_SEL_CONFIG_4,
+           DLP_PERF_SEL_CONFIG_4_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_PERF_SEL_CONFIG_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_PERF_SEL_CONFIG_4(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_PERF_SEL_CONFIG));
+#endif
+    return i_data.extractToRight<DLP_PERF_SEL_CONFIG_4,
+           DLP_PERF_SEL_CONFIG_4_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_PERF_SEL_CONFIG_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_PERF_SEL_CONFIG_5(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_PERF_SEL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_PERF_SEL_CONFIG_5,
+           DLP_PERF_SEL_CONFIG_5_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_PERF_SEL_CONFIG_5 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_PERF_SEL_CONFIG_5(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_PERF_SEL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_PERF_SEL_CONFIG_5,
+           DLP_PERF_SEL_CONFIG_5_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_PERF_SEL_CONFIG_5 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_PERF_SEL_CONFIG_5(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_PERF_SEL_CONFIG));
+#endif
+    return i_data.extractToRight<DLP_PERF_SEL_CONFIG_5,
+           DLP_PERF_SEL_CONFIG_5_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_PERF_SEL_CONFIG_5 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_PERF_SEL_CONFIG_6(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_PERF_SEL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_PERF_SEL_CONFIG_6,
+           DLP_PERF_SEL_CONFIG_6_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_PERF_SEL_CONFIG_6 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_PERF_SEL_CONFIG_6(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_PERF_SEL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_PERF_SEL_CONFIG_6,
+           DLP_PERF_SEL_CONFIG_6_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_PERF_SEL_CONFIG_6 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_PERF_SEL_CONFIG_6(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_PERF_SEL_CONFIG));
+#endif
+    return i_data.extractToRight<DLP_PERF_SEL_CONFIG_6,
+           DLP_PERF_SEL_CONFIG_6_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_PERF_SEL_CONFIG_6 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_PERF_SEL_CONFIG_7(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_PERF_SEL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_PERF_SEL_CONFIG_7,
+           DLP_PERF_SEL_CONFIG_7_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_PERF_SEL_CONFIG_7 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_PERF_SEL_CONFIG_7(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_PERF_SEL_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_PERF_SEL_CONFIG_7,
+           DLP_PERF_SEL_CONFIG_7_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_PERF_SEL_CONFIG_7 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_PERF_SEL_CONFIG_7(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_PERF_SEL_CONFIG));
+#endif
+    return i_data.extractToRight<DLP_PERF_SEL_CONFIG_7,
+           DLP_PERF_SEL_CONFIG_7_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_PERF_SEL_CONFIG_7 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_EDRAM_STATUS(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
@@ -12860,342 +15111,6 @@ fapi_try_exit:
     return i_data;
 #endif
 }
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX63_PL(const fapi2::Target<K, M, V>&
-        i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX63_PL;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX63_PL(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX63_PL;
-#endif
-    return fapi2::getScom(i_target, IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX63_PL, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX63_PL(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX63_PL));
-#endif
-    return fapi2::putScom(i_target, IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX63_PL, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-
-static inline fapi2::buffer<uint64_t>& SET_IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX63_PL_RX_BD_LATCH_DAC_N100(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX63_PL));
-#endif
-    return o_data.insertFromRight<IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX63_PL_RX_BD_LATCH_DAC_N100,
-           IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX63_PL_RX_BD_LATCH_DAC_N100_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX63_PL_RX_BD_LATCH_DAC_N100 chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX63_PL_RX_BD_LATCH_DAC_N100(
-    const uint64_t i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX63_PL));
-#endif
-    return o_data.insertFromRight<IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX63_PL_RX_BD_LATCH_DAC_N100,
-           IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX63_PL_RX_BD_LATCH_DAC_N100_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX63_PL_RX_BD_LATCH_DAC_N100 chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX63_PL_RX_BD_LATCH_DAC_N100(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX63_PL));
-#endif
-    return i_data.extractToRight<IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX63_PL_RX_BD_LATCH_DAC_N100,
-           IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX63_PL_RX_BD_LATCH_DAC_N100_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX63_PL_RX_BD_LATCH_DAC_N100 chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX73_PL(const fapi2::Target<K, M, V>&
-        i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX73_PL;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX73_PL(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX73_PL;
-#endif
-    return fapi2::getScom(i_target, IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX73_PL, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX73_PL(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX73_PL));
-#endif
-    return fapi2::putScom(i_target, IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX73_PL, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-
-static inline fapi2::buffer<uint64_t>& SET_IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX73_PL_RX_BD_LATCH_DAC_E110(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX73_PL));
-#endif
-    return o_data.insertFromRight<IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX73_PL_RX_BD_LATCH_DAC_E110,
-           IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX73_PL_RX_BD_LATCH_DAC_E110_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX73_PL_RX_BD_LATCH_DAC_E110 chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX73_PL_RX_BD_LATCH_DAC_E110(
-    const uint64_t i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX73_PL));
-#endif
-    return o_data.insertFromRight<IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX73_PL_RX_BD_LATCH_DAC_E110,
-           IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX73_PL_RX_BD_LATCH_DAC_E110_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX73_PL_RX_BD_LATCH_DAC_E110 chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX73_PL_RX_BD_LATCH_DAC_E110(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX73_PL));
-#endif
-    return i_data.extractToRight<IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX73_PL_RX_BD_LATCH_DAC_E110,
-           IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX73_PL_RX_BD_LATCH_DAC_E110_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX73_PL_RX_BD_LATCH_DAC_E110 chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX88_PL(const fapi2::Target<K, M, V>&
-        i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX88_PL;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX88_PL(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX88_PL;
-#endif
-    return fapi2::getScom(i_target, IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX88_PL, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX88_PL(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX88_PL));
-#endif
-    return fapi2::putScom(i_target, IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX88_PL, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-
-static inline fapi2::buffer<uint64_t>& SET_IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX88_PL_RX_BD_LATCH_DAC_W101(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX88_PL));
-#endif
-    return o_data.insertFromRight<IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX88_PL_RX_BD_LATCH_DAC_W101,
-           IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX88_PL_RX_BD_LATCH_DAC_W101_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX88_PL_RX_BD_LATCH_DAC_W101 chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX88_PL_RX_BD_LATCH_DAC_W101(
-    const uint64_t i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX88_PL));
-#endif
-    return o_data.insertFromRight<IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX88_PL_RX_BD_LATCH_DAC_W101,
-           IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX88_PL_RX_BD_LATCH_DAC_W101_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX88_PL_RX_BD_LATCH_DAC_W101 chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX88_PL_RX_BD_LATCH_DAC_W101(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX88_PL));
-#endif
-    return i_data.extractToRight<IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX88_PL_RX_BD_LATCH_DAC_W101,
-           IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX88_PL_RX_BD_LATCH_DAC_W101_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX88_PL_RX_BD_LATCH_DAC_W101 chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_IOO_RX0_0_RD_4_RX_BIT_REGS_CNTLX5_PL(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = IOO_RX0_0_RD_4_RX_BIT_REGS_CNTLX5_PL;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_IOO_RX0_0_RD_4_RX_BIT_REGS_CNTLX5_PL(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = IOO_RX0_0_RD_4_RX_BIT_REGS_CNTLX5_PL;
-#endif
-    return fapi2::getScom(i_target, IOO_RX0_0_RD_4_RX_BIT_REGS_CNTLX5_PL, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_IOO_RX0_0_RD_4_RX_BIT_REGS_CNTLX5_PL(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(IOO_RX0_0_RD_4_RX_BIT_REGS_CNTLX5_PL));
-#endif
-    return fapi2::putScom(i_target, IOO_RX0_0_RD_4_RX_BIT_REGS_CNTLX5_PL, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
 
 
 }

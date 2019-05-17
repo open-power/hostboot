@@ -271,10 +271,7 @@ static const uint32_t LOCAL_FIR_IN62 = 62;
 static const uint32_t LOCAL_FIR_EXT_LOCAL_XSTOP = 63;
 // eq/reg00011.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_PCBQBI_PPE = 0x00000006c00003c0ull;
-static const uint64_t QME_PCBQBI_RO = 0x200e003cull;
+static const uint64_t QME_PCBQBI = 0x200e003cull;
 
 static const uint32_t QME_PCBQBI_ENTRY_VALID = 0;
 static const uint32_t QME_PCBQBI_MERGING_SCHEME = 2;
@@ -286,10 +283,7 @@ static const uint32_t QME_PCBQBI_ADDR = 16;
 static const uint32_t QME_PCBQBI_ADDR_LEN = 16;
 // eq/reg00011.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_RCPTR_PPE = 0x00000006c0001880ull;
-static const uint64_t QME_RCPTR_SCOM = 0x200e0188ull;
+static const uint64_t QME_RCPTR = 0x200e0188ull;
 
 static const uint32_t QME_RCPTR_TARGET_PSTATE = 0;
 static const uint32_t QME_RCPTR_TARGET_PSTATE_LEN = 8;
@@ -298,10 +292,7 @@ static const uint32_t QME_RCPTR_TARGET_INDEX = 59;
 static const uint32_t QME_RCPTR_TARGET_INDEX_LEN = 5;
 // eq/reg00011.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_SCOM_XIMEM_PPE = 0x00000006c00021c0ull;
-static const uint64_t QME_SCOM_XIMEM_RO = 0x200e021cull;
+static const uint64_t QME_SCOM_XIMEM = 0x200e021cull;
 
 static const uint32_t QME_SCOM_XIMEM_ADDR = 0;
 static const uint32_t QME_SCOM_XIMEM_ADDR_LEN = 32;
@@ -317,10 +308,7 @@ static const uint32_t QME_SCOM_XIMEM_IFETCH_PENDING = 62;
 static const uint32_t QME_SCOM_XIMEM_DATAOP_PENDING = 63;
 // eq/reg00011.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_SCOM_XIVDR30_PPE = 0x00000006c00029c0ull;
-static const uint64_t QME_SCOM_XIVDR30_RO = 0x200e029cull;
+static const uint64_t QME_SCOM_XIVDR30 = 0x200e029cull;
 
 static const uint32_t QME_SCOM_XIVDR30_0 = 0;
 static const uint32_t QME_SCOM_XIVDR30_0_LEN = 32;
@@ -328,10 +316,7 @@ static const uint32_t QME_SCOM_XIVDR30_1 = 32;
 static const uint32_t QME_SCOM_XIVDR30_1_LEN = 32;
 // eq/reg00011.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_TTSR_PPE = 0x00000006c0001380ull;
-static const uint64_t QME_TTSR_RO_CLRPART = 0x200e0138ull;
+static const uint64_t QME_TTSR = 0x200e0138ull;
 // eq/reg00011.H
 
 static const uint64_t RECOV = 0x20040001ull;

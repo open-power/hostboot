@@ -35,8 +35,7 @@ namespace c
 {
 
 
-static const uint64_t CPMS_CERRMSK_PPE = 0x00000006c001e140ull;
-static const uint64_t CPMS_CERRMSK_RW = 0x200e0e14ull;
+static const uint64_t CPMS_CERRMSK = 0x200e0e14ull;
 
 static const uint32_t CPMS_CERRMSK_PFET_SEQ_ERR_MASK = 0;
 static const uint32_t CPMS_CERRMSK_DDS_ERR_MASK = 1;
@@ -174,8 +173,7 @@ static const uint32_t NC_NCMISC_NCSCOMS_NCU_TOPOTABLE_REG3_31 = 36;
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_TOPOTABLE_REG3_31_LEN = 4;
 // c/reg00007.H
 
-static const uint64_t QME_PSCRS3_PPE = 0x00000006c00185c0ull;
-static const uint64_t QME_PSCRS3_RW = 0x200e085cull;
+static const uint64_t QME_PSCRS3 = 0x200e085cull;
 
 static const uint32_t QME_PSCRS3_DPDES_EXIT_ENABLE = 0;
 static const uint32_t QME_PSCRS3_SD = 1;
@@ -199,10 +197,7 @@ static const uint32_t QME_PSCRS3_PLS = 24;
 static const uint32_t QME_PSCRS3_PLS_LEN = 4;
 // c/reg00007.H
 
-static const uint64_t QME_SCSR_PPE = 0x00000006c0018400ull;
-static const uint64_t QME_SCSR_PPE1 = 0x00000006c0018430ull;
-static const uint64_t QME_SCSR_PPE2 = 0x00000006c0018420ull;
-static const uint64_t QME_SCSR_SCOM = 0x200e0840ull;
+static const uint64_t QME_SCSR = 0x200e0840ull;
 static const uint64_t QME_SCSR_SCOM1 = 0x200e0843ull;
 static const uint64_t QME_SCSR_SCOM2 = 0x200e0842ull;
 
@@ -259,10 +254,7 @@ static const uint32_t QME_SCSR_PM_STATE = 60;
 static const uint32_t QME_SCSR_PM_STATE_LEN = 4;
 // c/reg00007.H
 
-static const uint64_t QME_TFCSR_PPE = 0x00000006c0018800ull;
-static const uint64_t QME_TFCSR_PPE1 = 0x00000006c0018830ull;
-static const uint64_t QME_TFCSR_PPE2 = 0x00000006c0018820ull;
-static const uint64_t QME_TFCSR_SCOM = 0x200e0880ull;
+static const uint64_t QME_TFCSR = 0x200e0880ull;
 static const uint64_t QME_TFCSR_SCOM1 = 0x200e0883ull;
 static const uint64_t QME_TFCSR_SCOM2 = 0x200e0882ull;
 

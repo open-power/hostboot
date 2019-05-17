@@ -1074,11 +1074,11 @@ fapi_try_exit:
 
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_MC_OMI_FIR_MASK_REG_SCOM(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_MC_OMI_FIR_MASK_REG_RW(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = MC_OMI_FIR_MASK_REG_SCOM;
+    scomt::last_scom = MC_OMI_FIR_MASK_REG_RW;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -1088,14 +1088,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_MC_OMI_FIR_MASK_REG_SCOM(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_MC_OMI_FIR_MASK_REG_RW(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = MC_OMI_FIR_MASK_REG_SCOM;
+    scomt::last_scom = MC_OMI_FIR_MASK_REG_RW;
 #endif
-    return fapi2::getScom(i_target, MC_OMI_FIR_MASK_REG_SCOM, o_data);
+    return fapi2::getScom(i_target, MC_OMI_FIR_MASK_REG_RW, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -1103,14 +1103,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_MC_OMI_FIR_MASK_REG_SCOM(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_MC_OMI_FIR_MASK_REG_RW(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_SCOM, MC_OMI_FIR_MASK_REG_SCOM1, MC_OMI_FIR_MASK_REG_SCOM2));
+    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_RW, MC_OMI_FIR_MASK_REG_WO_AND, MC_OMI_FIR_MASK_REG_WO_OR));
 #endif
-    return fapi2::putScom(i_target, MC_OMI_FIR_MASK_REG_SCOM, i_data);
+    return fapi2::putScom(i_target, MC_OMI_FIR_MASK_REG_RW, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -1118,11 +1118,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_MC_OMI_FIR_MASK_REG_SCOM1(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_MC_OMI_FIR_MASK_REG_WO_AND(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = MC_OMI_FIR_MASK_REG_SCOM1;
+    scomt::last_scom = MC_OMI_FIR_MASK_REG_WO_AND;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -1132,14 +1132,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_MC_OMI_FIR_MASK_REG_SCOM1(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_MC_OMI_FIR_MASK_REG_WO_AND(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = MC_OMI_FIR_MASK_REG_SCOM1;
+    scomt::last_scom = MC_OMI_FIR_MASK_REG_WO_AND;
 #endif
-    return fapi2::getScom(i_target, MC_OMI_FIR_MASK_REG_SCOM1, o_data);
+    return fapi2::getScom(i_target, MC_OMI_FIR_MASK_REG_WO_AND, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -1147,14 +1147,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_MC_OMI_FIR_MASK_REG_SCOM1(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_MC_OMI_FIR_MASK_REG_WO_AND(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_SCOM, MC_OMI_FIR_MASK_REG_SCOM1, MC_OMI_FIR_MASK_REG_SCOM2));
+    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_RW, MC_OMI_FIR_MASK_REG_WO_AND, MC_OMI_FIR_MASK_REG_WO_OR));
 #endif
-    return fapi2::putScom(i_target, MC_OMI_FIR_MASK_REG_SCOM1, i_data);
+    return fapi2::putScom(i_target, MC_OMI_FIR_MASK_REG_WO_AND, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -1162,11 +1162,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_MC_OMI_FIR_MASK_REG_SCOM2(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_MC_OMI_FIR_MASK_REG_WO_OR(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = MC_OMI_FIR_MASK_REG_SCOM2;
+    scomt::last_scom = MC_OMI_FIR_MASK_REG_WO_OR;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -1176,14 +1176,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_MC_OMI_FIR_MASK_REG_SCOM2(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_MC_OMI_FIR_MASK_REG_WO_OR(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = MC_OMI_FIR_MASK_REG_SCOM2;
+    scomt::last_scom = MC_OMI_FIR_MASK_REG_WO_OR;
 #endif
-    return fapi2::getScom(i_target, MC_OMI_FIR_MASK_REG_SCOM2, o_data);
+    return fapi2::getScom(i_target, MC_OMI_FIR_MASK_REG_WO_OR, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -1191,14 +1191,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_MC_OMI_FIR_MASK_REG_SCOM2(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_MC_OMI_FIR_MASK_REG_WO_OR(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_SCOM, MC_OMI_FIR_MASK_REG_SCOM1, MC_OMI_FIR_MASK_REG_SCOM2));
+    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_RW, MC_OMI_FIR_MASK_REG_WO_AND, MC_OMI_FIR_MASK_REG_WO_OR));
 #endif
-    return fapi2::putScom(i_target, MC_OMI_FIR_MASK_REG_SCOM2, i_data);
+    return fapi2::putScom(i_target, MC_OMI_FIR_MASK_REG_WO_OR, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -1210,7 +1210,7 @@ static inline fapi2::buffer<uint64_t>& SET_MC_OMI_FIR_MASK_REG_DL0_FIR_ERROR_MAS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_SCOM, MC_OMI_FIR_MASK_REG_SCOM1, MC_OMI_FIR_MASK_REG_SCOM2));
+    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_RW, MC_OMI_FIR_MASK_REG_WO_AND, MC_OMI_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<MC_OMI_FIR_MASK_REG_DL0_FIR_ERROR_MASK,
            MC_OMI_FIR_MASK_REG_DL0_FIR_ERROR_MASK_LEN>(i_data);
@@ -1225,7 +1225,7 @@ static inline fapi2::buffer<uint64_t>& SET_MC_OMI_FIR_MASK_REG_DL0_FIR_ERROR_MAS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_SCOM, MC_OMI_FIR_MASK_REG_SCOM1, MC_OMI_FIR_MASK_REG_SCOM2));
+    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_RW, MC_OMI_FIR_MASK_REG_WO_AND, MC_OMI_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<MC_OMI_FIR_MASK_REG_DL0_FIR_ERROR_MASK,
            MC_OMI_FIR_MASK_REG_DL0_FIR_ERROR_MASK_LEN>(i_data);
@@ -1240,7 +1240,7 @@ static inline fapi2::buffer<uint64_t>& GET_MC_OMI_FIR_MASK_REG_DL0_FIR_ERROR_MAS
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_SCOM, MC_OMI_FIR_MASK_REG_SCOM1, MC_OMI_FIR_MASK_REG_SCOM2));
+    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_RW, MC_OMI_FIR_MASK_REG_WO_AND, MC_OMI_FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<MC_OMI_FIR_MASK_REG_DL0_FIR_ERROR_MASK,
            MC_OMI_FIR_MASK_REG_DL0_FIR_ERROR_MASK_LEN>(o_data);
@@ -1255,7 +1255,7 @@ static inline fapi2::buffer<uint64_t>& SET_MC_OMI_FIR_MASK_REG_DL1_FIR_ERROR_MAS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_SCOM, MC_OMI_FIR_MASK_REG_SCOM1, MC_OMI_FIR_MASK_REG_SCOM2));
+    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_RW, MC_OMI_FIR_MASK_REG_WO_AND, MC_OMI_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<MC_OMI_FIR_MASK_REG_DL1_FIR_ERROR_MASK,
            MC_OMI_FIR_MASK_REG_DL1_FIR_ERROR_MASK_LEN>(i_data);
@@ -1270,7 +1270,7 @@ static inline fapi2::buffer<uint64_t>& SET_MC_OMI_FIR_MASK_REG_DL1_FIR_ERROR_MAS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_SCOM, MC_OMI_FIR_MASK_REG_SCOM1, MC_OMI_FIR_MASK_REG_SCOM2));
+    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_RW, MC_OMI_FIR_MASK_REG_WO_AND, MC_OMI_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<MC_OMI_FIR_MASK_REG_DL1_FIR_ERROR_MASK,
            MC_OMI_FIR_MASK_REG_DL1_FIR_ERROR_MASK_LEN>(i_data);
@@ -1285,7 +1285,7 @@ static inline fapi2::buffer<uint64_t>& GET_MC_OMI_FIR_MASK_REG_DL1_FIR_ERROR_MAS
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_SCOM, MC_OMI_FIR_MASK_REG_SCOM1, MC_OMI_FIR_MASK_REG_SCOM2));
+    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_RW, MC_OMI_FIR_MASK_REG_WO_AND, MC_OMI_FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<MC_OMI_FIR_MASK_REG_DL1_FIR_ERROR_MASK,
            MC_OMI_FIR_MASK_REG_DL1_FIR_ERROR_MASK_LEN>(o_data);
@@ -1300,7 +1300,7 @@ static inline fapi2::buffer<uint64_t>& SET_MC_OMI_FIR_MASK_REG_DL2_FIR_ERROR_MAS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_SCOM, MC_OMI_FIR_MASK_REG_SCOM1, MC_OMI_FIR_MASK_REG_SCOM2));
+    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_RW, MC_OMI_FIR_MASK_REG_WO_AND, MC_OMI_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<MC_OMI_FIR_MASK_REG_DL2_FIR_ERROR_MASK,
            MC_OMI_FIR_MASK_REG_DL2_FIR_ERROR_MASK_LEN>(i_data);
@@ -1315,7 +1315,7 @@ static inline fapi2::buffer<uint64_t>& SET_MC_OMI_FIR_MASK_REG_DL2_FIR_ERROR_MAS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_SCOM, MC_OMI_FIR_MASK_REG_SCOM1, MC_OMI_FIR_MASK_REG_SCOM2));
+    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_RW, MC_OMI_FIR_MASK_REG_WO_AND, MC_OMI_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<MC_OMI_FIR_MASK_REG_DL2_FIR_ERROR_MASK,
            MC_OMI_FIR_MASK_REG_DL2_FIR_ERROR_MASK_LEN>(i_data);
@@ -1330,7 +1330,7 @@ static inline fapi2::buffer<uint64_t>& GET_MC_OMI_FIR_MASK_REG_DL2_FIR_ERROR_MAS
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_SCOM, MC_OMI_FIR_MASK_REG_SCOM1, MC_OMI_FIR_MASK_REG_SCOM2));
+    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_RW, MC_OMI_FIR_MASK_REG_WO_AND, MC_OMI_FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<MC_OMI_FIR_MASK_REG_DL2_FIR_ERROR_MASK,
            MC_OMI_FIR_MASK_REG_DL2_FIR_ERROR_MASK_LEN>(o_data);
@@ -1345,7 +1345,7 @@ static inline fapi2::buffer<uint64_t>& SET_MC_OMI_FIR_MASK_REG_PERF_MON_WRAPPED_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_SCOM, MC_OMI_FIR_MASK_REG_SCOM1, MC_OMI_FIR_MASK_REG_SCOM2));
+    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_RW, MC_OMI_FIR_MASK_REG_WO_AND, MC_OMI_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<MC_OMI_FIR_MASK_REG_PERF_MON_WRAPPED_MASK,
            1>(i_data);
@@ -1360,7 +1360,7 @@ static inline fapi2::buffer<uint64_t>& SET_MC_OMI_FIR_MASK_REG_PERF_MON_WRAPPED_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_SCOM, MC_OMI_FIR_MASK_REG_SCOM1, MC_OMI_FIR_MASK_REG_SCOM2));
+    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_RW, MC_OMI_FIR_MASK_REG_WO_AND, MC_OMI_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.insertFromRight<MC_OMI_FIR_MASK_REG_PERF_MON_WRAPPED_MASK,
            1>(i_data);
@@ -1374,7 +1374,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_MC_OMI_FIR_MASK_REG_PERF_MON_WRAPPED_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_SCOM, MC_OMI_FIR_MASK_REG_SCOM1, MC_OMI_FIR_MASK_REG_SCOM2));
+    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_RW, MC_OMI_FIR_MASK_REG_WO_AND, MC_OMI_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.setBit<MC_OMI_FIR_MASK_REG_PERF_MON_WRAPPED_MASK>();
 #ifdef SCOM_CHECKING
@@ -1387,7 +1387,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_MC_OMI_FIR_MASK_REG_PERF_MON_WRAPPED_MASK(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_SCOM, MC_OMI_FIR_MASK_REG_SCOM1, MC_OMI_FIR_MASK_REG_SCOM2));
+    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_RW, MC_OMI_FIR_MASK_REG_WO_AND, MC_OMI_FIR_MASK_REG_WO_OR));
 #endif
     return o_data.clearBit<MC_OMI_FIR_MASK_REG_PERF_MON_WRAPPED_MASK>();
 #ifdef SCOM_CHECKING
@@ -1401,7 +1401,7 @@ static inline fapi2::buffer<uint64_t>& GET_MC_OMI_FIR_MASK_REG_PERF_MON_WRAPPED_
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_SCOM, MC_OMI_FIR_MASK_REG_SCOM1, MC_OMI_FIR_MASK_REG_SCOM2));
+    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_RW, MC_OMI_FIR_MASK_REG_WO_AND, MC_OMI_FIR_MASK_REG_WO_OR));
 #endif
     return i_data.extractToRight<MC_OMI_FIR_MASK_REG_PERF_MON_WRAPPED_MASK,
            1>(o_data);
@@ -1415,7 +1415,7 @@ fapi_try_exit:
 static inline bool GET_MC_OMI_FIR_MASK_REG_PERF_MON_WRAPPED_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_SCOM, MC_OMI_FIR_MASK_REG_SCOM1, MC_OMI_FIR_MASK_REG_SCOM2));
+    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_MASK_REG_RW, MC_OMI_FIR_MASK_REG_WO_AND, MC_OMI_FIR_MASK_REG_WO_OR));
 #endif
     return i_data.getBit<MC_OMI_FIR_MASK_REG_PERF_MON_WRAPPED_MASK>();
 #ifdef SCOM_CHECKING

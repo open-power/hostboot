@@ -13601,11 +13601,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_DLL_STATUS(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_DLP_LINK0_TX_LANE_CONTROL(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = DLL_STATUS;
+    scomt::last_scom = DLP_LINK0_TX_LANE_CONTROL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -13615,13 +13615,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_DLL_STATUS(const fapi2::Target<K, M, V>& i_target, fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::ReturnCode GET_DLP_LINK0_TX_LANE_CONTROL(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = DLL_STATUS;
+    scomt::last_scom = DLP_LINK0_TX_LANE_CONTROL;
 #endif
-    return fapi2::getScom(i_target, DLL_STATUS, o_data);
+    return fapi2::getScom(i_target, DLP_LINK0_TX_LANE_CONTROL, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -13629,13 +13630,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_DLL_STATUS(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+static inline fapi2::ReturnCode PUT_DLP_LINK0_TX_LANE_CONTROL(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_TX_LANE_CONTROL));
 #endif
-    return fapi2::putScom(i_target, DLL_STATUS, i_data);
+    return fapi2::putScom(i_target, DLP_LINK0_TX_LANE_CONTROL, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -13643,944 +13645,452 @@ fapi_try_exit:
 }
 
 
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_0_CURRENT_STATE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_TX_LANE_CONTROL_00_CONTROL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_TX_LANE_CONTROL));
 #endif
-    return o_data.insertFromRight<DLL_STATUS_0_CURRENT_STATE,
-           DLL_STATUS_0_CURRENT_STATE_LEN>(i_data);
+    return o_data.insertFromRight<DLP_LINK0_TX_LANE_CONTROL_00_CONTROL,
+           DLP_LINK0_TX_LANE_CONTROL_00_CONTROL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_0_CURRENT_STATE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DLP_LINK0_TX_LANE_CONTROL_00_CONTROL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_0_CURRENT_STATE(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_TX_LANE_CONTROL_00_CONTROL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_TX_LANE_CONTROL));
 #endif
-    return o_data.insertFromRight<DLL_STATUS_0_CURRENT_STATE,
-           DLL_STATUS_0_CURRENT_STATE_LEN>(i_data);
+    return o_data.insertFromRight<DLP_LINK0_TX_LANE_CONTROL_00_CONTROL,
+           DLP_LINK0_TX_LANE_CONTROL_00_CONTROL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_0_CURRENT_STATE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DLP_LINK0_TX_LANE_CONTROL_00_CONTROL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_DLL_STATUS_0_CURRENT_STATE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_TX_LANE_CONTROL_00_CONTROL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_TX_LANE_CONTROL));
 #endif
-    return i_data.extractToRight<DLL_STATUS_0_CURRENT_STATE,
-           DLL_STATUS_0_CURRENT_STATE_LEN>(o_data);
+    return i_data.extractToRight<DLP_LINK0_TX_LANE_CONTROL_00_CONTROL,
+           DLP_LINK0_TX_LANE_CONTROL_00_CONTROL_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_0_CURRENT_STATE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DLP_LINK0_TX_LANE_CONTROL_00_CONTROL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_0_PRIOR_STATE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_TX_LANE_CONTROL_01_CONTROL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_TX_LANE_CONTROL));
 #endif
-    return o_data.insertFromRight<DLL_STATUS_0_PRIOR_STATE,
-           DLL_STATUS_0_PRIOR_STATE_LEN>(i_data);
+    return o_data.insertFromRight<DLP_LINK0_TX_LANE_CONTROL_01_CONTROL,
+           DLP_LINK0_TX_LANE_CONTROL_01_CONTROL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_0_PRIOR_STATE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DLP_LINK0_TX_LANE_CONTROL_01_CONTROL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_0_PRIOR_STATE(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_TX_LANE_CONTROL_01_CONTROL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_TX_LANE_CONTROL));
 #endif
-    return o_data.insertFromRight<DLL_STATUS_0_PRIOR_STATE,
-           DLL_STATUS_0_PRIOR_STATE_LEN>(i_data);
+    return o_data.insertFromRight<DLP_LINK0_TX_LANE_CONTROL_01_CONTROL,
+           DLP_LINK0_TX_LANE_CONTROL_01_CONTROL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_0_PRIOR_STATE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DLP_LINK0_TX_LANE_CONTROL_01_CONTROL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_DLL_STATUS_0_PRIOR_STATE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_TX_LANE_CONTROL_01_CONTROL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_TX_LANE_CONTROL));
 #endif
-    return i_data.extractToRight<DLL_STATUS_0_PRIOR_STATE,
-           DLL_STATUS_0_PRIOR_STATE_LEN>(o_data);
+    return i_data.extractToRight<DLP_LINK0_TX_LANE_CONTROL_01_CONTROL,
+           DLP_LINK0_TX_LANE_CONTROL_01_CONTROL_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_0_PRIOR_STATE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DLP_LINK0_TX_LANE_CONTROL_01_CONTROL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_0_OPTICS_RST_B(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_TX_LANE_CONTROL_02_CONTROL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_TX_LANE_CONTROL));
 #endif
-    return o_data.insertFromRight<DLL_STATUS_0_OPTICS_RST_B,
-           1>(i_data);
+    return o_data.insertFromRight<DLP_LINK0_TX_LANE_CONTROL_02_CONTROL,
+           DLP_LINK0_TX_LANE_CONTROL_02_CONTROL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_0_OPTICS_RST_B chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DLP_LINK0_TX_LANE_CONTROL_02_CONTROL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_0_OPTICS_RST_B(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_TX_LANE_CONTROL_02_CONTROL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_TX_LANE_CONTROL));
 #endif
-    return o_data.insertFromRight<DLL_STATUS_0_OPTICS_RST_B,
-           1>(i_data);
+    return o_data.insertFromRight<DLP_LINK0_TX_LANE_CONTROL_02_CONTROL,
+           DLP_LINK0_TX_LANE_CONTROL_02_CONTROL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_0_OPTICS_RST_B chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DLP_LINK0_TX_LANE_CONTROL_02_CONTROL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_0_OPTICS_RST_B(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return o_data.setBit<DLL_STATUS_0_OPTICS_RST_B>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_0_OPTICS_RST_B chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_DLL_STATUS_0_OPTICS_RST_B(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return o_data.clearBit<DLL_STATUS_0_OPTICS_RST_B>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_0_OPTICS_RST_B chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DLL_STATUS_0_OPTICS_RST_B(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_TX_LANE_CONTROL_02_CONTROL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_TX_LANE_CONTROL));
 #endif
-    return i_data.extractToRight<DLL_STATUS_0_OPTICS_RST_B,
-           1>(o_data);
+    return i_data.extractToRight<DLP_LINK0_TX_LANE_CONTROL_02_CONTROL,
+           DLP_LINK0_TX_LANE_CONTROL_02_CONTROL_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_0_OPTICS_RST_B chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DLP_LINK0_TX_LANE_CONTROL_02_CONTROL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_DLL_STATUS_0_OPTICS_RST_B(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return i_data.getBit<DLL_STATUS_0_OPTICS_RST_B>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_0_OPTICS_RST_B chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_0_OPTICS_IRQ(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_TX_LANE_CONTROL_03_CONTROL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_TX_LANE_CONTROL));
 #endif
-    return o_data.insertFromRight<DLL_STATUS_0_OPTICS_IRQ,
-           1>(i_data);
+    return o_data.insertFromRight<DLP_LINK0_TX_LANE_CONTROL_03_CONTROL,
+           DLP_LINK0_TX_LANE_CONTROL_03_CONTROL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_0_OPTICS_IRQ chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DLP_LINK0_TX_LANE_CONTROL_03_CONTROL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_0_OPTICS_IRQ(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_TX_LANE_CONTROL_03_CONTROL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_TX_LANE_CONTROL));
 #endif
-    return o_data.insertFromRight<DLL_STATUS_0_OPTICS_IRQ,
-           1>(i_data);
+    return o_data.insertFromRight<DLP_LINK0_TX_LANE_CONTROL_03_CONTROL,
+           DLP_LINK0_TX_LANE_CONTROL_03_CONTROL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_0_OPTICS_IRQ chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DLP_LINK0_TX_LANE_CONTROL_03_CONTROL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_0_OPTICS_IRQ(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return o_data.setBit<DLL_STATUS_0_OPTICS_IRQ>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_0_OPTICS_IRQ chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_DLL_STATUS_0_OPTICS_IRQ(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return o_data.clearBit<DLL_STATUS_0_OPTICS_IRQ>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_0_OPTICS_IRQ chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DLL_STATUS_0_OPTICS_IRQ(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_TX_LANE_CONTROL_03_CONTROL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_TX_LANE_CONTROL));
 #endif
-    return i_data.extractToRight<DLL_STATUS_0_OPTICS_IRQ,
-           1>(o_data);
+    return i_data.extractToRight<DLP_LINK0_TX_LANE_CONTROL_03_CONTROL,
+           DLP_LINK0_TX_LANE_CONTROL_03_CONTROL_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_0_OPTICS_IRQ chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DLP_LINK0_TX_LANE_CONTROL_03_CONTROL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_DLL_STATUS_0_OPTICS_IRQ(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return i_data.getBit<DLL_STATUS_0_OPTICS_IRQ>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_0_OPTICS_IRQ chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_0_TRAINING(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_TX_LANE_CONTROL_04_CONTROL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_TX_LANE_CONTROL));
 #endif
-    return o_data.insertFromRight<DLL_STATUS_0_TRAINING,
-           1>(i_data);
+    return o_data.insertFromRight<DLP_LINK0_TX_LANE_CONTROL_04_CONTROL,
+           DLP_LINK0_TX_LANE_CONTROL_04_CONTROL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_0_TRAINING chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DLP_LINK0_TX_LANE_CONTROL_04_CONTROL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_0_TRAINING(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_TX_LANE_CONTROL_04_CONTROL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_TX_LANE_CONTROL));
 #endif
-    return o_data.insertFromRight<DLL_STATUS_0_TRAINING,
-           1>(i_data);
+    return o_data.insertFromRight<DLP_LINK0_TX_LANE_CONTROL_04_CONTROL,
+           DLP_LINK0_TX_LANE_CONTROL_04_CONTROL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_0_TRAINING chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DLP_LINK0_TX_LANE_CONTROL_04_CONTROL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_0_TRAINING(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return o_data.setBit<DLL_STATUS_0_TRAINING>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_0_TRAINING chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_DLL_STATUS_0_TRAINING(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return o_data.clearBit<DLL_STATUS_0_TRAINING>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_0_TRAINING chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DLL_STATUS_0_TRAINING(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_TX_LANE_CONTROL_04_CONTROL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_TX_LANE_CONTROL));
 #endif
-    return i_data.extractToRight<DLL_STATUS_0_TRAINING,
-           1>(o_data);
+    return i_data.extractToRight<DLP_LINK0_TX_LANE_CONTROL_04_CONTROL,
+           DLP_LINK0_TX_LANE_CONTROL_04_CONTROL_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_0_TRAINING chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DLP_LINK0_TX_LANE_CONTROL_04_CONTROL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_DLL_STATUS_0_TRAINING(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return i_data.getBit<DLL_STATUS_0_TRAINING>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_0_TRAINING chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_0_MAX_PKT_TIMER(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_TX_LANE_CONTROL_05_CONTROL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_TX_LANE_CONTROL));
 #endif
-    return o_data.insertFromRight<DLL_STATUS_0_MAX_PKT_TIMER,
-           DLL_STATUS_0_MAX_PKT_TIMER_LEN>(i_data);
+    return o_data.insertFromRight<DLP_LINK0_TX_LANE_CONTROL_05_CONTROL,
+           DLP_LINK0_TX_LANE_CONTROL_05_CONTROL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_0_MAX_PKT_TIMER chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DLP_LINK0_TX_LANE_CONTROL_05_CONTROL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_0_MAX_PKT_TIMER(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_TX_LANE_CONTROL_05_CONTROL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_TX_LANE_CONTROL));
 #endif
-    return o_data.insertFromRight<DLL_STATUS_0_MAX_PKT_TIMER,
-           DLL_STATUS_0_MAX_PKT_TIMER_LEN>(i_data);
+    return o_data.insertFromRight<DLP_LINK0_TX_LANE_CONTROL_05_CONTROL,
+           DLP_LINK0_TX_LANE_CONTROL_05_CONTROL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_0_MAX_PKT_TIMER chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DLP_LINK0_TX_LANE_CONTROL_05_CONTROL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_DLL_STATUS_0_MAX_PKT_TIMER(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_TX_LANE_CONTROL_05_CONTROL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_TX_LANE_CONTROL));
 #endif
-    return i_data.extractToRight<DLL_STATUS_0_MAX_PKT_TIMER,
-           DLL_STATUS_0_MAX_PKT_TIMER_LEN>(o_data);
+    return i_data.extractToRight<DLP_LINK0_TX_LANE_CONTROL_05_CONTROL,
+           DLP_LINK0_TX_LANE_CONTROL_05_CONTROL_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_0_MAX_PKT_TIMER chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DLP_LINK0_TX_LANE_CONTROL_05_CONTROL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_1_CURRENT_STATE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_TX_LANE_CONTROL_06_CONTROL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_TX_LANE_CONTROL));
 #endif
-    return o_data.insertFromRight<DLL_STATUS_1_CURRENT_STATE,
-           DLL_STATUS_1_CURRENT_STATE_LEN>(i_data);
+    return o_data.insertFromRight<DLP_LINK0_TX_LANE_CONTROL_06_CONTROL,
+           DLP_LINK0_TX_LANE_CONTROL_06_CONTROL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_1_CURRENT_STATE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DLP_LINK0_TX_LANE_CONTROL_06_CONTROL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_1_CURRENT_STATE(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_TX_LANE_CONTROL_06_CONTROL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_TX_LANE_CONTROL));
 #endif
-    return o_data.insertFromRight<DLL_STATUS_1_CURRENT_STATE,
-           DLL_STATUS_1_CURRENT_STATE_LEN>(i_data);
+    return o_data.insertFromRight<DLP_LINK0_TX_LANE_CONTROL_06_CONTROL,
+           DLP_LINK0_TX_LANE_CONTROL_06_CONTROL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_1_CURRENT_STATE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DLP_LINK0_TX_LANE_CONTROL_06_CONTROL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_DLL_STATUS_1_CURRENT_STATE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_TX_LANE_CONTROL_06_CONTROL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_TX_LANE_CONTROL));
 #endif
-    return i_data.extractToRight<DLL_STATUS_1_CURRENT_STATE,
-           DLL_STATUS_1_CURRENT_STATE_LEN>(o_data);
+    return i_data.extractToRight<DLP_LINK0_TX_LANE_CONTROL_06_CONTROL,
+           DLP_LINK0_TX_LANE_CONTROL_06_CONTROL_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_1_CURRENT_STATE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DLP_LINK0_TX_LANE_CONTROL_06_CONTROL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_1_PRIOR_STATE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_TX_LANE_CONTROL_07_CONTROL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_TX_LANE_CONTROL));
 #endif
-    return o_data.insertFromRight<DLL_STATUS_1_PRIOR_STATE,
-           DLL_STATUS_1_PRIOR_STATE_LEN>(i_data);
+    return o_data.insertFromRight<DLP_LINK0_TX_LANE_CONTROL_07_CONTROL,
+           DLP_LINK0_TX_LANE_CONTROL_07_CONTROL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_1_PRIOR_STATE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DLP_LINK0_TX_LANE_CONTROL_07_CONTROL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_1_PRIOR_STATE(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_TX_LANE_CONTROL_07_CONTROL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_TX_LANE_CONTROL));
 #endif
-    return o_data.insertFromRight<DLL_STATUS_1_PRIOR_STATE,
-           DLL_STATUS_1_PRIOR_STATE_LEN>(i_data);
+    return o_data.insertFromRight<DLP_LINK0_TX_LANE_CONTROL_07_CONTROL,
+           DLP_LINK0_TX_LANE_CONTROL_07_CONTROL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_1_PRIOR_STATE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DLP_LINK0_TX_LANE_CONTROL_07_CONTROL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_DLL_STATUS_1_PRIOR_STATE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_TX_LANE_CONTROL_07_CONTROL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_TX_LANE_CONTROL));
 #endif
-    return i_data.extractToRight<DLL_STATUS_1_PRIOR_STATE,
-           DLL_STATUS_1_PRIOR_STATE_LEN>(o_data);
+    return i_data.extractToRight<DLP_LINK0_TX_LANE_CONTROL_07_CONTROL,
+           DLP_LINK0_TX_LANE_CONTROL_07_CONTROL_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_1_PRIOR_STATE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DLP_LINK0_TX_LANE_CONTROL_07_CONTROL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_1_OPTICS_RST_B(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_TX_LANE_CONTROL_SP_CONTROL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_TX_LANE_CONTROL));
 #endif
-    return o_data.insertFromRight<DLL_STATUS_1_OPTICS_RST_B,
-           1>(i_data);
+    return o_data.insertFromRight<DLP_LINK0_TX_LANE_CONTROL_SP_CONTROL,
+           DLP_LINK0_TX_LANE_CONTROL_SP_CONTROL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_1_OPTICS_RST_B chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DLP_LINK0_TX_LANE_CONTROL_SP_CONTROL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_1_OPTICS_RST_B(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_TX_LANE_CONTROL_SP_CONTROL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_TX_LANE_CONTROL));
 #endif
-    return o_data.insertFromRight<DLL_STATUS_1_OPTICS_RST_B,
-           1>(i_data);
+    return o_data.insertFromRight<DLP_LINK0_TX_LANE_CONTROL_SP_CONTROL,
+           DLP_LINK0_TX_LANE_CONTROL_SP_CONTROL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_1_OPTICS_RST_B chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DLP_LINK0_TX_LANE_CONTROL_SP_CONTROL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_1_OPTICS_RST_B(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return o_data.setBit<DLL_STATUS_1_OPTICS_RST_B>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_1_OPTICS_RST_B chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_DLL_STATUS_1_OPTICS_RST_B(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return o_data.clearBit<DLL_STATUS_1_OPTICS_RST_B>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_1_OPTICS_RST_B chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DLL_STATUS_1_OPTICS_RST_B(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_TX_LANE_CONTROL_SP_CONTROL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_TX_LANE_CONTROL));
 #endif
-    return i_data.extractToRight<DLL_STATUS_1_OPTICS_RST_B,
-           1>(o_data);
+    return i_data.extractToRight<DLP_LINK0_TX_LANE_CONTROL_SP_CONTROL,
+           DLP_LINK0_TX_LANE_CONTROL_SP_CONTROL_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_1_OPTICS_RST_B chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DLP_LINK0_TX_LANE_CONTROL_SP_CONTROL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_DLL_STATUS_1_OPTICS_RST_B(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return i_data.getBit<DLL_STATUS_1_OPTICS_RST_B>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_1_OPTICS_RST_B chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_1_OPTICS_IRQ(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_TX_LANE_CONTROL__FAILED(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_TX_LANE_CONTROL));
 #endif
-    return o_data.insertFromRight<DLL_STATUS_1_OPTICS_IRQ,
-           1>(i_data);
+    return o_data.insertFromRight<DLP_LINK0_TX_LANE_CONTROL__FAILED,
+           DLP_LINK0_TX_LANE_CONTROL__FAILED_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_1_OPTICS_IRQ chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DLP_LINK0_TX_LANE_CONTROL__FAILED chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_1_OPTICS_IRQ(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_TX_LANE_CONTROL__FAILED(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_TX_LANE_CONTROL));
 #endif
-    return o_data.insertFromRight<DLL_STATUS_1_OPTICS_IRQ,
-           1>(i_data);
+    return o_data.insertFromRight<DLP_LINK0_TX_LANE_CONTROL__FAILED,
+           DLP_LINK0_TX_LANE_CONTROL__FAILED_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_1_OPTICS_IRQ chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DLP_LINK0_TX_LANE_CONTROL__FAILED chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_1_OPTICS_IRQ(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return o_data.setBit<DLL_STATUS_1_OPTICS_IRQ>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_1_OPTICS_IRQ chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_DLL_STATUS_1_OPTICS_IRQ(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return o_data.clearBit<DLL_STATUS_1_OPTICS_IRQ>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_1_OPTICS_IRQ chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DLL_STATUS_1_OPTICS_IRQ(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_TX_LANE_CONTROL__FAILED(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_TX_LANE_CONTROL));
 #endif
-    return i_data.extractToRight<DLL_STATUS_1_OPTICS_IRQ,
-           1>(o_data);
+    return i_data.extractToRight<DLP_LINK0_TX_LANE_CONTROL__FAILED,
+           DLP_LINK0_TX_LANE_CONTROL__FAILED_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_1_OPTICS_IRQ chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_DLL_STATUS_1_OPTICS_IRQ(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return i_data.getBit<DLL_STATUS_1_OPTICS_IRQ>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_1_OPTICS_IRQ chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_1_TRAINING(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return o_data.insertFromRight<DLL_STATUS_1_TRAINING,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_1_TRAINING chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_1_TRAINING(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return o_data.insertFromRight<DLL_STATUS_1_TRAINING,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_1_TRAINING chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_1_TRAINING(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return o_data.setBit<DLL_STATUS_1_TRAINING>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_1_TRAINING chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_DLL_STATUS_1_TRAINING(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return o_data.clearBit<DLL_STATUS_1_TRAINING>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_1_TRAINING chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DLL_STATUS_1_TRAINING(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return i_data.extractToRight<DLL_STATUS_1_TRAINING,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_1_TRAINING chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_DLL_STATUS_1_TRAINING(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return i_data.getBit<DLL_STATUS_1_TRAINING>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_1_TRAINING chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_1_MAX_PKT_TIMER(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return o_data.insertFromRight<DLL_STATUS_1_MAX_PKT_TIMER,
-           DLL_STATUS_1_MAX_PKT_TIMER_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_1_MAX_PKT_TIMER chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_1_MAX_PKT_TIMER(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return o_data.insertFromRight<DLL_STATUS_1_MAX_PKT_TIMER,
-           DLL_STATUS_1_MAX_PKT_TIMER_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_1_MAX_PKT_TIMER chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DLL_STATUS_1_MAX_PKT_TIMER(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return i_data.extractToRight<DLL_STATUS_1_MAX_PKT_TIMER,
-           DLL_STATUS_1_MAX_PKT_TIMER_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_1_MAX_PKT_TIMER chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_0_LINK_CAP_VALID(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return o_data.insertFromRight<DLL_STATUS_0_LINK_CAP_VALID,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_0_LINK_CAP_VALID chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_0_LINK_CAP_VALID(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return o_data.insertFromRight<DLL_STATUS_0_LINK_CAP_VALID,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_0_LINK_CAP_VALID chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_0_LINK_CAP_VALID(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return o_data.setBit<DLL_STATUS_0_LINK_CAP_VALID>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_0_LINK_CAP_VALID chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_DLL_STATUS_0_LINK_CAP_VALID(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return o_data.clearBit<DLL_STATUS_0_LINK_CAP_VALID>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_0_LINK_CAP_VALID chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DLL_STATUS_0_LINK_CAP_VALID(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return i_data.extractToRight<DLL_STATUS_0_LINK_CAP_VALID,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_0_LINK_CAP_VALID chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_DLL_STATUS_0_LINK_CAP_VALID(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return i_data.getBit<DLL_STATUS_0_LINK_CAP_VALID>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_0_LINK_CAP_VALID chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_1_LINK_CAP_VALID(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return o_data.insertFromRight<DLL_STATUS_1_LINK_CAP_VALID,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_1_LINK_CAP_VALID chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_1_LINK_CAP_VALID(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return o_data.insertFromRight<DLL_STATUS_1_LINK_CAP_VALID,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_1_LINK_CAP_VALID chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DLL_STATUS_1_LINK_CAP_VALID(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return o_data.setBit<DLL_STATUS_1_LINK_CAP_VALID>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_1_LINK_CAP_VALID chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_DLL_STATUS_1_LINK_CAP_VALID(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return o_data.clearBit<DLL_STATUS_1_LINK_CAP_VALID>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_1_LINK_CAP_VALID chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DLL_STATUS_1_LINK_CAP_VALID(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return i_data.extractToRight<DLL_STATUS_1_LINK_CAP_VALID,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_1_LINK_CAP_VALID chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_DLL_STATUS_1_LINK_CAP_VALID(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLL_STATUS));
-#endif
-    return i_data.getBit<DLL_STATUS_1_LINK_CAP_VALID>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLL_STATUS_1_LINK_CAP_VALID chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DLP_LINK0_TX_LANE_CONTROL__FAILED chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

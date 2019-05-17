@@ -1481,26 +1481,6 @@ static const uint32_t IOO_TX0_2_DD_4_TX_BIT_REGS_CNTL3_PL_RXDET_ENABLE = 52;
 static const uint32_t IOO_TX0_2_DD_4_TX_BIT_REGS_CNTL3_PL_RXDET_PULSE = 53;
 // iohs/reg00033.H
 
-static const uint64_t PERF_SEL_CONFIG = 0x1801101dull;
-
-static const uint32_t PERF_SEL_CONFIG_0 = 0;
-static const uint32_t PERF_SEL_CONFIG_0_LEN = 8;
-static const uint32_t PERF_SEL_CONFIG_1 = 8;
-static const uint32_t PERF_SEL_CONFIG_1_LEN = 8;
-static const uint32_t PERF_SEL_CONFIG_2 = 16;
-static const uint32_t PERF_SEL_CONFIG_2_LEN = 8;
-static const uint32_t PERF_SEL_CONFIG_3 = 24;
-static const uint32_t PERF_SEL_CONFIG_3_LEN = 8;
-static const uint32_t PERF_SEL_CONFIG_4 = 32;
-static const uint32_t PERF_SEL_CONFIG_4_LEN = 8;
-static const uint32_t PERF_SEL_CONFIG_5 = 40;
-static const uint32_t PERF_SEL_CONFIG_5_LEN = 8;
-static const uint32_t PERF_SEL_CONFIG_6 = 48;
-static const uint32_t PERF_SEL_CONFIG_6_LEN = 8;
-static const uint32_t PERF_SEL_CONFIG_7 = 56;
-static const uint32_t PERF_SEL_CONFIG_7_LEN = 8;
-// iohs/reg00033.H
-
 }
 }
 #include "iohs/reg00029.H"

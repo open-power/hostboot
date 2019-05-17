@@ -85,9 +85,9 @@ static const uint32_t EPS_THERM_WSUB2_TIMESTAMP_COUNTER_READ_OVERFLOW_ERR = 44;
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
+static const uint32_t FSXCOMP_FSXLOG_CBS_EL_HIST = 0x00050006ull;
 static const uint32_t FSXCOMP_FSXLOG_CBS_EL_HIST_FSI = 0x00002806ull;
 static const uint32_t FSXCOMP_FSXLOG_CBS_EL_HIST_FSI_BYTE = 0x00002818ull;
-static const uint32_t FSXCOMP_FSXLOG_CBS_EL_HIST_SCOM = 0x00050006ull;
 // perv/reg00019.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
@@ -150,9 +150,9 @@ static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL6_CLEAR_ROOT_CTRL6_6_31_LEN = 26;
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
+static const uint32_t FSXCOMP_FSXLOG_SB_MSG = 0x00050009ull;
 static const uint32_t FSXCOMP_FSXLOG_SB_MSG_FSI = 0x00002809ull;
 static const uint32_t FSXCOMP_FSXLOG_SB_MSG_FSI_BYTE = 0x00002824ull;
-static const uint32_t FSXCOMP_FSXLOG_SB_MSG_SCOM = 0x00050009ull;
 // perv/reg00019.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.

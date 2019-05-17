@@ -155,19 +155,13 @@ static const uint32_t MULTICAST_GROUP_2_MULTICAST2_GROUP = 3;
 static const uint32_t MULTICAST_GROUP_2_MULTICAST2_GROUP_LEN = 3;
 // eq/reg00009.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_DB2_PPE = 0x00000006c0001080ull;
-static const uint64_t QME_DB2_RW = 0x200e0108ull;
+static const uint64_t QME_DB2 = 0x200e0108ull;
 
 static const uint32_t QME_DB2_QME_DB2_MESSAGE_NUMBER = 0;
 static const uint32_t QME_DB2_QME_DB2_MESSAGE_NUMBER_LEN = 8;
 // eq/reg00009.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_PSSUM_PPE = 0x00000006c0001340ull;
-static const uint64_t QME_PSSUM_RO = 0x200e0134ull;
+static const uint64_t QME_PSSUM = 0x200e0134ull;
 
 static const uint32_t QME_PSSUM_CORE_PARTIAL_GOOD = 48;
 static const uint32_t QME_PSSUM_CORE_PARTIAL_GOOD_LEN = 4;

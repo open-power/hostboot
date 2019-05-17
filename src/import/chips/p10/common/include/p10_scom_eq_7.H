@@ -196,10 +196,7 @@ static const uint32_t OPCG_CAPT2_24_06ODD = 59;
 static const uint32_t OPCG_CAPT2_24_06ODD_LEN = 5;
 // eq/reg00007.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_ERR_PPE = 0x00000006c0000100ull;
-static const uint64_t QME_ERR_RW_WCLEAR = 0x200e0010ull;
+static const uint64_t QME_ERR = 0x200e0010ull;
 
 static const uint32_t QME_ERR_PPE_INTERNAL_ERROR = 0;
 static const uint32_t QME_ERR_PPE_EXTERNAL_ERROR = 1;
@@ -227,12 +224,7 @@ static const uint32_t QME_ERR_SPARE = 40;
 static const uint32_t QME_ERR_SPARE_LEN = 4;
 // eq/reg00007.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_QMCR_PPE = 0x00000006c0000880ull;
-static const uint64_t QME_QMCR_PPE1 = 0x00000006c00008b0ull;
-static const uint64_t QME_QMCR_PPE2 = 0x00000006c00008a0ull;
-static const uint64_t QME_QMCR_SCOM = 0x200e0088ull;
+static const uint64_t QME_QMCR = 0x200e0088ull;
 static const uint64_t QME_QMCR_WO_CLEAR = 0x200e008bull;
 static const uint64_t QME_QMCR_WO_OR = 0x200e008aull;
 
@@ -266,20 +258,14 @@ static const uint32_t QME_QMCR_CORE_PARTIAL_GOOD = 60;
 static const uint32_t QME_QMCR_CORE_PARTIAL_GOOD_LEN = 4;
 // eq/reg00007.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_RS4DBGC_PPE = 0x00000006c0001540ull;
-static const uint64_t QME_RS4DBGC_RO = 0x200e0154ull;
+static const uint64_t QME_RS4DBGC = 0x200e0154ull;
 
 static const uint32_t QME_RS4DBGC_SCAN_DATA_OUT = 0;
 static const uint32_t QME_RS4DBGC_SCAN_DATA_OUT_LEN = 56;
 static const uint32_t QME_RS4DBGC_LAST_CMD_TYPE = 63;
 // eq/reg00007.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_SCOM_XIDBGINF_PPE = 0x00000006c00023c0ull;
-static const uint64_t QME_SCOM_XIDBGINF_RO = 0x200e023cull;
+static const uint64_t QME_SCOM_XIDBGINF = 0x200e023cull;
 
 static const uint32_t QME_SCOM_XIDBGINF_SRR0_TOP = 0;
 static const uint32_t QME_SCOM_XIDBGINF_SRR0_TOP_LEN = 30;
@@ -287,10 +273,7 @@ static const uint32_t QME_SCOM_XIDBGINF_LR = 32;
 static const uint32_t QME_SCOM_XIDBGINF_LR_LEN = 32;
 // eq/reg00007.H
 
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint64_t QME_SWPR1_PPE = 0x00000006c0000940ull;
-static const uint64_t QME_SWPR1_RW = 0x200e0094ull;
+static const uint64_t QME_SWPR1 = 0x200e0094ull;
 
 static const uint32_t QME_SWPR1_BAR = 0;
 static const uint32_t QME_SWPR1_BAR_LEN = 27;

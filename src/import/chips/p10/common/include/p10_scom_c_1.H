@@ -187,8 +187,7 @@ static const uint32_t NC_NCMISC_NCSCOMS_NCU_TOPOTABLE_REG2_23 = 36;
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_TOPOTABLE_REG2_23_LEN = 4;
 // c/reg00001.H
 
-static const uint64_t QME_DCSR_PPE = 0x00000006c0018700ull;
-static const uint64_t QME_DCSR_WO = 0x200e0870ull;
+static const uint64_t QME_DCSR = 0x200e0870ull;
 
 static const uint32_t QME_DCSR_PLS_T0 = 0;
 static const uint32_t QME_DCSR_PLS_T0_LEN = 4;
@@ -209,22 +208,19 @@ static const uint32_t QME_DCSR_SL_T3_LEN = 2;
 static const uint32_t QME_DCSR_SRESET_MSR_S = 24;
 // c/reg00001.H
 
-static const uint64_t QME_PMCRS_PPE = 0x00000006c0018600ull;
-static const uint64_t QME_PMCRS_RW = 0x200e0860ull;
+static const uint64_t QME_PMCRS = 0x200e0860ull;
 
 static const uint32_t QME_PMCRS_QME_PMCRS_DATA = 0;
 static const uint32_t QME_PMCRS_QME_PMCRS_DATA_LEN = 64;
 // c/reg00001.H
 
-static const uint64_t QME_PMSRS_PPE = 0x00000006c0018640ull;
-static const uint64_t QME_PMSRS_RW = 0x200e0864ull;
+static const uint64_t QME_PMSRS = 0x200e0864ull;
 
 static const uint32_t QME_PMSRS_QME_PMSRS_DATA = 0;
 static const uint32_t QME_PMSRS_QME_PMSRS_DATA_LEN = 64;
 // c/reg00001.H
 
-static const uint64_t QME_PSCRS2_PPE = 0x00000006c0018580ull;
-static const uint64_t QME_PSCRS2_RW = 0x200e0858ull;
+static const uint64_t QME_PSCRS2 = 0x200e0858ull;
 
 static const uint32_t QME_PSCRS2_DPDES_EXIT_ENABLE = 0;
 static const uint32_t QME_PSCRS2_SD = 1;

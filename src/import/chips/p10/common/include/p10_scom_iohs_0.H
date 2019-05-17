@@ -82,10 +82,26 @@ static const uint32_t AXON_XSTOP1_XSTOP1_WAIT_CYCLES = 48;
 static const uint32_t AXON_XSTOP1_XSTOP1_WAIT_CYCLES_LEN = 12;
 // iohs/reg00000.H
 
-static const uint64_t FIR_WOF_REG = 0x18011008ull;
+static const uint64_t DLP_LINK1_INFO = 0x18011015ull;
 
-static const uint32_t FIR_WOF_REG_DLP_FIR_WOF = 0;
-static const uint32_t FIR_WOF_REG_DLP_FIR_WOF_LEN = 62;
+static const uint32_t DLP_LINK1_INFO_MAX_TIMEOUT = 0;
+static const uint32_t DLP_LINK1_INFO_MAX_TIMEOUT_LEN = 16;
+static const uint32_t DLP_LINK1_INFO_FRAME_CAP_VALID = 16;
+static const uint32_t DLP_LINK1_INFO_FRAME_CAP_INST = 17;
+static const uint32_t DLP_LINK1_INFO_FRAME_CAP_ADDR = 18;
+static const uint32_t DLP_LINK1_INFO_FRAME_CAP_ADDR_LEN = 6;
+static const uint32_t DLP_LINK1_INFO_FRAME_CAP_SYN = 24;
+static const uint32_t DLP_LINK1_INFO_FRAME_CAP_SYN_LEN = 8;
+static const uint32_t DLP_LINK1_INFO_REPLAY_CAP_VALID = 32;
+static const uint32_t DLP_LINK1_INFO_REPLAY_CAP_INST = 33;
+static const uint32_t DLP_LINK1_INFO_REPLAY_CAP_INST_LEN = 2;
+static const uint32_t DLP_LINK1_INFO_REPLAY_CAP_ADDR = 35;
+static const uint32_t DLP_LINK1_INFO_REPLAY_CAP_ADDR_LEN = 9;
+static const uint32_t DLP_LINK1_INFO_REPLAY_CAP_SYN = 44;
+static const uint32_t DLP_LINK1_INFO_REPLAY_CAP_SYN_LEN = 8;
+static const uint32_t DLP_LINK1_INFO_ACK_FIFO_CAP_VALID = 52;
+static const uint32_t DLP_LINK1_INFO_ACK_FIFO_CAP_ADDR = 55;
+static const uint32_t DLP_LINK1_INFO_ACK_FIFO_CAP_ADDR_LEN = 9;
 // iohs/reg00000.H
 
 static const uint64_t IOO_RX0_RXCTL_CTL_REGS_RX_CNTL1_PG = 0x8009000010012c3full;
@@ -1310,72 +1326,6 @@ static const uint32_t IOO_TX0_2_DD_4_TX_BIT_REGS_MODE1_PL_PL_SPARE_MODE_0 = 60;
 static const uint32_t IOO_TX0_2_DD_4_TX_BIT_REGS_MODE1_PL_PL_SPARE_MODE_1 = 61;
 static const uint32_t IOO_TX0_2_DD_4_TX_BIT_REGS_MODE1_PL_PL_SPARE_MODE_2 = 62;
 static const uint32_t IOO_TX0_2_DD_4_TX_BIT_REGS_MODE1_PL_PL_SPARE_MODE_3 = 63;
-// iohs/reg00003.H
-
-static const uint64_t LINK0_INFO = 0x18011014ull;
-
-static const uint32_t LINK0_INFO_MAX_TIMEOUT = 0;
-static const uint32_t LINK0_INFO_MAX_TIMEOUT_LEN = 16;
-static const uint32_t LINK0_INFO_FRAME_CAP_VALID = 16;
-static const uint32_t LINK0_INFO_FRAME_CAP_INST = 17;
-static const uint32_t LINK0_INFO_FRAME_CAP_ADDR = 18;
-static const uint32_t LINK0_INFO_FRAME_CAP_ADDR_LEN = 6;
-static const uint32_t LINK0_INFO_FRAME_CAP_SYN = 24;
-static const uint32_t LINK0_INFO_FRAME_CAP_SYN_LEN = 8;
-static const uint32_t LINK0_INFO_REPLAY_CAP_VALID = 32;
-static const uint32_t LINK0_INFO_REPLAY_CAP_INST = 33;
-static const uint32_t LINK0_INFO_REPLAY_CAP_INST_LEN = 2;
-static const uint32_t LINK0_INFO_REPLAY_CAP_ADDR = 35;
-static const uint32_t LINK0_INFO_REPLAY_CAP_ADDR_LEN = 9;
-static const uint32_t LINK0_INFO_REPLAY_CAP_SYN = 44;
-static const uint32_t LINK0_INFO_REPLAY_CAP_SYN_LEN = 8;
-static const uint32_t LINK0_INFO_ACK_FIFO_CAP_VALID = 52;
-static const uint32_t LINK0_INFO_ACK_FIFO_CAP_ADDR = 55;
-static const uint32_t LINK0_INFO_ACK_FIFO_CAP_ADDR_LEN = 9;
-// iohs/reg00003.H
-
-static const uint64_t LINK0_RX_LANE_CONTROL = 0x18011012ull;
-
-static const uint32_t LINK0_RX_LANE_CONTROL_DISABLED = 0;
-static const uint32_t LINK0_RX_LANE_CONTROL_DISABLED_LEN = 9;
-static const uint32_t LINK0_RX_LANE_CONTROL_BRINGUP = 12;
-static const uint32_t LINK0_RX_LANE_CONTROL_BRINGUP_LEN = 9;
-static const uint32_t LINK0_RX_LANE_CONTROL_SPARED = 24;
-static const uint32_t LINK0_RX_LANE_CONTROL_SPARED_LEN = 9;
-static const uint32_t LINK0_RX_LANE_CONTROL_LOCKED = 36;
-static const uint32_t LINK0_RX_LANE_CONTROL_LOCKED_LEN = 9;
-static const uint32_t LINK0_RX_LANE_CONTROL_FAILED = 48;
-static const uint32_t LINK0_RX_LANE_CONTROL_FAILED_LEN = 9;
-// iohs/reg00003.H
-
-static const uint64_t LINK1_ERROR_STATUS = 0x18011017ull;
-
-static const uint32_t LINK1_ERROR_STATUS_RESET_KEEPER = 0;
-static const uint32_t LINK1_ERROR_STATUS_ERROR_STATUS_CE = 1;
-static const uint32_t LINK1_ERROR_STATUS_ERROR_STATUS_CE_LEN = 7;
-static const uint32_t LINK1_ERROR_STATUS_ERROR_STATUS_UE = 8;
-static const uint32_t LINK1_ERROR_STATUS_ERROR_STATUS_UE_LEN = 4;
-static const uint32_t LINK1_ERROR_STATUS_ERROR_STATUS_OSC = 12;
-static const uint32_t LINK1_ERROR_STATUS_ERROR_STATUS_OSC_LEN = 2;
-static const uint32_t LINK1_ERROR_STATUS_ERROR_STATUS_TRAIN = 16;
-static const uint32_t LINK1_ERROR_STATUS_ERROR_STATUS_TRAIN_LEN = 5;
-static const uint32_t LINK1_ERROR_STATUS_ERROR_STATUS_UNRECOV = 24;
-static const uint32_t LINK1_ERROR_STATUS_ERROR_STATUS_UNRECOV_LEN = 14;
-static const uint32_t LINK1_ERROR_STATUS_ERROR_STATUS_INTERNAL = 40;
-static const uint32_t LINK1_ERROR_STATUS_ERROR_STATUS_INTERNAL_LEN = 24;
-// iohs/reg00003.H
-
-static const uint64_t MISC_ERROR_STATUS = 0x18011029ull;
-
-static const uint32_t MISC_ERROR_STATUS_MISC_RESET_KEEPER = 0;
-static const uint32_t MISC_ERROR_STATUS_DLX0_ERROR_STATUS = 8;
-static const uint32_t MISC_ERROR_STATUS_DLX0_ERROR_STATUS_LEN = 8;
-static const uint32_t MISC_ERROR_STATUS_DLX1_ERROR_STATUS = 16;
-static const uint32_t MISC_ERROR_STATUS_DLX1_ERROR_STATUS_LEN = 8;
-static const uint32_t MISC_ERROR_STATUS_OLL_ERROR_STATUS = 24;
-static const uint32_t MISC_ERROR_STATUS_OLL_ERROR_STATUS_LEN = 18;
-static const uint32_t MISC_ERROR_STATUS_ODL_ERROR_STATUS = 44;
-static const uint32_t MISC_ERROR_STATUS_ODL_ERROR_STATUS_LEN = 18;
 // iohs/reg00003.H
 
 static const uint64_t REGS_PRX1_DLR_APOR = 0x1801103eull;

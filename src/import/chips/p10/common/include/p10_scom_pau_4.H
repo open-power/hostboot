@@ -1116,9 +1116,9 @@ static const uint32_t FIR_ACTION1_REG_0_FIR_ACTION1_0 = 0;
 static const uint32_t FIR_ACTION1_REG_0_FIR_ACTION1_0_LEN = 62;
 // pau/reg00005.H
 
-static const uint64_t FIR_MASK_REG_0_SCOM = 0x10010c03ull;
-static const uint64_t FIR_MASK_REG_0_SCOM1 = 0x10010c04ull;
-static const uint64_t FIR_MASK_REG_0_SCOM2 = 0x10010c05ull;
+static const uint64_t FIR_MASK_REG_0_RW = 0x10010c03ull;
+static const uint64_t FIR_MASK_REG_0_WO_AND = 0x10010c04ull;
+static const uint64_t FIR_MASK_REG_0_WO_OR = 0x10010c05ull;
 
 static const uint32_t FIR_MASK_REG_0_FIR_MASK_0 = 0;
 static const uint32_t FIR_MASK_REG_0_FIR_MASK_0_LEN = 62;

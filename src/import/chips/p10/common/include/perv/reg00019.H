@@ -1342,6 +1342,51 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_CBS_EL_HIST(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_CBS_EL_HIST;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_CBS_EL_HIST(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_CBS_EL_HIST;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_CBS_EL_HIST, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_CBS_EL_HIST(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_CBS_EL_HIST, FSXCOMP_FSXLOG_CBS_EL_HIST_FSI,
+                           FSXCOMP_FSXLOG_CBS_EL_HIST_FSI_BYTE));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_CBS_EL_HIST, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_CBS_EL_HIST_FSI(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
@@ -1376,8 +1421,8 @@ static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_CBS_EL_HIST_FSI(const fapi2::
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_CBS_EL_HIST_FSI, FSXCOMP_FSXLOG_CBS_EL_HIST_FSI_BYTE,
-                           FSXCOMP_FSXLOG_CBS_EL_HIST_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_CBS_EL_HIST, FSXCOMP_FSXLOG_CBS_EL_HIST_FSI,
+                           FSXCOMP_FSXLOG_CBS_EL_HIST_FSI_BYTE));
 #endif
     return fapi2::putScom(i_target, FSXCOMP_FSXLOG_CBS_EL_HIST_FSI, i_data);
 #ifdef SCOM_CHECKING
@@ -1421,55 +1466,10 @@ static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_CBS_EL_HIST_FSI_BYTE(const fa
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_CBS_EL_HIST_FSI, FSXCOMP_FSXLOG_CBS_EL_HIST_FSI_BYTE,
-                           FSXCOMP_FSXLOG_CBS_EL_HIST_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_CBS_EL_HIST, FSXCOMP_FSXLOG_CBS_EL_HIST_FSI,
+                           FSXCOMP_FSXLOG_CBS_EL_HIST_FSI_BYTE));
 #endif
     return fapi2::putScom(i_target, FSXCOMP_FSXLOG_CBS_EL_HIST_FSI_BYTE, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_CBS_EL_HIST_SCOM(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_CBS_EL_HIST_SCOM;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_CBS_EL_HIST_SCOM(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_CBS_EL_HIST_SCOM;
-#endif
-    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_CBS_EL_HIST_SCOM, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_CBS_EL_HIST_SCOM(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_CBS_EL_HIST_FSI, FSXCOMP_FSXLOG_CBS_EL_HIST_FSI_BYTE,
-                           FSXCOMP_FSXLOG_CBS_EL_HIST_SCOM));
-#endif
-    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_CBS_EL_HIST_SCOM, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -3055,6 +3055,49 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_SB_MSG(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_SB_MSG;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_SB_MSG(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_SB_MSG;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_SB_MSG, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_SB_MSG(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_MSG, FSXCOMP_FSXLOG_SB_MSG_FSI, FSXCOMP_FSXLOG_SB_MSG_FSI_BYTE));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_SB_MSG, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_SB_MSG_FSI(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
@@ -3089,7 +3132,7 @@ static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_SB_MSG_FSI(const fapi2::Targe
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_MSG_FSI, FSXCOMP_FSXLOG_SB_MSG_FSI_BYTE, FSXCOMP_FSXLOG_SB_MSG_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_MSG, FSXCOMP_FSXLOG_SB_MSG_FSI, FSXCOMP_FSXLOG_SB_MSG_FSI_BYTE));
 #endif
     return fapi2::putScom(i_target, FSXCOMP_FSXLOG_SB_MSG_FSI, i_data);
 #ifdef SCOM_CHECKING
@@ -3133,53 +3176,9 @@ static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_SB_MSG_FSI_BYTE(const fapi2::
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_MSG_FSI, FSXCOMP_FSXLOG_SB_MSG_FSI_BYTE, FSXCOMP_FSXLOG_SB_MSG_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_MSG, FSXCOMP_FSXLOG_SB_MSG_FSI, FSXCOMP_FSXLOG_SB_MSG_FSI_BYTE));
 #endif
     return fapi2::putScom(i_target, FSXCOMP_FSXLOG_SB_MSG_FSI_BYTE, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_SB_MSG_SCOM(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_SB_MSG_SCOM;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_SB_MSG_SCOM(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_SB_MSG_SCOM;
-#endif
-    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_SB_MSG_SCOM, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_SB_MSG_SCOM(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_MSG_FSI, FSXCOMP_FSXLOG_SB_MSG_FSI_BYTE, FSXCOMP_FSXLOG_SB_MSG_SCOM));
-#endif
-    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_SB_MSG_SCOM, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;

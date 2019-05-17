@@ -35,8 +35,7 @@ namespace c
 {
 
 
-static const uint64_t CPMS_L3_PFETSTAT_PPE = 0x00000006c001e240ull;
-static const uint64_t CPMS_L3_PFETSTAT_RO = 0x200e0e24ull;
+static const uint64_t CPMS_L3_PFETSTAT = 0x200e0e24ull;
 
 static const uint32_t CPMS_L3_PFETSTAT_VDD_PFETS_ENABLED_SENSE = 0;
 static const uint32_t CPMS_L3_PFETSTAT_VDD_PFETS_DISABLED_SENSE = 1;
@@ -176,8 +175,7 @@ static const uint32_t NC_NCMISC_NCSCOMS_NCU_TOPOTABLE_REG1_15 = 36;
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_TOPOTABLE_REG1_15_LEN = 4;
 // c/reg00011.H
 
-static const uint64_t QME_PSCRS1_PPE = 0x00000006c0018540ull;
-static const uint64_t QME_PSCRS1_RW = 0x200e0854ull;
+static const uint64_t QME_PSCRS1 = 0x200e0854ull;
 
 static const uint32_t QME_PSCRS1_DPDES_EXIT_ENABLE = 0;
 static const uint32_t QME_PSCRS1_SD = 1;

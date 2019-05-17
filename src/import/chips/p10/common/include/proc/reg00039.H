@@ -8111,11 +8111,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_NX_DBG_DMA_ENG_FIR_MASK_SCOM(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_NX_DBG_DMA_ENG_FIR_MASK_RW(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = NX_DBG_DMA_ENG_FIR_MASK_SCOM;
+    scomt::last_scom = NX_DBG_DMA_ENG_FIR_MASK_RW;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -8125,14 +8125,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_NX_DBG_DMA_ENG_FIR_MASK_SCOM(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_NX_DBG_DMA_ENG_FIR_MASK_RW(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = NX_DBG_DMA_ENG_FIR_MASK_SCOM;
+    scomt::last_scom = NX_DBG_DMA_ENG_FIR_MASK_RW;
 #endif
-    return fapi2::getScom(i_target, NX_DBG_DMA_ENG_FIR_MASK_SCOM, o_data);
+    return fapi2::getScom(i_target, NX_DBG_DMA_ENG_FIR_MASK_RW, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -8140,14 +8140,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_NX_DBG_DMA_ENG_FIR_MASK_SCOM(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_NX_DBG_DMA_ENG_FIR_MASK_RW(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(NX_DBG_DMA_ENG_FIR_MASK_SCOM, NX_DBG_DMA_ENG_FIR_MASK_SCOM1, NX_DBG_DMA_ENG_FIR_MASK_SCOM2));
+    FAPI_TRY(scomt::chkReg(NX_DBG_DMA_ENG_FIR_MASK_RW, NX_DBG_DMA_ENG_FIR_MASK_WO_AND, NX_DBG_DMA_ENG_FIR_MASK_WO_OR));
 #endif
-    return fapi2::putScom(i_target, NX_DBG_DMA_ENG_FIR_MASK_SCOM, i_data);
+    return fapi2::putScom(i_target, NX_DBG_DMA_ENG_FIR_MASK_RW, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -8155,11 +8155,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_NX_DBG_DMA_ENG_FIR_MASK_SCOM1(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_NX_DBG_DMA_ENG_FIR_MASK_WO_AND(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = NX_DBG_DMA_ENG_FIR_MASK_SCOM1;
+    scomt::last_scom = NX_DBG_DMA_ENG_FIR_MASK_WO_AND;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -8169,14 +8169,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_NX_DBG_DMA_ENG_FIR_MASK_SCOM1(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_NX_DBG_DMA_ENG_FIR_MASK_WO_AND(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = NX_DBG_DMA_ENG_FIR_MASK_SCOM1;
+    scomt::last_scom = NX_DBG_DMA_ENG_FIR_MASK_WO_AND;
 #endif
-    return fapi2::getScom(i_target, NX_DBG_DMA_ENG_FIR_MASK_SCOM1, o_data);
+    return fapi2::getScom(i_target, NX_DBG_DMA_ENG_FIR_MASK_WO_AND, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -8184,14 +8184,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_NX_DBG_DMA_ENG_FIR_MASK_SCOM1(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_NX_DBG_DMA_ENG_FIR_MASK_WO_AND(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(NX_DBG_DMA_ENG_FIR_MASK_SCOM, NX_DBG_DMA_ENG_FIR_MASK_SCOM1, NX_DBG_DMA_ENG_FIR_MASK_SCOM2));
+    FAPI_TRY(scomt::chkReg(NX_DBG_DMA_ENG_FIR_MASK_RW, NX_DBG_DMA_ENG_FIR_MASK_WO_AND, NX_DBG_DMA_ENG_FIR_MASK_WO_OR));
 #endif
-    return fapi2::putScom(i_target, NX_DBG_DMA_ENG_FIR_MASK_SCOM1, i_data);
+    return fapi2::putScom(i_target, NX_DBG_DMA_ENG_FIR_MASK_WO_AND, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -8199,11 +8199,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_NX_DBG_DMA_ENG_FIR_MASK_SCOM2(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_NX_DBG_DMA_ENG_FIR_MASK_WO_OR(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = NX_DBG_DMA_ENG_FIR_MASK_SCOM2;
+    scomt::last_scom = NX_DBG_DMA_ENG_FIR_MASK_WO_OR;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -8213,14 +8213,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_NX_DBG_DMA_ENG_FIR_MASK_SCOM2(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_NX_DBG_DMA_ENG_FIR_MASK_WO_OR(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = NX_DBG_DMA_ENG_FIR_MASK_SCOM2;
+    scomt::last_scom = NX_DBG_DMA_ENG_FIR_MASK_WO_OR;
 #endif
-    return fapi2::getScom(i_target, NX_DBG_DMA_ENG_FIR_MASK_SCOM2, o_data);
+    return fapi2::getScom(i_target, NX_DBG_DMA_ENG_FIR_MASK_WO_OR, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -8228,14 +8228,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_NX_DBG_DMA_ENG_FIR_MASK_SCOM2(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_NX_DBG_DMA_ENG_FIR_MASK_WO_OR(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(NX_DBG_DMA_ENG_FIR_MASK_SCOM, NX_DBG_DMA_ENG_FIR_MASK_SCOM1, NX_DBG_DMA_ENG_FIR_MASK_SCOM2));
+    FAPI_TRY(scomt::chkReg(NX_DBG_DMA_ENG_FIR_MASK_RW, NX_DBG_DMA_ENG_FIR_MASK_WO_AND, NX_DBG_DMA_ENG_FIR_MASK_WO_OR));
 #endif
-    return fapi2::putScom(i_target, NX_DBG_DMA_ENG_FIR_MASK_SCOM2, i_data);
+    return fapi2::putScom(i_target, NX_DBG_DMA_ENG_FIR_MASK_WO_OR, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -8248,7 +8248,7 @@ static inline fapi2::buffer<uint64_t>& SET_NX_DBG_DMA_ENG_FIR_MASK_NX_DMA_ENG_FI
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NX_DBG_DMA_ENG_FIR_MASK_SCOM, NX_DBG_DMA_ENG_FIR_MASK_SCOM1, NX_DBG_DMA_ENG_FIR_MASK_SCOM2));
+    FAPI_TRY(scomt::chkReg(NX_DBG_DMA_ENG_FIR_MASK_RW, NX_DBG_DMA_ENG_FIR_MASK_WO_AND, NX_DBG_DMA_ENG_FIR_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<NX_DBG_DMA_ENG_FIR_MASK_NX_DMA_ENG_FIR_MASK_BITS,
            NX_DBG_DMA_ENG_FIR_MASK_NX_DMA_ENG_FIR_MASK_BITS_LEN>(i_data);
@@ -8264,7 +8264,7 @@ static inline fapi2::buffer<uint64_t>& SET_NX_DBG_DMA_ENG_FIR_MASK_NX_DMA_ENG_FI
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NX_DBG_DMA_ENG_FIR_MASK_SCOM, NX_DBG_DMA_ENG_FIR_MASK_SCOM1, NX_DBG_DMA_ENG_FIR_MASK_SCOM2));
+    FAPI_TRY(scomt::chkReg(NX_DBG_DMA_ENG_FIR_MASK_RW, NX_DBG_DMA_ENG_FIR_MASK_WO_AND, NX_DBG_DMA_ENG_FIR_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<NX_DBG_DMA_ENG_FIR_MASK_NX_DMA_ENG_FIR_MASK_BITS,
            NX_DBG_DMA_ENG_FIR_MASK_NX_DMA_ENG_FIR_MASK_BITS_LEN>(i_data);
@@ -8281,7 +8281,7 @@ static inline fapi2::buffer<uint64_t>& GET_NX_DBG_DMA_ENG_FIR_MASK_NX_DMA_ENG_FI
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NX_DBG_DMA_ENG_FIR_MASK_SCOM, NX_DBG_DMA_ENG_FIR_MASK_SCOM1, NX_DBG_DMA_ENG_FIR_MASK_SCOM2));
+    FAPI_TRY(scomt::chkReg(NX_DBG_DMA_ENG_FIR_MASK_RW, NX_DBG_DMA_ENG_FIR_MASK_WO_AND, NX_DBG_DMA_ENG_FIR_MASK_WO_OR));
 #endif
     return i_data.extractToRight<NX_DBG_DMA_ENG_FIR_MASK_NX_DMA_ENG_FIR_MASK_BITS,
            NX_DBG_DMA_ENG_FIR_MASK_NX_DMA_ENG_FIR_MASK_BITS_LEN>(o_data);

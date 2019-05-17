@@ -41,8 +41,7 @@ static const uint32_t ATOMIC_LOCK_MASK_LATCH_REG_ATOMIC_LOCK_MASK = 0;
 static const uint32_t ATOMIC_LOCK_MASK_LATCH_REG_ATOMIC_LOCK_MASK_LEN = 32;
 // c/reg00014.H
 
-static const uint64_t CPMS_ASSR_PPE = 0x00000006c001e180ull;
-static const uint64_t CPMS_ASSR_RO = 0x200e0e18ull;
+static const uint64_t CPMS_ASSR = 0x200e0e18ull;
 
 static const uint32_t CPMS_ASSR_L3_PFETSTAT_VDD_PFETS_ENABLED_SENSE = 0;
 static const uint32_t CPMS_ASSR_L3_PFETSTAT_VDD_PFETS_DISABLED_SENSE = 1;
@@ -164,8 +163,7 @@ static const uint64_t L3_MISC_L3CERRS_PM_LCO_DIS_REG = 0x20010616ull;
 static const uint32_t L3_MISC_L3CERRS_PM_LCO_DIS_REG_L3_PM_LCO_DIS_CFG = 0;
 // c/reg00014.H
 
-static const uint64_t QME_CISR_PPE = 0x00000006c0018780ull;
-static const uint64_t QME_CISR_RO = 0x200e0878ull;
+static const uint64_t QME_CISR = 0x200e0878ull;
 
 static const uint32_t QME_CISR_HYP_INTR_PRESENT = 0;
 static const uint32_t QME_CISR_HYP_INTR_PRESENT_LEN = 4;

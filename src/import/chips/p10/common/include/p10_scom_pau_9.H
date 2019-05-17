@@ -503,9 +503,9 @@ static const uint32_t DAT_MISC_CERR_PTY_FIRST_CERR_PTY_FIRST_BITS = 37;
 static const uint32_t DAT_MISC_CERR_PTY_FIRST_CERR_PTY_FIRST_BITS_LEN = 27;
 // pau/reg00012.H
 
-static const uint64_t FIR_REG_1_SCOM = 0x10010c40ull;
-static const uint64_t FIR_REG_1_SCOM1 = 0x10010c41ull;
-static const uint64_t FIR_REG_1_SCOM2 = 0x10010c42ull;
+static const uint64_t FIR_REG_1_RW = 0x10010c40ull;
+static const uint64_t FIR_REG_1_WO_AND = 0x10010c41ull;
+static const uint64_t FIR_REG_1_WO_OR = 0x10010c42ull;
 
 static const uint32_t FIR_REG_1_NDL_BRK0_STALL = 0;
 static const uint32_t FIR_REG_1_NDL_BRK0_NOSTALL = 1;

@@ -35,9 +35,6 @@ namespace c
 {
 
 
-static const uint64_t CPMS_MMAR_PPE = 0x00000006c001e380ull;
-static const uint64_t CPMS_MMAR_PPE1 = 0x00000006c001e3a0ull;
-static const uint64_t CPMS_MMAR_PPE2 = 0x00000006c001e3b0ull;
 static const uint64_t CPMS_MMAR_RW = 0x200e0e38ull;
 static const uint64_t CPMS_MMAR_WO_CLEAR = 0x200e0e3aull;
 static const uint64_t CPMS_MMAR_WO_OR = 0x200e0e3bull;

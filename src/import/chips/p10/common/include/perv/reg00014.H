@@ -15729,6 +15729,49 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_SB_CS(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_SB_CS;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_SB_CS(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_SB_CS;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_SB_CS, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_SB_CS(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_SB_CS, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_SB_CS_FSI(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
@@ -15763,7 +15806,7 @@ static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_SB_CS_FSI(const fapi2::Target
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return fapi2::putScom(i_target, FSXCOMP_FSXLOG_SB_CS_FSI, i_data);
 #ifdef SCOM_CHECKING
@@ -15807,53 +15850,9 @@ static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_SB_CS_FSI_BYTE(const fapi2::T
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return fapi2::putScom(i_target, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_SB_CS_SCOM(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_SB_CS_SCOM;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_SB_CS_SCOM(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_SB_CS_SCOM;
-#endif
-    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_SB_CS_SCOM, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_SB_CS_SCOM(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
-#endif
-    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_SB_CS_SCOM, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -15865,7 +15864,7 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_SB_CS_SECURE_DEBUG_MOD
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_SB_CS_SECURE_DEBUG_MODE,
            1>(i_data);
@@ -15880,7 +15879,7 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_SB_CS_SECURE_DEBUG_MOD
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_SB_CS_SECURE_DEBUG_MODE,
            1>(i_data);
@@ -15894,7 +15893,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_SB_CS_SECURE_DEBUG_MODE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_SB_CS_SECURE_DEBUG_MODE>();
 #ifdef SCOM_CHECKING
@@ -15907,7 +15906,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_SB_CS_SECURE_DEBUG_MODE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_SB_CS_SECURE_DEBUG_MODE>();
 #ifdef SCOM_CHECKING
@@ -15921,7 +15920,7 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_SB_CS_SECURE_DEBUG_MOD
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_SB_CS_SECURE_DEBUG_MODE,
            1>(o_data);
@@ -15935,7 +15934,7 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_SB_CS_SECURE_DEBUG_MODE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_SB_CS_SECURE_DEBUG_MODE>();
 #ifdef SCOM_CHECKING
@@ -15949,7 +15948,7 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_SB_CS_START_RESTART_VE
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_SB_CS_START_RESTART_VECTOR0,
            1>(i_data);
@@ -15964,7 +15963,7 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_SB_CS_START_RESTART_VE
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_SB_CS_START_RESTART_VECTOR0,
            1>(i_data);
@@ -15978,7 +15977,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_SB_CS_START_RESTART_VECTOR0(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_SB_CS_START_RESTART_VECTOR0>();
 #ifdef SCOM_CHECKING
@@ -15991,7 +15990,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_SB_CS_START_RESTART_VECTOR0(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_SB_CS_START_RESTART_VECTOR0>();
 #ifdef SCOM_CHECKING
@@ -16005,7 +16004,7 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_SB_CS_START_RESTART_VE
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_SB_CS_START_RESTART_VECTOR0,
            1>(o_data);
@@ -16019,7 +16018,7 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_SB_CS_START_RESTART_VECTOR0(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_SB_CS_START_RESTART_VECTOR0>();
 #ifdef SCOM_CHECKING
@@ -16033,7 +16032,7 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_SB_CS_START_RESTART_VE
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_SB_CS_START_RESTART_VECTOR1,
            1>(i_data);
@@ -16048,7 +16047,7 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_SB_CS_START_RESTART_VE
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_SB_CS_START_RESTART_VECTOR1,
            1>(i_data);
@@ -16062,7 +16061,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_SB_CS_START_RESTART_VECTOR1(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_SB_CS_START_RESTART_VECTOR1>();
 #ifdef SCOM_CHECKING
@@ -16075,7 +16074,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_SB_CS_START_RESTART_VECTOR1(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_SB_CS_START_RESTART_VECTOR1>();
 #ifdef SCOM_CHECKING
@@ -16089,7 +16088,7 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_SB_CS_START_RESTART_VE
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_SB_CS_START_RESTART_VECTOR1,
            1>(o_data);
@@ -16103,7 +16102,7 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_SB_CS_START_RESTART_VECTOR1(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_SB_CS_START_RESTART_VECTOR1>();
 #ifdef SCOM_CHECKING
@@ -16117,7 +16116,7 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_SB_CS_INTERRUPT_S0(fap
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_SB_CS_INTERRUPT_S0,
            1>(i_data);
@@ -16132,7 +16131,7 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_SB_CS_INTERRUPT_S0(con
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_SB_CS_INTERRUPT_S0,
            1>(i_data);
@@ -16146,7 +16145,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_SB_CS_INTERRUPT_S0(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_SB_CS_INTERRUPT_S0>();
 #ifdef SCOM_CHECKING
@@ -16159,7 +16158,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_SB_CS_INTERRUPT_S0(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_SB_CS_INTERRUPT_S0>();
 #ifdef SCOM_CHECKING
@@ -16173,7 +16172,7 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_SB_CS_INTERRUPT_S0(fap
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_SB_CS_INTERRUPT_S0,
            1>(o_data);
@@ -16187,7 +16186,7 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_SB_CS_INTERRUPT_S0(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_SB_CS_INTERRUPT_S0>();
 #ifdef SCOM_CHECKING
@@ -16201,7 +16200,7 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_SB_CS_INTERRUPT_S1(fap
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_SB_CS_INTERRUPT_S1,
            1>(i_data);
@@ -16216,7 +16215,7 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_SB_CS_INTERRUPT_S1(con
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_SB_CS_INTERRUPT_S1,
            1>(i_data);
@@ -16230,7 +16229,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_SB_CS_INTERRUPT_S1(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_SB_CS_INTERRUPT_S1>();
 #ifdef SCOM_CHECKING
@@ -16243,7 +16242,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_SB_CS_INTERRUPT_S1(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_SB_CS_INTERRUPT_S1>();
 #ifdef SCOM_CHECKING
@@ -16257,7 +16256,7 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_SB_CS_INTERRUPT_S1(fap
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_SB_CS_INTERRUPT_S1,
            1>(o_data);
@@ -16271,7 +16270,7 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_SB_CS_INTERRUPT_S1(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_SB_CS_INTERRUPT_S1>();
 #ifdef SCOM_CHECKING
@@ -16286,7 +16285,7 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_SB_CS_BYPASSING_RESET_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_SB_CS_BYPASSING_RESET_SEQUENCE_PIB_I2CM,
            1>(i_data);
@@ -16302,7 +16301,7 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_SB_CS_BYPASSING_RESET_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_SB_CS_BYPASSING_RESET_SEQUENCE_PIB_I2CM,
            1>(i_data);
@@ -16318,7 +16317,7 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_SB_CS_BYPASSING_RESET_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_SB_CS_BYPASSING_RESET_SEQUENCE_PIB_I2CM>();
 #ifdef SCOM_CHECKING
@@ -16333,7 +16332,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_SB_CS_BYPASSING_RESE
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_SB_CS_BYPASSING_RESET_SEQUENCE_PIB_I2CM>();
 #ifdef SCOM_CHECKING
@@ -16349,7 +16348,7 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_SB_CS_BYPASSING_RESET_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_SB_CS_BYPASSING_RESET_SEQUENCE_PIB_I2CM,
            1>(o_data);
@@ -16364,7 +16363,7 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_SB_CS_BYPASSING_RESET_SEQUENCE_PIB_I2CM(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_SB_CS_BYPASSING_RESET_SEQUENCE_PIB_I2CM>();
 #ifdef SCOM_CHECKING
@@ -16380,7 +16379,7 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_SB_CS_SELECT_SECONDARY
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_SB_CS_SELECT_SECONDARY_SEEPROM,
            1>(i_data);
@@ -16395,7 +16394,7 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_SB_CS_SELECT_SECONDARY
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_SB_CS_SELECT_SECONDARY_SEEPROM,
            1>(i_data);
@@ -16410,7 +16409,7 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_SB_CS_SELECT_SECONDARY
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_SB_CS_SELECT_SECONDARY_SEEPROM>();
 #ifdef SCOM_CHECKING
@@ -16424,7 +16423,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_SB_CS_SELECT_SECONDA
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_SB_CS_SELECT_SECONDARY_SEEPROM>();
 #ifdef SCOM_CHECKING
@@ -16439,7 +16438,7 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_SB_CS_SELECT_SECONDARY
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_SB_CS_SELECT_SECONDARY_SEEPROM,
            1>(o_data);
@@ -16453,7 +16452,7 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_SB_CS_SELECT_SECONDARY_SEEPROM(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_SB_CS_SELECT_SECONDARY_SEEPROM>();
 #ifdef SCOM_CHECKING
@@ -16468,7 +16467,7 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_SB_CS_DEBUG_BOLT_ON_CO
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_SB_CS_DEBUG_BOLT_ON_CONTROL_BITS,
            FSXCOMP_FSXLOG_SB_CS_DEBUG_BOLT_ON_CONTROL_BITS_LEN>(i_data);
@@ -16484,7 +16483,7 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_SB_CS_DEBUG_BOLT_ON_CO
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_SB_CS_DEBUG_BOLT_ON_CONTROL_BITS,
            FSXCOMP_FSXLOG_SB_CS_DEBUG_BOLT_ON_CONTROL_BITS_LEN>(i_data);
@@ -16501,7 +16500,7 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_SB_CS_DEBUG_BOLT_ON_CO
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE, FSXCOMP_FSXLOG_SB_CS_SCOM));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SB_CS, FSXCOMP_FSXLOG_SB_CS_FSI, FSXCOMP_FSXLOG_SB_CS_FSI_BYTE));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_SB_CS_DEBUG_BOLT_ON_CONTROL_BITS,
            FSXCOMP_FSXLOG_SB_CS_DEBUG_BOLT_ON_CONTROL_BITS_LEN>(o_data);
