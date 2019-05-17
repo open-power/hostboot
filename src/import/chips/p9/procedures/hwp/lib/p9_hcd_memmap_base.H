@@ -461,6 +461,13 @@ HCD_CONST(CME_QUAD_PSTATE_SIZE,                 HALF_KB)
 
 HCD_CONST(CME_REGION_SIZE,                      (64 * ONE_KB))
 
+
+// HOMER compatibility
+
+HCD_CONST(STOP_API_CPU_SAVE_VER,                0x02)
+HCD_CONST(SELF_SAVE_RESTORE_VER,                0x02)
+HCD_CONST(SMF_SUPPORT_SIGNATURE_OFFSET,         0x1300)
+HCD_CONST(SMF_SELF_SIGNATURE,                   (0x5f534d46))
 // Debug
 
 HCD_CONST(CPMR_TRACE_REGION_OFFSET,             (512 * ONE_KB))

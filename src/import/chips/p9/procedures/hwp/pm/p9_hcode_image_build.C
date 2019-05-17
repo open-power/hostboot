@@ -1491,8 +1491,8 @@ void updateCpmrHeaderSR( Homerlayout_t* i_pChipHomer, uint8_t i_fusedState, uint
 
     if( SMF_SELF_SIGNATURE  ==  i_smfSign )
     {
-        pCpmrHdr->selfRestoreVer    =   0x01;
-        pCpmrHdr->stopApiVer        =   0x01;
+        pCpmrHdr->selfRestoreVer    =   SELF_SAVE_RESTORE_VER;
+        pCpmrHdr->stopApiVer        =   STOP_API_CPU_SAVE_VER;
     }
     else
     {
