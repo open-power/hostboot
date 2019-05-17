@@ -45,21 +45,7 @@
     #define CPMS_CUCR_WO_CLEAR           0xC000E3E0
     #define CPMS_CUCR_WO_OR              0xC000E3F0
 
-    #define CPMS_RVCSR_RW                CPMS_RVCSR_SCOM
-    #define CPMS_RVCSR_WO_CLEAR          CPMS_RVCSR_SCOM1
-    #define CPMS_RVCSR_WO_OR             CPMS_RVCSR_SCOM2
-
     #define CPMS_CGCSR_RW                CPMS_CGCSR_SCOM
-    #define CPMS_CGCSR_WO_CLEAR          CPMS_CGCSR_SCOM1
-    #define CPMS_CGCSR_WO_OR             CPMS_CGCSR_SCOM2
-
-    #define CPMS_CL2_PFETCNTL_RW         CPMS_CL2_PFETCNTL_SCOM
-    #define CPMS_CL2_PFETCNTL_WO_CLEAR   CPMS_CL2_PFETCNTL_SCOM1
-    #define CPMS_CL2_PFETCNTL_WO_OR      CPMS_CL2_PFETCNTL_SCOM2
-
-    #define CPMS_L3_PFETCNTL_RW          CPMS_CL2_PFETCNTL_SCOM
-    #define CPMS_L3_PFETCNTL_WO_CLEAR    CPMS_CL2_PFETCNTL_SCOM1
-    #define CPMS_L3_PFETCNTL_WO_OR       CPMS_CL2_PFETCNTL_SCOM2
 
     #define QME_SCSR_RW                  QME_SCSR_SCOM
     #define QME_SCSR_WO_CLEAR            QME_SCSR_SCOM1
