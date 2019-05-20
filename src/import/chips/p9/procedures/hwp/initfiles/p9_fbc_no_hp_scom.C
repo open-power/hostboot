@@ -31,8 +31,8 @@ using namespace fapi2;
 
 constexpr uint64_t literal_0 = 0;
 constexpr uint64_t literal_1 = 1;
-constexpr uint64_t literal_3 = 3;
 constexpr uint64_t literal_0x0 = 0x0;
+constexpr uint64_t literal_3 = 3;
 constexpr uint64_t literal_0x3 = 0x3;
 constexpr uint64_t literal_2 = 2;
 constexpr uint64_t literal_0x4 = 0x4;
@@ -89,8 +89,6 @@ fapi2::ReturnCode p9_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
         uint64_t l_def_IS_FLAT_8 = (l_TGT1_ATTR_PROC_EPS_TABLE_TYPE == fapi2::ENUM_ATTR_PROC_EPS_TABLE_TYPE_EPS_TYPE_HE_F8);
         fapi2::ATTR_PROC_FABRIC_PUMP_MODE_Type l_TGT1_ATTR_PROC_FABRIC_PUMP_MODE;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_PUMP_MODE, TGT1, l_TGT1_ATTR_PROC_FABRIC_PUMP_MODE));
-        fapi2::ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE_Type l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE, TGT0, l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE));
         fapi2::buffer<uint64_t> l_scom_buffer;
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x501180aull, l_scom_buffer ));
@@ -133,16 +131,8 @@ fapi2::ReturnCode p9_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
 
             if (((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
             {
-                if ((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == fapi2::ENUM_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE_SMP))
-                {
-                    constexpr auto l_PB_COM_PB_CFG_NP2_EN_OFF = 0x0;
-                    l_scom_buffer.insert<49, 1, 61, uint64_t>(l_PB_COM_PB_CFG_NP2_EN_OFF );
-                }
-                else if ((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == fapi2::ENUM_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE_NV))
-                {
-                    constexpr auto l_PB_COM_PB_CFG_NP2_EN_ON = 0x7;
-                    l_scom_buffer.insert<49, 1, 61, uint64_t>(l_PB_COM_PB_CFG_NP2_EN_ON );
-                }
+                constexpr auto l_PB_COM_PB_CFG_NP2_EN_ON = 0x7;
+                l_scom_buffer.insert<49, 1, 61, uint64_t>(l_PB_COM_PB_CFG_NP2_EN_ON );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x501180aull, l_scom_buffer));
@@ -188,16 +178,8 @@ fapi2::ReturnCode p9_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
 
             if (((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
             {
-                if ((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == fapi2::ENUM_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE_SMP))
-                {
-                    constexpr auto l_PB_COM_PB_CFG_NP2_EN_OFF = 0x0;
-                    l_scom_buffer.insert<49, 1, 62, uint64_t>(l_PB_COM_PB_CFG_NP2_EN_OFF );
-                }
-                else if ((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == fapi2::ENUM_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE_NV))
-                {
-                    constexpr auto l_PB_COM_PB_CFG_NP2_EN_ON = 0x7;
-                    l_scom_buffer.insert<49, 1, 62, uint64_t>(l_PB_COM_PB_CFG_NP2_EN_ON );
-                }
+                constexpr auto l_PB_COM_PB_CFG_NP2_EN_ON = 0x7;
+                l_scom_buffer.insert<49, 1, 62, uint64_t>(l_PB_COM_PB_CFG_NP2_EN_ON );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x5011c0aull, l_scom_buffer));
@@ -1745,16 +1727,8 @@ fapi2::ReturnCode p9_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
 
             if (((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
             {
-                if ((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == fapi2::ENUM_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE_SMP))
-                {
-                    constexpr auto l_PB_COM_PB_CFG_NP2_EN_OFF = 0x0;
-                    l_scom_buffer.insert<49, 1, 63, uint64_t>(l_PB_COM_PB_CFG_NP2_EN_OFF );
-                }
-                else if ((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == fapi2::ENUM_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE_NV))
-                {
-                    constexpr auto l_PB_COM_PB_CFG_NP2_EN_ON = 0x7;
-                    l_scom_buffer.insert<49, 1, 63, uint64_t>(l_PB_COM_PB_CFG_NP2_EN_ON );
-                }
+                constexpr auto l_PB_COM_PB_CFG_NP2_EN_ON = 0x7;
+                l_scom_buffer.insert<49, 1, 63, uint64_t>(l_PB_COM_PB_CFG_NP2_EN_ON );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x501200aull, l_scom_buffer));
