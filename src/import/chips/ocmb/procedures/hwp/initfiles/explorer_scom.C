@@ -117,6 +117,7 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
         fapi2::ATTR_MEM_EFF_DRAM_CL_Type l_TGT1_ATTR_MEM_EFF_DRAM_CL;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_CL, TGT1, l_TGT1_ATTR_MEM_EFF_DRAM_CL));
         uint64_t l_def_IS_IBM_SIM = literal_0;
+        uint64_t l_def_IS_HW = (l_TGT2_ATTR_IS_SIMULATION == literal_0);
         fapi2::ATTR_MEM_DRAM_CWL_Type l_TGT1_ATTR_MEM_DRAM_CWL;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_DRAM_CWL, TGT1, l_TGT1_ATTR_MEM_DRAM_CWL));
         fapi2::ATTR_MEM_EFF_FREQ_Type l_TGT1_ATTR_MEM_EFF_FREQ;
@@ -246,6 +247,11 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
             {
                 l_scom_buffer.insert<36, 6, 58, uint64_t>(((l_TGT1_ATTR_MEM_EFF_DRAM_CL - literal_4) + l_def_RDIMM_Add_latency) );
             }
+            else if (l_def_IS_HW)
+            {
+                l_scom_buffer.insert<36, 6, 58, uint64_t>((((l_TGT1_ATTR_MEM_EFF_DRAM_CL - literal_11) + l_def_RDIMM_Add_latency) +
+                        l_TGT1_ATTR_MEM_EXP_DFIMRL_CLK) );
+            }
 
             if (l_def_IS_MICROSEMI_SIM)
             {
@@ -254,6 +260,10 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
             else if (l_def_IS_IBM_SIM)
             {
                 l_scom_buffer.insert<47, 5, 59, uint64_t>(((l_TGT1_ATTR_MEM_EFF_DRAM_CL - literal_4) + l_def_RDIMM_Add_latency) );
+            }
+            else if (l_def_IS_HW)
+            {
+                l_scom_buffer.insert<47, 5, 59, uint64_t>(((l_TGT1_ATTR_MEM_EFF_DRAM_CL - literal_9) + l_def_RDIMM_Add_latency) );
             }
 
             if (l_def_IS_MICROSEMI_SIM)
@@ -264,6 +274,10 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
             {
                 l_scom_buffer.insert<42, 5, 59, uint64_t>(((l_TGT1_ATTR_MEM_EFF_DRAM_CL - literal_4) + l_def_RDIMM_Add_latency) );
             }
+            else if (l_def_IS_HW)
+            {
+                l_scom_buffer.insert<42, 5, 59, uint64_t>(((l_TGT1_ATTR_MEM_EFF_DRAM_CL - literal_9) + l_def_RDIMM_Add_latency) );
+            }
 
             if (l_def_IS_MICROSEMI_SIM)
             {
@@ -272,6 +286,10 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
             else if (l_def_IS_IBM_SIM)
             {
                 l_scom_buffer.insert<30, 6, 58, uint64_t>(((l_TGT1_ATTR_MEM_DRAM_CWL - literal_9) + l_def_RDIMM_Add_latency) );
+            }
+            else if (l_def_IS_HW)
+            {
+                l_scom_buffer.insert<30, 6, 58, uint64_t>(((l_TGT1_ATTR_MEM_DRAM_CWL - literal_14) + l_def_RDIMM_Add_latency) );
             }
 
             if (l_def_IS_MICROSEMI_SIM)
@@ -282,6 +300,10 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
             {
                 l_scom_buffer.insert<57, 5, 59, uint64_t>(((l_TGT1_ATTR_MEM_DRAM_CWL - literal_2) + l_def_RDIMM_Add_latency) );
             }
+            else if (l_def_IS_HW)
+            {
+                l_scom_buffer.insert<57, 5, 59, uint64_t>(((l_TGT1_ATTR_MEM_DRAM_CWL - literal_7) + l_def_RDIMM_Add_latency) );
+            }
 
             if (l_def_IS_MICROSEMI_SIM)
             {
@@ -290,6 +312,10 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
             else if (l_def_IS_IBM_SIM)
             {
                 l_scom_buffer.insert<52, 5, 59, uint64_t>(((l_TGT1_ATTR_MEM_DRAM_CWL - literal_2) + l_def_RDIMM_Add_latency) );
+            }
+            else if (l_def_IS_HW)
+            {
+                l_scom_buffer.insert<52, 5, 59, uint64_t>(((l_TGT1_ATTR_MEM_DRAM_CWL - literal_7) + l_def_RDIMM_Add_latency) );
             }
 
             l_scom_buffer.insert<24, 6, 58, uint64_t>(literal_24 );
@@ -780,6 +806,7 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
             }
 
             l_scom_buffer.insert<46, 11, 53, uint64_t>(l_def_REFRESH_INTERVAL );
+            l_scom_buffer.insert<62, 1, 63, uint64_t>(literal_1 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8011437ull, l_scom_buffer));
         }
         {
