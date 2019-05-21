@@ -2729,17 +2729,6 @@ struct attrEnumTraits<pmic::attr_eff_engine_fields>
     static constexpr size_t DISPATCHER = pmic::ATTR_EFF_DISPATCHER;
 };
 
-///
-/// @brief Value traits for attr_eff_engine_fields
-/// @class attrEngineTraits
-/// @note attr_eff_engine_fields
-///
-template < >
-struct attrEnumTraits<generic_metadata_fields>
-{
-    static constexpr size_t DISPATCHER = ATTR_METADATA_DISPATCHER;
-};
-
 }//mss
 
 #endif

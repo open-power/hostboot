@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018
+# Contributors Listed Below - COPYRIGHT 2018,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -28,4 +28,5 @@
 
 PROCEDURE=p9a_mss_eff_config
 $(eval $(call ADD_P9A_MEMORY_INCDIRS,$(PROCEDURE)))
+lib$(PROCEDURE)_DEPLIBS+=mss_pmic
 $(call BUILD_PROCEDURE)

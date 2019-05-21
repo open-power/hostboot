@@ -42,6 +42,7 @@
 #include <vpd_access.H>
 #include <mss_generic_attribute_getters.H>
 #include <lib/eff_config/explorer_attr_engine_traits.H>
+#include <lib/eff_config/pmic_attr_engine_traits.H>
 #include <lib/freq/axone_freq_traits.H>
 #include <lib/freq/axone_sync.H>
 #include <generic/memory/mss_git_data_helper.H>
@@ -110,6 +111,9 @@ fapi2::ReturnCode p9a_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
 
                 // Set up explorer SPD ATTRS
                 FAPI_TRY( mss::attr_eff_engine<mss::exp::attr_eff_engine_fields>::set(l_spd_decoder) );
+
+                // Set up pmic SPD ATTRS
+                FAPI_TRY( mss::attr_eff_engine<mss::pmic::attr_eff_engine_fields>::set(l_spd_decoder) );
             }
         }
 
