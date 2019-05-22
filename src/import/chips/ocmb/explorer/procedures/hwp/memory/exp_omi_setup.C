@@ -61,7 +61,7 @@ extern "C"
         FAPI_TRY(mss::half_dimm_mode(i_target, l_is_half_dimm));
 
         // Prints out the data
-        FAPI_INF("%s %s enterprise mode %s-DIMM mode", mss::c_str(i_target), l_is_enterprise ? "is" : "isn't",
+        FAPI_INF("%s is %s enterprise mode, and %s-DIMM mode", mss::c_str(i_target), l_is_enterprise ? "" : "non",
                  l_is_half_dimm ? "half" : "full");
 
         // Sets up the register

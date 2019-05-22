@@ -77,7 +77,7 @@ inline fapi2::ReturnCode enterprise_mode( const fapi2::Target<fapi2::TARGET_TYPE
         // 2) we do not have the override to non-enterprise mode
         o_is_enterprise_mode = l_enterprise_mode && l_no_override;
 
-        FAPI_INF("%s is in %s mode chip is %s override is %s", mss::c_str(i_target),
+        FAPI_INF("%s is in %s mode. (OCMB chip is %s, with %s)", mss::c_str(i_target),
                  o_is_enterprise_mode ? "enterprise" : "non-enterprise", l_enterprise_mode ? "enterprise" : "non-enterprise",
                  l_no_override ? "no override" : "override to non-enterprise");
     }
@@ -108,7 +108,7 @@ inline fapi2::ReturnCode half_dimm_mode( const fapi2::Target<fapi2::TARGET_TYPE_
     if(!l_is_enterprise)
     {
         o_is_half_dimm_mode = false;
-        FAPI_INF("%s is in full-DIMM as the chip is in non-enterprise mode", mss::c_str(i_target));
+        FAPI_INF("%s is in full-DIMM since the chip is in non-enterprise mode", mss::c_str(i_target));
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
@@ -119,7 +119,7 @@ inline fapi2::ReturnCode half_dimm_mode( const fapi2::Target<fapi2::TARGET_TYPE_
     if(l_override != fapi2::ENUM_ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE_NO_OVERRIDE)
     {
         o_is_half_dimm_mode = l_override == fapi2::ENUM_ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE_OVERRIDE_HALF_DIMM;
-        FAPI_INF("%s is in enterprise mode %s override is present. The chip is in %s (attribute %u)", mss::c_str(i_target),
+        FAPI_INF("%s is in enterprise mode, and %s override is present. The chip is in %s (attribute %u)", mss::c_str(i_target),
                  "an", o_is_half_dimm_mode ? "half-DIMM mode" : "full-DIMM mode", l_override);
         return fapi2::FAPI2_RC_SUCCESS;
     }
@@ -129,7 +129,7 @@ inline fapi2::ReturnCode half_dimm_mode( const fapi2::Target<fapi2::TARGET_TYPE_
 
     // Set half DIMM mode based upon the the normal attribute
     o_is_half_dimm_mode = l_half_dimm == fapi2::ENUM_ATTR_MSS_OCMB_HALF_DIMM_MODE_HALF_DIMM;
-    FAPI_INF("%s is in enterprise mode %s override is present. The chip is in %s (attribute %u)", mss::c_str(i_target),
+    FAPI_INF("%s is in enterprise mode, and %s override is present. The chip is in %s (attribute %u)", mss::c_str(i_target),
              "no", o_is_half_dimm_mode ? "half-DIMM mode" : "full-DIMM mode", l_half_dimm);
 
 fapi_try_exit:
