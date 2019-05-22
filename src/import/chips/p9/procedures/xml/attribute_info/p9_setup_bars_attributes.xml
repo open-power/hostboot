@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -167,6 +167,20 @@
     <mrwHide/>
   </attribute>
   <!-- ********************************************************************* -->
+   <attribute>
+    <id>ATTR_PROC_NPU_MMIO_BAR_ENABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>NPU MMIO (stack2) BAR enable
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes: none
+    </description>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
+    <platInit/>
+    <mrwHide/>
+  </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_PROC_NPU_MMIO_BAR_BASE_ADDR_OFFSET</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -185,9 +199,9 @@
   </attribute>
   <!-- ********************************************************************* -->
    <attribute>
-    <id>ATTR_PROC_NPU_MMIO_BAR_ENABLE</id>
+    <id>ATTR_PROC_NPU0_MMIO_BAR_ENABLE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>NPU MMIO (stack2) BAR enable
+    <description>NPU0 MMIO BAR enable
       creator: platform
       consumer: p9_setup_bars
       firmware notes: none
@@ -196,6 +210,166 @@
     <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
     <platInit/>
     <mrwHide/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_NPU0_MMIO_BAR_BASE_ADDR_OFFSET</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>NPU MMIO BAR
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes:
+        Defines 16MB range mapped to NPU0 registers
+        Attribute holds offset (relative to chip MMIO origin) to program into
+        chip address range field of BAR -- Bits 15:39 of the RA
+        (excludes system/memory select/group/chip fields)
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <mrwHide/>
+  </attribute>
+  <!-- ********************************************************************* -->
+   <attribute>
+    <id>ATTR_PROC_NPU1_MMIO_BAR_ENABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>NPU1 MMIO BAR enable
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes: none
+    </description>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
+    <platInit/>
+    <mrwHide/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_NPU1_MMIO_BAR_BASE_ADDR_OFFSET</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>NPU1 MMIO BAR
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes:
+        Defines 16MB range mapped to NPU1 registers
+        Attribute holds offset (relative to chip MMIO origin) to program into
+        chip address range field of BAR -- Bits 15:39 of the RA
+        (excludes system/memory select/group/chip fields)
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <mrwHide/>
+  </attribute>
+  <!-- ********************************************************************* -->
+   <attribute>
+    <id>ATTR_PROC_NPU2_MMIO_BAR_ENABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>NPU2 MMIO BAR enable
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes: none
+    </description>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
+    <platInit/>
+    <mrwHide/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_NPU2_MMIO_BAR_BASE_ADDR_OFFSET</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>NPU2 MMIO BAR
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes:
+        Defines 16MB range mapped to NPU2 registers
+        Attribute holds offset (relative to chip MMIO origin) to program into
+        chip address range field of BAR -- Bits 15:39 of the RA
+        (excludes system/memory select/group/chip fields)
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <mrwHide/>
+  </attribute>
+  <!-- ********************************************************************** -->
+  <attribute>
+    <id>ATTR_PROC_NPU0_PRI_CONFIG</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description> 
+      NPU0 NTL Private Register Interface (PRI) Configuration register settings
+      Array 0 = SM0 value
+            1 = SM1 value
+            2 = SM2 value
+            3 = SM3 value
+      Bits of values:
+      0    PRI_CONFIG_DISABLE: Disable
+      1    Disable (this will disable NTL from decoding the NDL register space)
+      1:2  PRI_CONFIG_NDL: NDL indication sent in the PRI Read/Write access
+            00 = NDL 0
+            01 = NDL 1
+            10 = NDL 2
+            11 = NDL 3
+      3:4 PRI_CONFIG_PHY: Indicates if NTL should decode a PHY register space
+            00 = Decode PHY0 register space
+            01 = Decode PHY1 register space
+            1- = Do not decode any PHY register space
+    </description>
+    <valueType>uint8</valueType>
+    <array>4</array>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************** -->
+  <attribute>
+    <id>ATTR_PROC_NPU1_PRI_CONFIG</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description> 
+      NPU1 NTL Private Register Interface (PRI) Configuration register settings
+      Array 0 = SM0 value
+            1 = SM1 value
+            2 = SM2 value
+            3 = SM3 value
+      Bits of values:
+      0    PRI_CONFIG_DISABLE: Disable
+      1    Disable (this will disable NTL from decoding the NDL register space)
+      1:2  PRI_CONFIG_NDL: NDL indication sent in the PRI Read/Write access
+            00 = NDL 0
+            01 = NDL 1
+            10 = NDL 2
+            11 = NDL 3
+      3:4 PRI_CONFIG_PHY: Indicates if NTL should decode a PHY register space
+            00 = Decode PHY0 register space
+            01 = Decode PHY1 register space
+            1- = Do not decode any PHY register space
+    </description>
+    <valueType>uint8</valueType>
+    <array>4</array>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************** -->
+  <attribute>
+    <id>ATTR_PROC_NPU2_PRI_CONFIG</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description> 
+      NPU2 NTL Private Register Interface (PRI) Configuration register settings
+      Array 0 = SM0 value
+            1 = SM1 value
+            2 = SM2 value
+            3 = SM3 value
+      Bits of values:
+      0    PRI_CONFIG_DISABLE: Disable
+      1    Disable (this will disable NTL from decoding the NDL register space)
+      1:2  PRI_CONFIG_NDL: NDL indication sent in the PRI Read/Write access
+            00 = NDL 0
+            01 = NDL 1
+            10 = NDL 2
+            11 = NDL 3
+      3:4 PRI_CONFIG_PHY: Indicates if NTL should decode a PHY register space
+            00 = Decode PHY0 register space
+            01 = Decode PHY1 register space
+            1- = Do not decode any PHY register space
+    </description>
+    <valueType>uint8</valueType>
+    <array>4</array>
+    <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>

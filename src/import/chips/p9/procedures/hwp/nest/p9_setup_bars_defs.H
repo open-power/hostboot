@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -344,6 +344,13 @@ const uint8_t NPU_NUM_BAR_SHADOWS = 4;
 const uint64_t NPU_BAR_BASE_ADDR_MASK = 0x0001FFFFFFFFFFFFULL;
 const uint64_t NPU_BAR_ADDR_SHIFT = 12;
 
+// The NPU BAR does not include the Memory Select bits.
+// This mask ensures after shifting the attribute bar value
+// we only set the relivant BAR bits.
+//                                  0001122233444556
+//                                  0482604826048260
+const uint64_t NPU_BAR_REG_MASK = 0x1FFFFFF000000000ULL;
+
 const uint64_t NPU_PHY0_BAR_REGS_NDD1[NPU_NUM_BAR_SHADOWS] =
 {
     PU_NPU0_SM0_PHY_BAR,
@@ -353,6 +360,14 @@ const uint64_t NPU_PHY0_BAR_REGS_NDD1[NPU_NUM_BAR_SHADOWS] =
 };
 
 const uint64_t NPU_PHY0_BAR_REGS[NPU_NUM_BAR_SHADOWS] =
+{
+    0x05011406,
+    0x05011436,
+    0x05011466,
+    0x05011496
+};
+
+const uint64_t NPU_PHY0_BAR_REGS_ADD1[NPU_NUM_BAR_SHADOWS] =
 {
     0x05011406,
     0x05011436,
@@ -390,6 +405,31 @@ const uint64_t NPU_MMIO_BAR_REGS[NPU_NUM_BAR_SHADOWS] =
     0x05011036,
     0x05011066,
     0x05011096
+};
+
+// P9A Npu instances
+struct p9_setup_bars_p9a_npu_regs
+{
+    uint64_t bar_regs[NPU_NUM_BAR_SHADOWS];
+    uint64_t pri_regs[NPU_NUM_BAR_SHADOWS];
+};
+
+p9_setup_bars_p9a_npu_regs  p9_setup_bars_p9a_npu0_regs =
+{
+    { 0x501103C, 0x501109C, 0x50110FC, 0x501115C },
+    { 0x50111F6, 0x5011216, 0x50113D6, 0x50113F6 }
+};
+
+p9_setup_bars_p9a_npu_regs  p9_setup_bars_p9a_npu1_regs =
+{
+    { 0x501143C, 0x501149C, 0x50114FC, 0x501155C },
+    { 0x50115F6, 0x5011616, 0x50117D6, 0x50117F6 }
+};
+
+p9_setup_bars_p9a_npu_regs  p9_setup_bars_p9a_npu2_regs =
+{
+    { 0x3011C3C, 0x3011C9C, 0x3011CFC, 0x3011D5C },
+    { 0x3011DF6, 0x3011E16, 0x3011FD6, 0x3011FF6 }
 };
 
 #endif //_P9_SETUP_BARS_DEFS_H_

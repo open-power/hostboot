@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -743,6 +743,160 @@ fapi_try_exit:
 }
 
 
+/// @brief Configure an NPU instance
+///
+/// @param[in] i_target Processor chip target
+/// @param[in] i_attr_bar_enable Enable the NPU MMIO bar
+/// @param[in] i_attr_bar The BAR for the NPU instance
+/// @param[in] i_mmio_offset The MMIO offset for the chip
+/// @param[in] i_attr_pri The private reg interface settings for each NDL
+/// @param[in] i_npu_regs The registers for this NPU
+/// @param[in] i_chip_info Structure describing chip properties/base addresses
+///
+/// @return FAPI_RC_SUCCESS if all calls are successful, else error
+fapi2::ReturnCode
+p9a_setup_bars_npuX(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                    const uint8_t& i_attr_bar_enable,
+                    fapi2::buffer<uint64_t> i_attr_bar,
+                    const uint64_t& i_mmio_offset,
+                    const uint8_t i_attr_pri[],
+                    p9_setup_bars_p9a_npu_regs& i_npu_regs,
+                    p9_setup_bars_chip_info& i_chip_info)
+{
+    FAPI_DBG("Start");
+
+    if (i_attr_bar_enable)
+    {
+        p9_setup_bars_addr_range l_mmio_range;
+        FAPI_ASSERT((i_attr_bar & P9_SETUP_BARS_OFFSET_MASK_16_MB) == 0,
+                    fapi2::P9_SETUP_BARS_NPU_MMIO_BAR_ATTR_ERR()
+                    .set_TARGET(i_target)
+                    .set_BAR_OFFSET(i_attr_bar)
+                    .set_BAR_OFFSET_MASK(P9_SETUP_BARS_OFFSET_MASK_16_MB)
+                    .set_BAR_OVERLAP(i_attr_bar & P9_SETUP_BARS_OFFSET_MASK_2_MB),
+                    "NPU MMIO BAR offset attribute is not aligned to HW implementation");
+
+        i_attr_bar &= NPU_BAR_BASE_ADDR_MASK;
+        i_attr_bar += i_mmio_offset;
+        i_attr_bar = i_attr_bar << NPU_BAR_ADDR_SHIFT;
+        i_attr_bar = NPU_BAR_REG_MASK & i_attr_bar;
+        i_attr_bar.setBit<PU_NPU0_SM0_PHY_BAR_CONFIG_ENABLE>();
+
+        for (uint8_t ll = 0; ll < NPU_NUM_BAR_SHADOWS; ll++)
+        {
+            FAPI_TRY(fapi2::putScom(i_target, i_npu_regs.bar_regs[ll], i_attr_bar),
+                     "Error from putScom (0x08X)", i_npu_regs.bar_regs[ll]);
+        }
+
+        l_mmio_range.base_addr = i_attr_bar;
+        l_mmio_range.size = P9_SETUP_BARS_SIZE_16_MB;
+        l_mmio_range.enabled = true;
+        i_chip_info.ranges.push_back(l_mmio_range);
+        i_chip_info.ranges.back().print();
+    }
+
+    for (uint8_t ll = 0; ll < NPU_NUM_BAR_SHADOWS; ll++)
+    {
+        uint64_t l_pri_val = static_cast<uint64_t>(i_attr_pri[ll]) << (64 - 8);
+        FAPI_TRY(fapi2::putScom(i_target, i_npu_regs.pri_regs[ll], l_pri_val),
+                 "Error from putScom (0x08X)", i_npu_regs.pri_regs[ll]);
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+/// @brief Configure p9a NPU MMIO access
+///
+/// @param[in] i_target Processor chip target
+/// @param[in] i_target_sys System target
+/// @param[in] i_chip_info Structure describing chip properties/base addresses
+///
+/// @return FAPI_RC_SUCCESS if all calls are successful, else error
+fapi2::ReturnCode
+p9a_setup_bars_npu(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                   const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target_sys,
+                   p9_setup_bars_chip_info& i_chip_info)
+
+{
+    FAPI_DBG("Start");
+
+    fapi2::buffer<uint64_t> l_mmio_bar = i_chip_info.base_address_mmio;
+
+    //NPU0
+    {
+        fapi2::ATTR_PROC_NPU0_MMIO_BAR_ENABLE_Type l_mmio_enable;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_NPU0_MMIO_BAR_ENABLE, i_target, l_mmio_enable),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_NPU0_MMIO_BAR_ENABLE)");
+
+        fapi2::ATTR_PROC_NPU0_MMIO_BAR_BASE_ADDR_OFFSET_Type l_mmio_offset;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_NPU0_MMIO_BAR_BASE_ADDR_OFFSET, i_target_sys, l_mmio_offset),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_NPU0_MMIO_BAR_BASE_ADDR_OFFSET)");
+
+        fapi2::ATTR_PROC_NPU0_PRI_CONFIG_Type l_pri_config;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_NPU0_PRI_CONFIG, i_target, l_pri_config),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_NPU0_PRI_CONFIG)");
+
+        FAPI_TRY(p9a_setup_bars_npuX(i_target,
+                                     l_mmio_enable,
+                                     l_mmio_offset,
+                                     l_mmio_bar,
+                                     l_pri_config,
+                                     p9_setup_bars_p9a_npu0_regs,
+                                     i_chip_info));
+    }
+    //NPU1
+    {
+        fapi2::ATTR_PROC_NPU1_MMIO_BAR_ENABLE_Type l_mmio_enable;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_NPU1_MMIO_BAR_ENABLE, i_target, l_mmio_enable),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_NPU1_MMIO_BAR_ENABLE)");
+
+        fapi2::ATTR_PROC_NPU1_MMIO_BAR_BASE_ADDR_OFFSET_Type l_mmio_offset;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_NPU1_MMIO_BAR_BASE_ADDR_OFFSET, i_target_sys, l_mmio_offset),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_NPU1_MMIO_BAR_BASE_ADDR_OFFSET)");
+
+        fapi2::ATTR_PROC_NPU1_PRI_CONFIG_Type l_pri_config;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_NPU1_PRI_CONFIG, i_target, l_pri_config),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_NPU1_PRI_CONFIG)");
+
+        FAPI_TRY(p9a_setup_bars_npuX(i_target,
+                                     l_mmio_enable,
+                                     l_mmio_offset,
+                                     l_mmio_bar,
+                                     l_pri_config,
+                                     p9_setup_bars_p9a_npu1_regs,
+                                     i_chip_info));
+    }
+    //NPU2
+    {
+        fapi2::ATTR_PROC_NPU2_MMIO_BAR_ENABLE_Type l_mmio_enable;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_NPU2_MMIO_BAR_ENABLE, i_target, l_mmio_enable),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_NPU2_MMIO_BAR_ENABLE)");
+
+        fapi2::ATTR_PROC_NPU2_MMIO_BAR_BASE_ADDR_OFFSET_Type l_mmio_offset;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_NPU2_MMIO_BAR_BASE_ADDR_OFFSET, i_target_sys, l_mmio_offset),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_NPU2_MMIO_BAR_BASE_ADDR_OFFSET)");
+
+        fapi2::ATTR_PROC_NPU2_PRI_CONFIG_Type l_pri_config;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_NPU2_PRI_CONFIG, i_target, l_pri_config),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_NPU2_PRI_CONFIG)");
+
+        FAPI_TRY(p9a_setup_bars_npuX(i_target,
+                                     l_mmio_enable,
+                                     l_mmio_offset,
+                                     l_mmio_bar,
+                                     l_pri_config,
+                                     p9_setup_bars_p9a_npu2_regs,
+                                     i_chip_info));
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+
 /// @brief Configure NPU MMIO access
 ///
 /// @param[in] i_target Processor chip target
@@ -1237,7 +1391,12 @@ p9_setup_bars_check_overlap(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
                             .set_BASE_ADDR2(i_chip_info.ranges[jj].base_addr)
                             .set_END_ADDR2(i_chip_info.ranges[jj].end_addr())
                             .set_ENABLED2(i_chip_info.ranges[jj].enabled),
-                            "Overlapping address regions detected!");
+                            "Overlapping address regions detected %llx->%llx  %llx->%llx!",
+                            i_chip_info.ranges[ii].base_addr,
+                            i_chip_info.ranges[ii].end_addr(),
+                            i_chip_info.ranges[jj].base_addr,
+                            i_chip_info.ranges[jj].end_addr()
+                           );
             }
         }
     }
@@ -1255,6 +1414,10 @@ p9_setup_bars(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
     FAPI_INF("Start");
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     p9_setup_bars_chip_info l_chip_info;
+    fapi2::ATTR_CHIP_EC_FEATURE_ONE_NPU_TOP_Type l_one_npu;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_ONE_NPU_TOP, i_target, l_one_npu),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_ONE_NPU_TOP)");
 
     // process chip information
     FAPI_TRY(p9_setup_bars_build_chip_info(i_target,
@@ -1268,9 +1431,18 @@ p9_setup_bars(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
     // PSI
     FAPI_TRY(p9_setup_bars_psi(i_target, FAPI_SYSTEM, l_chip_info),
              "Error from p9_setup_bars_psi");
+
     // NPU
-    FAPI_TRY(p9_setup_bars_npu(i_target, FAPI_SYSTEM, l_chip_info),
-             "Error from p9_setup_bars_npu");
+    if (l_one_npu)
+    {
+        FAPI_TRY(p9_setup_bars_npu(i_target, FAPI_SYSTEM, l_chip_info),
+                 "Error from p9_setup_bars_npu");
+    }
+    else
+    {
+        FAPI_TRY(p9a_setup_bars_npu(i_target, FAPI_SYSTEM, l_chip_info),
+                 "Error from p9a_setup_bars_npu");
+    }
 
     // MCD
     if (!l_chip_info.hw423589_option1)
