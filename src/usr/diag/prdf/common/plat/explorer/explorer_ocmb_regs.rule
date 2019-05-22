@@ -390,3 +390,43 @@
         scomaddr    0x08012415;
         capture     group default;
     };
+
+    ############################################################################
+    # Explorer ECC Address Registers
+    ############################################################################
+
+    register MBNCER
+    {
+        name        "Explorer Mainline NCE Address Trap Register";
+        scomaddr    0x0801186A;
+        capture     group default;
+    };
+
+    register MBRCER
+    {
+        name        "Explorer Mainline RCE Address Trap Register";
+        scomaddr    0x0801186B;
+        capture     group default;
+    };
+
+    register MBMPER
+    {
+        name        "Explorer Mainline MPE Address Trap Register";
+        scomaddr    0x0801186C;
+        capture     group default;
+    };
+
+    register MBUER
+    {
+        name        "Explorer Mainline UE Address Trap Register";
+        scomaddr    0x0801186D;
+        capture     group default;
+    };
+
+    register MBAUER
+    {
+        name        "Explorer Mainline AUE Address Trap Register";
+        scomaddr    0x0801186E;
+        capture     group default;
+    };
+
