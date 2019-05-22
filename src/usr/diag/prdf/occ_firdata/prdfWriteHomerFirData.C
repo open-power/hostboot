@@ -656,6 +656,9 @@ void getAddresses( TrgtMap_t & io_targMap )
         // AUE/IAUE analysis
         0x080118D7, // MCBMCAT
 
+        // AUE/IAUE analysis
+        0x0801186D, // MBUER
+        0x0801186E, // MBAUER
     };
 
     // EC level handling will be done with a

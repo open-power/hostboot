@@ -167,7 +167,7 @@ uint32_t getMemReadAddr( ExtensibleChip * i_chip, uint32_t i_pos,
 
 /**
  * @brief  Reads the specified mainline memory read address from hardware.
- * @param  i_chip MCA or MBA.
+ * @param  i_chip MCA, MBA, or OCMB.
  * @param  i_reg  The target address register.
  * @param  o_addr The returned address from hardware.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
@@ -189,7 +189,7 @@ uint32_t getMemReadAddr( ExtensibleChip * i_chip, MemAddr::ReadReg i_reg,
  * mode or not. Therefore, users must call getMcbistMaintPort() to get the port
  * information.
  *
- * @param  i_chip An MBA or MCBIST chip.
+ * @param  i_chip An MBA, MCBIST, or OCMB chip.
  * @param  o_addr The returned address from hardware.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
@@ -226,9 +226,9 @@ uint32_t getMemMaintEndAddr( ExtensibleChip * i_chip, MemAddr & o_addr );
  *  - if there are more than one configured ports behind the MCBIST.
  *  - if all configured ports have the same geometry.
  *
- * @note   Only supported for MCBIST/OCMB.
- * @param  i_mcbChip An MCBIST/OCMB chip.
- * @param  o_portList A list of all MCAs/MEM_PORTs targeted by the command.
+ * @note   Only supported for MCBIST.
+ * @param  i_mcbChip An MCBIST chip.
+ * @param  o_portList A list of all MCAs targeted by the command.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
