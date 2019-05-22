@@ -70,10 +70,13 @@ const uint64_t P10_FBC_UTILS_LAST_ADDR_IN_CACHELINE = 0x78ULL;
 // cacheline size = 128B
 const uint64_t FABRIC_CACHELINE_SIZE = 0x80;
 
+// fbc racetrack stations
+const uint8_t FABRIC_NUM_STATIONS = 16;
+
 // max memory interleave = 16TB
 const uint64_t MAX_INTERLEAVE_GROUP_SIZE = 0x0000100000000000ULL;
 
-// FBC base address determination constants
+// fbc base address determination constants
 const uint8_t FABRIC_ADDR_SMF_BIT = 12;
 const uint8_t FABRIC_ADDR_MSEL_START_BIT = 13;
 const uint8_t FABRIC_ADDR_MSEL_END_BIT = 14;
@@ -102,8 +105,8 @@ fapi2::ReturnCode p10_fbc_utils_get_fbc_state(
 /// @brief Use ADU pMisc Mode register to clear fabric stop signal, overriding
 /// a stop condition caused by a checkstop
 ///
-/// @param[in] i_target         Reference to processor chip target
-/// @return fapi::ReturnCode    FAPI2_RC_SUCCESS if success, else error code.
+/// @param[in] i_target             Reference to processor chip target
+/// @return fapi::ReturnCode        FAPI2_RC_SUCCESS if success, else error code.
 ///
 fapi2::ReturnCode p10_fbc_utils_override_fbc_stop(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
@@ -111,14 +114,14 @@ fapi2::ReturnCode p10_fbc_utils_override_fbc_stop(
 ///
 ///@brief Dynamically determine base address for a given chip
 ///
-/// @param[in] i_target                 Reference to processor chip target
-/// @param[in] i_addr_mode              HB_BOOT_ID or EFF_TOPOLOGY_ID (chip 0 of
-///                                     drawer vs eff topology id)
-/// @param[out] o_base_address_nm0      base address of nm0 region of memory map
-/// @param[out] o_base_address_nm1      base address of nm1 region of memory map
-/// @param[out] o_base_address_m        base address of m region of memory map
-/// @param[out] o_base_address_mmio     base address of mmio region of memory map
-/// @return fapi2::ReturnCode           FAPI2_RC_SUCCESS if success, else error
+/// @param[in] i_target             Reference to processor chip target
+/// @param[in] i_addr_mode          HB_BOOT_ID or EFF_TOPOLOGY_ID (chip 0 of
+///                                 drawer vs eff topology id)
+/// @param[out] o_base_address_nm0  base address of nm0 region of memory map
+/// @param[out] o_base_address_nm1  base address of nm1 region of memory map
+/// @param[out] o_base_address_m    base address of m region of memory map
+/// @param[out] o_base_address_mmio base address of mmio region of memory map
+/// @return fapi2::ReturnCode       FAPI2_RC_SUCCESS if success, else error code.
 ///
 fapi2::ReturnCode p10_fbc_utils_get_chip_base_address(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
@@ -127,5 +130,18 @@ fapi2::ReturnCode p10_fbc_utils_get_chip_base_address(
     uint64_t& o_base_address_nm1,
     uint64_t& o_base_address_m,
     uint64_t& o_base_address_mmio);
+
+///
+///@brief Write to all instances of a given racetrack scom register
+///
+/// @param[in] i_target             Reference to processor chip target
+/// @param[in] i_scom_addr          Scom address for EQ0 instance of racetrack regs
+/// @param[in] i_scom_data          Scom data to write, assumes 64-bit value
+/// @return fapi2::ReturnCode       FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode p10_fbc_utils_set_racetrack_regs(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const uint64_t i_scom_addr,
+    const uint64_t i_scom_data);
 
 #endif // _P10_FBC_UTILS_H_

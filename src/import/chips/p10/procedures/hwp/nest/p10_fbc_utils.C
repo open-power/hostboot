@@ -101,6 +101,9 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+////////////////////////////////////////////////////////
+// p10_fbc_utils_get_chip_base_address
+////////////////////////////////////////////////////////
 fapi2::ReturnCode p10_fbc_utils_get_chip_base_address(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const p10_fbc_utils_addr_mode i_addr_mode,
@@ -187,6 +190,27 @@ fapi2::ReturnCode p10_fbc_utils_get_chip_base_address(
         o_base_address_nm1 = l_base_address();
         l_base_address.setBit<FABRIC_ADDR_MSEL_END_BIT>();
         o_base_address_mmio = l_base_address();
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+////////////////////////////////////////////////////////
+// p10_fbc_utils_set_racetrack_regs
+////////////////////////////////////////////////////////
+fapi2::ReturnCode p10_fbc_utils_set_racetrack_regs(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const uint64_t i_scom_addr,
+    const uint64_t i_scom_data)
+{
+    FAPI_DBG("Start");
+
+    for(uint8_t station = 0; station < FABRIC_NUM_STATIONS; station++)
+    {
+        FAPI_TRY(putScom(i_target, i_scom_addr + (station << 6), i_scom_data),
+                 "Error from writing to racetrack scom register (station %d)", station);
     }
 
 fapi_try_exit:
