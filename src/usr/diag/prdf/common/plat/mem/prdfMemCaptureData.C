@@ -525,17 +525,14 @@ void addEccData<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
     CaptureData & cd = io_sc.service_data->GetCaptureData();
     OcmbDataBundle * db = getOcmbDataBundle( i_chip );
+
     TargetHandle_t ocmbTrgt = i_chip->getTrgt();
 
     // Add DRAM repairs data from hardware.
     captureDramRepairsData<TYPE_OCMB_CHIP>( ocmbTrgt, cd );
 
     // Add DRAM repairs data from VPD.
-    // TODO RTC 210072 - Explorer only has one port, however, multiple ports
-    // will be supported in the future. Updates will need to be made here so we
-    // can get the relevant port.
-    TargetHandle_t memPort = getConnectedChild( ocmbTrgt, TYPE_MEM_PORT, 0 );
-    captureDramRepairsVpd<TYPE_MEM_PORT>( memPort, cd );
+    captureDramRepairsVpd<TYPE_OCMB_CHIP>( ocmbTrgt, cd );
 
     // Add IUE counts to capture data.
     captureIueCounts<OcmbDataBundle*>( ocmbTrgt, db, cd );
@@ -575,11 +572,7 @@ void addEccData<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
     captureDramRepairsData<TYPE_OCMB_CHIP>( i_trgt, cd );
 
     // Add DRAM repairs data from VPD.
-    // TODO RTC 210072 - Explorer only has one port, however, multiple ports
-    // will be supported in the future. Updates will need to be made here so we
-    // can get the relevant port.
-    TargetHandle_t memPort = getConnectedChild( i_trgt, TYPE_MEM_PORT, 0 );
-    captureDramRepairsVpd<TYPE_MEM_PORT>( memPort, cd );
+    captureDramRepairsVpd<TYPE_OCMB_CHIP>( i_trgt, cd );
 
     ErrDataService::AddCapData( cd, io_errl );
 }

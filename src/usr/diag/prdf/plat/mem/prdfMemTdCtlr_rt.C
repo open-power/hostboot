@@ -920,19 +920,13 @@ uint32_t __findChipMarks<TYPE_MEM_PORT>(
 
         if ( !chipMark.isValid() ) continue; // no chip mark present
 
-        // TODO RTC 210072 - Explorer only has one port, however, multiple ports
-        // will be supported in the future. Updates will need to be made here
-        // so we can get the relevant port.
-        TargetHandle_t memPort = getConnectedChild( ocmb->getTrgt(),
-                                                    TYPE_MEM_PORT, 0 );
-
         // Get the DQ Bitmap data.
         MemDqBitmap dqBitmap;
-        o_rc = getBadDqBitmap( memPort, rank, dqBitmap );
+        o_rc = getBadDqBitmap( ocmb->getTrgt(), rank, dqBitmap );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getBadDqBitmap(0x%08x,0x%02x)",
-                      getHuid(memPort), rank.getKey() );
+                      ocmb->getHuid(), rank.getKey() );
             break;
         }
 
@@ -942,7 +936,7 @@ uint32_t __findChipMarks<TYPE_MEM_PORT>(
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "dqBitmap.isChipMark() failed on 0x%08x "
-                      "0x%02x", getHuid(memPort), rank.getKey() );
+                      "0x%02x", ocmb->getHuid(), rank.getKey() );
             break;
         }
 
@@ -1241,20 +1235,14 @@ uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::handleRrFo()
 
             if ( !chipMark.isValid() ) continue; // no chip mark present
 
-            // TODO RTC 210072 - Explorer only has one port, however,
-            // multiple ports will be supported in the future. Updates will
-            // need to be made here so we can get the relevant port.
-
             // Get the DQ Bitmap data.
-            TargetHandle_t memPort = getConnectedChild( ocmbChip->getTrgt(),
-                                                        TYPE_MEM_PORT, 0 );
             MemDqBitmap dqBitmap;
 
-            o_rc = getBadDqBitmap( memPort, rank, dqBitmap );
+            o_rc = getBadDqBitmap( ocmbChip->getTrgt(), rank, dqBitmap );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "getBadDqBitmap(0x%08x, %d)",
-                          getHuid(memPort), rank.getMaster() );
+                          ocmbChip->getHuid(), rank.getMaster() );
                 break;
             }
 

@@ -338,6 +338,10 @@ uint32_t getBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
             o_rc = __getBadDqBitmap<fapi2::TARGET_TYPE_MEM_PORT>( i_trgt,
                 i_rank, o_bitmap );
             break;
+        case TYPE_OCMB_CHIP:
+            o_rc = __getBadDqBitmap<fapi2::TARGET_TYPE_OCMB_CHIP>( i_trgt,
+                i_rank, o_bitmap );
+            break;
         default:
             PRDF_ERR( PRDF_FUNC "Invalid trgt type" );
             o_rc = FAIL;
@@ -414,6 +418,10 @@ uint32_t setBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
             break;
         case TYPE_MEM_PORT:
             o_rc = __setBadDqBitmap<fapi2::TARGET_TYPE_MEM_PORT>( i_trgt,
+                i_rank, i_bitmap );
+            break;
+        case TYPE_OCMB_CHIP:
+            o_rc = __setBadDqBitmap<fapi2::TARGET_TYPE_OCMB_CHIP>( i_trgt,
                 i_rank, i_bitmap );
             break;
         default:

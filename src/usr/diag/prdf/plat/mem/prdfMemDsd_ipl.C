@@ -121,15 +121,8 @@ uint32_t DsdEvent<T>::verifySpare( const uint32_t & i_eccAttns,
             // Set the bad spare in the VPD. At this point, the chip mark
             // should have already been set in the VPD because it was recently
             // verified.
-            TargetHandle_t bitmapTrgt = iv_chip->getTrgt();
-            if ( TYPE_OCMB_CHIP == T )
-            {
-                ExtensibleChip * bitmapChip = getConnectedChild( iv_chip,
-                    TYPE_MEM_PORT, iv_mark.getSymbol().getPortSlct() );
-                bitmapTrgt = bitmapChip->getTrgt();
-            }
             MemDqBitmap bitmap;
-            o_rc = getBadDqBitmap( bitmapTrgt, iv_rank, bitmap );
+            o_rc = getBadDqBitmap( iv_chip->getTrgt(), iv_rank, bitmap );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "getBadDqBitmap() failed" );
@@ -149,7 +142,7 @@ uint32_t DsdEvent<T>::verifySpare( const uint32_t & i_eccAttns,
                 }
             }
 
-            o_rc = setBadDqBitmap( bitmapTrgt, iv_rank, bitmap );
+            o_rc = setBadDqBitmap( iv_chip->getTrgt(), iv_rank, bitmap );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "setBadDqBitmap() failed" );

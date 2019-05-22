@@ -101,8 +101,8 @@ uint8_t symbol2PortSlct<TARGETING::TYPE_OCMB_CHIP>( uint8_t i_symbol )
 
 //------------------------------------------------------------------------------
 
-template<>
-uint8_t dq2Symbol<TARGETING::TYPE_MCA>( uint8_t i_dq, uint8_t i_ps )
+template<TARGETING::TYPE T>
+uint8_t dq2Symbol( uint8_t i_dq, uint8_t i_ps )
 {
     uint8_t symbol = SYMBOLS_PER_RANK;
 
@@ -127,14 +127,12 @@ uint8_t dq2Symbol<TARGETING::TYPE_MCA>( uint8_t i_dq, uint8_t i_ps )
     return symbol;
 }
 
-//------------------------------------------------------------------------------
-
-template<>
-uint8_t dq2Symbol<TARGETING::TYPE_MEM_PORT>( uint8_t i_dq, uint8_t i_ps )
-{
-    // MEM_PORT case is identical to MCA
-    return dq2Symbol<TARGETING::TYPE_MCA>( i_dq, i_ps );
-}
+template
+uint8_t dq2Symbol<TARGETING::TYPE_MCA>( uint8_t i_dq, uint8_t i_ps );
+template
+uint8_t dq2Symbol<TARGETING::TYPE_MEM_PORT>( uint8_t i_dq, uint8_t i_ps );
+template
+uint8_t dq2Symbol<TARGETING::TYPE_OCMB_CHIP>( uint8_t i_dq, uint8_t i_ps );
 
 //------------------------------------------------------------------------------
 

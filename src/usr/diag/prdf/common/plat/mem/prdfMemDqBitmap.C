@@ -447,6 +447,9 @@ std::vector<MemSymbol> MemDqBitmap::getSymbolList( uint8_t i_portSlct )
                         case TYPE_MEM_PORT:
                             symbol = dq2Symbol<TYPE_MEM_PORT>( dq, i_portSlct );
                             break;
+                        case TYPE_OCMB_CHIP:
+                            symbol = dq2Symbol<TYPE_OCMB_CHIP>(dq, i_portSlct);
+                            break;
                         default:
                             PRDF_ERR( "Invalid trgt type" );
                             PRDF_ASSERT( false );

@@ -193,7 +193,7 @@ bool obusInSmpMode(TARGETING::TargetHandle_t obusTgt);
 
 /**
  * @brief  Reads the bad DQ bitmap attribute for both ports of the target rank.
- * @param  i_trgt        A MCA/MBA/MEM_PORT target.
+ * @param  i_trgt        A MCA/MBA/MEM_PORT/OCMB_CHIP target.
  * @param  i_rank        Target rank.
  * @param  o_bitmap      DQ bitmap container.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
@@ -203,7 +203,7 @@ uint32_t getBadDqBitmap( TARGETING::TargetHandle_t i_trgt,
 
 /**
  * @brief  Writes the bad DQ bitmap attribute for both ports of the target rank.
- * @param  i_trgt   A MCA/MBA/MEM_PORT target.
+ * @param  i_trgt   A MCA/MBA/MEM_PORT/OCMB_CHIP target.
  * @param  i_rank   Target rank.
  * @param  i_bitmap DQ bitmap container.
  * @note   This is a no-op if DRAM Repairs are disabled in manufacturing.
@@ -215,7 +215,7 @@ uint32_t setBadDqBitmap( TARGETING::TargetHandle_t i_trgt,
 
 /**
  * @brief  Clears the bad DQ bitmap attribute for all ports of the target rank.
- * @param  i_trgt   A MCA/MBA/MEM_PORT target.
+ * @param  i_trgt   A MCA/MBA/MEM_PORT/OCMB_CHIP target.
  * @param  i_rank   Target rank.
  * @note   This is a no-op if DRAM Repairs are disabled in manufacturing.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.

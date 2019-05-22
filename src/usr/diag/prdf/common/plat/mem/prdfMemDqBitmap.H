@@ -75,8 +75,11 @@ class MemDqBitmap
                  BitmapData i_d ) : iv_trgt(i_trgt), iv_rank(i_rank),
                  iv_x4Dram(true), iv_data(i_d)
     {
-        if ( TARGETING::TYPE_MEM_PORT == PlatServices::getTargetType(iv_trgt) )
+        if ( TARGETING::TYPE_MEM_PORT == PlatServices::getTargetType(iv_trgt) ||
+             TARGETING::TYPE_OCMB_CHIP ==
+                  PlatServices::getTargetType(iv_trgt) )
         {
+            // TODO RTC 210072 - Support multiple ports
             TARGETING::TargetHandle_t dimm =
                 PlatServices::getConnectedDimm( iv_trgt, iv_rank );
             iv_x4Dram = PlatServices::isDramWidthX4( dimm );
@@ -236,7 +239,7 @@ class MemDqBitmap
 
   private: // instance variables
 
-    TARGETING::TargetHandle_t iv_trgt; ///< Target MBA/MCA/MEM_PORT
+    TARGETING::TargetHandle_t iv_trgt; ///< Target MBA/MCA/MEM_PORT/OCMB_CHIP
     MemRank iv_rank;                   ///< Target rank
     bool iv_x4Dram;                    ///< TRUE if iv_trgt uses x4 DRAMs
 
