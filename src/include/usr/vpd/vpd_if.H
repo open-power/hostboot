@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -106,6 +106,25 @@ namespace VPD
      *      error log.
      */
     errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target );
+
+    /**
+     * @brief This function checks if the eeprom cache for the target is in
+     *        sync with hardware and returns the result in o_isInSync.
+     *
+     * @param[in]   i_target      Target device
+     *
+     *
+     * @param[in]   i_eepromType  Eeprom content type of target device
+     *
+     * @param[out]  o_isInSync    true if part and serial numbers in cache match
+     *                            hardware. Otherwise, false.
+     *
+     * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+     *      error log.
+     */
+    errlHndl_t ensureEepromCacheIsInSync(TARGETING::Target * i_target,
+                            TARGETING::EEPROM_CONTENT_TYPE   i_eepromType,
+                                         bool              & o_isInSync);
 
     /**
      * @brief This function invalidates the VPD data in the PNOR cache.

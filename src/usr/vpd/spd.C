@@ -53,6 +53,7 @@
 #include "spdDDR4.H"
 #include "spdDDR4_DDIMM.H"
 #include "errlud_vpd.H"
+#include "ocmb_spd.H"
 #include <config.h>
 
 // ----------------------------------------------
@@ -122,6 +123,11 @@ const bool g_usePNOR = true;
 */
 bool isValidDimmType ( uint8_t i_dimmType );
 
+//@TODO RTC 203788 doxygen
+bool isValidDimmType(uint8_t i_memType,
+                     TARGETING::EEPROM_CONTENT_TYPE i_eepromType);
+
+
 /**
 * @brief Compare two values and return whether e2 is greater than
 *       the e1 value.  This is used during lower_bound to cut
@@ -139,6 +145,7 @@ bool isValidDimmType ( uint8_t i_dimmType );
 bool compareEntries ( const KeywordData e1,
                       const KeywordData e2 );
 
+// @TODO RTC 203788 update comment block
 /**
  * @brief This function will read the DIMM memory type.
  *
@@ -151,9 +158,28 @@ bool compareEntries ( const KeywordData e1,
  * @return errlHndl_t - NULL if successful, otherwise a pointer
  *      to the error log.
  */
-errlHndl_t getMemType ( uint8_t & o_memType,
-                        TARGETING::Target * i_target,
-                        VPD::vpdCmdTarget i_location );
+errlHndl_t getMemType(uint8_t & o_memType,
+                     TARGETING::Target * i_target,
+                     VPD::vpdCmdTarget i_location,
+                     EEPROM::EEPROM_SOURCE i_eepromSource = EEPROM::AUTOSELECT);
+
+// @TODO RTC 203788 update comment block
+/**
+ * @brief This function will read the DIMM memory type.
+ *
+ * @param[out] o_memType - The memory type value to return.
+ *
+ * @param[in] i_target - The target to read data from.
+ *
+ * @param[in] i_location - The SPD source (PNOR/SEEPROM).
+ *
+ * @return errlHndl_t - NULL if successful, otherwise a pointer
+ *      to the error log.
+ */
+errlHndl_t getMemType(uint8_t &                  o_memType,
+                     TARGETING::Target *         i_target,
+                     TARGETING::EEPROM_CONTENT_TYPE i_eepromType,
+                     EEPROM::EEPROM_SOURCE       i_eepromSource);
 
 /**
  * @brief This function will read the DIMM module type.
@@ -207,6 +233,29 @@ bool isValidDimmType ( const uint8_t i_dimmType )
     return ( ( SPD_DDR3_TYPE == i_dimmType ) ||
              ( SPD_DDR4_TYPE == i_dimmType ) );
 }
+
+
+bool isValidDimmType(uint8_t i_memType,
+                     TARGETING::EEPROM_CONTENT_TYPE i_eepromType)
+{
+    bool isValid = false;
+
+// TODO RTC:204341 Add support for reading/write EECACHE during runtime
+#ifndef __HOSTBOOT_RUNTIME
+    if (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_ISDIMM)
+    {
+        isValid = isValidDimmType(i_memType);
+    }
+    else if (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_DDIMM)
+    {
+        isValid = isValidOcmbDimmType(i_memType);
+    }
+
+#endif
+
+    return isValid;
+}
+
 
 // ------------------------------------------------------------------
 // spdGetKeywordValue
@@ -438,11 +487,12 @@ errlHndl_t spdWriteKeywordValue ( DeviceFW::OperationType i_opType,
 // ------------------------------------------------------------------
 // spdFetchData
 // ------------------------------------------------------------------
-errlHndl_t spdFetchData ( uint64_t i_byteAddr,
-                          size_t i_numBytes,
-                          void * o_data,
-                          TARGETING::Target * i_target,
-                          VPD::vpdCmdTarget i_location )
+errlHndl_t spdFetchData ( uint64_t              i_byteAddr,
+                          size_t                i_numBytes,
+                          void                * o_data,
+                          TARGETING::Target   * i_target,
+                          VPD::vpdCmdTarget     i_location,
+                          EEPROM::EEPROM_SOURCE i_eepromSource)
 {
     errlHndl_t err{nullptr};
 
@@ -498,7 +548,7 @@ errlHndl_t spdFetchData ( uint64_t i_byteAddr,
                                       DEVICE_EEPROM_ADDRESS(
                                           EEPROM::VPD_PRIMARY,
                                           i_byteAddr,
-                                          EEPROM::AUTOSELECT) );
+                                          i_eepromSource));
             if( err )
             {
                 TRACFCOMP(g_trac_spd,
@@ -622,12 +672,13 @@ errlHndl_t spdWriteData ( uint64_t i_offset,
 // ------------------------------------------------------------------
 // spdGetValue
 // ------------------------------------------------------------------
-errlHndl_t spdGetValue ( VPD::vpdKeyword i_keyword,
-                         void * io_buffer,
-                         size_t & io_buflen,
-                         TARGETING::Target * i_target,
-                         uint64_t i_DDRRev,
-                         VPD::vpdCmdTarget i_location )
+errlHndl_t spdGetValue(VPD::vpdKeyword       i_keyword,
+                       void                * io_buffer,
+                       size_t              & io_buflen,
+                       TARGETING::Target   * i_target,
+                       uint64_t              i_DDRRev,
+                       VPD::vpdCmdTarget     i_location,
+                       EEPROM::EEPROM_SOURCE i_eepromSource)
 {
     errlHndl_t err{nullptr};
     uint8_t * tmpBuffer = static_cast<uint8_t *>(io_buffer);
@@ -1790,9 +1841,10 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
 // ------------------------------------------------------------------
 // getMemType
 // ------------------------------------------------------------------
-errlHndl_t getMemType ( uint8_t           & o_memType,
-                        TARGETING::Target * i_target,
-                        VPD::vpdCmdTarget   i_location )
+errlHndl_t getMemType(uint8_t             & o_memType,
+                      TARGETING::Target   * i_target,
+                      VPD::vpdCmdTarget     i_location,
+                      EEPROM::EEPROM_SOURCE i_eepromSource)
 {
     errlHndl_t err{nullptr};
 
@@ -1800,7 +1852,8 @@ errlHndl_t getMemType ( uint8_t           & o_memType,
                         MEM_TYPE_SZ,
                         &o_memType,
                         i_target,
-                        i_location );
+                        i_location,
+                        i_eepromSource);
 
     TRACUCOMP( g_trac_spd,
                EXIT_MRK"SPD::getMemType() - MemType: 0x%02x, Error: %s",
@@ -1808,6 +1861,57 @@ errlHndl_t getMemType ( uint8_t           & o_memType,
                ((NULL == err) ? "No" : "Yes") );
 
     return err;
+}
+
+
+errlHndl_t getMemType(uint8_t &                  o_memType,
+                     TARGETING::Target *         i_target,
+                     TARGETING::EEPROM_CONTENT_TYPE i_eepromType,
+                     EEPROM::EEPROM_SOURCE       i_eepromSource)
+{
+    errlHndl_t err = nullptr;
+
+// @TODO RTC 204341 Implement for runtime
+#ifndef __HOSTBOOT_RUNTIME
+
+    if (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_ISDIMM)
+    {
+        err = getMemType(o_memType,
+                         i_target,
+                         VPD::AUTOSELECT,
+                         i_eepromSource);
+    }
+    else if (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_DDIMM)
+    {
+        err = getMemType(o_memType,
+                         i_target,
+                         i_eepromSource);
+    }
+    else
+    {
+        /*@
+        * @errortype
+        * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+        * @moduleid         VPD::VPD_GET_MEMTYPE
+        * @reasoncode       VPD::VPD_INVALID_EEPROM_CONTENT_TYPE
+        * @userdata1        Eeprom Content Type Given
+        * @userdata2        Target HUID
+        * @devdesc          An unsupported eeprom content type was supplied.
+        * @custdesc         A problem occurred during the IPL
+        *                   of the system.
+        */
+        err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                      VPD::VPD_GET_MEMTYPE,
+                                      VPD::VPD_INVALID_EEPROM_CONTENT_TYPE,
+                                      i_eepromType,
+                                      TARGETING::get_huid(i_target),
+                                      ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+    }
+
+#endif
+
+    return err;
+
 }
 
 // ------------------------------------------------------------------
@@ -2173,6 +2277,189 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
 
     TRACSSCOMP(g_trac_spd, EXIT_MRK"spd.C::setPartAndSerialNumberAttributes()");
 }
+
+// @TODO RTC 203788 Doxygen
+errlHndl_t readFromEepromSource(TARGETING::Target*          i_target,
+                                TARGETING::EEPROM_CONTENT_TYPE i_eepromType,
+                          const VPD::vpdKeyword             i_keyword,
+                          const uint8_t                     i_memType,
+                                void*                       io_buffer,
+                                size_t&                     io_buflen,
+                                EEPROM::EEPROM_SOURCE       i_eepromSource)
+{
+    errlHndl_t err = nullptr;
+
+// @TODO RTC 204341 Implement for runtime
+#ifndef __HOSTBOOT_RUNTIME
+    if (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_ISDIMM)
+    {
+        err = spdGetValue(i_keyword,
+                          io_buffer,
+                          io_buflen,
+                          i_target,
+                          i_memType,
+                          VPD::SEEPROM,
+                          i_eepromSource);
+    }
+    else if (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_DDIMM)
+    {
+        err = ocmbGetSPD(i_target,
+                         io_buffer,
+                         io_buflen,
+                         i_keyword,
+                         i_memType,
+                         i_eepromSource);
+    }
+    else
+    {
+        /*@
+        * @errortype
+        * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+        * @moduleid         VPD::VPD_READ_FROM_EEPROM_SOURCE
+        * @reasoncode       VPD::VPD_INVALID_EEPROM_CONTENT_TYPE
+        * @userdata1        Eeprom Content Type Given
+        * @userdata2        Target HUID
+        * @devdesc          An unsupported eeprom content type was supplied.
+        * @custdesc         A problem occurred during the IPL
+        *                   of the system.
+        */
+        err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                      VPD::VPD_READ_FROM_EEPROM_SOURCE,
+                                      VPD::VPD_INVALID_EEPROM_CONTENT_TYPE,
+                                      i_eepromType,
+                                      TARGETING::get_huid(i_target),
+                                      ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+    }
+#endif
+
+    return err;
+}
+
+
+// ------------------------------------------------------------------
+// cmpEecacheToEeprom
+// ------------------------------------------------------------------
+errlHndl_t cmpEecacheToEeprom(TARGETING::Target * i_target,
+                              TARGETING::EEPROM_CONTENT_TYPE i_eepromType,
+                              VPD::vpdKeyword i_keyword,
+                              bool &o_match)
+{
+    errlHndl_t err = nullptr;
+
+    TRACSSCOMP(g_trac_spd, ENTER_MRK"cmpEecacheToEeprom()");
+
+    o_match = false;
+    do
+    {
+        // Read the Basic Memory Type from the Eeprom Cache
+        uint8_t memTypeCache(MEM_TYPE_INVALID);
+        err = getMemType(memTypeCache,
+                         i_target,
+                         i_eepromType,
+                         EEPROM::CACHE);
+        if (err)
+        {
+            break;
+        }
+
+        if (!isValidDimmType(memTypeCache, i_eepromType))
+        {
+            break;
+        }
+
+        // Read the Basic Memory Type from HARDWARE
+        uint8_t memTypeHardware(MEM_TYPE_INVALID);
+        err = getMemType(memTypeHardware,
+                         i_target,
+                         i_eepromType,
+                         EEPROM::HARDWARE);
+        if (err)
+        {
+            break;
+        }
+
+        if (!isValidDimmType(memTypeHardware, i_eepromType))
+        {
+            // Leave o_match == false and exit.
+            break;
+        }
+
+        if (memTypeCache != memTypeHardware)
+        {
+            // CACHE and HARDWARE don't match.
+            // Leave o_match == false and exit.
+            break;
+        }
+
+         // Get the keyword size
+        const KeywordData* entry = nullptr;
+        err = getKeywordEntry(i_keyword,
+                              memTypeHardware,
+                              i_target,
+                              entry);
+        if (err)
+        {
+            break;
+        }
+        size_t dataSize = entry->length;
+
+
+        // Read the keyword from HARDWARE
+        size_t sizeHardware = dataSize;
+        uint8_t dataHardware[sizeHardware];
+        err = readFromEepromSource(i_target,
+                                   i_eepromType,
+                                   i_keyword,
+                                   memTypeHardware,
+                                   dataHardware,
+                                   sizeHardware,
+                                   EEPROM::HARDWARE);
+        if (err)
+        {
+            break;
+        }
+
+        // Read the keyword from CACHE
+        size_t sizeCache = dataSize;
+        uint8_t dataCache[sizeCache];
+        err = readFromEepromSource(i_target,
+                                   i_eepromType,
+                                   i_keyword,
+                                   memTypeHardware,
+                                   dataCache,
+                                   sizeCache,
+                                   EEPROM::CACHE);
+        if (err)
+        {
+            // CACHE may not be loaded, ignore the error
+            delete err;
+            err = NULL;
+            break;
+        }
+
+        // Compare the HARDWARE/CACHE keyword size/data
+        if (sizeHardware != sizeCache)
+        {
+            // CACHE and HARDWARE don't match.
+            // Leave o_match == false and exit.
+            break;
+        }
+        if (memcmp(dataHardware, dataCache, sizeHardware))
+        {
+            // CACHE and HARDWARE don't match.
+            // Leave o_match == false and exit.
+            break;
+        }
+
+        o_match = true;
+
+    } while(0);
+
+    TRACSSCOMP( g_trac_spd, EXIT_MRK"cmpEecacheToEeprom(): returning %s errors. o_match = 0x%X ",
+                (err ? "with" : "with no"), o_match );
+
+    return err;
+ }
 
 // ------------------------------------------------------------------
 // cmpPnorToSeeprom

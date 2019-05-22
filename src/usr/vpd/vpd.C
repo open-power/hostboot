@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -590,10 +590,11 @@ errlHndl_t getPnAndSnRecordAndKeywords( TARGETING::Target * i_target,
             io_keywordSN = CVPD::SN;
 #endif
         }
-        else if( i_type == TARGETING::TYPE_DIMM )
+        else if((  i_type == TARGETING::TYPE_DIMM )
+               || (i_type == TARGETING::TYPE_OCMB_CHIP))
         {
             // SPD does not have singleton instance
-            // SPD does not use records
+            // SPD does not use record
             io_keywordPN = SPD::MODULE_PART_NUMBER;
             io_keywordSN = SPD::MODULE_SERIAL_NUMBER;
         }
@@ -669,6 +670,139 @@ errlHndl_t getPnAndSnRecordAndKeywords( TARGETING::Target * i_target,
         }
     }while( 0 );
     TRACSSCOMP(g_trac_vpd, EXIT_MRK"getPnAndSnRecordAndKeywords()");
+    return l_err;
+}
+
+// ------------------------------------------------------------------
+// ensureEepromCacheIsInSync
+// ------------------------------------------------------------------
+errlHndl_t ensureEepromCacheIsInSync(TARGETING::Target           * i_target,
+                                  TARGETING::EEPROM_CONTENT_TYPE   i_eepromType,
+                                  bool                           & o_isInSync)
+{
+    errlHndl_t l_err = nullptr;
+
+    TRACDCOMP(g_trac_vpd, ENTER_MRK"ensureEepromCacheIsInSync() ");
+
+    vpdRecord  l_record    = 0;
+    vpdKeyword l_keywordPN = 0;
+    vpdKeyword l_keywordSN = 0;
+
+    TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
+
+    //@TODO RTC 203788 Uncomment when used for IBM_MVPD and IBM_FRUVPD content
+    //                 types.
+//    IpVpdFacade* l_ipvpd = &(Singleton<MvpdFacade>::instance());
+//
+//    // If we have a NODE, use pvpd api
+//    if(l_type == TARGETING::TYPE_NODE)
+//    {
+//        l_ipvpd = &(Singleton<PvpdFacade>::instance());
+//    }
+//
+    do
+    {
+        // Get the correct Part and serial numbers
+        l_err = getPnAndSnRecordAndKeywords(i_target,
+                                            l_type,
+                                            l_record,
+                                            l_keywordPN,
+                                            l_keywordSN);
+        if( l_err )
+        {
+            TRACFCOMP(g_trac_vpd,
+                      "VPD::ensureEepromCacheIsInSync: "
+                      "Error getting part and serial numbers");
+            break;
+        }
+
+        // Compare the Part Numbers in CACHE/HARDWARE
+        bool l_matchPN = false;
+        if (  (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_IBM_MVPD)
+           || (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_IBM_FRUVPD))
+        {
+           // @TODO: RTC 203788 Implement cmpEecacheToEeprom
+           // l_err = l_ipvpd->cmpEecacheToEeprom(i_target,
+           //                                     l_record,
+           //                                     l_keywordPN,
+           //                                     l_matchPN);
+        }
+        else if (  (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_ISDIMM)
+                || (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_DDIMM))
+        {
+            l_err = SPD::cmpEecacheToEeprom(i_target,
+                                            i_eepromType,
+                                            l_keywordPN,
+                                            l_matchPN);
+        }
+
+        if (l_err)
+        {
+            TRACDCOMP(g_trac_vpd,ERR_MRK
+                      "VPD::ensureEepromCacheIsInSync: "
+                      "Error checking for CACHE/HARDWARE PN match");
+            break;
+        }
+
+        // Compare the Serial Numbers in CACHE/HARDWARE
+        bool l_matchSN = false;
+        if (  (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_IBM_MVPD)
+           || (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_IBM_FRUVPD))
+        {
+            //@TODO RTC 203788: Implement for this case
+           // l_err = l_ipvpd->cmpEecacheToEeprom(i_target,
+           //                                     l_record,
+           //                                     l_keywordSN,
+           //                                     l_matchSN);
+        }
+        else if (  (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_ISDIMM)
+                || (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_DDIMM))
+        {
+            l_err = SPD::cmpEecacheToEeprom(i_target,
+                                            i_eepromType,
+                                            l_keywordSN,
+                                            l_matchSN);
+        }
+
+        if (l_err)
+        {
+            TRACDCOMP(g_trac_vpd,ERR_MRK"VPD::ensureEepromCacheIsInSync: Error checking for CACHE/HARDWARE SN match");
+            break;
+        }
+
+        // Check the serial number and part number of the system if the previous
+        // record/key pair matched. Note that this time the record/key pairs are
+        // OSYS/SS and OSYS/MM for serial number and part number, respectively
+        // @TODO RTC 210350 Handle this case.
+//        if (l_type == TARGETING::TYPE_NODE &&
+//           (l_matchSN && l_matchPN))
+//        {
+//
+//        }
+
+        o_isInSync = (l_matchPN && l_matchSN);
+
+        // If we did not match, we need to load HARDWARE VPD data into CACHE
+        if (o_isInSync)
+        {
+            TRACFCOMP(g_trac_vpd,
+                      "VPD::ensureEepromCacheIsInSync: CACHE_PN/SN == HARDWARE_PN/SN for target %.8X",
+                      TARGETING::get_huid(i_target));
+        }
+        else
+        {
+            TRACFCOMP(g_trac_vpd,
+                      "VPD::ensureEepromCacheIsInSync: CACHE_PN/SN != HARDWARE_PN/SN,CACHE must be loaded from HARDWARE for target %.8X",
+                      TARGETING::get_huid(i_target));
+
+            //Set the targets as changed since the p/n's don't match
+            HWAS::markTargetChanged(i_target);
+        }
+
+    } while(0);
+
+    TRACDCOMP(g_trac_vpd, EXIT_MRK"ensureEepromCacheIsInSync()");
+
     return l_err;
 }
 

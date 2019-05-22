@@ -39,6 +39,7 @@
 #include <initservice/initsvcreasoncodes.H>
 #include <pnor/pnorif.H>
 #include <vpd/vpd_if.H>
+
 #include <errl/errludtarget.H>
 #include <config.h>
 #ifdef CONFIG_CONSOLE
@@ -216,6 +217,7 @@ bool addEepromToCachedList(const eepromRecordHeader & i_eepromRecordHeader)
                     i_eepromRecordHeader.completeRecord.devAddr,
                     i_eepromRecordHeader.completeRecord.mux_select,
                     i_eepromRecordHeader.completeRecord.cache_copy_size);
+
         l_matchFound = false;
     }
 
@@ -271,7 +273,7 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
         if(l_errl)
         {
             // buildEepromRecordHeader should have traced any relavent information if
-            // is was needed, just break out and pass the error along
+            // it was needed, just break out and pass the error along
             break;
         }
 
@@ -416,44 +418,13 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
                     INITSERVICE::doShutdown(INITSERVICE::SHUTDOWN_DO_RECONFIG_LOOP);
                 }
 
-                //
-                // At this point we have found a match in the PNOR but we need
-                // to decide what all needs an update
-                //
-
-                // Stash the internal_offset of the section we found in so we can add
-                // this record to g_cachedEeproms for later use
+                // Stash the internal_offset of the section we found in so we
+                // can add this record to g_cachedEeproms for later use
                 l_eepromRecordHeader.completeRecord.internal_offset  =
-                            l_recordHeaderToUpdate->completeRecord.internal_offset;
+                        l_recordHeaderToUpdate->completeRecord.internal_offset;
 
-
-                if(l_recordHeaderToUpdate->completeRecord.cached_copy_valid)
-                {
-                    // If the existing eeprom record is valid, then only update the
-                    // contents if the SN/PN for current HW do not match the eeprom
-                    // record. (target must be present to cache)
-
-                    // TODO RTC:203788 add lookup for PN and SN matches
-                    //if( !i_present || PNandSNMatch )
-                    {
-                        l_updateContents = false;
-                    }
-
-                    // If target is present there is nothing in the
-                    // header to update
-                    if( i_present )
-                    {
-                        l_updateHeader = false;
-                    }
-                }
-                else if(!i_present)
-                {
-                    // If the target is not present, then do not update contents or header
-                    l_updateContents = false;
-                    l_updateHeader = false;
-                }
-
-                TRACSSCOMP( g_trac_eeprom, "cacheEeprom() already found copy for eeprom role %d for target w/ HUID 0x.%08X",
+                TRACSSCOMP(g_trac_eeprom,
+                          "cacheEeprom() already found copy for eeprom role %d for target w/ HUID 0x.%08X",
                           i_eepromType , TARGETING::get_huid(i_target));
                 break;
             }
@@ -461,15 +432,123 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
 
         if(!addEepromToCachedList(l_eepromRecordHeader))
         {
-            TRACSSCOMP( g_trac_eeprom, "cacheEeprom() Eeprom w/ Role %d, HUID 0x.%08X added to cached list",
-                  i_eepromType , TARGETING::get_huid(i_target));
+            TRACSSCOMP( g_trac_eeprom,
+                      "cacheEeprom() Eeprom w/ Role %d, HUID 0x.%08X added to cached list",
+                      i_eepromType , TARGETING::get_huid(i_target));
         }
         else
         {
-            TRACSSCOMP( g_trac_eeprom, "cacheEeprom() Eeprom w/ Role %d, HUID 0x.%08X already in cached list",
-                  i_eepromType , TARGETING::get_huid(i_target));
+            TRACSSCOMP( g_trac_eeprom,
+                      "cacheEeprom() Eeprom w/ Role %d, HUID 0x.%08X already in cached list",
+                      i_eepromType , TARGETING::get_huid(i_target));
         }
 
+
+        uint64_t l_eepromCacheVaddr = lookupEepromAddr(l_eepromRecordHeader);
+        const uint64_t l_invalidAddress = 0xFFFFFFFFFFFFFFFF;
+
+        // If the virtual address of the eeprom record header is an invalid
+        // address then this is the first time this target's eeprom is being
+        // cached.
+        bool l_isNewCacheEntry = false;
+        if (memcmp(
+                reinterpret_cast<void *>(l_eepromCacheVaddr),
+                &l_invalidAddress, sizeof(uint64_t)) == 0)
+        {
+            l_isNewCacheEntry = true;
+        }
+
+        // At this point we have found a match in the PNOR but we need
+        // to decide what all needs an update.
+        //
+        // Only check if the cache is in sync with HARDWARE if there is an
+        // existing EECACHE section. Otherwise, the code after this logic will
+        // take care of adding a new eeprom cache section for the target.
+        if (   l_recordHeaderToUpdate->completeRecord.cached_copy_valid
+            && !l_isNewCacheEntry)
+        {
+            // Create namespace alias for targeting to reduce number of
+            // new lines required to be within line character limit.
+            namespace T = TARGETING;
+
+            // If the existing eeprom record is valid, then only update
+            // the contents if the SN/PN for current HW do not match the
+            // eeprom record. (target must be present to cache)
+            T::EEPROM_CONTENT_TYPE l_eepromContentType =
+                T::EEPROM_CONTENT_TYPE_RAW;
+
+            if (i_eepromType == EEPROM::VPD_PRIMARY)
+            {
+                auto l_eepromVpd =
+                   i_target->getAttr<T::ATTR_EEPROM_VPD_PRIMARY_INFO>();
+
+                l_eepromContentType =
+                    static_cast<T::EEPROM_CONTENT_TYPE>(
+                            l_eepromVpd.eepromContentType);
+            }
+            else
+            {
+               auto l_eepromVpd =
+                   i_target->getAttr<T::ATTR_EEPROM_VPD_BACKUP_INFO>();
+
+               l_eepromContentType =
+                   static_cast<T::EEPROM_CONTENT_TYPE>(
+                           l_eepromVpd.eepromContentType);
+            }
+
+            TRACSSCOMP(g_trac_eeprom,
+                       "cacheEeprom() Target 0x%.8X "
+                       "EEPROM_CONTENT_TYPE 0x%X",
+                       T::get_huid(i_target),
+                       l_eepromContentType);
+
+            bool l_isInSync = false;
+
+            if (i_present)
+            {
+                l_errl = VPD::ensureEepromCacheIsInSync(i_target,
+                                                        l_eepromContentType,
+                                                        l_isInSync);
+
+                if (l_errl != nullptr)
+                {
+                    break;
+                }
+
+                if(l_isInSync)
+                {
+                    l_updateContents = false;
+                }
+
+            }
+            else
+            {
+                // Clear out the contents of the cache for this eeprom if we have detected that it
+                // was once valid, indicating it was present at one time, and is now showing
+                // up as not present. We want to clear the contents of cache so we can achieve
+                // the replug behavior where a tester can remove the part, boot, then plug in the
+                // same part and boot again fresh.
+                void * l_internalSectionAddr =
+                    reinterpret_cast<uint8_t *>(l_eecacheSectionHeaderPtr) + l_eepromRecordHeader.completeRecord.internal_offset;
+                 memset( l_internalSectionAddr, 0xFF ,
+                        (l_recordHeaderToUpdate->completeRecord.cache_copy_size * KILOBYTE));
+                 l_updateContents = false;
+            }
+
+            // If target is present there is nothing in the
+            // header to update
+            if( i_present )
+            {
+                l_updateHeader = false;
+            }
+        }
+        else if(!i_present)
+        {
+            // If the target is not present, then do not update contents
+            // or header
+            l_updateContents = false;
+            l_updateHeader = false;
+        }
 
         // Above we have determined whether the contents of the eeprom at
         // hand need to have their contents updated. Only do the following

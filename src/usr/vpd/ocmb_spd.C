@@ -31,6 +31,7 @@
 #include "ocmb_spd.H"
 #include "spd.H"
 #include "errlud_vpd.H"
+#include <vpd/vpd_if.H>
 
 extern trace_desc_t * g_trac_spd;
 
@@ -71,27 +72,12 @@ DEVICE_REGISTER_ROUTE(DeviceFW::READ,
                       T::TYPE_OCMB_CHIP,
                       ocmbSPDPerformOp);
 
-/**
- * @brief Read keyword from SPD
- *
- *        Currently used to detect I2C_MUTEX and OCMB_CHIP targets
- *
- * @param[in]     i_target     OCMB target to read data from
- * @param[in/out] io_buffer    databuffer SPD will be written to
- * @param[in/out] io_buflen    length of the given data buffer
- * @param[in]     i_keyword    keyword from spdenums.H to read
- * @param[in]     i_memType    The memory type of this target.
- *
- * @pre io_buffer and i_target must be non-null
- * @pre currenlty only supported value for i_keyword is ENTIRE_SPD
- *
- * @return  errlHndl_t
- */
 errlHndl_t ocmbGetSPD(T::TargetHandle_t        i_target,
-                            void* const        io_buffer,
+                            void*              io_buffer,
                             size_t&            io_buflen,
-                      const uint64_t &         i_keyword,
-                      const uint8_t            i_memType)
+                      const VPD::vpdKeyword    i_keyword,
+                      const uint8_t            i_memType,
+                      EEPROM::EEPROM_SOURCE    i_location)
 {
     errlHndl_t l_errl = nullptr;
 
@@ -196,7 +182,7 @@ errlHndl_t ocmbGetSPD(T::TargetHandle_t        i_target,
                                entry->offset,
                                dataSize,
                                io_buffer,
-                               EEPROM::AUTOSELECT);
+                               i_location);
 
         if (l_errl != nullptr)
         {
@@ -262,8 +248,9 @@ bool isValidOcmbDimmType(const uint8_t i_dimmType)
 // ------------------------------------------------------------------
 // getMemType
 // ------------------------------------------------------------------
-errlHndl_t getMemType(uint8_t&           o_memType,
-                      T::TargetHandle_t  i_target)
+errlHndl_t getMemType(uint8_t&              o_memType,
+                      T::TargetHandle_t     i_target,
+                      EEPROM::EEPROM_SOURCE i_location)
 {
     errlHndl_t err = nullptr;
 
@@ -271,7 +258,7 @@ errlHndl_t getMemType(uint8_t&           o_memType,
                         MEM_TYPE_ADDR,
                         MEM_TYPE_SZ,
                         &o_memType,
-                        EEPROM::AUTOSELECT);
+                        i_location);
 
     TRACSSCOMP(g_trac_spd,
                EXIT_MRK"SPD::getMemType() - MemType: 0x%02x, Error: %s",
@@ -300,7 +287,7 @@ errlHndl_t ocmbSPDPerformOp(DeviceFW::OperationType i_opType,
     {
         // Read the Basic Memory Type
         uint8_t memType(MEM_TYPE_INVALID);
-        errl = getMemType(memType, i_target);
+        errl = getMemType(memType, i_target, EEPROM::AUTOSELECT);
 
         if( errl )
         {
@@ -330,7 +317,8 @@ errlHndl_t ocmbSPDPerformOp(DeviceFW::OperationType i_opType,
                               io_buffer,
                               io_buflen,
                               keyword,
-                              memType);
+                              memType,
+                              EEPROM::AUTOSELECT);
 
             if( errl )
             {
