@@ -373,7 +373,7 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
 
     // Printing mux info separately, if combined, nothing is displayed
     char* l_muxPath = o_i2cInfo.i2cMuxPath.toString();
-    TRACFCOMP(g_trac_eeprom, "eepromReadAttributes(): "
+    TRACUCOMP(g_trac_eeprom, "eepromReadAttributes(): "
               "muxSelector=0x%X, muxPath=%s",
               o_i2cInfo.i2cMuxBusSelector,
               l_muxPath);

@@ -95,9 +95,6 @@ errlHndl_t ocmbGetSPD(T::TargetHandle_t        i_target,
 {
     errlHndl_t l_errl = nullptr;
 
-    TRACFCOMP(g_trac_spd,
-              ENTER_MRK"ocmbGetSPD()");
-
     assert(i_target != nullptr, "i_target is nullptr in ocmbGetSPD");
 
     do {
