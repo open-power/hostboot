@@ -91,6 +91,7 @@
   <array>4</array>
   <platInit/>
   <writeable/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -101,6 +102,7 @@
   <array>8</array>
   <platInit/>
   <writeable/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -112,6 +114,7 @@
   <valueType>uint8</valueType>
   <writeable/>
   <platInit/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -123,6 +126,7 @@
   <valueType>uint8</valueType>
   <writeable/>
   <platInit/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -134,6 +138,7 @@
   <valueType>uint8</valueType>
   <writeable/>
   <platInit/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -145,6 +150,7 @@
   <valueType>uint8</valueType>
   <writeable/>
   <platInit/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -157,6 +163,7 @@
   <enum>BYPASS = 0x1, NO_BYPASS = 0x0</enum>
   <writeable/>
   <platInit/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -169,6 +176,7 @@
   <enum>BYPASS = 0x1, NO_BYPASS = 0x0</enum>
   <writeable/>
   <platInit/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -181,6 +189,7 @@
   <enum>BYPASS = 0x1, NO_BYPASS = 0x0</enum>
   <writeable/>
   <platInit/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
