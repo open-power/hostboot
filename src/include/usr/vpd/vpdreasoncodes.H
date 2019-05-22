@@ -100,6 +100,8 @@ enum vpdModuleId
     VPD_OCMB_GET_SPD                        = 0x90,
     VPD_OCMB_SPD_PERFORM_OP                 = 0x91,
 
+    VPD_READ_FROM_EEPROM_SOURCE             = 0x92,
+    VPD_GET_MEMTYPE                         = 0x93,
 
 };
 
