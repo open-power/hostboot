@@ -109,7 +109,7 @@ errlHndl_t eepromPerformOpHW(DeviceFW::OperationType i_opType,
              ( io_i2cInfo.devSize_KB * KILOBYTE  ) )
         {
             TRACFCOMP( g_trac_eeprom,
-                       ERR_MRK"eepromPerformOp(): Device Overflow! "
+                       ERR_MRK"eepromPerformOpHW(): Device Overflow! "
                        "C-e/p/dA=%d-%d/%d/0x%X, offset=0x%X, len=0x%X "
                        "devSizeKB=0x%X", io_i2cInfo.eepromRole, io_i2cInfo.engine,
                        io_i2cInfo.port, io_i2cInfo.devAddr, io_i2cInfo.offset,
@@ -155,19 +155,19 @@ errlHndl_t eepromPerformOpHW(DeviceFW::OperationType i_opType,
             l_currentOpLen = l_snglChipSize - io_i2cInfo.offset;
         }
 
-        TRACFCOMP( g_trac_eeprom,
-                   "eepromPerformOp():  i_opType=%d "
+        TRACDCOMP( g_trac_eeprom,
+                   "eepromPerformOpHW():  i_opType=%d "
                    "C-e/p/dA=%d-%d/%d/0x%X, offset=0x%X, len=0x%X, ",
                    i_opType, io_i2cInfo.eepromRole, io_i2cInfo.engine,
-                   io_i2cInfo.port, io_i2cInfo.devAddr, io_i2cInfo.offset, io_buflen)
+                   io_i2cInfo.port, io_i2cInfo.devAddr, io_i2cInfo.offset, io_buflen);
 
-        TRACFCOMP (g_trac_eeprom,
-                   "eepromPerformOp(): snglChipKB=0x%X, chipCount=0x%X, devSizeKB=0x%X",
+        TRACDCOMP (g_trac_eeprom,
+                   "eepromPerformOpHW(): snglChipKB=0x%X, chipCount=0x%X, devSizeKB=0x%X",
                    l_snglChipSize, io_i2cInfo.chipCount, io_i2cInfo.devSize_KB);
 
         // Printing mux info separately, if combined, nothing is displayed
         char* l_muxPath = io_i2cInfo.i2cMuxPath.toString();
-        TRACFCOMP(g_trac_eeprom, "eepromPerformOp(): "
+        TRACDCOMP(g_trac_eeprom, "eepromPerformOpHW(): "
                   "muxSelector=0x%X, muxPath=%s",
                   io_i2cInfo.i2cMuxBusSelector,
                   l_muxPath);
@@ -207,7 +207,7 @@ errlHndl_t eepromPerformOpHW(DeviceFW::OperationType i_opType,
             else
             {
                 TRACFCOMP( g_trac_eeprom,
-                           ERR_MRK"eepromPerformOp(): "
+                           ERR_MRK"eepromPerformOpHW(): "
                            "Invalid EEPROM Operation!");
 
                 /*@

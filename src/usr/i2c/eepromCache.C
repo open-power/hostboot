@@ -310,7 +310,7 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
             // if nothing has been cached before then version should
             // be set to be the latest version of the struct available
             l_eecacheSectionHeaderPtr->version = EECACHE_VERSION_LATEST;
-            TRACFCOMP( g_trac_eeprom,
+            TRACDCOMP( g_trac_eeprom,
                        "cacheEeprom() Found Empty Cache, set version of cache structure to be 0x%.02x",
                        EECACHE_VERSION_1);
         }
@@ -322,7 +322,7 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
             // This means the start of first eeprom's cached data will be immediately
             // following the end of the EECACHE header.
             l_eecacheSectionHeaderPtr->end_of_cache = sizeof(eecacheSectionHeader);
-            TRACFCOMP( g_trac_eeprom,
+            TRACDCOMP( g_trac_eeprom,
                        "cacheEeprom() Found Empty Cache, set end of cache to be 0x%.04x (End of ToC)",
                        sizeof(eecacheSectionHeader));
         }
