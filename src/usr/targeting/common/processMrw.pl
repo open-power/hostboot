@@ -1777,6 +1777,38 @@ sub processOmi
     my $num = $fapi_pos % $numberOfOmiPerProc;
     $value = "physical:sys-0/node-0/proc-$proc_num/" . $omi_map{$num};
     $targetObj->setAttribute($target, "OMIC_PARENT", $value);
+
+    my $omi = Math::BigInt->new($targetObj->getAttribute($target,"FAPI_POS"));
+    # Base omi bar offset
+    # We use this base address in simics_AXONE.system.xml and want our
+    # addresses to match the ones in that xml
+    my $base = 0x30400000000;
+    my $gigabyte = 0x40000000;
+    my $value = 0;
+
+    # This algorithm is explained in src/usr/mmio/mmio.C
+    if ($omi % 2 eq 0)
+    {
+        $value = $base + $omi * 4 * $gigabyte;
+    }
+    else
+    {
+        $value = $base + (($omi - 1) * 4 + 2) * $gigabyte;
+    }
+
+    $value = sprintf("0x%016s", substr(($value)->as_hex(),2));
+    $targetObj->setAttribute($target, "OMI_INBAND_BAR_BASE_ADDR_OFFSET",
+        $value);
+
+    # Set the parent MC BAR value to value of first OMI unit
+    if ($omi % 8 eq 0)
+    {
+        my $parent_mcc = $targetObj->getTargetParent($target);
+        my $parent_mi = $targetObj->getTargetParent($parent_mcc);
+        my $parent_mc = $targetObj->getTargetParent($parent_mi);
+        $targetObj->setAttribute($parent_mc, "OMI_INBAND_BAR_BASE_ADDR_OFFSET",
+            $value);
+    }
 }
 
 #--------------------------------------------------

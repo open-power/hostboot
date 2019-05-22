@@ -123,10 +123,10 @@ errlHndl_t mmioSetup()
                 // paired OCMB spaces get interleaved as follows :
                 //       ocmb  |  BAR ATTRIBUTE     | Type | Base reg           - end addr           | size | sub-ch
                 //       +-----+--------------------+------+-----------------------------------------+------+-------
-                //       ocmb0 | 0x0006030200000000 | cnfg | 0x0006030200000000 - 0x000603027FFFFFFF | 2GB  | 0
-                //       ocmb1 | 0x0006030280000000 | cnfg | 0x0006030280000000 - 0x00060302FFFFFFFF | 2GB  | 1
-                //       ocmb0 | N/A                | mmio | 0x0006030300000000 - 0x000603037FFFFFFF | 2GB  | 0
-                //       ocmb1 | N/A                | mmio | 0x0006030380000000 - 0x00060303FFFFFFFF | 2GB  | 1
+                //       ocmb0 | 0xYYYYYYY000000000 | cnfg | 0xYYYYYYY000000000 - 0xYYYYYYY07FFFFFFF | 2GB  | 0
+                //       ocmb1 | 0xYYYYYYY080000000 | cnfg | 0xYYYYYYY080000000 - 0xYYYYYYY0FFFFFFFF | 2GB  | 1
+                //       ocmb0 | N/A                | mmio | 0xYYYYYYY100000000 - 0xYYYYYYY17FFFFFFF | 2GB  | 0
+                //       ocmb1 | N/A                | mmio | 0xYYYYYYY180000000 - 0xYYYYYYY1FFFFFFFF | 2GB  | 1
                 //       +-----+--------------------+------+-----------------------------------------+------+-------
 
                 // Calculate CNFG space BAR to write to OCMB attribute

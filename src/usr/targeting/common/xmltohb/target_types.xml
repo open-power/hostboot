@@ -2551,6 +2551,9 @@
       <id>MODEL</id>
       <default>AXONE</default>
     </attribute>
+    <attribute>
+      <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+    </attribute>
   </targetType>
 
   <targetType>
@@ -3491,6 +3494,9 @@
       <default>AXONE</default>
       <id>MODEL</id>
     </attribute>
+    <attribute>
+      <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+    </attribute>
   </targetType>
 
   <targetType>
@@ -3844,6 +3850,9 @@
     <attribute>
       <default>AXONE</default>
       <id>MODEL</id>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
     </attribute>
   </targetType>
 
