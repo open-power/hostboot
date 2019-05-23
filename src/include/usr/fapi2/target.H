@@ -267,6 +267,9 @@ inline TARGETING::TYPE convertFapi2TypeToTargeting(fapi2::TargetType i_T)
         case fapi2::TARGET_TYPE_MEM_PORT:
             o_targetingType = TARGETING::TYPE_MEM_PORT;
             break;
+        case fapi2::TARGET_TYPE_PMIC:
+            o_targetingType = TARGETING::TYPE_PMIC;
+            break;
         default:
             FAPI_ERR("convertFapi2TypeToTargeting:: Chiplet type not supported 0x%.8X!", i_T);
             assert(false);
@@ -381,6 +384,9 @@ inline fapi2::TargetType  convertTargetingTypeToFapi2(TARGETING::TYPE i_T)
             break;
         case TARGETING::TYPE_MEM_PORT:
             o_targetingType = fapi2::TARGET_TYPE_MEM_PORT;
+            break;
+        case TARGETING::TYPE_PMIC:
+            o_targetingType = fapi2::TARGET_TYPE_PMIC;
             break;
         default:
             o_targetingType = fapi2::TARGET_TYPE_NONE;
@@ -920,9 +926,11 @@ inline std::vector<Target<K_CHILD, M, V> >
     // valid children for OCMB
     // OCMB -> MEM_PORT
     // OCMB -> DIMM
+    // OCMB -> PMIC
     static_assert(!((T_SELF == fapi2::TARGET_TYPE_OCMB_CHIP) &&
                     (K_CHILD != fapi2::TARGET_TYPE_MEM_PORT) &&
-                    (K_CHILD != fapi2::TARGET_TYPE_DIMM)),
+                    (K_CHILD != fapi2::TARGET_TYPE_DIMM) &&
+                    (K_CHILD != fapi2::TARGET_TYPE_PMIC)),
                   "improper child of fapi2::TARGET_TYPE_OCMB_CHIP");
 
     // valid children for MEM_PORT

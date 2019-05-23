@@ -177,6 +177,29 @@ endef
 
 $(call BUILD_GENERATED)
 
+
+## Generate pmic_accessors header file
+#GENERATED = gen_pmic_accessors
+#COMMAND = gen_accessors.pl
+#$(GENERATED)_COMMAND_PATH = $(IMPORT_PATH)/generic/memory/tools/
+#
+#OUTPATH = ${ROOTPATH}/obj/genfiles/chips/ocmb/common/procedures/hwp/pmic/lib/
+#FILE_PREFIX = mss_pmic
+#
+#SOURCES += $(ROOTPATH)/chips/ocmb/common/procedures/xml/attribute_info/pmic_eff_attributes.xml
+#
+#CLEAN_TARGETS += ${OUTPATH}/mss_pmic_attribute_getters.H
+#CLEAN_TARGETS += ${OUTPATH}/mss_pmic_attribute_setters.H
+#CLEAN_TARGETS += ${OUTPATH}/.gen_pmic_accessors.built
+#
+#define gen_pmic_accessors_RUN
+#		$(C1) mkdir $(OUTPATH) -p
+#		$(C1) $$< --system=AXONE --output-dir=$(OUTPATH) --output-file-prefix=$(FILE_PREFIX) $$(filter-out $$<,$$^)
+#endef
+#
+#$(call BUILD_GENERATED)
+
+
 # Add common and generated parts to object list.
 
 MSS_PATH := $(PROCEDURES_PATH)/hwp/memory/lib
