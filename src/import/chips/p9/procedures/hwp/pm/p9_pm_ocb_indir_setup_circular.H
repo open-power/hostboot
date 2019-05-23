@@ -24,9 +24,9 @@
 /* IBM_PROLOG_END_TAG                                                     */
 /// @file  p9_pm_ocb_indir_setup_circular.H
 /// @brief  Configure OCB Channels for Circular Push or Pull Mode
-// *HWP HWP Owner       : Amit Kumar <akumar@us.ibm.com>
-// *HWP Backup HWP Owner: Greg Still <stillgs@us.ibm.com>
-// *HWP FW Owner        : Sangeetha T S <sangeet2@in.ibm.com>
+
+// *HWP HW Owner        : Greg Still <stillgs@us.ibm.com>
+// *HWP FW Owner        : Amit Tendolkar <amit.tendolkar@in.ibm.com>
 // *HWP Team            : PM
 // *HWP Level           : 2
 // *HWP Consumed by     : HS
