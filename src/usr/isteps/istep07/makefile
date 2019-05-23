@@ -74,6 +74,8 @@ EXTRAINCDIR += ${HWP_PATH_EXP}/lib/eff_config/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/generic/memory/lib/
 EXTRAINCDIR += ${EXP_COMMON_PATH}/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic/
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/common/procedures/hwp/pmic/
 
 VPATH += ${HWP_PATH} ${HWP_PATH_P9}/lib/spd
 VPATH += $(PROCEDURES_PATH)/hwp/nest ${ROOTPATH}/src/usr/fapi2
@@ -108,7 +110,7 @@ include $(HWP_PATH_CEN)/p9c_mss_bulk_pwr_throttles.mk
 include $(HWP_PATH_CEN)/p9c_mss_eff_mb_interleave.mk
 
 
-# Axone only objects 
+# Axone only objects
 OBJS += $(if $(CONFIG_AXONE),p9a_mss_volt.o,)
 OBJS += $(if $(CONFIG_AXONE),p9a_mss_freq.o,)
 OBJS += $(if $(CONFIG_AXONE),p9a_mss_freq_system.o,)
