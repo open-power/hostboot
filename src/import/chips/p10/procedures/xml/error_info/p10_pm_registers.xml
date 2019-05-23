@@ -1,0 +1,430 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p10/procedures/xml/error_info/p10_pm_registers.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2019                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- Register FFDC defintions used by all PM procedures -->
+<!--
+     *HWP HWP Owner: Greg Still <stillgs@us.ibm.com>
+     *HWP HWP Backup Owner: Brian Vanderpool <vanderp@us.ibm.com>
+     *HWP FW Owner: Prasad Bg Ranganath <prasadbgr@in.ibm.com>
+     *HWP Team: PM
+     *HWP Level: 3
+     *HWP Consumed by: SBE:HB:FSP
+-->
+<hwpErrors>
+  <!-- *********************************************************************** -->
+  <registerFfdc>
+    <id>XGPE_FFDC_REGISTERS</id>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCCFLG3_RW</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXIDBGPRO</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXIRAMDBG</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXIRAMEDR</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE3_OCB_GPETSEL</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEIVPR</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEMACR</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXISGBU</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXISGBL</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXIICACU</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXIICACL</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXIDCACU</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXIDCACL</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>OCCGPE0_FFDC_REGISTERS</id>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE0_OCB_GPEXIDBGPRO</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE0_OCB_GPEXIRAMDBG</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE0_OCB_GPEXIRAMEDR</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE0_OCB_GPETSEL</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE0_OCB_GPEIVPR</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE0_OCB_GPEMACR</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE0_OCB_GPEXISGBU</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE0_OCB_GPEXISGBL</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE0_OCB_GPEXIICACU</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE0_OCB_GPEXIICACL</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE0_OCB_GPEXIDCACU</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE0_OCB_GPEXIDCACL</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>OCCGPE1_FFDC_REGISTERS</id>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE1_OCB_GPEXIDBGPRO</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE1_OCB_GPEXIRAMDBG</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE1_OCB_GPEXIRAMEDR</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE1_OCB_GPETSEL</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE1_OCB_GPEIVPR</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE1_OCB_GPEMACR</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE1_OCB_GPEXISGBU</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE1_OCB_GPEXISGBL</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE1_OCB_GPEXIICACU</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE1_OCB_GPEXIICACL</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE1_OCB_GPEXIDCACU</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE1_OCB_GPEXIDCACL</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>PGPE_FFDC_REGISTERS</id>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCCFLG2_RW</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXIDBGPRO</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXIRAMDBG</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXIRAMEDR</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE2_OCB_GPETSEL</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEIVPR</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEMACR</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXISGBU</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXISGBL</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXIICACU</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXIICACL</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXIDCACU</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXIDCACL</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>PBA_FFDC_BASIC_REGISTERS</id>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVCTL0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVCTL1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVCTL2</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVCTL3</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVCTL1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVCTL2</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVCTL3</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVRST</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBAMODE</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBAFIR_RW</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBAFIRACT0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBAFIRACT1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBAFIRMASK_RW</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAF_PBAFIR_RW</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAF_PBAFIRACT0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAF_PBAFIRACT1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAF_PBAFIRMASK_RW</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAF_PBAERRRPT0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAF_PBAERRRPT1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAF_PBAERRRPT2</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBAERRRPT1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBAERRRPT2</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBABAR0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBABAR1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBABAR2</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBABAR3</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBABARMSK0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBABARMSK1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBABARMSK2</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBABARMSK3</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>PBA_FFDC_REGISTERS</id>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBAXCFG</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_BCUE_STAT</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_BCUE_PBADR</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_BCUE_OCIBAR</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_BCDE_PBADR</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_BCDE_OCIBAR</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_BCDE_STAT</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVCTL0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVCTL1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVCTL2</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVCTL3</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVRST</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBAMODE</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBAFIR_RW</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBAFIRACT0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBAFIRACT1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBAFIRMASK_RW</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAF_PBAERRRPT0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAF_PBAERRRPT1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAF_PBAERRRPT2</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBAERRRPT1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBAERRRPT2</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBARBUFVAL0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBARBUFVAL1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBARBUFVAL2</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBARBUFVAL3</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBARBUFVAL4</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBARBUFVAL5</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBARBUFVAL1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBARBUFVAL2</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBARBUFVAL3</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBARBUFVAL4</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBARBUFVAL5</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBABAR0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBABAR1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBABAR2</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBABAR3</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBABARMSK0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBABARMSK1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBABARMSK2</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBABARMSK3</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** RTC 210895
+  <registerFfdc>
+    <id>PSS_FFDC_REGISTERS</id>
+    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_ADCCR0</scomRegister>
+    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_ADCCR1</scomRegister>
+    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_ADCCR2</scomRegister>
+    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_SPIPSS_ADC_STATUS_REG</scomRegister>
+    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_ADC_CMD_REG</scomRegister>
+    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_ADC_RESET</scomRegister>
+    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_ADC_WDATA</scomRegister>
+    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_ADC_RDATA0</scomRegister>
+    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_ADC_RDATA1</scomRegister>
+    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_ADC_RDATA2</scomRegister>
+    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_ADC_RDATA3</scomRegister>
+    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_ADC_RDATA4</scomRegister>
+    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_ADC_RDATA5</scomRegister>
+    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_ADC_RDATA6</scomRegister>
+    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_ADC_RDATA7</scomRegister>
+    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_P2S_100NS</scomRegister>
+    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_P2SCR0</scomRegister>
+    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_P2SCR1</scomRegister>
+    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_P2SCR2</scomRegister>
+    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_PMC_SPIPSS_P2S_STATUS_REG</scomRegister>
+    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_P2S_CMD</scomRegister>
+    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_P2S_WDATA</scomRegister>
+    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_P2S_RDATA</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVCTL0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVCTL1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVCTL2</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVCTL3</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVRST</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBAMODE</scomRegister>
+  </registerFfdc>
+  -->
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>OCB_CHANNEL0_FFDC_REGISTERS</id>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_PIB_OCBAR0</scomRegister>
+    <!--  The data register is not included as this can get access error due to
+          channel use/setup and the content of this is not vital to debug
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBDR0</scomRegister>
+    -->
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_PIB_OCBCSR0_RO</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBSLBR0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBSLCS0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBSHBR0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBSHCS0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBLWSR0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBLWCR0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBLWSBR0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBSES0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_PIB_OCBESR0</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>OCB_CHANNEL1_FFDC_REGISTERS</id>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_PIB_OCBAR1</scomRegister>
+    <!--  The data register is not included as this can get access error due to
+          channel use/setup and the content of this is not vital to debug
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBDR1</scomRegister>
+    -->
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_PIB_OCBCSR1_RO</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBSLBR1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBSLCS1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBSHBR1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBSHCS1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBLWSR1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBLWCR1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBLWSBR1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBSES1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_PIB_OCBESR1</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>OCB_CHANNEL2_FFDC_REGISTERS</id>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_PIB_OCBAR2</scomRegister>
+    <!--  The data register is not included as this can get access error due to
+          channel use/setup and the content of this is not vital to debug
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBDR2</scomRegister>
+    -->
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_PIB_OCBCSR2_RO</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBSLBR2</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBSLCS2</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBSHBR2</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBSHCS2</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBLWSR2</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBLWCR2</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBLWSBR2</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBSES2</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_PIB_OCBESR2</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>OCB_CHANNEL3_FFDC_REGISTERS</id>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_PIB_OCBAR3</scomRegister>
+    <!--  The data register is not included as this can get access error due to
+          channel use/setup and the content of this is not vital to debug
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBDR3</scomRegister>
+    -->
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_PIB_OCBCSR3_RO</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBSLBR3</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBSLCS3</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBSHBR3</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBSHCS3</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBLWSR3</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBLWCR3</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBLWSBR3</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVCTL0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVCTL1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVCTL2</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVCTL3</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVRST</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBAMODE</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBSES3</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_PIB_OCBESR3</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+      <id>OCC_JTAG_FFDC_REGISTERS</id>
+      <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_PIB_OJIC</scomRegister>
+      <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_PIB_OJSTAT</scomRegister>
+      <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_PIB_OJTDI</scomRegister>
+      <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_PIB_OJTDO</scomRegister>
+      <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_RW</scomRegister>
+  </registerFfdc>
+  <!-- *********************************************************************** -->
+  <registerFfdc>
+    <id>PM_FIR_REGISTERS</id>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_SCOM_OCCLFIR_RW</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_SCOM_OCCLFIRMASK_RW</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_SCOM_OCCLFIRACT0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_SCOM_OCCLFIRACT1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAF_PBAFIR_RW</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBAFIR_RW</scomRegister>
+  </registerFfdc>
+  <!-- *********************************************************************** -->
+  <registerFfdc>
+    <id>OCC_FFDC_REGISTERS</id>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OISR0_RO</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OIMR0_RW</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OITR0_RW</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OISR1_RO</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OIMR1_RW</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OITR1_RW</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCCFLG0_RW</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCCFLG1_RW</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_CCSR_RW</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBLWCR0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBLWCR1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBLWCR2</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBLWCR3</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBLWSBR0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBLWSBR1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBLWSBR2</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBLWSBR3</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBLWSR0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBLWSR1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBLWSR2</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCBLWSR3</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_PIB_OCBAR0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_PIB_OCBAR1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_PIB_OCBAR2</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_PIB_OCBAR3</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_PIB_OCBCSR0_RO</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_PIB_OCBCSR1_RO</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_PIB_OCBCSR2_RO</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_PIB_OCBCSR3_RO</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_PIB_OCBESR0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_PIB_OCBESR1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_PIB_OCBESR2</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_PIB_OCBESR3</scomRegister>
+    <!-- TODO: need to added the new OPIT -->
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBAMODE</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVCTL0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVCTL1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVCTL2</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVCTL3</scomRegister>
+    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVRST</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE0_OCB_GPEIVPR</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE1_OCB_GPEIVPR</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEIVPR</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEIVPR</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_SCOM_OCCLFIR_RW</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE1_OCB_GPEDBG</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEDBG</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEDBG</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE0_OCB_GPEXIRAMDBG</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE1_OCB_GPEXIRAMDBG</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXIRAMDBG</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXIRAMDBG</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE0_OCB_GPEXIRAMEDR</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE1_OCB_GPEXIRAMEDR</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXIRAMEDR</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXIRAMEDR</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE0_OCB_GPEXIDBGPRO</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE1_OCB_GPEXIDBGPRO</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXIDBGPRO</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXIDBGPRO</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OINKR0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OINKR1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCCFLG0_RW</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCCFLG1_RW</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_G0ISR0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_G1ISR0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_G2ISR0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_G3ISR0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_G0ISR1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_G1ISR1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_G2ISR1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_G3ISR1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCCS0_RW</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCCS1_RW</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCCS2_RW</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCCS3_RW</scomRegister>
+  </registerFfdc>
+  <!-- *********************************************************************** -->
+  <registerFfdc>
+    <id>CHECK_MASTER_STOP15_FFDC_REGS_PU</id>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_CCSR_RW</scomRegister>
+  </registerFfdc>
+  <!-- *********************************************************************** -->
+  <registerFfdc>
+    <id>CHECK_MASTER_STOP15_FFDC_REGS_EQ</id>
+    <scomRegister>scomt::eq::QME_FLAGS_RW</scomRegister>
+    <scomRegister>scomt::eq::QME_SCRA_RW</scomRegister>
+    <scomRegister>scomt::eq::QME_SCRB_RW</scomRegister>    
+    <scomRegister>scomt::eq::QME_LFIR_RW</scomRegister>
+    <scomRegister>scomt::eq::QME_SCOM_XIXCR</scomRegister>
+    <scomRegister>scomt::eq::QME_SCOM_XIRAMDBG</scomRegister>
+    <scomRegister>scomt::eq::QME_SCOM_XIRAMEDR</scomRegister>
+    <scomRegister>scomt::eq::QME_SCOM_XIDBGPRO</scomRegister>
+    <scomRegister>scomt::eq::QME_SCOM_XIDBGINF</scomRegister>
+    <scomRegister>scomt::eq::QME_SCOM_XIVDR0</scomRegister>
+    <scomRegister>scomt::eq::QME_SCOM_XIVDR2</scomRegister>
+    <scomRegister>scomt::eq::QME_SCOM_XIVDR4</scomRegister>
+    <scomRegister>scomt::eq::QME_SCOM_XIVDR6</scomRegister>
+    <scomRegister>scomt::eq::QME_SCOM_XIVDR8</scomRegister>
+    <scomRegister>scomt::eq::QME_SCOM_XIVDRX</scomRegister>
+    <scomRegister>scomt::eq::QME_SCOM_XIVDR28</scomRegister>
+    <scomRegister>scomt::eq::QME_SCOM_XIVDR30</scomRegister>
+    <scomRegister>scomt::eq::QME_SCDR</scomRegister>
+  </registerFfdc>
+  <!-- *********************************************************************** -->
+  <registerFfdc>
+    <id>CHECK_MASTER_STOP15_FFDC_REGS_EC</id>
+    <scomRegister>scomt::c::QME_SSH_SRC</scomRegister>
+    <scomRegister>scomt::c::QME_SCSR</scomRegister>
+  </registerFfdc>
+  <!-- *********************************************************************** -->
+
+</hwpErrors>
