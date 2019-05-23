@@ -44,7 +44,8 @@
       TARGET_TYPE_PMIC,
       TARGET_TYPE_NMMU,
       TARGET_TYPE_PAU,
-      TARGET_TYPE_IOHS
+      TARGET_TYPE_IOHS,
+      TARGET_TYPE_PAUC
     </targetType>
     <description>
       1 if the target is functional, else 0.  Set by the platform.
@@ -87,7 +88,8 @@
       TARGET_TYPE_MEM_PORT, TARGET_TYPE_PMIC,
       TARGET_TYPE_NMMU,
       TARGET_TYPE_PAU,
-      TARGET_TYPE_IOHS
+      TARGET_TYPE_IOHS,
+      TARGET_TYPE_PAUC
     </targetType>
     <description>
       Logical position of target within a system. This is derived from the SMP location
@@ -121,7 +123,8 @@
       TARGET_TYPE_PMIC,
       TARGET_TYPE_NMMU,
       TARGET_TYPE_PAU,
-      TARGET_TYPE_IOHS
+      TARGET_TYPE_IOHS,
+      TARGET_TYPE_PAUC
     </targetType>
     <description>
       A target's position relative to its immediate parent target.
@@ -135,6 +138,7 @@
       PROC - PEC - PHB
       PROC - CAPP
       PROC - NMMU
+      PROC - PAUC
       PROC - PAU
       PROC - IOHS
       PROC - MCBIST - MCS - MCA/MEM_PORT - DIMM
