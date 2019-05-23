@@ -23,6 +23,7 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
 execute_in_sandbox()
 {
     [ -z "${SANDBOXBASE}" ] && echo "Missing SANDBOXBASE." && exit 1
@@ -52,11 +53,26 @@ execute_in_sandbox()
     rm ${SANDBOXBASE}/src/sandbox_execute_cmd
 }
 
-needs_machine_variable()
+export_key_variables()
 {
+    # Export MACHINE variable
     MACHINE=${MACHINE:-$DEFAULT_MACHINE}
     export MACHINE
     echo "Setting up for Machine = $MACHINE"
+
+    # Export PNOR_LAYOUT_SELECTED variable
+    # Dynamically check if file exists indicating the fsprelease.config was used
+    # Note this file is generated in the hb config file rule in top level makefile
+    if [[ -f ${PROJECT_ROOT}/obj/genfiles/hb_fsp_release ]]; then
+        echo "FSP build, using fsp pnor xml layout"
+        export PNOR_LAYOUT_SELECTED=FSP
+    elif [[ -f ${PROJECT_ROOT}/obj/genfiles/hb_simics_p10_release ]]; then
+        echo "P10 build, using P10 PNOR XML layout"
+        export PNOR_LAYOUT_SELECTED=P10
+    else
+        echo "Non FSP build, using standalone (default) pnor xml layout"
+        export PNOR_LAYOUT_SELECTED=STANDALONE
+    fi
 }
 
 hb_helptext()
@@ -102,14 +118,14 @@ hb_helptext()
         echo "  Usage:"
         echo "      hb simsetup"
         echo
-        echo "  Creates a simics workspace (FSP sandbox) in the directed"
-        echo "  location and initializes simics as well as executing any"
-        echo "  hostboot specific workarounds."
+        echo "  Creates a simics workspace in the directed location and"
+        echo "  initializes simics as well as executing any hostboot specific"
+        echo "  workarounds."
         echo
-        echo "  FSP backing build and workarounds are chosen as directed"
-        echo "  by the CI test files (src/build/citest/etc)."
+        echo "  If using an ODE sandbox FSP backing build and workarounds are"
+        echo "  chosen as directed by the CI test files (src/build/citest/etc)."
         echo
-        echo "  Environment Variables:"
+        echo "  Environment Variables (when using an ODE sandbox):"
         echo "      SANDBOXROOT: Root directory of where the sandboxes"
         echo "                   should go."
         echo "      SANDBOXNAME: Desired name of the hostboot sandbox."
@@ -121,8 +137,8 @@ hb_helptext()
         echo "      hb prime"
         echo "      hb prime --test"
         echo
-        echo "  Copies hostboot images and simics scripts into the"
-        echo "  simics workspace."
+        echo "  Copies hostboot images and simics scripts into the simics"
+        echo "  workspace."
         echo
         echo "  Options:"
         echo "      --test : Copy test images (as opposed to non-test)."
@@ -288,6 +304,17 @@ hb_workon()
 
 hb_prime()
 {
+    export_key_variables
+
+    # Priming for P10 Standalone without ODE SB
+
+    if [[ $HB_STANDALONE -eq 1 ]] && [[ $PNOR_LAYOUT_SELECTED != "FSP" ]]; then
+        hbDistribute --hb-standalone $*
+        exit 0
+    fi
+
+    # Priming using ODE SB
+
     [ -z "${SANDBOXBASE}" ] && echo "Missing SANDBOXBASE." && exit 1
     [ -z "${PROJECT_ROOT}" ] && echo "Missing PROJECT_ROOT." && exit 1
 
@@ -312,6 +339,7 @@ hb_prime()
     fi
 
     hbDistribute --hb-standalone $*
+
 }
 
 hb_fipssetup()
@@ -353,23 +381,42 @@ hb_fipssetup()
 
 hb_simsetup()
 {
-    hb_fipssetup
-
-    DRIVER=`cat ${PROJECT_ROOT}/src/build/citest/etc/bbuild`
+    export_key_variables
     SIMICS_LEVEL=`cat ${PROJECT_ROOT}/src/build/citest/etc/simbuild`
     EECACHE_PREBUILT=`cat ${PROJECT_ROOT}/src/build/citest/etc/eecache_prebuilt`
 
-    needs_machine_variable
-    if [ "${MACHINE}" == "P10_STANDALONE" ]; then
-        echo "mkdir -p ${SANDBOXBASE}/simics"
-        execute_in_sandbox "mkdir -p ${SANDBOXBASE}/simics" "ppc"
-        execute_in_sandbox "tar -xf ${SIMICS_LEVEL} -C ${SANDBOXBASE}/simics/" "ppc"
-        execute_in_sandbox "cd ${SANDBOXBASE}/simics/ && ./INSTALL.sh" "ppc"
-        echo "cp ${EECACHE_PREBUILT} ${SANDBOXBASE}/simics/eecache_prebuilt.bin.ecc"
-        execute_in_sandbox "cp ${EECACHE_PREBUILT} ${SANDBOXBASE}/simics/eecache_prebuilt.bin.ecc" "ppc"
-    else
-        execute_in_sandbox "start_simics -no_start -machine ${MACHINE}"  "ppc"
+    # Setup for P10 Standalone without ODE SB
+
+    if [[ $HB_STANDALONE -eq 1 ]] && [[ $PNOR_LAYOUT_SELECTED != "FSP" ]]; then
+
+        STANDALONE=${PROJECT_ROOT}/standalone
+        STANDALONE_SIMICS=${STANDALONE}/simics
+
+        if [[ ! -d ${STANDALONE} ]];then
+            mkdir -p ${STANDALONE}
+        fi
+
+        if [[ ! -d ${STANDALONE_SIMICS} ]];then
+            mkdir -p ${STANDALONE_SIMICS}/hbfw
+        fi
+
+        echo tar -xf ${SIMICS_LEVEL} -C ${STANDALONE_SIMICS}
+        tar -xf ${SIMICS_LEVEL} -C ${STANDALONE_SIMICS}
+        echo "cd ${STANDALONE_SIMICS} && ./INSTALL.sh"
+        cd ${STANDALONE_SIMICS} && ./INSTALL.sh
+        echo "cp ${EECACHE_PREBUILT} ${STANDALONE_SIMICS}/eecache_prebuilt.bin.ecc"
+        cp ${EECACHE_PREBUILT} ${STANDALONE_SIMICS}/eecache_prebuilt.bin.ecc
+
+        exit 0
+
     fi
+
+    # Setup when using ODE SB
+
+    DRIVER=`cat ${PROJECT_ROOT}/src/build/citest/etc/bbuild`
+
+    hb_fipssetup
+    execute_in_sandbox "start_simics -no_start -machine ${MACHINE}"  "ppc"
 
     echo "Running workarounds (postsimsetup)."
     cp ${PROJECT_ROOT}/src/build/citest/etc/workarounds.postsimsetup ${SANDBOXBASE}/src
@@ -383,26 +430,8 @@ hb_simsetup()
 
 hb_startsimics()
 {
-    [ -z "${SANDBOXBASE}" ] && echo "Missing SANDBOXBASE." && exit 1
-    [ -z "${PROJECT_ROOT}" ] && echo "Missing PROJECT_ROOT." && exit 1
 
-    if [ ! -d "${SANDBOXBASE}" ]; then
-        echo "Sandbox does not exist.  Create with 'hb simsetup."
-        exit 1
-    fi
-
-    SBDRIVER=`cat ${SANDBOXBASE}/rc_files/sb.conf | \
-              grep "backing_build" | awk '{ print $3 }'`
-    DRIVER=`cat ${PROJECT_ROOT}/src/build/citest/etc/bbuild`
-
-    if [ ${SBDRIVER} != ${DRIVER} ]; then
-        echo "Driver mismatch between sandbox and src/build/citest/etc/bbuild."
-        echo "Sandbox at ${SBDRIVER}"
-        echo "Update sandbox with 'hb simsetup'."
-        exit 1
-    fi
-
-    needs_machine_variable
+    export_key_variables
 
     # Dynamically check config file if secureboot enabled build occurred and
     # set mode accordingly
@@ -420,21 +449,69 @@ hb_startsimics()
         fi
     else
         echo "File DNE ${PROJECT_ROOT}/obj/genfiles/config.h"
-        exit -1
+        exit 1
     fi
 
-    if [ "${MACHINE}" == "P10_STANDALONE" ]; then
-        export MY_DIR="${SANDBOXBASE}/obj/ppc/simu/scripts/hbfw"
-        export RUNSIMCMD="cd ${SANDBOXBASE}/simics/ && ./runsim -m ${MACHINE} hb_script_to_run=${MY_DIR}/startup.simics pnor_img=${SANDBOXBASE}/obj/ppc/hbfw/img/p10.pnor sbe_seeprom_img=/gsa/ausgsa/projects/h/hostboot/simbuild/SBE_19b2530_HB_c391a8a_sbe_seeprom_p10.bin.ecc sbe_boot_mem='seeprom' enable_lpc_console=TRUE"
+    # Starting Simics for P10 Standalone without ODE SB
 
-        echo "**********"
-        echo $RUNSIMCMD
-        echo "**********"
-        execute_in_sandbox "${RUNSIMCMD} ${SIMICSOPTIONS} $*" "ppc"
-    else
-        execute_in_sandbox \
-            "start_simics -machine ${MACHINE} ${SIMICSOPTIONS} $*"  "ppc"
+    if [[ $HB_STANDALONE -eq 1 ]] && [[ $PNOR_LAYOUT_SELECTED != "FSP" ]]; then
+
+        STANDALONE_SIMICS=${PROJECT_ROOT}/standalone/simics
+
+        # Env. vars. for startup.simics and hb-tools scripts
+        export HBBLPATH=${PROJECT_ROOT}/standalone/pnor/hbbl.bin
+        export HBICORE_EXTENDED_PATH=${PROJECT_ROOT}/standalone/staging/hbicore_extended.bin
+        export PATH=${STANDALONE_SIMICS}/hbfw/:${PATH}
+
+        if [[ ! -d ${STANDALONE_SIMICS} ]] || [[ ! -d ${STANDALONE_SIMICS}/hbfw ]]; then
+            echo "Missing Simics files, please run \"hb simsetup\"."
+            exit -1
+        fi
+
+        # Run Simics
+        echo "cd ${STANDALONE_SIMICS} && ./runsim -m ${MACHINE} \
+            hb_script_to_run=${STANDALONE_SIMICS}/hbfw/startup.simics \
+            pnor_img=${PROJECT_ROOT}/standalone/pnor/${PNOR_LAYOUT_SELECTED}.pnor \
+            sbe_seeprom_img=/gsa/ausgsa/projects/h/hostboot/simbuild/SBE_19b2530_HB_c391a8a_sbe_seeprom_p10.bin.ecc \
+            sbe_boot_mem='seeprom' enable_lpc_console=TRUE"
+
+        cd ${STANDALONE_SIMICS} && ./runsim -m ${MACHINE} \
+            hb_script_to_run=${STANDALONE_SIMICS}/hbfw/startup.simics \
+            pnor_img=${PROJECT_ROOT}/standalone/pnor/${PNOR_LAYOUT_SELECTED}.pnor \
+            sbe_seeprom_img=/gsa/ausgsa/projects/h/hostboot/simbuild/SBE_19b2530_HB_c391a8a_sbe_seeprom_p10.bin.ecc \
+            sbe_boot_mem='seeprom' enable_lpc_console=TRUE
+
+        exit 0
     fi
+
+    # Starting Simics when using an ODE SB
+
+    [ -z "${SANDBOXBASE}" ] && echo "Missing SANDBOXBASE." && exit 1
+    [ -z "${PROJECT_ROOT}" ] && echo "Missing PROJECT_ROOT." && exit 1
+
+    # Env. vars. for startup.simics and hb-tools scripts
+    export HBBLPATH=${SANDBOXBASE}/obj/ppc/hbfw/img/hbbl.bin
+    export HBICORE_EXTENDED_PATH=${SANDBOXBASE}/src/hbfw/img/hostboot_extended.bin
+
+    if [ ! -d "${SANDBOXBASE}" ]; then
+        echo "Sandbox does not exist.  Create with 'hb simsetup."
+        exit 1
+    fi
+
+    SBDRIVER=`cat ${SANDBOXBASE}/rc_files/sb.conf | \
+              grep "backing_build" | awk '{ print $3 }'`
+    DRIVER=`cat ${PROJECT_ROOT}/src/build/citest/etc/bbuild`
+
+    if [ ${SBDRIVER} != ${DRIVER} ]; then
+        echo "Driver mismatch between sandbox and src/build/citest/etc/bbuild."
+        echo "Sandbox at ${SBDRIVER}"
+        echo "Update sandbox with 'hb simsetup'."
+        exit 1
+    fi
+
+    execute_in_sandbox \
+        "start_simics -machine ${MACHINE} ${SIMICSOPTIONS} $*"  "ppc"
+
 }
 
 hb_rsync_call()

@@ -41,8 +41,13 @@ print_usage()
     echo "    target.  Typically this is used to populate an ODE sandbox with"
     echo "    images and debug tools or for the generation of a build release"
     echo "    directory."
+    echo "    However, if building for P10 Standalone, an ODE sandbox will not"
+    echo "    be used. Instead, a 'standalone' directory will be created"
+    echo "    under PROJECT_ROOT where the PNOR will be assembled, and the"
+    echo "    Simics tools will be kept."
     echo
-    echo "    Target content is defined in src/build/mkrules/dist.targets.mk"
+    echo "    If using ODE Sandbox, Target content is defined in"
+    echo "    src/build/mkrules/dist.targets.mk"
     echo
     echo "  Options:"
     echo "    --help: Prints usage information"
@@ -144,31 +149,49 @@ do
     esac
 done
 
-echo "sbroot=${SANDBOXROOT} sbname=${SANDBOXNAME}"
-echo "target dir ${TARGET_DIR}"
-# Verify target directory or default to sandbox.
-if [ "${TARGET_DIR}" == "invalid directory" ]; then
-    if [ -z "${SANDBOXROOT}" -o -z "${SANDBOXNAME}" ]; then
-        echo "ERROR: TARGET_DIR - No path specified and \$SANDBOXBASE undefined."
-        print_usage
-        exit -1
-    else
-        TARGET_DIR=${SANDBOXROOT}/${SANDBOXNAME}/src/hbfw
-    fi
+# Export PNOR_LAYOUT_SELECTED variable
+# Dynamically check if file exists indicating the fsprelease.config was used
+# Note this file is generated in the hb config file rule in top level makefile
+if [[ -f ${PROJECT_ROOT}/obj/genfiles/hb_fsp_release ]]; then
+    echo "FSP build, using fsp pnor xml layout"
+    export PNOR_LAYOUT_SELECTED=FSP
+elif [[ -f ${PROJECT_ROOT}/obj/genfiles/hb_simics_p10_release ]]; then
+    echo "P10 build, using P10 PNOR XML layout"
+    export PNOR_LAYOUT_SELECTED=P10
+else
+    echo "Non FSP build, using standalone (default) pnor xml layout"
+    export PNOR_LAYOUT_SELECTED=STANDALONE
 fi
 
+if [[ $HB_STANDALONE != "1" ]] || [ $PNOR_LAYOUT_SELECTED == "FSP" ];then
+# The following should not run if we are distributing for a ${HB_STANDALONE}
+# system, i.e. when using an ODE SB
 
-echo "sbfw dir = ${SBFW_DIR}"
-# Verify SBFW directory or default to sandbox.
-if [ "${SBFW_DIR}" == "invalid directory" -a \
-    "${TARGET}" != "openpower_TARGET" -a \
-    "${TARGET}" != "errltool_TARGET" ]; then
-    if [ -z "${SANDBOXROOT}" -o -z "${SANDBOXNAME}" ]; then
-        echo "ERROR:SBFW - No path specified and \$SANDBOXBASE undefined."
-        print_usage
-        exit -1
-    else
-        SBFW_DIR=${SANDBOXROOT}/${SANDBOXNAME}/src/sbei/sbfw
+    echo "sbroot=${SANDBOXROOT} sbname=${SANDBOXNAME}"
+    echo "target dir ${TARGET_DIR}"
+    # Verify target directory or default to sandbox.
+    if [ "${TARGET_DIR}" == "invalid directory" ]; then
+        if [ -z "${SANDBOXROOT}" -o -z "${SANDBOXNAME}" ]; then
+            echo "ERROR: TARGET_DIR - No path specified and \$SANDBOXBASE undefined."
+            print_usage
+            exit -1
+        else
+            TARGET_DIR=${SANDBOXROOT}/${SANDBOXNAME}/src/hbfw
+        fi
+    fi
+
+    echo "sbfw dir = ${SBFW_DIR}"
+    # Verify SBFW directory or default to sandbox.
+    if [ "${SBFW_DIR}" == "invalid directory" -a \
+        "${TARGET}" != "openpower_TARGET" -a \
+        "${TARGET}" != "errltool_TARGET" ]; then
+        if [ -z "${SANDBOXROOT}" -o -z "${SANDBOXNAME}" ]; then
+            echo "ERROR:SBFW - No path specified and \$SANDBOXBASE undefined."
+            print_usage
+            exit -1
+        else
+            SBFW_DIR=${SANDBOXROOT}/${SANDBOXNAME}/src/sbei/sbfw
+        fi
     fi
 fi
 
@@ -206,19 +229,6 @@ else
     exit -1
 fi
 
-# Dynamically check if file exists indicating the fsprelease.config was used
-# Note this file is generated in the hb config file rule in top level makefile
-if [[ -f ${PROJECT_ROOT}/obj/genfiles/hb_fsp_release ]]; then
-    echo "FSP build, using fsp pnor xml layout"
-    export PNOR_LAYOUT_SELECTED=FSP
-elif [[ -f ${PROJECT_ROOT}/obj/genfiles/hb_simics_p10_release ]]; then
-    echo "P10 build, using P10 PNOR XML layout"
-    export PNOR_LAYOUT_SELECTED=P10
-else
-    echo "Non FSP build, using standalone (default) pnor xml layout"
-    export PNOR_LAYOUT_SELECTED=STANDALONE
-fi
-
 # Clean up preivous rand files. Should only be needed if a previous call failed.
 # Done before dist.targets.mk because there are parallel operations that occur.
 # So if we delete in genPnorImages.pl we would wipe out stuff currently being
@@ -242,12 +252,29 @@ if [ -n "$KEY_TRANSITION_PARAMS" ]; then
     echo "Key transition options = $KEY_TRANSITION_PARAMS"
 fi
 
-if [[ $HB_STANDALONE -eq 1 ]]; then
-    if [ $PNOR_LAYOUT_SELECTED != "FSP" ];then
-        build-ffs-tools
+if [[ $HB_STANDALONE -eq 1 ]] && [ $PNOR_LAYOUT_SELECTED != "FSP" ];then
+# The following only runs when the environment is not using an ODE SB. Such is
+# the case when using the "P10 standalone, non-FSP" configuration.
+
+    # UNDERSCORE_TEST is set to _test when hbDistribute is called with --test
+    # and set to an empty string otherwise.
+    if [[ ${TARGET_TEST} ]]; then
+        export UNDERSCORE_TEST="_test"
     fi
+
+    # Setup for makefile and Simics
+    source standaloneHelper --assembleSetup
+    source standaloneHelper --simicsSetup
+
+    # Run makefile
+    cd ${PROJECT_ROOT}/standalone/pnor
+    make -rR ${DEBUG:=} -f ${PROJECT_ROOT}/src/build/mkrules/assemble.standalone.mk
+
+    exit 0
+
 fi
 
+# Distribute to ODE SB
 cd $REPO_ROOT/src/build/mkrules
 make -rR ${DEBUG:=} -f dist.targets.mk $TARGET
 

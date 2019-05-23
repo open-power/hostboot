@@ -1,0 +1,3 @@
+# CFM artifact ID to be used when CFM_TEST_IMAGE has been specified; used to
+# assemble PNOR image
+export CFM_TEST_ARTIFACT_ID=

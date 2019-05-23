@@ -1,0 +1,129 @@
+#!/bin/bash -e
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/build/tools/standaloneHelper $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2012,2019
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+#
+# This script aids in various tasks needed to assemble and simulate a P10
+# standalone chip
+#
+
+# Export artifacts IDs and variables that will be used in
+# assemble.standalone.mk
+assemble_setup()
+{
+
+    build-ffs-tools
+
+    source ${PROJECT_ROOT}/src/build/citest/etc/sbe
+    source ${PROJECT_ROOT}/src/build/citest/etc/hcode
+    source ${PROJECT_ROOT}/src/build/citest/etc/occ
+    source ${PROJECT_ROOT}/src/build/citest/etc/wof
+
+    if [ ! -z "${SECUREBOOT_KEY_TRANSITION_MODE}" ] &&
+        [ ! -z "${CFM_TEST_IMAGE}" ]; then
+        source ${PROJECT_ROOT}/src/build/citest/etc/cfmtest
+    fi
+
+    if cat ${PROJECT_ROOT}/obj/genfiles/config.h | grep -q "CONFIG_SECUREBOOT 1"; then
+        export CONFIG_SECUREBOOT="1"
+    fi
+
+    if [[ ! -d ${PROJECT_ROOT}/standalone/pnor ]];then
+        mkdir -p ${PROJECT_ROOT}/standalone/pnor
+    fi
+
+    if [[ ! -d ${PROJECT_ROOT}/standalone/staging ]];then
+        mkdir -p ${PROJECT_ROOT}/standalone/staging
+    fi
+
+    # Removing previously assembled items
+    rm -rf ${PROJECT_ROOT}/standalone/pnor/*
+    rm -rf ${PROJECT_ROOT}/standalone/staging/*
+
+}
+
+# Setup layout of files around simics.
+simics_setup()
+{
+
+    hbfw_dir=${PROJECT_ROOT}/standalone/simics/hbfw
+
+    if [[ ! -d ${hbfw_dir} ]];then
+        echo "Could not find " ${hbfw_dir}
+        echo "Please run \"hb simsetup\" to create it and other Simics artifacts."
+        exit -1
+    fi
+
+    # Emptying out .../hbfw directory and repopulating it
+    rm -rf ${hbfw_dir}/*
+
+    # Copy down fsp-trace
+    cp /opt/mcp/shared/fr_FLD9-DEV-20190308/opt/fsp/usr/bin/fsp-trace ${hbfw_dir}
+
+    # Copy down HB's Simics and Debugs files
+    cp -rf ${PROJECT_ROOT}/src/build/simics/* ${hbfw_dir}
+    cp -rf ${PROJECT_ROOT}/src/build/debug/* ${hbfw_dir}
+
+    # Copy gen files
+    cp ${PROJECT_ROOT}/obj/genfiles/attrInfo.csv ${hbfw_dir}
+    cp ${PROJECT_ROOT}/obj/genfiles/targAttrInfo.csv ${hbfw_dir}
+    cp ${PROJECT_ROOT}/obj/genfiles/attrEnumInfo.csv ${hbfw_dir}
+
+    # Copy img files
+    cp ${PROJECT_ROOT}/img/dimmspd_cdimm.dat ${hbfw_dir}
+    cp ${PROJECT_ROOT}/img/procmvpd.dat ${hbfw_dir}
+    cp ${PROJECT_ROOT}/img/securerom.bin.modinfo ${hbfw_dir}
+    cp ${PROJECT_ROOT}/img/dimmspd.dat ${hbfw_dir}
+    cp ${PROJECT_ROOT}/img/hbibl.bin.modinfo ${hbfw_dir}
+    cp ${PROJECT_ROOT}/img/hbirt${UNDERSCORE_TEST}.bin.modinfo ${hbfw_dir}/hbirt.bin.modinfo
+    cp ${PROJECT_ROOT}/img/procmvpd_p9a.dat ${hbfw_dir}
+    cp ${PROJECT_ROOT}/img/securerom.list.bz2 ${hbfw_dir}
+    cp ${PROJECT_ROOT}/img/dvpd.dat ${hbfw_dir}
+    cp ${PROJECT_ROOT}/img/hbibl.list.bz2 ${hbfw_dir}
+    cp ${PROJECT_ROOT}/img/hbirt${UNDERSCORE_TEST}.list.bz2 ${hbfw_dir}/hbirt.list.bz2
+    cp ${PROJECT_ROOT}/img/procmvpd_p9c.dat ${hbfw_dir}
+    cp ${PROJECT_ROOT}/img/securerom.syms ${hbfw_dir}
+    cp ${PROJECT_ROOT}/img/hbibl.syms ${hbfw_dir}
+    cp ${PROJECT_ROOT}/img/hbirt${UNDERSCORE_TEST}.syms ${hbfw_dir}/hbirt.syms
+    cp ${PROJECT_ROOT}/img/procmvpd_p9n.dat ${hbfw_dir}
+    cp ${PROJECT_ROOT}/img/errlparser ${hbfw_dir}
+    cp ${PROJECT_ROOT}/img/hbicore${UNDERSCORE_TEST}.bin.modinfo ${hbfw_dir}/hbicore.bin.modinfo
+    cp ${PROJECT_ROOT}/img/isteplist.csv ${hbfw_dir}
+    cp ${PROJECT_ROOT}/img/procmvpd_ven.dat ${hbfw_dir}
+    cp ${PROJECT_ROOT}/img/cvpd.dat ${hbfw_dir}
+    cp ${PROJECT_ROOT}/img/hbicore${UNDERSCORE_TEST}.list.bz2 ${hbfw_dir}/hbicore.list.bz2
+    cp ${PROJECT_ROOT}/img/hbicore${UNDERSCORE_TEST}.syms ${hbfw_dir}/hbicore.syms
+    cp ${PROJECT_ROOT}/img/hbotStringFile ${hbfw_dir}
+
+}
+
+case $1 in
+    "--assembleSetup")
+        assemble_setup
+    ;;
+    "--simicsSetup")
+        simics_setup
+    ;;
+esac

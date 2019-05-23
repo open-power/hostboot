@@ -1,0 +1,2 @@
+# WOF artifact ID used to assemble PNOR image
+export WOF_ARTIFACT_ID=c8be187ab85968a33ed30fdf69fd42adcf2fe8dc

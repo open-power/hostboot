@@ -1,0 +1,2 @@
+# HCODE artifact ID used to assemble PNOR image
+export HCODE_ARTIFACT_ID=6973a406404d56f7da532a7fce0e5caf21e28dea

@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
@@ -22,7 +23,6 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-#!/usr/bin/perl
 use strict;
 use warnings;
 use File::Path;
@@ -163,7 +163,7 @@ sub init
     # because HBB/HBI/HBRT are not necessarily laid out in memory as
     # they are in PNOR or anywhere else.
 
-    my $hbicore_extended_bin_fname = "$ENV{SANDBOXROOT}/$ENV{SANDBOXNAME}/src/hbfw/img/hostboot_extended.bin";
+    my $hbicore_extended_bin_fname = "$ENV{HBICORE_EXTENDED_PATH}";
 
     userDebug("Opening " . $hbicore_extended_bin_fname . " for HBI\n");
 
