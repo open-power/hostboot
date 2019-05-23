@@ -27,9 +27,8 @@
 /// @brief Access procedure to the OCC OCB indirect channels
 ///
 
-// *HWP HWP Owner       : Amit Kumar <akumar3@us.ibm.com>
-// *HWP HWP Backup Owner: Greg Still <stillgs@us.ibm.com>
-// *HWP FW Owner        : Sangeetha T S <sangeet2@in.ibm.com>
+// *HWP HW Owner        : Greg Still <stillgs@us.ibm.com>
+// *HWP FW Owner        : Amit Tendolkar <amit.tendolkar@in.ibm.com>
 // *HWP Team            : PM
 // *HWP Level           : 3
 // *HWP Consumed by     : SBE:HS
