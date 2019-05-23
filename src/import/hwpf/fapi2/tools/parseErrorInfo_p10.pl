@@ -50,7 +50,6 @@ $XML::Simple::PREFERRED_PARSER = 'XML::Parser';
 # Specify perl modules to use
 #------------------------------------------------------------------------------
 use Digest::MD5 qw(md5_hex);
-use File::Basename;
 use XML::Simple;
 my $xml = new XML::Simple( KeyAttr => [] );
 
@@ -518,17 +517,6 @@ print CRFILE "#include <p10_scom_proc.H>\n";
 print CRFILE "#include <p10_scom_pauc.H>\n";
 print CRFILE "#include <p10_scom_pau.H>\n";
 print CRFILE "#include <p10_scom_nmmu.H>\n";
-print CRFILE "#include <p10_scom_c.H>\n";
-print CRFILE "#include <p10_scom_eq.H>\n";
-print CRFILE "#include <p10_scom_iohs.H>\n";
-print CRFILE "#include <p10_scom_mcc.H>\n";
-print CRFILE "#include <p10_scom_mc.H>\n";
-print CRFILE "#include <p10_scom_omic.H>\n";
-print CRFILE "#include <p10_scom_omi.H>\n";
-print CRFILE "#include <p10_scom_pec.H>\n";
-print CRFILE "#include <p10_scom_perv.H>\n";
-print CRFILE "#include <p10_scom_phb.H>\n";
-print CRFILE "#include <p10_scom_proc.H>\n";
 
 print CRFILE "namespace fapi2\n";
 print CRFILE "{\n";
@@ -600,8 +588,6 @@ print SBFUNFILE "};\n";
 foreach my $argnum ( 0 .. $#ARGV )
 {
     my $infile = $ARGV[$argnum];
-    my $filename = basename($infile);
-    print "    XML        $filename\n";
     my $count  = 0;
 
     #--------------------------------------------------------------------------
