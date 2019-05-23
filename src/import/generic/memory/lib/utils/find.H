@@ -38,6 +38,8 @@
 
 #include <fapi2.H>
 #include <vector>
+#include <generic/memory/lib/utils/c_str.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 namespace mss
 {
@@ -458,6 +460,40 @@ bool find_value_from_key( const std::pair<T, OT> (&i_array)[N],
 
     FAPI_ERR ("No match found for find_value_from_key");
     return false;
+}
+
+///
+/// @brief Mapping boilerplate check
+/// @tparam T FAPI2 target type
+/// @tparam IT map key type
+/// @tparam OT map value type
+/// @param[in] i_target the FAPI target
+/// @param[in] i_map SPD to attribute data mapping
+/// @param[in] i_ffdc_code FFDC function code
+/// @param[in] i_key Key to query map
+/// @param[out] o_output value from key
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template< fapi2::TargetType T, typename IT, typename OT >
+inline fapi2::ReturnCode lookup_table_check(const fapi2::Target<T>& i_target,
+        const std::vector<std::pair<IT, OT>>& i_map,
+        const generic_ffdc_codes i_ffdc_code,
+        const IT i_key,
+        OT& o_output)
+{
+    const bool l_is_val_found = mss::find_value_from_key(i_map, i_key, o_output);
+
+    FAPI_ASSERT( l_is_val_found,
+                 fapi2::MSS_LOOKUP_FAILED()
+                 .set_KEY(i_key)
+                 .set_DATA(o_output)
+                 .set_FUNCTION(i_ffdc_code)
+                 .set_TARGET(i_target),
+                 "Failed to find a mapped value for %d on %s",
+                 i_key,
+                 mss::spd::c_str(i_target) );
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 }// mss

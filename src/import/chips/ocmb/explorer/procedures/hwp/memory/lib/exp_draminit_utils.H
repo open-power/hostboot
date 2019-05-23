@@ -235,7 +235,7 @@ class phy_params
         ///
         /// @brief fetch the attributes and initialize it to the params
         /// @param[in] i_target the fapi2 target
-        /// @param[in,out] o_rc the fapi2 output
+        /// @param[out] o_rc the fapi2 output
         ///
         phy_params(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
                    fapi2::ReturnCode& o_rc):

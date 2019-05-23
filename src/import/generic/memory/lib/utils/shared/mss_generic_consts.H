@@ -215,11 +215,17 @@ enum generic_ffdc_codes
     SET_PRIM_BUS_WIDTH = 0x1069,
     SET_PRIM_DIE_COUNT = 0x1070,
     SET_DRAM_DENSITY = 0x1071,
+    SET_SI_RD_VREF_DQ = 0x1075,
+    SET_CAC_DELAY_A = 0x1076,
+    SET_CAC_DELAY_B = 0x1077,
+    EFD_CA_LATENCY_MODE = 0x1080,
+    EFD_CA_PL_MODE = 0x1081,
+
 
     // Power thermal functions
     POWER_LIMIT = 0x1072,
-    SLOPE = 1073,
-    INTERCEPT = 1074,
+    SLOPE = 0x1073,
+    INTERCEPT = 0x1074,
 };
 
 ///
