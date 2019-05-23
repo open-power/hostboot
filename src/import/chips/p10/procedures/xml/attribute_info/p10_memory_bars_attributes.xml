@@ -43,10 +43,6 @@
   <valueType>uint64</valueType>
   <array>4 9</array>
   <enum>
-    MI0    = 0,
-    MI1    = 1,
-    MI2    = 2,
-    MI3    = 3,
     MCFGP0    = 0,
     MCFGP1    = 1,
     MCFGPM0   = 2,
