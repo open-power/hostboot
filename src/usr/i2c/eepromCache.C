@@ -358,6 +358,9 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
                 // to be the current "end of cache" offset in the toc.
                 l_eepromRecordHeader.completeRecord.internal_offset = l_eecacheSectionHeaderPtr->end_of_cache;
                 l_eecacheSectionHeaderPtr->end_of_cache += l_eepromLen;
+
+                // Set cached_copy_valid to 0 until the cache contents actually gets loaded
+                l_recordHeaderToUpdate->completeRecord.cached_copy_valid = 0;
                 l_updateContents = i_present;
                 break;
             }
@@ -444,29 +447,14 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
         }
 
 
-        uint64_t l_eepromCacheVaddr = lookupEepromAddr(l_eepromRecordHeader);
-        const uint64_t l_invalidAddress = 0xFFFFFFFFFFFFFFFF;
-
-        // If the virtual address of the eeprom record header is an invalid
-        // address then this is the first time this target's eeprom is being
-        // cached.
-        bool l_isNewCacheEntry = false;
-        if (memcmp(
-                reinterpret_cast<void *>(l_eepromCacheVaddr),
-                &l_invalidAddress, sizeof(uint64_t)) == 0)
-        {
-            l_isNewCacheEntry = true;
-        }
-
-        // At this point we have found a match in the PNOR but we need
-        // to decide what all needs an update.
-        //
         // Only check if the cache is in sync with HARDWARE if there is an
         // existing EECACHE section. Otherwise, the code after this logic will
         // take care of adding a new eeprom cache section for the target.
-        if (   l_recordHeaderToUpdate->completeRecord.cached_copy_valid
-            && !l_isNewCacheEntry)
+        if (l_recordHeaderToUpdate->completeRecord.cached_copy_valid)
         {
+            // At this point we have found a match in the PNOR but we need
+            // to decide what all needs an update.
+
             // Create namespace alias for targeting to reduce number of
             // new lines required to be within line character limit.
             namespace T = TARGETING;
@@ -620,6 +608,13 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
             if(l_errl)
             {
                 break;
+            }
+
+            // If cache copy was not valid before, it is now valid, we must update the header
+            if (!l_recordHeaderToUpdate->completeRecord.cached_copy_valid)
+            {
+                  l_eepromRecordHeader.completeRecord.cached_copy_valid = 0x01;
+                  l_updateHeader = true;
             }
 
         }
