@@ -727,7 +727,8 @@ errlHndl_t cmpEecacheToEeprom(TARGETING::Target *            i_target,
     }
     else
     {
-        assert(false, "Error, invalid EEPROM type passed to cmpEecacheToEeprom");
+        assert(false, "Error, invalid EEPROM type 0x%x for target HUID 0x%X passed to cmpEecacheToEeprom",
+               i_eepromType, get_huid(i_target));
     }
 
     return l_err;
