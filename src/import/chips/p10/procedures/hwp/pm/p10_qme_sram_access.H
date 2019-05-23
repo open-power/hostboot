@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -86,7 +87,7 @@ extern "C" {
 ///     - QME to display is enabled and unfenced
 ///  Note that the address does not wrap if the length + starting address exceeds the maximum address
 ///
-/// @param [in]  i_qme_target         EX target
+/// @param [in]  i_qme_target         EQ target
 /// @param [in]  i_start_address      Start Address is between 0xFFFF80000 and 0xFFFFFFFF and must be 8B aligned
 /// @param [in]  i_length_dword       Length in dwords (# of accesses)
 /// @param [in]  i_operation          Access operatio to perform (GET/PUT)

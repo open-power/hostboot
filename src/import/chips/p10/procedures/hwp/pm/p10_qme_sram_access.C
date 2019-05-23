@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -36,16 +37,16 @@
 //  Includes
 // -----------------------------------------------------------------------------
 #include <p10_qme_sram_access.H>
-// @todo RTC 206154 Replace with generated header when available
-//#include <p10_quad_scom_addresses.H>
-#include <p10_pm_address_temp.C>
+#include "p10_scom_eq.H"
+
+using namespace scomt::eq;
 
 // ----------------------------------------------------------------------
 // Constants
 // ----------------------------------------------------------------------
 const uint32_t QSAR_AUTO_INCREMENT_BIT = 63;
 
-// These really should come from hcd_common
+// These really should come from hcd_common RTC 210851
 const uint32_t QME_SRAM_SIZE = 64 * 1024;
 const uint32_t QME_SRAM_BASE_ADDR = 0xFFFF0000;
 
