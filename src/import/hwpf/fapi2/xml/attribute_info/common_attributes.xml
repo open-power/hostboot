@@ -89,6 +89,7 @@
       TARGET_TYPE_NMMU,
       TARGET_TYPE_PAU,
       TARGET_TYPE_IOHS,
+      TARGET_TYPE_FC,
       TARGET_TYPE_PAUC
     </targetType>
     <description>
