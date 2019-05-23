@@ -50,6 +50,7 @@ $XML::Simple::PREFERRED_PARSER = 'XML::Parser';
 # Specify perl modules to use
 #------------------------------------------------------------------------------
 use Digest::MD5 qw(md5_hex);
+use File::Basename;
 use XML::Simple;
 my $xml = new XML::Simple( KeyAttr => [] );
 
@@ -587,8 +588,10 @@ print SBFUNFILE "};\n";
 #------------------------------------------------------------------------------
 foreach my $argnum ( 0 .. $#ARGV )
 {
-    my $infile = $ARGV[$argnum];
-    my $count  = 0;
+    my $infile   = $ARGV[$argnum];
+    my $filename = basename($infile);
+    print "    XML        $filename\n";
+    my $count = 0;
 
     #--------------------------------------------------------------------------
     # Read XML file. The ForceArray option ensures that there is an array of
