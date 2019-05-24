@@ -1,0 +1,48 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p10/procedures/xml/error_info/p10_sbe_scratch_regs_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<hwpErrors>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_SBE_SCRATCH_REGS_MC_FREQ_LOOKUP_ERR</rc>
+  <description>
+    Frequency requested via ATTR_FREQ_MC_MHZ was not found in list
+    of supported frequency values
+  </description>
+  <ffdc>TARGET_CHIP</ffdc>
+  <ffdc>TARGET_MC</ffdc>
+  <ffdc>FREQ_MC_MHZ</ffdc>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_SBE_SCRATCH_REGS_IOHS_FREQ_LOOKUP_ERR</rc>
+  <description>
+    Frequency requested via ATTR_FREQ_IOHS_MHZ was not found in list
+    of supported frequency values
+  </description>
+  <ffdc>TARGET_CHIP</ffdc>
+  <ffdc>TARGET_IOHS</ffdc>
+  <ffdc>FREQ_IOHS_MHZ</ffdc>
+</hwpError>
+<!-- ******************************************************************** -->
+</hwpErrors>
