@@ -36,7 +36,6 @@
   </enum>
   <default>HB_IPL</default>
   <writeable/>
-  <platInit/>
   <mrwHide/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -74,7 +73,7 @@
   <id>ATTR_ISTEP_MODE</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
-    Indicates whether IPL should be done by stepping through the isteps (true) 
+    Indicates whether IPL should be done by stepping through the isteps (true)
     or continuously executing all steps end-to-end (false).
   </description>
   <valueType>uint8</valueType>
@@ -180,6 +179,141 @@
   <valueType>uint8</valueType>
   <platInit/>
   <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_SBE_SELECT_EX_POLICY</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>Consumed by p10_sbe_select_ex.
+  Dictates policy for selection of active cores and backing caches
+
+  CRONUS_MAX_ACTIVE -- request maximum set of active cores possible
+    (use case for Cronus istep 4 to establish run state
+    on all functional cores), no backing caches
+
+  HB_DEFAULT -- request minset of active cores (2 in fused core mode, 1
+    otherwise) and backing caches (2)
+
+  HB_MAX_FOOTPRINT -- request the maximum set of backing caches
+    possible (maintaining a power of 2 size, and guaranteeing minset of
+    active cores)
+
+  HB_MAX_THREADS -- request the maximum set of active cores possible,
+    logically applied after processing HB_MAX_FOOTPRINT directive if set
+
+  For memory preserving IPLs, the attribute will be honored in the calcuation
+    of active cores, but no backing caches will be requested
+
+  For cache-contained IPL types, the selection policy is fixed in code --
+    request maximum set of active cores possible, no backing caches
+
+  For chip-contained IPL types, the selection policy is fixed in code --
+    request based on contents of ATTR_CHIP_CONTAINED_ACTIVE_CORES_VEC,
+    ATTR_CHIP_CONTAINED_BACKING_CACHES_VEC
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    HB_DEFAULT = 0x0,
+    CRONUS_MAX_ACTIVE = 0x1,
+    HB_MAX_FOOTPRINT = 0x2,
+    HB_MAX_THREADS = 0x4,
+    HB_MAX_FOOTPRINT_MAX_THREADS = 0x6
+  </enum>
+  <writeable/>
+  <initToZero/>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_MASTER_CORE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+  Indicates the master boot core selected by p10_sbe_select_ex.
+  Ranges from 0 to 31.
+  </description>
+  <valueType>uint8</valueType>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_ACTIVE_CORES_VEC</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Bit vector indicating the active cores selected by
+  p10_sbe_select_ex.
+  Bit 0 = Core 0, Bit 1 = Core 1, ..., Bit 31 = Core 31.
+  </description>
+  <valueType>uint32</valueType>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CHIP_CONTAINED_ACTIVE_CORES_VEC</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Bit vector indicating the active cores to be set by
+  p10_sbe_select_ex for a chip contained IPL.
+  Bit 0 = Core 0, Bit 1 = Core 1, ..., Bit 31 = Core 31.
+  </description>
+  <valueType>uint32</valueType>
+  <writeable/>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_BACKING_CACHES_VEC</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Bit vector indicating the backing caches selected
+  by p10_sbe_select_ex.
+  Bit 0 = Cache 0, Bit 1 = Cache 1, ..., Bit 31 = Cache 31.
+  </description>
+  <valueType>uint32</valueType>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CHIP_CONTAINED_BACKING_CACHES_VEC</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Bit vector indicating the backing caches to be set by
+  by p10_sbe_select_ex.
+  Bit 0 = Cache 0, Bit 1 = Cache 1, ..., Bit 31 = Cache 31.
+  </description>
+  <valueType>uint32</valueType>
+  <writeable/>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_ACTIVE_CORES_NUM</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Number of necessary active boot cores requested. Written by
+  p10_sbe_select_ex based on IPL type and ATTR_SBE_SELECT_EX_POLICY
+  </description>
+  <writeable/>
+  <valueType>uint8</valueType>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_BACKING_CACHES_NUM</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Number of necessary backing caches required. Written by
+  p10_sbe_select_ex based on IPL type and ATTR_SBE_SELECT_EX_POLICY
+  </description>
+  <writeable/>
+  <valueType>uint8</valueType>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_FUSED_CORE_MODE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Summarizes the fused status of cores. This is same for all p10 chips
+    in the system. If a core is in a fused state, attribute should read 1
+    else zero. It needs to be populated during ipl but before istep 15.
+  </description>
+  <valueType>uint8</valueType>
+  <enum> CORE_UNFUSED = 0x0, CORE_FUSED = 0x1 </enum>
+  <platInit/>
+  <default>CORE_UNFUSED</default>
+  <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
 </attributes>

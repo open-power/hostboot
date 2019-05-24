@@ -50,14 +50,6 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
-  <id>ATTR_CLOCK_PLL_MUX</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>setup clock mux settings</description>
-  <valueType>uint64</valueType>
-  <writeable/>
-</attribute>
-<!-- ********************************************************************** -->
-<attribute>
   <id>ATTR_CP_REFCLOCK_SELECT</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Osc refclock configurations</description>
@@ -209,83 +201,24 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
-  <id>ATTR_CLOCK_MUX15_IOHS0_LCPLL_INPUT</id>
+  <id>ATTR_CLOCK_MUX_IOHS_LCPLL_INPUT</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>IOHS0 LCPLL input</description>
+  <description>IOHS LCPLL input
+    IOHS0: Mux15
+    IOHS1: Mux16 (no Mux13 input)
+    IOHS2: Mux17 (no Mux13 input)
+    IOHS3: Mux18
+    IOHS4: Mux19
+    IOHS5: Mux20
+    IOHS6: Mux21
+    IOHS7: Mux22
+  </description>
   <valueType>uint8</valueType>
   <enum>PLLTODFLT = 0, MUX14 = 1, MUX13 = 2</enum>
   <platInit/>
   <initToZero/>
-</attribute>
-<!-- ********************************************************************** -->
-<attribute>
-  <id>ATTR_CLOCK_MUX16_IOHS1_LCPLL_INPUT</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>IOHS1 LCPLL input</description>
-  <valueType>uint8</valueType>
-  <enum>PLLTODFLT = 0, MUX14 = 1</enum>
-  <platInit/>
-  <initToZero/>
-</attribute>
-<!-- ********************************************************************** -->
-<attribute>
-  <id>ATTR_CLOCK_MUX17_IOHS2_LCPLL_INPUT</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>IOHS2 LCPLL input</description>
-  <valueType>uint8</valueType>
-  <enum>PLLTODFLT = 0, MUX14 = 1</enum>
-  <platInit/>
-  <initToZero/>
-</attribute>
-<!-- ********************************************************************** -->
-<attribute>
-  <id>ATTR_CLOCK_MUX18_IOHS3_LCPLL_INPUT</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>IOHS3 LCPLL input</description>
-  <valueType>uint8</valueType>
-  <enum>PLLTODFLT = 0, MUX14 = 1, MUX13 = 2</enum>
-  <platInit/>
-  <initToZero/>
-</attribute>
-<!-- ********************************************************************** -->
-<attribute>
-  <id>ATTR_CLOCK_MUX19_IOHS4_LCPLL_INPUT</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>IOHS4 LCPLL input</description>
-  <valueType>uint8</valueType>
-  <enum>PLLTODFLT = 0, MUX14 = 1, MUX13 = 2</enum>
-  <platInit/>
-  <initToZero/>
-</attribute>
-<!-- ********************************************************************** -->
-<attribute>
-  <id>ATTR_CLOCK_MUX20_IOHS5_LCPLL_INPUT</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>IOHS5 LCPLL input</description>
-  <valueType>uint8</valueType>
-  <enum>PLLTODFLT = 0, MUX14 = 1, MUX13 = 2</enum>
-  <platInit/>
-  <initToZero/>
-</attribute>
-<!-- ********************************************************************** -->
-<attribute>
-  <id>ATTR_CLOCK_MUX21_IOHS6_LCPLL_INPUT</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>IOHS6 LCPLL input</description>
-  <valueType>uint8</valueType>
-  <enum>PLLTODFLT = 0, MUX14 = 1, MUX13 = 2</enum>
-  <platInit/>
-  <initToZero/>
-</attribute>
-<!-- ********************************************************************** -->
-<attribute>
-  <id>ATTR_CLOCK_MUX22_IOHS7_LCPLL_INPUT</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>IOHS7 LCPLL input</description>
-  <valueType>uint8</valueType>
-  <enum>PLLTODFLT = 0, MUX14 = 1, MUX13 = 2</enum>
-  <platInit/>
-  <initToZero/>
+  <array>8</array>
+  <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -299,23 +232,18 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
-  <id>ATTR_CLOCK_MUX24_PCI0_LCPLL_INPUT</id>
+  <id>ATTR_CLOCK_MUX_PCI_LCPLL_INPUT</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>PCI0 LCPLL input</description>
+  <description>PCI LCPLL input mux control
+    PCI0: Mux24
+    PCI1: Mux25
+ </description>
   <valueType>uint8</valueType>
   <enum>MUX23 = 0, PCI_REFCLOCK0 = 1, PCI_REFCLOCK1 = 2</enum>
   <platInit/>
   <initToZero/>
-</attribute>
-<!-- ********************************************************************** -->
-<attribute>
-  <id>ATTR_CLOCK_MUX25_PCI1_LCPLL_INPUT</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>PCI1 LCPLL input</description>
-  <valueType>uint8</valueType>
-  <enum>MUX23 = 0, PCI_REFCLOCK0 = 1, PCI_REFCLOCK1 = 2</enum>
-  <platInit/>
-  <initToZero/>
+  <array>2</array>
+  <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -327,7 +255,7 @@
     0b1 = 32 MHz LPC reference clock
   </description>
   <valueType>uint8</valueType>
-  <enum>LPC_REFCLOCK = 0, PLLTODFLT = 1</enum>
+  <enum>PLLTODFLT = 0, LPC_REFCLOCK = 1</enum>
   <platInit/>
   <initToZero/>
 </attribute>

@@ -28,392 +28,463 @@
 <!--    Additionally, build time initial values can also be optionally      -->
 <!--    defined.                                                            -->
 <entries>
+  <!-- static: chip type and EC -->
   <entry>
-           <name>ATTR_EC</name>
-           <!-- The value needs to be changed as per the EC level  -->
-           <value>0x10</value>
+    <name>ATTR_NAME</name>
+    <value>0xA</value>
   </entry>
-
   <entry>
-           <name>ATTR_NAME</name>
-           <value>0x5</value>
+    <name>ATTR_EC</name>
+    <value>0x10</value>
   </entry>
-
+  <!-- customize-only attributes -->
   <entry>
-           <name>ATTR_SECURITY_MODE</name>
-           <value>0x0</value>
+    <name>ATTR_SECURITY_MODE</name>
+    <value>0x0</value>
   </entry>
-
   <entry>
-      <name>ATTR_CHIP_UNIT_POS</name>
-      <virtual/>
+    <!-- ATTR_PG_MVPD will be customized from the PG keyword data in module VPD -->
+    <name>ATTR_PG_MVPD</name>
+    <value>0xFFE03FFF</value> <!--  0 Unused -->
+    <value>0xFFE071FF</value> <!--  1 PERV   -->
+    <value>0xFFE37FFF</value> <!--  2 N0     -->
+    <value>0xFFE51FFF</value> <!--  3 N1     -->
+    <value>0xFFFFFFFF</value> <!--  4 Unused -->
+    <value>0xFFFFFFFF</value> <!--  5 Unused -->
+    <value>0xFFFFFFFF</value> <!--  6 Unused -->
+    <value>0xFFFFFFFF</value> <!--  7 Unused -->
+    <value>0XFFE00C1F</value> <!--  8 PCI0   -->
+    <value>0XFFE00C1F</value> <!--  9 PCI1   -->
+    <value>0xFFFFFFFF</value> <!-- 10 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 11 Unused -->
+    <value>0xFFE21DFF</value> <!-- 12 MC0    -->
+    <value>0xFFE21DFF</value> <!-- 13 MC1    -->
+    <value>0xFFE21DFF</value> <!-- 14 MC2    -->
+    <value>0xFFE21DFF</value> <!-- 15 MC3    -->
+    <value>0xFFE39FFF</value> <!-- 16 PAU0   -->
+    <value>0xFFE39FFF</value> <!-- 17 PAU1   -->
+    <value>0xFFE19FFF</value> <!-- 18 PAU2   -->
+    <value>0xFFE19FFF</value> <!-- 19 PAU3   -->
+    <value>0xFFFFFFFF</value> <!-- 20 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 21 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 22 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 23 Unused -->
+    <value>0xFFE33DFF</value> <!-- 24 IOHS0  -->
+    <value>0xFFE33DFF</value> <!-- 25 IOHS1  -->
+    <value>0xFFE33DFF</value> <!-- 26 IOHS2  -->
+    <value>0xFFE33DFF</value> <!-- 27 IOHS3  -->
+    <value>0xFFE33DFF</value> <!-- 28 IOHS4  -->
+    <value>0xFFE33DFF</value> <!-- 29 IOHS5  -->
+    <value>0xFFE33DFF</value> <!-- 30 IOHS6  -->
+    <value>0xFFE33DFF</value> <!-- 31 IOHS7  -->
+    <value>0xFFE0001F</value> <!-- 32 EQ0    -->
+    <value>0xFFE0001F</value> <!-- 33 EQ1    -->
+    <value>0xFFE0001F</value> <!-- 34 EQ2    -->
+    <value>0xFFE0001F</value> <!-- 35 EQ3    -->
+    <value>0xFFE0001F</value> <!-- 36 EQ4    -->
+    <value>0xFFE0001F</value> <!-- 37 EQ5    -->
+    <value>0xFFE0001F</value> <!-- 38 EQ6    -->
+    <value>0xFFE0001F</value> <!-- 39 EQ7    -->
+    <value>0xFFFFFFFF</value> <!-- 40 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 41 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 42 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 43 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 44 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 45 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 46 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 47 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 48 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 49 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 50 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 51 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 52 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 53 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 54 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 55 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 56 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 57 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 58 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 59 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 60 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 61 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 62 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 63 Unused -->
   </entry>
-
   <entry>
-         <name>ATTR_BOOT_FLAGS</name>
-         <value>0x00000000</value>
+    <name>ATTR_PULSE_MODE_ENABLE</name>
+    <value>0x0</value>
   </entry>
-
+  <entry>
+    <name>ATTR_PULSE_MODE_VALUE</name>
+    <value>0x0</value>
+  </entry>
+  <entry>
+    <name>ATTR_SECTOR_BUFFER_STRENGTH</name>
+    <value>0x0</value>
+  </entry>
+  <!-- sampled: CBS status/control register -->
+  <entry>
+    <name>ATTR_SECURITY_ENABLE</name>
+    <value>0x0</value>
+  </entry>
+  <!-- sampled: mailbox 1, 2, 7 -->
+  <entry>
+    <!-- ATTR_PG will be calculated and written by HWP code, based on ATTR_PG_MVPD and -->
+    <!-- the gard information passed in via mailbox                                    -->
+    <name>ATTR_PG</name>
+    <value>0xFFFFFFFF</value> <!--  0 Unused -->
+    <value>0xFFFFFFFF</value> <!--  1 PERV   -->
+    <value>0xFFFFFFFF</value> <!--  2 N0     -->
+    <value>0xFFFFFFFF</value> <!--  3 N1     -->
+    <value>0xFFFFFFFF</value> <!--  4 Unused -->
+    <value>0xFFFFFFFF</value> <!--  5 Unused -->
+    <value>0xFFFFFFFF</value> <!--  6 Unused -->
+    <value>0xFFFFFFFF</value> <!--  7 Unused -->
+    <value>0xFFFFFFFF</value> <!--  8 PCI0   -->
+    <value>0xFFFFFFFF</value> <!--  9 PCI1   -->
+    <value>0xFFFFFFFF</value> <!-- 10 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 11 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 12 MC0    -->
+    <value>0xFFFFFFFF</value> <!-- 13 MC1    -->
+    <value>0xFFFFFFFF</value> <!-- 14 MC2    -->
+    <value>0xFFFFFFFF</value> <!-- 15 MC3    -->
+    <value>0xFFFFFFFF</value> <!-- 16 PAU0   -->
+    <value>0xFFFFFFFF</value> <!-- 17 PAU1   -->
+    <value>0xFFFFFFFF</value> <!-- 18 PAU2   -->
+    <value>0xFFFFFFFF</value> <!-- 19 PAU3   -->
+    <value>0xFFFFFFFF</value> <!-- 20 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 21 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 22 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 23 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 24 IOHS0  -->
+    <value>0xFFFFFFFF</value> <!-- 25 IOHS1  -->
+    <value>0xFFFFFFFF</value> <!-- 26 IOHS2  -->
+    <value>0xFFFFFFFF</value> <!-- 27 IOHS3  -->
+    <value>0xFFFFFFFF</value> <!-- 28 IOHS4  -->
+    <value>0xFFFFFFFF</value> <!-- 29 IOHS5  -->
+    <value>0xFFFFFFFF</value> <!-- 30 IOHS6  -->
+    <value>0xFFFFFFFF</value> <!-- 31 IOHS7  -->
+    <value>0xFFFFFFFF</value> <!-- 32 EQ0    -->
+    <value>0xFFFFFFFF</value> <!-- 33 EQ1    -->
+    <value>0xFFFFFFFF</value> <!-- 34 EQ2    -->
+    <value>0xFFFFFFFF</value> <!-- 35 EQ3    -->
+    <value>0xFFFFFFFF</value> <!-- 36 EQ4    -->
+    <value>0xFFFFFFFF</value> <!-- 37 EQ5    -->
+    <value>0xFFFFFFFF</value> <!-- 38 EQ6    -->
+    <value>0xFFFFFFFF</value> <!-- 39 EQ7    -->
+    <value>0xFFFFFFFF</value> <!-- 40 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 41 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 42 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 43 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 44 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 45 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 46 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 47 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 48 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 49 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 50 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 51 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 52 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 53 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 54 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 55 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 56 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 57 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 58 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 59 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 60 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 61 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 62 Unused -->
+    <value>0xFFFFFFFF</value> <!-- 63 Unused -->
+  </entry>
+  <entry>
+    <name>ATTR_CHIP_CONTAINED_ACTIVE_CORES_VEC</name>
+    <value>0x00000000</value>
+  </entry>
+  <!-- sampled: mailbox 3 -->
+  <entry>
+    <name>ATTR_BOOT_FLAGS</name>
+    <value>0x00000000</value>
+  </entry>
   <entry>
     <name>ATTR_IS_MPIPL</name>
     <value>0x00</value>
   </entry>
-
   <entry>
-    <name>ATTR_SYS_FORCE_ALL_CORES</name>
-    <value>0x00</value>
+    <name>ATTR_IS_SP_MODE</name>
+    <value>0x0</value>
   </entry>
-
+  <!-- sampled: mailbox 4 -->
+  <entry>
+    <name>ATTR_I2C_BUS_DIV_REF</name>
+    <value>0x00A4</value>
+  </entry>
+  <entry>
+    <name>ATTR_FREQ_CORE_BOOT_MHZ</name>
+    <value>0x07D0</value>
+  </entry>
+  <!-- sampled: mailbox 5 -->
+  <entry>
+    <name>ATTR_SYSTEM_IPL_PHASE</name>
+    <value>0x1</value>
+  </entry>
+  <entry>
+    <name>ATTR_CONTAINED_IPL_TYPE</name>
+    <value>0x0</value>
+  </entry>
+  <entry>
+    <name>ATTR_RUNN_MODE</name>
+    <value>0x0</value>
+  </entry>
+  <entry>
+    <name>ATTR_DISABLE_HBBL_VECTORS</name>
+    <value>0x0</value>
+  </entry>
+  <entry>
+    <name>ATTR_SBE_SELECT_EX_POLICY</name>
+    <value>0x0</value>
+  </entry>
+  <entry>
+    <name>ATTR_CLOCK_MUX_IOHS_LCPLL_INPUT</name>
+    <value>0x0</value>
+    <value>0x0</value>
+    <value>0x0</value>
+    <value>0x0</value>
+    <value>0x0</value>
+    <value>0x0</value>
+    <value>0x0</value>
+    <value>0x0</value>
+  </entry>
+  <entry>
+    <name>ATTR_CLOCK_MUX_PCI_LCPLL_INPUT</name>
+    <value>0x0</value>
+    <value>0x0</value>
+  </entry>
+  <!-- sampled: mailbox 6 -->
+  <entry>
+    <name>ATTR_CP_PLLTODFLT_BYPASS</name>
+    <value>0x0</value>
+  </entry>
+  <entry>
+    <name>ATTR_CP_PLLNESTFLT_BYPASS</name>
+    <value>0x0</value>
+  </entry>
+  <entry>
+    <name>ATTR_CP_PLLIOFLT_BYPASS</name>
+    <value>0x0</value>
+  </entry>
+  <entry>
+    <name>ATTR_CP_PLLIOSSFLT_BYPASS</name>
+    <value>0x0</value>
+  </entry>
+  <entry>
+    <name>ATTR_NEST_DPLL_BYPASS</name>
+    <value>0x0</value>
+  </entry>
+  <entry>
+    <name>ATTR_PAU_DPLL_BYPASS</name>
+    <value>0x0</value>
+  </entry>
+  <entry>
+    <name>ATTR_IO_TANK_PLL_BYPASS</name>
+    <value>0x0</value>
+  </entry>
+  <entry>
+    <name>ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID</name>
+    <value>0x0</value>
+  </entry>
+  <entry>
+    <name>ATTR_PROC_FABRIC_TOPOLOGY_MODE</name>
+    <value>0x0</value>
+  </entry>
+  <entry>
+    <name>ATTR_PROC_FABRIC_BROADCAST_MODE</name>
+    <value>0x0</value>
+  </entry>
   <entry>
     <name>ATTR_PROC_SBE_MASTER_CHIP</name>
     <value>0x01</value>
   </entry>
   <entry>
-    <name>ATTR_DISABLE_HBBL_VECTORS</name>
+    <name>ATTR_PROC_FABRIC_TOPOLOGY_ID</name>
+    <value>0x0</value>
+  </entry>
+  <entry>
+    <name>ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE</name>
+    <!-- Initialize all 32 entries to 0xFF (INVALID)           -->
+    <!-- will be updated on SBE platform based on topology IDs -->
+    <value>0xFF</value> <!-- 00 -->
+    <value>0xFF</value> <!-- 01 -->
+    <value>0xFF</value> <!-- 02 -->
+    <value>0xFF</value> <!-- 03 -->
+    <value>0xFF</value> <!-- 04 -->
+    <value>0xFF</value> <!-- 05 -->
+    <value>0xFF</value> <!-- 06 -->
+    <value>0xFF</value> <!-- 07 -->
+    <value>0xFF</value> <!-- 08 -->
+    <value>0xFF</value> <!-- 09 -->
+    <value>0xFF</value> <!-- 10 -->
+    <value>0xFF</value> <!-- 11 -->
+    <value>0xFF</value> <!-- 12 -->
+    <value>0xFF</value> <!-- 13 -->
+    <value>0xFF</value> <!-- 14 -->
+    <value>0xFF</value> <!-- 15 -->
+    <value>0xFF</value> <!-- 16 -->
+    <value>0xFF</value> <!-- 17 -->
+    <value>0xFF</value> <!-- 18 -->
+    <value>0xFF</value> <!-- 19 -->
+    <value>0xFF</value> <!-- 20 -->
+    <value>0xFF</value> <!-- 21 -->
+    <value>0xFF</value> <!-- 22 -->
+    <value>0xFF</value> <!-- 23 -->
+    <value>0xFF</value> <!-- 24 -->
+    <value>0xFF</value> <!-- 25 -->
+    <value>0xFF</value> <!-- 26 -->
+    <value>0xFF</value> <!-- 27 -->
+    <value>0xFF</value> <!-- 28 -->
+    <value>0xFF</value> <!-- 29 -->
+    <value>0xFF</value> <!-- 30 -->
+    <value>0xFF</value> <!-- 31 -->
+  </entry>
+  <!-- sampled: mailbox 9 -->
+  <entry>
+    <name>ATTR_FREQ_PAU_MHZ</name>
+    <value>0x07B0</value>
+  </entry>
+  <entry>
+    <name>ATTR_MC_PLL_BUCKET</name>
+    <value>0x0</value>
+    <value>0x0</value>
+    <value>0x0</value>
+    <value>0x0</value>
+  </entry>
+  <entry>
+    <name>ATTR_NDL_MESHCTRL_SETUP</name>
+    <value>0x0</value>
+  </entry>
+  <!-- sampled: mailbox 10 -->
+  <entry>
+    <name>ATTR_IOHS_PLL_BUCKET</name>
+    <value>0x0</value>
+    <value>0x0</value>
+    <value>0x0</value>
+    <value>0x0</value>
+    <value>0x0</value>
+    <value>0x0</value>
+    <value>0x0</value>
+    <value>0x0</value>
+  </entry>
+  <entry>
+    <name>ATTR_CHIP_CONTAINED_BACKING_CACHES_VEC</name>
+    <value>0x00000000</value>
+  </entry>
+  <!-- calculated attributes (p10_sbe_select_ex) -->
+  <entry>
+    <name>ATTR_ACTIVE_CORES_NUM</name>
     <value>0x1</value>
   </entry>
-
   <entry>
-      <!-- The values here are per pervasive chiplet in the order of the chiplet
-      numbers Bit 3 (in the 16-bit representation) is used to indicate
-      partial good. If this bit is 1, the region is bad, else it is good.
-      Bits 0,1,2 are don't care. For nimbus, pervasive chiplets 10 and 11 are
-      not used (OB1 and OB2), therefore the value for them is 0xFFFF -->
-            <name>ATTR_PG</name> <!-- As per SOA_SC model config of Nimbus chip-->
-            <value>0xFFFF</value> <!-- Unused -->
-            <value>0xE07D</value> <!-- PERV -->
-            <value>0xE03F</value> <!-- N0 -->
-            <value>0xE03F</value> <!-- N1 -->
-            <value>0xE03F</value> <!-- N2 -->
-            <value>0xE01F</value> <!-- N3 -->
-            <value>0xE44D</value> <!-- XB -->
-            <value>0xE1FD</value> <!-- MC01 -->
-            <value>0xE1FD</value> <!-- MC23 -->
-            <value>0xE1FD</value> <!-- OB0 -->
-            <value>0xFFFF</value> <!-- OB1 -->
-            <value>0xFFFF</value> <!-- OB2 -->
-            <value>0xE1FD</value> <!-- OB3 -->
-            <value>0xE1FD</value> <!-- PCI0 -->
-            <value>0xE0FD</value> <!-- PCI1 -->
-            <value>0xE07D</value> <!-- PCI2 -->
-            <value>0xE001</value> <!-- EP0 -->
-            <value>0xE001</value> <!-- EP1 -->
-            <value>0xE001</value> <!-- EP2 -->
-            <value>0xE289</value> <!-- EP3 -->
-            <value>0xE001</value> <!-- EP4 -->
-            <value>0xE001</value> <!-- EP5 -->
-            <value>0xFFFF</value> <!-- Unused -->
-            <value>0xFFFF</value> <!-- Unused -->
-            <value>0xFFFF</value> <!-- Unused -->
-            <value>0xFFFF</value> <!-- Unused -->
-            <value>0xFFFF</value> <!-- Unused -->
-            <value>0xFFFF</value> <!-- Unused -->
-            <value>0xFFFF</value> <!-- Unused -->
-            <value>0xFFFF</value> <!-- Unused -->
-            <value>0xFFFF</value> <!-- Unused -->
-            <value>0xFFFF</value> <!-- Unused -->
-            <value>0xE1FF</value> <!-- EC00 -->
-            <value>0xE1FF</value> <!-- EC01 -->
-            <value>0xE1FF</value> <!-- EC02 -->
-            <value>0xE1FF</value> <!-- EC03 -->
-            <value>0xE1FF</value> <!-- EC04 -->
-            <value>0xE1FF</value> <!-- EC05 -->
-            <value>0xE1FF</value> <!-- EC06 -->
-            <value>0xE1FF</value> <!-- EC07 -->
-            <value>0xE1FF</value> <!-- EC08 -->
-            <value>0xE1FF</value> <!-- EC09 -->
-            <value>0xE1FF</value> <!-- EC10 -->
-            <value>0xE1FF</value> <!-- EC11 -->
-            <value>0xE1FF</value> <!-- EC12 -->
-            <value>0xE1FF</value> <!-- EC13 -->
-            <value>0xE1FF</value> <!-- EC14 -->
-            <value>0xE1FF</value> <!-- EC15 -->
-            <value>0xE1FF</value> <!-- EC16 -->
-            <value>0xE1FF</value> <!-- EC17 -->
-            <value>0xE1FF</value> <!-- EC18 -->
-            <value>0xE1FF</value> <!-- EC19 -->
-            <value>0xE1FF</value> <!-- EC20 -->
-            <value>0xE1FF</value> <!-- EC21 -->
-            <value>0xE1FF</value> <!-- EC22 -->
-            <value>0xE1FF</value> <!-- EC23 -->
-            <value>0xFFFF</value> <!-- Unused -->
-            <value>0xFFFF</value> <!-- Unused -->
-            <value>0xFFFF</value> <!-- Unused -->
-            <value>0xFFFF</value> <!-- Unused -->
-            <value>0xFFFF</value> <!-- Unused -->
-            <value>0xFFFF</value> <!-- Unused -->
-            <value>0xFFFF</value> <!-- Unused -->
-            <value>0xFFFF</value> <!-- Unused -->
+    <name>ATTR_BACKING_CACHES_NUM</name>
+    <value>0x2</value>
   </entry>
   <entry>
-           <name>ATTR_SECURITY_ENABLE</name>
-           <value>0x0</value>
-  </entry>
-
-  <entry>
-        <name>ATTR_IS_SP_MODE</name>
-        <value>0x0</value>
-  </entry>
-
-  <entry>
-      <name>ATTR_BACKUP_SEEPROM_SELECT</name>
-      <value>0x0</value>
-  </entry>
-
-  <entry>
-       <name>ATTR_CP_REFCLOCK_SELECT</name>
-       <value>0x0</value>
-  </entry>
-
-  <entry>
-      <name>ATTR_PAU_DPLL_BYPASS</name>
-      <value>0x0</value>
-  </entry>
-
-  <entry>
-      <name>ATTR_FREQ_PAU_MHZ</name>
-      <value>0x00000960</value>
-  </entry>
-
-  <entry>
-      <name>ATTR_CP_PLLTODFLT_BYPASS</name>
-      <value>0x0</value>
-  </entry>
-
-  <entry>
-      <name>ATTR_CP_PLLNESTFLT_BYPASS</name>
-      <value>0x0</value>
-  </entry>
-
-  <entry>
-      <name>ATTR_CP_PLLIOFLT_BYPASS</name>
-      <value>0x0</value>
-  </entry>
-
-  <entry>
-      <name>ATTR_FREQ_CORE_BOOT_MHZ</name>
-      <value>0x0</value>
-  </entry>
-
-  <entry>
-      <name>ATTR_CP_PLLIOSSFLT_BYPASS</name>
-      <value>0x0</value>
+    <name>ATTR_ACTIVE_CORES_VEC</name>
+    <value>0x0</value>
   </entry>
   <entry>
-      <name>ATTR_NEST_DPLL_BYPASS</name>
-      <value>0x0</value>
+    <name>ATTR_BACKING_CACHES_VEC</name>
+    <value>0x0</value>
   </entry>
   <entry>
-      <name>ATTR_CLOCK_MUX15_IOHS0_LCPLL_INPUT</name>
-      <value>0x0</value>
+    <name>ATTR_MASTER_CORE</name>
+    <value>0x0</value>
+  </entry>
+  <!-- calculated attributes (p10_sbe_mcs_setup) -->
+  <entry>
+    <name>ATTR_PROC_SBE_MCS_SETUP_REG_STATES</name>
+    <value>0x0</value>
   </entry>
   <entry>
-      <name>ATTR_CLOCK_MUX16_IOHS1_LCPLL_INPUT</name>
-      <value>0x0</value>
+    <name>ATTR_PROC_SBE_MCS_SETUP_SELECTED_MC</name>
+    <value>0x0</value>
+  </entry>
+  <!-- calculated attributes (p10_sbe_load_bootloader) -->
+  <entry>
+    <name>ATTR_SBE_MASTER_HRMOR_ADDRESS</name>
+    <value>0x0</value>
+  </entry>
+  <!-- platinit attributes -->
+  <entry>
+    <name>ATTR_BACKUP_SEEPROM_SELECT</name>
+    <value>0x0</value>
   </entry>
   <entry>
-      <name>ATTR_CLOCK_MUX17_IOHS2_LCPLL_INPUT</name>
-      <value>0x0</value>
+    <name>ATTR_CP_REFCLOCK_SELECT</name>
+    <value>0x0</value>
   </entry>
   <entry>
-      <name>ATTR_CLOCK_MUX18_IOHS3_LCPLL_INPUT</name>
-      <value>0x0</value>
+    <name>ATTR_FUSED_CORE_MODE</name>
+    <value>0x0</value>
   </entry>
   <entry>
-      <name>ATTR_CLOCK_MUX19_IOHS4_LCPLL_INPUT</name>
-      <value>0x0</value>
+    <name>ATTR_MEM_MIRROR_PLACEMENT_POLICY</name>
+    <value>0x0</value>
   </entry>
   <entry>
-      <name>ATTR_CLOCK_MUX20_IOHS5_LCPLL_INPUT</name>
-      <value>0x0</value>
+    <name>ATTR_SMF_CONFIG</name>
+    <value>0x0</value>
   </entry>
   <entry>
-      <name>ATTR_CLOCK_MUX21_IOHS6_LCPLL_INPUT</name>
-      <value>0x0</value>
+    <name>ATTR_SBE_HBBL_EXCEPTION_INSTRUCT</name>
+    <value>0x48000000</value>
   </entry>
   <entry>
-      <name>ATTR_CLOCK_MUX22_IOHS7_LCPLL_INPUT</name>
-      <value>0x0</value>
+    <name>ATTR_HOSTBOOT_HRMOR_OFFSET</name>
+    <value>0x8000000</value>
   </entry>
   <entry>
-      <name>ATTR_CLOCK_MUX24_PCI0_LCPLL_INPUT</name>
-      <value>0x0</value>
+    <name>ATTR_PROC_XSCOM_BAR_BASE_ADDR_OFFSET</name>
+    <value>0x000003FC00000000</value>
   </entry>
   <entry>
-      <name>ATTR_CLOCK_MUX25_PCI1_LCPLL_INPUT</name>
-      <value>0x0</value>
+    <name>ATTR_PROC_LPC_BAR_BASE_ADDR_OFFSET</name>
+    <value>0x0000030000000000</value>
   </entry>
   <entry>
-      <name>ATTR_SECTOR_BUFFER_STRENGTH</name>
-      <value>0x0</value>
+    <name>ATTR_SBE_BOOTLOADER_OFFSET</name>
+    <value>0x200000</value>
   </entry>
   <entry>
-      <name>ATTR_MC_PLL</name>
-      <value>0x0</value>
+    <name>ATTR_SBE_BOOT_SIDE</name>
+    <value>0x0</value>
   </entry>
   <entry>
-      <name>ATTR_IOHS_PLL</name>
-      <value>0x0</value>
+    <name>ATTR_PNOR_BOOT_SIDE</name>
+    <value>0x0</value>
   </entry>
   <entry>
-      <name>ATTR_PULSE_MODE_ENABLE</name>
-      <value>0x0</value>
+    <name>ATTR_PNOR_SIZE</name>
+    <value>0x0</value>
   </entry>
   <entry>
-      <name>ATTR_PULSE_MODE_VALUE</name>
-      <value>0x0</value>
+    <name>ATTR_SECURE_SETTINGS</name>
+    <value>0x0</value>
   </entry>
   <entry>
-      <name>ATTR_IO_TANK_PLL_BYPASS</name>
-      <value>0x0</value>
+    <name>ATTR_LPC_CONSOLE_INITIALIZED</name>
+    <value>0x0</value>
   </entry>
   <entry>
-      <name>ATTR_PROC_FABRIC_TOPOLOGY_ID</name>
-      <value>0x0</value>
+    <name>ATTR_SBE_ADDR_KEY_STASH_ADDR</name>
+    <value>0x0</value>
   </entry>
   <entry>
-      <name>ATTR_PROC_FABRIC_TOPOLOGY_MODE</name>
-      <value>0x0</value>
+    <name>ATTR_NUM_KEY_ADDR_PAIR</name>
+    <value>0x0</value>
   </entry>
+  <!-- virtual attributes -->
   <entry>
-      <name>ATTR_ACTIVE_CORES_VEC</name>
-      <value>0x0</value>
+    <name>ATTR_CHIP_UNIT_POS</name>
+    <virtual/>
   </entry>
-  <entry>
-      <name>ATTR_FUSED_CORE_MODE</name>
-      <value>0x0</value>
-  </entry>
-  <entry>
-      <name>ATTR_ACTIVE_CORES_NUM</name>
-      <value>0x0</value>
-  </entry>
-  <entry>
-      <name>ATTR_BACKING_CACHES_NUM</name>
-      <value>0x0</value>
-  </entry>
-  <entry>
-      <name>ATTR_MASTER_CORE</name>
-      <value>0x0</value>
-  </entry>
-  <entry>
-      <name>ATTR_BACKING_CACHES_VEC</name>
-      <value>0x0</value>
-  </entry>
-  <entry>
-      <name>ATTR_IOHS_PLL_BUCKET</name>
-      <value>0x0</value>
-  </entry>
-  <entry>
-      <name>ATTR_MC_PLL_BUCKET</name>
-      <value>0x0</value>
-  </entry>
-  <entry>
-      <name>ATTR_PROC_FABRIC_BROADCAST_MODE</name>
-      <value>0x0</value>
-  </entry>
-  <entry>
-      <name>ATTR_SYSTEM_IPL_PHASE</name>
-      <value>0x1</value>
-  </entry>
-  <entry>
-      <name>ATTR_SMF_CONFIG</name>
-      <value>0x0</value>
-  </entry>
-  <entry>
-      <name>ATTR_PROC_XSCOM_BAR_BASE_ADDR_OFFSET</name>
-      <value>0x0</value>
-  </entry>
-  <entry>
-      <name>ATTR_PROC_LPC_BAR_BASE_ADDR_OFFSET</name>
-      <value>0x0</value>
-  </entry>
-  <entry>
-      <name>ATTR_MEM_MIRROR_PLACEMENT_POLICY</name>
-      <value>0x0</value>
-  </entry>
-  <entry>
-      <name>ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID</name>
-      <value>0x0</value>
-  </entry>
-
-  <entry>
-      <name>ATTR_SBE_HBBL_EXCEPTION_INSTRUCT</name>
-      <value>0x0</value>
-  </entry>
-  <entry>
-     <name>ATTR_HOSTBOOT_HRMOR_OFFSET</name>
-     <value>0x0</value>
-  </entry>
-  <entry>
-      <name>ATTR_SBE_BOOTLOADER_OFFSET</name>
-      <value>0x0</value>
-  </entry>
- <entry>
-      <name>ATTR_SBE_BOOT_SIDE</name>
-      <value>0x0</value>
-  </entry>
- <entry>
-      <name>ATTR_LPC_CONSOLE_INITIALIZED</name>
-      <value>0x0</value>
-  </entry>
- <entry>
-      <name>ATTR_SECURE_SETTINGS</name>
-      <value>0x0</value>
-  </entry>
- <entry>
-      <name>ATTR_SBE_ADDR_KEY_STASH_ADDR</name>
-      <value>0x0</value>
- </entry>
- <entry>
-      <name>ATTR_PROC_SBE_MCS_SETUP_REG_STATES</name>
-      <value>0x0</value>
- </entry>
- <entry>
-      <name>ATTR_PROC_SBE_MCS_SETUP_SELECTED_MC</name>
-      <value>0x0</value>
- </entry>
- <entry>
-      <name>ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE</name>
-      <!-- Initialize all 32 entries to 0xff (INVALID) -->
-      <value>0xff</value> <!-- 00 -->
-      <value>0xff</value> <!-- 01 -->
-      <value>0xff</value> <!-- 02 -->
-      <value>0xff</value> <!-- 03 -->
-      <value>0xff</value> <!-- 04 -->
-      <value>0xff</value> <!-- 05 -->
-      <value>0xff</value> <!-- 06 -->
-      <value>0xff</value> <!-- 07 -->
-      <value>0xff</value> <!-- 08 -->
-      <value>0xff</value> <!-- 09 -->
-      <value>0xff</value> <!-- 10 -->
-      <value>0xff</value> <!-- 11 -->
-      <value>0xff</value> <!-- 12 -->
-      <value>0xff</value> <!-- 13 -->
-      <value>0xff</value> <!-- 14 -->
-      <value>0xff</value> <!-- 15 -->
-      <value>0xff</value> <!-- 16 -->
-      <value>0xff</value> <!-- 17 -->
-      <value>0xff</value> <!-- 18 -->
-      <value>0xff</value> <!-- 19 -->
-      <value>0xff</value> <!-- 20 -->
-      <value>0xff</value> <!-- 21 -->
-      <value>0xff</value> <!-- 22 -->
-      <value>0xff</value> <!-- 23 -->
-      <value>0xff</value> <!-- 24 -->
-      <value>0xff</value> <!-- 25 -->
-      <value>0xff</value> <!-- 26 -->
-      <value>0xff</value> <!-- 27 -->
-      <value>0xff</value> <!-- 28 -->
-      <value>0xff</value> <!-- 29 -->
-      <value>0xff</value> <!-- 30 -->
-      <value>0xff</value> <!-- 31 -->
- </entry>
- <entry>
-      <name>ATTR_NUM_KEY_ADDR_PAIR</name>
-      <value>0x0</value>
- </entry>
- <entry>
-      <name>ATTR_SBE_MASTER_HRMOR_ADDRESS</name>
-      <value>0x0</value>
- </entry>
 </entries>
