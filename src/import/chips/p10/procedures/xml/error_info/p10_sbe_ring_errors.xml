@@ -1,0 +1,150 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p10/procedures/xml/error_info/p10_sbe_ring_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<hwpErrors>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_RS4_BAD_RING_TYPE</rc>
+    <description>RS4 container is populated with incorrect ring type</description>
+    <ffdc>RING_TYPE</ffdc>
+    <ffdc>RING_ID</ffdc>
+    <ffdc>INPUT_OVERRIDE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_INVALID_RING_SECTION</rc>
+    <description>Invalid offset to ring section in image header</description>
+    <ffdc>RING_OFFSET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_INVALID_RING_CHIPLET_SECTION</rc>
+    <description>Invalid offset to chiplet level TOR in ring section</description>
+    <ffdc>TOR_MAGIC_WORD</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_INVALID_TOR_VERSION</rc>
+    <description>Invalid value of TOR version in TOR header</description>
+    <ffdc>TOR_VER</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_INVALID_RING_ID</rc>
+    <description>Ring id passed is incorrect or unknown</description>
+    <ffdc>RING_ID</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P10_PUTRING_CHECKWORD_DATA_MISMATCH</rc>
+    <description>putring failed due to checkword mismatch</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>CHIPLET_ID</ffdc>
+    <ffdc>SCOM_ADDRESS</ffdc>
+    <ffdc>SCOM_DATA</ffdc>
+    <ffdc>BITS_DECODED</ffdc>
+    <ffdc>RING_ID</ffdc>
+    <ffdc>RINGMODE</ffdc>
+    <ffdc>RETURN_CODE</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>TARGET</target>
+    </gard>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P10_PUTRING_OPCG_DONE_TIMEOUT</rc>
+    <description>putring failed due to opcg done timeout</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>CHIPLET_ID</ffdc>
+    <ffdc>SCOM_ADDRESS</ffdc>
+    <ffdc>SCOM_DATA</ffdc>
+    <ffdc>ROTATE_COUNT</ffdc>
+    <ffdc>RING_ID</ffdc>
+    <ffdc>RETURN_CODE</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>TARGET</target>
+    </gard>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P10_PARALLEL_SCAN_COMPARE_ERR</rc>
+    <description>Putring failed to complete parallel scanning</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>CHIPLET_ID</ffdc>
+    <ffdc>RING_ID</ffdc>
+    <ffdc>CPLT_STAT0</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+  <sbeError/>
+  <rc>RC_FAPI2_RC_INVALID_PARAMETER</rc>
+  <description>Invalid parameter passed for scanning</description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+  <sbeError/>
+  <rc>RC_TOR_TRAVERSAL_ERROR</rc>
+  <description>TOR Traversal led to incorrect ring</description>
+   <ffdc>ACTUAL_RING_ID</ffdc>
+   <ffdc>EXPECTED_RING_ID</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+</hwpErrors>
