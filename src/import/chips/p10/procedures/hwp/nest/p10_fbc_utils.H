@@ -29,9 +29,9 @@
 /// The functions in this file provide:
 /// - Information about the instantaneous state of the fabric
 /// - Means to restart the fabric after a checkstop condition
-///
-/// TODO:
 /// - Determination of the chip's base address in the real address map
+/// - Ability to set all instances of a fabric racetrack scom
+/// - Extraction of group/chip bits from a topology id
 ///
 /// @author Joe McGill <jmcgill@us.ibm.com>
 ///
@@ -58,31 +58,41 @@ enum p10_fbc_utils_addr_mode
     HB_BOOT_ID        // address 0 of drawer
 };
 
+//------------------------------------------------------------------------------
+// Constant definitions
+//------------------------------------------------------------------------------
 #ifndef __PPE_QME
-    //------------------------------------------------------------------------------
-    // Constant definitions
-    //------------------------------------------------------------------------------
+// address range definitions
+const uint64_t P10_FBC_UTILS_FBC_MAX_ADDRESS = ((1ULL << 56) - 1ULL);
+const uint64_t P10_FBC_UTILS_CACHELINE_MASK = 0x7FULL;
+const uint64_t P10_FBC_UTILS_LAST_ADDR_IN_CACHELINE = 0x78ULL;
 
-    // address range definitions
-    const uint64_t P10_FBC_UTILS_FBC_MAX_ADDRESS = ((1ULL << 56) - 1ULL);
-    const uint64_t P10_FBC_UTILS_CACHELINE_MASK = 0x7FULL;
-    const uint64_t P10_FBC_UTILS_LAST_ADDR_IN_CACHELINE = 0x78ULL;
+// cacheline size = 128B
+const uint64_t FABRIC_CACHELINE_SIZE = 0x80;
 
-    // cacheline size = 128B
-    const uint64_t FABRIC_CACHELINE_SIZE = 0x80;
+// fbc racetrack stations
+const uint8_t FABRIC_NUM_STATIONS = 16;
 
-    // fbc racetrack stations
-    const uint8_t FABRIC_NUM_STATIONS = 16;
+// max memory interleave = 16TB
+const uint64_t MAX_INTERLEAVE_GROUP_SIZE = 0x0000100000000000ULL;
 
-    // max memory interleave = 16TB
-    const uint64_t MAX_INTERLEAVE_GROUP_SIZE = 0x0000100000000000ULL;
+// fbc base address determination constants
+const uint8_t FABRIC_ADDR_SMF_BIT = 12;
+const uint8_t FABRIC_ADDR_MSEL_START_BIT = 13;
+const uint8_t FABRIC_ADDR_MSEL_END_BIT = 14;
+const uint8_t FABRIC_ADDR_TOPO_ID_INDEX_START_BIT = 15;
+const uint8_t FABRIC_ADDR_TOPO_ID_INDEX_END_BIT = 19;
 
-    // fbc base address determination constants
-    const uint8_t FABRIC_ADDR_SMF_BIT = 12;
-    const uint8_t FABRIC_ADDR_MSEL_START_BIT = 13;
-    const uint8_t FABRIC_ADDR_MSEL_END_BIT = 14;
-    const uint8_t FABRIC_ADDR_TOPO_ID_INDEX_START_BIT = 15;
-    const uint8_t FABRIC_ADDR_TOPO_ID_INDEX_END_BIT = 19;
+// smp configuration definitions
+const uint8_t P10_FBC_UTILS_MAX_LINKS = 8;
+
+// phase1 used to init scope of hbi drawer, call from hb
+// phase2 used to stitch drawers, call from fsp
+enum p10_build_smp_operation
+{
+    SMP_ACTIVATE_PHASE1 = 1,
+    SMP_ACTIVATE_PHASE2 = 2
+};
 #endif // !__PPE_QME
 
 //------------------------------------------------------------------------------
@@ -105,21 +115,6 @@ fapi2::ReturnCode get_topology_idx(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const p10_fbc_utils_addr_mode& i_addr_mode,
     uint8_t& o_topology_idx);
-
-///
-/// @brief Look-up the topology id in the topology id table at the passed in
-///        5b index.
-///        Note: see p10_fbc_utils_get_topology_idx
-/// @param[in] i_target         Reference to processor chip target
-/// @param[in] o_topology_idx   5b index into the topology id table
-/// @param[out] o_topology_id   4b topology id from topology id table
-/// @return fapi::ReturnCode    FAPI2_RC_SUCCESS on success, FAPI2_RC_FALSE if
-///                             the topology id is INVALID in the table
-///
-fapi2::ReturnCode get_topology_id(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const uint8_t& i_topology_idx,
-    fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID_Type& o_topology_id);
 
 ///
 /// @brief Initialize chip's entry in the topology id table.
@@ -181,7 +176,7 @@ fapi2::ReturnCode p10_fbc_utils_override_fbc_stop(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
 ///
-///@brief Dynamically determine base address for a given chip
+/// @brief Dynamically determine base address for a given chip
 ///
 /// @param[in] i_target             Reference to processor chip target
 /// @param[in] i_addr_mode          HB_BOOT_ID or EFF_TOPOLOGY_ID (chip 0 of
@@ -201,7 +196,7 @@ fapi2::ReturnCode p10_fbc_utils_get_chip_base_address(
     uint64_t& o_base_address_mmio);
 
 ///
-///@brief Write to all instances of a given racetrack scom register
+/// @brief Write to all instances of a given racetrack scom register
 ///
 /// @param[in] i_target             Reference to processor chip target
 /// @param[in] i_scom_addr          Scom address for EQ0 instance of racetrack regs
@@ -212,6 +207,19 @@ fapi2::ReturnCode p10_fbc_utils_set_racetrack_regs(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const uint64_t i_scom_addr,
     const uint64_t i_scom_data);
+
+///
+/// @brief Extract group/chip bits from fabric topology ID based on topology mode
+///
+/// @param[in]  i_target                Reference to processor chip target
+/// @param[out] o_topology_group_id     Topology ID group bits, right-aligned
+/// @param[out] o_topology_chip_id      Topology ID chip bits, right-aligned
+/// @return fapi2::ReturnCode           FAPI2_RC_SUCCESS if success, else error
+///
+fapi2::ReturnCode p10_fbc_utils_get_topology_id(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    uint8_t& o_topology_group_id,
+    uint8_t& o_topology_chip_id);
 
 #endif // !__PPE_QME
 #endif // _P10_FBC_UTILS_H_

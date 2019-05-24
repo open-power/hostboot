@@ -192,15 +192,13 @@ fapi2::ReturnCode init_topology_id_table(
     FAPI_TRY(get_topology_idx(i_target, EFF_TOPOLOGY_ID, l_topo_idx));
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID, i_target, l_topo_id));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE, i_target,
-                           l_topo_tbl));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE, i_target, l_topo_tbl));
 
     l_topo_tbl[l_topo_idx] = l_topo_id;
 
     FAPI_DBG("Set topology id table[%zu]=%02x", l_topo_idx, l_topo_id);
 
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE, i_target,
-                           l_topo_tbl));
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE, i_target, l_topo_tbl));
 
 fapi_try_exit:
     FAPI_DBG("exit");
@@ -232,8 +230,7 @@ fapi2::ReturnCode get_topology_table_scoms(
     fapi2::buffer<uint64_t> regval;
     fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE_Type l_topo_tbl;
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE, i_target,
-                           l_topo_tbl));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE, i_target, l_topo_tbl));
 
     l_topo_tbl_len = sizeof(l_topo_tbl) / sizeof(l_topo_tbl[0]);
 
@@ -255,15 +252,13 @@ fapi2::ReturnCode get_topology_table_scoms(
 
             if (val == fapi2::ENUM_ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE_INVALID)
             {
-                FAPI_DBG("Skipped TOPOLOGY_ID_TABLE[%02zu]=INVALID regval=%016llx",
-                         idx, regval);
+                FAPI_DBG("Skipped TOPOLOGY_ID_TABLE[%02zu]=INVALID regval=%016llx", idx, regval);
                 continue;
             }
 
             set_topo_scom(i_target, VALID, j, 1, regval);
             set_topo_scom(i_target, ENTRY, j, val, regval);
-            FAPI_DBG("Set     TOPOLOGY_ID_TABLE[%02zu]=%02x      regval=%016llx",
-                     idx, val, regval);
+            FAPI_DBG("Set     TOPOLOGY_ID_TABLE[%02zu]=%02x      regval=%016llx", idx, val, regval);
         }
 
         o_topology_id_table_scoms.push_back(regval);
@@ -411,6 +406,44 @@ fapi2::ReturnCode p10_fbc_utils_set_racetrack_regs(
     {
         FAPI_TRY(putScom(i_target, i_scom_addr + (station << 6), i_scom_data),
                  "Error from writing to racetrack scom register (station %d)", station);
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+////////////////////////////////////////////////////////
+// p10_fbc_utils_get_topology_id
+////////////////////////////////////////////////////////
+fapi2::ReturnCode p10_fbc_utils_get_topology_id(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    uint8_t& o_topology_group_id,
+    uint8_t& o_topology_chip_id)
+{
+    FAPI_DBG("Start");
+
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+
+    fapi2::ATTR_PROC_FABRIC_TOPOLOGY_MODE_Type l_topology_mode;
+    fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID_Type l_topology_id;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_TOPOLOGY_MODE, FAPI_SYSTEM, l_topology_mode),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_TOPOLOGY_MODE)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID, i_target, l_topology_id),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_TOPOLOGY_ID)");
+
+    if(l_topology_mode == fapi2::ENUM_ATTR_PROC_FABRIC_TOPOLOGY_MODE_MODE0)
+    {
+        // MODE0 = GGG_C format
+        o_topology_group_id = (l_topology_id >> 1) & 0x07;
+        o_topology_chip_id  = (l_topology_id & 0x01);
+    }
+    else
+    {
+        // MODE1 = GG_CC format
+        o_topology_group_id = (l_topology_id >> 2) & 0x03;
+        o_topology_chip_id  = (l_topology_id & 0x03);
     }
 
 fapi_try_exit:
