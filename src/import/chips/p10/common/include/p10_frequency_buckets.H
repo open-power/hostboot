@@ -22,10 +22,41 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// to be built into unsigned HW image
 
 #ifndef _P10_FREQUENCY_BUCKETS_H_
 #define _P10_FREQUENCY_BUCKETS_H_
 
+// constant defining number of MEM PLL frequency options ('buckets')
+// to be built into unsigned HW image
+const uint8_t MEM_PLL_FREQ_BUCKETS = 5;
+
+// MEM PLL frequency in MHz
+// index is bucket number
+const uint32_t MEM_PLL_FREQ_LIST[MEM_PLL_FREQ_BUCKETS] =
+{
+    1200,
+    1333,
+    1466,
+    1600,
+    2000,
+};
+
+// constant definining number of IOHS PLL frequency options ('buckets')
+// to be built into unsigned HW image
+const uint8_t IOHS_PLL_FREQ_BUCKETS = 8;
+
+// IOHS PLL frequency in MHz
+// index is bucket number
+const uint32_t IOHS_PLL_FREQ_LIST[IOHS_PLL_FREQ_BUCKETS] =
+{
+    1250,
+    1563,
+    1611,
+    1992,
+    2000,
+    2067,
+    2070,
+    0
+};
 
 #endif // _P10_FREQUENCY_BUCKETS_H_

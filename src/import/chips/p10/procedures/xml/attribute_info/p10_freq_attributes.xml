@@ -134,17 +134,7 @@
   </description>
   <valueType>uint32</valueType>
   <platInit/>
-</attribute>
-<!-- ********************************************************************** -->
-<attribute>
-  <id>ATTR_FREQ_CORE_BOOT_MULT</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>
-    Core boot frequency multiplier
-  </description>
-  <valueType>uint16</valueType>
   <writeable/>
-  <platInit/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -159,25 +149,31 @@
   <valueType>uint32</valueType>
   <enum>
     1333 = 1333,
-    1600 = 1600
+    1467 = 1467,
+    1600 = 1600,
+    2000 = 2000
   </enum>
   <platInit/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
   <id>ATTR_FREQ_IOHS_MHZ</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <targetType>TARGET_TYPE_IOHS</targetType>
   <description>
     The frequency of a processor's IOHS mesh clocks, in MHz.
     This can be set differently on a by-link basis.
   </description>
   <valueType>uint32</valueType>
   <enum>
+    1250 = 1250,
+    1563 = 1563,
     1611 = 1611,
-    2060 = 2060
+    1992 = 1992,
+    2000 = 2000,
+    2067 = 2067,
+    2070 = 2070
   </enum>
   <platInit/>
-  <array>8</array>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -189,14 +185,6 @@
     Provided by the MRW.
   </description>
   <valueType>uint32</valueType>
-  <platInit/>
-</attribute>
-<!-- ********************************************************************** -->
-<attribute>
-  <id>ATTR_FREQ_PAU_MULT</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>PAU frequency multiplier</description>
-  <valueType>uint16</valueType>
   <platInit/>
   <writeable/>
 </attribute>
