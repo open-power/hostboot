@@ -37,7 +37,7 @@ $imgBase =~ s/.*\///;
 
 my $PREFIX = $ENV{'CROSS_PREFIX'};
 my $address = hex `${PREFIX}nm $src -C | grep $imageIdSym | colrm 17`;
-my $imageId = $ENV{'HOSTBOOT_VERSION'};
+my $imageId = $ENV{'HOSTBOOT_IMAGEID'};
 if ($imageId eq '')
 {
     $imageId = $ENV{'HOSTBOOT_P8_VERSION'};
