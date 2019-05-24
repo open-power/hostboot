@@ -38,7 +38,7 @@
 
 #include <fapi2.H>
 #include <cstdint>
-#include <generic/memory/lib/utils/dimm/kind.H>
+#include <lib/dimm/nimbus_kind.H>
 
 namespace mss
 {

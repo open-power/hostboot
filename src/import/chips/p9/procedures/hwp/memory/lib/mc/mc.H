@@ -41,7 +41,7 @@
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
 #include <lib/mss_attribute_accessors.H>
-#include <generic/memory/lib/utils/dimm/kind.H>
+#include <lib/dimm/nimbus_kind.H>
 #include <lib/shared/mss_const.H>
 #include <generic/memory/lib/utils/scom.H>
 

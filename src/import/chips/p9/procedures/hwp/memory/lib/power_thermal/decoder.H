@@ -37,7 +37,7 @@
 
 #include <fapi2.H>
 #include <lib/shared/mss_const.H>
-#include <generic/memory/lib/utils/dimm/kind.H>
+#include <lib/dimm/nimbus_kind.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/utils/power_thermal/gen_decoder.H>
 

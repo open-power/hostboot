@@ -44,7 +44,7 @@
 #include <lib/shared/mss_const.H>
 #include <generic/memory/lib/utils/scom.H>
 #include <generic/memory/lib/utils/c_str.H>
-#include <generic/memory/lib/utils/dimm/kind.H>
+#include <lib/dimm/nimbus_kind.H>
 
 namespace mss
 {

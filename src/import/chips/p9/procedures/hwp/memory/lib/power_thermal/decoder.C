@@ -46,7 +46,7 @@
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/utils/power_thermal/gen_decoder.H>
-#include <generic/memory/lib/utils/dimm/kind.H>
+#include <lib/dimm/nimbus_kind.H>
 
 
 namespace mss

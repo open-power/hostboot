@@ -47,6 +47,7 @@
 #include <generic/memory/lib/utils/buffer_ops.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/mss_generic_system_attribute_getters.H>
+#include <generic/memory/lib/mss_generic_attribute_getters.H>
 
 namespace mss
 {
@@ -600,6 +601,7 @@ fapi2::ReturnCode setup_mc_config1_helper(const fapi2::Target<T>& i_target)
     fapi2::buffer<uint64_t> l_val;
 
     uint8_t l_sim = 0;
+    uint8_t l_edpl_disable = 0;
     FAPI_TRY( mss::attr::get_is_simulation( l_sim) );
 
     // CFG_DL0_CFG1_PREIPL_PRBS
@@ -687,7 +689,8 @@ fapi2::ReturnCode setup_mc_config1_helper(const fapi2::Target<T>& i_target)
                    TT::MC_REG2_DL0_CONFIG1_CFG_EDPL_THRESHOLD_LEN>(EDPL_ERR_THRES_16);
 
     // CFG_DL0_EDPL_ENA: dl0 error detection per lane "edpl" enable
-    l_val.template writeBit<TT::MC_REG2_DL0_CONFIG1_CFG_EDPL_ENA>(1);
+    FAPI_TRY(mss::attr::get_mss_omi_edpl_disable(l_edpl_disable));
+    l_val.template writeBit<TT::MC_REG2_DL0_CONFIG1_CFG_EDPL_ENA>(l_edpl_disable ? 0 : 1);
 
     FAPI_TRY( mss::putScom(i_target, TT::MC_REG2_DL0_CONFIG1, l_val) );
 

@@ -46,7 +46,7 @@
 #include <lib/mc/port.H>
 #include <lib/utils/mss_nimbus_conversions.H>
 #include <lib/utils/bit_count.H>
-#include <generic/memory/lib/utils/dimm/kind.H>
+#include <lib/dimm/nimbus_kind.H>
 #include <lib/mcbist/mcbist_traits.H>
 #include <generic/memory/lib/utils/num.H>
 #include <generic/memory/lib/utils/poll.H>
