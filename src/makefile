@@ -266,6 +266,7 @@ TESTCASE_MODULES += $(if $(CONFIG_EARLY_TESTCASES) && $(FSP_BUILD) ,,testnvram)
 TESTCASE_MODULES += $(if $(CONFIG_AXONE_BRING_UP),,testsmf)
 TESTCASE_MODULES += testexpaccess
 TESTCASE_MODULES += testexpupd
+TESTCASE_MODULES += testmmio
 
 #******************************************************************
 #KNOWN ISSUES (I might let these run but there is something wrong)
