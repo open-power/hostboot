@@ -38,7 +38,7 @@
 <registerFfdc>
   <id>REG_FFDC_ADU_FBC_NOT_INITIALIZED</id>
   <scomRegister>scomt::proc::TP_TPBR_AD_SND_MODE_REG</scomRegister>
-  <scomRegister>scomt::proc::PB_COM_ES3_MODE</scomRegister>
+  <scomRegister>scomt::proc::PB_COM_SCOM_ES3_STATION_MODE</scomRegister>
   <scomRegister>scomt::perv::ATTN_INTERRUPT_REG</scomRegister>
 </registerFfdc>
 <!-- ******************************************************************** -->
