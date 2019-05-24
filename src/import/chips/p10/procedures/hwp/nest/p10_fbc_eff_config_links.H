@@ -40,7 +40,12 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <fapi2.H>
+#include <p10_fbc_utils.H>
 //#include <p10_build_smp.H>
+
+//------------------------------------------------------------------------------
+// Constants definitions
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 // Structure definitions
@@ -49,9 +54,7 @@
 /// function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p10_fbc_eff_config_links_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
-    //p10_build_smp_operation,
-    bool,
-    bool);
+    p10_build_smp_operation);
 
 //------------------------------------------------------------------------------
 // Function prototypes
@@ -65,20 +68,12 @@ extern "C"
 ///
 /// @param[in] i_target              Reference to processor chip target
 /// @param[in] i_op                  Enumerated type representing SMP build phase (HB or FSP)
-/// @param[in] i_process_electrical  Process electrical links?
-///                                  NOTE: TRUE if XBUS links should be
-///                                        processed in this invocation context
-/// @param[in] i_process_optical     Process optical links?
-///                                  NOTE: TRUE if OBUS links should be
-///                                        processed in this invocation context
 ///
 /// @return fapi2:ReturnCode         FAPI2_RC_SUCCESS if success, else error code.
 ///
     fapi2::ReturnCode p10_fbc_eff_config_links(
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-        //p10_build_smp_operation i_op,
-        bool i_process_electrical,
-        bool i_process_optical);
+        p10_build_smp_operation i_op);
 
 } // extern "C"
 
