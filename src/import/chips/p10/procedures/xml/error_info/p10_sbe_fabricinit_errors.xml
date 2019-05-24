@@ -26,7 +26,7 @@
 <!-- ******************************************************************** -->
 <registerFfdc>
   <id>REG_FFDC_SBE_FABRICINIT</id>
-  <scomRegister>scomt::proc::PB_COM_ES3_MODE</scomRegister>
+  <scomRegister>scomt::proc::PB_COM_SCOM_ES3_STATION_MODE</scomRegister>
   <scomRegister>scomt::proc::TP_TPBR_AD_SND_MODE_REG</scomRegister>
 </registerFfdc>
 <!-- ******************************************************************** -->
