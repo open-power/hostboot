@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,6 +44,7 @@ constexpr uint64_t literal_0x200 = 0x200;
 constexpr uint64_t literal_0x300 = 0x300;
 constexpr uint64_t literal_0xFFF = 0xFFF;
 constexpr uint64_t literal_0x8 = 0x8;
+constexpr uint64_t literal_0x7E = 0x7E;
 constexpr uint64_t literal_0x0 = 0x0;
 constexpr uint64_t literal_0xE000000000000000 = 0xE000000000000000;
 constexpr uint64_t literal_0x0000740000000000 = 0x0000740000000000;
@@ -70,7 +71,6 @@ constexpr uint64_t literal_0x66 = 0x66;
 constexpr uint64_t literal_0b01 = 0b01;
 constexpr uint64_t literal_0x67 = 0x67;
 constexpr uint64_t literal_0x4B = 0x4B;
-constexpr uint64_t literal_0x7E = 0x7E;
 constexpr uint64_t literal_0x009A48180F63FFFF = 0x009A48180F63FFFF;
 constexpr uint64_t literal_0x009A48180F03FFFF = 0x009A48180F03FFFF;
 constexpr uint64_t literal_0x8005000200100000 = 0x8005000200100000;
@@ -130,6 +130,16 @@ fapi2::ReturnCode p9_npu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                 FAPI_TRY(fapi2::getScom( TGT0, 0x3011c00ull, l_scom_buffer ));
 
                 l_scom_buffer.insert<3, 1, 63, uint64_t>(literal_0b0 );
+
+                if ((l_def_NVLINK_ACTIVE == literal_1))
+                {
+                    l_scom_buffer.insert<26, 1, 63, uint64_t>(literal_0x1 );
+                }
+
+                if (literal_1)
+                {
+                    l_scom_buffer.insert<6, 1, 63, uint64_t>(literal_0x1 );
+                }
 
                 if ((l_def_NVLINK_ACTIVE == literal_1))
                 {
@@ -218,6 +228,16 @@ fapi2::ReturnCode p9_npu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
 
                 if ((l_def_NVLINK_ACTIVE == literal_1))
                 {
+                    l_scom_buffer.insert<26, 1, 63, uint64_t>(literal_0x1 );
+                }
+
+                if (literal_1)
+                {
+                    l_scom_buffer.insert<6, 1, 63, uint64_t>(literal_0x1 );
+                }
+
+                if ((l_def_NVLINK_ACTIVE == literal_1))
+                {
                     l_scom_buffer.insert<32, 1, 63, uint64_t>(literal_0x1 );
                 }
 
@@ -303,6 +323,16 @@ fapi2::ReturnCode p9_npu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
 
                 if ((l_def_NVLINK_ACTIVE == literal_1))
                 {
+                    l_scom_buffer.insert<26, 1, 63, uint64_t>(literal_0x1 );
+                }
+
+                if (literal_1)
+                {
+                    l_scom_buffer.insert<6, 1, 63, uint64_t>(literal_0x1 );
+                }
+
+                if ((l_def_NVLINK_ACTIVE == literal_1))
+                {
                     l_scom_buffer.insert<32, 1, 63, uint64_t>(literal_0x1 );
                 }
 
@@ -385,6 +415,16 @@ fapi2::ReturnCode p9_npu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                 FAPI_TRY(fapi2::getScom( TGT0, 0x3011d20ull, l_scom_buffer ));
 
                 l_scom_buffer.insert<3, 1, 63, uint64_t>(literal_0b0 );
+
+                if ((l_def_NVLINK_ACTIVE == literal_1))
+                {
+                    l_scom_buffer.insert<26, 1, 63, uint64_t>(literal_0x1 );
+                }
+
+                if (literal_1)
+                {
+                    l_scom_buffer.insert<6, 1, 63, uint64_t>(literal_0x1 );
+                }
 
                 if ((l_def_NVLINK_ACTIVE == literal_1))
                 {
@@ -553,6 +593,32 @@ fapi2::ReturnCode p9_npu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                 }
 
                 FAPI_TRY(fapi2::putScom(TGT0, 0x3011da7ull, l_scom_buffer));
+            }
+        }
+        {
+            if (((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
+            {
+                FAPI_TRY(fapi2::getScom( TGT0, 0x3011e2aull, l_scom_buffer ));
+
+                if ((l_def_NVLINK_ACTIVE == literal_1))
+                {
+                    l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x7E );
+                }
+
+                FAPI_TRY(fapi2::putScom(TGT0, 0x3011e2aull, l_scom_buffer));
+            }
+        }
+        {
+            if (((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
+            {
+                FAPI_TRY(fapi2::getScom( TGT0, 0x3011e5aull, l_scom_buffer ));
+
+                if ((l_def_NVLINK_ACTIVE == literal_1))
+                {
+                    l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x7E );
+                }
+
+                FAPI_TRY(fapi2::putScom(TGT0, 0x3011e5aull, l_scom_buffer));
             }
         }
         {
@@ -872,6 +938,19 @@ fapi2::ReturnCode p9_npu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             if (((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<3, 1, 63, uint64_t>(literal_0b0 );
+            }
+
+            if (((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
+            {
+                if ((l_def_NVLINK_ACTIVE == literal_1))
+                {
+                    l_scom_buffer.insert<26, 1, 63, uint64_t>(literal_0x1 );
+                }
+
+                if (literal_1)
+                {
+                    l_scom_buffer.insert<6, 1, 63, uint64_t>(literal_0x1 );
+                }
             }
 
             if (((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
@@ -1862,6 +1941,19 @@ fapi2::ReturnCode p9_npu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             {
                 if ((l_def_NVLINK_ACTIVE == literal_1))
                 {
+                    l_scom_buffer.insert<26, 1, 63, uint64_t>(literal_0x1 );
+                }
+
+                if (literal_1)
+                {
+                    l_scom_buffer.insert<6, 1, 63, uint64_t>(literal_0x1 );
+                }
+            }
+
+            if (((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
+            {
+                if ((l_def_NVLINK_ACTIVE == literal_1))
+                {
                     l_scom_buffer.insert<32, 1, 63, uint64_t>(literal_0x1 );
                 }
             }
@@ -2590,6 +2682,19 @@ fapi2::ReturnCode p9_npu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                 {
                     if ((l_def_NVLINK_ACTIVE == literal_1))
                     {
+                        l_scom_buffer.insert<26, 1, 63, uint64_t>(literal_0x1 );
+                    }
+
+                    if (literal_1)
+                    {
+                        l_scom_buffer.insert<6, 1, 63, uint64_t>(literal_0x1 );
+                    }
+                }
+
+                if (((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
+                {
+                    if ((l_def_NVLINK_ACTIVE == literal_1))
+                    {
                         l_scom_buffer.insert<32, 1, 63, uint64_t>(literal_0x1 );
                     }
                 }
@@ -2949,6 +3054,19 @@ fapi2::ReturnCode p9_npu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                 if (((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
                 {
                     l_scom_buffer.insert<3, 1, 63, uint64_t>(literal_0b0 );
+                }
+
+                if (((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
+                {
+                    if ((l_def_NVLINK_ACTIVE == literal_1))
+                    {
+                        l_scom_buffer.insert<26, 1, 63, uint64_t>(literal_0x1 );
+                    }
+
+                    if (literal_1)
+                    {
+                        l_scom_buffer.insert<6, 1, 63, uint64_t>(literal_0x1 );
+                    }
                 }
 
                 if (((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
@@ -5526,14 +5644,6 @@ fapi2::ReturnCode p9_npu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             {
                 FAPI_TRY(fapi2::getScom( TGT0, 0x501138aull, l_scom_buffer ));
 
-                if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
-                {
-                    if ((l_def_NVLINK_ACTIVE == literal_1))
-                    {
-                        l_scom_buffer.insert<0, 64, 0, uint64_t>(literal_0x7F60B04500AC0000 );
-                    }
-                }
-
                 if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5)
                         && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10))
                     || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x12)) || ((l_chip_id == 0x6)
@@ -5542,6 +5652,14 @@ fapi2::ReturnCode p9_npu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                     if ((l_def_NVLINK_ACTIVE == literal_1))
                     {
                         l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x7E );
+                    }
+                }
+
+                if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
+                {
+                    if ((l_def_NVLINK_ACTIVE == literal_1))
+                    {
+                        l_scom_buffer.insert<0, 64, 0, uint64_t>(literal_0x7F60B04500AC0000 );
                     }
                 }
 
@@ -5664,6 +5782,19 @@ fapi2::ReturnCode p9_npu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                 if (((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
                 {
                     l_scom_buffer.insert<3, 1, 63, uint64_t>(literal_0b0 );
+                }
+
+                if (((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
+                {
+                    if ((l_def_NVLINK_ACTIVE == literal_1))
+                    {
+                        l_scom_buffer.insert<26, 1, 63, uint64_t>(literal_0x1 );
+                    }
+
+                    if (literal_1)
+                    {
+                        l_scom_buffer.insert<6, 1, 63, uint64_t>(literal_0x1 );
+                    }
                 }
 
                 if (((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
@@ -6378,6 +6509,19 @@ fapi2::ReturnCode p9_npu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                 {
                     if ((l_def_NVLINK_ACTIVE == literal_1))
                     {
+                        l_scom_buffer.insert<26, 1, 63, uint64_t>(literal_0x1 );
+                    }
+
+                    if (literal_1)
+                    {
+                        l_scom_buffer.insert<6, 1, 63, uint64_t>(literal_0x1 );
+                    }
+                }
+
+                if (((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
+                {
+                    if ((l_def_NVLINK_ACTIVE == literal_1))
+                    {
                         l_scom_buffer.insert<32, 1, 63, uint64_t>(literal_0x1 );
                     }
                 }
@@ -6970,6 +7114,19 @@ fapi2::ReturnCode p9_npu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                 {
                     if ((l_def_NVLINK_ACTIVE == literal_1))
                     {
+                        l_scom_buffer.insert<26, 1, 63, uint64_t>(literal_0x1 );
+                    }
+
+                    if (literal_1)
+                    {
+                        l_scom_buffer.insert<6, 1, 63, uint64_t>(literal_0x1 );
+                    }
+                }
+
+                if (((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
+                {
+                    if ((l_def_NVLINK_ACTIVE == literal_1))
+                    {
                         l_scom_buffer.insert<32, 1, 63, uint64_t>(literal_0x1 );
                     }
                 }
@@ -7087,6 +7244,16 @@ fapi2::ReturnCode p9_npu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                 FAPI_TRY(fapi2::getScom( TGT0, 0x5011520ull, l_scom_buffer ));
 
                 l_scom_buffer.insert<3, 1, 63, uint64_t>(literal_0b0 );
+
+                if ((l_def_NVLINK_ACTIVE == literal_1))
+                {
+                    l_scom_buffer.insert<26, 1, 63, uint64_t>(literal_0x1 );
+                }
+
+                if (literal_1)
+                {
+                    l_scom_buffer.insert<6, 1, 63, uint64_t>(literal_0x1 );
+                }
 
                 if ((l_def_NVLINK_ACTIVE == literal_1))
                 {
@@ -7230,6 +7397,17 @@ fapi2::ReturnCode p9_npu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             {
                 FAPI_TRY(fapi2::getScom( TGT0, 0x501158aull, l_scom_buffer ));
 
+                if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5)
+                        && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10))
+                    || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x12)) || ((l_chip_id == 0x6)
+                            && (l_chip_ec == 0x13)) )
+                {
+                    if ((l_def_NVLINK_ACTIVE == literal_1))
+                    {
+                        l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x7E );
+                    }
+                }
+
                 if (((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
                 {
                     if ((l_def_NVLINK_ACTIVE == literal_1))
@@ -7262,17 +7440,6 @@ fapi2::ReturnCode p9_npu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                     }
                 }
 
-                if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5)
-                        && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10))
-                    || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x12)) || ((l_chip_id == 0x6)
-                            && (l_chip_ec == 0x13)) )
-                {
-                    if ((l_def_NVLINK_ACTIVE == literal_1))
-                    {
-                        l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x7E );
-                    }
-                }
-
                 FAPI_TRY(fapi2::putScom(TGT0, 0x501158aull, l_scom_buffer));
             }
         }
@@ -7300,6 +7467,19 @@ fapi2::ReturnCode p9_npu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             }
         }
         {
+            if (((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
+            {
+                FAPI_TRY(fapi2::getScom( TGT0, 0x501162aull, l_scom_buffer ));
+
+                if ((l_def_NVLINK_ACTIVE == literal_1))
+                {
+                    l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x7E );
+                }
+
+                FAPI_TRY(fapi2::putScom(TGT0, 0x501162aull, l_scom_buffer));
+            }
+        }
+        {
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5)
                     && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10))
                 || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x12)) || ((l_chip_id == 0x6)
@@ -7318,6 +7498,19 @@ fapi2::ReturnCode p9_npu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                 }
 
                 FAPI_TRY(fapi2::putScom(TGT0, 0x5011645ull, l_scom_buffer));
+            }
+        }
+        {
+            if (((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
+            {
+                FAPI_TRY(fapi2::getScom( TGT0, 0x501165aull, l_scom_buffer ));
+
+                if ((l_def_NVLINK_ACTIVE == literal_1))
+                {
+                    l_scom_buffer.insert<32, 8, 56, uint64_t>(literal_0x7E );
+                }
+
+                FAPI_TRY(fapi2::putScom(TGT0, 0x501165aull, l_scom_buffer));
             }
         }
         {
