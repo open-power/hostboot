@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,9 +27,13 @@
 #include <errl/errlentry.H>
 #include <limits.h>
 #include <devicefw/driverif.H>
-#include <mmio/mmio.H>
+#include "../mmio.H"
+#include <targeting/common/utilFilter.H>
+#include <explorer_scom_addresses.H>
+#include <exp_oc_regs.H>
 
-extern trace_desc_t* g_trac_mmio;
+static const uint64_t EXPLR_IB_CONFIG_OFFSET = 0x0000000000000000ull;
+static const uint64_t EXPLR_IB_MMIO_OFFSET   = 0x0000000100000000ull; // 4GB
 
 class MmioTest : public CxxTest::TestSuite
 {
@@ -40,70 +44,66 @@ class MmioTest : public CxxTest::TestSuite
      */
     void test_Valid(void)
     {
-        TRACFCOMP( g_trac_mmio, "MmioTest::test_Valid> Start" );
+        TS_TRACE("MmioTest::test_Valid> Start" );
 
         uint64_t fails = 0;
         uint64_t total = 0;
         errlHndl_t l_err = nullptr;
-        uint64_t regdata = 0;
-        size_t op_size = sizeof(uint64_t);
+        uint32_t regdata4 = 0;
+        size_t op_size = 0;
 
-// TODO RTC 202533 - enable this test once the Axone model is IPLing
-// successfully in Simics.
-#if 0
         // Get OCMB target, return if there is no OCMB
         TARGETING::TargetHandle_t   ocmb_target = nullptr;
         TARGETING::TargetHandleList ocmb_target_list;
-        getAllChips(ocmb_target_list, TARGETING::TYPE_OCMB_CHIP);
+        TARGETING::getAllChips(ocmb_target_list, TARGETING::TYPE_OCMB_CHIP);
         if (ocmb_target_list.size() == 0)
         {
-            TRACFCOMP(g_trac_fsiscom, "MmioTest::test_Valid> Target is NULL");
+            TS_TRACE("MmioTest::test_Valid> Target is NULL");
             TS_INFO("MmioTest::test_Valid> Target is NULL");
             return;
         }
         ocmb_target = ocmb_target_list[0];
 
-        // read
+        // valid read from config space register
         ++total;
-        l_err = MMIO::mmioPerformOp(
-                          DeviceFW::READ,
+        op_size = sizeof(regdata4);
+        l_err = DeviceFW::deviceRead(
                           ocmb_target,
-                          &regdata,
+                          &regdata4,
                           op_size,
-                          0x0,
-                          op_size);
+                          DEVICE_MMIO_ADDRESS((EXPLR_IB_CONFIG_OFFSET |
+                                               EXPLR_OC_O0MBIT_O0DID_LSB),
+                                               op_size));
         if(l_err != nullptr)
         {
-            TRACFCOMP(g_trac_mmio,
-                      "MmioTest::test_Valid> Error for read, RC=0x%04X",
+            TS_TRACE("MmioTest::test_Valid> Error for read, RC=0x%04X",
                       ERRL_GETRC_SAFE(l_err));
             TS_FAIL("MmioTest::test_Valid> Error for read, RC=0x%04X",
                     ERRL_GETRC_SAFE(l_err));
             ++fails;
-            errlCommit(l_err, MMIO_COMP_ID);
+            errlCommit(l_err, CXXTEST_COMP_ID);
         }
 
-        // write
+        // valid write to config space register
         ++total;
-        l_err = MMIO::mmioPerformOp(
-                          DeviceFW::WRITE,
+        op_size = sizeof(regdata4);
+        l_err = DeviceFW::deviceWrite(
                           ocmb_target,
-                          &regdata,
+                          &regdata4,
                           op_size,
-                          0x08,
-                          op_size);
+                          DEVICE_MMIO_ADDRESS((EXPLR_IB_CONFIG_OFFSET |
+                                               EXPLR_OC_O0CCD_LSB),
+                                               op_size));
         if(l_err != nullptr)
         {
-            TRACFCOMP(g_trac_mmio,
-                      "MmioTest::test_Valid> Error for write, RC=0x%04X",
-                      ERRL_GETRC_SAFE(l_err));
+            TS_TRACE("MmioTest::test_Valid> Error for write, RC=0x%04X",
+                     ERRL_GETRC_SAFE(l_err));
             TS_FAIL("MmioTest::test_Valid> Error for write, RC=0x%04X",
                     ERRL_GETRC_SAFE(l_err));
             ++fails;
-            errlCommit(l_err, MMIO_COMP_ID);
+            errlCommit(l_err, CXXTEST_COMP_ID);
         }
-#endif
 
-        TRACFCOMP(g_trac_mmio, "Mmio::test_Valid> %d/%d fails", fails, total);
+        TS_TRACE("Mmio::test_Valid> %d/%d fails", fails, total);
     };
 };

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,6 +58,8 @@ namespace MMIO
         RC_BAD_MMIO_WRITE            = MMIO_COMP_ID | 0x09,
         RC_PROC_NOT_FOUND            = MMIO_COMP_ID | 0x0A,
         RC_BAR_OFFSET_MISMATCH       = MMIO_COMP_ID | 0x0B,
+        RC_MMIO_CHAN_CHECKSTOP       = MMIO_COMP_ID | 0x0C,
+        RC_UNSUPPORTED_CHIPID        = MMIO_COMP_ID | 0x0D,
     };
 };
 
