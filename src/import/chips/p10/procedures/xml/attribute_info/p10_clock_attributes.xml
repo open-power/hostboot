@@ -71,9 +71,9 @@
 <attribute>
   <id>ATTR_CLOCK_MUX0A_RCS_PLL_INPUT</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>RCS PLL input for FPLL #1</description>
+  <description>RCS PLL input for TOD Filter PLL</description>
   <valueType>uint8</valueType>
-  <enum>RCS_PLLA = 0x0, RCS_PLLB = 0x1</enum>
+  <enum>RCS_MAIN_OUT = 0x0, RCS_ASYNC_OUT = 0x1</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -81,9 +81,9 @@
 <attribute>
   <id>ATTR_CLOCK_MUX0B_RCS_PLL_INPUT</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>RCS PLL input for FPLL #2</description>
+  <description>RCS PLL input for Nest Filter PLL</description>
   <valueType>uint8</valueType>
-  <enum>RCS_PLLA = 0x0, RCS_PLLB = 0x1</enum>
+  <enum>RCS_MAIN_OUT = 0x0, RCS_ASYNC_OUT = 0x1</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -91,9 +91,9 @@
 <attribute>
   <id>ATTR_CLOCK_MUX0C_RCS_PLL_INPUT</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>RCS PLL input for FPLL #3</description>
+  <description>RCS PLL input for IO Filter PLL</description>
   <valueType>uint8</valueType>
-  <enum>RCS_PLLA = 0x0, RCS_PLLB = 0x1, FREQ_100MHZ = 0x2</enum>
+  <enum>RCS_MAIN_OUT = 0x0, RCS_ASYNC_OUT = 0x1, PCI_REFCLOCK0 = 0x2</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -101,9 +101,9 @@
 <attribute>
   <id>ATTR_CLOCK_MUX0D_RCS_PLL_INPUT</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>RCS PLL input for FPLL #4</description>
+  <description>RCS PLL input for IO Spread Spectrum Filter PLL</description>
   <valueType>uint8</valueType>
-  <enum>RCS_PLLA = 0x0, RCS_PLLB = 0x1</enum>
+  <enum>RCS_MAIN_OUT = 0x0, RCS_ASYNC_OUT = 0x1</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -113,7 +113,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>MUX 1 input</description>
   <valueType>uint8</valueType>
-  <enum>PAU_DPLL_INPUT = 0, TCK = 1</enum>
+  <enum>MUX10 = 0, TCK = 1</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -123,7 +123,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>MUX 2a input</description>
   <valueType>uint8</valueType>
-  <enum>MUX1 = 0, PAU_DPLL_OUTPUT = 1</enum>
+  <enum>PAU_DPLL = 0, MUX1 = 1</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -133,7 +133,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>MUX 2b input</description>
   <valueType>uint8</valueType>
-  <enum>MUX1 = 0, PAU_DPLL_OUTPUT = 1</enum>
+  <enum>PAU_DPLL = 0, MUX1 = 1</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -143,7 +143,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>MUX 3 input</description>
   <valueType>uint8</valueType>
-  <enum>MUX2B = 0, NEST_DPLL_OUTPUT = 1</enum>
+  <enum>NEST_DPLL = 0, MUX2B = 1</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -153,7 +153,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>MUX 4a input</description>
   <valueType>uint8</valueType>
-  <enum>MUX0 = 0, MUX1 = 1</enum>
+  <enum>MUX3_DIV_BY_2 = 0, MUX3_DIV_BY_1 = 1</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -161,9 +161,9 @@
 <attribute>
   <id>ATTR_CLOCK_MUX10_PAU_DPLL_INPUT</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>PAU DPLL input from FPLL</description>
+  <description>PAU DPLL input from Filter PLLs</description>
   <valueType>uint8</valueType>
-  <enum>FPLL_4 = 0, FPLL_3 = 1</enum>
+  <enum>PLLIOSSFLT = 0, PLLIOFLT = 1</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -171,9 +171,9 @@
 <attribute>
   <id>ATTR_CLOCK_MUX11_NEST_DPLL_INPUT</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>NEST DPLL input from FPLL</description>
+  <description>NEST DPLL input from Filter PLLs</description>
   <valueType>uint8</valueType>
-  <enum> FPLL_4 = 0, FPLL_3 = 1</enum>
+  <enum> PLLIOSSFLT = 0, PLLIOFLT = 1</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -183,7 +183,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>OMI LCPLL input</description>
   <valueType>uint8</valueType>
-  <enum>FPLL_1 = 0, FPLL_2 = 1, FPLL_3 = 2</enum>
+  <enum>PLLTODFLT = 0, PLLNESTFLT = 1, PLLIOFLT = 2</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -193,7 +193,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Mux 13 input</description>
   <valueType>uint8</valueType>
-  <enum>FPLL_1 = 0, FPLL_2 = 1, FPLL_3 = 2</enum>
+  <enum>PLLTODFLT = 0, PLLNESTFLT = 1, PLLIOFLT = 2</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -203,7 +203,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Mux 14 input</description>
   <valueType>uint8</valueType>
-  <enum>FPLL_2 = 0, FPLL_3 = 1</enum>
+  <enum>PLLNESTFLT = 0, PLLIOFLT = 1</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -213,7 +213,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>IOHS0 LCPLL input</description>
   <valueType>uint8</valueType>
-  <enum>FPLL_1 = 0, MUX_13 = 1, MUX_14 = 2</enum>
+  <enum>PLLTODFLT = 0, MUX14 = 1, MUX13 = 2</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -223,7 +223,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>IOHS1 LCPLL input</description>
   <valueType>uint8</valueType>
-  <enum>FPLL_1 = 0, MUX_14 = 1</enum>
+  <enum>PLLTODFLT = 0, MUX14 = 1</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -233,7 +233,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>IOHS2 LCPLL input</description>
   <valueType>uint8</valueType>
-  <enum>FPLL_1 = 0, MUX_14 = 1</enum>
+  <enum>PLLTODFLT = 0, MUX14 = 1</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -243,7 +243,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>IOHS3 LCPLL input</description>
   <valueType>uint8</valueType>
-  <enum>FPLL_1 = 0, MUX_13 = 1, MUX_14 = 2</enum>
+  <enum>PLLTODFLT = 0, MUX14 = 1, MUX13 = 2</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -253,7 +253,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>IOHS4 LCPLL input</description>
   <valueType>uint8</valueType>
-  <enum>FPLL_1 = 0, MUX_13 = 1, MUX_14 = 2</enum>
+  <enum>PLLTODFLT = 0, MUX14 = 1, MUX13 = 2</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -263,7 +263,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>IOHS5 LCPLL input</description>
   <valueType>uint8</valueType>
-  <enum>FPLL_1 = 0, MUX_13 = 1, MUX_14 = 2</enum>
+  <enum>PLLTODFLT = 0, MUX14 = 1, MUX13 = 2</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -273,7 +273,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>IOHS6 LCPLL input</description>
   <valueType>uint8</valueType>
-  <enum>FPLL_1 = 0, MUX_13 = 1, MUX_14 = 2</enum>
+  <enum>PLLTODFLT = 0, MUX14 = 1, MUX13 = 2</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -283,7 +283,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>IOHS7 LCPLL input</description>
   <valueType>uint8</valueType>
-  <enum>FPLL_1 = 0, MUX_13 = 1, MUX_14 = 2</enum>
+  <enum>PLLTODFLT = 0, MUX14 = 1, MUX13 = 2</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -293,7 +293,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Mux 23 input from FPLL</description>
   <valueType>uint8</valueType>
-  <enum>FPLL_4 = 0, FPLL_3 = 1, MUX_0D = 2</enum>
+  <enum>PLLTODFLT = 0, PLLIOSSFLT = 1, MUX0D = 2</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -303,7 +303,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>PCI0 LCPLL input</description>
   <valueType>uint8</valueType>
-  <enum>FREQ_100MHZ = 1, MUX_23 = 0</enum>
+  <enum>MUX23 = 0, PCI_REFCLOCK0 = 1, PCI_REFCLOCK1 = 2</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -313,7 +313,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>PCI1 LCPLL input</description>
   <valueType>uint8</valueType>
-  <enum>FREQ_100MHZ = 1, MUX_23 = 0</enum>
+  <enum>MUX23 = 0, PCI_REFCLOCK0 = 1, PCI_REFCLOCK1 = 2</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -322,12 +322,12 @@
   <id>ATTR_CLOCK_PLL_MUX_TOD</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
-    setup clock mux settings for TOD Refclk input
+    setup clock mux settings for TOD Refclock input
     0b0 = 16 MHz I/O Filter PLL Output
     0b1 = 32 MHz LPC reference clock
   </description>
   <valueType>uint8</valueType>
-  <enum>IO_FPLL_OUTPUT = 0, LPC_REF_CLK = 1</enum>
+  <enum>LPC_REFCLOCK = 0, PLLTODFLT = 1</enum>
   <platInit/>
   <initToZero/>
 </attribute>

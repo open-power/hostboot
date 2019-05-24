@@ -176,17 +176,17 @@
   </entry>
 
   <entry>
-      <name>ATTR_CP_FILTER_1_BYPASS</name>
+      <name>ATTR_CP_PLLTODFLT_BYPASS</name>
       <value>0x0</value>
   </entry>
 
   <entry>
-      <name>ATTR_CP_FILTER_2_BYPASS</name>
+      <name>ATTR_CP_PLLNESTFLT_BYPASS</name>
       <value>0x0</value>
   </entry>
 
   <entry>
-      <name>ATTR_CP_FILTER_3_BYPASS</name>
+      <name>ATTR_CP_PLLIOFLT_BYPASS</name>
       <value>0x0</value>
   </entry>
 
@@ -196,7 +196,7 @@
   </entry>
 
   <entry>
-      <name>ATTR_CP_FILTER_4_BYPASS</name>
+      <name>ATTR_CP_PLLIOSSFLT_BYPASS</name>
       <value>0x0</value>
   </entry>
   <entry>
