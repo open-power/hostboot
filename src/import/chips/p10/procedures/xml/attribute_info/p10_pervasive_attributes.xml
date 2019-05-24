@@ -106,10 +106,10 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
-  <id>ATTR_CP_FILTER_1_BYPASS</id>
+  <id>ATTR_CP_PLLTODFLT_BYPASS</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
-    To skip the locking sequence and check for lock of CP filter1 PLL
+    To skip the locking sequence and check for lock of CP TOD Filter PLL
   </description>
   <valueType>uint8</valueType>
   <writeable/>
@@ -118,10 +118,10 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
-  <id>ATTR_CP_FILTER_2_BYPASS</id>
+  <id>ATTR_CP_PLLNESTFLT_BYPASS</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
-    To skip the locking sequence and check for lock of CP filter2 PLL
+    To skip the locking sequence and check for lock of CP Nest Filter PLL
   </description>
   <valueType>uint8</valueType>
   <writeable/>
@@ -130,10 +130,10 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
-  <id>ATTR_CP_FILTER_3_BYPASS</id>
+  <id>ATTR_CP_PLLIOFLT_BYPASS</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
-    To skip the locking sequence and check for lock of CP filter3 PLL
+    To skip the locking sequence and check for lock of CP IO Filter PLL
   </description>
   <valueType>uint8</valueType>
   <writeable/>
@@ -142,10 +142,10 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
-  <id>ATTR_CP_FILTER_4_BYPASS</id>
+  <id>ATTR_CP_PLLIOSSFLT_BYPASS</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
-    To skip the locking sequence and check for lock of CP filter4 PLL
+    To skip the locking sequence and check for lock of CP IO Spread Spectrum Filter PLL
   </description>
   <valueType>uint8</valueType>
   <writeable/>
@@ -183,7 +183,7 @@
   <id>ATTR_IO_TANK_PLL_BYPASS</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
-    Skip locking sequence and check for lock of IO PLL
+    Skip locking sequence and check for lock of IO PLLs
   </description>
   <valueType>uint8</valueType>
   <enum>BYPASS = 0x1, NO_BYPASS = 0x0</enum>
