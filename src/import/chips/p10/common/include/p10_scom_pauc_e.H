@@ -35,6 +35,15 @@ namespace pauc
 {
 
 
+static const uint64_t DL_PPE_WRAP_SCOM_FUNC = 0x10012c67ull;
+
+static const uint32_t DL_PPE_WRAP_SCOM_FUNC_EOL_SLOW_TOGGLE = 0;
+static const uint32_t DL_PPE_WRAP_SCOM_FUNC_EOL_FAST_TOGGLE = 1;
+static const uint32_t DL_PPE_WRAP_SCOM_FUNC_PPE_INTERRUPT = 2;
+static const uint32_t DL_PPE_WRAP_SCOM_FUNC_PPE_FUNC_SPARES = 3;
+static const uint32_t DL_PPE_WRAP_SCOM_FUNC_PPE_FUNC_SPARES_LEN = 13;
+// pauc/reg00014.H
+
 static const uint64_t EPS_DBG_TRACE_REG_1 = 0x100107ceull;
 
 static const uint32_t EPS_DBG_TRACE_REG_1_1_CONDITION1_ACTION_DO = 0;
@@ -137,38 +146,6 @@ static const uint32_t EPS_FIR_LOCAL_ACTION1_62 = 62;
 static const uint32_t EPS_FIR_LOCAL_ACTION1_63 = 63;
 // pauc/reg00014.H
 
-static const uint64_t FIR_MASK_REG_RW = 0x10012c43ull;
-static const uint64_t FIR_MASK_REG_WO_AND = 0x10012c44ull;
-static const uint64_t FIR_MASK_REG_WO_OR = 0x10012c45ull;
-
-static const uint32_t FIR_MASK_REG_IOO0_RX_INVALID_STATE_OR_PARITY_ERROR_MASK = 0;
-static const uint32_t FIR_MASK_REG_IOO1_RX_INVALID_STATE_OR_PARITY_ERROR_MASK = 1;
-static const uint32_t FIR_MASK_REG_OMI0_RX_INVALID_STATE_OR_PARITY_ERROR_MASK = 2;
-static const uint32_t FIR_MASK_REG_OMI1_RX_INVALID_STATE_OR_PARITY_ERROR_MASK = 3;
-static const uint32_t FIR_MASK_REG_IOO0_TX_INVALID_STATE_OR_PARITY_ERROR_MASK = 4;
-static const uint32_t FIR_MASK_REG_IOO1_TX_INVALID_STATE_OR_PARITY_ERROR_MASK = 5;
-static const uint32_t FIR_MASK_REG_OMI0_TX_INVALID_STATE_OR_PARITY_ERROR_MASK = 6;
-static const uint32_t FIR_MASK_REG_OMI1_TX_INVALID_STATE_OR_PARITY_ERROR_MASK = 7;
-static const uint32_t FIR_MASK_REG_ZCAL_INVALID_STATE_OR_PARITY_ERROR_MASK = 8;
-static const uint32_t FIR_MASK_REG_PPE_INT_HWERROR_MASK = 9;
-static const uint32_t FIR_MASK_REG_PPE_EXT_HWERROR_MASK = 10;
-static const uint32_t FIR_MASK_REG_PPE_HALT_WATCHDOG_OR_INTERRUPT_MASK = 11;
-static const uint32_t FIR_MASK_REG_PPE_HALT_DEBUG_MASK = 12;
-static const uint32_t FIR_MASK_REG_PPE_HALTED_MASK = 13;
-static const uint32_t FIR_MASK_REG_PPE_WATCHDOG_TIMEOUT_MASK = 14;
-static const uint32_t FIR_MASK_REG_PPE_ARB_MISSED_SCRUB_TICK_MASK = 15;
-static const uint32_t FIR_MASK_REG_PPE_ARB_ARRAY_UNCORRECTABLE_ERROR_MASK = 16;
-static const uint32_t FIR_MASK_REG_PPE_ARB_ARRAY_CORRECTABLE_ERROR_MASK = 17;
-static const uint32_t FIR_MASK_REG_PPE_CODE_RECAL_ABORT_MASK = 18;
-static const uint32_t FIR_MASK_REG_PPE_CODE_FATAL_ERROR_MASK = 19;
-static const uint32_t FIR_MASK_REG_PPE_CODE_WARNING_MASK = 20;
-static const uint32_t FIR_MASK_REG_PPE_CODE_DFT_ERROR_MASK = 21;
-static const uint32_t FIR_MASK_REG_PPE_CODE_RECAL_NOT_RUN_MASK = 22;
-static const uint32_t FIR_MASK_REG_PPE_CODE_THREAD_LOCKED_MASK = 23;
-static const uint32_t FIR_MASK_REG_PPE_CODE_6_MASK = 24;
-static const uint32_t FIR_MASK_REG_PPE_CODE_7_MASK = 25;
-// pauc/reg00014.H
-
 static const uint64_t OPCG_REG1 = 0x10030003ull;
 
 static const uint32_t OPCG_REG1_SCAN_COUNT = 0;
@@ -247,6 +224,18 @@ static const uint32_t PB_PTL_FIR_MASK_REG_PTL0_SPARE_MASK = 36;
 static const uint32_t PB_PTL_FIR_MASK_REG_PTL1_SPARE_MASK = 37;
 static const uint32_t PB_PTL_FIR_MASK_REG_PTL2_SPARE_MASK = 38;
 static const uint32_t PB_PTL_FIR_MASK_REG_PTL3_SPARE_MASK = 39;
+// pauc/reg00014.H
+
+static const uint64_t PHY_SCOM_MAC_FIR_ACTION0_REG = 0x10012c06ull;
+
+static const uint32_t PHY_SCOM_MAC_FIR_ACTION0_REG_FIR_ACTION0 = 0;
+static const uint32_t PHY_SCOM_MAC_FIR_ACTION0_REG_FIR_ACTION0_LEN = 26;
+// pauc/reg00014.H
+
+static const uint64_t PHY_SCOM_MAC_FIR_ACTION1_REG = 0x10012c07ull;
+
+static const uint32_t PHY_SCOM_MAC_FIR_ACTION1_REG_FIR_ACTION1 = 0;
+static const uint32_t PHY_SCOM_MAC_FIR_ACTION1_REG_FIR_ACTION1_LEN = 26;
 // pauc/reg00014.H
 
 static const uint64_t RCMD_RATE_CFG = 0x1001180cull;

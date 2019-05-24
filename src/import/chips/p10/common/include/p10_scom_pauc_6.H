@@ -68,6 +68,12 @@ static const uint32_t CPLT_CTRL1_REGION13_FENCE_DC = 17;
 static const uint32_t CPLT_CTRL1_REGION14_FENCE_DC = 18;
 // pauc/reg00006.H
 
+static const uint64_t DL_PPE_WRAP_ARB_CSAR = 0x10012c4dull;
+
+static const uint32_t DL_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS = 16;
+static const uint32_t DL_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS_LEN = 13;
+// pauc/reg00006.H
+
 static const uint64_t EPS_DBG_INST1_COND_REG_3 = 0x100107c3ull;
 // pauc/reg00006.H
 
@@ -129,7 +135,7 @@ static const uint32_t EPS_THERM_WSUB_TIMESTAMP_COUNTER_READ_OVERFLOW_ERR = 44;
 
 static const uint64_t LOCAL_XSTOP_MASK_RW = 0x10040043ull;
 static const uint64_t LOCAL_XSTOP_MASK_WO_CLEAR = 0x10040063ull;
-static const uint64_t LOCAL_XSTOP_MASK_WO_OR = 0x10040015ull;
+static const uint64_t LOCAL_XSTOP_MASK_WO_OR = 0x10040053ull;
 
 static const uint32_t LOCAL_XSTOP_MASK_01 = 1;
 static const uint32_t LOCAL_XSTOP_MASK_02 = 2;
@@ -154,26 +160,10 @@ static const uint32_t LOCAL_XSTOP_UNMASKED_LOCAL_XSTOP_UNMASKED_IN = 1;
 static const uint32_t LOCAL_XSTOP_UNMASKED_LOCAL_XSTOP_UNMASKED_IN_LEN = 15;
 // pauc/reg00006.H
 
-static const uint64_t PPE_MIB_XIICAC = 0x10012c19ull;
+static const uint64_t PHY_PPE_WRAP_ARB_CSAR = 0x10012c0dull;
 
-static const uint32_t PPE_MIB_XIICAC_MIB_XIMEM_MEM_IFETCH_PENDING = 35;
-// pauc/reg00006.H
-
-static const uint64_t PPE_XIXCR = 0x10012c10ull;
-
-static const uint32_t PPE_XIXCR_PPE_XIXCR_XCR = 1;
-static const uint32_t PPE_XIXCR_PPE_XIXCR_XCR_LEN = 3;
-static const uint32_t PPE_XIXCR_NULL_CTR = 32;
-static const uint32_t PPE_XIXCR_NULL_CTR_LEN = 32;
-// pauc/reg00006.H
-
-static const uint64_t REGS_TX_IMPCAL3_PB = 0x800f140010012c3full;
-// pauc/reg00006.H
-
-static const uint64_t REGS_TX_IMPCAL_SWO7_PB = 0x800f640010012c3full;
-
-static const uint32_t REGS_TX_IMPCAL_SWO7_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XP_16_31 = 48;
-static const uint32_t REGS_TX_IMPCAL_SWO7_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XP_16_31_LEN = 16;
+static const uint32_t PHY_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS = 16;
+static const uint32_t PHY_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS_LEN = 13;
 // pauc/reg00006.H
 
 static const uint64_t TRA0_TR0_CONFIG_5 = 0x10010408ull;
@@ -200,6 +190,8 @@ static const uint32_t TRA0_TR1_CONFIG_TRACE_RUN_HOLD_OFF = 18;
 static const uint32_t TRA0_TR1_CONFIG_TRACE_RUN_STATUS = 19;
 static const uint32_t TRA0_TR1_CONFIG_TRACE_RUN_STICKY = 20;
 static const uint32_t TRA0_TR1_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
+static const uint32_t TRA0_TR1_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT = 22;
+static const uint32_t TRA0_TR1_CONFIG_MASTER_CLOCK_ENABLE_INT = 23;
 // pauc/reg00006.H
 
 static const uint64_t TRA1_TR0_CONFIG = 0x10010482ull;
@@ -218,6 +210,14 @@ static const uint32_t TRA1_TR0_CONFIG_TRACE_RUN_HOLD_OFF = 18;
 static const uint32_t TRA1_TR0_CONFIG_TRACE_RUN_STATUS = 19;
 static const uint32_t TRA1_TR0_CONFIG_TRACE_RUN_STICKY = 20;
 static const uint32_t TRA1_TR0_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
+static const uint32_t TRA1_TR0_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT = 22;
+static const uint32_t TRA1_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT = 23;
+// pauc/reg00006.H
+
+static const uint64_t TXIRLM_REGS_TX_IMPCAL_SWO6_PB = 0x800f5c0010012c3full;
+
+static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO6_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XP_0_15 = 48;
+static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO6_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XP_0_15_LEN = 16;
 // pauc/reg00006.H
 
 }

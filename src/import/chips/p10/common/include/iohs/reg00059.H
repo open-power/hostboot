@@ -22807,51 +22807,6 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_QUALITY_SPARE_COUNTER_1(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_QUALITY));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_QUALITY_SPARE_COUNTER_1,
-           DLP_LINK0_QUALITY_SPARE_COUNTER_1_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLP_LINK0_QUALITY_SPARE_COUNTER_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_QUALITY_SPARE_COUNTER_1(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_QUALITY));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_QUALITY_SPARE_COUNTER_1,
-           DLP_LINK0_QUALITY_SPARE_COUNTER_1_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLP_LINK0_QUALITY_SPARE_COUNTER_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_QUALITY_SPARE_COUNTER_1(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_QUALITY));
-#endif
-    return i_data.extractToRight<DLP_LINK0_QUALITY_SPARE_COUNTER_1,
-           DLP_LINK0_QUALITY_SPARE_COUNTER_1_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLP_LINK0_QUALITY_SPARE_COUNTER_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
 static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_QUALITY_SPARE_COUNTER_2(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -23548,6 +23503,90 @@ static inline bool GET_DLP_PHY_CONFIG_LINK1_SELECT(fapi2::buffer<uint64_t>& i_da
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     FAPI_ERR("Invalid dial access DLP_PHY_CONFIG_LINK1_SELECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_PHY_CONFIG_PRBS15_NPRBS7(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_PHY_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_PHY_CONFIG_PRBS15_NPRBS7,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_PHY_CONFIG_PRBS15_NPRBS7 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_PHY_CONFIG_PRBS15_NPRBS7(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_PHY_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_PHY_CONFIG_PRBS15_NPRBS7,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_PHY_CONFIG_PRBS15_NPRBS7 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_PHY_CONFIG_PRBS15_NPRBS7(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_PHY_CONFIG));
+#endif
+    return o_data.setBit<DLP_PHY_CONFIG_PRBS15_NPRBS7>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_PHY_CONFIG_PRBS15_NPRBS7 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_DLP_PHY_CONFIG_PRBS15_NPRBS7(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_PHY_CONFIG));
+#endif
+    return o_data.clearBit<DLP_PHY_CONFIG_PRBS15_NPRBS7>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_PHY_CONFIG_PRBS15_NPRBS7 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_PHY_CONFIG_PRBS15_NPRBS7(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_PHY_CONFIG));
+#endif
+    return i_data.extractToRight<DLP_PHY_CONFIG_PRBS15_NPRBS7,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_PHY_CONFIG_PRBS15_NPRBS7 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_DLP_PHY_CONFIG_PRBS15_NPRBS7(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_PHY_CONFIG));
+#endif
+    return i_data.getBit<DLP_PHY_CONFIG_PRBS15_NPRBS7>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_PHY_CONFIG_PRBS15_NPRBS7 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

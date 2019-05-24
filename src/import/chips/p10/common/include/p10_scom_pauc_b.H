@@ -47,6 +47,46 @@ static const uint32_t ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
 static const uint64_t ATTN_INTERRUPT_REG = 0x100f001aull;
 // pauc/reg00011.H
 
+static const uint64_t DL_PPE_WRAP_XIRAMGA = 0x10012c52ull;
+
+static const uint32_t DL_PPE_WRAP_XIRAMGA_GA_IR = 0;
+static const uint32_t DL_PPE_WRAP_XIRAMGA_GA_IR_LEN = 32;
+static const uint32_t DL_PPE_WRAP_XIRAMGA_RA_SPRG0 = 32;
+static const uint32_t DL_PPE_WRAP_XIRAMGA_RA_SPRG0_LEN = 32;
+// pauc/reg00011.H
+
+static const uint64_t DL_SCOM_MAC_FIR_REG_RW = 0x10012c40ull;
+static const uint64_t DL_SCOM_MAC_FIR_REG_WO_AND = 0x10012c41ull;
+static const uint64_t DL_SCOM_MAC_FIR_REG_WO_OR = 0x10012c42ull;
+
+static const uint32_t DL_SCOM_MAC_FIR_REG_IOO0_RX_INVALID_STATE_OR_PARITY_ERROR = 0;
+static const uint32_t DL_SCOM_MAC_FIR_REG_IOO1_RX_INVALID_STATE_OR_PARITY_ERROR = 1;
+static const uint32_t DL_SCOM_MAC_FIR_REG_OMI0_RX_INVALID_STATE_OR_PARITY_ERROR = 2;
+static const uint32_t DL_SCOM_MAC_FIR_REG_OMI1_RX_INVALID_STATE_OR_PARITY_ERROR = 3;
+static const uint32_t DL_SCOM_MAC_FIR_REG_IOO0_TX_INVALID_STATE_OR_PARITY_ERROR = 4;
+static const uint32_t DL_SCOM_MAC_FIR_REG_IOO1_TX_INVALID_STATE_OR_PARITY_ERROR = 5;
+static const uint32_t DL_SCOM_MAC_FIR_REG_OMI0_TX_INVALID_STATE_OR_PARITY_ERROR = 6;
+static const uint32_t DL_SCOM_MAC_FIR_REG_OMI1_TX_INVALID_STATE_OR_PARITY_ERROR = 7;
+static const uint32_t DL_SCOM_MAC_FIR_REG_ZCAL_INVALID_STATE_OR_PARITY_ERROR = 8;
+static const uint32_t DL_SCOM_MAC_FIR_REG_PPE_INT_HWERROR = 9;
+static const uint32_t DL_SCOM_MAC_FIR_REG_PPE_EXT_HWERROR = 10;
+static const uint32_t DL_SCOM_MAC_FIR_REG_PPE_HALT_WATCHDOG_OR_INTERRUPT = 11;
+static const uint32_t DL_SCOM_MAC_FIR_REG_PPE_HALT_DEBUG = 12;
+static const uint32_t DL_SCOM_MAC_FIR_REG_PPE_HALTED = 13;
+static const uint32_t DL_SCOM_MAC_FIR_REG_PPE_WATCHDOG_TIMEOUT = 14;
+static const uint32_t DL_SCOM_MAC_FIR_REG_PPE_ARB_MISSED_SCRUB_TICK = 15;
+static const uint32_t DL_SCOM_MAC_FIR_REG_PPE_ARB_ARRAY_UNCORRECTABLE_ERROR = 16;
+static const uint32_t DL_SCOM_MAC_FIR_REG_PPE_ARB_ARRAY_CORRECTABLE_ERROR = 17;
+static const uint32_t DL_SCOM_MAC_FIR_REG_PPE_CODE_RECAL_ABORT = 18;
+static const uint32_t DL_SCOM_MAC_FIR_REG_PPE_CODE_FATAL_ERROR = 19;
+static const uint32_t DL_SCOM_MAC_FIR_REG_PPE_CODE_WARNING = 20;
+static const uint32_t DL_SCOM_MAC_FIR_REG_PPE_CODE_DFT_ERROR = 21;
+static const uint32_t DL_SCOM_MAC_FIR_REG_PPE_CODE_RECAL_NOT_RUN = 22;
+static const uint32_t DL_SCOM_MAC_FIR_REG_PPE_CODE_THREAD_LOCKED = 23;
+static const uint32_t DL_SCOM_MAC_FIR_REG_PPE_CODE_6 = 24;
+static const uint32_t DL_SCOM_MAC_FIR_REG_PPE_CODE_7 = 25;
+// pauc/reg00011.H
+
 static const uint64_t EPS_DBG_TRACE_MODE_REG_2 = 0x100107cfull;
 
 static const uint32_t EPS_DBG_TRACE_MODE_REG_2_RUNN_COUNT_COMPARE_VALUE = 0;
@@ -131,38 +171,6 @@ static const uint32_t EPS_FIR_LOCAL_MASK_62 = 62;
 static const uint32_t EPS_FIR_LOCAL_MASK_63 = 63;
 // pauc/reg00011.H
 
-static const uint64_t FIR_REG_RW = 0x10012c40ull;
-static const uint64_t FIR_REG_WO_AND = 0x10012c41ull;
-static const uint64_t FIR_REG_WO_OR = 0x10012c42ull;
-
-static const uint32_t FIR_REG_IOO0_RX_INVALID_STATE_OR_PARITY_ERROR = 0;
-static const uint32_t FIR_REG_IOO1_RX_INVALID_STATE_OR_PARITY_ERROR = 1;
-static const uint32_t FIR_REG_OMI0_RX_INVALID_STATE_OR_PARITY_ERROR = 2;
-static const uint32_t FIR_REG_OMI1_RX_INVALID_STATE_OR_PARITY_ERROR = 3;
-static const uint32_t FIR_REG_IOO0_TX_INVALID_STATE_OR_PARITY_ERROR = 4;
-static const uint32_t FIR_REG_IOO1_TX_INVALID_STATE_OR_PARITY_ERROR = 5;
-static const uint32_t FIR_REG_OMI0_TX_INVALID_STATE_OR_PARITY_ERROR = 6;
-static const uint32_t FIR_REG_OMI1_TX_INVALID_STATE_OR_PARITY_ERROR = 7;
-static const uint32_t FIR_REG_ZCAL_INVALID_STATE_OR_PARITY_ERROR = 8;
-static const uint32_t FIR_REG_PPE_INT_HWERROR = 9;
-static const uint32_t FIR_REG_PPE_EXT_HWERROR = 10;
-static const uint32_t FIR_REG_PPE_HALT_WATCHDOG_OR_INTERRUPT = 11;
-static const uint32_t FIR_REG_PPE_HALT_DEBUG = 12;
-static const uint32_t FIR_REG_PPE_HALTED = 13;
-static const uint32_t FIR_REG_PPE_WATCHDOG_TIMEOUT = 14;
-static const uint32_t FIR_REG_PPE_ARB_MISSED_SCRUB_TICK = 15;
-static const uint32_t FIR_REG_PPE_ARB_ARRAY_UNCORRECTABLE_ERROR = 16;
-static const uint32_t FIR_REG_PPE_ARB_ARRAY_CORRECTABLE_ERROR = 17;
-static const uint32_t FIR_REG_PPE_CODE_RECAL_ABORT = 18;
-static const uint32_t FIR_REG_PPE_CODE_FATAL_ERROR = 19;
-static const uint32_t FIR_REG_PPE_CODE_WARNING = 20;
-static const uint32_t FIR_REG_PPE_CODE_DFT_ERROR = 21;
-static const uint32_t FIR_REG_PPE_CODE_RECAL_NOT_RUN = 22;
-static const uint32_t FIR_REG_PPE_CODE_THREAD_LOCKED = 23;
-static const uint32_t FIR_REG_PPE_CODE_6 = 24;
-static const uint32_t FIR_REG_PPE_CODE_7 = 25;
-// pauc/reg00011.H
-
 static const uint64_t LOCAL_FIR_RW = 0x10040100ull;
 static const uint64_t LOCAL_FIR_WO_AND = 0x10040101ull;
 static const uint64_t LOCAL_FIR_WO_OR = 0x10040102ull;
@@ -239,6 +247,14 @@ static const uint64_t PB_MAILBOX_00_REG = 0x10011830ull;
 static const uint64_t PB_MAILBOX_01_REG = 0x10011831ull;
 // pauc/reg00011.H
 
+static const uint64_t PHY_PPE_WRAP_XIDBGINF = 0x10012c1full;
+
+static const uint32_t PHY_PPE_WRAP_XIDBGINF_SRR0 = 0;
+static const uint32_t PHY_PPE_WRAP_XIDBGINF_SRR0_LEN = 30;
+static const uint32_t PHY_PPE_WRAP_XIDBGINF_LR = 32;
+static const uint32_t PHY_PPE_WRAP_XIDBGINF_LR_LEN = 32;
+// pauc/reg00011.H
+
 static const uint64_t RECOV = 0x10040001ull;
 
 static const uint32_t RECOV_ANY_RECOV = 0;
@@ -301,6 +317,31 @@ static const uint64_t TRA0_TR1_CONFIG_1 = 0x10010444ull;
 
 static const uint32_t TRA0_TR1_CONFIG_1_CMP_MSK_LT_B_64_TO_87 = 0;
 static const uint32_t TRA0_TR1_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN = 24;
+// pauc/reg00011.H
+
+static const uint64_t XSTOP4 = 0x10030014ull;
+
+static const uint32_t XSTOP4_XSTOP4_MASK_B = 0;
+static const uint32_t XSTOP4_ALIGNED_XSTOP4 = 1;
+static const uint32_t XSTOP4_TRIGGER_OPCG_ON_XSTOP4 = 2;
+static const uint32_t XSTOP4_XSTOP4_WAIT_ALLWAYS = 3;
+static const uint32_t XSTOP4_XSTOP4_PERV = 4;
+static const uint32_t XSTOP4_XSTOP4_UNIT1 = 5;
+static const uint32_t XSTOP4_XSTOP4_UNIT2 = 6;
+static const uint32_t XSTOP4_XSTOP4_UNIT3 = 7;
+static const uint32_t XSTOP4_XSTOP4_UNIT4 = 8;
+static const uint32_t XSTOP4_XSTOP4_UNIT5 = 9;
+static const uint32_t XSTOP4_XSTOP4_UNIT6 = 10;
+static const uint32_t XSTOP4_XSTOP4_UNIT7 = 11;
+static const uint32_t XSTOP4_XSTOP4_UNIT8 = 12;
+static const uint32_t XSTOP4_XSTOP4_UNIT9 = 13;
+static const uint32_t XSTOP4_XSTOP4_UNIT10 = 14;
+static const uint32_t XSTOP4_XSTOP4_UNIT11 = 15;
+static const uint32_t XSTOP4_XSTOP4_UNIT12 = 16;
+static const uint32_t XSTOP4_XSTOP4_UNIT13 = 17;
+static const uint32_t XSTOP4_XSTOP4_UNIT14 = 18;
+static const uint32_t XSTOP4_XSTOP4_WAIT_CYCLES = 48;
+static const uint32_t XSTOP4_XSTOP4_WAIT_CYCLES_LEN = 12;
 // pauc/reg00011.H
 
 }

@@ -62,9 +62,6 @@ static const uint32_t EC_PC_COMMON_SPR_SCOMC_MODE_CX_SCOMC = 54;
 static const uint32_t EC_PC_COMMON_SPR_SCOMC_MODE_CX_SCOMC_LEN = 7;
 // c/reg00012.H
 
-static const uint64_t EC_PC_PMU_PMUC_SRC_MASK = 0x20020407ull;
-// c/reg00012.H
-
 static const uint64_t EC_PC_SPURR_FREQ_SCALE = 0x200204a0ull;
 
 static const uint32_t EC_PC_SPURR_FREQ_SCALE_OVERRIDE_EN = 0;

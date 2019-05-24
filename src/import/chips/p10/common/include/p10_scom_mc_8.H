@@ -348,6 +348,8 @@ static const uint32_t TRA0_TR0_CONFIG_TRACE_RUN_HOLD_OFF = 18;
 static const uint32_t TRA0_TR0_CONFIG_TRACE_RUN_STATUS = 19;
 static const uint32_t TRA0_TR0_CONFIG_TRACE_RUN_STICKY = 20;
 static const uint32_t TRA0_TR0_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
+static const uint32_t TRA0_TR0_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT = 22;
+static const uint32_t TRA0_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT = 23;
 // mc/reg00008.H
 
 static const uint64_t TRA1_TR0_CONFIG_0 = 0x0c010443ull;

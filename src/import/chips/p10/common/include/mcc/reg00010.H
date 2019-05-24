@@ -4229,6 +4229,196 @@ fapi_try_exit:
 #endif
 }
 
+static inline fapi2::buffer<uint64_t>& SET_DSTL_DSTLERRRPT_CHANA_CREDIT_RETURN_PARITY_ERR_HOLD_OUT(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DSTL_DSTLERRRPT));
+#endif
+    return o_data.insertFromRight<DSTL_DSTLERRRPT_CHANA_CREDIT_RETURN_PARITY_ERR_HOLD_OUT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DSTL_DSTLERRRPT_CHANA_CREDIT_RETURN_PARITY_ERR_HOLD_OUT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DSTL_DSTLERRRPT_CHANA_CREDIT_RETURN_PARITY_ERR_HOLD_OUT(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DSTL_DSTLERRRPT));
+#endif
+    return o_data.insertFromRight<DSTL_DSTLERRRPT_CHANA_CREDIT_RETURN_PARITY_ERR_HOLD_OUT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DSTL_DSTLERRRPT_CHANA_CREDIT_RETURN_PARITY_ERR_HOLD_OUT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DSTL_DSTLERRRPT_CHANA_CREDIT_RETURN_PARITY_ERR_HOLD_OUT(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DSTL_DSTLERRRPT));
+#endif
+    return o_data.setBit<DSTL_DSTLERRRPT_CHANA_CREDIT_RETURN_PARITY_ERR_HOLD_OUT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DSTL_DSTLERRRPT_CHANA_CREDIT_RETURN_PARITY_ERR_HOLD_OUT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_DSTL_DSTLERRRPT_CHANA_CREDIT_RETURN_PARITY_ERR_HOLD_OUT(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DSTL_DSTLERRRPT));
+#endif
+    return o_data.clearBit<DSTL_DSTLERRRPT_CHANA_CREDIT_RETURN_PARITY_ERR_HOLD_OUT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DSTL_DSTLERRRPT_CHANA_CREDIT_RETURN_PARITY_ERR_HOLD_OUT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DSTL_DSTLERRRPT_CHANA_CREDIT_RETURN_PARITY_ERR_HOLD_OUT(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DSTL_DSTLERRRPT));
+#endif
+    return i_data.extractToRight<DSTL_DSTLERRRPT_CHANA_CREDIT_RETURN_PARITY_ERR_HOLD_OUT,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DSTL_DSTLERRRPT_CHANA_CREDIT_RETURN_PARITY_ERR_HOLD_OUT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_DSTL_DSTLERRRPT_CHANA_CREDIT_RETURN_PARITY_ERR_HOLD_OUT(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DSTL_DSTLERRRPT));
+#endif
+    return i_data.getBit<DSTL_DSTLERRRPT_CHANA_CREDIT_RETURN_PARITY_ERR_HOLD_OUT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DSTL_DSTLERRRPT_CHANA_CREDIT_RETURN_PARITY_ERR_HOLD_OUT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DSTL_DSTLERRRPT_CHANB_CREDIT_RETURN_PARITY_ERR_HOLD_OUT(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DSTL_DSTLERRRPT));
+#endif
+    return o_data.insertFromRight<DSTL_DSTLERRRPT_CHANB_CREDIT_RETURN_PARITY_ERR_HOLD_OUT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DSTL_DSTLERRRPT_CHANB_CREDIT_RETURN_PARITY_ERR_HOLD_OUT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DSTL_DSTLERRRPT_CHANB_CREDIT_RETURN_PARITY_ERR_HOLD_OUT(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DSTL_DSTLERRRPT));
+#endif
+    return o_data.insertFromRight<DSTL_DSTLERRRPT_CHANB_CREDIT_RETURN_PARITY_ERR_HOLD_OUT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DSTL_DSTLERRRPT_CHANB_CREDIT_RETURN_PARITY_ERR_HOLD_OUT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DSTL_DSTLERRRPT_CHANB_CREDIT_RETURN_PARITY_ERR_HOLD_OUT(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DSTL_DSTLERRRPT));
+#endif
+    return o_data.setBit<DSTL_DSTLERRRPT_CHANB_CREDIT_RETURN_PARITY_ERR_HOLD_OUT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DSTL_DSTLERRRPT_CHANB_CREDIT_RETURN_PARITY_ERR_HOLD_OUT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_DSTL_DSTLERRRPT_CHANB_CREDIT_RETURN_PARITY_ERR_HOLD_OUT(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DSTL_DSTLERRRPT));
+#endif
+    return o_data.clearBit<DSTL_DSTLERRRPT_CHANB_CREDIT_RETURN_PARITY_ERR_HOLD_OUT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DSTL_DSTLERRRPT_CHANB_CREDIT_RETURN_PARITY_ERR_HOLD_OUT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DSTL_DSTLERRRPT_CHANB_CREDIT_RETURN_PARITY_ERR_HOLD_OUT(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DSTL_DSTLERRRPT));
+#endif
+    return i_data.extractToRight<DSTL_DSTLERRRPT_CHANB_CREDIT_RETURN_PARITY_ERR_HOLD_OUT,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DSTL_DSTLERRRPT_CHANB_CREDIT_RETURN_PARITY_ERR_HOLD_OUT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_DSTL_DSTLERRRPT_CHANB_CREDIT_RETURN_PARITY_ERR_HOLD_OUT(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DSTL_DSTLERRRPT));
+#endif
+    return i_data.getBit<DSTL_DSTLERRRPT_CHANB_CREDIT_RETURN_PARITY_ERR_HOLD_OUT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DSTL_DSTLERRRPT_CHANB_CREDIT_RETURN_PARITY_ERR_HOLD_OUT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
 static inline fapi2::buffer<uint64_t>& SET_DSTL_DSTLERRRPT_SUBCHANNEL_A_FAIL_STATE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -4393,6 +4583,95 @@ static inline bool GET_DSTL_DSTLERRRPT_SUBCHANNEL_B_FAIL_STATE(fapi2::buffer<uin
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     FAPI_ERR("Invalid dial access DSTL_DSTLERRRPT_SUBCHANNEL_B_FAIL_STATE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_DSTL_DSTLFIRACT1(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = DSTL_DSTLFIRACT1;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_DSTL_DSTLFIRACT1(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = DSTL_DSTLFIRACT1;
+#endif
+    return fapi2::getScom(i_target, DSTL_DSTLFIRACT1, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_DSTL_DSTLFIRACT1(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(DSTL_DSTLFIRACT1));
+#endif
+    return fapi2::putScom(i_target, DSTL_DSTLFIRACT1, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+static inline fapi2::buffer<uint64_t>& SET_DSTL_DSTLFIRACT1_DSTLFIRACT1_ACTION_1(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DSTL_DSTLFIRACT1));
+#endif
+    return o_data.insertFromRight<DSTL_DSTLFIRACT1_DSTLFIRACT1_ACTION_1,
+           DSTL_DSTLFIRACT1_DSTLFIRACT1_ACTION_1_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DSTL_DSTLFIRACT1_DSTLFIRACT1_ACTION_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DSTL_DSTLFIRACT1_DSTLFIRACT1_ACTION_1(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DSTL_DSTLFIRACT1));
+#endif
+    return o_data.insertFromRight<DSTL_DSTLFIRACT1_DSTLFIRACT1_ACTION_1,
+           DSTL_DSTLFIRACT1_DSTLFIRACT1_ACTION_1_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DSTL_DSTLFIRACT1_DSTLFIRACT1_ACTION_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DSTL_DSTLFIRACT1_DSTLFIRACT1_ACTION_1(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DSTL_DSTLFIRACT1));
+#endif
+    return i_data.extractToRight<DSTL_DSTLFIRACT1_DSTLFIRACT1_ACTION_1,
+           DSTL_DSTLFIRACT1_DSTLFIRACT1_ACTION_1_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DSTL_DSTLFIRACT1_DSTLFIRACT1_ACTION_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

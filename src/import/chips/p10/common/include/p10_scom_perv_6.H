@@ -155,9 +155,11 @@ static const uint32_t CPLT_CTRL1_REGION13_FENCE_DC = 17;
 static const uint32_t CPLT_CTRL1_REGION14_FENCE_DC = 18;
 // perv/reg00008.H
 
-static const uint64_t DPLL_CNTL_NEST_REGS_CTRL_RW = 0x00000152ull;
-static const uint64_t DPLL_CNTL_NEST_REGS_CTRL_WO_CLEAR = 0x00000053ull;
-static const uint64_t DPLL_CNTL_NEST_REGS_CTRL_WO_OR = 0x00000054ull;
+//ERRCODE: // Some of the name targets not found in address targets: perv
+
+static const uint64_t DPLL_CNTL_NEST_REGS_CTRL_RW = 0x00060152ull;
+static const uint64_t DPLL_CNTL_NEST_REGS_CTRL_WO_CLEAR = 0x00060153ull;
+static const uint64_t DPLL_CNTL_NEST_REGS_CTRL_WO_OR = 0x00060154ull;
 
 static const uint32_t DPLL_CNTL_NEST_REGS_CTRL_DPLL_LOCK_SEL = 0;
 static const uint32_t DPLL_CNTL_NEST_REGS_CTRL_ENABLE_JUMP_PROTECT = 1;
@@ -363,7 +365,7 @@ static const uint32_t L3TRA3_TR0_CONFIG_2_B_LEN = 24;
 
 static const uint64_t LOCAL_XSTOP_MASK_RW = 0x00040043ull;
 static const uint64_t LOCAL_XSTOP_MASK_WO_CLEAR = 0x00040063ull;
-static const uint64_t LOCAL_XSTOP_MASK_WO_OR = 0x00040015ull;
+static const uint64_t LOCAL_XSTOP_MASK_WO_OR = 0x00040053ull;
 
 static const uint32_t LOCAL_XSTOP_MASK_01 = 1;
 static const uint32_t LOCAL_XSTOP_MASK_02 = 2;
@@ -736,6 +738,8 @@ static const uint32_t TRA0_TR1_CONFIG_TRACE_RUN_HOLD_OFF = 18;
 static const uint32_t TRA0_TR1_CONFIG_TRACE_RUN_STATUS = 19;
 static const uint32_t TRA0_TR1_CONFIG_TRACE_RUN_STICKY = 20;
 static const uint32_t TRA0_TR1_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
+static const uint32_t TRA0_TR1_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT = 22;
+static const uint32_t TRA0_TR1_CONFIG_MASTER_CLOCK_ENABLE_INT = 23;
 // perv/reg00008.H
 
 static const uint64_t TRA1_TR0_CONFIG = 0x00010482ull;
@@ -754,6 +758,8 @@ static const uint32_t TRA1_TR0_CONFIG_TRACE_RUN_HOLD_OFF = 18;
 static const uint32_t TRA1_TR0_CONFIG_TRACE_RUN_STATUS = 19;
 static const uint32_t TRA1_TR0_CONFIG_TRACE_RUN_STICKY = 20;
 static const uint32_t TRA1_TR0_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
+static const uint32_t TRA1_TR0_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT = 22;
+static const uint32_t TRA1_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT = 23;
 // perv/reg00008.H
 
 static const uint64_t TRA1_TR1_CONFIG_3 = 0x000104c6ull;

@@ -54,6 +54,20 @@ static const uint32_t CLOCK_STAT_NSL_UNIT13_NSL = 17;
 static const uint32_t CLOCK_STAT_NSL_UNIT14_NSL = 18;
 // pauc/reg00003.H
 
+static const uint64_t DL_PPE_WRAP_ARB_CSDR = 0x10012c4eull;
+
+static const uint32_t DL_PPE_WRAP_ARB_CSDR_CSDR_SRAM_DATA = 0;
+static const uint32_t DL_PPE_WRAP_ARB_CSDR_CSDR_SRAM_DATA_LEN = 64;
+// pauc/reg00003.H
+
+static const uint64_t DL_PPE_WRAP_XIDBGINF = 0x10012c5full;
+
+static const uint32_t DL_PPE_WRAP_XIDBGINF_SRR0 = 0;
+static const uint32_t DL_PPE_WRAP_XIDBGINF_SRR0_LEN = 30;
+static const uint32_t DL_PPE_WRAP_XIDBGINF_LR = 32;
+static const uint32_t DL_PPE_WRAP_XIDBGINF_LR_LEN = 32;
+// pauc/reg00003.H
+
 static const uint64_t EPS_FIR_ANY_LOCAL_ERR_MASK = 0x10040080ull;
 
 static const uint32_t EPS_FIR_ANY_LOCAL_ERR_MASK_XSTOP_TO_PCB = 0;
@@ -243,24 +257,29 @@ static const uint64_t PHASE_COUNTER_RESET = 0x10030028ull;
 static const uint32_t PHASE_COUNTER_RESET_PHASECOUNTER_RESET = 0;
 // pauc/reg00003.H
 
+static const uint64_t PHY_PPE_WRAP_ARB_CSDR = 0x10012c0eull;
+
+static const uint32_t PHY_PPE_WRAP_ARB_CSDR_CSDR_SRAM_DATA = 0;
+static const uint32_t PHY_PPE_WRAP_ARB_CSDR_CSDR_SRAM_DATA_LEN = 64;
+// pauc/reg00003.H
+
+static const uint64_t PHY_PPE_WRAP_MIB_XISGB = 0x10012c18ull;
+
+static const uint32_t PHY_PPE_WRAP_MIB_XISGB_SGB_STORE_ADDRESS = 0;
+static const uint32_t PHY_PPE_WRAP_MIB_XISGB_SGB_STORE_ADDRESS_LEN = 32;
+static const uint32_t PHY_PPE_WRAP_MIB_XISGB_MEM_IMPRECISE_ERROR_PENDING = 35;
+static const uint32_t PHY_PPE_WRAP_MIB_XISGB_SGB_BYTE_VALID = 36;
+static const uint32_t PHY_PPE_WRAP_MIB_XISGB_SGB_BYTE_VALID_LEN = 4;
+static const uint32_t PHY_PPE_WRAP_MIB_XISGB_SGB_FLUSH_PENDING = 63;
+// pauc/reg00003.H
+
+static const uint64_t PHY_PPE_WRAP_SCOM_WORK_REG1 = 0x10012c21ull;
+
+static const uint32_t PHY_PPE_WRAP_SCOM_WORK_REG1_SCOM_PPE_WORK1 = 0;
+static const uint32_t PHY_PPE_WRAP_SCOM_WORK_REG1_SCOM_PPE_WORK1_LEN = 32;
+// pauc/reg00003.H
+
 static const uint64_t PLL_LOCK_REG = 0x100f0019ull;
-// pauc/reg00003.H
-
-static const uint64_t REGS_TX_IMPCAL2_PB = 0x800f0c0010012c3full;
-// pauc/reg00003.H
-
-static const uint64_t REGS_TX_IMPCAL_SWO6_PB = 0x800f5c0010012c3full;
-
-static const uint32_t REGS_TX_IMPCAL_SWO6_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XP_0_15 = 48;
-static const uint32_t REGS_TX_IMPCAL_SWO6_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XP_0_15_LEN = 16;
-// pauc/reg00003.H
-
-static const uint64_t SCOM_PPE_FLAGS_RW = 0x10012c23ull;
-static const uint64_t SCOM_PPE_FLAGS_WO_CLEAR = 0x10012c25ull;
-static const uint64_t SCOM_PPE_FLAGS_WO_OR = 0x10012c24ull;
-
-static const uint32_t SCOM_PPE_FLAGS_SCOM_PPE_FLAGS_FIELD = 0;
-static const uint32_t SCOM_PPE_FLAGS_SCOM_PPE_FLAGS_FIELD_LEN = 16;
 // pauc/reg00003.H
 
 static const uint64_t SPATTN_MASK_RW = 0x10040042ull;
@@ -310,6 +329,24 @@ static const uint32_t TRA0_TR0_CONFIG_3_C = 0;
 static const uint32_t TRA0_TR0_CONFIG_3_C_LEN = 24;
 static const uint32_t TRA0_TR0_CONFIG_3_D = 24;
 static const uint32_t TRA0_TR0_CONFIG_3_D_LEN = 24;
+// pauc/reg00003.H
+
+static const uint64_t TXIRLM_REGS_SPARE_MODE_PB = 0x800f7c0010012c3full;
+
+static const uint32_t TXIRLM_REGS_SPARE_MODE_PB_0 = 48;
+static const uint32_t TXIRLM_REGS_SPARE_MODE_PB_1 = 49;
+static const uint32_t TXIRLM_REGS_SPARE_MODE_PB_2 = 50;
+static const uint32_t TXIRLM_REGS_SPARE_MODE_PB_3 = 51;
+static const uint32_t TXIRLM_REGS_SPARE_MODE_PB_4 = 52;
+static const uint32_t TXIRLM_REGS_SPARE_MODE_PB_5 = 53;
+static const uint32_t TXIRLM_REGS_SPARE_MODE_PB_6 = 54;
+static const uint32_t TXIRLM_REGS_SPARE_MODE_PB_7 = 55;
+// pauc/reg00003.H
+
+static const uint64_t TXIRLM_REGS_TX_IMPCAL_SWO7_PB = 0x800f640010012c3full;
+
+static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO7_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XP_16_31 = 48;
+static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO7_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XP_16_31_LEN = 16;
 // pauc/reg00003.H
 
 }

@@ -38,7 +38,7 @@ namespace mcc
 static const uint64_t DSTL_DSTLFIRACT0 = 0x0c010d06ull;
 
 static const uint32_t DSTL_DSTLFIRACT0_DSTLFIRACT0_ACTION_0 = 0;
-static const uint32_t DSTL_DSTLFIRACT0_DSTLFIRACT0_ACTION_0_LEN = 35;
+static const uint32_t DSTL_DSTLFIRACT0_DSTLFIRACT0_ACTION_0_LEN = 37;
 // mcc/reg00012.H
 
 static const uint64_t DSTL_DSTLPSAVE1 = 0x0c010d13ull;

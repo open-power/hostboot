@@ -61,9 +61,11 @@ static const uint32_t DEVICE_ID_REG_SOCKET_ID_LEN = 3;
 static const uint32_t DEVICE_ID_REG_CHIPPOS_ID = 39;
 // perv/reg00004.H
 
-static const uint64_t DPLL_CNTL_PAU_REGS_CTRL_RW = 0x00000052ull;
-static const uint64_t DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR = 0x00000053ull;
-static const uint64_t DPLL_CNTL_PAU_REGS_CTRL_WO_OR = 0x00000054ull;
+//ERRCODE: // Some of the name targets not found in address targets: perv
+
+static const uint64_t DPLL_CNTL_PAU_REGS_CTRL_RW = 0x00060052ull;
+static const uint64_t DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR = 0x00060053ull;
+static const uint64_t DPLL_CNTL_PAU_REGS_CTRL_WO_OR = 0x00060054ull;
 
 static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_DPLL_LOCK_SEL = 0;
 static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_ENABLE_JUMP_PROTECT = 1;
@@ -323,6 +325,8 @@ static const uint32_t L3TRA2_TR0_CONFIG_TRACE_RUN_HOLD_OFF = 18;
 static const uint32_t L3TRA2_TR0_CONFIG_TRACE_RUN_STATUS = 19;
 static const uint32_t L3TRA2_TR0_CONFIG_TRACE_RUN_STICKY = 20;
 static const uint32_t L3TRA2_TR0_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
+static const uint32_t L3TRA2_TR0_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT = 22;
+static const uint32_t L3TRA2_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT = 23;
 // perv/reg00004.H
 
 static const uint64_t L3TRA2_TR1_CONFIG_2 = 0x000182a5ull;
@@ -357,6 +361,8 @@ static const uint32_t L3TRA3_TR1_CONFIG_TRACE_RUN_HOLD_OFF = 18;
 static const uint32_t L3TRA3_TR1_CONFIG_TRACE_RUN_STATUS = 19;
 static const uint32_t L3TRA3_TR1_CONFIG_TRACE_RUN_STICKY = 20;
 static const uint32_t L3TRA3_TR1_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
+static const uint32_t L3TRA3_TR1_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT = 22;
+static const uint32_t L3TRA3_TR1_CONFIG_MASTER_CLOCK_ENABLE_INT = 23;
 // perv/reg00004.H
 
 static const uint64_t LOCAL_XSTOP = 0x00040003ull;
@@ -741,6 +747,8 @@ static const uint32_t TRA4_TR0_CONFIG_TRACE_RUN_HOLD_OFF = 18;
 static const uint32_t TRA4_TR0_CONFIG_TRACE_RUN_STATUS = 19;
 static const uint32_t TRA4_TR0_CONFIG_TRACE_RUN_STICKY = 20;
 static const uint32_t TRA4_TR0_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
+static const uint32_t TRA4_TR0_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT = 22;
+static const uint32_t TRA4_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT = 23;
 // perv/reg00005.H
 
 static const uint64_t TRA4_TR0_CONFIG_5 = 0x00010608ull;
@@ -782,6 +790,8 @@ static const uint32_t TRA5_TR1_CONFIG_TRACE_RUN_HOLD_OFF = 18;
 static const uint32_t TRA5_TR1_CONFIG_TRACE_RUN_STATUS = 19;
 static const uint32_t TRA5_TR1_CONFIG_TRACE_RUN_STICKY = 20;
 static const uint32_t TRA5_TR1_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
+static const uint32_t TRA5_TR1_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT = 22;
+static const uint32_t TRA5_TR1_CONFIG_MASTER_CLOCK_ENABLE_INT = 23;
 // perv/reg00005.H
 
 static const uint64_t TRA5_TR1_CONFIG_3 = 0x000106c6ull;

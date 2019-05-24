@@ -439,6 +439,12 @@ static const uint32_t SCOMFIR_MCFGPM1_GROUP_SIZE = 25;
 static const uint32_t SCOMFIR_MCFGPM1_GROUP_SIZE_LEN = 15;
 // mc/reg00000.H
 
+static const uint64_t SCOMFIR_MCFIRACT2 = 0x0c010c09ull;
+
+static const uint32_t SCOMFIR_MCFIRACT2_MCFIRACT2_ACTION_2 = 0;
+static const uint32_t SCOMFIR_MCFIRACT2_MCFIRACT2_ACTION_2_LEN = 24;
+// mc/reg00000.H
+
 static const uint64_t SCOMFIR_MCMODE2 = 0x0c010c13ull;
 
 static const uint32_t SCOMFIR_MCMODE2_FORCE_SFSTAT_ACTIVE = 0;

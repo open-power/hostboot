@@ -71,14 +71,14 @@ static const uint32_t AXON_EPS_DBG_XTRA_TRACE_MODE_XTRA_TRACE_MODE_DATA_LEN = 42
 
 static const uint64_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5 = 0x18040085ull;
 
-static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_ANY_XSTOP_ERR = 0;
-static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_ANY_RECOV_ERR = 1;
-static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_ANY_SPATTN_ERR = 2;
-static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_ANY_LXSTOP_ERR = 3;
-static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_ANY_HOSTATTN_ERR = 4;
-static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_SYSTEM_XSTOP = 5;
-static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_OOB1 = 6;
-static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_DBG_FIR_XSTOP_ON_TRIG = 7;
+static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_XSTOP_ERR = 0;
+static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_RECOV_ERR = 1;
+static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_SPATTN_ERR = 2;
+static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_LXSTOP_ERR = 3;
+static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_HOSTATTN_ERR = 4;
+static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_SYS_XSTOP_ERR = 5;
+static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_OOB1_ERR = 6;
+static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_DBG_TRIG_ERR = 7;
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP01 = 12;
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP02 = 13;
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP03 = 14;
@@ -169,6 +169,31 @@ static const uint32_t AXON_OPCG_CAPT3_12ODD = 59;
 static const uint32_t AXON_OPCG_CAPT3_12ODD_LEN = 5;
 // iohs/reg00064.H
 
+static const uint64_t AXON_XSTOP4 = 0x18030014ull;
+
+static const uint32_t AXON_XSTOP4_XSTOP4_MASK_B = 0;
+static const uint32_t AXON_XSTOP4_ALIGNED_XSTOP4 = 1;
+static const uint32_t AXON_XSTOP4_TRIGGER_OPCG_ON_XSTOP4 = 2;
+static const uint32_t AXON_XSTOP4_XSTOP4_WAIT_ALLWAYS = 3;
+static const uint32_t AXON_XSTOP4_XSTOP4_PERV = 4;
+static const uint32_t AXON_XSTOP4_XSTOP4_UNIT1 = 5;
+static const uint32_t AXON_XSTOP4_XSTOP4_UNIT2 = 6;
+static const uint32_t AXON_XSTOP4_XSTOP4_UNIT3 = 7;
+static const uint32_t AXON_XSTOP4_XSTOP4_UNIT4 = 8;
+static const uint32_t AXON_XSTOP4_XSTOP4_UNIT5 = 9;
+static const uint32_t AXON_XSTOP4_XSTOP4_UNIT6 = 10;
+static const uint32_t AXON_XSTOP4_XSTOP4_UNIT7 = 11;
+static const uint32_t AXON_XSTOP4_XSTOP4_UNIT8 = 12;
+static const uint32_t AXON_XSTOP4_XSTOP4_UNIT9 = 13;
+static const uint32_t AXON_XSTOP4_XSTOP4_UNIT10 = 14;
+static const uint32_t AXON_XSTOP4_XSTOP4_UNIT11 = 15;
+static const uint32_t AXON_XSTOP4_XSTOP4_UNIT12 = 16;
+static const uint32_t AXON_XSTOP4_XSTOP4_UNIT13 = 17;
+static const uint32_t AXON_XSTOP4_XSTOP4_UNIT14 = 18;
+static const uint32_t AXON_XSTOP4_XSTOP4_WAIT_CYCLES = 48;
+static const uint32_t AXON_XSTOP4_XSTOP4_WAIT_CYCLES_LEN = 12;
+// iohs/reg00064.H
+
 static const uint64_t DLP_DLL_STATUS = 0x18011028ull;
 
 static const uint32_t DLP_DLL_STATUS_0_CURRENT_STATE = 4;
@@ -189,8 +214,12 @@ static const uint32_t DLP_DLL_STATUS_1_OPTICS_IRQ = 41;
 static const uint32_t DLP_DLL_STATUS_1_TRAINING = 42;
 static const uint32_t DLP_DLL_STATUS_1_MAX_PKT_TIMER = 43;
 static const uint32_t DLP_DLL_STATUS_1_MAX_PKT_TIMER_LEN = 5;
-static const uint32_t DLP_DLL_STATUS_0_LINK_CAP_VALID = 62;
-static const uint32_t DLP_DLL_STATUS_1_LINK_CAP_VALID = 63;
+static const uint32_t DLP_DLL_STATUS_0_LINK_UP = 48;
+static const uint32_t DLP_DLL_STATUS_1_LINK_UP = 49;
+static const uint32_t DLP_DLL_STATUS_0_PSAVE_STATE = 56;
+static const uint32_t DLP_DLL_STATUS_0_PSAVE_STATE_LEN = 4;
+static const uint32_t DLP_DLL_STATUS_1_PSAVE_STATE = 60;
+static const uint32_t DLP_DLL_STATUS_1_PSAVE_STATE_LEN = 4;
 // iohs/reg00064.H
 
 static const uint64_t DLP_LINK0_ERROR_STATUS = 0x18011016ull;
@@ -490,7 +519,7 @@ static const uint32_t IOO_RX0_0_RD_5_RX_BIT_REGS_CNTL4_PL_A = 49;
 static const uint32_t IOO_RX0_0_RD_5_RX_BIT_REGS_CNTL4_PL_A_LEN = 7;
 static const uint32_t IOO_RX0_0_RD_5_RX_BIT_REGS_CNTL4_PL_B = 57;
 static const uint32_t IOO_RX0_0_RD_5_RX_BIT_REGS_CNTL4_PL_B_LEN = 7;
-// iohs/reg00064.H
+// iohs/reg00065.H
 
 static const uint64_t IOO_RX0_0_RD_5_RX_BIT_REGS_MODE2_PL = 0x8003280510012c3full;
 
@@ -809,7 +838,7 @@ static const uint64_t IOO_RX0_2_RD_0_RX_DAC_REGS_LOFF_B_CNTLX62_PL = 0x8001f00e1
 
 static const uint32_t IOO_RX0_2_RD_0_RX_DAC_REGS_LOFF_B_CNTLX62_PL_RX_BD_LATCH_DAC_N011 = 55;
 static const uint32_t IOO_RX0_2_RD_0_RX_DAC_REGS_LOFF_B_CNTLX62_PL_RX_BD_LATCH_DAC_N011_LEN = 9;
-// iohs/reg00065.H
+// iohs/reg00066.H
 
 static const uint64_t IOO_RX0_2_RD_0_RX_DAC_REGS_LOFF_B_CNTLX72_PL = 0x8002400e10012c3full;
 
@@ -1170,7 +1199,7 @@ static const uint32_t IOO_TX0_0_DD_2_TX_BIT_REGS_CNTL12_PL_EN = 49;
 static const uint32_t IOO_TX0_0_DD_2_TX_BIT_REGS_CNTL12_PL_EN_LEN = 7;
 static const uint32_t IOO_TX0_0_DD_2_TX_BIT_REGS_CNTL12_PL_SEL = 56;
 static const uint32_t IOO_TX0_0_DD_2_TX_BIT_REGS_CNTL12_PL_SEL_LEN = 7;
-// iohs/reg00066.H
+// iohs/reg00067.H
 
 static const uint64_t IOO_TX0_0_DD_2_TX_BIT_REGS_CNTL22_PL = 0x8004dc0210012c3full;
 

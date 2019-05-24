@@ -235,6 +235,31 @@ static const uint32_t TRA0_TR0_CONFIG_9_TRIG1_ERR_CMP = 35;
 static const uint32_t TRA0_TR0_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
 // mc/reg00013.H
 
+static const uint64_t XSTOP5 = 0x0c030015ull;
+
+static const uint32_t XSTOP5_XSTOP5_MASK_B = 0;
+static const uint32_t XSTOP5_ALIGNED_XSTOP5 = 1;
+static const uint32_t XSTOP5_TRIGGER_OPCG_ON_XSTOP5 = 2;
+static const uint32_t XSTOP5_XSTOP5_WAIT_ALLWAYS = 3;
+static const uint32_t XSTOP5_XSTOP5_PERV = 4;
+static const uint32_t XSTOP5_XSTOP5_UNIT1 = 5;
+static const uint32_t XSTOP5_XSTOP5_UNIT2 = 6;
+static const uint32_t XSTOP5_XSTOP5_UNIT3 = 7;
+static const uint32_t XSTOP5_XSTOP5_UNIT4 = 8;
+static const uint32_t XSTOP5_XSTOP5_UNIT5 = 9;
+static const uint32_t XSTOP5_XSTOP5_UNIT6 = 10;
+static const uint32_t XSTOP5_XSTOP5_UNIT7 = 11;
+static const uint32_t XSTOP5_XSTOP5_UNIT8 = 12;
+static const uint32_t XSTOP5_XSTOP5_UNIT9 = 13;
+static const uint32_t XSTOP5_XSTOP5_UNIT10 = 14;
+static const uint32_t XSTOP5_XSTOP5_UNIT11 = 15;
+static const uint32_t XSTOP5_XSTOP5_UNIT12 = 16;
+static const uint32_t XSTOP5_XSTOP5_UNIT13 = 17;
+static const uint32_t XSTOP5_XSTOP5_UNIT14 = 18;
+static const uint32_t XSTOP5_XSTOP5_WAIT_CYCLES = 48;
+static const uint32_t XSTOP5_XSTOP5_WAIT_CYCLES_LEN = 12;
+// mc/reg00013.H
+
 }
 }
 #include "mc/reg00013.H"

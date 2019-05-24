@@ -68,6 +68,11 @@ static const uint32_t CTRL_PROTECT_MODE_REG_READ_PROTECT_ENABLE = 0;
 static const uint32_t CTRL_PROTECT_MODE_REG_WRITE_PROTECT_ENABLE = 1;
 // pauc/reg00012.H
 
+static const uint64_t DL_PPE_WRAP_MIB_XIICAC = 0x10012c59ull;
+
+static const uint32_t DL_PPE_WRAP_MIB_XIICAC_MIB_XIMEM_MEM_IFETCH_PENDING = 35;
+// pauc/reg00012.H
+
 static const uint64_t EPS_DBG_MODE_REG = 0x100107c0ull;
 
 static const uint32_t EPS_DBG_MODE_REG_GLB_BRCST_MODE = 0;
@@ -92,14 +97,14 @@ static const uint32_t EPS_DBG_MODE_REG_INST2_CONDITION_HISTORY_STATUS_LEN = 3;
 
 static const uint64_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK5 = 0x10040085ull;
 
-static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_ANY_XSTOP_ERR = 0;
-static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_ANY_RECOV_ERR = 1;
-static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_ANY_SPATTN_ERR = 2;
-static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_ANY_LXSTOP_ERR = 3;
-static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_ANY_HOSTATTN_ERR = 4;
-static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_SYSTEM_XSTOP = 5;
-static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_OOB1 = 6;
-static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_DBG_FIR_XSTOP_ON_TRIG = 7;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_XSTOP_ERR = 0;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_RECOV_ERR = 1;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_SPATTN_ERR = 2;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_LXSTOP_ERR = 3;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_HOSTATTN_ERR = 4;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_SYS_XSTOP_ERR = 5;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_OOB1_ERR = 6;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_DBG_TRIG_ERR = 7;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP01 = 12;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP02 = 13;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP03 = 14;
@@ -172,44 +177,13 @@ static const uint64_t PCB_OPCG_STOP = 0x10030030ull;
 static const uint32_t PCB_OPCG_STOP_PCB_OPCGSTOP = 0;
 // pauc/reg00012.H
 
-static const uint64_t PPE_MIB_XIMEM = 0x10012c17ull;
-
-static const uint32_t PPE_MIB_XIMEM_ADDR = 0;
-static const uint32_t PPE_MIB_XIMEM_ADDR_LEN = 32;
-static const uint32_t PPE_MIB_XIMEM_R_NW = 32;
-static const uint32_t PPE_MIB_XIMEM_BUSY = 33;
-static const uint32_t PPE_MIB_XIMEM_IMPRECISE_ERROR_PENDING = 34;
-static const uint32_t PPE_MIB_XIMEM_BYTE_ENABLE = 35;
-static const uint32_t PPE_MIB_XIMEM_BYTE_ENABLE_LEN = 8;
-static const uint32_t PPE_MIB_XIMEM_LINE_MODE = 43;
-static const uint32_t PPE_MIB_XIMEM_ERROR = 49;
-static const uint32_t PPE_MIB_XIMEM_ERROR_LEN = 3;
-static const uint32_t PPE_MIB_XIMEM_IFETCH_PENDING = 62;
-static const uint32_t PPE_MIB_XIMEM_DATAOP_PENDING = 63;
-// pauc/reg00012.H
-
 static const uint64_t PRE_COUNTER_REG = 0x100f0028ull;
 
 static const uint32_t PRE_COUNTER_REG_PRE_COUNTER = 0;
 static const uint32_t PRE_COUNTER_REG_PRE_COUNTER_LEN = 8;
 // pauc/reg00012.H
 
-static const uint64_t REGS_ZCAL_FIR_ERROR_INJECT_PB = 0x800f980010012c3full;
-
-static const uint32_t REGS_ZCAL_FIR_ERROR_INJECT_PB_ZCAL_FIR_ERR_INJ = 48;
-static const uint32_t REGS_ZCAL_FIR_ERROR_INJECT_PB_ZCAL_FIR_ERR_INJ_LEN = 2;
-// pauc/reg00012.H
-
 static const uint64_t SCAN64CONTSCAN = 0x1003f000ull;
-// pauc/reg00012.H
-
-static const uint64_t SCOM_PPE_FUNC = 0x10012c27ull;
-
-static const uint32_t SCOM_PPE_FUNC_EOL_SLOW_TOGGLE = 0;
-static const uint32_t SCOM_PPE_FUNC_EOL_FAST_TOGGLE = 1;
-static const uint32_t SCOM_PPE_FUNC_PPE_INTERRUPT = 2;
-static const uint32_t SCOM_PPE_FUNC_PPE_FUNC_SPARES = 3;
-static const uint32_t SCOM_PPE_FUNC_PPE_FUNC_SPARES_LEN = 13;
 // pauc/reg00012.H
 
 static const uint64_t TRA0_TR1_TRACE_LO_DATA_REG = 0x10010441ull;

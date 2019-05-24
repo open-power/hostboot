@@ -102,7 +102,7 @@ static const uint64_t AXON_EPS_THERM_WSUB_CONTROL_REG = 0x18050012ull;
 
 static const uint64_t AXON_LOCAL_XSTOP_MASK_RW = 0x18040043ull;
 static const uint64_t AXON_LOCAL_XSTOP_MASK_WO_CLEAR = 0x18040063ull;
-static const uint64_t AXON_LOCAL_XSTOP_MASK_WO_OR = 0x18040015ull;
+static const uint64_t AXON_LOCAL_XSTOP_MASK_WO_OR = 0x18040053ull;
 
 static const uint32_t AXON_LOCAL_XSTOP_MASK_01 = 1;
 static const uint32_t AXON_LOCAL_XSTOP_MASK_02 = 2;

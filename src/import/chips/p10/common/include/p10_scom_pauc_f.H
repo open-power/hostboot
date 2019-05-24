@@ -84,16 +84,30 @@ static const uint32_t CPLT_CTRL5_18 = 18;
 static const uint32_t CPLT_CTRL5_19 = 19;
 // pauc/reg00015.H
 
+static const uint64_t DL_PPE_WRAP_XIRAMRA = 0x10012c51ull;
+
+static const uint32_t DL_PPE_WRAP_XIRAMRA_XCR = 1;
+static const uint32_t DL_PPE_WRAP_XIRAMRA_XCR_LEN = 3;
+static const uint32_t DL_PPE_WRAP_XIRAMRA_RAMRA_SPRG0 = 32;
+static const uint32_t DL_PPE_WRAP_XIRAMRA_RAMRA_SPRG0_LEN = 32;
+// pauc/reg00015.H
+
+static const uint64_t DL_PPE_WRAP_SCOM_WORK_REG2 = 0x10012c62ull;
+
+static const uint32_t DL_PPE_WRAP_SCOM_WORK_REG2_SCOM_PPE_WORK2 = 0;
+static const uint32_t DL_PPE_WRAP_SCOM_WORK_REG2_SCOM_PPE_WORK2_LEN = 32;
+// pauc/reg00015.H
+
 static const uint64_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2 = 0x10040082ull;
 
-static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_ANY_XSTOP_ERR = 0;
-static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_ANY_RECOV_ERR = 1;
-static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_ANY_SPATTN_ERR = 2;
-static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_ANY_LXSTOP_ERR = 3;
-static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_ANY_HOSTATTN_ERR = 4;
-static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_SYSTEM_XSTOP = 5;
-static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_OOB1 = 6;
-static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_DBG_FIR_XSTOP_ON_TRIG = 7;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_XSTOP_ERR = 0;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_RECOV_ERR = 1;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_SPATTN_ERR = 2;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_LXSTOP_ERR = 3;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_HOSTATTN_ERR = 4;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_SYS_XSTOP_ERR = 5;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_OOB1_ERR = 6;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_DBG_TRIG_ERR = 7;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP01 = 12;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP02 = 13;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP03 = 14;
@@ -147,26 +161,10 @@ static const uint32_t PB_MAILBOX_CTL_REG_B_SPARE_LEN = 4;
 static const uint64_t PB_TL_LINK_SYN_01_REG = 0x10011812ull;
 // pauc/reg00015.H
 
-static const uint64_t PPE_XIRAMDBG = 0x10012c13ull;
-
-static const uint32_t PPE_XIRAMDBG_NULL_MSR_SIBRC = 9;
-static const uint32_t PPE_XIRAMDBG_NULL_MSR_SIBRC_LEN = 3;
-static const uint32_t PPE_XIRAMDBG_NULL_MSR_WE = 14;
-static const uint32_t PPE_XIRAMDBG_NULL_MSR_LP = 20;
-static const uint32_t PPE_XIRAMDBG_PPE_XIRAMRA_SPRG0 = 32;
-static const uint32_t PPE_XIRAMDBG_PPE_XIRAMRA_SPRG0_LEN = 32;
-// pauc/reg00015.H
-
 static const uint64_t PROTECT_MODE_REG = 0x100f03feull;
 
 static const uint32_t PROTECT_MODE_REG_READ_PROTECT_ENABLE = 0;
 static const uint32_t PROTECT_MODE_REG_WRITE_PROTECT_ENABLE = 1;
-// pauc/reg00015.H
-
-static const uint64_t REGS_ZCAL_FIR_MASK_PB = 0x800f900010012c3full;
-
-static const uint32_t REGS_ZCAL_FIR_MASK_PB_ZCAL_FIR_ERRS_MASK = 48;
-static const uint32_t REGS_ZCAL_FIR_MASK_PB_ZCAL_FIR_ERRS_MASK_LEN = 2;
 // pauc/reg00015.H
 
 static const uint64_t TIMEOUT_REG = 0x100f0010ull;
@@ -176,6 +174,27 @@ static const uint64_t TRA0_TR0_CONFIG_1 = 0x10010404ull;
 
 static const uint32_t TRA0_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87 = 0;
 static const uint32_t TRA0_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN = 24;
+// pauc/reg00015.H
+
+static const uint64_t TXIRLM_REGS_TX_IMPCAL3_PB = 0x800f140010012c3full;
+// pauc/reg00015.H
+
+static const uint64_t TXIRLM_REGS_TX_IMPCAL_SWO1_PB = 0x800f340010012c3full;
+
+static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO1_PB_SWO_EN = 48;
+static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO1_PB_SWO_CAL_SEGS = 49;
+static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO1_PB_SWO_CMP_INV = 50;
+static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO1_PB_SWO_CMP_OFFSET = 51;
+static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO1_PB_SWO_CMP_RESET = 52;
+static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO1_PB_SWO_POWERDOWN = 53;
+static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO1_PB_SWO_TCOIL = 54;
+static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO1_PB_RANGE_CHECK = 56;
+static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO1_PB_CYA_DATA_INV = 57;
+static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO1_PB_TEST_OVR_2R = 58;
+static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO1_PB_TEST_OVR_1R = 59;
+static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO1_PB_TEST_OVR_4X_SEG = 60;
+static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO1_PB_TEST_CLK_DIV = 61;
+static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO1_PB_TEST_CLK_DIV_LEN = 2;
 // pauc/reg00015.H
 
 static const uint64_t VITAL_SCAN_OUT = 0x100f0017ull;

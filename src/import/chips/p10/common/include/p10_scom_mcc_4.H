@@ -99,6 +99,12 @@ static const uint32_t DSTL_DSTLCFG_RESERVED_61_63 = 61;
 static const uint32_t DSTL_DSTLCFG_RESERVED_61_63_LEN = 3;
 // mcc/reg00004.H
 
+static const uint64_t USTL_USTLFIRACT2 = 0x0c010e09ull;
+
+static const uint32_t USTL_USTLFIRACT2_USTLFIRACT2_ACTION_2 = 0;
+static const uint32_t USTL_USTLFIRACT2_USTLFIRACT2_ACTION_2_LEN = 62;
+// mcc/reg00004.H
+
 }
 }
 #include "mcc/reg00004.H"

@@ -69,9 +69,6 @@ static const uint32_t CPMS_L3_PFETCNTL_SRAM_ENABLE = 63;
 static const uint64_t EC_PC_COMMON_SPR_HMEER = 0x20020496ull;
 // c/reg00000.H
 
-static const uint64_t EC_PC_COMMON_SPR_OCC_SCOMD = 0x20020483ull;
-// c/reg00000.H
-
 static const uint64_t EC_PC_PMU_SPRCOR_INV_ERATE = 0x2002040full;
 // c/reg00000.H
 

@@ -75,9 +75,8 @@ static const uint32_t ATCL_CL_CLSCOM_MCWAT_WAT_BLOCK_WRBUF_AVAIL_LEN = 4;
 static const uint32_t ATCL_CL_CLSCOM_MCWAT_CLX_DEBUG_SUM_MASK = 36;
 static const uint32_t ATCL_CL_CLSCOM_MCWAT_CLX_DEBUG_SUM_MASK_LEN = 22;
 static const uint32_t ATCL_CL_CLSCOM_MCWAT_EN_DEBUG_OR = 58;
-static const uint32_t ATCL_CL_CLSCOM_MCWAT_RESERVED59_62 = 59;
-static const uint32_t ATCL_CL_CLSCOM_MCWAT_RESERVED59_62_LEN = 4;
-static const uint32_t ATCL_CL_CLSCOM_MCWAT_CLSTATE_INT_DEBUG_SEL = 63;
+static const uint32_t ATCL_CL_CLSCOM_MCWAT_RESERVED59_63 = 59;
+static const uint32_t ATCL_CL_CLSCOM_MCWAT_RESERVED59_63_LEN = 5;
 // mcc/reg00009.H
 
 static const uint64_t DSTL_DSTLFIRMASK_RW = 0x0c010d03ull;
@@ -85,7 +84,7 @@ static const uint64_t DSTL_DSTLFIRMASK_WO_AND = 0x0c010d04ull;
 static const uint64_t DSTL_DSTLFIRMASK_WO_OR = 0x0c010d05ull;
 
 static const uint32_t DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK = 0;
-static const uint32_t DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK_LEN = 35;
+static const uint32_t DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK_LEN = 37;
 // mcc/reg00009.H
 
 static const uint64_t DSTL_DSTLSTATUS = 0x0c010d10ull;

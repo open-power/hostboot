@@ -216,8 +216,10 @@ static const uint32_t QME_PMCRS_QME_PMCRS_DATA_LEN = 64;
 
 static const uint64_t QME_PMSRS = 0x200e0864ull;
 
-static const uint32_t QME_PMSRS_QME_PMSRS_DATA = 0;
-static const uint32_t QME_PMSRS_QME_PMSRS_DATA_LEN = 64;
+static const uint32_t QME_PMSRS_PSTATE_DATA = 0;
+static const uint32_t QME_PMSRS_PSTATE_DATA_LEN = 36;
+static const uint32_t QME_PMSRS_VERSION = 59;
+static const uint32_t QME_PMSRS_VERSION_LEN = 5;
 // c/reg00001.H
 
 static const uint64_t QME_PSCRS2 = 0x200e0858ull;

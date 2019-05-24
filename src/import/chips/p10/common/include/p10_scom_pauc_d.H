@@ -56,18 +56,6 @@ static const uint32_t CTRL_ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
 static const uint64_t EPS_DBG_DEBUG_TRACE_CONTROL = 0x100107d0ull;
 // pauc/reg00013.H
 
-static const uint64_t FIR_ACTION0_REG = 0x10012c46ull;
-
-static const uint32_t FIR_ACTION0_REG_FIR_ACTION0 = 0;
-static const uint32_t FIR_ACTION0_REG_FIR_ACTION0_LEN = 26;
-// pauc/reg00013.H
-
-static const uint64_t FIR_ACTION1_REG = 0x10012c47ull;
-
-static const uint32_t FIR_ACTION1_REG_FIR_ACTION1 = 0;
-static const uint32_t FIR_ACTION1_REG_FIR_ACTION1_LEN = 26;
-// pauc/reg00013.H
-
 static const uint64_t OPCG_CAPT1 = 0x10030010ull;
 
 static const uint32_t OPCG_CAPT1_COUNT = 0;
@@ -150,12 +138,12 @@ static const uint32_t PB_PTL_FIR_WOF_REG_PB_PTL_FIR_WOF = 0;
 static const uint32_t PB_PTL_FIR_WOF_REG_PB_PTL_FIR_WOF_LEN = 40;
 // pauc/reg00013.H
 
-static const uint64_t PPE_XIRAMRA = 0x10012c11ull;
+static const uint64_t PHY_PPE_WRAP_XIDBGPRO = 0x10012c15ull;
 
-static const uint32_t PPE_XIRAMRA_XCR = 1;
-static const uint32_t PPE_XIRAMRA_XCR_LEN = 3;
-static const uint32_t PPE_XIRAMRA_RAMRA_SPRG0 = 32;
-static const uint32_t PPE_XIRAMRA_RAMRA_SPRG0_LEN = 32;
+static const uint32_t PHY_PPE_WRAP_XIDBGPRO_SIBRC = 9;
+static const uint32_t PHY_PPE_WRAP_XIDBGPRO_SIBRC_LEN = 3;
+static const uint32_t PHY_PPE_WRAP_XIDBGPRO_WE = 14;
+static const uint32_t PHY_PPE_WRAP_XIDBGPRO_LP = 20;
 // pauc/reg00013.H
 
 static const uint64_t PRIMARY_ADDRESS_REG = 0x100f0000ull;
@@ -220,34 +208,7 @@ static const uint32_t RECOV_MASK_52 = 52;
 static const uint32_t RECOV_MASK_53 = 53;
 // pauc/reg00013.H
 
-static const uint64_t REGS_TX_IMPCAL1_PB = 0x800f040010012c3full;
-// pauc/reg00013.H
-
-static const uint64_t REGS_TX_IMPCAL_P_4X_PB = 0x800f2c0010012c3full;
-
-static const uint32_t REGS_TX_IMPCAL_P_4X_PB_TX_ZCAL_P_4X = 48;
-static const uint32_t REGS_TX_IMPCAL_P_4X_PB_TX_ZCAL_P_4X_LEN = 5;
-// pauc/reg00013.H
-
-static const uint64_t REGS_TX_IMPCAL_SWO5_PB = 0x800f540010012c3full;
-
-static const uint32_t REGS_TX_IMPCAL_SWO5_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XN_32_39 = 48;
-static const uint32_t REGS_TX_IMPCAL_SWO5_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XN_32_39_LEN = 8;
-// pauc/reg00013.H
-
-static const uint64_t REGS_ZCAL_FIR_RESET_PB = 0x800f800010012c3full;
-
-static const uint32_t REGS_ZCAL_FIR_RESET_PB_CLR_PAR_ERRS = 62;
-static const uint32_t REGS_ZCAL_FIR_RESET_PB_FIR_RESET = 63;
-// pauc/reg00013.H
-
 static const uint64_t SCAN_UPDATEDR_LONG = 0x1003b000ull;
-// pauc/reg00013.H
-
-static const uint64_t SCOM_PPE_WORK_REG2 = 0x10012c22ull;
-
-static const uint32_t SCOM_PPE_WORK_REG2_SCOM_PPE_WORK2 = 0;
-static const uint32_t SCOM_PPE_WORK_REG2_SCOM_PPE_WORK2_LEN = 32;
 // pauc/reg00013.H
 
 static const uint64_t TRA0_TR0_CONFIG_9 = 0x10010409ull;
@@ -285,6 +246,37 @@ static const uint64_t TRA0_TR1_CONFIG_0 = 0x10010443ull;
 
 static const uint32_t TRA0_TR1_CONFIG_0_CMP_MSK_LT_B_0_TO_63 = 0;
 static const uint32_t TRA0_TR1_CONFIG_0_CMP_MSK_LT_B_0_TO_63_LEN = 64;
+// pauc/reg00013.H
+
+static const uint64_t TXIRLM_REGS_TX_IMPCAL_SWO4_PB = 0x800f4c0010012c3full;
+
+static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO4_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XN_16_31 = 48;
+static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO4_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XN_16_31_LEN = 16;
+// pauc/reg00013.H
+
+static const uint64_t XSTOP5 = 0x10030015ull;
+
+static const uint32_t XSTOP5_XSTOP5_MASK_B = 0;
+static const uint32_t XSTOP5_ALIGNED_XSTOP5 = 1;
+static const uint32_t XSTOP5_TRIGGER_OPCG_ON_XSTOP5 = 2;
+static const uint32_t XSTOP5_XSTOP5_WAIT_ALLWAYS = 3;
+static const uint32_t XSTOP5_XSTOP5_PERV = 4;
+static const uint32_t XSTOP5_XSTOP5_UNIT1 = 5;
+static const uint32_t XSTOP5_XSTOP5_UNIT2 = 6;
+static const uint32_t XSTOP5_XSTOP5_UNIT3 = 7;
+static const uint32_t XSTOP5_XSTOP5_UNIT4 = 8;
+static const uint32_t XSTOP5_XSTOP5_UNIT5 = 9;
+static const uint32_t XSTOP5_XSTOP5_UNIT6 = 10;
+static const uint32_t XSTOP5_XSTOP5_UNIT7 = 11;
+static const uint32_t XSTOP5_XSTOP5_UNIT8 = 12;
+static const uint32_t XSTOP5_XSTOP5_UNIT9 = 13;
+static const uint32_t XSTOP5_XSTOP5_UNIT10 = 14;
+static const uint32_t XSTOP5_XSTOP5_UNIT11 = 15;
+static const uint32_t XSTOP5_XSTOP5_UNIT12 = 16;
+static const uint32_t XSTOP5_XSTOP5_UNIT13 = 17;
+static const uint32_t XSTOP5_XSTOP5_UNIT14 = 18;
+static const uint32_t XSTOP5_XSTOP5_WAIT_CYCLES = 48;
+static const uint32_t XSTOP5_XSTOP5_WAIT_CYCLES_LEN = 12;
 // pauc/reg00013.H
 
 }

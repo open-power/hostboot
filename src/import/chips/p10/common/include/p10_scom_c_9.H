@@ -61,6 +61,9 @@ static const uint32_t EC_PC_IMA_TRACE_BUFFERSIZE = 48;
 static const uint32_t EC_PC_IMA_TRACE_BUFFERSIZE_LEN = 3;
 // c/reg00009.H
 
+static const uint64_t EC_PC_TFX_SM = 0x2002049bull;
+// c/reg00009.H
+
 static const uint64_t EC_PC_THRCTL_TCTLCOM_HANG_CONTROL = 0x20020452ull;
 
 static const uint32_t EC_PC_THRCTL_TCTLCOM_HANG_CONTROL_CORE_HANG_LIMIT = 0;

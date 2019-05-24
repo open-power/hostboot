@@ -56,9 +56,6 @@ static const uint64_t EC_PC_COMMON_SPR_SPATTN_WO_OR = 0x20020497ull;
 static const uint64_t EC_PC_FIR_CORE_ACTION0 = 0x20020446ull;
 // c/reg00011.H
 
-static const uint64_t EC_PC_PMU_PMUC_SIER_MASK = 0x20020406ull;
-// c/reg00011.H
-
 static const uint64_t EC_PC_PMU_SPRCOR_SCOMC = 0x20020408ull;
 // c/reg00011.H
 

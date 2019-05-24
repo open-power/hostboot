@@ -41,6 +41,12 @@ static const uint32_t CRYPTO_ENCRYPT_CRYPTOKEY2B_KEY2B = 0;
 static const uint32_t CRYPTO_ENCRYPT_CRYPTOKEY2B_KEY2B_LEN = 64;
 // mcc/reg00014.H
 
+static const uint64_t USTL_USTLFIRACT1 = 0x0c010e07ull;
+
+static const uint32_t USTL_USTLFIRACT1_USTLFIRACT1_ACTION_1 = 0;
+static const uint32_t USTL_USTLFIRACT1_USTLFIRACT1_ACTION_1_LEN = 62;
+// mcc/reg00014.H
+
 static const uint64_t USTL_USTLINJ = 0x0c010e0cull;
 
 static const uint32_t USTL_USTLINJ_FAIL_RESP_TYPE = 3;

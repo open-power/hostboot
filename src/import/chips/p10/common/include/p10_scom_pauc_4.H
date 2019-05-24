@@ -54,6 +54,22 @@ static const uint32_t CLOCK_STAT_ARY_UNIT13_ARY = 17;
 static const uint32_t CLOCK_STAT_ARY_UNIT14_ARY = 18;
 // pauc/reg00004.H
 
+static const uint64_t DL_PPE_WRAP_ARB_CSCR_RW = 0x10012c4aull;
+static const uint64_t DL_PPE_WRAP_ARB_CSCR_WO_CLEAR = 0x10012c4bull;
+static const uint64_t DL_PPE_WRAP_ARB_CSCR_WO_OR = 0x10012c4cull;
+
+static const uint32_t DL_PPE_WRAP_ARB_CSCR_SRAM_ACCESS_MODE = 0;
+static const uint32_t DL_PPE_WRAP_ARB_CSCR_SRAM_SCRUB_ENABLE = 1;
+static const uint32_t DL_PPE_WRAP_ARB_CSCR_ECC_CORRECT_DIS = 2;
+static const uint32_t DL_PPE_WRAP_ARB_CSCR_ECC_DETECT_DIS = 3;
+static const uint32_t DL_PPE_WRAP_ARB_CSCR_ECC_INJECT_TYPE = 4;
+static const uint32_t DL_PPE_WRAP_ARB_CSCR_ECC_INJECT_ERR = 5;
+static const uint32_t DL_PPE_WRAP_ARB_CSCR_SPARE_6_7 = 6;
+static const uint32_t DL_PPE_WRAP_ARB_CSCR_SPARE_6_7_LEN = 2;
+static const uint32_t DL_PPE_WRAP_ARB_CSCR_SRAM_SCRUB_INDEX = 47;
+static const uint32_t DL_PPE_WRAP_ARB_CSCR_SRAM_SCRUB_INDEX_LEN = 13;
+// pauc/reg00004.H
+
 static const uint64_t EPS_THERM_WSUB_INJECT_REG = 0x10050011ull;
 
 static const uint32_t EPS_THERM_WSUB_INJECT_REG_TRIP = 0;
@@ -98,20 +114,28 @@ static const uint64_t PCB_OPCG_GO = 0x10030020ull;
 static const uint32_t PCB_OPCG_GO_PCB_OPCGGO = 0;
 // pauc/reg00004.H
 
-static const uint64_t PPE_XIDBGINF = 0x10012c1full;
+static const uint64_t PHY_PPE_WRAP_ARB_CSCR_RW = 0x10012c0aull;
+static const uint64_t PHY_PPE_WRAP_ARB_CSCR_WO_CLEAR = 0x10012c0bull;
+static const uint64_t PHY_PPE_WRAP_ARB_CSCR_WO_OR = 0x10012c0cull;
 
-static const uint32_t PPE_XIDBGINF_SRR0 = 0;
-static const uint32_t PPE_XIDBGINF_SRR0_LEN = 30;
-static const uint32_t PPE_XIDBGINF_LR = 32;
-static const uint32_t PPE_XIDBGINF_LR_LEN = 32;
+static const uint32_t PHY_PPE_WRAP_ARB_CSCR_SRAM_ACCESS_MODE = 0;
+static const uint32_t PHY_PPE_WRAP_ARB_CSCR_SRAM_SCRUB_ENABLE = 1;
+static const uint32_t PHY_PPE_WRAP_ARB_CSCR_ECC_CORRECT_DIS = 2;
+static const uint32_t PHY_PPE_WRAP_ARB_CSCR_ECC_DETECT_DIS = 3;
+static const uint32_t PHY_PPE_WRAP_ARB_CSCR_ECC_INJECT_TYPE = 4;
+static const uint32_t PHY_PPE_WRAP_ARB_CSCR_ECC_INJECT_ERR = 5;
+static const uint32_t PHY_PPE_WRAP_ARB_CSCR_SPARE_6_7 = 6;
+static const uint32_t PHY_PPE_WRAP_ARB_CSCR_SPARE_6_7_LEN = 2;
+static const uint32_t PHY_PPE_WRAP_ARB_CSCR_SRAM_SCRUB_INDEX = 47;
+static const uint32_t PHY_PPE_WRAP_ARB_CSCR_SRAM_SCRUB_INDEX_LEN = 13;
 // pauc/reg00004.H
 
-static const uint64_t REGS_TX_IMPCAL_SWO2_PB = 0x800f3c0010012c3full;
+static const uint64_t PHY_PPE_WRAP_XIRAMGA = 0x10012c12ull;
 
-static const uint32_t REGS_TX_IMPCAL_SWO2_PB_IN_VAL = 48;
-static const uint32_t REGS_TX_IMPCAL_SWO2_PB_IN_VAL_LEN = 7;
-static const uint32_t REGS_TX_IMPCAL_SWO2_PB_AX_VAL = 55;
-static const uint32_t REGS_TX_IMPCAL_SWO2_PB_AX_VAL_LEN = 7;
+static const uint32_t PHY_PPE_WRAP_XIRAMGA_GA_IR = 0;
+static const uint32_t PHY_PPE_WRAP_XIRAMGA_GA_IR_LEN = 32;
+static const uint32_t PHY_PPE_WRAP_XIRAMGA_RA_SPRG0 = 32;
+static const uint32_t PHY_PPE_WRAP_XIRAMGA_RA_SPRG0_LEN = 32;
 // pauc/reg00004.H
 
 static const uint64_t TRA0_TR0_TRACE_LO_DATA_REG = 0x10010401ull;
@@ -143,6 +167,24 @@ static const uint32_t TRA1_TR0_CONFIG_2_A = 0;
 static const uint32_t TRA1_TR0_CONFIG_2_A_LEN = 24;
 static const uint32_t TRA1_TR0_CONFIG_2_B = 24;
 static const uint32_t TRA1_TR0_CONFIG_2_B_LEN = 24;
+// pauc/reg00004.H
+
+static const uint64_t TXIRLM_REGS_TX_IMPCAL1_PB = 0x800f040010012c3full;
+// pauc/reg00004.H
+
+static const uint64_t TXIRLM_REGS_TX_IMPCAL_NVAL_PB = 0x800f1c0010012c3full;
+
+static const uint32_t TXIRLM_REGS_TX_IMPCAL_NVAL_PB_TX_ZCAL_N = 48;
+static const uint32_t TXIRLM_REGS_TX_IMPCAL_NVAL_PB_TX_ZCAL_N_LEN = 9;
+// pauc/reg00004.H
+
+static const uint64_t TXIRLM_REGS_TX_IMPCAL_SWO3_PB = 0x800f440010012c3full;
+
+static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO3_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XN_0_15 = 48;
+static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO3_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XN_0_15_LEN = 16;
+// pauc/reg00004.H
+
+static const uint64_t TXIRLM_REGS_ZCAL_FIR_PB = 0x800f880010012c3full;
 // pauc/reg00004.H
 
 static const uint64_t XSTOP1 = 0x1003000cull;

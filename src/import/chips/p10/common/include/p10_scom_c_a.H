@@ -45,9 +45,6 @@ static const uint64_t EC_PC_FIR_RAM_STATUS = 0x20020450ull;
 // c/reg00010.H
 
 static const uint64_t EC_PC_PMC_UPDATE = 0x20020414ull;
-
-static const uint32_t EC_PC_PMC_UPDATE_MSR_S_ON_SRESET = 0;
-static const uint32_t EC_PC_PMC_UPDATE_DIS_XFER_TFAC = 1;
 // c/reg00010.H
 
 static const uint64_t EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG = 0x20020a81ull;

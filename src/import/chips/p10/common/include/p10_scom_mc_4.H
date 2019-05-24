@@ -83,6 +83,12 @@ static const uint32_t MBA_SCOMFIR_MCWATDATA3_MASK_A = 22;
 static const uint32_t MBA_SCOMFIR_MCWATDATA3_MASK_A_LEN = 22;
 // mc/reg00004.H
 
+static const uint64_t MBA_SCOMFIR_MISCFIRACT2 = 0x0c010f09ull;
+
+static const uint32_t MBA_SCOMFIR_MISCFIRACT2_MISCFIRACT2_FIR_ACTION2 = 0;
+static const uint32_t MBA_SCOMFIR_MISCFIRACT2_MISCFIRACT2_FIR_ACTION2_LEN = 12;
+// mc/reg00004.H
+
 static const uint64_t OPCG_REG2 = 0x0c030004ull;
 
 static const uint32_t OPCG_REG2_OPCG_GO2 = 0;

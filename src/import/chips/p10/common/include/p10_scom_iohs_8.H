@@ -137,6 +137,28 @@ static const uint32_t DLP_LINK0_RX_LANE_CONTROL_FAILED = 48;
 static const uint32_t DLP_LINK0_RX_LANE_CONTROL_FAILED_LEN = 9;
 // iohs/reg00034.H
 
+static const uint64_t DLP_LINK1_EDPL_STATUS = 0x18011025ull;
+
+static const uint32_t DLP_LINK1_EDPL_STATUS_0 = 0;
+static const uint32_t DLP_LINK1_EDPL_STATUS_0_LEN = 4;
+static const uint32_t DLP_LINK1_EDPL_STATUS_1 = 7;
+static const uint32_t DLP_LINK1_EDPL_STATUS_1_LEN = 4;
+static const uint32_t DLP_LINK1_EDPL_STATUS_2 = 14;
+static const uint32_t DLP_LINK1_EDPL_STATUS_2_LEN = 4;
+static const uint32_t DLP_LINK1_EDPL_STATUS_3 = 21;
+static const uint32_t DLP_LINK1_EDPL_STATUS_3_LEN = 4;
+static const uint32_t DLP_LINK1_EDPL_STATUS_4 = 28;
+static const uint32_t DLP_LINK1_EDPL_STATUS_4_LEN = 4;
+static const uint32_t DLP_LINK1_EDPL_STATUS_5 = 35;
+static const uint32_t DLP_LINK1_EDPL_STATUS_5_LEN = 4;
+static const uint32_t DLP_LINK1_EDPL_STATUS_6 = 42;
+static const uint32_t DLP_LINK1_EDPL_STATUS_6_LEN = 4;
+static const uint32_t DLP_LINK1_EDPL_STATUS_7 = 49;
+static const uint32_t DLP_LINK1_EDPL_STATUS_7_LEN = 4;
+static const uint32_t DLP_LINK1_EDPL_STATUS_8 = 56;
+static const uint32_t DLP_LINK1_EDPL_STATUS_8_LEN = 4;
+// iohs/reg00034.H
+
 static const uint64_t DLP_OPTICAL_CONFIG = 0x1801100full;
 
 static const uint32_t DLP_OPTICAL_CONFIG_CONFIG_DISABLE_BAD_LANE_COUNT = 0;
@@ -478,7 +500,7 @@ static const uint64_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX23_PL = 0x8000b8031
 
 static const uint32_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX23_PL_RX_BE_LATCH_DAC_N = 55;
 static const uint32_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX23_PL_RX_BE_LATCH_DAC_N_LEN = 9;
-// iohs/reg00034.H
+// iohs/reg00035.H
 
 static const uint64_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX63_PL = 0x8001f80310012c3full;
 
@@ -796,7 +818,7 @@ static const uint64_t IOO_RX0_1_RD_5_RX_DAC_REGS_LOFF_A_CNTLX37_PL = 0x8001280f1
 
 static const uint32_t IOO_RX0_1_RD_5_RX_DAC_REGS_LOFF_A_CNTLX37_PL_RX_AD_LATCH_DAC_E010 = 55;
 static const uint32_t IOO_RX0_1_RD_5_RX_DAC_REGS_LOFF_A_CNTLX37_PL_RX_AD_LATCH_DAC_E010_LEN = 9;
-// iohs/reg00035.H
+// iohs/reg00036.H
 
 static const uint64_t IOO_RX0_1_RD_5_RX_DAC_REGS_LOFF_A_CNTLX47_PL = 0x8001780f10012c3full;
 
@@ -1108,7 +1130,7 @@ static const uint32_t IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL20_PL_SEL_LEN = 5;
 static const uint64_t IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL30_PL = 0x80051c0110012c3full;
 
 static const uint32_t IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL30_PL_TX_FORCE_HS_FFE = 48;
-// iohs/reg00036.H
+// iohs/reg00037.H
 
 static const uint64_t IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL3_PL = 0x8004440110012c3full;
 

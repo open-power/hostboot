@@ -413,8 +413,6 @@ static const uint32_t DLP_LINK0_QUALITY_RX_BW = 13;
 static const uint32_t DLP_LINK0_QUALITY_RX_BW_LEN = 11;
 static const uint32_t DLP_LINK0_QUALITY_ERROR_RATE = 25;
 static const uint32_t DLP_LINK0_QUALITY_ERROR_RATE_LEN = 23;
-static const uint32_t DLP_LINK0_QUALITY_SPARE_COUNTER_1 = 49;
-static const uint32_t DLP_LINK0_QUALITY_SPARE_COUNTER_1_LEN = 7;
 static const uint32_t DLP_LINK0_QUALITY_SPARE_COUNTER_2 = 57;
 static const uint32_t DLP_LINK0_QUALITY_SPARE_COUNTER_2_LEN = 7;
 // iohs/reg00059.H
@@ -441,6 +439,7 @@ static const uint32_t DLP_PHY_CONFIG_PRBS_CONFIG_LEN = 10;
 static const uint32_t DLP_PHY_CONFIG_PRBS_INVERT = 50;
 static const uint32_t DLP_PHY_CONFIG_LINK0_SELECT = 56;
 static const uint32_t DLP_PHY_CONFIG_LINK1_SELECT = 57;
+static const uint32_t DLP_PHY_CONFIG_PRBS15_NPRBS7 = 59;
 static const uint32_t DLP_PHY_CONFIG_PRECODER_ENABLE = 60;
 static const uint32_t DLP_PHY_CONFIG_50G_MODE = 61;
 static const uint32_t DLP_PHY_CONFIG_DL_SELECT = 62;

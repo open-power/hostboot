@@ -299,6 +299,31 @@ static const uint32_t SCOMFIR_MCFGP0_R0_MMIO_GROUP_SIZE = 54;
 static const uint32_t SCOMFIR_MCFGP0_R0_MMIO_GROUP_SIZE_LEN = 8;
 // mc/reg00011.H
 
+static const uint64_t XSTOP4 = 0x0c030014ull;
+
+static const uint32_t XSTOP4_XSTOP4_MASK_B = 0;
+static const uint32_t XSTOP4_ALIGNED_XSTOP4 = 1;
+static const uint32_t XSTOP4_TRIGGER_OPCG_ON_XSTOP4 = 2;
+static const uint32_t XSTOP4_XSTOP4_WAIT_ALLWAYS = 3;
+static const uint32_t XSTOP4_XSTOP4_PERV = 4;
+static const uint32_t XSTOP4_XSTOP4_UNIT1 = 5;
+static const uint32_t XSTOP4_XSTOP4_UNIT2 = 6;
+static const uint32_t XSTOP4_XSTOP4_UNIT3 = 7;
+static const uint32_t XSTOP4_XSTOP4_UNIT4 = 8;
+static const uint32_t XSTOP4_XSTOP4_UNIT5 = 9;
+static const uint32_t XSTOP4_XSTOP4_UNIT6 = 10;
+static const uint32_t XSTOP4_XSTOP4_UNIT7 = 11;
+static const uint32_t XSTOP4_XSTOP4_UNIT8 = 12;
+static const uint32_t XSTOP4_XSTOP4_UNIT9 = 13;
+static const uint32_t XSTOP4_XSTOP4_UNIT10 = 14;
+static const uint32_t XSTOP4_XSTOP4_UNIT11 = 15;
+static const uint32_t XSTOP4_XSTOP4_UNIT12 = 16;
+static const uint32_t XSTOP4_XSTOP4_UNIT13 = 17;
+static const uint32_t XSTOP4_XSTOP4_UNIT14 = 18;
+static const uint32_t XSTOP4_XSTOP4_WAIT_CYCLES = 48;
+static const uint32_t XSTOP4_XSTOP4_WAIT_CYCLES_LEN = 12;
+// mc/reg00011.H
+
 }
 }
 #include "mc/reg00011.H"

@@ -152,7 +152,7 @@ static const uint32_t EPS_THERM_WSUB_TIMESTAMP_COUNTER_READ_OVERFLOW_ERR = 44;
 
 static const uint64_t LOCAL_XSTOP_MASK_RW = 0x08040043ull;
 static const uint64_t LOCAL_XSTOP_MASK_WO_CLEAR = 0x08040063ull;
-static const uint64_t LOCAL_XSTOP_MASK_WO_OR = 0x08040015ull;
+static const uint64_t LOCAL_XSTOP_MASK_WO_OR = 0x08040053ull;
 
 static const uint32_t LOCAL_XSTOP_MASK_01 = 1;
 static const uint32_t LOCAL_XSTOP_MASK_02 = 2;
@@ -242,6 +242,8 @@ static const uint32_t TRA0_TR1_CONFIG_TRACE_RUN_HOLD_OFF = 18;
 static const uint32_t TRA0_TR1_CONFIG_TRACE_RUN_STATUS = 19;
 static const uint32_t TRA0_TR1_CONFIG_TRACE_RUN_STICKY = 20;
 static const uint32_t TRA0_TR1_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
+static const uint32_t TRA0_TR1_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT = 22;
+static const uint32_t TRA0_TR1_CONFIG_MASTER_CLOCK_ENABLE_INT = 23;
 // pec/reg00006.H
 
 }

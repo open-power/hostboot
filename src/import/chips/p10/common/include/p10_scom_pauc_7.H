@@ -35,6 +35,21 @@ namespace pauc
 {
 
 
+static const uint64_t DL_PPE_WRAP_SCOM_CNTL = 0x10012c60ull;
+
+static const uint32_t DL_PPE_WRAP_SCOM_CNTL_SCOM_PPE_IORESET = 0;
+static const uint32_t DL_PPE_WRAP_SCOM_CNTL_SCOM_PPE_PDWN = 1;
+static const uint32_t DL_PPE_WRAP_SCOM_CNTL_SCOM_PPE_ARB_ECC_INJECT_ERR = 2;
+static const uint32_t DL_PPE_WRAP_SCOM_CNTL_SCOM_PPE_INTERLEAVING = 3;
+static const uint32_t DL_PPE_WRAP_SCOM_CNTL_SCOM_PPE_INTERLEAVING_LEN = 2;
+static const uint32_t DL_PPE_WRAP_SCOM_CNTL_PPE_IO_VALID_ASYNC_DLY = 5;
+static const uint32_t DL_PPE_WRAP_SCOM_CNTL_PPE_IO_VALID_ASYNC_DLY_LEN = 3;
+static const uint32_t DL_PPE_WRAP_SCOM_CNTL_IO_PPE_DONE_ASYNC_DLY = 8;
+static const uint32_t DL_PPE_WRAP_SCOM_CNTL_IO_PPE_DONE_ASYNC_DLY_LEN = 3;
+static const uint32_t DL_PPE_WRAP_SCOM_CNTL_SCOM_PPE_SPARES = 11;
+static const uint32_t DL_PPE_WRAP_SCOM_CNTL_SCOM_PPE_SPARES_LEN = 5;
+// pauc/reg00007.H
+
 static const uint64_t EPS_THERM_WSUB_CONTROL_REG = 0x10050012ull;
 // pauc/reg00007.H
 
@@ -129,22 +144,6 @@ static const uint32_t OPCG_CAPT2_24_06ODD_LEN = 5;
 static const uint64_t PB_PMU1_TLPM_COUNTER = 0x1001181cull;
 // pauc/reg00007.H
 
-static const uint64_t PPE_ARB_CSCR_RW = 0x10012c0aull;
-static const uint64_t PPE_ARB_CSCR_WO_CLEAR = 0x10012c0bull;
-static const uint64_t PPE_ARB_CSCR_WO_OR = 0x10012c0cull;
-
-static const uint32_t PPE_ARB_CSCR_SRAM_ACCESS_MODE = 0;
-static const uint32_t PPE_ARB_CSCR_SRAM_SCRUB_ENABLE = 1;
-static const uint32_t PPE_ARB_CSCR_ECC_CORRECT_DIS = 2;
-static const uint32_t PPE_ARB_CSCR_ECC_DETECT_DIS = 3;
-static const uint32_t PPE_ARB_CSCR_ECC_INJECT_TYPE = 4;
-static const uint32_t PPE_ARB_CSCR_ECC_INJECT_ERR = 5;
-static const uint32_t PPE_ARB_CSCR_SPARE_6_7 = 6;
-static const uint32_t PPE_ARB_CSCR_SPARE_6_7_LEN = 2;
-static const uint32_t PPE_ARB_CSCR_SRAM_SCRUB_INDEX = 47;
-static const uint32_t PPE_ARB_CSCR_SRAM_SCRUB_INDEX_LEN = 13;
-// pauc/reg00007.H
-
 static const uint64_t RECOV_UNMASKED = 0x10040011ull;
 
 static const uint32_t RECOV_UNMASKED_RECOV_UNMASKED_IN = 1;
@@ -152,12 +151,6 @@ static const uint32_t RECOV_UNMASKED_RECOV_UNMASKED_IN_LEN = 53;
 // pauc/reg00007.H
 
 static const uint64_t SCAN_UPDATEDR = 0x1003a000ull;
-// pauc/reg00007.H
-
-static const uint64_t SCOM_PPE_WORK_REG1 = 0x10012c21ull;
-
-static const uint32_t SCOM_PPE_WORK_REG1_SCOM_PPE_WORK1 = 0;
-static const uint32_t SCOM_PPE_WORK_REG1_SCOM_PPE_WORK1_LEN = 32;
 // pauc/reg00007.H
 
 static const uint64_t SPATTN_UNMASKED = 0x10040012ull;
@@ -198,6 +191,18 @@ static const uint32_t TRA1_TR0_CONFIG_5_C = 0;
 static const uint32_t TRA1_TR0_CONFIG_5_C_LEN = 24;
 static const uint32_t TRA1_TR0_CONFIG_5_D = 24;
 static const uint32_t TRA1_TR0_CONFIG_5_D_LEN = 24;
+// pauc/reg00007.H
+
+static const uint64_t TXIRLM_REGS_TX_IMPCAL_PVAL_PB = 0x800f240010012c3full;
+
+static const uint32_t TXIRLM_REGS_TX_IMPCAL_PVAL_PB_TX_ZCAL_P = 48;
+static const uint32_t TXIRLM_REGS_TX_IMPCAL_PVAL_PB_TX_ZCAL_P_LEN = 9;
+// pauc/reg00007.H
+
+static const uint64_t TXIRLM_REGS_ZCAL_FIR_MASK_PB = 0x800f900010012c3full;
+
+static const uint32_t TXIRLM_REGS_ZCAL_FIR_MASK_PB_ZCAL_FIR_ERRS_MASK = 48;
+static const uint32_t TXIRLM_REGS_ZCAL_FIR_MASK_PB_ZCAL_FIR_ERRS_MASK_LEN = 2;
 // pauc/reg00007.H
 
 }

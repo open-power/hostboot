@@ -148,7 +148,7 @@ static const uint32_t L3TRA3_TR0_CONFIG_2_B_LEN = 24;
 
 static const uint64_t LOCAL_XSTOP_MASK_RW = 0x20040043ull;
 static const uint64_t LOCAL_XSTOP_MASK_WO_CLEAR = 0x20040063ull;
-static const uint64_t LOCAL_XSTOP_MASK_WO_OR = 0x20040015ull;
+static const uint64_t LOCAL_XSTOP_MASK_WO_OR = 0x20040053ull;
 
 static const uint32_t LOCAL_XSTOP_MASK_01 = 1;
 static const uint32_t LOCAL_XSTOP_MASK_02 = 2;

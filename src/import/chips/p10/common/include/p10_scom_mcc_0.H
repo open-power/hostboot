@@ -35,6 +35,12 @@ namespace mcc
 {
 
 
+static const uint64_t DSTL_DSTLFIRACT2 = 0x0c010d09ull;
+
+static const uint32_t DSTL_DSTLFIRACT2_DSTLFIRACT2_ACTION_2 = 0;
+static const uint32_t DSTL_DSTLFIRACT2_DSTLFIRACT2_ACTION_2_LEN = 37;
+// mcc/reg00000.H
+
 }
 }
 #include "mcc/reg00000.H"

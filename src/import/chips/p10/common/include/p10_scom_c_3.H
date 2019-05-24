@@ -67,12 +67,6 @@ static const uint32_t CPMS_CL2_PFETCNTL_VCS_PG_SEL_LEN = 4;
 static const uint32_t CPMS_CL2_PFETCNTL_SRAM_ENABLE = 63;
 // c/reg00003.H
 
-static const uint64_t EC_PC_COMMON_SPR_OCC_SCOMC = 0x20020482ull;
-
-static const uint32_t EC_PC_COMMON_SPR_OCC_SCOMC_MODE_CX_OCC_SCOMC = 54;
-static const uint32_t EC_PC_COMMON_SPR_OCC_SCOMC_MODE_CX_OCC_SCOMC_LEN = 7;
-// c/reg00003.H
-
 static const uint64_t EC_PC_COMMON_SPR_V1_HMER_RW_WAND = 0x20020493ull;
 static const uint64_t EC_PC_COMMON_SPR_V1_HMER_WO_OR = 0x2002048full;
 
@@ -359,8 +353,8 @@ static const uint32_t QME_CDBA_QME_CDBA_MESSAGE_NUMBER_LEN = 8;
 
 static const uint64_t QME_CSIR = 0x200e087cull;
 
-static const uint32_t QME_CSIR_QME_CSIR_DATA = 0;
-static const uint32_t QME_CSIR_QME_CSIR_DATA_LEN = 64;
+static const uint32_t QME_CSIR_QME_CSIR_PMSR_INSTR_DATA = 36;
+static const uint32_t QME_CSIR_QME_CSIR_PMSR_INSTR_DATA_LEN = 23;
 // c/reg00003.H
 
 }

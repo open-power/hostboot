@@ -182,13 +182,21 @@ static const uint32_t CPLT_CTRL0_FREE_USAGE_53A = 53;
 static const uint32_t CPLT_CTRL0_FREE_USAGE_54A = 54;
 static const uint32_t CPLT_CTRL0_FREE_USAGE_55A = 55;
 static const uint32_t CPLT_CTRL0_FREE_USAGE_56A = 56;
+static const uint32_t CPLT_CTRL0_TC_JTAG_TRST0_N_DC = 56;
 static const uint32_t CPLT_CTRL0_FREE_USAGE_57A = 57;
+static const uint32_t CPLT_CTRL0_TC_JTAG_TRST1_N_DC = 57;
 static const uint32_t CPLT_CTRL0_FREE_USAGE_58A = 58;
+static const uint32_t CPLT_CTRL0_TC_JTAG_TRST2_N_DC = 58;
 static const uint32_t CPLT_CTRL0_FREE_USAGE_59A = 59;
+static const uint32_t CPLT_CTRL0_TC_JTAG_TRST3_N_DC = 59;
 static const uint32_t CPLT_CTRL0_FREE_USAGE_60A = 60;
+static const uint32_t CPLT_CTRL0_TC_JTAG_MUX0_SEL_DC = 60;
 static const uint32_t CPLT_CTRL0_FREE_USAGE_61A = 61;
+static const uint32_t CPLT_CTRL0_TC_JTAG_MUX1_SEL_DC = 61;
 static const uint32_t CPLT_CTRL0_FREE_USAGE_62A = 62;
+static const uint32_t CPLT_CTRL0_TC_JTAG_MUX2_SEL_DC = 62;
 static const uint32_t CPLT_CTRL0_FREE_USAGE_63A = 63;
+static const uint32_t CPLT_CTRL0_TC_JTAG_MUX3_SEL_DC = 63;
 // perv/reg00000.H
 
 static const uint64_t EPS_DBG_INST1_COND_REG_2 = 0x000107c2ull;
@@ -527,6 +535,8 @@ static const uint32_t L3TRA0_TR1_CONFIG_TRACE_RUN_HOLD_OFF = 18;
 static const uint32_t L3TRA0_TR1_CONFIG_TRACE_RUN_STATUS = 19;
 static const uint32_t L3TRA0_TR1_CONFIG_TRACE_RUN_STICKY = 20;
 static const uint32_t L3TRA0_TR1_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
+static const uint32_t L3TRA0_TR1_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT = 22;
+static const uint32_t L3TRA0_TR1_CONFIG_MASTER_CLOCK_ENABLE_INT = 23;
 // perv/reg00000.H
 
 static const uint64_t L3TRA1_TR0_CONFIG = 0x00018242ull;
@@ -545,6 +555,8 @@ static const uint32_t L3TRA1_TR0_CONFIG_TRACE_RUN_HOLD_OFF = 18;
 static const uint32_t L3TRA1_TR0_CONFIG_TRACE_RUN_STATUS = 19;
 static const uint32_t L3TRA1_TR0_CONFIG_TRACE_RUN_STICKY = 20;
 static const uint32_t L3TRA1_TR0_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
+static const uint32_t L3TRA1_TR0_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT = 22;
+static const uint32_t L3TRA1_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT = 23;
 // perv/reg00000.H
 
 static const uint64_t L3TRA1_TR1_CONFIG_2 = 0x00018265ull;
@@ -1015,6 +1027,8 @@ static const uint32_t TRA6_TR1_CONFIG_TRACE_RUN_HOLD_OFF = 18;
 static const uint32_t TRA6_TR1_CONFIG_TRACE_RUN_STATUS = 19;
 static const uint32_t TRA6_TR1_CONFIG_TRACE_RUN_STICKY = 20;
 static const uint32_t TRA6_TR1_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
+static const uint32_t TRA6_TR1_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT = 22;
+static const uint32_t TRA6_TR1_CONFIG_MASTER_CLOCK_ENABLE_INT = 23;
 // perv/reg00001.H
 
 static const uint64_t TRA6_TR1_CONFIG_3 = 0x00010746ull;
@@ -1041,6 +1055,8 @@ static const uint32_t TRA7_TR0_CONFIG_TRACE_RUN_HOLD_OFF = 18;
 static const uint32_t TRA7_TR0_CONFIG_TRACE_RUN_STATUS = 19;
 static const uint32_t TRA7_TR0_CONFIG_TRACE_RUN_STICKY = 20;
 static const uint32_t TRA7_TR0_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
+static const uint32_t TRA7_TR0_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT = 22;
+static const uint32_t TRA7_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT = 23;
 // perv/reg00001.H
 
 static const uint64_t TRA7_TR0_CONFIG_5 = 0x00010788ull;

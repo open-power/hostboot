@@ -162,14 +162,14 @@ static const uint32_t CPLT_CTRL0_FREE_USAGE_52A = 52;
 static const uint32_t CPLT_CTRL0_FREE_USAGE_53A = 53;
 static const uint32_t CPLT_CTRL0_FREE_USAGE_54A = 54;
 static const uint32_t CPLT_CTRL0_FREE_USAGE_55A = 55;
-static const uint32_t CPLT_CTRL0_FREE_USAGE_56A = 56;
-static const uint32_t CPLT_CTRL0_FREE_USAGE_57A = 57;
-static const uint32_t CPLT_CTRL0_FREE_USAGE_58A = 58;
-static const uint32_t CPLT_CTRL0_FREE_USAGE_59A = 59;
-static const uint32_t CPLT_CTRL0_FREE_USAGE_60A = 60;
-static const uint32_t CPLT_CTRL0_FREE_USAGE_61A = 61;
-static const uint32_t CPLT_CTRL0_FREE_USAGE_62A = 62;
-static const uint32_t CPLT_CTRL0_FREE_USAGE_63A = 63;
+static const uint32_t CPLT_CTRL0_TC_JTAG_TRST0_N_DC = 56;
+static const uint32_t CPLT_CTRL0_TC_JTAG_TRST1_N_DC = 57;
+static const uint32_t CPLT_CTRL0_TC_JTAG_TRST2_N_DC = 58;
+static const uint32_t CPLT_CTRL0_TC_JTAG_TRST3_N_DC = 59;
+static const uint32_t CPLT_CTRL0_TC_JTAG_MUX0_SEL_DC = 60;
+static const uint32_t CPLT_CTRL0_TC_JTAG_MUX1_SEL_DC = 61;
+static const uint32_t CPLT_CTRL0_TC_JTAG_MUX2_SEL_DC = 62;
+static const uint32_t CPLT_CTRL0_TC_JTAG_MUX3_SEL_DC = 63;
 // pec/reg00000.H
 
 static const uint64_t EPS_DBG_INST1_COND_REG_2 = 0x080107c2ull;
