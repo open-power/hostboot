@@ -2265,6 +2265,7 @@
     </enum>
     <platInit/>
     <initToZero/>
+    <mrwHide/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -2286,6 +2287,7 @@
     </enum>
     <platInit/>
     <initToZero/>
+    <mrwHide/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -2303,6 +2305,7 @@
      <valueType>uint64</valueType>
     <platInit/>
     <initToZero/>
+    <mrwHide/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
