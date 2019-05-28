@@ -535,6 +535,15 @@ fapi2::ReturnCode p10_perv_sbe_cmn_clock_start_stop(const
 
     }
 
+    FAPI_DBG("Clear clock region");
+    FAPI_TRY(fapi2::putScom(i_mcast_target, PERV_CLK_REGION, 0));
+
+    FAPI_DBG("Enter flush (clear flushmode inhibit)");
+    //Setting CPLT_CTRL0 register value
+    l_data64.flush<0>();
+    l_data64.setBit<PERV_1_CPLT_CTRL0_CTRL_CC_FLUSHMODE_INH_DC>();
+    FAPI_TRY(fapi2::putScom(i_mcast_target, PERV_CPLT_CTRL0_CLEAR, l_data64));
+
     FAPI_INF("p10_perv_sbe_cmn_clock_start_stop: Exiting ...");
 
 fapi_try_exit:
