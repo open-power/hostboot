@@ -26,6 +26,20 @@
 
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_PROC_CHIP_LCO_TARGETS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    The 32b vector of all good, functional cores on the chip. This is used
+        to initialize the LCO targets used when an L3 masters an LCO in a
+        PROC_FABRIC_SL_DOMAIN=CHIP configuration.
+    </description>
+    <valueType>uint32</valueType>
+    <initToZero/>
+    <group>state</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_PROC_DPLL_DIVIDER</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
