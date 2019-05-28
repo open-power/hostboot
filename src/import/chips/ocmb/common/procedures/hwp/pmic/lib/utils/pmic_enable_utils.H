@@ -63,7 +63,8 @@ enum enable_mode
 
 /// @brief pointer to PMIC attribute getters for DIMM target
 typedef fapi2::ReturnCode (*pmic_attr_ptr)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, uint8_t& o_value);
-
+typedef fapi2::ReturnCode (*pmic_attr_ptr_signed)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        int8_t& o_value);
 // Pointers below allow for run-time attribute getter selection by PMIC ID (0,1)
 
 // Voltage Setting
@@ -111,47 +112,25 @@ static constexpr pmic_attr_ptr get_swd_voltage_range_select[] =
 };
 
 // Voltage Offset
-static constexpr pmic_attr_ptr get_swa_voltage_offset[] =
+static constexpr pmic_attr_ptr_signed get_swa_voltage_offset[] =
 {
     mss::attr::get_pmic0_swa_voltage_offset,
     mss::attr::get_pmic1_swa_voltage_offset
 };
-static constexpr pmic_attr_ptr get_swb_voltage_offset[] =
+static constexpr pmic_attr_ptr_signed get_swb_voltage_offset[] =
 {
     mss::attr::get_pmic0_swb_voltage_offset,
     mss::attr::get_pmic1_swb_voltage_offset
 };
-static constexpr pmic_attr_ptr get_swc_voltage_offset[] =
+static constexpr pmic_attr_ptr_signed get_swc_voltage_offset[] =
 {
     mss::attr::get_pmic0_swc_voltage_offset,
     mss::attr::get_pmic1_swc_voltage_offset
 };
-static constexpr pmic_attr_ptr get_swd_voltage_offset[] =
+static constexpr pmic_attr_ptr_signed get_swd_voltage_offset[] =
 {
     mss::attr::get_pmic0_swd_voltage_offset,
     mss::attr::get_pmic1_swd_voltage_offset
-};
-
-// Voltage Offset Direction
-static constexpr pmic_attr_ptr get_swa_voltage_offset_direction[] =
-{
-    mss::attr::get_pmic0_swa_voltage_offset_direction,
-    mss::attr::get_pmic1_swa_voltage_offset_direction
-};
-static constexpr pmic_attr_ptr get_swb_voltage_offset_direction[] =
-{
-    mss::attr::get_pmic0_swb_voltage_offset_direction,
-    mss::attr::get_pmic1_swb_voltage_offset_direction
-};
-static constexpr pmic_attr_ptr get_swc_voltage_offset_direction[] =
-{
-    mss::attr::get_pmic0_swc_voltage_offset_direction,
-    mss::attr::get_pmic1_swc_voltage_offset_direction
-};
-static constexpr pmic_attr_ptr get_swd_voltage_offset_direction[] =
-{
-    mss::attr::get_pmic0_swd_voltage_offset_direction,
-    mss::attr::get_pmic1_swd_voltage_offset_direction
 };
 
 // Sequence Delay
@@ -205,8 +184,35 @@ static constexpr pmic_attr_ptr get_phase_comb[] =
     mss::attr::get_pmic1_phase_comb
 };
 
+// EFD Fields
+
+// Offset
+static constexpr pmic_attr_ptr_signed get_efd_swa_voltage_offset[] =
+{
+    mss::attr::get_efd_pmic0_swa_voltage_offset,
+    mss::attr::get_efd_pmic1_swa_voltage_offset
+};
+
+static constexpr pmic_attr_ptr_signed get_efd_swb_voltage_offset[] =
+{
+    mss::attr::get_efd_pmic0_swb_voltage_offset,
+    mss::attr::get_efd_pmic1_swb_voltage_offset
+};
+
+static constexpr pmic_attr_ptr_signed get_efd_swc_voltage_offset[] =
+{
+    mss::attr::get_efd_pmic0_swc_voltage_offset,
+    mss::attr::get_efd_pmic1_swc_voltage_offset
+};
+
+static constexpr pmic_attr_ptr_signed get_efd_swd_voltage_offset[] =
+{
+    mss::attr::get_efd_pmic0_swd_voltage_offset,
+    mss::attr::get_efd_pmic1_swd_voltage_offset
+};
+
 // These arrays allow us to dynamically choose the right attribute getter at runtime based on the rail and mss::pmic::id
-static const pmic_attr_ptr* l_get_volt_setting[] =
+static const pmic_attr_ptr* get_volt_setting[] =
 {
     mss::pmic::get_swa_voltage_setting,
     mss::pmic::get_swb_voltage_setting,
@@ -214,7 +220,7 @@ static const pmic_attr_ptr* l_get_volt_setting[] =
     mss::pmic::get_swd_voltage_setting
 };
 
-static const pmic_attr_ptr* l_get_volt_range_select[] =
+static const pmic_attr_ptr* get_volt_range_select[] =
 {
     mss::pmic::get_swa_voltage_range_select,
     mss::pmic::get_swb_voltage_range_select,
@@ -222,7 +228,7 @@ static const pmic_attr_ptr* l_get_volt_range_select[] =
     mss::pmic::get_swd_voltage_range_select
 };
 
-static const pmic_attr_ptr* l_get_volt_offset[] =
+static const pmic_attr_ptr_signed* get_volt_offset[] =
 {
     mss::pmic::get_swa_voltage_offset,
     mss::pmic::get_swb_voltage_offset,
@@ -230,12 +236,13 @@ static const pmic_attr_ptr* l_get_volt_offset[] =
     mss::pmic::get_swd_voltage_offset
 };
 
-static const pmic_attr_ptr* l_get_volt_offset_direction[] =
+// EFD Offset + Direction functions
+static const pmic_attr_ptr_signed* get_efd_volt_offset[] =
 {
-    mss::pmic::get_swa_voltage_offset_direction,
-    mss::pmic::get_swb_voltage_offset_direction,
-    mss::pmic::get_swc_voltage_offset_direction,
-    mss::pmic::get_swd_voltage_offset_direction
+    mss::pmic::get_efd_swa_voltage_offset,
+    mss::pmic::get_efd_swb_voltage_offset,
+    mss::pmic::get_efd_swc_voltage_offset,
+    mss::pmic::get_efd_swd_voltage_offset
 };
 
 // For output traces
@@ -244,6 +251,8 @@ static const std::vector<const char*> PMIC_RAIL_NAMES = {"SWA", "SWB", "SWC", "S
 // Attribute setter FP type
 typedef fapi2::ReturnCode (*pmic_attr_setter_ptr)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t i_value);
+typedef fapi2::ReturnCode (*pmic_attr_setter_ptr_signed)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        int8_t i_value);
 
 // Voltage Setting
 static constexpr pmic_attr_setter_ptr set_swa_voltage_setting[] =
@@ -290,47 +299,25 @@ static constexpr pmic_attr_setter_ptr set_swd_voltage_range_select[] =
 };
 
 // Voltage Offset
-static constexpr pmic_attr_setter_ptr set_swa_voltage_offset[] =
+static constexpr pmic_attr_setter_ptr_signed set_swa_voltage_offset[] =
 {
     mss::attr::set_pmic0_swa_voltage_offset,
     mss::attr::set_pmic1_swa_voltage_offset
 };
-static constexpr pmic_attr_setter_ptr set_swb_voltage_offset[] =
+static constexpr pmic_attr_setter_ptr_signed set_swb_voltage_offset[] =
 {
     mss::attr::set_pmic0_swb_voltage_offset,
     mss::attr::set_pmic1_swb_voltage_offset
 };
-static constexpr pmic_attr_setter_ptr set_swc_voltage_offset[] =
+static constexpr pmic_attr_setter_ptr_signed set_swc_voltage_offset[] =
 {
     mss::attr::set_pmic0_swc_voltage_offset,
     mss::attr::set_pmic1_swc_voltage_offset
 };
-static constexpr pmic_attr_setter_ptr set_swd_voltage_offset[] =
+static constexpr pmic_attr_setter_ptr_signed set_swd_voltage_offset[] =
 {
     mss::attr::set_pmic0_swd_voltage_offset,
     mss::attr::set_pmic1_swd_voltage_offset
-};
-
-// Voltage Offset Direction
-static constexpr pmic_attr_setter_ptr set_swa_voltage_offset_direction[] =
-{
-    mss::attr::set_pmic0_swa_voltage_offset_direction,
-    mss::attr::set_pmic1_swa_voltage_offset_direction
-};
-static constexpr pmic_attr_setter_ptr set_swb_voltage_offset_direction[] =
-{
-    mss::attr::set_pmic0_swb_voltage_offset_direction,
-    mss::attr::set_pmic1_swb_voltage_offset_direction
-};
-static constexpr pmic_attr_setter_ptr set_swc_voltage_offset_direction[] =
-{
-    mss::attr::set_pmic0_swc_voltage_offset_direction,
-    mss::attr::set_pmic1_swc_voltage_offset_direction
-};
-static constexpr pmic_attr_setter_ptr set_swd_voltage_offset_direction[] =
-{
-    mss::attr::set_pmic0_swd_voltage_offset_direction,
-    mss::attr::set_pmic1_swd_voltage_offset_direction
 };
 
 // Sequence Delay
@@ -384,40 +371,30 @@ static constexpr pmic_attr_setter_ptr set_phase_comb[] =
     mss::attr::set_pmic1_phase_comb
 };
 
-// TK - these will be needed in the next commit (pmic_bias).
+// Offset
+static constexpr pmic_attr_setter_ptr_signed set_efd_swa_voltage_offset[] =
+{
+    mss::attr::set_efd_pmic0_swa_voltage_offset,
+    mss::attr::set_efd_pmic1_swa_voltage_offset
+};
 
-// These arrays allow us to dynamically choose the right attribute setter at runtime based on the rail and mss::pmic::id
-// static const pmic_attr_setter_ptr* l_set_volt_setting[] =
-// {
-//     mss::pmic::set_swa_voltage_setting,
-//     mss::pmic::set_swb_voltage_setting,
-//     mss::pmic::set_swc_voltage_setting,
-//     mss::pmic::set_swd_voltage_setting
-// };
+static constexpr pmic_attr_setter_ptr_signed set_efd_swb_voltage_offset[] =
+{
+    mss::attr::set_efd_pmic0_swb_voltage_offset,
+    mss::attr::set_efd_pmic1_swb_voltage_offset
+};
 
-// static const pmic_attr_setter_ptr* l_set_volt_range_select[] =
-// {
-//     mss::pmic::set_swa_voltage_range_select,
-//     mss::pmic::set_swb_voltage_range_select,
-//     mss::pmic::set_swc_voltage_range_select,
-//     mss::pmic::set_swd_voltage_range_select
-// };
+static constexpr pmic_attr_setter_ptr_signed set_efd_swc_voltage_offset[] =
+{
+    mss::attr::set_efd_pmic0_swc_voltage_offset,
+    mss::attr::set_efd_pmic1_swc_voltage_offset
+};
 
-// static const pmic_attr_setter_ptr* l_set_volt_offset[] =
-// {
-//     mss::pmic::set_swa_voltage_offset,
-//     mss::pmic::set_swb_voltage_offset,
-//     mss::pmic::set_swc_voltage_offset,
-//     mss::pmic::set_swd_voltage_offset
-// };
-
-// static const pmic_attr_setter_ptr* l_set_volt_offset_direction[] =
-// {
-//     mss::pmic::set_swa_voltage_offset_direction,
-//     mss::pmic::set_swb_voltage_offset_direction,
-//     mss::pmic::set_swc_voltage_offset_direction,
-//     mss::pmic::set_swd_voltage_offset_direction
-// };
+static constexpr pmic_attr_setter_ptr_signed set_efd_swd_voltage_offset[] =
+{
+    mss::attr::set_efd_pmic0_swd_voltage_offset,
+    mss::attr::set_efd_pmic1_swd_voltage_offset
+};
 
 //-----------------------------------
 // SPD Biasing functions
@@ -521,16 +498,16 @@ inline fapi2::ReturnCode calculate_voltage_write_buffer(
     fapi2::buffer<uint8_t>& o_volt_buffer)
 {
     uint8_t l_volt = 0;
-    uint8_t l_volt_offset = 0;
-    uint8_t l_volt_offset_direction = 0;
+    int8_t l_volt_offset = 0;
+    int8_t l_efd_volt_offset = 0;
 
     // Get the attributes corresponding to the rail and PMIC indices
-    FAPI_TRY(l_get_volt_setting[i_rail][i_id](i_dimm_target, l_volt));
-    FAPI_TRY(l_get_volt_offset[i_rail][i_id](i_dimm_target, l_volt_offset));
-    FAPI_TRY(l_get_volt_offset_direction[i_rail][i_id](i_dimm_target, l_volt_offset_direction));
+    FAPI_TRY(get_volt_setting[i_rail][i_id](i_dimm_target, l_volt));
+    FAPI_TRY(get_volt_offset[i_rail][i_id](i_dimm_target, l_volt_offset));
+    FAPI_TRY(get_efd_volt_offset[i_rail][i_id](i_dimm_target, l_efd_volt_offset));
 
-    o_volt_buffer = (l_volt_offset_direction == CONSTS::OFFSET_PLUS) ?
-                    l_volt + l_volt_offset : l_volt - l_volt_offset;
+    // Set output buffer
+    o_volt_buffer = l_volt + l_volt_offset + l_efd_volt_offset;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -603,7 +580,7 @@ inline fapi2::ReturnCode bias_with_spd_voltages<mss::pmic::vendor::TI>(
         bool l_overflow = false;
 
         uint8_t l_volt_range_select = 0;
-        FAPI_TRY(l_get_volt_range_select[l_rail_index][i_id](i_dimm_target, l_volt_range_select));
+        FAPI_TRY(get_volt_range_select[l_rail_index][i_id](i_dimm_target, l_volt_range_select));
 
         // SWD supports a RANGE 1, but NOT SWA-C
         if (l_rail_index == mss::pmic::rail::SWD)

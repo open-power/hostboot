@@ -39,6 +39,7 @@
 
 #include <fapi2.H>
 #include <lib/utils/pmic_consts.H>
+#include <lib/eff_config/pmic_efd_processing.H>
 #include <generic/memory/lib/data_engine/data_engine_traits_def.H>
 #include <generic/memory/lib/data_engine/data_engine.H>
 #include <generic/memory/lib/spd/spd_facade.H>
@@ -307,57 +308,15 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWA_VOLTAGE_OF
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        return i_spd_data.volt_offset_swa_pmic0(o_setting);
-    }
-};
+        uint8_t l_offset = 0;
+        uint8_t l_direction = 0;
+        FAPI_TRY(i_spd_data.volt_offset_swa_pmic0(l_offset));
+        FAPI_TRY(i_spd_data.volt_offset_direction_swa_pmic0(l_direction));
 
-//
-/// @brief Traits for attr_engine
-/// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC0_SWA_VOLTAGE_OFFSET_DIRECTION specialization
-///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWA_VOLTAGE_OFFSET_DIRECTION>
-{
-    using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWA_VOLTAGE_OFFSET_DIRECTION_Type;
-    using attr_integral_type = std::remove_all_extents<attr_type>::type;
-    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC0_SWA_VOLTAGE_OFFSET_DIRECTION_TargetType;
-    static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC0_SWA_VOLTAGE_OFFSET_DIRECTION;
+        o_setting = mss::pmic::convert_to_signed_offset(l_offset, l_direction);
 
-    ///
-    /// @brief attribute getter
-    /// @param[in] i_target the fapi2 target
-    /// @param[out] o_setting array to populate
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                      attr_type& o_setting)
-    {
-        return attr::get_pmic0_swa_voltage_offset_direction(i_target, o_setting);
-    }
-
-    ///
-    /// @brief attribute setter
-    /// @param[in] i_target the fapi2 target
-    /// @param[in] i_setting array to set
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                      attr_type& i_setting)
-    {
-        return attr::set_pmic0_swa_voltage_offset_direction(i_target, i_setting);
-    }
-
-    ///
-    /// @brief Computes setting for attribute
-    /// @param[in] i_spd_data EFD data
-    /// @param[out] o_setting value we want to set attr with
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
-            attr_integral_type& o_setting)
-    {
-        return i_spd_data.volt_offset_direction_swa_pmic0(o_setting);
+    fapi_try_exit:
+        return fapi2::current_err;
     }
 };
 
@@ -607,57 +566,15 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWB_VOLTAGE_OF
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        return i_spd_data.volt_offset_swb_pmic0(o_setting);
-    }
-};
+        uint8_t l_offset = 0;
+        uint8_t l_direction = 0;
+        FAPI_TRY(i_spd_data.volt_offset_swb_pmic0(l_offset));
+        FAPI_TRY(i_spd_data.volt_offset_direction_swb_pmic0(l_direction));
 
-//
-/// @brief Traits for attr_engine
-/// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC0_SWB_VOLTAGE_OFFSET_DIRECTION specialization
-///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWB_VOLTAGE_OFFSET_DIRECTION>
-{
-    using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWB_VOLTAGE_OFFSET_DIRECTION_Type;
-    using attr_integral_type = std::remove_all_extents<attr_type>::type;
-    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC0_SWB_VOLTAGE_OFFSET_DIRECTION_TargetType;
-    static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC0_SWB_VOLTAGE_OFFSET_DIRECTION;
+        o_setting = mss::pmic::convert_to_signed_offset(l_offset, l_direction);
 
-    ///
-    /// @brief attribute getter
-    /// @param[in] i_target the fapi2 target
-    /// @param[out] o_setting array to populate
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                      attr_type& o_setting)
-    {
-        return attr::get_pmic0_swb_voltage_offset_direction(i_target, o_setting);
-    }
-
-    ///
-    /// @brief attribute setter
-    /// @param[in] i_target the fapi2 target
-    /// @param[in] i_setting array to set
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                      attr_type& i_setting)
-    {
-        return attr::set_pmic0_swb_voltage_offset_direction(i_target, i_setting);
-    }
-
-    ///
-    /// @brief Computes setting for attribute
-    /// @param[in] i_spd_data EFD data
-    /// @param[out] o_setting value we want to set attr with
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
-            attr_integral_type& o_setting)
-    {
-        return i_spd_data.volt_offset_direction_swb_pmic0(o_setting);
+    fapi_try_exit:
+        return fapi2::current_err;
     }
 };
 
@@ -908,57 +825,15 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWC_VOLTAGE_OF
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        return i_spd_data.volt_offset_swc_pmic0(o_setting);
-    }
-};
+        uint8_t l_offset = 0;
+        uint8_t l_direction = 0;
+        FAPI_TRY(i_spd_data.volt_offset_swc_pmic0(l_offset));
+        FAPI_TRY(i_spd_data.volt_offset_direction_swc_pmic0(l_direction));
 
-//
-/// @brief Traits for attr_engine
-/// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC0_SWC_VOLTAGE_OFFSET_DIRECTION specialization
-///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWC_VOLTAGE_OFFSET_DIRECTION>
-{
-    using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWC_VOLTAGE_OFFSET_DIRECTION_Type;
-    using attr_integral_type = std::remove_all_extents<attr_type>::type;
-    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC0_SWC_VOLTAGE_OFFSET_DIRECTION_TargetType;
-    static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC0_SWC_VOLTAGE_OFFSET_DIRECTION;
+        o_setting = mss::pmic::convert_to_signed_offset(l_offset, l_direction);
 
-    ///
-    /// @brief attribute getter
-    /// @param[in] i_target the fapi2 target
-    /// @param[out] o_setting array to populate
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                      attr_type& o_setting)
-    {
-        return attr::get_pmic0_swc_voltage_offset_direction(i_target, o_setting);
-    }
-
-    ///
-    /// @brief attribute setter
-    /// @param[in] i_target the fapi2 target
-    /// @param[in] i_setting array to set
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                      attr_type& i_setting)
-    {
-        return attr::set_pmic0_swc_voltage_offset_direction(i_target, i_setting);
-    }
-
-    ///
-    /// @brief Computes setting for attribute
-    /// @param[in] i_spd_data EFD data
-    /// @param[out] o_setting value we want to set attr with
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
-            attr_integral_type& o_setting)
-    {
-        return i_spd_data.volt_offset_direction_swc_pmic0(o_setting);
+    fapi_try_exit:
+        return fapi2::current_err;
     }
 };
 
@@ -1209,57 +1084,15 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWD_VOLTAGE_OF
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        return i_spd_data.volt_offset_swd_pmic0(o_setting);
-    }
-};
+        uint8_t l_offset = 0;
+        uint8_t l_direction = 0;
+        FAPI_TRY(i_spd_data.volt_offset_swd_pmic0(l_offset));
+        FAPI_TRY(i_spd_data.volt_offset_direction_swd_pmic0(l_direction));
 
-//
-/// @brief Traits for attr_engine
-/// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC0_SWD_VOLTAGE_OFFSET_DIRECTION specialization
-///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWD_VOLTAGE_OFFSET_DIRECTION>
-{
-    using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWD_VOLTAGE_OFFSET_DIRECTION_Type;
-    using attr_integral_type = std::remove_all_extents<attr_type>::type;
-    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC0_SWD_VOLTAGE_OFFSET_DIRECTION_TargetType;
-    static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC0_SWD_VOLTAGE_OFFSET_DIRECTION;
+        o_setting = mss::pmic::convert_to_signed_offset(l_offset, l_direction);
 
-    ///
-    /// @brief attribute getter
-    /// @param[in] i_target the fapi2 target
-    /// @param[out] o_setting array to populate
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                      attr_type& o_setting)
-    {
-        return attr::get_pmic0_swd_voltage_offset_direction(i_target, o_setting);
-    }
-
-    ///
-    /// @brief attribute setter
-    /// @param[in] i_target the fapi2 target
-    /// @param[in] i_setting array to set
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                      attr_type& i_setting)
-    {
-        return attr::set_pmic0_swd_voltage_offset_direction(i_target, i_setting);
-    }
-
-    ///
-    /// @brief Computes setting for attribute
-    /// @param[in] i_spd_data EFD data
-    /// @param[out] o_setting value we want to set attr with
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
-            attr_integral_type& o_setting)
-    {
-        return i_spd_data.volt_offset_direction_swd_pmic0(o_setting);
+    fapi_try_exit:
+        return fapi2::current_err;
     }
 };
 
@@ -1614,57 +1447,15 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWA_VOLTAGE_OF
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        return i_spd_data.volt_offset_swa_pmic1(o_setting);
-    }
-};
+        uint8_t l_offset = 0;
+        uint8_t l_direction = 0;
+        FAPI_TRY(i_spd_data.volt_offset_swa_pmic1(l_offset));
+        FAPI_TRY(i_spd_data.volt_offset_direction_swa_pmic1(l_direction));
 
-//
-/// @brief Traits for attr_engine
-/// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC1_SWA_VOLTAGE_OFFSET_DIRECTION specialization
-///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWA_VOLTAGE_OFFSET_DIRECTION>
-{
-    using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWA_VOLTAGE_OFFSET_DIRECTION_Type;
-    using attr_integral_type = std::remove_all_extents<attr_type>::type;
-    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC1_SWA_VOLTAGE_OFFSET_DIRECTION_TargetType;
-    static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC1_SWA_VOLTAGE_OFFSET_DIRECTION;
+        o_setting = mss::pmic::convert_to_signed_offset(l_offset, l_direction);
 
-    ///
-    /// @brief attribute getter
-    /// @param[in] i_target the fapi2 target
-    /// @param[out] o_setting array to populate
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                      attr_type& o_setting)
-    {
-        return attr::get_pmic1_swa_voltage_offset_direction(i_target, o_setting);
-    }
-
-    ///
-    /// @brief attribute setter
-    /// @param[in] i_target the fapi2 target
-    /// @param[in] i_setting array to set
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                      attr_type& i_setting)
-    {
-        return attr::set_pmic1_swa_voltage_offset_direction(i_target, i_setting);
-    }
-
-    ///
-    /// @brief Computes setting for attribute
-    /// @param[in] i_spd_data EFD data
-    /// @param[out] o_setting value we want to set attr with
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
-            attr_integral_type& o_setting)
-    {
-        return i_spd_data.volt_offset_direction_swa_pmic1(o_setting);
+    fapi_try_exit:
+        return fapi2::current_err;
     }
 };
 
@@ -1914,57 +1705,15 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWB_VOLTAGE_OF
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        return i_spd_data.volt_offset_swb_pmic1(o_setting);
-    }
-};
+        uint8_t l_offset = 0;
+        uint8_t l_direction = 0;
+        FAPI_TRY(i_spd_data.volt_offset_swb_pmic1(l_offset));
+        FAPI_TRY(i_spd_data.volt_offset_direction_swb_pmic1(l_direction));
 
-//
-/// @brief Traits for attr_engine
-/// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC1_SWB_VOLTAGE_OFFSET_DIRECTION specialization
-///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWB_VOLTAGE_OFFSET_DIRECTION>
-{
-    using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWB_VOLTAGE_OFFSET_DIRECTION_Type;
-    using attr_integral_type = std::remove_all_extents<attr_type>::type;
-    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC1_SWB_VOLTAGE_OFFSET_DIRECTION_TargetType;
-    static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC1_SWB_VOLTAGE_OFFSET_DIRECTION;
+        o_setting = mss::pmic::convert_to_signed_offset(l_offset, l_direction);
 
-    ///
-    /// @brief attribute getter
-    /// @param[in] i_target the fapi2 target
-    /// @param[out] o_setting array to populate
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                      attr_type& o_setting)
-    {
-        return attr::get_pmic1_swb_voltage_offset_direction(i_target, o_setting);
-    }
-
-    ///
-    /// @brief attribute setter
-    /// @param[in] i_target the fapi2 target
-    /// @param[in] i_setting array to set
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                      attr_type& i_setting)
-    {
-        return attr::set_pmic1_swb_voltage_offset_direction(i_target, i_setting);
-    }
-
-    ///
-    /// @brief Computes setting for attribute
-    /// @param[in] i_spd_data EFD data
-    /// @param[out] o_setting value we want to set attr with
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
-            attr_integral_type& o_setting)
-    {
-        return i_spd_data.volt_offset_direction_swb_pmic1(o_setting);
+    fapi_try_exit:
+        return fapi2::current_err;
     }
 };
 
@@ -2214,57 +1963,15 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWC_VOLTAGE_OF
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        return i_spd_data.volt_offset_swc_pmic1(o_setting);
-    }
-};
+        uint8_t l_offset = 0;
+        uint8_t l_direction = 0;
+        FAPI_TRY(i_spd_data.volt_offset_swc_pmic1(l_offset));
+        FAPI_TRY(i_spd_data.volt_offset_direction_swc_pmic1(l_direction));
 
-//
-/// @brief Traits for attr_engine
-/// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC1_SWC_VOLTAGE_OFFSET_DIRECTION specialization
-///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWC_VOLTAGE_OFFSET_DIRECTION>
-{
-    using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWC_VOLTAGE_OFFSET_DIRECTION_Type;
-    using attr_integral_type = std::remove_all_extents<attr_type>::type;
-    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC1_SWC_VOLTAGE_OFFSET_DIRECTION_TargetType;
-    static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC1_SWC_VOLTAGE_OFFSET_DIRECTION;
+        o_setting = mss::pmic::convert_to_signed_offset(l_offset, l_direction);
 
-    ///
-    /// @brief attribute getter
-    /// @param[in] i_target the fapi2 target
-    /// @param[out] o_setting array to populate
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                      attr_type& o_setting)
-    {
-        return attr::get_pmic1_swc_voltage_offset_direction(i_target, o_setting);
-    }
-
-    ///
-    /// @brief attribute setter
-    /// @param[in] i_target the fapi2 target
-    /// @param[in] i_setting array to set
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                      attr_type& i_setting)
-    {
-        return attr::set_pmic1_swc_voltage_offset_direction(i_target, i_setting);
-    }
-
-    ///
-    /// @brief Computes setting for attribute
-    /// @param[in] i_spd_data EFD data
-    /// @param[out] o_setting value we want to set attr with
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
-            attr_integral_type& o_setting)
-    {
-        return i_spd_data.volt_offset_direction_swc_pmic1(o_setting);
+    fapi_try_exit:
+        return fapi2::current_err;
     }
 };
 
@@ -2514,57 +2221,15 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWD_VOLTAGE_OF
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        return i_spd_data.volt_offset_swd_pmic1(o_setting);
-    }
-};
+        uint8_t l_offset = 0;
+        uint8_t l_direction = 0;
+        FAPI_TRY(i_spd_data.volt_offset_swd_pmic1(l_offset));
+        FAPI_TRY(i_spd_data.volt_offset_direction_swd_pmic1(l_direction));
 
-//
-/// @brief Traits for attr_engine
-/// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC1_SWD_VOLTAGE_OFFSET_DIRECTION specialization
-///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWD_VOLTAGE_OFFSET_DIRECTION>
-{
-    using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWD_VOLTAGE_OFFSET_DIRECTION_Type;
-    using attr_integral_type = std::remove_all_extents<attr_type>::type;
-    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC1_SWD_VOLTAGE_OFFSET_DIRECTION_TargetType;
-    static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC1_SWD_VOLTAGE_OFFSET_DIRECTION;
+        o_setting = mss::pmic::convert_to_signed_offset(l_offset, l_direction);
 
-    ///
-    /// @brief attribute getter
-    /// @param[in] i_target the fapi2 target
-    /// @param[out] o_setting array to populate
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                      attr_type& o_setting)
-    {
-        return attr::get_pmic1_swd_voltage_offset_direction(i_target, o_setting);
-    }
-
-    ///
-    /// @brief attribute setter
-    /// @param[in] i_target the fapi2 target
-    /// @param[in] i_setting array to set
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                      attr_type& i_setting)
-    {
-        return attr::set_pmic1_swd_voltage_offset_direction(i_target, i_setting);
-    }
-
-    ///
-    /// @brief Computes setting for attribute
-    /// @param[in] i_spd_data EFD data
-    /// @param[out] o_setting value we want to set attr with
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
-            attr_integral_type& o_setting)
-    {
-        return i_spd_data.volt_offset_direction_swd_pmic1(o_setting);
+    fapi_try_exit:
+        return fapi2::current_err;
     }
 };
 

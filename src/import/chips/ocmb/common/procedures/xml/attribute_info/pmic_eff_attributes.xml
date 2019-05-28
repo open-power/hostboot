@@ -67,26 +67,13 @@
         <id>ATTR_MEM_EFF_PMIC0_SWA_VOLTAGE_OFFSET</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
-          PMIC0 SWA Voltage Offset in steps (1 bit increments)
+          PMIC0 SWA Voltage Offset (signed, 1 bit increments)
         </description>
         <initToZero></initToZero>
-        <valueType>uint8</valueType>
+        <valueType>int8</valueType>
         <writeable/>
         <array>2</array>
         <mssAccessorName>pmic0_swa_voltage_offset</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC0_SWA_VOLTAGE_OFFSET_DIRECTION</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          Add (0), Subtract (1)
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <array>2</array>
-        <mssAccessorName>pmic0_swa_voltage_offset_direction</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -145,26 +132,13 @@
         <id>ATTR_MEM_EFF_PMIC0_SWB_VOLTAGE_OFFSET</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
-          PMIC0 SWB Voltage Offset in steps (1 bit increments)
+          PMIC0 SWB Voltage Offset (signed, 1 bit increments)
         </description>
         <initToZero></initToZero>
-        <valueType>uint8</valueType>
+        <valueType>int8</valueType>
         <writeable/>
         <array>2</array>
         <mssAccessorName>pmic0_swb_voltage_offset</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC0_SWB_VOLTAGE_OFFSET_DIRECTION</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          Add (0), Subtract (1)
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <array>2</array>
-        <mssAccessorName>pmic0_swb_voltage_offset_direction</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -223,26 +197,13 @@
         <id>ATTR_MEM_EFF_PMIC0_SWC_VOLTAGE_OFFSET</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
-          PMIC0 SWC Voltage Offset in steps (1 bit increments)
+          PMIC0 SWC Voltage Offset (signed, 1 bit increments)
         </description>
         <initToZero></initToZero>
-        <valueType>uint8</valueType>
+        <valueType>int8</valueType>
         <writeable/>
         <array>2</array>
         <mssAccessorName>pmic0_swc_voltage_offset</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC0_SWC_VOLTAGE_OFFSET_DIRECTION</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          Add (0), Subtract (1)
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <array>2</array>
-        <mssAccessorName>pmic0_swc_voltage_offset_direction</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -301,26 +262,13 @@
         <id>ATTR_MEM_EFF_PMIC0_SWD_VOLTAGE_OFFSET</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
-          PMIC0 SWD Voltage Offset in steps (1 bit increments)
+          PMIC0 SWD Voltage Offset (signed, 1 bit increments)
         </description>
         <initToZero></initToZero>
-        <valueType>uint8</valueType>
+        <valueType>int8</valueType>
         <writeable/>
         <array>2</array>
         <mssAccessorName>pmic0_swd_voltage_offset</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC0_SWD_VOLTAGE_OFFSET_DIRECTION</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          Add (0), Subtract (1)
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <array>2</array>
-        <mssAccessorName>pmic0_swd_voltage_offset_direction</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -392,26 +340,13 @@
         <id>ATTR_MEM_EFF_PMIC1_SWA_VOLTAGE_OFFSET</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
-          PMIC1 SWA Voltage Offset in steps (1 bit increments)
+          PMIC1 SWA Voltage Offset (signed, 1 bit increments)
         </description>
         <initToZero></initToZero>
-        <valueType>uint8</valueType>
+        <valueType>int8</valueType>
         <writeable/>
         <array>2</array>
         <mssAccessorName>pmic1_swa_voltage_offset</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC1_SWA_VOLTAGE_OFFSET_DIRECTION</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          Add (0), Subtract (1)
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <array>2</array>
-        <mssAccessorName>pmic1_swa_voltage_offset_direction</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -470,26 +405,13 @@
         <id>ATTR_MEM_EFF_PMIC1_SWB_VOLTAGE_OFFSET</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
-          PMIC1 SWB Voltage Offset in steps (1 bit increments)
+          PMIC1 SWB Voltage Offset (signed, 1 bit increments)
         </description>
         <initToZero></initToZero>
-        <valueType>uint8</valueType>
+        <valueType>int8</valueType>
         <writeable/>
         <array>2</array>
         <mssAccessorName>pmic1_swb_voltage_offset</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC1_SWB_VOLTAGE_OFFSET_DIRECTION</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          Add (0), Subtract (1)
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <array>2</array>
-        <mssAccessorName>pmic1_swb_voltage_offset_direction</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -548,26 +470,13 @@
         <id>ATTR_MEM_EFF_PMIC1_SWC_VOLTAGE_OFFSET</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
-          PMIC1 SWC Voltage Offset in steps (1 bit increments)
+          PMIC1 SWC Voltage Offset (signed, 1 bit increments)
         </description>
         <initToZero></initToZero>
-        <valueType>uint8</valueType>
+        <valueType>int8</valueType>
         <writeable/>
         <array>2</array>
         <mssAccessorName>pmic1_swc_voltage_offset</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC1_SWC_VOLTAGE_OFFSET_DIRECTION</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          Add (0), Subtract (1)
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <array>2</array>
-        <mssAccessorName>pmic1_swc_voltage_offset_direction</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -626,26 +535,13 @@
         <id>ATTR_MEM_EFF_PMIC1_SWD_VOLTAGE_OFFSET</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
-          PMIC1 SWD Voltage Offset in steps (1 bit increments)
+          PMIC1 SWD Voltage Offset (signed, 1 bit increments)
         </description>
         <initToZero></initToZero>
-        <valueType>uint8</valueType>
+        <valueType>int8</valueType>
         <writeable/>
         <array>2</array>
         <mssAccessorName>pmic1_swd_voltage_offset</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC1_SWD_VOLTAGE_OFFSET_DIRECTION</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          Add (0), Subtract (1)
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <array>2</array>
-        <mssAccessorName>pmic1_swd_voltage_offset_direction</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -699,5 +595,109 @@
         <array>2</array>
         <mssAccessorName>pmic1_phase_comb</mssAccessorName>
     </attribute>
-    
+
+    <attribute>
+        <id>ATTR_MEM_EFF_EFD_PMIC0_SWA_VOLTAGE_OFFSET</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC0 SWA Voltage Offset (signed, 1 bit increments)
+        </description>
+        <initToZero></initToZero>
+        <valueType>int8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>efd_pmic0_swa_voltage_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_EFD_PMIC0_SWB_VOLTAGE_OFFSET</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC0 SWB Voltage Offset (signed, 1 bit increments)
+        </description>
+        <initToZero></initToZero>
+        <valueType>int8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>efd_pmic0_swb_voltage_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_EFD_PMIC0_SWC_VOLTAGE_OFFSET</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC0 SWC Voltage Offset (signed, 1 bit increments)
+        </description>
+        <initToZero></initToZero>
+        <valueType>int8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>efd_pmic0_swc_voltage_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_EFD_PMIC0_SWD_VOLTAGE_OFFSET</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC0 SWD Voltage Offset (signed, 1 bit increments)
+        </description>
+        <initToZero></initToZero>
+        <valueType>int8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>efd_pmic0_swd_voltage_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_EFD_PMIC1_SWA_VOLTAGE_OFFSET</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC1 SWA Voltage Offset (signed, 1 bit increments)
+        </description>
+        <initToZero></initToZero>
+        <valueType>int8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>efd_pmic1_swa_voltage_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_EFD_PMIC1_SWB_VOLTAGE_OFFSET</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC1 SWB Voltage Offset (signed, 1 bit increments)
+        </description>
+        <initToZero></initToZero>
+        <valueType>int8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>efd_pmic1_swb_voltage_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_EFD_PMIC1_SWC_VOLTAGE_OFFSET</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC1 SWC Voltage Offset (signed, 1 bit increments)
+        </description>
+        <initToZero></initToZero>
+        <valueType>int8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>efd_pmic1_swc_voltage_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_EFD_PMIC1_SWD_VOLTAGE_OFFSET</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC1 SWD Voltage Offset (signed, 1 bit increments)
+        </description>
+        <initToZero></initToZero>
+        <valueType>int8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>efd_pmic1_swd_voltage_offset</mssAccessorName>
+    </attribute>
+
 </attributes>

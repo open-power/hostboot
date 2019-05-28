@@ -44,6 +44,7 @@
 #include <lib/eff_config/explorer_attr_engine_traits.H>
 #include <lib/eff_config/pmic_attr_engine_traits.H>
 #include <lib/eff_config/explorer_efd_processing.H>
+#include <lib/eff_config/pmic_efd_processing.H>
 #include <lib/freq/axone_freq_traits.H>
 #include <lib/freq/axone_sync.H>
 #include <generic/memory/mss_git_data_helper.H>
@@ -95,7 +96,11 @@ fapi2::ReturnCode p9a_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
             // Set up SI ATTRS
             FAPI_TRY( mss::attr_si_engine<mss::attr_si_engine_fields>::set(l_efd_data) );
 
+            // Explorer EFD
             FAPI_TRY( mss::exp::efd::process(dimm, l_efd_data));
+
+            // PMIC EFD
+            FAPI_TRY(mss::pmic::efd::process(dimm, l_efd_data));
         }
 
         {

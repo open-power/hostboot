@@ -1351,16 +1351,16 @@ class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUS
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note PMIC0_SWA_SETTING field specialization
+/// @note PMIC0_SWA_OFFSET field specialization
 /// @note valid for all revs
 ///
 template< mss::spd::rev R >
-class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC0_SWA_SETTING, R >
+class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC0_SWA_OFFSET, R >
 {
     public:
 
         static constexpr size_t COMPARISON_VAL = 0x3f;
-        static constexpr const char* FIELD_STR = "PMIC0 SWA Setting";
+        static constexpr const char* FIELD_STR = "PMIC0 SWA Offset";
 
         template <typename T>
         using COMPARISON_OP = std::less_equal<T>;
@@ -1370,16 +1370,17 @@ class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUS
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note PMIC0_SWA_RANGE field specialization
+/// @note PMIC0_SWA_OFFSET_DIRECTION field specialization
 /// @note valid for all revs
 ///
 template< mss::spd::rev R >
-class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC0_SWA_RANGE, R >
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC0_SWA_OFFSET_DIRECTION, R >
 {
     public:
 
         static constexpr size_t COMPARISON_VAL = 0x01;
-        static constexpr const char* FIELD_STR = "PMIC0 SWA Range";
+        static constexpr const char* FIELD_STR = "PMIC0 SWA Offset Direction";
 
         template <typename T>
         using COMPARISON_OP = std::less_equal<T>;
@@ -1389,16 +1390,16 @@ class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUS
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note PMIC0_SWB_SETTING field specialization
+/// @note PMIC0_SWB_OFFSET field specialization
 /// @note valid for all revs
 ///
 template< mss::spd::rev R >
-class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC0_SWB_SETTING, R >
+class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC0_SWB_OFFSET, R >
 {
     public:
 
         static constexpr size_t COMPARISON_VAL = 0x3f;
-        static constexpr const char* FIELD_STR = "PMIC0 SWB Setting";
+        static constexpr const char* FIELD_STR = "PMIC0 SWB Offset";
 
         template <typename T>
         using COMPARISON_OP = std::less_equal<T>;
@@ -1408,16 +1409,17 @@ class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUS
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note PMIC0_SWB_RANGE field specialization
+/// @note PMIC0_SWB_OFFSET_DIRECTION field specialization
 /// @note valid for all revs
 ///
 template< mss::spd::rev R >
-class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC0_SWB_RANGE, R >
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC0_SWB_OFFSET_DIRECTION, R >
 {
     public:
 
         static constexpr size_t COMPARISON_VAL = 0x01;
-        static constexpr const char* FIELD_STR = "PMIC0 SWB Range";
+        static constexpr const char* FIELD_STR = "PMIC0 SWB Offset Direction";
 
         template <typename T>
         using COMPARISON_OP = std::less_equal<T>;
@@ -1427,16 +1429,16 @@ class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUS
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note PMIC0_SWC_SETTING field specialization
+/// @note PMIC0_SWC_OFFSET field specialization
 /// @note valid for all revs
 ///
 template< mss::spd::rev R >
-class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC0_SWC_SETTING, R >
+class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC0_SWC_OFFSET, R >
 {
     public:
 
         static constexpr size_t COMPARISON_VAL = 0x3f;
-        static constexpr const char* FIELD_STR = "PMIC0 SWC Setting";
+        static constexpr const char* FIELD_STR = "PMIC0 SWC Offset";
 
         template <typename T>
         using COMPARISON_OP = std::less_equal<T>;
@@ -1446,16 +1448,17 @@ class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUS
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note PMIC0_SWC_RANGE field specialization
+/// @note PMIC0_SWC_OFFSET_DIRECTION field specialization
 /// @note valid for all revs
 ///
 template< mss::spd::rev R >
-class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC0_SWC_RANGE, R >
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC0_SWC_OFFSET_DIRECTION, R >
 {
     public:
 
         static constexpr size_t COMPARISON_VAL = 0x01;
-        static constexpr const char* FIELD_STR = "PMIC0 SWC Range";
+        static constexpr const char* FIELD_STR = "PMIC0 SWC Offset Direction";
 
         template <typename T>
         using COMPARISON_OP = std::less_equal<T>;
@@ -1465,16 +1468,16 @@ class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUS
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note PMIC0_SWD_SETTING field specialization
+/// @note PMIC0_SWD_OFFSET field specialization
 /// @note valid for all revs
 ///
 template< mss::spd::rev R >
-class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC0_SWD_SETTING, R >
+class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC0_SWD_OFFSET, R >
 {
     public:
 
         static constexpr size_t COMPARISON_VAL = 0x3f;
-        static constexpr const char* FIELD_STR = "PMIC0 SWD Setting";
+        static constexpr const char* FIELD_STR = "PMIC0 SWD Offset";
 
         template <typename T>
         using COMPARISON_OP = std::less_equal<T>;
@@ -1484,16 +1487,17 @@ class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUS
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note PMIC0_SWD_RANGE field specialization
+/// @note PMIC0_SWD_OFFSET_DIRECTION field specialization
 /// @note valid for all revs
 ///
 template< mss::spd::rev R >
-class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC0_SWD_RANGE, R >
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC0_SWD_OFFSET_DIRECTION, R >
 {
     public:
 
         static constexpr size_t COMPARISON_VAL = 0x01;
-        static constexpr const char* FIELD_STR = "PMIC0 SWD Range";
+        static constexpr const char* FIELD_STR = "PMIC0 SWD Offset Direction";
 
         template <typename T>
         using COMPARISON_OP = std::less_equal<T>;
@@ -1503,16 +1507,16 @@ class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUS
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note PMIC1_SWA_SETTING field specialization
+/// @note PMIC1_SWA_OFFSET field specialization
 /// @note valid for all revs
 ///
 template< mss::spd::rev R >
-class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC1_SWA_SETTING, R >
+class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC1_SWA_OFFSET, R >
 {
     public:
 
         static constexpr size_t COMPARISON_VAL = 0x3f;
-        static constexpr const char* FIELD_STR = "PMIC1 SWA Setting";
+        static constexpr const char* FIELD_STR = "PMIC1 SWA Offset";
 
         template <typename T>
         using COMPARISON_OP = std::less_equal<T>;
@@ -1522,16 +1526,17 @@ class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUS
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note PMIC1_SWA_RANGE field specialization
+/// @note PMIC1_SWA_OFFSET_DIRECTION field specialization
 /// @note valid for all revs
 ///
 template< mss::spd::rev R >
-class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC1_SWA_RANGE, R >
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC1_SWA_OFFSET_DIRECTION, R >
 {
     public:
 
         static constexpr size_t COMPARISON_VAL = 0x01;
-        static constexpr const char* FIELD_STR = "PMIC1 SWA Range";
+        static constexpr const char* FIELD_STR = "PMIC1 SWA Offset Direction";
 
         template <typename T>
         using COMPARISON_OP = std::less_equal<T>;
@@ -1541,16 +1546,16 @@ class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUS
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note PMIC1_SWB_SETTING field specialization
+/// @note PMIC1_SWB_OFFSET field specialization
 /// @note valid for all revs
 ///
 template< mss::spd::rev R >
-class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC1_SWB_SETTING, R >
+class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC1_SWB_OFFSET, R >
 {
     public:
 
         static constexpr size_t COMPARISON_VAL = 0x3f;
-        static constexpr const char* FIELD_STR = "PMIC1 SWB Setting";
+        static constexpr const char* FIELD_STR = "PMIC1 SWB Offset";
 
         template <typename T>
         using COMPARISON_OP = std::less_equal<T>;
@@ -1560,16 +1565,17 @@ class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUS
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note PMIC1_SWB_RANGE field specialization
+/// @note PMIC1_SWB_OFFSET_DIRECTION field specialization
 /// @note valid for all revs
 ///
 template< mss::spd::rev R >
-class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC1_SWB_RANGE, R >
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC1_SWB_OFFSET_DIRECTION, R >
 {
     public:
 
         static constexpr size_t COMPARISON_VAL = 0x01;
-        static constexpr const char* FIELD_STR = "PMIC1 SWB Range";
+        static constexpr const char* FIELD_STR = "PMIC1 SWB Offset Direction";
 
         template <typename T>
         using COMPARISON_OP = std::less_equal<T>;
@@ -1579,16 +1585,16 @@ class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUS
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note PMIC1_SWC_SETTING field specialization
+/// @note PMIC1_SWC_OFFSET field specialization
 /// @note valid for all revs
 ///
 template< mss::spd::rev R >
-class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC1_SWC_SETTING, R >
+class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC1_SWC_OFFSET, R >
 {
     public:
 
         static constexpr size_t COMPARISON_VAL = 0x3f;
-        static constexpr const char* FIELD_STR = "PMIC1 SWC Setting";
+        static constexpr const char* FIELD_STR = "PMIC1 SWC Offset";
 
         template <typename T>
         using COMPARISON_OP = std::less_equal<T>;
@@ -1598,16 +1604,17 @@ class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUS
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note PMIC1_SWC_RANGE field specialization
+/// @note PMIC1_SWC_OFFSET_DIRECTION field specialization
 /// @note valid for all revs
 ///
 template< mss::spd::rev R >
-class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC1_SWC_RANGE, R >
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC1_SWC_OFFSET_DIRECTION, R >
 {
     public:
 
         static constexpr size_t COMPARISON_VAL = 0x01;
-        static constexpr const char* FIELD_STR = "PMIC1 SWC Range";
+        static constexpr const char* FIELD_STR = "PMIC1 SWC Offset Direction";
 
         template <typename T>
         using COMPARISON_OP = std::less_equal<T>;
@@ -1617,16 +1624,16 @@ class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUS
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note PMIC1_SWD_SETTING field specialization
+/// @note PMIC1_SWD_OFFSET field specialization
 /// @note valid for all revs
 ///
 template< mss::spd::rev R >
-class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC1_SWD_SETTING, R >
+class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC1_SWD_OFFSET, R >
 {
     public:
 
         static constexpr size_t COMPARISON_VAL = 0x3f;
-        static constexpr const char* FIELD_STR = "PMIC1 SWD Setting";
+        static constexpr const char* FIELD_STR = "PMIC1 SWD Offset";
 
         template <typename T>
         using COMPARISON_OP = std::less_equal<T>;
@@ -1636,16 +1643,17 @@ class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUS
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note PMIC1_SWD_RANGE field specialization
+/// @note PMIC1_SWD_OFFSET_DIRECTION field specialization
 /// @note valid for all revs
 ///
 template< mss::spd::rev R >
-class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC1_SWD_RANGE, R >
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC1_SWD_OFFSET_DIRECTION, R >
 {
     public:
 
         static constexpr size_t COMPARISON_VAL = 0x01;
-        static constexpr const char* FIELD_STR = "PMIC1 SWD Range";
+        static constexpr const char* FIELD_STR = "PMIC1 SWD Offset Direction";
 
         template <typename T>
         using COMPARISON_OP = std::less_equal<T>;

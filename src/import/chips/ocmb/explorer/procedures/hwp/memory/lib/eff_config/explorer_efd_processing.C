@@ -205,7 +205,7 @@ fapi2::ReturnCode dfimrl_ddrclk(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_
     FAPI_TRY(i_efd_data->dfimrl_ddrclk(l_dfimrl_ddrclk));
 
     // Set the attribute
-    FAPI_TRY(mss::attr::get_exp_dfimrl_clk(l_port, l_dfimrl_ddrclk));
+    FAPI_TRY(mss::attr::set_exp_dfimrl_clk(l_port, l_dfimrl_ddrclk));
 
 fapi_try_exit:
     return fapi2::current_err;
