@@ -96,15 +96,15 @@ avsInitExtVoltageControl(
     // [18:23] o2s_in_l_count1  =  X;     No input on first frame
 
     //uint32_t O2SCTRLF_value = 0b10000010000011111100000000000000;
-    ocb_o2sctrlf0a_t O2SCTRLF_value;
-    O2SCTRLF_value.fields.o2s_frame_size_an = p10avslib::O2S_FRAME_SIZE;
-    O2SCTRLF_value.fields.o2s_out_count1_an = p10avslib::O2S_FRAME_SIZE;
-    O2SCTRLF_value.fields.o2s_in_delay1_an = p10avslib::O2S_IN_DELAY1;
+    ocb_o2sctrlfn_t O2SCTRLF_value;
+    O2SCTRLF_value.fields.o2s_frame_size_n = p10avslib::O2S_FRAME_SIZE;
+    O2SCTRLF_value.fields.o2s_out_count1_n = p10avslib::O2S_FRAME_SIZE;
+    O2SCTRLF_value.fields.o2s_in_delay1_n = p10avslib::O2S_IN_DELAY1;
 
     l_data64.flush<0>();
-    l_data64.insertFromRight<0, 6>(O2SCTRLF_value.fields.o2s_frame_size_an);
-    l_data64.insertFromRight<6, 6>(O2SCTRLF_value.fields.o2s_out_count1_an);
-    l_data64.insertFromRight<12, 6>(O2SCTRLF_value.fields.o2s_in_delay1_an);
+    l_data64.insertFromRight<0, 6>(O2SCTRLF_value.fields.o2s_frame_size_n);
+    l_data64.insertFromRight<6, 6>(O2SCTRLF_value.fields.o2s_out_count1_n);
+    l_data64.insertFromRight<12, 6>(O2SCTRLF_value.fields.o2s_in_delay1_n);
     FAPI_TRY(putScom(i_target,
                      p10avslib::OCB_O2SCTRLF[i_avsBusNum],
                      l_data64));
@@ -118,11 +118,11 @@ avsInitExtVoltageControl(
     // [12:17] o2s_in_l_count2   = 32; -> 0x20;
 
     // uint32_t O2SCTRLS_value = 0b00000000000010000000000000000000;
-    ocb_o2sctrls0a_t O2SCTRLS_value;
-    O2SCTRLS_value.fields.o2s_in_count2_an = p10avslib::O2S_FRAME_SIZE;
+    ocb_o2sctrlsn_t O2SCTRLS_value;
+    O2SCTRLS_value.fields.o2s_in_count2_n = p10avslib::O2S_FRAME_SIZE;
 
     l_data64.flush<0>();
-    l_data64.insertFromRight<12, 6>(O2SCTRLS_value.fields.o2s_in_count2_an);
+    l_data64.insertFromRight<12, 6>(O2SCTRLS_value.fields.o2s_in_count2_n);
     FAPI_TRY(putScom(i_target,
                      p10avslib::OCB_O2SCTRLS[i_avsBusNum],
                      l_data64));
@@ -147,9 +147,9 @@ avsInitExtVoltageControl(
     // 1 / (AVSBus frequency *8) held in an attribute allows a
     // fully l_data64 driven computation without a divide operation.
 
-    ocb_o2sctrl10a_t O2SCTRL1_value;
-    O2SCTRL1_value.fields.o2s_bridge_enable_an = 1;
-    O2SCTRL1_value.fields.o2s_bridge_enable_bn = 1;
+    ocb_o2sctrl1n_t O2SCTRL1_value;
+    O2SCTRL1_value.fields.o2s_bridge_enable_n_a = 1;
+    O2SCTRL1_value.fields.o2s_bridge_enable_n_b = 1;
 
     //Nest frequency attribute in MHz
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PAU_MHZ,
@@ -177,14 +177,14 @@ avsInitExtVoltageControl(
     FAPI_INF("AVSBus frequency value is %d", l_avsbus_frequency);
     FAPI_INF("Divider value is %d", l_divider);
 
-    O2SCTRL1_value.fields.o2s_clock_divider_an = l_divider;
-    O2SCTRL1_value.fields.o2s_nr_of_frames_an = 1;
+    O2SCTRL1_value.fields.o2s_clock_divider_n = l_divider;
+    O2SCTRL1_value.fields.o2s_nr_of_frames_n = 1;
 
     l_data64.flush<0>();
-    l_data64.insertFromRight<0, 1>(O2SCTRL1_value.fields.o2s_bridge_enable_an);
-    l_data64.insertFromRight<1, 1>(O2SCTRL1_value.fields.o2s_bridge_enable_bn);
-    l_data64.insertFromRight<4, 10>(O2SCTRL1_value.fields.o2s_clock_divider_an);
-    l_data64.insertFromRight<17, 1>(O2SCTRL1_value.fields.o2s_nr_of_frames_an);
+    l_data64.insertFromRight<0, 1>(O2SCTRL1_value.fields.o2s_bridge_enable_n_a);
+    l_data64.insertFromRight<1, 1>(O2SCTRL1_value.fields.o2s_bridge_enable_n_b);
+    l_data64.insertFromRight<4, 10>(O2SCTRL1_value.fields.o2s_clock_divider_n);
+    l_data64.insertFromRight<17, 1>(O2SCTRL1_value.fields.o2s_nr_of_frames_n);
     FAPI_TRY(putScom(i_target,
                      p10avslib::OCB_O2SCTRL1[i_avsBusNum],
                      l_data64));
@@ -199,12 +199,12 @@ avsInitExtVoltageControl(
     // 0x00000: Wait 1 SPI Clock
     // 0x00001 - 0x1FFFF: value = number of ~SPI Clocks
     // Max. delay at the fastest SPI clock is 1.3ms.
-    ocb_o2sctrl20a_t O2SCTRL2_value;
-    O2SCTRL2_value.fields.o2s_inter_frame_delay_an = 0x0;
+    ocb_o2sctrl2n_t O2SCTRL2_value;
+    O2SCTRL2_value.fields.o2s_inter_frame_delay_n = 0x0;
 
     l_data64.flush<0>();
     l_data64.insertFromRight<0, 16>
-    (O2SCTRL2_value.fields.o2s_inter_frame_delay_an);
+    (O2SCTRL2_value.fields.o2s_inter_frame_delay_n);
     FAPI_TRY(putScom(i_target,
                      p10avslib::OCB_O2SCTRL2[i_avsBusNum],
                      l_data64));
