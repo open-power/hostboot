@@ -34,8 +34,8 @@ extern "C"
 {
 
 fapi2::ReturnCode __getDimmRepairData( const fapi2::Target
-    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA|fapi2::TARGET_TYPE_MEM_PORT>
-    & i_fapiTrgt,
+    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA|
+     fapi2::TARGET_TYPE_MEM_PORT|fapi2::TARGET_TYPE_OCMB_CHIP> & i_fapiTrgt,
     const uint8_t i_dimm,
     const uint8_t i_rank,
     TARGETING::TargetHandle_t & o_dimmTrgt,
@@ -109,8 +109,8 @@ fapi2::ReturnCode __getDimmRepairData( const fapi2::Target
 
 //------------------------------------------------------------------------------
 fapi2::ReturnCode getRowRepair( const fapi2::Target
-    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA|fapi2::TARGET_TYPE_MEM_PORT>
-    & i_fapiTrgt,
+    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA|
+     fapi2::TARGET_TYPE_MEM_PORT|fapi2::TARGET_TYPE_OCMB_CHIP> & i_fapiTrgt,
     const uint8_t i_dimm,
     const uint8_t i_rank,
     uint8_t (&o_data)[mss::ROW_REPAIR_BYTE_COUNT],
@@ -147,8 +147,8 @@ fapi2::ReturnCode getRowRepair( const fapi2::Target
 
 //------------------------------------------------------------------------------
 fapi2::ReturnCode setRowRepair( const fapi2::Target
-    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA|fapi2::TARGET_TYPE_MEM_PORT>
-    & i_fapiTrgt,
+    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA|
+     fapi2::TARGET_TYPE_MEM_PORT|fapi2::TARGET_TYPE_OCMB_CHIP> & i_fapiTrgt,
     const uint8_t i_dimm,
     const uint8_t i_rank,
     uint8_t (&i_data)[mss::ROW_REPAIR_BYTE_COUNT],

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,7 +39,7 @@ extern "C"
  * Row Repair Data getter procedure to get the DQ bitmap and returns the data
  * for the specified rank.
  *
- * @param[in]  i_fapiTrgt Reference to MCA/MBA/MEM_PORT Target
+ * @param[in]  i_fapiTrgt Reference to MCA/MBA/MEM_PORT/OCMB_CHIP Target
  * @param[in]  i_dimm MCA/MBA port DIMM number
  * @param[in]  i_rank DIMM rank number
  * @param[out] o_data Reference to data where Row Repair Data is copied to
@@ -48,8 +48,8 @@ extern "C"
  * @return ReturnCode
  */
 fapi2::ReturnCode getRowRepair( const fapi2::Target
-    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA|fapi2::TARGET_TYPE_MEM_PORT>
-    & i_fapiTrgt,
+    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA|
+     fapi2::TARGET_TYPE_MEM_PORT|fapi2::TARGET_TYPE_OCMB_CHIP> & i_fapiTrgt,
     const uint8_t i_dimm,
     const uint8_t i_rank,
     uint8_t (&o_data)[mss::ROW_REPAIR_BYTE_COUNT],
@@ -62,7 +62,7 @@ fapi2::ReturnCode getRowRepair( const fapi2::Target
  * Row Repair Data setter procedure to set the data
  * for the specified rank.
  *
- * @param[in]  i_fapiTrgt Reference to MCA/MBA/MEM_PORT Target
+ * @param[in]  i_fapiTrgt Reference to MCA/MBA/MEM_PORT/OCMB_CHIP Target
  * @param[in]  i_dimm MCA/MBA port DIMM number
  * @param[in]  i_rank DIMM rank number
  * @param[out] i_data Reference to data where Row Repair Data is
@@ -71,8 +71,8 @@ fapi2::ReturnCode getRowRepair( const fapi2::Target
  * @return ReturnCode
  */
 fapi2::ReturnCode setRowRepair( const fapi2::Target
-    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA|fapi2::TARGET_TYPE_MEM_PORT>
-    & i_fapiTrgt,
+    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA|
+     fapi2::TARGET_TYPE_MEM_PORT|fapi2::TARGET_TYPE_OCMB_CHIP> & i_fapiTrgt,
     const uint8_t i_dimm,
     const uint8_t i_rank,
     uint8_t (&i_data)[mss::ROW_REPAIR_BYTE_COUNT],
