@@ -56,7 +56,7 @@ extern "C"
 {
 
 ///
-/// @brief Set fabric effective configuration attributes
+/// @brief Set fabric effective config attributes for aggregate links
 ///
 /// @param[in] i_target       Reference to processor chip target
 /// @return fapi2:ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
