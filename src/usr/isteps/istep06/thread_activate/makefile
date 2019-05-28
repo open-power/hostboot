@@ -28,12 +28,12 @@ MODULE = thread_activate
 
 ##      support for fapi2
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/plat
-EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
 
 ## pointer to common HWP files
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/isteps/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/isteps
 
 ##  Include sub dirs
 ##  NOTE: add a new EXTRAINCDIR when you add a new HWP
@@ -41,6 +41,7 @@ HWP_PATH_1 += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/core
 HWP_PATH_2 += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/pm
 HWP_PATH += ${HWP_PATH_1}/ ${HWP_PATH_2}/
 EXTRAINCDIR += ${HWP_PATH}
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt
 
 ##  NOTE: add new object files when you add a new HWP
 OBJS += thread_activate.o

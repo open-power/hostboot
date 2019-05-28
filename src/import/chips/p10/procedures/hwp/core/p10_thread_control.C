@@ -38,9 +38,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <p10_thread_control.H>
-//#include <p10_quad_scom_addresses_fld.H>
 
-#include <p10_sbe_instruct_start_TEMP_DEFINES.H>//TODO: RTC 206777
 using fapi2::TARGET_TYPE_CORE;
 
 //------------------------------------------------------------------------------
@@ -50,7 +48,7 @@ using fapi2::TARGET_TYPE_CORE;
 // in regular offsets. This map allows us to go from a thread_bitset
 // to a generic register with the proper bits set. We can then shift
 // this result to align with the actual operation bit in the reg.
-// PS. this map works for C_RAS_STATUS as well.
+// PS. this map works for scomt::c::EC_PC_THRCTL_TCTLCOM_RAS_STATUS as well.
 static const uint64_t g_control_reg_map[] =
 {
     0x0000000000000000, // b0000, no threads
@@ -279,26 +277,28 @@ fapi2::ReturnCode p10_thread_control_query(
     uint64_t& o_state)
 {
     FAPI_DBG("Entering: Thread bit set %u", i_threads);
+    using namespace scomt;
+    using namespace scomt::c;
 
     // Initializing
     o_state = 0;
 
     // Setup mask values
     const uint64_t l_running_mask =
-        (g_control_reg_map[i_threads] >> C_RAS_STATUS_T0_CORE_MAINT) |
-        (g_control_reg_map[i_threads] >> C_RAS_STATUS_T0_THREAD_QUIESCED);
+        (g_control_reg_map[i_threads] >> EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT0_CORE_MAINT) |
+        (g_control_reg_map[i_threads] >> EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT0_THREAD_QUIESCED);
     const uint64_t l_step_ready_mask =
-        (g_control_reg_map[i_threads] >> C_RAS_STATUS_T0_CORE_MAINT) |
-        (g_control_reg_map[i_threads] >> C_RAS_STATUS_T0_THREAD_QUIESCED) |
-        (g_control_reg_map[i_threads] >> C_RAS_STATUS_T0_ICT_EMPTY);
+        (g_control_reg_map[i_threads] >> EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT0_CORE_MAINT) |
+        (g_control_reg_map[i_threads] >> EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT0_THREAD_QUIESCED) |
+        (g_control_reg_map[i_threads] >> EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT0_ICT_EMPTY);
     const uint64_t l_stopped_mask =
-        (g_control_reg_map[i_threads] >> C_RAS_STATUS_T0_CORE_MAINT) |
-        (g_control_reg_map[i_threads] >> C_RAS_STATUS_T0_THREAD_QUIESCED);
+        (g_control_reg_map[i_threads] >> EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT0_CORE_MAINT) |
+        (g_control_reg_map[i_threads] >> EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT0_THREAD_QUIESCED);
 
-    // Get C_RAS_STATUS reg
-    FAPI_TRY(fapi2::getScom(i_target, C_RAS_STATUS, o_rasStatusReg),
+    // Get scomt::c::EC_PC_THRCTL_TCTLCOM_RAS_STATUS reg
+    FAPI_TRY(fapi2::getScom(i_target, EC_PC_THRCTL_TCTLCOM_RAS_STATUS, o_rasStatusReg),
              "p10_thread_control_query(): getScom() returns an error, "
-             "Addr C_RAS_STATUS 0x%.16llX", C_RAS_STATUS);
+             "Addr RAS_STATUS 0x%.16llX", EC_PC_THRCTL_TCTLCOM_RAS_STATUS);
 
     // Note: all threads must meet a given condition in order for the
     //       bit to be set.
@@ -316,35 +316,35 @@ fapi2::ReturnCode p10_thread_control_query(
 
     // Check for THREAD_STATE_MAINT
     if ( o_rasStatusReg &
-         g_control_reg_map[i_threads] >> C_RAS_STATUS_T0_CORE_MAINT )
+         g_control_reg_map[i_threads] >> EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT0_CORE_MAINT )
     {
         o_state |= THREAD_STATE_MAINT;
     }
 
     // Check for THREAD_STATE_QUIESCED
     if ( o_rasStatusReg &
-         g_control_reg_map[i_threads] >> C_RAS_STATUS_T0_THREAD_QUIESCED )
+         g_control_reg_map[i_threads] >> EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT0_THREAD_QUIESCED )
     {
         o_state |= THREAD_STATE_QUIESCED;
     }
 
     // Check for THREAD_STATE_ICT_EMPTY
     if ( o_rasStatusReg &
-         g_control_reg_map[i_threads] >> C_RAS_STATUS_T0_ICT_EMPTY )
+         g_control_reg_map[i_threads] >> EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT0_ICT_EMPTY )
     {
         o_state |= THREAD_STATE_ICT_EMPTY;
     }
 
     // Check for THREAD_STATE_LSU_QUIESCED
     if ( o_rasStatusReg &
-         g_control_reg_map[i_threads] >> C_RAS_STATUS_T0_LSU_QUIESCED )
+         g_control_reg_map[i_threads] >> EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT0_LSU_QUIESCED )
     {
         o_state |= THREAD_STATE_LSU_QUIESCED;
     }
 
     // Check for THREAD_STATE_ISTEP_SUCCESS
     if ( o_rasStatusReg &
-         g_control_reg_map[i_threads] >> C_RAS_STATUS_T0_STEP_SUCCESS )
+         g_control_reg_map[i_threads] >> EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT0_STEP_SUCCESS )
     {
         o_state |= THREAD_STATE_ISTEP_SUCCESS;
     }
@@ -356,7 +356,7 @@ fapi2::ReturnCode p10_thread_control_query(
         o_state |= THREAD_STATE_ISTEP_READY;
     }
 
-    FAPI_DBG("C_RAS_STATUS: 0x%.16llX, Thread state 0x%.16llX",
+    FAPI_DBG("RAS_STATUS: 0x%.16llX, Thread state 0x%.16llX",
              o_rasStatusReg, o_state);
 
 fapi_try_exit:
@@ -382,16 +382,19 @@ fapi2::ReturnCode p10_thread_control_sreset(
     FAPI_DBG("p10_thread_control_sreset : Initiating sreset command to core PC logic for threads 0x%x",
              i_threads);
 
+    using namespace scomt;
+    using namespace scomt::c;
+
     // No Precondition for Sreset; power management is handled by platform
     // Clear blocking interrupts
     {
         fapi2::buffer<uint64_t> l_mode_data;
 
-        FAPI_TRY(fapi2::getScom(i_target, C_RAS_MODEREG, l_mode_data),
+        FAPI_TRY(fapi2::getScom(i_target, scomt::c::EC_PC_THRCTL_TCTLCOM_RAS_MODEREG, l_mode_data),
                  "p10_thread_control_step: getScom error when reading "
                  "ras_modreg for threads 0x%x", i_threads);
-        l_mode_data.clearBit<C_RAS_MODEREG_MR_FENCE_INTERRUPTS>();
-        FAPI_TRY(fapi2::putScom(i_target, C_RAS_MODEREG, l_mode_data),
+        l_mode_data.clearBit<EC_PC_THRCTL_TCTLCOM_RAS_MODEREG_FENCE_INTERRUPTS>();
+        FAPI_TRY(fapi2::putScom(i_target, scomt::c::EC_PC_THRCTL_TCTLCOM_RAS_MODEREG, l_mode_data),
                  "p10_thread_control_step: putScom error when issuing "
                  "ras_modreg step mode for threads 0x%x", i_threads);
     }
@@ -399,8 +402,8 @@ fapi2::ReturnCode p10_thread_control_sreset(
     // Setup & Initiate SReset Command
     {
         fapi2::buffer<uint64_t> l_scom_data(
-            g_control_reg_map[i_threads] >> C_DIRECT_CONTROLS_DC_T0_SRESET_REQUEST);
-        FAPI_TRY(fapi2::putScom(i_target, C_DIRECT_CONTROLS, l_scom_data),
+            g_control_reg_map[i_threads] >> EC_PC_THRCTL_TCTLCOM_DIRECT_CONTROLS_0_SRESET_REQUEST);
+        FAPI_TRY(fapi2::putScom(i_target, scomt::c::EC_PC_THRCTL_TCTLCOM_DIRECT_CONTROLS, l_scom_data),
                  "p10_thread_control_sreset: putScom error when issuing "
                  "sp_sreset for threads 0x%x", i_threads);
     }
@@ -430,6 +433,9 @@ fapi2::ReturnCode p10_thread_control_start(
     FAPI_DBG("p10_thread_control_start : Initiating start command to core PC logic for threads 0x%x",
              i_threads);
 
+    using namespace scomt;
+    using namespace scomt::c;
+
     // Preconditions: Only valid when in maint mode
     {
         bool l_in_maint = false;
@@ -445,18 +451,18 @@ fapi2::ReturnCode p10_thread_control_start(
                         .set_C_RAS_STATUS_REG(o_rasStatusReg),
                         "p10_thread_control_start: ERROR: Cannot issue Thread Start "
                         "because the threads aren't in maint mode (threads=%x), "
-                        "C_RAS_STATUS reg 0x%.16llX", i_threads, o_rasStatusReg);
+                        "RAS_STATUS reg 0x%.16llX", i_threads, o_rasStatusReg);
     }
 
     // Clear blocking interrupts
     {
         fapi2::buffer<uint64_t> l_mode_data;
 
-        FAPI_TRY(fapi2::getScom(i_target, C_RAS_MODEREG, l_mode_data),
+        FAPI_TRY(fapi2::getScom(i_target, EC_PC_THRCTL_TCTLCOM_RAS_MODEREG, l_mode_data),
                  "p10_thread_control_step: getScom error when reading "
                  "ras_modreg for threads 0x%x", i_threads);
-        l_mode_data.clearBit<C_RAS_MODEREG_MR_FENCE_INTERRUPTS>();
-        FAPI_TRY(fapi2::putScom(i_target, C_RAS_MODEREG, l_mode_data),
+        l_mode_data.clearBit<EC_PC_THRCTL_TCTLCOM_RAS_MODEREG_FENCE_INTERRUPTS>();
+        FAPI_TRY(fapi2::putScom(i_target, EC_PC_THRCTL_TCTLCOM_RAS_MODEREG, l_mode_data),
                  "p10_thread_control_step: putScom error when issuing ras_modreg "
                  "step mode for threads 0x%x", i_threads);
     }
@@ -464,8 +470,8 @@ fapi2::ReturnCode p10_thread_control_start(
     // Start the threads
     {
         fapi2::buffer<uint64_t> l_scom_data(
-            g_control_reg_map[i_threads] >> C_DIRECT_CONTROLS_DC_T0_CORE_START);
-        FAPI_TRY(fapi2::putScom(i_target, C_DIRECT_CONTROLS, l_scom_data),
+            g_control_reg_map[i_threads] >> EC_PC_THRCTL_TCTLCOM_DIRECT_CONTROLS_0_CORE_START);
+        FAPI_TRY(fapi2::putScom(i_target, EC_PC_THRCTL_TCTLCOM_DIRECT_CONTROLS, l_scom_data),
                  "p10_thread_control_start: putScom error when issuing sp_start "
                  "for threads 0x%x", i_threads);
     }
@@ -495,15 +501,17 @@ fapi2::ReturnCode p10_thread_control_stop(
     FAPI_DBG("p10_thread_control_stop : Initiating stop command to core PC logic for threads 0x%x",
              i_threads);
 
+    using namespace scomt;
+    using namespace scomt::c;
     // Block interrupts while stopped
     {
         fapi2::buffer<uint64_t> l_mode_data;
 
-        FAPI_TRY(fapi2::getScom(i_target, C_RAS_MODEREG, l_mode_data),
+        FAPI_TRY(fapi2::getScom(i_target, EC_PC_THRCTL_TCTLCOM_RAS_MODEREG, l_mode_data),
                  "p10_thread_control_step: getScom error when reading "
                  "ras_modreg for threads 0x%x", i_threads);
-        l_mode_data.setBit<C_RAS_MODEREG_MR_FENCE_INTERRUPTS>();
-        FAPI_TRY(fapi2::putScom(i_target, C_RAS_MODEREG, l_mode_data),
+        l_mode_data.setBit<EC_PC_THRCTL_TCTLCOM_RAS_MODEREG_FENCE_INTERRUPTS>();
+        FAPI_TRY(fapi2::putScom(i_target, EC_PC_THRCTL_TCTLCOM_RAS_MODEREG, l_mode_data),
                  "p10_thread_control_step: putScom error when issuing ras_modreg "
                  "step mode for threads 0x%x", i_threads);
     }
@@ -511,8 +519,8 @@ fapi2::ReturnCode p10_thread_control_stop(
     // Stop the threads
     {
         fapi2::buffer<uint64_t> l_scom_data(
-            g_control_reg_map[i_threads] >> C_DIRECT_CONTROLS_DC_T0_CORE_STOP);
-        FAPI_TRY(fapi2::putScom(i_target, C_DIRECT_CONTROLS, l_scom_data),
+            g_control_reg_map[i_threads] >> EC_PC_THRCTL_TCTLCOM_DIRECT_CONTROLS_0_CORE_STOP);
+        FAPI_TRY(fapi2::putScom(i_target, EC_PC_THRCTL_TCTLCOM_DIRECT_CONTROLS, l_scom_data),
                  "p10_thread_control_stop: putScom error when issuing sp_stop "
                  "for threads 0x%x", i_threads);
     }
@@ -538,7 +546,7 @@ fapi2::ReturnCode p10_thread_control_stop(
                         .set_C_RAS_STATUS_REG(o_rasStatusReg),
                         "p10_thread_control_stop: ERROR: Thread Stop issued, "
                         "but the threads are running. Stop might have failed "
-                        "for threads 0x%x, C_RAS_STATUS reg 0x%.16llX",
+                        "for threads 0x%x, RAS_STATUS reg 0x%.16llX",
                         i_threads, o_rasStatusReg);
     }
     FAPI_INF("p10_thread_control_stop : stop command issued for threads 0x%x",
@@ -567,6 +575,8 @@ fapi2::ReturnCode p10_thread_control_step(
     FAPI_DBG("p10_thread_control_stop : Initiating step command to core PC "
              "logic for threads 0x%x", i_threads);
 
+    using namespace scomt;
+    using namespace scomt::c;
     // Preconditions
     {
         bool l_step_ready = false;
@@ -582,17 +592,17 @@ fapi2::ReturnCode p10_thread_control_step(
                         .set_C_RAS_STATUS_REG(o_rasStatusReg),
                         "p10_thread_control_step: ERROR: Thread cannot be "
                         "stepped because they are not ready to step (threads=%x), "
-                        "C_RAS_STATUS reg 0x%.16llX", i_threads, o_rasStatusReg);
+                        "RAS_STATUS reg 0x%.16llX", i_threads, o_rasStatusReg);
     }
 
 
     // Setup single step mode and issue step.
     {
         fapi2::buffer<uint64_t> l_step_data(
-            g_control_reg_map[i_threads] >> C_DIRECT_CONTROLS_DC_T0_CORE_STEP);
+            g_control_reg_map[i_threads] >> EC_PC_THRCTL_TCTLCOM_DIRECT_CONTROLS_0_CORE_STEP);
 
         // Set issue the step
-        FAPI_TRY(fapi2::putScom(i_target, C_DIRECT_CONTROLS, l_step_data),
+        FAPI_TRY(fapi2::putScom(i_target, EC_PC_THRCTL_TCTLCOM_DIRECT_CONTROLS, l_step_data),
                  "p10_thread_control_step: putScom error when issuing step "
                  "command for threads 0x%x", i_threads);
     }
@@ -623,8 +633,8 @@ fapi2::ReturnCode p10_thread_control_step(
                         .set_PTC_STEP_COMP_POLL_LIMIT(PTC_STEP_COMP_POLL_LIMIT),
                         "p10_thread_control_stop: ERROR: Thread Step failed."
                         "Complete bits aren't set after %d poll atempts. "
-                        "WARNING: C_RAS_STATUS bit still in single instruction "
-                        "mode. Threads 0x%x, C_RAS_STATUS reg 0x%.16llX",
+                        "WARNING: RAS_STATUS bit still in single instruction "
+                        "mode. Threads 0x%x, RAS_STATUS reg 0x%.16llX",
                         PTC_STEP_COMP_POLL_LIMIT, i_threads, o_rasStatusReg);
     }
 

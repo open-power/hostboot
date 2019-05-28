@@ -41,10 +41,8 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <fapi2.H>
-//#include <p10_quad_scom_addresses.H>//TODO: Update when SCOM Headers are available
-//(RTC: 206779)
 
-#include <p10_sbe_instruct_start_TEMP_DEFINES.H>
+#include <p10_scom_c.H>
 
 //------------------------------------------------------------------------------
 // Constants
