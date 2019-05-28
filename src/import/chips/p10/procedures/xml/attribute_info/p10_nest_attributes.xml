@@ -44,6 +44,21 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_PROC_FABRIC_SL_DOMAIN</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Processor fabric SL domain (proxime) configuration.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    CHIP       = 0x00,
+    HEMISPHERE = 0x01
+  </enum>
+  <platInit/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_PROC_FABRIC_BROADCAST_MODE</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
