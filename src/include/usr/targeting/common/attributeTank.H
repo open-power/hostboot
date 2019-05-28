@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -144,6 +144,28 @@ namespace AttributeTank
 #endif
     };
 #ifndef STANDALONE_COMPILE
+
+    /**
+     * @struct Attribute
+     *
+     * This structure defines a single attribute.
+     */
+    struct Attribute
+    {
+        /**
+         * @brief Constructor
+         */
+        Attribute();
+
+        /**
+         * @brief Destructor. Frees memory
+         */
+        ~Attribute();
+
+        // Public data
+        AttributeHeader iv_hdr;
+        uint8_t * iv_pVal;      // Pointer to attribute value
+    };
 
     /**
      * @struct AttributeSerializedChunk
@@ -396,28 +418,6 @@ private:
     // Copy constructor and assignment operator disabled
     AttributeTank(const AttributeTank & i_right);
     AttributeTank & operator=(const AttributeTank & i_right);
-
-    /**
-     * @struct Attribute
-     *
-     * This structure defines a single attribute.
-     */
-    struct Attribute
-    {
-        /**
-         * @brief Constructor
-         */
-        Attribute();
-
-        /**
-         * @brief Destructor. Frees memory
-         */
-        ~Attribute();
-
-        // Public data
-        AttributeHeader iv_hdr;
-        uint8_t * iv_pVal;      // Pointer to attribute value
-    };
 
     // The attributes
     // Note: A possible performance boost could be to store the elements in a

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,7 +29,16 @@
 
 #define HBRT_TRACE_NAME "HBRT"
 
-#include "interface.h"
+extern trace_desc_t *g_trac_runtime;
+
+#include <vector>
+
+#include "interface.h"                      // hostInterfaces
+#include "generic_hbrt_fsp_message.H"       // GenericFspMboxMessage_t, AttributeSetter_t
+#include "targeting/common/attributeTank.H" // TARGETING::AttributeTank::Attribute
+#include <initservice/initserviceif.H>      // INITSERVICE
+#include "util/runtime/rt_fwreq_helper.H"   // firmware_request_helper
+#include "runtime/runtime_reasoncodes.H"    // MOD_XXX and RC_XXX
 
 /** @file hbrt_utilities.H
  *  @brief A file to put HBRT Interface utilities
@@ -54,9 +63,9 @@
  *          to newly created data.)
  *
  *  @post   The request/response messages point to a valid struct,
- *          the request/response message size are equal to each other
- *          and contain the size of the request/response messages
- *          respectively upon a successful call else all the output
+ *          the request/response messages' size are equal to each other, request
+ *          message is initalized (data size is set) and response message is
+ *          zeroed out, upon a successful call else all the output
  *          parameters will either be NULL or 0 based on type.
  *
  *  @note   Use this function iff hbrt_fw_msg::io_type is of type
@@ -65,7 +74,7 @@
  *  @note   Caller is responsible for deleting (use delete []) the
  *          allocated memory
  *
- *  @param[in] i_fspReqPayloadSize  The size of the payload that will
+ *  @param[in] i_fspReqPayloadSize The size of the payload that will
  *                                 populate GenericFspMboxMessage_t::data
  *  @param[out] o_fspMsgSize       Return the size of the
  *                                 GenericFspMboxMessage_t, adjusted to
@@ -76,14 +85,19 @@
  *                                 will be equal to the request msg size
  *  @param[out] o_responseMsg      The allocated response message (not
  *                                 NULL), zeroed out
+ *  @return true if NO issue allocating memory for request/response messages,
+ *          else false
  */
-void createGenericFspMsg(uint32_t i_fspReqPayloadSize,
-                       uint32_t &o_fspMsgSize,
-                       uint64_t &o_requestMsgSize,
-                       hostInterfaces::hbrt_fw_msg* &o_requestMsg,
-                       uint64_t &o_responseMsgSize,
-                       hostInterfaces::hbrt_fw_msg* &o_responseMsg)
+bool createGenericFspMsg(uint32_t i_fspReqPayloadSize,
+                         uint32_t &o_fspMsgSize,
+                         uint64_t &o_requestMsgSize,
+                         hostInterfaces::hbrt_fw_msg* &o_requestMsg,
+                         uint64_t &o_responseMsgSize,
+                         hostInterfaces::hbrt_fw_msg* &o_responseMsg)
 {
+   // Default the return value to true, assume things will go right
+   bool l_retVal(true);
+
    // Do some quick initialization of the output data
    o_fspMsgSize = o_requestMsgSize = o_responseMsgSize = 0;
    o_requestMsg = o_responseMsg = nullptr;
@@ -111,7 +125,7 @@ void createGenericFspMsg(uint32_t i_fspReqPayloadSize,
    o_requestMsg = reinterpret_cast<hostInterfaces::hbrt_fw_msg *>
                      (new uint8_t[o_requestMsgSize]);
 
-   // If anyone of these two message's memory can't be allocated, then
+   // If any one of these two message's memory can't be allocated, then
    // delete both messages (in case one did allocate memory), set both
    // messages to NULL pointers and set their respective sizes to zero.
    if (!o_responseMsg || !o_requestMsg)
@@ -123,6 +137,10 @@ void createGenericFspMsg(uint32_t i_fspReqPayloadSize,
       // Return output data zeroed out
       o_responseMsg = o_requestMsg = nullptr;
       o_fspMsgSize = o_requestMsgSize = o_responseMsgSize = 0;
+
+      // Return false, indicating that this function had an issue creating
+      // the request and/or response message
+      l_retVal = false;
    }
    else
    {
@@ -135,7 +153,175 @@ void createGenericFspMsg(uint32_t i_fspReqPayloadSize,
       o_requestMsg->generic_msg.dataSize = o_fspMsgSize;
       o_requestMsg->generic_msg.__req = GenericFspMboxMessage_t::REQUEST;
    }
+
+   return l_retVal;
 }  // end createGenericFspMsg
+
+
+/**
+ *  @brief  Serializes a list of Attributes to be sent to FSP
+ *
+ *  @param[in] i_attributeList  List of attributes to send to FSP
+ *
+ *  @return - error, NULL if no error
+ */
+errlHndl_t sendAttributes(const std::vector<TARGETING::AttributeTank::Attribute>&
+                          i_attributeList)
+{
+    TRACFCOMP(g_trac_runtime,
+              ENTER_MRK"sendAttributes - number of attributes to send %d",
+              i_attributeList.size());
+
+    // Handle to error log
+    errlHndl_t l_err{nullptr};
+
+    // Handles to the firmware messages
+    hostInterfaces::hbrt_fw_msg *l_fwRequestMsg{nullptr};   // request message
+    hostInterfaces::hbrt_fw_msg *l_fwResponseMsg{nullptr};  // response message
+
+    do
+    {
+        // If caller passes in an empty list, then nothing to do
+        if (!i_attributeList.size())
+        {
+            TRACFCOMP(g_trac_runtime, "sendAttributes: attribute list is empty,"
+                      "nothing to do ...");
+            break;
+        }
+
+        // Make sure mbox is available
+        assert(INITSERVICE::spBaseServicesEnabled(),
+               "ERROR: Cannot perform request 'sendAttributes', mbox is not available");
+
+        // Make sure we have all of our function pointers setup right
+        if ((nullptr == g_hostInterfaces) ||
+            (nullptr == g_hostInterfaces->firmware_request))
+        {
+            TRACFCOMP(g_trac_runtime, ERR_MRK"sendAttributes: "
+                      "Hypervisor firmware_request interface not linked");
+
+            /*@
+             * @errortype
+             * @severity     ERRL_SEV_UNRECOVERABLE
+             * @moduleid     MOD_RT_FIRMWARE_REQUEST
+             * @reasoncode   RC_FW_REQUEST_RT_NULL_PTR
+             * @userdata1    Number of Attributes to serialize and send
+             * @devdesc      Hypervisor firmware request interface not linked
+             * @custdesc     Internal firmware error
+             */
+            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            RUNTIME::MOD_RT_FIRMWARE_REQUEST,
+                                            RUNTIME::RC_FW_REQUEST_RT_NULL_PTR,
+                                            i_attributeList.size(),
+                                            0,
+                                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+            break;
+        }
+
+        /// Calculate the size requirements needed to serialize the Attribute info
+        // Start with the size of 'struct AttributeSetter_t' itself
+        uint16_t l_dataSize(sizeof(AttributeSetter_t));
+
+        // Then add in the individual attributes themselves
+        for (auto l_attribute: i_attributeList)
+        {
+            // Add in the size of `struct AttributeHeader`
+            l_dataSize += sizeof(l_attribute.iv_hdr);
+            // Finally add in the size of the attribute value
+            l_dataSize += l_attribute.iv_hdr.iv_valSize;
+        }
+
+        // Create and initialize to zero a few needed variables
+        uint32_t l_fullFspDataSize(0);
+        uint64_t l_fwRequestMsgSize(0), l_fwResponseMsgSize(0);
+
+        // Create the dynamic firmware messages
+        if (!createGenericFspMsg(l_dataSize,
+                                 l_fullFspDataSize,
+                                 l_fwRequestMsgSize,
+                                 l_fwRequestMsg,
+                                 l_fwResponseMsgSize,
+                                 l_fwResponseMsg) )
+        {
+            TRACFCOMP(g_trac_runtime, ERR_MRK"sendAttributes: "
+                      "Unable to allocate firmware request messages");
+
+            /*@
+             * @errortype
+             * @severity     ERRL_SEV_UNRECOVERABLE
+             * @moduleid     MOD_SEND_ATTRIBUTES_TO_FSP
+             * @reasoncode   RC_NULL_FIRMWARE_MSG_PTR
+             * @userdata1    Number of Attributes to serialize and send
+             * @devdesc      Unable to allocate firmware request messages
+             * @custdesc     Internal firmware error
+             */
+            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            RUNTIME::MOD_SEND_ATTRIBUTES_TO_FSP,
+                                            RUNTIME::RC_NULL_FIRMWARE_MSG_PTR,
+                                            i_attributeList.size(),
+                                            0,
+                                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+            break;
+        }
+
+        // Populate the 'message queue' and 'message type' for this message
+        l_fwRequestMsg->generic_msg.msgq = MBOX::FSP_NVDIMM_KEYS_MSGQ_ID;
+        l_fwRequestMsg->generic_msg.msgType =
+                                   GenericFspMboxMessage_t::MSG_DECONFIG_TARGET;
+
+        // Create a useful struct to populate the generic_msg::data field
+        AttributeSetter_t* l_attributeSetter =
+                                reinterpret_cast<AttributeSetter_t*>
+                                        (&(l_fwRequestMsg->generic_msg.data));
+
+        // Initialize the AttributeSetter to default values
+        l_attributeSetter->initialize();
+
+        // The number of attributes being copied can be obtained from
+        // size of the attrbute input list
+        l_attributeSetter->iv_numAttributes = i_attributeList.size();
+
+        // Retrieve the individual attributes (header and value)
+        // Create a useful struct to poulate attribute data
+        uint8_t* l_attributeData = l_attributeSetter->iv_attrData;
+        for (const auto & l_attribute: i_attributeList)
+        {
+            // Copy the attribute header
+            memcpy(l_attributeData,
+                   &(l_attribute.iv_hdr),
+                   sizeof(l_attribute.iv_hdr));
+            // Advance pointer, one beyond the attribute header
+            l_attributeData += sizeof(l_attribute.iv_hdr);
+
+            // Copy the attribute value
+            memcpy(l_attributeData,
+                   l_attribute.iv_pVal,
+                   l_attribute.iv_hdr.iv_valSize);
+            // Advance pointer, one beyond the attribute value
+            l_attributeData += l_attribute.iv_hdr.iv_valSize;
+        }
+
+        // Make the firmware_request call
+        l_err = firmware_request_helper(l_fwRequestMsgSize,
+                                        l_fwRequestMsg,
+                                        &l_fwResponseMsgSize,
+                                        l_fwResponseMsg);
+    } while (0);
+
+    // Release the firmware messages and set to NULL
+    delete []l_fwRequestMsg;
+    delete []l_fwResponseMsg;
+    l_fwRequestMsg = l_fwResponseMsg = nullptr;
+
+    TRACFCOMP(g_trac_runtime, EXIT_MRK"sendAttributes - exit with %s",
+              (nullptr == l_err ? "no error" : "error"));
+
+
+    return l_err;
+}
+
 
 #endif //__HOSTBOOT_RUNTIME_INTERFACE_VERSION_ONLY
 #endif // __RUNTIME__UTILITIES_H

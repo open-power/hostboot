@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,6 +66,7 @@ namespace RUNTIME
         MOD_CHECK_HB_RES_MEM_LIMIT       = 0x26,  /**< populate_hbruntime.C */
         MOD_INIT_RT_RES_MEM_TRACE_BUF    = 0x27,  /**< rt_rsvdtracebuffer.C */
         MOD_OPEN_UNTRUSTED_SP_AREAS      = 0x28,  /**< populate_hbruntime.C */
+        MOD_SEND_ATTRIBUTES_TO_FSP       = 0x29,  /**< hbrt_utilities.H */
     };
 
     enum RuntimeReasonCode
@@ -139,6 +140,7 @@ namespace RUNTIME
         RC_SP_ATTN_AREA_OVERFLOW       = RUNTIME_COMP_ID | 0x42,
         RC_SP_ATTN_AREA1_SIZE_OVERFLOW = RUNTIME_COMP_ID | 0x43,
         RC_UNKNOWN_LABEL               = RUNTIME_COMP_ID | 0x44,
+        RC_NULL_FIRMWARE_MSG_PTR       = RUNTIME_COMP_ID | 0x45,
     };
 
     enum UserDetailsTypes

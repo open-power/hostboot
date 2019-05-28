@@ -541,19 +541,23 @@ typedef struct hostInterfaces
     /**
      *  @brief Structure to be sent and received in the
      *         firmware_request call
+     *
+     *  @note  see README.md file on how to create an HBRT to FW
+     *         request message interface
      */
-    enum
+
+    enum  // hbrt_fw_msg::io_type             the struct associated with io_type
     {
        HBRT_FW_MSG_TYPE_REQ_NOP = 0,
-       HBRT_FW_MSG_TYPE_RESP_NOP = 1,
-       HBRT_FW_MSG_TYPE_RESP_GENERIC = 2,
-       HBRT_FW_MSG_TYPE_REQ_HCODE_UPDATE = 3,
-       HBRT_FW_MSG_HBRT_FSP_REQ = 4,
-       HBRT_FW_MSG_TYPE_ERROR_LOG = 5,
-       HBRT_FW_MSG_HBRT_FSP_RESP = 6,
-       HBRT_FW_MSG_TYPE_I2C_LOCK = 7,
-       HBRT_FW_MSG_TYPE_SBE_STATE = 8,
-       HBRT_FW_MSG_TYPE_NVDIMM_PROTECTION = 9,
+       HBRT_FW_MSG_TYPE_RESP_NOP = 1,          // struct resp_generic
+       HBRT_FW_MSG_TYPE_RESP_GENERIC = 2,      // struct resp_generic
+       HBRT_FW_MSG_TYPE_REQ_HCODE_UPDATE = 3,  // struct req_hcode_update
+       HBRT_FW_MSG_HBRT_FSP_REQ = 4,           // struct GenericFspMboxMessage_t
+       HBRT_FW_MSG_TYPE_ERROR_LOG = 5,         // struct error_log
+       HBRT_FW_MSG_HBRT_FSP_RESP = 6,          // struct GenericFspMboxMessage_t
+       HBRT_FW_MSG_TYPE_I2C_LOCK = 7,          // struct req_i2c_lock
+       HBRT_FW_MSG_TYPE_SBE_STATE = 8,         // struct sbe_state
+       HBRT_FW_MSG_TYPE_NVDIMM_PROTECTION = 9, // struct nvdimm_protection_state
     };
 
     // NVDIMM protection state enum
@@ -593,7 +597,7 @@ typedef struct hostInterfaces
           } req_hcode_update;
 
           // This struct is sent from HBRT with
-          // io_type set to HBRT_FW_MSG_TYPE_ERR_LOG
+          // io_type set to HBRT_FW_MSG_TYPE_ERROR_LOG
           // Send an error log to FSP
           struct
           {
