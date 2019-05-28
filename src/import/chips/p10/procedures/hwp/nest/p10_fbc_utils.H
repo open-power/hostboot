@@ -85,6 +85,7 @@ const uint8_t FABRIC_ADDR_TOPO_ID_INDEX_END_BIT = 19;
 
 // smp configuration definitions
 const uint8_t P10_FBC_UTILS_MAX_LINKS = 8;
+const uint8_t P10_FBC_UTILS_MAX_CHIPS = 8;
 
 // phase1 used to init scope of hbi drawer, call from hb
 // phase2 used to stitch drawers, call from fsp
