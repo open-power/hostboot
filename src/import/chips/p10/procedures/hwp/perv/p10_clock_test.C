@@ -55,12 +55,12 @@ fapi2::ReturnCode p10_clock_test(const
 
     FAPI_INF("p10_clock_test: Entering ...");
 
-    FAPI_DBG("unfence input wires to register 281D");
+    FAPI_DBG("unfence input wires to register 2810");
     FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_ROOT_CTRL0_FSI, l_data32));
     l_data32.clearBit<PERV_ROOT_CTRL0_FENCE0_DC>();
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_ROOT_CTRL0_FSI, l_data32));
 
-    FAPI_DBG("unfence input wires to register 291D ");
+    FAPI_DBG("unfence input wires to register 2910");
     FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_ROOT_CTRL0_COPY_FSI, l_data32));
     l_data32.clearBit<PERV_ROOT_CTRL0_FENCE0_DC>();
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_ROOT_CTRL0_COPY_FSI, l_data32));
@@ -101,7 +101,7 @@ static fapi2::ReturnCode p10_clock_test_latches(
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CP_REFCLOCK_SELECT, i_target_chip, l_cp_refclck_select),
              "Error from FAPI_ATTR_GET (ATTR_CP_REFCLOCK_SELECT)");
 
-    l_data32.flush<0>().setBit<4>();
+    l_data32.flush<0>().setBit<3>();
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip,
                                     set_rcs_clock_test_in ? PERV_ROOT_CTRL5_SET_FSI : PERV_ROOT_CTRL5_CLEAR_FSI, l_data32));
 
@@ -110,8 +110,8 @@ static fapi2::ReturnCode p10_clock_test_latches(
     FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_SNS1LTH_FSI,
                                     l_data32));
 
-    check_clockA = set_rcs_clock_test_in ? (l_data32.getBit<0>() == 1) : (l_data32.getBit<0>() == 0) ;
-    check_clockB = set_rcs_clock_test_in ? (l_data32.getBit<1>() == 1) : (l_data32.getBit<1>() == 0) ;
+    check_clockA = set_rcs_clock_test_in ? (l_data32.getBit<4>() == 1) : (l_data32.getBit<4>() == 0) ;
+    check_clockB = set_rcs_clock_test_in ? (l_data32.getBit<5>() == 1) : (l_data32.getBit<5>() == 0) ;
 
     if (! (l_cp_refclck_select == fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_OSC1))
     {
