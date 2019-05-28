@@ -44,13 +44,6 @@ namespace gem
 {
 
 ///
-/// @brief Checks that DIMM sizes are 32GB
-/// @param[in] i_target the controller
-/// @return FAPI2_RC_SUCCESS iff ok
-///
-fapi2::ReturnCode gem_draminit_check_memory_size(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
-
-///
 /// @brief Polls DRAM calibration register to check for complete
 /// @param[in] i_target the controller
 /// @return FAPI2_RC_SUCCESS iff ok
