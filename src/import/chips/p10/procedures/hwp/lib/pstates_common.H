@@ -204,6 +204,8 @@ typedef struct
     uint32_t vcs_mv;
     uint32_t ics_tdp_ac_10ma;
     uint32_t ics_tdp_dc_10ma;
+    uint32_t ics_rdp_ac_10ma;
+    uint32_t ics_rdp_dc_10ma;
     uint32_t frequency_guardband_sort_mhz;
     uint32_t vdd_vmin;
     uint32_t idd_power_pattern_10ma;
