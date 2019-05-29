@@ -109,7 +109,7 @@ typedef struct
     uint32_t attr_dpll_bias;
     uint32_t attr_undervolting;
     uint32_t attr_pm_safe_frequency_mhz;
-    int32_t attr_pm_safe_voltage_mv[2];
+    uint32_t attr_pm_safe_voltage_mv[2];
 
     uint32_t attr_freq_core_floor;
     uint32_t attr_freq_core_floor_mhz;
@@ -142,12 +142,12 @@ typedef struct
     uint32_t attr_proc_r_loadline_uohm[4];
     uint32_t attr_proc_vrm_voffset_uv[4];
     uint8_t  attr_boot_voltage_biase_0p5pct;
-    // External Voltage Timing attributes
-    uint32_t attr_ext_vrm_transition_start_ns;
-    uint32_t attr_ext_vrm_transition_rate_inc_uv_per_us;
-    uint32_t attr_ext_vrm_transition_rate_dec_uv_per_us;
-    uint32_t attr_ext_vrm_stabilization_time_us;
-    uint32_t attr_ext_vrm_step_size_mv;
+    // External Voltage Timing attributes VDD,VCS,VDN,VIO
+    uint32_t attr_ext_vrm_transition_start_ns[4];
+    uint32_t attr_ext_vrm_transition_rate_inc_uv_per_us[4];
+    uint32_t attr_ext_vrm_transition_rate_dec_uv_per_us[4];
+    uint32_t attr_ext_vrm_stabilization_time_us[4];
+    uint32_t attr_ext_vrm_step_size_mv[4];
     uint32_t attr_save_mode_nodds_uplift_mv[2]; //VDD,VCS
 
 
@@ -183,7 +183,7 @@ class PlatPmPPB
             iv_dds_enabled(0), iv_ivrm_enabled(0), iv_wof_enabled(0), iv_safe_voltage (0),
             iv_safe_frequency(0), iv_reference_frequency_mhz(0), iv_reference_frequency_khz(0),
             iv_frequency_step_khz(0), iv_proc_dpll_divider(0), iv_nest_freq_mhz(0),
-            iv_wov_underv_enabled(0), iv_wov_overv_enabled(0)
+            iv_wov_underv_enabled(0), iv_wov_overv_enabled(0), iv_poundV_fmax_enable(true)
 
         {
             attr_init();
@@ -208,6 +208,39 @@ class PlatPmPPB
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode compute_boot_safe(
             const VoltageConfigActions_t i_action);
+
+        /// -----------------------------------------------------------------------
+        /// @brief Initialize global pstate parameter block
+        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// -----------------------------------------------------------------------
+        fapi2::ReturnCode gppb_init( GlobalPstateParmBlock_t* i_globalppb);
+
+        /// -----------------------------------------------------------------------
+        /// @brief Initialize local pstate parameter block
+        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// -----------------------------------------------------------------------
+//        fapi2::ReturnCode lppb_init(LocalPstateParmBlock* i_localppb);
+
+        /// -----------------------------------------------------------------------
+        /// @brief Initialize occ pstate parameter block
+        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// -----------------------------------------------------------------------
+        fapi2::ReturnCode oppb_init(OCCPstateParmBlock_t* i_occppb);
+
+        /// -----------------------------------------------------------------------
+        /// @brief This fills up the DDS slopes in GlobalParmBlock
+        /// @param[out]     o_gppb  global PPB data
+        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// -----------------------------------------------------------------------
+        void compute_dds_slopes(GlobalPstateParmBlock_t* o_gppb);
+
+        /// -----------------------------------------------------------------------
+        /// @brief This fills up the PStateVSlopes and VPStatesSlopes in
+        ///         GlobalParmBlock
+        /// @param[out]     o_gppb  global PPB data
+        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// -----------------------------------------------------------------------
+        void compute_PStateV_I_slope(GlobalPstateParmBlock_t* o_gppb);
 
         /// -----------------------------------------------------------------------
         /// @brief Read #V data from module vpd
@@ -366,6 +399,70 @@ class PlatPmPPB
             return static_cast<int>(x - 0.9999999999999999);
         }
 
+        void get_poundV_data_raw(PoundVOpPoint_t* o_data)
+        {
+            memcpy(o_data, iv_attr_mvpd_poundV_raw, sizeof(iv_attr_mvpd_poundV_raw));
+        }
+
+        void get_poundV_data_biased(PoundVOpPoint_t* o_data)
+        {
+            memcpy(o_data, iv_attr_mvpd_poundV_biased, sizeof(iv_attr_mvpd_poundV_biased));
+        }
+        /// -----------------------------------------------------------------------
+        /// @brief Compute slope values for fixed point of shift 4.12
+        /// @param[in]     y1    pstate value of powersave
+        /// @param[in]     y0    pstate value of nominal
+        /// @param[in]     x1    VDD value of nominal
+        /// @param[in]     x0    VDD value of powersave
+        /// @return computed slope threshold value
+        /// -----------------------------------------------------------------------
+        int16_t compute_slope_4_12(uint32_t y1, uint32_t y0, uint32_t x1, uint32_t x0)
+        {
+            return (int16_t)
+                   (
+                       // Perform division using floats for maximum precision
+                       // Store resulting slope in 4.12 Fixed-Pt format
+                       ((float)(y1 - y0) / (float)(x1 - x0)) * (1 << VID_SLOPE_FP_SHIFT_12)
+                   );
+
+        }
+        /// -----------------------------------------------------------------------
+        /// @brief Compute slope values for fixed point of shift 4.12
+        /// @param[in]     y1    pstate value of powersave
+        /// @param[in]     y0    pstate value of nominal
+        /// @param[in]     x1    VDD value of nominal
+        /// @param[in]     x0    VDD value of powersave
+        /// @return computed slope threshold value
+        /// -----------------------------------------------------------------------
+        int16_t compute_slope_2_6(uint32_t y1, uint32_t y0, uint32_t x1, uint32_t x0)
+        {
+            return (int8_t)
+                   (
+                       // Perform division using floats for maximum precision
+                       // Store resulting slope in 2.6 Fixed-Pt format
+                       ((float)(y1 - y0) / (float)(x1 - x0)) * (1 << 6)
+                   );
+
+        }
+        /// -----------------------------------------------------------------------
+        /// @brief Compute slope values for fixed point of shift 4.9
+        /// @param[in]     y1    pstate value of powersave
+        /// @param[in]     y0    pstate value of nominal
+        /// @param[in]     x1    VDD value of nominal
+        /// @param[in]     x0    VDD value of powersave
+        /// @return computed slope threshold value
+        /// -----------------------------------------------------------------------
+        int16_t compute_slope_4_9(uint32_t y1, uint32_t y0, uint32_t x1, uint32_t x0)
+        {
+            return (int16_t)
+                   (
+                       // Perform division using floats for maximum precision
+                       // Store resulting slope in 4.9 Fixed-Pt format
+                       ((float)(y1 - y0) / (float)(x1 - x0)) * (1 << I_SLOPE_FP_SHIFT_9)
+                   );
+
+        }
+
         /// -----------------------------------------------------------------------
         /// @brief Compute VDD/VCS/VDN voltage for given system parameters
         /// @param[in]     i_vpd_mv voltage value in milli volts
@@ -401,6 +498,16 @@ class PlatPmPPB
 
             return  (l_result);
         }
+        /// -----------------------------------------------------------------------
+        /// @brief Pstate attribute ATTR_SYSTEM_PSTATES_MODE status
+        /// @return true/false
+        /// -----------------------------------------------------------------------
+        bool isPstateModeEnabled()
+        {
+            return((iv_attrs.attr_pstate_mode == fapi2::ENUM_ATTR_SYSTEM_PSTATES_MODE_OFF) ?
+                   true : false);
+        } //end of isPstateModeEnabled
+
 
         /// -----------------------------------------------------------------------
         /// @brief Adjust bias value for given frequency value
@@ -463,6 +570,7 @@ class PlatPmPPB
         uint8_t                   iv_wov_underv_enabled;
         uint8_t                   iv_wov_overv_enabled;
         bool                      iv_optional_pdv_pts_value_zero;
+        bool                      iv_poundV_fmax_enable;
 
 
         PoundVOpPoint_t           iv_raw_vpd_pts[NUM_PV_POINTS];
@@ -498,6 +606,22 @@ typedef fapi2::ReturnCode (*p10_pstate_parameter_block_FP_t) (
 
 extern "C"
 {
+    /// -------------------------------------------------------------------
+    /// @brief  Print a GlobalPstateParameterBlock structure on a given stream
+    /// @param[in]  i_gppb    The Global Pstate Parameter Block to print
+    /// @return void
+    /// -------------------------------------------------------------------
+    void
+    gppb_print(GlobalPstateParmBlock_t* i_gppb);
+
+    /// -------------------------------------------------------------------
+    /// @brief  Print a OCCPstateParameterBlock structure on a given stream
+    /// @param[in]  i_oppb The OCC Pstate Parameter Block to print
+    /// @return void
+    /// -------------------------------------------------------------------
+    void
+    oppb_print(OCCPstateParmBlock_t* i_oppb);
+
     /// -------------------------------------------------------------------
     /// @brief  Print an iddq_print structure on a given stream
     /// @param[in]  i_iddqt pointer to Iddq structure to output
