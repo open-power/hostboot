@@ -643,6 +643,12 @@ void getAddresses( TrgtMap_t & io_targMap )
     {
         0x08040002, // MB_CHIPLET_FIR_MASK
         0x08040007, // MB_CHIPLET_SPA_FIR_MASK
+        0x08012813, // DL0_ERROR_HOLD
+        0x0801241D, // TLX_ERR1_REPORT
+
+        // AUE/IAUE analysis
+        0x080118D7, // MCBMCAT
+
     };
 
     // EC level handling will be done with a

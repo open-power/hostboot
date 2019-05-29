@@ -975,6 +975,12 @@ int32_t calloutBusInterface( ExtensibleChip * i_chip,
         {
             hwasType = HWAS::DMI_BUS_TYPE;
         }
+        else if ( (TYPE_OMI == rxType && TYPE_OCMB_CHIP == txType) ||
+                  (TYPE_OCMB_CHIP == rxType && TYPE_OMI == txType) )
+        {
+            //TODO RTC 199028
+            //hwasType = HWAS::OMI_BUS_TYPE;
+        }
         else
         {
             PRDF_ASSERT( false );
@@ -1087,6 +1093,7 @@ PRDF_PLUGIN_DEFINE_NS( axone_xbus,     LaneRepair, calloutBusInterfacePlugin );
 PRDF_PLUGIN_DEFINE_NS( nimbus_obus,    LaneRepair, calloutBusInterfacePlugin );
 PRDF_PLUGIN_DEFINE_NS( cumulus_obus,   LaneRepair, calloutBusInterfacePlugin );
 PRDF_PLUGIN_DEFINE_NS( axone_obus,     LaneRepair, calloutBusInterfacePlugin );
+PRDF_PLUGIN_DEFINE_NS( explorer_ocmb,  LaneRepair, calloutBusInterfacePlugin );
 PRDF_PLUGIN_DEFINE_NS( cumulus_dmi,    LaneRepair, calloutBusInterfacePlugin );
 PRDF_PLUGIN_DEFINE_NS( centaur_membuf, LaneRepair, calloutBusInterfacePlugin );
 
