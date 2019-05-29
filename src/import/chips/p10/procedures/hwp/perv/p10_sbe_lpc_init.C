@@ -35,40 +35,40 @@
 #include "p10_scom_proc.H"
 #include "p10_lpc_utils.H"
 
-// FIXME @RTC209732 : remove/replace with generated values
-namespace
-{
-static const uint64_t PERV_N1_CPLT_CTRL0_OR = 0x03000010ull;
-static const uint64_t PERV_N1_CPLT_CTRL0_CLEAR =  0x03000020ull;
-static const uint64_t PERV_N1_CPLT_CONF1_OR = 0x03000019ull;
-static const uint64_t PERV_N1_CPLT_CONF1_CLEAR = 0x03000029ull;
-}
-
-// FIXME @RTC209732 : remove __attribute__((unused))
-static fapi2::ReturnCode __attribute__((unused)) switch_lpc_clock_mux(
+static fapi2::ReturnCode switch_lpc_clock_mux(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
     bool use_nest_clock)
 {
+    using namespace scomt::proc;
+
     fapi2::buffer<uint64_t> l_data64;
-    l_data64.flush<0>();
-    l_data64.setBit<1>();
-    return fapi2::putScom(i_target_chip, use_nest_clock ? ::PERV_N1_CPLT_CTRL0_OR : ::PERV_N1_CPLT_CTRL0_CLEAR, l_data64);
+    l_data64.setBit<TP_TCN1_N1_CPLT_CTRL0_TC_UNIT_SYNCCLK_MUXSEL_DC>();
+    return fapi2::putScom(i_target_chip, use_nest_clock ? TP_TCN1_N1_CPLT_CTRL0_WO_OR
+                          : TP_TCN1_N1_CPLT_CTRL0_WO_CLEAR, l_data64);
 }
 
-// FIXME @RTC209732 : remove __attribute__((unused))
-static fapi2::ReturnCode __attribute__((unused)) reset_lpc_master(
+static fapi2::ReturnCode reset_lpc_master(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip)
 {
-    fapi2::buffer<uint64_t> l_data64;
+    using namespace scomt::proc;
+
+    fapi2::buffer<uint64_t> l_data64 = 0;
 
     //Do the functional reset that resets the internal registers
     //Setting registers to do an LPC functional reset
-    l_data64.flush<0>().setBit<CPLT_CONF1_TC_LP_RESET>();
-    FAPI_TRY(fapi2::putScom(i_target_chip, ::PERV_N1_CPLT_CONF1_OR, l_data64));
+    PREP_TP_TCN1_N1_CPLT_CONF1_WO_OR(i_target_chip);
+//  FIXME RTC:209732 use proper SCOM header constant for bit 12
+//    SET_TP_TCN1_N1_CPLT_CONF1_LP_RESET(l_data64);
+    l_data64.setBit<12>();
+    FAPI_TRY(PUT_TP_TCN1_N1_CPLT_CONF1_WO_OR(i_target_chip, l_data64));
 
     //Turn off the LPC functional reset
-    l_data64.flush<0>().setBit<CPLT_CONF1_TC_LP_RESET>();
-    FAPI_TRY(fapi2::putScom(i_target_chip, ::PERV_N1_CPLT_CONF1_CLEAR, l_data64));
+    l_data64 = 0;
+    PREP_TP_TCN1_N1_CPLT_CONF1_WO_CLEAR(i_target_chip);
+//  FIXME RTC:209732 use proper SCOM header constant for bit 12
+//    SET_TP_TCN1_N1_CPLT_CONF1_LP_RESET(l_data64);
+    l_data64.setBit<12>();
+    FAPI_TRY(PUT_TP_TCN1_N1_CPLT_CONF1_WO_CLEAR(i_target_chip, l_data64));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -106,12 +106,12 @@ fapi2::ReturnCode p10_sbe_lpc_init(
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SP_MODE, i_target_chip, l_is_fsp), "Error getting ATTR_IS_SP_MODE");
 
     /* The next two steps have to take place with the nest clock muxed into the LPC clock so all the logic sees its resets */
-// FIXME @RTC209732    FAPI_TRY(switch_lpc_clock_mux(i_target_chip, true));
+    FAPI_TRY(switch_lpc_clock_mux(i_target_chip, true));
 
     //------------------------------------------------------------------------------------------
     //--- STEP 1: Functional reset of LPC Master
     //------------------------------------------------------------------------------------------
-// FIXME @RTC209732    FAPI_TRY(reset_lpc_master(i_target_chip));
+    FAPI_TRY(reset_lpc_master(i_target_chip));
 
     //------------------------------------------------------------------------------------------
     //--- STEP 2: Issue an LPC bus reset
@@ -119,7 +119,7 @@ fapi2::ReturnCode p10_sbe_lpc_init(
     FAPI_TRY(reset_lpc_bus_via_master(i_target_chip));
 
     /* We can flip the LPC clock back to the external clock input now */
-// FIXME @RTC209732    FAPI_TRY(switch_lpc_clock_mux(i_target_chip, false));
+    FAPI_TRY(switch_lpc_clock_mux(i_target_chip, false));
 
     //------------------------------------------------------------------------------------------
     //--- STEP 3: Program settings in LPC Master and FPGA
