@@ -183,7 +183,7 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                                                      attrs.attr_avs_bus_num[VDN],
                                                      attrs.attr_avs_bus_rail_select[VDN],
                                                      attrs.attr_boot_voltage_mv[VDN],
-                                                     attrs.attr_ext_vrm_step_size_mv,
+                                                     attrs.attr_ext_vrm_step_size_mv[VDN],
                                                      l_present_boot_voltage[VDN],
                                                      VDN_SETUP),
                          "error from VDN setup function");
@@ -203,7 +203,7 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                                                      attrs.attr_avs_bus_num[VIO],
                                                      attrs.attr_avs_bus_rail_select[VIO],
                                                      attrs.attr_boot_voltage_mv[VIO],
-                                                     attrs.attr_ext_vrm_step_size_mv,
+                                                     attrs.attr_ext_vrm_step_size_mv[VIO],
                                                      l_present_boot_voltage[VIO],
                                                      VIO_SETUP),
                          "error from VIO setup function");
@@ -336,7 +336,7 @@ update_VDD_VCS_voltage(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targ
                        const uint8_t* i_bus_num,
                        const uint8_t* i_rail_select,
                        const uint32_t* i_voltage_mv,
-                       const uint32_t i_ext_vrm_step_size_mv,
+                       const uint32_t* i_ext_vrm_step_size_mv,
                        const uint32_t* i_present_boot_voltage)
 
 {
@@ -353,7 +353,7 @@ update_VDD_VCS_voltage(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targ
                                                  i_bus_num[i],
                                                  i_rail_select[i],
                                                  i_voltage_mv[i],
-                                                 i_ext_vrm_step_size_mv,
+                                                 i_ext_vrm_step_size_mv[i],
                                                  i_present_boot_voltage[i],
                                                  l_evid_value),
                      "Error from p10_setup_evid_voltageWrite setup function");
@@ -374,7 +374,7 @@ update_VDD_VCS_voltage(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targ
                                                  i_bus_num[i],
                                                  i_rail_select[i],
                                                  i_voltage_mv[i],
-                                                 i_ext_vrm_step_size_mv,
+                                                 i_ext_vrm_step_size_mv[i],
                                                  i_present_boot_voltage[i],
                                                  l_evid_value),
                      "Error from p10_setup_evid_voltageWrite setup function");
@@ -633,3 +633,5 @@ p10_update_dpll_value (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targ
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+
