@@ -3330,10 +3330,11 @@
   <!-- ******************************************************************** -->
   <attribute>
       <id>ATTR_CHIP_EC_FEATURE_HW438727</id>
-    <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_PROC_CHIP</targetType>
+    <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_PROC_CHIP,TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Anything NDD20+,CDD10+: Disable clockgating to allow correct
-      errors to be reported in ODL c_err_rpt and other error capture
+      Anything NDD20+,CDD10+,ADD10+: Disable clockgating to allow correct
+      errors to be reported in ODL c_err_rpt and other error capture.
+      Axone see: HW481539
   </description>
     <chipEcFeature>
       <chip>
@@ -3345,6 +3346,13 @@
       </chip>
       <chip>
         <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_AXONE</name>
         <ec>
           <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
