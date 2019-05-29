@@ -2709,6 +2709,7 @@ const initFlags_t initFlagArray[]=
 {
 {"tm-suspend-mode",                             0x8000000000000000},
 {"inst-thread-reconfig-control-trig0-1",        0x0000000000000000},
+{"fw-count-cache-disabled",                     0x8000000000000000},
 {"inst-l1d-flush-trig2",                        0x0000000000000000},
 {"inst-l1d-flush-ori30,30,0",                   0x8000000000000000},
 {"inst-spec-barrier-ori31,31,0",                0x8000000000000000},
