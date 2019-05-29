@@ -74,6 +74,9 @@ enum POUNDW_DDS_FIELDS
 #define RUNTIME_RAILS       2
 #define RUNTIME_RAIL_VDD    0
 #define RUNTIME_RAIL_VCS    1
+#define RUNTIME_RAIL_IDD    0
+#define RUNTIME_RAIL_ICS    1
+
 
 /// These defines resonant clock data structures constants
 #define RESCLK_FREQ_REGIONS 4
@@ -260,14 +263,6 @@ typedef struct
 /// Voltage Regulation Module (VRM) Control Settings
 typedef struct
 {
-    /// The exponent of the exponential encoding of Pstate stepping delay
-    uint8_t stepdelay_range;
-
-    /// The significand of the exponential encoding of Pstate stepping delay
-    uint8_t stepdelay_value;
-
-    uint8_t spare[2];
-
     /// Time between ext VRM detects write voltage cmd and when voltage begins to move
     uint32_t transition_start_ns[RUNTIME_RAILS];
 
@@ -321,7 +316,7 @@ typedef struct
     PoundVOpPoint_t     operating_points_set[NUM_VPD_PTS_SET][NUM_PV_POINTS];
     uint32_t            spare0[16];             // 128B word-aligned
 
-    PoundVBias_t        poundv_biases_0p05pct[NUM_PV_POINTS];  // Values in 0.5%
+    PoundVBias_t        poundv_biases_0p05pct;  // Values in 0.5%
 
     SysPowerDistParms_t vdd_sysparm;
     SysPowerDistParms_t vcs_sysparm;
@@ -344,12 +339,16 @@ typedef struct
     /// All are in 4.12 decimal form into uint16_t integer value
     uint16_t            ps_voltage_slopes[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
     uint16_t            voltage_ps_slopes[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
-    uint16_t            ps_ac_current_slopes[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
-    uint16_t            ps_dc_current_slopes[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
-    uint16_t            ac_current_ps_slopes[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
-    uint16_t            dc_current_ps_slopes[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
+    uint16_t            ps_ac_current_tdp[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
+    uint16_t            ps_dc_current_tdp[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
+    uint16_t            ac_current_ps_tdp[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
+    uint16_t            dc_current_ps_tdp[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
+    uint16_t            ps_ac_current_rdp[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
+    uint16_t            ps_dc_current_rdp[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
+    uint16_t            ac_current_ps_rdp[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
+    uint16_t            dc_current_ps_rdp[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
     uint16_t            ps_dds_delay_slopes[NUM_VPD_PTS_SET][MAXIMUM_CORES][VPD_NUM_SLOPES_REGION];
-    uint8_t             ps_dds_slopes[NUM_POUNDW_DDS_FIELDS ][NUM_VPD_PTS_SET][MAXIMUM_CORES][VPD_NUM_SLOPES_REGION];
+    uint8_t             ps_dds_slopes[NUM_POUNDW_DDS_FIELDS][NUM_VPD_PTS_SET][MAXIMUM_CORES][VPD_NUM_SLOPES_REGION];
 
     //AvsBusTopology
     AvsBusTopology_t avs_bus_topology;
@@ -381,7 +380,7 @@ typedef struct
     // Jump-value slopes
     // int16_t ps_dds_jump_slopes[VPD_NUM_SLOPES_REGION][NUM_JUMP_VALUES];
 
-//} __attribute__((packed, aligned(1024))) GlobalPstateParmBlock_t;
+// __attribute__((packed, aligned(1024))) GlobalPstateParmBlock_t;
 } GlobalPstateParmBlock_t;
 
 
