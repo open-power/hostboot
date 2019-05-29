@@ -666,6 +666,27 @@
     <initToZero/>
     <group>debug</group>
   </attribute>
+  
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_POUND_V_STATIC_DATA_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Enables pstate parameter block code to use the static #V data
+
+    Consumer: p10_pstate_parameter_block.C
+
+    Platform default:OFF
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <enum>
+        OFF = 0x00,
+        ON = 0x01
+    </enum>
+    <initToZero/>
+    <group>debug</group>
+  </attribute>
 
   <!-- ********************************************************************* -->
   <attribute>
@@ -1374,17 +1395,19 @@
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_EXTERNAL_VRM_STEPSIZE</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
     Step size (binary in microvolts) to take upon external VRM voltage. This
     provide a limit of the external VRMs steps.
 
     Consumer: p10_pstate_parameter_block -> p10_setup_evid Pstate Parameter
     (PSPB) for PGPE
+    [index] ->0: VDD; 1: VCS; 2: VDN; 3: VIO;
 
     Provided by the Machine Readable Workbook after system characterization.
     </description>
     <valueType>uint32</valueType>
+    <array>4</array>
     <platinit/>
     <group>vrm</group>
   </attribute>
@@ -1392,7 +1415,7 @@
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_EXTERNAL_VRM_TRANSITION_RATE_DEC_UV_PER_US</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
     Transition rate (binary in microVolts per microsecond) of the VRM for an
     transition.This is used as part of the overall voltage time calculation
@@ -1401,9 +1424,12 @@
 
     Consumer: p10_pstate_parameter_block -> Pstate Parameter Block (PSPB) for PGPE
 
+    [index] ->0: VDD; 1: VCS; 2: VDN; 3: VIO;
+
     Provided by the Machine Readable Workbook after system characterization.
     </description>
     <valueType>uint32</valueType>
+    <array>4</array>
     <platinit/>
     <initToZero/>
     <group>vrm</group>
@@ -1412,7 +1438,7 @@
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_EXTERNAL_VRM_TRANSITION_RATE_INC_UV_PER_US</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
     Transition rate (binary in microVolts per microsecond) of the VRM for an
     transition.This is used as part of the overall voltage time calculation
@@ -1421,9 +1447,12 @@
 
     Consumer: p10_pstate_parameter_block -> Pstate Parameter Block (PSPB) for PGPE
 
+    [index] ->0: VDD; 1: VCS; 2: VDN; 3: VIO;
+
     Provided by the Machine Readable Workbook after system characterization.
     </description>
     <valueType>uint32</valueType>
+    <array>4</array>
     <platinit/>
     <initToZero/>
     <group>vrm</group>
@@ -1432,7 +1461,7 @@
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_EXTERNAL_VRM_TRANSITION_STABILIZATION_TIME_NS</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
     Time (binary in nanoseconds) to allow the voltage rail to stabilize before
     transition to be fully complete. This value is used for both and
@@ -1442,9 +1471,12 @@
 
     Consumer: p10_pstate_parameter_block -> Pstate Parameter Block (PSPB) for PGPE
 
+    [index] ->0: VDD; 1: VCS; 2: VDN; 3: VIO;
+
     Provided by the Machine Readable Workbook after system characterization.
     </description>
     <valueType>uint32</valueType>
+    <array>4</array>
     <platinit/>
     <initToZero/>
     <group>vrm</group>
@@ -1453,7 +1485,7 @@
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_EXTERNAL_VRM_TRANSITION_START_NS</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
     Delay (binary in nanoseconds) from the time the VRM receives the write
     until the voltage actually moves.This value is used for both and
@@ -1463,9 +1495,12 @@
 
     Consumer: p10_pstate_parameter_block -> Pstate Parameter Block (PSPB) for PGPE
 
+    [index] ->0: VDD; 1: VCS; 2: VDN; 3: VIO;
+
     Provided by the Machine Readable Workbook after system characterization.
     </description>
     <valueType>uint32</valueType>
+    <array>4</array>
     <platinit/>
     <initToZero/>
     <group>vrm</group>
@@ -1778,7 +1813,7 @@
 
     Modified in p10_pstate_parameter_block
     </description>
-    <valueType>int32</valueType>
+    <valueType>uint32</valueType>
     <array>2</array>
     <platinit/>
     <initToZero/>

@@ -38,6 +38,19 @@
 </attribute>
 <!-- ********************************************************************* -->
 <attribute>
+  <id>ATTR_FREQ_DPLL_REFCLOCK_KHZ</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    The frequency of the processor DPLL refclock in KHz.
+    Provided by the Machine Readable Workbook.
+    This can be overridden to adjust the refclock frequency.
+  </description>
+  <valueType>uint32</valueType>
+  <platInit/>
+  <default>133333</default>
+</attribute>
+<!-- ********************************************************************* -->
+<attribute>
   <id>ATTR_FREQ_IO_REFCLOCK_KHZ</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>

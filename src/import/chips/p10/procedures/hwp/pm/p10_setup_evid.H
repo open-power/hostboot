@@ -172,7 +172,7 @@ extern "C"
                            const uint8_t* i_bus_num,
                            const uint8_t* i_rail_select,
                            const uint32_t* i_voltage_mv,
-                           const uint32_t i_ext_vrm_step_size_mv,
+                           const uint32_t* i_ext_vrm_step_size_mv,
                            const uint32_t* i_present_boot_voltage);
 
 
