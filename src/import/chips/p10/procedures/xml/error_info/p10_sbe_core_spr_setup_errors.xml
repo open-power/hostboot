@@ -1,0 +1,74 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p10/procedures/xml/error_info/p10_sbe_core_spr_setup_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P10_SBE_CORE_SPR_SETUP_MASTER_CORE_NOT_FOUND</rc>
+    <description>
+      Procedure: p10_sbe_core_spr_setup
+      Unable to match ATTR_MASTER_CORE attribute value with any
+      child core chiplet of master processor chip passed to HWP
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>MASTER_CORE_NUM</ffdc>
+    <ffdc>FUSED_MODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P10_SBE_CORE_SPR_SETUP_MASTER_FUSED_CORE_PARTNER_NOT_FOUND</rc>
+    <description>
+      Procedure: p10_sbe_core_spr_setup
+      Unable to find partner fused core for identified master core
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>MASTER_CORE_NUM</ffdc>
+    <ffdc>FUSED_MODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P10_SBE_CORE_SPR_SETUP_NOT_MASTER_CHIP</rc>
+    <description>
+      Procedure: p10_sbe_core_spr_setup
+      HWP called on SBE which is not designated as drawer master chip
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+</hwpErrors>
