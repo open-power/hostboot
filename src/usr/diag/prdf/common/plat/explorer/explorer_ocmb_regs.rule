@@ -343,3 +343,50 @@
         scomaddr    0x08011C1F;
         capture     group default;
     };
+
+    ###########################################################################
+    # P9 OCMB target OMIDLFIR
+    ###########################################################################
+
+    register DL0_ERROR_HOLD
+    {
+        name        "P9 OCMB target DL0 Error Hold Register";
+        scomaddr    0x08012813;
+        capture     group default;
+    };
+
+    ###########################################################################
+    # P9 OCMB target TLXFIR
+    ###########################################################################
+
+    register TLXFIR_AND
+    {
+        name        "Explorer chip TLXFIR AND";
+        scomaddr    0x08012401;
+        capture     group never;
+        access      write_only;
+    };
+
+    register TLXFIR_MASK_OR
+    {
+        name        "Explorer chip TLXFIR MASK OR";
+        scomaddr    0x08012405;
+        capture     group never;
+        access      write_only;
+    };
+
+    register TLX_ERR1_REPORT
+    {
+        name        "P9 OCMB target TLX Error Report Register";
+        scomaddr    0x0801241D;
+        reset       (&, 0x0801241D);
+        mask        (|, 0x08012415);
+        capture     group default;
+    };
+
+    register TLX_ERR1_REPORT_MASK
+    {
+        name        "P9 OCMB target TLX Error Report Register Mask";
+        scomaddr    0x08012415;
+        capture     group default;
+    };

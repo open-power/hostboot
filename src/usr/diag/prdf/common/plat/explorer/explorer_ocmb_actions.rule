@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018
+# Contributors Listed Below - COPYRIGHT 2018,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -55,6 +55,12 @@ actionclass threshold32pday
     threshold( field(32 / day) );
 };
 
+/** Threshold of 5 per day */
+actionclass threshold5pday
+{
+    threshold( field(5 / day) );
+};
+
 ################################################################################
 #                       Threshold and Mask policy
 ################################################################################
@@ -98,6 +104,13 @@ actionclass callout2ndLvlMed
 /** Callout self with  low priority but don't gard it */
 actionclass calloutSelfLowNoGard
 { callout(MRU_LOW, NO_GARD); };
+
+actionclass omi_bus
+{
+    calloutSelfMedA;
+    callout(connected(TYPE_OMI), MRU_MEDA);
+    funccall("calloutBusInterfacePlugin");
+};
 
 ################################################################################
 #                           Callouts with thresholds                           #
@@ -153,6 +166,110 @@ actionclass TBDDefaultCallout
 };
 
 ################################################################################
+#                                 OCMB Actions                                 #
+################################################################################
+
+/** MCBIST program complete */
+actionclass mcbist_program_complete
+{
+    funccall("McbistCmdComplete");
+};
+
+/** DDR4 PHY Interrupt */
+actionclass ddr4_phy_interrupt
+{
+    calloutSelfHigh;
+    threshold5pday;
+    funccall("Ddr4PhyInterrupt");
+};
+
+/** Foxhound Fatal */
+actionclass foxhound_fatal
+{
+    funccall("FoxhoundFatal");
+    threshold1;
+};
+
+/** OMI-DL Fatal Error */
+actionclass dl_fatal_error
+{
+    try( funccall("DlFatalError"), omi_bus );
+    threshold1;
+};
+
+/** Verify Chip Mark */
+actionclass verify_chip_mark_0 { funccall("AnalyzeFetchMpe_0"); };
+actionclass verify_chip_mark_1 { funccall("AnalyzeFetchMpe_1"); };
+actionclass verify_chip_mark_2 { funccall("AnalyzeFetchMpe_2"); };
+actionclass verify_chip_mark_3 { funccall("AnalyzeFetchMpe_3"); };
+actionclass verify_chip_mark_4 { funccall("AnalyzeFetchMpe_4"); };
+actionclass verify_chip_mark_5 { funccall("AnalyzeFetchMpe_5"); };
+actionclass verify_chip_mark_6 { funccall("AnalyzeFetchMpe_6"); };
+actionclass verify_chip_mark_7 { funccall("AnalyzeFetchMpe_7"); };
+
+# TODO RTC 208211
+/** Mainline NCE/TCE handling */
+actionclass mainline_nce_tce_handling
+{
+    defaultMaskedError;
+};
+
+/** Handle Mainline AUEs/IAUEs */
+actionclass mainline_aue_iaue_handling
+{
+    defaultMaskedError;
+};
+
+/** Mainline UE handling */
+actionclass mainline_ue_handling
+{
+    defaultMaskedError;
+};
+
+/** Handle Mainline IUEs */
+actionclass mainline_iue_handling
+{
+    defaultMaskedError;
+};
+
+actionclass memory_impe_handling
+{
+    defaultMaskedError;
+};
+
+/** Handle Maintenance AUEs */
+actionclass maintenance_aue_handling
+{
+    defaultMaskedError;
+};
+
+/** Handle Maintenance IAUEs */
+actionclass maintenance_iaue_handling
+{
+    defaultMaskedError;
+};
+
+/** RDF RCD Parity Error */
+actionclass rdf_rcd_parity_error
+{
+    funccall("RdfRcdParityError");
+    threshold1;
+};
+
+/** SRQ RCD Parity Error */
+actionclass srq_rcd_parity_error
+{
+    funccall("CalloutAttachedDimmsHigh");
+    callout(connected(TYPE_MEM_PORT,0), MRU_LOW);
+    threshold32pday;
+};
+
+actionclass mem_port_failure
+{
+    defaultMaskedError;
+};
+
+################################################################################
 # Analyze groups
 ################################################################################
 
@@ -162,5 +279,10 @@ actionclass analyzeSRQFIR    { analyze(gSRQFIR);    };
 actionclass analyzeMCBISTFIR { analyze(gMCBISTFIR); };
 actionclass analyzeRDFFIR    { analyze(gRDFFIR);    };
 actionclass analyzeTLXFIR    { analyze(gTLXFIR);    };
+actionclass analyzeTLXERR1
+{
+    analyze(gTLX_ERR1_REPORT);
+    funccall("clearAndMaskTlxtRe");
+};
 actionclass analyzeOMIDLFIR  { analyze(gOMIDLFIR);  };
 
