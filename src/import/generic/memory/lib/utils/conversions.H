@@ -88,7 +88,9 @@ static const std::vector<std::pair<uint64_t, uint64_t>> FREQ_TO_CLOCK_PERIOD =
 {
     {DIMM_SPEED_1600, 1250}, // DDR4
     {DIMM_SPEED_1866, 1071}, // DDR4
+    {DIMM_SPEED_1866, 1072}, // DDR4 - rounding error.
     {DIMM_SPEED_2133,  937}, // DDR4
+    {DIMM_SPEED_2133,  938}, // DDR4 - rounding error.
     {DIMM_SPEED_2400,  833}, // DDR4
     {DIMM_SPEED_2666,  750}, // DDR4
     {DIMM_SPEED_2933,  682}, // DDR4
