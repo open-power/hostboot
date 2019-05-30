@@ -115,18 +115,21 @@ ErrorInfoBusCallout::ErrorInfoBusCallout(
 /// @param[in] i_deconfigure True if Target should be deconfigured
 /// @param[in] i_gard        True if Target should be GARDed
 /// @param[in] i_priority    The priority of any callout
+/// @param[in] i_gardType    Type of GARD
 ///
 ErrorInfoCDG::ErrorInfoCDG(
     const Target<TARGET_TYPE_ALL>& i_target,
     const bool i_callout,
     const bool i_deconfigure,
     const bool i_gard,
-    const CalloutPriorities::CalloutPriority i_priority):
+    const CalloutPriorities::CalloutPriority i_priority,
+    const GardTypes::GardType i_gardType):
     iv_target(i_target),
     iv_callout(i_callout),
     iv_calloutPriority(i_priority),
     iv_deconfigure(i_deconfigure),
-    iv_gard(i_gard)
+    iv_gard(i_gard),
+    iv_gardType(i_gardType)
 {}
 
 ///
@@ -332,13 +335,15 @@ void ErrorInfoEntryTargetCDG::addErrorInfo(
         iv_deconfigure,
         iv_gard,
         static_cast<CalloutPriorities::CalloutPriority>
-        (iv_calloutPriority)
+        (iv_calloutPriority),
+        static_cast<GardTypes::GardType>(iv_gardType)
     );
 
-    FAPI_DBG("addErrorInfo: Adding target 0x%lx cdg (%d:%d:%d), pri: %d",
+    FAPI_INF("addErrorInfo: Adding target 0x%lx cdg (%d:%d:%d), pri: %d, gtyp: %d",
              ei->iv_target.get(),
              ei->iv_callout, ei->iv_deconfigure,
-             ei->iv_gard, ei->iv_calloutPriority);
+             ei->iv_gard, ei->iv_calloutPriority,
+             ei->iv_gardType);
 
     // Add the ErrorInfo
     i_info->iv_CDGs.push_back(std::shared_ptr<ErrorInfoCDG>(ei));

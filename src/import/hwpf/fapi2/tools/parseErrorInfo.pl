@@ -1245,6 +1245,10 @@ foreach my $argnum ( 0 .. $#ARGV )
                     # Add the Target to cdgTargetHash to be processed with any
                     # callout and deconfigure requests
                     $cdgTargetHash{ $gard->{target} }{gard} = 1;
+                    if ( exists $gard->{gardType} )
+                    {
+                        $cdgTargetHash{ $gard->{target} }{gardType} = $gard->{gardType};
+                    }
                     $elementsFound++;
                 }
                 if ( exists $gard->{childTargets} )
@@ -1302,6 +1306,7 @@ foreach my $argnum ( 0 .. $#ARGV )
                 my $priority = 'NONE';
                 my $deconf   = 0;
                 my $gard     = 0;
+                my $gardType = 'GARD_Fatal';
 
                 if ( exists $cdgTargetHash{$cdg}->{callout} )
                 {
@@ -1318,6 +1323,11 @@ foreach my $argnum ( 0 .. $#ARGV )
                 if ( exists $cdgTargetHash{$cdg}->{gard} )
                 {
                     $gard = 1;
+
+                    if ( exists $cdgTargetHash{$cdg}->{gardType} )
+                    {
+                        $gardType = $cdgTargetHash{$cdg}->{gardType};
+                    }
                 }
 
                 # Add the Target to the objectlist if it doesn't already exist
@@ -1334,6 +1344,8 @@ foreach my $argnum ( 0 .. $#ARGV )
                 $eiEntryStr .= "    l_entries[$eiEntryCount].target_cdg.iv_gard = $gard; \\\n";
                 $eiEntryStr .=
                     "    l_entries[$eiEntryCount].target_cdg.iv_calloutPriority = fapi2::CalloutPriorities::$priority; \\\n";
+                $eiEntryStr .=
+                    "    l_entries[$eiEntryCount].target_cdg.iv_gardType = fapi2::GardTypes::$gardType; \\\n";
                 $eiEntryCount++;
             }
 
