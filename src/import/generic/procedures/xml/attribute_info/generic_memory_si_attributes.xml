@@ -100,7 +100,8 @@
         <id>ATTR_MEM_SI_DRAM_DRV_IMP_DQ_DQS</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
-            Array[DIMM][RANK] DQ and DQS Drive Impedance.
+          Array[DIMM][RANK]
+          DQ and DQS Drive Impedance.
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -115,22 +116,26 @@
         <id>ATTR_MEM_SI_DRAM_PREAMBLE</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
-            Number of clocks used for read/write preamble. Calibration only uses 1 nCK preamble (DEFAULT). Mainline has both 1 nCK and 2 nCK preamble option.
-            The value of "0" means 1 nCK preamble, the value of "1" means 2 nCK preamble. Bit 3 for READ preamble, and Bit 7 for WRITE preamble.
-            E.g. 0b00010001 means 2 nCK preamble for both READ and WRITE
+          Array[DIMM][RANK]
+          Number of clocks used for read/write preamble. Calibration only uses 1 nCK preamble (DEFAULT). Mainline has both 1 nCK and 2 nCK preamble option.
+          The value of "0" means 1 nCK preamble, the value of "1" means 2 nCK preamble. Bit 3 for READ preamble, and Bit 7 for WRITE preamble.
+          E.g. 0b00010001 means 2 nCK preamble for both READ and WRITE
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
+        <enum>READ_PREAMBLE_BIT = 3, WRITE_PREAMBLE_BIT = 7</enum>
         <mssUnits>nCK</mssUnits>
         <mssAccessorName>si_dram_preamble</mssAccessorName>
+        <array>2 4</array>
     </attribute>
 
     <attribute>
         <id>ATTR_MEM_SI_DRAM_RTT_NOM</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
-            Array[DIMM][RANK] DRAM side Nominal Termination Resistance in Ohms.
+          Array[DIMM][RANK]
+          DRAM side Nominal Termination Resistance in Ohms.
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -145,7 +150,8 @@
         <id>ATTR_MEM_SI_DRAM_RTT_PARK</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
-            Array[DIMM][RANK] DRAM side Park Termination Resistance in Ohms.
+          Array[DIMM][RANK]
+          DRAM side Park Termination Resistance in Ohms.
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -160,7 +166,8 @@
         <id>ATTR_MEM_SI_DRAM_RTT_WR</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
-            Array[DIMM][RANK] DRAM side Write Termination Resistance in Ohms.
+          Array[DIMM][RANK]
+          DRAM side Write Termination Resistance in Ohms.
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -172,23 +179,101 @@
     </attribute>
 
     <attribute>
+      <id>ATTR_MEM_SI_VREF_DQ_TRAIN_VALUE</id>
+      <targetType>TARGET_TYPE_MEM_PORT</targetType>
+      <description>
+        ARRAY[DIMM][RANK]
+        vrefdq_train value. This is for DDR4 MRS6.
+      </description>
+      <initToZero></initToZero>
+      <valueType>uint8</valueType>
+      <writeable/>
+      <array>2 4</array>
+      <mssAccessorName>si_vref_dq_train_value</mssAccessorName>
+    </attribute>
+
+    <attribute>
+      <id>ATTR_MEM_SI_VREF_DQ_TRAIN_RANGE</id>
+      <targetType>TARGET_TYPE_MEM_PORT</targetType>
+      <description>
+        ARRAY[DIMM][RANK]
+        vrefdq_train range. This is for DDR4 MRS6.
+      </description>
+      <initToZero></initToZero>
+      <valueType>uint8</valueType>
+      <enum>RANGE1 = 0, RANGE2 = 1</enum>
+      <writeable/>
+      <array>2 4</array>
+      <mssAccessorName>si_vref_dq_train_range</mssAccessorName>
+    </attribute>
+
+    <attribute>
+      <id>ATTR_MEM_SI_GEARDOWN_MODE</id>
+      <targetType>TARGET_TYPE_MEM_PORT</targetType>
+      <description>
+        ARRAY[DIMM][RANK]
+        Gear Down Mode.
+        This is for DDR4 MRS3.
+        Each memory channel will have a value.
+      </description>
+      <initToZero></initToZero>
+      <valueType>uint8</valueType>
+      <enum>HALF=0, QUARTER=1</enum>
+      <writeable/>
+      <array>2 4</array>
+      <mssAccessorName>si_geardown_mode</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_SI_MC_DRV_DQ_DQS</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          Array[DIMM][RANK]
+          Tx drive impedance for DQ/DQS of all ranks in ohms
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>si_mc_drv_dq_dqs</mssAccessorName>
+        <array>2 4</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_SI_MC_RCV_EQ_DQ_DQS</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          Array[DIMM][RANK]
+          Memory Controller side Receiver Equalization for Data and Data Strobe Lines.
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <enum>DISABLE = 0, ENABLE = 1</enum>
+        <mssAccessorName>si_mc_rcv_eq_dq_dqs</mssAccessorName>
+        <array>2 4</array>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MEM_SI_MC_DRV_EQ_DQ_DQS</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
-            Memory Controller side Drive Equalization for Data and Data Strobe Lines.
+          Array[DIMM][RANK]
+          Memory Controller side Drive Equalization for Data and Data Strobe Lines.
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <enum>DISABLE = 0, FFE = 1</enum>
         <mssAccessorName>si_mc_drv_eq_dq_dqs</mssAccessorName>
+        <array>2 4</array>
     </attribute>
 
     <attribute>
         <id>ATTR_MEM_SI_MC_DRV_IMP_CLK</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
-            Memory Controller side Drive Impedance for Clock in Ohms.
+          Array[DIMM][RANK]
+          Memory Controller side Drive Impedance for Clock in Ohms.
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -196,13 +281,15 @@
         <enum>DISABLE = 0</enum>
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_drv_imp_clk</mssAccessorName>
+        <array>2 4</array>
     </attribute>
 
     <attribute>
         <id>ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
-            Memory Controller side Drive Impedance for Address, Bank Address, Bank Group and Activate Lines in Ohms.
+          Array[DIMM][RANK]
+          Memory Controller side Drive Impedance for Address, Bank Address, Bank Group and Activate Lines in Ohms.
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -210,13 +297,15 @@
         <enum>DISABLE = 0</enum>
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_drv_imp_cmd_addr</mssAccessorName>
+        <array>2 4</array>
     </attribute>
 
     <attribute>
         <id>ATTR_MEM_SI_MC_DRV_IMP_CNTL</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
-            Memory Controller side Drive Impedance for Clock Enable, ODT, Parity, and Reset Lines in Ohms.
+          Array[DIMM][RANK]
+          Memory Controller side Drive Impedance for Clock Enable, ODT, Parity, and Reset Lines in Ohms.
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -224,13 +313,15 @@
         <enum>DISABLE = 0</enum>
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_drv_imp_cntl</mssAccessorName>
+        <array>2 4</array>
     </attribute>
 
     <attribute>
         <id>ATTR_MEM_SI_MC_DRV_IMP_CSCID</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
-            Memory Controller side Drive Impedance for Chip Select and Chip ID Lines in Ohms.
+          Array[DIMM][RANK]
+          Memory Controller side Drive Impedance for Chip Select and Chip ID Lines in Ohms.
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -238,13 +329,15 @@
         <enum>DISABLE = 0</enum>
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_drv_imp_cscid</mssAccessorName>
+        <array>2 4</array>
     </attribute>
 
     <attribute>
         <id>ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
-            Array[PSTATE] Memory Controller side Drive Impedance Pull Down for Data and Data Strobe Lines in Ohms.
+          Array[DIMM][RANK]
+          Memory Controller side Drive Impedance Pull Down for Data and Data Strobe Lines in Ohms.
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -252,14 +345,15 @@
         <enum>DISABLE = 0</enum>
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_drv_imp_dq_dqs_pull_down</mssAccessorName>
-        <array>1</array>
+        <array>2 4</array>
     </attribute>
 
     <attribute>
         <id>ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
-            Array[PSTATE] Memory Controller side Drive Impedance Pull Up for Data and Data Strobe Lines in Ohms.
+          Array[DIMM][RANK]
+          Memory Controller side Drive Impedance Pull Up for Data and Data Strobe Lines in Ohms.
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -267,14 +361,15 @@
         <enum>DISABLE = 0</enum>
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_drv_imp_dq_dqs_pull_up</mssAccessorName>
-        <array>1</array>
+        <array>2 4</array>
     </attribute>
 
     <attribute>
         <id>ATTR_MEM_SI_MC_DRV_SLEW_RATE_CLK</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
-            Memory Controller side Drive Slew Rate for Clock in Ohms.
+          Array[DIMM][RANK]
+          Memory Controller side Drive Slew Rate for Clock in Ohms.
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -282,13 +377,15 @@
         <enum>DISABLE = 0</enum>
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_drv_slew_rate_clk</mssAccessorName>
+        <array>2 4</array>
     </attribute>
 
     <attribute>
         <id>ATTR_MEM_SI_MC_DRV_SLEW_RATE_CMD_ADDR</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
-            Memory Controller side Drive Slew Rate for Address, Bank Address, Bank Group and Activate Lines in Ohms.
+          Array[DIMM][RANK]
+          Memory Controller side Drive Slew Rate for Address, Bank Address, Bank Group and Activate Lines in Ohms.
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -296,13 +393,15 @@
         <enum>DISABLE = 0</enum>
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_drv_slew_rate_cmd_addr</mssAccessorName>
+        <array>2 4</array>
     </attribute>
 
     <attribute>
         <id>ATTR_MEM_SI_MC_DRV_SLEW_RATE_CNTL</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
-            Memory Controller side Drive Slew Rate for Clock Enable, ODT, Parity, and Reset Lines in Ohms.
+          Array[DIMM][RANK]
+          Memory Controller side Drive Slew Rate for Clock Enable, ODT, Parity, and Reset Lines in Ohms.
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -310,13 +409,15 @@
         <enum>DISABLE = 0</enum>
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_drv_slew_rate_cntl</mssAccessorName>
+        <array>2 4</array>
     </attribute>
 
     <attribute>
         <id>ATTR_MEM_SI_MC_DRV_SLEW_RATE_CSCID</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
-            Memory Controller side Drive Slew Rate for Chip Select and Chip ID Lines in Ohms.
+          Array[DIMM][RANK]
+          Memory Controller side Drive Slew Rate for Chip Select and Chip ID Lines in Ohms.
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -324,13 +425,15 @@
         <enum>DISABLE = 0</enum>
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_drv_slew_rate_cscid</mssAccessorName>
+        <array>2 4</array>
     </attribute>
 
     <attribute>
         <id>ATTR_MEM_SI_MC_DRV_SLEW_RATE_DQ_DQS</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
-            Array[PSTATE] Memory Controller side Drive Slew Rate for Data and Data Strobe Lines in Ohms.
+          Array[DIMM][RANK]
+          Memory Controller side Drive Slew Rate for Data and Data Strobe Lines in Ohms.
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -338,20 +441,7 @@
         <enum>DISABLE = 0</enum>
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_drv_slew_rate_dq_dqs</mssAccessorName>
-        <array>1</array>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_SI_MC_RCV_EQ_DQ_DQS</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-            Memory Controller side Receiver Equalization for Data and Data Strobe Lines.
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <enum>DISABLE = 0, DFE = 1</enum>
-        <mssAccessorName>si_mc_rcv_eq_dq_dqs</mssAccessorName>
+        <array>2 4</array>
     </attribute>
 
     <attribute>
@@ -366,13 +456,15 @@
         <enum>DISABLE = 0</enum>
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_rcv_imp_alert_n</mssAccessorName>
+        <array>2 4</array>
     </attribute>
 
     <attribute>
         <id>ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
-            Array[PSTATE] Memory Controller side Receiver Impedance. Data and Data Strobe Lines in Ohms.
+          Array[DIMM][RANK]
+          Memory Controller side Receiver Impedance. Data and Data Strobe Lines in Ohms.
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -380,15 +472,17 @@
         <enum>DISABLE = 0</enum>
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_rcv_imp_dq_dqs</mssAccessorName>
-        <array>1</array>
+        <array>2 4</array>
     </attribute>
 
     <attribute>
         <id>ATTR_MEM_SI_ODT_RD</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
-            Array[DIMM][RANK] READ, On Die Termination triggering bitmap. Use bitmap to determine which ODT to fire for the designated rank.
-            The bits in 8 bit field are [Dimm0 ODT0][Dimm0 ODT1][N/A][N/A][Dimm1 ODT0][Dimm1 ODT1][N/A][N/A]
+          Array[DIMM][RANK]
+          READ, On Die Termination triggering bitmap. Use bitmap to determine which ODT to fire for the designated rank.
+          The bits in 8 bit field are
+          [DIMM0 ODT0][DIMM0 ODT1][DIMM0 ODT2][DIMM0 ODT3][DIMM1 ODT0][DIMM1 ODT1][DIMM1 ODT2][DIMM1 ODT3]
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -401,8 +495,10 @@
         <id>ATTR_MEM_SI_ODT_WR</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
-            Array[DIMM][RANK] WRITE, On Die Termination triggering bitmap. Use bitmap to determine which ODT to fire for the designated rank.
-            The bits in 8 bit field are [Dimm0 ODT0][Dimm0 ODT1][N/A][N/A][Dimm1 ODT0][Dimm1 ODT1][N/A][N/A]
+          Array[DIMM][RANK]
+          WRITE, On Die Termination triggering bitmap. Use bitmap to determine which ODT to fire for the designated rank.
+          The bits in 8 bit field are
+          [DIMM0 ODT0][DIMM0 ODT1][DIMM0 ODT2][DIMM0 ODT3][DIMM1 ODT0][DIMM1 ODT1][DIMM1 ODT2][DIMM1 ODT3]
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
