@@ -36,740 +36,857 @@
 
 <attributes>
 
-    <attribute>
-        <id>ATTR_MEM_EFF_DRAM_GEN</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          ARRAY[DIMM]
-          DRAM Device Type.
-          Decodes SPD byte 2.
-          Generation of memory: DDR3, DDR4.
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <enum>EMPTY = 0, DDR3 = 1, DDR4 = 2</enum>
-        <writeable/>
-        <array>2</array>
-        <mssAccessorName>dram_gen</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_DIMM_TYPE</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          ARRAY[DIMM]
-          Base Module Type.
-          Decodes SPD Byte 3 (bits 3~0).
-          Type of DIMM: RDIMM, UDIMM, LRDIMM as specified by the JEDEC standard.
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <enum> EMPTY = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3</enum>
-        <writeable/>
-        <array>2</array>
-        <mssAccessorName>dimm_type</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_HYBRID_MEMORY_TYPE</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          ARRAY[DIMM]
-          Hybrid Media.
-          Decodes SPD Byte 3 (bits 6~4)
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <enum> NONE = 0, NVDIMM = 1</enum>
-        <writeable/>
-        <array>2</array>
-        <mssAccessorName>hybrid_memory_type</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_HYBRID</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          ARRAY[DIMM]
-          Hybrid.
-          Decodes SPD Byte 3 (bit 7)
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <enum> NOT_HYBRID = 0, IS_HYBRID= 1</enum>
-        <writeable/>
-        <array>2</array>
-        <mssAccessorName>hybrid</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_DRAM_DENSITY</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          ARRAY[DIMM]
-          DRAM Density.
-          Decodes SPD Byte 4 (bits 3~0).
-          Total SDRAM capacity per die.
-          For multi-die stacks (DDP, QDP, or 3DS), this represents
-          the capacity of each DRAM die in the stack.
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <enum> 4G = 4, 8G = 8, 16G = 16 </enum>
-        <writeable/>
-        <array>2</array>
-        <mssUnit>Gb</mssUnit>
-        <mssAccessorName>dram_density</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_DRAM_BANK_BITS</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          ARRAY[DIMM]
-          Number of DRAM bank address bits.
-          Actual number of banks is 2^N, where
-          N is the number of bank address bits.
-          Decodes SPD Byte 4 (bits 5~4).
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <array>2</array>
-        <mssAccessorName>dram_bank_bits</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_DRAM_BANK_GROUP_BITS</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          ARRAY[DIMM]
-          Bank Groups Bits.
-          Decoded SPD Byte 4 (bits 7~6).
-          Actual number of bank groups is 2^N,
-          where N is the number of bank address bits.
-          This value represents the number of bank groups
-          into which the memory array is divided.
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <array>2</array>
-        <mssAccessorName>dram_bank_group_bits</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_DRAM_COLUMN_BITS</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          ARRAY[DIMM]
-          Column Address Bits.
-          Decoded SPD Byte 5 (bits 2~0).
-          Actual number of DRAM columns is 2^N,
-          where N is the number of column address bits
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <array>2</array>
-        <mssAccessorName>dram_columns_bits</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_DRAM_ROW_BITS</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          ARRAY[DIMM]
-          Row Address Bits.
-          Decodes Byte 5 (bits 5~3).
-          Number of DRAM column address bits.
-          Actual number of DRAM rows is 2^N,
-          where N is the number of row address bits
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <enum> NUM14 = 14, NUM15 = 15, NUM16 = 16, NUM17 = 17, NUM18 = 18</enum>
-        <writeable/>
-        <array>2</array>
-        <mssAccessorName>dram_row_bits</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PRIM_STACK_TYPE</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          ARRAY[DIMM]
-          Primary SDRAM Package Type.
-          Decodes Byte 6.
-          This byte defines the primary set of SDRAMs.
-          Monolithic = SPD, Multi-load stack = DDP/QDP, Single-load stack = 3DS
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <enum> SDP = 0, DDP_QDP = 1, 3DS = 2</enum>
-        <writeable/>
-        <array>2</array>
-        <mssAccessorName>prim_stack_type</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_DRAM_PPR</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          ARRAY[DIMM]
-          Post Package Repair. Used in various locations and is evaluated in mss_eff_cnfg.
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <enum>NOT_SUPPORTED = 0, SUPPORTED = 1</enum>
-        <writeable/>
-        <array>2</array>
-        <mssAccessorName>dram_ppr</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_DRAM_SOFT_PPR</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          ARRAY[DIMM]
-          Soft Post Package Repair. Used in various locations and is evaluated in mss_eff_cnfg.
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <enum>NOT_SUPPORTED = 0, SUPPORTED = 1</enum>
-        <writeable/>
-        <array>2</array>
-        <mssAccessorName>dram_soft_ppr</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_DRAM_TRCD</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          Minimum RAS to CAS Delay Time
-          in nck (number of clock cyles).
-          Decodes SPD byte 25 (7~0) and byte 112 (7~0).
-          Each memory channel will have a value.
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssUnits> nck </mssUnits>
-        <mssAccessorName>dram_trcd</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_DRAM_TRP</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          SDRAM Row Precharge Delay Time
-          in nck (number of clock cycles).
-          Decodes SPD byte 26 (bits 7~0) and byte 121 (bits 7~0).
-          Each memory channel will have a value.
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssUnits> nck </mssUnits>
-        <mssAccessorName>dram_trp</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_DRAM_TRAS</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          Minimum Active to Precharge Delay Time
-          in nck (number of clock cycles).
-          Decodes SPD byte 27 (bits 3~0) and byte 28 (7~0).
-          Each memory channel will have a value.
-          creator: mss_eff_cnfg_timing
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssUnits> nck </mssUnits>
-        <mssAccessorName>dram_tras</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_DRAM_TRC</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          Minimum Active to Active/Refresh Delay
-          in nck (number of clock cyles).
-          Decodes SPD byte 27 (bits 7~4), byte 29 (bits 7~0), and byte 120.
-          Each memory channel will have a value.
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssUnits> nck </mssUnits>
-        <mssAccessorName>dram_trc</mssAccessorName>
-    </attribute>
-
-    <attribute>
-      <id>ATTR_MEM_EFF_DRAM_TRFC</id>
-      <targetType>TARGET_TYPE_MEM_PORT</targetType>
-      <description>
-        DDR4 Spec defined as Refresh Cycle Time (tRFC).
-        SPD Spec refers it to the Minimum Refresh Recovery Delay Time.
-        In nck (number of clock cyles).
-        Decodes SPD byte 31 (bits 15~8) and byte 30 (bits 7~0) for tRFC1.
-        Decodes SPD byte 33 (bits 15~8) and byte 32 (bits 7~0) for tRFC2.
-        Decodes SPD byte 35 (bits 15~8) and byte 34 (bits 7~0) for tRFC4.
-        Selected tRFC value depends on MRW attribute that selects refresh mode.
-        For 3DS, The tRFC time to the same logical rank is defined as tRFC_slr and is
-        specificed as the value as for a monolithic DDR4 SDRAM of equivalent density.
-      </description>
+  <attribute>
+    <id>ATTR_MEM_EFF_DRAM_GEN</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      ARRAY[DIMM]
+      DRAM Device Type.
+      Decodes SPD byte 2.
+      Generation of memory: DDR3, DDR4.
+    </description>
     <initToZero></initToZero>
-      <valueType>uint16</valueType>
-      <writeable/>
-      <mssUnits> nck </mssUnits>
-      <mssAccessorName>dram_trfc</mssAccessorName>
-    </attribute>
+    <valueType>uint8</valueType>
+    <enum>EMPTY = 0, DDR3 = 1, DDR4 = 2</enum>
+    <writeable/>
+    <array>2</array>
+    <mssAccessorName>dram_gen</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MEM_EFF_DRAM_TFAW</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          Minimum Four Activate Window Delay Time
-          in nck (number of clock cycles).
-          Decodes SPD byte 36 (bits 3~0) and byte 37 (bits 7~0).
-          For 3DS, tFAW time to the same logical rank is defined as
-          tFAW_slr_x4 or tFAW_slr_x8 (for x4 and x8 devices only) and
-          specificed as the value as for a monolithic DDR4 SDRAM
-          equivalent density.
-          Each memory channel will have a value.
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssUnits> nck </mssUnits>
-        <mssAccessorName>dram_tfaw</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MEM_EFF_DIMM_TYPE</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      ARRAY[DIMM]
+      Base Module Type.
+      Decodes SPD Byte 3 (bits 3~0).
+      Type of DIMM: RDIMM, UDIMM, LRDIMM as specified by the JEDEC standard.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum> EMPTY = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3, DDIMM = 4</enum>
+    <writeable/>
+    <array>2</array>
+    <mssAccessorName>dimm_type</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MEM_EFF_DRAM_TRRD_S</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          Minimum Activate to Activate Delay Time, different bank group
-          in nck (number of clock cycles).
-          Decodes SPD byte 38 (bits 7~0).
-          For 3DS, The tRRD_S time to a different bank group in the
-          same logical rank is defined as tRRD_slr and is
-          specificed as the value as for a monolithic
-          DDR4 SDRAM of equivalent density.
-          Each memory channel will have a value.
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssUnits> nck </mssUnits>
-        <mssAccessorName>dram_trrd_s</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MEM_EFF_HYBRID_MEMORY_TYPE</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      ARRAY[DIMM]
+      Hybrid Media.
+      Decodes SPD Byte 3 (bits 6~4)
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum> NONE = 0, NVDIMM = 1</enum>
+    <writeable/>
+    <array>2</array>
+    <mssAccessorName>hybrid_memory_type</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MEM_EFF_DRAM_TRRD_L</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          Minimum Activate to Activate Delay Time, same bank group
-          in nck (number of clock cycles).
-          Decodes SPD byte 39 (bits 7~0).
-          For 3DS, The tRRD_L time to the same bank group in the
-          same logical rank is defined as tRRD_L_slr and is
-          specificed as the value as for a monolithic
-          DDR4 SDRAM of equivalent density.
-          Each memory channel will have a value.
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-      <mssUnits> nck </mssUnits>
-        <mssAccessorName>dram_trrd_l</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MEM_EFF_HYBRID</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      ARRAY[DIMM]
+      Hybrid.
+      Decodes SPD Byte 3 (bit 7)
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum> NOT_HYBRID = 0, IS_HYBRID= 1</enum>
+    <writeable/>
+    <array>2</array>
+    <mssAccessorName>hybrid</mssAccessorName>
+  </attribute>
 
-    <attribute>
-      <id>ATTR_MEM_EFF_DRAM_TRRD_DLR</id>
-      <targetType>TARGET_TYPE_MEM_PORT</targetType>
-      <description>
-        Minimum Activate to Activate Delay Time (different logical ranks)
-        in nck (number of clock cycles).
-        For 3DS, The tRRD_S time to a different logical rank is defined as tRRD_dlr.
-        Each memory channel will have a value.
-      </description>
-      <initToZero></initToZero>
-      <valueType>uint8</valueType>
-      <writeable/>
-      <mssUnits> nck </mssUnits>
-      <mssAccessorName>dram_trrd_dlr</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      ARRAY[DIMM]
+      OMI to DDR frequency ratio
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum> 1_TO_1 = 1, 2_TO_1 = 2, 4_TO_1 = 4, 8_TO_1 = 8, 16_TO_1 = 16, 32_TO_1 = 32, 64_TO_1 = 64, 128_TO_1 = 128</enum>
+    <default>8</default>
+    <writeable/>
+    <array>2</array>
+    <mssUnit>ratio</mssUnit>
+    <mssAccessorName>host_to_ddr_speed_ratio</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MEM_EFF_DRAM_TCCD_L</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          Minimum CAS to CAS Delay Time, same bank group
-          in nck (number of clock cycles).
-          Decodes SPD byte 40 (bits 7~0) and byte 117 (bits 7~0).
-          This is for DDR4 MRS6.
-          Each memory channel will have a value.
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <enum>4NCK = 4, 5NCK = 5, 6NCK = 6, 7NCK = 7, 8NCK = 8</enum>
-        <writeable/>
-        <mssUnits> nck </mssUnits>
-        <mssAccessorName>dram_tccd_l</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MEM_EFF_DRAM_DENSITY</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      ARRAY[DIMM]
+      DRAM Density.
+      Decodes SPD Byte 4 (bits 3~0).
+      Total SDRAM capacity per die.
+      For multi-die stacks (DDP, QDP, or 3DS), this represents
+      the capacity of each DRAM die in the stack.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum> 4G = 4, 8G = 8, 16G = 16 </enum>
+    <writeable/>
+    <array>2</array>
+    <mssUnit>Gb</mssUnit>
+    <mssAccessorName>dram_density</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MEM_EFF_DRAM_TWR</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          Minimum Write Recovery Time.
-          Decodes SPD byte 41 (bits 3~0) and byte 42 (bits 7~0).
-          Each memory channel will have a value.
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssUnits> nck </mssUnits>
-        <mssAccessorName>dram_twr</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MEM_EFF_DRAM_BANK_BITS</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      ARRAY[DIMM]
+      Number of DRAM bank address bits.
+      Actual number of banks is 2^N, where
+      N is the number of bank address bits.
+      Decodes SPD Byte 4 (bits 5~4).
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <array>2</array>
+    <mssAccessorName>dram_bank_bits</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MEM_EFF_DRAM_TWTR_S</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          Minimum Write to Read Time, different bank group
-          in nck (number of clock cycles).
-          Decodes SPD byte 43 (3~0) and byte 44 (bits 7~0).
-          Each memory channel will have a value.
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssUnits> nck </mssUnits>
-        <mssAccessorName>dram_twtr_s</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MEM_EFF_DRAM_BANK_GROUP_BITS</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      ARRAY[DIMM]
+      Bank Groups Bits.
+      Decoded SPD Byte 4 (bits 7~6).
+      Actual number of bank groups is 2^N,
+      where N is the number of bank address bits.
+      This value represents the number of bank groups
+      into which the memory array is divided.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <array>2</array>
+    <mssAccessorName>dram_bank_group_bits</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MEM_EFF_DRAM_TWTR_L</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          Minimum Write to Read Time, same bank group
-          in nck (number of clock cycles).
-          Decodes byte 43 (7~4) and byte 45 (bits 7~0).
-          Each memory channel will have a value.
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssUnits> nck </mssUnits>
-        <mssAccessorName>dram_twtr_l</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MEM_EFF_DRAM_COLUMN_BITS</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      ARRAY[DIMM]
+      Column Address Bits.
+      Decoded SPD Byte 5 (bits 2~0).
+      Actual number of DRAM columns is 2^N,
+      where N is the number of column address bits
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <array>2</array>
+    <mssAccessorName>dram_column_bits</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MEM_EFF_DRAM_TMAW</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          Maximum Activate Window
-          in nck (number of clock cycles).
-          Decodes SPD byte 7 (bits 5~4).
-          Depends on tREFI multiplier.
-          Each memory channel will have a value.
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint16</valueType>
-        <writeable/>
-        <mssUnits> nck </mssUnits>
-        <mssAccessorName>dram_tmaw</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MEM_EFF_DRAM_ROW_BITS</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      ARRAY[DIMM]
+      Row Address Bits.
+      Decodes Byte 5 (bits 5~3).
+      Number of DRAM column address bits.
+      Actual number of DRAM rows is 2^N,
+      where N is the number of row address bits
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum> NUM14 = 14, NUM15 = 15, NUM16 = 16, NUM17 = 17, NUM18 = 18</enum>
+    <writeable/>
+    <array>2</array>
+    <mssAccessorName>dram_row_bits</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MEM_EFF_DRAM_WIDTH</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          ARRAY[DIMM]
-          SDRAM Device Width
-          Decodes SPD Byte 12 (bits 2~0).
-          Options: X4 (4 bits), X8 (8 bits), X16 (16 bits), X32 (32 bits).
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <enum>X4 = 4, X8 = 8, X16 = 16, X32 = 32</enum>
-        <mssUnit>bits</mssUnit>
-        <writeable/>
-        <array>2</array>
-        <mssAccessorName>dram_width</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MEM_EFF_PRIM_DIE_COUNT</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      ARRAY[DIMM]
+      Primary SDRAM Die Count.
+      Decodes Byte 6 (bits 6~4).
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum>
+      D1 = 1,
+      D2 = 2,
+      D3 = 3,
+      D4 = 4,
+      D5 = 5,
+      D6 = 6,
+      D7 = 7,
+      D8 = 8
+    </enum>
+    <writeable/>
+    <array>2</array>
+    <mssAccessorName>prim_die_count</mssAccessorName>
+  </attribute>
 
-    <attribute>
-      <id>ATTR_MEM_EFF_NUM_RANKS_PER_DIMM</id>
-      <targetType>TARGET_TYPE_MEM_PORT</targetType>
-      <description>
-        ARRAY[DIMM]
-        Total number of ranks in each DIMM.
-        For monolithic and multi-load stack modules (SDP/DDP) this is the same as
-        the number of package ranks per DIMM (SPD Byte 12 bits 5~3).
+  <attribute>
+    <id>ATTR_MEM_EFF_PRIM_STACK_TYPE</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      ARRAY[DIMM]
+      Primary SDRAM Package Type (bits 1~0).
+      Decodes Byte 6.
+      This byte defines the primary set of SDRAMs.
+      Monolithic = SPD, Multi-load stack = DDP/QDP, Single-load stack = 3DS
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum> SDP = 0, DDP_QDP = 1, 3DS = 2</enum>
+    <writeable/>
+    <array>2</array>
+    <mssAccessorName>prim_stack_type</mssAccessorName>
+  </attribute>
 
-        For single load stack (3DS) modules this value represents the number
-        of logical ranks per DIMM.
-        Logical rank refers the individually addressable die in a 3DS stack
-        and has no meaning for monolithic or multi-load stacked SDRAMs.
-      </description>
-      <initToZero></initToZero>
-      <valueType>uint8</valueType>
-      <enum>
-        1R = 1, 2R = 2, 4R = 4, 8R = 8, 16R = 16
-      </enum>
-      <writeable/>
-      <array>2</array>
-      <mssAccessorName>num_ranks_per_dimm</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MEM_EFF_PRIM_BUS_WIDTH</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      ARRAY[DIMM]
+      Primary bus with (bits 1~0).
+      Decodes Byte 13.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum>
+      8_BITS = 8, 16_BITS = 16, 32_BITS = 32, 64_BITS = 64
+    </enum>
+    <writeable/>
+    <array>2</array>
+    <mssAccessorName>prim_bus_width</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MEM_EFF_REGISTER_TYPE</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          ARRAY[DIMM]
-          Register Type
-          Decodes SPD Byte 131
-        </description>
-        <enum>RCD01 = 0x0, RCD02 = 0x1</enum>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <array>2</array>
-        <mssAccessorName>register_type</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MEM_EFF_DRAM_PPR</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      ARRAY[DIMM]
+      Post Package Repair. Used in various locations and is evaluated in mss_eff_cnfg.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum>NOT_SUPPORTED = 0, SUPPORTED = 1</enum>
+    <writeable/>
+    <array>2</array>
+    <mssAccessorName>dram_ppr</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MEM_EFF_DRAM_MFG_ID</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          ARRAY[DIMM]
-          DRAM Manufacturer ID Code
-          Decodes SPD Byte 350 and 351
-        </description>
-        <enum>MICRON = 0x802C, SAMSUNG = 0x80CE, HYNIX = 0x80AD </enum>
-        <initToZero></initToZero>
-        <valueType>uint16</valueType>
-        <writeable/>
-        <array>2</array>
-        <mssAccessorName>dram_mfg_id</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MEM_EFF_DRAM_SOFT_PPR</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      ARRAY[DIMM]
+      Soft Post Package Repair. Used in various locations and is evaluated in mss_eff_cnfg.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum>NOT_SUPPORTED = 0, SUPPORTED = 1</enum>
+    <writeable/>
+    <array>2</array>
+    <mssAccessorName>dram_soft_ppr</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MEM_EFF_RCD_MFG_ID</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          ARRAY[DIMM]
-          Register Manufacturer ID Code
-          Decodes SPD Byte 133 and 134
-        </description>
-        <enum>INPHI = 0xB304, MONTAGE = 0x3286, IDT = 0xB380 </enum>
-        <initToZero></initToZero>
-        <valueType>uint16</valueType>
-        <writeable/>
-        <array>2</array>
-        <mssAccessorName>rcd_mfg_id</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MEM_EFF_DRAM_TRCD</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Minimum RAS to CAS Delay Time
+      in nck (number of clock cyles).
+      Decodes SPD byte 25 (7~0) and byte 112 (7~0).
+      Each memory channel will have a value.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssUnits> nck </mssUnits>
+    <mssAccessorName>dram_trcd</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MEM_EFF_REGISTER_REV</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          ARRAY[DIMM]
-          Register Revision Number
-          Decodes SPD Byte 135
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <array>2</array>
-        <mssAccessorName>register_rev</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MEM_EFF_DRAM_TRP</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      SDRAM Row Precharge Delay Time
+      in nck (number of clock cycles).
+      Decodes SPD byte 26 (bits 7~0) and byte 121 (bits 7~0).
+      Each memory channel will have a value.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssUnits> nck </mssUnits>
+    <mssAccessorName>dram_trp</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MEM_EFF_PACKAGE_RANK_MAP</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          ARRAY[DIMM][DQ_NIBBLES]
-          Package Rank Map
-          Decodes SPD Byte 60 - 77 (Bits 7~6)
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <array>2 20</array>
-        <mssAccessorName>package_rank_map</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MEM_EFF_DRAM_TRAS</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Minimum Active to Precharge Delay Time
+      in nck (number of clock cycles).
+      Decodes SPD byte 27 (bits 3~0) and byte 28 (7~0).
+      Each memory channel will have a value.
+      creator: mss_eff_cnfg_timing
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssUnits> nck </mssUnits>
+    <mssAccessorName>dram_tras</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MEM_EFF_NIBBLE_MAP</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          ARRAY[DIMM][DQ_NIBBLES]
-          Nibble Map
-          Decodes SPD Byte 60 - 77 (Bits 5~0) for DDR4
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <array>2 20</array>
-        <mssAccessorName>nibble_map</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MEM_EFF_DRAM_TRC</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Minimum Active to Active/Refresh Delay
+      in nck (number of clock cyles).
+      Decodes SPD byte 27 (bits 7~4), byte 29 (bits 7~0), and byte 120.
+      Each memory channel will have a value.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssUnits> nck </mssUnits>
+    <mssAccessorName>dram_trc</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MEM_EFF_DIMM_SIZE</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          ARRAY[DIMM]
-          DIMM Size, in GB Used in various locations
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint32</valueType>
-        <enum>
-          4GB = 4,
-          8GB = 8,
-          16GB = 16,
-          32GB = 32,
-          64GB = 64,
-          128GB = 128,
-          256GB = 256,
-          512GB = 512
-        </enum>
-        <writeable/>
-        <array>2</array>
-        <mssUnits>GB</mssUnits>
-        <mssAccessorName>dimm_size</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MEM_EFF_DRAM_TRFC</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      DDR4 Spec defined as Refresh Cycle Time (tRFC).
+      SPD Spec refers it to the Minimum Refresh Recovery Delay Time.
+      In nck (number of clock cyles).
+      Decodes SPD byte 31 (bits 15~8) and byte 30 (bits 7~0) for tRFC1.
+      Decodes SPD byte 33 (bits 15~8) and byte 32 (bits 7~0) for tRFC2.
+      Decodes SPD byte 35 (bits 15~8) and byte 34 (bits 7~0) for tRFC4.
+      Selected tRFC value depends on MRW attribute that selects refresh mode.
+      For 3DS, The tRFC time to the same logical rank is defined as tRFC_slr and is
+      specificed as the value as for a monolithic DDR4 SDRAM of equivalent density.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint16</valueType>
+    <writeable/>
+    <mssUnits> nck </mssUnits>
+    <mssAccessorName>dram_trfc</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MEM_EFF_DRAM_CL</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          CAS Latency.
-          Each memory channel will have a value.
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssUnits>nck</mssUnits>
-        <mssAccessorName>dram_cl</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MEM_EFF_DRAM_TFAW</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Minimum Four Activate Window Delay Time
+      in nck (number of clock cycles).
+      Decodes SPD byte 36 (bits 3~0) and byte 37 (bits 7~0).
+      For 3DS, tFAW time to the same logical rank is defined as
+      tFAW_slr_x4 or tFAW_slr_x8 (for x4 and x8 devices only) and
+      specificed as the value as for a monolithic DDR4 SDRAM
+      equivalent density.
+      Each memory channel will have a value.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssUnits> nck </mssUnits>
+    <mssAccessorName>dram_tfaw</mssAccessorName>
+  </attribute>
 
-    <attribute>
-      <id>ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM</id>
-      <targetType>TARGET_TYPE_MEM_PORT</targetType>
-      <description>
-        ARRAY[DIMM]
-        Specifies the number of master ranks per DIMM.
-        Represents the number of physical ranks on a DIMM.
-        From SPD spec JEDEC Standard No. 21-C: Page 4.1.2.L-4.
-        Byte 12 (Bits 5~3) Number of package ranks per DIMM.
-        Package ranks per DIMM refers to the collections of devices
-        on the module sharing common chip select signals.
-      </description>
-      <initToZero></initToZero>
-      <valueType>uint8</valueType>
-      <enum>
-        1R = 1, 2R = 2, 4R = 4, 8R = 8
-      </enum>
-      <writeable/>
-      <array>2</array>
-      <mssAccessorName>num_master_ranks_per_dimm</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MEM_EFF_DRAM_TRRD_S</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Minimum Activate to Activate Delay Time, different bank group
+      in nck (number of clock cycles).
+      Decodes SPD byte 38 (bits 7~0).
+      For 3DS, The tRRD_S time to a different bank group in the
+      same logical rank is defined as tRRD_slr and is
+      specificed as the value as for a monolithic
+      DDR4 SDRAM of equivalent density.
+      Each memory channel will have a value.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssUnits> nck </mssUnits>
+    <mssAccessorName>dram_trrd_s</mssAccessorName>
+  </attribute>
 
-    <attribute>
-      <id>ATTR_MEM_EFF_DRAM_TREFI</id>
-      <targetType>TARGET_TYPE_MEM_PORT</targetType>
-      <description>
-        Average Refresh Interval (tREFI)
-        in nck (number of clock cycles).
-        This depends on MRW attribute that selects fine refresh mode (x1, x2, x4).
-        From DDR4 spec (79-4A).
+  <attribute>
+    <id>ATTR_MEM_EFF_DRAM_TRRD_L</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Minimum Activate to Activate Delay Time, same bank group
+      in nck (number of clock cycles).
+      Decodes SPD byte 39 (bits 7~0).
+      For 3DS, The tRRD_L time to the same bank group in the
+      same logical rank is defined as tRRD_L_slr and is
+      specificed as the value as for a monolithic
+      DDR4 SDRAM of equivalent density.
+      Each memory channel will have a value.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssUnits> nck </mssUnits>
+    <mssAccessorName>dram_trrd_l</mssAccessorName>
+  </attribute>
 
-        For 3DS, the tREFI time to the same logical rank is defined as
-        tRFC_slr1, tRFC_slr2, or tRFC_slr4.
-      </description>
-      <initToZero></initToZero>
-      <valueType>uint16</valueType>
-      <writeable/>
-      <mssUnits> nck </mssUnits>
-      <mssAccessorName>dram_trefi</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MEM_EFF_DRAM_TRRD_DLR</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Minimum Activate to Activate Delay Time (different logical ranks)
+      in nck (number of clock cycles).
+      For 3DS, The tRRD_S time to a different logical rank is defined as tRRD_dlr.
+      Each memory channel will have a value.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssUnits> nck </mssUnits>
+    <mssAccessorName>dram_trrd_dlr</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MEM_EFF_DRAM_TRTP</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          Internal Read to Precharge Delay.
-          From the DDR4 spec (79-4A).
-          Each memory channel will have a value.
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssUnits>nck</mssUnits>
-        <mssAccessorName>dram_trtp</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MEM_EFF_DRAM_TCCD_L</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Minimum CAS to CAS Delay Time, same bank group
+      in nck (number of clock cycles).
+      Decodes SPD byte 40 (bits 7~0) and byte 117 (bits 7~0).
+      This is for DDR4 MRS6.
+      Each memory channel will have a value.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum>4NCK = 4, 5NCK = 5, 6NCK = 6, 7NCK = 7, 8NCK = 8</enum>
+    <writeable/>
+    <mssUnits> nck </mssUnits>
+    <mssAccessorName>dram_tccd_l</mssAccessorName>
+  </attribute>
 
-    <attribute>
-      <id>ATTR_MEM_EFF_DRAM_TRFC_DLR</id>
-      <targetType>TARGET_TYPE_MEM_PORT</targetType>
-      <description>
-        Minimum Refresh Recovery Delay Time (different logical ranks)
-        in nck (number of clock cyles).
-        Selected tRFC value (tRFC_dlr1, tRFC_dlr2, or tRFC_dlr4)
-        depends on MRW attribute that selects fine refresh mode (x1, x2, x4).
-        For 3DS, The tRFC time to different logical ranks are defined as tRFC_dlr
-      </description>
-      <initToZero></initToZero>
-      <valueType>uint8</valueType>
-      <writeable/>
-      <mssUnits> nck </mssUnits>
-      <mssAccessorName>dram_trfc_dlr</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MEM_EFF_DRAM_TWR</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Minimum Write Recovery Time.
+      Decodes SPD byte 41 (bits 3~0) and byte 42 (bits 7~0).
+      Each memory channel will have a value.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssUnits> nck </mssUnits>
+    <mssAccessorName>dram_twr</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MEM_EFF_FREQ</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-            Frequency of this memory channel in MT/s (Mega Transfers per second)
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint64</valueType>
-        <writeable/>
-        <mssUnits> MT/s </mssUnits>
-        <mssAccessorName>freq</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MEM_EFF_DRAM_TWTR_S</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Minimum Write to Read Time, different bank group
+      in nck (number of clock cycles).
+      Decodes SPD byte 43 (3~0) and byte 44 (bits 7~0).
+      Each memory channel will have a value.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssUnits> nck </mssUnits>
+    <mssAccessorName>dram_twtr_s</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MEM_EFF_VOLT_VDDR</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-            DRAM Voltage, each voltage rail would need to have a value.
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint32</valueType>
-        <writeable/>
-        <mssUnits> mV </mssUnits>
-        <mssAccessorName>volt_vddr</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MEM_EFF_DRAM_TWTR_L</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Minimum Write to Read Time, same bank group
+      in nck (number of clock cycles).
+      Decodes byte 43 (7~4) and byte 45 (bits 7~0).
+      Each memory channel will have a value.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssUnits> nck </mssUnits>
+    <mssAccessorName>dram_twtr_l</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MEM_EFF_VOLT_VPP</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-            DRAM VPP Voltage, each voltage rail would need to have a value.
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint32</valueType>
-        <writeable/>
-        <mssUnits> mV </mssUnits>
-        <mssAccessorName>volt_vpp</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MEM_EFF_DRAM_TMAW</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Maximum Activate Window
+      in nck (number of clock cycles).
+      Decodes SPD byte 7 (bits 5~4).
+      Depends on tREFI multiplier.
+      Each memory channel will have a value.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint16</valueType>
+    <writeable/>
+    <mssUnits> nck </mssUnits>
+    <mssAccessorName>dram_tmaw</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_DRAM_WIDTH</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      ARRAY[DIMM]
+      SDRAM Device Width
+      Decodes SPD Byte 12 (bits 2~0).
+      Options: X4 (4 bits), X8 (8 bits), X16 (16 bits), X32 (32 bits).
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum>X4 = 4, X8 = 8, X16 = 16, X32 = 32</enum>
+    <mssUnit>bits</mssUnit>
+    <writeable/>
+    <array>2</array>
+    <mssAccessorName>dram_width</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      ARRAY[DIMM]
+      Total number of ranks in each DIMM.
+      For monolithic and multi-load stack modules (SDP/DDP) this is the same as
+      the number of package ranks per DIMM (SPD Byte 12 bits 5~3).
+
+      For single load stack (3DS) modules this value represents the number
+      of logical ranks per DIMM.
+      Logical rank refers the individually addressable die in a 3DS stack
+      and has no meaning for monolithic or multi-load stacked SDRAMs.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum>
+      1R = 1, 2R = 2, 4R = 4, 8R = 8, 16R = 16
+    </enum>
+    <writeable/>
+    <array>2</array>
+    <mssAccessorName>logical_ranks_per_dimm</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_REGISTER_TYPE</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      ARRAY[DIMM]
+      Register Type
+      Decodes SPD Byte 131
+    </description>
+    <enum>RCD01 = 0x0, RCD02 = 0x1</enum>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <array>2</array>
+    <mssAccessorName>register_type</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_DRAM_MFG_ID</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      ARRAY[DIMM]
+      DRAM Manufacturer ID Code
+      Decodes SPD Byte 350 and 351
+    </description>
+    <enum>MICRON = 0x802C, SAMSUNG = 0x80CE, HYNIX = 0x80AD </enum>
+    <initToZero></initToZero>
+    <valueType>uint16</valueType>
+    <writeable/>
+    <array>2</array>
+    <mssAccessorName>dram_mfg_id</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_DRAM_MODULE_HEIGHT</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      ARRAY[DIMM]
+      DRAM Modlue Height
+      Decodes SPD Byte 193
+    </description>
+    <enum>1U = 0, 2U = 1, 4U = 2 </enum>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <array>2</array>
+    <mssAccessorName>dram_module_height</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_RCD_MFG_ID</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      ARRAY[DIMM]
+      Register Manufacturer ID Code
+      Decodes SPD Byte 133 and 134
+    </description>
+    <enum>INPHI = 0xB304, MONTAGE = 0x3286, IDT = 0xB380 </enum>
+    <initToZero></initToZero>
+    <valueType>uint16</valueType>
+    <writeable/>
+    <array>2</array>
+    <mssAccessorName>rcd_mfg_id</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_REGISTER_REV</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      ARRAY[DIMM]
+      Register Revision Number
+      Decodes SPD Byte 135
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <array>2</array>
+    <mssAccessorName>register_rev</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_PACKAGE_RANK_MAP</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      ARRAY[DIMM][DQ_NIBBLES]
+      Package Rank Map
+      Decodes SPD Byte 60 - 77 (Bits 7~6)
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <array>2 20</array>
+    <mssAccessorName>package_rank_map</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_NIBBLE_MAP</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      ARRAY[DIMM][DQ_NIBBLES]
+      Nibble Map
+      Decodes SPD Byte 60 - 77 (Bits 5~0) for DDR4
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <array>2 20</array>
+    <mssAccessorName>nibble_map</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_DIMM_SIZE</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      ARRAY[DIMM]
+      DIMM Size, in GB Used in various locations
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint32</valueType>
+    <enum>
+      4GB = 4,
+      8GB = 8,
+      16GB = 16,
+      32GB = 32,
+      64GB = 64,
+      128GB = 128,
+      256GB = 256,
+      512GB = 512
+    </enum>
+    <writeable/>
+    <array>2</array>
+    <mssUnits>GB</mssUnits>
+    <mssAccessorName>dimm_size</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_DIMM_SPARE</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Spare DRAM availability. Used in various locations and is computed in mss_eff_cnfg.
+      Array indexes are [DIMM][RANK]
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum>NO_SPARE = 0, LOW_NIBBLE = 1, HIGH_NIBBLE = 2, FULL_BYTE = 3</enum>
+    <writeable/>
+    <array> 2 4</array>
+    <mssAccessorName>dimm_spare</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_DRAM_CL</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      CAS Latency.
+      Each memory channel will have a value.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssUnits>nck</mssUnits>
+    <mssAccessorName>dram_cl</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_DRAM_MDS</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Controls if the given target has an MDS (managed DRAM solution)
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssAccessorName>dram_mds</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      ARRAY[DIMM]
+      Specifies the number of master ranks per DIMM.
+      Represents the number of physical ranks on a DIMM.
+      From SPD spec JEDEC Standard No. 21-C: Page 4.1.2.L-4.
+      Byte 12 (Bits 5~3) Number of package ranks per DIMM.
+      Package ranks per DIMM refers to the collections of devices
+      on the module sharing common chip select signals.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum>
+      1R = 1, 2R = 2, 4R = 4, 8R = 8
+    </enum>
+    <writeable/>
+    <array>2</array>
+    <mssAccessorName>num_master_ranks_per_dimm</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_DIMM_RANKS_CONFIGED</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Bit wise representation of master ranks in each DIMM that are used for reads and writes.
+      Used by PRD.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <array> 2 </array>
+    <mssAccessorName>dimm_ranks_configed</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_DRAM_TREFI</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Average Refresh Interval (tREFI)
+      in nck (number of clock cycles).
+      This depends on MRW attribute that selects fine refresh mode (x1, x2, x4).
+      From DDR4 spec (79-4A).
+
+      For 3DS, the tREFI time to the same logical rank is defined as
+      tRFC_slr1, tRFC_slr2, or tRFC_slr4.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint16</valueType>
+    <writeable/>
+    <mssUnits> nck </mssUnits>
+    <mssAccessorName>dram_trefi</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_DRAM_TRTP</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Internal Read to Precharge Delay.
+      From the DDR4 spec (79-4A).
+      Each memory channel will have a value.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssUnits>nck</mssUnits>
+    <mssAccessorName>dram_trtp</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_DRAM_TRFC_DLR</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Minimum Refresh Recovery Delay Time (different logical ranks)
+      in nck (number of clock cyles).
+      Selected tRFC value (tRFC_dlr1, tRFC_dlr2, or tRFC_dlr4)
+      depends on MRW attribute that selects fine refresh mode (x1, x2, x4).
+      For 3DS, The tRFC time to different logical ranks are defined as tRFC_dlr
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssUnits> nck </mssUnits>
+    <mssAccessorName>dram_trfc_dlr</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_FREQ</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Frequency of this memory channel in MT/s (Mega Transfers per second)
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint64</valueType>
+    <writeable/>
+    <mssUnits> MT/s </mssUnits>
+    <mssAccessorName>freq</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_VOLT_VDDR</id>
+    <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    <description>
+      DRAM Voltage, each voltage rail would need to have a value.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <mssUnits> mV </mssUnits>
+    <mssAccessorName>volt_vddr</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_VOLT_VPP</id>
+    <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    <description>
+      DRAM VPP Voltage, each voltage rail would need to have a value.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <mssUnits> mV </mssUnits>
+    <mssAccessorName>volt_vpp</mssAccessorName>
+  </attribute>
 
 </attributes>
