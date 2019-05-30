@@ -33,46 +33,88 @@
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
+#include <lib/shared/exp_consts.H>
 #include <exp_inband.H>
+#include <lib/shared/exp_consts.H>
 #include <generic/memory/lib/utils/c_str.H>
+#include <generic/memory/lib/utils/mss_bad_bits.H>
 #include <lib/exp_draminit_utils.H>
+#include <lib/phy/exp_train_display.H>
+#include <lib/phy/exp_train_handler.H>
+#include <lib/shared/exp_consts.H>
+#include <generic/memory/mss_git_data_helper.H>
 
-///
-/// @brief Initializes DRAM
-/// @param[in] i_target the controller
-/// @return FAPI2_RC_SUCCESS iff ok
-///
-fapi2::ReturnCode exp_draminit(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+extern "C"
 {
-    uint32_t l_crc = 0;
-
-    user_input_msdg l_phy_params;
-    FAPI_TRY(mss::exp::setup_phy_params(i_target, l_phy_params),
-             "Failed setup_phy_params() for %s", mss::c_str(i_target));
-
-    // Copy the PHY initialization parameters into the internal buffer of Explorer
-    FAPI_TRY( mss::exp::ib::putUserInputMsdg(i_target, l_phy_params, l_crc),
-              "Failed putUserInputMsdg() for %s", mss::c_str(i_target) );
-
-    // Issue full boot mode cmd though EXP-FW REQ buffer
+    ///
+    /// @brief Initializes DRAM
+    /// @param[in] i_target the controller
+    /// @return FAPI2_RC_SUCCESS if ok
+    ///
+    fapi2::ReturnCode exp_draminit(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
     {
-        host_fw_command_struct l_cmd;
-        mss::exp::setup_cmd_params(l_crc, l_cmd);
-        FAPI_TRY( mss::exp::ib::putCMD(i_target, l_cmd),
-                  "Failed putCMD() for  %s", mss::c_str(i_target) );
+        mss::display_git_commit_info("exp_draminit");
+
+        uint32_t l_crc = 0;
+
+        user_input_msdg l_phy_params;
+        FAPI_TRY(mss::exp::setup_phy_params(i_target, l_phy_params),
+                 "Failed setup_phy_params() for %s", mss::c_str(i_target));
+
+        // Copy the PHY initialization parameters into the internal buffer of Explorer
+        FAPI_TRY( mss::exp::ib::putUserInputMsdg(i_target, l_phy_params, l_crc),
+                  "Failed putUserInputMsdg() for %s", mss::c_str(i_target) );
+
+        // Issue full boot mode cmd though EXP-FW REQ buffer
+        {
+            host_fw_command_struct l_cmd;
+            mss::exp::setup_cmd_params(l_crc, l_cmd);
+            FAPI_TRY( mss::exp::ib::putCMD(i_target, l_cmd),
+                      "Failed putCMD() for  %s", mss::c_str(i_target) );
+        }
+
+        // Read the response message from EXP-FW RESP buffer
+        {
+            host_fw_response_struct l_response;
+            user_response_msdg l_train_response;
+
+            std::vector<uint8_t> l_rsp_data;
+            fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
+
+            FAPI_TRY( mss::exp::ib::getRSP(i_target, l_response, l_rsp_data),
+                      "Failed getRSP() for  %s", mss::c_str(i_target) );
+
+            // Proccesses the response data
+            FAPI_TRY( mss::exp::read_training_response(i_target, l_rsp_data, l_train_response),
+                      "Failed read_training_response for %s", mss::c_str(i_target));
+
+            // Displays the training response
+            FAPI_TRY( mss::exp::train::display_info(i_target, l_train_response));
+
+            // Check if cmd was successful
+            l_rc = mss::exp::check::response(i_target, l_response);
+
+            // If not, then we need to process the bad bitmap
+            if(l_rc != fapi2::FAPI2_RC_SUCCESS)
+            {
+                mss::exp::bad_bit_interface l_interface(l_train_response);
+
+                // Record bad bits should only fail if we have an attributes issue - that's a major issue
+                FAPI_TRY(mss::record_bad_bits<mss::mc_type::EXPLORER>(i_target, l_interface));
+
+                // Now, go to our true error handling procedure
+                FAPI_TRY(l_rc, "mss::exp::check::response failed for %s", mss::c_str(i_target));
+            }
+        }
+
+    fapi_try_exit:
+        FAPI_INF("Draminit training - %s %s",
+                 (fapi2::current_err == fapi2::FAPI2_RC_SUCCESS ? "success" : "errors reported - trying to blame FIR's"),
+                 mss::c_str(i_target));
+
+        // Due to the RAS/PRD requirements, we need to check for FIR's
+        // If any FIR's have lit up, this draminit fail could have been caused by the FIR, rather than bad hardware
+        // So, let PRD retrigger this step to see if we can resolve the issue
+        return mss::check::fir_or_pll_fail<mss::mc_type::EXPLORER>(i_target, fapi2::current_err);
     }
-
-    // Read the response message from EXP-FW RESP buffer
-    {
-        host_fw_response_struct l_response;
-        FAPI_TRY( mss::exp::ib::getRSP(i_target, l_response),
-                  "Failed getRSP() for  %s", mss::c_str(i_target) );
-
-        // Check if cmd was successful
-        FAPI_TRY(mss::exp::check::response(i_target, l_response),
-                 "Failed check::response() for  %s", mss::c_str(i_target) );
-    }
-
-fapi_try_exit:
-    return fapi2::current_err;
 }
