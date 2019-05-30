@@ -185,6 +185,9 @@ static inline bool is_dimm_type_valid(const uint8_t i_dimm_type)
     {
         case RDIMM:
         case LRDIMM:
+        case DDIMM:
+        case SORDIMM:
+        case MINIRDIMM:
             l_result = true;
             break;
 
@@ -213,7 +216,7 @@ inline fapi2::ReturnCode dimm_type(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
                 .set_FUNCTION(i_func_code)
                 .set_DIMM_TARGET(i_target),
                 "Invalid DIMM type recieved (%d) for %s",
-                i_dimm_type, spd::c_str(i_target));
+                i_dimm_type, DDIMM, spd::c_str(i_target));
 
     return fapi2::FAPI2_RC_SUCCESS;
 
