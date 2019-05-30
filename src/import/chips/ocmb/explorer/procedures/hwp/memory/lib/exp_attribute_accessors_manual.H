@@ -39,7 +39,10 @@
 #define EXP_ATTR_ACCESS_MANUAL_H_
 
 #include <fapi2.H>
+#include <mss_explorer_attribute_getters.H>
+
 #include <generic/memory/lib/utils/c_str.H>
+#include <generic/memory/lib/utils/find.H>
 
 namespace mss
 {
@@ -50,7 +53,8 @@ namespace mss
 /// @param[out] o_is_enterprise_mode true if the part is in enterprise mode
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
 ///
-inline fapi2::ReturnCode enterprise_mode( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+inline fapi2::ReturnCode enterprise_mode( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+        i_target,
         bool& o_is_enterprise_mode )
 {
     // Constexprs for beautification
@@ -62,8 +66,8 @@ inline fapi2::ReturnCode enterprise_mode( const fapi2::Target<fapi2::TARGET_TYPE
     uint8_t l_enterprise = 0;
     uint8_t l_override = 0;
 
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_ENTERPRISE_MODE, i_target, l_enterprise) );
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_NONENTERPRISE_MODE_OVERRIDE, i_target, l_override) );
+    FAPI_TRY( mss::attr::get_ocmb_enterprise_mode(i_target, l_enterprise) );
+    FAPI_TRY( mss::attr::get_ocmb_nonenterprise_mode_override(i_target, l_override) );
 
     {
         const bool l_enterprise_mode = l_enterprise == ENTERPRISE;
@@ -73,7 +77,7 @@ inline fapi2::ReturnCode enterprise_mode( const fapi2::Target<fapi2::TARGET_TYPE
         // 2) we do not have the override to non-enterprise mode
         o_is_enterprise_mode = l_enterprise_mode && l_no_override;
 
-        FAPI_INF("%s is in %s mode chip is %s override is %s", mss::c_str(i_target),
+        FAPI_INF("%s is in %s mode. (OCMB chip is %s, with %s)", mss::c_str(i_target),
                  o_is_enterprise_mode ? "enterprise" : "non-enterprise", l_enterprise_mode ? "enterprise" : "non-enterprise",
                  l_no_override ? "no override" : "override to non-enterprise");
     }
@@ -88,7 +92,8 @@ fapi_try_exit:
 /// @param[out] o_is_half_dimm_mode true if the part is in half-DIMM mode
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
 ///
-inline fapi2::ReturnCode half_dimm_mode( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+inline fapi2::ReturnCode half_dimm_mode( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+        i_target,
         bool& o_is_half_dimm_mode )
 {
     // Variables
@@ -103,31 +108,75 @@ inline fapi2::ReturnCode half_dimm_mode( const fapi2::Target<fapi2::TARGET_TYPE_
     if(!l_is_enterprise)
     {
         o_is_half_dimm_mode = false;
-        FAPI_INF("%s is in full-DIMM as the chip is in non-enterprise mode", mss::c_str(i_target));
+        FAPI_INF("%s is in full-DIMM since the chip is in non-enterprise mode", mss::c_str(i_target));
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
     // Now that we're not in enterprise mode, check for overrides
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE, i_target, l_override) );
+    FAPI_TRY( mss::attr::get_ocmb_half_dimm_mode_override(i_target, l_override) );
 
     // If we have an override, set based upon the override
     if(l_override != fapi2::ENUM_ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE_NO_OVERRIDE)
     {
         o_is_half_dimm_mode = l_override == fapi2::ENUM_ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE_OVERRIDE_HALF_DIMM;
-        FAPI_INF("%s is in enterprise mode %s override is present. The chip is in %s (attribute %u)", mss::c_str(i_target),
+        FAPI_INF("%s is in enterprise mode, and %s override is present. The chip is in %s (attribute %u)", mss::c_str(i_target),
                  "an", o_is_half_dimm_mode ? "half-DIMM mode" : "full-DIMM mode", l_override);
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
     // No override, so go with the attribute derived from the ECID
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_HALF_DIMM_MODE, i_target, l_half_dimm) );
+    FAPI_TRY( mss::attr::get_ocmb_half_dimm_mode(i_target, l_half_dimm) );
 
     // Set half DIMM mode based upon the the normal attribute
     o_is_half_dimm_mode = l_half_dimm == fapi2::ENUM_ATTR_MSS_OCMB_HALF_DIMM_MODE_HALF_DIMM;
-    FAPI_INF("%s is in enterprise mode %s override is present. The chip is in %s (attribute %u)", mss::c_str(i_target),
+    FAPI_INF("%s is in enterprise mode, and %s override is present. The chip is in %s (attribute %u)", mss::c_str(i_target),
              "no", o_is_half_dimm_mode ? "half-DIMM mode" : "full-DIMM mode", l_half_dimm);
 
 fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief ATTR_MEM_EFF_VOLT_VDDR setter
+/// @tparam T the fapi2 target type of the target
+/// @param[in] i_target const ref to the TARGET_TYPE_OCMB_CHIP
+/// @param[in] i_value value to set
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
+//TODO: Remove this once we have auto-generated attr setters
+///
+template< fapi2::TargetType T >
+inline fapi2::ReturnCode set_volt_vddr(const fapi2::Target<T>& i_target, uint32_t i_value)
+{
+    const auto l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
+
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_VOLT_VDDR, l_ocmb, i_value) );
+    return fapi2::current_err;
+
+fapi_try_exit:
+    FAPI_ERR("failed setting ATTR_MEM_EFF_VOLT_VDDR: 0x%lx (target: %s)",
+             uint64_t(fapi2::current_err), mss::c_str(i_target));
+    return fapi2::current_err;
+}
+
+///
+/// @brief ATTR_MEM_EFF_VOLT_VPP setter
+/// @tparam T the fapi2 target type of the target
+/// @param[in] i_target const ref to the TARGET_TYPE_OCMB_CHIP
+/// @param[in] i_value value to set
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
+//TODO: Remove this once we have auto-generated attr setters
+///
+template< fapi2::TargetType T >
+inline fapi2::ReturnCode set_volt_vpp(const fapi2::Target<T>& i_target, uint32_t i_value)
+{
+    const auto l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
+
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_VOLT_VPP, l_ocmb, i_value) );
+    return fapi2::current_err;
+
+fapi_try_exit:
+    FAPI_ERR("failed setting ATTR_MEM_EFF_VOLT_VPP: 0x%lx (target: %s)",
+             uint64_t(fapi2::current_err), mss::c_str(i_target));
     return fapi2::current_err;
 }
 
