@@ -250,90 +250,190 @@ class fields<mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>
             WR_VREF_DQ_VALUE_START = 2,
             WR_VREF_DQ_VALUE_LEN = 6,
 
-            // Byte 45: ODT WR Map CS Byte1
-            ODT_WR_MAP1_BYTE = 45,
+            // Byte 45: Host RD VREF DQ
+            RD_VREF_DQ_BYTE = 45,
+            PHY_VREF_PERCENT_START = 1,
+            PHY_VREF_PERCENT_LEN = 7,
+
+            // Byte 46: ODT WR Map CS Byte1
+            ODT_WR_MAP1_BYTE = 46,
             ODT_WR_MAP_RANK3_START = 0,
             ODT_WR_MAP_RANK3_LEN = 4,
             ODT_WR_MAP_RANK2_START = 4,
             ODT_WR_MAP_RANK2_LEN = 4,
 
-            // Byte 46: ODT WR Map CS Byte0
-            ODT_WR_MAP0_BYTE = 46,
+            // Byte 47: ODT WR Map CS Byte0
+            ODT_WR_MAP0_BYTE = 47,
             ODT_WR_MAP_RANK1_START = 0,
             ODT_WR_MAP_RANK1_LEN = 4,
             ODT_WR_MAP_RANK0_START = 4,
             ODT_WR_MAP_RANK0_LEN = 4,
 
-            // Byte 47: ODT RD Map CS Byte1
-            ODT_RD_MAP1_BYTE = 47,
+            // Byte 48: ODT RD Map CS Byte1
+            ODT_RD_MAP1_BYTE = 48,
             ODT_RD_MAP_RANK3_START = 0,
             ODT_RD_MAP_RANK3_LEN = 4,
             ODT_RD_MAP_RANK2_START = 4,
             ODT_RD_MAP_RANK2_LEN = 4,
 
-            // Byte 48: ODT RD Map CS Byte0
-            ODT_RD_MAP0_BYTE = 48,
+            // Byte 49: ODT RD Map CS Byte0
+            ODT_RD_MAP0_BYTE = 49,
             ODT_RD_MAP_RANK1_START = 0,
             ODT_RD_MAP_RANK1_LEN = 4,
             ODT_RD_MAP_RANK0_START = 4,
             ODT_RD_MAP_RANK0_LEN = 4,
 
-            // Byte 49: Geardown during training
-            GEARDOWN_DURING_TRAINING_BYTE = 49,
+            // Byte 50: Geardown during training
+            GEARDOWN_DURING_TRAINING_BYTE = 50,
             GEARDOWN_DURING_TRAINING_START = 7,
             GEARDOWN_DURING_TRAINING_LEN = 1,
 
-            // Byte 50: PMIC0 SWA Volt
-            PMIC0_SWA_BYTE = 50,
+            // Byte 51: BIST CAL Mode
+            BIST_CA_LATENCY_MODE_BYTE = 51,
+            BIST_CA_LATENCY_MODE_START = 4,
+            BIST_CA_LATENCY_MODE_LEN = 4,
+
+            // Byte 52: BIST CA Parity Latency Mode
+            BIST_CA_PL_MODE_BYTE = 52,
+            BIST_CA_PL_MODE_START = 4,
+            BIST_CA_PL_MODE_LEN = 4,
+
+            // Byte 53: DFI Max RD Latency
+            DFI_MAX_RD_LATENCY_BYTE = 53,
+            DFIMRL_DDRCLK_START = 3,
+            DFIMRL_DDRCLK_LEN = 5,
+
+            // Byte 54: CAC Delay A side Group 0
+            CAC_DELAY_A_SIDE_GROUP_0_BYTE = 54,
+            CAC_DLY_A_0_START = 3,
+            CAC_DLY_A_0_LEN = 5,
+
+            // Byte 55: CAC Delay A side Group 1
+            CAC_DELAY_A_SIDE_GROUP_1_BYTE = 55,
+            CAC_DLY_A_1_START = 3,
+            CAC_DLY_A_1_LEN = 5,
+
+            // Byte 56: CAC Delay A side Group 2
+            CAC_DELAY_A_SIDE_GROUP_2_BYTE = 56,
+            CAC_DLY_A_2_START = 3,
+            CAC_DLY_A_2_LEN = 5,
+
+            // Byte 57: CAC Delay A side Group 3
+            CAC_DELAY_A_SIDE_GROUP_3_BYTE = 57,
+            CAC_DLY_A_3_START = 3,
+            CAC_DLY_A_3_LEN = 5,
+
+            // Byte 58: CAC Delay A side Group 4
+            CAC_DELAY_A_SIDE_GROUP_4_BYTE = 58,
+            CAC_DLY_A_4_START = 3,
+            CAC_DLY_A_4_LEN = 5,
+
+            // Byte 59: CAC Delay A side Group 5
+            CAC_DELAY_A_SIDE_GROUP_5_BYTE = 59,
+            CAC_DLY_A_5_START = 3,
+            CAC_DLY_A_5_LEN = 5,
+
+            // Byte 60: CAC Delay A side Group 6
+            CAC_DELAY_A_SIDE_GROUP_6_BYTE = 60,
+            CAC_DLY_A_6_START = 3,
+            CAC_DLY_A_6_LEN = 5,
+
+            // Byte 61: CAC Delay A side Group 7
+            CAC_DELAY_A_SIDE_GROUP_7_BYTE = 61,
+            CAC_DLY_A_7_START = 3,
+            CAC_DLY_A_7_LEN = 5,
+
+            // Byte 62: CAC Delay B side Group 0
+            CAC_DELAY_B_SIDE_GROUP_0_BYTE = 62,
+            CAC_DLY_B_0_START = 3,
+            CAC_DLY_B_0_LEN = 5,
+
+            // Byte 63: CAC Delay B side Group 1
+            CAC_DELAY_B_SIDE_GROUP_1_BYTE = 63,
+            CAC_DLY_B_1_START = 3,
+            CAC_DLY_B_1_LEN = 5,
+
+            // Byte 64: CAC Delay B side Group 2
+            CAC_DELAY_B_SIDE_GROUP_2_BYTE = 64,
+            CAC_DLY_B_2_START = 3,
+            CAC_DLY_B_2_LEN = 5,
+
+            // Byte 65: CAC Delay B side Group 3
+            CAC_DELAY_B_SIDE_GROUP_3_BYTE = 65,
+            CAC_DLY_B_3_START = 3,
+            CAC_DLY_B_3_LEN = 5,
+
+            // Byte 66: CAC Delay B side Group 4
+            CAC_DELAY_B_SIDE_GROUP_4_BYTE = 66,
+            CAC_DLY_B_4_START = 3,
+            CAC_DLY_B_4_LEN = 5,
+
+            // Byte 67: CAC Delay B side Group 5
+            CAC_DELAY_B_SIDE_GROUP_5_BYTE = 67,
+            CAC_DLY_B_5_START = 3,
+            CAC_DLY_B_5_LEN = 5,
+
+            // Byte 68: CAC Delay B side Group 6
+            CAC_DELAY_B_SIDE_GROUP_6_BYTE = 68,
+            CAC_DLY_B_6_START = 3,
+            CAC_DLY_B_6_LEN = 5,
+
+            // Byte 69: CAC Delay B side Group 7
+            CAC_DELAY_B_SIDE_GROUP_7_BYTE = 69,
+            CAC_DLY_B_7_START = 3,
+            CAC_DLY_B_7_LEN = 5,
+
+            // Byte 70: PMIC0 SWA Volt
+            PMIC0_SWA_BYTE = 70,
             PMIC0_SWA_SETTING_START = 0,
             PMIC0_SWA_SETTING_LEN = 7,
             PMIC0_SWA_RANGE_START = 7,
             PMIC0_SWA_RANGE_LEN = 1,
 
-            // Byte 51: PMIC0 SWB Volt
-            PMIC0_SWB_BYTE = 51,
+            // Byte 71: PMIC0 SWB Volt
+            PMIC0_SWB_BYTE = 71,
             PMIC0_SWB_SETTING_START = 0,
             PMIC0_SWB_SETTING_LEN = 7,
             PMIC0_SWB_RANGE_START = 7,
             PMIC0_SWB_RANGE_LEN = 1,
 
-            // Byte 52: PMIC0 SWC Volt
-            PMIC0_SWC_BYTE = 52,
+            // Byte 72: PMIC0 SWC Volt
+            PMIC0_SWC_BYTE = 72,
             PMIC0_SWC_SETTING_START = 0,
             PMIC0_SWC_SETTING_LEN = 7,
             PMIC0_SWC_RANGE_START = 7,
             PMIC0_SWC_RANGE_LEN = 1,
 
-            // Byte 53: PMIC0 SWD Volt
-            PMIC0_SWD_BYTE = 53,
+            // Byte 73: PMIC0 SWD Volt
+            PMIC0_SWD_BYTE = 73,
             PMIC0_SWD_SETTING_START = 0,
             PMIC0_SWD_SETTING_LEN = 7,
             PMIC0_SWD_RANGE_START = 7,
             PMIC0_SWD_RANGE_LEN = 1,
 
-            // Byte 54: PMIC1 SWA Volt
-            PMIC1_SWA_BYTE = 54,
+            // Byte 74: PMIC1 SWA Volt
+            PMIC1_SWA_BYTE = 74,
             PMIC1_SWA_SETTING_START = 0,
             PMIC1_SWA_SETTING_LEN = 7,
             PMIC1_SWA_RANGE_START = 7,
             PMIC1_SWA_RANGE_LEN = 1,
 
-            // Byte 55: PMIC1 SWB Volt
-            PMIC1_SWB_BYTE = 55,
+            // Byte 75: PMIC1 SWB Volt
+            PMIC1_SWB_BYTE = 75,
             PMIC1_SWB_SETTING_START = 0,
             PMIC1_SWB_SETTING_LEN = 7,
             PMIC1_SWB_RANGE_START = 7,
             PMIC1_SWB_RANGE_LEN = 1,
 
-            // Byte 56: PMIC1 SWC Volt
-            PMIC1_SWC_BYTE = 56,
+            // Byte 76: PMIC1 SWC Volt
+            PMIC1_SWC_BYTE = 76,
             PMIC1_SWC_SETTING_START = 0,
             PMIC1_SWC_SETTING_LEN = 7,
             PMIC1_SWC_RANGE_START = 7,
             PMIC1_SWC_RANGE_LEN = 1,
 
-            // Byte 57: PMIC1 SWD Volt
-            PMIC1_SWD_BYTE = 57,
+            // Byte 77: PMIC1 SWD Volt
+            PMIC1_SWD_BYTE = 77,
             PMIC1_SWD_SETTING_START = 0,
             PMIC1_SWD_SETTING_LEN = 7,
             PMIC1_SWD_RANGE_START = 7,
@@ -458,54 +558,114 @@ class fields<mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>
         static constexpr field_t WR_VREF_DQ_RANGE{WR_VREF_DQ_BYTE, WR_VREF_DQ_RANGE_START, WR_VREF_DQ_RANGE_LEN};
         static constexpr field_t WR_VREF_DQ_VALUE{WR_VREF_DQ_BYTE, WR_VREF_DQ_VALUE_START, WR_VREF_DQ_VALUE_LEN};
 
-        // Byte 45: ODT WR Map CS Byte1
+        // Byte 45: Host RD VREF DQ
+        static constexpr field_t PHY_VREF_PERCENT{RD_VREF_DQ_BYTE, PHY_VREF_PERCENT_START, PHY_VREF_PERCENT_LEN};
+
+        // Byte 46: ODT WR Map CS Byte1
         static constexpr field_t ODT_WR_MAP_RANK3{ODT_WR_MAP1_BYTE, ODT_WR_MAP_RANK3_START, ODT_WR_MAP_RANK3_LEN};
         static constexpr field_t ODT_WR_MAP_RANK2{ODT_WR_MAP1_BYTE, ODT_WR_MAP_RANK2_START, ODT_WR_MAP_RANK2_LEN};
 
-        // Byte 46: ODT WR Map CS Byte0
+        // Byte 47: ODT WR Map CS Byte0
         static constexpr field_t ODT_WR_MAP_RANK1{ODT_WR_MAP0_BYTE, ODT_WR_MAP_RANK1_START, ODT_WR_MAP_RANK1_LEN};
         static constexpr field_t ODT_WR_MAP_RANK0{ODT_WR_MAP0_BYTE, ODT_WR_MAP_RANK0_START, ODT_WR_MAP_RANK0_LEN};
 
-        // Byte 47: ODT RD Map CS Byte1
+        // Byte 48: ODT RD Map CS Byte1
         static constexpr field_t ODT_RD_MAP_RANK3{ODT_RD_MAP1_BYTE, ODT_RD_MAP_RANK3_START, ODT_RD_MAP_RANK3_LEN};
         static constexpr field_t ODT_RD_MAP_RANK2{ODT_RD_MAP1_BYTE, ODT_RD_MAP_RANK2_START, ODT_RD_MAP_RANK2_LEN};
 
-        // Byte 48: ODT RD Map CS Byte0
+        // Byte 49: ODT RD Map CS Byte0
         static constexpr field_t ODT_RD_MAP_RANK1{ODT_RD_MAP0_BYTE, ODT_RD_MAP_RANK1_START, ODT_RD_MAP_RANK1_LEN};
         static constexpr field_t ODT_RD_MAP_RANK0{ODT_RD_MAP0_BYTE, ODT_RD_MAP_RANK0_START, ODT_RD_MAP_RANK0_LEN};
 
-        // Byte 49: Geardown during training
+        // Byte 50: Geardown during training
         static constexpr field_t GEARDOWN_DURING_TRAINING{GEARDOWN_DURING_TRAINING_BYTE, GEARDOWN_DURING_TRAINING_START, GEARDOWN_DURING_TRAINING_LEN};
 
-        // Byte 50: PMIC0 SWA Volt
+        // Byte 51: BIST CAL Mode
+        static constexpr field_t BIST_CA_LATENCY_MODE{BIST_CA_LATENCY_MODE_BYTE, BIST_CA_LATENCY_MODE_START, BIST_CA_LATENCY_MODE_LEN};
+
+        // Byte 52: BIST CA Parity Latency Mode
+        static constexpr field_t BIST_CA_PL_MODE{BIST_CA_PL_MODE_BYTE, BIST_CA_PL_MODE_START, BIST_CA_PL_MODE_LEN};
+
+        // Byte 53: DFI Max RD Latency
+        static constexpr field_t DFIMRL_DDRCLK{DFI_MAX_RD_LATENCY_BYTE, DFIMRL_DDRCLK_START, DFIMRL_DDRCLK_LEN};
+
+        // Byte 54: CAC Delay A side Group 0
+        static constexpr field_t CAC_DLY_A_0{CAC_DELAY_A_SIDE_GROUP_0_BYTE, CAC_DLY_A_0_START, CAC_DLY_A_0_LEN};
+
+        // Byte 55: CAC Delay A side Group 1
+        static constexpr field_t CAC_DLY_A_1{CAC_DELAY_A_SIDE_GROUP_1_BYTE, CAC_DLY_A_1_START, CAC_DLY_A_1_LEN};
+
+        // Byte 56: CAC Delay A side Group 2
+        static constexpr field_t CAC_DLY_A_2{CAC_DELAY_A_SIDE_GROUP_2_BYTE, CAC_DLY_A_2_START, CAC_DLY_A_2_LEN};
+
+        // Byte 57: CAC Delay A side Group 3
+        static constexpr field_t CAC_DLY_A_3{CAC_DELAY_A_SIDE_GROUP_3_BYTE, CAC_DLY_A_3_START, CAC_DLY_A_3_LEN};
+
+        // Byte 58: CAC Delay A side Group 4
+        static constexpr field_t CAC_DLY_A_4{CAC_DELAY_A_SIDE_GROUP_4_BYTE, CAC_DLY_A_4_START, CAC_DLY_A_4_LEN};
+
+        // Byte 59: CAC Delay A side Group 5
+        static constexpr field_t CAC_DLY_A_5{CAC_DELAY_A_SIDE_GROUP_5_BYTE, CAC_DLY_A_5_START, CAC_DLY_A_5_LEN};
+
+        // Byte 60: CAC Delay A side Group 6
+        static constexpr field_t CAC_DLY_A_6{CAC_DELAY_A_SIDE_GROUP_6_BYTE, CAC_DLY_A_6_START, CAC_DLY_A_6_LEN};
+
+        // Byte 61: CAC Delay A side Group 7
+        static constexpr field_t CAC_DLY_A_7{CAC_DELAY_A_SIDE_GROUP_7_BYTE, CAC_DLY_A_7_START, CAC_DLY_A_7_LEN};
+
+        // Byte 62: CAC Delay B side Group 0
+        static constexpr field_t CAC_DLY_B_0{CAC_DELAY_B_SIDE_GROUP_0_BYTE, CAC_DLY_B_0_START, CAC_DLY_B_0_LEN};
+
+        // Byte 63: CAC Delay B side Group 1
+        static constexpr field_t CAC_DLY_B_1{CAC_DELAY_B_SIDE_GROUP_1_BYTE, CAC_DLY_B_1_START, CAC_DLY_B_1_LEN};
+
+        // Byte 64: CAC Delay B side Group 2
+        static constexpr field_t CAC_DLY_B_2{CAC_DELAY_B_SIDE_GROUP_2_BYTE, CAC_DLY_B_2_START, CAC_DLY_B_2_LEN};
+
+        // Byte 65: CAC Delay B side Group 3
+        static constexpr field_t CAC_DLY_B_3{CAC_DELAY_B_SIDE_GROUP_3_BYTE, CAC_DLY_B_3_START, CAC_DLY_B_3_LEN};
+
+        // Byte 66: CAC Delay B side Group 4
+        static constexpr field_t CAC_DLY_B_4{CAC_DELAY_B_SIDE_GROUP_4_BYTE, CAC_DLY_B_4_START, CAC_DLY_B_4_LEN};
+
+        // Byte 67: CAC Delay B side Group 5
+        static constexpr field_t CAC_DLY_B_5{CAC_DELAY_B_SIDE_GROUP_5_BYTE, CAC_DLY_B_5_START, CAC_DLY_B_5_LEN};
+
+        // Byte 68: CAC Delay B side Group 6
+        static constexpr field_t CAC_DLY_B_6{CAC_DELAY_B_SIDE_GROUP_6_BYTE, CAC_DLY_B_6_START, CAC_DLY_B_6_LEN};
+
+        // Byte 69: CAC Delay B side Group 7
+        static constexpr field_t CAC_DLY_B_7{CAC_DELAY_B_SIDE_GROUP_7_BYTE, CAC_DLY_B_7_START, CAC_DLY_B_7_LEN};
+
+        // Byte 70: PMIC0 SWA Volt
         static constexpr field_t PMIC0_SWA_SETTING{PMIC0_SWA_BYTE, PMIC0_SWA_SETTING_START, PMIC0_SWA_SETTING_LEN};
         static constexpr field_t PMIC0_SWA_RANGE{PMIC0_SWA_BYTE, PMIC0_SWA_RANGE_START, PMIC0_SWA_RANGE_LEN};
 
-        // Byte 51: PMIC0 SWB Volt
+        // Byte 71: PMIC0 SWB Volt
         static constexpr field_t PMIC0_SWB_SETTING{PMIC0_SWB_BYTE, PMIC0_SWB_SETTING_START, PMIC0_SWB_SETTING_LEN};
         static constexpr field_t PMIC0_SWB_RANGE{PMIC0_SWB_BYTE, PMIC0_SWB_RANGE_START, PMIC0_SWB_RANGE_LEN};
 
-        // Byte 52: PMIC0 SWC Volt
+        // Byte 72: PMIC0 SWC Volt
         static constexpr field_t PMIC0_SWC_SETTING{PMIC0_SWC_BYTE, PMIC0_SWC_SETTING_START, PMIC0_SWC_SETTING_LEN};
         static constexpr field_t PMIC0_SWC_RANGE{PMIC0_SWC_BYTE, PMIC0_SWC_RANGE_START, PMIC0_SWC_RANGE_LEN};
 
-        // Byte 53: PMIC0 SWD Volt
+        // Byte 73: PMIC0 SWD Volt
         static constexpr field_t PMIC0_SWD_SETTING{PMIC0_SWD_BYTE, PMIC0_SWD_SETTING_START, PMIC0_SWD_SETTING_LEN};
         static constexpr field_t PMIC0_SWD_RANGE{PMIC0_SWD_BYTE, PMIC0_SWD_RANGE_START, PMIC0_SWD_RANGE_LEN};
 
-        // Byte 54: PMIC1 SWA Volt
+        // Byte 74: PMIC1 SWA Volt
         static constexpr field_t PMIC1_SWA_SETTING{PMIC1_SWA_BYTE, PMIC1_SWA_SETTING_START, PMIC1_SWA_SETTING_LEN};
         static constexpr field_t PMIC1_SWA_RANGE{PMIC1_SWA_BYTE, PMIC1_SWA_RANGE_START, PMIC1_SWA_RANGE_LEN};
 
-        // Byte 55: PMIC1 SWB Volt
+        // Byte 75: PMIC1 SWB Volt
         static constexpr field_t PMIC1_SWB_SETTING{PMIC1_SWB_BYTE, PMIC1_SWB_SETTING_START, PMIC1_SWB_SETTING_LEN};
         static constexpr field_t PMIC1_SWB_RANGE{PMIC1_SWB_BYTE, PMIC1_SWB_RANGE_START, PMIC1_SWB_RANGE_LEN};
 
-        // Byte 56: PMIC1 SWC Volt
+        // Byte 76: PMIC1 SWC Volt
         static constexpr field_t PMIC1_SWC_SETTING{PMIC1_SWC_BYTE, PMIC1_SWC_SETTING_START, PMIC1_SWC_SETTING_LEN};
         static constexpr field_t PMIC1_SWC_RANGE{PMIC1_SWC_BYTE, PMIC1_SWC_RANGE_START, PMIC1_SWC_RANGE_LEN};
 
-        // Byte 57: PMIC1 SWD Volt
+        // Byte 77: PMIC1 SWD Volt
         static constexpr field_t PMIC1_SWD_SETTING{PMIC1_SWD_BYTE, PMIC1_SWD_SETTING_START, PMIC1_SWD_SETTING_LEN};
         static constexpr field_t PMIC1_SWD_RANGE{PMIC1_SWD_BYTE, PMIC1_SWD_RANGE_START, PMIC1_SWD_RANGE_LEN};
 };
