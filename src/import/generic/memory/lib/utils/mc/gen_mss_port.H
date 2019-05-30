@@ -511,7 +511,7 @@ inline fapi2::ReturnCode reset_reorder_queue_settings(const fapi2::Target<T>& i_
     // Changes the reorder queue settings
     {
         // Two settings are FIFO and REORDER.  FIFO is a 1 in the registers, while reorder is a 0 state
-        const mss::states l_state = ((l_reorder_queue == fapi2::ENUM_ATTR_MSS_REORDER_QUEUE_SETTING_FIFO) ?
+        const mss::states l_state = ((l_reorder_queue == fapi2::ENUM_ATTR_MEM_REORDER_QUEUE_SETTING_FIFO) ?
                                      mss::states::ON : mss::states::OFF);
         FAPI_TRY(configure_rrq(i_target, l_state), "%s failed to reset read reorder queue settings", mss::c_str(i_target));
         FAPI_TRY(configure_wrq(i_target, l_state), "%s failed to reset read reorder queue settings", mss::c_str(i_target));
