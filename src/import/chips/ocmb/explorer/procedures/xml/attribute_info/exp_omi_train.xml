@@ -44,10 +44,13 @@
         <valueType>uint8</valueType>
         <enum>
             NORMAL_MODE = 0,
-            MANUFACTURING_MODE = 1
+            MANUFACTURING_MODE = 1,
+            PRODUCT_QUALIFICATION_MODE = 2
         </enum>
-        <default>0</default>
-        <writeable/>
+        <initToZero/>
+        <platInit/>
+        <overrideOnly/>
+        <mssAccessorName>ocmb_exp_boot_config_fw_mode</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -61,8 +64,10 @@
             NO_LOOPBACK_TESTING = 0,
             PERFORM_LOOPBACK_TESTING = 1
         </enum>
-        <default>0</default>
-        <writeable/>
+        <initToZero/>
+        <platInit/>
+        <overrideOnly/>
+        <mssAccessorName>ocmb_exp_boot_config_opencapi_loopback_test</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -77,8 +82,10 @@
             I2C = 1,
             JTAG = 2
         </enum>
-        <default>0</default>
-        <writeable/>
+        <initToZero/>
+        <platInit/>
+        <overrideOnly/>
+        <mssAccessorName>ocmb_exp_boot_config_transport_layer</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -93,23 +100,27 @@
            BOOT_RIGHT_AFTER_CONFIG = 0,
            WAIT_FOR_HOST_CMD = 1
         </enum>
-        <default>0</default>
-        <writeable/>
+        <platInit/>
+        <initToZero/>
+        <overrideOnly/>
+        <mssAccessorName>ocmb_exp_boot_config_dl_layer_boot_mode</mssAccessorName>
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_OCMB_EXP_BOOT_CONFIG_BOOT_MODE</id>
+        <id>ATTR_MSS_OCMB_EXP_BOOT_CONFIG_DFE_DISABLE</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
-            Indicates the full boot or step-by-step boot
+            Set to disable DFE
         </description>
         <valueType>uint8</valueType>
         <enum>
-            FULL_BOOT = 0,
-            STEP_BY_STEP_BOOT = 1
+            DEFAULT = 0,
+            DISABLED = 1
         </enum>
-        <default>0</default>
-        <writeable/>
+        <initToZero/>
+        <platInit/>
+        <overrideOnly/>
+        <mssAccessorName>ocmb_exp_boot_config_dfe_disable</mssAccessorName>
     </attribute>
 
      <attribute>
@@ -124,7 +135,8 @@
             LANE_4= 2
         </enum>
         <default>1</default>
-        <writeable/>
+        <platInit/>
+        <mssAccessorName>ocmb_exp_boot_config_lane_mode</mssAccessorName>
     </attribute>
 
      <attribute>
@@ -140,7 +152,8 @@
            SERDES_25_60GBPS = 3
         </enum>
         <default>3</default>
-        <writeable/>
+        <platInit/>
+        <mssAccessorName>ocmb_exp_boot_config_serdes_frequency</mssAccessorName>
     </attribute>
 
 </attributes>
