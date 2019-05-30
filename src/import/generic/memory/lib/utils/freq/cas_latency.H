@@ -135,7 +135,7 @@ template <>
 class CasLatencyTraits<mc_type::EXPLORER>
 {
     public:
-        static constexpr fapi2::TargetType TARGET_TYPE = fapi2::TARGET_TYPE_OCMB_CHIP;
+        static constexpr fapi2::TargetType TARGET_TYPE = fapi2::TARGET_TYPE_MEM_PORT;
         static const std::vector<uint32_t> SUPPORTED_FREQS;
         static constexpr const char* MC_STR = "EXPLORER";
 };
