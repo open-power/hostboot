@@ -36,6 +36,8 @@
 #define EXP_OMI_UTILS_H_
 
 #include <fapi2.H>
+#include <explorer_scom_addresses.H>
+#include <explorer_scom_addresses_fld.H>
 #include <generic/memory/lib/utils/c_str.H>
 
 namespace mss
@@ -44,29 +46,6 @@ namespace exp
 {
 namespace omi
 {
-
-///
-/// @brief Constants used for the OMI register fields
-///
-// TODO:RTC196850 Update Explorer code to use actual register addresses/names
-enum fields
-{
-    // Bit we set to put ourselves into enterprise mode
-    ENTERPRISE_SET_BIT = 0,
-    HALF_DIMM_MODE = 1,
-    // How the HW is actually configured in enterprise mode
-    ENTERPRISE_BIT_CONFIG = 2,
-};
-
-///
-/// @brief Constants used for the OMI registers
-///
-// TODO:RTC196850 Update Explorer code to use actual register addresses/names
-enum registers
-{
-    // Bit we set to put ourselves into enterprise mode
-    MENTERP = 0x080108e4,
-};
 
 ///////////////////////////////////////////////////////////////////////////////////
 /// Bit Field Operations
@@ -79,7 +58,7 @@ enum registers
 ///
 inline bool get_enterprise_set_bit( const fapi2::buffer<uint64_t>& i_data )
 {
-    return i_data.getBit<fields::ENTERPRISE_SET_BIT>();
+    return i_data.getBit<EXPLR_MMIO_MENTERP_MMIO_ENTERPRISE_MODE>();
 }
 
 ///
@@ -89,7 +68,7 @@ inline bool get_enterprise_set_bit( const fapi2::buffer<uint64_t>& i_data )
 ///
 inline void set_enterprise_set_bit( fapi2::buffer<uint64_t>& io_data, const bool i_is_enterprise )
 {
-    io_data.writeBit<fields::ENTERPRISE_SET_BIT>(i_is_enterprise);
+    io_data.writeBit<EXPLR_MMIO_MENTERP_MMIO_ENTERPRISE_MODE>(i_is_enterprise);
 }
 
 ///
@@ -99,7 +78,7 @@ inline void set_enterprise_set_bit( fapi2::buffer<uint64_t>& io_data, const bool
 ///
 inline bool get_half_dimm_mode( const fapi2::buffer<uint64_t>& i_data )
 {
-    return i_data.getBit<fields::HALF_DIMM_MODE>();
+    return i_data.getBit<EXPLR_MMIO_MENTERP_HALF_DIMM_MODE>();
 }
 
 ///
@@ -109,7 +88,7 @@ inline bool get_half_dimm_mode( const fapi2::buffer<uint64_t>& i_data )
 ///
 inline void set_half_dimm_mode( fapi2::buffer<uint64_t>& io_data, const bool i_is_half_dimm_mode )
 {
-    io_data.writeBit<fields::HALF_DIMM_MODE>(i_is_half_dimm_mode);
+    io_data.writeBit<EXPLR_MMIO_MENTERP_HALF_DIMM_MODE>(i_is_half_dimm_mode);
 }
 
 // Note: ENTERPRISE_BIT_CONFIG is a Read only bit, so no setting it
@@ -121,7 +100,7 @@ inline void set_half_dimm_mode( fapi2::buffer<uint64_t>& io_data, const bool i_i
 ///
 inline bool get_enterprise_config( const fapi2::buffer<uint64_t>& i_data )
 {
-    return i_data.getBit<fields::ENTERPRISE_BIT_CONFIG>();
+    return i_data.getBit<EXPLR_MMIO_MENTERP_CFG_ENTERPRISE_MODE>();
 }
 
 ///
@@ -163,7 +142,7 @@ fapi_try_exit:
 inline fapi2::ReturnCode read_enterprise_config( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         fapi2::buffer<uint64_t>& o_data )
 {
-    return fapi2::getScom(i_target, registers::MENTERP, o_data);
+    return fapi2::getScom(i_target, EXPLR_MMIO_MENTERP, o_data);
 }
 
 ///
@@ -175,7 +154,7 @@ inline fapi2::ReturnCode read_enterprise_config( const fapi2::Target<fapi2::TARG
 inline fapi2::ReturnCode write_enterprise_config( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         const  fapi2::buffer<uint64_t>& i_data )
 {
-    return fapi2::putScom(i_target, registers::MENTERP, i_data);
+    return fapi2::putScom(i_target, EXPLR_MMIO_MENTERP, i_data);
 }
 
 namespace train
