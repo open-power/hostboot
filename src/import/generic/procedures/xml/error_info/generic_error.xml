@@ -38,21 +38,15 @@
 <hwpErrors>
 
   <hwpError>
-    <rc>RC_MSS_BAD_FREQ_CALCULATED</rc>
+    <rc>RC_MSS_DIVIDE_BY_ZERO</rc>
     <description>
-        No frequency found for MC Either bad mrw attribute or no DIMMS installed?
-        Should be a code bug if we get here
+      Attempt to divide by zero
     </description>
-    <ffdc>MSS_FREQ</ffdc>
-    <ffdc>SUPPORTED_FREQ_0</ffdc>
-    <ffdc>SUPPORTED_FREQ_1</ffdc>
-    <ffdc>SUPPORTED_FREQ_2</ffdc>
-    <ffdc>SUPPORTED_FREQ_3</ffdc>
-    <ffdc>TARGET</ffdc>
-    <ffdc>PROC_TYPE</ffdc>
+    <ffdc>DIVISOR</ffdc>
+    <ffdc>DIVIDEND</ffdc>
     <callout>
       <procedure>CODE</procedure>
-      <priority>HIGH</priority>
+      <priority>LOW</priority>
     </callout>
   </hwpError>
 
@@ -71,6 +65,27 @@
       <procedure>CODE</procedure>
       <priority>LOW</priority>
     </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_FAILED_SPD_REVISION_FALLBACK</rc>
+    <description>
+      Unable to fall back SPD decoder to the highest decoded
+      revision. Most likely a programming error.
+    </description>
+    <ffdc>FAILED_REVISION</ffdc>
+    <ffdc>FUNCTION_CODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
   </hwpError>
 
   <hwpError>
@@ -132,6 +147,17 @@
           <childType>TARGET_TYPE_DIMM</childType>
       </childTargets>
     </gard>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_FREQ_INDEX_TOO_LARGE</rc>
+    <description>Error calculating the index into max_freq array</description>
+    <ffdc>INDEX</ffdc>
+    <ffdc>NUM_MAX_FREQS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
@@ -210,6 +236,18 @@
      </callout>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_INVALID_CAST_CALC_NCK</rc>
+    <description>Invalid cast or calculation for calc_nck</description>
+    <ffdc>TIMING_PS</ffdc>
+    <ffdc>NCK_NS</ffdc>
+    <ffdc>CORRECTION_FACTOR</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
 <hwpError>
   <rc>RC_MSS_INVALID_CLOCK_PERIOD</rc>
   <description>
@@ -222,17 +260,144 @@
   </callout>
 </hwpError>
 
-<hwpError>
-  <rc>RC_MSS_INVALID_FREQUENCY</rc>
-  <description>
-    An invalid frequency was passed to frequency to clock period
-  </description>
-  <ffdc>FREQ</ffdc>
-  <callout>
-    <procedure>CODE</procedure>
-    <priority>HIGH</priority>
-  </callout>
-</hwpError>
+  <hwpError>
+    <rc>RC_MSS_INVALID_DB_MDQ_DRIVE_STRENGTH</rc>
+    <description>
+        Bad SPD data for bytes 145 - 147.
+        Reserved settings for data buffer MDQ drive strength received.
+        This could be code problem (decoding) or bad SPD.
+    </description>
+    <ffdc>DATA_RATE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_DIMM_SPEED</rc>
+    <description>
+      Invalid DIMM speed received. Possibly a programming error.
+    </description>
+    <ffdc>DIMM_SPEED</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_DIMM_TYPE</rc>
+    <description>
+      Received a DIMM type unsupported by the SPD decoder factory
+    </description>
+    <ffdc>DIMM_TYPE</ffdc>
+    <ffdc>FUNCTION</ffdc>
+    <callout>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_DRAM_GEN</rc>
+    <description>
+      Received a DRAM gen unsupported by the SPD decoder factory
+    </description>
+    <ffdc>DRAM_GEN</ffdc>
+    <ffdc>FUNCTION</ffdc>
+    <callout>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_FREQUENCY</rc>
+    <description>
+      An invalid frequency was passed to frequency to clock period
+    </description>
+    <ffdc>FREQ</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_FREQ_LIST_PASSED</rc>
+    <description>
+       Wrong size vector passed into frequency scoreboard function
+    </description>
+    <ffdc>SIZE</ffdc>
+    <ffdc>EXPECTED</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_HYBRID_MODULE</rc>
+    <description>
+      Received an invalid or unsupported hybrid media (SPD byte 3, bits [6:4])
+      for a specified hybrid modue (SPD byte 3, bit [7])
+    </description>
+    <ffdc>HYBRID</ffdc>
+    <ffdc>HYBRID_MEDIA</ffdc>
+    <ffdc>FUNCTION</ffdc>
+    <callout>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
 
   <hwpError>
     <rc>RC_MSS_INVALID_PORT_INDEX_PASSED</rc>
@@ -243,6 +408,61 @@
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_RANK</rc>
+    <description>
+      Invalid rank passed into function
+    </description>
+    <ffdc>FUNCTION</ffdc>
+    <ffdc>RANK</ffdc>
+    <ffdc>PORT_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_SPD_PARAMETER_RECEIVED</rc>
+    <description>
+      Unable to fall back SPD decoder to the highest decoded
+      revision. Most likely a programming error.
+    </description>
+    <ffdc>SPD_PARAM</ffdc>
+    <ffdc>FUNCTION_CODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_SPD_RESERVED_BITS</rc>
+    <description>
+        Invalid SPD reserved bits received.
+        This could be code problem (decoding) or bad SPD.
+    </description>
+    <ffdc>FUNCTION_CODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
   </hwpError>
 
   <hwpError>
@@ -260,6 +480,36 @@
     <gard>
         <target>DIMM_TARGET</target>
     </gard>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_VPD_FREQ_LIST_PASSED</rc>
+    <description>
+       Wrong size vector passed into limit_freq_by_vpd function
+    </description>
+    <ffdc>SIZE</ffdc>
+    <ffdc>EXPECTED</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_VPD_KEYWORD_MAX</rc>
+    <description>
+      VPD keyword is too big for space allocated for it.
+    </description>
+    <ffdc>MAX</ffdc>
+    <ffdc>ACTUAL</ffdc>
+    <ffdc>KEYWORD</ffdc>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>VPD_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 
 <hwpError>
@@ -280,6 +530,16 @@
 </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_MEMDIAGS_NO_MCBIST_SUBTESTS</rc>
+    <description>Attempt to run an MCBIST program with no subtests</description>
+    <ffdc>MC_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_VOLT_WRONG_NUMBER_OF_VOLTAGES</rc>
     <description>Incorrect number of voltages supplied to set_voltage_attributes function</description>
     <ffdc>VOLT_TARGET</ffdc>
@@ -289,6 +549,26 @@
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_VOLT_DDR_TYPE_REQUIRED_VOLTAGE</rc>
+    <description>One or more DIMMs do not support required voltage for DDR type.</description>
+    <ffdc>EXPECTED_OPERABLE</ffdc>
+    <ffdc>EXPECTED_ENDURANT</ffdc>
+    <ffdc>ACTUAL_OPERABLE</ffdc>
+    <ffdc>ACTUAL_ENDURANT</ffdc>
+   <callout>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
   </hwpError>
 
   <hwpError>
@@ -308,6 +588,477 @@
       </childTargets>
       <priority>MEDIUM</priority>
     </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_UNEXPECTED_VALUE_SEEN</rc>
+    <description> Invalid value seen versus the expected value wanted </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>EXPECTED</ffdc>
+    <ffdc>ACTUAL</ffdc>
+    <ffdc>FUNCTION</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_OUT_OF_BOUNDS_INDEXING</rc>
+    <description>
+      Desired index is larger than list (std::vector, array, etc.) size.
+      Likely a programming error.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>INDEX</ffdc>
+    <ffdc>LIST_SIZE</ffdc>
+    <ffdc>FUNCTION</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_CONVERSION_ERROR</rc>
+    <description>
+      Overflow or underflow occured converting one integral type to another.
+      This is a programming error.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>ORIGINAL_VAL</ffdc>
+    <ffdc>CONVERTED_VAL</ffdc>
+    <ffdc>FUNCTION</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_FAILED_DATA_INTEGRITY_CHECK</rc>
+    <description>
+        Bad data received.
+        Settings are incorrect for received data.
+        This could be code problem (decoding) or bad data.
+    </description>
+    <ffdc>VALUE</ffdc>
+    <ffdc>BYTE</ffdc>
+    <ffdc>FFDC_CODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_ZERO_FREQ_OR_SIZE</rc>
+    <description>
+      An zero memory frequency was passed to calculate min cmd gap
+    </description>
+    <ffdc>FREQ</ffdc>
+    <ffdc>SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MEMDIAGS_INVALID_PATTERN_INDEX</rc>
+    <description>An invalid pattern index was passed to the pattern loader</description>
+    <ffdc>INDEX</ffdc>
+    <ffdc>MC_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MCBIST_PROGRAM_TOO_BIG</rc>
+    <description>MCBIST program larger than currently supported size</description>
+    <ffdc>PROGRAM_LENGTH</ffdc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>MC_TYPE</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MCBIST_INVALID_ADDRESS_PAIR_INDEX</rc>
+    <description>An invalid address pair index</description>
+    <ffdc>INDEX</ffdc>
+    <ffdc>MC_TYPE</ffdc>
+    <ffdc>TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_POWER_INTERCEPT_NOT_SET</rc>
+    <description>
+      The attribute ATTR_MSS_TOTAL_POWER_INTERCEPT was not set and equals 0
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_POWER_SLOPE_NOT_SET</rc>
+    <description>
+      The attribute ATTR_MSS_TOTAL_POWER_INTERCEPT was not set and equals 0
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_NO_DATABUS_UTILIZATION</rc>
+    <description>
+      There are 2 DIMMS on the port but both have 0 databus utilization
+    </description>
+    <ffdc>PORT_DATABUS_UTIL</ffdc>
+    <ffdc>DIMM_COUNT</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_CALC_POWER_CURVE_DIVIDE_BY_ZERO</rc>
+    <description>
+      Denominator equals 0
+    </description>
+    <ffdc>PORT_DATABUS_UTIL</ffdc>
+    <ffdc>UTIL_CONVERSION</ffdc>
+    <ffdc>IDLE_UTIL</ffdc>
+    <ffdc>RESULT</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+ <hwpError>
+    <rc>RC_MSS_NO_PORT_POWER_LIMIT</rc>
+    <description>
+        Got 0 when calculating port power limit.
+        Either no dimms or attribute MEM_WATT_TARGET wasn't set
+    </description>
+    <ffdc>COUNT_DIMMS</ffdc>
+    <ffdc>PORT_POWER_LIMIT</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+ </hwpError>
+
+ <hwpError>
+    <rc>RC_MSS_NO_PORT_POWER</rc>
+    <description>
+        Got 0 when calculating port power limits using the DIMMs databus utilization
+    </description>
+    <ffdc>COUNT_DIMMS</ffdc>
+    <ffdc>MAX_UTILIZATION_DIMM_0</ffdc>
+    <ffdc>MAX_UTILIZATION_DIMM_1</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+ </hwpError>
+
+ <hwpError>
+    <rc>RC_MSS_M_DRAM_CLOCKS_EQUALS_ZERO</rc>
+    <description>
+        ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS was not set and equals zero
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+ </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MAX_FREQ_ATTR_SIZE_CHANGED</rc>
+    <description>
+        Number of entries for MSS_MRW_MAX_FREQ attribute from VPD has changed without updating the code
+        Asserted because direct accesses to array
+    </description>
+    <ffdc>ACTUAL_SIZE</ffdc>
+    <ffdc>SUPPOSED_SIZE</ffdc>
+    <ffdc>PORT_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+ <hwpError>
+    <rc>RC_MSS_CALC_PORT_POWER_EXCEEDS_MAX</rc>
+    <description>
+      The calculated port power from equalizing throttles exceeds the maximum allowed power
+    </description>
+    <ffdc>CALCULATED_PORT_POWER</ffdc>
+    <ffdc>MAX_POWER_ALLOWED</ffdc>
+    <ffdc>PORT_POS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <childTargets>
+          <parent>PORT_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+       <childTargets>
+          <parent>PORT_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+    </deconfigure>
+ </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_SPD_REV_ENCODING_LEVEL_NOT_SUPPORTED</rc>
+    <description>
+      SPD revision on byte 1 (bits 7~4) has a unsupported encoding level
+      that is greater than the largest decoded SPD decoder. There is
+      no backward compatible revision to fallback to.  This could be
+      bad SPD or a programming error.
+    </description>
+    <ffdc>ENCODING_LEVEL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_SPD_TIMING_FAIL</rc>
+    <description>
+      Timing SPD parameter failed to meet JEDEC SPD timing
+      bounds.  FUNCTION_CODE ffdc field encodes which timing param.
+    </description>
+    <ffdc>FAILED_REVISION</ffdc>
+    <ffdc>FUNCTION_CODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_TOO_MANY_DIMMS_ON_PORT</rc>
+    <description>There seem to be too many dimms on the port</description>
+    <ffdc>DIMM_COUNT</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+        <childTargets>
+          <parent>PORT_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+        </childTargets>
+        <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+
+ <hwpError>
+    <rc>RC_MSS_SLOT_UTIL_EXCEEDS_PORT</rc>
+    <description>
+      The memory throttle per slot (DIMM) exceeds the allowed throttle for the port
+    </description>
+    <ffdc>SLOT_UTIL</ffdc>
+    <ffdc>PORT_UTIL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+ </hwpError>
+
+ <hwpError>
+     <rc>RC_MSS_OUTPUT_OVERFLOW_CALC_UTIL</rc>
+    <description>
+        Type of output variable is not large enough for the calculations
+    </description>
+    <ffdc>RESULT</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+ </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_POWER_THERMAL_DECODE_ERROR</rc>
+    <description>
+      There was no match or value found in decoding the power thermal attributes
+    </description>
+    <ffdc>DIMM_TARGET</ffdc>
+    <ffdc>ATTR</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MRW_SAFEMODE_UTIL_THROTTLE_NOT_SUPPORTED</rc>
+    <description>
+        The MRW safemode utilization that is less than the minimum utilization supported.  Check ATTR_MSS_MRW_SAFEMODE_DRAM_DATABUS_UTIL.
+    </description>
+    <ffdc>MRW_SAFEMODE_UTIL</ffdc>
+    <ffdc>MIN_UTIL_VALUE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_NO_POWER_THERMAL_ATTR_FOUND</rc>
+    <description>
+      There was no match or value found in decoding the power thermal attributes
+    </description>
+    <ffdc>GENERATED_KEY</ffdc>
+    <ffdc>FUNCTION</ffdc>
+    <ffdc>DIMM_TARGET</ffdc>
+    <ffdc>SIZE</ffdc>
+    <ffdc>DRAM_GEN</ffdc>
+    <ffdc>DIMM_TYPE</ffdc>
+    <ffdc>DRAM_WIDTH</ffdc>
+    <ffdc>DRAM_DENSITY</ffdc>
+    <ffdc>STACK_TYPE</ffdc>
+    <ffdc>MFGID</ffdc>
+    <ffdc>MODULE_HEIGHT</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_POWER_THERMAL_ENCODE_ERROR</rc>
+    <description>
+      There was no match or value found in encoding the power thermal attributes
+    </description>
+    <ffdc>DIMM_TARGET</ffdc>
+    <ffdc>ATTR</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_POWER_THERMAL_ATTR_VECTORS_INCORRECT</rc>
+    <description>
+      The attributes vectors size is incorrect for find_xxx functions
+    </description>
+    <ffdc>FUNCTION</ffdc>
+    <ffdc>INPUT_SIZE</ffdc>
+    <ffdc>EXPECTED_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_POWER_THERMAL_DIMM_INDEX_OUT_OF_BOUND</rc>
+    <description>
+      The dimm index is out of bound for the port
+    </description>
+    <ffdc>INPUT_SIZE</ffdc>
+    <ffdc>MAX_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_TOO_MANY_PRIMARY_RANKS_ON_DIMM</rc>
+    <description>
+        Too many primary ranks were seen on the dimm according
+        to the call to master_ranks_per_dimm</description>
+    <ffdc>RANK_COUNT</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_TOO_MANY_PRIMARY_RANKS_ON_PORT</rc>
+    <description>
+        Too many primary ranks were seen on the port according
+        to the call to master_ranks_per_dimm</description>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_RANK_OUT_OF_RANGE</rc>
+    <description>
+        The rank provided to the rank::info constructor exceeded
+        the maximum rank for the MC
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <ffdc>TARGET</ffdc>
+    <ffdc>RANK</ffdc>
   </hwpError>
 
 </hwpErrors>
