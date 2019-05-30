@@ -40,6 +40,7 @@
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/spd/ddimm/efd_decoder.H>
 #include <generic/memory/lib/utils/mss_buffer_utils.H>
+#include <generic/memory/lib/utils/find.H>
 
 namespace mss
 {
@@ -501,6 +502,19 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         }
 
         ///
+        /// @brief Decodes Host RD VREF DQ -> PHY_VREF_PERCENT
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode phy_vref_percent(uint8_t& o_output) const
+        {
+            FAPI_TRY( (reader<fields_t::PHY_VREF_PERCENT, R>(iv_target, iv_data, o_output)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
         /// @brief Decodes Initial WR VREF DQ setting -> WR_VREF_DQ_VALUE
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
@@ -625,6 +639,296 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         virtual fapi2::ReturnCode geardown_during_training(uint8_t& o_output) const override
         {
             FAPI_TRY(( reader<fields_t::GEARDOWN_DURING_TRAINING, R>(iv_target, iv_data, o_output)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes BIST CAL Mode -> BIST_CA_LATENCY_MODE
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode bist_ca_latency_mode(uint8_t& o_output) const
+        {
+            // Note: using a one-to-one mapping to allow us to re-use the API
+            // We really just need to check that the value exists in the list
+            const std::vector<std::pair<uint8_t, uint8_t>> ALLOWED_VALUES =
+            {
+                {0b0000, 0b0000},
+                {0b0011, 0b0011},
+                {0b0100, 0b0100},
+                {0b0101, 0b0101},
+                {0b0110, 0b0110},
+                {0b1000, 0b1000},
+            };
+
+            FAPI_TRY( (reader<fields_t::BIST_CA_LATENCY_MODE, R>(iv_target, iv_data, o_output)) );
+
+            {
+                // Map EFD value to desired setting
+                // Value and key should be the same thing, just creating a helper variable to avoid confusion
+                const auto l_key = o_output;
+                uint8_t l_value = 0;
+                o_output = 0;
+                FAPI_TRY(lookup_table_check(iv_target, ALLOWED_VALUES, EFD_CA_LATENCY_MODE, l_key, o_output));
+                o_output = l_value;
+            }
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes BIST CA Parity Latency Mode -> BIST_CA_PL_MODE
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode bist_ca_pl_mode(uint8_t& o_output) const
+        {
+            // Note: using a one-to-one mapping to allow us to re-use the API
+            // We really just need to check that the value exists in the list
+            const std::vector<std::pair<uint8_t, uint8_t>> ALLOWED_VALUES =
+            {
+                {0b0000, 0b0000},
+                {0b0100, 0b0100},
+                {0b0101, 0b0101},
+                {0b0110, 0b0110},
+                {0b1000, 0b1000},
+            };
+
+            FAPI_TRY( (reader<fields_t::BIST_CA_PL_MODE, R>(iv_target, iv_data, o_output)) );
+
+            {
+                // Map EFD value to desired setting
+                // Value and key should be the same thing, just creating a helper variable to avoid confusion if we return with a bad value and an RC
+                const auto l_key = o_output;
+                uint8_t l_value = 0;
+                o_output = 0;
+                FAPI_TRY(lookup_table_check(iv_target, ALLOWED_VALUES, EFD_CA_PL_MODE, l_key, l_value));
+                o_output = l_value;
+            }
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes DFI Max RD Latency -> DFIMRL_DDRCLK
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dfimrl_ddrclk(uint8_t& o_output) const
+        {
+            FAPI_TRY( (reader<fields_t::DFIMRL_DDRCLK, R>(iv_target, iv_data, o_output)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes CAC Delay A side Group 0 -> CAC_DLY_A_0
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode cac_delay_a_side_group_0(uint8_t& o_output) const
+        {
+            FAPI_TRY( (reader<fields_t::CAC_DLY_A_0, R>(iv_target, iv_data, o_output)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes CAC Delay A side Group 1 -> CAC_DLY_A_1
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode cac_delay_a_side_group_1(uint8_t& o_output) const
+        {
+            FAPI_TRY( (reader<fields_t::CAC_DLY_A_1, R>(iv_target, iv_data, o_output)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes CAC Delay A side Group 2 -> CAC_DLY_A_2
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode cac_delay_a_side_group_2(uint8_t& o_output) const
+        {
+            FAPI_TRY( (reader<fields_t::CAC_DLY_A_2, R>(iv_target, iv_data, o_output)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes CAC Delay A side Group 3 -> CAC_DLY_A_3
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode cac_delay_a_side_group_3(uint8_t& o_output) const
+        {
+            FAPI_TRY( (reader<fields_t::CAC_DLY_A_3, R>(iv_target, iv_data, o_output)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes CAC Delay A side Group 4 -> CAC_DLY_A_4
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode cac_delay_a_side_group_4(uint8_t& o_output) const
+        {
+            FAPI_TRY( (reader<fields_t::CAC_DLY_A_4, R>(iv_target, iv_data, o_output)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes CAC Delay A side Group 5 -> CAC_DLY_A_5
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode cac_delay_a_side_group_5(uint8_t& o_output) const
+        {
+            FAPI_TRY( (reader<fields_t::CAC_DLY_A_5, R>(iv_target, iv_data, o_output)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes CAC Delay A side Group 6 -> CAC_DLY_A_6
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode cac_delay_a_side_group_6(uint8_t& o_output) const
+        {
+            FAPI_TRY( (reader<fields_t::CAC_DLY_A_6, R>(iv_target, iv_data, o_output)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes CAC Delay A side Group 7 -> CAC_DLY_A_7
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode cac_delay_a_side_group_7(uint8_t& o_output) const
+        {
+            FAPI_TRY( (reader<fields_t::CAC_DLY_A_7, R>(iv_target, iv_data, o_output)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes CAC Delay B side Group 0 -> CAC_DLY_B_0
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode cac_delay_b_side_group_0(uint8_t& o_output) const
+        {
+            FAPI_TRY( (reader<fields_t::CAC_DLY_B_0, R>(iv_target, iv_data, o_output)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes CAC Delay B side Group 1 -> CAC_DLY_B_1
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode cac_delay_b_side_group_1(uint8_t& o_output) const
+        {
+            FAPI_TRY( (reader<fields_t::CAC_DLY_B_1, R>(iv_target, iv_data, o_output)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes CAC Delay B side Group 2 -> CAC_DLY_B_2
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode cac_delay_b_side_group_2(uint8_t& o_output) const
+        {
+            FAPI_TRY( (reader<fields_t::CAC_DLY_B_2, R>(iv_target, iv_data, o_output)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes CAC Delay B side Group 3 -> CAC_DLY_B_3
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode cac_delay_b_side_group_3(uint8_t& o_output) const
+        {
+            FAPI_TRY( (reader<fields_t::CAC_DLY_B_3, R>(iv_target, iv_data, o_output)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes CAC Delay B side Group 4 -> CAC_DLY_B_4
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode cac_delay_b_side_group_4(uint8_t& o_output) const
+        {
+            FAPI_TRY( (reader<fields_t::CAC_DLY_B_4, R>(iv_target, iv_data, o_output)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes CAC Delay B side Group 5 -> CAC_DLY_B_5
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode cac_delay_b_side_group_5(uint8_t& o_output) const
+        {
+            FAPI_TRY( (reader<fields_t::CAC_DLY_B_5, R>(iv_target, iv_data, o_output)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes CAC Delay B side Group 6 -> CAC_DLY_B_6
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode cac_delay_b_side_group_6(uint8_t& o_output) const
+        {
+            FAPI_TRY( (reader<fields_t::CAC_DLY_B_6, R>(iv_target, iv_data, o_output)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes CAC Delay B side Group 7 -> CAC_DLY_B_7
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode cac_delay_b_side_group_7(uint8_t& o_output) const
+        {
+            FAPI_TRY( (reader<fields_t::CAC_DLY_B_7, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;
