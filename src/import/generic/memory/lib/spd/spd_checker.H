@@ -102,17 +102,20 @@ namespace check
 /// @tparam TT defaulted to bitRangeTraits<TB>
 /// @param[in] i_target fapi2 target
 /// @param[in] i_timing the timing value
+/// @param[in] i_rev the SPD revision that needs to be checked
 /// @param[in] i_ffdc ffdc function code
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 template < bit_len BL, fapi2::TargetType T, typename TT = bitRangeTraits<BL> >
 fapi2::ReturnCode max_timing_range(const fapi2::Target<T>& i_target,
                                    const int64_t i_timing,
+                                   const rev i_rev,
                                    const generic_ffdc_codes i_ffdc)
 {
     FAPI_ASSERT( (i_timing <= TT::UPPER_BOUND) &&
                  (i_timing >= TT::LOWER_BOUND),
                  fapi2::MSS_SPD_TIMING_FAIL()
+                 .set_FAILED_REVISION(i_rev)
                  .set_FUNCTION_CODE(i_ffdc)
                  .set_TARGET(i_target),
                  "Failed timing parameter check for %s",
