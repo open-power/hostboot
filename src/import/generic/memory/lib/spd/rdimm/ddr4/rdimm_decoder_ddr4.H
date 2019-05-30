@@ -435,7 +435,6 @@ class decoder<DDR4, RDIMM_MODULE, R > : public dimm_module_decoder
             return fapi2::current_err;
         }
 
-
 };// decoder
 
 }// spd
