@@ -88,14 +88,14 @@ revert_mc_hb_dcbz_config(
     FAPI_TRY(fapi2::putScom(i_target_mc, scomt::mc::SCOMFIR_MCFIRMASK_RW,
                             l_reg_states[fapi2::ENUM_ATTR_PROC_SBE_MCS_SETUP_REG_STATES_MCFIRMASK]),
              "Error from putScom (MCFIR_WRX)");
-/////// TODO: RTC: 209863
-//    FAPI_TRY(fapi2::putScom(i_target_mc, scomt::mc::SCOMFIR_MCFIRACT0,
-//                l_reg_states[fapi2::ENUM_ATTR_PROC_SBE_MCS_SETUP_REG_STATES_MCFIRACT0]),
-//             "Error from putScom (MCFIRACT0)");
-//
-//    FAPI_TRY(fapi2::putScom(i_target_mc, scomt::mc::SCOMFIR_MCFIRACT1,
-//                l_reg_states[fapi2::ENUM_ATTR_PROC_SBE_MCS_SETUP_REG_STATES_MCFIRACT1]),
-//             "Error from putScom (MCFIRACT1)");
+
+    FAPI_TRY(fapi2::putScom(i_target_mc, scomt::mc::SCOMFIR_MCFIRACT0,
+                            l_reg_states[fapi2::ENUM_ATTR_PROC_SBE_MCS_SETUP_REG_STATES_MCFIRACT0]),
+             "Error from putScom (MCFIRACT0)");
+
+    FAPI_TRY(fapi2::putScom(i_target_mc, scomt::mc::SCOMFIR_MCFIRACT1,
+                            l_reg_states[fapi2::ENUM_ATTR_PROC_SBE_MCS_SETUP_REG_STATES_MCFIRACT1]),
+             "Error from putScom (MCFIRACT1)");
 
     FAPI_TRY(fapi2::putScom(i_target_mc, scomt::mc::SCOMFIR_MCTO,
                             l_reg_states[fapi2::ENUM_ATTR_PROC_SBE_MCS_SETUP_REG_STATES_MCTO]),
