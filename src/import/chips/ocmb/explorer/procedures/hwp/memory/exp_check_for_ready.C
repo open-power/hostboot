@@ -34,9 +34,10 @@
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
+#include <lib/shared/exp_defaults.H>
 #include <exp_check_for_ready.H>
 #include <lib/i2c/exp_i2c.H>
-#include <generic/memory/lib/utils/poll.H>
+#include <generic/memory/mss_git_data_helper.H>
 
 extern "C"
 {
@@ -47,32 +48,9 @@ extern "C"
 ///
     fapi2::ReturnCode exp_check_for_ready(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
     {
-        // Using default parameters
-        mss::poll_parameters l_poll_params;
+        mss::display_git_commit_info("exp_check_for_ready");
 
-        // From MSCC explorer firmware arch spec
-        // 4.1.5: After power-up, the Explorer Chip will respond with NACK to all incoming I2C requests
-        // from the HOST until the I2C slave interface is ready to receive commands.
-        FAPI_ASSERT( mss::poll(i_target, l_poll_params, [i_target]()->bool
-        {
-            return mss::exp::i2c::is_ready(i_target) == fapi2::FAPI2_RC_SUCCESS;
-        }),
-        fapi2::MSS_EXP_I2C_POLLING_TIMEOUT().
-        set_TARGET(i_target),
-        "Failed to see an ACK from I2C -- polling timeout on %s",
-        mss::c_str(i_target) );
-
-        // We send the EXP_FW_STATUS command as a sanity check to see if it returns SUCCESS
-        FAPI_ASSERT( mss::poll(i_target, l_poll_params, [i_target]()->bool
-        {
-            return mss::exp::i2c::fw_status(i_target) == fapi2::FAPI2_RC_SUCCESS;
-        }),
-        fapi2::MSS_EXP_STATUS_POLLING_TIMEOUT().
-        set_TARGET(i_target),
-        "Failled to see a successful return code -- polling timeout on %s",
-        mss::c_str(i_target) );
-
-        return fapi2::FAPI2_RC_SUCCESS;
+        FAPI_TRY(mss::exp::i2c::exp_check_for_ready_helper(i_target));
 
     fapi_try_exit:
         return fapi2::current_err;
