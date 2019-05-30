@@ -96,6 +96,33 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Checks the I2c explorer boot stage for FUNTIME_FW
+/// @param[in] i_target the OCMB target
+/// @param[in] i_data data to check from EXP_FW_STATUS
+///
+inline fapi2::ReturnCode runtime_boot_stage( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const std::vector<uint8_t>& i_data )
+{
+    constexpr uint8_t EXPECTED_BOOT_STAGE = boot_stages::RUNTIME_FW;
+    uint8_t l_boot_stage = 0;
+    FAPI_TRY( status::get_boot_stage(i_target, i_data, l_boot_stage) );
+
+    // Check that Explorer is in the RUNTIME_FW boot stage
+    FAPI_ASSERT( (l_boot_stage == EXPECTED_BOOT_STAGE),
+                 fapi2::MSS_EXP_I2C_WRONG_BOOT_STAGE().
+                 set_TARGET(i_target).
+                 set_BOOT_STAGE(l_boot_stage).
+                 set_EXPECTED_BOOT_STAGE(EXPECTED_BOOT_STAGE),
+                 "FW_STATUS command returned wrong boot stage (0x%01x, expected 0x%01x) for %s",
+                 l_boot_stage, EXPECTED_BOOT_STAGE, mss::c_str(i_target) );
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 }// check
 
 ///
@@ -151,8 +178,9 @@ inline fapi2::ReturnCode fw_status(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
     for(; l_loop < NUM_LOOPS && l_busy; ++l_loop)
     {
         std::vector<uint8_t> l_data;
-        FAPI_TRY(get_fw_status(i_target, l_data));
+        FAPI_TRY( get_fw_status(i_target, l_data) );
         FAPI_TRY( check::status_code(i_target, FW_STATUS, l_data, l_busy) );
+        FAPI_TRY( check::runtime_boot_stage(i_target, l_data) );
 
         if (l_busy)
         {

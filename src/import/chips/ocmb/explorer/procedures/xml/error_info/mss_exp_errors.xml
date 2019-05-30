@@ -392,6 +392,27 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_EXP_I2C_WRONG_BOOT_STAGE</rc>
+    <description>
+      Received incorrect boot stage from
+      command ID EXP_FW_STATUS
+    </description>
+    <ffdc>BOOT_STAGE</ffdc>
+    <ffdc>EXPECTED_BOOT_STAGE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_EXP_I2C_POLLING_TIMEOUT</rc>
     <description>
       Polling the explorer I2C slave interface for an ACK
