@@ -1504,4 +1504,59 @@ static const uint64_t EXPLR_WDF_WMSK                                            
 
 static const uint64_t EXPLR_WDF_WSPAR                                           = 0x08012008ull;
 
+
+static const uint32_t EXPLR_EFUSE_IMAGE_OUT_0                                   = 0x20B080ull;
+
+
+static const uint32_t EXPLR_EFUSE_IMAGE_OUT_1                                   = 0x20B084ull;
+
+
+static const uint32_t EXPLR_EFUSE_IMAGE_OUT_2                                   = 0x20B088ull;
+
+
+static const uint32_t EXPLR_EFUSE_IMAGE_OUT_3                                   = 0x20B08Cull;
+
+
+static const uint32_t EXPLR_EFUSE_PE_DATA_0                                     = 0x20B090ull;
+
+
+static const uint32_t EXPLR_EFUSE_PE_DATA_1                                     = 0x20B094ull;
+
+
+static const uint32_t EXPLR_EFUSE_PE_DATA_2                                     = 0x20B098ull;
+
+
+static const uint32_t EXPLR_EFUSE_PE_DATA_3                                     = 0x20B09Cull;
+
+
+static const uint32_t EXPLR_EFUSE_PE_DATA_4                                     = 0x20B0A0ull;
+
+
+static const uint32_t EXPLR_EFUSE_PE_DATA_5                                     = 0x20B0A4ull;
+
+
+static const uint32_t EXPLR_EFUSE_PE_DATA_6                                     = 0x20B0A8ull;
+
+
+static const uint32_t EXPLR_EFUSE_PE_DATA_8                                     = 0x20B0ACull;
+
+
+static const uint32_t EXPLR_EFUSE_PE_DATA_9                                     = 0x20B0B0ull;
+
+
+static const uint32_t EXPLR_EFUSE_PE_DATA_10                                    = 0x20B0B4ull;
+
+
+static const uint32_t EXPLR_EFUSE_PE_DATA_11                                    = 0x20B0B8ull;
+
+
+static const uint32_t EXPLR_EFUSE_PE_DATA_12                                    = 0x20B0BCull;
+
+
+static const uint32_t EXPLR_EFUSE_PE_DATA_13                                    = 0x20B0C0ull;
+
+
+static const uint32_t EXPLR_EFUSE_PE_DATA_14                                    = 0x20B0C4ull;
+
+
 #endif
