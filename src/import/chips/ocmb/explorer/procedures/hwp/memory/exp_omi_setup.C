@@ -37,6 +37,7 @@
 #include <generic/memory/lib/utils/c_str.H>
 #include <lib/exp_attribute_accessors_manual.H>
 #include <lib/omi/exp_omi_utils.H>
+#include <generic/memory/mss_git_data_helper.H>
 
 extern "C"
 {
@@ -48,17 +49,19 @@ extern "C"
     ///
     fapi2::ReturnCode exp_omi_setup( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
     {
+        mss::display_git_commit_info("exp_omi_setup");
+
         // Declares variables
         fapi2::buffer<uint64_t> l_data;
         bool l_is_enterprise = false;
         bool l_is_half_dimm = false;
 
-        // Gets the configuration information
+        // Gets the configuration information from attributes
         FAPI_TRY(mss::enterprise_mode(i_target, l_is_enterprise));
         FAPI_TRY(mss::half_dimm_mode(i_target, l_is_half_dimm));
 
         // Prints out the data
-        FAPI_INF("%s %s enterprise mode %s-DIMM mode", mss::c_str(i_target), l_is_enterprise ? "is" : "isn't",
+        FAPI_INF("%s is %s enterprise mode, and %s-DIMM mode", mss::c_str(i_target), l_is_enterprise ? "" : "non",
                  l_is_half_dimm ? "half" : "full");
 
         // Sets up the register
