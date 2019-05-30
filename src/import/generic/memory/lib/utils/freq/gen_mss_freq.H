@@ -164,7 +164,7 @@ fapi2::ReturnCode is_vpd_config_supported( const fapi2::Target<TT::VPD_TARGET_TY
                      set_MAX(VPD_KW_MAX).
                      set_ACTUAL(io_vpd_info.iv_size).
                      set_KEYWORD(VPD_BLOB).
-                     set_MCS_TARGET(i_target),
+                     set_VPD_TARGET(i_target),
                      "VPD MR keyword size retrieved: %d, is larger than max: %d for %s",
                      io_vpd_info.iv_size, TT::VPD_KEYWORD_MAX, mss::c_str(i_target));
     }
