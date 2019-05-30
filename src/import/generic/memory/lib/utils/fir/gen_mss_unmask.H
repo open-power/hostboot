@@ -22,3 +22,90 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file gen_mss_unmask.H
+/// @brief Subroutines for unmasking and setting up MSS FIR
+///
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP HWP Backup: Marc Gollub <gollub@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: FSP:HB
+
+#ifndef _GEN_MSS_UNMASK_FIR_H_
+#define _GEN_MSS_UNMASK_FIR_H_
+
+#include <fapi2.H>
+
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+
+namespace mss
+{
+
+namespace unmask
+{
+
+///
+/// @brief Unmask and setup actions performed after draminit_mc
+/// @tparam MC the memory controller type
+/// @tparam T the fapi2::TargetType which hold the FIR bits
+/// @param[in] i_target the fapi2::Target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
+fapi2::ReturnCode after_draminit_mc( const fapi2::Target<T>& i_target );
+
+///
+/// @brief Unmask and setup actions performed after draminit_training
+/// @tparam MC the memory controller type
+/// @tparam T the fapi2::TargetType which hold the FIR bits
+/// @param[in] i_target the fapi2::Target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
+fapi2::ReturnCode after_draminit_training( const fapi2::Target<T>& i_target );
+
+///
+/// @brief Unmask and setup actions performed after mss_scominit
+/// @tparam MC the memory controller type
+/// @tparam T the fapi2::TargetType which hold the FIR bits
+/// @param[in] i_target the fapi2::Target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
+fapi2::ReturnCode after_scominit( const fapi2::Target<T>& i_target );
+
+///
+/// @brief Unmask and setup actions performed after mss_ddr_phy_reset
+/// @tparam MC the memory controller type
+/// @tparam T the fapi2::TargetType which hold the FIR bits
+/// @param[in] i_target the fapi2::Target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
+fapi2::ReturnCode after_phy_reset( const fapi2::Target<T>& i_target );
+
+///
+/// @brief Unmask and setup actions for memdiags related FIR
+/// @tparam MC the memory controller type
+/// @tparam T the fapi2::TargetType which hold the FIR bits
+/// @param[in] i_target the fapi2::Target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
+fapi2::ReturnCode after_memdiags( const fapi2::Target<T>& i_target );
+
+///
+/// @brief Unmask and setup actions for scrub related FIR
+/// @tparam MC the memory controller type
+/// @tparam T the fapi2::TargetType which hold the FIR bits
+/// @param[in] i_target the fapi2::Target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
+fapi2::ReturnCode after_background_scrub( const fapi2::Target<T>& i_target );
+
+}
+}
+#endif
