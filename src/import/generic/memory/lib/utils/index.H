@@ -37,24 +37,7 @@
 #define _MSS_INDEX_H_
 
 #include <fapi2.H>
-#include <generic/memory/lib/utils/pos.H>
-
-///
-/// @brief Trait classes for the mss::index functions
-///
-template<fapi2::TargetType T>
-class indexTraits
-{
-    public:
-        enum
-        {
-            MCS_PER_MC = 2,
-            PORTS_PER_MCBIST = 4,
-            PORTS_PER_MCS = 2,
-            DIMMS_PER_PORT = 2,
-            MBA_PER_MC = 2,
-        };
-};
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 namespace mss
 {
@@ -66,42 +49,28 @@ namespace mss
 /// @return size_t the attribute array index.
 ///
 template< fapi2::TargetType T >
-inline size_t index(const fapi2::Target<T>& i_target);
-
-///
-/// @brief Return an attribute array index from a DIMM target
-/// @param[in] i_target a DIMM target representing the DIMM in question
-/// @return size_t the attribute array index.
-///
-template<>
-inline size_t index(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+inline size_t index(const fapi2::Target<T>& i_target)
 {
-    typedef indexTraits<fapi2::TARGET_TYPE_DIMM> TT;
-    return mss::pos(i_target) % TT::DIMMS_PER_PORT;
-}
+    // Unrolled c_str to avoid a circular include
+    char l_c_str_storage[fapi2::MAX_ECMD_STRING_LEN] = {};
+    fapi2::toString( i_target, l_c_str_storage, fapi2::MAX_ECMD_STRING_LEN );
 
-///
-///@brief Return an attribute array index from a MCA target
-/// @param[in] i_target a MCA target representing the MCA in question
-/// @return size_t the attribute array index.
-///
-template<>
-inline size_t index(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
-{
-    typedef indexTraits<fapi2::TARGET_TYPE_MCA> TT;
-    return mss::pos(i_target) % TT::PORTS_PER_MCS;
-}
+    uint8_t l_pos = 0;
 
-///
-/// @brief Return an attribute array index from a MCS target
-/// @param[in] i_target a MCS target representing the MCS in question
-/// @return size_t the attribute array index.
-///
-template<>
-inline size_t index(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target)
-{
-    typedef indexTraits<fapi2::TARGET_TYPE_MCS> TT;
-    return mss::pos(i_target) % TT::MCS_PER_MC;
+    // Don't use FAPI_TRY as you'll mess up fapi2::current_err which
+    // lmits where this can be used.
+    if (FAPI_ATTR_GET(fapi2::ATTR_REL_POS, i_target, l_pos) != fapi2::FAPI2_RC_SUCCESS)
+    {
+        goto fapi_try_exit;
+    }
+
+    return l_pos;
+
+fapi_try_exit:
+    // If we can't get our relative position, we're in other trouble
+    FAPI_ERR("can't get ATTR_REL_POS for %s", l_c_str_storage);
+    fapi2::Assert(false);
+    return 0;
 }
 
 ///
