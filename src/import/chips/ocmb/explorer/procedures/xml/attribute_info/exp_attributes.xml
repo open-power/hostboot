@@ -29,7 +29,6 @@
 <!-- -->
 <!-- *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com> -->
 <!-- *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com> -->
-<!-- *HWP FW Owner: Bill Hoffa <wghoffa@us.ibm.com> -->
 <!-- *HWP Team: Memory -->
 <!-- *HWP Level: 2 -->
 <!-- *HWP Consumed by: FSP:HB -->
@@ -52,6 +51,32 @@
             ENTERPRISE = 1
         </enum>
         <writeable/>
+        <mssAccessorName>ocmb_enterprise_mode</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_OCMB_ENTERPRISE_POLICY</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+            Indicates whether the OCMB is allowed to run in enterprise
+            mode, commodity mode, or either.
+
+            ALLOW_ENTERPRISE = Most permissive, uses whatever is installed in
+               the way it is intended to be used.
+            REQUIRE_ENTERPRISE = Throws an error for any commodity dimms that
+               are installed.
+            FORCE_NONENTERPRISE = Throws an error for any enterprise dimms that
+               are installed.
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            ALLOW_ENTERPRISE = 0,
+            FORCE_ENTERPRISE = 1,
+            FORCE_COMMODITY  = 2
+        </enum>
+        <platInit/>
+        <default>ALLOW_ENTERPRISE</default>
+        <mssAccessorName>ocmb_enterprise_policy</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -68,6 +93,7 @@
             OVERRIDE_NON_ENTERPRISE = 1
         </enum>
         <writeable/>
+        <mssAccessorName>ocmb_nonenterprise_mode_override</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -84,6 +110,7 @@
             HALF_DIMM = 1
         </enum>
         <writeable/>
+        <mssAccessorName>ocmb_half_dimm_mode</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -100,6 +127,277 @@
             OVERRIDE_HALF_DIMM = 2
         </enum>
         <writeable/>
+        <mssAccessorName>ocmb_half_dimm_mode_override</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_MEM_MVPD_FWMS</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          Mark store records from OCMB VPD. The array dimension is [port][mark].
+          Explorer only has one port so only [0][mark] is used in explorer.
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint32</valueType>
+        <writeable/>
+        <array> 8 </array>
+        <mssAccessorName>mvpd_fwms</mssAccessorName>
+    </attribute>
+
+    <!-- user_input_msdg attribute overrides start -->
+    <attribute>
+        <id>ATTR_MEM_EXP_CS_PRESENT</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Indicate presence of DRAM at each Chip Select for PHY
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint16</valueType>
+        <writeable/>
+        <mssAccessorName>exp_cs_present</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EXP_INIT_VREF_DQ</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+           Initial VrefDQ setting before training
+        </description>
+        <valueType>uint8</valueType>
+        <initToZero></initToZero>
+        <writeable/>
+        <mssAccessorName>exp_init_vref_dq</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EXP_INIT_PHY_VREF</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+           Initial DQ Vref setting of PHY before training
+        </description>
+        <valueType>uint16</valueType>
+        <initToZero></initToZero>
+        <writeable/>
+        <mssAccessorName>exp_init_phy_vref</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EXP_RCD_DIC</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+           CA and CS signal Driver Characteristics from F0RC03, F0RC04, F0RC05
+        </description>
+        <valueType>uint16</valueType>
+        <initToZero></initToZero>
+        <writeable/>
+        <mssAccessorName>exp_rcd_dic</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EXP_RCD_VOLTAGE_CTRL</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+           RCD operating voltage VDD and VrefCA control from F0RC0B and F0RC1x
+        </description>
+        <valueType>uint16</valueType>
+        <initToZero></initToZero>
+        <writeable/>
+        <mssAccessorName>exp_rcd_voltage_ctrl</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EXP_DRAM_ADDRESS_MIRRORING</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Ranks that have address mirroring.
+            This data is derived from SPD or VPD.
+            Note: This is a bit-wise map and muliple ranks can be mirrored.
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <array>2</array>
+        <writeable/>
+        <mssAccessorName>exp_dram_address_mirroring</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EXP_RCD_SLEW_RATE</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            RCD slew rate control from F1RC02,F1RC03,F1RC04,F1RC05
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint16</valueType>
+        <writeable/>
+        <mssAccessorName>exp_rcd_slew_rate</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EXP_3DS_HEIGHT</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Explorer setting for 3DS stack
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint16</valueType>
+        <enum>PLANAR = 0, H2 = 2, H4 = 4, H8 = 8</enum>
+        <writeable/>
+        <mssAccessorName>exp_3ds_height</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EXP_SPD_CL_SUPPORTED</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Cas Latency Supported by DRAM
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint32</valueType>
+        <writeable/>
+        <mssAccessorName>exp_spd_cl_supported</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EXP_SPD_TAA_MIN</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          Minimum Cas Latency Time (tAAmin) in Picosecond (Byte 24)
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint16</valueType>
+        <writeable/>
+        <mssUnits>ps</mssUnits>
+        <mssAccessorName>exp_spd_taa_min</mssAccessorName>
+    </attribute>
+
+  <attribute>
+      <id>ATTR_MSS_EXP_REORDER_QUEUE_SETTING</id>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+      <description>
+          Contains the settings for write/read reorder queue
+      </description>
+      <default>REORDER</default>
+      <initToZero></initToZero>
+      <writeable/>
+      <enum>REORDER = 0, FIFO = 1</enum>
+      <valueType>uint8</valueType>
+      <writeable/>
+      <mssAccessorName>exp_reorder_queue_setting</mssAccessorName>
+  </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EXP_FIRMWARE_EMULATION_MODE</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Enable Special mode for Emulation Support
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <mssUnits>bool</mssUnits>
+        <enum>NORMAL = 0, EMULATION = 1</enum>
+        <writeable/>
+        <mssAccessorName>exp_firmware_emulation_mode</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_OCMB_EXP_STRUCT_MMIO_ENDIAN_CTRL</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+          Controls whether or not transaction bytes are
+          swapped before and after mmio accesses to
+          the buffer.
+        </description>
+        <valueType>uint8</valueType>
+        <initToZero></initToZero>
+        <enum>
+            SWAP = 0,
+            NO_SWAP = 1
+        </enum>
+        <writeable/>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_OCMB_EXP_STRUCT_ENDIAN</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+          Controls whether the structure fields written
+          and read to and from the buffer are big
+          or little endian.
+        </description>
+        <valueType>uint8</valueType>
+        <initToZero></initToZero>
+        <enum>
+            BIG_ENDIAN = 0,
+            LITTLE_ENDIAN = 1
+        </enum>
+        <writeable/>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_OCMB_ECID</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            ECID of the chip as determined by the IPL getecid procedure.
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint16</valueType>
+        <array>14</array>
+        <writeable/>
+        <mssAccessorName>ocmb_ecid</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EXP_DFIMRL_CLK</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            timing parameter for the DFIMRL clock
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>exp_dfimrl_clk</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_ATXDLY_A</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          ARRAY[ADDRESS INDEX]
+          ATxDly_A/B[0]: ODT[1],ODT[0],CS_N[0],CS_N[1]
+          ATxDly_A/B[1]: ADDR[13],ADDR[5],BG[0],CKE[1]
+          ATxDly_A/B[2]: ADDR[17],ADDR[7],BA[0],ADDR[16]
+          ATxDly_A/B[3]: ADDR[8],BG[1],CID[1],CID[0]
+          ATxDly_A/B[4]: ADDR[1],ADDR[9],ADDR[2],CAPARITY
+          ATxDly_A/B[5]: ADDR[12],ADDR[3],ADDR[4],ADDR[0]
+          ATxDly_A/B[6]: CKE[0],ADDR[15],ACT_N,ADDR[10]
+          ATxDly_A/B[7]: ADDR[11],ADDR[6],BA[1],ADDR[14]
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>8</array>
+        <mssAccessorName>exp_atxdly_a</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_ATXDLY_B</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          ARRAY[ADDRESS INDEX]
+          ATxDly_A/B[0]: ODT[1],ODT[0],CS_N[0],CS_N[1]
+          ATxDly_A/B[1]: ADDR[13],ADDR[5],BG[0],CKE[1]
+          ATxDly_A/B[2]: ADDR[17],ADDR[7],BA[0],ADDR[16]
+          ATxDly_A/B[3]: ADDR[8],BG[1],CID[1],CID[0]
+          ATxDly_A/B[4]: ADDR[1],ADDR[9],ADDR[2],CAPARITY
+          ATxDly_A/B[5]: ADDR[12],ADDR[3],ADDR[4],ADDR[0]
+          ATxDly_A/B[6]: CKE[0],ADDR[15],ACT_N,ADDR[10]
+          ATxDly_A/B[7]: ADDR[11],ADDR[6],BA[1],ADDR[14]
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>8</array>
+        <mssAccessorName>exp_atxdly_b</mssAccessorName>
     </attribute>
 
 </attributes>
