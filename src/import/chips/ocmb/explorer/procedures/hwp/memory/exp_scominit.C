@@ -38,6 +38,7 @@
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/utils/find.H>
 #include <explorer_scom.H>
+#include <generic/memory/mss_git_data_helper.H>
 
 extern "C"
 {
@@ -49,6 +50,8 @@ extern "C"
     ///
     fapi2::ReturnCode exp_scominit( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
     {
+        mss::display_git_commit_info("exp_scominit");
+
         if (mss::count_dimm(i_target) == 0)
         {
             FAPI_INF("... skipping mss_scominit %s - no DIMM ...", mss::c_str(i_target));
