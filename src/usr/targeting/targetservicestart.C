@@ -397,6 +397,14 @@ static void checkProcessorTargeting(TargetService& i_targetService)
                     l_haveOneCorrectProcessor = true;
                 }
                 break;
+/* TODO RTC 208792 - this needs P10 targeting changes first
+            case MODEL_POWER10:
+                if(l_coreType == CORE_POWER10)
+                {
+                    l_haveOneCorrectProcessor = true;
+                }
+                break;
+*/
 
             default:
                 break;

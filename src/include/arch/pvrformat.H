@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -132,6 +132,8 @@ struct PVR_t
         P8_VENICE = 0x4D,
         P9_ALL    = 0x4E, //NIMBUS/CUMULUS
         P9_AXONE  = 0x4F,
+
+        P10       = 0x80,
     };
 
     /**

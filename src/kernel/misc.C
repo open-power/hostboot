@@ -532,6 +532,7 @@ namespace KernelMisc
           case CORE_POWER9_NIMBUS:
           case CORE_POWER9_CUMULUS:
           case CORE_POWER9_AXONE:
+          case CORE_POWER10:
           case CORE_UNKNOWN:
           default:
               // See EX07.EC.CC.PCC0.COMMON.SPR_COMMON.SCOMC in scomdef for
@@ -619,6 +620,7 @@ const char* ProcessorCoreTypeStrings[]
     "Nimbus",
     "Cumulus",
     "Axone",
+    "POWER10",
     "Unknown"
 };
 

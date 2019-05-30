@@ -137,6 +137,8 @@ enum ProcessorCoreType
     /** Power9' "AXONE" core */
     CORE_POWER9_AXONE,
 
+    CORE_POWER10,
+
     CORE_UNKNOWN,
 };
 

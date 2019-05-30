@@ -150,7 +150,7 @@ namespace Bootloader{
                                                l_pSecRomInfo->branchtableOffset;
             g_blData->blToHbData.secureRom = l_pRomStart;
 
-            // Set HW key hash pointer (20K - 64 bytes) and size
+            // Set HW key hash pointer (24K - 64 bytes) and size
             g_blData->blToHbData.hwKeysHash = reinterpret_cast<const void *>
                                                             (HW_KEYS_HASH_ADDR);
             g_blData->blToHbData.hwKeysHashSize = SHA512_DIGEST_LENGTH;

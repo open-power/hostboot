@@ -146,6 +146,25 @@ if ($hb_mode == 0) {
     run-command-file (lookup-file hbfw/standalone.simics)
 }
 
+# Manually populate the SBE to HBBL communication area while we don't have a real SBE
+# Most of the data was copied from P9
+#
+# The "Jump forward x3000 instruction"
+system_cmp0.phys_mem.set address = 0x8200000 size = 4 0x48003000
+system_cmp0.phys_mem.set address = 0x8200004 size = 4 0x00090005
+# The size of the HBBL + 0x3000 offset. Note that all mem after that address and before
+# HBB will be zeroed out.
+system_cmp0.phys_mem.set address = 0x820000c size = 8 0x9000
+system_cmp0.phys_mem.set address = 0x8200014 size = 2 0x0900
+system_cmp0.phys_mem.set address = 0x8200016 size = 8 0x0006
+system_cmp0.phys_mem.set address = 0x820001e size = 2 0x03fc
+system_cmp0.phys_mem.set address = 0x8200020 size = 8 0x00060300
+
+# Now force the HBBL image into the L3 cache (again, since SBE isn't there to do this).
+# Note that we need to skip over the exception vectors (to arrive at the 0x3000 offset).
+$sb_base = (env SANDBOXBASE)
+backplane0.proc0.l3_img.load-file (lookup-file $sb_base+"/obj/ppc/hbfw/img/hbbl.bin") 0x203000
+
 ########################### WORKAROUNDS ####################################
 # Setup the mailbox.
 # for mbox on core 0 use:

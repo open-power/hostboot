@@ -358,7 +358,7 @@ hb_simsetup()
     SIMICS_LEVEL=`cat ${PROJECT_ROOT}/src/build/citest/etc/simbuild`
 
     needs_machine_variable
-    if [ "${MACHINE}" == "p10_standalone" ]; then
+    if [ "${MACHINE}" == "P10_STANDALONE" ]; then
         echo "mkdir -p ${SANDBOXBASE}/simics"
         execute_in_sandbox "mkdir -p ${SANDBOXBASE}/simics" "ppc"
         echo "tar ${SIMICS_LEVEL}  -C ${SANDBOXBASE}/simics/"
@@ -420,9 +420,9 @@ hb_startsimics()
         exit -1
     fi
 
-    if [ "${MACHINE}" == "p10_standalone" ]; then
+    if [ "${MACHINE}" == "P10_STANDALONE" ]; then
         export MY_DIR="${SANDBOXBASE}/obj/ppc/simu/scripts/hbfw"
-        export RUNSIMCMD="cd ${SANDBOXBASE}/simics/ && ./runsim -m ${MACHINE} hb_script_to_run=${MY_DIR}/startup.simics pnor_img=${MY_DIR}/../../../hbfw/img/p10.pnor sbe_seeprom_img=${SANDBOXBASE}/images/ppc/lab/flash/sbe_seeprom_p9a_10.bin.ecc num_procs=1 vpd_proc=vpd/images/11a4199cd205aaad34566b1832e3ef6a enable_lpc_console=TRUE"
+        export RUNSIMCMD="cd ${SANDBOXBASE}/simics/ && ./runsim -m ${MACHINE} hb_script_to_run=${MY_DIR}/startup.simics pnor_img=${SANDBOXBASE}/obj/ppc/hbfw/img/p10.pnor sbe_seeprom_img=${SANDBOXBASE}/images/ppc/lab/flash/sbe_seeprom_p9a_10.bin.ecc num_procs=1 enable_lpc_console=TRUE"
         echo "**********"
         echo $RUNSIMCMD
         echo "**********"

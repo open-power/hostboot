@@ -32,7 +32,7 @@
 namespace Bootloader{
 // Max size of HBBL without ECC. Must match PNOR layout for eyeCatch HBBL
 // Must be aligned CACHELINE_SIZE of 128 bytes
-#define MAX_HBBL_SIZE (20 * KILOBYTE)
+#define MAX_HBBL_SIZE (24 * KILOBYTE)
 
 // Location of the HW Key Hash located at the end of the HBBL without ECC
 #define HBBL_HW_KEY_HASH_LOCATION  (MAX_HBBL_SIZE - sizeof(SHA512_t))

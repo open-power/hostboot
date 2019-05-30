@@ -305,6 +305,7 @@ void kernel_execute_softpatch()
             case CORE_POWER9_NIMBUS:
             case CORE_POWER9_CUMULUS:
             case CORE_POWER9_AXONE:
+            case CORE_POWER10:
             case CORE_UNKNOWN:
                 p8_softpatch_denorm_assist(t->fp_context);
                 break;

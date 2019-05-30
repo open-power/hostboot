@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,6 +69,9 @@ namespace CpuID
 
             case PVR_t::P9_AXONE:
                return CORE_POWER9_AXONE;
+
+            case PVR_t::P10:
+               return CORE_POWER10;
 
             default:
                 return CORE_UNKNOWN;
