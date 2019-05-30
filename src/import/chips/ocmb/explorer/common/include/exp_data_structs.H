@@ -55,6 +55,19 @@ enum exp_struct_sizes
     ARGUMENT_SIZE = 28,
     SENSOR_CACHE_PADDING_SIZE_0 = 3,
     SENSOR_CACHE_PADDING_SIZE_1 = 15,
+
+    // Constants for draminit
+    DRAMINIT_NUM_ADDR_DELAYS = 8,
+    DRAMINIT_STRUCTURE_VERSION = 2,
+
+    // Training response constants
+    TIMING_RESPONSE_2D_ARRAY_SIZE = 16,
+    TRAINING_RESPONSE_NUM_RANKS = 4,
+    TRAINING_RESPONSE_NUM_DRAM = 20,
+    TRAINING_RESPONSE_NUM_LANES = 80,
+    TRAINING_RESPONSE_NUM_RC = 27,
+    TRAINING_RESPONSE_MR6_SIZE = TRAINING_RESPONSE_NUM_RANKS * TRAINING_RESPONSE_NUM_DRAM,
+    RCW_8BIT_CUTOFF = 16,
 };
 
 ///
@@ -104,6 +117,8 @@ typedef struct
 ///
 typedef struct user_input_msdg
 {
+    uint32_t version_number;
+
     // Choose the Dimm type from one of below:
     // 0 = UDIMM
     // 1 = RDIMM
@@ -178,6 +193,16 @@ typedef struct user_input_msdg
     // 0 = Normal mode (2-rank);
     uint16_t Rank4Mode;
 
+    // Operate PHY in Encoded QuadCs Mode (only valid for
+    // RDIMM/RLDIMM) (NOT Supported in Explorer) when enabled,
+    // each CA bus drives one RCD in Encoded QuadCs mode.
+    // {cid_a/b[0],csn_a/b[1:0]} are connected to {DC0,DCS1_n,DCS0_n}
+    // to select master ranks. cid_a/b[1] is connected to DC2 to
+    // select up to 2 logic ranks (2H 3DStack)
+    // 1 = Encoded QuadCs Mode
+    // 0 = Direct DualCs Mod
+    uint16_t EncodedQuadCs;
+
     // Support 1rank 3DS Device in
     // 1 = 1 rank 3DS in DDP board
     // PHY are connected to c[0],c[1],c[2] of DRAM);
@@ -197,6 +222,12 @@ typedef struct user_input_msdg
     // 1 = Support Everspin DDR4 MRAM;
     // 0 = Normal DDR4 DRAM;
     uint16_t MRAMSupport;
+
+
+    // 1 = Support MDS 8H DRAM (odt[1] is connected to c[2] of
+    // MDS DRAM);
+    // 0 = Normal Mode;
+    uint16_t MDSSupport;
 
     // Number of p-states used
     // Always set NumPStates to 1 for Explorer.
@@ -417,7 +448,7 @@ typedef struct user_input_msdg
     // Disable Receiver DFE
     // PhyEqualization[1] = 0: Enable Driver FFE; = 0:
     // Disable Driver FFE
-    uint16_t PhyEqualization;
+    uint16_t PhyEqualization[MSDG_MAX_PSTATE];
 
     // Initial VrefDQ (MR6)
     // InitVrefDQ[6] = VrefDQ training range (same as MR6[6])
@@ -519,14 +550,14 @@ typedef struct user_input_msdg
     // RcdIBTCtrl[1:0] CA Input Bus Termination
     // RcdIBTCtrl[3:2] DCS[3:0]_n Input Bus Termination // RcdIBTCtrl[5:4] DCKE Input Bus Termination
     // RcdIBTCtrl[7:6] DODT Input Bus Termination
-    uint16_t RcdIBTCtrl;
+    uint16_t RcdIBTCtrl[MSDG_MAX_PSTATE];
 
     // RCD Data Buffer Interface Driver Characteristics (F1RC00)
     // RcdDBDic[0] BCOM[3:0],BODT,BCKE, driver strength
     // RcdDBDic[1] Reserved
     // RcdDBDic[2] BCK_t/BCK_c driver strength
     // RcdDBDic[3] Reserved
-    uint16_t RcdDBDic;
+    uint16_t RcdDBDic[MSDG_MAX_PSTATE];
 
     // RCD slew rate control (F1RC02,F1RC03,F1RC04,F1RC05)
     // RcdSlewRate[1:0] slew rate control of address/command
@@ -536,12 +567,27 @@ typedef struct user_input_msdg
     // RcdSlewRate[9:8] slew rate control of Y1_t/c, Y3_t/c
     // RcdSlewRate[11:10] slew rate control of Y0_t/c, Y2_t/c
     // RcdSlewRate[13:12] slew rate control of BCOM[3:0], BODT, BCKE // RcdSlewRate[15:14] slew rate control of BCK_t/c
-    uint16_t RcdSlewRate;
+    uint16_t RcdSlewRate[MSDG_MAX_PSTATE];
 
-    // Enable Special mode for Emulation Support
-    // [0] = 0 Normal firmware mode
-    // [0] = 1 Emulation firmware mode
-    uint16_t EmulationSupport;
+    // DFIMRL_DDRCLK: Max Read Latency counted by DDR Clock.
+    // dfi_rddata is returned (14 + DFIMRL_DDRCLK) cycles after
+    // dfi_rddata_en is asserted.
+    uint16_t DFIMRL_DDRCLK;
+
+    //ATxDly_A/B[0]: ODT[1],ODT[0],CS_N[0],CS_N[1]
+    //ATxDly_A/B[1]: ADDR[13],ADDR[5],BG[0],CKE[1]
+    //ATxDly_A/B[2]: ADDR[17],ADDR[7],BA[0],ADDR[16]
+    //ATxDly_A/B[3]: ADDR[8],BG[1],CID[1],CID[0]
+    //ATxDly_A/B[4]: ADDR[1],ADDR[9],ADDR[2],CAPARITY
+    //ATxDly_A/B[5]: ADDR[12],ADDR[3],ADDR[4],ADDR[0]
+    //ATxDly_A/B[6]: CKE[0],ADDR[15],ACT_N,ADDR[10]
+    //ATxDly_A/B[7]: ADDR[11],ADDR[6],BA[1],ADDR[14]
+    //7bit A-side AC Delay
+    //ATxDly_A[pstate][NumAnib]
+    uint8_t  ATxDly_A[MSDG_MAX_PSTATE][DRAMINIT_NUM_ADDR_DELAYS];
+    //7bit B-side AC Delay
+    //ATxDly_B[pstate][NumAnib]
+    uint8_t  ATxDly_B[MSDG_MAX_PSTATE][DRAMINIT_NUM_ADDR_DELAYS];
 } user_input_msdg_t;
 
 ///
@@ -591,5 +637,102 @@ typedef struct
     //                               // initial_packet1[1:7] Reserved
     uint8_t reserved1[SENSOR_CACHE_PADDING_SIZE_1];
 } sensor_cache_struct;
+
+
+///
+/// @class user_response_timing_msdg_t
+/// @brief Contains the command to command timing training results
+///
+typedef struct user_response_timing_msdg
+{
+    uint16_t DFIMRL_DDRCLK_trained; // Training result of DFIMRL_DDRCLK parameter (by mrlTraining step).
+    // DFIMRL_DDRCLK: Max Read Latency counted by DDR Clock. dfi_rddata is returned (14 + DFIMRL_DDRCLK) cycles after dfi_rddata_en is asserted.
+    //DFI rank-to rank space timing must be determined by the actual board delay (DQ/DQS bus turnarounds).
+    //PHY firmware training result provide CDD (critical delay difference) information to help to calculate the minimum required timing spacing for memory controllers.
+    //Minimal possible gap between rank-to-rank read-read transaction is defined by tCCDmin(R_rank[i], R_rank[j]) = 4 + max(abs(CDD_RR_[i]_[j]));
+    int8_t   CDD_RR[TRAINING_RESPONSE_NUM_RANKS][TRAINING_RESPONSE_NUM_RANKS];      // CDD_RR[n][m]: This is a signed integer value. Read to read critical delay difference from cs n to cs m
+    // CDD_RR[0][0], CDD_RR[1][1], CDD_RR[2][2], CDD_RR[3][3] are always 0;
+    //Minimal possible gap between rank-to-rank write-write transaction is defined by tCCDmin(W_rank[i], W_rank[j]) = 4 + max(abs(CDD_WW_[i]_[j]));
+    int8_t   CDD_WW[TRAINING_RESPONSE_NUM_RANKS][TRAINING_RESPONSE_NUM_RANKS];      // CDD_WW[n][m]: This is a signed integer value. Write to write critical delay difference from cs n to cs m
+    // CDD_WW[0][0], CDD_WW[1][1], CDD_WW[2][2], CDD_WW[3][3] are always 0;
+    //Minimal possible gap between rank-to-rank read-write transaction is defined by tCCDmin(R_rank[i], W_rank[j]) = (RL + BL/2 + 1 + WR_PREAMBLE - WL) + max(abs(CDD_RW_[i]_[j]));
+    //RL: Read Latency; WL: Write Latency; BL: Burst Length; WR_PREAMBLE: Write Preamble cycles
+    int8_t   CDD_RW[TRAINING_RESPONSE_NUM_RANKS][TRAINING_RESPONSE_NUM_RANKS];      // CDD_RW[n][m]This is a signed integer value. Read to write critical delay difference from cs 3 to cs 3
+    //Minimal possible gap between rank-to-rank write-read transaction is defined by tCCDmin(W_rank[i], R_rank[j]) = (WL + PL + BL/2 + tWTR_L) + max(abs(CDD_RW_[i]_[j]));
+    //WL: Write Latency; BL: Burst Length; PL: CA Parity Latency; tWTR_L: delay from internal write to internal read for same bank group
+    int8_t   CDD_WR[TRAINING_RESPONSE_NUM_RANKS][TRAINING_RESPONSE_NUM_RANKS];      // CDD_WR[n][m]This is a signed integer value. Write to read critical delay difference from cs 3 to cs 3
+} user_response_timing_msdg_t;
+
+///
+/// @class user_response_error_msdg
+/// @brief Contains the lane failure results
+///
+typedef struct user_response_error_msdg
+{
+    uint16_t Failure_Lane[TRAINING_RESPONSE_NUM_LANES]; // error code of DQ[n] on Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    //Failure status of training. Each uint16_t field contains the training error code of all 4 ranks on 1 DQ lane.
+    //4-bit error code reports the training errors:
+    //0x0: No Error
+    //0x1: DevInit Error
+    //0x2: RxEnable Error
+    //0x3: Find Write Leveling Error
+    //0x4: Read Deskew Error
+    //0x5: Read 1D SI Friendly Training Error
+    //0x6: Coarse Write Leveling Error
+    //0x7: Write 1D Training Error
+    //0x8: Read 1D Traiing Error
+    //0x9: Read Latency Training Error
+    //0xA~0xF: Reserved
+} user_response_error_msdg_t;
+
+///
+/// @class user_response_mrs_msdg_t
+/// @brief MRS response structure
+///
+typedef struct user_response_mrs_msdg_t
+{
+    uint16_t MR0;               // Value of DDR mode register MR0 for all ranks, all devices
+    uint16_t MR1[TRAINING_RESPONSE_NUM_RANKS];            // Value of DDR mode register MR1 for each rank (up to 4 ranks)
+    uint16_t MR2[TRAINING_RESPONSE_NUM_RANKS];            // Value of DDR mode register MR2 for each rank (up to 4 ranks)
+    uint16_t MR3;               // Value of DDR mode register MR3 for all ranks, all devices
+    uint16_t MR4;               // Value of DDR mode register MR4 for all ranks, all devices
+    uint16_t MR5[TRAINING_RESPONSE_NUM_RANKS];            // Value of DDR mode register MR5 for each rank (up to 4 ranks)
+    uint16_t MR6[TRAINING_RESPONSE_NUM_RANKS][TRAINING_RESPONSE_NUM_DRAM];        // Value of DDR mode register MR6 for each nibble on each rank
+    // for X8,X16 DRAMs MR6[i][2n+1] = MR6[i][2n] (n = 0~9)
+} user_response_mrs_msdg_t;
+
+///
+/// @class user_response_rc_msdg_t
+/// @brief RCD response structure
+///
+typedef struct user_response_rc_msdg_t
+{
+    uint8_t   F0RC_D0[TRAINING_RESPONSE_NUM_RC];      // RCD control words for DIMM0; Invalid for UDIMM
+    // F0RC_D0[15:0] BIT [3:0]: 4-bit value of F0RC00~F0RC0F
+    // F0RC_D0[26:16] BIT [7:0]: 8-bit value of F0RC1x~F0RCBx
+    uint8_t   F1RC_D0[TRAINING_RESPONSE_NUM_RC];      // RCD control words for DIMM0; Invalid for UDIMM
+    // F1RC_D0[15:0] BIT [3:0]: 4-bit value of F1RC00~F1RC0F
+    // F1RC_D0[26:16] BIT [7:0]: 8-bit value of F1RC1x~F1RCBx
+    uint8_t   F0RC_D1[TRAINING_RESPONSE_NUM_RC];      // RCD control words for DIMM1; Invalid for UDIMM
+    // F0RC_D0[15:0] BIT [3:0]: 4-bit value of F0RC00~F0RC0F
+    // F0RC_D0[26:16] BIT [7:0]: 8-bit value of F0RC1x~F0RCBx
+    uint8_t   F1RC_D1[TRAINING_RESPONSE_NUM_RC];      // RCD control words for DIMM1; Invalid for UDIMM
+    // F1RC_D0[15:0] BIT [3:0]: 4-bit value of F1RC00~F1RC0F
+    // F1RC_D0[26:16] BIT [7:0]: 8-bit value of F1RC1x~F1RCBx
+} user_response_rc_msdg_t;
+
+///
+/// @class user_response_msdg_t
+/// @brief Microchip response structure
+///
+typedef struct user_response_msdg
+{
+    uint32_t                        version_number;
+    user_response_timing_msdg_t     tm_resp;
+    user_response_error_msdg        err_resp;
+    user_response_mrs_msdg_t        mrs_resp;
+    user_response_rc_msdg_t         rc_resp;
+
+} user_response_msdg_t;
 
 #endif
