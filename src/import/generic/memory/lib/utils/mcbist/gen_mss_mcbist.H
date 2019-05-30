@@ -40,8 +40,8 @@
 
 #include <generic/memory/lib/utils/poll.H>
 #include <generic/memory/lib/utils/memory_size.H>
-#include <generic/memory/lib/utils/mcbist/gen_patterns.H>
-#include <generic/memory/lib/utils/mcbist/gen_settings.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_patterns.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_settings.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_traits.H>
 #include <generic/memory/lib/utils/num.H>
 #include <generic/memory/lib/utils/mc/gen_mss_port.H>
@@ -340,11 +340,7 @@ class subtest_t
         ///
         inline void enable_dimm( const uint64_t i_dimm )
         {
-            if (TT::MULTI_DIMMS == mss::states::YES)
-            {
-                iv_mcbmr.template writeBit<TT::COMPL_3RD_CMD>(i_dimm);
-            }
-
+            iv_mcbmr.template writeBit<TT::COMPL_3RD_CMD>(i_dimm);
             return;
         }
 
@@ -372,10 +368,8 @@ class subtest_t
         ///
         inline uint64_t get_dimm() const
         {
-            if (TT::MULTI_DIMMS == mss::states::YES)
-            {
-                return iv_mcbmr.template getBit<TT::COMPL_3RD_CMD>() ? 1 : 0;
-            }
+
+            return iv_mcbmr.template getBit<TT::COMPL_3RD_CMD>() ? 1 : 0;
 
             return 0;
         }
@@ -2134,6 +2128,9 @@ class program
         ///
         inline fapi2::ReturnCode process_errors( const fapi2::Target<T> i_target ) const
         {
+            // MCBIST error traits
+            using ET = mcbistMCTraits<DEFAULT_MC_TYPE>;
+
             // Until reading the error array is documented, comparison errors 'just' result in
             // a flag indicating there was a problem on port.
             {
@@ -2150,8 +2147,8 @@ class program
                 l_data.extractToRight<TT::SUBTEST_NUM_INDICATOR, TT::SUBTEST_NUM_INDICATOR_LEN>(l_subtest);
 
                 FAPI_ASSERT( l_port == 0,
-                             fapi2::MSS_MEMDIAGS_COMPARE_ERROR_IN_LAST_PATTERN()
-                             .set_MCBIST_TARGET(i_target)
+                             ET::memdiags_compare_error_in_last_pattern()
+                             .set_MC_TARGET(i_target)
                              .set_PORT(mss::first_bit_set(l_port))
                              .set_SUBTEST(l_subtest),
                              "%s MCBIST error on port %d subtest %d", mss::c_str(i_target), mss::first_bit_set(l_port), l_subtest );
@@ -2166,8 +2163,8 @@ class program
                 FAPI_TRY( fapi2::getScom(i_target, TT::SRERR1_REG, l_read1), "%s Failed getScom", mss::c_str(i_target) );
 
                 FAPI_ASSERT( ((l_read0 == 0) && (l_read1 == 0)),
-                             fapi2::MSS_MEMDIAGS_ERROR_IN_LAST_PATTERN()
-                             .set_MCBIST_TARGET(i_target)
+                             ET::memdiags_error_in_last_pattern()
+                             .set_MC_TARGET(i_target)
                              .set_STATUS0(l_read0)
                              .set_STATUS1(l_read1),
                              "%s MCBIST scrub/read error reg0: 0x%016lx reg1: 0x%016lx", mss::c_str(i_target), l_read0, l_read1 );
@@ -3483,6 +3480,7 @@ fapi2::ReturnCode read_rb_array(const fapi2::Target<T>& i_target,
 template<  mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 fapi2::ReturnCode poll( const fapi2::Target<T>& i_target, const program<MC>& i_program )
 {
+    using ET = mss::mcbistMCTraits<MC>;
     fapi2::buffer<uint64_t> l_status;
 
     const uint64_t l_done = fapi2::buffer<uint64_t>().setBit<TT::MCBIST_DONE>();
@@ -3506,7 +3504,7 @@ fapi2::ReturnCode poll( const fapi2::Target<T>& i_target, const program<MC>& i_p
 
     // Check to see if we're still in progress - meaning we timed out.
     FAPI_ASSERT((l_status & l_in_progress) != l_in_progress,
-                fapi2::MSS_MCBIST_TIMEOUT().set_MCBIST_TARGET(i_target),
+                ET::mcbist_timeout().set_MC_TARGET(i_target),
                 "MCBIST timed out %s", mss::c_str(i_target));
 
     // The control register has a bit for done-and-happy and a bit for done-and-unhappy
@@ -3519,8 +3517,8 @@ fapi2::ReturnCode poll( const fapi2::Target<T>& i_target, const program<MC>& i_p
 
         // If we're here there were no errors, but lets report if the fail bit was set anyway.
         FAPI_ASSERT( (l_status & l_fail) != l_fail,
-                     fapi2::MSS_MCBIST_UNKNOWN_FAILURE()
-                     .set_MCBIST_TARGET(i_target)
+                     ET::mcbist_unknown_failure()
+                     .set_MC_TARGET(i_target)
                      .set_STATUS_REGISTER(l_status),
                      "%s MCBIST reported a fail, but process_errors didn't find it 0x%016llx",
                      mss::c_str(i_target), l_status );
@@ -3530,8 +3528,8 @@ fapi2::ReturnCode poll( const fapi2::Target<T>& i_target, const program<MC>& i_p
     }
 
     FAPI_ASSERT(false,
-                fapi2::MSS_MCBIST_DATA_FAIL()
-                .set_MCBIST_TARGET(i_target)
+                ET::mcbist_data_fail()
+                .set_MC_TARGET(i_target)
                 .set_STATUS_REGISTER(l_status),
                 "%s MCBIST executed but we got corrupted data in the control register 0x%016llx",
                 mss::c_str(i_target), l_status );
@@ -3569,7 +3567,7 @@ fapi_try_exit:
 /// @param[in] i_program the mcbist program to execute
 /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff OK
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T>, typename ET = mcbistMCTraits<MC> >
 fapi2::ReturnCode execute( const fapi2::Target<T>& i_target, const program<MC>& i_program )
 {
     fapi2::buffer<uint64_t> l_status;
@@ -3582,7 +3580,7 @@ fapi2::ReturnCode execute( const fapi2::Target<T>& i_target, const program<MC>& 
     // Before we go off into the bushes, lets see if there are any instructions in the
     // program. If not, we can save everyone the hassle
     FAPI_ASSERT(0 != i_program.iv_subtests.size(),
-                fapi2::MSS_MEMDIAGS_NO_MCBIST_SUBTESTS().set_MCBIST_TARGET(i_target),
+                fapi2::MSS_MEMDIAGS_NO_MCBIST_SUBTESTS().set_MC_TARGET(i_target),
                 "Attempt to run an MCBIST program with no subtests on %s", mss::c_str(i_target));
 
     FAPI_TRY( clear_error_helper<MC>(i_target, const_cast<program<MC>&>(i_program)) );
@@ -3631,7 +3629,7 @@ fapi2::ReturnCode execute( const fapi2::Target<T>& i_target, const program<MC>& 
 
     // So we've either run/are running or we timed out waiting for the start.
     FAPI_ASSERT( l_poll_result == true,
-                 fapi2::MSS_MEMDIAGS_MCBIST_FAILED_TO_START().set_MCBIST_TARGET(i_target),
+                 ET::memdiags_failed_to_start().set_MC_TARGET(i_target),
                  "The MCBIST engine failed to start its program" );
 
     // If the user asked for async mode, we can leave. Otherwise, poll and check for errors
