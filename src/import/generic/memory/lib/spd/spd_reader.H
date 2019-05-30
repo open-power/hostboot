@@ -39,9 +39,7 @@
 
 #include <fapi2.H>
 #include <cstdint>
-#include <generic/memory/lib/spd/spd_field.H>
 #include <generic/memory/lib/spd/spd_traits_ddr4.H>
-#include <generic/memory/lib/utils/mss_field.H>
 
 namespace mss
 {
