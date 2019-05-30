@@ -1,0 +1,50 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p10/procedures/xml/error_info/p10_sbe_mcs_setup_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P10_SBE_MCS_SETUP_NO_MC_FOUND_ERR</rc>
+    <description>
+      There is no functional MCS/MI unit target configured on the master chip
+    </description>
+    <ffdc>CHIP</ffdc>
+    <ffdc>IS_MASTER_SBE</ffdc>
+    <ffdc>IS_MPIPL</ffdc>
+    <ffdc>IPL_TYPE</ffdc>
+    <ffdc>MC0_PG</ffdc>
+    <ffdc>MC1_PG</ffdc>
+    <ffdc>MC2_PG</ffdc>
+    <ffdc>MC3_PG</ffdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+</hwpErrors>
