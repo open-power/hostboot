@@ -33,9 +33,11 @@
 // *HWP Level: 3
 // *HWP Consumed by: Memory
 
+#include <generic/memory/lib/utils/find.H>
 #include <lib/omi/exp_omi_utils.H>
 #include <lib/shared/exp_consts.H>
 #include <lib/i2c/exp_i2c_fields.H>
+#include <mss_explorer_attribute_getters.H>
 
 namespace mss
 {
@@ -60,54 +62,35 @@ fapi2::ReturnCode setup_fw_boot_config( const fapi2::Target<fapi2::TARGET_TYPE_O
     uint8_t l_loopback_test = 0;
     uint8_t l_transport_layer = 0;
     uint8_t l_dl_layer_boot_mode = 0;
-    uint8_t l_boot_mode = 0;
+    uint8_t l_dfe_disable = 0;
     uint8_t l_lane_mode = 0;
-    uint8_t l_serdes_freq = 0;
+    uint32_t l_omi_freq = 0;
+
+    const auto& l_proc = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
 
     // Read the EXP_FW_BOOT_CONFIG from the attributes
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_BOOT_CONFIG_FW_MODE,
-                           i_target,
-                           l_fw_mode),
-             "Error from FAPI_ATTR_GET (ATTR_MSS_OCMB_EXP_BOOT_CONFIG_FW_MODE) on %s", mss::c_str(i_target));
+    FAPI_TRY(mss::attr::get_ocmb_exp_boot_config_fw_mode(i_target, l_fw_mode));
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_BOOT_CONFIG_OPENCAPI_LOOPBACK_TEST,
-                           i_target,
-                           l_loopback_test),
-             "Error from FAPI_ATTR_GET (ATTR_MSS_OCMB_EXP_BOOT_CONFIG_OPENCAPI_LOOPBACK_TEST) on %s", mss::c_str(i_target));
+    FAPI_TRY(mss::attr::get_ocmb_exp_boot_config_opencapi_loopback_test(i_target, l_loopback_test));
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_BOOT_CONFIG_TRANSPORT_LAYER,
-                           i_target,
-                           l_transport_layer),
-             "Error from FAPI_ATTR_GET (ATTR_MSS_OCMB_EXP_BOOT_CONFIG_TRANSPORT_LAYER) on %s", mss::c_str(i_target));
+    FAPI_TRY(mss::attr::get_ocmb_exp_boot_config_transport_layer(i_target, l_transport_layer));
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_BOOT_CONFIG_DL_LAYER_BOOT_MODE,
-                           i_target,
-                           l_dl_layer_boot_mode),
-             "Error from FAPI_ATTR_GET (ATTR_MSS_OCMB_EXP_BOOT_CONFIG_DL_LAYER_BOOT_MODE) on %s", mss::c_str(i_target));
+    FAPI_TRY(mss::attr::get_ocmb_exp_boot_config_dl_layer_boot_mode(i_target, l_dl_layer_boot_mode));
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_BOOT_CONFIG_BOOT_MODE,
-                           i_target,
-                           l_boot_mode),
-             "%s Error from FAPI_ATTR_GET (ATTR_MSS_OCMB_EXP_BOOT_CONFIG_BOOT_MODE) on %s", mss::c_str(i_target));
+    FAPI_TRY(mss::attr::get_ocmb_exp_boot_config_dfe_disable(i_target, l_dfe_disable));
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_BOOT_CONFIG_LANE_MODE,
-                           i_target,
-                           l_lane_mode),
-             "Error from FAPI_ATTR_GET (ATTR_MSS_OCMB_EXP_BOOT_CONFIG_LANE_MODE) on %s", mss::c_str(i_target));
+    FAPI_TRY(mss::attr::get_ocmb_exp_boot_config_lane_mode(i_target, l_lane_mode));
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_BOOT_CONFIG_SERDES_FREQUENCY,
-                           i_target,
-                           l_serdes_freq),
-             "Error from FAPI_ATTR_GET (ATTR_MSS_OCMB_EXP_BOOT_CONFIG_SERDES_FREQUENCY) on %s", mss::c_str(i_target));
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_FREQ_OMI_MHZ, l_proc, l_omi_freq) );
 
 
     // Clears o_data, just in case
     o_data.clear();
     o_data.assign(mss::exp::i2c::FW_BOOT_CONFIG_BYTE_LEN, 0);
 
-    FAPI_TRY(mss::exp::i2c::boot_cfg::set_serdes_freq( i_target, o_data, l_serdes_freq ));
+    FAPI_TRY(mss::exp::i2c::boot_cfg::set_serdes_freq( i_target, o_data, l_omi_freq ));
     FAPI_TRY(mss::exp::i2c::boot_cfg::set_lane_mode( i_target, o_data, l_lane_mode ));
-    FAPI_TRY(mss::exp::i2c::boot_cfg::set_boot_mode( i_target, o_data, l_boot_mode ));
+    FAPI_TRY(mss::exp::i2c::boot_cfg::set_dfe_disable( i_target, o_data, l_dfe_disable ));
     FAPI_TRY(mss::exp::i2c::boot_cfg::set_dl_layer_boot_mode( i_target, o_data, l_dl_layer_boot_mode ));
     FAPI_TRY(mss::exp::i2c::boot_cfg::set_transport_layer( i_target, o_data, l_transport_layer ));
     FAPI_TRY(mss::exp::i2c::boot_cfg::set_loopback_test( i_target, o_data, l_loopback_test ));
