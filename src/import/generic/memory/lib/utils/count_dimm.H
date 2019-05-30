@@ -71,5 +71,24 @@ inline size_t count_dimm(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
     return 1;
 }
 
+///
+/// @brief Return the count of the number of DIMM attached to a vector of targets
+/// @tparam T the fapi2::TargetType
+/// @param[in] i_target a vector of targets
+/// @return size_t the count of DIMM attached
+///
+template< fapi2::TargetType T >
+inline size_t count_dimm(const std::vector<fapi2::Target<T>>& i_targets)
+{
+    size_t l_dimm_count = 0;
+
+    for (const auto& l_target : i_targets)
+    {
+        l_dimm_count += count_dimm(l_target);
+    }
+
+    return l_dimm_count;
+}
+
 }
 #endif
