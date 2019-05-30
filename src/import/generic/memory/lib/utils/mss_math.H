@@ -31,6 +31,7 @@
 #ifndef _MSS_MATH_H_
 #define _MSS_MATH_H_
 
+#include <fapi2.H>
 #include <cstdint>
 
 namespace mss
@@ -70,6 +71,60 @@ inline int64_t round_half_away_from_zero( const double i_input )
     return ( i_input < 0.0 ? static_cast<int64_t>(i_input - 0.5) :  static_cast<int64_t>(i_input + 0.5) );
 }
 
+///
+/// @brief Divide and round unsigned values
+/// @tparam T input and output types
+/// @param[in] i_divisor the divisor (number to be divided)
+/// @param[in] i_dividend the dividend (number to divide by)
+/// @param[out] o_quotient the quotient
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+template<typename T>
+inline fapi2::ReturnCode divide_and_round( const T i_divisor,
+        const T i_dividend,
+        T& o_quotient )
+{
+    o_quotient = 0;
+
+    // Zero dividend would cause a divide-by-zero, so prevent that
+    FAPI_ASSERT( (i_dividend != 0),
+                 fapi2::MSS_DIVIDE_BY_ZERO()
+                 .set_DIVISOR(i_divisor)
+                 .set_DIVIDEND(i_dividend),
+                 "Caught an attempt to divide by zero (%d / %d)",
+                 i_divisor, i_dividend );
+
+    {
+        const auto l_quotient_unrounded = i_divisor / i_dividend;
+        const auto l_remainder = i_divisor % i_dividend;
+
+        // Round the quotient up or down depending on the remainder
+        o_quotient = l_quotient_unrounded + ((l_remainder >= i_dividend / 2) ? 1 : 0);
+    }
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+///
+/// @brief Determines if the double has decimal digits and adds 1 and rounds if true
+/// @param[in] i_val the double to be rounded up if trialing digits
+/// @return the input value rounded up to the next whole digit
+/// @note Called in p9_mss_bulk_pwr_throttles
+///
+inline uint32_t round_up(const double i_val)
+{
+    //convert to uint to truncate decimals and convert back to double for comparison
+    uint32_t temp = uint32_t (i_val);
+
+    //if not equal, lost something from truncating, so add 1
+    temp += (temp == i_val) ? 0 : 1;
+
+    //Truncate final value
+    return temp;
+}
 
 }// mss
 
