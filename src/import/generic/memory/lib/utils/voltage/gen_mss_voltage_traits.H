@@ -44,14 +44,14 @@ namespace mss
 
 ///
 /// @class Traits and policy class for voltage code
-/// @tparam M mss::mc_type memory controller type
+/// @tparam P mss::proc_type processor type
 /// @tparam D mss::spd::device_type DRAM device type (generation)
 ///
-template< mss::mc_type M, mss::spd::device_type D >
+template< mss::mc_type P, mss::spd::device_type D >
 class voltage_traits;
 
 ///
-/// @class Traits and policy class for voltage code - specialization for the NIMBUS memory controller type
+/// @class Traits and policy class for voltage code - specialization for the NIMBUS processor type, DDR4 device type
 ///
 template<>
 class voltage_traits<mss::mc_type::NIMBUS, mss::spd::device_type::DDR4>
@@ -67,10 +67,32 @@ class voltage_traits<mss::mc_type::NIMBUS, mss::spd::device_type::DDR4>
         // Traits values
         //////////////////////////////////////////////////////////////
         // List of attribute setter functions for setting voltage rail values
-        // This vector is defined in the p9 space: lib/eff_config/nimbus_mss_voltage.C
         static const std::vector<fapi2::ReturnCode (*)(const fapi2::Target<VOLTAGE_TARGET_TYPE>&, uint32_t)> voltage_setters;
 };
 
+///
+/// @class Traits and policy class for voltage code - specialization for the AXONE processor type, DDR4 device type
+///
+template<>
+class voltage_traits<mss::mc_type::EXPLORER, mss::spd::device_type::DDR4>
+{
+    public:
+        //////////////////////////////////////////////////////////////
+        // Target types
+        //////////////////////////////////////////////////////////////
+        static constexpr fapi2::TargetType VOLTAGE_TARGET_TYPE = fapi2::TARGET_TYPE_OCMB_CHIP;
+        static constexpr fapi2::TargetType SPD_TARGET_TYPE = fapi2::TARGET_TYPE_MEM_PORT;
+
+        //////////////////////////////////////////////////////////////
+        // Traits values
+        //////////////////////////////////////////////////////////////
+        // List of attribute setter functions for setting voltage rail values
+        static const std::vector<fapi2::ReturnCode (*)(const fapi2::Target<VOLTAGE_TARGET_TYPE>&, uint32_t)> voltage_setters;
+
+        // Static consts for DDR4 voltages used in p9_mss_volt
+        static const uint64_t DDR4_NOMINAL_VOLTAGE = 1200;
+        static const uint64_t DDR4_VPP_VOLTAGE = 2500;
+};
 
 } // ns mss
 #endif
