@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,7 +53,6 @@ void* host_establish_ex_chiplet (void *io_pArgs)
 {
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_establish_ex_chiplet entry" );
     ISTEP_ERROR::IStepError l_StepError;
-    #ifndef CONFIG_AXONE_BRING_UP
     errlHndl_t l_errl = NULL;
     do {
         //Use targeting code to get a list of all processors
@@ -64,6 +63,7 @@ void* host_establish_ex_chiplet (void *io_pArgs)
         {
             const fapi2::Target<TARGET_TYPE_PROC_CHIP>
                 l_fapi_cpu_target(l_procChip);
+
             // call p9_update_ec_eq_state.C HWP
             FAPI_INVOKE_HWP( l_errl,
                              p9_update_ec_eq_state,
@@ -78,7 +78,6 @@ void* host_establish_ex_chiplet (void *io_pArgs)
             }
         }
     }while(0);
-    #endif
 
     // end task, returning any errorlogs to IStepDisp
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_establish_ex_chiplet exit" );
