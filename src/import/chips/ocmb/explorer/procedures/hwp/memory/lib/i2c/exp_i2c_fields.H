@@ -57,10 +57,10 @@ struct fields
     // First value is byte index, then buffer extract start bit, and extract data length
 
     // Part of EXP_FW_BOOT_CONFIG
-    static constexpr mss::field_t<mss::endian::BIG> BOOT_MODE{0, 0, 1};
+    static constexpr mss::field_t<mss::endian::BIG> DFE_DISABLE{0, 0, 1};
     static constexpr mss::field_t<mss::endian::BIG> LANE_MODE{0, 1, 3};
     static constexpr mss::field_t<mss::endian::BIG> SERDES_FREQ{0, 4, 4};
-    static constexpr mss::field_t<mss::endian::BIG> FW_MODE{1, 2, 1};
+    static constexpr mss::field_t<mss::endian::BIG> FW_MODE{1, 1, 2};
     static constexpr mss::field_t<mss::endian::BIG> LOOPBACK_TEST{1, 3, 1};
     static constexpr mss::field_t<mss::endian::BIG> TRANSPORT_LAYER{1, 4, 2};
     static constexpr mss::field_t<mss::endian::BIG> DL_LAYER_BOOT_MODE{1, 6, 2};
@@ -108,14 +108,14 @@ struct fieldTraits<fields::LANE_MODE>
 };
 
 ///
-/// @class fieldTraits - BOOT_MODE specialization
+/// @class fieldTraits - DFE_DISABLE specialization
 /// @brief Traits assoiated with the Explorer I2C commands
 ///
 template <>
-struct fieldTraits<fields::BOOT_MODE>
+struct fieldTraits<fields::DFE_DISABLE>
 {
     static constexpr uint8_t COMPARISON_VAL = 0x01;
-    static constexpr const char* FIELD_STR = "Boot mode";
+    static constexpr const char* FIELD_STR = "DFE Disable";
 
     template <typename T>
     using COMPARISON_OP = std::less_equal<T>;
@@ -170,7 +170,7 @@ struct fieldTraits<fields::LOOPBACK_TEST>
 template <>
 struct fieldTraits<fields::FW_MODE>
 {
-    static constexpr uint8_t COMPARISON_VAL = 0x01;
+    static constexpr uint8_t COMPARISON_VAL = 0x02;
     static constexpr const char* FIELD_STR = "FW Mode";
 
     template <typename T>
@@ -284,15 +284,12 @@ inline fapi2::ReturnCode get_serdes_freq(const fapi2::Target<fapi2::TARGET_TYPE_
 /// @brief SERDES_FREQ setter
 /// @param[in] i_target the OCMB target
 /// @param[in,out] io_data the buffer as a reference to a vector
-/// @param[in] i_setting the value to set
+/// @param[in] i_freq frequency to set
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-inline fapi2::ReturnCode set_serdes_freq(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-        std::vector<uint8_t>& io_data,
-        const uint8_t i_setting)
-{
-    return set_field<fields::SERDES_FREQ>(i_target, io_data, i_setting);
-}
+fapi2::ReturnCode set_serdes_freq(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                  std::vector<uint8_t>& io_data,
+                                  const uint32_t i_freq);
 
 ///
 /// @brief LANE_MODE getter
@@ -323,31 +320,31 @@ inline fapi2::ReturnCode set_lane_mode(const fapi2::Target<fapi2::TARGET_TYPE_OC
 }
 
 ///
-/// @brief BOOT_MODE getter
+/// @brief DFE_DISABLE getter
 /// @param[in] i_target the OCMB target
 /// @param[in] i_data the buffer as a reference to a vector
 /// @param[out] o_setting
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-inline fapi2::ReturnCode get_boot_mode(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                                       const std::vector<uint8_t>& i_data,
-                                       uint8_t& o_setting)
+inline fapi2::ReturnCode get_dfe_disable(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const std::vector<uint8_t>& i_data,
+        uint8_t& o_setting)
 {
-    return get_field<fields::BOOT_MODE>(i_target, i_data, o_setting);
+    return get_field<fields::DFE_DISABLE>(i_target, i_data, o_setting);
 }
 
 ///
-/// @brief BOOT_MODE setter
+/// @brief DFE_DISABLE setter
 /// @param[in] i_target the OCMB target
 /// @param[in,out] io_data the buffer as a reference to a vector
 /// @param[in] i_setting the value to set
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-inline fapi2::ReturnCode set_boot_mode(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                                       std::vector<uint8_t>& io_data,
-                                       const uint8_t i_setting)
+inline fapi2::ReturnCode set_dfe_disable(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        std::vector<uint8_t>& io_data,
+        const uint8_t i_setting)
 {
-    return set_field<fields::BOOT_MODE>(i_target, io_data, i_setting);
+    return set_field<fields::DFE_DISABLE>(i_target, io_data, i_setting);
 }
 
 /// @brief DL_LAYER_BOOT_MODE getter
