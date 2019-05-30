@@ -762,7 +762,7 @@ class decoder<DDR4, BASE_CNFG, R> : public base_cnfg_decoder
         virtual fapi2::ReturnCode base_module( uint8_t& o_value ) const override
         {
             // Sparsed reserved bits within valid SPD field range
-            static const std::vector<uint8_t> l_reserved_bits{0b0111, 0b1010, 0b1011, 0b1110, 0b1111};
+            static const std::vector<uint8_t> l_reserved_bits{0b0111, 0b1011, 0b1110, 0b1111};
             FAPI_TRY( (mss::spd::reader<fields_t::BASE_MODULE, R>(iv_target, iv_data, o_value)) );
             FAPI_TRY( check::reserved_values(iv_target, l_reserved_bits, BASE_MODULE_TYPE, o_value) );
 
@@ -1189,11 +1189,19 @@ class decoder<DDR4, BASE_CNFG, R> : public base_cnfg_decoder
                 right_aligned_insert(l_buffer, l_fourth_raw_byte, l_third_raw_byte, l_sec_raw_byte, l_first_raw_byte);
 
                 // According to the JEDEC spec:
-                // Byte 22 (Bits 7~0) and Byte 23 are reserved and thus not supported
-                // Check for a valid value
-                constexpr size_t MAX_VALID_VAL = 0x3FFFF;
+                // Byte 22 (Bits 7~0) and Byte 23 are reserved in the base revision SPD general section
+                // Only bit 6 (right-aligned) for Byte 23 is reserved for subsequent SPD revisions
+                // Check for a valid value, and that reserved bit is not set
+                // We return Byte 23 arbitrarily as the failed byte, but any byte (20 - 23) would work
+                constexpr size_t MAX_VALID_VAL = (R == rev::V1_0) ? 0x0003FFFF : 0xBFFFFFFF;
+
+                constexpr uint64_t DATA_START_OFFSET  = 32;
+                constexpr uint64_t RESERVED_BIT = DATA_START_OFFSET + 1;
+                // Bit 6 of byte 23 must be 0 (reserved for future use)
+                const bool RESERVED_BIT_VALUE = l_buffer.getBit<RESERVED_BIT>();
+
                 FAPI_TRY( mss::check::invalid_value(iv_target,
-                                                    l_buffer <= MAX_VALID_VAL,
+                                                    l_buffer <= MAX_VALID_VAL && !RESERVED_BIT_VALUE,
                                                     23,
                                                     l_buffer,
                                                     mss::BAD_SPD_DATA,
