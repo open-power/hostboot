@@ -38,12 +38,142 @@
 
 #include <fapi2.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <generic/memory/lib/utils/scom.H>
 #include <generic/memory/lib/utils/c_str.H>
 
 namespace mss
 {
 namespace check
 {
+
+///
+/// @brief Checks whether any FIRs have lit up on a target
+/// @tparam MC MC type for which to check FIR's
+/// @tparam T the fapi2::TargetType which hold the FIR bits
+/// @param[in] i_target - the target on which to operate
+/// @param[in,out] io_rc - the return code for the function
+/// @param[out] o_fir_error - true iff a FIR was hit
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template< mss::mc_type MC, fapi2::TargetType T >
+fapi2::ReturnCode bad_fir_bits( const fapi2::Target<T>& i_target, fapi2::ReturnCode& io_rc, bool& o_fir_error );
+
+///
+/// @brief Checks whether the passed in FIRs have any un-masked errors set
+/// @tparam MC MC type for which to check FIR's
+/// @tparam T the fapi2::TargetType which hold the FIR bits
+/// @param[in] i_target - the target on which to operate
+/// @param[in] i_fir_regs - FIR register and mask register
+/// @param[out] o_fir_error - true iff a FIR was hit
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template< mss::mc_type MC, fapi2::TargetType T >
+inline fapi2::ReturnCode fir_with_mask( const fapi2::Target<T>& i_target,
+                                        const std::pair<uint64_t, uint64_t>& i_fir_regs,
+                                        bool& o_fir_error )
+{
+    // Temporary variables to make the code a bit more readable
+    const auto FIR_REG = i_fir_regs.first;
+    const auto FIR_MASK = i_fir_regs.second;
+
+    fapi2::buffer<uint64_t> l_fir;
+    fapi2::buffer<uint64_t> l_fir_mask;
+
+    // Read the registers
+    FAPI_TRY(mss::getScom(i_target, FIR_REG, l_fir));
+    FAPI_TRY(mss::getScom(i_target, FIR_MASK, l_fir_mask));
+
+
+    // The mask register will need to be inverted as a 0 in the mask register means the FIR is legit
+    // A bitwise and works the opposite way
+    l_fir_mask.invert();
+
+    // If we have any unmasked bit, set that we have a FIR error and exit out with success
+    // Note: we want to set success here as PRD will find the FIR as "new" and retrigger the procedure this way
+    o_fir_error = ((l_fir & l_fir_mask) != 0);
+
+    // And print the information for debuggability
+    FAPI_INF("%s %s on reg 0x%016lx value 0x%016lx and mask 0x%016lx value 0x%016lx", mss::c_str(i_target),
+             o_fir_error ? "has FIR's set" : "has no FIR's set", FIR_REG, l_fir, FIR_MASK, l_fir_mask.invert());
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Checks whether a FIR or unlocked PLL could be the root cause of another failure
+/// @tparam MC MC type for which to check FIR's
+/// @tparam T the fapi2::TargetType which hold the FIR bits
+/// @param[in] i_target - the target on which to operate
+/// @param[in,out] io_rc - the return code for the function
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+/// @note This is a helper function to enable unit testing
+///
+template< mss::mc_type MC, fapi2::TargetType T >
+fapi2::ReturnCode hostboot_fir_or_pll_fail( const fapi2::Target<T>& i_target, fapi2::ReturnCode& io_rc)
+{
+    // We didn't have an error, so return success
+    if(io_rc == fapi2::FAPI2_RC_SUCCESS)
+    {
+        FAPI_INF("%s has a good return code, returning success", mss::c_str(i_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    fapi2::ReturnCode l_fircheck_scom_err(fapi2::FAPI2_RC_SUCCESS);
+    bool l_fir_error = false;
+
+    FAPI_ERR("%s has a bad return code, time to check some firs!", mss::c_str(i_target));
+
+    l_fircheck_scom_err = bad_fir_bits<MC>(i_target, io_rc, l_fir_error);
+
+    FAPI_ERR("%s took a fail. FIR was %s", mss::c_str(i_target),
+             l_fir_error ? "set - returning FIR RC" : "unset - returning inputted RC");
+
+    // If we had a FIR error, log the original error and return success
+    // PRD will handle the original error
+    if(l_fir_error)
+    {
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    }
+    else
+    {
+        fapi2::current_err = io_rc;
+    }
+
+    return fapi2::current_err;
+}
+
+///
+/// @brief Checks whether a FIR or unlocked PLL could be the root cause of another failure, if a check fir boolean is passed in
+/// @tparam MC MC type for which to check FIR's
+/// @tparam T the fapi2::TargetType which hold the FIR bits
+/// @param[in] i_target - the target on which to operate
+/// @param[in,out] io_rc - the return code for the function
+/// @param[in] i_check_fir - true IFF the FIR needs to be checked - defaults to true
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template< mss::mc_type MC, fapi2::TargetType T >
+fapi2::ReturnCode fir_or_pll_fail( const fapi2::Target<T>& i_target,
+                                   fapi2::ReturnCode& io_rc,
+                                   const bool i_check_fir = true)
+{
+#ifdef __HOSTBOOT_MODULE
+
+    fapi2::ReturnCode l_rc(io_rc);
+
+    // If need be, check the FIR below
+    if(i_check_fir)
+    {
+        // Handle any issues according to PRD FIR scheme, as a FIR could have caused this issue
+        l_rc = hostboot_fir_or_pll_fail<MC>(i_target, l_rc);
+    }
+
+    return l_rc;
+
+#else
+    return io_rc;
+#endif
+}
 
 ///
 /// @brief Checks conditional passes and implements traces & exits if it fails
