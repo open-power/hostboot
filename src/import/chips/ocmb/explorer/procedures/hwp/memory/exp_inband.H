@@ -87,6 +87,8 @@
 #include <exp_data_structs.H>
 #include <explorer_scom_addresses.H>
 #include <explorer_scom_addresses_fld.H>
+#include <explorer_scom_addresses_fixes.H>
+#include <explorer_scom_addresses_fld_fixes.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 namespace mss
@@ -98,8 +100,13 @@ namespace exp
 namespace ib
 {
 
+static const size_t BUFFER_TRANSACTION_SIZE = 8;
+
 static const uint64_t EXPLR_IB_CONFIG_OFFSET = 0x0000000000000000ull;
 static const uint64_t EXPLR_IB_MMIO_OFFSET   = 0x0000000100000000ull; // 4GB
+static const uint64_t EXPLR_IB_BAR_SIZE      = 0b01111111;  // 4GB Depends on EXPLR_IB_MMIO_OFFSET
+static const uint64_t EXPLR_IB_BAR_B_BIT     = EXPLR_IB_MMIO_OFFSET >> 1; // 2GB AND with A == 0, AND with B != 0
+static const uint64_t EXPLR_IB_BAR_MASK_ZERO = (EXPLR_IB_BAR_B_BIT - 1); // AND with BAR must == 0
 
 //--------------------------------------------------------------------------------
 // The MSCC RAM Range Register SCOM 0x080108e5  MSCCRNGE
@@ -128,28 +135,32 @@ static const uint64_t EXPLR_IB_SENSOR_CACHE_ADDR = EXPLR_IB_MMIO_OFFSET | 0x4008
 //--------------------------------------------------------------------------------
 
 ///
-/// @brief Converts user_input_msdg to little endian
+/// @brief Converts user_input_msdg to little endian and calculates the crc
 /// @param[in] i_input user_input_msdg structure to convert
-/// @return vector of little endian data
+/// @param[out] o_data vector of bytes for mmio
+/// @param[out] o_crc the calculated crc of the data
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
-std::vector<uint8_t> user_input_msdg_to_little_endian(const user_input_msdg& i_input);
+fapi2::ReturnCode user_input_msdg_to_little_endian(const user_input_msdg& i_input, std::vector<uint8_t>& o_data,
+        uint32_t& o_crc);
 
 ///
 /// @brief Converts host_fw_command_struct to little endian
 /// @param[in] i_input user_input_msdg structure to convert
-/// @return vector of little endian data
+/// @param[out] o_data vector of bytes for mmio.
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
-std::vector<uint8_t> host_fw_command_struct_to_little_endian(const host_fw_command_struct& i_input);
+fapi2::ReturnCode host_fw_command_struct_to_little_endian(const host_fw_command_struct& i_input,
+        std::vector<uint8_t>& o_data);
 
 ///
 /// @brief Converts a little endian data array to a host_fw_response_struct
 /// @param[in] i_data little endian data to process
 /// @param[out] o_crc computed CRC
 /// @param[out] o_response response structure
-/// @return true if success false if failure
-/// @note helper function - returning a bool and will have true FFDC in a separate function
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
-bool host_fw_response_struct_from_little_endian(const std::vector<uint8_t>& i_data,
+fapi2::ReturnCode host_fw_response_struct_from_little_endian(std::vector<uint8_t>& i_data,
         uint32_t& o_crc,
         host_fw_response_struct& o_response);
 
@@ -163,17 +174,17 @@ bool host_fw_response_struct_from_little_endian(const std::vector<uint8_t>& i_da
 ///
 fapi2::ReturnCode host_fw_response_struct_from_little_endian(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
         i_target,
-        const std::vector<uint8_t>& i_data,
+        std::vector<uint8_t>& i_data,
         host_fw_response_struct& o_response);
 
 ///
 /// @brief Converts a little endian data array to a sensor_cache_struct
 /// @param[in] i_data little endian data to process
 /// @param[out] o_data sensor cache structure
-/// @return true if success false if failure
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 /// @note helper function - returning a bool and will have true FFDC in a separate function
 ///
-bool sensor_cache_struct_from_little_endian(const std::vector<uint8_t>& i_data,
+fapi2::ReturnCode sensor_cache_struct_from_little_endian(std::vector<uint8_t>& i_data,
         sensor_cache_struct& o_data);
 
 ///
@@ -186,7 +197,7 @@ bool sensor_cache_struct_from_little_endian(const std::vector<uint8_t>& i_data,
 ///
 fapi2::ReturnCode sensor_cache_struct_from_little_endian(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
         i_target,
-        const std::vector<uint8_t>& i_data,
+        std::vector<uint8_t>& i_data,
         sensor_cache_struct& o_data);
 
 //--------------------------------------------------------------------------------
@@ -341,18 +352,32 @@ fapi2::ReturnCode getOCCfg(
     const uint64_t i_cfgAddr,
     fapi2::buffer<uint32_t>& o_data) ;
 
+///
+/// @brief Polls for response ready door bell bit
+/// @param[in] i_target the OCMB target on which to operate
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode poll_for_response_ready(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
 
-
+///
+/// @brief Clears outbound (response ready) door bell bit
+/// @param[in] i_target the OCMB target on which to operate
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode clear_outbound_doorbell(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
 
 /// @brief Reads a response from the response buffer
 ///
 /// @param[in] i_target     The Explorer chip to read data from
 /// @param[out] o_rsp       The response data read from the buffer
+/// @param[out] o_data      Raw (little-endian) response data buffer portion
+///                         The size of this buffer will be a multiple of 8
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 fapi2::ReturnCode getRSP(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-    host_fw_response_struct& o_rsp) ;
+    host_fw_response_struct& o_rsp,
+    std::vector<uint8_t>& o_data) ;
 
 
 
@@ -367,6 +392,85 @@ fapi2::ReturnCode getSensorCache(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
     sensor_cache_struct& o_data) ;
 
+//--------------------------------------------------------------------------------
+// Command/Response/Data structure Endian handling
+//--------------------------------------------------------------------------------
+
+/// @brief We will use 4 or 8 byte reads via fapi2::put/getMMIO for buffer
+/// data structures.  The byte order of the 4 or 8 byte reads should be little
+/// endian.  In order to represent the data structure in its proper layout
+/// the endianness of each 4 or 8 byte read must be corrected.
+///
+/// @param[inout] io_data   Either data structure in proper byte order that we
+///      want to swizzle prior to writing to the buffer, or the data returned
+///      from reading the buffer that we want to unsizzle.
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode correctMMIOEndianForStruct(std::vector<uint8_t>& io_data);
+
+/// @brief Ensure data is an even multiple of 8 (BUFFER_TRANSACTION_SIZE).
+///        If (sizeof(buffer) % BUFFER_TRANSACTION_SIZE != 0) ; then pad
+///        buffer with zeros until statement is true.
+///
+/// @param[in,out] io_data   Communication data , either CMD or RSP buffer
+///
+/// @return void
+inline void padCommData(std::vector<uint8_t>& io_data)
+{
+    while ((io_data.size() % BUFFER_TRANSACTION_SIZE) != 0)
+    {
+        io_data.push_back(0);
+    }
+}
+
+///
+/// @brief Forces native data into the correct endianness necessary for Explorer
+/// buffer data structures.
+/// @tparam T the data type to process
+/// @param[in] i_input inputted data to process
+/// @param[in,out] io_data vector to append data to
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+///
+template < typename T >
+fapi2::ReturnCode forceCrctEndian(const T& i_input, std::vector<uint8_t>& io_data);
+
+///
+/// @brief Forces native data into the correct endianness for an array buffer
+/// data structures.
+/// @tparam T the data type to process
+/// @param[in] i_input inputted data to process
+/// @param[in] i_size size of the array
+/// @param[in,out] io_data vector to append data to
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+///
+template < typename T >
+fapi2::ReturnCode forceCrctEndianArray(const T* i_input, const uint64_t i_size, std::vector<uint8_t>& io_data);
+
+///
+/// @brief Converts endianness of data read from Explorer buffer data structures
+//  into native order.
+/// @tparam T the data type to output to
+/// @param[in] i_input inputted data to process
+/// @param[in,out] io_idx current index
+/// @param[out] o_data data that has been converted into native endianness
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+///
+template < typename T >
+fapi2::ReturnCode readCrctEndian(const std::vector<uint8_t>& i_input, uint32_t& io_idx, T& o_data);
+
+///
+/// @brief Converts endianness of data read from Explorer buffer data structures
+/// into native order.
+/// @tparam T the data type to output to
+/// @param[in] i_input inputted data to process
+/// @param[in] i_size size of the array
+/// @param[in,out] io_idx current index
+/// @param[out] o_data data that has been converted into native endianness
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+///
+template < typename T >
+fapi2::ReturnCode readCrctEndianArray(const std::vector<uint8_t>& i_input, const uint32_t i_size, uint32_t& io_idx,
+                                      T* o_data);
 
 //--------------------------------------------------------------------------------
 
