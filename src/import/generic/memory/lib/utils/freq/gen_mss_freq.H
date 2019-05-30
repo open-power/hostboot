@@ -36,13 +36,13 @@
 #ifndef _GEN_MSS_FREQ_H_
 #define _GEN_MSS_FREQ_H_
 
+#include <generic/memory/lib/utils/pos.H>
 #include <generic/memory/lib/utils/freq/gen_mss_freq_traits.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/spd/spd_facade.H>
 #include <generic/memory/lib/spd/spd_utils.H>
 #include <generic/memory/lib/utils/freq/cas_latency.H>
 #include <generic/memory/lib/utils/freq/mss_freq_scoreboard.H>
-#include <generic/memory/lib/data_engine/pre_data_init.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <vpd_access.H>
 
@@ -80,7 +80,7 @@ fapi2::ReturnCode set_freq(const fapi2::Target<T>& i_target,
 /// @param[out] o_master_ranks number of master ranks per DIMM
 /// @return     FAPI2_RC_SUCCESS iff ok
 ///
-template<mss::proc_type P, fapi2::TargetType T>
+template<mss::proc_type P, typename TT = mss::frequency_traits<P>, fapi2::TargetType T>
 fapi2::ReturnCode get_master_rank_per_dimm(const fapi2::Target<T>& i_target,
         uint8_t* o_master_ranks);
 
@@ -92,54 +92,112 @@ fapi2::ReturnCode get_master_rank_per_dimm(const fapi2::Target<T>& i_target,
 /// @param[out] o_dimm_type DIMM types
 /// @return     FAPI2_RC_SUCCESS iff ok
 ///
-template<mss::proc_type P, fapi2::TargetType T>
+template<mss::proc_type P, typename TT = mss::frequency_traits<P>, fapi2::TargetType T>
 fapi2::ReturnCode get_dimm_type(const fapi2::Target<T>& i_target,
                                 uint8_t* o_dimm_type);
 
 ///
-/// @brief      Configures the number of ranks in the VPD accessor dependent upon DIMM type
+/// @brief Calls out the code if we calculated a bad frequency for the domain
 /// @tparam P mss::proc_type on which to operate
 /// @tparam TT Traits associated with the processor type
-/// @param[in]  i_target the target on which to set the frequency values
-/// @param[in,out]  io_vpd_info VPD information that needs to be configured
-/// @return     FAPI2_RC_SUCCESS iff ok
+/// @param[in] i_target target on which to operate
+/// @param[in] i_final_freq frequency calculated for domain
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template<mss::proc_type P, typename TT = mss::frequency_traits<P>>
+fapi2::ReturnCode callout_bad_freq_calculated(const fapi2::Target<TT::FREQ_TARGET_TYPE>& i_target,
+        const uint64_t i_final_freq);
+
+///
+/// @brief Configures the number of ranks in the VPD accessor dependent upon DIMM type
+/// @tparam P mss::proc_type on which to operate
+/// @tparam TT Traits associated with the processor type
+/// @param[in] i_target the target on which to set the frequency values
+/// @param[in,out] io_vpd_info VPD information that needs to be configured
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<mss::proc_type P, typename TT = mss::frequency_traits<P>>
 fapi2::ReturnCode configure_vpd_ranks(const fapi2::Target<TT::PORT_TARGET_TYPE>& i_target,
-                                      fapi2::VPDInfo<TT::VPD_TARGET_TYPE>& io_vpd_info)
+                                      fapi2::VPDInfo<TT::VPD_TARGET_TYPE>& io_vpd_info);
+
+///
+/// @brief Checks to see if a specific VPD configuration is valid
+/// @tparam P mss::proc_type on which to operate
+/// @tparam TT Traits associated with the processor type
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_proposed_freq frequency to check for support
+/// @param[in,out] io_vpd_info VPDInfo instance to use
+/// @param[out] o_supported true if VPD supports the proposed frequency
+///
+template<mss::proc_type P, typename TT = mss::frequency_traits<P>>
+fapi2::ReturnCode is_vpd_config_supported( const fapi2::Target<TT::VPD_TARGET_TYPE>& i_target,
+        const uint64_t i_proposed_freq,
+        fapi2::VPDInfo<TT::VPD_TARGET_TYPE>& io_vpd_info,
+        bool& o_supported)
 {
-    uint8_t l_rank_count_dimm[TT::MAX_DIMM_PER_PORT] = {};
-    uint8_t l_dimm_type[TT::MAX_DIMM_PER_PORT] = {};
+    uint8_t l_vpd_blob[TT::VPD_KEYWORD_MAX] = {};
 
-    // ATTR to update
-    // Note: this flat out assumes that we have two DIMM per port max. This goes against the directive to have arrays be dynamic in length and derived from ATTR's
-    FAPI_TRY( get_master_rank_per_dimm<P>(i_target, &(l_rank_count_dimm[0])) );
-    FAPI_TRY( get_dimm_type<P>(i_target, &(l_dimm_type[0])) );
+    // We are unsupported by default
+    o_supported = false;
 
-    // So for LRDIMM, our SI works a bit differently than for non-LRDIMM
-    // LRDIMM's have buffers that operate on a per-DIMM basis across multiple ranks
-    // As such, they act as a single load, similar to a 1R DIMM would
-    // per the IBM signal integrity team, the 1R DIMM settings should be used for LRDIMM's
-    // So, if we are LRDIMM's and have ranks, we want to only note it as a 1R DIMM for purposes of querying the VPD
-    FAPI_DBG("%s for DIMM 0 rank count %u dimm type %u %s",
-             mss::c_str(i_target), l_rank_count_dimm[0], l_dimm_type[0], l_dimm_type[0] == TT::LRDIMM_TYPE ? "LRDIMM" : "RDIMM");
-    FAPI_DBG("%s for DIMM 1 rank count %u dimm type %u %s",
-             mss::c_str(i_target), l_rank_count_dimm[1], l_dimm_type[1], l_dimm_type[1] == TT::LRDIMM_TYPE ? "LRDIMM" : "RDIMM");
+    // In order to retrieve the VPD contents we first need the keyword size.
+    // If we are unable to retrieve the keyword size then this speed isn't
+    // supported in the VPD in Cronus (but not FW) and we skip to the next
+    // possible speed bin.
 
-    l_rank_count_dimm[0] = ((l_dimm_type[0] == TT::LRDIMM_TYPE) && (l_rank_count_dimm[0] > 0)) ? 1 : l_rank_count_dimm[0];
-    l_rank_count_dimm[1] = ((l_dimm_type[1] == TT::LRDIMM_TYPE) && (l_rank_count_dimm[1] > 0)) ? 1 : l_rank_count_dimm[1];
+    // So, we'll use VPD access for the IBM specific product data (assuming the vendor of the OCMB's side as well)
+    if( fapi2::getVPD(i_target, io_vpd_info, nullptr) != fapi2::FAPI2_RC_SUCCESS )
+    {
+        FAPI_INF("Couldn't retrieve MR size from VPD for this config %s -- skipping freq %d MT/s",
+                 mss::c_str(i_target), i_proposed_freq );
 
-    FAPI_DBG("after LR modification %s for DIMM 0 rank count %u dimm type %u %s",
-             mss::c_str(i_target), l_rank_count_dimm[0], l_dimm_type[0], l_dimm_type[0] == TT::LRDIMM_TYPE ? "LRDIMM" : "RDIMM");
-    FAPI_DBG("after LR modification %s for DIMM 1 rank count %u dimm type %u %s",
-             mss::c_str(i_target), l_rank_count_dimm[1], l_dimm_type[1], l_dimm_type[1] == TT::LRDIMM_TYPE ? "LRDIMM" : "RDIMM");
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
 
-    io_vpd_info.iv_rank_count_dimm_0 = l_rank_count_dimm[0];
-    io_vpd_info.iv_rank_count_dimm_1 = l_rank_count_dimm[1];
+    // Need temporary variables to avoid issues with FAPI_ASSERT and templated variables
+    {
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+        const auto VPD_KW_MAX = TT::VPD_KEYWORD_MAX;
+        const auto VPD_BLOB = TT::VPD_BLOB;
+        FAPI_ASSERT( io_vpd_info.iv_size <= TT::VPD_KEYWORD_MAX,
+                     fapi2::MSS_INVALID_VPD_KEYWORD_MAX().
+                     set_MAX(VPD_KW_MAX).
+                     set_ACTUAL(io_vpd_info.iv_size).
+                     set_KEYWORD(VPD_BLOB).
+                     set_MCS_TARGET(i_target),
+                     "VPD MR keyword size retrieved: %d, is larger than max: %d for %s",
+                     io_vpd_info.iv_size, TT::VPD_KEYWORD_MAX, mss::c_str(i_target));
+    }
+
+    // Firmware doesn't do the VPD lookup in the size check so repeat the logic here
+    if(  fapi2::getVPD(i_target, io_vpd_info, &(l_vpd_blob[0])) != fapi2::FAPI2_RC_SUCCESS )
+    {
+        FAPI_INF("Couldn't retrieve %s data from VPD for this config %s -- skipping freq %d MT/s", TT::VPD_BLOB_NAME,
+                 mss::c_str(i_target), i_proposed_freq );
+
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // If we made it here, it means the frequency was supported for this config
+    o_supported = true;
 
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+///
+/// @brief Check VPD config for support of a given freq
+/// @tparam P mss::proc_type on which to operate
+/// @tparam TT Traits associated with the processor type
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_proposed_freq frequency to check for support
+/// @param[out] o_supported true if VPD supports the proposed frequency
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template<mss::proc_type P, typename TT = mss::frequency_traits<P>>
+fapi2::ReturnCode check_freq_support_vpd( const fapi2::Target<TT::PORT_TARGET_TYPE>& i_target,
+        const uint64_t i_proposed_freq,
+        bool& o_supported);
 
 ///
 /// @brief      Sets frequency attributes
@@ -168,28 +226,7 @@ inline fapi2::ReturnCode set_freq_attrs(const fapi2::Target<TT::FREQ_TARGET_TYPE
     // If we saw all 0's, write a 0.
     l_final_freq = (l_final_freq == UINT64_MAX) ? 0 : l_final_freq;
 
-    {
-        // Declaring temporary variables to avoid linker errors associated with FAPI_ASSERT
-        const auto FREQ0 = TT::SUPPORTED_FREQ0;
-        const auto FREQ1 = TT::SUPPORTED_FREQ1;
-        const auto FREQ2 = TT::SUPPORTED_FREQ2;
-        const auto FREQ3 = TT::SUPPORTED_FREQ3;
-
-        // If we don't find a valid frequency OR don't get a 0 (nothing configured on this clock domain), then error out
-        FAPI_ASSERT( std::binary_search(TT::SUPPORTED_FREQS.begin(), TT::SUPPORTED_FREQS.end(), l_final_freq) ||
-                     l_final_freq == 0,
-                     fapi2::MSS_BAD_FREQ_CALCULATED()
-                     .set_MSS_FREQ(l_final_freq)
-                     .set_TARGET(i_target)
-                     .set_PROC_TYPE(P)
-                     .set_SUPPORTED_FREQ_0(FREQ0)
-                     .set_SUPPORTED_FREQ_1(FREQ1)
-                     .set_SUPPORTED_FREQ_2(FREQ2)
-                     .set_SUPPORTED_FREQ_3(FREQ3),
-                     "%s: Calculated FREQ (%d) isn't supported",
-                     mss::c_str(i_target),
-                     l_final_freq);
-    }
+    FAPI_TRY(callout_bad_freq_calculated<P>(i_target, l_final_freq));
 
     FAPI_INF( "Final Chosen Frequency: %d (%s)", l_final_freq, mss::c_str(i_target) );
 
@@ -257,7 +294,6 @@ fapi_try_exit:
 /// @tparam P mss::proc_type on which to operate
 /// @tparam TT Traits associated with the processor type
 /// @param[in] i_target the target on which to operate
-/// @param[in] i_target target on which to operate for which to get the DIMM configs
 /// @param[out] o_vpd_supported_freqs reference to a 2 dimensional vector of supported VPD frequencies for each MCA
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
@@ -266,8 +302,6 @@ template<mss::proc_type P, typename TT = mss::frequency_traits<P>>
 fapi2::ReturnCode vpd_supported_freqs( const fapi2::Target<TT::FREQ_TARGET_TYPE>& i_target,
                                        std::vector<std::vector<uint32_t>>& o_vpd_supported_freqs)
 {
-    uint8_t l_vpd_blob[TT::VPD_KEYWORD_MAX] = {};
-
     // This bitmap will keep track of the ports we visit.
     // Any we don't are not configured, so will support all frequencies in the scoreboard
     fapi2::buffer<uint8_t> configured_ports;
@@ -280,12 +314,9 @@ fapi2::ReturnCode vpd_supported_freqs( const fapi2::Target<TT::FREQ_TARGET_TYPE>
         o_vpd_supported_freqs.push_back(std::vector<uint32_t>());
     }
 
-    fapi2::VPDInfo<TT::VPD_TARGET_TYPE> l_vpd_info(TT::VPD_BLOB);
-
     // Just go to find target for the port level
     for( const auto& p : mss::find_targets<TT::PORT_TARGET_TYPE>(i_target) )
     {
-        const auto& l_vpd_target = mss::find_target<TT::VPD_TARGET_TYPE>(p);
         const auto l_port_pos = mss::relative_pos<TT::FREQ_TARGET_TYPE>(p);
         FAPI_TRY( configured_ports.setBit(l_port_pos) );
 
@@ -301,61 +332,21 @@ fapi2::ReturnCode vpd_supported_freqs( const fapi2::Target<TT::FREQ_TARGET_TYPE>
             continue;
         }
 
-        // Configures the number of ranks for the VPD configuration
-        FAPI_TRY( configure_vpd_ranks<P>(p, l_vpd_info), "%s failed to configure VPD ranks", mss::c_str(p));
-        l_vpd_info.iv_is_config_ffdc_enabled = false;
-
         // Iterate through all supported memory freqs
         for( const auto& freq : TT::SUPPORTED_FREQS )
         {
-            l_vpd_info.iv_freq_mhz = freq;
+            bool l_supported = false;
 
-            FAPI_INF("%s. VPD info - frequency: %d MT/s, rank count for dimm_0: %d, dimm_1: %d",
-                     mss::c_str(p), l_vpd_info.iv_freq_mhz, l_vpd_info.iv_rank_count_dimm_0, l_vpd_info.iv_rank_count_dimm_1);
-
-            // In order to retrieve the VPD contents we first need the keyword size.
-            // If we are unable to retrieve the keyword size then this speed isn't
-            // supported in the VPD in Cronus (but not FW) and we skip to the next
-            // possible speed bin.
-
-            // So, we'll use VPD access for the IBM specific product data (assuming the vendor of the OCMB's side as well)
-            if( fapi2::getVPD(l_vpd_target, l_vpd_info, nullptr) != fapi2::FAPI2_RC_SUCCESS )
-            {
-                FAPI_INF("Couldn't retrieve MR size from VPD for this config %s -- skipping freq %d MT/s", mss::c_str(p), freq );
-
-                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-                continue;
-            }
-
-            // Need temporary variables to avoid issues with FAPI_ASSERT and templated variables
-            {
-                const auto VPD_KW_MAX = TT::VPD_KEYWORD_MAX;
-                const auto VPD_BLOB = TT::VPD_BLOB;
-                FAPI_ASSERT( l_vpd_info.iv_size <= TT::VPD_KEYWORD_MAX,
-                             fapi2::MSS_INVALID_VPD_KEYWORD_MAX().
-                             set_MAX(VPD_KW_MAX).
-                             set_ACTUAL(l_vpd_info.iv_size).
-                             set_KEYWORD(VPD_BLOB).
-                             set_MCS_TARGET(i_target),
-                             "VPD MR keyword size retrieved: %d, is larger than max: %d for %s",
-                             l_vpd_info.iv_size, TT::VPD_KEYWORD_MAX, mss::c_str(i_target));
-            }
-
-            // Firmware doesn't do the VPD lookup in the size check so repeat the logic here
-            if(  fapi2::getVPD(l_vpd_target, l_vpd_info, &(l_vpd_blob[0])) != fapi2::FAPI2_RC_SUCCESS )
-            {
-                FAPI_INF("Couldn't retrieve %s data from VPD for this config %s -- skipping freq %d MT/s", TT::VPD_BLOB_NAME,
-                         mss::c_str(p), freq );
-
-                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-                continue;
-            }
+            FAPI_TRY(check_freq_support_vpd<P>(p, freq, l_supported));
 
             // Add supported freqs to our output
-            FAPI_INF("VPD supported freq added: %d for %s", freq, mss::c_str(p) );
-            o_vpd_supported_freqs[l_port_pos].push_back(freq);
-        }// freqs
-    }// mca
+            if (l_supported)
+            {
+                FAPI_INF("VPD supported freq added: %d for %s", freq, mss::c_str(p) );
+                o_vpd_supported_freqs[l_port_pos].push_back(freq);
+            }
+        }
+    }
 
     // Mark any ports we didn't visit as supporting all frequencies
     for ( uint64_t l_port_pos = 0; l_port_pos <  TT::PORTS_PER_FREQ_DOMAIN; ++l_port_pos )
@@ -467,13 +458,13 @@ inline fapi2::ReturnCode supported_freqs(const fapi2::Target<TT::FREQ_TARGET_TYP
     o_freqs.clear();
 
     freq_scoreboard l_scoreboard(TT::PORTS_PER_FREQ_DOMAIN, TT::SUPPORTED_FREQS);
-    std::vector<uint32_t> l_max_freqs(NUM_MAX_FREQS, 0);
+    std::vector<uint32_t> l_max_mrw_freqs(NUM_MAX_FREQS, 0);
     std::vector<std::vector<uint32_t>> l_vpd_supported_freqs;
     std::vector<uint32_t> l_spd_supported_freq;
     std::vector<uint8_t> l_deconfigured = {0};
 
     // Retrieve system MRW, SPD, and VPD constraints
-    FAPI_TRY( max_allowed_dimm_freq<P>(l_max_freqs.data()), "%s max_allowed_dimm_freq", mss::c_str(i_target) );
+    FAPI_TRY( max_allowed_dimm_freq<P>(l_max_mrw_freqs.data()), "%s max_allowed_dimm_freq", mss::c_str(i_target) );
     FAPI_TRY( spd_supported_freq<P>(i_target, l_spd_supported_freq),
               "%s spd supported freqs", mss::c_str(i_target) );
     FAPI_TRY( vpd_supported_freqs<P>(i_target, l_vpd_supported_freqs),
@@ -483,7 +474,7 @@ inline fapi2::ReturnCode supported_freqs(const fapi2::Target<TT::FREQ_TARGET_TYP
     FAPI_TRY( limit_freq_by_processor<P>(i_target, l_scoreboard) );
 
     // Limit frequency scoreboard according to MRW constraints
-    FAPI_TRY( limit_freq_by_mrw<P>(i_target, l_max_freqs, l_scoreboard) );
+    FAPI_TRY( limit_freq_by_mrw<P>(i_target, l_max_mrw_freqs, l_scoreboard) );
 
     // Limit frequency scoreboard according to VPD constraints
     FAPI_TRY( limit_freq_by_vpd<P>(i_target, l_vpd_supported_freqs, l_scoreboard) );
@@ -535,9 +526,6 @@ fapi2::ReturnCode generate_freq(const fapi2::Target<TT::FREQ_TARGET_TYPE>& i_tar
 {
     std::vector<uint64_t> l_min_dimm_freq;
     std::vector<uint32_t> l_supported_freqs;
-
-    // We will first set pre-eff_config attributes
-    FAPI_TRY( mss::set_pre_init_attrs<P>(i_target));
 
     // Get supported freqs for this MCBIST
     FAPI_TRY( mss::supported_freqs<P>(i_target, l_supported_freqs), "%s failed to get supported frequencies",
