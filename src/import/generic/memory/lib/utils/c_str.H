@@ -28,7 +28,7 @@
 /// @brief Function to return the C-string name of a thing
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: HB:FSP
@@ -37,7 +37,6 @@
 #define _MSS_C_STR_H_
 
 #include <fapi2.H>
-#include <generic/memory/lib/utils/index.H>
 
 namespace mss
 {
@@ -72,35 +71,27 @@ inline const char* c_str( const fapi2::template Target<T>& i_target )
     return c_str_storage;
 }
 
+///
+/// @brief fapi2::Target c_str general declaration
+/// @param[in] i_target - target you want the name for
+/// @return const char *
+/// @note DIMM specialization
+///
 template<>
 inline const char* c_str( const fapi2::template Target<fapi2::TARGET_TYPE_DIMM>& i_target )
 {
-    const auto l_mca = i_target.getParent<fapi2::TARGET_TYPE_MCA>();
-    const auto l_mcs = l_mca.getParent<fapi2::TARGET_TYPE_MCS>();
+    static constexpr auto l_max_gen = 3;
+    static constexpr auto l_max_type = 5;
 
-    constexpr auto l_max_gen = 3;
-    constexpr auto l_max_type = 4;
-    const char* const l_map_gen_to_string[l_max_gen] = {"empty", "DDR3", "DDR4"};
-    const char* const l_map_type_to_string[l_max_type] = {"empty", "RDIMM", "UDIMM", "LRDIMM"};
-
-    uint8_t l_type = 0;
     uint8_t l_gen = 0;
-    char l_buffer[fapi2::MAX_ECMD_STRING_LEN] = {};
-
-    fapi2::toString( i_target, c_str_storage, fapi2::MAX_ECMD_STRING_LEN );
+    uint8_t l_type = 0;
 
     // Had to unroll FAPI_TRY so that fapi2::current_err doesn't get overwritten, causes errors
     // when calling c_str inside of a function that returns fapi2::ReturnCode
-    constexpr size_t PORTS_PER_MCS = 2;
-    constexpr size_t MAX_DIMM_PER_PORT = 2;
-    uint8_t l_value[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-
-    if (FAPI_ATTR_GET(fapi2::ATTR_EFF_DIMM_TYPE, l_mcs, l_value) != fapi2::FAPI2_RC_SUCCESS)
+    if (FAPI_ATTR_GET(fapi2::ATTR_MEM_DIMM_TYPE_METADATA, i_target, l_type) != fapi2::FAPI2_RC_SUCCESS)
     {
         goto fapi_try_exit;
     }
-
-    l_type = l_value[mss::index(l_mca)][mss::index(i_target)];
 
     if (l_type >= l_max_type)
     {
@@ -109,20 +100,26 @@ inline const char* c_str( const fapi2::template Target<fapi2::TARGET_TYPE_DIMM>&
 
     // Had to unroll FAPI_TRY so that fapi2::current_err doesn't get overwritten, causes errors
     // when calling c_str inside of a function that returns fapi2::ReturnCode
-    if (FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_GEN, l_mcs, l_value) != fapi2::FAPI2_RC_SUCCESS)
+    if (FAPI_ATTR_GET(fapi2::ATTR_MEM_DRAM_GEN_METADATA, i_target, l_gen) != fapi2::FAPI2_RC_SUCCESS)
     {
         goto fapi_try_exit;
     }
-
-    l_gen = l_value[mss::index(l_mca)][mss::index(i_target)];
 
     if (l_gen >= l_max_gen)
     {
         goto fapi_try_exit;
     }
 
-    snprintf(l_buffer, fapi2::MAX_ECMD_STRING_LEN, " %s (%s)", l_map_type_to_string[l_type], l_map_gen_to_string[l_gen]);
-    return strncat( c_str_storage, l_buffer, fapi2::MAX_ECMD_STRING_LEN - strlen(c_str_storage) );
+    {
+        const char* const l_map_gen_to_string[l_max_gen] = {"empty", "DDR3", "DDR4"};
+        const char* const l_map_type_to_string[l_max_type] = {"empty", "RDIMM", "UDIMM", "LRDIMM", "DDIMM"};
+
+        char l_buffer[fapi2::MAX_ECMD_STRING_LEN] = {};
+        fapi2::toString( i_target, c_str_storage, fapi2::MAX_ECMD_STRING_LEN );
+
+        snprintf(l_buffer, fapi2::MAX_ECMD_STRING_LEN, " %s (%s)", l_map_type_to_string[l_type], l_map_gen_to_string[l_gen]);
+        return strncat( c_str_storage, l_buffer, fapi2::MAX_ECMD_STRING_LEN - strlen(c_str_storage) );
+    }
 
 fapi_try_exit:
     // Probably the best we're going to do ...
