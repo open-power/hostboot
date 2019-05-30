@@ -189,6 +189,66 @@ bool readLEArray(const std::vector<uint8_t>& i_input, const uint32_t i_size, uin
     return l_passing;
 }
 
+///
+/// @brief Converts BE data into native order
+/// @tparam T the data type to output to
+/// @param[in] i_input inputted data to process
+/// @param[in,out] io_idx current index
+/// @param[out] o_data data that has been converted into native endianness
+/// @return bool true if passing false if failing
+/// @note Real FFDC will be handled outside
+///
+template < typename T >
+bool readBE(const std::vector<uint8_t>& i_input, uint32_t& io_idx, T& o_data)
+{
+    const uint32_t l_sz = static_cast<uint32_t>(sizeof(o_data));
+    uint64_t l_idx = io_idx;
+    io_idx = l_sz + io_idx;
+
+    // Checks that our final index is within the data range
+    // Note: we decrement the index prior, so equal to is ok
+    if(io_idx > i_input.size())
+    {
+        return false;
+    }
+
+    o_data = 0;
+
+    for(uint64_t i = 0; i < l_sz; i++)
+    {
+        uint8_t v = i_input[l_idx];
+        o_data <<= BITS_PER_BYTE;
+        o_data |= v;
+        l_idx++;
+    }
+
+    return true;
+}
+
+///
+/// @brief Converts BE data into native order
+/// @tparam T the data type to output to
+/// @param[in] i_input inputted data to process
+/// @param[in] i_size size of the array
+/// @param[in,out] io_idx current index
+/// @param[out] o_data data that has been converted into native endianness
+/// @return bool true if passing false if failing
+/// @note Real FFDC will be handled outside
+///
+template < typename T >
+bool readBEArray(const std::vector<uint8_t>& i_input, const uint32_t i_size, uint32_t& io_idx, T* o_data)
+{
+    // Loop while the readLE is still passing and we haven't looped through the array's boundaries
+    bool l_passing = true;
+
+    for(uint32_t i = 0; i < i_size && l_passing; ++i)
+    {
+        l_passing = readBE(i_input, io_idx, o_data[i]);
+    }
+
+    return l_passing;
+}
+
 }
 
 #endif
