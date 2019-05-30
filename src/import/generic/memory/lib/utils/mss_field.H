@@ -179,6 +179,9 @@ inline fapi2::ReturnCode get_field(const fapi2::Target<T>& i_target,
                                    const FFDC i_ffdc_codes,
                                    OT& o_value)
 {
+    // Initializes the output value to 0, that way, we won't have any stale data in o_value
+    o_value = 0;
+
     const size_t BYTE = F.get_byte(i_data);
 
     FAPI_ASSERT( BYTE < i_data.size(),
