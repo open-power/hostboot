@@ -24,10 +24,12 @@
 # IBM_PROLOG_END_TAG
 # Makefile for exp_omi_init HWP
 PROCEDURE=exp_omi_init
+$(eval $(call ADD_EXP_MEMORY_INCDIRS,$(PROCEDURE)))
 lib$(PROCEDURE)_DEPLIBS+=mss_generic
 lib$(PROCEDURE)_DEPLIBS+=exp_inband
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/ocmb/explorer/common/include)
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/ocmb/explorer/common/inband)
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/nest)
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/procedures/hwp/memory/lib)
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH))
 $(call BUILD_PROCEDURE)
