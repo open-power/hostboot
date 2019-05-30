@@ -48,7 +48,7 @@ namespace exp
 void setup_cmd_params(const uint32_t i_cmd_data_crc, host_fw_command_struct& o_cmd)
 {
     // Issue full boot mode cmd though EXP-FW REQ buffer
-    o_cmd.cmd_id = mss::exp::omi::FW_SPD_DATA_SET;
+    o_cmd.cmd_id = mss::exp::omi::EXP_FW_DDR_PHY_INIT;
     o_cmd.cmd_flags = 0;
 
     // TK - Fabricated value need to figure out if we'll be creating req_id tables
@@ -58,6 +58,94 @@ void setup_cmd_params(const uint32_t i_cmd_data_crc, host_fw_command_struct& o_c
     o_cmd.host_work_area = 0;
     o_cmd.cmd_work_area = 0;
     memset(o_cmd.padding, 0, sizeof(o_cmd.padding));
+}
+
+///
+/// @brief user_input_msdg structure setup
+/// @tparam T the fapi2 TargetType
+/// @param[in] i_target the fapi2 target
+/// @param[out] o_phy_params the phy params data struct
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode setup_phy_params(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                   user_input_msdg& o_phy_params)
+{
+    for (const auto l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
+    {
+        fapi2::ReturnCode l_rc;
+        const phy_params l_set_phy_params(l_port, l_rc);
+        FAPI_TRY(l_rc, "Unable to instantiate phy_params for target %s", mss::c_str(i_target));
+
+        // Set the params by fetching them from the attributes
+        FAPI_TRY(l_set_phy_params.set_version_number(o_phy_params));
+        FAPI_TRY(l_set_phy_params.setup_DimmType(o_phy_params));
+        FAPI_TRY(l_set_phy_params.setup_CsPresent(o_phy_params));
+        FAPI_TRY(l_set_phy_params.setup_DramDataWidth(o_phy_params));
+        FAPI_TRY(l_set_phy_params.setup_Height3DS(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_ActiveDBYTE(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_ActiveNibble(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_AddrMirror(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_ColumnAddrWidth(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_RowAddrWidth(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_SpdCLSupported(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_SpdtAAmin(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_Rank4Mode(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_EncodedQuadCs(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_DDPCompatible(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_TSV8HSupport(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_MRAMSupport(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_MDSSupport(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_NumPStates(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_Frequency(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_PhyOdtImpedance(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_PhyDrvImpedancePU(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_PhyDrvImpedancePD(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_PhySlewRate(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_ATxImpedance(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_ATxSlewRate(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_CKTxImpedance(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_CKTxSlewRate(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_AlertOdtImpedance(o_phy_params));
+
+        // TK to use the rank API once it's available
+        // For now we are assuming ranks 2 and 3 are on DIMM1 for RttNom, RttWr and RttPark
+        FAPI_TRY(l_set_phy_params.set_RttNom(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_RttWr(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_RttPark(o_phy_params));
+
+        FAPI_TRY(l_set_phy_params.set_DramDic(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_DramWritePreamble(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_DramReadPreamble(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_PhyEqualization(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_InitVrefDQ(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_InitPhyVref(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_OdtWrMapCs(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_OdtRdMapCs(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_Geardown(o_phy_params));
+
+        // TK need to check if this also includes RC0E
+        FAPI_TRY(l_set_phy_params.set_CALatencyAdder(o_phy_params));
+
+        FAPI_TRY(l_set_phy_params.set_BistCALMode(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_BistCAParityLatency(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_RcdDic(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_RcdVoltageCtrl(o_phy_params));
+
+        // TK check bit ordering here for RcdIBTCtrl and RcdDBDic
+        FAPI_TRY(l_set_phy_params.set_RcdIBTCtrl(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_RcdDBDic(o_phy_params));
+
+        FAPI_TRY(l_set_phy_params.set_RcdSlewRate(o_phy_params));
+
+        FAPI_TRY(l_set_phy_params.set_DFIMRL_DDRCLK(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_ATxDly_A(o_phy_params));
+        FAPI_TRY(l_set_phy_params.set_ATxDly_B(o_phy_params));
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 namespace check
