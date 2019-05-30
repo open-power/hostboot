@@ -38,6 +38,7 @@
 #include <lib/omi/exp_omi_utils.H>
 #include <lib/i2c/exp_i2c.H>
 #include <exp_omi_train.H>
+#include <generic/memory/mss_git_data_helper.H>
 
 extern "C"
 {
@@ -49,6 +50,8 @@ extern "C"
     ///
     fapi2::ReturnCode exp_omi_train(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
     {
+        mss::display_git_commit_info("exp_omi_train");
+
         std::vector<uint8_t> l_data;
 
         // Gets the data setup
