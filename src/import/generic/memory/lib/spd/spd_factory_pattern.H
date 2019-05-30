@@ -42,6 +42,7 @@
 #include <generic/memory/lib/spd/common/ddr4/spd_decoder_ddr4.H>
 #include <generic/memory/lib/spd/rdimm/ddr4/rdimm_decoder_ddr4.H>
 #include <generic/memory/lib/spd/lrdimm/ddr4/lrdimm_decoder_ddr4.H>
+#include <generic/memory/lib/spd/ddimm/ddr4/ddimm_decoder_ddr4.H>
 #include <generic/memory/lib/spd/spd_checker.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
@@ -211,13 +212,14 @@ class module_factory
         module_factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                        const std::vector<uint8_t>& i_spd_data):
             iv_target(i_target),
-            LRDIMM_DDR4_REV_1_0{DDR4, LRDIMM_MODULE, rev::V1_0},
-            LRDIMM_DDR4_REV_1_1{DDR4, LRDIMM_MODULE, rev::V1_1},
-            LRDIMM_DDR4_REV_1_2{DDR4, LRDIMM_MODULE, rev::V1_2},
-            RDIMM_DDR4_REV_1_0{DDR4, RDIMM_MODULE, rev::V1_0},
-            RDIMM_DDR4_REV_1_1{DDR4, RDIMM_MODULE, rev::V1_1},
-            NVDIMM_DDR4_REV_1_0{DDR4, NVDIMM_MODULE, rev::V1_0},
-            NVDIMM_DDR4_REV_1_1{DDR4, NVDIMM_MODULE, rev::V1_1}
+            LRDIMM_DDR4_REV_1_0{ DDR4, LRDIMM_MODULE, rev::V1_0},
+            LRDIMM_DDR4_REV_1_1{ DDR4, LRDIMM_MODULE, rev::V1_1},
+            LRDIMM_DDR4_REV_1_2{ DDR4, LRDIMM_MODULE, rev::V1_2},
+            RDIMM_DDR4_REV_1_0 { DDR4, RDIMM_MODULE,  rev::V1_0},
+            RDIMM_DDR4_REV_1_1 { DDR4, RDIMM_MODULE,  rev::V1_1},
+            NVDIMM_DDR4_REV_1_0{ DDR4, NVDIMM_MODULE, rev::V1_0},
+            NVDIMM_DDR4_REV_1_1{ DDR4, NVDIMM_MODULE, rev::V1_1},
+            DDIMM_DDR4_REV_0_0 { DDR4, DDIMM_MODULE,  rev::V0_0}
         {
             // Setup pre-defined maps available to search through
             init_map_vars(i_spd_data, iv_decoder_map);
@@ -267,6 +269,7 @@ class module_factory
         const module_key RDIMM_DDR4_REV_1_1;
         const module_key NVDIMM_DDR4_REV_1_0;
         const module_key NVDIMM_DDR4_REV_1_1;
+        const module_key DDIMM_DDR4_REV_0_0;
 
         std::map< module_key, std::shared_ptr<T> > iv_decoder_map;
 
@@ -311,12 +314,21 @@ class module_factory
             //
 
             // Rev 1.0
-            // NVDIMMs start out life w/the updated general section.
+            // NVDIMMs start out life w/the updated general section (not a base level).
             o_map[NVDIMM_DDR4_REV_1_0] = std::make_shared< decoder<DDR4, BASE_CNFG, rev::V1_1> >(iv_target, i_spd_data);
 
             // Rev 1.1
             // Changes to the NVDIMM module occured, general section remains the same
             o_map[NVDIMM_DDR4_REV_1_1] = std::make_shared< decoder<DDR4, BASE_CNFG, rev::V1_1> >(iv_target, i_spd_data);
+
+            //
+            // DDIMMs
+            //
+
+            // Current emulation level
+            // Rev 0.0
+            // DDIMMs start out life w/the updated general section
+            o_map[DDIMM_DDR4_REV_0_0] = std::make_shared< decoder<DDR4, BASE_CNFG, rev::V0_0> >(iv_target, i_spd_data);
         }
 
         ///
@@ -354,6 +366,15 @@ class module_factory
             // Changes lrdimm section occured
             // General section remained the same
             o_map[LRDIMM_DDR4_REV_1_2] = std::make_shared< decoder<DDR4, LRDIMM_MODULE, rev::V1_2> >(iv_target, i_spd_data);
+
+            //
+            // DDIMMs
+            //
+
+            // Current emulation level
+            // Rev 0.0
+            // Life starts out at base revision level
+            o_map[DDIMM_DDR4_REV_0_0] = std::make_shared< decoder<DDR4, DDIMM_MODULE, rev::V0_0> >(iv_target, i_spd_data);
         }
 
         ///
