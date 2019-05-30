@@ -22,5 +22,719 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<attributes> 
+<attributes>
+  <attribute>
+    <id>ATTR_MSS_MRW_SUPPORTED_FREQ</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      List of memory frequencies supported by the current system.
+    </description>
+    <valueType>uint32</valueType>
+    <array>4</array>
+    <platInit/>
+    <!-- Note, mirrors ATTR_MSS_FREQ -->
+    <enum>
+      MT1866 = 1866,
+      MT2133 = 2133,
+      MT2400 = 2400,
+      MT2666 = 2666,
+      MT2933 = 2933,
+      MT3200 = 3200
+    </enum>
+    <default> 1866, 2133, 2400, 2666 </default>
+    <mssUnit>MT/s</mssUnit>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_MRW_IS_PLANAR</id>
+    <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    <description>
+          Indicates if the DIMM connected to this controller
+          are in a planar configuration
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FALSE = 0x00, TRUE = 0x01</enum>
+    <platInit/>
+    <default>FALSE</default>
+    <initToZero/>
+    <mssAccessorName>mem_mrw_is_planar</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Machine Readable Workbook safe mode throttle value for numerator cfg_nm_n_per_port
+        Set to below optimum value/ rate.
+        On a per port basis
+        Also used for emergency mode throttle FARB4Q_EMERGENCY_N
+        Used to thermally protect the system in all supported environmental conditions when OCC is not functional
+        Consumer: thermal_init, initfile
+    </description>
+    <valueType>uint16</valueType>
+    <default>32</default>
+    <platInit/>
+    <initToZero/>
+    <mssAccessorName>mrw_safemode_mem_throttled_n_commands_per_port</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_THERMAL_MEMORY_POWER_LIMIT</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Machine Readable Workbook Thermal Memory Power Limit
+        Used to calculate throttles to be at or under the power limit
+        Per DIMM basis
+        KEY (0-19): In order
+        DIMM_SIZE = bits 0-3,
+        DIMM_GEN = 4-5,
+        DIMM_TYPE = 6-7,
+        DIMM_WIDTH = 8-10,
+        DIMM_DENSITY = 11-13,
+        DIMM_STACK_TYPE = 14-15,
+        DRAM_MFGID = 16-18,
+        DIMMS_PER_PORT = 19-20,
+        Bits 21-32: Not used
+        VALUE (bits 32-63) in cW:
+        VMEM+VPP thermal power limit per DIMM = 32-63
+        Consumers: eff_config_thermal and bulk_pwr_throttles
+    </description>
+    <valueType>uint64</valueType>
+    <mssUnits>cW</mssUnits>
+    <default>0xfffff80000000794</default>
+    <array>10</array>
+    <platInit/>
+    <initToZero/>
+    <mssAccessorName>mrw_thermal_memory_power_limit</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_PWR_INTERCEPT</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Machine Readable Workbook Power Curve Intercept for DIMM
+        Used to get the VDDR and VDDR+VPP power curve for each DIMM
+        Decoded and used to set ATTR_MSS_TOTAL_PWR_INTERCEPT
+        Key Value pair
+        KEY (0-19): In order
+        DIMM_SIZE = bits 0-3,
+        DIMM_GEN = 4-5,
+        DIMM_TYPE = 6-7,
+        DIMM_WIDTH = 8-10,
+        DIMM_DENSITY = 11-13,
+        DIMM_STACK_TYPE = 14-15,
+        DRAM_MFGID = 16-18,
+        DIMMS_PER_PORT = 19-20,
+        Bits 21-32: Not used
+        VALUE (bits 32-63) in cW:
+        VMEM power curve = 32-47
+        VMEM+VPP power curve = 48-63
+        Consumers: eff_config_thermal
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <initToZero/>
+    <array>100</array>
+    <default>0xfffff8000384044C</default>
+    <mssAccessorName>mrw_pwr_intercept</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_PWR_SLOPE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Machine Readable Workbook Power Curve Slope for DIMM
+        Used to get the VDDR and VDDR+VPP power curve for each DIMM
+        Decoded and used to set ATTR_MSS_TOTAL_PWR_INTERCEPT
+        Key Value pair
+        KEY (0-19): In order
+        DIMM_SIZE = bits 0-3,
+        DIMM_GEN = 4-5,
+        DIMM_TYPE = 6-7,
+        DIMM_WIDTH = 8-10,
+        DIMM_DENSITY = 11-13,
+        DIMM_STACK_TYPE = 14-15,
+        DRAM_MFGID = 16-18,
+        DIMMS_PER_PORT = 19-20,
+        Bits 21-32: Not used
+        VALUE (bits 32-63) in cW:
+        VMEM power curve = 32-47
+        VMEM+VPP power curve = 48-63
+        Consumers: eff_config_thermal
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <initToZero/>
+    <array>100</array>
+    <default>0xfffff800041A044C</default>
+    <mssAccessorName>mrw_pwr_slope</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_REFRESH_RATE_REQUEST</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Machine Readable Workbook Refresh Rate
+        Desired refresh interval used in refresh register 0, MBAREF0Q_CFG_REFRESH_INTERVAL
+        7.8 us (SINGLE)
+        3.9 us (DOUBLE)
+        7.02 us (SINGLE_10_PERCENT_FASTER)
+        3.51 us (DOUBLE_10_PERCENT_FASTER)
+   </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <enum>
+        DOUBLE=0,
+        SINGLE=1,
+        SINGLE_10_PERCENT_FASTER=2,
+        DOUBLE_10_PERCENT_FASTER=3
+    </enum>
+    <default>0x0</default>
+    <initToZero/>
+    <mssAccessorName>mrw_refresh_rate_request</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Machine Readable Workbook DIMM power curve percent uplift
+      for this system at max utilization.
+      Value should be 0 for ISDIMMs
+   </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <default>0x0</default>
+    <initToZero/>
+    <mssAccessorName>mrw_dimm_power_curve_percent_uplift</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT_IDLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Machine Readable Workbook DIMM power curve percent uplift
+      for this system at idle utilization.
+      Value should be 0 for ISDIMMs
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <default>0x0</default>
+    <initToZero/>
+    <mssAccessorName>mrw_dimm_power_curve_percent_uplift_idle</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Machine Readable Workbook for the number of M DRAM clocks.
+      One approach to curbing DRAM power usage is by throttling
+      traffic through a programmable N commands over M window.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <default>0x00000200</default>
+    <initToZero/>
+    <mssAccessorName>mrw_mem_m_dram_clocks</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_MAX_DRAM_DATABUS_UTIL</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Machine Readable Workbook value for maximum dram data bus utilization in centi percent (c%).
+      Used to determine memory throttle values.
+      Max databus utilization on a per port basis
+      Default to 90%
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <mssUnits>c%</mssUnits>
+    <default>0x00002328</default>
+    <initToZero/>
+    <mssAccessorName>mrw_max_dram_databus_util</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_POWER_CONTROL_REQUESTED</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Memory power control settings programmed during IPL
+        Used by OCC when exiting idle power-save mode
+    </description>
+    <valueType>uint8</valueType>
+    <enum>OFF = 0x00, POWER_DOWN = 0x01, PD_AND_STR = 0x02, PD_AND_STR_CLK_STOP = 0x03</enum>
+    <platInit/>
+    <default>OFF</default>
+    <initToZero/>
+    <mssAccessorName>mrw_power_control_requested</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Memory power control settings for IDLE powersave mode
+        Used by OCC when entering idle power-save mode
+    </description>
+    <valueType>uint8</valueType>
+    <enum>OFF = 0x00, POWER_DOWN = 0x01, PD_AND_STR = 0x02, PD_AND_STR_CLK_STOP = 0x03</enum>
+    <platInit/>
+    <default>OFF</default>
+    <initToZero/>
+    <mssAccessorName>mrw_idle_power_control_requested</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Machine Readable Workbook enablement of the HWP code to adjust the
+      VMEM regulator power limit based on number of installed DIMMs.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FALSE = 0, TRUE = 1</enum>
+    <platInit/>
+    <initToZero/>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR3</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Machine Readable Workbook VMEM regulator power limit per CDIMM assuming a full configuration. Units in cW
+        Used for Cumulus
+        Consumed in mss_eff_config_thermal
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <mssUnits>cW</mssUnits>
+    <initToZero/>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR4</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Machine Readable Workbook VMEM regulator power limit per DIMM assuming a full configuration. Units in cW
+        Consumed in mss_eff_config_thermal
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <mssUnits>cW</mssUnits>
+    <default>0x000006A4</default>
+    <initToZero/>
+    <mssAccessorName>mrw_vmem_regulator_power_limit_per_dimm_ddr4</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Machine Readable Workbook value for the maximum possible number
+      of dimms that can be installed under any of the VMEM regulators.
+      Consumed in eff_config_thermal to calculate mem_watt_target
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <initToZero/>
+    <mssAccessorName>mrw_max_number_dimms_possible_per_vmem_regulator</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_AVDD_OFFSET_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Used for to determine whether to apply an offset to AVDD. Supplied by MRW.</description>
+    <valueType>uint8</valueType>
+    <enum>ENABLE = 1, DISABLE = 0</enum>
+    <platInit/>
+    <initToZero/>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_VDD_OFFSET_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Used for to determine whether to apply an offset to VDD. Supplied by MRW.</description>
+    <valueType>uint8</valueType>
+    <enum>ENABLE = 1, DISABLE = 0</enum>
+    <platInit/>
+    <initToZero/>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_VCS_OFFSET_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Used for to determine whether to apply an offset to VCS. Supplied by MRW.</description>
+    <valueType>uint8</valueType>
+    <enum>ENABLE = 1, DISABLE = 0</enum>
+    <platInit/>
+    <initToZero/>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_VPP_OFFSET_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Used for to determine whether to apply an offset to VCS. Supplied by MRW.</description>
+    <valueType>uint8</valueType>
+    <enum>ENABLE = 1, DISABLE = 0</enum>
+    <platInit/>
+    <initToZero/>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_VDDR_OFFSET_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Used for to determine whether to apply an offset to VDDR. Supplied by MRW.</description>
+    <valueType>uint8</valueType>
+    <enum>ENABLE = 1, DISABLE = 0</enum>
+    <platInit/>
+    <initToZero/>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_FINE_REFRESH_MODE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Fine refresh mode.
+      Sets DDR4 MRS3.
+      ZZ uses normal mode.
+      From JEDEC DDR4 Spec 1716.78C from 07-2016
+      Page 47 Table 4.9.1
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+      NORMAL = 0,
+      FIXED_2X = 1,
+      FIXED_4X = 2,
+      FLY_2X = 5,
+      FLY_4X = 6
+    </enum>
+    <platInit/>
+    <initToZero/>
+    <default>NORMAL</default>
+    <mssAccessorName>mrw_fine_refresh_mode</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_TEMP_REFRESH_RANGE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Temperature refresh range.
+      Sets DDR4 MRS4.
+      Should be defaulted to extended range.
+      NORMAL for running at 85 degrees C or less, EXTENDED for 95 or less degrees C
+      Used for calculating periodic refresh intervals
+      JEDEC DDR4 spec 1716.78C from 07-2016
+      page 46 4.8.1
+    </description>
+    <valueType>uint8</valueType>
+    <enum>NORMAL = 0, EXTEND = 1</enum>
+    <platInit/>
+    <initToZero/>
+    <default>EXTEND</default>
+    <mssAccessorName>mrw_temp_refresh_range</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_RESET_DELAY_BEFORE_CAL</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>For resetting the phy delay values at the beginning of calling mss_draminit_training. YES means the vaules will be reset.</description>
+    <valueType>uint8</valueType>
+    <enum>YES = 0, NO = 1</enum>
+    <default>YES</default>
+    <initToZero/>
+    <platInit/>
+    <mssAccessorName>mrw_reset_delay_before_cal</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_PERIODIC_MEMCAL_MODE_OPTIONS</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Describes the settings for periodic calibration for all ports:
+      Reading left to right. (DEFAULT: 0xD90C -> Byte 0(11011001), Byte 1(00001100))
+      For each bit: OFF = 0, ON = 1. Setting to 0 indicates to disable periodic memcal.
+      Byte 0:
+      0: ZCAL
+      1: SYSCK_ALIGN
+      2: RDCENTERING
+      3: RDLCK_ALIGN
+      4: DQS_ALIGN
+      5: RDCLK_UPDATE
+      6: PER_DUTYCYCLE
+      7: PERCAL_PWR_DIS
+
+      Byte 1:
+      0: PERCAL_REPEAT
+      1: PERCAL_REPEAT
+      2: PERCAL_REPEAT
+      3: SINGLE_BIT_MPR
+      4: MBA_CFG_0
+      5: MBA_CFG_1
+      6: SPARE
+      7: SPARE
+    </description>
+    <valueType>uint16</valueType>
+    <mssUnits> encoded settings for periodic calibration </mssUnits>
+    <platInit/>
+    <default>0xD90C</default>
+    <mssAccessorName>mrw_periodic_memcal_mode_options</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_PERIODIC_ZQCAL_MODE_OPTIONS</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Describes the settings for periodic ZQ calibration for all ports:
+      Reading left to right. For each bit: OFF = 0, ON = 1.
+      Setting to 0 indicates to disable periodic zqcal.
+      Byte 0:
+      0: ZQCAL
+      All others reserved for future use
+    </description>
+    <valueType>uint16</valueType>
+    <mssUnits> encoded settings for periodic calibration </mssUnits>
+    <platInit/>
+    <default>0x8000</default>
+    <mssAccessorName>mrw_periodic_zqcal_mode_options</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_DRAM_2N_MODE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Allows user to manually turn on and off 2N Mode.
+      AUTO indicates to use Signal Integrity generated setting (from VPD).
+    </description>
+    <valueType>uint8</valueType>
+    <enum>AUTO = 0, FORCE_TO_1N_MODE = 1, FORCE_TO_2N_MODE = 2 </enum>
+    <mssUnits> encoded settings for 2N Mode </mssUnits>
+    <platInit/>
+    <initToZero/>
+    <default>AUTO</default>
+    <mssAccessorName>mrw_dram_2n_mode</mssAccessorName>
+  </attribute>
+
+ <attribute>
+    <id>ATTR_MSS_MRW_DRAM_WRITE_CRC</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description> Enables DRAM Write CRC</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <enum> DISABLE = 0, ENABLE = 1 </enum>
+    <default> 0  </default>
+    <mssAccessorName>mrw_dram_write_crc</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_TEMP_REFRESH_MODE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Used in MR4 A3
+        Temperature refresh mode
+        Should be defaulted to disable
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <initToZero/>
+    <enum> DISABLE = 0, ENABLE = 1 </enum>
+    <default> 0  </default>
+    <mssAccessorName>mrw_temp_refresh_mode</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_FORCE_BCMODE_OFF</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        An override switch to shut off broadcast mode
+        Enum values:
+        YES: broadcast mode is forced off
+        NO:  broadcast mode uses the default value
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <initToZero/>
+    <enum> NO = 0, YES = 1 </enum>
+    <mssAccessorName>mrw_force_bcmode_off</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_NVDIMM_PLUG_RULES</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        A bitmap containing the plug rules for NVDIMM.
+        1 if a DIMM supports an NVDIMM being plugged in, 0 if it does not
+        DIMM slot 0 is the left most bit
+        The index to the bitmap is the position of the DIMM target
+        As such, a bitmap of 0b10010000, would allow NVDIMM plugged into DIMM0 and DIMM3
+        Note: this attribute is a 64 bit number to account for 16 DIMM per processor if there is ever a 4 processor system
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <default> 0 </default>
+    <enum> NO_NVDIMM = 0, NVDIMM_CAPABLE = 1 </enum>
+    <mssAccessorName>mrw_nvdimm_plug_rules</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_ALLOW_UNSUPPORTED_RCW</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Switch that allows unsupported raw card references by providing a
+      default raw card setting.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <default> 1  </default>
+    <enum> DISABLE = 0, ENABLE = 1 </enum>
+    <mssAccessorName>mrw_allow_unsupported_rcw</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_SUPPORTED_DRAM_WIDTH</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Bitmap of DRAM widths supported by a system. A 1 indicates that the system supports a density.
+      Enums below represent the the bit location in the attribute for a given DRAM width.
+      Default value is 0xC -> both x4/x8 supported
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <default> 0xc0 </default>
+    <enum> X4 = 0, X8 = 1 </enum>
+    <mssAccessorName>mrw_supported_dram_width</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_OCMB_THERMAL_MEMORY_POWER_LIMIT</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Machine Readable Workbook Thermal Memory Power Limit
+        Used to calculate throttles to be at or under the power limit
+        Per DIMM basis
+        KEY (0-21): In order
+        DIMM_SIZE = bits 0-3,
+        DIMM_GEN = 4-5,
+        DIMM_TYPE = 6-8,
+        DIMM_WIDTH = 9-11,
+        DIMM_DENSITY = 12-14,
+        DIMM_STACK_TYPE = 15-16,
+        DRAM_MFGID = 17-19,
+        DIMM_HEIGHT = 20-21,
+        Bits 22-32: Not used
+        VALUE (bits 32-47) in cW:
+        OCMB+DRAM thermal power limit per DIMM = 32-47
+    </description>
+    <valueType>uint64</valueType>
+    <mssUnits>cW</mssUnits>
+    <default>0xfffffc07940000</default>
+    <array>25</array>
+    <platInit/>
+    <mssAccessorName>mrw_ocmb_thermal_memory_power_limit</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_OCMB_PWR_SLOPE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Machine Readable Workbook Power Curve Slope for DIMM
+        Used to get the OCMB+DRAM power curve for each DIMM
+        Per DIMM basis
+        KEY (0-21): In order
+        DIMM_SIZE = bits 0-3,
+        DIMM_GEN = 4-5,
+        DIMM_TYPE = 6-8,
+        DIMM_WIDTH = 9-11,
+        DIMM_DENSITY = 12-14,
+        DIMM_STACK_TYPE = 15-16,
+        DRAM_MFGID = 17-19,
+        DIMM_HEIGHT = 20-21,
+        Bits 22-32: Not used
+        VALUE (bits 32-47) in cW/utilization:
+        OCMB+DRAM thermal power limit per DIMM = 32-47
+    </description>
+    <valueType>uint64</valueType>
+    <mssUnits>cW</mssUnits>
+    <default>0xfffffc00044C0000</default>
+    <array>50</array>
+    <platInit/>
+    <mssAccessorName>mrw_ocmb_pwr_slope</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_OCMB_PWR_INTERCEPT</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Machine Readable Workbook Power Curve Intercept for DIMM
+        Used to get the OCMB+DRAM power curve for each DIMM
+        Per DIMM basis
+        KEY (0-21): In order
+        DIMM_SIZE = bits 0-3,
+        DIMM_GEN = 4-5,
+        DIMM_TYPE = 6-8,
+        DIMM_WIDTH = 9-11,
+        DIMM_DENSITY = 12-14,
+        DIMM_STACK_TYPE = 15-16,
+        DRAM_MFGID = 17-19,
+        DIMM_HEIGHT = 20-21,
+        Bits 22-32: Not used
+        VALUE (bits 32-47) in cW/utilization:
+        OCMB+DRAM thermal power limit per DIMM = 32-47
+    </description>
+    <valueType>uint64</valueType>
+    <mssUnits>cW/utilization</mssUnits>
+    <default>0xfffffc00044C0000</default>
+    <array>50</array>
+    <platInit/>
+    <mssAccessorName>mrw_ocmb_pwr_intercept</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_OCMB_CURRENT_CURVE_WITH_LIMIT</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Machine Readable Workbook Power Curve Intercept and limit for DIMM
+        Used to get the PMIC power curve and limit for each DIMM
+        Per DIMM basis
+        KEY (0-21): In order
+        DIMM_SIZE = bits 0-3,
+        DIMM_GEN = 4-5,
+        DIMM_TYPE = 6-8,
+        DIMM_WIDTH = 9-11,
+        DIMM_DENSITY = 12-14,
+        DIMM_STACK_TYPE = 15-16,
+        DRAM_MFGID = 17-19,
+        DIMM_HEIGHT = 20-21,
+        Bits 22-32: Not used
+        VALUE (bits 32-39): Current limit (dA)
+        VALUE (bits 40-51): Current slope (cA/utilization)
+        VALUE (bits 52-63): Current intercept (cA)
+    </description>
+    <valueType>uint64</valueType>
+    <mssUnits>dA, cA/utilization, cA</mssUnits>
+    <default>0xfffffc0000000000</default>
+    <array>25</array>
+    <platInit/>
+    <mssAccessorName>mrw_ocmb_current_curve_with_limit</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_SAFEMODE_DRAM_DATABUS_UTIL</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Machine Readable Workbook value for safe mode dram data bus utilization in centi percent (c%).
+        Set to below optimum value/ rate.
+        On a per port basis
+        Also used for emergency mode throttle
+        Used to thermally protect the system in all supported environmental conditions when OCC is not functional
+        Consumer: thermal_init, initfile
+        Default to 2500 c%%
+    </description>
+    <valueType>uint32</valueType>
+    <default>0x000009C4</default>
+    <platInit/>
+    <initToZero/>
+    <mssAccessorName>mrw_safemode_dram_databus_util</mssAccessorName>
+  </attribute>
 </attributes>
