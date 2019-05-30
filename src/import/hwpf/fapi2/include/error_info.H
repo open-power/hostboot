@@ -311,12 +311,14 @@ struct ErrorInfoCDG
     /// @param[in] i_deconfigure True if Target should be deconfigured
     /// @param[in] i_gard        True if Target should be GARDed
     /// @param[in] i_priority    The priority of any callout
+    /// @param[in] i_gardType    Type of GARD
     ///
     ErrorInfoCDG(const Target<TARGET_TYPE_ALL>& i_target,
                  const bool i_callout,
                  const bool i_deconfigure,
                  const bool i_gard,
-                 const CalloutPriorities::CalloutPriority i_priority);
+                 const CalloutPriorities::CalloutPriority i_priority,
+                 const GardTypes::GardType i_gardType);
 
 #ifdef FAPI_CUSTOM_MALLOC
     ///
@@ -348,6 +350,9 @@ struct ErrorInfoCDG
 
     // GARD Information
     bool iv_gard;
+
+    // GARD Type
+    GardTypes::GardType iv_gardType;
 };
 
 ///
@@ -598,6 +603,7 @@ struct ErrorInfoEntryTargetCDG
     uint8_t iv_deconfigure;
     uint8_t iv_gard;
     uint8_t iv_calloutPriority;
+    uint8_t iv_gardType;
     void addErrorInfo(std::shared_ptr<ErrorInfo> i_info,
                       const void* const* i_object) const;
 };

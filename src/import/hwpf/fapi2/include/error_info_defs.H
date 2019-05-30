@@ -278,6 +278,29 @@ enum CollectTrace
 };
 }
 
+///
+/// @enum gardType
+///
+/// This enumeration defines the possible gard types
+/// NOTE:This gardType is same as the gard types defined in HWAS
+/// so they should always be kept in sync.
+///
+namespace GardTypes
+{
+enum GardType
+{
+    GARD_NULL                   = 0x00,
+    GARD_User_Manual            = 0xD2, //Manual Guard.
+    GARD_Unrecoverable          = 0xE2, //TODO:RTC-76814
+    GARD_Fatal                  = 0xE3, //IPL Failures, and others.
+    GARD_Predictive             = 0xE6, //Policy flag to disable.
+    GARD_Power                  = 0xE9, //Needed since EID is NOT passed in.
+    GARD_PHYP                   = 0xEA, //Needed since EID is NOT passed in.
+    GARD_Reconfig               = 0xEB, //Force deconfig on reconfig loop
+    GARD_Void                   = 0xFF,
+};
+}
+
 // @brief convert the processor relative sbe target instance into a fapi pos
 //
 // @param[in] i_targType - type of target from SBE FFDC buffer
