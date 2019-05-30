@@ -427,7 +427,7 @@ class throttle
 
 
         ///
-        /// @brief Calculate ATTR_MSS_CHANNEL_PAIR_MAXPOWER and  ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT,
+        /// @brief Calculate ATTR_EXP_PORT__MAXPOWER and  ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT,
         /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
         /// @note Called in p9_mss_bulk_pwr_throttles
         /// @note determines the throttle levels based off of the port's power curve, max databus utilization,
@@ -437,7 +437,7 @@ class throttle
         fapi2::ReturnCode power_regulator_throttles ();
 
         ///
-        /// @brief Set ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT,
+        /// @brief Set ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT,
         /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
         /// @note Called in p9_mss_bulk_pwr_throttles
         /// @note Sets the throttle levels based off of the dimm's thermal limits
@@ -549,7 +549,7 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Set ATTR_MSS_CHANNEL_PAIR_MAXPOWER, ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT and _PER_PORT
+/// @brief Set ATTR_MSS_CHANNEL_PAIR_MAXPOWER, ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT and _PER_PORT
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
 /// @note Called in p9_mss_bulk_pwr_throttles
 /// @note determines the throttle levels based off of the port's power curve,
@@ -639,7 +639,7 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Set ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT and PER_PORT
+/// @brief Set ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT and PER_PORT
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
 /// @note Called in p9_mss_bulk_pwr_throttles
 /// @note Sets the throttle levels based off of the dimm's thermal limits
@@ -1179,7 +1179,7 @@ fapi2::ReturnCode equalize_throttles (const std::vector< fapi2::Target<T> >& i_t
                     //Need this because of pos traits and templating stuff
                     uint64_t l_fail = mss::fapi_pos(l_port);
                     //Set the failing port. OCC just needs one failing port, doesn't need all of them
-                    FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_MSS_MEM_PORT_POS_OF_FAIL_THROTTLE,
+                    FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_EXP_MEM_PORT_POS_OF_FAIL_THROTTLE,
                                              fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
                                              l_fail) );
 
