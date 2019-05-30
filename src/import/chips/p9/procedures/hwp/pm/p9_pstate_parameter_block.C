@@ -893,9 +893,9 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         if (iv_attrs.attr_system_vdm_disable == fapi2::ENUM_ATTR_SYSTEM_VDM_DISABLE_OFF)
         {
             //Initializing threshold and jump values for GPPB
-            memset ( io_globalppb->vid_point_set,
-                    0,
-                    sizeof(io_globalppb->vid_point_set));
+            for (uint8_t p = 0; p < NUM_OP_POINTS; p++) {
+                io_globalppb->vid_point_set[p] = iv_vid_point_set[0][p];
+            }
 
             memcpy ( io_globalppb->threshold_set,
                     iv_threshold_set,
@@ -905,9 +905,9 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
                     iv_jump_value_set,
                     sizeof(io_globalppb->jump_value_set));
 
-            memset ( io_globalppb->PsVIDCompSlopes,
-                    0,
-                    sizeof(io_globalppb->PsVIDCompSlopes));
+            for (uint32_t r = 0; r < VPD_NUM_SLOPES_REGION; r++) {
+                io_globalppb->PsVIDCompSlopes[r] = iv_PsVIDCompSlopes[0][r];
+            }
 
             memcpy ( io_globalppb->PsVDMThreshSlopes,
                     iv_PsVDMThreshSlopes,
