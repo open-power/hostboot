@@ -33,15 +33,98 @@
 // *HWP Level: 2
 // *HWP Consumed by: CI
 
-#ifndef EXP_CONSTS_H
-#define EXP_CONSTS_H
+#ifndef MSS_EXP_CONSTS_H
+#define MSS_EXP_CONSTS_H
+
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 namespace mss
 {
+
 namespace exp
 {
 
 constexpr uint32_t OCMB_ADDR_SHIFT = 3;
+
+///
+/// @brief enum list for the indexes for the address delays
+/// @note Taken from 07-MAY-19 firwmare document
+///
+enum attr_delay_index
+{
+    ODT1 = 0,
+    ODT0 = 0,
+    CS_N0 = 0,
+    CS_N1 = 0,
+    ADDR13 = 1,
+    ADDR5 = 1,
+    BG0 = 1,
+    CKE1 = 1,
+    ADDR17 = 2,
+    ADDR7 = 2,
+    BA0 = 2,
+    ADDR16 = 2,
+    ADDR8 = 3,
+    BG1 = 3,
+    CID1 = 3,
+    CID0 = 3,
+    ADDR1 = 4,
+    ADDR9 = 4,
+    ADDR2 = 4,
+    CAPARITY = 4,
+    ADDR12 = 5,
+    ADDR3 = 5,
+    ADDR4 = 5,
+    ADDR0 = 5,
+    CKE0 = 6,
+    ADDR15 = 6,
+    ACT_N = 6,
+    ADDR10 = 6,
+    ADDR11 = 7,
+    ADDR6 = 7,
+    BA1 = 7,
+    ADDR14 = 7,
+};
+
+///
+/// @brief enum list of explorer SPD derived attributes to set
+/// @note these attrs are strictly derived from SPD
+/// @warning wrapped in exp namesapce to be distinguished from
+/// the generic attr_eff_engine_fields
+///
+enum attr_eff_engine_fields
+{
+    // Template recursive base case
+    ATTR_EFF_BASE_CASE = 0,
+
+    // Attrs to set
+    BYTE_ENABLES = 1,
+    NIBBLE_ENABLES = 2,
+    SPD_TAA_MIN = 3,
+    FOUR_RANK_MODE = 4,
+    DDP_COMPATIBILITY = 5,
+    TSV_8H_SUPPORT = 6,
+    PSTATES = 7,
+    MRAM_SUPPORT = 8,
+    HEIGHT_3DS = 9,
+    SPD_CL_SUPPORTED = 10,
+
+    // Dispatcher set to last enum value
+    ATTR_EFF_DISPATCHER = SPD_CL_SUPPORTED,
+};
+
+///
+/// @brief common explorer sizes
+///
+enum sizes
+{
+    MAX_PORT_PER_OCMB = 1,
+    MAX_DIMM_PER_PORT = 2,
+    MAX_RANK_PER_DIMM = 4,
+    MAX_BITS_PER_PORT = 80,
+    MAX_RANKS_DIMM1 = 2,
+    MAX_MRANK_PER_PORT = MAX_DIMM_PER_PORT * MAX_RANK_PER_DIMM,
+};
 
 ///
 /// @brief explorer ffdc codes
@@ -52,11 +135,48 @@ enum ffdc_codes
     EXP_I2C_SET_FIELD = 0x0001,
     READ_HOST_FW_RESPONSE_STRUCT = 0x0003,
     READ_SENSOR_CACHE_STRUCT = 0x0004,
+    READ_CRCT_ENDIAN = 0x0005,
+    READ_TRAINING_RESPONSE_STRUCT = 0x0006,
+
+    SET_BYTE_ENABLES = 0x1041,
+    SET_NIBBLE_ENABLES = 0x1042,
+    SET_TAA_MIN = 0x1043,
+    SET_FOUR_RANK_MODE = 0x1044,
+    SET_DDP_COMPATIBILITY = 0x1045,
+    SET_TSV_8H_SUPPORT = 0x1046,
+    SET_VREF_DQ_TRAIN_RANGE = 0x1047,
+    SET_PSTATES = 0x1048,
+    SET_MRAM_SUPPORT = 0x1049,
+    SET_3DS_HEIGHT = 0x1050,
+    SET_SPD_CL_SUPPORTED = 0x1051,
+    SET_SERDES_FREQ = 0x1052,
+};
+
+///
+/// @brief constants for getecid procedure
+///
+enum ecid_consts
+{
+    FUSE_ARRAY_SIZE = 14,
+    DATA_IN_SIZE = 16,
+    // TK - Will need to be changed once ATTR_ECID is made larger
+    ATTR_ECID_SIZE = 2,
+};
+
+///
+/// @brief generic explorer constants
+///
+enum generic_consts
+{
+    // Number of DRAM for x4 vs x8
+    EXP_NUM_DRAM_X4 = 20,
+    EXP_NUM_DRAM_X8 = 10,
 };
 
 namespace i2c
 {
 
+///
 /// @brief List of explorer I2C commands
 ///
 enum cmd_id : uint8_t
@@ -78,7 +198,7 @@ enum sizes
 {
     // 32-bit commands
     FW_BOOT_CONFIG_BYTE_LEN = 4,
-    FW_STATUS_BYTE_LEN      = 4,
+    FW_STATUS_BYTE_LEN      = 5,
 
     FW_WRITE_REG_DATA_SIZE  = 0x08,
     FW_REG_ADDR_LATCH_SIZE  = 0x04,
@@ -99,6 +219,7 @@ enum status_codes
     SUCCESS              = 0x00,
     ADDRESS_OUT_OF_RANGE = 0x01,
     ADDRESS_PROHIBITED   = 0x02,
+    FW_BUSY              = 0xFE,
 };
 
 ///
@@ -176,17 +297,49 @@ namespace omi
 ///
 enum cmd_and_response_id
 {
-    FW_DDR_INTERFACE_INIT = 0x01,
-    FW_TEMP_SENSOR_INIT = 0x02,
-    FW_ERR_LOGGING_INTERFACE_INIT = 0x03,
-    FW_GO_COMMAND = 0x04,
-    FW_ADAPTER_PROPERTIES_GET = 0x05,
-    FW_STATUS_GET = 0x06,
-    FW_TEMPERATURE_GET = 0x07,
-    FW_ERROR_LOG_GET = 0x08,
-    FW_SPD_DATA_SET = 0x09,
-    FW_BINARY_UPGRADE = 0x0A,
-    FW_FLASH_LOADER_VERSION_INFO = 0x0B,
+    // initialize the DDR PHY controller when Step-by-Step BOOT mode
+    //  is selected
+    EXP_FW_PHY_STEP_BY_STEP_INIT = 0x01,
+
+    // sent by the Host along with PHY initialization data copied
+    //  into data buffer for FW to use for configuring DDR PHY interface.
+    EXP_FW_DDR_PHY_INIT = 0x02,
+
+    // read temperature sensor
+    EXP_FW_TEMP_SENSOR_PASS_THROUGH_READ = 0x03,
+
+    // configure temperature sensor
+    EXP_FW_TEMP_SENSOR_PASS_THROUGH_WRITE = 0x04,
+
+    // configure interval read mechanism
+    EXP_FW_TEMP_SENSOR_CONFIG_INTERVAL_READ = 0x05,
+
+    // transition the FW into runtime mode when Step-by-Step BOOT mode
+    //  is selected
+    EXP_FW_GO_COMMAND = 0x06,
+
+    // determine various configurations related to controller
+    EXP_FW_ADAPTER_PROPERTIES_GET = 0x07,
+
+    // sent by Host along with latest FW executable code, which is
+    //  copied into data buffer location so that existing FW can
+    //  upgrade the FW image
+    EXP_FW_BINARY_UPGRADE = 0x08,
+
+    // find the flash loader version information
+    EXP_FW_FLASH_LOADER_VERSION_INFO = 0x09,
+
+    // read the error logs from various modules of Explorer block
+    EXP_FW_ERROR_LOG_GET = 0x0A,
+};
+
+///
+/// @brief Command flag definitions
+///
+enum cmd_flags
+{
+    NO_FLAGS = 0,
+    ADDITIONAL_DATA = 1,
 };
 
 ///
@@ -199,7 +352,6 @@ enum response_arg
 };
 
 }// omi
-
 }// exp
 }// mss
 
