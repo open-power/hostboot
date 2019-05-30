@@ -304,9 +304,6 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
         uint32_t model = getChipModel( trgt );
 
         #ifdef __HOSTBOOT_MODULE
-        // TODO: remove depricated MODEL_EXPLORER once MODEL_OCMB is supported.
-        if ( MODEL_EXPLORER == model ) continue;
-
         // Special case for OCMBs (hostboot only issue for P9).
         if ( MODEL_OCMB == model )
         {
