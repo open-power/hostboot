@@ -24,7 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 ///
-/// @file memdiags.H
+/// @file gen_mss_memdiags.H
 /// @brief API for memory diagnostics
 ///
 // *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
@@ -41,9 +41,9 @@
 #include <generic/memory/lib/mss_generic_system_attribute_getters.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist.H>
-#include <generic/memory/lib/utils/mcbist/gen_address.H>
-#include <generic/memory/lib/utils/mcbist/gen_patterns.H>
-#include <generic/memory/lib/utils/mcbist/gen_settings.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_address.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_patterns.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_settings.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/utils/conversions.H>
@@ -226,6 +226,7 @@ fapi2::ReturnCode stop( const fapi2::Target<T>& i_target )
 {
     // Too long, make shorter
     using TT = mss::mcbistTraits<MC, T>;
+    using ET = mss::mcbistMCTraits<MC>;
 
     // Poll parameters are defined as TK so that we wait a nice time for operations
     // For now use the defaults
@@ -257,8 +258,8 @@ fapi2::ReturnCode stop( const fapi2::Target<T>& i_target )
 
     // So we've either stopped or we timed out
     FAPI_ASSERT( l_poll_result == true,
-                 fapi2::MSS_MEMDIAGS_MCBIST_FAILED_TO_STOP()
-                 .set_MCBIST_TARGET(i_target)
+                 ET::memdiags_failed_to_stop()
+                 .set_MC_TARGET(i_target)
                  .set_POLL_COUNT(l_poll_parameters.iv_poll_count),
                  "%s The MCBIST engine failed to stop its program",
                  mss::c_str(i_target) );
@@ -448,6 +449,7 @@ fapi_try_exit:
 template< mss::mc_type MC, fapi2::TargetType T, typename TT >
 inline fapi2::ReturnCode operation<MC, T, TT>::single_port_init()
 {
+    using ET = mcbistMCTraits<MC>;
     FAPI_INF("single port init for %s", mss::c_str(iv_target));
 
     const uint64_t l_relative_port_number = iv_const.iv_start_address.get_port();
@@ -455,10 +457,10 @@ inline fapi2::ReturnCode operation<MC, T, TT>::single_port_init()
 
     // Make sure the specificed port is functional
     FAPI_ASSERT( mss::is_functional<TT::PORT_TYPE>(iv_target, l_relative_port_number),
-                 fapi2::MSS_MEMDIAGS_PORT_NOT_FUNCTIONAL()
+                 ET::memdiags_port_not_functional()
                  .set_RELATIVE_PORT_POSITION(l_relative_port_number)
                  .set_ADDRESS( uint64_t(iv_const.iv_start_address) )
-                 .set_MCBIST_TARGET(iv_target),
+                 .set_MC_TARGET(iv_target),
                  "Port with relative postion %d is not functional for %s",
                  l_relative_port_number, mss::c_str(iv_target));
 
@@ -846,6 +848,7 @@ template<  mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
 fapi2::ReturnCode sf_init( const fapi2::Target<T>& i_target,
                            const uint64_t i_pattern = PATTERN_0 )
 {
+    using ET = mss::mcbistMCTraits<MC>;
     FAPI_INF("superfast init start for %s", mss::c_str(i_target));
 
     uint8_t l_sim = false;
@@ -866,7 +869,7 @@ fapi2::ReturnCode sf_init( const fapi2::Target<T>& i_target,
         sf_init_operation<MC> l_init_op(i_target, l_const, l_rc);
 
         FAPI_ASSERT( l_rc == fapi2::FAPI2_RC_SUCCESS,
-                     fapi2::MSS_MEMDIAGS_SUPERFAST_INIT_FAILED_TO_INIT().set_MCBIST_TARGET(i_target),
+                     ET::memdiags_sf_init_failed_init().set_MC_TARGET(i_target),
                      "Unable to initialize the MCBIST engine for a sf read %s", mss::c_str(i_target) );
 
         return l_init_op.execute();
@@ -901,6 +904,7 @@ fapi2::ReturnCode sf_read( const fapi2::Target<T>& i_target,
                            const end_boundary i_end = end_boundary::STOP_AFTER_SLAVE_RANK,
                            const mss::mcbist::address& i_end_address = mss::mcbist::address(TT::LARGEST_ADDRESS) )
 {
+    using ET = mss::mcbistMCTraits<MC>;
     FAPI_INF("superfast read - start for %s", mss::c_str(i_target));
 
     fapi2::ReturnCode l_rc;
@@ -908,7 +912,7 @@ fapi2::ReturnCode sf_read( const fapi2::Target<T>& i_target,
     sf_read_operation<MC> l_read_op(i_target, l_const, l_rc);
 
     FAPI_ASSERT( l_rc == fapi2::FAPI2_RC_SUCCESS,
-                 fapi2::MSS_MEMDIAGS_SUPERFAST_READ_FAILED_TO_INIT().set_MCBIST_TARGET(i_target),
+                 ET::memdiags_sf_init_failed_init().set_MC_TARGET(i_target),
                  "Unable to initialize the MCBIST engine for a sf read %s", mss::c_str(i_target) );
 
     return l_read_op.execute();
@@ -936,6 +940,7 @@ fapi2::ReturnCode background_scrub( const fapi2::Target<T>& i_target,
                                     const speed i_speed,
                                     const mss::mcbist::address& i_address )
 {
+    using ET = mss::mcbistMCTraits<MC>;
     FAPI_INF("continuous (background) scrub for %s", mss::c_str(i_target));
 
     fapi2::ReturnCode l_rc;
@@ -943,7 +948,7 @@ fapi2::ReturnCode background_scrub( const fapi2::Target<T>& i_target,
     continuous_scrub_operation<MC> l_op(i_target, l_const, l_rc);
 
     FAPI_ASSERT( l_rc == fapi2::FAPI2_RC_SUCCESS,
-                 fapi2::MSS_MEMDIAGS_CONTINUOUS_SCRUB_FAILED_TO_INIT().set_MCBIST_TARGET(i_target),
+                 ET::memdiags_continuous_scrub_failed_init().set_MC_TARGET(i_target),
                  "Unable to initialize the MCBIST engine for a continuous scrub %s", mss::c_str(i_target) );
 
     return l_op.execute();
@@ -974,6 +979,7 @@ fapi2::ReturnCode targeted_scrub( const fapi2::Target<T>& i_target,
                                   const mss::mcbist::address& i_end_address,
                                   const end_boundary i_end )
 {
+    using ET = mss::mcbistMCTraits<MC>;
     FAPI_INF("targeted scrub for %s", mss::c_str(i_target));
 
     fapi2::ReturnCode l_rc;
@@ -981,7 +987,7 @@ fapi2::ReturnCode targeted_scrub( const fapi2::Target<T>& i_target,
     targeted_scrub_operation<MC> l_op(i_target, l_const, l_rc);
 
     FAPI_ASSERT( l_rc == fapi2::FAPI2_RC_SUCCESS,
-                 fapi2::MSS_MEMDIAGS_TARGETED_SCRUB_FAILED_TO_INIT().set_MCBIST_TARGET(i_target),
+                 ET::memdiags_targeted_scrub_failed_init().set_MC_TARGET(i_target),
                  "Unable to initialize the MCBIST engine for a targeted scrub %s", mss::c_str(i_target) );
 
     return l_op.execute();
@@ -1010,6 +1016,7 @@ fapi2::ReturnCode continue_cmd( const fapi2::Target<T>& i_target,
 {
     // Too long, make shorter
     using TT = mss::mcbistTraits<MC, T>;
+    using ET = mss::mcbistMCTraits<MC>;
 
     // We can use a local mcbist::program to help with the bit processing, and then write just the registers we touch.
     mss::mcbist::program<MC> l_program;
@@ -1067,7 +1074,7 @@ fapi2::ReturnCode continue_cmd( const fapi2::Target<T>& i_target,
         };
 
         FAPI_ASSERT( l_stopped_at_boundary == false,
-                     fapi2::MSS_MEMDIAGS_ALREADY_AT_BOUNDARY().set_MCBIST_TARGET(i_target).set_BOUNDARY(i_stop),
+                     ET::memdiags_already_at_boundary().set_MC_TARGET(i_target).set_BOUNDARY(i_stop),
                      "Asked to stop at a boundary, but we're already there" );
 
         // Ok, if we're here either we need to change the stop and boundary conditions.
@@ -1118,6 +1125,7 @@ fapi_try_exit:
 template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 fapi2::ReturnCode mss_scrub_helper(const fapi2::Target<T>& i_target )
 {
+    using ET = mss::mcbistMCTraits<MC>;
     FAPI_INF("Start mss_scrub_helper for %s", mss::c_str(i_target));
 
     // If there are no DIMM we don't need to bother. In fact, we can't as we didn't setup
@@ -1183,7 +1191,7 @@ fapi2::ReturnCode mss_scrub_helper(const fapi2::Target<T>& i_target )
     l_probes);
 
     FAPI_ASSERT( l_poll_results == true,
-                 fapi2::MSS_MEMDIAGS_SUPERFAST_INIT_FAILED_TO_INIT().set_MCBIST_TARGET(i_target),
+                 ET::memdiags_sf_init_failed_init().set_MC_TARGET(i_target),
                  "p9_mss_scrub (init) timedout %s", mss::c_str(i_target) );
 
     // Unmask firs after memdiags and turn off FIFO mode
