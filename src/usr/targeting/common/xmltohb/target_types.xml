@@ -404,7 +404,7 @@
     </attribute>
   </targetType>
 
-  <!-- Generic OCMB, used for Exlporer, Gemini, etc -->
+  <!-- Generic OCMB, used for Explorer, Gemini, etc -->
   <targetType>
     <id>chip-ocmb</id>
     <parent>chip</parent>

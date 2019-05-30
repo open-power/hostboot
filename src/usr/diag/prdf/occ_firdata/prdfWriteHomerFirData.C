@@ -942,10 +942,6 @@ errlHndl_t getHwConfig( std::vector<HOMER_ChipInfo_t> & o_chipInfVector,
         // Iterate all of the OCMB chips.
         for ( auto & ocmb : getFunctionalTargetList(TYPE_OCMB_CHIP) )
         {
-            // TODO: remove depricated MODEL_EXPLORER once MODEL_OCMB is
-            // supported.
-            if ( MODEL_EXPLORER == getChipModel(ocmb) ) continue;
-
             // Get the OCMB chip type.
             HOMER_ChipType_t ocmbType = HOMER_CHIP_INVALID;
             switch ( getChipId(ocmb) )
