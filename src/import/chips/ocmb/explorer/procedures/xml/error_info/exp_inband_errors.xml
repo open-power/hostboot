@@ -55,4 +55,33 @@
     </callout>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_EXP_INBAND_BE_DATA_RANGE</rc>
+    <description>
+       Data is not long enough for big endian conversion
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>FUNCTION</ffdc>
+    <ffdc>DATA_SIZE</ffdc>
+    <ffdc>MAX_INDEX</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_EXP_INBAND_RSP_NO_DOORBELL</rc>
+    <description>
+       Doorbell is low when expecting a response
+    </description>
+    <ffdc>DATA</ffdc>
+    <ffdc>NUM_LOOPS</ffdc>
+    <ffdc>OCMB_TARGET</ffdc>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
 </hwpErrors>
