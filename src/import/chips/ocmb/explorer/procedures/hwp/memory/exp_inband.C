@@ -136,71 +136,88 @@ fapi2::ReturnCode putOCCfg(
 
 
 
-///
-/// @brief Converts user_input_msdg to little endian
-/// @param[in] i_input user_input_msdg structure to convert
-/// @return vector of little endian data
-///
-std::vector<uint8_t> user_input_msdg_to_little_endian(const user_input_msdg& i_input)
+fapi2::ReturnCode user_input_msdg_to_little_endian(const user_input_msdg& i_input, std::vector<uint8_t>& o_data,
+        uint32_t& o_crc)
 {
-    std::vector<uint8_t> l_data;
-    forceLE(i_input.DimmType, l_data);
-    forceLE(i_input.CsPresent, l_data);
-    forceLE(i_input.DramDataWidth, l_data);
-    forceLE(i_input.Height3DS, l_data);
-    forceLE(i_input.ActiveDBYTE, l_data);
-    forceLE(i_input.ActiveNibble, l_data);
-    forceLE(i_input.AddrMirror, l_data);
-    forceLE(i_input.ColumnAddrWidth, l_data);
-    forceLE(i_input.RowAddrWidth, l_data);
-    forceLE(i_input.SpdCLSupported, l_data);
-    forceLE(i_input.SpdtAAmin, l_data);
-    forceLE(i_input.Rank4Mode, l_data);
-    forceLE(i_input.DDPCompatible, l_data);
-    forceLE(i_input.TSV8HSupport, l_data);
-    forceLE(i_input.MRAMSupport, l_data);
-    forceLE(i_input.NumPStates, l_data);
-    forceLEArray(i_input.Frequency, MSDG_MAX_PSTATE, l_data);
-    forceLEArray(i_input.PhyOdtImpedance, MSDG_MAX_PSTATE, l_data);
-    forceLEArray(i_input.PhyDrvImpedancePU, MSDG_MAX_PSTATE, l_data);
-    forceLEArray(i_input.PhyDrvImpedancePD, MSDG_MAX_PSTATE, l_data);
-    forceLEArray(i_input.PhySlewRate, MSDG_MAX_PSTATE, l_data);
-    forceLE(i_input.ATxImpedance, l_data);
-    forceLE(i_input.ATxSlewRate, l_data);
-    forceLE(i_input.CKTxImpedance, l_data);
-    forceLE(i_input.CKTxSlewRate, l_data);
-    forceLE(i_input.AlertOdtImpedance, l_data);
-    forceLEArray(i_input.DramRttNomR0, MSDG_MAX_PSTATE, l_data);
-    forceLEArray(i_input.DramRttNomR1, MSDG_MAX_PSTATE, l_data);
-    forceLEArray(i_input.DramRttNomR2, MSDG_MAX_PSTATE, l_data);
-    forceLEArray(i_input.DramRttNomR3, MSDG_MAX_PSTATE, l_data);
-    forceLEArray(i_input.DramRttWrR0, MSDG_MAX_PSTATE, l_data);
-    forceLEArray(i_input.DramRttWrR1, MSDG_MAX_PSTATE, l_data);
-    forceLEArray(i_input.DramRttWrR2, MSDG_MAX_PSTATE, l_data);
-    forceLEArray(i_input.DramRttWrR3, MSDG_MAX_PSTATE, l_data);
-    forceLEArray(i_input.DramRttParkR0, MSDG_MAX_PSTATE, l_data);
-    forceLEArray(i_input.DramRttParkR1, MSDG_MAX_PSTATE, l_data);
-    forceLEArray(i_input.DramRttParkR2, MSDG_MAX_PSTATE, l_data);
-    forceLEArray(i_input.DramRttParkR3, MSDG_MAX_PSTATE, l_data);
-    forceLEArray(i_input.DramDic, MSDG_MAX_PSTATE, l_data);
-    forceLEArray(i_input.DramWritePreamble, MSDG_MAX_PSTATE, l_data);
-    forceLEArray(i_input.DramReadPreamble, MSDG_MAX_PSTATE, l_data);
-    forceLE(i_input.PhyEqualization, l_data);
-    forceLEArray(i_input.InitVrefDQ, MSDG_MAX_PSTATE, l_data);
-    forceLEArray(i_input.InitPhyVref, MSDG_MAX_PSTATE, l_data);
-    forceLEArray(i_input.OdtWrMapCs, MSDG_MAX_PSTATE, l_data);
-    forceLEArray(i_input.OdtRdMapCs, MSDG_MAX_PSTATE, l_data);
-    forceLEArray(i_input.Geardown, MSDG_MAX_PSTATE, l_data);
-    forceLEArray(i_input.CALatencyAdder, MSDG_MAX_PSTATE, l_data);
-    forceLEArray(i_input.BistCALMode, MSDG_MAX_PSTATE, l_data);
-    forceLEArray(i_input.BistCAParityLatency, MSDG_MAX_PSTATE, l_data);
-    forceLEArray(i_input.RcdDic, MSDG_MAX_PSTATE, l_data);
-    forceLEArray(i_input.RcdVoltageCtrl, MSDG_MAX_PSTATE, l_data);
-    forceLE(i_input.RcdIBTCtrl, l_data);
-    forceLE(i_input.RcdDBDic, l_data);
-    forceLE(i_input.RcdSlewRate, l_data);
-    forceLE(i_input.EmulationSupport, l_data);
-    return l_data;
+    o_data.clear();
+    FAPI_TRY(forceCrctEndian(i_input.version_number, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.DimmType, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.CsPresent, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.DramDataWidth, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.Height3DS, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.ActiveDBYTE, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.ActiveNibble, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.AddrMirror, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.ColumnAddrWidth, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.RowAddrWidth, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.SpdCLSupported, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.SpdtAAmin, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.Rank4Mode, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.EncodedQuadCs, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.DDPCompatible, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.TSV8HSupport, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.MRAMSupport, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.MDSSupport, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.NumPStates, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.Frequency, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.PhyOdtImpedance, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.PhyDrvImpedancePU, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.PhyDrvImpedancePD, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.PhySlewRate, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.ATxImpedance, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.ATxSlewRate, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.CKTxImpedance, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.CKTxSlewRate, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.AlertOdtImpedance, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.DramRttNomR0, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.DramRttNomR1, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.DramRttNomR2, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.DramRttNomR3, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.DramRttWrR0, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.DramRttWrR1, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.DramRttWrR2, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.DramRttWrR3, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.DramRttParkR0, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.DramRttParkR1, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.DramRttParkR2, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.DramRttParkR3, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.DramDic, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.DramWritePreamble, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.DramReadPreamble, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.PhyEqualization, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.InitVrefDQ, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.InitPhyVref, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.OdtWrMapCs, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.OdtRdMapCs, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.Geardown, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.CALatencyAdder, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.BistCALMode, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.BistCAParityLatency, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.RcdDic, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.RcdVoltageCtrl, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.RcdIBTCtrl, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.RcdDBDic, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.RcdSlewRate, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.DFIMRL_DDRCLK, o_data));
+
+    for(uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
+    {
+        FAPI_TRY(forceCrctEndianArray(i_input.ATxDly_A[l_pstate], DRAMINIT_NUM_ADDR_DELAYS, o_data));
+    }
+
+    for(uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
+    {
+        FAPI_TRY(forceCrctEndianArray(i_input.ATxDly_B[l_pstate], DRAMINIT_NUM_ADDR_DELAYS, o_data));
+    }
+
+    o_crc = crc32_gen(o_data);
+
+    padCommData(o_data);
+    FAPI_TRY(correctMMIOEndianForStruct(o_data));
+
+fapi_try_exit:
+    FAPI_DBG("Exiting with return code : 0x%08X...", (uint64_t) fapi2::current_err);
+    return fapi2::current_err;
 }
 
 /// @brief Writes user_input_msdg to the data buffer
@@ -215,39 +232,43 @@ fapi2::ReturnCode putUserInputMsdg(
     const user_input_msdg& i_data,
     uint32_t& o_crc)
 {
-    const auto l_data = user_input_msdg_to_little_endian(i_data);
-    o_crc = crc32_gen(l_data);
+    std::vector<uint8_t> l_data;
 
-    return fapi2::putMMIO(i_target, EXPLR_IB_DATA_ADDR, 8, l_data);
+    FAPI_TRY(user_input_msdg_to_little_endian(i_data, l_data, o_crc));
+
+    FAPI_TRY(fapi2::putMMIO(i_target, EXPLR_IB_DATA_ADDR, BUFFER_TRANSACTION_SIZE, l_data));
+
+fapi_try_exit:
+    FAPI_DBG("Exiting with return code : 0x%08X...", (uint64_t) fapi2::current_err);
+    return fapi2::current_err;
 }
 
 
 
-///
-/// @brief Converts host_fw_command_struct to little endian
-/// @param[in] i_input user_input_msdg structure to convert
-/// @return vector of little endian data
-///
-std::vector<uint8_t> host_fw_command_struct_to_little_endian(const host_fw_command_struct& i_input)
+fapi2::ReturnCode host_fw_command_struct_to_little_endian(const host_fw_command_struct& i_input,
+        std::vector<uint8_t>& o_data)
 {
-    std::vector<uint8_t> l_data;
-
-    forceLE(i_input.cmd_id, l_data);
-    forceLE(i_input.cmd_flags, l_data);
-    forceLE(i_input.request_identifier, l_data);
-    forceLE(i_input.cmd_length, l_data);
-    forceLE(i_input.cmd_crc, l_data);
-    forceLE(i_input.host_work_area, l_data);
-    forceLE(i_input.cmd_work_area, l_data);
-    forceLEArray(i_input.padding, CMD_PADDING_SIZE, l_data);
-    forceLEArray(i_input.command_argument, ARGUMENT_SIZE, l_data);
+    uint32_t l_cmd_header_crc = 0;
+    FAPI_TRY(forceCrctEndian(i_input.cmd_id, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.cmd_flags, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.request_identifier, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.cmd_length, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.cmd_crc, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.host_work_area, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.cmd_work_area, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.padding, CMD_PADDING_SIZE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.command_argument, ARGUMENT_SIZE, o_data));
 
     // Generates and adds on the CRC
-    const uint32_t l_cmd_header_crc = crc32_gen(l_data);
+    l_cmd_header_crc = crc32_gen(o_data);
     FAPI_DBG("Command header crc: %xl", l_cmd_header_crc);
-    forceLE(l_cmd_header_crc, l_data);
+    FAPI_TRY(forceCrctEndian(l_cmd_header_crc, o_data));
+    padCommData(o_data);
+    FAPI_TRY(correctMMIOEndianForStruct(o_data));
 
-    return l_data;
+fapi_try_exit:
+    FAPI_DBG("Exiting with return code : 0x%08X...", (uint64_t) fapi2::current_err);
+    return fapi2::current_err;
 }
 
 /// @brief Writes a command to the command buffer and issues interrupt
@@ -260,20 +281,26 @@ fapi2::ReturnCode putCMD(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
     const host_fw_command_struct& i_cmd)
 {
-    const auto l_data = host_fw_command_struct_to_little_endian(i_cmd);
+    std::vector<uint8_t> l_data;
     fapi2::buffer<uint64_t> l_scom;
+
+    FAPI_TRY(host_fw_command_struct_to_little_endian(i_cmd, l_data));
 
     // Clear the doorbell
     l_scom.setBit<EXPLR_MMIO_MDBELLC_MDBELL_MDBELL>();
-    FAPI_TRY(mss::exp::ib::putScom(i_target, EXPLR_MMIO_MDBELLC, l_scom));
+    FAPI_DBG("Clearing the inbound doorbell...");
+    FAPI_TRY(fapi2::putScom(i_target, EXPLR_MMIO_MDBELLC, l_scom), "Failed to clear inbound doorbell register");
 
     // Set the command
-    FAPI_TRY(fapi2::putMMIO(i_target, EXPLR_IB_CMD_ADDR, 8, l_data))
+    FAPI_DBG("Writing the command...");
+    FAPI_TRY(fapi2::putMMIO(i_target, EXPLR_IB_CMD_ADDR, BUFFER_TRANSACTION_SIZE, l_data),
+             "Failed to write to the command buffer");
 
     // Ring the doorbell - aka the bit that interrupts the microchip FW and tells it to do the thing
     l_scom.flush<0>();
     l_scom.setBit<EXPLR_MMIO_MDBELL_MDBELL>();
-    FAPI_TRY(mss::exp::ib::putScom(i_target, EXPLR_MMIO_MDBELL, l_scom));
+    FAPI_DBG("Setting the inbound doorbell...");
+    FAPI_TRY(fapi2::putScom(i_target, EXPLR_MMIO_MDBELL, l_scom), "Failed to set inbound doorbell bit");
 
 fapi_try_exit:
     FAPI_DBG("Exiting with return code : 0x%08X...", (uint64_t) fapi2::current_err);
@@ -382,34 +409,34 @@ fapi_try_exit:
 }
 
 
-
 ///
 /// @brief Converts a little endian data array to a host_fw_response_struct
 /// @param[in] i_data little endian data to process
 /// @param[out] o_crc computed CRC
 /// @param[out] o_response response structure
-/// @return true if success false if failure
-/// @note helper function - returning a bool and will have true FFDC in a separate function
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
-bool host_fw_response_struct_from_little_endian(const std::vector<uint8_t>& i_data,
+fapi2::ReturnCode host_fw_response_struct_from_little_endian(std::vector<uint8_t>& i_data,
         uint32_t& o_crc,
         host_fw_response_struct& o_response)
 {
     uint32_t l_idx = 0;
-    bool l_rc = readLE(i_data, l_idx, o_response.response_id);
-    l_rc &= readLE(i_data, l_idx, o_response.response_flags);
-    l_rc &= readLE(i_data, l_idx, o_response.request_identifier);
-    l_rc &= readLE(i_data, l_idx, o_response.response_length);
-    l_rc &= readLE(i_data, l_idx, o_response.response_crc);
-    l_rc &= readLE(i_data, l_idx, o_response.host_work_area);
-
-    l_rc &= readLEArray(i_data, RSP_PADDING_SIZE, l_idx, o_response.padding);
-    l_rc &= readLEArray(i_data, ARGUMENT_SIZE, l_idx, o_response.response_argument);
+    FAPI_TRY(correctMMIOEndianForStruct(i_data));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, o_response.response_id));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, o_response.response_flags));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, o_response.request_identifier));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, o_response.response_length));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, o_response.response_crc));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, o_response.host_work_area));
+    FAPI_TRY(readCrctEndianArray(i_data, RSP_PADDING_SIZE, l_idx, o_response.padding));
+    FAPI_TRY(readCrctEndianArray(i_data, ARGUMENT_SIZE, l_idx, o_response.response_argument));
 
     o_crc = crc32_gen(i_data, l_idx);
-    l_rc &= readLE(i_data, l_idx, o_response.response_header_crc);
 
-    return l_rc;
+    FAPI_TRY(readCrctEndian(i_data, l_idx, o_response.response_header_crc));
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
@@ -422,14 +449,12 @@ bool host_fw_response_struct_from_little_endian(const std::vector<uint8_t>& i_da
 ///
 fapi2::ReturnCode host_fw_response_struct_from_little_endian(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
         i_target,
-        const std::vector<uint8_t>& i_data,
+        std::vector<uint8_t>& i_data,
         host_fw_response_struct& o_response)
 {
-    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     uint32_t l_crc = 0;
-    FAPI_ASSERT( host_fw_response_struct_from_little_endian(i_data,
-                 l_crc,
-                 o_response),
+    fapi2::current_err = host_fw_response_struct_from_little_endian(i_data, l_crc, o_response);
+    FAPI_ASSERT( fapi2::current_err == fapi2::FAPI2_RC_SUCCESS,
                  fapi2::EXP_INBAND_LE_DATA_RANGE()
                  .set_TARGET(i_target)
                  .set_FUNCTION(mss::exp::READ_HOST_FW_RESPONSE_STRUCT)
@@ -438,6 +463,8 @@ fapi2::ReturnCode host_fw_response_struct_from_little_endian(const fapi2::Target
                  "%s Failed to convert from data to host_fw_response_struct data size %u expected size %u",
                  mss::c_str(i_target), i_data.size(), sizeof(host_fw_response_struct));
 
+//TODO CQ: SW461052 Correct MMIO CRC responses
+#ifndef CONFIG_AXONE_BRING_UP
     FAPI_ASSERT(l_crc == o_response.response_header_crc,
                 fapi2::EXP_INBAND_RSP_CRC_ERR()
                 .set_COMPUTED(l_crc)
@@ -445,6 +472,68 @@ fapi2::ReturnCode host_fw_response_struct_from_little_endian(const fapi2::Target
                 .set_OCMB_TARGET(i_target),
                 "%s Response CRC failed to validate computed: 0x%08x got: 0x%08x",
                 mss::c_str(i_target), l_crc, o_response.response_header_crc);
+#endif
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Polls for response ready door bell bit
+/// @param[in] i_target the OCMB target on which to operate
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode poll_for_response_ready(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+{
+    constexpr uint64_t NUM_LOOPS = 50;
+    // So, why aren't we using the memory team's polling API?
+    // This is a base function that will be utilized by the platform code
+    // As such, we don't want to pull in more libraries than we need to: it would cause extra dependencies
+    // So, we're decomposing the polling library below
+    bool l_doorbell_response = false;
+    uint64_t l_loop = 0;
+    fapi2::buffer<uint64_t> l_data;
+
+    // Loop until we max our our loop count or get a doorbell response
+    for(; l_loop < NUM_LOOPS && !l_doorbell_response; ++l_loop)
+    {
+        FAPI_TRY(fapi2::getScom(i_target, EXPLR_MIPS_TO_OCMB_INTERRUPT_REGISTER1, l_data));
+        l_doorbell_response = l_data.getBit<EXPLR_MIPS_TO_OCMB_INTERRUPT_REGISTER1_DOORBELL>();
+        FAPI_TRY( fapi2::delay( DELAY_100NS, 200) );
+    }
+
+    FAPI_DBG("%s stopped on loop%u/%u data:0x%016lx %u",
+             mss::c_str(i_target), l_loop, NUM_LOOPS, l_data, l_doorbell_response);
+
+    // Error check - doorbell response should be true
+    FAPI_ASSERT(l_doorbell_response,
+                fapi2::EXP_INBAND_RSP_NO_DOORBELL()
+                .set_OCMB_TARGET(i_target)
+                .set_DATA(l_data)
+                .set_NUM_LOOPS(l_loop),
+                "%s doorbell timed out after %u loops: data 0x%016lx",
+                mss::c_str(i_target), l_loop, l_data);
+
+    // Ding-dong! the doorbell is rung and the response is ready
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Clears outbound (response ready) door bell bit
+/// @param[in] i_target the OCMB target on which to operate
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode clear_outbound_doorbell(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+{
+    fapi2::buffer<uint64_t> l_data;
+
+    // Doorbell is cleared by writing a '1' to the doorbell bit
+    l_data.setBit<EXPLR_MIPS_TO_OCMB_INTERRUPT_REGISTER1_DOORBELL>();
+
+    FAPI_DBG("%s Clearing outbound doorbell...", mss::c_str(i_target));
+    FAPI_TRY(fapi2::putScom(i_target, EXPLR_MIPS_TO_OCMB_INTERRUPT_REGISTER1, l_data));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -454,16 +543,44 @@ fapi_try_exit:
 ///
 /// @param[in] i_target     The Explorer chip to read data from
 /// @param[out] o_rsp       The response data read from the buffer
+/// @param[out] o_data      Raw (little-endian) response data buffer portion
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 fapi2::ReturnCode getRSP(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-    host_fw_response_struct& o_rsp)
+    host_fw_response_struct& o_rsp,
+    std::vector<uint8_t>& o_data)
 {
     std::vector<uint8_t> l_data(static_cast<int>(sizeof(o_rsp)));
-    FAPI_TRY(fapi2::getMMIO(i_target, EXPLR_IB_RSP_ADDR, 8, l_data));
 
+    // Polls for the response to be ready first
+    FAPI_TRY(poll_for_response_ready(i_target));
+
+    FAPI_DBG("Reading the response buffer...");
+    FAPI_TRY(fapi2::getMMIO(i_target, EXPLR_IB_RSP_ADDR, BUFFER_TRANSACTION_SIZE, l_data));
     FAPI_TRY(host_fw_response_struct_from_little_endian(i_target, l_data, o_rsp));
+
+    FAPI_DBG("Checking if we have response data...");
+
+    // If response data in buffer portion, return that too
+    if (o_rsp.response_length > 0)
+    {
+        // make sure expected size is a multiple of 8
+        const uint32_t l_padding = ((o_rsp.response_length % 8) > 0) ? (8 - (o_rsp.response_length % 8)) : 0;
+        o_data.resize( o_rsp.response_length + l_padding );
+        FAPI_DBG("Reading response data...");
+
+        FAPI_TRY( fapi2::getMMIO(i_target, EXPLR_IB_DATA_ADDR, BUFFER_TRANSACTION_SIZE, o_data) );
+        FAPI_TRY( correctMMIOEndianForStruct(o_data) );
+    }
+    else
+    {
+        FAPI_DBG("No response data returned...");
+        // make sure no buffer data is returned
+        o_data.clear();
+    }
+
+    FAPI_TRY(clear_outbound_doorbell(i_target));
 
 fapi_try_exit:
     FAPI_DBG("%s Exiting with return code : 0x%08X...", mss::c_str(i_target), (uint64_t) fapi2::current_err);
@@ -480,29 +597,32 @@ fapi_try_exit:
 /// @return true if success false if failure
 /// @note helper function - returning a bool and will have true FFDC in a separate function
 ///
-bool sensor_cache_struct_from_little_endian(const std::vector<uint8_t>& i_data,
+fapi2::ReturnCode sensor_cache_struct_from_little_endian(std::vector<uint8_t>& i_data,
         sensor_cache_struct& o_data)
 {
     uint32_t l_idx = 0;
-    bool l_rc = readLE(i_data, l_idx, o_data.status);
-    l_rc &= readLE(i_data, l_idx, o_data.ocmb_dts);
-    l_rc &= readLE(i_data, l_idx, o_data.mem_dts0);
-    l_rc &= readLE(i_data, l_idx, o_data.mem_dts1);
-    l_rc &= readLE(i_data, l_idx, o_data.mba_reads);
-    l_rc &= readLE(i_data, l_idx, o_data.mba_writes);
-    l_rc &= readLE(i_data, l_idx, o_data.mba_activations);
-    l_rc &= readLE(i_data, l_idx, o_data.mba_powerups);
-    l_rc &= readLE(i_data, l_idx, o_data.self_timed_refresh);
-    l_rc &= readLEArray(i_data, SENSOR_CACHE_PADDING_SIZE_0, l_idx, o_data.reserved0);
-    l_rc &= readLE(i_data, l_idx, o_data.frame_count);
-    l_rc &= readLE(i_data, l_idx, o_data.mba_arrival_histo_base);
-    l_rc &= readLE(i_data, l_idx, o_data.mba_arrival_histo_low);
-    l_rc &= readLE(i_data, l_idx, o_data.mba_arrival_histo_med);
-    l_rc &= readLE(i_data, l_idx, o_data.mba_arrival_histo_high);
-    l_rc &= readLE(i_data, l_idx, o_data.initial_packet1);
-    l_rc &= readLEArray(i_data, SENSOR_CACHE_PADDING_SIZE_1, l_idx, o_data.reserved1);
 
-    return l_rc;
+    FAPI_TRY(correctMMIOEndianForStruct(i_data));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, o_data.status));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, o_data.ocmb_dts));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, o_data.mem_dts0));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, o_data.mem_dts1));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, o_data.mba_reads));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, o_data.mba_writes));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, o_data.mba_activations));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, o_data.mba_powerups));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, o_data.self_timed_refresh));
+    FAPI_TRY(readCrctEndianArray(i_data, SENSOR_CACHE_PADDING_SIZE_0, l_idx, o_data.reserved0));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, o_data.frame_count));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, o_data.mba_arrival_histo_base));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, o_data.mba_arrival_histo_low));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, o_data.mba_arrival_histo_med));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, o_data.mba_arrival_histo_high));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, o_data.initial_packet1));
+    FAPI_TRY(readCrctEndianArray(i_data, SENSOR_CACHE_PADDING_SIZE_1, l_idx, o_data.reserved1));
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
@@ -515,19 +635,11 @@ bool sensor_cache_struct_from_little_endian(const std::vector<uint8_t>& i_data,
 ///
 fapi2::ReturnCode sensor_cache_struct_from_little_endian(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
         i_target,
-        const std::vector<uint8_t>& i_data,
+        std::vector<uint8_t>& i_data,
         sensor_cache_struct& o_data)
 {
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-    FAPI_ASSERT( sensor_cache_struct_from_little_endian(i_data,
-                 o_data),
-                 fapi2::EXP_INBAND_LE_DATA_RANGE()
-                 .set_TARGET(i_target)
-                 .set_FUNCTION(mss::exp::READ_SENSOR_CACHE_STRUCT)
-                 .set_DATA_SIZE(i_data.size())
-                 .set_MAX_INDEX(sizeof(sensor_cache_struct)),
-                 "%s Failed to convert from data to sensor_cache_struct data size %u expected size %u",
-                 mss::c_str(i_target), i_data.size(), sizeof(sensor_cache_struct));
+    FAPI_TRY(sensor_cache_struct_from_little_endian(i_data, o_data));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -556,6 +668,215 @@ fapi_try_exit:
     FAPI_DBG("%s Exiting with return code : 0x%08X...", mss::c_str(i_target), (uint64_t) fapi2::current_err);
     return fapi2::current_err;
 }
+
+
+
+
+
+/// @brief We will use 4 or 8 byte reads via fapi2::put/getMMIO for buffer
+/// data structures.  The byte order of the 4 or 8 byte reads should be little
+/// endian.  In order to represent the data structure in its proper layout
+/// the endianness of each 4 or 8 byte read must be corrected.
+///
+/// @param[in,out] io_data   Either data structure in proper byte order that we
+///      want to swizzle prior to writing to the buffer, or the data returned
+///      from reading the buffer that we want to unsizzle.
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode correctMMIOEndianForStruct(std::vector<uint8_t>& io_data)
+{
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_MSS_OCMB_EXP_STRUCT_MMIO_ENDIAN_CTRL_Type l_endian_ctrl;
+    size_t l_loops = 0;
+
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_STRUCT_MMIO_ENDIAN_CTRL,
+                            FAPI_SYSTEM, l_endian_ctrl));
+
+    if (l_endian_ctrl == fapi2::ENUM_ATTR_MSS_OCMB_EXP_STRUCT_MMIO_ENDIAN_CTRL_NO_SWAP)
+    {
+        goto fapi_try_exit;
+    }
+
+    l_loops = io_data.size() / BUFFER_TRANSACTION_SIZE;
+
+    for (size_t l_idx = 0; l_idx < l_loops; l_idx++)
+    {
+        for (int l_bidx = BUFFER_TRANSACTION_SIZE - 1; l_bidx >= 0; l_bidx--)
+        {
+            io_data.push_back(io_data.at(l_bidx));
+        }
+
+        io_data.erase(io_data.begin(), io_data.begin() + BUFFER_TRANSACTION_SIZE);
+    }
+
+    // Because of how the AXI bridge in Explorer breaks up the transaction, we also need to swap 32-bit word order
+    for (size_t l_idx = 0; l_idx < io_data.size(); l_idx += BUFFER_TRANSACTION_SIZE)
+    {
+        for (size_t l_bidx = l_idx; l_bidx < l_idx + BUFFER_TRANSACTION_SIZE / 2; l_bidx++)
+        {
+            uint8_t l_temp_first_word = io_data.at(l_bidx);
+            uint8_t l_temp_second_word = io_data.at(l_bidx + BUFFER_TRANSACTION_SIZE / 2);
+            io_data[l_bidx] = l_temp_second_word;
+            io_data[l_bidx + BUFFER_TRANSACTION_SIZE / 2] = l_temp_first_word;
+        }
+    }
+
+fapi_try_exit:
+    FAPI_DBG("Exiting with return code : 0x%08X...", (uint64_t) fapi2::current_err);
+    return fapi2::current_err;
+}
+
+///
+/// @brief Forces native data into the correct endianness necessary for Explorer
+/// buffer data structures.
+/// @tparam T the data type to process
+/// @param[in] i_input inputted data to process
+/// @param[in,out] io_data vector to append data to
+///
+template < typename T >
+fapi2::ReturnCode forceCrctEndian(const T& i_input, std::vector<uint8_t>& io_data)
+{
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_MSS_OCMB_EXP_STRUCT_ENDIAN_Type l_struct_endian;
+
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_STRUCT_ENDIAN,
+                            FAPI_SYSTEM, l_struct_endian));
+
+    if (l_struct_endian == fapi2::ENUM_ATTR_MSS_OCMB_EXP_STRUCT_ENDIAN_LITTLE_ENDIAN)
+    {
+        forceLE(i_input, io_data);
+    }
+    else
+    {
+        forceBE(i_input, io_data);
+    }
+
+fapi_try_exit:
+    FAPI_DBG("Exiting with return code : 0x%08X...", (uint64_t) fapi2::current_err);
+    return fapi2::current_err;
+}
+
+
+
+///
+/// @brief Forces native data into the correct endianness for an array buffer
+/// data structures.
+/// @tparam T the data type to process
+/// @param[in] i_input inputted data to process
+/// @param[in] i_size size of the array
+/// @param[in,out] io_data vector to append data to
+///
+template < typename T >
+fapi2::ReturnCode forceCrctEndianArray(const T* i_input, const uint64_t i_size, std::vector<uint8_t>& io_data)
+{
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_MSS_OCMB_EXP_STRUCT_ENDIAN_Type l_struct_endian;
+
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_STRUCT_ENDIAN,
+                            FAPI_SYSTEM, l_struct_endian));
+
+    if (l_struct_endian == fapi2::ENUM_ATTR_MSS_OCMB_EXP_STRUCT_ENDIAN_LITTLE_ENDIAN)
+    {
+        forceLEArray(i_input, i_size, io_data);
+    }
+    else
+    {
+        forceBEArray(i_input, i_size, io_data);
+    }
+
+fapi_try_exit:
+    FAPI_DBG("Exiting with return code : 0x%08X...", (uint64_t) fapi2::current_err);
+    return fapi2::current_err;
+}
+
+
+
+///
+/// @brief Converts endianness of data read from Explorer buffer data structures
+//  into native order.
+/// @tparam T the data type to output to
+/// @param[in] i_input inputted data to process
+/// @param[in,out] io_idx current index
+/// @param[out] o_data data that has been converted into native endianness
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+///
+template < typename T >
+fapi2::ReturnCode readCrctEndian(const std::vector<uint8_t>& i_input, uint32_t& io_idx, T& o_data)
+{
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_MSS_OCMB_EXP_STRUCT_ENDIAN_Type l_struct_endian;
+
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_STRUCT_ENDIAN,
+                            FAPI_SYSTEM, l_struct_endian));
+
+    if (l_struct_endian == fapi2::ENUM_ATTR_MSS_OCMB_EXP_STRUCT_ENDIAN_LITTLE_ENDIAN)
+    {
+        FAPI_ASSERT(readLE(i_input, io_idx, o_data),
+                    fapi2::EXP_INBAND_LE_DATA_RANGE()
+                    .set_TARGET(FAPI_SYSTEM)
+                    .set_FUNCTION(mss::exp::READ_CRCT_ENDIAN)
+                    .set_DATA_SIZE(i_input.size())
+                    .set_MAX_INDEX(sizeof(o_data)),
+                    "Failed to convert from LE data read, size %u expected size %u",
+                    i_input.size(), sizeof(o_data));
+    }
+    else
+    {
+        FAPI_ASSERT(readBE(i_input, io_idx, o_data),
+                    fapi2::EXP_INBAND_BE_DATA_RANGE()
+                    .set_TARGET(FAPI_SYSTEM)
+                    .set_FUNCTION(mss::exp::READ_CRCT_ENDIAN)
+                    .set_DATA_SIZE(i_input.size())
+                    .set_MAX_INDEX(sizeof(o_data)),
+                    "Failed to convert from BE data read, size %u expected size %u",
+                    i_input.size(), sizeof(o_data));
+    }
+
+fapi_try_exit:
+    FAPI_DBG("Exiting with return code : 0x%08X...", (uint64_t) fapi2::current_err);
+    return fapi2::current_err;
+}
+
+
+
+template < typename T >
+fapi2::ReturnCode readCrctEndianArray(const std::vector<uint8_t>& i_input, const uint32_t i_size, uint32_t& io_idx,
+                                      T* o_data)
+{
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_MSS_OCMB_EXP_STRUCT_ENDIAN_Type l_struct_endian;
+
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_STRUCT_ENDIAN,
+                            FAPI_SYSTEM, l_struct_endian));
+
+    if (l_struct_endian == fapi2::ENUM_ATTR_MSS_OCMB_EXP_STRUCT_ENDIAN_LITTLE_ENDIAN)
+    {
+        FAPI_ASSERT(readLEArray(i_input, i_size, io_idx, o_data),
+                    fapi2::EXP_INBAND_LE_DATA_RANGE()
+                    .set_TARGET(FAPI_SYSTEM)
+                    .set_FUNCTION(mss::exp::READ_CRCT_ENDIAN)
+                    .set_DATA_SIZE(i_input.size())
+                    .set_MAX_INDEX(sizeof(o_data)),
+                    "Failed to convert from LE array data read, size %u expected size %u",
+                    i_input.size(), sizeof(o_data));
+    }
+    else
+    {
+        FAPI_ASSERT(readBEArray(i_input, i_size, io_idx, o_data),
+                    fapi2::EXP_INBAND_BE_DATA_RANGE()
+                    .set_TARGET(FAPI_SYSTEM)
+                    .set_FUNCTION(mss::exp::READ_CRCT_ENDIAN)
+                    .set_DATA_SIZE(i_input.size())
+                    .set_MAX_INDEX(sizeof(o_data)),
+                    "Failed to convert from BE array data read, size %u expected size %u",
+                    i_input.size(), sizeof(o_data));
+    }
+
+fapi_try_exit:
+    FAPI_DBG("Exiting with return code : 0x%08X...", (uint64_t) fapi2::current_err);
+    return fapi2::current_err;
+}
+
 
 } // ns ib
 
