@@ -39,7 +39,7 @@
 #include <fapi2.H>
 
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
-#include <generic/memory/lib/utils/mcbist/gen_address.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_address.H>
 
 namespace mss
 {
