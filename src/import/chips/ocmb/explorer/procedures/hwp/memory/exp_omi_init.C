@@ -36,6 +36,9 @@
 #include <exp_oc_regs.H>
 #include <exp_inband.H>
 #include <chips/common/utils/chipids.H>
+#include <mss_explorer_attribute_getters.H>
+#include <mss_p10_attribute_getters.H>
+#include <generic/memory/mss_git_data_helper.H>
 
 ///
 /// @brief Verify we know how to talk to the connected device
@@ -79,75 +82,43 @@ fapi2::ReturnCode omiSetUpstreamTemplates(const fapi2::Target<fapi2::TARGET_TYPE
     fapi2::ATTR_EXPLR_ENABLE_US_TMPL_1_Type l_enable_tmpl_1;
     fapi2::ATTR_EXPLR_ENABLE_US_TMPL_5_Type l_enable_tmpl_5;
     fapi2::ATTR_EXPLR_ENABLE_US_TMPL_9_Type l_enable_tmpl_9;
-    fapi2::ATTR_EXPLR_ENABLE_US_TMPL_B_Type l_enable_tmpl_B;
+    fapi2::ATTR_EXPLR_ENABLE_US_TMPL_B_Type l_enable_tmpl_b;
     fapi2::ATTR_EXPLR_TMPL_0_PACING_Type l_tmpl_0_pacing;
     fapi2::ATTR_EXPLR_TMPL_1_PACING_Type l_tmpl_1_pacing;
     fapi2::ATTR_EXPLR_TMPL_5_PACING_Type l_tmpl_5_pacing;
     fapi2::ATTR_EXPLR_TMPL_9_PACING_Type l_tmpl_9_pacing;
-    fapi2::ATTR_EXPLR_TMPL_B_PACING_Type l_tmpl_B_pacing;
+    fapi2::ATTR_EXPLR_TMPL_B_PACING_Type l_tmpl_b_pacing;
 
-    fapi2::ATTR_CHIP_EC_FEATURE_US_TEMPLATES_0159_Type l_us_only_0159;
+    // RTC 211405 - TODO: Double check on upstream setting for P10
+    bool l_us_only_0159 = true;
+//    fapi2::ATTR_CHIP_EC_FEATURE_US_TEMPLATES_0159_Type l_us_only_0159;
 
     auto const& l_proc = i_target.getParent<fapi2::TARGET_TYPE_OMI>()
                          .getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
 
+#if 0
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_US_TEMPLATES_0159,
                            l_proc,
                            l_us_only_0159),
              "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_US_TEMPLATES_0159)");
+#endif
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EXPLR_ENABLE_US_TMPL_1,
-                           i_target,
-                           l_enable_tmpl_1),
-             "Error from FAPI_ATTR_GET (ATTR_EXPLR_ENABLE_US_TMPL_1)");
+    FAPI_TRY(mss::attr::get_explr_enable_us_tmpl_1(i_target, l_enable_tmpl_1));
+    FAPI_TRY(mss::attr::get_explr_enable_us_tmpl_5(i_target, l_enable_tmpl_5));
+    FAPI_TRY(mss::attr::get_explr_enable_us_tmpl_9(i_target, l_enable_tmpl_9));
+    FAPI_TRY(mss::attr::get_explr_enable_us_tmpl_b(i_target, l_enable_tmpl_b));
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EXPLR_ENABLE_US_TMPL_5,
-                           i_target,
-                           l_enable_tmpl_5),
-             "Error from FAPI_ATTR_GET (ATTR_EXPLR_ENABLE_US_TMPL_5)");
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EXPLR_ENABLE_US_TMPL_9,
-                           i_target,
-                           l_enable_tmpl_9),
-             "Error from FAPI_ATTR_GET (ATTR_EXPLR_ENABLE_US_TMPL_9)");
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EXPLR_ENABLE_US_TMPL_B,
-                           i_target,
-                           l_enable_tmpl_B),
-             "Error from FAPI_ATTR_GET (ATTR_EXPLR_ENABLE_US_TMPL_B)");
-
-    FAPI_ASSERT(!l_us_only_0159 || !l_enable_tmpl_B,
+    FAPI_ASSERT(!l_us_only_0159 || !l_enable_tmpl_b,
                 fapi2::PROC_DOES_NOT_SUPPORT_US_B()
                 .set_TARGET(l_proc)
-                .set_B(l_enable_tmpl_B),
+                .set_B(l_enable_tmpl_b),
                 "Upstream template B requested, but not supported by proc");
 
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EXPLR_TMPL_0_PACING,
-                           i_target,
-                           l_tmpl_0_pacing),
-             "Error from FAPI_ATTR_GET (ATTR_EXPLR_TMPL_0_PACING)");
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EXPLR_TMPL_1_PACING,
-                           i_target,
-                           l_tmpl_1_pacing),
-             "Error from FAPI_ATTR_GET (ATTR_EXPLR_TMPL_1_PACING)");
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EXPLR_TMPL_5_PACING,
-                           i_target,
-                           l_tmpl_5_pacing),
-             "Error from FAPI_ATTR_GET (ATTR_EXPLR_TMPL_5_PACING)");
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EXPLR_TMPL_9_PACING,
-                           i_target,
-                           l_tmpl_9_pacing),
-             "Error from FAPI_ATTR_GET (ATTR_EXPLR_TMPL_9_PACING)");
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EXPLR_TMPL_B_PACING,
-                           i_target,
-                           l_tmpl_B_pacing),
-             "Error from FAPI_ATTR_GET (ATTR_EXPLR_TMPL_B_PACING)");
-
+    FAPI_TRY(mss::attr::get_explr_tmpl_0_pacing(i_target, l_tmpl_0_pacing));
+    FAPI_TRY(mss::attr::get_explr_tmpl_1_pacing(i_target, l_tmpl_1_pacing));
+    FAPI_TRY(mss::attr::get_explr_tmpl_5_pacing(i_target, l_tmpl_5_pacing));
+    FAPI_TRY(mss::attr::get_explr_tmpl_9_pacing(i_target, l_tmpl_9_pacing));
+    FAPI_TRY(mss::attr::get_explr_tmpl_b_pacing(i_target, l_tmpl_b_pacing));
 
     l_data.setBit<EXPLR_OC_OTTCFG_MSB_TEMPLATE_0>(); //Template 0
 
@@ -158,7 +129,7 @@ fapi2::ReturnCode omiSetUpstreamTemplates(const fapi2::Target<fapi2::TARGET_TYPE
     l_data.writeBit<EXPLR_OC_OTTCFG_MSB_TEMPLATE_9>
     (l_enable_tmpl_9 == fapi2::ENUM_ATTR_EXPLR_ENABLE_US_TMPL_9_ENABLED); //Template 9
     l_data.writeBit<EXPLR_OC_OTTCFG_MSB_TEMPLATE_11>
-    (l_enable_tmpl_B == fapi2::ENUM_ATTR_EXPLR_ENABLE_US_TMPL_B_ENABLED); //Template B
+    (l_enable_tmpl_b == fapi2::ENUM_ATTR_EXPLR_ENABLE_US_TMPL_B_ENABLED); //Template B
 
 
     FAPI_TRY(mss::exp::ib::putOCCfg(i_target, EXPLR_OC_OTTCFG_MSB, l_data));
@@ -194,11 +165,11 @@ fapi2::ReturnCode omiSetUpstreamTemplates(const fapi2::Target<fapi2::TARGET_TYPE
         FAPI_DBG("Upstream template 9 enabled with pacing %X", l_tmpl_9_pacing);
     }
 
-    if (l_enable_tmpl_B == fapi2::ENUM_ATTR_EXPLR_ENABLE_US_TMPL_B_ENABLED)
+    if (l_enable_tmpl_b == fapi2::ENUM_ATTR_EXPLR_ENABLE_US_TMPL_B_ENABLED)
     {
         l_data.insertFromRight<EXPLR_OC_OTRCFG76_LSB_TEMPLATE_11,
-                               EXPLR_OC_OTRCFG76_LSB_TEMPLATE_11_LEN>(l_tmpl_B_pacing);
-        FAPI_DBG("Upstream template B enabled with pacing %X", l_tmpl_B_pacing);
+                               EXPLR_OC_OTRCFG76_LSB_TEMPLATE_11_LEN>(l_tmpl_b_pacing);
+        FAPI_DBG("Upstream template B enabled with pacing %X", l_tmpl_b_pacing);
     }
 
     FAPI_TRY(mss::exp::ib::putOCCfg(i_target, EXPLR_OC_OTRCFG76_LSB, l_data));
@@ -227,21 +198,9 @@ fapi2::ReturnCode omiTLVersionShortBackOff(const fapi2::Target<fapi2::TARGET_TYP
     auto const& l_proc = i_target.getParent<fapi2::TARGET_TYPE_OMI>()
                          .getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EXPLR_SHRT_BACKOFF_TIMER,
-                           i_target,
-                           l_short_backoff),
-             "Error from FAPI_ATTR_GET (ATTR_EXPLR_SHRT_BACKOFF_TIMER)");
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_OMI_OC_MAJOR_VER,
-                           l_proc,
-                           l_proc_oc_major),
-             "Error from FAPI_ATTR_GET (ATTR_PROC_OMI_OC_MAJOR_VER)");
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_OMI_OC_MINOR_VER,
-                           l_proc,
-                           l_proc_oc_minor),
-             "Error from FAPI_ATTR_GET (ATTR_PROC_OMI_OC_MINOR_VER)");
-
+    FAPI_TRY(mss::attr::get_explr_shrt_backoff_timer(i_target, l_short_backoff));
+    FAPI_TRY(mss::attr::get_omi_oc_major_ver(l_proc, l_proc_oc_major));
+    FAPI_TRY(mss::attr::get_omi_oc_minor_ver(l_proc, l_proc_oc_minor));
 
     //Write proc's supported OC version
     l_data.insertFromRight<EXPLR_OC_OVERCFG_LSB_TL_MAJOR_VERSION_CONFIGURATION,
@@ -288,7 +247,7 @@ fapi2::ReturnCode omiCheckSupportedBit(const fapi2::buffer<uint32_t>& i_data, co
     }
 
 fapi_try_exit:
-    FAPI_ERR("extractToRight failed return code : 0x%08X", (uint64_t) fapi2::current_err);
+    FAPI_DBG("Exit with return code : 0x%08X", (uint64_t) fapi2::current_err);
     return fapi2::current_err;
 }
 
@@ -319,7 +278,7 @@ fapi2::ReturnCode omiCheckSupportedPacing(const fapi2::buffer<uint32_t>& i_data,
     }
 
 fapi_try_exit:
-    FAPI_ERR("extractToRight failed return code : 0x%08X", (uint64_t) fapi2::current_err);
+    FAPI_DBG("Exit with return code : 0x%08X", (uint64_t) fapi2::current_err);
     return fapi2::current_err;
 }
 
@@ -346,23 +305,26 @@ fapi2::ReturnCode omiValidateDownstream(const fapi2::Target<fapi2::TARGET_TYPE_O
     fapi2::ATTR_PROC_TMPL_A_PACING_Type l_tmpl_A_pace;
     uint8_t l_tmp = 0x0;
 
-    fapi2::ATTR_CHIP_EC_FEATURE_DS_TEMPLATES_0147_Type l_ds_only_0147;
+//  RTC 211405 - TODO: Double check on this downstream setting in P10
+    bool l_ds_only_0147 = true;
+//    fapi2::ATTR_CHIP_EC_FEATURE_DS_TEMPLATES_0147_Type l_ds_only_0147;
 
     const auto& l_proc = i_target.getParent<fapi2::TARGET_TYPE_OMI>()
                          .getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
 
     const auto& l_mcc_target = i_target.getParent<fapi2::TARGET_TYPE_OMI>()
                                .getParent<fapi2::TARGET_TYPE_MCC>();
-
+#if 0
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_DS_TEMPLATES_0147,
                            l_proc,
                            l_ds_only_0147),
              "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_DS_TEMPLATES_0147)");
+#endif
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_ENABLE_DL_TMPL_1,
                            l_mcc_target,
                            l_enable_tmpl_1),
-             "Error from FAPI_ATTR_GET (ATTR_PROC_ENABLE_DL_TMPL_1)");
+             "Error from FAPI_ATTR_GET (ATTR_PROC_ENABLE_DL_TiMPL_1)");
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_ENABLE_DL_TMPL_4,
                            l_mcc_target,
@@ -540,30 +502,11 @@ fapi2::ReturnCode omiSetACTagPASIDMetaData(const fapi2::Target<fapi2::TARGET_TYP
     fapi2::buffer<uint32_t> l_afu_actag_len_supported;
     fapi2::buffer<uint32_t> l_pasid_len_supported;
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EXPLR_METADATA_ENABLE,
-                           i_target,
-                           l_meta_data_ena),
-             "Error from FAPI_ATTR_GET (ATTR_EXPLR_METADATA_ENABLE)");
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EXPLR_PASID_BASE,
-                           i_target,
-                           l_pasid_base),
-             "Error from FAPI_ATTR_GET (ATTR_EXPLR_PASID_BASE)");
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EXPLR_ACTAG_BASE,
-                           i_target,
-                           l_actag_base),
-             "Error from FAPI_ATTR_GET (ATTR_EXPLR_ACTAG_BASE)");
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EXPLR_AFU_ACTAG_LEN,
-                           i_target,
-                           l_afu_actag_len),
-             "Error from FAPI_ATTR_GET (ATTR_EXPLR_AFU_ACTAG_LEN)");
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EXPLR_PASID_LEN,
-                           i_target,
-                           l_pasid_len),
-             "Error from FAPI_ATTR_GET (ATTR_EXPLR_PASID_LEN)");
+    FAPI_TRY(mss::attr::get_explr_metadata_enable(i_target, l_meta_data_ena));
+    FAPI_TRY(mss::attr::get_explr_pasid_base(i_target, l_pasid_base));
+    FAPI_TRY(mss::attr::get_explr_actag_base(i_target, l_actag_base));
+    FAPI_TRY(mss::attr::get_explr_afu_actag_len(i_target, l_afu_actag_len));
+    FAPI_TRY(mss::attr::get_explr_pasid_len(i_target, l_pasid_len));
 
     //Set PASID Base and enable metadata
     FAPI_TRY(mss::exp::ib::getOCCfg(i_target, EXPLR_OC_OCTRLPID_MSB, l_value));
@@ -667,6 +610,8 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode exp_omi_init(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
+    mss::display_git_commit_info("exp_omi_init");
+
     FAPI_DBG("Start");
     FAPI_TRY(omiDeviceVerify(i_target));
     FAPI_TRY(omiSetUpstreamTemplates(i_target));
