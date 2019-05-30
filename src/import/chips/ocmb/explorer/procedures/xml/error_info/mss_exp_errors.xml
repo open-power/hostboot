@@ -24,6 +24,317 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
 
+  <registerFfdc>
+    <id>REG_FFDC_EXP_MEMDIAGS_FAILURE</id>
+    <scomRegister>EXPLR_MCBIST_MCBMR0Q</scomRegister>
+    <scomRegister>EXPLR_MCBIST_MCBCFGQ</scomRegister>
+    <scomRegister>EXPLR_MCBIST_MCB_CNTLQ</scomRegister>
+    <scomRegister>EXPLR_MCBIST_MCB_CNTLSTATQ</scomRegister>
+    <scomRegister>EXPLR_MCBIST_MCBSTATQ</scomRegister>
+    <scomRegister>EXPLR_MCBIST_MCBMCATQ</scomRegister>
+    <scomRegister>EXPLR_MCBIST_MCBPARMQ</scomRegister>
+    <scomRegister>EXPLR_MCBIST_MCBAGRAQ</scomRegister>
+    <scomRegister>EXPLR_MCBIST_MBSEC1Q</scomRegister>
+    <scomRegister>EXPLR_MCBIST_MBSTRQ</scomRegister>
+    <scomRegister>EXPLR_MCBIST_MCBISTFIRQ</scomRegister>
+    <scomRegister>EXPLR_MCBIST_MCBAMR0A0Q</scomRegister>
+    <scomRegister>EXPLR_MCBIST_MCBAMR1A0Q</scomRegister>
+    <scomRegister>EXPLR_MCBIST_MCBAMR2A0Q</scomRegister>
+    <scomRegister>EXPLR_MCBIST_MCBAMR3A0Q</scomRegister>
+
+    <scomRegister>EXPLR_MCBIST_MCBFD0Q</scomRegister>
+    <scomRegister>EXPLR_MCBIST_MCBFD1Q</scomRegister>
+    <scomRegister>EXPLR_MCBIST_MCBFD2Q</scomRegister>
+    <scomRegister>EXPLR_MCBIST_MCBFD3Q</scomRegister>
+    <scomRegister>EXPLR_MCBIST_MCBFD4Q</scomRegister>
+    <scomRegister>EXPLR_MCBIST_MCBFD5Q</scomRegister>
+    <scomRegister>EXPLR_MCBIST_MCBFD6Q</scomRegister>
+    <scomRegister>EXPLR_MCBIST_MCBFD7Q</scomRegister>
+
+    <scomRegister>EXPLR_MCBIST_MCBSA0Q</scomRegister>
+    <scomRegister>EXPLR_MCBIST_MCBSA1Q</scomRegister>
+    <scomRegister>EXPLR_MCBIST_MCBSA2Q</scomRegister>
+    <scomRegister>EXPLR_MCBIST_MCBSA3Q</scomRegister>
+    <scomRegister>EXPLR_MCBIST_MCBEA0Q</scomRegister>
+    <scomRegister>EXPLR_MCBIST_MCBEA1Q</scomRegister>
+    <scomRegister>EXPLR_MCBIST_MCBEA2Q</scomRegister>
+    <scomRegister>EXPLR_MCBIST_MCBEA3Q</scomRegister>
+  </registerFfdc>
+
+  <hwpError>
+    <rc>RC_EXP_MEMDIAGS_COMPARE_ERROR_IN_LAST_PATTERN</rc>
+    <description>A miscompare error was caused by the last MCBIST pattern</description>
+    <ffdc>PORT</ffdc>
+    <ffdc>SUBTEST</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_EXP_MEMDIAGS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_EXP_MEMDIAGS_ERROR_IN_LAST_PATTERN</rc>
+    <description>An error was caused by the last MCBIST pattern</description>
+    <ffdc>STATUS0</ffdc>
+    <ffdc>STATUS1</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_EXP_MEMDIAGS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_EXP_MEMDIAGS_MCBIST_FAILED_TO_START</rc>
+    <description>The MCBIST engine failed to start its program</description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_EXP_MEMDIAGS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_EXP_MEMDIAGS_PORT_NOT_FUNCTIONAL</rc>
+    <description>The port used in an MCBIST program is not functional</description>
+    <ffdc>RELATIVE_PORT_POSITION</ffdc>
+    <ffdc>ADDRESS</ffdc>
+    <ffdc>MC_TARGET</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_EXP_MEMDIAGS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_EXP_MEMDIAGS_SUPERFAST_INIT_FAILED_TO_INIT</rc>
+    <description>A superfast init operation failed initialization</description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_EXP_MEMDIAGS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_EXP_MEMDIAGS_SUPERFAST_READ_FAILED_TO_INIT</rc>
+    <description>A superfast read operation failed initialization</description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_EXP_MEMDIAGS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_EXP_MEMDIAGS_MCBIST_FAILED_TO_STOP</rc>
+    <description>The MCBIST engine failed to stop its program</description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_EXP_MEMDIAGS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <ffdc>POLL_COUNT</ffdc>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_EXP_MEMDIAGS_CONTINUOUS_SCRUB_FAILED_TO_INIT</rc>
+    <description>A continuous scrub operation failed initialization</description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_EXP_MEMDIAGS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_EXP_MEMDIAGS_TARGETED_SCRUB_FAILED_TO_INIT</rc>
+    <description>A continuous scrub operation failed initialization</description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_EXP_MEMDIAGS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_EXP_MEMDIAGS_ALREADY_AT_BOUNDARY</rc>
+    <description>A continue request asked to stop at a boundary, but we are there already</description>
+    <ffdc>MC_TARGET</ffdc>
+    <ffdc>BOUNDARY</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_EXP_MEMDIAGS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+        <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_EXP_MCBIST_TIMEOUT</rc>
+    <description>
+        MCBIST program failed to return in the time allowed
+        Software timer, MCBIST has not finished in the time allowed
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_EXP_MEMDIAGS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MC_TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>MC_TARGET</target>
+    </gard>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_EXP_MCBIST_DATA_FAIL</rc>
+    <description>
+        MCBIST program appeared to have failed, but set conflicting bits in the status register
+    </description>
+    <ffdc>STATUS_REGISTER</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_EXP_MEMDIAGS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MC_TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>MC_TARGET</target>
+    </gard>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_EXP_MCBIST_UNKNOWN_FAILURE</rc>
+    <description>MCBIST program reported a failure but no error status was found</description>
+    <ffdc>STATUS_REGISTER</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_EXP_MEMDIAGS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MC_TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>MC_TARGET</target>
+    </gard>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_DRAMINIT_BAD_NUM_RANKS</rc>
+    <description>Bad number of ranks were passed in the bad bits functionality</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>NUM_RANKS</ffdc>
+    <ffdc>MAX_RANKS</ffdc>
+    <callout>
+      <target>CODE</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_DRAMINIT_UNSUPPORTED_DIMM_TYPE</rc>
+    <description>Unsupported DIMM type encountered in draminit_training procedure</description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>PORT</ffdc>
+    <ffdc>TYPE</ffdc>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_DRAMINIT_UNSUPPORTED_DRAM_WIDTH</rc>
+    <description>Unsupported DRAM width encountered in draminit_training procedure</description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>PORT</ffdc>
+    <ffdc>DATA_WIDTH</ffdc>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_DRAMINIT_UNSUPPORTED_3DS_HEIGHT</rc>
+    <description>Unsupported 3DS height encountered in draminit_training procedure</description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>PORT</ffdc>
+    <ffdc>HEIGHT</ffdc>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
   <hwpError>
     <rc>RC_MSS_EXP_ENTERPRISE_SETUP_ERROR</rc>
     <description>The enterprise mode bit is in the incorrect state</description>
@@ -47,6 +358,47 @@
     </description>
     <ffdc>STATUS_CODE</ffdc>
     <ffdc>CMD_ID</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_I2C_FW_STATUS_BUSY</rc>
+    <description>
+      Received FW_BUSY status after polling timeout for
+      command ID EXP_FW_STATUS
+    </description>
+    <ffdc>STATUS_CODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_I2C_WRONG_BOOT_STAGE</rc>
+    <description>
+      Received incorrect boot stage from
+      command ID EXP_FW_STATUS
+    </description>
+    <ffdc>BOOT_STAGE</ffdc>
+    <ffdc>EXPECTED_BOOT_STAGE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
@@ -116,6 +468,209 @@
     <deconfigure>
       <target>TARGET</target>
     </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_SENSOR_CACHE_ENABLE_FAILED</rc>
+    <description>
+      The response_argument field of the host_fw_response_struct returned
+      a FAILURE for enabling sensor cache
+    </description>
+    <ffdc>RSP_ID</ffdc>
+    <ffdc>ERROR_CODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <registerFfdc>
+    <id>REG_FFDC_EXP_CCS_FAILURE</id>
+    <scomRegister>EXPLR_MCBIST_CCS_MODEQ</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_STATQ</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_CNTLQ</scomRegister>
+    <scomRegister>EXPLR_MCBIST_MCBMCATQ</scomRegister>
+
+    <!-- Instructions -->
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_00</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_01</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_02</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_03</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_04</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_05</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_06</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_07</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_08</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_09</scomRegister>
+
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_10</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_11</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_12</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_13</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_14</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_15</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_16</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_17</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_18</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_19</scomRegister>
+
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_20</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_21</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_22</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_23</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_24</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_25</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_26</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_27</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_28</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_29</scomRegister>
+
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_30</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_31</scomRegister>
+
+    <!-- Control array -->
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_00</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_01</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_02</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_03</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_04</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_05</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_06</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_07</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_08</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_09</scomRegister>
+
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_10</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_11</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_12</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_13</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_14</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_15</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_16</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_17</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_18</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_19</scomRegister>
+
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_20</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_21</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_22</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_23</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_24</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_25</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_26</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_27</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_28</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_29</scomRegister>
+
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_30</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_31</scomRegister>
+
+    <!-- to get the CCS state machine hung state -->
+    <scomRegister>EXPLR_MCBIST_MBA_MCBERRPT0Q</scomRegister>
+    <scomRegister>EXPLR_MCBIST_MBA_MCBERRPT1Q</scomRegister>
+  </registerFfdc>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_CCS_READ_MISCOMPARE</rc>
+    <description>
+        CCS reports a read miscompare.
+    </description>
+    <ffdc>FAIL_TYPE</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_EXP_CCS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>PORT_TARGET</target>
+    </gard>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_CCS_UE_SUE</rc>
+    <description>
+        CCS reports a UE or SUE in the CCS program array
+        Chould be an indicator of corruption in the CCS program
+    </description>
+    <ffdc>FAIL_TYPE</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_EXP_CCS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MC_TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>MC_TARGET</target>
+    </gard>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_CCS_HUNG</rc>
+    <description>
+        Software reported that the machine is not seeing the CCS finish in the alloted time
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_EXP_CCS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+   <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MC_TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>MC_TARGET</target>
+    </gard>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_EXP_CCS_HUNG_TRYING_TO_STOP</rc>
+    <description>
+        CCS failed to return from in-progress status while trying to stop a previous program
+        Software reported that CCS did not finish in alloted time after manually triggering stop
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_EXP_CCS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MC_TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>MC_TARGET</target>
+    </gard>
   </hwpError>
 
 </hwpErrors>
