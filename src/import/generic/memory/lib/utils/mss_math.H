@@ -107,6 +107,17 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Round value to a multiple of another number
+///
+/// @param[in] i_value value to round
+/// @param[in] i_multiple multiple to round to
+/// @return uint64_t rounded value
+///
+inline uint32_t round_to_nearest_multiple(const uint32_t i_value, const uint32_t i_multiple)
+{
+    return ((i_value + i_multiple / 2) / i_multiple) * i_multiple;
+}
 
 ///
 /// @brief Determines if the double has decimal digits and adds 1 and rounds if true
