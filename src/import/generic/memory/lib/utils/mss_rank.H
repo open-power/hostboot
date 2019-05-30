@@ -39,7 +39,7 @@
 #include <fapi2.H>
 #include <generic/memory/lib/utils/pos.H>
 #include <generic/memory/lib/utils/find.H>
-#include <mss_generic_attribute_getters.H>
+#include <generic/memory/lib/mss_generic_attribute_getters.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 namespace mss
