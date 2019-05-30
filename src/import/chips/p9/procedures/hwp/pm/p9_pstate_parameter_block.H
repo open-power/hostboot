@@ -205,8 +205,8 @@ typedef struct
     uint32_t proc_dpll_divider;
 
     ///Undervolt and Overvolt Attributes
-    uint8_t attr_wov_underv_enable;
-    uint8_t attr_wov_overv_enable;
+    uint8_t attr_wov_underv_disable;
+    uint8_t attr_wov_overv_disable;
     uint8_t attr_wov_underv_force;
     uint32_t attr_wov_sample_125us;
     uint32_t attr_wov_max_droop_pct;

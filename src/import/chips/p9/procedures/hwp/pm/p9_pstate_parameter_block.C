@@ -480,22 +480,22 @@ fapi2::ReturnCode PlatPmPPB::set_global_feature_attributes()
         (fapi2::ATTR_WOV_OVERV_ENABLED_Type)fapi2::ENUM_ATTR_WOV_OVERV_ENABLED_FALSE;
 
 
-      iv_wov_underv_enabled = false;
-      iv_wov_overv_enabled = false;
       //Check whether to enable WOV Undervolting. WOV can
       //only be enabled if VDMs are enabled
-      if (is_wov_underv_enabled() &&
-          is_vdm_enabled())
+      if (!is_wov_underv_enabled() ||
+          !is_vdm_enabled())
       {
-          iv_wov_underv_enabled = true;
+          FAPI_DBG("UNDERV_DISABLED")
+          iv_wov_underv_enabled = false;
       }
 
       //Check whether to enable WOV Overvolting. WOV can
       //only be enabled if VDMs are enabled
-      if (is_wov_overv_enabled() &&
-          is_vdm_enabled())
+      if (!is_wov_overv_enabled() || 
+          !is_vdm_enabled())
       {
-          iv_wov_overv_enabled = true;
+          FAPI_DBG("OVERV_DISABLED")
+          iv_wov_overv_enabled = false;
       }
 
     if (iv_pstates_enabled)
@@ -2143,8 +2143,8 @@ FAPI_INF("%-60s = 0x%08x %d", #attr_name, iv_attrs.attr_assign, iv_attrs.attr_as
     DATABLOCK_GET_ATTR(ATTR_PROC_DPLL_DIVIDER,        iv_procChip, proc_dpll_divider);
     // AVSBus ... needed by p9_setup_evid
     //Get WOV attributes
-    DATABLOCK_GET_ATTR(ATTR_SYSTEM_WOV_OVERV_DISABLE,        FAPI_SYSTEM,attr_wov_overv_enable);
-    DATABLOCK_GET_ATTR(ATTR_SYSTEM_WOV_UNDERV_DISABLE,       FAPI_SYSTEM,attr_wov_underv_enable);
+    DATABLOCK_GET_ATTR(ATTR_SYSTEM_WOV_OVERV_DISABLE,        FAPI_SYSTEM,attr_wov_overv_disable);
+    DATABLOCK_GET_ATTR(ATTR_SYSTEM_WOV_UNDERV_DISABLE,       FAPI_SYSTEM,attr_wov_underv_disable);
     DATABLOCK_GET_ATTR(ATTR_WOV_UNDERV_FORCE,               iv_procChip,attr_wov_underv_force);
     DATABLOCK_GET_ATTR(ATTR_WOV_SAMPLE_125US,               iv_procChip,attr_wov_sample_125us);
     DATABLOCK_GET_ATTR(ATTR_WOV_MAX_DROOP_10THPCT,          iv_procChip,attr_wov_max_droop_pct);
@@ -3809,13 +3809,10 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundW (void)
             is_wov_underv_enabled() == 1 )
         {
             iv_wov_underv_enabled = true;
-            FAPI_INF("UNDERV_TESTED or UNDERV_FORCE set to 1");
-        }
-
-        else
-        {
+            FAPI_DBG("UNDERV_TESTED or UNDERV_FORCE set to 1");
+        } else {
             iv_wov_underv_enabled = false;
-            FAPI_INF("UNDERV_TESTED and UNDERV_FORCE set to 0");
+            FAPI_DBG("UNDERV_TESTED and UNDERV_FORCE set to 0");
         }
 
 
@@ -4400,7 +4397,7 @@ fapi_try_exit:
 ///////////////////////////////////////////////////////////
 bool PlatPmPPB::is_wov_underv_enabled()
 {
-    return(!(iv_attrs.attr_wov_underv_enable) &&
+    return(!(iv_attrs.attr_wov_underv_disable) &&
          iv_wov_underv_enabled)
          ? true : false;
 }
@@ -4411,7 +4408,7 @@ bool PlatPmPPB::is_wov_underv_enabled()
 ///////////////////////////////////////////////////////////
 bool PlatPmPPB::is_wov_overv_enabled()
 {
-    return (!(iv_attrs.attr_wov_overv_enable) &&
+    return (!(iv_attrs.attr_wov_overv_disable) &&
          iv_wov_overv_enabled)
          ? true : false;
 }
