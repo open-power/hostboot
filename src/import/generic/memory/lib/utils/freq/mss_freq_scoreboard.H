@@ -39,8 +39,10 @@
 #include <vector>
 #include <fapi2.H>
 #include <generic/memory/lib/utils/freq/gen_mss_freq_traits.H>
+#include <generic/memory/lib/utils/pos.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/find.H>
+#include <generic/memory/lib/utils/pos.H>
 
 namespace mss
 {
@@ -59,6 +61,17 @@ namespace mss
 template<mss::proc_type P>
 fapi2::ReturnCode num_master_ranks_per_dimm(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_master_ranks);
+
+///
+/// @brief Gets the DIMM type for a specific DIMM
+/// @tparam P mss::proc_type on which to operate
+/// @param[in] i_target DIMM target
+/// @param[out] o_dimm_type DIMM type on the DIMM target
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template<mss::proc_type P>
+fapi2::ReturnCode get_dimm_type(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                uint8_t& o_dimm_type);
 
 ///
 /// @brief Gets the attribute for the maximum allowed dimm frequency
@@ -131,7 +144,34 @@ class freq_scoreboard
         /// @return FAPI2_RC_SUCCESS if successful
         ///
         fapi2::ReturnCode remove_freqs_above_limit(const uint64_t i_port_pos,
-                const uint32_t i_freq_limit);
+                const uint32_t i_freq_limit)
+        {
+            FAPI_TRY( check_port_position(i_port_pos,
+                                          generic_ffdc_codes::FREQ_SCOREBOARD_REMOVE_FREQS_ABOVE_LIMIT),
+                      "Invalid port index passed to remove_freqs_above_limit (%d)",
+                      i_port_pos);
+
+            {
+                auto& l_port_supported_freqs = iv_supported_port_freqs[i_port_pos];
+
+                // Can't do a ranged for loop here because we need the index to get the frequency out of iv_freq_values
+                for ( size_t l_index = 0; l_index < l_port_supported_freqs.size(); ++l_index )
+                {
+                    const auto l_scoreboard_freq = iv_freq_values[l_index];
+
+                    if ( l_scoreboard_freq > i_freq_limit )
+                    {
+                        FAPI_INF("Removing freq %d on port %d since it's above the limit %d", l_scoreboard_freq, i_port_pos, i_freq_limit);
+                        l_port_supported_freqs[l_index] = false;
+                    }
+                }
+            }
+
+            return fapi2::FAPI2_RC_SUCCESS;
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
 
         ///
         /// @brief Remove frequencies above a limit from the scoreboard
@@ -140,7 +180,30 @@ class freq_scoreboard
         /// @return FAPI2_RC_SUCCESS if successful
         ///
         fapi2::ReturnCode remove_freqs_above_limit(const uint64_t i_port_pos,
-                const std::vector<uint32_t> i_freq_limits);
+                const std::vector<uint32_t> i_freq_limits)
+        {
+            FAPI_TRY( check_port_position(i_port_pos,
+                                          generic_ffdc_codes::FREQ_SCOREBOARD_REMOVE_FREQS_ABOVE_LIMIT_VECTOR),
+                      "Invalid port index passed to remove_freqs_above_limit (%d)",
+                      i_port_pos);
+
+            FAPI_ASSERT(i_freq_limits.size() == iv_num_ports,
+                        fapi2::MSS_INVALID_FREQ_LIST_PASSED()
+                        .set_SIZE(i_freq_limits.size())
+                        .set_EXPECTED(iv_num_ports),
+                        "Invalid frequency list passed to remove_freqs_above_limit (size should be %d but got %d)",
+                        iv_num_ports, i_freq_limits.size());
+
+            {
+                const auto l_freq_limit = i_freq_limits[i_port_pos];
+                FAPI_TRY( this->remove_freqs_above_limit(i_port_pos, l_freq_limit) );
+            }
+
+            return fapi2::FAPI2_RC_SUCCESS;
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
 
         ///
         /// @brief Remove frequencies not on a given list from the scoreboard
@@ -184,7 +247,25 @@ class freq_scoreboard
         /// @return FAPI2_RC_SUCCESS if successful
         ///
         fapi2::ReturnCode max_supported_freq(const uint64_t i_port_pos,
-                                             uint32_t& o_freq) const;
+                                             uint32_t& o_freq) const
+        {
+            FAPI_TRY( this->check_port_position(i_port_pos,
+                                                generic_ffdc_codes::FREQ_SCOREBOARD_MAX_SUPPORTED_FREQ),
+                      "Invalid port index passed to max_supported_freq (%d)",
+                      i_port_pos);
+
+            {
+                std::vector<uint32_t> l_supported_freqs;
+                FAPI_TRY( this->supported_freqs(i_port_pos, l_supported_freqs) );
+
+                o_freq = l_supported_freqs.empty() ? 0 : l_supported_freqs.back();
+            }
+
+            return fapi2::FAPI2_RC_SUCCESS;
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
 
         ///
         /// @brief Return a list of supported frequencies for a given port
@@ -193,7 +274,31 @@ class freq_scoreboard
         /// @return FAPI2_RC_SUCCESS if successful
         ///
         fapi2::ReturnCode supported_freqs(const uint64_t i_port_pos,
-                                          std::vector<uint32_t>& o_freqs) const;
+                                          std::vector<uint32_t>& o_freqs) const
+        {
+            FAPI_TRY( check_port_position(i_port_pos,
+                                          generic_ffdc_codes::FREQ_SCOREBOARD_SUPPORTED_FREQS),
+                      "Invalid port index passed to supported_freqs (%d)",
+                      i_port_pos);
+
+            {
+                o_freqs.clear();
+                auto& l_port_supported_freqs = iv_supported_port_freqs[i_port_pos];
+
+                for ( size_t l_index = 0; l_index < iv_freq_values.size(); ++l_index )
+                {
+                    if (l_port_supported_freqs[l_index])
+                    {
+                        o_freqs.push_back(iv_freq_values[l_index]);
+                    }
+                }
+            }
+
+            return fapi2::FAPI2_RC_SUCCESS;
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
 
         ///
         /// @brief Resolve frequency scoreboard by deconfiguring any non-conforming ports
@@ -480,7 +585,7 @@ inline fapi2::ReturnCode limit_freq_by_mrw(const fapi2::Target<TT::FREQ_TARGET_T
         FAPI_ASSERT( (l_dimms_on_port <= TT::MAX_DIMM_PER_PORT),
                      fapi2::MSS_TOO_MANY_DIMMS_ON_PORT()
                      .set_DIMM_COUNT(l_dimms_on_port)
-                     .set_MCA_TARGET(p),
+                     .set_PORT_TARGET(p),
                      "Seeing %d DIMM on port %s",
                      l_dimms_on_port,
                      mss::c_str(p));
@@ -489,8 +594,11 @@ inline fapi2::ReturnCode limit_freq_by_mrw(const fapi2::Target<TT::FREQ_TARGET_T
         for (const auto& d : l_dimms)
         {
             uint8_t l_num_master_ranks = 0;
+            uint8_t l_dimm_type = 0;
+            uint8_t l_rank_index = 0;
             size_t l_index = 0xFF;
             FAPI_TRY( num_master_ranks_per_dimm<P>(d, l_num_master_ranks) );
+            FAPI_TRY( get_dimm_type<P>(d, l_dimm_type));
 
             // Just a quick check but we're in deep yogurt if this triggers
             FAPI_ASSERT( (l_num_master_ranks <= TT::MAX_PRIMARY_RANK_PER_DIMM),
@@ -501,7 +609,11 @@ inline fapi2::ReturnCode limit_freq_by_mrw(const fapi2::Target<TT::FREQ_TARGET_T
                          l_dimms_on_port,
                          mss::c_str(d));
 
-            l_index = l_indexes[l_dimms_on_port - 1][l_num_master_ranks - 1];
+            // If we have an LRDIMM, it's treated as a one rank DIMM from the memory controller's perspective
+            l_rank_index = l_dimm_type == TT::LRDIMM_TYPE ? 0 : l_num_master_ranks - 1;
+            l_index = l_indexes[l_dimms_on_port - 1][l_rank_index];
+            FAPI_INF("%s is %s. rank_index%u index:%u", spd::c_str(d), l_dimm_type == TT::LRDIMM_TYPE ? "LRDIMM" : "RDIMM",
+                     l_rank_index, l_index);
 
             FAPI_ASSERT( (l_index < NUM_MAX_FREQS),
                          fapi2::MSS_FREQ_INDEX_TOO_LARGE()
@@ -515,7 +627,7 @@ inline fapi2::ReturnCode limit_freq_by_mrw(const fapi2::Target<TT::FREQ_TARGET_T
 
             FAPI_INF("%s rank config %d drop %d yields max freq attribute index of %d (%d)",
                      mss::c_str(d), l_num_master_ranks, l_dimms_on_port,
-                     l_indexes[l_dimms_on_port - 1][l_num_master_ranks - 1],
+                     l_indexes[l_dimms_on_port - 1][l_rank_index],
                      i_max_mrw_freqs[l_index] );
 
             l_port_max_freq = std::min(l_port_max_freq, i_max_mrw_freqs[l_index]);
