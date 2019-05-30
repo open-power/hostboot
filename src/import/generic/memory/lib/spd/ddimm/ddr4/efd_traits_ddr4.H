@@ -780,6 +780,25 @@ class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUS
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
+/// @note PHY_VREF_PERCENT field specialization
+/// @note valid for all revs
+///
+template< mss::spd::rev R >
+class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PHY_VREF_PERCENT, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x7f;
+        static constexpr const char* FIELD_STR = "Host RD VREF DQ";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
 /// @note WR_VREF_DQ_VALUE field specialization
 /// @note valid for all revs
 ///
@@ -962,6 +981,367 @@ class readerTraits
 
         static constexpr size_t COMPARISON_VAL = 0x01;
         static constexpr const char* FIELD_STR = "Geardown during training";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note BIST_CA_LATENCY_MODE field specialization
+/// @note valid for all revs
+///
+template< mss::spd::rev R >
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::BIST_CA_LATENCY_MODE, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x08;
+        static constexpr const char* FIELD_STR = "BIST Command address Latency Mode";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note BIST_CA_PL_MODE field specialization
+/// @note valid for all revs
+///
+template< mss::spd::rev R >
+class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::BIST_CA_PL_MODE, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x08;
+        static constexpr const char* FIELD_STR = "BIST CA Parity Latency Mode";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note DFIMRL_DDRCLK field specialization
+/// @note valid for all revs
+///
+template< mss::spd::rev R >
+class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::DFIMRL_DDRCLK, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x0f;
+        static constexpr const char* FIELD_STR = "DFI Max RD Latency";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note CAC_DLY_A_0 field specialization
+/// @note valid for all revs
+///
+template< mss::spd::rev R >
+class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::CAC_DLY_A_0, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x1f;
+        static constexpr const char* FIELD_STR = "CAC Delay A side Group 0";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note CAC_DLY_A_1 field specialization
+/// @note valid for all revs
+///
+template< mss::spd::rev R >
+class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::CAC_DLY_A_1, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x1f;
+        static constexpr const char* FIELD_STR = "CAC Delay A side Group 1";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note CAC_DLY_A_2 field specialization
+/// @note valid for all revs
+///
+template< mss::spd::rev R >
+class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::CAC_DLY_A_2, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x1f;
+        static constexpr const char* FIELD_STR = "CAC Delay A side Group 2";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note CAC_DLY_A_3 field specialization
+/// @note valid for all revs
+///
+template< mss::spd::rev R >
+class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::CAC_DLY_A_3, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x1f;
+        static constexpr const char* FIELD_STR = "CAC Delay A side Group .";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note CAC_DLY_A_4 field specialization
+/// @note valid for all revs
+///
+template< mss::spd::rev R >
+class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::CAC_DLY_A_4, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x1f;
+        static constexpr const char* FIELD_STR = "CAC Delay A side Group 4";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note CAC_DLY_A_5 field specialization
+/// @note valid for all revs
+///
+template< mss::spd::rev R >
+class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::CAC_DLY_A_5, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x1f;
+        static constexpr const char* FIELD_STR = "CAC Delay A side Group 5";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note CAC_DLY_A_6 field specialization
+/// @note valid for all revs
+///
+template< mss::spd::rev R >
+class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::CAC_DLY_A_6, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x1f;
+        static constexpr const char* FIELD_STR = "CAC Delay A side Group 6";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note CAC_DLY_A_7 field specialization
+/// @note valid for all revs
+///
+template< mss::spd::rev R >
+class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::CAC_DLY_A_7, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x1f;
+        static constexpr const char* FIELD_STR = "CAC Delay A side Group 7";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note CAC_DLY_B_0 field specialization
+/// @note valid for all revs
+///
+template< mss::spd::rev R >
+class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::CAC_DLY_B_0, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x1f;
+        static constexpr const char* FIELD_STR = "CAC Delay B side Group 0";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note CAC_DLY_B_1 field specialization
+/// @note valid for all revs
+///
+template< mss::spd::rev R >
+class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::CAC_DLY_B_1, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x1f;
+        static constexpr const char* FIELD_STR = "CAC Delay B side Group 1";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note CAC_DLY_B_2 field specialization
+/// @note valid for all revs
+///
+template< mss::spd::rev R >
+class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::CAC_DLY_B_2, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x1f;
+        static constexpr const char* FIELD_STR = "CAC Delay B side Group 2";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note CAC_DLY_B_3 field specialization
+/// @note valid for all revs
+///
+template< mss::spd::rev R >
+class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::CAC_DLY_B_3, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x1f;
+        static constexpr const char* FIELD_STR = "CAC Delay B side Group 3";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note CAC_DLY_B_4 field specialization
+/// @note valid for all revs
+///
+template< mss::spd::rev R >
+class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::CAC_DLY_B_4, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x1f;
+        static constexpr const char* FIELD_STR = "CAC Delay B side Group 4";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note CAC_DLY_B_5 field specialization
+/// @note valid for all revs
+///
+template< mss::spd::rev R >
+class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::CAC_DLY_B_5, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x1f;
+        static constexpr const char* FIELD_STR = "CAC Delay B side Group 5";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note CAC_DLY_B_6 field specialization
+/// @note valid for all revs
+///
+template< mss::spd::rev R >
+class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::CAC_DLY_B_6, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x1f;
+        static constexpr const char* FIELD_STR = "CAC Delay B side Group 6";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note CAC_DLY_B_7 field specialization
+/// @note valid for all revs
+///
+template< mss::spd::rev R >
+class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::CAC_DLY_B_7, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x1f;
+        static constexpr const char* FIELD_STR = "CAC Delay B side Group 7";
 
         template <typename T>
         using COMPARISON_OP = std::less_equal<T>;
