@@ -424,8 +424,8 @@ hb_startsimics()
         #export MYDIR=$bb/obj/ppc/hbfw/simics/startup.simics
         #then /runsim -m p10_standalone -o hb_script_to_run=$MYDIR
         export MY_DIR="${SANDBOXBASE}/obj/ppc/simu/scripts/hbfw"
-        echo "cd ${SANDBOXBASE}/simics/ && ./runsim -m ${MACHINE} hb_script_to_run=${MY_DIR}/startup.simics pnor_img=${MY_DIR}/../../../hbfw/img/p10.pnor sbe_seeprom_img=${SANDBOXBASE}/images/ppc/lab/flash/sbe_seeprom_p9a_10.bin.ecc num_procs=1 vpd_proc=vpd/images/11a4199cd205aaad34566b1832e3ef6a"
-        execute_in_sandbox "cd ${SANDBOXBASE}/simics/ && ./runsim -m ${MACHINE} hb_script_to_run=${MY_DIR}/startup.simics pnor_img=${MY_DIR}/../../../hbfw/img/p10.pnor sbe_seeprom_img=${SANDBOXBASE}/images/ppc/lab/flash/sbe_seeprom_p9a_10.bin.ecc num_procs=1 vpd_proc=vpd/images/11a4199cd205aaad34566b1832e3ef6a" "ppc"
+        echo "cd ${SANDBOXBASE}/simics/ && ./runsim -m ${MACHINE} hb_script_to_run=${MY_DIR}/startup.simics pnor_img=${MY_DIR}/../../../hbfw/img/p10.pnor sbe_seeprom_img=${SANDBOXBASE}/images/ppc/lab/flash/sbe_seeprom_p9a_10.bin.ecc num_procs=1 vpd_proc=vpd/images/11a4199cd205aaad34566b1832e3ef6a ${SIMICSOPTIONS} $*"
+        execute_in_sandbox "cd ${SANDBOXBASE}/simics/ && ./runsim -m ${MACHINE} hb_script_to_run=${MY_DIR}/startup.simics pnor_img=${MY_DIR}/../../../hbfw/img/p10.pnor sbe_seeprom_img=${SANDBOXBASE}/images/ppc/lab/flash/sbe_seeprom_p9a_10.bin.ecc num_procs=1 vpd_proc=vpd/images/11a4199cd205aaad34566b1832e3ef6a ${SIMICSOPTIONS} $*" "ppc"
     else
         execute_in_sandbox \
             "start_simics -machine ${MACHINE} ${SIMICSOPTIONS} $*"  "ppc"
