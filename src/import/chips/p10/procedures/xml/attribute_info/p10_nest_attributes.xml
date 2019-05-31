@@ -25,6 +25,25 @@
 <attributes>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Processor fabric topology id table. Index is the value of RA[15:19] and the
+    value stored is the 4-bit topology id of the owning chip (of that space).
+  </description>
+  <valueType>uint8</valueType>
+  <enum>INVALID = 0xff</enum>
+  <array>32</array>
+  <default>
+    INVALID,INVALID,INVALID,INVALID,INVALID,INVALID,INVALID,INVALID,
+    INVALID,INVALID,INVALID,INVALID,INVALID,INVALID,INVALID,INVALID,
+    INVALID,INVALID,INVALID,INVALID,INVALID,INVALID,INVALID,INVALID,
+    INVALID,INVALID,INVALID,INVALID,INVALID,INVALID,INVALID,INVALID
+  </default>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_PROC_FABRIC_BROADCAST_MODE</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
