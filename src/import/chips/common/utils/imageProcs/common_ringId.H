@@ -144,6 +144,8 @@ enum ChipId
     CID_P10 = 0xA,
 };
 
+#define P10_MVPD_CHIP_NAME 0xda
+
 // Ring classes
 // - Specified whether root ring:            ROOT (only applied in RING_PROPERTIES list)
 // - Specifies origination repo:             EKB or MVPD
