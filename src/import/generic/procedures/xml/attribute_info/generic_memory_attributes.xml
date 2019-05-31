@@ -387,5 +387,21 @@
     <writeable/>
     <mssAccessorName>dimm_type_metadata</mssAccessorName>
   </attribute>
-  
+
+  <attribute>
+    <id>ATTR_MSS_OMI_EDPL_DISABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      EDPL (Error Detection Per Lane) is a feature in the DL that adds some additional checks to
+      the traffic going across the OpenCAPI link in order to better track which lanes are having issues.
+      Note: EDPL must be set the same on both sides of the link. This attribute affects both the proc/mc
+      side and the OCMB side.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FALSE = 0, TRUE = 1</enum>
+    <platInit/>
+    <initToZero/>
+    <mssAccessorName>mss_omi_edpl_disable</mssAccessorName>
+  </attribute>
+
 </attributes>
