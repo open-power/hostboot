@@ -116,33 +116,6 @@ fapi2::ReturnCode p9_fbc_ioo_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x901080cull, l_scom_buffer ));
 
-            if (((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
-            {
-                if (l_def_OBUS_NV_ENABLED)
-                {
-                    constexpr auto l_PB_IOO_LL0_CONFIG_NV0_NPU_ENABLED_ON = 0x1;
-                    l_scom_buffer.insert<60, 1, 63, uint64_t>(l_PB_IOO_LL0_CONFIG_NV0_NPU_ENABLED_ON );
-                }
-            }
-
-            if (((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
-            {
-                if (l_def_OBUS_NV_ENABLED)
-                {
-                    constexpr auto l_PB_IOO_LL0_CONFIG_NV1_NPU_ENABLED_ON = 0x1;
-                    l_scom_buffer.insert<61, 1, 63, uint64_t>(l_PB_IOO_LL0_CONFIG_NV1_NPU_ENABLED_ON );
-                }
-            }
-
-            if (((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
-            {
-                if (l_def_OBUS_NV_ENABLED)
-                {
-                    constexpr auto l_PB_IOO_LL0_CONFIG_NV2_NPU_ENABLED_ON = 0x1;
-                    l_scom_buffer.insert<62, 1, 63, uint64_t>(l_PB_IOO_LL0_CONFIG_NV2_NPU_ENABLED_ON );
-                }
-            }
-
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5)
                     && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10))
                 || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x12)) || ((l_chip_id == 0x6)
@@ -176,15 +149,6 @@ fapi2::ReturnCode p9_fbc_ioo_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS
                 {
                     constexpr auto l_PB_IOO_LL0_CONFIG_NV2_NPU_ENABLED_ON = 0x1;
                     l_scom_buffer.insert<63, 1, 63, uint64_t>(l_PB_IOO_LL0_CONFIG_NV2_NPU_ENABLED_ON );
-                }
-            }
-
-            if (((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
-            {
-                if (l_def_OBUS_NV_ENABLED)
-                {
-                    constexpr auto l_PB_IOO_LL0_CONFIG_NV3_NPU_ENABLED_ON = 0x1;
-                    l_scom_buffer.insert<63, 1, 63, uint64_t>(l_PB_IOO_LL0_CONFIG_NV3_NPU_ENABLED_ON );
                 }
             }
 
