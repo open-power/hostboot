@@ -9,8 +9,8 @@ if not defined hb_skip_vpd_preload {$hb_skip_vpd_preload = 0}
 
 
 if ($hb_mode == 0) { # Axone and beyond
-    # this number is no longer provided we have to look it up
-    $num_dimms = (dec (list-length((get-master-procs)[0].get-dimms)))
+    # There is no VPD cache on Axone
+    $hb_skip_vpd_preload = 1;
 }
 
 # Preload VPD in PNOR unless told not to
