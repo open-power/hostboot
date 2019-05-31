@@ -818,6 +818,23 @@ template<>
 fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
 
 
+///
+/// @brief Change the state of the force_str bit - mc_type::NIMBUS specialization
+/// @tparam MC the memory controller type
+/// @param[in] i_target the target
+/// @param[in] i_state the state
+/// @return FAPI2_RC_SUCCESS if and only if ok
+/// @note This bit doesn't exist on Nimbus, so this is a no-op
+///
+template<>
+inline fapi2::ReturnCode change_force_str<DEFAULT_MC_TYPE>(
+    const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+    const states i_state )
+{
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+
 //
 // We expect to come in to draminit with the following setup:
 // 1. ENABLE_RESET_N (FARB5Q(6)) 0

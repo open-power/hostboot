@@ -84,6 +84,10 @@ extern "C"
         FAPI_TRY( mss::change_refresh_enable(i_target, mss::HIGH), "%s Failed change_refresh_enable",
                   mss::c_str(i_target) );
 
+        // Trigger the MC to take the DRAMs out of self refresh
+        FAPI_TRY( mss::change_force_str<mss::mc_type::EXPLORER>(i_target, mss::LOW), "%s Failed change_force_str",
+                  mss::c_str(i_target) );
+
         // Enable periodic short zq cal
         FAPI_TRY( mss::enable_zq_cal(i_target), "%s Failed enable_zq_cal", mss::c_str(i_target) );
 

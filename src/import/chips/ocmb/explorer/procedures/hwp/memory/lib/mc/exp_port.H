@@ -71,6 +71,7 @@ class portTraits< mss::mc_type::EXPLORER >
         static constexpr uint64_t FARB6Q_REG = EXPLR_SRQ_MBA_FARB6Q;
         static constexpr uint64_t FARB9Q_REG = EXPLR_SRQ_MBA_FARB9Q;
         static constexpr uint64_t REFRESH_REG = EXPLR_SRQ_MBAREF0Q;
+        static constexpr uint64_t STR0Q_REG = EXPLR_SRQ_MBASTR0Q;
         static constexpr uint64_t ECC_REG = EXPLR_RDF_RECR;
         static constexpr uint64_t DSM0Q_REG = EXPLR_SRQ_MBA_DSM0Q;
         static constexpr uint64_t FWMS_REG = EXPLR_RDF_FWMS0;
@@ -93,6 +94,8 @@ class portTraits< mss::mc_type::EXPLORER >
             CFG_ZQ_PER_CAL_ENABLE = EXPLR_SRQ_MBA_FARB9Q_CFG_ZQ_PER_CAL_ENABLE,
 
             REFRESH_ENABLE = EXPLR_SRQ_MBAREF0Q_CFG_REFRESH_ENABLE,
+
+            CFG_FORCE_STR = EXPLR_SRQ_MBASTR0Q_CFG_FORCE_STR,
 
             ECC_CHECK_DISABLE = EXPLR_RDF_RECR_MBSECCQ_DISABLE_MEMORY_ECC_CHECK_CORRECT,
             ECC_CORRECT_DISABLE = EXPLR_RDF_RECR_MBSECCQ_DISABLE_MEMORY_ECC_CORRECT,
@@ -153,6 +156,31 @@ inline fapi2::ReturnCode reorder_queue_setting<mss::mc_type::EXPLORER>(
 {
     return mss::attr::get_reorder_queue_setting(i_target, o_value);
 }
+
+///
+/// @brief Change the state of the force_str bit - mc_type::EXPLORER specialization
+/// @tparam MC the memory controller type
+/// @param[in] i_target the target
+/// @param[in] i_state the state
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< >
+inline fapi2::ReturnCode change_force_str<DEFAULT_MC_TYPE>(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const states i_state )
+{
+    using TT = portTraits<mss::mc_type::EXPLORER>;
+    fapi2::buffer<uint64_t> l_data;
+
+    FAPI_DBG("Change force_str to %s %s", (i_state == HIGH ? "high" : "low"), mss::c_str(i_target));
+    FAPI_TRY( mss::getScom(i_target, TT::STR0Q_REG, l_data) );
+    l_data.writeBit<TT::CFG_FORCE_STR>(i_state);
+    FAPI_TRY( mss::putScom(i_target, TT::STR0Q_REG, l_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 
 }// mss
 

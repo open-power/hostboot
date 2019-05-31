@@ -294,6 +294,19 @@ fapi_try_exit:
 
 
 ///
+/// @brief Change the state of the force_str bit
+/// @tparam MC the memory controller type
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_target the target
+/// @param[in] i_state the state
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = portTraits<MC> >
+fapi2::ReturnCode change_force_str( const fapi2::Target<T>& i_target, const states i_state );
+
+
+///
 /// @brief Change the state of the MC Refresh enable bit
 /// @tparam MC the memory controller type
 /// @tparam T the fapi2 target type of the target
