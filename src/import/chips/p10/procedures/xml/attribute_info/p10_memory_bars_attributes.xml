@@ -30,28 +30,30 @@
   <description>
     Holds the values to be programmed into Memory BAR registers.
     These values are calculated by p10_mss_eff_grouping HWP.
-    Array arrangements: 4 MIs x 9 registers each
-      [0][0] = [MI0][MCFGP0] .... [0][8] = [MI0][MCMODE0]
-      [1][0] = [MI1][MCFGP0] .... [1][8] = [MI1][MCMODE0]
-      [2][0] = [MI2][MCFGP0] .... [2][8] = [MI2][MCMODE0]
-      [3][0] = [MI3][MCFGP0] .... [3][8] = [MI3][MCMODE0]
-    Set by p10_mss_eff_grouping.
+    Array arrangements: 4 MIs x 10 register values/masks each.
+      [0][0] = [MI0][MCFGP0] .... [MI0][9] = [MI0][MCMODE0_mask]
+      [1][0] = [MI1][MCFGP0] .... [MI1][9] = [MI1][MCMODE0_mask]
+      [2][0] = [MI2][MCFGP0] .... [MI2][9] = [MI2][MCMODE0_mask]
+      [3][0] = [MI3][MCFGP0] .... [MI3][9] = [MI3][MCMODE0_mask]
     The BARs will be written by p10_sbe_write_mcs_bar_config HWP when
     called by Hostboot.
+    The mask value of a register must be applied wherever applicable.
+    Set by p10_mss_eff_grouping.
     Consumers: HB/SBE
   </description>
   <valueType>uint64</valueType>
-  <array>4 9</array>
+  <array>4 10</array>
   <enum>
-    MCFGP0    = 0,
-    MCFGP1    = 1,
-    MCFGPM0   = 2,
-    MCFGPM1   = 3,
-    MCFGP0A   = 4,
-    MCFGP1A   = 5,
-    MCFGPM0A  = 6,
-    MCFGPM1A  = 7,
-    MCMODE0   = 8
+    MCFGP0         = 0,
+    MCFGP1         = 1,
+    MCFGPM0        = 2,
+    MCFGPM1        = 3,
+    MCFGP0A        = 4,
+    MCFGP1A        = 5,
+    MCFGPM0A       = 6,
+    MCFGPM1A       = 7,
+    MCMODE0        = 8,
+    MCMODE0_mask   = 9
   </enum>
   <writeable/>
   <initToZero/>
@@ -170,36 +172,56 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
-  <id>ATTR_MSS_MCS_GROUP_32</id>
+  <id>ATTR_MSS_MCC_GROUP_32</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
     creator: p10_mss_eff_grouping
     consumer: mss_setup_bars
     Data Structure from eff grouping to setup bars to help determine
     different groups. Measured in GB.
-
-    Non-Mirroring array[0-7]  [0.20]:
-         0-- Port size; 1-- No of ports in group; 2-- Total group size of non-mirroring;
-         3-- Base address; 4-11-- PortID number in group;
-        12-- Alt Memory valid(0); 13-- Alt Memory valid (1);
-        14-- Alt Group size (0); 15-- Alt Group size(1);
-        16-- Alt Base address (0); 17-- Alt Base address (1);
-        18-- SMF Memory Valid
-        19-- SMF Group Size (size[22:35] in lower bits)
-        20-- SMF Base Address (addr[22:35] in lower bits)
-
-    Mirroring array[8-15] [0:20]:
-         0-- Port size; 1-- No of ports in group; 2-- Total group size of mirroring;
-         3-- Base address; 4-11-- PortID number;
-        12-- Alt Memory valid(0); 13-- Alt Memory valid (1);
-        14-- Alt Group size (0); 15-- Alt Group size(1);
-        16-- Alt Base address (0); 17-- Alt Base address (1);
-        18-- SMF Memory Valid
-        19-- SMF Group Size (size[22:35] in lower bits)
-        20-- SMF Base Address (addr[22:35] in lower bits)
+    Non-Mirroring array[0-7][0.20]:
+            0-- Port size;
+            1-- No of ports in group;
+            2-- Total group size of non-mirroring;
+            3-- Base address;
+         4-11-- PortID number in group;
+           12-- Alt Memory valid(0);
+           13-- Alt Memory valid (1);
+           14-- Alt Group size (0);
+           15-- Alt Group size(1);
+           16-- Alt Base address (0);
+           17-- Alt Base address (1);
+           18-- SMF Memory Valid
+           19-- SMF Group Size (size[22:35] in lower bits)
+           20-- SMF Base Address (addr[22:35] in lower bits)
+    Mirroring array[8-15][0:20]:
+           Same index description as above for mirror groups.
    </description>
   <valueType>uint32</valueType>
   <array>16,21</array>
+  <enum>
+    MCC_SIZE          = 0,
+    NUM_MCC_IN_GROUP  = 1,
+    GROUP_SIZE        = 2,
+    BASE_ADDR         = 3,
+    MCC_ID_1          = 4,
+    MCC_ID_2          = 5,
+    MCC_ID_3          = 6,
+    MCC_ID_4          = 7,
+    MCC_ID_5          = 8,
+    MCC_ID_6          = 9,
+    MCC_ID_7          = 10,
+    MCC_ID_8          = 11,
+    ALT_VALID_0       = 12,
+    ALT_VALID_1       = 13,
+    ALT_SIZE_0        = 14,
+    ALT_SIZE_1        = 15,
+    ALT_BASE_ADDR_0   = 16,
+    ALT_BASE_ADDR_1   = 17,
+    SMF_VALID         = 18,
+    SMF_SIZE          = 19,
+    SMF_BASE_ADDR     = 20
+  </enum>
   <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
