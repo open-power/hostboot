@@ -462,4 +462,45 @@
     </callout>
   </hwpError>
   <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_DD_LEVEL_MISMATCH_ERROR</rc>
+    <description>The DD level from HB and MVPD is not same</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>ATTR_DDLEVEL</ffdc>
+    <ffdc>MVPD_DDLEVEL</ffdc>
+    <ffdc>MVPD_DDDATA1</ffdc>
+    <ffdc>MVPD_DDDATA2</ffdc>
+    <ffdc>MVPD_DDDATA3</ffdc>
+    <ffdc>MVPD_DDDATA4</ffdc>
+    <ffdc>MVPD_DDSIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_CHIPNAME_MISMATCH_ERROR</rc>
+    <description>The Chip Name from HB and MVPD is not same</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>ATTR_NAME</ffdc>
+    <ffdc>MVPD_NAME</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_MVPD_DD_KEYWORD_VERSION_ERROR</rc>
+    <description>The DD Keyword version from MVPD, found to be invalid</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>MVPD_DD_KWD_VERSION</ffdc>
+    <ffdc>MVPD_DDSIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
 </hwpErrors>

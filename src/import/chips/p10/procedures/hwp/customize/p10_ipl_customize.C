@@ -1476,7 +1476,13 @@ ReturnCode p10_ipl_customize (
     uint32_t        attrMaxSbeSeepromSize = 0;
     uint32_t        l_requestedBootCoreMask = (i_sysPhase == SYSPHASE_HB_SBE) ? io_bootCoreMask : 0x00FFFFFF;
     uint8_t         attrDdLevel = UNDEFINED_DD_LEVEL; // Used for host services
-
+    uint32_t        l_sizeMvpdDDField = 0;
+    uint8_t*        l_decimalDDData = nullptr;
+    uint8_t*        l_fullDDData = nullptr;
+    uint8_t         l_mvpdDD = 0;
+    uint8_t         l_chipName = 0;
+    uint32_t        l_sizeMvpdCIField = 0;
+    uint8_t*        l_fullCIData = nullptr;
 
     FAPI_IMP ("Entering p10_ipl_customize w/sysPhase=%d...", i_sysPhase);
 
@@ -1563,6 +1569,126 @@ ReturnCode p10_ipl_customize (
 
     FAPI_DBG("Input image size: %d", l_inputImageSize);
 
+    // First, determine the DD level
+    l_fapiRc = FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, i_procTarget, attrDdLevel);
+
+    FAPI_ASSERT( l_fapiRc == fapi2::FAPI2_RC_SUCCESS,
+                 fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
+                 set_CHIP_TARGET(i_procTarget).
+                 set_OCCURRENCE(1),
+                 "FAPI_ATTR_GET(ATTR_EC) failed." );
+
+    FAPI_DBG("attrDdLevel (for DD level .rings) = 0x%x", attrDdLevel);
+
+    //Fetching the chip name
+    l_fapiRc = FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, i_procTarget, l_chipName);
+
+    FAPI_ASSERT( l_fapiRc == fapi2::FAPI2_RC_SUCCESS,
+                 fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
+                 set_CHIP_TARGET(i_procTarget).
+                 set_OCCURRENCE(1),
+                 "FAPI_ATTR_GET(ATTR_NAME) failed." );
+
+    FAPI_DBG("chipName (from HW image .rings) = 0x%x", l_chipName);
+
+    //Fetching DD version from MVPD file
+    FAPI_TRY(getMvpdField(fapi2::MVPD_RECORD_CRP0,
+                          fapi2::MVPD_KEYWORD_DD,
+                          i_procTarget,
+                          NULL,
+                          l_sizeMvpdDDField),
+             "getMvpdField failed for CRP0/DD (1) w/rc=0x%08x",
+             (uint64_t)fapi2::current_err);
+
+    l_fullDDData = new uint8_t[l_sizeMvpdDDField]();
+    l_decimalDDData = new uint8_t[l_sizeMvpdDDField]();
+
+    FAPI_TRY(getMvpdField(fapi2::MVPD_RECORD_CRP0,
+                          fapi2::MVPD_KEYWORD_DD,
+                          i_procTarget,
+                          l_fullDDData,
+                          l_sizeMvpdDDField),
+             "getMvpdField failed for CRP0/DD (2) w/rc=0x%08x and"
+             "DD level size is of %u bytes",
+             (uint64_t)fapi2::current_err, l_sizeMvpdDDField);
+
+    //Size of DD keyword is of 5 bytes. 1st byte is keyword version,
+    //Checking the keyword version
+    FAPI_ASSERT((l_fullDDData[0] == MVPD_DD_KWD_VER1),
+                fapi2::XIPC_MVPD_DD_KEYWORD_VERSION_ERROR().
+                set_CHIP_TARGET(i_procTarget).
+                set_MVPD_DD_KWD_VERSION(l_fullDDData[0]).
+                set_MVPD_DDSIZE(l_sizeMvpdDDField),
+                "DD Keyword version from MVPD is 0x%0x, "
+                "size of DD keyword is %u",
+                l_fullDDData[0], l_sizeMvpdDDField);
+
+    //Converting ASCI to hex
+    //2nd & 3rd byte contains RIT and 4th and 5th bytes has EC value.
+    //DD level in MVPD is determined using RIT and EC values.
+    //For example:- if DD level is x.y than the RIT = x & EC = y.
+    //Therefore below we are considering RIT and EC values.
+    //i value is initialized to 1 as the data field(RIT+EC) starts from there.
+    for(uint32_t i = 1; i < l_sizeMvpdDDField; i++)
+    {
+        *(l_decimalDDData + i) = *(l_fullDDData + i) - '0';
+    }
+
+    //Storing the value of l_fullDDData in a uint8, value obtained from
+    //MVPD is in 4 bytes i.e. the 1st two bytes contain the major DD number, x,
+    //and the next two bytes contain the minor DD number, y, in DDx.y
+    //Hence the below conversion is done where the 1st two bytes are
+    //ORed and shifted by 4 bits.
+    l_mvpdDD = (((*(l_decimalDDData + 1) * 10 + * (l_decimalDDData + 2)) << 4) |
+                (*(l_decimalDDData + 3) * 10 + * (l_decimalDDData + 4)));
+    FAPI_DBG("l_mvpdDD (DD level fetched from MVPD) is 0x%02x", l_mvpdDD);
+
+    FAPI_ASSERT((l_mvpdDD == attrDdLevel),
+                fapi2::XIPC_DD_LEVEL_MISMATCH_ERROR().
+                set_CHIP_TARGET(i_procTarget).
+                set_ATTR_DDLEVEL(attrDdLevel).
+                set_MVPD_DDLEVEL(l_mvpdDD).
+                set_MVPD_DDDATA1(*(l_fullDDData + 1)).
+                set_MVPD_DDDATA2(*(l_fullDDData + 2)).
+                set_MVPD_DDDATA3(*(l_fullDDData + 3)).
+                set_MVPD_DDDATA4(*(l_fullDDData + 4)).
+                set_MVPD_DDSIZE(l_sizeMvpdDDField),
+                "DD level from Platform (i.e attrDdLevel: 0x%0x) and "
+                "MVPD (i.e l_mvpdDD: 0x%0x)is not matching. "
+                "Data fetched from MVPD, 1st Byte = 0x%0x, 2nd Byte = 0x%0x, "
+                " 3rd Byte = 0x%0x, 4th Byte = 0x%0x. Size of MVPD is %u.",
+                attrDdLevel, l_mvpdDD, *(l_fullDDData + 1), *(l_fullDDData + 2),
+                *(l_fullDDData + 3), *(l_fullDDData + 4), l_sizeMvpdDDField);
+
+    //Fetching chip name from MVPD
+    FAPI_TRY( getMvpdField(fapi2::MVPD_RECORD_CRP0,
+                           fapi2::MVPD_KEYWORD_CI,
+                           i_procTarget,
+                           NULL,
+                           l_sizeMvpdCIField),
+              "getMvpdField failed for CRP0/CI (1) w/rc=0x%08x",
+              (uint64_t)fapi2::current_err);
+
+    l_fullCIData = new uint8_t[l_sizeMvpdCIField]();
+
+    FAPI_TRY( getMvpdField(fapi2::MVPD_RECORD_CRP0,
+                           fapi2::MVPD_KEYWORD_CI,
+                           i_procTarget,
+                           l_fullCIData,
+                           l_sizeMvpdCIField),
+              "getMvpdField failed for CRP0/CI (2) w/rc=0x%08x and"
+              "chipname data size is of %u bytes",
+              (uint64_t)fapi2::current_err, l_sizeMvpdCIField);
+    FAPI_DBG("Chip name fetched from MVPD is 0x%0x", *l_fullCIData);
+
+    FAPI_ASSERT((*(l_fullCIData) == P10_MVPD_CHIP_NAME) && (l_chipName == CID_P10),
+                fapi2::XIPC_CHIPNAME_MISMATCH_ERROR().
+                set_CHIP_TARGET(i_procTarget).
+                set_ATTR_NAME(l_chipName).
+                set_MVPD_NAME(l_fullCIData),
+                "Chip name from Platform (i.e. l_chipName: 0x%0x)"
+                "and MVPD (i.e. l_fullCIData: 0x%0x)is different",
+                l_chipName, *l_fullCIData );
 
 #ifdef CHIP_GEN_P9
 #ifndef WIN32
@@ -1858,16 +1984,6 @@ ReturnCode p10_ipl_customize (
     // - Determine if there GPTR support, and overlays support, through Mvpd
     //////////////////////////////////////////////////////////////////////////
 
-    // First, determine the DD level
-    l_fapiRc = FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, i_procTarget, attrDdLevel);
-
-    FAPI_ASSERT( l_fapiRc == fapi2::FAPI2_RC_SUCCESS,
-                 fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
-                 set_CHIP_TARGET(i_procTarget).
-                 set_OCCURRENCE(1),
-                 "FAPI_ATTR_GET(ATTR_EC) failed." );
-
-    FAPI_DBG("attrDdLevel (for DD level .rings) = 0x%x", attrDdLevel);
 
     switch (i_sysPhase)
     {

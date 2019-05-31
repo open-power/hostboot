@@ -31,6 +31,7 @@
 #define NUM_OF_CORES     (uint8_t)32
 #define NUM_OF_QMES      (uint8_t)8
 #define CORES_PER_QME    (NUM_OF_CORES/NUM_OF_QMES)
+#define MVPD_DD_KWD_VER1 (uint8_t)0x01
 
 enum SYSPHASE
 {
