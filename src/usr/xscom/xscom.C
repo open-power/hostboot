@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,6 +54,9 @@
 #include <sys/mm.h>
 #include <kernel/bltohbdatamgr.H>
 #undef HMER // from securerom/ROM.H
+
+using namespace TARGETING;
+using namespace MEMMAP;
 
 // Trace definition
 trace_desc_t* g_trac_xscom = NULL;
@@ -858,15 +861,26 @@ uint64_t readRemoteScom( uint64_t i_node,
     TARGETING::Target * l_MasterProcTarget = nullptr;
     TARGETING::TargetService & l_tgtServ = TARGETING::targetService();
     l_tgtServ.masterProcChipTargetHandle( l_MasterProcTarget );
-    uint8_t l_chipId =
-            l_MasterProcTarget->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
+
+    // TODO RTC 212966
+    // Enable when attributes are pulled in.
+    //const auto l_localTopoId =
+    //    l_MasterProcTarget->getAttr<ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID>();
+    //const auto topoMode_t l_topoMode =
+    //    l_MasterProcTarget->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_MODE>();
+    //uint8_t l_chipId;
+    //uint8_t l_groupId;
+    //mmioExtractGroupAndChip(l_topoMode, l_localtopoId, l_groupId, l_chipId);
+    //const auto l_remoteTopoId = mmioMakeTopoId(l_topoMode, i_node, l_chipId);
+    topoMode_t l_topoMode = topoMode_t::PROC_FABRIC_TOPOLOGY_MODE_MODE0;
+    topoId_t l_remoteTopoId = 0;
 
     // compute xscom address & control
     // This will return xscom base of the remote node
     uint64_t l_xscomBaseAddr =
             computeMemoryMapOffset( MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR,
-                                    i_node,
-                                    l_chipId );
+                                    l_topoMode,
+                                    l_remoteTopoId);
 
 
     //Map xscom base into processor space

@@ -2810,19 +2810,6 @@
   </attribute>
 
   <attribute>
-    <description>Base Address of Interrupt Presenter</description>
-    <id>INTP_BASE_ADDR</id>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <simpleType>
-      <uint64_t>
-        <default>0xFFFFFFFFFFFFFFFF</default>
-      </uint64_t>
-    </simpleType>
-  </attribute>
-
-  <attribute>
     <id>ISTEP_MODE</id>
     <description>If True, puts HostBoot into SPLess SingleStep mode.</description>
     <simpleType>

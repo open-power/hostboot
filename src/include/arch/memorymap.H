@@ -26,6 +26,70 @@
 #define _MEMORYMAP_H
 
 #include <limits.h>
+#include <usr/initservice/mboxRegs.H>
+
+//TODO RTC 212966
+//Remove these once attributes are available from EKB
+using namespace INITSERVICE;
+using namespace SPLESS;
+namespace TARGETING
+{
+    using ATTR_PROC_FABRIC_TOPOLOGY_MODE_type = MboxScratch6_t::fabricTopologyMode_t;
+    using ATTR_PROC_FABRIC_TOPOLOGY_ID_type = uint8_t;
+    using ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID_type = uint8_t;
+}
+
+namespace MEMMAP
+{
+
+using namespace TARGETING;
+
+// Shortened type name for convenience
+using topoId_t = ATTR_PROC_FABRIC_TOPOLOGY_ID_type;
+using topoMode_t = ATTR_PROC_FABRIC_TOPOLOGY_MODE_type;
+using groupId_t = uint8_t;
+using chipId_t = uint8_t;
+
+/**
+ * @brief bit definitions for 4-bit mode 0/1 topology ID
+ */
+typedef union
+{
+    struct // GGGC
+    {
+        uint8_t rsvd1:4; // 0:3
+        uint8_t group:3; // 4:6
+        uint8_t chip :1; // 7
+    } mode0;
+    struct // GGCC
+    {
+        uint8_t rsvd1:4; // 0:3
+        uint8_t group:2; // 4:5
+        uint8_t chip :2; // 6:7
+    } mode1;
+    topoId_t topoId;
+}topologyIdBits_t;
+
+/**
+ * @brief bit definitions for 5-bit mode 0/1 topology index
+ */
+typedef union
+{
+    struct // GGG0C
+    {
+        uint8_t rsvd1:3; // 0:2
+        uint8_t group:3; // 3:5
+        uint8_t rsvd2:1; // 6
+        uint8_t chip :1; // 7
+    } mode0;
+    struct // 0GGCC
+    {
+        uint8_t rsvd1:4; // 0:3
+        uint8_t group:2; // 4:5
+        uint8_t chip :2; // 6:7
+    } mode1;
+    uint8_t topoIndex;
+}topologyIndexBits_t;
 
 /**
  * Collection of constants and utility functions related to the
@@ -33,36 +97,134 @@
  */
 
 /**
- *  @brief  Static offsets into other chips
+ *  @brief  Each 5-bit topology index addresses a 16 terabyte space
  */
-constexpr uint64_t  MMIO_OFFSET_PER_CHIP  = (4*TERABYTE);  //0x40000000000
-constexpr uint64_t  MMIO_OFFSET_PER_GROUP = (32*TERABYTE); //0x200000000000
+constexpr uint64_t  MMIO_OFFSET_PER_TOPO_INDEX =  0x0000100000000000;
 
-constexpr uint64_t  MMIO_BASE = 0x6000000000000;
 /**
- * @brief Compute MMIO value for a given chip and base value
+ *  @brief This address bit determines if the address is in SMF space.
  */
-inline uint64_t computeMemoryMapOffset( uint64_t i_baseAddr,
-                                        uint8_t i_group,
-                                        uint8_t i_chip )
+constexpr uint64_t  IS_SMF_ADDR_BIT =             0x0008000000000000;
+
+
+/**
+ * @brief Compute MMIO address for a 4-bit topology ID, topology Mode and
+ *        base address value.
+ *
+ * @param[in] i_baseAddr The base MMIO address for topology index 0
+ * @param[in] i_topologyMode The topology mode.
+ * @param[in] i_topologyId The topology ID (or effective topology ID)
+ *
+ * @return The base address adjusted for the chip associated with the given
+ *         topology ID.
+ */
+inline uint64_t computeMemoryMapOffset( const uint64_t i_baseAddr,
+                                        const topoMode_t i_topologyMode,
+                                        const topoId_t i_topologyId)
 {
-    return (i_baseAddr +
-      (MMIO_OFFSET_PER_GROUP * i_group) +
-      (MMIO_OFFSET_PER_CHIP * i_chip));
+    // The 5-bit topology index value must be used to calculate the
+    // address.  The index value is derived from the topology ID as
+    // follows:
+    //
+    // MODE0: GGGC -> GGG0C
+    // MODE1: GGCC -> 0GGCC
+    topologyIdBits_t l_idBits;
+    l_idBits.topoId = i_topologyId;
+    topologyIndexBits_t l_indexBits;
+    l_indexBits.topoIndex = 0;
+
+    if(i_topologyMode == topoMode_t::PROC_FABRIC_TOPOLOGY_MODE_MODE0)
+    {
+        l_indexBits.mode0.group = l_idBits.mode0.group;
+        l_indexBits.mode0.chip = l_idBits.mode0.chip;
+    }
+    else
+    {
+        l_indexBits.mode1.group = l_idBits.mode1.group;
+        l_indexBits.mode1.chip = l_idBits.mode1.chip;
+    }
+
+    return (i_baseAddr + (MMIO_OFFSET_PER_TOPO_INDEX * l_indexBits.topoIndex));
 };
+
+
+/**
+ * @brief Extract the fabric group and chip ID's from a 4-bit topology ID
+ *
+ * @param[in] i_topologyMode The topology mode.
+ * @param[in] i_topologyId The topology ID (or effective topology ID)
+ * @param[out] o_group The group number
+ * @param[out] o_chip The chip number
+ *
+ */
+inline void extractGroupAndChip(const topoMode_t i_topologyMode,
+                                const topoId_t i_topologyId,
+                                groupId_t& o_group,
+                                chipId_t& o_chip)
+{
+    // NOTE: mode 0 -> GGGC
+    //       mode 1 -> GGCC
+    topologyIdBits_t l_idBits;
+    l_idBits.topoId = i_topologyId;
+    if(i_topologyMode == topoMode_t::PROC_FABRIC_TOPOLOGY_MODE_MODE0)
+    {
+        o_group = l_idBits.mode0.group;
+        o_chip = l_idBits.mode0.chip;
+    }
+    else
+    {
+        o_group = l_idBits.mode1.group;
+        o_chip = l_idBits.mode1.chip;
+    }
+};
+
+/**
+ * @brief Make a 4-bit topology ID from a group and chip ID formatted with
+ *        the given topology mode.
+ *
+ * @param[in] i_topologyMode The topology mode.
+ * @param[in] i_group The group number
+ * @param[in] i_chip The chip number
+ *
+ * @return The topology ID for the group and chip number
+ */
+inline topoId_t makeTopoId(const topoMode_t i_topologyMode,
+                           const groupId_t i_group,
+                           const chipId_t i_chip)
+{
+    // NOTE: mode 0 -> GGGC
+    //       mode 1 -> GGCC
+    topologyIdBits_t l_idBits;
+    l_idBits.topoId = 0;
+    if (i_topologyMode == topoMode_t::PROC_FABRIC_TOPOLOGY_MODE_MODE0)
+    {
+        l_idBits.mode0.group = i_group;
+        l_idBits.mode0.chip = i_chip;
+    }
+    else
+    {
+        l_idBits.mode1.group = i_group;
+        l_idBits.mode1.chip = i_chip;
+    }
+
+    return l_idBits.topoId;
+};
+
 
 /**
  *  @brief  A few default values that will need to be known
  *          by low-level code
  */
-constexpr uint64_t  MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR = 0x000603FC00000000;
-constexpr uint64_t  MMIO_GROUP0_CHIP0_LPC_BASE_ADDR   = 0x0006030000000000;
+constexpr uint64_t  MMIO_BASE =                              0x0006000000000000;
+constexpr uint64_t  MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR =      0x000603FC00000000;
+constexpr uint64_t  MMIO_GROUP0_CHIP0_LPC_BASE_ADDR   =      0x0006030000000000;
 constexpr uint64_t  MMIO_GROUP0_CHIP0_PSI_BRIDGE_BASE_ADDR = 0x0006030203000000;
-constexpr uint64_t  MMIO_GROUP0_CHIP0_XIVE_CONTROLLER_BASE_ADDR = 0x0006030203100000;
-constexpr uint64_t  MMIO_GROUP0_CHIP0_XIVE_THREAD_MGMT1_BASE_ADDR = 0x0006020000000000;
-constexpr uint64_t  MMIO_GROUP0_CHIP0_PSI_HB_ESB_BASE_ADDR = 0x00060302031C0000;
-constexpr uint64_t  MMIO_GROUP0_CHIP0_INTP_BASE_ADDR = 0x0003FFFF80000000;
-constexpr uint64_t  IS_SMF_ADDR_BIT = 0x0001000000000000;
+constexpr uint64_t  MMIO_GROUP0_CHIP0_XIVE_CONTROLLER_BASE_ADDR =
+                                                             0x0006030200000000;
+constexpr uint64_t  MMIO_GROUP0_CHIP0_XIVE_THREAD_MGMT1_BASE_ADDR =
+                                                             0x0006030203180000;
+constexpr uint64_t  MMIO_GROUP0_CHIP0_PSI_HB_ESB_BASE_ADDR = 0x0006030202000000;
 
+} //end namespace
 
 #endif //#ifndef _MEMORYMAP_H

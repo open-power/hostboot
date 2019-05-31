@@ -110,6 +110,21 @@
         <id>POSITION</id>
         <default>0</default>
     </attribute>
+    <attribute><id>FSP_BASE_ADDR</id>
+        <default>0x0006030100000000</default>
+    </attribute>
+    <attribute><id>PSI_BRIDGE_BASE_ADDR</id>
+        <default>0x0006030203000000</default>
+    </attribute>
+    <attribute><id>PSI_HB_ESB_ADDR</id>
+        <default>0x0006030202000000</default>
+    </attribute>
+    <attribute><id>XIVE_CONTROLLER_BAR_ADDR</id>
+        <default>0x0006030200000000</default>
+    </attribute>
+    <attribute><id>XIVE_THREAD_MGMT1_BAR_ADDR</id>
+        <default>0x0006030203180000</default>
+    </attribute>
 </targetInstance>
 
 

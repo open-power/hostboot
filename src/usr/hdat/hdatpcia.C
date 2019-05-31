@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -224,9 +224,6 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
                 uint32_t l_procFabricId =
                     l_pProcTarget->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
 
-                uint64_t l_procIntrBase =
-                      l_pProcTarget->getAttr<TARGETING::ATTR_INTP_BASE_ADDR>();
-
                 uint32_t l_procPosition =
                     l_pProcTarget->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
 
@@ -298,9 +295,9 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
                         pciaThreadData[l_threadIndex].pciaProcIdReg =
                         l_ThreadProcIdReg;
 
+                        //This field is deprecated starting with P9
                         this->iv_spPcia[index].hdatThreadData.
-                        pciaThreadData[l_threadIndex].pciaInterruptLine =
-                        l_ThreadProcIdReg;
+                        pciaThreadData[l_threadIndex].pciaInterruptLine = 0;
 
                         Procstatus = isFunctional(l_pTarget) ?
                                            HDAT_PROC_USABLE :
@@ -312,23 +309,13 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
                         (static_cast<hdatProcStatus> (l_procStatus)
                         ) & HDAT_EXIST_FLAGS_MASK_FOR_PCIA;
 
-                        //IBASE ADDRESS + NNNN + 000
-                        //Where NNNN = Thread Number =
-                        //         (Core Number * Number of threads) + Thread Number
-                        uint64_t l_ibase = l_procIntrBase +
-                              (l_coreNum * 0x1000 * l_coreThreadCount) +
-                              l_threadIndex * 0x1000;
+                        // This field is deprecated starting with P9
+                        this->iv_spPcia[index].hdatThreadData.
+                        pciaThreadData[l_threadIndex].pciaIbaseAddr.hi  = 0;
 
+                        // This field is deprecated starting with P9
                         this->iv_spPcia[index].hdatThreadData.
-                        pciaThreadData[l_threadIndex].pciaIbaseAddr.hi  =
-                               ((l_ibase & 0xFFFFFFFF00000000ull) >> 32);
-                        this->iv_spPcia[index].hdatThreadData.
-                        pciaThreadData[l_threadIndex].pciaIbaseAddr.hi |=
-                                HDAT_REAL_ADDRESS_MASK;
-
-                        this->iv_spPcia[index].hdatThreadData.
-                        pciaThreadData[l_threadIndex].pciaIbaseAddr.lo  =
-                                (l_ibase & 0x00000000FFFFFFFFull);
+                        pciaThreadData[l_threadIndex].pciaIbaseAddr.lo  = 0;
 
                         if(HDAT_PROC_NOT_INSTALLED == (HDAT_PROC_STAT_BITS &
                             this->iv_spPcia[index].hdatCoreData.pciaProcStatus))

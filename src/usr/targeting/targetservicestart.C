@@ -82,6 +82,7 @@
 #include <targeting/common/associationmanager.H>
 
 using namespace INITSERVICE::SPLESS;
+using namespace MEMMAP;
 //******************************************************************************
 // targetService
 //******************************************************************************
@@ -760,18 +761,38 @@ static void initializeAttributes(TargetService& i_targetService,
                 TARGETING::targetService().getTopLevelTarget(l_sys);
                 getAllChips(l_chips, TYPE_PROC, false);
 
-                ATTR_PROC_EFF_FABRIC_GROUP_ID_type l_eff_id;
                 ATTR_FABRIC_PRESENT_GROUPS_type l_fabric_groups = 0;
+
+                // TODO RTC 212966
+                // Get the topology mode (same for all chips).
+                //const auto l_topoMode =
+                //    l_chip->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_MODE>();
+                const auto l_topoMode =
+                    topoMode_t::PROC_FABRIC_TOPOLOGY_MODE_MODE0;
 
                 for(auto l_chip : l_chips)
                 {
-                    // Read the fabric group id
-                    l_eff_id = l_chip->getAttr<ATTR_PROC_EFF_FABRIC_GROUP_ID>();
+                    // TODO RTC 212966
+                    // Read the fabric topology id
+                    //const auto l_topoId =
+                    //    l_chip->getAttr<ATTR_PROC_EFF_FABRIC_TOPOLOGY_ID>();
+                    (void)l_chip;
+                    const topoId_t l_topoId = 0;
+
+                    // Extract the group ID from the topology ID
+                    groupId_t l_groupId;
+                    chipId_t l_chipId;
+                    extractGroupAndChip(l_topoMode,
+                                        l_topoId,
+                                        l_groupId,
+                                        l_chipId);
+
+
                     // Set the corresponding bit in fabric groups
                     l_fabric_groups |= (1 <<
                                        ((sizeof(ATTR_FABRIC_PRESENT_GROUPS_type)
                                         * 8)
-                                        - l_eff_id - 1));
+                                        - l_groupId - 1));
                 }
                 l_sys->setAttr<ATTR_FABRIC_PRESENT_GROUPS>(l_fabric_groups);
             }
@@ -844,21 +865,30 @@ static void adjustMemoryMap( TargetService& i_targetService )
 
     TARGETING::TargetHandleList l_funcProcs;
     getAllChips(l_funcProcs, TYPE_PROC, false );
+
+    // TODO RTC 212966
+    // Get topology mode (same for all procs)
+    //const auto l_topologyMode =
+    //    l_procChip->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_MODE>();
+    const auto l_topologyMode =
+        topoMode_t::PROC_FABRIC_TOPOLOGY_MODE_MODE0;
+
     for( auto & l_procChip : l_funcProcs )
     {
         TARG_INF( "Proc=%.8X", get_huid(l_procChip) );
+
         // Set effective fabric ids back to default values
-        ATTR_FABRIC_GROUP_ID_type l_groupId =
-          l_procChip->getAttr<ATTR_FABRIC_GROUP_ID>();
-        l_procChip->setAttr<ATTR_PROC_EFF_FABRIC_GROUP_ID>(l_groupId);
 
-        ATTR_FABRIC_CHIP_ID_type l_chipId =
-          l_procChip->getAttr<ATTR_FABRIC_CHIP_ID>();
-        l_procChip->setAttr<ATTR_PROC_EFF_FABRIC_CHIP_ID>(l_chipId);
+        // TODO RTC 212966
+        //const auto l_topologyId =
+        //    l_procChip->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_ID>();
+        topoId_t l_topologyId = 0;
 
-        // Compute default xscom BAR
+        // TODO RTC 212966
+        //l_procChip->setAttr<ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID>(l_topologyId);
+
         ATTR_XSCOM_BASE_ADDRESS_type l_xscomBAR =
-          computeMemoryMapOffset( l_xscomBase, l_groupId, l_chipId );
+            computeMemoryMapOffset(l_xscomBase, l_topologyMode, l_topologyId);
 
         //If SBE Xscom addr has SMF bit on... propagate
         if(l_curXscomBAR & IS_SMF_ADDR_BIT)
@@ -874,14 +904,15 @@ static void adjustMemoryMap( TargetService& i_targetService )
         {
             l_swapVictim = l_procChip;
             TARG_INF( "Master Proc %.8X is using XSCOM BAR from %.8X, BAR=%.16llX", get_huid(l_pMasterProcChip), get_huid(l_swapVictim), l_curXscomBAR );
-            l_swapAttrs[ATTR_PROC_EFF_FABRIC_GROUP_ID] = l_groupId;
-            l_swapAttrs[ATTR_PROC_EFF_FABRIC_CHIP_ID] = l_chipId;
+
+            // TODO RTC 212966
+            //l_swapAttrs[ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID] = l_topologyId;
             l_swapAttrs[ATTR_XSCOM_BASE_ADDRESS] = l_xscomBAR;
         }
 
         // Compute default LPC BAR
         ATTR_LPC_BUS_ADDR_type l_lpcBAR =
-          computeMemoryMapOffset( l_lpcBase, l_groupId, l_chipId );
+          computeMemoryMapOffset( l_lpcBase, l_topologyMode, l_topologyId);
         TARG_INF( " LPC=%.16llX", l_lpcBAR );
         l_procChip->setAttr<ATTR_LPC_BUS_ADDR>(l_lpcBAR);
         if( l_swapVictim == l_procChip )
@@ -902,8 +933,7 @@ static void adjustMemoryMap( TargetService& i_targetService )
         //Setup Interrupt Related Bars
         ATTR_PSI_BRIDGE_BASE_ADDR_type l_psiBridgeBAR =
             computeMemoryMapOffset(MMIO_GROUP0_CHIP0_PSI_BRIDGE_BASE_ADDR,
-                                  l_groupId,
-                                  l_chipId);
+                                   l_topologyMode, l_topologyId);
         TARG_INF( " PSI_BRIDGE_BAR =%.16llX", l_psiBridgeBAR );
         l_procChip->setAttr<ATTR_PSI_BRIDGE_BASE_ADDR>(l_psiBridgeBAR);
         if( l_swapVictim == l_procChip)
@@ -913,8 +943,7 @@ static void adjustMemoryMap( TargetService& i_targetService )
 
         ATTR_XIVE_CONTROLLER_BAR_ADDR_type l_xiveCtrlBAR =
             computeMemoryMapOffset(MMIO_GROUP0_CHIP0_XIVE_CONTROLLER_BASE_ADDR,
-                                   l_groupId,
-                                   l_chipId);
+                                   l_topologyMode, l_topologyId);
         TARG_INF( " XIVE_CONTROLLER_BAR =%.16llX", l_xiveCtrlBAR );
         l_procChip->setAttr<ATTR_XIVE_CONTROLLER_BAR_ADDR>(l_xiveCtrlBAR);
         if( l_swapVictim == l_procChip)
@@ -924,8 +953,7 @@ static void adjustMemoryMap( TargetService& i_targetService )
 
         ATTR_XIVE_THREAD_MGMT1_BAR_ADDR_type l_xiveThreadMgmtBAR =
             computeMemoryMapOffset(MMIO_GROUP0_CHIP0_XIVE_THREAD_MGMT1_BASE_ADDR,
-                                   l_groupId,
-                                   l_chipId);
+                                   l_topologyMode, l_topologyId);
         TARG_INF( " XIVE_THREAD_MGMT1_BAR =%.16llX", l_xiveThreadMgmtBAR );
         l_procChip->setAttr<ATTR_XIVE_THREAD_MGMT1_BAR_ADDR>(l_xiveThreadMgmtBAR);
         if( l_swapVictim == l_procChip)
@@ -935,8 +963,7 @@ static void adjustMemoryMap( TargetService& i_targetService )
 
         ATTR_PSI_HB_ESB_ADDR_type l_psiHbEsbBAR =
             computeMemoryMapOffset(MMIO_GROUP0_CHIP0_PSI_HB_ESB_BASE_ADDR,
-                                   l_groupId,
-                                   l_chipId);
+                                   l_topologyMode, l_topologyId);
         TARG_INF( " PSI_HB_ESB_BAR =%.16llX", l_psiHbEsbBAR );
         l_procChip->setAttr<ATTR_PSI_HB_ESB_ADDR>(l_psiHbEsbBAR);
         if( l_swapVictim == l_procChip)
@@ -944,16 +971,6 @@ static void adjustMemoryMap( TargetService& i_targetService )
             l_swapAttrs[ATTR_PSI_HB_ESB_ADDR] = l_psiHbEsbBAR;
         }
 
-        ATTR_INTP_BASE_ADDR_type l_intpBAR =
-            computeMemoryMapOffset(MMIO_GROUP0_CHIP0_INTP_BASE_ADDR,
-                                   l_groupId,
-                                   l_chipId);
-        TARG_INF( " INTP_BAR =%.16llX", l_intpBAR );
-        l_procChip->setAttr<ATTR_INTP_BASE_ADDR>(l_intpBAR);
-        if( l_swapVictim == l_procChip)
-        {
-            l_swapAttrs[ATTR_INTP_BASE_ADDR] = l_intpBAR;
-        }
         //finished setting up interrupt bars
 
         // Set the rest of the BARs...
@@ -966,10 +983,10 @@ static void adjustMemoryMap( TargetService& i_targetService )
     if( l_swapVictim != l_pMasterProcChip )
     {
         // Walk through all of the attributes we cached above
-        SWAP_ATTRIBUTE( ATTR_PROC_EFF_FABRIC_GROUP_ID, l_pMasterProcChip,
-                        l_swapVictim, l_swapAttrs );
-        SWAP_ATTRIBUTE( ATTR_PROC_EFF_FABRIC_CHIP_ID, l_pMasterProcChip,
-                        l_swapVictim, l_swapAttrs );
+
+        // TODO RTC 212966
+        //SWAP_ATTRIBUTE( ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID, l_pMasterProcChip,
+        //                l_swapVictim, l_swapAttrs );
         SWAP_ATTRIBUTE( ATTR_XSCOM_BASE_ADDRESS, l_pMasterProcChip,
                         l_swapVictim, l_swapAttrs );
         SWAP_ATTRIBUTE( ATTR_LPC_BUS_ADDR, l_pMasterProcChip,
@@ -981,8 +998,6 @@ static void adjustMemoryMap( TargetService& i_targetService )
         SWAP_ATTRIBUTE( ATTR_XIVE_THREAD_MGMT1_BAR_ADDR, l_pMasterProcChip,
                         l_swapVictim, l_swapAttrs );
         SWAP_ATTRIBUTE( ATTR_PSI_HB_ESB_ADDR, l_pMasterProcChip,
-                        l_swapVictim, l_swapAttrs );
-        SWAP_ATTRIBUTE( ATTR_INTP_BASE_ADDR, l_pMasterProcChip,
                         l_swapVictim, l_swapAttrs );
         // Handle the rest of the BARs...
     }

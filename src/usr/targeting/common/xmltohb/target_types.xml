@@ -805,6 +805,21 @@
   <targetType>
     <id>chip-processor-power10</id>
     <parent>chip-processor</parent>
+    <attribute>
+      <id>FSP_BASE_ADDR</id>
+    </attribute>
+    <attribute>
+      <id>PSI_BRIDGE_BASE_ADDR</id>
+    </attribute>
+    <attribute>
+      <id>PSI_HB_ESB_ADDR</id>
+    </attribute>
+    <attribute>
+      <id>XIVE_CONTROLLER_BAR_ADDR</id>
+    </attribute>
+    <attribute>
+      <id>XIVE_THREAD_MGMT1_BAR_ADDR</id>
+    </attribute>
   </targetType>
 
   <targetType>
@@ -988,9 +1003,6 @@
     </attribute>
     <attribute>
       <id>IMT_BASE_ADDR</id>
-    </attribute>
-    <attribute>
-      <id>INTP_BASE_ADDR</id>
     </attribute>
     <attribute>
       <id>ISTEP_MODE</id>

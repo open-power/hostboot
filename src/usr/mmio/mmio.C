@@ -90,7 +90,7 @@ errlHndl_t mmioSetup()
                   l_mcTarget->getAttr<TARGETING::ATTR_OMI_INBAND_BAR_BASE_ADDR_OFFSET>();
 
             // Apply the MMIO base offset so we get the real address
-            uint64_t  l_realAddr = ( l_omiBaseAddr | MMIO_BASE );
+            uint64_t  l_realAddr = ( l_omiBaseAddr | MEMMAP::MMIO_BASE );
 
             // Map the device with a kernal call, each device, the MC,  is 32 GB
             uint64_t l_virtAddr = reinterpret_cast<uint64_t>
@@ -179,7 +179,7 @@ errlHndl_t mmioSetup()
                 assert(l_ocmbTargetList.size() == 1 , "OCMB chips list found for a given OMI != 1 as expected");
 
                 TRACFCOMP(g_trac_mmio, "Setting HUID 0x%.08X MMIO vm addr to be 0x%lX , real address is 0x%lX", TARGETING::get_huid(l_ocmbTargetList[0]),
-                        l_currentOmiVirtAddr, l_calulatedRealAddr | MMIO_BASE );
+                        l_currentOmiVirtAddr, l_calulatedRealAddr | MEMMAP::MMIO_BASE );
 
                 l_ocmbTargetList[0]->setAttr<TARGETING::ATTR_MMIO_VM_ADDR>(l_currentOmiVirtAddr);
             }

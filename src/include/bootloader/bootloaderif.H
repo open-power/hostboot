@@ -121,8 +121,8 @@ struct BlToHbData
                    secureRomSize(0), hwKeysHash(nullptr),
                    hwKeysHashSize(0), hbbHeader(nullptr),
                    hbbHeaderSize(0), secureAccessBit(0),
-                   xscomBAR(MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR),
-                   lpcBAR(MMIO_GROUP0_CHIP0_LPC_BASE_ADDR),
+                   xscomBAR(MEMMAP::MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR),
+                   lpcBAR(MEMMAP::MMIO_GROUP0_CHIP0_LPC_BASE_ADDR),
                    securityOverride(0), allowAttrOverrides(0),
                    sizeOfStructure(0), keyAddrStashData(0),
                    secBackdoorBit(0), cacheSizeMb(0) {}

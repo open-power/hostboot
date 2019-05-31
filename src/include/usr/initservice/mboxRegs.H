@@ -411,8 +411,8 @@ namespace SPLESS
     {
         enum fabricTopologyMode_t
         {
-            GGG_C = 0,
-            GG_CC = 1
+            PROC_FABRIC_TOPOLOGY_MODE_MODE0, //GGG_C
+            PROC_FABRIC_TOPOLOGY_MODE_MODE1  //GG_CC
         };
 
         enum fabricBroadcastMode_t

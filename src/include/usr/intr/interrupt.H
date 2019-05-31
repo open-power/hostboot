@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -244,15 +244,6 @@ namespace INTR
      * @return error log handle on error
      */
     errlHndl_t enablePsiIntr(TARGETING::Target * i_target);
-
-    /**
-     * Return the interrupt presenter for requested target/thread
-     * @param[in] i_ex  The target EX
-     * @param[in] i_thread  Which thread on EX (0-7)
-     * @return 64 bit address for the interrupt present addr
-     */
-    uint64_t getIntpAddr(const TARGETING::Target * i_ex,
-                         uint8_t i_thread);
 
     /**
      * Indicate the existence of another HB node in the system

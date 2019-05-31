@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -77,7 +77,6 @@ class InterruptMsgHdlr : public MessageHandler
             // between SMF and non-SMF.
             ACK_HYPERVISOR_INT_REG_OFFSET = 0x1830,
 
-            INTP_BAR_VALUE     = 0xFFFFE000,    // upper 32 bits of IPCBAR
             INTERPROC_XISR     = 2,     //IPI XISR is 2
 
             MSG_KEY_THREAD_WKUP  = 0x8000000000000000ul,

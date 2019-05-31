@@ -3374,22 +3374,6 @@ errlHndl_t IntrRp::enableVPCPullErr(TARGETING::Target * i_target)
     return l_err;
 }
 
-uint64_t INTR::getIntpAddr(const TARGETING::Target * i_ec, uint8_t i_thread)
-{
-    const TARGETING::Target * l_proc = getParentChip(i_ec);
-    uint64_t l_intB =l_proc->getAttr<TARGETING::ATTR_INTP_BASE_ADDR>();
-
-    PIR_t pir(0);
-    pir.groupId = l_proc->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
-    pir.chipId = l_proc->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
-    pir.coreId = i_ec->getAttr<TARGETING::ATTR_CHIP_UNIT>();
-    pir.threadId = i_thread;
-
-    return (l_intB+ InterruptMsgHdlr::mmio_offset(
-              pir.word & (InterruptMsgHdlr::P9_PIR_THREADID_MSK |
-                          InterruptMsgHdlr::P9_PIR_COREID_MSK)));
-}
-
 void* INTR::IntrRp::handleCpuTimeout(void* _pir)
 {
     uint64_t pir = reinterpret_cast<uint64_t>(_pir);

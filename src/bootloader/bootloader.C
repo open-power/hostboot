@@ -53,6 +53,8 @@
 #include <pnor/pnorif.H>
 #include <kernel/memstate.H>
 
+using namespace MEMMAP;
+
 extern char bootloader_end_address;
 
 // XSCOM/LPC BAR constants

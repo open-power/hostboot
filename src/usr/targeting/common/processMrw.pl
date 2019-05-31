@@ -411,12 +411,10 @@ if ($build eq "fsp")
 }
 ## check topology
 foreach my $n (keys %{$targetObj->{TOPOLOGY}}) {
-    foreach my $p (keys %{$targetObj->{TOPOLOGY}->{$n}}) {
-        if ($targetObj->{TOPOLOGY}->{$n}->{$p} > 1) {
-            print "ERROR: Fabric topology invalid.  2 targets have same ".
-                  "FABRIC_GROUP_ID,FABRIC_CHIP_ID ($n,$p)\n";
-            $targetObj->myExit(3);
-        }
+    if ($targetObj->{TOPOLOGY}->{$n} > 1) {
+        print "ERROR: Fabric topology invalid.  2 targets have same ".
+              "FABRIC_TOPOLOGY_ID ($n)\n";
+        $targetObj->myExit(3);
     }
 }
 ## check for errors
@@ -1424,19 +1422,35 @@ sub setupBars
     #--------------------------------------------------
     ## Setup BARs
 
-    my $group = $targetObj->getAttribute($target, "FABRIC_GROUP_ID");
-    my $proc   = $targetObj->getAttribute($target, "FABRIC_CHIP_ID");
-    $targetObj->{TOPOLOGY}->{$group}->{$proc}++;
+    #TODO RTC 212966
+    #The topology ID is a 4 bit value that must be converted to
+    #a 5-bit topology index before we can use it to calculate the
+    #address offset.
+    #The conversion method depends on the topology mode.
+    #my $topoId = $targetObj->getAttribute($target, "PROC_FABRIC_TOPOLOGY_ID");
+    #my $topoMode = $targetObj->getAttribute($target, "PROC_FABRIC_TOPOLOGY_MODE");
+    my $topoId = 0;
+    my $topoMode = 0;
 
-    #P9 has a defined memory map for all configurations,
-    #these are the base addresses for group0-chip0.
-    #Each chip in the group has its own 4TB space,
-    #which each group being 32TB of space.
+    #Assume topo mode 1 (GGCC -> 0GGCC)
+    my $topoIndex = $topoId;
+
+    #Check for topo mode 0
+    if ($topoMode == 0)
+    {
+        # GGGC -> GGG0C
+        $topoIndex = (($topoIndex & 0xE) << 1) | ($topoIndex & 0x1);
+    }
+
+    #keep track of which topology ID's have been used
+    $targetObj->{TOPOLOGY}->{$topoId}++;
+
+    #P10 has a defined memory map for all configurations,
+    #these are the base addresses for topology ID 0 (group0-chip0).
     my %bars=(  "FSP_BASE_ADDR"             => 0x0006030100000000,
                 "PSI_BRIDGE_BASE_ADDR"      => 0x0006030203000000,
-                "INTP_BASE_ADDR"            => 0x0003FFFF80300000,
-                "PSI_HB_ESB_ADDR"           => 0x00060302031C0000,
-                "XIVE_CONTROLLER_BAR_ADDR"  => 0x0006030203100000);
+                "PSI_HB_ESB_ADDR"           => 0x0006030202000000,
+                "XIVE_CONTROLLER_BAR_ADDR"  => 0x0006030200000000);
     #Note - Not including XSCOM_BASE_ADDRESS and LPC_BUS_ADDR in here
     # because Hostboot code itself writes those on every boot
     if (!$targetObj->isBadAttribute($target,"XSCOM_BASE_ADDRESS") )
@@ -1448,15 +1462,14 @@ sub setupBars
         $targetObj->deleteAttribute($target,"LPC_BUS_ADDR");
     }
 
-    my $groupOffset = 0x200000000000;
-    my $procOffset  = 0x40000000000;
+    #Each 5-bit topology index has its own 16TB space.
+    my $topoIndexOffset = 0x0000100000000000;
 
     foreach my $bar (keys %bars)
     {
         my $i_base = Math::BigInt->new($bars{$bar});
             my $value=sprintf("0x%016s",substr((
-                        $i_base+$groupOffset*$group+
-                        $procOffset*$proc)->as_hex(),2));
+                        $i_base+$topoIndexOffset*$topoIndex)->as_hex(),2));
         $targetObj->setAttribute($target,$bar,$value);
     }
 }
@@ -1822,11 +1835,7 @@ sub processMi
         $targetObj->log($target,
             "Processing MI child: $child Type: $child_type");
 
-        if ($child_type eq "DMI")
-        {
-            processDmi($targetObj, $child);
-        }
-        elsif ($child_type eq "MCC")
+        if ($child_type eq "MCC")
         {
             processMcc($targetObj, $child);
         }
@@ -1848,45 +1857,6 @@ sub processMi
         $targetObj->setAttribute( $target, "CHIPLET_ID", $value);
     }
 
-}
-
-
-#--------------------------------------------------
-## DMI
-##
-## Sets DMI offset address attribute
-sub processDmi
-{
-    my $targetObj    = shift;
-    my $target       = shift;
-
-    my $dmi = Math::BigInt->new($targetObj->getAttribute($target,"CHIP_UNIT"));
-
-    my $ibase       = 0x0030220000000;  # Base ibscom offset
-    my $dmiOffset   = 0x0000004000000;  # 64MB
-
-    my $value = sprintf("0x%016s",substr((
-                        $ibase+
-                        $dmiOffset*$dmi)->as_hex(),2));
-
-    $targetObj->setAttribute($target,"DMI_INBAND_BAR_BASE_ADDR_OFFSET",$value);
-    $targetObj->deleteAttribute($target,"DMI_INBAND_BAR_ENABLE");
-
-    {
-        use integer;
-        # There are a total of four DMI units on an MC unit. So, to
-        # determine which MC an DMI belongs to, the CHIP_UNIT of the DMI can
-        # be divided by the number of units per MC to arrive at the correct
-        # offset to add to the pervasive DMI parent offset.
-        my $numberOfDmiPerMc = 4;
-        my $chip_unit = $targetObj->getAttribute($target, "CHIP_UNIT");
-
-        my $value = sprintf("0x%x",
-                            Targets::PERVASIVE_PARENT_DMI_OFFSET
-                            + ($chip_unit / $numberOfDmiPerMc));
-
-        $targetObj->setAttribute( $target, "CHIPLET_ID", $value);
-    }
 }
 
 

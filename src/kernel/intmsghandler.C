@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,6 +32,7 @@
 #include <kernel/cpu.H>
 #include <kernel/scheduler.H>
 #include <arch/ppc.H>
+#include <assert.h>
 
 const char* VFS_ROOT_MSG_INTR = "/msg/interrupt";
 
@@ -114,47 +115,10 @@ void InterruptMsgHdlr::handleInterrupt()
     }
     else
     {
-        printk("InterruptMsgHdlr got called before IPC was setup\n");
-        // The INTR mmio base address is not yet available via the attributes.
-        // If we get here during an MPIPL then the BAR value could be read
-        // from the ICP BAR SCOM register, however, since this value will
-        // never change unless PHYP changes its memory map, it is deemed
-        // sufficient to hard code the value.  If this is not an MPIPL then
-        // there is a serious problem elsewhere.
-
-        cv_ipc_base_address = (uint64_t)(INTP_BAR_VALUE) << 32; // val in BAR
-        cv_ipc_base_address >>= 14;                 // convert to base address
-
-        uint64_t xirrAddress =
-            cv_ipc_base_address + mmio_offset(pir) + XIRR_ADDR_OFFSET;
-
-        // Ignore HRMOR setting
-        xirrAddress |= 0x8000000000000000ul;
-
-        uint32_t xirr = 0;
-
-        asm volatile("lwzcix %0, 0, %1"
-                     : "=r" (xirr)
-                     : "r" (xirrAddress)
-                     : );
-
-        // There should not be any more interrupts until an eoi is sent
-        // by writing the xirr back with the value read.
-
-        //If this is an IPI -- clean it up
-        //TODO RTC 137564
-        if((xirr & 0x00FFFFFF) == INTERPROC_XISR)
-        {
-            uint64_t mfrrAddress =
-              cv_ipc_base_address + mmio_offset(pir) + MFRR_ADDR_OFFSET;
-
-            // Ignore HRMOR setting
-            mfrrAddress |= 0x8000000000000000ul;
-            uint8_t mfrr = 0xFF;
-
-            asm volatile("stbcix %0,0,%1" :: "r" (mfrr) , "r" (mfrrAddress));
-            asm volatile("stwcix %0,0,%1" :: "r" (xirr) , "r" (xirrAddress));
-        }
+        // This block had P8 legacy code that should never run on P9/P10.
+        // Still, placing an assert here just in case we ever do get here.
+        printk("InterruptMsgHdlr got called before IPC was setup");
+        kassert(false);
     }
 }
 

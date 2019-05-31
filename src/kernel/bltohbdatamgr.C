@@ -30,6 +30,8 @@
 #include <bootloader/bootloaderif.H>
 #include <kernel/vmmmgr.H>
 
+using namespace MEMMAP;
+
 // Global and only BlToHbDataManager instance
 BlToHbDataManager g_BlToHbDataManager;
 
