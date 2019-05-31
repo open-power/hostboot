@@ -9007,7 +9007,24 @@
       </chip>
     </chipEcFeature>
   </attribute>
-
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_AXONE_MMU</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+     Bumpy Toothpaste fix not enabled in Axone
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_AXONE</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_OMI_DL_X4_BACKOFF_ENABLE</id>
     <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
@@ -9024,7 +9041,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
-
+  <!-- ******************************************************************** -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_GEMINI_MENTERP_WORKAROUND</id>
     <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
@@ -9041,5 +9058,4 @@
       </chip>
     </chipEcFeature>
   </attribute>
-
 </attributes>
