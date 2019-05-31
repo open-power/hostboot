@@ -418,6 +418,7 @@
           <no_export/>
      </attribute>
 
+    <!-- Firmware boots rely on the hypervisor/os to enable the NPUs -->
     <attribute>
           <id>ATTR_PROC_NPU_PHY0_BAR_ENABLE</id>
           <default>0</default>
@@ -453,6 +454,74 @@
           <default>0x0000030200000000</default>
           <no_export/>
      </attribute>
+
+    <attribute>
+          <id>ATTR_PROC_NPU_MMIO_BAR_ENABLE</id>
+          <default>0</default>
+          <no_export/>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_PROC_NPU0_MMIO_BAR_ENABLE</id>
+          <default>0</default>
+          <no_export/>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_PROC_NPU1_MMIO_BAR_ENABLE</id>
+          <default>0</default>
+          <no_export/>
+    </attribute>
+
+    <attribute>
+          <id>ATTR_PROC_NPU2_MMIO_BAR_ENABLE</id>
+          <default>0</default>
+          <no_export/>
+    </attribute>
+
+    <attribute>
+          <id>ATTR_PROC_NPU_MMIO_BAR_BASE_ADDR_OFFSET</id>
+          <default>0x0000030200000000</default>
+          <no_export/>
+    </attribute>
+
+    <attribute>
+          <id>ATTR_PROC_NPU0_MMIO_BAR_BASE_ADDR_OFFSET</id>
+          <default>0x0</default>
+          <no_export/>
+    </attribute>
+
+    <attribute>
+          <id>ATTR_PROC_NPU1_MMIO_BAR_BASE_ADDR_OFFSET</id>
+          <default>0x0</default>
+          <no_export/>
+    </attribute>
+
+    <attribute>
+          <id>ATTR_PROC_NPU2_MMIO_BAR_BASE_ADDR_OFFSET</id>
+          <default>0x0</default>
+          <no_export/>
+    </attribute>
+
+    <attribute>
+          <id>ATTR_PROC_NPU0_PRI_CONFIG</id>
+          <default>0x0,0x0,0x0,0x0</default>
+          <no_export/>
+    </attribute>
+
+    <attribute>
+          <id>ATTR_PROC_NPU1_PRI_CONFIG</id>
+          <default>0x0,0x0,0x0,0x0</default>
+          <no_export/>
+    </attribute>
+
+    <attribute>
+          <id>ATTR_PROC_NPU2_PRI_CONFIG</id>
+          <default>0x0,0x0,0x0,0x0</default>
+          <no_export/>
+    </attribute>
+
+    <!-- end NPU config -->
 
     <attribute>
           <id>ATTR_PROC_NX_RNG_BAR_ENABLE</id>
