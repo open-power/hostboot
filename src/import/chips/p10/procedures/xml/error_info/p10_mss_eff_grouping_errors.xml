@@ -57,9 +57,8 @@
 <hwpError>
     <rc>RC_MSS_EFF_GROUPING_UNABLE_TO_GROUP</rc>
     <description>
-        p10_mss_eff_grouping is unable to group at least one
-        MCA/DMI port on this chip, based on the specified
-        memory interleaving and mirroring rules.
+        p10_mss_eff_grouping is unable to group at least one MCC on this chip
+        based on the specified memory interleaving and mirroring rules.
         This is a memory plugging error.
         Refer to memory plugging rules.
     </description>
@@ -130,13 +129,11 @@
 </hwpError>
 
 <hwpError>
-    <rc>RC_MSS_EFF_GROUPING_SMF_NOT_ENABLED_OR_SUPPORTED</rc>
+    <rc>RC_MSS_EFF_GROUPING_SMF_NOT_ENABLED</rc>
     <description>
-        Secure memory is not enabled or supported.
+        Secure memory is not enabled.
     </description>
-    <ffdc>SMF_SUPPORTED</ffdc>
     <ffdc>SMF_CONFIG</ffdc>
-    <ffdc>SMF_ENABLED</ffdc>
     <ffdc>SMF_TOTAL_BAR_SIZE</ffdc>
     <callout>
       <procedure>CODE</procedure>
@@ -226,14 +223,54 @@
     <ffdc>MIRROR_BASE_ADDRS</ffdc>
     <ffdc>CURR_GROUP_IDX</ffdc>
     <ffdc>CURR_GROUP_SIZE</ffdc>
-    <ffdc>CURR_REGION_IDX</ffdc>
     <ffdc>CURR_REGION_SIZE_LEFT</ffdc>
-    <ffdc>MAX_REGION_IDX</ffdc>
     <ffdc>MAX_REGION_SIZE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_EFF_GROUPING_INVALID_GROUP_SIZE</rc>
+  <description>Can't locate given Group size in the GROUP_SIZE_TABLE in order
+               to determine MCFGP/MCFGPM Group size value (bits 13:23).</description>
+  <ffdc>MC_TARGET</ffdc>
+  <ffdc>MC_POS</ffdc>
+  <ffdc>GROUP_SIZE</ffdc>
+  <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_EFF_GROUPING_INVALID_MCC_CONFIG</rc>
+  <description>Invalid number in group for MCC 0/1 of the MC (MI).
+               The combination can not be found in the Channel Per Group
+               table.</description>
+  <ffdc>MC_TARGET</ffdc>
+  <ffdc>MCC0_NUM_MCC_IN_GROUP</ffdc>
+  <ffdc>MCC0_GROUP</ffdc>
+  <ffdc>MCC1_MCC_NUM_IN_GROUP</ffdc>
+  <ffdc>MCC1_GROUP</ffdc>
+  <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_SETUP_BARS_HOLE1_SMF_CONFLICT</rc>
+  <description>The MC HOLE1 and SMF areas are both valid and will conflict
+               when setting the MCFGPA/MCFGPMA registers.</description>
+  <ffdc>TARGET</ffdc>
+  <ffdc>HOLE1_VALID</ffdc>
+  <ffdc>SMF_VALID</ffdc>
+  <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+  </callout>
 </hwpError>
 
 </hwpErrors>
