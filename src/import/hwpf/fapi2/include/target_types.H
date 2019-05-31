@@ -124,10 +124,11 @@ enum TargetType : uint64_t
 
     TARGET_TYPE_MULTICASTABLE = TARGET_TYPE_CORE   |
                                 TARGET_TYPE_EQ     |
-                                TARGET_TYPE_MCBIST |
-                                TARGET_TYPE_OBUS   |
-                                TARGET_TYPE_PERV   |
-                                TARGET_TYPE_PEC,
+                                TARGET_TYPE_IOHS   |
+                                TARGET_TYPE_MC     |
+                                TARGET_TYPE_PAUC   |
+                                TARGET_TYPE_PEC    |
+                                TARGET_TYPE_PERV,
 
     // Mappings to target types found in the error xml files
     TARGET_TYPE_EX_CHIPLET    = TARGET_TYPE_EX,
