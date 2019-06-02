@@ -684,14 +684,14 @@ fapi2::ReturnCode pm_disable_resclk(
     uint16_t l_quad_table_value;
     uint8_t l_caccr_bit_13_14_value = 0;
 
-    uint32_t attr_freq_proc_refclock_khz = 0;
+    uint32_t attr_freq_dpll_refclock_khz = 0;
     uint32_t attr_proc_dpll_divider = 8;
 
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     auto l_exChiplets = i_target.getChildren<fapi2::TARGET_TYPE_EX>
                         (fapi2::TARGET_STATE_FUNCTIONAL);
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PROC_REFCLOCK_KHZ, FAPI_SYSTEM, attr_freq_proc_refclock_khz)
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_DPLL_REFCLOCK_KHZ, FAPI_SYSTEM, attr_freq_dpll_refclock_khz)
              , "Attribute read failed");
     //Read the frequency of the quad
     l_address = EQ_QPPM_DPLL_FREQ;
@@ -701,10 +701,10 @@ fapi2::ReturnCode pm_disable_resclk(
     l_data64.extractToRight<EQ_QPPM_DPLL_FREQ_FMULT,
                             EQ_QPPM_DPLL_FREQ_FMULT_LEN>(l_fmult);
 
-    FAPI_INF("EQ_QPPM_DPLL_FREQ_FMULT %04x, attr_freq_proc_refclock_khz %08x, attr_proc_dpll_divider %x",
-             l_fmult, attr_freq_proc_refclock_khz, attr_proc_dpll_divider);
+    FAPI_INF("EQ_QPPM_DPLL_FREQ_FMULT %04x, attr_freq_dpll_refclock_khz %08x, attr_proc_dpll_divider %x",
+             l_fmult, attr_freq_dpll_refclock_khz, attr_proc_dpll_divider);
 
-    l_fmult =  ((l_fmult * attr_freq_proc_refclock_khz ) / attr_proc_dpll_divider) / 1000;
+    l_fmult =  ((l_fmult * attr_freq_dpll_refclock_khz ) / attr_proc_dpll_divider) / 1000;
 
     FAPI_INF("EQ_QPPM_DPLL_FREQ FMULT value %08x", l_fmult);
 

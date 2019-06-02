@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -32,6 +32,17 @@
       The frequency of the processor refclock in kHz.
       Provided by the Machine Readable Workbook.
       This can be overridden to adjust the refclock frequency.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <default>133333</default>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_FREQ_DPLL_REFCLOCK_KHZ</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      The frequency of the processor DPLL refclock in kHz.
     </description>
     <valueType>uint32</valueType>
     <platInit/>

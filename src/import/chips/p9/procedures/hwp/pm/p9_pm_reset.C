@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -500,7 +500,7 @@ p9_pm_reset_psafe_update(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_ta
     fapi2::ATTR_VDD_AVSBUS_BUSNUM_Type l_vdd_bus_num;
     fapi2::ATTR_VDD_AVSBUS_RAIL_Type   l_vdd_bus_rail;
     fapi2::ATTR_VDD_BOOT_VOLTAGE_Type       l_vdd_voltage_mv;
-    fapi2::ATTR_FREQ_PROC_REFCLOCK_KHZ_Type l_freq_proc_refclock_khz;
+    fapi2::ATTR_FREQ_DPLL_REFCLOCK_KHZ_Type l_freq_proc_refclock_khz;
     fapi2::ATTR_PROC_DPLL_DIVIDER_Type      l_proc_dpll_divider;
     fapi2::ATTR_SAFE_MODE_NOVDM_UPLIFT_MV_Type l_uplift_mv;
     fapi2::ATTR_EXTERNAL_VRM_STEPSIZE_Type l_ext_vrm_step_size_mv;
@@ -511,7 +511,7 @@ p9_pm_reset_psafe_update(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_ta
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDD_AVSBUS_RAIL, i_target, l_vdd_bus_rail));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDD_BOOT_VOLTAGE, i_target, l_vdd_voltage_mv));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_DPLL_DIVIDER, i_target, l_proc_dpll_divider));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PROC_REFCLOCK_KHZ, FAPI_SYSTEM, l_freq_proc_refclock_khz));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_DPLL_REFCLOCK_KHZ, FAPI_SYSTEM, l_freq_proc_refclock_khz));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SAFE_MODE_NOVDM_UPLIFT_MV, i_target, l_uplift_mv));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EXTERNAL_VRM_STEPSIZE, FAPI_SYSTEM, l_ext_vrm_step_size_mv));
     l_attr_safe_mode_mv += l_uplift_mv;

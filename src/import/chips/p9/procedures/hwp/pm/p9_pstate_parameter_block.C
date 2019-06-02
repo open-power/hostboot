@@ -2077,7 +2077,7 @@ FAPI_INF("%-60s = 0x%08x %d", #attr_name, iv_attrs.attr_assign, iv_attrs.attr_as
     DATABLOCK_GET_ATTR(ATTR_VOLTAGE_INT_VDD_BIAS_POWERSAVE,  iv_procChip, attr_voltage_int_vdd_bias_powersave);
 
     // Frequency attributes
-    DATABLOCK_GET_ATTR(ATTR_FREQ_PROC_REFCLOCK_KHZ, FAPI_SYSTEM, attr_freq_proc_refclock_khz);
+    DATABLOCK_GET_ATTR(ATTR_FREQ_DPLL_REFCLOCK_KHZ, FAPI_SYSTEM, attr_freq_dpll_refclock_khz);
     DATABLOCK_GET_ATTR(ATTR_FREQ_PB_MHZ,            FAPI_SYSTEM, attr_nest_frequency_mhz);
     DATABLOCK_GET_ATTR(ATTR_FREQ_CORE_CEILING_MHZ,  FAPI_SYSTEM, attr_freq_core_ceiling_mhz);
     DATABLOCK_GET_ATTR(ATTR_SAFE_MODE_FREQUENCY_MHZ,iv_procChip, attr_pm_safe_frequency_mhz);
@@ -2139,7 +2139,7 @@ FAPI_INF("%-60s = 0x%08x %d", #attr_name, iv_attrs.attr_assign, iv_attrs.attr_as
     DATABLOCK_GET_ATTR(ATTR_PROC_R_LOADLINE_VCS_UOHM, iv_procChip, r_loadline_vcs_uohm);
     DATABLOCK_GET_ATTR(ATTR_PROC_R_DISTLOSS_VCS_UOHM, iv_procChip, r_distloss_vcs_uohm);
     DATABLOCK_GET_ATTR(ATTR_PROC_VRM_VOFFSET_VCS_UV,  iv_procChip, vrm_voffset_vcs_uv);
-    DATABLOCK_GET_ATTR(ATTR_FREQ_PROC_REFCLOCK_KHZ,   FAPI_SYSTEM, freq_proc_refclock_khz);
+    DATABLOCK_GET_ATTR(ATTR_FREQ_DPLL_REFCLOCK_KHZ,   FAPI_SYSTEM, freq_proc_refclock_khz);
     DATABLOCK_GET_ATTR(ATTR_PROC_DPLL_DIVIDER,        iv_procChip, proc_dpll_divider);
     // AVSBus ... needed by p9_setup_evid
     //Get WOV attributes
@@ -2169,7 +2169,7 @@ FAPI_INF("%-60s = 0x%08x %d", #attr_name, iv_attrs.attr_assign, iv_attrs.attr_as
                 #_attr_name, iv_attrs._attr_name, iv_attrs._attr_name); \
     }
 
-    SET_DEFAULT(attr_freq_proc_refclock_khz, 133333);
+    SET_DEFAULT(attr_freq_dpll_refclock_khz, 133333);
     SET_DEFAULT(freq_proc_refclock_khz,      133333); // Future: collapse this out
     SET_DEFAULT(attr_ext_vrm_transition_start_ns, EXT_VRM_TRANSITION_START_NS)
     SET_DEFAULT(attr_ext_vrm_transition_rate_inc_uv_per_us, EXT_VRM_TRANSITION_RATE_INC_UV_PER_US)
@@ -2302,7 +2302,7 @@ FAPI_INF("%-60s = 0x%08x %d", #attr_name, iv_attrs.attr_assign, iv_attrs.attr_as
     iv_wov_overv_enabled = true;
 
     //Calculate nest & frequency_step_khz
-    iv_frequency_step_khz = (iv_attrs.attr_freq_proc_refclock_khz /
+    iv_frequency_step_khz = (iv_attrs.attr_freq_dpll_refclock_khz /
                              iv_attrs.attr_proc_dpll_divider);
 
     iv_nest_freq_mhz      = iv_attrs.attr_nest_frequency_mhz;

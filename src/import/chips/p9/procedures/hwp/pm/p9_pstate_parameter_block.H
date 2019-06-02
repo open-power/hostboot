@@ -119,7 +119,7 @@ typedef struct
     uint32_t attr_proc_r_distloss_vcs_uohm;
     uint32_t attr_proc_vrm_voffset_vcs_uv;
 
-    uint32_t attr_freq_proc_refclock_khz;
+    uint32_t attr_freq_dpll_refclock_khz;
     uint32_t attr_proc_dpll_divider;
     uint32_t attr_nest_frequency_mhz;
 

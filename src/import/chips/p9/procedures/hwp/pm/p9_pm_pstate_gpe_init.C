@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -263,10 +263,10 @@ fapi2::ReturnCode pstate_gpe_init(
         auto l_eqChiplets = i_target.getChildren<fapi2::TARGET_TYPE_EQ>
                             (fapi2::TARGET_STATE_FUNCTIONAL);
         fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ_Type l_attr_safe_mode_freq_mhz;
-        fapi2::ATTR_FREQ_PROC_REFCLOCK_KHZ_Type l_ref_clock_freq_khz;
+        fapi2::ATTR_FREQ_DPLL_REFCLOCK_KHZ_Type l_ref_clock_freq_khz;
         fapi2::ATTR_PROC_DPLL_DIVIDER_Type l_proc_dpll_divider;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ, i_target, l_attr_safe_mode_freq_mhz));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PROC_REFCLOCK_KHZ, FAPI_SYSTEM, l_ref_clock_freq_khz));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_DPLL_REFCLOCK_KHZ, FAPI_SYSTEM, l_ref_clock_freq_khz));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_DPLL_DIVIDER, i_target, l_proc_dpll_divider));
         // Convert frequency value to a format that needs to be written to the
         // register
