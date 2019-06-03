@@ -539,13 +539,14 @@ inline fapi2::ReturnCode bias_with_spd_voltages<mss::pmic::vendor::IDT>(
                     fapi2::PMIC_VOLTAGE_OUT_OF_RANGE()
                     .set_TARGET(i_pmic_target)
                     .set_VOLTAGE_BITMAP(l_volt_buffer)
-                    .set_RAIL(mss::pmic::VOLT_SETTING_REGS[l_rail_index]),
+                    .set_RAIL(mss::pmic::VOLT_SETTING_ACTIVE_REGS[l_rail_index]),
                     "Voltage out of range as determined by SPD voltage +/- offset for %s of %s",
                     PMIC_RAIL_NAMES[l_rail_index], mss::c_str(i_pmic_target) );
 
         l_volt_buffer = l_volt_buffer << CONSTS::SHIFT_VOLTAGE_FOR_REG;
-        FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, mss::pmic::VOLT_SETTING_REGS[l_rail_index], l_volt_buffer),
-                 "Error writing address 0x%02hhX of PMIC %s", mss::pmic::VOLT_SETTING_REGS[l_rail_index], mss::c_str(i_pmic_target));
+        FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, mss::pmic::VOLT_SETTING_ACTIVE_REGS[l_rail_index], l_volt_buffer),
+                 "Error writing address 0x%02hhX of PMIC %s", mss::pmic::VOLT_SETTING_ACTIVE_REGS[l_rail_index],
+                 mss::c_str(i_pmic_target));
 
     }
 
@@ -625,13 +626,14 @@ inline fapi2::ReturnCode bias_with_spd_voltages<mss::pmic::vendor::TI>(
                      fapi2::PMIC_VOLTAGE_OUT_OF_RANGE()
                      .set_TARGET(i_pmic_target)
                      .set_VOLTAGE_BITMAP(l_volt_buffer)
-                     .set_RAIL(mss::pmic::VOLT_SETTING_REGS[l_rail_index]),
+                     .set_RAIL(mss::pmic::VOLT_SETTING_ACTIVE_REGS[l_rail_index]),
                      "Voltage out of range as determined by SPD voltage +/- offset for %s of %s",
                      PMIC_RAIL_NAMES[l_rail_index], mss::c_str(i_pmic_target) );
 
         l_volt_buffer = l_volt_buffer << CONSTS::SHIFT_VOLTAGE_FOR_REG;
-        FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, mss::pmic::VOLT_SETTING_REGS[l_rail_index], l_volt_buffer),
-                 "Error writing address 0x%02hhX of PMIC %s", mss::pmic::VOLT_SETTING_REGS[l_rail_index], mss::c_str(i_pmic_target));
+        FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, mss::pmic::VOLT_SETTING_ACTIVE_REGS[l_rail_index], l_volt_buffer),
+                 "Error writing address 0x%02hhX of PMIC %s", mss::pmic::VOLT_SETTING_ACTIVE_REGS[l_rail_index],
+                 mss::c_str(i_pmic_target));
 
     }
 

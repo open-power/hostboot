@@ -42,6 +42,7 @@
 #include <pmic_regs_fld.H>
 #include <lib/utils/pmic_consts.H>
 #include <mss_pmic_attribute_getters.H>
+#include <generic/memory/lib/utils/find.H>
 
 namespace mss
 {
@@ -71,12 +72,12 @@ static constexpr uint8_t const VOLT_SETTING_ACTIVE_REGS[] =
     REGS::R27_SWD_VOLTAGE_SETTING
 };
 
-static constexpr uint8_t const VOLT_SETTING_REGS[] =
+static constexpr uint8_t const VOLT_SETTING_VENDOR_REGS[] =
 {
-    REGS::R21_SWA_VOLTAGE_SETTING,
-    REGS::R23_SWB_VOLTAGE_SETTING,
-    REGS::R25_SWC_VOLTAGE_SETTING,
-    REGS::R27_SWD_VOLTAGE_SETTING
+    REGS::R45_SWA_VOLTAGE_SETTING,
+    REGS::R47_SWB_VOLTAGE_SETTING,
+    REGS::R49_SWC_VOLTAGE_SETTING,
+    REGS::R4B_SWD_VOLTAGE_SETTING
 };
 
 static constexpr uint8_t const VOLT_RANGE_FLDS[] =
@@ -102,6 +103,34 @@ static constexpr uint32_t const VOLT_RANGE_MAXES[][CONSTS::NUM_RANGES] =
     {CONSTS::SWABC_VOLT_RANGE0_MAX, CONSTS::SWABC_VOLT_RANGE1_MAX},
     {CONSTS::SWD_VOLT_RANGE0_MAX,   CONSTS::SWD_VOLT_RANGE1_MAX}
 };
+
+///
+/// @brief Get the valid pmics for id object
+///
+/// @param[in] i_pmic_target
+/// @param[in] i_id
+/// @param[out] o_pmics vector of PMICS matching
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+inline std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>> get_valid_pmics_for_id(
+            const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+            const mss::pmic::id i_id)
+{
+    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>> l_output_pmics;
+
+    const auto l_pmics = mss::find_targets<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target);
+
+    for (const auto& l_pmic : l_pmics)
+    {
+        if (mss::index(l_pmic) % CONSTS::NUM_UNIQUE_PMICS == i_id)
+        {
+            l_output_pmics.push_back(l_pmic);
+        }
+    }
+
+    return l_output_pmics;
+}
 
 ///
 /// @brief polls PMIC for PBULK PWR_GOOD status

@@ -82,6 +82,9 @@ enum vendor
     UNKNOWN_VENDOR,
     TI = 0x9780,
     IDT = 0xB380,
+
+    TI_SHORT = 0x97,
+    IDT_SHORT = 0xB3,
 };
 
 ///
@@ -245,6 +248,10 @@ struct consts<mss::pmic::product::JEDEC_COMPLIANT>
     static constexpr uint8_t VENDOR_PASSWORD_HIGH       = 0x94;
     static constexpr uint8_t UNLOCK_VENDOR_REGION       = 0x40;
     static constexpr uint8_t LOCK_VENDOR_REGION         = 0x00;
+    static constexpr uint8_t BURN_R40_TO_R4F            = 0x81;
+    static constexpr uint8_t BURN_R50_TO_R5F            = 0x82;
+    static constexpr uint8_t BURN_R60_TO_R6F            = 0x85; // TI spec says 0x83, is that a deviation or a typo?
+    static constexpr uint8_t BURN_COMPLETE              = 0x5A;
 
     static constexpr uint8_t PROGRAMMABLE_MODE          = 0x01;
     static constexpr uint8_t SECURE_MODE                = 0x00;
