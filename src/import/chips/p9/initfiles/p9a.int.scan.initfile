@@ -1,0 +1,47 @@
+#-- *!***************************************************************************
+#-- *!
+#-- *! OWNER NAME : David Kauer (dmkauer@us.ibm.com)
+#-- *!
+#-- *!***************************************************************************
+
+
+SyntaxVersion = 3
+
+target_type 0 TARGET_TYPE_PROC_CHIP;
+
+# Enabled for DD1 only 
+ispy INT.INT_PC_LBS1_CMD_MMIO_LDST_CS [when=L && ATTR_CHIP_EC_FEATURE_P9N_INT_DD10] {
+   bits, spyv;
+   5,    0b1;
+   6,    0b1;
+}
+
+# Defect HW378025 / Nimbus DD1 only
+ispy INT.INT_PC_LBS1_REGS_CLOCKGATE_DIS_CS [when=L && ATTR_CHIP_EC_FEATURE_HW378025] {
+   spyv;
+   0b1;
+}
+
+# Defect HW930007 / Nimbus DD1 only
+ispy INT.INT_PC.LBS2.VPC.P1.LCBCNTL_BLK.CLOCKGATE_DISABLE [when=L && ATTR_CHIP_EC_FEATURE_HW930007] {
+   spyv;
+   0b1;
+}
+
+# Defect HW408972 / Nimbus DD1 & DD2
+ispy INT.INT_PC_LBS1_CRESP_MAC_CS [when=L && ATTR_CHIP_EC_FEATURE_HW408972] {
+   bits, spyv, expr;
+   3,    0b1, ((ATTR_CHIP_EC_FEATURE_P9N_INT_DD10 == 1) || (ATTR_CHIP_EC_FEATURE_P9N_INT_DD20 == 1));
+   4,    0b1, (ATTR_CHIP_EC_FEATURE_P9N_INT_DD21 == 1);
+}
+
+# Defect HW388874
+espy BRIDGE.PSIHB.ESB_OR_LSI_INTERRUPTS [when=L] {
+   spyv, expr;
+   ON,   (ATTR_CHIP_EC_FEATURE_HW388874 == 0);
+}
+# HW441771 - Axone init to return to P9 behavior
+ispy INT.INT_VC_LBS6_ARX_CS_AXONE_DISABLE_CILOAD_ORDERINGS [when=L && ATTR_CHIP_EC_FEATURE_AXONE_HW441771] {
+    spyv;
+    0b1;
+}
