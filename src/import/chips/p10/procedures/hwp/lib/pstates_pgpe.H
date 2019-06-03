@@ -53,6 +53,23 @@ extern "C" {
 
 #include <stdint.h>
 
+enum POUNDW_DDS_FIELDS
+{
+    TRIP_OFFSET             = 0,
+    DATA0_OFFSET            = 1,
+    DATA1_OFFSET            = 2,
+    DATA2_OFFSET            = 3,
+    LARGE_DROOP_DETECT      = 4,
+    SMALL_DROOP_DETECT      = 5,
+    SLOPEA_START_DETECT     = 6,
+    SLOPEA_END_DETECT       = 7,
+    SLOPEB_START_DETECT     = 8,
+    SLOPEB_END_DETECT       = 9,
+    SLOPEA_CYCLES           = 10,
+    SLOPEB_CYCLES           = 11,
+    NUM_POUNDW_DDS_FIELDS   = 12
+};
+
 /// Control Attributes
 typedef union
 {
@@ -163,7 +180,7 @@ typedef struct
             uint64_t spare1        : 6;
 #endif
         } fields;
-    } digital_droop_sensor_config;
+    } ddsc;
 } PoundWEntry_t;
 
 /// #W DPLL Settings
@@ -290,6 +307,7 @@ typedef struct
     /// DDS Data
     /// DDSParmBlock dds;
     /// @todo need to define the DDS parm block
+    PoundWEntry_t       dds[MAXIMUM_CORES][NUM_PV_POINTS];
 
     /// The following are needed to generated the Pstate Table to HOMER.
     ResClkSetup_t       resclk;
@@ -302,6 +320,8 @@ typedef struct
     uint16_t            ps_dc_current_slopes[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
     uint16_t            ac_current_ps_slopes[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
     uint16_t            dc_current_ps_slopes[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
+    uint16_t            ps_dds_delay_slopes[NUM_VPD_PTS_SET][MAXIMUM_CORES][VPD_NUM_SLOPES_REGION];
+    uint8_t             ps_dds_slopes[NUM_POUNDW_DDS_FIELDS ][NUM_VPD_PTS_SET][MAXIMUM_CORES][VPD_NUM_SLOPES_REGION];
 
     //AvsBusTopology
     AvsBusTopology_t avs_bus_topology;
