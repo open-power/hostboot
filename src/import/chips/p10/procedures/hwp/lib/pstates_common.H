@@ -133,6 +133,8 @@
 #define VID_SLOPE_FP_SHIFT_12       12
 #define THRESH_SLOPE_FP_SHIFT       12
 #define I_SLOPE_FP_SHIFT_9           9
+#define DDS_DELAY_SLOPE_FP_SHIFT_12 12  //DDS Delay slope format 4.12
+#define DDS_SLOPE_FP_SHIFT_6         6  //DDS fields(except delay) slope format 2.6
 
 /// IDDQ readings,
 #define IDDQ_MEASUREMENTS     6
