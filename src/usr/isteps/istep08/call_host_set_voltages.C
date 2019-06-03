@@ -72,9 +72,6 @@ void* call_host_set_voltages(void *io_pArgs)
 
     do
     {
-        // Skip p9_setup_evid on Axone, no targets exist
-        #ifndef CONFIG_AXONE_BRING_UP
-
         TargetHandleList l_procList;
         // Get the system's procs
         getAllChips( l_procList,
@@ -118,7 +115,6 @@ void* call_host_set_voltages(void *io_pArgs)
         {
             break;
         }
-        #endif
 
         // If no error occurred and FSP is present,
         // send voltage information to HWSV
