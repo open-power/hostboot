@@ -772,7 +772,7 @@ fapi2::ReturnCode p10_adu_utils_busy_bit_poll(
     bool l_expectedState = false;
 
     // Check for a successful status max_wait_poll times
-    for (uint i = 0; i < PROC_ADU_UTILS_ADU_STATUS_MAX_WAIT_POLLS; i++)
+    for (uint32_t i = 0; i < PROC_ADU_UTILS_ADU_STATUS_MAX_WAIT_POLLS; i++)
     {
         // Read ADU status register
         FAPI_TRY(getScom(i_target, PU_ALTD_STATUS_REG, l_statusReg), "Error reading from ALTD_STATUS Register");
@@ -819,7 +819,7 @@ fapi2::ReturnCode p10_adu_utils_status_errors_check(
     bool l_statusError = false;
 
     // Check for a successful status max_wait_poll times
-    for (uint i = 0; i < PROC_ADU_UTILS_ADU_STATUS_MAX_WAIT_POLLS; i++)
+    for (uint32_t i = 0; i < PROC_ADU_UTILS_ADU_STATUS_MAX_WAIT_POLLS; i++)
     {
         l_statusError = false;
 
