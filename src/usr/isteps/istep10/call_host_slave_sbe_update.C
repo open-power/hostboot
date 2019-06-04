@@ -249,6 +249,7 @@ void* call_host_slave_sbe_update (void *io_pArgs)
 {
     errlHndl_t  l_errl  =   NULL;
     IStepError l_StepError;
+    bool l_testAltMaster = true;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_slave_sbe_update entry" );
@@ -322,6 +323,7 @@ void* call_host_slave_sbe_update (void *io_pArgs)
                     l_errl->removeDeconfigure();
                     // Commit error
                     errlCommit( l_errl, HWPF_COMP_ID );
+                    l_testAltMaster = false;
                 }
                 else
                 {
@@ -334,14 +336,17 @@ void* call_host_slave_sbe_update (void *io_pArgs)
 
         // Call to Validate any Alternative Master's connection to PNOR
         // Any error returned should not fail istep
-        l_errl = PNOR::validateAltMaster();
-        if (l_errl)
+        if (l_testAltMaster == true)
         {
-            //Remove any deconfigure information, we only need the PNOR Part callout and do not want
-            // to deconfigure the entire proc because of a PNOR part problem
-            l_errl->removeDeconfigure();
-            // Commit error
-            errlCommit( l_errl, HWPF_COMP_ID );
+            l_errl = PNOR::validateAltMaster();
+            if (l_errl)
+            {
+                //Remove any deconfigure information, we only need the PNOR Part callout and do not want
+                // to deconfigure the entire proc because of a PNOR part problem
+                l_errl->removeDeconfigure();
+                // Commit error
+                errlCommit( l_errl, HWPF_COMP_ID );
+            }
         }
 
         // Set SEEPROM_VERSIONS_MATCH attributes for each processor
