@@ -31,6 +31,7 @@ HWP_PATH_P9  += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory
 HWP_PATH_CEN += ${ROOTPATH}/src/import/chips/centaur/procedures/hwp/memory
 # Axone
 HWP_PATH_P9A += ${ROOTPATH}/src/import/chips/p9a/procedures/hwp/memory
+HWP_PATH_P9A += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic
 # Explorer
 HWP_PATH_EXP += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory
 
@@ -81,6 +82,7 @@ VPATH += ${HWP_PATH} ${HWP_PATH_P9}/lib/spd
 VPATH += $(PROCEDURES_PATH)/hwp/nest ${ROOTPATH}/src/usr/fapi2
 VPATH += ${PROCEDURES_PATH}/hwp/perv
 VPATH += ${HWP_PATH_P9}/lib ${HWP_PATH_P9}/lib/utils ${HWP_PATH_P9}/lib/eff_config
+VPATH += ${HWP_PATH_P9A}/lib/eff_config
 VPATH += ${HWP_PATH_P9}/lib/freq ${HWP_PATH_P9}/lib/dimm
 VPATH += ${ROOTPATH}/src/usr/sbe
 
@@ -116,6 +118,7 @@ OBJS += $(if $(CONFIG_AXONE),p9a_mss_freq.o,)
 OBJS += $(if $(CONFIG_AXONE),p9a_mss_freq_system.o,)
 OBJS += $(if $(CONFIG_AXONE),p9a_mss_eff_config.o,)
 OBJS += $(if $(CONFIG_AXONE),p9a_mss_eff_config_thermal.o,)
+OBJS += $(if $(CONFIG_AXONE),pmic_efd_processing.o,)
 
 #host_mss_attr_cleanup : MSS ATTR Cleanup
 include $(HWP_PATH_CEN)/p9c_mss_attr_cleanup.mk
