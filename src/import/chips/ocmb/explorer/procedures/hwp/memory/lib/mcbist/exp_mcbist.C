@@ -121,7 +121,6 @@ fapi2::ReturnCode read_rb_array(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>
 {
     using TT = mcbistTraits<DEFAULT_MC_TYPE, fapi2::TARGET_TYPE_OCMB_CHIP>;
 
-    fapi2::buffer<uint64_t> l_control_value;
     fapi2::buffer<uint64_t> l_data;
     uint64_t l_array_addr = i_start_addr;
 
@@ -131,18 +130,18 @@ fapi2::ReturnCode read_rb_array(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>
     o_data.clear();
     o_ecc_data.clear();
 
-    // set start address
-    l_control_value.insertFromRight<TT::RB_ADDRESS, TT::RB_ADDRESS_LEN>(l_array_addr)
-    // enable the auto increment bit
-    .setBit<TT::RB_AUTOINC>();
-
-    FAPI_INF("Setting the RB array access control register.");
-    FAPI_TRY( mss::putScom(l_ocmb, TT::RD_BUF_CTL_REG, l_control_value) );
-
     for (uint8_t l_index = 0; l_index < i_num_entries; ++l_index)
     {
-        // Note that since we enabled AUTOINC above, reading ECC_REG will increment
-        // the array pointer so the next DATA_REG read will read the next array entry
+        fapi2::buffer<uint64_t> l_control_value;
+
+        // set start address
+        l_control_value.insertFromRight<TT::RB_ADDRESS, TT::RB_ADDRESS_LEN>(l_array_addr);
+
+        FAPI_INF("Setting the RB array access control register.");
+        FAPI_TRY( mss::putScom(l_ocmb, TT::RD_BUF_CTL_REG, l_control_value) );
+
+
+        // We setup the address to what we need it to be, so let's continue
         FAPI_TRY( mss::getScom(i_target, TT::RD_BUF_DATA_REG, l_data) );
         FAPI_INF("RB data index %d is: 0x%016lx", l_array_addr, l_data);
         o_data.push_back(l_data);
