@@ -246,7 +246,7 @@ errlHndl_t nodePresenceDetect(DeviceFW::OperationType i_opType,
     }
 
     pvpd_present = VPD::pvpdPresent( i_target );
-#if(defined( CONFIG_PVPD_READ_FROM_HW ) && !defined( __HOSTBOOT_RUNTIME) )
+#if(defined( CONFIG_PVPD_READ_FROM_HW ) && !defined( __HOSTBOOT_RUNTIME) && defined(CONFIG_PVPD_READ_FROM_PNOR))
     if( pvpd_present )
     {
         // Check if the VPD data in the PNOR matches the SEEPROM

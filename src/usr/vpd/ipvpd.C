@@ -988,8 +988,12 @@ errlHndl_t IpVpdFacade::findRecordOffset ( const char * i_record,
                 return err;
             }
 
-            TRACFCOMP( g_trac_vpd, INFO_MRK" Record %s for target 0x%.8X exists at %p in PNOR",
+            // Don't trace that record exists in PNOR if it does not
+            if (l_overridePtr != nullptr)
+            {
+                TRACFCOMP( g_trac_vpd, INFO_MRK" Record %s for target 0x%.8X exists at %p in PNOR",
                        i_record, get_huid(i_target), l_overridePtr );
+            }
         }
 
         // If we have an override, the record is already pointed at directly
@@ -1283,7 +1287,7 @@ errlHndl_t IpVpdFacade::findRecordOffsetSeeprom ( const char * i_record,
                                                   TARGETING::Target * i_target,
                                                   input_args_t i_args )
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
     char l_buffer[256] = { 0 };
     uint16_t offset = 0x0;
 
@@ -1351,6 +1355,12 @@ errlHndl_t IpVpdFacade::findRecordOffsetSeeprom ( const char * i_record,
         err = retrieveKeyword( "PT", "VTOC", offset, index, i_target, l_buffer,
                                pt_len, i_args );
         if ( err ) {
+            // There may be only one PT record
+            if (index != 0)
+            {
+                delete err;
+                err = nullptr;
+            }
             break;
         }
 
@@ -1374,7 +1384,7 @@ errlHndl_t IpVpdFacade::findRecordOffsetSeeprom ( const char * i_record,
         }
     }
 
-    if ( !found && err == NULL ) {
+    if ( !found && err == nullptr ) {
         TRACFCOMP( g_trac_vpd,
                    ERR_MRK"IpVpdFacade::findRecordOffsetSeeprom: "
                    "No matching Record (%s) found in VTOC!", i_record );

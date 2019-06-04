@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,8 +61,8 @@ UdVpdParms::UdVpdParms( TARGETING::Target * i_target,
                           reallocUsrBuf(sizeof(uint8_t)
                                         +sizeof(uint32_t)
                                         +sizeof(uint64_t)*3));
-    uint32_t tmp64 = 0;
-    uint16_t tmp32 = 0;
+    uint64_t tmp64 = 0;
+    uint32_t tmp32 = 0;
     uint8_t tmp8 = 0;
 
     tmp8 = read_notWrite;
@@ -124,8 +124,8 @@ UdConfigParms::UdConfigParms( TARGETING::Target * i_target,
     char * l_pBuf = reinterpret_cast<char *>(
                           reallocUsrBuf(sizeof(uint32_t)
                                        +sizeof(uint64_t)*7));
-    uint32_t tmp64 = 0;
-    uint16_t tmp32 = 0;
+    uint64_t tmp64 = 0;
+    uint32_t tmp32 = 0;
 
     tmp32 = TARGETING::get_huid(i_target);
     memcpy(l_pBuf, &tmp32, sizeof(tmp32));
