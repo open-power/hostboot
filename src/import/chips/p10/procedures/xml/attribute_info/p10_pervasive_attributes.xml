@@ -25,14 +25,26 @@
 <attributes>
 <!-- ********************************************************************** -->
 <attribute>
-  <id>ATTR_PG</id>
+  <id>ATTR_PG_MVPD</id>
   <targetType>TARGET_TYPE_PERV</targetType>
   <description>
-    Chiplet Partial good info attribute
-    This should be a direct copy of the data from the PG keyword of VPD.
+    Chiplet partial good information, direct from module VPD PG keyword
   </description>
   <valueType>uint32</valueType>
   <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PG</id>
+  <targetType>TARGET_TYPE_PERV</targetType>
+  <description>
+    Chiplet partial good information to be consumed by IPL HWP code.
+    This attribute logically represents the combination of VPD PG plus
+    any additional runtime deconfiguration to be applied on the current IPL.
+  </description>
+  <valueType>uint32</valueType>
+  <default>0xFFFFFFFF</default>
+  <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
