@@ -22,6 +22,10 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+#ifndef __RING_PROPERTIES_H__
+#define __RING_PROPERTIES_H__
+
 namespace PERV
 {
 enum RingOffset
@@ -633,4 +637,5 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { EQ::ec_l3_cmsk              , EQ_TYPE   }, // 136
     { EQ::ec_l3_inex              , EQ_TYPE   }, // 137
 };
-#endif
+#endif  //__PPE__
+#endif // __RING_PROPERTIES_H__
