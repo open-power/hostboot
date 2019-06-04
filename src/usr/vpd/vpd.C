@@ -475,55 +475,55 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
 void updateSerialNumberFromBMC( TARGETING::Target * i_nodetarget )
 {
 #ifdef CONFIG_UPDATE_SN_FROM_BMC
-	errlHndl_t l_errl = NULL;
-	size_t     l_vpdSize = 0;
+    errlHndl_t l_errl = NULL;
+    size_t     l_vpdSize = 0;
 
-	//Get Product Serial Number from Backplane
-	char* l_sn_prod = NULL;
-	l_sn_prod = IPMIFRUINV::getProductSN(0);
-	if (l_sn_prod != NULL)
-	{
-		TRACFCOMP(g_trac_vpd, "Got system serial number from BMC.");
-		TRACFCOMP(g_trac_vpd, "SN from BMC is: %s", l_sn_prod);
+    //Get Product Serial Number from Backplane
+    char* l_sn_prod = NULL;
+    l_sn_prod = IPMIFRUINV::getProductSN(0);
+    if (l_sn_prod != NULL)
+    {
+        TRACFCOMP(g_trac_vpd, "Got system serial number from BMC.");
+        TRACFCOMP(g_trac_vpd, "SN from BMC is: %s", l_sn_prod);
 
-		l_errl = deviceRead(i_nodetarget, NULL, l_vpdSize,
-			    DEVICE_PVPD_ADDRESS( PVPD::OSYS, PVPD::SS ));
+        l_errl = deviceRead(i_nodetarget, NULL, l_vpdSize,
+                DEVICE_PVPD_ADDRESS( PVPD::OSYS, PVPD::SS ));
 
-		if(l_errl == NULL)
-		{
-			uint8_t l_vpddata[l_vpdSize];
+        if(l_errl == NULL)
+        {
+            uint8_t l_vpddata[l_vpdSize];
 
-			l_errl = deviceRead(i_nodetarget, l_vpddata, l_vpdSize,
-				DEVICE_PVPD_ADDRESS( PVPD::OSYS, PVPD::SS ));
+            l_errl = deviceRead(i_nodetarget, l_vpddata, l_vpdSize,
+                DEVICE_PVPD_ADDRESS( PVPD::OSYS, PVPD::SS ));
 
-			if(l_errl == NULL)
-			{
-				TRACFCOMP(g_trac_vpd, "SN in PVPD::OSYS:SS: %s, size: %d", l_vpddata, l_vpdSize);
+            if(l_errl == NULL)
+            {
+                TRACFCOMP(g_trac_vpd, "SN in PVPD::OSYS:SS: %s, size: %d", l_vpddata, l_vpdSize);
 
-				if (strncmp(l_sn_prod, l_vpddata, l_vpdSize) != 0)
-				{
-					l_errl = deviceWrite(i_nodetarget, l_sn_prod, l_vpdSize,
-								DEVICE_PVPD_ADDRESS( PVPD::OSYS, PVPD::SS ));
-					CONSOLE::displayf(NULL, "updated SN from BMC into PVPD.");
-					CONSOLE::flush();
-					CONSOLE::displayf(NULL, "Need a reboot.");
-					CONSOLE::flush();
-					INITSERVICE::requestReboot();
-				}
-			}
-		}
+                if (strncmp(l_sn_prod, l_vpddata, l_vpdSize) != 0)
+                {
+                    l_errl = deviceWrite(i_nodetarget, l_sn_prod, l_vpdSize,
+                                DEVICE_PVPD_ADDRESS( PVPD::OSYS, PVPD::SS ));
+                    CONSOLE::displayf(NULL, "updated SN from BMC into PVPD.");
+                    CONSOLE::flush();
+                    CONSOLE::displayf(NULL, "Need a reboot.");
+                    CONSOLE::flush();
+                    INITSERVICE::requestReboot();
+                }
+            }
+        }
 
-		if(l_errl)
-		{
-			ERRORLOG::errlCommit(l_errl,VPD_COMP_ID);
-		}
+        if(l_errl)
+        {
+            ERRORLOG::errlCommit(l_errl,VPD_COMP_ID);
+        }
 
-		 //getProductSN requires the caller to delete the char array
-		 delete[] l_sn_prod;
-		 l_sn_prod = NULL;
+         //getProductSN requires the caller to delete the char array
+         delete[] l_sn_prod;
+         l_sn_prod = NULL;
 
-		TRACFCOMP(g_trac_vpd, "End updateSerialNumberFromBMC.");
-	}
+        TRACFCOMP(g_trac_vpd, "End updateSerialNumberFromBMC.");
+    }
 #endif
 }
 
@@ -600,47 +600,9 @@ errlHndl_t getPnAndSnRecordAndKeywords( TARGETING::Target * i_target,
         }
         else if( i_type == TARGETING::TYPE_NODE )
         {
-#if defined(CONFIG_PVPD_READ_FROM_HW) && defined(CONFIG_PVPD_READ_FROM_PNOR)
-            IpVpdFacade* l_ipvpd     = &(Singleton<PvpdFacade>::instance());
             io_record    = PVPD::OPFR;
             io_keywordPN = PVPD::VP;
             io_keywordSN = PVPD::VS;
-
-            bool l_zeroPN;
-            l_err = l_ipvpd->cmpSeepromToZero( i_target,
-                                               io_record,
-                                               io_keywordPN,
-                                               l_zeroPN );
-            if (l_err)
-            {
-                TRACFCOMP(g_trac_vpd,ERR_MRK"VPD::getPnAndSnRecordAndKeywords: Error checking if OPFR:VP == 0");
-                break;
-            }
-
-            bool l_zeroSN;
-            l_err = l_ipvpd->cmpSeepromToZero( i_target,
-                                               io_record,
-                                               io_keywordSN,
-                                               l_zeroSN );
-            if (l_err)
-            {
-                TRACFCOMP(g_trac_vpd,ERR_MRK"VPD::getPnAndSnRecordAndKeywords: Error checking if OPFR:VS == 0");
-                break;
-            }
-
-            // If VP and VS are zero, use VINI instead
-            if( l_zeroPN && l_zeroSN )
-            {
-                TRACFCOMP(g_trac_vpd, "setting cvpd to VINI PN SN");
-                io_record    = PVPD::VINI;
-                io_keywordPN = PVPD::PN;
-                io_keywordSN = PVPD::SN;
-            }
-#else
-            io_record    = PVPD::VINI;
-            io_keywordPN = PVPD::PN;
-            io_keywordSN = PVPD::SN;
-#endif
         }
         else if( i_type == TARGETING::TYPE_MCS )
         {
