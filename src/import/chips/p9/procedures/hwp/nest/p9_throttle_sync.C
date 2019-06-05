@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -79,19 +79,38 @@ template<>
 uint8_t findNumDimms(const fapi2::Target<fapi2::TARGET_TYPE_MI>& i_miTarget)
 {
     FAPI_DBG("Entering findNumDimms");
-    auto l_dmiChiplets = i_miTarget.getChildren<fapi2::TARGET_TYPE_DMI>();
 
     uint8_t l_num_dimms = 0;
 
-    for (auto l_dmi : l_dmiChiplets)
+    // Cumulus code
+    const auto& l_dmiChiplets = i_miTarget.getChildren<fapi2::TARGET_TYPE_DMI>();
+
+    for (const auto& l_dmi : l_dmiChiplets)
     {
-        auto l_memBufs = l_dmi.getChildren<fapi2::TARGET_TYPE_MEMBUF_CHIP>();
+        const auto& l_memBufs = l_dmi.getChildren<fapi2::TARGET_TYPE_MEMBUF_CHIP>();
 
         if (l_memBufs.size() > 0)
         {
             l_num_dimms++;
         }
     }
+
+    FAPI_DBG("After number of DIMM's after cumulus targets %u", l_num_dimms);
+
+    // Axone code
+    const auto& l_omiChiplets = i_miTarget.getChildren<fapi2::TARGET_TYPE_OMI>();
+
+    for (const auto& l_omi : l_omiChiplets)
+    {
+        const auto& l_memBufs = l_omi.getChildren<fapi2::TARGET_TYPE_OCMB_CHIP>();
+
+        if (l_memBufs.size() > 0)
+        {
+            l_num_dimms++;
+        }
+    }
+
+    FAPI_DBG("After number of DIMM's after axone targets %u", l_num_dimms);
 
     FAPI_DBG("Exiting findNumDimms");
     return l_num_dimms;
@@ -374,7 +393,7 @@ fapi2::ReturnCode throttleSync(
         }
 
         // Program the MCMODE0 if HW397255 is not enabled which means we
-        // should have a chip with Nimbus DD2+ or Cumulus.
+        // should have a chip with Nimbus DD2+ or Cumulus/Axone.
         if (i_HW397255_enabled == 0)
         {
             progMCMODE0(l_mc, i_mcTargets);
@@ -442,7 +461,7 @@ extern "C"
         // HW397255 requires to also program a master MCS on MC23 if
         // it has DIMMs.
         // This should only be enabled for Nimbus DD1, disabled for Nimbus DD2
-        // and Cumulus.
+        // and Cumulus/Axone.
         fapi2::ATTR_CHIP_EC_FEATURE_HW397255_Type l_HW397255_enabled;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW397255,
                                i_target, l_HW397255_enabled),
@@ -456,7 +475,7 @@ extern "C"
                      (uint64_t)fapi2::current_err);
         }
 
-        // Cumulus
+        // Cumulus/Axone
         if (l_miChiplets.size() > 0)
         {
             FAPI_TRY(throttleSync(l_miChiplets, l_HW397255_enabled),
