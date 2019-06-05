@@ -61,7 +61,10 @@ extern "C"
     fapi2::ReturnCode p9_mss_scrub( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
     {
         FAPI_INF("Start mss scrub for %s", mss::c_str(i_target));
-        FAPI_TRY(mss::memdiags::mss_scrub_helper(i_target));
+        // Initialize memory and set firs accordingly
+        FAPI_TRY(mss::memdiags::mss_initialize_memory(i_target));
+        // Kickoff background scrub and unmask firs
+        FAPI_TRY(mss::memdiags::mss_background_scrub_helper(i_target));
 
     fapi_try_exit:
         return fapi2::current_err;

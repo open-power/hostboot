@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018
+# Contributors Listed Below - COPYRIGHT 2018,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -27,5 +27,5 @@
 -include 00p9a_common.mk
 
 PROCEDURE=p9a_mss_eff_config_thermal
-$(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
+$(eval $(call ADD_P9A_MEMORY_INCDIRS,$(PROCEDURE)))
 $(call BUILD_PROCEDURE)
