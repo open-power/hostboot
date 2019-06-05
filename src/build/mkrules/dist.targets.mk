@@ -305,6 +305,7 @@ fsp.tar_CONTENTS = \
     src/build/buildpnor/genfakeheader.pl \
     src/build/buildpnor/genPnorImages.pl \
     src/build/buildpnor/buildUcdFlashImages.pl \
+    src/build/buildpnor/buildBpmFlashImages.pl \
     src/build/buildpnor/PnorUtils.pm \
     src/build/buildpnor/imprintHwKeyHash \
     src/build/buildpnor/pkgOcmbFw.pl \
