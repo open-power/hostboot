@@ -9088,14 +9088,18 @@
         <id>FAPI_POS</id>
         <default>9</default>
     </attribute>
+    <!-- Note that EEPROM_VPD_PRIMARY_INFO/FAPI_I2C_CONTROL_INFO attrs for OCMB 9-15 and DIMM 9-15
+         are invalid. The engine value is set to be engine 1 (C) which has 12
+         valid ports according to the simics axone model. Only the first 4 ports
+         are actually used so we will use 5-12 as dummy ports for the unused dimm targets.
+         We cannot use the ports on engine 3 (E) becuase simics only has 2 ports marked as valid-->
     <attribute>
         <id>FAPI_I2C_CONTROL_INFO</id>
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
-            <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>1</value></field>
-            <!-- Use incorrect devAddr so device doesnt show present but we still detect that something should be there -->
-            <field><id>devAddr</id><value>0xD2</value></field>
+            <field><id>engine</id><value>1</value></field>
+            <field><id>port</id><value>5</value></field>
+            <field><id>devAddr</id><value>0xD0</value></field>
             <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
         </default>
@@ -9103,18 +9107,15 @@
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>1</value></field>
+            <field><id>port</id><value>5</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <!-- Use incorrect devAddr so device doesnt show present but we still detect that something should be there -->
-            <field><id>devAddr</id><value>0xA2</value></field>
-            <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>1</value></field>
-            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
-            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
-            <field><id>writeCycleTime</id><value>20</value></field>
-            <field><id>writePageSize</id><value>32</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
-            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -9154,14 +9155,18 @@
         <id>FAPI_POS</id>
         <default>10</default>
     </attribute>
+    <!-- Note that EEPROM_VPD_PRIMARY_INFO/FAPI_I2C_CONTROL_INFO attrs for OCMB 9-15 and DIMM 9-15
+         are invalid. The engine value is set to be engine 1 (C) which has 12
+         valid ports according to the simics axone model. Only the first 4 ports
+         are actually used so we will use 5-12 as dummy ports for the unused dimm targets.
+         We cannot use the ports on engine 3 (E) becuase simics only has 2 ports marked as valid-->
     <attribute>
         <id>FAPI_I2C_CONTROL_INFO</id>
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
-            <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>1</value></field>
-            <!-- Use incorrect devAddr so device doesnt show present but we still detect that something should be there -->
-            <field><id>devAddr</id><value>0xD4</value></field>
+            <field><id>engine</id><value>1</value></field>
+            <field><id>port</id><value>6</value></field>
+            <field><id>devAddr</id><value>0xD0</value></field>
             <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
         </default>
@@ -9169,18 +9174,15 @@
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>1</value></field>
+            <field><id>port</id><value>6</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <!-- Use incorrect devAddr so device doesnt show present but we still detect that something should be there -->
-            <field><id>devAddr</id><value>0xA4</value></field>
-            <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>1</value></field>
-            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
-            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
-            <field><id>writeCycleTime</id><value>20</value></field>
-            <field><id>writePageSize</id><value>32</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
-            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -9220,14 +9222,16 @@
         <id>FAPI_POS</id>
         <default>11</default>
     </attribute>
+    <!-- Note that EEPROM_VPD_PRIMARY_INFO/FAPI_I2C_CONTROL_INFO attrs for OCMB 9-15 and DIMM 9-15
+      are invalid. The port and devAddr values are invalid, info is just here to fully test
+      the EEPROM caching code (DIMM X should match OCMB X) -->
     <attribute>
         <id>FAPI_I2C_CONTROL_INFO</id>
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>1</value></field>
-            <!-- Use incorrect devAddr so device doesnt show present but we still detect that something should be there -->
-            <field><id>devAddr</id><value>0xD6</value></field>
+            <field><id>port</id><value>4</value></field>
+            <field><id>devAddr</id><value>0xD4</value></field>
             <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
         </default>
@@ -9235,18 +9239,17 @@
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
+            <field><id>devAddr</id><value>0xA4</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>4</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>devAddr</id><value>0xA6</value></field>
-            <field><id>engine</id><value>3</value></field>
-            <!-- Use incorrect devAddr so device doesnt show present but we still detect that something should be there -->
-            <field><id>port</id><value>1</value></field>
-            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
-            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
-            <field><id>writeCycleTime</id><value>20</value></field>
-            <field><id>writePageSize</id><value>32</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
-            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -9286,14 +9289,16 @@
         <id>FAPI_POS</id>
         <default>12</default>
     </attribute>
+    <!-- Note that EEPROM_VPD_PRIMARY_INFO/FAPI_I2C_CONTROL_INFO attrs for OCMB 9-15 and DIMM 9-15
+      are invalid. The port and devAddr values are invalid, info is just here to fully test
+      the EEPROM caching code (DIMM X should match OCMB X) -->
     <attribute>
         <id>FAPI_I2C_CONTROL_INFO</id>
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <!-- Use incorrect devAddr/port so device doesnt show present but we still detect that something should be there -->
-            <field><id>port</id><value>2</value></field>
-            <field><id>devAddr</id><value>0xD2</value></field>
+            <field><id>port</id><value>5</value></field>
+            <field><id>devAddr</id><value>0xD5</value></field>
             <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
         </default>
@@ -9301,18 +9306,17 @@
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
+            <field><id>devAddr</id><value>0xA5</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>5</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <!-- Use incorrect devAddr/port so device doesnt show present but we still detect that something should be there -->
-            <field><id>devAddr</id><value>0xA2</value></field>
-            <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>2</value></field>
-            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
-            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
-            <field><id>writeCycleTime</id><value>20</value></field>
-            <field><id>writePageSize</id><value>32</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
-            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -9352,14 +9356,16 @@
         <id>FAPI_POS</id>
         <default>13</default>
     </attribute>
+    <!-- Note that EEPROM_VPD_PRIMARY_INFO/FAPI_I2C_CONTROL_INFO attrs for OCMB 9-15 and DIMM 9-15
+      are invalid. The port and devAddr values are invalid, info is just here to fully test
+      the EEPROM caching code (DIMM X should match OCMB X) -->
     <attribute>
         <id>FAPI_I2C_CONTROL_INFO</id>
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <!-- Use incorrect devAddr/port so device doesnt show present but we still detect that something should be there -->
-            <field><id>port</id><value>2</value></field>
-            <field><id>devAddr</id><value>0xD4</value></field>
+            <field><id>port</id><value>6</value></field>
+            <field><id>devAddr</id><value>0xD6</value></field>
             <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
         </default>
@@ -9367,18 +9373,17 @@
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
+            <field><id>devAddr</id><value>0xA6</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>6</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <!-- Use incorrect devAddr/port so device doesnt show present but we still detect that something should be there -->
-            <field><id>devAddr</id><value>0xA4</value></field>
-            <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>2</value></field>
-            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
-            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
-            <field><id>writeCycleTime</id><value>20</value></field>
-            <field><id>writePageSize</id><value>32</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
-            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -9418,14 +9423,16 @@
         <id>FAPI_POS</id>
         <default>14</default>
     </attribute>
+    <!-- Note that EEPROM_VPD_PRIMARY_INFO/FAPI_I2C_CONTROL_INFO attrs for OCMB 9-15 and DIMM 9-15
+      are invalid. The port and devAddr values are invalid, info is just here to fully test
+      the EEPROM caching code (DIMM X should match OCMB X) -->
     <attribute>
         <id>FAPI_I2C_CONTROL_INFO</id>
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <!-- Use incorrect devAddr/port so device doesnt show present but we still detect that something should be there -->
-            <field><id>port</id><value>2</value></field>
-            <field><id>devAddr</id><value>0xD6</value></field>
+            <field><id>port</id><value>7</value></field>
+            <field><id>devAddr</id><value>0xD7</value></field>
             <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
         </default>
@@ -9433,18 +9440,17 @@
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
+            <field><id>devAddr</id><value>0xA7</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>7</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>devAddr</id><value>0xA6</value></field>
-            <field><id>engine</id><value>3</value></field>
-            <!-- Use incorrect devAddr/port so device doesnt show present but we still detect that something should be there -->
-            <field><id>port</id><value>2</value></field>
-            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
-            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
-            <field><id>writeCycleTime</id><value>20</value></field>
-            <field><id>writePageSize</id><value>32</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
-            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -9484,13 +9490,15 @@
         <id>FAPI_POS</id>
         <default>15</default>
     </attribute>
+    <!-- Note that EEPROM_VPD_PRIMARY_INFO/FAPI_I2C_CONTROL_INFO attrs for OCMB 9-15 and DIMM 9-15
+      are invalid. The port and devAddr values are invalid, info is just here to fully test
+      the EEPROM caching code (DIMM X should match OCMB X) -->
     <attribute>
         <id>FAPI_I2C_CONTROL_INFO</id>
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>2</value></field>
-            <!-- Use incorrect devAddr/port so device doesnt show present but we still detect that something should be there -->
             <field><id>devAddr</id><value>0xD8</value></field>
             <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
@@ -9499,18 +9507,17 @@
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
-            <field><id>byteAddrOffset</id><value>0x02</value></field>
-            <field><id>chipCount</id><value>0x01</value></field>
             <field><id>devAddr</id><value>0xA8</value></field>
             <field><id>engine</id><value>3</value></field>
-            <!-- Use incorrect devAddr/port so device doesnt show present but we still detect that something should be there -->
-            <field><id>port</id><value>2</value></field>
-            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>port</id><value>8</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
-            <field><id>writeCycleTime</id><value>20</value></field>
-            <field><id>writePageSize</id><value>32</value></field>
             <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -11196,14 +11203,16 @@
         <default>9</default>
     </attribute>
     <!-- Note that EEPROM_VPD_PRIMARY_INFO attrs for OCMB 9-15 and DIMM 9-15
-         are invalid. The port value is invalid, info is just here to fully test
-         the EEPROM caching code (DIMM X should match OCMB X) -->
+         are invalid. The engine value is set to be engine 1 (C) which has 12
+         valid ports according to the simics axone model. Only the first 4 ports
+         are actually used so we will use 5-12 as dummy ports for the unused dimm targets.
+         We cannot use the ports on engine 3 (E) becuase simics only has 2 ports marked as valid-->
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
             <field><id>devAddr</id><value>0xA0</value></field>
-            <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>2</value></field>
+            <field><id>engine</id><value>1</value></field>
+            <field><id>port</id><value>5</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
@@ -11247,14 +11256,16 @@
         <default>10</default>
     </attribute>
     <!-- Note that EEPROM_VPD_PRIMARY_INFO attrs for OCMB 9-15 and DIMM 9-15
-         are invalid. The port value is invalid, info is just here to fully test
-         the EEPROM caching code (DIMM X should match OCMB X) -->
+         are invalid. The engine value is set to be engine 1 (C) which has 12
+         valid ports according to the simics axone model. Only the first 4 ports
+         are actually used so we will use 5-12 as dummy ports for the unused dimm targets.
+         We cannot use the ports on engine 3 (E) becuase simics only has 2 ports marked as valid-->
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
             <field><id>devAddr</id><value>0xA0</value></field>
-            <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>3</value></field>
+            <field><id>engine</id><value>1</value></field>
+            <field><id>port</id><value>6</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
@@ -11298,12 +11309,12 @@
         <default>11</default>
     </attribute>
     <!-- Note that EEPROM_VPD_PRIMARY_INFO attrs for OCMB 9-15 and DIMM 9-15
-         are invalid. The port value is invalid, info is just here to fully test
+         are invalid. The port and devAddr values are invalid, info is just here to fully test
          the EEPROM caching code (DIMM X should match OCMB X) -->
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
-            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>devAddr</id><value>0xA4</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>4</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -11349,12 +11360,12 @@
         <default>12</default>
     </attribute>
     <!-- Note that EEPROM_VPD_PRIMARY_INFO attrs for OCMB 9-15 and DIMM 9-15
-         are invalid. The port value is invalid, info is just here to fully test
+         are invalid. The port and devAddr values are invalid, info is just here to fully test
          the EEPROM caching code (DIMM X should match OCMB X) -->
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
-            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>devAddr</id><value>0xA5</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>5</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -11400,12 +11411,12 @@
         <default>13</default>
     </attribute>
     <!-- Note that EEPROM_VPD_PRIMARY_INFO attrs for OCMB 9-15 and DIMM 9-15
-         are invalid. The port value is invalid, info is just here to fully test
+         are invalid. The port and devAddr values are invalid, info is just here to fully test
          the EEPROM caching code (DIMM X should match OCMB X) -->
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
-            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>devAddr</id><value>0xA6</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>6</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -11451,12 +11462,12 @@
         <default>14</default>
     </attribute>
     <!-- Note that EEPROM_VPD_PRIMARY_INFO attrs for OCMB 9-15 and DIMM 9-15
-         are invalid. The port value is invalid, info is just here to fully test
+         are invalid. The port and devAddr values are invalid, info is just here to fully test
          the EEPROM caching code (DIMM X should match OCMB X) -->
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
-            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>devAddr</id><value>0xA7</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>7</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -11502,12 +11513,12 @@
         <default>15</default>
     </attribute>
     <!-- Note that EEPROM_VPD_PRIMARY_INFO attrs for OCMB 9-15 and DIMM 9-15
-         are invalid. The port value is invalid, info is just here to fully test
+         are invalid. The port and devAddr values are invalid, info is just here to fully test
          the EEPROM caching code (DIMM X should match OCMB X) -->
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
-            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>devAddr</id><value>0xA8</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>8</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
