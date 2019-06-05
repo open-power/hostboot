@@ -127,10 +127,28 @@ fapi2::ReturnCode putOCCfg(
     const uint64_t i_cfgAddr,
     const fapi2::buffer<uint32_t>& i_data)
 {
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     uint32_t l_v = static_cast<uint32_t>(i_data);
     std::vector<uint8_t> l_wd;
-    forceLE(l_v, l_wd);
-    return fapi2::putMMIO(i_target, i_cfgAddr, 4, l_wd);
+    fapi2::ATTR_MSS_OCMB_EXP_OMI_CFG_ENDIAN_CTRL_Type l_endian;
+
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_OMI_CFG_ENDIAN_CTRL,
+                            FAPI_SYSTEM, l_endian));
+
+    if (l_endian == fapi2::ENUM_ATTR_MSS_OCMB_EXP_OMI_CFG_ENDIAN_CTRL_LITTLE_ENDIAN)
+    {
+        forceLE(l_v, l_wd);
+    }
+    else
+    {
+        forceBE(l_v, l_wd);
+    }
+
+    FAPI_TRY( fapi2::putMMIO(i_target, i_cfgAddr, 4, l_wd) );
+
+fapi_try_exit:
+    FAPI_DBG("Exiting with return code : 0x%08X...", (uint64_t) fapi2::current_err);
+    return fapi2::current_err;
 }
 
 
@@ -397,11 +415,26 @@ fapi2::ReturnCode getOCCfg(
     const uint64_t i_cfgAddr,
     fapi2::buffer<uint32_t>& o_data)
 {
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     uint32_t l_rd = 0;
     std::vector<uint8_t> l_data(4);
     uint32_t l_idx = 0;
+    fapi2::ATTR_MSS_OCMB_EXP_OMI_CFG_ENDIAN_CTRL_Type l_endian;
+
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_OMI_CFG_ENDIAN_CTRL,
+                            FAPI_SYSTEM, l_endian));
+
     FAPI_TRY(fapi2::getMMIO(i_target, i_cfgAddr, 4, l_data));
-    readLE(l_data, l_idx, l_rd);
+
+    if (l_endian == fapi2::ENUM_ATTR_MSS_OCMB_EXP_OMI_CFG_ENDIAN_CTRL_LITTLE_ENDIAN)
+    {
+        readLE(l_data, l_idx, l_rd);
+    }
+    else
+    {
+        readBE(l_data, l_idx, l_rd);
+    }
+
     o_data = l_rd;
 fapi_try_exit:
     FAPI_DBG("Exiting with return code : 0x%08X...", (uint64_t) fapi2::current_err);
