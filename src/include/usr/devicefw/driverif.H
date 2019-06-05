@@ -103,6 +103,7 @@ namespace DeviceFW
         I2C_SMBUS_WORD         = 3, ///< I2c SMBUS Read/Write Word
         I2C_SMBUS_BYTE         = 4, ///< I2c SMBUS Read/Write Byte
         I2C_SMBUS_SEND_OR_RECV = 5, ///< I2c SMBUS Send/Receive Byte
+        I2C_SMBUS_WORD_NO_PEC  = 6, ///< I2c SMBUS Read/Write Word without PEC byte
     };
 
 #ifndef PARSER

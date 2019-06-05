@@ -41,7 +41,7 @@ TRAC_INIT(&g_trac_nvdimm_upd, NVDIMM_UPD, 2*KILOBYTE);
 
 
 // Easy macro replace for unit testing
-// #define TRACUCOMP(args...)  TRACFCOMP(args)
+//#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
 
 namespace NVDIMM
@@ -1446,6 +1446,7 @@ errlHndl_t NvdimmInstalledImage::byteRegionBlockTransfer(const uint8_t * i_data,
             // After a block has been transferred, verify that the 32-byte block
             // was received by polling FIRMWARE_OPS_STATUS offset for
             // FIRMWARE_BLOCK_RECEIVED.
+            TRACUCOMP(g_trac_nvdimm_upd, ">> waitFwOpsBlockReceived");
             l_err = waitFwOpsBlockReceived();
             if (l_err)
             {
@@ -1454,6 +1455,7 @@ errlHndl_t NvdimmInstalledImage::byteRegionBlockTransfer(const uint8_t * i_data,
                     " 0x%.8X", blockNum, TARGETING::get_huid(iv_dimm));
                 break;
             }
+
             // block of data successfully sent to NV controller
             TRACUCOMP(g_trac_nvdimm_upd,"byteRegionBlockTransfer: block 0x%02X successfully sent to NV controller", blockNum);
             blockNum++;

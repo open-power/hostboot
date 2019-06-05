@@ -449,12 +449,13 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
     {
         if(   (subop==DeviceFW::I2C_SMBUS_BLOCK)
            || (subop==DeviceFW::I2C_SMBUS_BYTE)
-           || (subop==DeviceFW::I2C_SMBUS_WORD))
+           || (subop==DeviceFW::I2C_SMBUS_WORD)
+           || (subop == DeviceFW::I2C_SMBUS_WORD_NO_PEC) )
         {
             args.smbus.commandCode =
                 static_cast<decltype(args.smbus.commandCode)>(
                     va_arg(i_args,uint64_t));
-            args.smbus.usePec = true; // All implementations use PEC
+            args.smbus.usePec = true; // Most implementations use PEC
             args.i2cMuxBusSelector = va_arg(i_args,uint64_t);
             args.i2cMuxPath = reinterpret_cast<const TARGETING::EntityPath*>(
                 va_arg(i_args, uint64_t));
@@ -477,11 +478,18 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
             if ( args.offset_length != 0 )
             {
                 args.offset_buffer = temp;
-
             }
         }
 
-        args.subop=subop;
+        if (subop == DeviceFW::I2C_SMBUS_WORD_NO_PEC)
+        {
+            args.smbus.usePec = false;
+            args.subop = DeviceFW::I2C_SMBUS_WORD;
+        }
+        else
+        {
+            args.subop=subop;
+        }
 
         err = i2cCommonOp( i_opType,
                            i_target,

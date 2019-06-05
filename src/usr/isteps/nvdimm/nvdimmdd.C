@@ -68,8 +68,8 @@ TRAC_INIT( & g_trac_nvdimmr, "NVDIMMR", KILOBYTE );
 
 
 // Easy macro replace for unit testing
-#define TRACUCOMP(args...)  TRACFCOMP(args)
-//#define TRACUCOMP(args...)
+//#define TRACUCOMP(args...)  TRACFCOMP(args)
+#define TRACUCOMP(args...)
 
 // ----------------------------------------------
 // Defines
@@ -208,7 +208,7 @@ errlHndl_t nvdimmPerformOp( DeviceFW::OperationType i_opType,
             l_currentOpLen = l_snglChipSize - i2cInfo.offset;
         }
 
-        TRACFCOMP( g_trac_nvdimm,
+        TRACUCOMP( g_trac_nvdimm,
                    "nvdimmPerformOp():  i_opType=%d "
                    "e/p/dA=%d/%d/0x%X, offset=0x%X, len=0x%X, "
                    "snglChipKB=0x%X, chipCount=0x%X, devSizeKB=0x%X", i_opType,
@@ -218,7 +218,7 @@ errlHndl_t nvdimmPerformOp( DeviceFW::OperationType i_opType,
 
         // Printing mux info separately, if combined, nothing is displayed
         char* l_muxPath = i2cInfo.i2cMuxPath.toString();
-        TRACFCOMP(g_trac_nvdimm, "nvdimmPerformOp(): "
+        TRACUCOMP(g_trac_nvdimm, "nvdimmPerformOp(): "
                   "muxSelector=0x%X, muxPath=%s",
                   i2cInfo.i2cMuxBusSelector,
                   l_muxPath);
@@ -650,8 +650,6 @@ errlHndl_t nvdimmWrite ( TARGETING::Target * i_target,
     size_t byteAddrSize = 0;
     uint8_t * newBuffer = nullptr;
     bool needFree = false;
-    uint32_t data_left = 0;
-    uint32_t diff_wps = 0;
 
     TRACDCOMP( g_trac_nvdimm,
                ENTER_MRK"nvdimmWrite()" );
@@ -716,6 +714,15 @@ errlHndl_t nvdimmWrite ( TARGETING::Target * i_target,
 
         // Setup a max-size buffer of writePageSize
         size_t newBufLen = i_i2cInfo.writePageSize;
+
+        // Break data into word size transfers if possible
+        if ( (io_buflen > sizeof(uint16_t)) &&
+             ((io_buflen % sizeof(uint16_t)) == 0) )
+        {
+            newBufLen = sizeof(uint16_t);
+        }
+        assert(newBufLen > 0, "Unable to allocate 0 buffer size for nvdimmWrite()");
+
         newBuffer = static_cast<uint8_t*>(malloc( newBufLen ));
         needFree = true;
 
@@ -730,16 +737,6 @@ errlHndl_t nvdimmWrite ( TARGETING::Target * i_target,
 
         while( total_bytes_written < io_buflen )
         {
-            // Determine how much data can be written in this loop
-            // Can't go over a writePageSize boundary
-
-            // Total data left to write
-            data_left = io_buflen - total_bytes_written;
-
-            // Difference to next writePageSize boundary
-            diff_wps = i_i2cInfo.writePageSize -
-                                (i_i2cInfo.offset % i_i2cInfo.writePageSize);
-
             // Add the data the user wanted to write
             memcpy( newBuffer,
                     &l_data_ptr[total_bytes_written],
@@ -759,15 +756,13 @@ errlHndl_t nvdimmWrite ( TARGETING::Target * i_target,
             }
 
             TRACUCOMP(g_trac_nvdimm,"nvdimmWrite() Loop: %d/%d/0x%X "
-                "writeBuflen=%d, offset=0x%X, "
-                "bAS=%d, diffs=%d/%d",
+                "writeBuflen=%d, offset=0x%X, bAS=%d",
                 i_i2cInfo.port, i_i2cInfo.engine, i_i2cInfo.devAddr,
-                newBufLen, i_i2cInfo.offset, byteAddrSize,
-                data_left, diff_wps);
+                newBufLen, i_i2cInfo.offset, byteAddrSize);
 
             // Printing mux info separately, if combined, nothing is displayed
             char* l_muxPath = i_i2cInfo.i2cMuxPath.toString();
-            TRACFCOMP(g_trac_nvdimm, "nvdimmWrite(): "
+            TRACUCOMP(g_trac_nvdimm, "nvdimmWrite(): "
                       "muxSelector=0x%X, muxPath=%s",
                       i_i2cInfo.i2cMuxBusSelector,
                       l_muxPath);
@@ -789,6 +784,14 @@ errlHndl_t nvdimmWrite ( TARGETING::Target * i_target,
                 // for this loop
                 TRACFCOMP(g_trac_nvdimm,
                          "Failed writing data: original nvdimm write");
+                // total writes for the data size (divide by each write size)
+                size_t totalWritesNeeded = io_buflen/newBufLen;
+                // current write number (writes done + next one)
+                size_t currentWrite = total_bytes_written/newBufLen + 1;
+                TRACFCOMP( g_trac_nvdimm,ERR_MRK"nvdimmWrite(): "
+                    "Tried to write out %d bytes out of %d total: "
+                    "Failed on the %d of %d writes", newBufLen, io_buflen,
+                    currentWrite, totalWritesNeeded );
                 break;
             }
 
@@ -850,28 +853,47 @@ errlHndl_t nvdimmWriteData( TARGETING::Target * i_target,
     errlHndl_t err_retryable = nullptr;
     do
     {
-         /***********************************************************/
-         /* Attempt write multiple times ONLY on retryable fails    */
-         /***********************************************************/
+        /***********************************************************/
+        /* Attempt write multiple times ONLY on retryable fails    */
+        /***********************************************************/
         for (uint8_t retry = 0;
               retry <= NVDIMM_MAX_RETRIES;
               retry++)
-         {
+        {
             // Do the actual data write
-            err = deviceOp( DeviceFW::WRITE,
-                            i_target,
-                            i_dataToWrite,
-                            i_dataLen,
-                            DEVICE_I2C_ADDRESS_OFFSET(
-                                        i_i2cInfo.port,
-                                        i_i2cInfo.engine,
-                                        i_i2cInfo.devAddr,
-                                        i_byteAddressSize,
-                                        reinterpret_cast<uint8_t*>(
-                                        i_byteAddress),
-                                        i_i2cInfo.i2cMuxBusSelector,
-                                        &(i_i2cInfo.i2cMuxPath) ));
-
+            if ( i_dataLen == sizeof(uint16_t) )
+            {
+                err = deviceOp( DeviceFW::WRITE,
+                                i_target,
+                                i_dataToWrite,
+                                i_dataLen,
+                                DeviceFW::I2C,
+                                I2C_SMBUS_RW_W_CMD_PARAMS(
+                                    DeviceFW::I2C_SMBUS_WORD_NO_PEC,
+                                    i_i2cInfo.engine,
+                                    i_i2cInfo.port,
+                                    i_i2cInfo.devAddr,
+                                    *(reinterpret_cast<uint8_t*>(i_byteAddress)
+                                        + (i_byteAddressSize-1)),
+                                    i_i2cInfo.i2cMuxBusSelector,
+                                    &(i_i2cInfo.i2cMuxPath)) );
+            }
+            else
+            {
+                err = deviceOp( DeviceFW::WRITE,
+                                i_target,
+                                i_dataToWrite,
+                                i_dataLen,
+                                DEVICE_I2C_ADDRESS_OFFSET(
+                                            i_i2cInfo.port,
+                                            i_i2cInfo.engine,
+                                            i_i2cInfo.devAddr,
+                                            i_byteAddressSize,
+                                            reinterpret_cast<uint8_t*>(
+                                            i_byteAddress),
+                                            i_i2cInfo.i2cMuxBusSelector,
+                                            &(i_i2cInfo.i2cMuxPath) ));
+             }
              if ( err == nullptr )
              {
                  // Operation completed successfully
