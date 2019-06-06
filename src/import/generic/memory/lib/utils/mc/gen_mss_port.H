@@ -112,9 +112,9 @@ fapi2::ReturnCode change_iml_complete( const fapi2::Target<T>& i_target, states 
 
     FAPI_DBG("Change the IML init complete bit to high for %s %s", (i_state == HIGH ? "high" : "low"),
              mss::c_str(i_target));
-    FAPI_TRY( mss::getScom(i_target, TT::FARB6Q_REG, l_data) );
+    FAPI_TRY( mss::getScom(i_target, TT::PMU8Q_REG, l_data) );
     l_data.writeBit<TT::CFG_INIT_COMPLETE>(i_state);
-    FAPI_TRY( mss::putScom(i_target, TT::FARB6Q_REG, l_data) );
+    FAPI_TRY( mss::putScom(i_target, TT::PMU8Q_REG, l_data) );
 
 fapi_try_exit:
     return fapi2::current_err;

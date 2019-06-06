@@ -39,6 +39,7 @@
 #include <fapi2.H>
 #include <explorer_scom_addresses.H>
 #include <explorer_scom_addresses_fld.H>
+#include <explorer_scom_addresses_fld_fixes.H>
 #include <lib/exp_attribute_accessors_manual.H>
 #include <lib/shared/exp_consts.H>
 #include <lib/dimm/exp_rank.H>
@@ -70,6 +71,7 @@ class portTraits< mss::mc_type::EXPLORER >
         static constexpr uint64_t FARB5Q_REG = EXPLR_SRQ_MBA_FARB5Q;
         static constexpr uint64_t FARB6Q_REG = EXPLR_SRQ_MBA_FARB6Q;
         static constexpr uint64_t FARB9Q_REG = EXPLR_SRQ_MBA_FARB9Q;
+        static constexpr uint64_t PMU8Q_REG = EXPLR_SRQ_MBA_PMU8Q;
         static constexpr uint64_t REFRESH_REG = EXPLR_SRQ_MBAREF0Q;
         static constexpr uint64_t STR0Q_REG = EXPLR_SRQ_MBASTR0Q;
         static constexpr uint64_t ECC_REG = EXPLR_RDF_RECR;
@@ -89,8 +91,7 @@ class portTraits< mss::mc_type::EXPLORER >
             CFG_CCS_INST_RESET_ENABLE = EXPLR_SRQ_MBA_FARB5Q_CFG_CCS_INST_RESET_ENABLE,
             CFG_DDR_RESETN = EXPLR_SRQ_MBA_FARB5Q_CFG_DDR_RESETN,
             CFG_CCS_ADDR_MUX_SEL = EXPLR_SRQ_MBA_FARB5Q_CFG_CCS_ADDR_MUX_SEL,
-            //TODO: It's not defined in scom register header file. Change this once it's available in scom address header file
-            CFG_INIT_COMPLETE = 32, //EXPLR_SRQ_MBA_FARB6Q_CFG_INIT_COMPLETE,
+            CFG_INIT_COMPLETE = EXPLR_SRQ_MBA_PMU8Q_CFG_INIT_COMPLETE,
             CFG_ZQ_PER_CAL_ENABLE = EXPLR_SRQ_MBA_FARB9Q_CFG_ZQ_PER_CAL_ENABLE,
 
             REFRESH_ENABLE = EXPLR_SRQ_MBAREF0Q_CFG_REFRESH_ENABLE,
