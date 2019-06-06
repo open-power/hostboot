@@ -187,6 +187,11 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                       TARGETING::TYPE_OMI,
                       startScomProcess);
 
+DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
+                      DeviceFW::SCOM,
+                      TARGETING::TYPE_NPU,
+                      startScomProcess);
+
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 errlHndl_t startScomProcess(DeviceFW::OperationType i_opType,
@@ -958,6 +963,11 @@ bool getChipUnitP9 (TARGETING::TYPE i_type,
         case(TARGETING::TYPE_OMIC) :
         {
             o_chipUnit = PU_OMIC_CHIPUNIT;
+            break;
+        }
+        case(TARGETING::TYPE_NPU) :
+        {
+            o_chipUnit = PU_NPU_CHIPUNIT;
             break;
         }
         default:
