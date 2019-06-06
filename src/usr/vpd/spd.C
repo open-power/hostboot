@@ -2394,7 +2394,9 @@ errlHndl_t cmpEecacheToEeprom(TARGETING::Target * i_target,
 
         if (!isValidDimmType(memTypeCache, i_eepromType))
         {
-            TRACFCOMP(g_trac_spd, ERR_MRK"cmpEecacheToEeprom() Invalid DIMM type found in cache copy of eeprom");
+            TRACFCOMP(g_trac_spd, ERR_MRK
+                     "cmpEecacheToEeprom() Invalid DIMM type found in cache copy of eeprom,"
+                     " we will not be able to understand contents");
             break;
         }
 
