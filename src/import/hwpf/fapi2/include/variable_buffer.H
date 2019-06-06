@@ -475,7 +475,7 @@ class variable_buffer
         ///
         inline fapi2::ReturnCodes flipBit( bits_type SB, bits_type L = 1)
         {
-            ReturnCodes rc;
+            ReturnCodes rc = FAPI2_RC_SUCCESS;
 
             // make sure we are within our container
             if((SB + L) <= this->iv_perceived_bit_length)
