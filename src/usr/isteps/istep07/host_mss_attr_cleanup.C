@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -75,7 +75,6 @@ using   namespace   TARGETING;
 void*    host_mss_attr_cleanup( void *io_pArgs )
 {
     IStepError l_StepError;
-    errlHndl_t l_err = NULL;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_mss_attr_cleanup entry");
     // errlHndl_t l_err = NULL;
@@ -98,7 +97,9 @@ void*    host_mss_attr_cleanup( void *io_pArgs )
         l_pTopLevel->setAttr<TARGETING::ATTR_MRW_HW_MIRRORING_ENABLE>
           (fapi2::ENUM_ATTR_MRW_HW_MIRRORING_ENABLE_FALSE);
     }
-
+    // TODO RTC 198112 Memory Reconfig Loop for Axone
+    #ifndef CONFIG_AXONE
+    errlHndl_t l_err = nullptr;
     TargetHandleList l_funcDimmList;
     // Get all the functional Dimms
     TARGETING::getAllLogicalCards(l_funcDimmList, TYPE_DIMM, true);
@@ -123,6 +124,7 @@ void*    host_mss_attr_cleanup( void *io_pArgs )
         }
     }
 
+    #endif
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_mss_attr_cleanup exit" );
 
