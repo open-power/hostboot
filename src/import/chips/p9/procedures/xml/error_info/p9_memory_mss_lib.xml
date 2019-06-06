@@ -509,4 +509,17 @@
       <priority>HIGH</priority>
     </callout>
   </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_STR_NOT_ENTERED</rc>
+    <description>Indicates a MCA has not entered STR within the allotted time</description>
+    <ffdc>PROC_TARGET</ffdc>
+    <ffdc>MCA_POS</ffdc>
+    <ffdc>MCA_FARB6Q</ffdc>
+    <ffdc>STR_STATE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
 </hwpErrors>

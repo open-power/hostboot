@@ -48,6 +48,7 @@ namespace workarounds
 namespace nvdimm
 {
 
+
 // MBASTR0Q for each MCA
 // Note: Since the scoms are executed at the chip, it needs the dedicated
 // address for each MCA
@@ -89,6 +90,19 @@ constexpr const uint64_t FARB5Q_REG[] =
     MCA_7_MBA_FARB5Q,
 };
 
+// FARB6Q for each MCA
+constexpr const uint64_t FARB6Q_REG[] =
+{
+    MCA_0_MBA_FARB6Q,
+    MCA_1_MBA_FARB6Q,
+    MCA_2_MBA_FARB6Q,
+    MCA_3_MBA_FARB6Q,
+    MCA_4_MBA_FARB6Q,
+    MCA_5_MBA_FARB6Q,
+    MCA_6_MBA_FARB6Q,
+    MCA_7_MBA_FARB6Q,
+};
+
 // MCB_CNTLQ
 constexpr const uint64_t MCB_CNTLQ_REG[] =
 {
@@ -118,7 +132,10 @@ fapi2::ReturnCode self_refresh_entry( const fapi2::Target<fapi2::TARGET_TYPE_PRO
     FAPI_DBG("Entering STR on port %u.", l_mca_pos);
 
     {
-        fapi2::buffer<uint64_t> l_mbarpc0_data, l_mbastr0_data, l_mcbcntlq_data;
+        fapi2::buffer<uint64_t> l_mbarpc0_data;
+        fapi2::buffer<uint64_t> l_mbastr0_data;
+        fapi2::buffer<uint64_t> l_mcbcntlq_data;
+        fapi2::buffer<uint64_t> l_mcafarb6q_data;
         constexpr uint64_t ENABLE = 1;
         constexpr uint64_t DISABLE = 0;
         constexpr uint64_t MAXALL_MIN0 = 0b010;
@@ -126,6 +143,15 @@ fapi2::ReturnCode self_refresh_entry( const fapi2::Target<fapi2::TARGET_TYPE_PRO
         constexpr uint64_t PORTS_PER_MCBIST = 4;
         constexpr uint64_t TIME_0 = 0;
         const uint8_t l_mcbist = l_mca_pos < PORTS_PER_MCBIST ? 0 : 1;
+
+        // Variables for polling. Poll up to a second to make sure the port has entered STR
+        // Why a second? No idea. STR is controlled by the sequencer via power control.
+        // The settings are set to enter STR ASAP but a poll here would let us know
+        // if somehow the port is not in STR.
+        constexpr uint64_t POLL_ITERATION = 500;
+        constexpr uint64_t DELAY_2MS_IN_NS = 2000000;
+        bool l_in_str = false;
+        uint8_t l_sim = 0;
 
         // Stop mcbist first otherwise it can kick the DIMM out of STR
         FAPI_TRY(fapi2::getScom(i_target, MCB_CNTLQ_REG[l_mcbist], l_mcbcntlq_data));
@@ -149,6 +175,34 @@ fapi2::ReturnCode self_refresh_entry( const fapi2::Target<fapi2::TARGET_TYPE_PRO
         // Step 3 - In MBARPC0Q, enable power domain control.
         l_mbarpc0_data.writeBit<MCA_MBARPC0Q_CFG_MIN_MAX_DOMAINS_ENABLE>(ENABLE);
         FAPI_TRY(fapi2::putScom(i_target, MBARPC0Q_REG[l_mca_pos], l_mbarpc0_data));
+
+#ifndef __PPE__
+        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_sim) );
+#endif
+
+        if (!l_sim)
+        {
+            // Poll to make sure we are in STR before proceeding.
+            for (uint8_t i = 0; i < POLL_ITERATION; i++)
+            {
+                FAPI_TRY(fapi2::delay(DELAY_2MS_IN_NS, 0), "Error returned from fapi2::delay call");
+                FAPI_TRY(fapi2::getScom(i_target, FARB6Q_REG[l_mca_pos], l_mcafarb6q_data));
+
+                if (l_mcafarb6q_data.getBit<MCA_MBA_FARB6Q_CFG_STR_STATE>())
+                {
+                    l_in_str = true;
+                    break;
+                }
+            }
+
+            FAPI_ASSERT(l_in_str,
+                        fapi2::MSS_STR_NOT_ENTERED().
+                        set_PROC_TARGET(i_target).
+                        set_MCA_POS(l_mca_pos).
+                        set_MCA_FARB6Q(l_mcafarb6q_data).
+                        set_STR_STATE(l_in_str),
+                        "STR not entered on port %u", l_mca_pos);
+        }
     }
 
 fapi_try_exit:
