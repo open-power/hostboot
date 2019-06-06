@@ -356,6 +356,8 @@ errlHndl_t IpVpdFacade::cmpEecacheToEeprom(TARGETING::Target * i_target,
 
         if( l_err || (l_sizeCache == 0) )
         {
+            TRACFCOMP(g_trac_vpd,
+                      "cmpEecacheToEeprom() an error occurred reading the keyword size in cache");
             break;
         }
 
@@ -368,6 +370,8 @@ errlHndl_t IpVpdFacade::cmpEecacheToEeprom(TARGETING::Target * i_target,
 
         if( l_err )
         {
+            TRACFCOMP(g_trac_vpd,
+                      "cmpEecacheToEeprom() an error occurred reading the keyword in cache");
             break;
         }
 
@@ -380,6 +384,8 @@ errlHndl_t IpVpdFacade::cmpEecacheToEeprom(TARGETING::Target * i_target,
 
         if( l_err || (l_sizeHardware == 0) )
         {
+            TRACFCOMP(g_trac_vpd,
+                      "cmpEecacheToEeprom() an error occurred reading the keyword size in hardware");
             break;
         }
 
@@ -392,6 +398,8 @@ errlHndl_t IpVpdFacade::cmpEecacheToEeprom(TARGETING::Target * i_target,
 
         if( l_err )
         {
+            TRACFCOMP(g_trac_vpd,
+                      "cmpEecacheToEeprom() an error occurred reading the keyword in hardware");
             break;
         }
 
