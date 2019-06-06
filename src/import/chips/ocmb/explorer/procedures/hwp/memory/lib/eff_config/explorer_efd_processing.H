@@ -53,6 +53,25 @@ namespace efd
 {
 
 ///
+/// @brief Processes the Host INIT RD VREF DQ
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_efd_data the EFD data to process
+/// @return fapi2::FAPI2_RC_SUCCESS iff function completes successfully
+/// @note this is pulled in for exp_draminit. The individual fields are pulled into the SI engine
+///
+fapi2::ReturnCode init_vref_dq(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                               const std::shared_ptr<mss::efd::base_decoder>& i_efd_data);
+
+///
+/// @brief Processes the Host INIT PHY VREF
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_efd_data the EFD data to process
+/// @return fapi2::FAPI2_RC_SUCCESS iff function completes successfully
+///
+fapi2::ReturnCode init_phy_vref(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                const std::shared_ptr<mss::efd::base_decoder>& i_efd_data);
+
+///
 /// @brief Processes the CAC delay A side
 /// @param[in] i_target the target on which to operate
 /// @param[in] i_efd_data the EFD data to process
@@ -69,15 +88,6 @@ fapi2::ReturnCode cac_delay_a(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_ta
 ///
 fapi2::ReturnCode cac_delay_b(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                               const std::shared_ptr<mss::efd::base_decoder>& i_efd_data);
-
-///
-/// @brief Processes the Host RD VREF DQ
-/// @param[in] i_target the target on which to operate
-/// @param[in] i_efd_data the EFD data to process
-/// @return fapi2::FAPI2_RC_SUCCESS iff function completes successfully
-///
-fapi2::ReturnCode host_rd_vref_dq(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                  const std::shared_ptr<mss::efd::base_decoder>& i_efd_data);
 
 ///
 /// @brief Processes the CS command latency

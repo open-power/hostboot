@@ -220,6 +220,9 @@ enum generic_ffdc_codes
     SET_CAC_DELAY_B = 0x1077,
     EFD_CA_LATENCY_MODE = 0x1080,
     EFD_CA_PL_MODE = 0x1081,
+    SET_COL_ADDR_BITS = 0x1082,
+    SET_ROW_ADDR_BITS = 0x1083,
+    SET_3DS_HEIGHT = 0x1084,
 
 
     // Power thermal functions

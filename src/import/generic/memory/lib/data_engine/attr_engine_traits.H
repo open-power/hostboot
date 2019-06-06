@@ -402,6 +402,138 @@ struct attrEngineTraits<attr_eff_engine_fields, DRAM_WIDTH>
     }
 };
 
+///
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @note attr_si_engine_fields, COLUMN_ADDR_BITS specialization
+///
+template<>
+struct attrEngineTraits<attr_eff_engine_fields, COLUMN_ADDR_BITS>
+{
+    using attr_type = fapi2::ATTR_MEM_EFF_DRAM_COLUMN_BITS_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_DRAM_COLUMN_BITS_TargetType;
+    static constexpr generic_ffdc_codes FFDC_CODE = SET_COL_ADDR_BITS;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static inline fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+            attr_type& o_setting)
+    {
+        return mss::attr::get_dram_column_bits(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static inline fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+            attr_type& i_setting)
+    {
+        return mss::attr::set_dram_column_bits(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_efd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static inline fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
+            attr_integral_type& o_setting)
+    {
+        static const std::vector< std::pair<uint8_t, uint8_t> > DRAM_ADDR_COL_MAP =
+        {
+            {0b001, fapi2::ENUM_ATTR_MEM_EFF_DRAM_COLUMN_BITS_NUM10},
+        };
+
+        const auto l_dimm = i_spd_data.get_dimm_target();
+
+        attr_integral_type l_value = 0;
+        FAPI_TRY(i_spd_data.column_address_bits(l_value))
+
+        // Map SPD value to desired setting
+        FAPI_TRY(lookup_table_check(l_dimm, DRAM_ADDR_COL_MAP, SET_COL_ADDR_BITS, l_value, o_setting));
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+};
+
+///
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @note attr_si_engine_fields, ROW_ADDR_BITS specialization
+///
+template<>
+struct attrEngineTraits<attr_eff_engine_fields, ROW_ADDR_BITS>
+{
+    using attr_type = fapi2::ATTR_MEM_EFF_DRAM_ROW_BITS_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_DRAM_ROW_BITS_TargetType;
+    static constexpr generic_ffdc_codes FFDC_CODE = SET_ROW_ADDR_BITS;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static inline fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+            attr_type& o_setting)
+    {
+        return mss::attr::get_dram_row_bits(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static inline fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+            attr_type& i_setting)
+    {
+        return mss::attr::set_dram_row_bits(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_efd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static inline fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
+            attr_integral_type& o_setting)
+    {
+        static const std::vector< std::pair<uint8_t, uint8_t> > DRAM_ADDR_ROW_MAP =
+        {
+            {0b010, fapi2::ENUM_ATTR_MEM_EFF_DRAM_ROW_BITS_NUM14},
+            {0b011, fapi2::ENUM_ATTR_MEM_EFF_DRAM_ROW_BITS_NUM15},
+            {0b100, fapi2::ENUM_ATTR_MEM_EFF_DRAM_ROW_BITS_NUM16},
+            {0b101, fapi2::ENUM_ATTR_MEM_EFF_DRAM_ROW_BITS_NUM17},
+            {0b110, fapi2::ENUM_ATTR_MEM_EFF_DRAM_ROW_BITS_NUM18},
+        };
+
+        const auto l_dimm = i_spd_data.get_dimm_target();
+
+        attr_integral_type l_value = 0;
+        FAPI_TRY(i_spd_data.row_address_bits(l_value))
+
+        // Map SPD value to desired setting
+        FAPI_TRY(lookup_table_check(l_dimm, DRAM_ADDR_ROW_MAP, SET_ROW_ADDR_BITS, l_value, o_setting));
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+};
+
 //
 // SI parameters
 //
@@ -1162,107 +1294,24 @@ struct attrEngineTraits<attr_si_engine_fields, SI_DRAM_DRV_IMP_DQ_DQS>
     static inline fapi2::ReturnCode get_value_to_set(const std::shared_ptr<efd::base_decoder>& i_efd_data,
             attr_integral_type& o_setting)
     {
-        return i_efd_data->dram_dic(o_setting);
-    }
-};
+        static const std::vector< std::pair<uint8_t, uint8_t> > DRAM_DIC_MAP =
+        {
+            // {key byte, capacity in GBs}
+            {0, fapi2::ENUM_ATTR_MEM_SI_DRAM_DRV_IMP_DQ_DQS_DISABLE},
+            {1, fapi2::ENUM_ATTR_MEM_SI_DRAM_DRV_IMP_DQ_DQS_OHM34},
+            {2, fapi2::ENUM_ATTR_MEM_SI_DRAM_DRV_IMP_DQ_DQS_OHM48},
+        };
 
-///
-/// @brief Traits for attr_engine
-/// @class attrEngineTraits
-/// @note attr_si_engine_fields, SI_VREF_DQ_TRAIN_RANGE specialization
-///
-template<>
-struct attrEngineTraits<attr_si_engine_fields, SI_VREF_DQ_TRAIN_RANGE>
-{
-    using attr_type = fapi2::ATTR_MEM_SI_VREF_DQ_TRAIN_RANGE_Type;
-    using attr_integral_type = std::remove_all_extents<attr_type>::type;
-    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_SI_VREF_DQ_TRAIN_RANGE_TargetType;
-    static constexpr generic_ffdc_codes FFDC_CODE = SET_SI_VREF_DQ_TRAIN_RANGE;
+        const auto l_ocmb = i_efd_data->get_ocmb_target();
 
-    ///
-    /// @brief attribute getter
-    /// @param[in] i_target the fapi2 target
-    /// @param[out] o_setting array to populate
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static inline fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-            attr_type& o_setting)
-    {
-        return mss::attr::get_si_vref_dq_train_range(i_target, o_setting);
-    }
+        attr_integral_type l_dram_dic = 0;
+        FAPI_TRY(i_efd_data->dram_dic(l_dram_dic))
 
-    ///
-    /// @brief attribute setter
-    /// @param[in] i_target the fapi2 target
-    /// @param[in] i_setting array to set
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static inline fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-            attr_type& i_setting)
-    {
-        return mss::attr::set_si_vref_dq_train_range(i_target, i_setting);
-    }
+        // Map SPD value to desired setting
+        FAPI_TRY(lookup_table_check(l_ocmb, DRAM_DIC_MAP, SET_SI_DRAM_DRV_IMP_DQ_DQS, l_dram_dic, o_setting));
 
-    ///
-    /// @brief Computes setting for attribute
-    /// @param[in] i_efd_data EFD data
-    /// @param[out] o_setting value we want to set attr with
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static inline fapi2::ReturnCode get_value_to_set(const std::shared_ptr<efd::base_decoder>& i_efd_data,
-            attr_integral_type& o_setting)
-    {
-        return i_efd_data->wr_vref_dq_range(o_setting);
-    }
-};
-
-///
-/// @brief Traits for attr_engine
-/// @class attrEngineTraits
-/// @note attr_si_engine_fields, SI_VREF_DQ_TRAIN_VALUE specialization
-///
-template<>
-struct attrEngineTraits<attr_si_engine_fields, SI_VREF_DQ_TRAIN_VALUE>
-{
-    using attr_type = fapi2::ATTR_MEM_SI_VREF_DQ_TRAIN_VALUE_Type;
-    using attr_integral_type = std::remove_all_extents<attr_type>::type;
-    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_SI_VREF_DQ_TRAIN_VALUE_TargetType;
-    static constexpr generic_ffdc_codes FFDC_CODE = SET_SI_VREF_DQ_TRAIN_VALUE;
-
-    ///
-    /// @brief attribute getter
-    /// @param[in] i_target the fapi2 target
-    /// @param[out] o_setting array to populate
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static inline fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-            attr_type& o_setting)
-    {
-        return mss::attr::get_si_vref_dq_train_value(i_target, o_setting);
-    }
-
-    ///
-    /// @brief attribute setter
-    /// @param[in] i_target the fapi2 target
-    /// @param[out] o_setting array to populate
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static inline fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-            attr_type& o_setting)
-    {
-        return mss::attr::set_si_vref_dq_train_value(i_target, o_setting);
-    }
-
-    ///
-    /// @brief Computes setting for attribute
-    /// @param[in] i_efd_data EFD data
-    /// @param[out] o_setting value we want to set attr with
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static inline fapi2::ReturnCode get_value_to_set(const std::shared_ptr<efd::base_decoder>& i_efd_data,
-            attr_integral_type& o_setting)
-    {
-        return i_efd_data->wr_vref_dq_value(o_setting);
+    fapi_try_exit:
+        return fapi2::current_err;
     }
 };
 
@@ -1622,6 +1671,78 @@ struct attrEngineTraits<attr_engine_derived_fields, MEM_DIMM_SIZE>
         FAPI_DBG("DIMM size = %d => (%d * %d * %d) / (8 * %d)",
                  o_setting, l_dram_density, l_bus_width, l_logical_rank_per_dimm, l_dram_width);
 
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+};
+
+///
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @note attr_engine_derived_fields, HEIGHT_3DS specialization
+///
+template<>
+struct attrEngineTraits<attr_engine_derived_fields, HEIGHT_3DS>
+{
+    using attr_type = fapi2::ATTR_MEM_3DS_HEIGHT_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_3DS_HEIGHT_TargetType;
+    static constexpr generic_ffdc_codes FFDC_CODE = SET_3DS_HEIGHT;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_3ds_height(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_3ds_height(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_spd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_value_to_set(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+            attr_integral_type& o_setting)
+    {
+        uint8_t l_master_ranks_per_dimm = 0;
+        uint8_t l_logical_ranks_per_dimm = 0;
+
+        FAPI_TRY(mss::attr::get_num_master_ranks_per_dimm(i_target, l_master_ranks_per_dimm));
+        FAPI_TRY(mss::attr::get_logical_ranks_per_dimm(i_target, l_logical_ranks_per_dimm));
+        {
+            uint16_t l_result = l_logical_ranks_per_dimm / l_master_ranks_per_dimm;
+
+            static const std::vector< std::pair<uint16_t, uint16_t> > HEIGHT_3DS_MAP =
+            {
+                // {key byte, device width (bits)}
+                {1, fapi2::ENUM_ATTR_MEM_3DS_HEIGHT_PLANAR},
+                {2, fapi2::ENUM_ATTR_MEM_3DS_HEIGHT_H2},
+                {4, fapi2::ENUM_ATTR_MEM_3DS_HEIGHT_H4},
+                {8, fapi2::ENUM_ATTR_MEM_3DS_HEIGHT_H8},
+                // All others reserved
+            };
+
+            // Map SPD value to desired setting
+            FAPI_TRY(lookup_table_check(i_target, HEIGHT_3DS_MAP, mss::SET_3DS_HEIGHT, l_result, o_setting));
+        }
     fapi_try_exit:
         return fapi2::current_err;
     }

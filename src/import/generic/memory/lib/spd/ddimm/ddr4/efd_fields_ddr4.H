@@ -244,16 +244,16 @@ class fields<mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>
             PHY_EQUALIZATION_LEN = 2,
 
             // Byte 44: Initial WR VREF DQ setting
-            WR_VREF_DQ_BYTE = 44,
+            INIT_VREF_DQ_BYTE = 44,
             WR_VREF_DQ_RANGE_START = 1,
             WR_VREF_DQ_RANGE_LEN = 1,
             WR_VREF_DQ_VALUE_START = 2,
             WR_VREF_DQ_VALUE_LEN = 6,
 
             // Byte 45: Host RD VREF DQ
-            RD_VREF_DQ_BYTE = 45,
-            PHY_VREF_PERCENT_START = 1,
-            PHY_VREF_PERCENT_LEN = 7,
+            INIT_PHY_VREF_BYTE = 45,
+            INIT_PHY_VREF_START = 1,
+            INIT_PHY_VREF_LEN = 7,
 
             // Byte 46: ODT WR Map CS Byte1
             ODT_WR_MAP1_BYTE = 46,
@@ -554,12 +554,12 @@ class fields<mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>
         // Byte 43: PHY Equalization
         static constexpr field_t PHY_EQUALIZATION{PHY_EQUALIZATION_BYTE, PHY_EQUALIZATION_START, PHY_EQUALIZATION_LEN};
 
-        // Byte 44: Initial WR VREF DQ setting
-        static constexpr field_t WR_VREF_DQ_RANGE{WR_VREF_DQ_BYTE, WR_VREF_DQ_RANGE_START, WR_VREF_DQ_RANGE_LEN};
-        static constexpr field_t WR_VREF_DQ_VALUE{WR_VREF_DQ_BYTE, WR_VREF_DQ_VALUE_START, WR_VREF_DQ_VALUE_LEN};
+        // Byte 44: Initial VREF DQ setting
+        static constexpr field_t WR_VREF_DQ_RANGE{INIT_VREF_DQ_BYTE, WR_VREF_DQ_RANGE_START, WR_VREF_DQ_RANGE_LEN};
+        static constexpr field_t WR_VREF_DQ_VALUE{INIT_VREF_DQ_BYTE, WR_VREF_DQ_VALUE_START, WR_VREF_DQ_VALUE_LEN};
 
-        // Byte 45: Host RD VREF DQ
-        static constexpr field_t PHY_VREF_PERCENT{RD_VREF_DQ_BYTE, PHY_VREF_PERCENT_START, PHY_VREF_PERCENT_LEN};
+        // Byte 45: Initial PHY VREF setting
+        static constexpr field_t INIT_PHY_VREF{INIT_PHY_VREF_BYTE, INIT_PHY_VREF_START, INIT_PHY_VREF_LEN};
 
         // Byte 46: ODT WR Map CS Byte1
         static constexpr field_t ODT_WR_MAP_RANK3{ODT_WR_MAP1_BYTE, ODT_WR_MAP_RANK3_START, ODT_WR_MAP_RANK3_LEN};

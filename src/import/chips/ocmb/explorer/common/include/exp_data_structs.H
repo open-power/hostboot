@@ -75,7 +75,7 @@ enum exp_struct_sizes
 /// @brief The host command structure
 /// @note The HOST uses 64 Byte Command Information Unit (IU) for sending commands to Firmware
 ///
-typedef struct
+typedef struct __attribute__((packed))
 {
     // Command Header
     uint8_t  cmd_id;                          // Command type
@@ -88,14 +88,15 @@ typedef struct
     uint32_t padding[CMD_PADDING_SIZE];        // Fill up to the size of one cache line
     uint8_t  command_argument[ARGUMENT_SIZE]; // Additional parameters associated with the command
     uint32_t cmd_header_crc;                  // CRC of 64 bytes of command header
-} host_fw_command_struct;
+}
+host_fw_command_struct;
 
 ///
 /// @class host_fw_response_struct
 /// @brief The firmware response structure
 /// @note The Firmware uses 64 Byte Response Information Unit (IU) for sending responses to HOST
 ///
-typedef struct
+typedef struct __attribute__((packed))
 {
     // Response Header
     uint8_t  response_id;                      // Response ID - same as Command ID
@@ -107,7 +108,8 @@ typedef struct
     uint32_t padding[RSP_PADDING_SIZE];         // Fill up to the size of one cache line
     uint8_t  response_argument[ARGUMENT_SIZE]; // Additional parameters associated with the response
     uint32_t response_header_crc;              // CRC of 64 bytes of reponse header
-} host_fw_response_struct;
+}
+host_fw_response_struct;
 
 
 ///
@@ -115,7 +117,7 @@ typedef struct
 /// @brief PHY initialization parameters
 /// @note PHY FW module requires certain parameters from HOST software
 ///
-typedef struct user_input_msdg
+typedef struct __attribute__((packed)) user_input_msdg
 {
     uint32_t version_number;
 
@@ -166,7 +168,7 @@ typedef struct user_input_msdg
     // 0 = No Address Mirror.
     uint16_t AddrMirror;
 
-    // DRAM Column Addr Width (Valid value: 5,6,7,10)
+    // DRAM Column Addr Width (Valid value: 10)
     uint16_t ColumnAddrWidth;
 
     // DRAM Row Addr Width (Valid value: 14,15,16,17,18)
@@ -595,7 +597,7 @@ typedef struct user_input_msdg
 /// @brief The sensor cache structure
 /// @note The data in the sensor cache is returned in 2 32-byte packets
 ///
-typedef struct
+typedef struct __attribute__((packed))
 {
     /*
      * Packet 0
@@ -636,14 +638,15 @@ typedef struct
     uint8_t initial_packet1;         // initial_packet1[0] '1' on first packet1 return, otherwise '0'
     //                               // initial_packet1[1:7] Reserved
     uint8_t reserved1[SENSOR_CACHE_PADDING_SIZE_1];
-} sensor_cache_struct;
+}
+sensor_cache_struct;
 
 
 ///
 /// @class user_response_timing_msdg_t
 /// @brief Contains the command to command timing training results
 ///
-typedef struct user_response_timing_msdg
+typedef struct __attribute__((packed)) user_response_timing_msdg
 {
     uint16_t DFIMRL_DDRCLK_trained; // Training result of DFIMRL_DDRCLK parameter (by mrlTraining step).
     // DFIMRL_DDRCLK: Max Read Latency counted by DDR Clock. dfi_rddata is returned (14 + DFIMRL_DDRCLK) cycles after dfi_rddata_en is asserted.
@@ -667,7 +670,7 @@ typedef struct user_response_timing_msdg
 /// @class user_response_error_msdg
 /// @brief Contains the lane failure results
 ///
-typedef struct user_response_error_msdg
+typedef struct __attribute__((packed)) user_response_error_msdg
 {
     uint16_t Failure_Lane[TRAINING_RESPONSE_NUM_LANES]; // error code of DQ[n] on Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
     //Failure status of training. Each uint16_t field contains the training error code of all 4 ranks on 1 DQ lane.
@@ -689,7 +692,7 @@ typedef struct user_response_error_msdg
 /// @class user_response_mrs_msdg_t
 /// @brief MRS response structure
 ///
-typedef struct user_response_mrs_msdg_t
+typedef struct __attribute__((packed)) user_response_mrs_msdg_t
 {
     uint16_t MR0;               // Value of DDR mode register MR0 for all ranks, all devices
     uint16_t MR1[TRAINING_RESPONSE_NUM_RANKS];            // Value of DDR mode register MR1 for each rank (up to 4 ranks)
@@ -705,7 +708,7 @@ typedef struct user_response_mrs_msdg_t
 /// @class user_response_rc_msdg_t
 /// @brief RCD response structure
 ///
-typedef struct user_response_rc_msdg_t
+typedef struct __attribute__((packed)) user_response_rc_msdg_t
 {
     uint8_t   F0RC_D0[TRAINING_RESPONSE_NUM_RC];      // RCD control words for DIMM0; Invalid for UDIMM
     // F0RC_D0[15:0] BIT [3:0]: 4-bit value of F0RC00~F0RC0F
@@ -725,7 +728,7 @@ typedef struct user_response_rc_msdg_t
 /// @class user_response_msdg_t
 /// @brief Microchip response structure
 ///
-typedef struct user_response_msdg
+typedef struct __attribute__((packed)) user_response_msdg
 {
     uint32_t                        version_number;
     user_response_timing_msdg_t     tm_resp;

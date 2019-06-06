@@ -98,9 +98,11 @@ enum attr_eff_engine_fields
     DRAM_DENSITY = 3,
     PRIMARY_DIE_COUNT = 4,
     PRIM_STACK_TYPE = 5,
+    COLUMN_ADDR_BITS = 6,
+    ROW_ADDR_BITS = 7,
 
     // Dispatcher set to last enum value
-    ATTR_EFF_DISPATCHER = PRIM_STACK_TYPE,
+    ATTR_EFF_DISPATCHER = ROW_ADDR_BITS,
 };
 
 ///
@@ -127,11 +129,9 @@ enum attr_si_engine_fields
     SI_DRAM_PREAMBLE = 13,
     SI_MC_DRV_EQ_DQ_DQS = 14,
     SI_DRAM_DRV_IMP_DQ_DQS = 15,
-    SI_VREF_DQ_TRAIN_RANGE = 16,
-    SI_VREF_DQ_TRAIN_VALUE = 17,
-    SI_ODT_WR = 18,
-    SI_ODT_RD = 19,
-    SI_GEARDOWN_MODE = 20,
+    SI_ODT_WR = 16,
+    SI_ODT_RD = 17,
+    SI_GEARDOWN_MODE = 18,
 
     // Dispatcher set to last enum value
     ATTR_SI_DISPATCHER = SI_GEARDOWN_MODE,
@@ -154,7 +154,8 @@ enum attr_engine_derived_fields
 
     // Attrs to set
     MEM_DIMM_SIZE = 1,
-    LOGICAL_RANKS = 2,
+    HEIGHT_3DS = 2,         // HEIGHT_3DS must be calculated after LOGICAL_RANKS
+    LOGICAL_RANKS = 3,
 
     // Dispatcher set to last enum value
     ATTR_DERIVED_DISPATCHER = LOGICAL_RANKS,

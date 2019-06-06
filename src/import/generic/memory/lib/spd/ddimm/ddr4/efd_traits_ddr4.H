@@ -784,7 +784,7 @@ class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUS
 /// @note valid for all revs
 ///
 template< mss::spd::rev R >
-class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PHY_VREF_PERCENT, R >
+class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::INIT_PHY_VREF, R >
 {
     public:
 

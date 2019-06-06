@@ -489,6 +489,19 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         }
 
         ///
+        /// @brief Decodes Host RD VREF DQ -> INIT_PHY_VREF
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode init_phy_vref(uint8_t& o_output) const override
+        {
+            FAPI_TRY( (reader<fields_t::INIT_PHY_VREF, R>(iv_target, iv_data, o_output)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
         /// @brief Decodes Initial WR VREF DQ setting -> WR_VREF_DQ_RANGE
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
@@ -496,19 +509,6 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         virtual fapi2::ReturnCode wr_vref_dq_range(uint8_t& o_output) const override
         {
             FAPI_TRY(( reader<fields_t::WR_VREF_DQ_RANGE, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief Decodes Host RD VREF DQ -> PHY_VREF_PERCENT
-        /// @param[out] o_output encoding from SPD
-        /// @return FAPI2_RC_SUCCESS if okay
-        ///
-        virtual fapi2::ReturnCode phy_vref_percent(uint8_t& o_output) const
-        {
-            FAPI_TRY( (reader<fields_t::PHY_VREF_PERCENT, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;

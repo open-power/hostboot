@@ -102,26 +102,42 @@ fapi2::ReturnCode read_training_response(const fapi2::Target<fapi2::TARGET_TYPE_
     // True if we pass
     // We assert at the end to avoid LOTS of fapi asserts
     uint32_t l_idx = 0;
-    bool l_pass = readLE(i_data, l_idx, o_resp.version_number);
+
+    uint32_t l_version_number = 0;
+    bool l_pass = readLE(i_data, l_idx, l_version_number);
+    o_resp.version_number = l_version_number;
+
+    uint16_t l_DFIMRL_DDRCLK_trained = 0;
 
     // Reads in the timing portion of the training response
-    l_pass &= readLE(i_data, l_idx, o_resp.tm_resp.DFIMRL_DDRCLK_trained);
+    l_pass &= readLE(i_data, l_idx, l_DFIMRL_DDRCLK_trained);
     l_pass &= readLEArray(i_data, TIMING_RESPONSE_2D_ARRAY_SIZE, l_idx, &o_resp.tm_resp.CDD_RR[0][0]);
     l_pass &= readLEArray(i_data, TIMING_RESPONSE_2D_ARRAY_SIZE, l_idx, &o_resp.tm_resp.CDD_WW[0][0]);
     l_pass &= readLEArray(i_data, TIMING_RESPONSE_2D_ARRAY_SIZE, l_idx, &o_resp.tm_resp.CDD_RW[0][0]);
     l_pass &= readLEArray(i_data, TIMING_RESPONSE_2D_ARRAY_SIZE, l_idx, &o_resp.tm_resp.CDD_WR[0][0]);
 
+    // Write to user_response_msdg
+    o_resp.tm_resp.DFIMRL_DDRCLK_trained = l_DFIMRL_DDRCLK_trained;
+
     // Error response
     l_pass &= readLEArray(i_data, 80, l_idx, o_resp.err_resp.Failure_Lane);
 
+    uint16_t l_MR0 = 0;
+    uint16_t l_MR3 = 0;
+    uint16_t l_MR4 = 0;
+
     // MRS response
-    l_pass &= readLE(i_data, l_idx, o_resp.mrs_resp.MR0);
+    l_pass &= readLE(i_data, l_idx, l_MR0);
     l_pass &= readLEArray(i_data, TRAINING_RESPONSE_NUM_RANKS, l_idx, o_resp.mrs_resp.MR1);
     l_pass &= readLEArray(i_data, TRAINING_RESPONSE_NUM_RANKS, l_idx, o_resp.mrs_resp.MR2);
-    l_pass &= readLE(i_data, l_idx, o_resp.mrs_resp.MR3);
-    l_pass &= readLE(i_data, l_idx, o_resp.mrs_resp.MR4);
+    l_pass &= readLE(i_data, l_idx, l_MR3);
+    l_pass &= readLE(i_data, l_idx, l_MR4);
     l_pass &= readLEArray(i_data, TRAINING_RESPONSE_NUM_RANKS, l_idx, o_resp.mrs_resp.MR5);
     l_pass &= readLEArray(i_data, TRAINING_RESPONSE_MR6_SIZE, l_idx, &o_resp.mrs_resp.MR6[0][0]);
+
+    o_resp.mrs_resp.MR0 = l_MR0;
+    o_resp.mrs_resp.MR3 = l_MR3;
+    o_resp.mrs_resp.MR4 = l_MR4;
 
     // Register Control Word (RCW) response
     l_pass &= readLEArray(i_data, TRAINING_RESPONSE_NUM_RC, l_idx, o_resp.rc_resp.F0RC_D0);

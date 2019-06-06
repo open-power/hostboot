@@ -492,7 +492,7 @@ class base_decoder
         }
 
         ///
-        /// @brief Decodes Initial WR VREF DQ setting -> WR_VREF_DQ_RANGE
+        /// @brief Decodes Initial VREF DQ setting -> WR_VREF_DQ_RANGE
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
@@ -503,22 +503,22 @@ class base_decoder
         }
 
         ///
-        /// @brief Decodes Host RD VREF DQ -> PHY_VREF_PERCENT
+        /// @brief Decodes Initial VREF DQ setting -> WR_VREF_DQ_VALUE
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode phy_vref_percent(uint8_t& o_output) const
+        virtual fapi2::ReturnCode wr_vref_dq_value(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
         ///
-        /// @brief Decodes Initial WR VREF DQ setting -> WR_VREF_DQ_VALUE
+        /// @brief Decodes Initial PHY VREF -> INIT_PHY_VREF
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode wr_vref_dq_value(uint8_t& o_output) const
+        virtual fapi2::ReturnCode init_phy_vref(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;

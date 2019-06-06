@@ -106,7 +106,7 @@
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
-        <enum>OHM34 = 34, OHM48 = 48</enum>
+        <enum>DISABLE = 0, OHM34 = 34, OHM48 = 48</enum>
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_dram_drv_imp_dq_dqs</mssAccessorName>
         <array>2 4</array>
@@ -176,35 +176,6 @@
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_dram_rtt_wr</mssAccessorName>
         <array>2 4</array>
-    </attribute>
-
-    <attribute>
-      <id>ATTR_MEM_SI_VREF_DQ_TRAIN_VALUE</id>
-      <targetType>TARGET_TYPE_MEM_PORT</targetType>
-      <description>
-        ARRAY[DIMM][RANK]
-        vrefdq_train value. This is for DDR4 MRS6.
-      </description>
-      <initToZero></initToZero>
-      <valueType>uint8</valueType>
-      <writeable/>
-      <array>2 4</array>
-      <mssAccessorName>si_vref_dq_train_value</mssAccessorName>
-    </attribute>
-
-    <attribute>
-      <id>ATTR_MEM_SI_VREF_DQ_TRAIN_RANGE</id>
-      <targetType>TARGET_TYPE_MEM_PORT</targetType>
-      <description>
-        ARRAY[DIMM][RANK]
-        vrefdq_train range. This is for DDR4 MRS6.
-      </description>
-      <initToZero></initToZero>
-      <valueType>uint8</valueType>
-      <enum>RANGE1 = 0, RANGE2 = 1</enum>
-      <writeable/>
-      <array>2 4</array>
-      <mssAccessorName>si_vref_dq_train_range</mssAccessorName>
     </attribute>
 
     <attribute>

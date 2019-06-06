@@ -457,19 +457,36 @@ fapi2::ReturnCode host_fw_response_struct_from_little_endian(std::vector<uint8_t
         host_fw_response_struct& o_response)
 {
     uint32_t l_idx = 0;
+
+    uint8_t l_response_id = 0;
+    uint8_t l_response_flags = 0;
+    uint16_t l_request_identifier = 0;
+    uint32_t l_response_length = 0;
+    uint32_t l_response_crc = 0;
+    uint32_t l_host_work_area = 0;
+    uint32_t l_response_header_crc = 0;
+
     FAPI_TRY(correctMMIOEndianForStruct(i_data));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, o_response.response_id));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, o_response.response_flags));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, o_response.request_identifier));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, o_response.response_length));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, o_response.response_crc));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, o_response.host_work_area));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, l_response_id));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, l_response_flags));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, l_request_identifier));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, l_response_length));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, l_response_crc));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, l_host_work_area));
     FAPI_TRY(readCrctEndianArray(i_data, RSP_PADDING_SIZE, l_idx, o_response.padding));
     FAPI_TRY(readCrctEndianArray(i_data, ARGUMENT_SIZE, l_idx, o_response.response_argument));
 
+    o_response.response_id = l_response_id;
+    o_response.response_flags = l_response_flags;
+    o_response.request_identifier = l_request_identifier;
+    o_response.response_length = l_response_length;
+    o_response.response_crc = l_response_crc;
+    o_response.host_work_area = l_host_work_area;
+
     o_crc = crc32_gen(i_data, l_idx);
 
-    FAPI_TRY(readCrctEndian(i_data, l_idx, o_response.response_header_crc));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, l_response_header_crc));
+    o_response.response_header_crc = l_response_header_crc;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -636,25 +653,58 @@ fapi_try_exit:
 fapi2::ReturnCode sensor_cache_struct_from_little_endian(std::vector<uint8_t>& i_data,
         sensor_cache_struct& o_data)
 {
+    // Local variables to avoid error in passing packed struct fields by reference
     uint32_t l_idx = 0;
+    uint16_t l_status = 0;
+    uint16_t l_ocmb_dts = 0;
+    uint16_t l_mem_dts0 = 0;
+    uint16_t l_mem_dts1 = 0;
+    uint32_t l_mba_reads = 0;
+    uint32_t l_mba_writes = 0;
+    uint32_t l_mba_activations = 0;
+    uint32_t l_mba_powerups = 0;
+    uint8_t l_self_timed_refresh = 0;
+    uint32_t l_frame_count = 0;
+    uint32_t l_mba_arrival_histo_base = 0;
+    uint32_t l_mba_arrival_histo_low = 0;
+    uint32_t l_mba_arrival_histo_med = 0;
+    uint32_t l_mba_arrival_histo_high = 0;
+    uint8_t l_initial_packet1 = 0;
 
     FAPI_TRY(correctMMIOEndianForStruct(i_data));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, o_data.status));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, o_data.ocmb_dts));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, o_data.mem_dts0));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, o_data.mem_dts1));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, o_data.mba_reads));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, o_data.mba_writes));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, o_data.mba_activations));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, o_data.mba_powerups));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, o_data.self_timed_refresh));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, l_status));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, l_ocmb_dts));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, l_mem_dts0));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, l_mem_dts1));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, l_mba_reads));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, l_mba_writes));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, l_mba_activations));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, l_mba_powerups));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, l_self_timed_refresh));
     FAPI_TRY(readCrctEndianArray(i_data, SENSOR_CACHE_PADDING_SIZE_0, l_idx, o_data.reserved0));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, o_data.frame_count));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, o_data.mba_arrival_histo_base));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, o_data.mba_arrival_histo_low));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, o_data.mba_arrival_histo_med));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, o_data.mba_arrival_histo_high));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, o_data.initial_packet1));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, l_frame_count));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, l_mba_arrival_histo_base));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, l_mba_arrival_histo_low));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, l_mba_arrival_histo_med));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, l_mba_arrival_histo_high));
+    FAPI_TRY(readCrctEndian(i_data, l_idx, l_initial_packet1));
+
+    o_data.frame_count = l_frame_count;
+    o_data.mba_arrival_histo_base = l_mba_arrival_histo_base;
+    o_data.mba_arrival_histo_low = l_mba_arrival_histo_low;
+    o_data.mba_arrival_histo_med = l_mba_arrival_histo_med;
+    o_data.mba_arrival_histo_high = l_mba_arrival_histo_high;
+    o_data.initial_packet1 = l_initial_packet1;
+    o_data.status = l_status;
+    o_data.ocmb_dts = l_ocmb_dts;
+    o_data.mem_dts0 = l_mem_dts0;
+    o_data.mem_dts1 = l_mem_dts1;
+    o_data.mba_reads = l_mba_reads;
+    o_data.mba_writes = l_mba_writes;
+    o_data.mba_activations = l_mba_activations;
+    o_data.mba_powerups = l_mba_powerups;
+    o_data.self_timed_refresh = l_self_timed_refresh;
+
     FAPI_TRY(readCrctEndianArray(i_data, SENSOR_CACHE_PADDING_SIZE_1, l_idx, o_data.reserved1));
 
 fapi_try_exit:

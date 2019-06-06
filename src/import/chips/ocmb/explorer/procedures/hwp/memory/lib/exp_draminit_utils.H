@@ -161,9 +161,9 @@ struct phy_params_t
     ///
     uint32_t iv_version_number;
     uint8_t iv_dimm_type[MAX_DIMM_PER_PORT];
-    uint16_t iv_chip_select;
+    uint8_t iv_chip_select[MAX_DIMM_PER_PORT];
     uint8_t iv_dram_data_width[MAX_DIMM_PER_PORT];
-    uint16_t iv_height_3DS;
+    uint16_t iv_height_3DS[MAX_DIMM_PER_PORT];
     uint16_t iv_dbyte_macro[MAX_DIMM_PER_PORT];
     uint32_t iv_nibble[MAX_DIMM_PER_PORT];
     uint8_t iv_addr_mirror[MAX_DIMM_PER_PORT];
@@ -194,8 +194,8 @@ struct phy_params_t
     uint8_t iv_dram_dic[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
     uint8_t iv_dram_preamble[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
     uint8_t iv_phy_equalization[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
-    uint8_t iv_init_vref_dq;
-    uint16_t iv_init_phy_vref;
+    uint8_t iv_init_vref_dq[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
+    uint8_t iv_init_phy_vref[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
     uint8_t iv_odt_wr_map_cs[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
     uint8_t iv_odt_rd_map_cs[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
     uint8_t iv_geardown_mode[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
@@ -244,9 +244,9 @@ class phy_params
             uint8_t l_master_ranks[MAX_DIMM_PER_PORT] = {};
             // Fetch attributes and populate the member variables
             FAPI_TRY(mss::attr::get_dimm_type(i_target, iv_params.iv_dimm_type));
-            FAPI_TRY(mss::attr::get_exp_cs_present(i_target, iv_params.iv_chip_select));
+            FAPI_TRY(mss::attr::get_dimm_ranks_configed(i_target, iv_params.iv_chip_select));
             FAPI_TRY(mss::attr::get_dram_width(i_target, iv_params.iv_dram_data_width));
-            FAPI_TRY(mss::attr::get_exp_3ds_height(i_target, iv_params.iv_height_3DS));
+            FAPI_TRY(mss::attr::get_3ds_height(i_target, iv_params.iv_height_3DS));
             FAPI_TRY(mss::attr::get_byte_enables(i_target, iv_params.iv_dbyte_macro));
             FAPI_TRY(mss::attr::get_nibble_enables(i_target, iv_params.iv_nibble));
             FAPI_TRY(mss::attr::get_exp_dram_address_mirroring(i_target, iv_params.iv_addr_mirror));
@@ -378,7 +378,14 @@ class phy_params
         ///
         fapi2::ReturnCode setup_CsPresent(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.CsPresent = iv_params.iv_chip_select;
+            fapi2::buffer<uint8_t> l_cs_present(iv_params.iv_chip_select[0]);
+
+            // Flip buffer (Needs to be right aligned, currently 0bXXXX0000)
+            l_cs_present.reverse();
+
+            // Now extend to 16 bits for phy_params struct
+            io_phy_params.CsPresent = static_cast<uint16_t>(l_cs_present);
+
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -428,21 +435,21 @@ class phy_params
         ///
         fapi2::ReturnCode setup_Height3DS(user_input_msdg& io_phy_params) const
         {
-            switch (iv_params.iv_height_3DS)
+            switch (iv_params.iv_height_3DS[0])
             {
-                case fapi2::ENUM_ATTR_MEM_EXP_3DS_HEIGHT_PLANAR:
+                case fapi2::ENUM_ATTR_MEM_3DS_HEIGHT_PLANAR:
                     io_phy_params.Height3DS = MSDG_PLANAR;
                     break;
 
-                case fapi2::ENUM_ATTR_MEM_EXP_3DS_HEIGHT_H2:
+                case fapi2::ENUM_ATTR_MEM_3DS_HEIGHT_H2:
                     io_phy_params.Height3DS = MSDG_H2;
                     break;
 
-                case fapi2::ENUM_ATTR_MEM_EXP_3DS_HEIGHT_H4:
+                case fapi2::ENUM_ATTR_MEM_3DS_HEIGHT_H4:
                     io_phy_params.Height3DS = MSDG_H4;
                     break;
 
-                case fapi2::ENUM_ATTR_MEM_EXP_3DS_HEIGHT_H8:
+                case fapi2::ENUM_ATTR_MEM_3DS_HEIGHT_H8:
                     io_phy_params.Height3DS = MSDG_H8;
                     break;
 
@@ -452,9 +459,9 @@ class phy_params
                                 fapi2::MSS_EXP_DRAMINIT_UNSUPPORTED_3DS_HEIGHT().
                                 set_OCMB_TARGET(l_ocmb).
                                 set_PORT(iv_target).
-                                set_HEIGHT(iv_params.iv_height_3DS),
+                                set_HEIGHT(iv_params.iv_height_3DS[0]),
                                 "%s 3DS Height is not a supported (%d)",
-                                mss::c_str(iv_target), iv_params.iv_height_3DS);
+                                mss::c_str(iv_target), iv_params.iv_height_3DS[0]);
                     break;
             }
 
@@ -604,7 +611,8 @@ class phy_params
         ///
         fapi2::ReturnCode set_Frequency(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.Frequency[0] = static_cast<uint16_t>(iv_params.iv_frequency);
+            // Divide by 2 to convert from DRAM freq to MEMCLK freq
+            io_phy_params.Frequency[0] = static_cast<uint16_t>(iv_params.iv_frequency / 2);
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -804,7 +812,7 @@ class phy_params
         ///
         fapi2::ReturnCode set_InitVrefDQ(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.InitVrefDQ[0] = iv_params.iv_init_vref_dq;
+            io_phy_params.InitVrefDQ[0] = iv_params.iv_init_vref_dq[0][0];
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -815,9 +823,7 @@ class phy_params
         ///
         fapi2::ReturnCode set_InitPhyVref(user_input_msdg& io_phy_params) const
         {
-            // Attr Vref = percentage of VDDQ, Receiver Vref = VDDQ*PhyVref[6:0]/128
-            // conversion is attr_value * 128 / 100
-            io_phy_params.InitPhyVref[0] = iv_params.iv_init_phy_vref * 128 / 100;
+            io_phy_params.InitPhyVref[0] = iv_params.iv_init_phy_vref[0][0];
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
