@@ -57,6 +57,7 @@ enum eepromModuleId
     EEPROM_CACHE_EEPROM                     = 0x07,
     EEPROM_CLEAR_EECACHE                    = 0x08,
     EEPROM_CACHE_PERFORM_OP                 = 0x09,
+    EEPROM_INVALIDATE_CACHE                 = 0x0A,
 };
 
 /**
@@ -87,6 +88,10 @@ enum eepromReasonCode
     EEPROM_NEW_DEVICE_DETECTED              = EEPROM_COMP_ID | 0x0E,   // While looking up a part, found that current EEPROM size does not
                                                                        // match what we have seen in previous IPLs indicating a new part has
                                                                        // been installed on the system.
+    EEPROM_CACHE_NOT_FOUND_IN_MAP           = EEPROM_COMP_ID | 0x0F,   // An entry we thought would be in the global map that keeps track of
+                                                                       // what eeproms have been cached was not found
+    EEPROM_CACHE_NOT_FOUND_IN_PNOR           = EEPROM_COMP_ID | 0x10,  // An entry we thought would be in the the EECACHE section of PNOR seems
+                                                                       // to be missing
 };
 
 enum UserDetailsTypes

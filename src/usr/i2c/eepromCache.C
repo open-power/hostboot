@@ -64,17 +64,18 @@ uint64_t g_eecachePnorSize  = 0;
 // Global map which is used as a way to quickly look up the virtual address
 // of a given eeprom's cached data in EECACHE section
 // Key   = eepromRecordHeader with unique info filled out
-// Value = virtual address pointing to the cached eeprom data in pnor
-std::map<eepromRecordHeader, uint64_t> g_cachedEeproms;
+// Value = A struct of 2 virtual addresses , one points to header address
+//         and other points to the location of the cache
+std::map<eepromRecordHeader, RecordAddresses_t> g_cachedEeproms;
 
 // Any time we access either any of the global variables defined above we want
 // to wrap the call in this mutex to avoid multi-threading issues
 mutex_t g_eecacheMutex = MUTEX_INITIALIZER;
 
-uint64_t lookupEepromAddr(const eepromRecordHeader& i_eepromRecordHeader)
+uint64_t lookupEepromCacheAddr(const eepromRecordHeader& i_eepromRecordHeader)
 {
     uint64_t l_vaddr = 0;
-    std::map<eepromRecordHeader, uint64_t>::iterator l_it;
+    std::map<eepromRecordHeader, RecordAddresses_t>::iterator l_it;
 
     // Wrap lookup in mutex because reads are not thread safe
     mutex_lock(&g_eecacheMutex);
@@ -83,12 +84,50 @@ uint64_t lookupEepromAddr(const eepromRecordHeader& i_eepromRecordHeader)
 
     if(l_it != g_cachedEeproms.end())
     {
-        l_vaddr = l_it->second;
+        l_vaddr = l_it->second.cache_entry_address;
     }
 
     if(l_vaddr == 0)
     {
-        TRACSSCOMP( g_trac_eeprom, "lookupEepromAddr() failed to find I2CM Huid: 0x%.08X, Port: 0x%.02X, Engine: 0x%.02X, Dev Addr: 0x%.02X, Mux Select: 0x%.02X, Size: 0x%.08X in g_cachedEeproms",
+        TRACFCOMP( g_trac_eeprom,
+                   "lookupEepromCacheAddr() failed to find"
+                    " I2CM Huid: 0x%.08X, Port: 0x%.02X,"
+                    " Engine: 0x%.02X, Dev Addr: 0x%.02X,"
+                    " Mux Select: 0x%.02X, Size: 0x%.08X"
+                    " in g_cachedEeproms",
+                    i_eepromRecordHeader.completeRecord.i2c_master_huid,
+                    i_eepromRecordHeader.completeRecord.port,
+                    i_eepromRecordHeader.completeRecord.engine,
+                    i_eepromRecordHeader.completeRecord.devAddr,
+                    i_eepromRecordHeader.completeRecord.mux_select,
+                    i_eepromRecordHeader.completeRecord.cache_copy_size);
+    }
+    return l_vaddr;
+}
+
+uint64_t lookupEepromHeaderAddr(const eepromRecordHeader& i_eepromRecordHeader)
+{
+    uint64_t l_vaddr = 0;
+    std::map<eepromRecordHeader, RecordAddresses_t>::iterator l_it;
+
+    // Wrap lookup in mutex because reads are not thread safe
+    mutex_lock(&g_eecacheMutex);
+    l_it = g_cachedEeproms.find(i_eepromRecordHeader);
+
+    if(l_it != g_cachedEeproms.end())
+    {
+        l_vaddr = l_it->second.header_entry_address;
+    }
+    mutex_unlock(&g_eecacheMutex);
+
+    if(l_vaddr == 0)
+    {
+        TRACFCOMP( g_trac_eeprom,
+                   "lookupEepromHeaderAddr() failed to find"
+                   " I2CM Huid: 0x%.08X, Port: 0x%.02X,"
+                   " Engine: 0x%.02X, Dev Addr: 0x%.02X,"
+                   " Mux Select: 0x%.02X, Size: 0x%.08X"
+                    "in g_cachedEeproms",
                     i_eepromRecordHeader.completeRecord.i2c_master_huid,
                     i_eepromRecordHeader.completeRecord.port,
                     i_eepromRecordHeader.completeRecord.engine,
@@ -199,18 +238,66 @@ errlHndl_t buildEepromRecordHeader(TARGETING::Target * i_target,
 // Do NOT allow adding/removing eeproms to cache during RT
 #ifndef __HOSTBOOT_RUNTIME
 
-bool addEepromToCachedList(const eepromRecordHeader & i_eepromRecordHeader)
+void printTableOfContents(void)
+{
+    eecacheSectionHeader * l_eecacheSectionHeaderPtr =
+              reinterpret_cast<eecacheSectionHeader*>(g_eecachePnorVaddr);
+
+    TRACFCOMP( g_trac_eeprom,
+               "printTableOfContents(): Version = 0x%.02X"
+               " End of Cache = 0x.08X",
+               l_eecacheSectionHeaderPtr->version,
+               l_eecacheSectionHeaderPtr->end_of_cache);
+
+    for(uint8_t i = 0; i < MAX_EEPROMS_VERSION_1; i++)
+    {
+        eepromRecordHeader l_currentRecordHeader =
+              l_eecacheSectionHeaderPtr->recordHeaders[i];
+
+        if( l_currentRecordHeader.completeRecord.internal_offset !=
+            UNSET_INTERNAL_OFFSET_VALUE)
+        {
+            TRACFCOMP( g_trac_eeprom,
+                       "printTableOfContents(): I2CM Huid: 0x%.08X, Port: 0x%.02X,"
+                       " Engine: 0x%.02X, Dev Addr: 0x%.02X,"
+                       " Mux Select: 0x%.02X, Size: 0x%.08X",
+                       l_currentRecordHeader.completeRecord.i2c_master_huid,
+                       l_currentRecordHeader.completeRecord.port,
+                       l_currentRecordHeader.completeRecord.engine,
+                       l_currentRecordHeader.completeRecord.devAddr,
+                       l_currentRecordHeader.completeRecord.mux_select,
+                       l_currentRecordHeader.completeRecord.cache_copy_size);
+
+            TRACFCOMP( g_trac_eeprom,
+                       "                          "
+                       "Internal Offset: 0x%.08X, Cache Valid: 0x%.02X",
+                       l_currentRecordHeader.completeRecord.internal_offset,
+                       l_currentRecordHeader.completeRecord.cached_copy_valid);
+        }
+    }
+
+}
+
+bool addEepromToCachedList(const eepromRecordHeader & i_eepromRecordHeader,
+                           const uint64_t i_recordHeaderVaddr)
 {
     bool l_matchFound = true;
-    std::map<eepromRecordHeader, uint64_t>::iterator it;
 
     // Map accesses are not thread safe, make sure this is always wrapped in mutex
     mutex_lock(&g_eecacheMutex);
 
     if(g_cachedEeproms.find(i_eepromRecordHeader) == g_cachedEeproms.end())
     {
-        g_cachedEeproms[i_eepromRecordHeader] = g_eecachePnorVaddr + i_eepromRecordHeader.completeRecord.internal_offset;
-        TRACSSCOMP( g_trac_eeprom, "addEepromToCachedList() Adding I2CM Huid: 0x%.08X, Port: 0x%.02X, Engine: 0x%.02X, Dev Addr: 0x%.02X, Mux Select: 0x%.02X, Size: 0x%.08X to g_cachedEeproms",
+        g_cachedEeproms[i_eepromRecordHeader].cache_entry_address =
+              g_eecachePnorVaddr + i_eepromRecordHeader.completeRecord.internal_offset;
+
+        g_cachedEeproms[i_eepromRecordHeader].header_entry_address =
+              i_recordHeaderVaddr;
+
+        TRACSSCOMP( g_trac_eeprom,
+                    "addEepromToCachedList() Adding I2CM Huid: 0x%.08X, Port: 0x%.02X,"
+                    " Engine: 0x%.02X, Dev Addr: 0x%.02X, Mux Select: 0x%.02X,"
+                    " Size: 0x%.08X to g_cachedEeproms",
                     i_eepromRecordHeader.completeRecord.i2c_master_huid,
                     i_eepromRecordHeader.completeRecord.port,
                     i_eepromRecordHeader.completeRecord.engine,
@@ -433,7 +520,11 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
             }
         }
 
-        if(!addEepromToCachedList(l_eepromRecordHeader))
+        // pass the record we have been building up (l_eepromRecordHeader)
+        // and the virtual address of this eeprom's record entry in the
+        // EECACHE table of contents as a uint64.
+        if(!addEepromToCachedList(l_eepromRecordHeader,
+                                  reinterpret_cast<uint64_t>(l_recordHeaderToUpdate)))
         {
             TRACSSCOMP( g_trac_eeprom,
                       "cacheEeprom() Eeprom w/ Role %d, HUID 0x.%08X added to cached list",
@@ -445,7 +536,6 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
                       "cacheEeprom() Eeprom w/ Role %d, HUID 0x.%08X already in cached list",
                       i_eepromType , TARGETING::get_huid(i_target));
         }
-
 
         // Only check if the cache is in sync with HARDWARE if there is an
         // existing EECACHE section. Otherwise, the code after this logic will
@@ -517,9 +607,12 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
                 // the replug behavior where a tester can remove the part, boot, then plug in the
                 // same part and boot again fresh.
                 void * l_internalSectionAddr =
-                    reinterpret_cast<uint8_t *>(l_eecacheSectionHeaderPtr) + l_eepromRecordHeader.completeRecord.internal_offset;
+                    reinterpret_cast<uint8_t *>(l_eecacheSectionHeaderPtr) +
+                    l_eepromRecordHeader.completeRecord.internal_offset;
+
                  memset( l_internalSectionAddr, 0xFF ,
                         (l_recordHeaderToUpdate->completeRecord.cache_copy_size * KILOBYTE));
+
                  l_updateContents = false;
             }
 
@@ -551,7 +644,8 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
             l_tmpBuffer = malloc(l_eepromLen);
 
             void * l_internalSectionAddr =
-                reinterpret_cast<uint8_t *>(l_eecacheSectionHeaderPtr) + l_eepromRecordHeader.completeRecord.internal_offset;
+                reinterpret_cast<uint8_t *>(l_eecacheSectionHeaderPtr) +
+                l_eepromRecordHeader.completeRecord.internal_offset;
 
             TRACSSCOMP( g_trac_eeprom, "cacheEeprom() passing the following into deviceOp eeprom address : huid 0x%.08X   length 0x%.08X  vaddr %p" ,
                         get_huid(i_target), l_eepromLen, l_internalSectionAddr);
@@ -732,6 +826,144 @@ DEVICE_REGISTER_ROUTE( DeviceFW::READ,
                        TARGETING::TYPE_DIMM,
                        genericI2CEepromCache );
 
+errlHndl_t setIsValidCacheEntry(const TARGETING::Target * i_target,
+                                const EEPROM_ROLE &i_eepromRole,
+                                bool i_isValid)
+{
+    errlHndl_t l_errl = nullptr;
+    eepromRecordHeader l_eepromRecordHeader;
+    eepromRecordHeader * l_eepromRecordHeaderToUpdate;
+    std::map<eepromRecordHeader, RecordAddresses_t>::iterator l_headerMapIterator;
+
+    eeprom_addr_t l_eepromInfo;
+    l_eepromInfo.eepromRole = i_eepromRole;
+
+    do{
+
+        TRACFCOMP( g_trac_eeprom, ENTER_MRK"setIsValidCacheEntry() "
+                    "Target HUID 0x%.08X  Eeprom Role = %d  Enter",
+                    TARGETING::get_huid(i_target), l_eepromInfo.eepromRole);
+
+        // Take the input paramters and use them to build a eeprom record header we can search with
+        l_errl = buildEepromRecordHeader(const_cast<TARGETING::Target *>(i_target),
+                                         l_eepromInfo,
+                                         l_eepromRecordHeader);
+
+        if(l_errl)
+        {
+            break;
+        }
+
+        // Find the address of the header entry in the table of contents of the EECACHE pnor section
+        l_eepromRecordHeaderToUpdate =
+            reinterpret_cast<eepromRecordHeader *>(lookupEepromHeaderAddr(l_eepromRecordHeader));
+
+        if(l_eepromRecordHeaderToUpdate == 0)
+        {
+              TRACFCOMP(g_trac_eeprom,
+                        ERR_MRK"setIsValidCacheEntry:  Attempting to invalidate cache for an "
+                        "eeprom but we could not find in global eecache map");
+              /*@
+              * @errortype
+              * @moduleid     EEPROM_INVALIDATE_CACHE
+              * @reasoncode   EEPROM_CACHE_NOT_FOUND_IN_MAP
+              * @userdata1[0:7]   i2c_master_huid
+              * @userdata1[8:9]   port on i2c master eeprom slave is on
+              * @userdata1[10:11] engine on i2c master eeprom slave is on
+              * @userdata1[12:13] devAddr of eeprom slave
+              * @userdata1[14:15] muxSelect of eeprom slave (0xFF is not valid)
+              * @userdata2[0:7]   size of eeprom
+              * @devdesc      invalidateCache failed to find cache in map
+              */
+              l_errl = new ERRORLOG::ErrlEntry(
+                              ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                              EEPROM_INVALIDATE_CACHE,
+                              EEPROM_CACHE_NOT_FOUND_IN_MAP,
+                              TWO_UINT32_TO_UINT64(
+                                  l_eepromRecordHeader.completeRecord.i2c_master_huid,
+                                  TWO_UINT16_TO_UINT32(
+                                      TWO_UINT8_TO_UINT16(
+                                          l_eepromRecordHeader.completeRecord.port,
+                                          l_eepromRecordHeader.completeRecord.engine),
+                                      TWO_UINT8_TO_UINT16(
+                                          l_eepromRecordHeader.completeRecord.devAddr,
+                                          l_eepromRecordHeader.completeRecord.mux_select))),
+                              l_eepromRecordHeader.completeRecord.cache_copy_size,
+                              ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+              break;
+        }
+
+        // Ensure that information at the address we just looked up matches the record we built up
+        if( memcmp(&l_eepromRecordHeaderToUpdate->uniqueRecord.uniqueID,
+                   &l_eepromRecordHeader.uniqueRecord.uniqueID,
+                   NUM_BYTE_UNIQUE_ID ) != 0 )
+        {
+              TRACFCOMP(g_trac_eeprom,ERR_MRK"setIsValidCacheEntry:  Attempting to invalidate cache for an"
+                        "eeprom but we could not find the entry in table of contents of EECACHE section of pnor");
+              /*@
+              * @errortype
+              * @moduleid     EEPROM_INVALIDATE_CACHE
+              * @reasoncode   EEPROM_CACHE_NOT_FOUND_IN_PNOR
+              * @userdata1[0:7]   i2c_master_huid
+              * @userdata1[8:9]   port on i2c master eeprom slave is on
+              * @userdata1[10:11] engine on i2c master eeprom slave is on
+              * @userdata1[12:13] devAddr of eeprom slave
+              * @userdata1[14:15] muxSelect of eeprom slave (0xFF is not valid)
+              * @userdata2[0:7]   size of eeprom
+              * @devdesc      invalidateCache failed to find cache in pnor
+              */
+              l_errl = new ERRORLOG::ErrlEntry(
+                              ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                              EEPROM_INVALIDATE_CACHE,
+                              EEPROM_CACHE_NOT_FOUND_IN_PNOR,
+                              TWO_UINT32_TO_UINT64(
+                                  l_eepromRecordHeader.completeRecord.i2c_master_huid,
+                                  TWO_UINT16_TO_UINT32(
+                                      TWO_UINT8_TO_UINT16(
+                                          l_eepromRecordHeader.completeRecord.port,
+                                          l_eepromRecordHeader.completeRecord.engine),
+                                      TWO_UINT8_TO_UINT16(
+                                          l_eepromRecordHeader.completeRecord.devAddr,
+                                          l_eepromRecordHeader.completeRecord.mux_select))),
+                              l_eepromRecordHeader.completeRecord.cache_copy_size,
+                              ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+              break;
+        }
+
+        // Update the header so that it state the entry is invalid
+        l_eepromRecordHeaderToUpdate->completeRecord.cached_copy_valid = i_isValid;
+
+        // Flush the page to make sure it gets to the PNOR
+        int rc = mm_remove_pages( FLUSH,
+                                  l_eepromRecordHeaderToUpdate,
+                                  sizeof(eepromRecordHeader) );
+        if( rc )
+        {
+            TRACFCOMP(g_trac_eeprom,
+                      ERR_MRK"setIsValidCacheEntry:  Error from mm_remove_pages trying for flush header write to pnor, rc=%d",rc);
+            /*@
+            * @errortype
+            * @moduleid     EEPROM_INVALIDATE_CACHE
+            * @reasoncode   EEPROM_FAILED_TO_FLUSH_HEADER
+            * @userdata1    Requested Address
+            * @userdata2    rc from mm_remove_pages
+            * @devdesc      invalidateCache mm_remove_pages FLUSH failed
+            */
+            l_errl = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            EEPROM_INVALIDATE_CACHE,
+                            EEPROM_FAILED_TO_FLUSH_HEADER,
+                            (uint64_t)l_eepromRecordHeaderToUpdate,
+                            TO_UINT64(rc),
+                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            break;
+        }
+
+    }while(0);
+
+    return l_errl;
+}
+
 #endif
 
 errlHndl_t eepromPerformOpCache(DeviceFW::OperationType i_opType,
@@ -748,7 +980,9 @@ errlHndl_t eepromPerformOpCache(DeviceFW::OperationType i_opType,
         TRACSSCOMP( g_trac_eeprom, ENTER_MRK"eepromPerformOpCache() "
                     "Target HUID 0x%.08X Enter", TARGETING::get_huid(i_target));
 
-        l_errl = buildEepromRecordHeader(i_target, i_eepromInfo, l_eepromRecordHeader);
+        l_errl = buildEepromRecordHeader(i_target,
+                                         i_eepromInfo,
+                                         l_eepromRecordHeader);
 
         if(l_errl)
         {
@@ -757,7 +991,7 @@ errlHndl_t eepromPerformOpCache(DeviceFW::OperationType i_opType,
             break;
         }
 
-        uint64_t l_eepromCacheVaddr = lookupEepromAddr(l_eepromRecordHeader);
+        uint64_t l_eepromCacheVaddr = lookupEepromCacheAddr(l_eepromRecordHeader);
 
         // Ensure that a copy of the eeprom exists in our map of cached eeproms
         if(l_eepromCacheVaddr)
@@ -780,7 +1014,8 @@ errlHndl_t eepromPerformOpCache(DeviceFW::OperationType i_opType,
                     i_eepromInfo.offset, io_buflen, l_eepromCacheVaddr);
 
             // Make sure that offset + buflen are less than the total size of the eeprom
-            if(i_eepromInfo.offset + io_buflen > (l_eepromRecordHeader.completeRecord.cache_copy_size * KILOBYTE))
+            if(i_eepromInfo.offset + io_buflen >
+              (l_eepromRecordHeader.completeRecord.cache_copy_size * KILOBYTE))
             {
                 TRACFCOMP(g_trac_eeprom,
                           ERR_MRK"eepromPerformOpCache: i_eepromInfo.offset + i_offset is greater than size of eeprom (0x%x KB)",
@@ -809,11 +1044,15 @@ errlHndl_t eepromPerformOpCache(DeviceFW::OperationType i_opType,
 
             if(i_opType == DeviceFW::READ)
             {
-                memcpy(io_buffer, reinterpret_cast<void *>(l_eepromCacheVaddr + i_eepromInfo.offset), io_buflen);
+                memcpy(io_buffer,
+                       reinterpret_cast<void *>(l_eepromCacheVaddr + i_eepromInfo.offset),
+                       io_buflen);
             }
             else if(i_opType == DeviceFW::WRITE)
             {
-                memcpy(reinterpret_cast<void *>(l_eepromCacheVaddr + i_eepromInfo.offset), io_buffer,  io_buflen);
+                memcpy(reinterpret_cast<void *>(l_eepromCacheVaddr + i_eepromInfo.offset),
+                       io_buffer,
+                       io_buflen);
 
                 #ifndef __HOSTBOOT_RUNTIME
 
@@ -823,7 +1062,9 @@ errlHndl_t eepromPerformOpCache(DeviceFW::OperationType i_opType,
                                           io_buflen );
                 if( rc )
                 {
-                    TRACFCOMP(g_trac_eeprom,ERR_MRK"eepromPerformOpCache:  Error from mm_remove_pages trying for flush contents write to pnor! rc=%d",rc);
+                    TRACFCOMP(g_trac_eeprom,
+                              ERR_MRK"eepromPerformOpCache:  Error from mm_remove_pages trying for flush contents write to pnor! rc=%d",
+                              rc);
                     /*@
                     * @errortype
                     * @moduleid     EEPROM_CACHE_PERFORM_OP
@@ -845,7 +1086,9 @@ errlHndl_t eepromPerformOpCache(DeviceFW::OperationType i_opType,
             }
             else
             {
-                TRACFCOMP(g_trac_eeprom,ERR_MRK"eepromPerformOpCache: Invalid OP_TYPE passed to function, i_opType=%d", i_opType);
+                TRACFCOMP(g_trac_eeprom,
+                          ERR_MRK"eepromPerformOpCache: Invalid OP_TYPE passed to function, i_opType=%d",
+                          i_opType);
                 /*@
                 * @errortype
                 * @moduleid     EEPROM_CACHE_PERFORM_OP

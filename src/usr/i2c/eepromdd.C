@@ -89,7 +89,7 @@ errlHndl_t resolveSource(TARGETING::Target * i_target,
                                   l_eepromRecordHeader);
     // if lookupEepromAddr returns non-zero address
     // then we know it exists in cache somewhere
-    if(lookupEepromAddr(l_eepromRecordHeader))
+    if(lookupEepromCacheAddr(l_eepromRecordHeader))
     {
         TRACDCOMP(g_trac_eeprom,"Eeprom found in cache, looking at eecache");
         o_source = EEPROM::CACHE;
@@ -178,29 +178,33 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
         if(l_source == EEPROM::CACHE  )
         {
             // Read the copy of the EEPROM data we have cached in PNOR
-            err = eepromPerformOpCache(i_opType, i_target, io_buffer, io_buflen, i2cInfo);
+            err = eepromPerformOpCache(i_opType, i_target,
+                                       io_buffer, io_buflen, i2cInfo);
 
             if(err)
             {
                 break;
             }
 
-            // If the operation is a write we also need to "write through" to HW after
-            // we write cache
+            // If the operation is a write we also need to
+            // "write through" to HW after we write cache
             if(i_opType == DeviceFW::WRITE)
             {
-                err = eepromPerformOpHW(i_opType, i_target, io_buffer, io_buflen, i2cInfo);
+                err = eepromPerformOpHW(i_opType, i_target,
+                                        io_buffer, io_buflen, i2cInfo);
             }
         }
         else if(l_source == EEPROM::HARDWARE)
         {
             // Read from the actual physical EEPROM device
-            err = eepromPerformOpHW(i_opType, i_target, io_buffer, io_buflen, i2cInfo);
+            err = eepromPerformOpHW(i_opType, i_target, io_buffer,
+                                    io_buflen, i2cInfo);
         }
         #else
 
         // Read from the actual physical EEPROM device
-        err = eepromPerformOpHW(i_opType, i_target, io_buffer, io_buflen, i2cInfo);
+        err = eepromPerformOpHW(i_opType, i_target, io_buffer,
+                                io_buflen, i2cInfo);
 
         #endif // CONFIG_SUPPORT_EEPROM_CACHING
 
