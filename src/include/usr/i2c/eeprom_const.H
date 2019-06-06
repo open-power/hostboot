@@ -108,7 +108,7 @@ enum EECACHE_VERSION
 *
 *        uniqueRecord is useful if you want to quickly compare the "unique"
 *        bits of a header entry which includes the target_huid, port, engine,
-*        devAddr, mux_huid, and mux_select.
+*        devAddr, mux_huid, and mux_select, and size
 *
 */
 union eepromRecordHeader
@@ -231,6 +231,23 @@ struct EepromInfo_t
         addrBytes(0),
         device(INVALID_CHIP_TYPE),
         assocTarg(nullptr)
+    {
+    }
+};
+
+/**
+ * @brief Define a set of information that describes the
+          different virtual addresses associated with a given
+          cache entry
+ */
+struct RecordAddresses_t
+{
+    uint64_t header_entry_address;
+    uint64_t cache_entry_address;
+
+    RecordAddresses_t()
+      : header_entry_address(0),
+        cache_entry_address(0)
     {
     }
 };

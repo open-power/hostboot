@@ -100,7 +100,7 @@ errlHndl_t buildEepromRecordHeader(TARGETING::Target * i_target,
 /**
 *
 * @brief Perform a lookup on the global map g_cachedEeproms to get a
-*        virtual address for a given EEPROM
+*        virtual address for a given EEPROM cache entry
 *
 * @param[in] i_eepromRecordHeader
 *
@@ -110,8 +110,56 @@ errlHndl_t buildEepromRecordHeader(TARGETING::Target * i_target,
 * @return uint64_t virtual address pointing to the cached eeprom data in pnor
 *
 */
-uint64_t lookupEepromAddr(const eepromRecordHeader & i_eepromRecordHeader);
+uint64_t lookupEepromCacheAddr(const eepromRecordHeader& i_eepromRecordHeader);
 
+/**
+*
+* @brief Perform a lookup on the global map g_cachedEeproms to get a
+*        virtual address for a given EEPROM entry in the EECACHE table of contents
+*
+* @param[in] i_eepromRecordHeader
+*
+* @pre  It is expected that i_eepromRecordHeader has valid information for
+*       the uniqueID (i2cm_huid, port, engine, devAddr, mux_select)
+*
+* @return uint64_t virtual address pointing to the cached eeprom data in pnor
+*
+*/
+uint64_t lookupEepromHeaderAddr(const eepromRecordHeader& i_eepromRecordHeader);
+
+#ifndef __HOSTBOOT_RUNTIME
+
+/**
+*
+* @brief Update the record entry in the Table of Contents of the EECACHE
+*        section of pnor to either mark the contents of the cache to be
+*        valid or invalid
+*
+* @param[in] i_target     Target associated with EEPROM
+*
+* @param[in] i_eepromRole Role of EEPROM associated with target (VPD_PRIMARY etc)
+*
+* @param[in] i_isValid    Mark eeprom cache valid or invalid ? 
+*
+* @return errlHndl_t - nullptr if successful, otherwise a pointer to the
+*       error log.
+*
+*/
+errlHndl_t setIsValidCacheEntry(const TARGETING::Target * i_target,
+                                const EEPROM_ROLE &i_eepromRole,
+                                bool i_isValid);
+
+/**
+*
+* @brief Print the info found in the Table of Contents of the EECACHE
+*        section of pnor to trace buffer
+*
+* @return void
+*
+*/
+void printTableOfContents(void);
+
+#endif  // __HOSTBOOT_RUNTIME
 }
 
 #endif
