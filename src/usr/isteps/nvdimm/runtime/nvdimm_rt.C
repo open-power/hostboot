@@ -526,16 +526,10 @@ errlHndl_t nvdimm_getDarnNumber(size_t i_genSize, uint8_t* o_genData)
         // Darn could return an error code
         uint32_t l_darnErrors = 0;
 
-        // TODO RTC:210978 NVDIMM encryption remove DARN instruction workaround
-        // Darn instruction is not working, hardcode until it is fixed
-        uint64_t l_darnHack = 0x465a67b23c89d234ull;
-
         while (l_darnErrors < MAX_DARN_ERRORS)
         {
             // Get a 64-bit random number with the darn instruction
-            // TODO RTC:210978 NVDIMM encryption remove DARN instruction workaround
-            //l_darnData[l_loop] = getDarn();
-            l_darnData[l_loop] = l_darnHack;
+            l_darnData[l_loop] = getDarn();
 
             if ( l_darnData[l_loop] != DARN_ERROR_CODE )
             {
