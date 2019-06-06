@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,7 +54,6 @@ vpdData mvpdData[] =
     { PVPD::VINI, PVPD::B4 },
     { PVPD::VINI, PVPD::B7 },
     { PVPD::VINI, PVPD::PF },
-    { PVPD::VINI, PVPD::LX },
 };
 
 const HdatKeywordInfo l_pvpdKeywords[] =
@@ -74,7 +73,6 @@ const HdatKeywordInfo l_pvpdKeywords[] =
     { PVPD::B4,  "B4" },
     { PVPD::B7,  "B7" },
     { PVPD::PF,  "PF" },
-    { PVPD::LX,  "LX" },
 };
 
 extern trace_desc_t *g_trac_hdat;
