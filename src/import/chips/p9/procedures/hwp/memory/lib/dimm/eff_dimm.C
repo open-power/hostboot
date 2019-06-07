@@ -366,16 +366,6 @@ enum invalid_freq_function_encoding : uint8_t
     F0BC6X = 0x60,
 };
 
-///
-/// @brief encoding for MSS_INVALID_TIMING so we can look up functions based on encoding
-///
-enum invalid_timing_function_encoding : uint8_t
-{
-    TRRD_S = 0,
-    TRRD_L = 1,
-    TFAW = 2,
-};
-
 /////////////////////////
 // Non-member function implementations
 /////////////////////////
@@ -4098,7 +4088,7 @@ fapi2::ReturnCode eff_dimm::dram_trrd_s()
                   l_trrd_s_in_nck);
     }
 
-    FAPI_TRY( trrd_s( iv_dimm, iv_dram_width, l_jedec_trrd) );
+    FAPI_TRY( trrd_s( iv_dimm, iv_dram_width, iv_freq, l_jedec_trrd) );
 
     // Taking the worst case between the required minimum JEDEC value and the proposed value from SPD
     if (l_jedec_trrd != l_trrd_s_in_nck)
@@ -4174,7 +4164,7 @@ fapi2::ReturnCode eff_dimm::dram_trrd_l()
                   l_trrd_l_in_nck);
     }
 
-    FAPI_TRY( trrd_l( iv_dimm, iv_dram_width, l_jedec_trrd) );
+    FAPI_TRY( trrd_l( iv_dimm, iv_dram_width, iv_freq, l_jedec_trrd) );
 
     // Taking the worst case between the required minimum JEDEC value and the proposed value from SPD
     if (l_jedec_trrd != l_trrd_l_in_nck)
@@ -4273,7 +4263,7 @@ fapi2::ReturnCode eff_dimm::dram_tfaw()
                   l_tfaw_in_nck);
     }
 
-    FAPI_TRY( mss::tfaw(iv_dimm, iv_dram_width, l_jedec_tfaw_in_nck), "Failed tfaw()" );
+    FAPI_TRY( mss::tfaw(iv_dimm, iv_dram_width, iv_freq, l_jedec_tfaw_in_nck), "Failed tfaw()" );
 
     // Taking the worst case between the required minimum JEDEC value and the proposed value from SPD
     if (l_jedec_tfaw_in_nck != l_tfaw_in_nck)
@@ -4342,11 +4332,15 @@ fapi2::ReturnCode eff_dimm::dram_tras()
     // which will give the best timing value for the dimm
     // (like 2400 MT/s) which may be different than the system
     // speed (if we were being limited by VPD or MRW restrictions)
-    const uint64_t l_tras_in_ps = mss::tras(iv_dimm);
+    uint64_t l_tras_in_ps;
+    uint64_t l_freq = 0;
+    uint8_t l_tras_in_nck = 0;
 
     // Calculate nck
     std::vector<uint8_t> l_attrs_dram_tras(PORTS_PER_MCS, 0);
-    uint8_t l_tras_in_nck = 0;
+
+    FAPI_TRY( freq(mss::find_target<fapi2::TARGET_TYPE_MCBIST>(iv_dimm), l_freq) );
+    l_tras_in_ps = mss::tras(iv_dimm, l_freq);
 
     // Cast needed for calculations to be done on the same integral type
     // as required by template deduction. We have iv_tCK_in_ps as a signed

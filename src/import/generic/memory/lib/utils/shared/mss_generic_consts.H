@@ -223,6 +223,21 @@ enum generic_ffdc_codes
     SET_COL_ADDR_BITS = 0x1082,
     SET_ROW_ADDR_BITS = 0x1083,
     SET_3DS_HEIGHT = 0x1084,
+    SET_DRAM_CWL = 0x1085,
+    SET_DRAM_TREFI = 0x1086,
+    SET_DRAM_TCCD_L = 0x1087,
+    SET_DRAM_TWTR_L = 0x1088,
+    SET_DRAM_TWTR_S = 0x1089,
+    SET_DRAM_TFAW = 0x108A,
+    SET_DRAM_TRCD = 0x108B,
+    SET_DRAM_TRP = 0x108C,
+    SET_DRAM_TRAS = 0x108D,
+    SET_DRAM_TWR = 0x108E,
+    SET_DRAM_TRTP = 0x108F,
+    SET_DRAM_TRRD_S = 0x1090,
+    SET_DRAM_TRRD_L = 0x1091,
+    SET_DRAM_TRFC = 0x1092,
+    SET_DRAM_TRFC_DLR = 0x1093,
 
 
     // Power thermal functions
