@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018
+# Contributors Listed Below - COPYRIGHT 2018,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -25,7 +25,6 @@
 # Makefile for exp_omi_init HWP
 PROCEDURE=exp_omi_init
 $(eval $(call ADD_EXP_MEMORY_INCDIRS,$(PROCEDURE)))
-lib$(PROCEDURE)_DEPLIBS+=mss_generic
 lib$(PROCEDURE)_DEPLIBS+=exp_inband
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/ocmb/explorer/common/include)
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/ocmb/explorer/common/inband)

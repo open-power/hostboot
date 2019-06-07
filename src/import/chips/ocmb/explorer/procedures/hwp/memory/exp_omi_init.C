@@ -56,6 +56,7 @@ fapi2::ReturnCode omiDeviceVerify(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
 
     FAPI_ASSERT(l_data == ((POWER_OCID::EXPLORER << 16) | (POWER_OCID::VENDOR_IBM)),
                 fapi2::OCMB_IS_NOT_EXPLORER()
+                .set_OCMB_TARGET(i_target)
                 .set_TARGET(i_target)
                 .set_ID(l_data),
                 "Explorer ID was not found");
