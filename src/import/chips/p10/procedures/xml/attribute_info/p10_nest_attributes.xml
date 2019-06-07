@@ -116,7 +116,7 @@
     then the first socket with memory behind it will swap topology
     IDs with the master chip to form EFF_TOPOLOGY_ID. All else remains
     the same. This is a 4-bit field in the format specified by
-    ATTR_PROC_FABRIC_TOPOLOGY_MODE..
+    ATTR_PROC_FABRIC_TOPOLOGY_MODE.
   </description>
   <valueType>uint8</valueType>
   <writeable/>
@@ -224,6 +224,26 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_PROC_FABRIC_IOHS_CONFIG_MODE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Shadows ATTR_IOHS_CONFIG_MODE to a proc-scoped attribute.
+    Set by p10_chiplet_fabric_scominit.
+    Used by fabric initfiles.
+  </description>
+  <valueType>uint8</valueType>
+  <array>8</array>
+  <enum>
+    SMPX  = 0x0,
+    SMPA  = 0x1,
+    NV    = 0x2,
+    OCAPI = 0x3
+  </enum>
+  <writeable/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_IOHS_LINK_TRAIN</id>
   <targetType>TARGET_TYPE_IOHS</targetType>
   <description>
@@ -238,8 +258,8 @@
     ODD_ONLY  = 0x2,
     NONE      = 0x3
   </enum>
-  <initToZero/>
   <writeable/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -402,10 +422,6 @@
   </description>
   <valueType>uint32</valueType>
   <array>8</array>
-  <enum>
-    OFF = 0x0,
-    ON = 0x1
-  </enum>
   <writeable/>
   <initToZero/>
 </attribute>
@@ -444,6 +460,20 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_PROC_FABRIC_A_INDIRECT</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Set indirect data routing on A links
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    OFF = 0x0,
+    ON = 0x1
+  </enum>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_PROC_FABRIC_A_LINK_DELAY</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
@@ -454,10 +484,6 @@
   </description>
   <valueType>uint32</valueType>
   <array>8</array>
-  <enum>
-    OFF = 0x0,
-    ON = 0x1
-  </enum>
   <writeable/>
   <initToZero/>
 </attribute>
