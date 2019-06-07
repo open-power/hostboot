@@ -28,6 +28,7 @@ ROOTPATH = ../../../..
 MODULE = testmmio
 
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/
 
 #TESTS = *.H
 

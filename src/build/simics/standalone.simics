@@ -47,3 +47,19 @@ echo "Enable IPMI Responder"
 try {
       run-python-file (lookup-file hbfw/ipmi_bt_responder.py)
 } except { echo "ERROR: Failed to load IPMIresponder." }
+
+###############################
+#Initialize Explorer Registers
+###############################
+
+# Loop over all explorer chips
+foreach $obj in (get-object-list ocmb -all){
+
+    # Allow for testing MMIO HW failures
+    # Forces write access to TRACE_TRDATA_CONFIG_0 to fail
+    # in src/usr/mmio/test/mmiotest.H
+    # NOTE: address is left shifted 3 and has MMIO
+    #       offset (0x100000000) added.
+    $obj->mmio_regs_mmioerr = 0x0000000140082018
+
+}
