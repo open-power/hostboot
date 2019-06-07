@@ -50,6 +50,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/
 EXTRAINCDIR += ${HWP_PATH_1}/hwp/accessors/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 
 include ${ROOTPATH}/src/build/mkrules/verbose.rules.mk
 define __CLEAN_TARGET

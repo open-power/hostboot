@@ -56,6 +56,7 @@
 #include <vpd/spdenums.H>
 #include <p10_pm_get_poundv_bucket_attr.H>
 #include <p10_pm_get_poundw_bucket_attr.H>
+#include <p10_frequency_buckets.H>
 #include <errl/errlmanager.H>
 
 #include <targeting/common/targetservice.H>
@@ -2077,6 +2078,295 @@ ReturnCode platGetFreqMcaMhz(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
     }
     return l_rc;
 }
+
+#else
+#if 0 //TODO RTC 215209
+/// @brief This function is called by the FAPI_ATTR_GET functions that lookup
+/// values in the MEM_PLL_FREQ_BUCKETS tree. The key's used to lookup values in that
+/// tree are the ATTR_FREQ_OMI_MHZ and ATTR_OMI_PLL_VCO attributes. These are on the
+/// processor target but it is expected that all of the values match.
+//  @param[out] o_omiFreq  OMI Frequency of the system
+//  @param[out] o_omiVco   OMI VCO of the system
+//  @return ReturnCode Zero on success, else platform specified error.
+errlHndl_t getOmiFreqAndVco(TARGETING::ATTR_FREQ_OMI_MHZ_type & o_omiFreq,
+                            TARGETING::ATTR_OMI_PLL_VCO_type & o_omiVco)
+{
+    errlHndl_t l_errl = nullptr;
+
+    // Get all functional Proc targets
+    TARGETING::TargetHandleList l_procsList;
+    getAllChips(l_procsList, TARGETING::TYPE_PROC);
+
+    // Until we are told we need to support individual processor frequency
+    // assert that all of the processors have the same values
+    for(uint8_t i = 0; i < l_procsList.size(); i++)
+    {
+        // First processor's value will be used to compare against all other processors
+        if(i == 0)
+        {
+            o_omiFreq = l_procsList[i]->getAttr<TARGETING::ATTR_FREQ_OMI_MHZ>();
+            o_omiVco = l_procsList[i]->getAttr<TARGETING::ATTR_OMI_PLL_VCO>();
+            continue;
+        }
+
+        TARGETING::ATTR_FREQ_OMI_MHZ_type l_omiFreqToCmp = l_procsList[i]->getAttr<TARGETING::ATTR_FREQ_OMI_MHZ>();
+        TARGETING::ATTR_OMI_PLL_VCO_type  l_omiVcoToCmp  = l_procsList[i]->getAttr<TARGETING::ATTR_OMI_PLL_VCO>();
+
+        // If we found that this processor's OMI freq / vco values do not match the first processor's values then
+        // return an error
+        if (l_omiFreqToCmp != o_omiFreq ||
+            l_omiVcoToCmp  != o_omiVco )
+        {
+            FAPI_ERR("platGetMcPllBucket: Detected two processors with difference OMI VCO / FREQ combinations."
+                      " Proc 0x%.08X has OMI freq = %d and OMI vco = %d. "
+                      " Proc 0x%.08X has OMI freq = %d and OMI vco = %d. " ,
+                    get_huid(l_procsList[0]), o_omiFreq, o_omiVco,
+                    get_huid(l_procsList[i]), l_omiFreqToCmp, l_omiVcoToCmp );
+
+            /*@
+              * @errortype
+              * @moduleid     fapi2::MOD_GET_OMI_FREQ_AND_VCO
+              * @reasoncode   fapi2::RC_PROC_FREQ_MISMATCH
+              * @userdata1[0:31]  first ATTR_FREQ_OMI_MHZ found
+              * @userdata1[32:63] first ATTR_FREQ_PLL_VCO found
+              * @userdata2[0:31]  ATTR_FREQ_OMI_MHZ mismatch found
+              * @userdata2[32:63] ATTR_FREQ_PLL_VCO mismatch found
+              * @devdesc      Found mismatching processor attribute settings
+              *               when we expect them to all be in sync
+              */
+            l_errl = new ERRORLOG::ErrlEntry(
+                              ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                              fapi2::MOD_GET_OMI_FREQ_AND_VCO,
+                              fapi2::RC_NO_MATCHING_FREQ,
+                              TWO_UINT32_TO_UINT64(o_omiFreq, o_omiVco),
+                              TWO_UINT32_TO_UINT64(l_omiFreqToCmp, l_omiVcoToCmp),
+                              ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
+            l_errl->collectTrace(FAPI_IMP_TRACE_NAME, 256);
+            break;
+        }
+    }
+
+    return l_errl;
+}
+
+// OMI bucket descriptor
+struct OmiFreqVcoBucketSelect_t
+{
+    uint32_t omifreq;   // OMI Frequency in MHz
+    uint32_t vco;       // VCO selector
+    uint8_t pll_bucket; // MCA Frequency in MHz
+};
+
+
+//******************************************************************************
+// fapi::platAttrSvc::platGetMcPllBucket function
+//******************************************************************************
+ReturnCode platGetMcPllBucket(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                             ATTR_MC_PLL_BUCKET_Type & o_val)
+{
+    fapi2::ReturnCode l_rc;
+    errlHndl_t l_errl = nullptr;
+    TARGETING::Target * l_sysTarget = nullptr;
+    TARGETING::ATTR_FREQ_OMI_MHZ_type l_omiFreq = 0;
+    TARGETING::ATTR_OMI_PLL_VCO_type  l_omiVco  = 0;
+    bool l_matchFound = false;
+
+    // There can be up to 2 matches for OMI frequencies. If only 1 match is found
+    // then we ignore the VCO attribute
+    std::vector<OmiFreqVcoBucketSelect_t> l_omiFreqMatches;
+
+    do{
+        // Convert to platform-style target
+        l_errl = getTargetingTarget(i_fapiTarget, l_sysTarget);
+
+        if(l_errl)
+        {
+            FAPI_ERR("platGetMcPllBucket: Error from getTargetingTarget");
+            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            break;
+        }
+
+        // Use helper function to lookup omi frequency and omi vco for this system
+        l_errl = getOmiFreqAndVco(l_omiFreq, l_omiVco);
+
+        if(l_errl)
+        {
+            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            break;
+        }
+
+        // Loop through the MEM_PLL frequency buckets to see if we can find a bucket that
+        // matches what we have found for omi freq and vco
+        for(uint8_t i = 0; i < MEM_PLL_FREQ_BUCKETS; i++)
+        {
+            if(OMI_PLL_FREQ_LIST[i].omifreq == l_omiFreq)
+            {
+                OmiFreqVcoBucketSelect_t l_tmpBucketSelect = {OMI_PLL_FREQ_LIST[i].omifreq, OMI_PLL_FREQ_LIST[i].vco, i};
+                l_omiFreqMatches.push_back(l_tmpBucketSelect);
+            }
+        }
+
+        if(l_omiFreqMatches.size() > 1)
+        {
+            for(uint8_t i = 0; i < l_omiFreqMatches.size(); i++)
+            {
+                if(l_omiFreqMatches[i].vco == l_omiVco)
+                {
+                    FAPI_INF("Found match to be bucket %d for freq %d, vco %d",
+                             l_omiFreqMatches[i].pll_bucket,
+                             OMI_PLL_FREQ_LIST[i].omifreq,
+                             OMI_PLL_FREQ_LIST[i].vco);
+                    l_matchFound = true;
+                    // Value returned in this case is the bucket number that had the matching values
+                    // MC_PLL_BUCKET attribute is 1-based so increment bucket ID by 1
+                    o_val = l_omiFreqMatches[i].pll_bucket + 1;
+                    break;
+                }
+            }
+        }
+        else if (l_omiFreqMatches.size() == 1)
+        {
+            FAPI_INF("Single match for OMI freq %d found in OMI_PLL_FREQ_LIST, ignoring VCO attribute. PLL Bucket = %d",
+                     l_omiFreq,
+                     l_omiFreqMatches[0].pll_bucket);
+            l_matchFound = true;
+            // MC_PLL_BUCKET attribute is 1-based so increment bucket ID by 1
+            o_val = l_omiFreqMatches[0].pll_bucket + 1;
+        }
+
+        // If not match is found return an error
+        if(!l_matchFound)
+        {
+            FAPI_ERR("platGetMcPllBucket: Could not find matching bucket for omiFreq = %d and vco = %d",
+                    l_omiFreq, l_omiVco);
+
+            /*@
+              * @errortype
+              * @moduleid     fapi2::MOD_FAPI2_PLAT_GET_MC_PLL_BUCKET
+              * @reasoncode   fapi2::RC_NO_MATCHING_FREQ
+              * @userdata1[0:31]  ATTR_FREQ_OMI_MHZ
+              * @userdata1[32:63] ATTR_FREQ_PLL_VCO
+              * @userdata2    Target HUID
+              * @devdesc      Invalid omi frequence and omi vco settings
+              */
+            l_errl = new ERRORLOG::ErrlEntry(
+                              ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                              fapi2::MOD_FAPI2_PLAT_GET_MC_PLL_BUCKET,
+                              fapi2::RC_NO_MATCHING_FREQ,
+                              TWO_UINT32_TO_UINT64(l_omiFreq, l_omiVco),
+                              TARGETING::get_huid(l_sysTarget),
+                              ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
+            l_errl->collectTrace(FAPI_IMP_TRACE_NAME, 256);
+            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            break;
+        }
+
+    }while(0);
+    return l_rc;
+}
+
+//******************************************************************************
+// fapi::platAttrSvc::platGetFreqMcaMhz function
+//******************************************************************************
+ReturnCode platGetFreqMcaMhz(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                             ATTR_FREQ_MCA_MHZ_Type & o_val)
+{
+    fapi2::ReturnCode l_rc;
+    errlHndl_t l_errl = nullptr;
+    TARGETING::Target * l_sysTarget = nullptr;
+    TARGETING::ATTR_FREQ_OMI_MHZ_type l_omiFreq = 0;
+    TARGETING::ATTR_OMI_PLL_VCO_type  l_omiVco  = 0;
+    bool l_matchFound = false;
+
+    // There can be up to 2 matches for OMI frequencies. If only 1 match is found
+    // then we ignore the VCO attribute
+    std::vector<OmiBucketDescriptor_t> l_matchingOmiBucketDescriptors;
+
+    do{
+        // Convert to platform-style target
+        l_errl = getTargetingTarget(i_fapiTarget, l_sysTarget);
+
+        if(l_errl)
+        {
+            FAPI_ERR("platGetFreqMcaMhz: Error from getTargetingTarget");
+            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            break;
+        }
+
+        // Use helper function to lookup omi frequency and omi vco for this system
+        l_errl = getOmiFreqAndVco(l_omiFreq, l_omiVco);
+
+        if(l_errl)
+        {
+            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            break;
+        }
+
+        // Loop through the MEM_PLL frequency buckets to see if we can find a bucket that
+        // matches what we have found for omi freq and vco
+        for(uint8_t i = 0; i < MEM_PLL_FREQ_BUCKETS; i++)
+        {
+            if(OMI_PLL_FREQ_LIST[i].omifreq == l_omiFreq)
+            {
+                l_matchingOmiBucketDescriptors.push_back(OMI_PLL_FREQ_LIST[i]);
+            }
+        }
+
+        if(l_matchingOmiBucketDescriptors.size() > 1)
+        {
+            for(uint8_t i = 0; i < l_matchingOmiBucketDescriptors.size(); i++)
+            {
+                if(l_matchingOmiBucketDescriptors[i].vco == l_omiVco)
+                {
+                    FAPI_INF("found match for freq %d, vco %d. Mca freq = %d",
+                             OMI_PLL_FREQ_LIST[i].omifreq, OMI_PLL_FREQ_LIST[i].vco);
+                    l_matchFound = true;
+                    // Value returned in this case is the bucket number that had the matching values
+                    o_val = l_matchingOmiBucketDescriptors[i].mcafreq;
+                    break;
+                }
+            }
+        }
+        else if (l_matchingOmiBucketDescriptors.size() == 1)
+        {
+            FAPI_INF("Single match for OMI freq %d found in OMI_PLL_FREQ_LIST, MCA freq found = %d, ignoring VCO attribute",
+                     l_omiFreq,
+                     l_matchingOmiBucketDescriptors[0].mcafreq);
+            l_matchFound = true;
+            o_val = l_matchingOmiBucketDescriptors[0].mcafreq;
+        }
+
+        if(!l_matchFound)
+        {
+            FAPI_ERR("platGetFreqMcaMhz: Could not find matching bucket for omiFreq = %d and vco = %d",
+                    l_omiFreq, l_omiVco);
+
+            /*@
+              * @errortype
+              * @moduleid     fapi2::MOD_FAPI2_PLAT_GET_FREQ_MCA_MHZ
+              * @reasoncode   fapi2::RC_NO_MATCHING_FREQ
+              * @userdata1[0:31]  ATTR_FREQ_OMI_MHZ
+              * @userdata1[32:63] ATTR_FREQ_PLL_VCO
+              * @userdata2    Target HUID
+              * @devdesc      Invalid omi frequence and omi vco settings
+              */
+            l_errl = new ERRORLOG::ErrlEntry(
+                              ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                              fapi2::MOD_FAPI2_PLAT_GET_FREQ_MCA_MHZ,
+                              fapi2::RC_NO_MATCHING_FREQ,
+                              TWO_UINT32_TO_UINT64(l_omiFreq, l_omiVco),
+                              TARGETING::get_huid(l_sysTarget),
+                              ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
+            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            break;
+        }
+
+    }while(0);
+    return l_rc;
+}
+
+
+#endif
 #endif
 
 

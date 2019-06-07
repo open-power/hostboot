@@ -69,6 +69,9 @@ namespace fapi2
         MOD_FAPI2_MONITOR_FOR_FSP_MSGS              = 0x1A,
         MOD_FAPI2_PLAT_GET_VPD_OCMB                 = 0x1B,
         MOD_FAPI2_PLAT_ERROR_ON_SET                 = 0x1C,
+        MOD_FAPI2_PLAT_GET_MC_PLL_BUCKET            = 0x1D,
+        MOD_FAPI2_PLAT_GET_FREQ_MCA_MHZ             = 0x1E,
+        MOD_GET_OMI_FREQ_AND_VCO                    = 0x1F,
     };
 
     /**
@@ -139,6 +142,7 @@ namespace fapi2
         // PLL_BUCKET generated errors
         RC_NO_MATCHING_FREQ            = HWPF_COMP_ID | 0x31,
         RC_FREQ_LIST_NOT_FOUND         = HWPF_COMP_ID | 0x32,
+        RC_PROC_FREQ_MISMATCH          = HWPF_COMP_ID | 0x33,
     };
 
     /**

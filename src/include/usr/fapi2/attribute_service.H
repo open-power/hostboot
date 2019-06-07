@@ -406,6 +406,14 @@ ReturnCode platGetFreqMcaMhz(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
 ReturnCode platSetFreqMcaMhz(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
                              uint32_t i_val);
 
+/// @brief This function is called by the FAPI_ATTR_GET macro when getting
+//  ATTR_MC_PLL_BUCKET
+//  @param[in] i_fapiTarget    FAPI2 Target pointer
+//  @param[in] o_val           PLL bucket associated with a given OMI freq
+//  @return ReturnCode Zero on success, else platform specified error.
+ReturnCode platGetMcPllBucket(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                              uint8_t& o_val);
+
 // -----------------------------------------------------------------------------
 // End TODO: End to be supported functions
 // -----------------------------------------------------------------------------
@@ -1539,11 +1547,7 @@ fapiToTargeting::ID, sizeof(VAL), &(VAL))
 //----------------------------------------------------------------------------
 // MACRO to route ATTR_FREQ_MCA_MHZ access to the correct HB function
 //----------------------------------------------------------------------------
-
-// For Axone ATTR_FREQ_MCA_MHZ is a regular writable attribute
-// For Nimbus/Cumulus ATTR_FREQ_MCA_MHZ is readonly and based on NEST
-#ifndef CONFIG_AXONE
-
+/* TODO RTC 215209
 #undef ATTR_FREQ_MCA_MHZ_GETMACRO
 #define ATTR_FREQ_MCA_MHZ_GETMACRO(ID, TARGET, VAL) \
     AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
@@ -1556,6 +1560,25 @@ fapiToTargeting::ID, sizeof(VAL), &(VAL))
     ? fapi2::ReturnCode() : \
     fapi2::platAttrSvc::platErrorOnSet(TARGET, VAL)
 
-#endif
+#ifdef CONFIG_AXONE
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_MC_PLL_BUCKET access to the correct HB function
+//----------------------------------------------------------------------------
+
+#undef ATTR_MC_PLL_BUCKET_GETMACRO
+#define ATTR_MC_PLL_BUCKET_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMcPllBucket(TARGET, VAL)
+#undef ATTR_MC_PLL_BUCKET_SETMACRO
+#define ATTR_MC_PLL_BUCKET_SETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::platErrorOnSet(TARGET, VAL)
+
+#endif //CONFIG_AXONE
+*/
 
 #endif // ATTRIBUTESERVICE_H_
