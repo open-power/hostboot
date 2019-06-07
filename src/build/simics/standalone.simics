@@ -143,6 +143,14 @@ if ($hb_mode == 0) { #Only do this on Axone and later models that have Explorer 
         $obj->mscc_regs_xcbi_ram1[14] = 0x063EF2EE
         $obj->mscc_regs_xcbi_ram1[15] = 0x063B5957
         $obj->mscc_regs_xcbi_ram1[16] = 0x40A3A12D
+
+        # Allow for testing MMIO HW failures
+        # Forces write access to TRACE_TRDATA_CONFIG_0 to fail
+        # in src/usr/mmio/test/mmiotest.H
+        # NOTE: address is left shifted 3 and has MMIO
+        #       offset (0x100000000) added.
+        $obj->mmio_regs_mmioerr = 0x0000000140082018
+
     }
 }
 
