@@ -54,7 +54,9 @@ namespace qmesram
 enum Op
 {
     GET,
-    PUT
+    PUT,
+    GET_NOAUTOINC,
+    PUT_NOAUTOINC
 };
 
 } // end of namespace qmesram
@@ -62,12 +64,12 @@ enum Op
 
 // function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p10_qme_sram_access_FP_t) (
-    const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_qme_target,
-    const uint32_t i_start_address,
-    const uint32_t i_length_dword,
-    const qmesram::Op i_operation,
-    uint64_t* o_data,
-    uint32_t& o_dwords_read);
+    const fapi2::Target < fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > &,
+    const uint32_t,
+    const uint32_t,
+    const qmesram::Op,
+    uint64_t*,
+    uint32_t&);
 
 extern "C" {
 
@@ -90,14 +92,14 @@ extern "C" {
 /// @param [in]  i_qme_target         EQ target
 /// @param [in]  i_start_address      Start Address is between 0xFFFF80000 and 0xFFFFFFFF and must be 8B aligned
 /// @param [in]  i_length_dword       Length in dwords (# of accesses)
-/// @param [in]  i_operation          Access operatio to perform (GET/PUT)
+/// @param [in]  i_operation          Access operatio to perform (GET/PUT/)
 /// @param [out] o_data               Output Data
 /// @param [out] o_dwords_read        Number of actual words in the output buffer.
 ///
 /// @retval FAPI2_RC_SUCCESS
 /// @retval RC_PROCPM_GPE_CODE_BAD_MODE
     fapi2::ReturnCode p10_qme_sram_access(
-        const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_qme_target,
+        const fapi2::Target < fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > & i_qme_target,
         const uint32_t i_start_address,
         const uint32_t i_length_dword,
         const qmesram::Op i_operation,
