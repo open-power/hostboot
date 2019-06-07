@@ -1941,6 +1941,9 @@
       <id>MAX_SBE_SEEPROM_SIZE</id>
     </attribute>
     <attribute>
+      <id>MC_PLL_BUCKET</id>
+    </attribute>
+    <attribute>
       <id>MFG_TRACE_ENABLE</id>
     </attribute>
     <attribute>

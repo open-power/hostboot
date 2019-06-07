@@ -61,6 +61,7 @@ EXTRAINCDIR += ${HWP_PATH_2}/vpd_accessors/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/scom/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 
 include ${ROOTPATH}/src/build/mkrules/verbose.rules.mk
 define __CLEAN_TARGET
