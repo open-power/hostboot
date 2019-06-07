@@ -110,6 +110,7 @@ class MembufWorkItem: public IStepWorkItem
 //******************************************************************************
 void MembufWorkItem::operator()()
 {
+#ifndef CONFIG_AXONE
     errlHndl_t l_err = nullptr;
 
     // reset watchdog for each memb as this function can be very slow
@@ -165,6 +166,8 @@ void MembufWorkItem::operator()()
                    TARGETING::get_huid(l_mbaTarget));
         }
     }
+#endif
+
 }
 
 

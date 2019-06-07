@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,7 +41,9 @@
 #include <fapi2.H>
 #include <fapi2/plat_hwp_invoker.H>
 #include <p9_mss_ddr_phy_reset.H>
+#ifndef CONFIG_AXONE
 #include <p9c_mss_ddr_phy_reset.H>
+#endif
 
 using   namespace   ERRORLOG;
 using   namespace   ISTEP;
@@ -103,6 +105,7 @@ void* call_mss_ddr_phy_reset (void *io_pArgs)
     } // end l_mcbist loop
 
 
+#ifndef CONFIG_AXONE
     if(l_stepError.getErrorHandle() == NULL)
     {
         // Get all Centaur targets
@@ -169,6 +172,7 @@ void* call_mss_ddr_phy_reset (void *io_pArgs)
  
         }
     }
+#endif
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_mss_ddr_phy_reset exit" );

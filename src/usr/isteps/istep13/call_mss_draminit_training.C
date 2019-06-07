@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -102,6 +102,7 @@ void* call_mss_draminit_training (void *io_pArgs)
         }
     }
 
+#ifndef CONFIG_AXONE
     if(l_stepError.getErrorHandle() == NULL)
     {
         // Get all Centaur targets
@@ -169,6 +170,7 @@ void* call_mss_draminit_training (void *io_pArgs)
         }
 
     }
+#endif
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_mss_draminit_training exit" );

@@ -98,7 +98,7 @@ include ${P9_PROCEDURES_PATH}/hwp/perv/p9_mem_startclocks.mk
 #Scom init
 include ${P9_PROCEDURES_PATH}/hwp/memory/p9_mss_scominit.mk
 include ${P9_PROCEDURES_PATH}/hwp/nest/p9_throttle_sync.mk
-include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_scominit.mk
+OBJS += $(if $(CONFIG_AXONE),,p9c_mss_scominit.o)
 
 include ${P9_PROCEDURES_PATH}/hwp/initfiles/p9n_ddrphy_scom.mk
 include ${P9_PROCEDURES_PATH}/hwp/initfiles/p9n_mca_scom.mk
@@ -111,28 +111,27 @@ include ${P9_PROCEDURES_PATH}/hwp/memory/p9_mss_draminit_mc.mk
 include ${P9_PROCEDURES_PATH}/hwp/memory/p9_mss_ddr_phy_reset.mk
 include ${P9_PROCEDURES_PATH}/hwp/memory/p9_mss_draminit_training_adv.mk
 
-include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_mcbist.mk
-include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_mcbist_common.mk
-include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_mcbist_address.mk
-include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_generic_shmoo.mk
-include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_draminit.mk
-include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_draminit_mc.mk
-include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_draminit_training.mk
-include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_ddr_phy_reset.mk
-include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_draminit_training_advanced.mk
-include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_mrs6_DDR4.mk
-include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_ddr4_pda.mk
-include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_ddr4_funcs.mk
-include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_termination_control.mk
-include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_access_delay_reg.mk
-include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_unmask_errors.mk
-include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_dimmBadDqBitmapFuncs.mk
-include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_funcs.mk
-include ${CEN_PROCEDURES_PATH}/hwp/initfiles/centaur_mbs_scom.mk
-include ${CEN_PROCEDURES_PATH}/hwp/initfiles/centaur_mba_scom.mk
-include ${CEN_PROCEDURES_PATH}/hwp/initfiles/centaur_ddrphy_scom.mk
-include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_row_repair.mk
-
+OBJS += $(if $(CONFIG_AXONE),,p9c_mss_mcbist.o)
+OBJS += $(if $(CONFIG_AXONE),,p9c_mss_mcbist_common.o)
+OBJS += $(if $(CONFIG_AXONE),,p9c_mss_mcbist_address.o)
+OBJS += $(if $(CONFIG_AXONE),,p9c_mss_generic_shmoo.o)
+OBJS += $(if $(CONFIG_AXONE),,p9c_mss_draminit.o)
+OBJS += $(if $(CONFIG_AXONE),,p9c_mss_draminit_mc.o)
+OBJS += $(if $(CONFIG_AXONE),,p9c_mss_draminit_training.o)
+OBJS += $(if $(CONFIG_AXONE),,p9c_mss_ddr_phy_reset.o)
+OBJS += $(if $(CONFIG_AXONE),,p9c_mss_draminit_training_advanced.o)
+OBJS += $(if $(CONFIG_AXONE),,p9c_mss_mrs6_DDR4.o)
+OBJS += $(if $(CONFIG_AXONE),,p9c_mss_ddr4_pda.o)
+OBJS += $(if $(CONFIG_AXONE),,p9c_mss_ddr4_funcs.o)
+OBJS += $(if $(CONFIG_AXONE),,p9c_mss_termination_control.o)
+OBJS += $(if $(CONFIG_AXONE),,p9c_mss_access_delay_reg.o)
+OBJS += $(if $(CONFIG_AXONE),,p9c_mss_unmask_errors.o)
+OBJS += $(if $(CONFIG_AXONE),,p9c_dimmBadDqBitmapFuncs.o)
+OBJS += $(if $(CONFIG_AXONE),,p9c_mss_funcs.o)
+OBJS += $(if $(CONFIG_AXONE),,centaur_mbs_scom.o)
+OBJS += $(if $(CONFIG_AXONE),,centaur_mba_scom.o)
+OBJS += $(if $(CONFIG_AXONE),,centaur_ddrphy_scom.o)
+OBJS += $(if $(CONFIG_AXONE),,p9c_mss_row_repair.o)
 
 OBJS += $(if $(CONFIG_AXONE),exp_scominit.o,)
 OBJS += $(if $(CONFIG_AXONE),explorer_scom.o,)

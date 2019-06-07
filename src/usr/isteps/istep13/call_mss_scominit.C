@@ -43,10 +43,11 @@
 #include    <fapi2.H>
 #include    <p9_mss_scominit.H>
 #include    <p9_throttle_sync.H>
-#include    <p9c_mss_scominit.H>
 #ifdef CONFIG_AXONE
 #include    <exp_scominit.H>
 #include    <chipids.H> // for EXPLORER ID
+#else
+#include    <p9c_mss_scominit.H>
 #endif
 
 using   namespace   ERRORLOG;
