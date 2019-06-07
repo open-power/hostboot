@@ -33,6 +33,9 @@
 /// *Consumed by          : HB:CRO
 ///
 
+#ifndef __PM_UTILS_H__
+#define __PM_UTILS_H__
+
 // Byte-reverse a 16-bit integer if on a little-endian machine
 uint16_t revle16(const uint16_t i_x);
 
@@ -41,3 +44,5 @@ uint32_t revle32(const uint32_t i_x);
 
 // Byte-reverse a 64-bit integer if on a little-endian machine
 uint64_t revle64(const uint64_t i_x);
+
+#endif  // __PM_UTILS_H__
