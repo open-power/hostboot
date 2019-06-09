@@ -1894,7 +1894,7 @@ typedef enum
                          ".core_restore", \
                          ".ioppe",        \
                          ".overlays",     \
-                         ".dyninits")
+                         ".dynamic")
 
 /**************************************************************************/
 /* SBE Image                                                              */
