@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,6 +55,7 @@ fapi2::ReturnCode p9_sbe_i2c_bit_rate_divisor_setting(
 {
     uint8_t l_attr_nest_pll_bucket = 0;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_CHIP_EC_FEATURE_I2CM_INTERNAL_CLK_DIV2_Type l_i2cm_internal_clk_div2 = 0;
     fapi2::buffer<uint16_t> l_mb_bit_rate_divisor;
     fapi2::buffer<uint64_t> l_data64;
     fapi2::buffer<uint32_t> l_data32;
@@ -63,7 +64,12 @@ fapi2::ReturnCode p9_sbe_i2c_bit_rate_divisor_setting(
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_NEST_PLL_BUCKET, FAPI_SYSTEM,
                            l_attr_nest_pll_bucket));
     FAPI_INF("ATTR_NEST_PLL_BUCKET value: %d", l_attr_nest_pll_bucket);
-    l_mb_bit_rate_divisor = NEST_PLL_FREQ_I2CDIV_LIST[l_attr_nest_pll_bucket - 1];
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_I2CM_INTERNAL_CLK_DIV2, i_target_chip, l_i2cm_internal_clk_div2));
+
+    l_mb_bit_rate_divisor = NEST_PLL_FREQ_I2CDIV_LIST[l_attr_nest_pll_bucket - 1] *
+                            ((l_i2cm_internal_clk_div2) ? (2) : (1));
+
     FAPI_INF("Bit_rate_divisor value: %d", l_mb_bit_rate_divisor);
 
     FAPI_DBG("Adjust I2C bit rate divisor setting in I2CM B Mode Reg");
