@@ -27,25 +27,15 @@
 
 <hwpErrors>
    <sbeTarget>MASTER_CHIP</sbeTarget>
-  <!-- ******************************************************************** -->
-   <hwpError>
-      <sbeError/>
-      <rc>RC_I2C_BUS_STATUS_BUSY</rc>
-      <description>I2C seeprom port is not responding</description>
-      <ffdc>STATUS_REGISTER_B</ffdc>
-      <ffdc>LOOP_COUNT</ffdc>
-      <ffdc>BACKUP_SEEPROM_ATTR</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
+  <!-- ******************************************************************** --> 
   <hwpError>
       <sbeError/>
       <rc>RC_MAGIC_NUMBER_NOT_VALID</rc>
       <description>Magic number not matching from Seeprom
          read with Fused number in OTPROM
       </description>
-      <ffdc>DATA0TO7_REGISTER_B</ffdc>
+      <ffdc>SEEPROM_START_ADDR</ffdc>
       <ffdc>MAGIC_NUMBER_VALUE</ffdc>
-      <ffdc>BACKUP_SEEPROM_ATTR</ffdc>
    </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
