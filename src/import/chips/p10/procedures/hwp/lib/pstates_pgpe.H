@@ -183,6 +183,35 @@ typedef struct
     } ddsc;
 } PoundWEntry_t;
 
+typedef struct
+{
+    union
+    {
+        uint16_t value;
+        struct
+        {
+
+#ifdef _BIG_ENDIAN
+            uint16_t spare1          : 1;
+            uint16_t alt_trip_offset : 3;
+            uint16_t spare2          : 2;
+            uint16_t alt_cal_adjust  : 2;
+            uint16_t alt_delay       : 8;
+#else
+            uint16_t alt_delay       : 8;
+            uint16_t alt_cal_adjust  : 2;
+            uint16_t spare2          : 2;
+            uint16_t alt_trip_offset : 3;
+            uint16_t spare1          : 1;
+#endif
+        } fields;
+    } alt_calibration_config;
+    uint16_t cal_core_freq;
+    uint16_t cal_vdd;
+    uint16_t alt_cal_core_freq;
+    uint16_t alt_cal_vdd;
+} AltCalbCnfg_t;
+
 /// #W DPLL Settings
 typedef struct
 {
@@ -214,9 +243,9 @@ typedef struct
     uint8_t              light_throttle_settings[10];
     uint8_t              harsh_throttle_settings[10];
     uint16_t             droop_freq_resp_reference;
-    uint8_t              large_droop_mode_reg_setting[8];
-    uint8_t              misc_droop_mode_reg_setting[8];
-    uint8_t              spare[215];
+    uint64_t             large_droop_mode_reg_setting;
+    uint64_t             misc_droop_mode_reg_setting;
+    uint8_t              spare[287];
 } PoundWOther_t;
 
 /// #W VPD Structure
@@ -224,9 +253,9 @@ typedef struct
 /// Part specific data to manage the Digital Droop Sensor (DDS)
 typedef struct
 {
+    AltCalbCnfg_t           calbCnfg[MAXIMUM_CORES][NUM_PV_POINTS];
     PoundWEntry_t           entry[MAXIMUM_CORES][NUM_PV_POINTS];
     PoundWOther_t           other;
-    uint8_t                 rsvd[256];
 } PoundW_t;
 
 /// Voltage Regulation Module (VRM) Control Settings
