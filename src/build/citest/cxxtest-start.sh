@@ -38,7 +38,7 @@ if [ "$MACHINE" != "NIMBUS" ] && [ "$MACHINE" != "CUMULUS" ] && \
    [ "$MACHINE" != "CUMULUS_CDIMM" ] && [ "$MACHINE" != "FSPBUILD" ];
 then
     export PATH=$PATH:$SANDBOXBASE/simics/
-    export START_SIMICS_CMD="runsim -m $MACHINE hb_script_to_run=$SANDBOXBASE/obj/ppc/simu/scripts/hbfw/startup.simics pnor_img=$SANDBOXBASE/obj/ppc/hbfw/img/axone.pnor sbe_seeprom_img=$SANDBOXBASE/images/ppc/lab/flash/sbe_seeprom_p9a_10.bin.ecc num_procs=1 vpd_proc=vpd/images/53e4ec8a5d8439c961a18442bef70102"
+    export START_SIMICS_CMD="runsim -m $MACHINE hb_script_to_run=$SANDBOXBASE/obj/ppc/simu/scripts/hbfw/startup.simics pnor_img=$SANDBOXBASE/obj/ppc/hbfw/img/axone.pnor sbe_seeprom_img=$SANDBOXBASE/images/ppc/lab/flash/sbe_seeprom_p9a_10.bin.ecc num_procs=1 vpd_proc=vpd/images/53e4ec8a5d8439c961a18442bef70102 enable_lpc_console=TRUE proc_scandef_abr=${BACKING_BUILD}/obj/ppc/simu/data/cec-chip/scandef.abr"
 fi
 
 #   Front end to autocitest - script to execute unit tests under simics.

@@ -424,7 +424,7 @@ hb_startsimics()
         #export MYDIR=$bb/obj/ppc/hbfw/simics/startup.simics
         #then /runsim -m axone -o hb_script_to_run=$MYDIR
         export MY_DIR="${SANDBOXBASE}/obj/ppc/simu/scripts/hbfw"
-        export RUNSIMCMD="cd ${SANDBOXBASE}/simics/ && ./runsim -m ${MACHINE} hb_script_to_run=${MY_DIR}/startup.simics pnor_img=${MY_DIR}/../../../hbfw/img/axone.pnor sbe_seeprom_img=${SANDBOXBASE}/images/ppc/lab/flash/sbe_seeprom_p9a_10.bin.ecc num_procs=1 vpd_proc=vpd/images/53e4ec8a5d8439c961a18442bef70102 enable_lpc_console=TRUE"
+        export RUNSIMCMD="cd ${SANDBOXBASE}/simics/ && ./runsim -m ${MACHINE} hb_script_to_run=${MY_DIR}/startup.simics pnor_img=${MY_DIR}/../../../hbfw/img/axone.pnor sbe_seeprom_img=${SANDBOXBASE}/images/ppc/lab/flash/sbe_seeprom_p9a_10.bin.ecc num_procs=1 vpd_proc=vpd/images/53e4ec8a5d8439c961a18442bef70102 enable_lpc_console=TRUE proc_scandef_abr=${DRIVER}/obj/ppc/simu/data/cec-chip/scandef.abr"
         echo "**********
         echo $RUNSIMCMD
         echo "**********
