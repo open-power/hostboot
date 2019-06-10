@@ -309,6 +309,9 @@ fapi2::ReturnCode putCMD(
     FAPI_DBG("Clearing the inbound doorbell...");
     FAPI_TRY(fapi2::putScom(i_target, EXPLR_MMIO_MDBELLC, l_scom), "Failed to clear inbound doorbell register");
 
+    // Clear the response doorbell, just in case the last response didn't get cleared
+    FAPI_TRY(clear_outbound_doorbell(i_target));
+
     // Set the command
     FAPI_DBG("Writing the command...");
     FAPI_TRY(fapi2::putMMIO(i_target, EXPLR_IB_CMD_ADDR, BUFFER_TRANSACTION_SIZE, l_data),
