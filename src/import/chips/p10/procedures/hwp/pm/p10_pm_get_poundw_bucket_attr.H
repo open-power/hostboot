@@ -47,7 +47,7 @@ enum poundwBucketParms
     POUNDW_VERSION_1       = 0x01,
     POUNDW_VERSION_SIZE    = 0x01, // version is uint8_t
     POUNDW_BUCKETID_SIZE   = 0x01, // bucket ID is uint8_t
-    PW_VER_1_DDSCDATA_SIZE = 0xA00,
+    PW_VER_1_DDSCDATA_SIZE = 2952,
 };
 
 

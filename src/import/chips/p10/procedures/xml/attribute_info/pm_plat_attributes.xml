@@ -1277,7 +1277,7 @@
     NOTE: you may need to handle correcting endianness if you are using this
     </description>
     <valueType>uint8</valueType>
-    <array>281</array>
+    <array>351</array>
     <platinit/>
     <initToZero/>
     <group>vpd</group>
@@ -1293,7 +1293,7 @@
     NOTE: you may need to handle correcting endianness if you are using this
     </description>
     <valueType>uint8</valueType>
-    <array>2560</array>
+    <array>2953</array>
     <platinit/>
     <initToZero/>
     <group>vpd</group>
