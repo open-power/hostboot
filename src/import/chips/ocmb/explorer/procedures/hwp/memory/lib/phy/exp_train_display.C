@@ -105,7 +105,7 @@ void display_lane_info(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_targ
 }
 
 ///
-/// @brief Displays MRS information
+/// @brief Displays MR information
 /// @param[in] i_target the OCMB target
 /// @param[in] i_training_info the training information to display
 ///
@@ -129,13 +129,13 @@ fapi2::ReturnCode display_mrs_info(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
             constexpr uint8_t DIMM_OFFSET = 2;
             const auto l_rank = l_dimm_rank + mss::index(l_dimm) * DIMM_OFFSET;
 
-            // MRS0->5 are easy, just display the value
-            FAPI_DBG("%s rank%u MRS%u 0x%04x", mss::c_str(i_target), l_rank, 0, i_training_info.mrs_resp.MR0);
-            FAPI_DBG("%s rank%u MRS%u 0x%04x", mss::c_str(i_target), l_rank, 1, i_training_info.mrs_resp.MR1[l_rank]);
-            FAPI_DBG("%s rank%u MRS%u 0x%04x", mss::c_str(i_target), l_rank, 2, i_training_info.mrs_resp.MR2[l_rank]);
-            FAPI_DBG("%s rank%u MRS%u 0x%04x", mss::c_str(i_target), l_rank, 3, i_training_info.mrs_resp.MR3);
-            FAPI_DBG("%s rank%u MRS%u 0x%04x", mss::c_str(i_target), l_rank, 4, i_training_info.mrs_resp.MR4);
-            FAPI_DBG("%s rank%u MRS%u 0x%04x", mss::c_str(i_target), l_rank, 5, i_training_info.mrs_resp.MR5[l_rank]);
+            // MR0->5 are easy, just display the value
+            FAPI_DBG("%s rank%u MR%u 0x%04x", mss::c_str(i_target), l_rank, 0, i_training_info.mrs_resp.MR0);
+            FAPI_DBG("%s rank%u MR%u 0x%04x", mss::c_str(i_target), l_rank, 1, i_training_info.mrs_resp.MR1[l_rank]);
+            FAPI_DBG("%s rank%u MR%u 0x%04x", mss::c_str(i_target), l_rank, 2, i_training_info.mrs_resp.MR2[l_rank]);
+            FAPI_DBG("%s rank%u MR%u 0x%04x", mss::c_str(i_target), l_rank, 3, i_training_info.mrs_resp.MR3);
+            FAPI_DBG("%s rank%u MR%u 0x%04x", mss::c_str(i_target), l_rank, 4, i_training_info.mrs_resp.MR4);
+            FAPI_DBG("%s rank%u MR%u 0x%04x", mss::c_str(i_target), l_rank, 5, i_training_info.mrs_resp.MR5[l_rank]);
 
             // The number of the DRAM's and the position to access each DRAM changes based upon x4 vs x8
             const auto l_num_dram = l_dram_width == fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X4 ?
@@ -148,7 +148,7 @@ fapi2::ReturnCode display_mrs_info(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
             for(uint64_t l_dram = 0; l_dram < l_num_dram; ++l_dram)
             {
                 const auto l_dram_pos = l_correction_factor * l_dram;
-                FAPI_DBG("%s rank%u MRS6 dram%u 0x%04x", mss::c_str(i_target), l_rank, l_dram,
+                FAPI_DBG("%s rank%u MR6 dram%u 0x%04x", mss::c_str(i_target), l_rank, l_dram,
                          i_training_info.mrs_resp.MR6[l_rank][l_dram_pos]);
             }
         }
@@ -264,9 +264,9 @@ fapi2::ReturnCode display_response_timing(const fapi2::Target<fapi2::TARGET_TYPE
 
     for(uint8_t l_rank_n = 0; l_rank_n < l_num_rank_per_ocmb; ++l_rank_n)
     {
-        FAPI_DBG("%s RD-to-RD rank%u: %2i %2i %2i %2i", i_training_info.tm_resp.CDD_RR[l_rank_n][0],
-                 i_training_info.tm_resp.CDD_RR[l_rank_n][1], i_training_info.tm_resp.CDD_RR[l_rank_n][2],
-                 i_training_info.tm_resp.CDD_RR[l_rank_n][3]);
+        FAPI_DBG("%s RD-to-RD rank%u: %2i %2i %2i %2i", mss::c_str(i_target), l_rank_n,
+                 i_training_info.tm_resp.CDD_RR[l_rank_n][0], i_training_info.tm_resp.CDD_RR[l_rank_n][1],
+                 i_training_info.tm_resp.CDD_RR[l_rank_n][2], i_training_info.tm_resp.CDD_RR[l_rank_n][3]);
     }
 
     // WR to WR
@@ -274,9 +274,9 @@ fapi2::ReturnCode display_response_timing(const fapi2::Target<fapi2::TARGET_TYPE
 
     for(uint8_t l_rank_n = 0; l_rank_n < l_num_rank_per_ocmb; ++l_rank_n)
     {
-        FAPI_DBG("%s WR-to-WR rank%u: %2i %2i %2i %2i", i_training_info.tm_resp.CDD_WW[l_rank_n][0],
-                 i_training_info.tm_resp.CDD_WW[l_rank_n][1], i_training_info.tm_resp.CDD_WW[l_rank_n][2],
-                 i_training_info.tm_resp.CDD_WW[l_rank_n][3]);
+        FAPI_DBG("%s WR-to-WR rank%u: %2i %2i %2i %2i", mss::c_str(i_target), l_rank_n,
+                 i_training_info.tm_resp.CDD_WW[l_rank_n][0], i_training_info.tm_resp.CDD_WW[l_rank_n][1],
+                 i_training_info.tm_resp.CDD_WW[l_rank_n][2], i_training_info.tm_resp.CDD_WW[l_rank_n][3]);
     }
 
     // WR to RD
@@ -284,9 +284,9 @@ fapi2::ReturnCode display_response_timing(const fapi2::Target<fapi2::TARGET_TYPE
 
     for(uint8_t l_rank_n = 0; l_rank_n < l_num_rank_per_ocmb; ++l_rank_n)
     {
-        FAPI_DBG("%s WR-to-RD rank%u: %2i %2i %2i %2i", i_training_info.tm_resp.CDD_WR[l_rank_n][0],
-                 i_training_info.tm_resp.CDD_WR[l_rank_n][1], i_training_info.tm_resp.CDD_WR[l_rank_n][2],
-                 i_training_info.tm_resp.CDD_WR[l_rank_n][3]);
+        FAPI_DBG("%s WR-to-RD rank%u: %2i %2i %2i %2i", mss::c_str(i_target), l_rank_n,
+                 i_training_info.tm_resp.CDD_WR[l_rank_n][0], i_training_info.tm_resp.CDD_WR[l_rank_n][1],
+                 i_training_info.tm_resp.CDD_WR[l_rank_n][2], i_training_info.tm_resp.CDD_WR[l_rank_n][3]);
     }
 
     // RD to WR
@@ -294,9 +294,9 @@ fapi2::ReturnCode display_response_timing(const fapi2::Target<fapi2::TARGET_TYPE
 
     for(uint8_t l_rank_n = 0; l_rank_n < l_num_rank_per_ocmb; ++l_rank_n)
     {
-        FAPI_DBG("%s RD-to-WR rank%u: %2i %2i %2i %2i", i_training_info.tm_resp.CDD_RW[l_rank_n][0],
-                 i_training_info.tm_resp.CDD_RW[l_rank_n][1], i_training_info.tm_resp.CDD_RW[l_rank_n][2],
-                 i_training_info.tm_resp.CDD_RW[l_rank_n][3]);
+        FAPI_DBG("%s RD-to-WR rank%u: %2i %2i %2i %2i", mss::c_str(i_target), l_rank_n,
+                 i_training_info.tm_resp.CDD_RW[l_rank_n][0], i_training_info.tm_resp.CDD_RW[l_rank_n][1],
+                 i_training_info.tm_resp.CDD_RW[l_rank_n][2], i_training_info.tm_resp.CDD_RW[l_rank_n][3]);
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
