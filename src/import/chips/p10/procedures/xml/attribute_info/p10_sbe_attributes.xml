@@ -307,4 +307,32 @@
       <name>ATTR_MC_PLL_BUCKET</name>
       <value>0x0</value>
   </entry>
+  <entry>
+      <name>ATTR_PROC_FABRIC_BROADCAST_MODE</name>
+      <value>0x0</value>
+  </entry>
+  <entry>
+      <name>ATTR_SYSTEM_IPL_PHASE</name>
+      <value>0x1</value>
+  </entry>
+  <entry>
+      <name>ATTR_SMF_CONFIG</name>
+      <value>0x0</value>
+  </entry>
+  <entry>
+      <name>ATTR_PROC_XSCOM_BAR_BASE_ADDR_OFFSET</name>
+      <value>0x0</value>
+  </entry>
+  <entry>
+      <name>ATTR_PROC_LPC_BAR_BASE_ADDR_OFFSET</name>
+      <value>0x0</value>
+  </entry>
+  <entry>
+      <name>ATTR_MEM_MIRROR_PLACEMENT_POLICY</name>
+      <value>0x0</value>
+  </entry>
+  <entry>
+      <name>ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID</name>
+      <value>0x0</value>
+  </entry>
 </entries>
