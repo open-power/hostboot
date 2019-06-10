@@ -59,11 +59,13 @@ typedef struct
     uint16_t vcs_voltage;
     uint16_t ics_tdp_ac_cur;
     uint16_t ics_tdp_dc_cur;
+    uint16_t ics_rdp_ac_cur;
+    uint16_t ics_rdp_dc_cur;
     uint16_t core_freq_gb_sort;
     uint16_t vdd_vmin;
     uint16_t ivdd_powr_cur_act;
     uint8_t core_powr_temp;
-    uint8_t  spare[3];
+    uint8_t  spare[6];
 } poundV_entry_pts_t;
 
 
@@ -78,7 +80,7 @@ typedef struct
     uint16_t SRVpciVltg;
     uint16_t SRIpciTdpAcCurr;
     uint16_t SRIpciTdpDcCurr;
-    uint8_t  SRRsvd[10];
+    uint8_t  SRRsvd[17];
 } poundV_static_rails_t;
 
 typedef struct
@@ -99,7 +101,7 @@ typedef struct
     uint8_t  TdpSrtPwrTmp;
     uint16_t VddTdpWofCoreFreq;
     uint16_t FxdFreqMdeCoreFreq;
-    uint8_t rsvd[3];
+    uint8_t rsvd[10];
 } poundV_other_info_t;
 //Represents the data contained within a single #V (version=1) bucket
 //Note: This structure should not be assumed to be binary identical
