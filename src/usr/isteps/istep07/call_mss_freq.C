@@ -74,13 +74,25 @@ using   namespace   ISTEP_ERROR;
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 
+#ifdef CONFIG_AXONE
+/**
+  * @brief Look at all FREQ_OMI_MHZ attribute on all processors, make sure
+  *        they are the same and return the value.
+  * @param[out] o_omiFreq  the frequency of the OMI link between proc and ocmbs
+  * @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+  *
+  * @note returns error if all OMIs do not have matching frequency set
+  */
+errlHndl_t getOmiFreq(TARGETING::ATTR_FREQ_OMI_MHZ_type & o_omiFreq);
+#endif
+
 //
 //  Wrapper function to call mss_freq
 //
 void*    call_mss_freq( void *io_pArgs )
 {
     IStepError l_StepError;
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
 
     #if (defined CONFIG_SECUREBOOT && ! defined CONFIG_AXONE)
     bool l_isMemdLoaded = false;
@@ -210,10 +222,21 @@ void*    call_mss_freq( void *io_pArgs )
         // allow it to change here
         TARGETING::Target * l_sys = nullptr;
         TARGETING::targetService().getTopLevelTarget( l_sys );
-        // TODO RTC: 207596 Get nest boot freq for OMIs
-        #ifndef CONFIG_AXONE_BRING_UP
-        uint32_t l_originalNest = Util::getBootNestFreq();
-        #endif
+
+        uint32_t l_originalNestFreq = Util::getBootNestFreq();
+
+        // Omi Freq is only used in P9a and beyond, to limit #ifdef
+        // craziness below just leave it at 0 so it never changes
+        uint32_t l_originalOmiFreq = 0;
+#ifdef CONFIG_AXONE
+        l_err = getOmiFreq(l_originalOmiFreq);
+        if(l_err)
+        {
+            l_StepError.addErrorDetails( l_err );
+            errlCommit( l_err, ISTEP_COMP_ID );
+            break;
+        }
+#endif
 
 /* FIXME RTC: 210975
 
@@ -306,30 +329,55 @@ void*    call_mss_freq( void *io_pArgs )
             break;
         }
 
-        // TODO RTC: 207596 Get nest boot freq for OMIs
-        #ifndef CONFIG_AXONE_BRING_UP
-        // Get latest FREQ_PB_MHZ
-        uint32_t l_newNest = l_sys->getAttr<TARGETING::ATTR_FREQ_PB_MHZ>();
+        // Get latest MC_SYNC_MODE and FREQ_PB_MHZ
+        uint8_t l_mcSyncMode = l_masterProc->getAttr<TARGETING::ATTR_MC_SYNC_MODE>();
+        uint32_t l_newOmiFreq = 0;
+
+        uint32_t l_newNestFreq = l_sys->getAttr<TARGETING::ATTR_FREQ_PB_MHZ>();
+#ifdef CONFIG_AXONE
+        l_err = getOmiFreq(l_newOmiFreq);
+        if(l_err)
+        {
+            l_StepError.addErrorDetails( l_err );
+            errlCommit( l_err, ISTEP_COMP_ID );
+            break;
+        }
+#endif
 
         //Trigger sbe update if the nest frequency changed.
-        if( l_newNest != l_originalNest )
+        if(    (l_newNestFreq != l_originalNestFreq)
+            || (l_mcSyncMode  != l_bootSyncMode)
+            || (l_newOmiFreq  != l_originalOmiFreq)
+          )
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "The nest frequency changed!"
-                  " Original Nest: %d New Nest: %d",
-                  l_originalNest, l_newNest );
+                  "The nest frequency or sync mode changed!"
+                  " Original Nest: %d New Nest: %d"
+                  " Original syncMode: %d New syncMode: %d"
+                  " Original Omi : %d New Omi : %d"
+                  , l_originalNestFreq, l_newNestFreq, l_bootSyncMode, l_mcSyncMode
+                  , l_originalOmiFreq, l_newOmiFreq
+                  );
             if(l_sys->getAttr<TARGETING::ATTR_IS_MPIPL_HB>() == true)
             {
 
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "Error: SBE update detected in MPIPL");
 
+                // It is highly unlikely nest frequency will change
+                // in Axone systems but OMI freq might. Its is impossible
+                // for OMI freq to change in Nimbus/Cumulus systems. So
+                // we will display Nest freq in error for Nimbus/Cumulus and
+                // display OMI freq for Axone.
+
                 /*@
                 * @errortype
                 * @moduleid          MOD_SBE_PERFORM_UPDATE_CHECK
                 * @reasoncode        RC_SBE_UPDATE_IN_MPIPL
-                * @userdata1[0:31]   original nest frequency
-                * @userdata1[32:63]  new nest frequency
+                * @userdata1[0:31]   original mc sync mode
+                * @userdata1[32:63]  new mc sync mode
+                * @userdata2[0:31]   original (nest p9 | omi p9a+) frequency
+                * @userdata2[32:63]  new (nest p9 | omi p9a+) frequency
                 * @devdesc           SBE cannot be reset during MPIPL
                 * @custdesc          Illegal action during boot
                 */
@@ -337,7 +385,18 @@ void*    call_mss_freq( void *io_pArgs )
                               MOD_SBE_PERFORM_UPDATE_CHECK,
                               RC_SBE_UPDATE_IN_MPIPL,
                               TWO_UINT32_TO_UINT64(
-                                  l_originalNest, l_newNest));
+                                  TO_UINT32(l_bootSyncMode),
+                                  TO_UINT32(l_mcSyncMode)),
+#ifndef CONFIG_AXONE
+                              TWO_UINT32_TO_UINT64(
+                                  l_originalNestFreq,
+                                  l_newNestFreq));
+#else
+                              TWO_UINT32_TO_UINT64(
+                                  l_originalOmiFreq,
+                                  l_newOmiFreq));
+#endif
+               l_err->collectTrace("ISTEPS_TRACE");
 
                 l_StepError.addErrorDetails( l_err );
                 errlCommit( l_err, ISTEP_COMP_ID );
@@ -345,8 +404,9 @@ void*    call_mss_freq( void *io_pArgs )
             else
             {
                 TARGETING::setFrequencyAttributes(l_sys,
-                                          l_newNest);
+                                                  l_newNestFreq);
                 l_err = SBE::updateProcessorSbeSeeproms();
+
                 if( l_err )
                 {
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -361,7 +421,6 @@ void*    call_mss_freq( void *io_pArgs )
                 }
             }
         }
-        #endif
 
     } while(0);
 
@@ -391,5 +450,55 @@ void*    call_mss_freq( void *io_pArgs )
 
     return l_StepError.getErrorHandle();
 }
+
+#ifdef CONFIG_AXONE
+errlHndl_t getOmiFreq(TARGETING::ATTR_FREQ_OMI_MHZ_type & o_omiFreq)
+{
+    errlHndl_t l_err = nullptr;
+    TARGETING::TargetHandleList l_procTargetList;
+        getAllChips(l_procTargetList, TYPE_PROC);
+
+    assert( l_procTargetList.size() > 0, "getOmiFreq: Expected at least one functional processor");
+
+    o_omiFreq = l_procTargetList[0]->getAttr<TARGETING::ATTR_FREQ_OMI_MHZ>();
+    // Until we are told we need to support individual processor frequency
+    // assert that all of the processors have the same values
+    for(uint8_t i = 1; i < l_procTargetList.size(); i++)
+    {
+
+        TARGETING::ATTR_FREQ_OMI_MHZ_type l_tmpFreq =
+              l_procTargetList[i]->getAttr<TARGETING::ATTR_FREQ_OMI_MHZ>();
+
+        if(o_omiFreq != l_tmpFreq)
+        {
+            /*@
+            * @errortype         ERRL_SEV_UNRECOVERABLE
+            * @moduleid          MOD_GET_OMI_FREQ
+            * @reasoncode        RC_OMI_FREQ_MISMATCH
+            * @userdata1[0:31]   First OMI freq found
+            * @userdata1[32:63]  Mismatched OMI freq found
+            * @userdata2[0:31]   Huid of first proc found
+            * @userdata2[32:63]  Huid of proc w/ mismatched OMI freq
+            * @devdesc           Processor have mismatch OMI freq
+            * @custdesc          Invalid processor frequency settings
+            */
+            l_err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                          MOD_GET_OMI_FREQ,
+                          RC_OMI_FREQ_MISMATCH,
+                          TWO_UINT32_TO_UINT64(
+                              TO_UINT32(o_omiFreq),
+                              TO_UINT32(l_tmpFreq)),
+                          TWO_UINT32_TO_UINT64(
+                              get_huid(l_procTargetList[0]),
+                              get_huid(l_procTargetList[i])),
+                          ErrlEntry::ADD_SW_CALLOUT);
+
+            break;
+        }
+    }
+
+    return l_err;
+}
+#endif
 
 };   // end namespace
