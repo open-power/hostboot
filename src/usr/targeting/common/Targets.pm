@@ -80,7 +80,8 @@ my %maxInstance = (
     "MI"            => 4,
     "MCC"           => 8,
     "OMI"           => 16,
-    "OCMB_CHIP"     => 12,
+    "OCMB_CHIP"     => 16,
+    "DDIMM"         => 16,
     "DMI"           => 8,
     "OCC"           => 1,
     "NV"            => 6,
@@ -879,43 +880,81 @@ sub buildAffinity
         }
         elsif ($type eq "OCMB_CHIP")
         {
-            # Ocmbs are not in order, so we take the parent dimm's FAPI_POS as
+            # Ocmbs are not in order, so we take the parent dimm's POSITION as
             # our current ocmb number
             # Ex. dimm19 = ocmb19
             my $parent = $self->getTargetParent($target);
-            $ocmb = $self->getAttribute($parent, "FAPI_POS");
+            $ocmb = $self->getAttribute($parent, "POSITION");
             $self->{targeting}{SYS}[0]{NODES}[$node]{OCMB_CHIPS}[$ocmb]{KEY} = $target;
             $self->setHuid($target, $sys_pos, $node);
 
             my $ocmb_phys = $node_phys . "/ocmb_chip-$ocmb";
-            # Same logic for MCC, but for OCMB_CHIP instead
-            my $numOfOcmbsPerProc = $maxInstance{$type};
-            my $numOfOcmbsPerMc = 8;
-            my $numOfOcmbsPerMi = 4;
-            my $numOfOcmbsPerMcc = 2;
-            my $proc_num = ($ocmb / $numOfOcmbsPerProc) % 2;
-            my $mc_num = ($ocmb / $numOfOcmbsPerMc) % 2;
-            my $mi_num = ($ocmb / $numOfOcmbsPerMi) % 2;
-            my $mcc_num = ($ocmb / $numOfOcmbsPerMcc) % 2;
-            my $omi_num = $ocmb % 2;
+
+            # Find the OMI bus connection to determine target values
+            my $proc_num = -1;
+            my $mc_num = -1;
+            my $mi_num = -1;
+            my $mcc_num = -1;
+            my $omi_num = -1;
+            my $conn = $self->findConnectionsByDirection($target, "OMI", "", 1);
+
+            my $omi_chip_unit = -1;
+            if ($conn ne "")
+            {
+                foreach my $conn (@{$conn->{CONN}})
+                {
+                    my $source = $conn->{SOURCE};
+                    my @targets = split(/\//, $source);
+                    # Split the source into proc#, mc#, mi#, mcc#, omi#
+                    # Source example:
+                    # /sys-#/node-#/Pallid-#/proc_socket-#/Hopper-#/p9_axone/mc#/mi#/mcc#/omi#
+                    foreach my $target (@targets)
+                    {
+                        $target =~ s/\D//g;
+                    }
+
+                    # Splitting on "/" makes the first array index empty string
+                    # so every value here is shifted over by 1
+                    # There are only ever two targets per parent in this case,
+                    # so to get the relative positions for each target, we take
+                    # mod two of the source value
+                    $proc_num = $targets[4] % 2;
+                    $mc_num = $targets[7] % 2;
+                    $mi_num = $targets[8] % 2;
+                    $mcc_num = $targets[9] % 2;
+
+                    # omi_num indicates the chip_unit of the corresponding omi
+                    $omi_num = $targets[10];
+                    $omi_chip_unit = $omi_num;
+                    $omi_num %= 2;
+                }
+            }
+
             my $ocmb_aff = $node_aff . "/proc-$proc_num/mc-$mc_num/mi-$mi_num/mcc-$mcc_num/omi-$omi_num/ocmb_chip-0";
             $self->setAttribute($target, "AFFINITY_PATH", $ocmb_aff);
             $self->setAttribute($target, "PHYS_PATH", $ocmb_phys);
 
-            my $ocmb_num = $ocmb;
+            # The standard fapi_pos calculation uses the relative position to
+            # the proc instead of omi_chip_unit. However, in this case, there is
+            # no direct way to get the relative position to the proc. The
+            # relationship between ocmb and omi is 1:1, so we take the chip unit
+            # of the corresponding omi as the relative position to the proc
+            my $fapi_pos = $omi_chip_unit + ($maxInstance{$type} * $proc_num);
+            $self->setAttribute($target, "FAPI_POS", $fapi_pos);
+
+            my $ocmb_num = $fapi_pos;
             # The norm for FAPI_NAME has a two digit number at the end
-            if ($ocmb < 10)
+            if ($fapi_pos < 10)
             {
-                $ocmb_num = "0$ocmb";
+                $ocmb_num = "0$fapi_pos";
             }
+
+            $self->setAttribute($target, "MRU_ID", "0x00060000");
+            $self->setAttribute($target, "POSITION", $ocmb);
 
             # chipunit:system:node:slot:position
             $self->setAttribute($target, "FAPI_NAME", "ocmb:k0:n0:s0:p$ocmb_num");
-            $self->setAttribute($target, "MRU_ID", "0x00060000");
 
-            $self->setAttribute($target, "POSITION", $ocmb);
-            my $fapi_pos = $ocmb + $numOfOcmbsPerProc * $proc_fapi;
-            $self->setAttribute($target, "FAPI_POS", $fapi_pos);
             $self->setAttribute($target, "REL_POS", "0");
 
             my $fapi_name = "FAPI_I2C_CONTROL_INFO";
@@ -981,6 +1020,8 @@ sub buildAffinity
             my $mcc_num = -1;
             my $omi_num = -1;
             my $conn = $self->findConnectionsByDirection($target, "OMI", "", 1);
+
+            my $omi_chip_unit = -1;
             if ($conn ne "")
             {
                 foreach my $conn (@{$conn->{CONN}})
@@ -988,29 +1029,48 @@ sub buildAffinity
                     my $source = $conn->{SOURCE};
                     my @targets = split(/\//, $source);
                     # Split the source into proc#, mc#, mi#, mcc#, omi#
+                    # Source example:
+                    # /sys-#/node-#/Pallid-#/proc_socket-#/Hopper-#/p9_axone/mc#/mi#/mcc#/omi#
                     foreach my $target (@targets)
                     {
                         $target =~ s/\D//g;
                     }
-                    $proc_num = @targets[4] % 2;
-                    $mc_num = @targets[7] % 2;
-                    $mi_num = @targets[8] % 2;
-                    $mcc_num = @targets[9] % 2;
-                    $omi_num = @targets[10] % 2;
+
+                    # Splitting on "/" makes the first array index empty string
+                    # so every value here is shifted over by 1
+                    # There are only ever two targets per parent in this case,
+                    # so to get the relative positions for each target, we take
+                    # mod two of the source value
+                    $proc_num = $targets[4] % 2;
+                    $mc_num = $targets[7] % 2;
+                    $mi_num = $targets[8] % 2;
+                    $mcc_num = $targets[9] % 2;
+                    $omi_num = $targets[10];
+
+                    # omi_num indicates the chip_unit of the corresponding omi
+                    $omi_chip_unit = $omi_num;
+                    $omi_num %= 2;
                 }
             }
 
             $self->{targeting}{SYS}[0]{NODES}[$node]{DIMMS}[$dimm]{KEY} = $target;
             $self->setAttribute($target, "PHYS_PATH", $node_phys . "/dimm-$dimm");
-            $self->setAttribute($target, "FAPI_POS", $dimm);
+
+            # The standard fapi_pos calculation uses the relative position to
+            # the proc instead of omi_chip_unit. However, in this case, there is
+            # no direct way to get the relative position to the proc. The
+            # relationship between dimm and omi is 1:1, so we take the chip unit
+            # of the corresponding omi as the relative position to the proc
+            my $fapi_pos = $omi_chip_unit + ($maxInstance{"DDIMM"} * $proc_num);
+            $self->setAttribute($target, "FAPI_POS", $fapi_pos);
             $self->setAttribute($target, "ORDINAL_ID", $dimm);
             $self->setAttribute($target, "REL_POS", 0);
             $self->setAttribute($target, "VPD_REC_NUM", $dimm);
 
-            my $dimm_num = $dimm;
-            if ($dimm < 10)
+            my $dimm_num = $fapi_pos;
+            if ($fapi_pos < 10)
             {
-                $dimm_num = "0$dimm";
+                $dimm_num = "0$fapi_pos";
             }
             # chipunit:slot:node:system:position
             $self->setAttribute($target, "FAPI_NAME", "dimm:k0:n0:s0:p$dimm_num");
@@ -1028,29 +1088,36 @@ sub buildAffinity
         elsif ($type eq "PMIC")
         {
             # Pmics are not in order, so we take the parent dimm's
-            # FAPI_POS * 2 as our current pmic number, adding one
-            # if it's a pmic1
-            # Ex. on a pmic0, dimm19 = pmic38
-            # Ex. on a pmic1, dimm19 = pmic39
+            # POSITION * 4 as our current pmic number, adding one
+            # if it's a pmic1, two if it's a pmic2, three if it's a
+            # pmic3
+            # Ex. on a pmic0, dimm19 = pmic76
+            # Ex. on a pmic1, dimm19 = pmic77
+            # Ex. on a pmic2, dimm19 = pmic78
+            # Ex. on a pmic3, dimm19 = pmic79
             my $instance_name = $self->getInstanceName($target);
             my $parent = $self->getTargetParent($target);
-            my $fapi_pos = $self->getAttribute($parent, "FAPI_POS");
+            my $parent_fapi_pos = $self->getAttribute($parent, "FAPI_POS");
+            my $parent_pos = $self->getAttribute($parent, "POSITION");
             my $position = $self->getAttribute($target, "POSITION");
-            $pmic = $fapi_pos * 2 + $position;
+            $pmic = ($parent_pos * 4) + $position;
 
             $self->{targeting}{SYS}[0]{NODES}[$node]{PMICS}[$pmic]{KEY} = $target;
             $self->setAttribute($target, "PHYS_PATH", $node_phys . "/pmic-$pmic");
             $self->setAttribute($target, "ORDINAL_ID", $pmic);
             $self->setAttribute($target, "REL_POS", $pmic % 2);
-            $self->setAttribute($target, "FAPI_POS", $pmic);
+
+            # Same logic with the position, but with FAPI_POS instead
+            my $fapi_pos = ($parent_fapi_pos * 4) + $position;
+            $self->setAttribute($target, "FAPI_POS", $fapi_pos);
             $self->setAttribute($target, "POSITION", $pmic);
             $self->setHuid($target, $sys_pos, $node);
 
-            my $pmic_num = $pmic;
+            my $pmic_num = $fapi_pos;
             # The norm for FAPI_NAME has a two digit number at the end
-            if ($pmic < 10)
+            if ($fapi_pos < 10)
             {
-                $pmic_num = "0$pmic";
+                $pmic_num = "0$fapi_pos";
             }
             # chipunit:slot:node:system:position
             $self->setAttribute($target, "FAPI_NAME", "pmic:k0:n0:s0:p$pmic_num");
@@ -1069,15 +1136,23 @@ sub buildAffinity
                     my $source = $conn->{SOURCE};
                     my @targets = split(/\//, $source);
                     # Split the source into proc#, mc#, mi#, mcc#, omi#
+                    # Source example:
+                    # /sys-#/node-#/Pallid-#/proc_socket-#/Hopper-#/p9_axone/mc#/mi#/mcc#/omi#
                     foreach my $target (@targets)
                     {
                         $target =~ s/\D//g;
                     }
-                    $proc_num = @targets[4] % 2;
-                    $mc_num = @targets[7] % 2;
-                    $mi_num = @targets[8] % 2;
-                    $mcc_num = @targets[9] % 2;
-                    $omi_num = @targets[10] % 2;
+
+                    # Splitting on "/" makes the first array index empty string
+                    # so every value here is shifted over by 1
+                    # There are only ever two targets per parent in this case,
+                    # so to get the relative positions for each target, we take
+                    # mod two of the source value
+                    $proc_num = $targets[4] % 2;
+                    $mc_num = $targets[7] % 2;
+                    $mi_num = $targets[8] % 2;
+                    $mcc_num = $targets[9] % 2;
+                    $omi_num = $targets[10] % 2;
                 }
             }
 
