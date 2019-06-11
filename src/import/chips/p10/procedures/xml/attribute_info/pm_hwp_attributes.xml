@@ -93,23 +93,6 @@
 
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_QME_BOOT_COPIER_IVPR_OFFSET</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-    Set by proc_hcode_image build with the offset value from the HOMER base
-        the QME Boot Copier interrupt vectors reside. This value must be 512B
-        The HOMER base address will be pre-establish in PBABAR0 so the address
-        to be off the form 0x8XXXXX00. The QME will be Sreset after this value
-        established
-    </description>
-    <valueType>uint32</valueType>
-    <initToZero/>
-    <writeable/>
-    <group>boot</group>
-  </attribute>
-
-  <!-- ********************************************************************* -->
-  <attribute>
     <id>ATTR_PM_SPWUP_IGNORE_XSTOP_FLAG</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
@@ -514,7 +497,7 @@
     <description>
     Enable trap function upon broadside scan
 
-    Consumers: p10_hcd_core/cache_*_initf 
+    Consumers: p10_hcd_core/cache_*_initf
     </description>
     <valueType>uint8</valueType>
     <enum>
@@ -524,6 +507,23 @@
     <initToZero/>
     <writeable/>
     <group>enablement</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SYSTEM_PSTATE0_FREQ_MHZ</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Frequency value of the fastest part in the system that establishes Pstate0.
+
+    Producer: p10_pm_set_pstate0.C
+
+    Consumers: p10_pstate_parameter_build
+    </description>
+    <valueType>uint32</valueType>
+    <initToZero/>
+    <writeable/>
+    <group>pstates</group>
   </attribute>
 
 </attributes>
