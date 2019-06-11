@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -99,10 +99,12 @@ void AttributeTank::clearAllAttributes(
 
     while (l_itr != iv_attributes.end())
     {
+        // Get a copy of the Attribute's node for quick access
+        uint8_t l_node = (*l_itr)->getHeader().iv_node;
         if (i_nodeFilter == NODE_FILTER_NOT_ALL_NODES)
         {
             // Only clear attributes that are not for all nodes
-            if ((*l_itr)->iv_hdr.iv_node == ATTR_NODE_NA)
+            if (l_node == ATTR_NODE_NA)
             {
                 l_itr++;
                 continue;
@@ -111,8 +113,8 @@ void AttributeTank::clearAllAttributes(
         else if (i_nodeFilter == NODE_FILTER_SPECIFIC_NODE_AND_ALL)
         {
             // Only clear attributes associated with i_node or all
-            if ( ((*l_itr)->iv_hdr.iv_node != ATTR_NODE_NA) &&
-                 ((*l_itr)->iv_hdr.iv_node != i_node) )
+            if ( (l_node != ATTR_NODE_NA) &&
+                 (l_node != i_node) )
             {
                 l_itr++;
                 continue;
@@ -121,7 +123,7 @@ void AttributeTank::clearAllAttributes(
         else if (i_nodeFilter == NODE_FILTER_SPECIFIC_NODE)
         {
             // Only clear attributes associated with i_node
-            if ((*l_itr)->iv_hdr.iv_node != i_node)
+            if (l_node != i_node)
             {
                 l_itr++;
                 continue;
@@ -153,13 +155,18 @@ void AttributeTank::clearNonConstAttribute(const uint32_t i_attrId,
     for (AttributesItr_t l_itr = iv_attributes.begin();
          l_itr != iv_attributes.end(); ++l_itr)
     {
-        if ( ((*l_itr)->iv_hdr.iv_attrId == i_attrId) &&
-             ((*l_itr)->iv_hdr.iv_targetType == i_targetType) &&
-             ((*l_itr)->iv_hdr.iv_pos == i_pos) &&
-             ((*l_itr)->iv_hdr.iv_unitPos == i_unitPos) &&
-             ((*l_itr)->iv_hdr.iv_node == i_node) )
+        // Get a (constant) reference to the Attribute Header
+        // for easy access to data members
+        const AttributeHeader &l_attributeHeader = (*l_itr)->getHeader();
+
+        // Find attribute that satisfies search criteria
+        if ( (l_attributeHeader.iv_attrId == i_attrId) &&
+             (l_attributeHeader.iv_targetType == i_targetType) &&
+             (l_attributeHeader.iv_pos == i_pos) &&
+             (l_attributeHeader.iv_unitPos == i_unitPos) &&
+             (l_attributeHeader.iv_node == i_node) )
         {
-            if (!((*l_itr)->iv_hdr.iv_flags & ATTR_FLAG_CONST))
+            if (!(l_attributeHeader.iv_flags & ATTR_FLAG_CONST))
             {
                 delete (*l_itr);
                 (*l_itr) = NULL;
@@ -196,20 +203,25 @@ void AttributeTank::setAttribute(const uint32_t i_attrId,
     for (AttributesItr_t l_itr = iv_attributes.begin();
          l_itr != iv_attributes.end(); ++l_itr)
     {
-        if ( ((*l_itr)->iv_hdr.iv_attrId == i_attrId) &&
-             ((*l_itr)->iv_hdr.iv_targetType == i_targetType) &&
-             ((*l_itr)->iv_hdr.iv_pos == i_pos) &&
-             ((*l_itr)->iv_hdr.iv_unitPos == i_unitPos) &&
-             ((*l_itr)->iv_hdr.iv_node == i_node) &&
-             ((*l_itr)->iv_hdr.iv_valSize == i_valSize) )
+        // Get a reference to the Attribute Header
+        // for easy access to data members
+        const AttributeHeader &l_attributeHeader = (*l_itr)->getHeader();
+
+        // Find attribute that satisfies search criteria
+        if ( (l_attributeHeader.iv_attrId == i_attrId) &&
+             (l_attributeHeader.iv_targetType == i_targetType) &&
+             (l_attributeHeader.iv_pos == i_pos) &&
+             (l_attributeHeader.iv_unitPos == i_unitPos) &&
+             (l_attributeHeader.iv_node == i_node) &&
+             (l_attributeHeader.iv_valSize == i_valSize) )
         {
             // Found existing attribute, update it unless the existing attribute
             // is const and the new attribute is non-const
-            if (!( ((*l_itr)->iv_hdr.iv_flags & ATTR_FLAG_CONST) &&
+            if (!( (l_attributeHeader.iv_flags & ATTR_FLAG_CONST) &&
                    (!(i_flags & ATTR_FLAG_CONST)) ) )
             {
-                (*l_itr)->iv_hdr.iv_flags = i_flags;
-                memcpy((*l_itr)->iv_pVal, i_pVal, i_valSize);
+                (*l_itr)->setFlags(i_flags);
+                (*l_itr)->setValue(i_pVal, i_valSize);
             }
             l_found = true;
             break;
@@ -221,15 +233,13 @@ void AttributeTank::setAttribute(const uint32_t i_attrId,
         // Add a new attribute to the tank
         Attribute * l_pAttr = new Attribute();
 
-        l_pAttr->iv_hdr.iv_attrId = i_attrId;
-        l_pAttr->iv_hdr.iv_targetType = i_targetType;
-        l_pAttr->iv_hdr.iv_pos = i_pos;
-        l_pAttr->iv_hdr.iv_unitPos = i_unitPos;
-        l_pAttr->iv_hdr.iv_node = i_node;
-        l_pAttr->iv_hdr.iv_flags = i_flags;
-        l_pAttr->iv_hdr.iv_valSize = i_valSize;
-        l_pAttr->iv_pVal = new uint8_t[i_valSize];
-        memcpy(l_pAttr->iv_pVal, i_pVal, i_valSize);
+        l_pAttr->setId(i_attrId);
+        l_pAttr->setTargetType(i_targetType);
+        l_pAttr->setPosition(i_pos);
+        l_pAttr->setUnitPosition(i_unitPos);
+        l_pAttr->setNode(i_node);
+        l_pAttr->setFlags(i_flags);
+        l_pAttr->setValue(i_pVal, i_valSize);
 
         iv_attributesExist = true;
         iv_attributes.push_back(l_pAttr);
@@ -253,18 +263,22 @@ bool AttributeTank::getAttribute(const uint32_t i_attrId,
     for (AttributesCItr_t l_itr = iv_attributes.begin(); l_itr
          != iv_attributes.end(); ++l_itr)
     {
-        // Allow match if attribute applies to all positions
-        if ( ((*l_itr)->iv_hdr.iv_attrId == i_attrId) &&
-             ((*l_itr)->iv_hdr.iv_targetType == i_targetType) &&
-             (((*l_itr)->iv_hdr.iv_pos == ATTR_POS_NA) ||
-              ((*l_itr)->iv_hdr.iv_pos == i_pos)) &&
-             (((*l_itr)->iv_hdr.iv_unitPos == ATTR_UNIT_POS_NA) ||
-              ((*l_itr)->iv_hdr.iv_unitPos == i_unitPos)) &&
-             (((*l_itr)->iv_hdr.iv_node == ATTR_NODE_NA) ||
-              ((*l_itr)->iv_hdr.iv_node == i_node)) )
+        // Get a (constant) reference to the Attribute Header
+        // for easy access to data members
+        const AttributeHeader &l_attributeHeader = (*l_itr)->getHeader();
+
+        // Find attribute that satisfies search criteria
+        if ( (l_attributeHeader.iv_attrId == i_attrId) &&
+             (l_attributeHeader.iv_targetType == i_targetType) &&
+             ((l_attributeHeader.iv_pos == ATTR_POS_NA) ||
+              (l_attributeHeader.iv_pos == i_pos)) &&
+             ((l_attributeHeader.iv_unitPos == ATTR_UNIT_POS_NA) ||
+              (l_attributeHeader.iv_unitPos == i_unitPos)) &&
+             ((l_attributeHeader.iv_node == ATTR_NODE_NA) ||
+              (l_attributeHeader.iv_node == i_node)) )
         {
             l_found = true;
-            memcpy(o_pVal, (*l_itr)->iv_pVal, (*l_itr)->iv_hdr.iv_valSize);
+            (*l_itr)->cloneValue(o_pVal, l_attributeHeader.iv_valSize);
             break;
         }
     }
@@ -293,10 +307,18 @@ void AttributeTank::serializeAttributes(
         // Fill up the buffer with as many attributes as possible
         while (l_itr != iv_attributes.end())
         {
+            // Get a (constant) reference to the Attribute Header
+            // for easy access to data members
+            const AttributeHeader &l_attributeHeader =
+                                                 (*l_itr)->getHeader();
+
+            // Get a copy of the node for quick access
+            uint8_t l_node = l_attributeHeader.iv_node;
+
             if (i_nodeFilter == NODE_FILTER_NOT_ALL_NODES)
             {
                 // Only want attributes that are not for all nodes
-                if ((*l_itr)->iv_hdr.iv_node == ATTR_NODE_NA)
+                if (l_node == ATTR_NODE_NA)
                 {
                     l_itr++;
                     continue;
@@ -305,8 +327,8 @@ void AttributeTank::serializeAttributes(
             else if (i_nodeFilter == NODE_FILTER_SPECIFIC_NODE_AND_ALL)
             {
                 // Only want attributes associated with i_node or all
-                if ( ((*l_itr)->iv_hdr.iv_node != ATTR_NODE_NA) &&
-                     ((*l_itr)->iv_hdr.iv_node != i_node) )
+                if ( (l_node != ATTR_NODE_NA) &&
+                     (l_node != i_node) )
                 {
                     l_itr++;
                     continue;
@@ -315,15 +337,14 @@ void AttributeTank::serializeAttributes(
             else if (i_nodeFilter == NODE_FILTER_SPECIFIC_NODE)
             {
                 // Only want attributes associated with i_node
-                if ((*l_itr)->iv_hdr.iv_node != i_node)
+                if (l_node != i_node)
                 {
                     l_itr++;
                     continue;
                 }
             }
 
-            if ((l_index + sizeof(AttributeHeader) +
-                     (*l_itr)->iv_hdr.iv_valSize) > i_chunkSize)
+            if ((l_index + (*l_itr)->getSize()) > i_chunkSize)
             {
                 // Attribute will not fit into the buffer
                 if (l_index == 0)
@@ -334,7 +355,7 @@ void AttributeTank::serializeAttributes(
                     TRACFCOMP(g_trac_targeting,
                         "serializeAttributes: Error, attr too big to serialize "
                         "(0x%x)",
-                        (*l_itr)->iv_hdr.iv_valSize);
+                        l_attributeHeader.iv_valSize);
                     l_itr++;
                 }
                 else
@@ -346,17 +367,8 @@ void AttributeTank::serializeAttributes(
             }
             else
             {
-                // Copy the attribute header to the buffer
-                AttributeHeader * l_pHeader =
-                    reinterpret_cast<AttributeHeader *>(l_pBuffer + l_index);
-                *l_pHeader = (*l_itr)->iv_hdr;
-                l_index += sizeof(AttributeHeader);
-
-                // Copy the attribute value to the buffer
-                memcpy((l_pBuffer + l_index), (*l_itr)->iv_pVal,
-                       (*l_itr)->iv_hdr.iv_valSize);
-                l_index += (*l_itr)->iv_hdr.iv_valSize;
-
+                l_index += (*l_itr)->serialize(l_pBuffer + l_index,
+                                               (*l_itr)->getSize());
                 l_itr++;
             }
         }
@@ -404,7 +416,7 @@ bool AttributeTank::attributeExists(const uint32_t i_attrId) const
     for (AttributesCItr_t l_itr = iv_attributes.begin(); l_itr
          != iv_attributes.end(); ++l_itr)
     {
-        if ((*l_itr)->iv_hdr.iv_attrId == i_attrId)
+        if ((*l_itr)->getHeader().iv_attrId == i_attrId)
         {
             l_found = true;
             break;
@@ -424,60 +436,57 @@ void AttributeTank::deserializeAttributes(
 
     uint32_t l_index = 0;
 
+    // Get a handle to the serialized Attributes
+    uint8_t* l_serializedData =
+                        reinterpret_cast<uint8_t*>(i_attributes.iv_pAttributes);
+
+    // Iterate thru the Attributes
     while (l_index < i_attributes.iv_size)
     {
-        AttributeHeader * l_pAttrHdr =
-            reinterpret_cast<AttributeHeader *>
-                (i_attributes.iv_pAttributes + l_index);
+        // Progress the offset to the serialized data
+        l_serializedData += l_index;
 
-        if (sizeof(AttributeHeader) > (i_attributes.iv_size - l_index))
+        // Create a new Attribute
+        Attribute * l_pAttribute = new Attribute();
+
+        // Deserialize the data, if possible
+        uint32_t l_deserializedDataSize = l_pAttribute->deserialize(
+                                l_serializedData,
+                                i_attributes.iv_size - l_index);
+
+        if (!l_deserializedDataSize)
         {
+            // Unable to deserialize data, delete Attribute
+            delete l_pAttribute;
+            l_pAttribute = NULL;
+
             // Remaining chunk smaller than attribute header, quit
             TRACFCOMP(g_trac_targeting,
-                      "deserializeAttributes: Error, header too big for chunk "
-                      "(0x%x)",
+                      "deserializeAttributes: Error, attribute too big for "
+                      "chunk (0x%x)",
                       (i_attributes.iv_size - l_index));
             break;
         }
 
-        l_index += sizeof(AttributeHeader);
-
-        if (l_pAttrHdr->iv_valSize > (i_attributes.iv_size - l_index))
-        {
-            // Remaining chunk smaller than attribute value, quit
-            TRACFCOMP(g_trac_targeting,
-                      "deserializeAttributes: Error, attr too big for chunk "
-                      "(0x%x:0x%x)",
-                      l_pAttrHdr->iv_valSize, (i_attributes.iv_size - l_index));
-            break;
-        }
-
-        // Create a new Attribute and add it to the tank
-        Attribute * l_pAttr = new Attribute();
-        l_pAttr->iv_hdr = *l_pAttrHdr;
-        l_pAttr->iv_pVal = new uint8_t[l_pAttrHdr->iv_valSize];
-        memcpy(l_pAttr->iv_pVal, (i_attributes.iv_pAttributes + l_index),
-               l_pAttrHdr->iv_valSize);
-
-        l_index += l_pAttrHdr->iv_valSize;
+        // Was able to deserialize data, add Attribute to the tank
         iv_attributesExist = true;
-        iv_attributes.push_back(l_pAttr);
+        iv_attributes.push_back(l_pAttribute);
 
-        if // attributes should be echo'd
-          ( i_echoAttributes == true )
+        // Increment the index after deserializing an attribute
+        l_index += l_deserializedDataSize;
+
+        if ( i_echoAttributes == true ) // attributes should be echo'd
         {
             // extract individual fields from attribute
-            uint32_t attrId = l_pAttr->iv_hdr.iv_attrId;
-            uint32_t targetType = l_pAttr->iv_hdr.iv_targetType;
-            uint16_t pos = l_pAttr->iv_hdr.iv_pos;
-            uint8_t unitPos = l_pAttr->iv_hdr.iv_unitPos;
+            uint32_t attrId(l_pAttribute->getHeader().iv_attrId);
+            uint32_t targetType(l_pAttribute->getHeader().iv_targetType);
+            uint16_t pos(l_pAttribute->getHeader().iv_pos);
+            uint8_t unitPos(l_pAttribute->getHeader().iv_unitPos);
 
-            const uint8_t * pNodeFlags = (&(l_pAttr->iv_hdr.iv_unitPos)) + 1;
+            uint8_t node(l_pAttribute->getHeader().iv_node);
+            uint8_t flags(l_pAttribute->getHeader().iv_flags);
 
-            uint8_t node = (*pNodeFlags) >> 4;  // isolate hi nibble
-            uint8_t flags = (*pNodeFlags) & 0x0F;  // isolate lo nibble
-
-            uint32_t valueLen = l_pAttr->iv_hdr.iv_valSize;
+            uint32_t valueLen(l_pAttribute->getHeader().iv_valSize);
 
             TRACFCOMP(g_trac_targeting,
                       "deserializeAttributes: Attribute Hdr: "
@@ -488,7 +497,7 @@ void AttributeTank::deserializeAttributes(
 
             TRACFBIN(g_trac_targeting,
                       "deserializeAttributes: Parm Value: ",
-                      l_pAttr->iv_pVal, valueLen);
+                      l_pAttribute->getValue(), valueLen);
         } // end echo attributes
     }
 
@@ -505,20 +514,6 @@ void AttributeTank::deserializeAttributes(
 }
 
 //******************************************************************************
-AttributeTank::Attribute::Attribute() :
-    iv_pVal(NULL)
-{
-
-}
-
-//******************************************************************************
-AttributeTank::Attribute::~Attribute()
-{
-    delete[] iv_pVal;
-    iv_pVal = NULL;
-}
-
-//******************************************************************************
 errlHndl_t AttributeTank::writePermAttributes()
 {
     errlHndl_t l_err = NULL;
@@ -526,8 +521,10 @@ errlHndl_t AttributeTank::writePermAttributes()
     for(AttributesCItr_t l_attrIter = iv_attributes.begin();
         l_attrIter != iv_attributes.end(); ++l_attrIter)
     {
-        Attribute* l_attr = *l_attrIter;
-        AttributeHeader l_attrHdr = l_attr->iv_hdr;
+        // Get a (constant) reference to the Attribute Header
+        // for easy access to data members
+        const AttributeHeader &l_attrHdr = (*l_attrIter)->getHeader();
+
         PredicatePostfixExpr l_permAttrOverrides;
 
         // Predicate to match target type
@@ -553,7 +550,7 @@ errlHndl_t AttributeTank::writePermAttributes()
             bool l_success = (*l_permTargetList)->_trySetAttr(
                                 static_cast<ATTRIBUTE_ID>(l_attrHdr.iv_attrId),
                                 l_attrHdr.iv_valSize,
-                                l_attr->iv_pVal );
+                                (*l_attrIter)->getValue() );
 
             if (l_success)
             {
@@ -561,16 +558,17 @@ errlHndl_t AttributeTank::writePermAttributes()
                     "permanent override of Attr ID:0x%X Value:0x%llX applied "
                     "to target 0x%X",
                     l_attrHdr.iv_attrId,
-                    *reinterpret_cast<uint64_t *>(l_attr->iv_pVal),
+                    *reinterpret_cast<const uint64_t *>
+                                                    ((*l_attrIter)->getValue()),
                     (*l_permTargetList)->getAttr<ATTR_HUID>() );
             }
             else
             {
-                uint8_t * io_pAttrData = NULL;
+                uint8_t * l_pAttrData(NULL);
                 bool l_found = (*l_permTargetList)->_tryGetAttr(
                                 static_cast<ATTRIBUTE_ID>(l_attrHdr.iv_attrId),
                                 l_attrHdr.iv_valSize,
-                                io_pAttrData);
+                                l_pAttrData);
 
                 if (l_found)
                 {
@@ -579,9 +577,10 @@ errlHndl_t AttributeTank::writePermAttributes()
                         "ID:0x%X Value:0x%llX on target 0x%X - current value "
                         "0x%llX",
                         l_attrHdr.iv_attrId,
-                        *reinterpret_cast<uint64_t *>(l_attr->iv_pVal),
+                        *reinterpret_cast<const uint64_t *>
+                                                    ((*l_attrIter)->getValue()),
                         (*l_permTargetList)->getAttr<ATTR_HUID>(),
-                        *reinterpret_cast<uint64_t *>(io_pAttrData) );
+                        *reinterpret_cast<uint64_t *>(l_pAttrData) );
                     /*@
                      * @errortype
                      * @moduleid     TARG_WRITE_PERM_ATTR
@@ -616,7 +615,7 @@ errlHndl_t AttributeTank::writePermAttributes()
                      * @devdesc      Given target does not have given attribute
                      *               to apply override
                      */
-                     UTIL::createTracingError(
+                    UTIL::createTracingError(
                        TARG_WRITE_PERM_ATTR,
                        TARG_RC_WRITE_PERM_ATTR_TARGET_FAIL,
                        (*l_permTargetList)->getAttr<ATTR_HUID>(),

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -136,6 +136,221 @@ void createGenericFspMsg(uint32_t i_fspReqPayloadSize,
       o_requestMsg->generic_msg.__req = GenericFspMboxMessage_t::REQUEST;
    }
 }  // end createGenericFspMsg
+
+
+/**
+ *  @brief  Serializes a list of Attributes to be sent to FSP
+ *
+ *  @param[in] i_attributeList  List of attributes to send to FSP
+ *
+ *  @return - error, NULL if no error
+ */
+errlHndl_t sendAttributes(const std::vector<TARGETING::AttributeTank::Attribute>&
+                          i_attributeList)
+{
+    TRACFCOMP(g_trac_runtime,
+              ENTER_MRK"sendAttributes - number of attributes to send %d",
+              i_attributeList.size());
+
+    // Handle to error log
+    errlHndl_t l_err{nullptr};
+
+    // Handles to the firmware messages
+    hostInterfaces::hbrt_fw_msg *l_fwRequestMsg{nullptr};   // request message
+    hostInterfaces::hbrt_fw_msg *l_fwResponseMsg{nullptr};  // response message
+
+    do
+    {
+        // If caller passes in an empty list, then nothing to do
+        if (!i_attributeList.size())
+        {
+            TRACFCOMP(g_trac_runtime, "sendAttributes: attribute list is "
+                      "empty,nothing to do ...");
+            break;
+        }
+
+        // Make sure mbox is available
+        assert(INITSERVICE::spBaseServicesEnabled(),
+               "ERROR: Cannot perform request 'sendAttributes', mbox is not available");
+
+        // Make sure we have all of our function pointers setup right
+        if ((nullptr == g_hostInterfaces) ||
+            (nullptr == g_hostInterfaces->firmware_request))
+        {
+            TRACFCOMP(g_trac_runtime, ERR_MRK"sendAttributes: "
+                      "Hypervisor firmware_request interface not linked");
+
+            /*@
+             * @errortype
+             * @severity     ERRL_SEV_UNRECOVERABLE
+             * @moduleid     MOD_RT_FIRMWARE_REQUEST
+             * @reasoncode   RC_FW_REQUEST_RT_NULL_PTR
+             * @userdata1    Number of Attributes to serialize and send
+             * @devdesc      Hypervisor firmware request interface not linked
+             * @custdesc     Internal firmware error
+             */
+            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           RUNTIME::MOD_RT_FIRMWARE_REQUEST,
+                                           RUNTIME::RC_FW_REQUEST_RT_NULL_PTR,
+                                           i_attributeList.size(),
+                                           0,
+                                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+            break;
+        }
+
+        /// Calculate the size requirements needed to serialize
+        /// the Attribute info
+        // Aggregate the size of the incoming Attributes
+        uint32_t l_aggregatedAttributeSize(0);
+        for (auto l_attribute: i_attributeList)
+        {
+            l_aggregatedAttributeSize += l_attribute.getSize();
+        }
+
+        // Combine the size of the AttributeSetter_t itself to the size of
+        // incoming Attributes to get the full size requirement needed
+        uint32_t l_dataSize(sizeof(AttributeSetter_t) +
+                            l_aggregatedAttributeSize);
+
+        // Create and initialize to zero a few needed variables
+        uint32_t l_fullFspDataSize(0);
+        uint64_t l_fwRequestMsgSize(0), l_fwResponseMsgSize(0);
+
+        // Create the dynamic firmware messages
+        if (!createGenericFspMsg(l_dataSize,
+                                 l_fullFspDataSize,
+                                 l_fwRequestMsgSize,
+                                 l_fwRequestMsg,
+                                 l_fwResponseMsgSize,
+                                 l_fwResponseMsg) )
+        {
+            TRACFCOMP(g_trac_runtime, ERR_MRK"sendAttributes: "
+                      "Unable to allocate firmware request messages");
+
+            /*@
+             * @errortype
+             * @severity     ERRL_SEV_UNRECOVERABLE
+             * @moduleid     MOD_SEND_ATTRIBUTES_TO_FSP
+             * @reasoncode   RC_NULL_FIRMWARE_MSG_PTR
+             * @userdata1    Number of Attributes to serialize and send
+             * @devdesc      Unable to allocate firmware request messages
+             * @custdesc     Internal firmware error
+             */
+            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                          RUNTIME::MOD_SEND_ATTRIBUTES_TO_FSP,
+                                          RUNTIME::RC_NULL_FIRMWARE_MSG_PTR,
+                                          i_attributeList.size(),
+                                          0,
+                                          ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+            break;
+        }
+
+        // Populate the 'message queue' and 'message type' for this message
+        l_fwRequestMsg->generic_msg.msgq = MBOX::FSP_NVDIMM_KEYS_MSGQ_ID;
+        l_fwRequestMsg->generic_msg.msgType =
+                                  GenericFspMboxMessage_t::MSG_DECONFIG_TARGET;
+
+        // Create a useful struct to populate the generic_msg::data field
+        AttributeSetter_t* l_attributeSetter =
+                                reinterpret_cast<AttributeSetter_t*>
+                                        (&(l_fwRequestMsg->generic_msg.data));
+
+        // Initialize the AttributeSetter to default values
+        l_attributeSetter->initialize();
+
+        // The number of attributes being copied can be obtained from
+        // size of the attrbute input list
+        l_attributeSetter->iv_numAttributes = i_attributeList.size();
+
+        // Retrieve the individual attributes (header and value)
+        // Create a useful struct to poulate attribute data
+        uint8_t* l_attributeData = l_attributeSetter->iv_attrData;
+        uint32_t l_sizeOfDataCopied(0);
+        for (const auto & l_attribute: i_attributeList)
+        {
+            if (l_aggregatedAttributeSize >= l_attribute.getSize())
+            {
+                l_sizeOfDataCopied = l_attribute.serialize(
+                                   l_attributeData, l_aggregatedAttributeSize);
+
+                if (!l_sizeOfDataCopied)
+                {
+                    TRACFCOMP(g_trac_runtime, ERR_MRK"sendAttributes: "
+                      "Serialization of an Attribute failed, "
+                      "should never happen")
+
+                    /*@
+                     * @errortype
+                     * @severity     ERRL_SEV_UNRECOVERABLE
+                     * @moduleid     MOD_SEND_ATTRIBUTES_TO_FSP
+                     * @reasoncode   RC_SERIALIZE_ATTRIBUTE_FAILED
+                     * @userdata1    Number of Attributes to serialize and send
+                     * @devdesc      Serialization of an Attribute Failed
+                     * @custdesc     Internal firmware error
+                     */
+                    l_err = new ERRORLOG::ErrlEntry(
+                                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                        RUNTIME::MOD_SEND_ATTRIBUTES_TO_FSP,
+                                        RUNTIME::RC_SERIALIZE_ATTRIBUTE_FAILED,
+                                        i_attributeList.size(),
+                                        0,
+                                        ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+                    break;
+                } // end if (!l_sizeOfDataCopied)
+            }
+            else
+            {
+                TRACFCOMP(g_trac_runtime, ERR_MRK"sendAttributes: "
+                       "Miscalculation of aggregated size of attributes, "
+                       "should never happen")
+
+                /*@
+                 * @errortype
+                 * @severity     ERRL_SEV_UNRECOVERABLE
+                 * @moduleid     MOD_SEND_ATTRIBUTES_TO_FSP
+                 * @reasoncode   RC_NO_SPACE_FOR_ATTRIBUTE_SERIALIZATION
+                 * @userdata1    Number of Attributes to serialize and send
+                 * @devdesc      Serialization data of Attribute to large
+                 *               for given buffer
+                 * @custdesc     Internal firmware error
+                 */
+                l_err = new ERRORLOG::ErrlEntry(
+                              ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                              RUNTIME::MOD_SEND_ATTRIBUTES_TO_FSP,
+                              RUNTIME::RC_NO_SPACE_FOR_ATTRIBUTE_SERIALIZATION,
+                              i_attributeList.size(),
+                              0,
+                              ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+                break;
+            }
+
+            // Decrement/increment our counters/pointers
+            l_aggregatedAttributeSize -= l_sizeOfDataCopied;
+            l_attributeData += l_sizeOfDataCopied;
+        }  // end for (const auto & l_attribute: i_attributeList)
+
+        // Make the firmware_request call
+        l_err = firmware_request_helper(l_fwRequestMsgSize,
+                                        l_fwRequestMsg,
+                                        &l_fwResponseMsgSize,
+                                        l_fwResponseMsg);
+    } while (0);
+
+    // Release the firmware messages and set to NULL
+    delete []l_fwRequestMsg;
+    delete []l_fwResponseMsg;
+    l_fwRequestMsg = l_fwResponseMsg = nullptr;
+
+    TRACFCOMP(g_trac_runtime, EXIT_MRK"sendAttributes - exit with %s",
+              (nullptr == l_err ? "no error" : "error"));
+
+
+    return l_err;
+}
 
 #endif //__HOSTBOOT_RUNTIME_INTERFACE_VERSION_ONLY
 #endif // __RUNTIME__UTILITIES_H

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -146,6 +146,328 @@ namespace AttributeTank
 #ifndef STANDALONE_COMPILE
 
     /**
+     * @struct Attribute
+     *
+     * This structure defines a single attribute.
+     */
+    struct Attribute
+    {
+        /**
+         * @brief Constructor
+         */
+        Attribute()
+        : iv_hdr(),
+          iv_pVal(NULL)
+        {
+        }
+
+        /**
+         * @brief Destructor. Frees memory
+         */
+        ~Attribute()
+        {
+            delete[] iv_pVal;
+            iv_pVal = NULL;
+        }
+
+        /**
+         * @brief Set the Attribute ID
+         */
+        void setId(const uint32_t i_attrId)
+        {
+            iv_hdr.iv_attrId = i_attrId;
+        }
+
+        /**
+         * @brief Set the Attribute Target Type
+         */
+        void setTargetType(const uint32_t i_targetType)
+        {
+            iv_hdr.iv_targetType = i_targetType;
+        }
+
+        /**
+         * @brief Set the Attribute Position
+         */
+        void setPosition(const uint16_t i_pos)
+        {
+            iv_hdr.iv_pos = i_pos;
+        }
+
+        /**
+         * @brief Set the Attribute Unit Position
+         */
+        void setUnitPosition(const uint8_t i_unitPos)
+        {
+            iv_hdr.iv_unitPos = i_unitPos;
+        }
+
+        /**
+         * @brief Set the Attribute Node
+         */
+        void setNode(const uint8_t i_node)
+        {
+            iv_hdr.iv_node = i_node;
+        }
+
+        /**
+         * @brief Set the Attribute Flags
+         */
+        void setFlags(const uint8_t i_flags)
+        {
+            iv_hdr.iv_flags = i_flags;
+        }
+
+        /**
+         * @brief Get the size of all the Attribute's data members,
+         *        aggregated together
+         *
+         * return Aggregated size of the Attribute's data members
+         */
+        uint32_t getSize() const
+        {
+            return (sizeof(iv_hdr) + iv_hdr.iv_valSize);
+        }
+
+        /**
+         * @brief Get a constant reference to the Attribute Header.
+         *        Returning a reference for fast retrieval.
+         *
+         * @note Caller should not attempt to modify contents of the
+         *       Attribute Header.  Use appropriate Attribute set methods
+         *
+         * return A constant reference to the Attribute Header
+         */
+        const AttributeHeader & getHeader() const
+        {
+            return iv_hdr;
+        }
+
+        /**
+         * @brief Set the Attribute Value to a copy of the given buffer
+         *
+         * @pre Passing in nonsensical parameters will produce unpredictable
+         *      results, ie passing in a null buffer with size > 0
+         *
+         * @note Passing in a null buffer with size 0 will clear the value
+         *
+         * @param[in] i_buffer The buffer that contains the value to
+         *                     be copied
+         * @param[in] i_bufferSize Size of the given buffer
+         *
+         * return The size of the data that was copied
+         */
+        uint32_t setValue(const void * const i_buffer,
+                          const uint32_t i_bufferSize)
+
+        {
+            // Reuse storage when possible
+            if (i_bufferSize != iv_hdr.iv_valSize)
+            {
+                // Clean up current Attribute Value
+                delete []iv_pVal;
+                iv_pVal = NULL;
+
+                // Set size and allocate memory space
+                iv_hdr.iv_valSize = i_bufferSize;
+                if (iv_hdr.iv_valSize)
+                {
+                    iv_pVal = new uint8_t[iv_hdr.iv_valSize];
+                }
+            }
+
+            // Make a copy of the data.  Passing in a size of 0
+            // or NULL turns this call to no-op
+            memcpy(iv_pVal, i_buffer, iv_hdr.iv_valSize);
+
+            return iv_hdr.iv_valSize;
+        }
+
+        /**
+         * @brief Get a constant pointer to the Attribute Value.
+         *        Returning a constant pointer for fast retrieval.
+         *
+         * @note Caller should not attempt to modify the contents nor
+         *       delete the pointer, use method setValue if
+         *       need be.
+         *
+         * return A constant pointer to the Attribute Value
+         */
+        const void* const getValue() const
+        {
+            return iv_pVal;
+        }
+
+        /**
+         * @brief Return a copy of the Attribute Value into caller's bufffer
+         *
+         * @param[in] i_buffer The buffer to copy Attribute Value into
+         * @param[in] i_bufferSize Size of the given buffer
+         *
+         * return The size of the Attribute Value that was copied
+         *        or 0 if unable to copy the Attribute Value - buffer
+         *        size to small will cause this
+         */
+        uint32_t cloneValue(void* const o_buffer,
+                            const uint32_t i_bufferSize) const
+        {
+            // Return the size of the cloned data
+            uint32_t l_attributeValueSize(0);
+
+            // Is the buffer large enough to contain the Attribute Value?
+            if (i_bufferSize >= iv_hdr.iv_valSize)
+            {
+                // Buffer is large enough to contain the Attribute Value -
+                // copy the Attribute Value to given buffer
+                memcpy(o_buffer, iv_pVal, iv_hdr.iv_valSize);
+
+                // Return the size of the cloned data
+                l_attributeValueSize = iv_hdr.iv_valSize;
+            }
+
+            return l_attributeValueSize;
+        }
+
+        /**
+         * @brief Serialize the Attribute, if the buffer given is large
+         *        enough to contain the Attribute's data members
+         *
+         * @param[out] o_buffer The buffer to contain the serialized
+         *                      data members
+         * @param[in]  i_bufferSize Size of the given buffer
+         *
+         * return 0 if buffer is to small to contain the data members;
+         *        otherwise the aggregated size of the Attribute's data
+         *        members copied
+         */
+        uint32_t serialize(void* const    o_buffer,
+                           const uint32_t i_bufferSize) const
+        {
+            // Return the size of the serialized data
+            uint32_t l_attributeSize(0);
+
+            // If buffer size greater than or equal to the size of the
+            // Attribute's data members aggregated together then
+            // copy the data members to buffer
+            if (i_bufferSize >= getSize())
+            {
+                // Get an Attribute handle to buffer for easy access
+                uint8_t* l_attribute = static_cast<uint8_t*>(o_buffer);
+
+                // Copy the Attribute Header
+                memcpy(l_attribute, &iv_hdr, sizeof(iv_hdr));
+                l_attribute += sizeof(iv_hdr);
+
+                // Copy the Attribute Value
+                memcpy(l_attribute, iv_pVal, iv_hdr.iv_valSize);
+
+                // Return the size of the serialized data
+                l_attributeSize = sizeof(iv_hdr) + iv_hdr.iv_valSize;
+            }
+
+            return l_attributeSize;
+        }
+
+        /**
+         * @brief Deserialize the buffer, if the buffer given is at least
+         *        the same size as an Attribute
+         *
+         * @param[out] i_buffer The buffer to deserialize
+         * @param[in]  i_bufferSize Size of the given buffer
+         *
+         * @post If the buffer is large enough to populate the Attribute, then
+         *       the Attribute will be populated, with it's own copy of the
+         *       data.  If the buffer is too small, then the Attribute is
+         *       untouched.
+         *
+         * return 0 if buffer is to small to populate an Attribute;
+         *        otherwise the aggregated size of the Attribute's data
+         *        members deserialized
+         */
+        uint32_t deserialize(const void* const i_buffer,
+                             const uint32_t    i_bufferSize)
+        {
+            // Return the size of the Attribute
+            uint32_t l_attributeSize(0);
+
+            // Get an Attribute handle to buffer for easy access
+            const Attribute* const l_attribute =
+                             reinterpret_cast<const Attribute* const>(i_buffer);
+
+            // Get the minimum size needed to check for values
+            uint32_t l_attributeHeaderSize(sizeof(iv_hdr));
+
+            // Make sure the buffer is not just large enough to inspect the
+            // Attribute Header but large enough to read Values if they exist
+            // Need to make sure size is at minimum threshold before calling
+            // getSize(), because getSize assumes the data is there to read
+            if ( (i_bufferSize >= l_attributeHeaderSize) &&
+                 (i_bufferSize >= (l_attribute->getSize())) )
+            {
+                // Get an uint8_t handle to buffer for easy access
+                const uint8_t* l_attributeData =
+                             reinterpret_cast<const uint8_t*>(i_buffer);
+
+                // Copy header data
+                memcpy(&iv_hdr, l_attributeData, l_attributeHeaderSize);
+
+                // Free iv_pVal data, if it currently has data, and set to NULL
+                delete []iv_pVal;  // OK to delete a NULL ptr
+                iv_pVal = NULL;
+
+                // Populate values if they exist
+                uint32_t l_valueSize = iv_hdr.iv_valSize;
+                if (l_valueSize)
+                {
+                    // Copy the Attribute Value
+                    iv_pVal = new uint8_t[l_valueSize];
+                    l_attributeData += l_attributeHeaderSize;
+                    memcpy(iv_pVal, l_attributeData, l_valueSize);
+                }
+
+                // Return the size of the Attribute
+                l_attributeSize = getSize();
+            }
+
+            return l_attributeSize;
+        }
+
+
+        /**
+         * @brief Assignment operator defined
+         */
+        Attribute& operator=(const Attribute& rhs)
+        {
+            // check for self-assignment
+            if (&rhs != this)
+            {
+                // Deep copy the attribute value
+                setValue(rhs.iv_pVal, rhs.iv_hdr.iv_valSize);
+                // Copy the Attribute header
+                iv_hdr = rhs.iv_hdr;
+            }
+
+            return *this;
+        }
+
+        /**
+         * @brief Copy constructor defined
+         */
+        Attribute(const Attribute& rhs)
+        : iv_hdr(),
+          iv_pVal(NULL)
+        {
+            // Call the assignment operator to do the work
+            *this = rhs;
+        }
+
+        // Private data
+        private:
+        AttributeHeader iv_hdr;
+        uint8_t * iv_pVal;      // Pointer to attribute value
+    };
+
+    /**
      * @struct AttributeSerializedChunk
      *
      * This structure defines a chunk of memory for containing serialized
@@ -183,7 +505,7 @@ namespace AttributeTank
     /**
      * @brief Destructor. Deletes all Attributes
      */
-    virtual ~AttributeTank();
+    ~AttributeTank();
 
     /**
      * @brief Checks if the platform has enabled synchronization
@@ -209,9 +531,8 @@ namespace AttributeTank
      *                           specific node (i_node)
      * @param[in]  i_node      See i_nodeFilter
      */
-    virtual void clearAllAttributes(
-        const NodeFilter i_nodeFilter = NODE_FILTER_NONE,
-        const uint8_t i_node = ATTR_NODE_NA);
+    void clearAllAttributes(const NodeFilter i_nodeFilter = NODE_FILTER_NONE,
+                            const uint8_t i_node = ATTR_NODE_NA);
 
     /**
      * @brief Clear any non-const attribute for a specified ID and Target
@@ -225,11 +546,11 @@ namespace AttributeTank
      * @param[in] i_unitPos    Target Unit Position
      * @param[in] i_node       Target Node
      */
-    virtual void clearNonConstAttribute(const uint32_t i_attrId,
-                                        const uint32_t i_targetType,
-                                        const uint16_t i_pos,
-                                        const uint8_t i_unitPos,
-                                        const uint8_t i_node);
+    void clearNonConstAttribute(const uint32_t i_attrId,
+                                const uint32_t i_targetType,
+                                const uint16_t i_pos,
+                                const uint8_t i_unitPos,
+                                const uint8_t i_node);
 
     /**
      * @brief Set an Attribute
@@ -251,14 +572,14 @@ namespace AttributeTank
      * @param[in] i_valSize    Size of attribute value in bytes
      * @param[in] i_pVal       Pointer to attribute value
      */
-    virtual void setAttribute(const uint32_t i_attrId,
-                              const uint32_t i_targetType,
-                              const uint16_t i_pos,
-                              const uint8_t i_unitPos,
-                              const uint8_t i_node,
-                              const uint8_t i_flags,
-                              const uint32_t i_valSize,
-                              const void * i_pVal);
+    void setAttribute(const uint32_t i_attrId,
+                      const uint32_t i_targetType,
+                      const uint16_t i_pos,
+                      const uint8_t i_unitPos,
+                      const uint8_t i_node,
+                      const uint8_t i_flags,
+                      const uint32_t i_valSize,
+                      const void * i_pVal);
 
     /**
      * @brief Get a copy of an Attribute
@@ -266,21 +587,24 @@ namespace AttributeTank
      * This is called on an OverrideAttributeTank to query/get an Attribute
      * Override when an attribute is got
      *
+     * @note Caller's responsibility to ensure the passed in buffer
+     *       is large enough to contain the Attribute Value.
+     *
      * @param[in]  i_attrId     Attribute ID
      * @param[in]  i_targetType Target Type attribute is for
      * @param[in]  i_pos        Target Position
      * @param[in]  i_unitPos    Target Unit Position
      * @param[in]  i_node       Target Node
-     * @param[out] o_pVal       Pointer to attribute value
+     * @param[out] o_pVal       Pointer to a copy of the attribute value
      *
      * return true if attribute exists and a copy was written to o_pVal
      */
-    virtual bool getAttribute(const uint32_t i_attrId,
-                              const uint32_t i_targetType,
-                              const uint16_t i_pos,
-                              const uint8_t i_unitPos,
-                              const uint8_t i_node,
-                              void * o_pVal) const;
+    bool getAttribute(const uint32_t i_attrId,
+                      const uint32_t i_targetType,
+                      const uint16_t i_pos,
+                      const uint8_t i_unitPos,
+                      const uint8_t i_node,
+                      void * o_pVal) const;
 
     /**
      * @brief Serialize all Attributes into newly allocated memory chunks
@@ -310,7 +634,7 @@ namespace AttributeTank
      *                            specific node (i_node)
      * @param[in]  i_node       See i_nodeFilter
      */
-    virtual void serializeAttributes(
+    void serializeAttributes(
         const AllocType i_allocType,
         const uint32_t i_chunkSize,
         std::vector<AttributeSerializedChunk> & o_attributes,
@@ -327,8 +651,7 @@ namespace AttributeTank
      * @param[in]  i_attributes Reference to AttributeSerializedChunk containing
      *                          attributes.
      */
-    virtual void deserializeAttributes(
-        const AttributeSerializedChunk & i_attributes);
+    void deserializeAttributes(const AttributeSerializedChunk & i_attributes);
 
 
     /**
@@ -344,9 +667,8 @@ namespace AttributeTank
      *
      * @param[in]  i_echoAttributes Select whether or not to echo the attributes
      */
-    virtual void deserializeAttributes(
-        const AttributeSerializedChunk & i_attributes,
-        bool i_echoAttributes );
+    void deserializeAttributes(const AttributeSerializedChunk & i_attributes,
+                               bool  i_echoAttributes );
 
 
     /**
@@ -359,7 +681,7 @@ namespace AttributeTank
      *
      * return true if any attributes exist
      */
-    virtual bool attributesExist() const { return iv_attributesExist; }
+    bool attributesExist() const { return iv_attributesExist; }
 
     /**
      * @brief Check if an attribute exists in the tank
@@ -374,7 +696,7 @@ namespace AttributeTank
      *
      * return true if any attributes exist
      */
-    virtual bool attributeExists(const uint32_t i_attrId) const;
+    bool attributeExists(const uint32_t i_attrId) const;
 
     /**
      * @brief This function writes attributes in an AttributeTank to targeting
@@ -396,28 +718,6 @@ private:
     // Copy constructor and assignment operator disabled
     AttributeTank(const AttributeTank & i_right);
     AttributeTank & operator=(const AttributeTank & i_right);
-
-    /**
-     * @struct Attribute
-     *
-     * This structure defines a single attribute.
-     */
-    struct Attribute
-    {
-        /**
-         * @brief Constructor
-         */
-        Attribute();
-
-        /**
-         * @brief Destructor. Frees memory
-         */
-        ~Attribute();
-
-        // Public data
-        AttributeHeader iv_hdr;
-        uint8_t * iv_pVal;      // Pointer to attribute value
-    };
 
     // The attributes
     // Note: A possible performance boost could be to store the elements in a
