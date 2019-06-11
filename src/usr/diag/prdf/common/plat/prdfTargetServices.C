@@ -957,13 +957,16 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
         else if ( TYPE_OMIC == trgtType && TYPE_OMI == i_connType )
         {
             // i_connPos is position relative to OMIC (0-2)
-            itr = std::find_if( list.begin(), list.end(),
-                    [&](const TargetHandle_t & t)
-                    {
-                        uint32_t omiPos = getTargetPosition(t);
-                        return (trgtPos   == (omiPos / MAX_OMI_PER_OMIC)) &&
-                               (i_connPos == (omiPos % MAX_OMI_PER_OMIC));
-                    } );
+            for ( auto & trgt : list )
+            {
+                uint8_t omiPos = 0;
+                if ( trgt->tryGetAttr<ATTR_OMI_DL_GROUP_POS>(omiPos) &&
+                     (i_connPos == omiPos) )
+                {
+                    *itr = trgt;
+                    break;
+                }
+            }
         }
         else if ( TYPE_PROC == trgtType && TYPE_NPU == i_connType )
         {

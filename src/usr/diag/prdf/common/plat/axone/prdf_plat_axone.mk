@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2018
+# Contributors Listed Below - COPYRIGHT 2016,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -37,5 +37,6 @@ prd_incpath += ${PRD_SRC_PATH}/common/plat/axone
 # Object files common to both FSP and Hostboot
 ################################################################################
 
-# plat/cumulus/ (rule plugin related)
+# plat/axone/ (rule plugin related)
+prd_rule_plugin += prdfOmicPlugins.o
 

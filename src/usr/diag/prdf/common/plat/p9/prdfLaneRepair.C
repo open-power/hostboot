@@ -1097,6 +1097,40 @@ PRDF_PLUGIN_DEFINE_NS( explorer_ocmb,  LaneRepair, calloutBusInterfacePlugin );
 PRDF_PLUGIN_DEFINE_NS( cumulus_dmi,    LaneRepair, calloutBusInterfacePlugin );
 PRDF_PLUGIN_DEFINE_NS( centaur_membuf, LaneRepair, calloutBusInterfacePlugin );
 
+/**
+ * @brief Add callouts for a BUS interface inputting a OMIC target
+ * @param  i_chip OMIC chip
+ * @param  io_sc  Step code data struct.
+ * @param  i_dl   The DL relative to the OMIC.
+ * @return SUCCESS always
+ */
+
+int32_t omicCalloutBusInterfacePlugin( ExtensibleChip * i_chip,
+                                   STEP_CODE_DATA_STRUCT & io_sc, uint8_t i_dl )
+{
+    ExtensibleChip * omi  = getConnectedChild( i_chip, TYPE_OMI, i_dl );
+    ExtensibleChip * ocmb = getConnectedChild( omi, TYPE_OCMB_CHIP, 0 );
+
+    // Callout both ends of the bus as well (OMI and OCMB)
+    io_sc.service_data->SetCallout( omi->getTrgt(),  MRU_MEDA );
+    io_sc.service_data->SetCallout( ocmb->getTrgt(), MRU_MEDA );
+
+    calloutBusInterface(omi, io_sc, MRU_LOW);
+    return SUCCESS;
+}
+
+#define OMIC_CALL_BUS_PLUGIN( POS ) \
+int32_t omicCalloutBusInterfacePlugin_##POS( ExtensibleChip * i_chip, \
+                                             STEP_CODE_DATA_STRUCT & io_sc ) \
+{ \
+    return omicCalloutBusInterfacePlugin( i_chip, io_sc, POS ); \
+} \
+PRDF_PLUGIN_DEFINE_NS( axone_omic, LaneRepair, \
+                       omicCalloutBusInterfacePlugin_##POS );
+
+OMIC_CALL_BUS_PLUGIN( 0 );
+OMIC_CALL_BUS_PLUGIN( 1 );
+OMIC_CALL_BUS_PLUGIN( 2 );
 
 //------------------------------------------------------------------------------
 
