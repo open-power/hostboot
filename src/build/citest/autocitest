@@ -333,10 +333,11 @@ while [ $(($modsstarted)) -lt 1 -o $(($modsstarted)) -ne $(($modscompleted)) ]; 
     sleep 20
     ((loopcount++))     # increment loopcount
     echo "loopcount = $loopcount"
-
+    date +'%H:%M:%S'
     echo "modscompleted log command"
-    echo "autosim $NOWIN --simcmd \"print ((system_cmp0.phys_mem).read 0x$mods_completed_addr 0x08)\"  1> $SBXHOME/modscompleted.log  2> /dev/null"
-    autosim $NOWIN --simcmd   "print ((system_cmp0.phys_mem).read 0x$mods_completed_addr 0x08)"  1> $SBXHOME/modscompleted.log  2> /dev/null
+    echo "autosim $NOWIN --simcmd \"print ((system_cmp0.phys_mem).read 0x$mods_completed_addr 0x08)\" 1> $SBXHOME/modscompleted.log  2> /dev/null"
+    autosim $NOWIN --simcmd   "print ((system_cmp0.phys_mem).read 0x$mods_completed_addr 0x08)" 1> $SBXHOME/modscompleted.log  2> /dev/null
+    date +'%H:%M:%S'
     echo
 
     echo "modscompleted command"
@@ -344,9 +345,11 @@ while [ $(($modsstarted)) -lt 1 -o $(($modsstarted)) -ne $(($modscompleted)) ]; 
     modscompleted=`cat $SBXHOME/modscompleted.log | awk '/0x/ {print strtonum($1)}'`
     echo
 
+    date +'%H:%M:%S'
     echo "modsstarted log command"
-    echo "autosim $NOWIN --simcmd   \"print ((system_cmp0.phys_mem).read 0x$mods_started_addr 0x08)\"     1> $SBXHOME/modsstarted.log  2> /dev/null"
-    autosim $NOWIN --simcmd   "print ((system_cmp0.phys_mem).read 0x$mods_started_addr 0x08)"     1> $SBXHOME/modsstarted.log  2> /dev/null
+    echo "autosim $NOWIN --simcmd   \"print ((system_cmp0.phys_mem).read 0x$mods_started_addr 0x08)\" 1> $SBXHOME/modsstarted.log  2> /dev/null"
+    autosim $NOWIN --simcmd   "print ((system_cmp0.phys_mem).read 0x$mods_started_addr 0x08)" 1> $SBXHOME/modsstarted.log  2> /dev/null
+    date +'%H:%M:%S'
     echo
 
     echo "modsstarted command"
@@ -356,18 +359,29 @@ while [ $(($modsstarted)) -lt 1 -o $(($modsstarted)) -ne $(($modscompleted)) ]; 
 
     echo "ModulesStarted:ModulesCompleted  => $modsstarted:$modscompleted"
 
-    # @TODO RTC:149210 temporary fix for autosim hangs on real code errors. For some reason
-    # when we hit an actual bug and simics halts, the autosim commands hang
-    # causing this loop to take >8 hours.
-    if [ -z $modsstarted ] && [ -z $modscompleted ]; then
-        echo "ERROR: autosim hanging on real code errors, temporarily catching early"
-        echo "See archived hbTracMerg for more info"
-        exit 1
+    # For code coverage, sometimes simics takes a while to respond as it dumps data.
+    # Allow it to continue if this condition is seen.
+    if [[ -z "${HOSTBOOT_PROFILE}" ]]; then
+        # @TODO RTC:149210 temporary fix for autosim hangs on real code errors. For some reason
+        # when we hit an actual bug and simics halts, the autosim commands hang
+        # causing this loop to take >8 hours.
+        if [ -z $modsstarted ] && [ -z $modscompleted ]; then
+            echo "ERROR: autosim hanging on real code errors, temporarily catching early"
+            echo "See archived hbTracMerg for more info"
+            exit 1
+        fi
     fi
 
-    if [ "$loopcount" -ge 150 ];   then
+    if [[ -z "${HOSTBOOT_PROFILE}" ]]; then
+        loop_timeout=150
+    else
+        # Increase timeout for code coverage
+        loop_timeout=500
+    fi
+
+    if [ "$loopcount" -ge "$loop_timeout" ];   then
         timestamp=`date +'%H:%M:%S'`
-        echo    "$timestamp ERROR: timed out after 50 minutes waiting for until test completion"
+        echo    "$timestamp ERROR: timed out waiting for until test completion"
         autosim $NOWIN --simcmd   "hb-Ps with-backtrace"
         timeout=$(($modsstarted - $modscompleted))
         break
@@ -465,6 +479,15 @@ echo "====> dump L3..."
 autosim $NOWIN --simcmd   "hb-dump"
 if [ $? -ne 0 ] ; then
     echo "ERROR: Unable to run $?"
+fi
+
+if [[ ! -z "${HOSTBOOT_PROFILE}" ]]; then
+    # After simics test are complete, dump data.
+    echo "====> hb-Gcov..."
+    autosim $NOWIN --simcmd "hb-Gcov" --timeout 300
+    if [ $? -ne 0 ] ; then
+        echo "ERROR: Unable to run $?"
+    fi
 fi
 
 ########################################################
