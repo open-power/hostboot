@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018
+# Contributors Listed Below - COPYRIGHT 2018,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -22,6 +22,61 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
+################################################################################
+#                                 OMIC Actions                                 #
+################################################################################
+
+actionclass dl0_omi
+{
+    callout(connected(TYPE_OMI,0), MRU_HIGH);
+};
+
+actionclass dl1_omi
+{
+    callout(connected(TYPE_OMI,1), MRU_HIGH);
+};
+
+actionclass dl2_omi
+{
+    callout(connected(TYPE_OMI,2), MRU_HIGH);
+};
+
+actionclass dl0_omi_bus
+{
+    funccall("omicCalloutBusInterfacePlugin_0");
+};
+
+actionclass dl1_omi_bus
+{
+    funccall("omicCalloutBusInterfacePlugin_1");
+};
+
+actionclass dl2_omi_bus
+{
+    funccall("omicCalloutBusInterfacePlugin_2");
+};
+
+/** OMI-DL0 Fatal Error */
+actionclass dl0_fatal_error
+{
+    try( funccall("DlFatalError_0"), dl0_omi_bus );
+    threshold1;
+};
+
+/** OMI-DL1 Fatal Error */
+actionclass dl1_fatal_error
+{
+    try( funccall("DlFatalError_1"), dl1_omi_bus );
+    threshold1;
+};
+
+/** OMI-DL2 Fatal Error */
+actionclass dl2_fatal_error
+{
+    try( funccall("DlFatalError_2"), dl2_omi_bus );
+    threshold1;
+};
 
 ################################################################################
 # Analyze groups

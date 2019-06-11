@@ -621,6 +621,13 @@ void getAddresses( TrgtMap_t & io_targMap )
         0x07013340, // OMIDLFIR
     };
 
+    io_targMap[TRGT_OMIC][REG_REG] =
+    {
+        0x07013353, // DL0_ERROR_HOLD
+        0x07013363, // DL1_ERROR_HOLD
+        0x07013373, // DL2_ERROR_HOLD
+    };
+
     io_targMap[TRGT_OCMB][REG_GLBL] =
     {
         0x08040000, // MB_CHIPLET_CS_FIR
