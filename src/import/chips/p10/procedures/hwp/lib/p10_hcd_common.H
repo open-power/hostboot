@@ -38,7 +38,9 @@
 
 #include <stdint.h>
 
+
 #define CPMS_CUCR                    0xC000E3C0
+//TODO HW487147 these 2 address needs to swaped.
 #define CPMS_CUCR_WO_CLEAR           0xC000E3E0
 #define CPMS_CUCR_WO_OR              0xC000E3F0
 
