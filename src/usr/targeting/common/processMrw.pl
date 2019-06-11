@@ -3041,7 +3041,17 @@ sub processI2C
                 # <vendor>,<device type>,<purpose>,<scope>
                 if ($type_str eq "NUVOTON_TPM")
                 {
-                    $label = "nuvoton,npct601,tpm,host";
+                    # Model values can be found in tpmddif.H and are kept in
+                    # sync with TPM_MODEL attribute in attribute_types_hb.xml
+                    my $tpm_model = $targetObj->getAttribute($i2c->{DEST_PARENT},"TPM_MODEL");
+                    if ($tpm_model eq 1)
+                    {
+                        $label = "nuvoton,npct601,tpm,host";
+                    }
+                    if ($tpm_model eq 2)
+                    {
+                        $label = "tcg,tpm_i2c_ptp,tpm,host";
+                    }
                 }
 
                 if ($label eq "")

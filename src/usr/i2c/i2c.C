@@ -5447,6 +5447,7 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
                 // Lookup i2c info for the TPM
                 l_err = TPMDD::tpmReadAttributes(pTpm,
                                                  tpmInfo, locality);
+
                 if( NULL != l_err )
                 {
                     // Unable to get info, so we skip
@@ -5478,7 +5479,29 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
                         TARGETING::HDAT_I2C_DEVICE_TYPE_NUVOTON_TPM;
                 l_currentDI.devicePurpose =
                     TARGETING::HDAT_I2C_DEVICE_PURPOSE_TPM;
-                strcpy(l_currentDI.deviceLabel,"?nuvoton,npct601,tpm,host");
+
+
+                // Read TPM Model attribute to determine the label
+                if (tpmInfo.model == TPMDD::TPM_MODEL_65x)
+                {
+                    strcpy(l_currentDI.deviceLabel,"?nuvoton,npct601,tpm,host");
+                }
+                else if (tpmInfo.model == TPMDD::TPM_MODEL_75x)
+                {
+                    strcpy(l_currentDI.deviceLabel,"?tcg,tpm_i2c_ptp,tpm,host");
+                }
+                else
+                {
+                    // Should never get here as tpmReadAttributes will fail if
+                    // unknown TPM Model, but just in case do this:
+                    strcpy(l_currentDI.deviceLabel,
+                           "?unknwon,unknown,tpm,host");
+                }
+
+                TRACUCOMP(g_trac_i2c,"TPM 0x%X is Model %d using label %s",
+                          TARGETING::get_huid(pTpm),
+                          tpmInfo.model,
+                          l_currentDI.deviceLabel);
                 o_deviceInfo.push_back(l_currentDI);
 
             } //end of tpm iter

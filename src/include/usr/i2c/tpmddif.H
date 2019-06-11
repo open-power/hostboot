@@ -64,7 +64,8 @@ enum tpm_locality_t
 /**
  * @brief TPM Models that are supported
  *
- * @note  Must stay in sync with TPM_MODEL in attribute_types_hb.xml
+ * @note  Must stay in sync with TPM_MODEL in attribute_types_hb.xml and
+ *        the attribute usage in processMrw.pl.
  * @note  Not using Attribute Enums since FSP does not currently support
  *        overriding enum values
  */
