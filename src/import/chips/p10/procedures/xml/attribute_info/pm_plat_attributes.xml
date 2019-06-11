@@ -122,6 +122,7 @@
     <overrideOnly/>
     <group>bias</group>
   </attribute>
+
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_DROOP_COUNT_CONTROL</id>
@@ -137,7 +138,55 @@
     </description>
     <valueType>uint64</valueType>
     <platInit/>
-    <default>0</default>
+    <initToZero/>
+    <overrideOnly/>
+    <group>dds</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_DDS_DROOP_EXTREME_OVERRIDE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Digital Droop Sensors (DDS) Extreme Threshold Select Value per VPD point.
+    a negative value below the DDS setting that will trigger droop event.  This
+    attibute overrides the
+
+    Array of 9 entries-:
+        0: PowerSave;
+        1: CF1;
+        2: CF2;
+        3: WOF Base;
+        4: CF3;
+        5: CF4;
+        6: UltraTurbo;
+        7: Fmax;
+        8: Enable
+
+    If index 8 is non-zero, the other entries are considered valid.
+
+    Producer: Override
+    </description>
+    <valueType>uint8</valueType>
+    <array>9</array>
+    <platInit/>
+    <enum>
+        OFF= 0x00,
+        8mV= 0x01,
+        16mV = 0x02,
+        24mV = 0x03,
+        32mV = 0x04,
+        40mV = 0x05,
+        48mV = 0x06,
+        56mV = 0x07,
+        64mV = 0x08,
+        72mV = 0x09,
+        80mV = 0x0A,
+        88mV = 0x0B,
+        92mV = 0x0C,
+        96mV = 0x0D
+    </enum>
+    <initToZero/>
     <overrideOnly/>
     <group>dds</group>
   </attribute>
@@ -492,7 +541,6 @@
         ON = 0x01
     </enum>
     <default>OFF</default>
-    <initToZero/>
     <overrideOnly/>
     <group>enablement</group>
   </attribute>
@@ -514,7 +562,6 @@
         ON = 0x01
     </enum>
     <default>OFF</default>
-    <initToZero/>
     <overrideOnly/>
     <group>enablement</group>
   </attribute>
@@ -537,11 +584,9 @@
         OFF = 0x01
     </enum>
     <default>ON</default>
-    <initToZero/>
     <overrideOnly/>
     <group>enablement</group>
   </attribute>
-
 
   <!-- ********************************************************************* -->
   <attribute>
@@ -565,7 +610,6 @@
         AUTO = 0x02
     </enum>
     <default>ON</default>
-    <initToZero/>
     <overrideOnly/>
     <group>enablement</group>
   </attribute>
@@ -578,8 +622,8 @@
     Disables the enablement of resonant clocking in the system.
 
     Producer: Override Consumers: p10_pstate_parameter_build to clear the flag
-    CME QuadManager
-    reaction
+    for PGPE reaction
+
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -588,7 +632,6 @@
         ON = 0x01
     </enum>
     <default>OFF</default>
-    <initToZero/>
     <overrideOnly/>
     <group>enablement</group>
   </attribute>
@@ -611,7 +654,6 @@
         ON=1
     </enum>
     <default>OFF</default>
-    <initToZero/>
     <group>enablement</group>
   </attribute>
 
@@ -641,7 +683,6 @@
         OFF_SKIP_DD=2
     </enum>
     <default>OFF</default>
-    <initToZero/>
     <group>enablement</group>
   </attribute>
 
@@ -669,7 +710,6 @@
         ON=1
     </enum>
     <default>OFF</default>
-    <initToZero/>
     <group>enablement</group>
   </attribute>
 
@@ -697,7 +737,6 @@
         ON=1
     </enum>
     <default>OFF</default>
-    <initToZero/>
     <group>enablement</group>
   </attribute>
 
@@ -777,7 +816,6 @@
         DECINC = 0x1
     </enum>
     <default>BINARY</default>
-    <initToZero/>
     <group>wof</group>
   </attribute>
 
@@ -805,7 +843,6 @@
         ON=1
     </enum>
     <default>OFF</default>
-    <initToZero/>
     <overrideOnly/>
     <group>enablement</group>
   </attribute>
@@ -834,7 +871,6 @@
     </enum>
     <default>OFF</default>
     <overrideOnly/>
-    <initToZero/>
     <group>enablement</group>
   </attribute>
 
@@ -892,7 +928,6 @@
         OFF = 3
     </enum>
     <default>FAIL</default>
-    <initToZero/>
     <group>enablement</group>
   </attribute>
 
@@ -927,7 +962,6 @@
         OFF = 3
     </enum>
     <default>FAIL</default>
-    <initToZero/>
     <group>enablement</group>
   </attribute>
 
@@ -962,7 +996,6 @@
         OFF = 3
     </enum>
     <default>FAIL</default>
-    <initToZero/>
     <group>enablement</group>
   </attribute>
 
@@ -1471,7 +1504,7 @@
     Consumer:  p10_pstate_parameter_build -> PGPE Hcode
 
     </description>
-    <valueType>uint8</valueType>
+    <valueType>uint16</valueType>
     <platInit/>
     <default>200</default>
     <overrideOnly/>
@@ -1489,7 +1522,7 @@
     Consumer:  p10_pstate_parameter_build -> PGPE Hcode
 
     </description>
-    <valueType>uint8</valueType>
+    <valueType>uint16</valueType>
     <platInit/>
     <default>00</default>
     <overrideOnly/>
@@ -1504,6 +1537,9 @@
     If WOV undervolting and/or WOF overvolting is enabled, then this is used to
     a check for maximum frequency loss. If frequency in tenths of is below
     value, then an error is logged and WOV is disabled.
+
+    Values can range from 0 to 200(20%). Values greater than 200 are to
+    clipped to 200 (20%).
     </description>
     <valueType>uint32</valueType>
     <platInit/>
@@ -1522,7 +1558,8 @@
 
     If, 0, then default value of 10(1%) is used.
 
-    Value can range from 1(0.1%) to 100(10%). Values greater than 100 are to
+    Values can range from 1(0.1%) to 100(10%). Values greater than 100 are to
+    clipped to 100 (10%).
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -1541,7 +1578,8 @@
 
     If 0, then default value of 0.5%(5) is used.
 
-    Value can range from 1(0.1%) to 20(2%). Values greater than 20 are clipped
+    Values can range from 1(0.1%) to 20(2%). Values greater than 20 are clipped
+    clipped to 20 (2%).
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -2080,6 +2118,22 @@
 
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_RVRM_DEADZONE_MV</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Retention voltage deadzone where the RVRM must be disabled if the external
+    effective voltage is less than ATTR_RVRM_VID (in mV) plus this attribute
+    value.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <default>50</default>
+    <overrideOnly/>
+    <group>rvrm</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_STOP_LEVELS_SUPPORTED</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
@@ -2196,6 +2250,27 @@
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
     Enables coarse throttle reaction to DDS events.
+
+    Producer:  Override/Lab
+    Consumers: p10_build_pstate_datablock
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+        OFF=0,
+        ON=1
+    </enum>
+    <platInit/>
+    <overrideOnly/>
+    <default>OFF</default>
+    <group>dds</group>
+  </attribute>
+
+  <!-- *********************************************************************-->
+  <attribute>
+    <id>ATTR_DDS_FREQ_JUMP_ENABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Enables frequency jump reaction to DDS events.
 
     Producer:  Override/Lab
     Consumers: p10_build_pstate_datablock
@@ -2416,6 +2491,7 @@
     <overrideOnly/>
     <group>dlr</group>
   </attribute>
+
   <!-- *********************************************************************-->
   <attribute>
     <id>ATTR_SAFE_MODE_XSTOP</id>
@@ -2435,6 +2511,47 @@
     <default>OFF</default>
     <group>debug</group>
   </attribute>
+
+  <!-- *********************************************************************-->
+  <attribute>
+    <id>ATTR_VCS_FLOOR_MV</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Establishes the minimum effective voltage (eg at the module pins) in mV for
+    the VCS rail used during Pstate operations.
+
+    If the value is 0, the values in #V are used normally (eg with system
+    parameter uplift) to achieve the effective voltage.
+
+    Producer:  Override/Lab
+    Consumers: p10_pstate_parameter_build -> PGPE Hcode
+    </description>
+    <valueType>uint16</valueType>
+    <platInit/>
+    <initToZero/>
+    <overrideOnly/>
+    <group>pstate</group>
+  </attribute>
+
+  <!-- *********************************************************************-->
+  <attribute>
+    <id>ATTR_VCS_VDD_OFFSET_MV</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Establishes the minimum voltage offset at the module pins in mV that the
+    VCS rail is above the VDD rail during Pstate operations when VCS above any
+    established VCS floor defined by ATTR_VCS_FLOOR_MV.   If ATTR_VCS_FLOOR_MV
+    is 0, this offset will apply across the entire VCS voltage range.
+
+    Producer:  MRW
+    Consumers: p10_pstate_parameter_build -> PGPE Hcode
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <default>20</default>
+    <group>pstate</group>
+  </attribute>
+
   <!-- *********************************************************************-->
   <attribute>
     <id>ATTR_WOF_ALTITUDE_TEMP_ADJUSTMENT</id>

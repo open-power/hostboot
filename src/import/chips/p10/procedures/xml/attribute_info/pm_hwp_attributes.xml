@@ -130,16 +130,16 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-       <id>ATTR_QME_LFIRMASK</id>
-       <targetType>TARGET_TYPE_EQ</targetType>
-       <description>The FIR mask value that has to be restored to the QME FIR
-       register. This value will be stored during the reset phase when the
-       FIRMASK will be cleared as part of the cleanup action.
-       </description>
-       <valueType>uint64</valueType>
-       <group>fir</group>
-       <initToZero/>
-       <writeable/>
+    <id>ATTR_QME_LFIRMASK</id>
+    <targetType>TARGET_TYPE_EQ</targetType>
+    <description>The FIR mask value that has to be restored to the QME FIR
+    register. This value will be stored during the reset phase when the
+    FIRMASK will be cleared as part of the cleanup action.
+    </description>
+    <valueType>uint64</valueType>
+    <group>fir</group>
+    <initToZero/>
+    <writeable/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -162,7 +162,7 @@
     1 = FIR masks have been initialized and the hardware should reflect correct
     2 = FIR masks have been initialized but the current hardware state is the
         value
-        This should be deprecated. For now will retain to avoid HB 
+        This should be deprecated. For now will retain to avoid HB
         compilation error.
     </description>
     <valueType>uint8</valueType>
@@ -699,6 +699,7 @@
     <initToZero/>
     <writeable/>
   </attribute>
+
   <!-- *********************************************************************-->
   <attribute>
     <id>ATTR_INSIDE_SPECIAL_WAKEUP</id>
@@ -715,4 +716,5 @@
     <initToZero/>
   </attribute>
   <!-- *********************************************************************-->
+  
 </attributes>
