@@ -25,6 +25,63 @@
 <attributes>
 <version>1.0.0</version>
 
+<!-- =====================================================================
+     HOST BOOT TARGET INSTANCES
+     Contains target instance declarations for the Simics P10
+     configuration
+     * Maximum amount of P10 chips in this Simics model is 1 (for now).
+     * Currently created for 1 chip and will be expanded as needed.
+     * Each P10 has 8 EQ units
+     *     Each EQ unit has 2 FC units (a total of 16 per chip)
+     *         Each FC has 2 exposed core targets (a total of 32 cores per chip)
+     * Each P10 has 4 MC units
+     *     Each MC unit has 1 MI unit (a total of 4 per chip)
+     *         Each MI unit has 2 MCC units (a total of 8 per chip)
+     *             Each MCC unit has 2 OMI Units (A total of 16 per chip)
+     *                 OMI Units are special as they have two parents (MCC + OMIC)
+     *                 Each OMI unit connects to 1 OCMB chip
+     *                     Each OCMB unit contains 1 MEM_PORT unit
+     *                         Each MEM_PORT unit connects to 1 logical DIMM
+     *                     Each OCMB has logical relationship with 2 PMICs
+     *     Each MC unit has 2 OMIC units (a total of 8 per chip)
+     *           Each OMIC unit has a logical relationship with 2 OMI Units (a total of 16 per chip)
+     *             OMI Units are special as they have two parents (OMIC + MCC)
+     * Each P10 has 2 PECs
+     *     PEC 0 has 3 PHBs
+     *     PEC 1 has 3 PHBs
+     * Each P10 has 2 NMMU logic blocks
+     * Each P10 has 4 PAUC chiplets
+     *     Each PAUC has 2 IOHS units (a total of 8 per chip)
+     *         Each IOHS, except IOHS 1 and 2, has 1 PAU unit (a total of 6 per chip)
+     *     Each PAUC has a logical relationship with 2 OMIC units (a total of 8 per chip)
+     * Each chiplet existing in an P10 has 1 equivalent PERV unit
+     * Each P10 has 1 OCC unit
+     * Each P10 has 1 NX unit
+
+    Summary:
+      - 1 P10 chip
+      - 1 OCC GPE
+      - 1 NX
+      - 2 NMMU
+      - 2 PEC
+      - 4 MC
+      - 4 MI
+      - 4 PAUC
+      - 6 PHB
+      - 8 IOHS
+      - 8 MCC
+      - 8 EQ
+      - 8 OMIC
+      - 16 FC
+      - 16 OMI
+      - 16 OCMB
+      - 16 MEM_PORT
+      - 16 DIMM
+      - 18 PMIC
+      - 32 Cores
+
+     ================================================================= -->
+
 <targetInstance>
     <id>sys-0</id>
     <type>sys-sys-power10</type>
@@ -196,6 +253,7 @@
 
 <!-- ===================================================================== -->
 <!-- NMMU Units -->
+<!-- 2 per proc, a total of 2 -->
 <!-- ===================================================================== -->
 <targetInstance>
     <id>sys0node0proc0nmmu0</id>
@@ -296,6 +354,7 @@
 
 <!-- ===================================================================== -->
 <!-- EQ Units -->
+<!-- 8 per proc, a total of 8 -->
 <!-- ===================================================================== -->
 <targetInstance>
     <id>sys0node0proc0eq0</id>
@@ -659,6 +718,7 @@
 
 <!-- ===================================================================== -->
 <!-- FC (Fused Core) Units -->
+<!-- 2 per EQ, a total of 16 -->
 <!-- ===================================================================== -->
 <targetInstance>
     <id>sys0node0proc0eq0fc0</id>
@@ -1366,6 +1426,7 @@
 
 <!-- ===================================================================== -->
 <!-- Core Units -->
+<!-- 2 per FC, a total of 32 -->
 <!-- ===================================================================== -->
 <targetInstance>
     <id>sys0node0proc0eq0fc0core0</id>
@@ -2814,6 +2875,7 @@
 
 <!-- ===================================================================== -->
 <!-- PEC Units -->
+<!-- 2 per proc, a total of 2 -->
 <!-- ===================================================================== -->
 <targetInstance>
     <id>sys0node0proc0pec0</id>
@@ -2907,6 +2969,7 @@
 
 <!-- ===================================================================== -->
 <!-- PHB Units -->
+<!-- 3 per PEC, a total of 6 -->
 <!-- ===================================================================== -->
 <targetInstance>
     <id>sys0node0proc0pec0phb0</id>
@@ -3180,6 +3243,7 @@
 
 <!-- ===================================================================== -->
 <!-- PAUC Units -->
+<!-- 4 per proc, a total of 4 -->
 <!-- ===================================================================== -->
 <targetInstance>
     <id>sys0node0proc0pauc0</id>
@@ -3375,6 +3439,7 @@
 
 <!-- ===================================================================== -->
 <!-- IOHS Units -->
+<!-- 2 per PAUC, a total of 8 -->
 <!-- ===================================================================== -->
 <targetInstance>
     <id>sys0node0proc0pauc0iohs0</id>
@@ -3762,6 +3827,7 @@
 
 <!-- ===================================================================== -->
 <!-- PAU Units -->
+<!-- 1 per IOHS, except IOHS1 and IOHS2, a total of 6 -->
 <!-- ===================================================================== -->
 <targetInstance>
     <id>sys0node0proc0pauc0iohs0pau0</id>
@@ -4057,6 +4123,7 @@
 
 <!-- ===================================================================== -->
 <!-- MC Units -->
+<!-- 4 per proc, a total of 4 -->
 <!-- ===================================================================== -->
 <targetInstance>
     <id>sys0node0proc0mc0</id>
@@ -4252,6 +4319,7 @@
 
 <!-- ===================================================================== -->
 <!-- MI Units -->
+<!-- 1 per MC, a total of 4 -->
 <!-- ===================================================================== -->
 <targetInstance>
     <id>sys0node0proc0mc0mi0</id>
@@ -4435,6 +4503,7 @@
 
 <!-- ===================================================================== -->
 <!-- MCC Units -->
+<!-- 2 per MI, a total of 8 -->
 <!-- ===================================================================== -->
 <targetInstance>
     <id>sys0node0proc0mc0mi0mcc0</id>
@@ -4798,6 +4867,7 @@
 
 <!-- ===================================================================== -->
 <!-- OMIC Units -->
+<!-- 2 per MC, a total of 8 -->
 <!-- ===================================================================== -->
 <targetInstance>
     <id>sys0node0proc0mc0omic0</id>
@@ -5161,6 +5231,7 @@
 
 <!-- ===================================================================== -->
 <!-- OMI Units -->
+<!-- 2 per MCC, a total of 16 -->
 <!-- ===================================================================== -->
 <targetInstance>
     <id>sys0node0proc0mc0mi0mcc0omi0</id>
@@ -5948,6 +6019,7 @@
 
 <!-- ===================================================================== -->
 <!-- OCMB_CHIP Units -->
+<!-- 1 per OMI, a total of 16 -->
 <!-- ===================================================================== -->
 <targetInstance>
     <id>sys0node0ocmb0</id>
@@ -6853,6 +6925,7 @@
 
 <!-- ===================================================================== -->
 <!-- PMIC Units -->
+<!-- 2 per OCMB, a total of 18 (a max of 64)-->
 <!-- ===================================================================== -->
 <targetInstance>
     <id>sys0node0pmic0</id>
@@ -7594,6 +7667,7 @@
 
 <!-- ===================================================================== -->
 <!-- MEMPORT Units -->
+<!-- 1 per OCMB_CHIP, a total of 16 -->
 <!-- ===================================================================== -->
 <targetInstance>
     <id>sys0node0ocmb0memport0</id>
@@ -8125,6 +8199,7 @@
 
 <!-- ===================================================================== -->
 <!-- DIMM Units -->
+<!-- 1 per MEM_PORT, a total of 16 -->
 <!-- ===================================================================== -->
 <targetInstance>
     <id>sys0node0dimm0</id>
