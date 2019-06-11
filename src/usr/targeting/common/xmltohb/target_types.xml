@@ -235,6 +235,40 @@
   </targetType>
 
   <targetType>
+    <id>chip-bmc-ast2600</id>
+    <parent>sp</parent>
+    <attribute>
+      <id>AFFINITY_PATH</id>
+      <default>affinity:sys-0/node-0/bmc-0</default>
+    </attribute>
+    <attribute>
+      <default>AST2600</default>
+      <id>MODEL</id>
+    </attribute>
+    <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
+    </attribute>
+    <attribute>
+      <default>BMC</default>
+      <id>TYPE</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
     <id>chip-fcdimm-ddr4</id>
     <parent>lcard-dimm-cdimm</parent>
   </targetType>

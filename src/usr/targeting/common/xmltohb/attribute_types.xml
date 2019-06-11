@@ -3935,6 +3935,9 @@
       <name>AST2500</name>
     </enumerator>
     <enumerator>
+      <name>AST2600</name>
+    </enumerator>
+    <enumerator>
       <name>PCA9847</name>
     </enumerator>
     <enumerator>
