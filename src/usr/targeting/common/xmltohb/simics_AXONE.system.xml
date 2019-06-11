@@ -201,7 +201,7 @@
     </attribute>
     <attribute>
         <id>ASYNC_NEST_FREQ_MHZ</id>
-        <default>0xFFFF</default>
+        <default>2000</default>
     </attribute>
     <attribute>
         <id>HB_SETTINGS</id>
@@ -636,6 +636,10 @@
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FREQ_OMI_MHZ</id>
+        <default>25600</default>
     </attribute>
 </targetInstance>
 
