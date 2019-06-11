@@ -153,7 +153,7 @@ inline fapi2::ReturnCode get_fw_status(const fapi2::Target<fapi2::TARGET_TYPE_OC
 
     // Get data and check for errors
     FAPI_TRY(fapi2::getI2c(i_target, l_size, l_cmd_id, o_data));
-    FAPI_INF( "status returned ( 5 bytes ) : 0x%.02X 0x%.02X 0x%.02X 0x%.02X 0x%.02X",
+    FAPI_DBG( "status returned ( 5 bytes ) : 0x%.02X 0x%.02X 0x%.02X 0x%.02X 0x%.02X",
               o_data[0], o_data[1] , o_data[2], o_data[3], o_data[4]);
 fapi_try_exit:
     return fapi2::current_err;

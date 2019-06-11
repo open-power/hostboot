@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -327,7 +327,7 @@ inline fapi2::ReturnCode get_field( const fapi2::Target<T>& i_target,
                  "Conversion error between original %d to converted %d value for %s",
                  l_temp, o_value, spd::c_str(i_target) );
 
-    FAPI_INF("%s: 0x%02x for %s",
+    FAPI_DBG("%s: 0x%02x for %s",
              TT::FIELD_STR,
              o_value,
              spd::c_str(i_target));
@@ -378,7 +378,7 @@ inline fapi2::ReturnCode set_field( const fapi2::Target<T>& i_target,
     FAPI_TRY( (set_field<E, F>(i_target, i_setting, i_ffdc_codes, io_data)),
               "Failed set_field() for %s", spd::c_str(i_target) );
 
-    FAPI_INF("%s: Set value of 0x%02x. Data for buffer at byte %d, is now 0x%02x for %s",
+    FAPI_DBG("%s: Set value of 0x%02x. Data for buffer at byte %d, is now 0x%02x for %s",
              TT::FIELD_STR,
              i_setting,
              BYTE,
