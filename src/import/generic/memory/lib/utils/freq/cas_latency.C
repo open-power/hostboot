@@ -46,14 +46,6 @@
 namespace mss
 {
 
-const std::vector< uint32_t > CasLatencyTraits<mc_type::NIMBUS>::SUPPORTED_FREQS =
-{
-    DIMM_SPEED_1866,
-    DIMM_SPEED_2133,
-    DIMM_SPEED_2400,
-    DIMM_SPEED_2666,
-};
-
 const std::vector< uint32_t > CasLatencyTraits<mc_type::EXPLORER>::SUPPORTED_FREQS =
 {
     DIMM_SPEED_2666,
