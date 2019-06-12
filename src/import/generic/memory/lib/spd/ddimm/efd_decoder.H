@@ -67,7 +67,6 @@ inline fapi2::ReturnCode reader( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
                                  const std::vector<IT>& i_spd_data,
                                  OT& o_value)
 {
-
     FAPI_TRY( (mss::get_field<endian::LITTLE, F, TT>(i_target, i_spd_data, mss::READ_SPD_FIELD, o_value)),
               "Failed efd::read_field() for %s", spd::c_str(i_target) );
 
@@ -834,176 +833,176 @@ class base_decoder
         }
 
         ///
-        /// @brief Decodes PMIC0 SWA Volt -> PMIC0_SWA_SETTING
+        /// @brief Decodes PMIC0 SWA Volt -> PMIC0_SWA_OFFSET
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode pmic0_swa_setting(uint8_t& o_output) const
+        virtual fapi2::ReturnCode pmic0_swa_offset(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
         ///
-        /// @brief Decodes PMIC0 SWA Volt -> PMIC0_SWA_RANGE
+        /// @brief Decodes PMIC0 SWA Volt -> PMIC0_SWA_OFFSET_DIRECTION
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode pmic0_swa_range(uint8_t& o_output) const
+        virtual fapi2::ReturnCode pmic0_swa_offset_direction(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
         ///
-        /// @brief Decodes PMIC0 SWB Volt -> PMIC0_SWB_SETTING
+        /// @brief Decodes PMIC0 SWB Volt -> PMIC0_SWB_OFFSET
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode pmic0_swb_setting(uint8_t& o_output) const
+        virtual fapi2::ReturnCode pmic0_swb_offset(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
         ///
-        /// @brief Decodes PMIC0 SWB Volt -> PMIC0_SWB_RANGE
+        /// @brief Decodes PMIC0 SWB Volt -> PMIC0_SWB_OFFSET_DIRECTION
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode pmic0_swb_range(uint8_t& o_output) const
+        virtual fapi2::ReturnCode pmic0_swb_offset_direction(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
         ///
-        /// @brief Decodes PMIC0 SWC Volt -> PMIC0_SWC_SETTING
+        /// @brief Decodes PMIC0 SWC Volt -> PMIC0_SWC_OFFSET
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode pmic0_swc_setting(uint8_t& o_output) const
+        virtual fapi2::ReturnCode pmic0_swc_offset(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
         ///
-        /// @brief Decodes PMIC0 SWC Volt -> PMIC0_SWC_RANGE
+        /// @brief Decodes PMIC0 SWC Volt -> PMIC0_SWC_OFFSET_DIRECTION
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode pmic0_swc_range(uint8_t& o_output) const
+        virtual fapi2::ReturnCode pmic0_swc_offset_direction(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
         ///
-        /// @brief Decodes PMIC0 SWD Volt -> PMIC0_SWD_SETTING
+        /// @brief Decodes PMIC0 SWD Volt -> PMIC0_SWD_OFFSET
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode pmic0_swd_setting(uint8_t& o_output) const
+        virtual fapi2::ReturnCode pmic0_swd_offset(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
         ///
-        /// @brief Decodes PMIC0 SWD Volt -> PMIC0_SWD_RANGE
+        /// @brief Decodes PMIC0 SWD Volt -> PMIC0_SWD_OFFSET_DIRECTION
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode pmic0_swd_range(uint8_t& o_output) const
+        virtual fapi2::ReturnCode pmic0_swd_offset_direction(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
         ///
-        /// @brief Decodes PMIC1 SWA Volt -> PMIC1_SWA_SETTING
+        /// @brief Decodes PMIC1 SWA Volt -> PMIC1_SWA_OFFSET
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode pmic1_swa_setting(uint8_t& o_output) const
+        virtual fapi2::ReturnCode pmic1_swa_offset(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
         ///
-        /// @brief Decodes PMIC1 SWA Volt -> PMIC1_SWA_RANGE
+        /// @brief Decodes PMIC1 SWA Volt -> PMIC1_SWA_OFFSET_DIRECTION
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode pmic1_swa_range(uint8_t& o_output) const
+        virtual fapi2::ReturnCode pmic1_swa_offset_direction(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
         ///
-        /// @brief Decodes PMIC1 SWB Volt -> PMIC1_SWB_SETTING
+        /// @brief Decodes PMIC1 SWB Volt -> PMIC1_SWB_OFFSET
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode pmic1_swb_setting(uint8_t& o_output) const
+        virtual fapi2::ReturnCode pmic1_swb_offset(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
         ///
-        /// @brief Decodes PMIC1 SWB Volt -> PMIC1_SWB_RANGE
+        /// @brief Decodes PMIC1 SWB Volt -> PMIC1_SWB_OFFSET_DIRECTION
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode pmic1_swb_range(uint8_t& o_output) const
+        virtual fapi2::ReturnCode pmic1_swb_offset_direction(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
         ///
-        /// @brief Decodes PMIC1 SWC Volt -> PMIC1_SWC_SETTING
+        /// @brief Decodes PMIC1 SWC Volt -> PMIC1_SWC_OFFSET
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode pmic1_swc_setting(uint8_t& o_output) const
+        virtual fapi2::ReturnCode pmic1_swc_offset(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
         ///
-        /// @brief Decodes PMIC1 SWC Volt -> PMIC1_SWC_RANGE
-        /// @param[out] o_output encoding from SPD
+        /// @brief Decodes PMIC1 SWC Volt -> PMIC1_SWC_OFFSET_DIRECTION
+        /// @param[out] o_output ncoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode pmic1_swc_range(uint8_t& o_output) const
+        virtual fapi2::ReturnCode pmic1_swc_offset_direction(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
         ///
-        /// @brief Decodes PMIC1 SWD Volt -> PMIC1_SWD_SETTING
+        /// @brief Decodes PMIC1 SWD Volt -> PMIC1_SWD_OFFSET
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode pmic1_swd_setting(uint8_t& o_output) const
+        virtual fapi2::ReturnCode pmic1_swd_offset(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
         ///
-        /// @brief Decodes PMIC1 SWD Volt -> PMIC1_SWD_RANGE
+        /// @brief Decodes PMIC1 SWD Volt -> PMIC1_SWD_OFFSET_DIRECTION
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode pmic1_swd_range(uint8_t& o_output) const
+        virtual fapi2::ReturnCode pmic1_swd_offset_direction(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
