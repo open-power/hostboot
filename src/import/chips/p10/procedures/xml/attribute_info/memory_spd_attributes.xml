@@ -1,0 +1,721 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p10/procedures/xml/attribute_info/memory_spd_attributes.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2019                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+
+<attributes>
+    <attribute>
+        <id>ATTR_EFF_DRAM_GEN</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          DRAM Device Type.
+          Decodes SPD byte 2.
+          Generation of memory: DDR3, DDR4.
+          creator: mss_eff_config
+          consumer: various
+          firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <enum>EMPTY = 0, DDR3 = 1, DDR4 = 2</enum>
+        <writeable/>
+        <array>2 2</array>
+        <mssAccessorName>eff_dram_gen</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DIMM_TYPE</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          Base Module Type.
+          Decodes SPD Byte 3 (bits 3~0).
+          Type of DIMM: RDIMM, UDIMM, LRDIMM as specified by the JEDEC standard.
+          creator: mss_eff_config
+          consumer: various
+          firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <enum> EMPTY = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3</enum>
+        <writeable/>
+        <array>2 2</array>
+        <mssAccessorName>eff_dimm_type</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_HYBRID_MEMORY_TYPE</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          Hybrid Media.
+          Decodes SPD Byte 3 (bits 6~4)
+          creator: mss_eff_config
+          consumer: various
+          firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <enum> NONE = 0, NVDIMM = 1</enum>
+        <writeable/>
+        <array>2 2</array>
+        <mssAccessorName>eff_hybrid_memory_type</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_HYBRID</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          Hybrid.
+          Decodes SPD Byte 3 (bit 7)
+          creator: mss_eff_config
+          consumer: various
+          firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <enum> NOT_HYBRID = 0, IS_HYBRID= 1</enum>
+        <writeable/>
+        <array>2 2</array>
+        <mssAccessorName>eff_hybrid</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_DENSITY</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            DRAM Density.
+            Decodes SPD Byte 4 (bits 3~0).
+            Total SDRAM capacity per die.
+            For multi-die stacks (DDP, QDP, or 3DS), this represents
+            the capacity of each DRAM die in the stack.
+            creator: mss_eff_config
+            consumer: various
+            firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <enum> 4G = 4, 8G = 8, 16G = 16 </enum>
+        <writeable/>
+        <array>2 2</array>
+        <mssUnit>Gb</mssUnit>
+        <mssAccessorName>eff_dram_density</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_BANK_BITS</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Number of DRAM bank address bits.
+            Actual number of banks is 2^N, where
+            N is the number of bank address bits.
+            Decodes SPD Byte 4 (bits 5~4).
+            creator: spd_decoder
+            consumer: various
+            firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2 2</array>
+        <mssAccessorName>eff_dram_bank_bits</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_BANK_GROUP_BITS</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Bank Groups Bits.
+            Decoded SPD Byte 4 (bits 7~6).
+            Actual number of bank groups is 2^N,
+            where N is the number of bank address bits.
+            This value represents the number of bank groups
+            into which the memory array is divided.
+            creator: mss_eff_config
+            consumer: various
+            firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2 2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_COLUMN_BITS</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Column Address Bits.
+            Decoded SPD Byte 5 (bits 2~0).
+            Actual number of DRAM columns is 2^N,
+            where N is the number of column address bits
+            creator: mss_eff_config
+            consumer: various
+            firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2 2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_ROW_BITS</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Row Address Bits.
+            Decodes Byte 5 (bits 5~3).
+            Number of DRAM column address bits.
+            Actual number of DRAM rows is 2^N,
+            where N is the number of row address bits
+            creator: mss_eff_config
+            consumer: various
+            firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <enum> NUM14 = 14, NUM15 = 15, NUM16 = 16, NUM17 = 17, NUM18 = 18</enum>
+        <writeable/>
+        <array>2 2</array>
+        <mssAccessorName>eff_dram_row_bits</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_PRIM_STACK_TYPE</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Primary SDRAM Package Type.
+            Decodes Byte 6.
+            This byte defines the primary set of SDRAMs.
+            Monolithic = SPD, Multi-load stack = DDP/QDP, Single-load stack = 3DS
+            creator: mss_eff_config
+            consumer: various
+            firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <enum> SDP = 0, DDP_QDP = 1, 3DS = 2</enum>
+        <writeable/>
+        <array>2 2</array>
+        <mssAccessorName>eff_prim_stack_type</mssAccessorName>
+    </attribute>
+    <attribute>
+        <id>ATTR_EFF_DRAM_PPR</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Post Package Repair. Used in various locations and is evaluated in mss_eff_cnfg.
+            creator: mss_eff_cnfg
+            consumer: various
+            firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <enum>NOT_SUPPORTED = 0, SUPPORTED = 1</enum>
+        <writeable/>
+        <array>2 2</array>
+        <mssAccessorName>eff_dram_ppr</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_SOFT_PPR</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Soft Post Package Repair. Used in various locations and is evaluated in mss_eff_cnfg.
+            creator: mss_eff_cnfg
+            consumer: various
+            firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <enum>NOT_SUPPORTED = 0, SUPPORTED = 1</enum>
+        <writeable/>
+        <array>2 2</array>
+        <mssAccessorName>eff_dram_soft_ppr</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_TRCD</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          Minimum RAS to CAS Delay Time
+          in nck (number of clock cyles).
+          Decodes SPD byte 25 (7~0) and byte 112 (7~0).
+          Each memory channel will have a value.
+          creator: eff_config
+          consumer: various
+          firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array> 2 </array>
+        <mssUnits> nck </mssUnits>
+        <mssAccessorName>eff_dram_trcd</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_TRP</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          SDRAM Row Precharge Delay Time
+          in nck (number of clock cycles).
+          Decodes SPD byte 26 (bits 7~0) and byte 121 (bits 7~0).
+          Each memory channel will have a value.
+          creator: eff_config
+          consumer: various
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array> 2 </array>
+        <mssUnits> nck </mssUnits>
+        <mssAccessorName>eff_dram_trp</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_TRAS</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          Minimum Active to Precharge Delay Time
+          in nck (number of clock cycles).
+          Decodes SPD byte 27 (bits 3~0) and byte 28 (7~0).
+          Each memory channel will have a value.
+          creator: mss_eff_cnfg_timing
+          consumer: various
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array> 2 </array>
+        <mssUnits> nck </mssUnits>
+        <mssAccessorName>eff_dram_tras</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_TRC</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          Minimum Active to Active/Refresh Delay
+          in nck (number of clock cyles).
+          Decodes SPD byte 27 (bits 7~4), byte 29 (bits 7~0), and byte 120.
+          Each memory channel will have a value.
+          creator: eff_confg
+          consumer: various
+          firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array> 2 </array>
+        <mssUnits> nck </mssUnits>
+        <mssAccessorName>eff_dram_trc</mssAccessorName>
+    </attribute>
+
+    <attribute>
+      <id>ATTR_EFF_DRAM_TRFC</id>
+      <targetType>TARGET_TYPE_MCS</targetType>
+      <description>
+        DDR4 Spec defined as Refresh Cycle Time (tRFC).
+        SPD Spec refers it to the Minimum Refresh Recovery Delay Time.
+        In nck (number of clock cyles).
+        Decodes SPD byte 31 (bits 15~8) and byte 30 (bits 7~0) for tRFC1.
+        Decodes SPD byte 33 (bits 15~8) and byte 32 (bits 7~0) for tRFC2.
+        Decodes SPD byte 35 (bits 15~8) and byte 34 (bits 7~0) for tRFC4.
+        Selected tRFC value depends on MRW attribute that selects refresh mode.
+        For 3DS, The tRFC time to the same logical rank is defined as tRFC_slr and is
+        specificed as the value as for a monolithic DDR4 SDRAM of equivalent density.
+        creator: eff_config
+        consumer: various
+        firmware notes: none</description>
+    <initToZero></initToZero>
+      <valueType>uint16</valueType>
+      <writeable/>
+      <array> 2 </array>
+      <mssUnits> nck </mssUnits>
+      <mssAccessorName>eff_dram_trfc</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_TFAW</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          Minimum Four Activate Window Delay Time
+          in nck (number of clock cycles).
+          Decodes SPD byte 36 (bits 3~0) and byte 37 (bits 7~0).
+          For 3DS, tFAW time to the same logical rank is defined as
+          tFAW_slr_x4 or tFAW_slr_x8 (for x4 and x8 devices only) and
+          specificed as the value as for a monolithic DDR4 SDRAM
+          equivalent density.
+          Each memory channel will have a value.
+          creator: eff_cnfg
+          consumer: various
+          firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array> 2 </array>
+        <mssUnits> nck </mssUnits>
+        <mssAccessorName>eff_dram_tfaw</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_TRRD_S</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          Minimum Activate to Activate Delay Time, different bank group
+          in nck (number of clock cycles).
+          Decodes SPD byte 38 (bits 7~0).
+          For 3DS, The tRRD_S time to a different bank group in the
+          same logical rank is defined as tRRD_slr and is
+          specificed as the value as for a monolithic
+          DDR4 SDRAM of equivalent density.
+          Each memory channel will have a value.
+          creator: eff_confg
+          consumer: various
+          firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array> 2 </array>
+        <mssUnits> nck </mssUnits>
+        <mssAccessorName>eff_dram_trrd_s</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_TRRD_L</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          Minimum Activate to Activate Delay Time, same bank group
+          in nck (number of clock cycles).
+          Decodes SPD byte 39 (bits 7~0).
+          For 3DS, The tRRD_L time to the same bank group in the
+          same logical rank is defined as tRRD_L_slr and is
+          specificed as the value as for a monolithic
+          DDR4 SDRAM of equivalent density.
+          Each memory channel will have a value.
+          creator: eff_confg
+          consumer: various
+          firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array> 2 </array>
+      <mssUnits> nck </mssUnits>
+        <mssAccessorName>eff_dram_trrd_l</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_TCCD_L</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          Minimum CAS to CAS Delay Time, same bank group
+          in nck (number of clock cycles).
+          Decodes SPD byte 40 (bits 7~0) and byte 117 (bits 7~0).
+          This is for DDR4 MRS6.
+          Each memory channel will have a value.
+          Creator: eff_config
+          Consumer:various
+          Firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <enum>4NCK = 4, 5NCK = 5, 6NCK = 6, 7NCK = 7, 8NCK = 8</enum>
+        <writeable/>
+        <array> 2 </array>
+        <mssUnits> nck </mssUnits>
+        <mssAccessorName>eff_dram_tccd_l</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_TWR</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Minimum Write Recovery Time.
+            Decodes SPD byte 41 (bits 3~0) and byte 42 (bits 7~0).
+            Each memory channel will have a value.
+            creator: mss_eff_cnfg_timing
+            consumer: various
+            firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array> 2 </array>
+        <mssUnits> nck </mssUnits>
+        <mssAccessorName>eff_dram_twr</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_TWTR_S</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          Minimum Write to Read Time, different bank group
+          in nck (number of clock cycles).
+          Decodes SPD byte 43 (3~0) and byte 44 (bits 7~0).
+          Each memory channel will have a value.
+          creator: eff_config
+          consumer: various
+          firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array> 2 </array>
+        <mssUnits> nck </mssUnits>
+        <mssAccessorName>eff_dram_twtr_s</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_TWTR_L</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          Minimum Write to Read Time, same bank group
+          in nck (number of clock cycles).
+          Decodes byte 43 (7~4) and byte 45 (bits 7~0).
+          Each memory channel will have a value.
+          creator: eff_config
+          consumer: various
+          firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array> 2 </array>
+        <mssUnits> nck </mssUnits>
+        <mssAccessorName>eff_dram_twtr_l</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_TMAW</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          Maximum Activate Window
+          in nck (number of clock cycles).
+          Decodes SPD byte 7 (bits 5~4).
+          Depends on tREFI multiplier.
+          Each memory channel will have a value.
+          creator: mss_eff_cnfg
+          consumer: various
+          firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint16</valueType>
+        <writeable/>
+        <array> 2 </array>
+        <mssUnits> nck </mssUnits>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_WIDTH</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          SDRAM Device Width
+          Decodes SPD Byte 12 (bits 2~0).
+          Options: X4 (4 bits), X8 (8 bits), X16 (16 bits), X32 (32 bits).
+          creator: mss_eff_cnfg
+          consumer: various
+          firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <enum>X4 = 4, X8 = 8, X16 = 16, X32 = 32</enum>
+        <mssUnit>bits</mssUnit>
+        <writeable/>
+        <array>2 2</array>
+        <mssAccessorName>eff_dram_width</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_RANK_MIX</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          DRAM Device Rank Mix
+          Decodes SPD Byte 12 (bits 5~3).
+          creator: mss_eff_cnfg
+          consumer: various
+          firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <enum>SYMMETRICAL = 0, ASYMMETICAL = 1</enum>
+        <mssUnit>decode from SPD spec</mssUnit>
+        <writeable/>
+        <array>2 2</array>
+    </attribute>
+
+    <attribute>
+      <id>ATTR_EFF_NUM_RANKS_PER_DIMM</id>
+      <targetType>TARGET_TYPE_MCS</targetType>
+      <description>
+        Total number of ranks in each DIMM.
+        For monolithic and multi-load stack modules (SDP/DDP) this is the same as
+        the number of package ranks per DIMM (SPD Byte 12 bits 5~3).
+
+        For single load stack (3DS) modules this value represents the number
+        of logical ranks per DIMM.
+        Logical rank refers the individually addressable die in a 3DS stack
+        and has no meaning for monolithic or multi-load stacked SDRAMs.
+        creator: mss_eff_cnfg
+        consumer: various
+        firmware notes: none
+      </description>
+      <initToZero></initToZero>
+      <valueType>uint8</valueType>
+      <enum>
+        1R = 1, 2R = 2, 4R = 4, 8R = 8, 16R = 16
+      </enum>
+      <writeable/>
+      <array> 2 2</array>
+      <mssAccessorName>eff_num_ranks_per_dimm</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_REGISTER_TYPE</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Register Type
+            Decodes SPD Byte 131
+            creator: mss_eff_cnfg
+            consumer: eff_dimm
+        </description>
+        <enum>RCD01 = 0x0, RCD02 = 0x1</enum>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2 2</array>
+        <mssAccessorName>eff_register_type</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_MFG_ID</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            DRAM Manufacturer ID Code
+            Decodes SPD Byte 350 and 351
+            creator: mss_eff_cnfg
+            consumer: power_thermal::decoder
+        </description>
+        <enum>MICRON = 0x802C, SAMSUNG = 0x80CE, HYNIX = 0x80AD </enum>
+        <initToZero></initToZero>
+        <valueType>uint16</valueType>
+        <writeable/>
+        <array>2 2</array>
+        <mssAccessorName>eff_dram_mfg_id</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_RCD_MFG_ID</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Register Manufacturer ID Code
+            Decodes SPD Byte 133 and 134
+            creator: mss_eff_cnfg
+        </description>
+        <enum>INPHI = 0xB304, MONTAGE = 0x3286, IDT = 0xB380 </enum>
+        <initToZero></initToZero>
+        <valueType>uint16</valueType>
+        <writeable/>
+        <array>2 2</array>
+        <mssAccessorName>eff_rcd_mfg_id</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_REGISTER_REV</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Register Revision Number
+            Decodes SPD Byte 135
+            creator: mss_eff_cnfg
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2 2</array>
+        <mssAccessorName>eff_register_rev</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_PACKAGE_RANK_MAP</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          Package Rank Map
+          Decodes SPD Byte 60 - 77 (Bits 7~6)
+          creator: mss_eff_cnfg
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2 2 18</array>
+        <mssAccessorName>eff_package_rank_map</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_NIBBLE_MAP</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          Nibble Map
+          Decodes SPD Byte 60 - 77 (Bits 5~0)
+          creator: mss_eff_cnfg
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2 2 18</array>
+        <mssAccessorName>eff_nibble_map</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ROW_REPAIR_DATA</id>
+        <targetType>TARGET_TYPE_DIMM</targetType>
+        <description>
+          Row Repair Data for a DIMM target.
+          Data for 4 master ranks * 32 bits per row repair
+          Each row repair contains:
+          -5 bits:  DRAM position (x8: 0-9, x4: 0-19)
+          -3 bits:  slave ranks (0-7)
+          -2 bits:  bank group (0-3)
+          -3 bits:  bank (0-7)
+          -18 bits: row
+          -1 bits:  repair validity (0: repair is invalid, 1: repair is valid)
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>4 4</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ROW_REPAIR_SUPPORTED_MRW</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+          True or false whether row repair is supported
+          MRW attribute
+        </description>
+        <valueType>uint8</valueType>
+        <enum>SUPPORTED = 1, UNSUPPORTED = 0</enum>
+        <platInit/>
+        <default>UNSUPPORTED</default>
+    </attribute>
+
+</attributes>
