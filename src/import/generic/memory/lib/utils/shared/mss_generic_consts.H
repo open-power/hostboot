@@ -22,17 +22,13 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
 ///
 /// @file mss_generic_consts.H
 /// @brief Common constants to be shared
 ///
-
-// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
-// *HWP Team: Memory
-// *HWP Level: 3
-// *HWP Consumed by: HB:FSP
+/// *HWP HW Maintainer: Louis Stermole <stermole@us.ibm.com>
+/// *HWP FW Maintainer: Christian Geddes <crgeddes@us.ibm.com>
+/// *HWP Consumed by: HB
 
 #ifndef _MSS_GENERIC_CONSTS_H_
 #define _MSS_GENERIC_CONSTS_H_
@@ -233,9 +229,7 @@ enum generic_ffdc_codes
 ///
 enum class proc_type
 {
-    NIMBUS  = 0x0900,
-    CUMULUS = 0x0901,
-    AXONE   = 0x0902,
+    P10     = 0xA00,
 };
 
 ///
@@ -243,9 +237,7 @@ enum class proc_type
 ///
 enum class mc_type
 {
-    NIMBUS   = 0,
-    CENTAUR  = 1,
-    EXPLORER = 2,
+    EXPLORER = 0,
 };
 
 ///
@@ -620,25 +612,6 @@ enum class throttle_type
 ///
 template< mc_type MC >
 class mcTypeTraits;
-
-///
-/// @brief Trait classes for mc_type - NIMBUS specialization
-///
-template< >
-struct mcTypeTraits<mc_type::NIMBUS>
-{
-    enum
-    {
-        MC_PER_MODULE = 2,
-        MCS_PER_MC = 2,
-        MCS_PER_PROC = MC_PER_MODULE * MCS_PER_MC,
-        PORTS_PER_MCBIST = 4,
-        PORTS_PER_MCS = 2,
-        DIMMS_PER_PORT = 2,
-        DIMMS_PER_MCS = PORTS_PER_MCS * DIMMS_PER_PORT,
-        DIMMS_PER_MCBIST = PORTS_PER_MCBIST * DIMMS_PER_PORT,
-    };
-};
 
 ///
 /// @brief Trait classes for mc_type - EXPLORER specialization
