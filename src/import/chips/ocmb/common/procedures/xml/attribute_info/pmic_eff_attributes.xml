@@ -1,0 +1,703 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/ocmb/common/procedures/xml/attribute_info/pmic_eff_attributes.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<attributes>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC0_MFG_ID</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          Manufacturer ID Code
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint16</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic0_mfg_id</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC0_SWA_VOLTAGE_SETTING</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC0 SWA Voltage Setting
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic0_swa_voltage_setting</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC0_SWA_VOLTAGE_RANGE_SELECT</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC0 SWA Voltage Range
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic0_swa_voltage_range_select</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC0_SWA_VOLTAGE_OFFSET</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC0 SWA Voltage Offset (signed, 1 bit increments)
+        </description>
+        <initToZero></initToZero>
+        <valueType>int8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic0_swa_voltage_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC0_SWA_SEQUENCE_DELAY</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          Delay after the sequence which enables SWA
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic0_swa_sequence_delay</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC0_SWA_SEQUENCE_ORDER</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          The sequence at which SWA will be enabled
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic0_swa_sequence_order</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC0_SWB_VOLTAGE_SETTING</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC0 SWB Voltage Setting
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic0_swb_voltage_setting</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC0_SWB_VOLTAGE_RANGE_SELECT</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC0 SWB Voltage Range
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic0_swb_voltage_range_select</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC0_SWB_VOLTAGE_OFFSET</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC0 SWB Voltage Offset (signed, 1 bit increments)
+        </description>
+        <initToZero></initToZero>
+        <valueType>int8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic0_swb_voltage_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC0_SWB_SEQUENCE_DELAY</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          Delay after the sequence which enables SWB
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic0_swb_sequence_delay</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC0_SWB_SEQUENCE_ORDER</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          The sequence at which SWB will be enabled
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic0_swb_sequence_order</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC0_SWC_VOLTAGE_SETTING</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC0 SWC Voltage Setting
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic0_swc_voltage_setting</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC0_SWC_VOLTAGE_RANGE_SELECT</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC0 SWC Voltage Range
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic0_swc_voltage_range_select</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC0_SWC_VOLTAGE_OFFSET</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC0 SWC Voltage Offset (signed, 1 bit increments)
+        </description>
+        <initToZero></initToZero>
+        <valueType>int8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic0_swc_voltage_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC0_SWC_SEQUENCE_DELAY</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          Delay after the sequence which enables SWC
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic0_swc_sequence_delay</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC0_SWC_SEQUENCE_ORDER</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          The sequence at which SWC will be enabled
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic0_swc_sequence_order</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC0_SWD_VOLTAGE_SETTING</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC0 SWD Voltage Setting
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic0_swd_voltage_setting</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC0_SWD_VOLTAGE_RANGE_SELECT</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC0 SWD Voltage Range
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic0_swd_voltage_range_select</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC0_SWD_VOLTAGE_OFFSET</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC0 SWD Voltage Offset (signed, 1 bit increments)
+        </description>
+        <initToZero></initToZero>
+        <valueType>int8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic0_swd_voltage_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC0_SWD_SEQUENCE_DELAY</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          Delay after the sequence which enables SWD
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic0_swd_sequence_delay</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC0_SWD_SEQUENCE_ORDER</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          The sequence at which SWD will be enabled
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic0_swd_sequence_order</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_MFG_ID</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          Manufacturer ID Code
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint16</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic1_mfg_id</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_SWA_VOLTAGE_SETTING</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC1 SWA Voltage Setting
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic1_swa_voltage_setting</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_SWA_VOLTAGE_RANGE_SELECT</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC1 SWA Voltage Range
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic1_swa_voltage_range_select</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_SWA_VOLTAGE_OFFSET</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC1 SWA Voltage Offset (signed, 1 bit increments)
+        </description>
+        <initToZero></initToZero>
+        <valueType>int8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic1_swa_voltage_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_SWA_SEQUENCE_DELAY</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          Delay after the sequence which enables SWA
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic1_swa_sequence_delay</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_SWA_SEQUENCE_ORDER</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          The sequence at which SWA will be enabled
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic1_swa_sequence_order</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_SWB_VOLTAGE_SETTING</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC1 SWB Voltage Setting
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic1_swb_voltage_setting</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_SWB_VOLTAGE_RANGE_SELECT</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC1 SWB Voltage Range
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic1_swb_voltage_range_select</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_SWB_VOLTAGE_OFFSET</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC1 SWB Voltage Offset (signed, 1 bit increments)
+        </description>
+        <initToZero></initToZero>
+        <valueType>int8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic1_swb_voltage_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_SWB_SEQUENCE_DELAY</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          Delay after the sequence which enables SWB
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic1_swb_sequence_delay</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_SWB_SEQUENCE_ORDER</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          The sequence at which SWB will be enabled
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic1_swb_sequence_order</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_SWC_VOLTAGE_SETTING</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC1 SWC Voltage Setting
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic1_swc_voltage_setting</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_SWC_VOLTAGE_RANGE_SELECT</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC1 SWC Voltage Range
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic1_swc_voltage_range_select</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_SWC_VOLTAGE_OFFSET</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC1 SWC Voltage Offset (signed, 1 bit increments)
+        </description>
+        <initToZero></initToZero>
+        <valueType>int8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic1_swc_voltage_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_SWC_SEQUENCE_DELAY</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          Delay after the sequence which enables SWC
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic1_swc_sequence_delay</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_SWC_SEQUENCE_ORDER</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          The sequence at which SWC will be enabled
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic1_swc_sequence_order</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_SWD_VOLTAGE_SETTING</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC1 SWD Voltage Setting
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic1_swd_voltage_setting</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_SWD_VOLTAGE_RANGE_SELECT</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC1 SWD Voltage Range
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic1_swd_voltage_range_select</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_SWD_VOLTAGE_OFFSET</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC1 SWD Voltage Offset (signed, 1 bit increments)
+        </description>
+        <initToZero></initToZero>
+        <valueType>int8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic1_swd_voltage_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_SWD_SEQUENCE_DELAY</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          Delay after the sequence which enables SWD
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic1_swd_sequence_delay</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_SWD_SEQUENCE_ORDER</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          The sequence at which SWD will be enabled
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic1_swd_sequence_order</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC0_PHASE_COMB</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          Phase configuration for PMIC0
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic0_phase_comb</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_PHASE_COMB</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          Phase configuration for PMIC1
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic1_phase_comb</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_EFD_PMIC0_SWA_VOLTAGE_OFFSET</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC0 SWA Voltage Offset (signed, 1 bit increments)
+        </description>
+        <initToZero></initToZero>
+        <valueType>int8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>efd_pmic0_swa_voltage_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_EFD_PMIC0_SWB_VOLTAGE_OFFSET</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC0 SWB Voltage Offset (signed, 1 bit increments)
+        </description>
+        <initToZero></initToZero>
+        <valueType>int8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>efd_pmic0_swb_voltage_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_EFD_PMIC0_SWC_VOLTAGE_OFFSET</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC0 SWC Voltage Offset (signed, 1 bit increments)
+        </description>
+        <initToZero></initToZero>
+        <valueType>int8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>efd_pmic0_swc_voltage_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_EFD_PMIC0_SWD_VOLTAGE_OFFSET</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC0 SWD Voltage Offset (signed, 1 bit increments)
+        </description>
+        <initToZero></initToZero>
+        <valueType>int8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>efd_pmic0_swd_voltage_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_EFD_PMIC1_SWA_VOLTAGE_OFFSET</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC1 SWA Voltage Offset (signed, 1 bit increments)
+        </description>
+        <initToZero></initToZero>
+        <valueType>int8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>efd_pmic1_swa_voltage_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_EFD_PMIC1_SWB_VOLTAGE_OFFSET</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC1 SWB Voltage Offset (signed, 1 bit increments)
+        </description>
+        <initToZero></initToZero>
+        <valueType>int8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>efd_pmic1_swb_voltage_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_EFD_PMIC1_SWC_VOLTAGE_OFFSET</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC1 SWC Voltage Offset (signed, 1 bit increments)
+        </description>
+        <initToZero></initToZero>
+        <valueType>int8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>efd_pmic1_swc_voltage_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_EFD_PMIC1_SWD_VOLTAGE_OFFSET</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          PMIC1 SWD Voltage Offset (signed, 1 bit increments)
+        </description>
+        <initToZero></initToZero>
+        <valueType>int8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>efd_pmic1_swd_voltage_offset</mssAccessorName>
+    </attribute>
+
+</attributes>
