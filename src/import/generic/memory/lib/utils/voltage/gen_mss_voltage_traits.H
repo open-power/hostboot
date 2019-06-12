@@ -50,25 +50,6 @@ namespace mss
 template< mss::mc_type P, mss::spd::device_type D >
 class voltage_traits;
 
-///
-/// @class Traits and policy class for voltage code - specialization for the NIMBUS processor type, DDR4 device type
-///
-template<>
-class voltage_traits<mss::mc_type::NIMBUS, mss::spd::device_type::DDR4>
-{
-    public:
-        //////////////////////////////////////////////////////////////
-        // Target types
-        //////////////////////////////////////////////////////////////
-        static constexpr fapi2::TargetType VOLTAGE_TARGET_TYPE = fapi2::TARGET_TYPE_MCBIST;
-        static constexpr fapi2::TargetType SPD_TARGET_TYPE = fapi2::TARGET_TYPE_MCS;
-
-        //////////////////////////////////////////////////////////////
-        // Traits values
-        //////////////////////////////////////////////////////////////
-        // List of attribute setter functions for setting voltage rail values
-        static const std::vector<fapi2::ReturnCode (*)(const fapi2::Target<VOLTAGE_TARGET_TYPE>&, uint32_t)> voltage_setters;
-};
 
 ///
 /// @class Traits and policy class for voltage code - specialization for the AXONE processor type, DDR4 device type
