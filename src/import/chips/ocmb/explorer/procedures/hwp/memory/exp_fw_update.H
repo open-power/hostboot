@@ -27,11 +27,9 @@
 /// @file exp_fw_update.H
 /// @brief Procedure declaration to update explorer firmware
 ///
-// *HWP HWP Owner: Glenn Miles <milesg@ibm.com>
-// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
-// *HWP Team: Memory
-// *HWP Level: 2
-// *HWP Consumed by: FSP:HB
+/// *HWP HW Maintainer: Louis Stermole <stermole@us.ibm.com>
+/// *HWP FW Maintainer: Christian Geddes <crgeddes@us.ibm.com>
+/// *HWP Consumed by: HB
 
 #ifndef __MSS_EXP_FW_UPDATE__
 #define __MSS_EXP_FW_UPDATE__
