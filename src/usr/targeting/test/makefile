@@ -67,6 +67,8 @@ COMMON_TESTCASE_REL_PATHS = \
 TESTS += testtargeting.H
 TESTS += testattrsync.H
 TESTS += testattrtank.H
+TESTS += testAttribute.H
+TESTS += testTargetUtil.H
 TESTS += ${COMMON_TESTCASE_REL_PATHS}
 
 OBJS += attributestrings.o
