@@ -61,6 +61,22 @@ int P10_RID::ringid_get_chiplet_properties(
             *o_chipletData = (ChipletData_t*)&MC::g_chipletData;
             break;
 
+        case PAU0_TYPE :
+            *o_chipletData = (ChipletData_t*)&PAU0::g_chipletData;
+            break;
+
+        case PAU1_TYPE :
+            *o_chipletData = (ChipletData_t*)&PAU1::g_chipletData;
+            break;
+
+        case PAU2_TYPE :
+            *o_chipletData = (ChipletData_t*)&PAU2::g_chipletData;
+            break;
+
+        case PAU3_TYPE :
+            *o_chipletData = (ChipletData_t*)&PAU3::g_chipletData;
+            break;
+
         case AXON_TYPE :
             *o_chipletData = (ChipletData_t*)&AXON::g_chipletData;
             break;
