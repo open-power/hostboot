@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2015
+# Contributors Listed Below - COPYRIGHT 2011,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -67,6 +67,8 @@ COMMON_TESTCASE_REL_PATHS = \
 TESTS += testtargeting.H
 TESTS += testattrsync.H
 TESTS += testattrtank.H
+TESTS += testAttribute.H
+TESTS += testTargetUtil.H
 TESTS += ${COMMON_TESTCASE_REL_PATHS}
 
 OBJS += attributestrings.o
