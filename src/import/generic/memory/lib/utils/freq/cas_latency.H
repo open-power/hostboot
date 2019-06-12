@@ -117,18 +117,6 @@ class CasLatencyTraits
 {};
 
 ///
-/// @brief Traits based upon the memory controller type for allowed frequencies - specialization for NIMBUS
-///
-template <>
-class CasLatencyTraits<mc_type::NIMBUS>
-{
-    public:
-        static constexpr fapi2::TargetType TARGET_TYPE = fapi2::TARGET_TYPE_MCA;
-        static const std::vector<uint32_t> SUPPORTED_FREQS;
-        static constexpr const char* MC_STR = "NIMBUS";
-};
-
-///
 /// @brief Traits based upon the memory controller type for allowed frequencies - specialization for EXPLORER
 ///
 template <>
