@@ -287,8 +287,8 @@ typedef struct
         uint32_t value;
         struct
         {
-            uint32_t text                       : 24;
-            uint32_t version                    : 8;
+            uint32_t text    : 24;
+            uint32_t version : 8;
         } fields;
     } magic_number;
 
@@ -319,7 +319,6 @@ typedef struct
 
     ///  ---- Double word 2 -----
 
-    uint16_t reserved2;
     /// Ceff Vcs Start
     ///    CeffVcs value represented by index 0 (in 0.01%)
     uint16_t vcs_start;
@@ -374,6 +373,22 @@ typedef struct
 
     ///  ---- Double word 5 -----
 
+    /// Ambient Condition Start
+    ///    Ambient Condition represented by index 0 (in 0.01%)
+    uint16_t amb_cond_start;
+
+    /// Ambient Condition Step
+    ///    Ambient Condition step value for each CeffAmb index (in 0.01%)
+    uint16_t amb_cond_step;
+
+    /// Ambient Condition Size
+    ///    Number of Ambient Condition indexes
+    uint16_t amb_cond_size;
+
+    uint16_t reserved1;
+
+    ///  ---- Double word 6 -----
+
     /// Socket Power (in Watts) for the WOF Tables
     uint16_t socket_power_w;
 
@@ -383,12 +398,13 @@ typedef struct
     uint16_t sort_power_freq_mhz;
 
     /// Regulator Design Point Current Capacity (in Amps)
-    uint16_t rdp_curernt_a;
+    uint16_t rdp_current_a;
 
     /// Boost Current Capacity (in Amps)
-    uint16_t boost_curernt_a;
+    uint16_t boost_current_a;
 
-    ///  ---- Double word 6 -----
+
+    ///  ---- Double word 7 -----
 
     /// Date Timestamp of the table set as established by the generation process.
     uint32_t table_date_timestamp;
@@ -396,9 +412,9 @@ typedef struct
     /// Table Version as established by the generation process.
     uint16_t table_version;
 
-    uint16_t reserved3;
+    uint16_t reserved2;
 
-    ///  ---- Double word 7 -----
+    ///  ---- Double word 8 -----
 
     /// Thermal Design Point (TDP) VDD Ceff Percent
     uint8_t  vdd_tdp_ceff_pct;
@@ -411,7 +427,7 @@ typedef struct
 
     uint8_t reserved4[5];
 
-    ///  ---- Double word 8 and 9 -----
+    ///  ---- Double word 9 and 10 -----
 
     /// Up to 16 ASCII characters as a Package designator
     char package_name[16];
@@ -419,11 +435,6 @@ typedef struct
     // Padding to 128B is left to the compiler via the following attribute.
 
 } WofTablesHeader_t __attribute__((aligned(128)));
-
-#define WOF_CEF_VDD_SIZE  30    // Indexes: 5% to 150% in 5% steps
-#define WOF_CEF_VCS_SIZE  6     // Indexes: 33%, 66%, 100%, 133%, 166%, 200%
-#define WOF_IO_SIZE       8     // Indexes: Max-Min/8 to 100% in Max-Min/7 steps
-#define WOF_VRT_SIZE      12    // Indexes: 31.25% to 100% in 6.25% steps
 
 /// Header associated with the WOF Voltage Ratio Tables (VRT)
 typedef struct
@@ -437,14 +448,21 @@ typedef struct
             uint32_t    type                : 1;
             uint32_t    content             : 1;
             uint32_t    version             : 2;
-            uint32_t    io_id               : 4;
+            uint32_t    io_id               : 2;
+            uint32_t    ac_id               : 2;
             uint32_t    vdd_ceff_ratio_pct  : 8;
             uint32_t    vcs_ceff_ratio_pct  : 8;
         } fields;
     };
 } VRT_header_t;
 
-/// WOF Voltage Ratio Tables (VRT)
+#define WOF_CEF_VDD_SIZE  26    // Indexes: 5% to 150% in 5% steps
+#define WOF_CEF_VCS_SIZE  6     // Indexes: 33%, 66%, 100%, 133%, 166%, 200%
+#define WOF_IO_SIZE       4     // Indexes: Max-Min/4 to 100% in Max-Min/3 steps
+#define WOF_AMBCOND_SIZE  4     // Indexes: Max-Min/4 to 100% in Max-Min/3 steps
+#define WOF_VRT_SIZE      12    // Indexes: 31.25% to 100% in 6.25% steps
+
+/// WOF Voltage Ratio Tables (VRT) -- 16B
 typedef struct
 {
     VRT_header_t header;
@@ -452,24 +470,39 @@ typedef struct
 } VRT_t;
 
 
-/// WOF System Voltage Rato Tables - contents in the form of frequency and throttle %
-/// @todo Need to work with FW team on the packing and alignment in the SEEPROM
-typedef struct SystemVRTLayout
-{
-    VRT_t         vrt;
-} SystemVRTLayout_t;
-
 /// WOF HOMER Voltage Ratio Table - contents in the form of Pstates and throttle %
 typedef struct
 {
-    VRT_t         vrt;
-} HomerVRTLayout_t;
+    VRT_t           ambcond[WOF_AMBCOND_SIZE];
+} WOFAmbCond_t;
+
+typedef struct
+{
+    WOFAmbCond_t    iodlr[WOF_IO_SIZE];
+} WOFIO_t;
+
+typedef struct
+{
+    WOFIO_t         vdd[WOF_CEF_VDD_SIZE];
+} WOFVDD_t;
+
+typedef struct
+{
+    WOFVDD_t        vcs[WOF_CEF_VCS_SIZE];
+} WOFVCS_t;
+
+/// WOF System Voltage Rato Tables - contents in the form of frequency and throttle %
+typedef struct SystemVRTLayout
+{
+    WofTablesHeader_t wof_header_data;
+    WOFVCS_t          vrt_array;
+} SystemVRTLayout_t;
 
 /// WOF HOMER Voltage Ratio Table Set - header plus table set
 typedef struct
 {
     WofTablesHeader_t wof_header_data;
-    VRT_t             vrt_array[WOF_IO_SIZE][WOF_CEF_VCS_SIZE][WOF_CEF_VDD_SIZE];
+    WOFVCS_t          vrt_array;
 } HomerWOFLayout_t;
 
 #ifdef __cplusplus
