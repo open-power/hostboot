@@ -939,204 +939,204 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode pmic0_swa_setting(uint8_t& o_output) const override
+        virtual fapi2::ReturnCode pmic0_swa_offset(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC0_SWA_SETTING, R>(iv_target, iv_data, o_output)) );
+            FAPI_TRY(( reader<fields_t::PMIC0_SWA_OFFSET, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;
         }
 
         ///
-        /// @brief Decodes PMIC0 SWA Volt -> PMIC0_SWA_RANGE
+        /// @brief Decodes PMIC0 SWA Volt -> PMIC0_SWA_OFFSET_DIRECTION
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode pmic0_swa_range(uint8_t& o_output) const override
+        virtual fapi2::ReturnCode pmic0_swa_offset_direction(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC0_SWA_RANGE, R>(iv_target, iv_data, o_output)) );
+            FAPI_TRY(( reader<fields_t::PMIC0_SWA_OFFSET_DIRECTION, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;
         }
 
         ///
-        /// @brief Decodes PMIC0 SWB Volt -> PMIC0_SWB_SETTING
+        /// @brief Decodes PMIC0 SWB Volt -> PMIC0_SWB_OFFSET
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode pmic0_swb_setting(uint8_t& o_output) const override
+        virtual fapi2::ReturnCode pmic0_swb_offset(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC0_SWB_SETTING, R>(iv_target, iv_data, o_output)) );
+            FAPI_TRY(( reader<fields_t::PMIC0_SWB_OFFSET, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;
         }
 
         ///
-        /// @brief Decodes PMIC0 SWB Volt -> PMIC0_SWB_RANGE
+        /// @brief Decodes PMIC0 SWB Volt -> PMIC0_SWB_OFFSET_DIRECTION
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode pmic0_swb_range(uint8_t& o_output) const override
+        virtual fapi2::ReturnCode pmic0_swb_offset_direction(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC0_SWB_RANGE, R>(iv_target, iv_data, o_output)) );
+            FAPI_TRY(( reader<fields_t::PMIC0_SWB_OFFSET_DIRECTION, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;
         }
 
         ///
-        /// @brief Decodes PMIC0 SWC Volt -> PMIC0_SWC_SETTING
+        /// @brief Decodes PMIC0 SWC Volt -> PMIC0_SWC_OFFSET
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode pmic0_swc_setting(uint8_t& o_output) const override
+        virtual fapi2::ReturnCode pmic0_swc_offset(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC0_SWC_SETTING, R>(iv_target, iv_data, o_output)) );
+            FAPI_TRY(( reader<fields_t::PMIC0_SWC_OFFSET, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;
         }
 
         ///
-        /// @brief Decodes PMIC0 SWC Volt -> PMIC0_SWC_RANGE
+        /// @brief Decodes PMIC0 SWC Volt -> PMIC0_SWC_OFFSET_DIRECTION
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode pmic0_swc_range(uint8_t& o_output) const override
+        virtual fapi2::ReturnCode pmic0_swc_offset_direction(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC0_SWC_RANGE, R>(iv_target, iv_data, o_output)) );
+            FAPI_TRY(( reader<fields_t::PMIC0_SWC_OFFSET_DIRECTION, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;
         }
 
         ///
-        /// @brief Decodes PMIC0 SWD Volt -> PMIC0_SWD_SETTING
+        /// @brief Decodes PMIC0 SWD Volt -> PMIC0_SWD_OFFSET
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode pmic0_swd_setting(uint8_t& o_output) const override
+        virtual fapi2::ReturnCode pmic0_swd_offset(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC0_SWD_SETTING, R>(iv_target, iv_data, o_output)) );
+            FAPI_TRY(( reader<fields_t::PMIC0_SWD_OFFSET, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;
         }
 
         ///
-        /// @brief Decodes PMIC0 SWD Volt -> PMIC0_SWD_RANGE
+        /// @brief Decodes PMIC0 SWD Volt -> PMIC0_SWD_OFFSET_DIRECTION
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode pmic0_swd_range(uint8_t& o_output) const override
+        virtual fapi2::ReturnCode pmic0_swd_offset_direction(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC0_SWD_RANGE, R>(iv_target, iv_data, o_output)) );
+            FAPI_TRY(( reader<fields_t::PMIC0_SWD_OFFSET_DIRECTION, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;
         }
 
         ///
-        /// @brief Decodes PMIC1 SWA Volt -> PMIC1_SWA_SETTING
+        /// @brief Decodes PMIC1 SWA Volt -> PMIC1_SWA_OFFSET
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode pmic1_swa_setting(uint8_t& o_output) const override
+        virtual fapi2::ReturnCode pmic1_swa_offset(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC1_SWA_SETTING, R>(iv_target, iv_data, o_output)) );
+            FAPI_TRY(( reader<fields_t::PMIC1_SWA_OFFSET, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;
         }
 
         ///
-        /// @brief Decodes PMIC1 SWA Volt -> PMIC1_SWA_RANGE
+        /// @brief Decodes PMIC1 SWA Volt -> PMIC1_SWA_OFFSET_DIRECTION
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode pmic1_swa_range(uint8_t& o_output) const override
+        virtual fapi2::ReturnCode pmic1_swa_offset_direction(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC1_SWA_RANGE, R>(iv_target, iv_data, o_output)) );
+            FAPI_TRY(( reader<fields_t::PMIC1_SWA_OFFSET_DIRECTION, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;
         }
 
         ///
-        /// @brief Decodes PMIC1 SWB Volt -> PMIC1_SWB_SETTING
+        /// @brief Decodes PMIC1 SWB Volt -> PMIC1_SWB_OFFSET
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode pmic1_swb_setting(uint8_t& o_output) const override
+        virtual fapi2::ReturnCode pmic1_swb_offset(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC1_SWB_SETTING, R>(iv_target, iv_data, o_output)) );
+            FAPI_TRY(( reader<fields_t::PMIC1_SWB_OFFSET, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;
         }
 
         ///
-        /// @brief Decodes PMIC1 SWB Volt -> PMIC1_SWB_RANGE
+        /// @brief Decodes PMIC1 SWB Volt -> PMIC1_SWB_OFFSET_DIRECTION
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode pmic1_swb_range(uint8_t& o_output) const override
+        virtual fapi2::ReturnCode pmic1_swb_offset_direction(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC1_SWB_RANGE, R>(iv_target, iv_data, o_output)) );
+            FAPI_TRY(( reader<fields_t::PMIC1_SWB_OFFSET_DIRECTION, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;
         }
 
         ///
-        /// @brief Decodes PMIC1 SWC Volt -> PMIC1_SWC_SETTING
+        /// @brief Decodes PMIC1 SWC Volt -> PMIC1_SWC_OFFSET
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode pmic1_swc_setting(uint8_t& o_output) const override
+        virtual fapi2::ReturnCode pmic1_swc_offset(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC1_SWC_SETTING, R>(iv_target, iv_data, o_output)) );
+            FAPI_TRY(( reader<fields_t::PMIC1_SWC_OFFSET, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;
         }
 
         ///
-        /// @brief Decodes PMIC1 SWC Volt -> PMIC1_SWC_RANGE
+        /// @brief Decodes PMIC1 SWC Volt -> PMIC1_SWC_OFFSET_DIRECTION
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode pmic1_swc_range(uint8_t& o_output) const override
+        virtual fapi2::ReturnCode pmic1_swc_offset_direction(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC1_SWC_RANGE, R>(iv_target, iv_data, o_output)) );
+            FAPI_TRY(( reader<fields_t::PMIC1_SWC_OFFSET_DIRECTION, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;
         }
 
         ///
-        /// @brief Decodes PMIC1 SWD Volt -> PMIC1_SWD_SETTING
+        /// @brief Decodes PMIC1 SWD Volt -> PMIC1_SWD_OFFSET
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode pmic1_swd_setting(uint8_t& o_output) const override
+        virtual fapi2::ReturnCode pmic1_swd_offset(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC1_SWD_SETTING, R>(iv_target, iv_data, o_output)) );
+            FAPI_TRY(( reader<fields_t::PMIC1_SWD_OFFSET, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;
         }
 
         ///
-        /// @brief Decodes PMIC1 SWD Volt -> PMIC1_SWD_RANGE
+        /// @brief Decodes PMIC1 SWD Volt -> PMIC1_SWD_OFFSET_DIRECTION
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode pmic1_swd_range(uint8_t& o_output) const override
+        virtual fapi2::ReturnCode pmic1_swd_offset_direction(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC1_SWD_RANGE, R>(iv_target, iv_data, o_output)) );
+            FAPI_TRY(( reader<fields_t::PMIC1_SWD_OFFSET_DIRECTION, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;
