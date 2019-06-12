@@ -1,0 +1,153 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/ocmb/common/procedures/xml/error_info/pmic_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<hwpErrors>
+
+  <hwpError>
+    <rc>RC_I2C_PMIC_INVALID_READ_SIZE</rc>
+    <description>
+       The number of bytes returned from the read did not match
+       the expected value.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>ADDRESS</ffdc>
+    <ffdc>SIZE_RETURNED</ffdc>
+    <ffdc>SIZE_REQUESTED</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_PMIC_CHIP_NOT_RECOGNIZED</rc>
+    <description>
+       The PMIC identifier register contents did not match any known chip.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>VENDOR_ID</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_PMIC_VOLTAGE_OUT_OF_RANGE</rc>
+    <description>
+       The voltage from the SPD and offset combination or bias operation was out of range for the PMIC.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>VOLTAGE_BITMAP</ffdc>
+    <ffdc>RAIL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_PMIC_ORDER_OUT_OF_RANGE</rc>
+    <description>
+       The sequence order specified by the SPD was out of range for the PMIC (max 4)
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>RAIL</ffdc>
+    <ffdc>ORDER</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_PMIC_VOLTAGE_RANGE_SETTING_OUT_OF_RANGE</rc>
+    <description>
+       The PMIC voltage setting range was too large (Valid: 0,1)
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>RAIL</ffdc>
+    <ffdc>RANGE_SETTING</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_PMIC_DELAY_OUT_OF_RANGE</rc>
+    <description>
+       The sequence delay specified by the SPD was out of range for the PMIC (max bitmap: 0b111)
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>RAIL</ffdc>
+    <ffdc>DELAY</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_PMIC_DIMM_SPD_4U</rc>
+    <description>
+       The module_height attribute SPD of this DIMM was read as 4U.
+       4U is not supported yet for pmic_enable().
+    </description>
+    <ffdc>TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+</hwpErrors>
