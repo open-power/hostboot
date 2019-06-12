@@ -48,6 +48,7 @@
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/mss_generic_system_attribute_getters.H>
 #include <generic/memory/lib/mss_generic_attribute_getters.H>
+#include <mss_p9a_attribute_getters.H>
 
 namespace mss
 {
@@ -476,6 +477,8 @@ fapi2::ReturnCode setup_mc_config0_helper(const fapi2::Target<T>& i_target)
 {
     // The value is 0x8200040000152824
     fapi2::buffer<uint64_t> l_val;
+    uint8_t l_dl_tx_ln_rev_en = 1;
+    uint8_t l_dl_x4_backoff_en = 1;
 
     // CFG_DL0_ENABLE: dl0 enabled
     l_val.template writeBit<TT::MC_REG2_DL0_CONFIG0_CFG_ENABLE>(1);
@@ -544,7 +547,9 @@ fapi2::ReturnCode setup_mc_config0_helper(const fapi2::Target<T>& i_target)
     l_val.template writeBit<TT::MC_REG2_DL0_CONFIG0_CFG_UNUSED2>(0);
 
     // CFG_DL0_TX_LN_REV_ENA: When set will allow dl0 to perform tx lane reversals.
-    l_val.template writeBit<TT::MC_REG2_DL0_CONFIG0_CFG_TX_LN_REV_ENA>(0);
+    FAPI_TRY(mss::attr::get_omi_dl_ln_rev_enable(i_target, l_dl_tx_ln_rev_en),
+             "Error from FAPI_ATTR_GET (ATTR_OMI_DL_LN_REV_ENABLE)");
+    l_val.template writeBit<TT::MC_REG2_DL0_CONFIG0_CFG_TX_LN_REV_ENA>(l_dl_tx_ln_rev_en);
 
     // CFG_DL0_128_130_ENCODING_ENABLED: dl0 128/130 encoding enabled
     l_val.template writeBit<TT::MC_REG2_DL0_CONFIG0_CFG_128_130_ENCODING_ENABLED>(0);
@@ -562,7 +567,9 @@ fapi2::ReturnCode setup_mc_config0_helper(const fapi2::Target<T>& i_target)
     l_val.template writeBit<TT::MC_REG2_DL0_CONFIG0_CFG_X1_BACKOFF_ENABLE>(0);
 
     // CFG_DL0_HALF_WIDTH_BACKOFF_ENABLE: dl0 x4 backoff enabled
-    l_val.template writeBit<TT::MC_REG2_DL0_CONFIG0_CFG_X4_BACKOFF_ENABLE>(1);
+    FAPI_TRY(mss::attr::get_omi_dl_x4_backoff_enable(i_target, l_dl_x4_backoff_en),
+             "Error from FAPI_ATTR_GET (ATTR_OMI_DL_X4_BACKOFF_ENABLE)");
+    l_val.template writeBit<TT::MC_REG2_DL0_CONFIG0_CFG_X4_BACKOFF_ENABLE>(l_dl_x4_backoff_en);
 
     l_val.template insertFromRight<TT::MC_REG2_DL0_CONFIG0_CFG_SUPPORTED_MODES,
                    TT::MC_REG2_DL0_CONFIG0_CFG_SUPPORTED_MODES_LEN>(LINK_WIDTHS_X8);

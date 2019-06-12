@@ -27,5 +27,5 @@
 -include 00p9a_common.mk
 
 PROCEDURE=p9a_omi_train
-$(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
+$(eval $(call ADD_P9A_MEMORY_INCDIRS,$(PROCEDURE)))
 $(call BUILD_PROCEDURE)

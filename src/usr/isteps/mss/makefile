@@ -175,6 +175,7 @@ FILE_PREFIX = mss_p9a
 SOURCES += $(ROOTPATH)/chips/p9/procedures/xml/attribute_info/p9a_io_attributes.xml
 SOURCES += $(ROOTPATH)/chips/p9/procedures/xml/attribute_info/p9a_omi_setup_bars.xml
 SOURCES += $(ROOTPATH)/chips/p9/procedures/xml/attribute_info/p9a_omi_init.xml
+SOURCES += $(ROOTPATH)/chips/p9/procedures/xml/attribute_info/p9a_omi_train.xml
 
 CLEAN_TARGETS += ${OUTPATH}/mss_p9a_attribute_getters.H
 CLEAN_TARGETS += ${OUTPATH}/mss_p9a_attribute_setters.H
