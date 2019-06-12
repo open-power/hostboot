@@ -1718,8 +1718,7 @@ bool nvdimm_encrypt_unlock(TargetHandleList &i_nvdimmList)
             {
                 TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_encrypt_unlock() nvdimm[%X] error reading ENCRYPTION_CONFIG_STATUS",get_huid(l_nvdimm));
                 errlCommit( l_err, NVDIMM_COMP_ID );
-                // TODO RTC:210689 Handle status flag
-                //nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR_NOBKUP);
+                nvdimmSetEncryptionError(l_nvdimm);
                 l_success = false;
                 continue;
             }
@@ -1743,8 +1742,7 @@ bool nvdimm_encrypt_unlock(TargetHandleList &i_nvdimmList)
             if (l_err)
             {
                 errlCommit( l_err, NVDIMM_COMP_ID );
-                // TODO RTC:210689 Handle status flag
-                //nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR_NOBKUP);
+                nvdimmSetEncryptionError(l_nvdimm);
                 l_success = false;
                 continue;
             }
@@ -1757,8 +1755,7 @@ bool nvdimm_encrypt_unlock(TargetHandleList &i_nvdimmList)
             {
                 TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_encrypt_unlock() nvdimm[%X] error reading ENCRYPTION_CONFIG_STATUS after unlock",get_huid(l_nvdimm));
                 errlCommit( l_err, NVDIMM_COMP_ID );
-                // TODO RTC:210689 Handle status flag
-                //nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR_NOBKUP);
+                nvdimmSetEncryptionError(l_nvdimm);
                 l_success = false;
                 continue;
             }
@@ -1789,9 +1786,8 @@ bool nvdimm_encrypt_unlock(TargetHandleList &i_nvdimmList)
                                     HWAS::NV_CONTROLLER_PART_TYPE,
                                     HWAS::SRCI_PRIORITY_HIGH);
 
-                // TODO RTC:210689 Handle status flag
-                //nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR_NOBKUP);
                 errlCommit( l_err, NVDIMM_COMP_ID );
+                nvdimmSetEncryptionError(l_nvdimm);
                 l_success = false;
             }
             else
@@ -1807,6 +1803,23 @@ bool nvdimm_encrypt_unlock(TargetHandleList &i_nvdimmList)
 
 
 #endif
+
+
+void nvdimmSetEncryptionError(Target *i_nvdimm)
+{
+    ATTR_NVDIMM_ARMED_type l_armed_state = {};
+    // TODO: RTC 211510 Move ATTR_NVDIMM_ARMED from proc_type to dimm type
+    //l_armed_state = i_nvdimm->getAttr<ATTR_NVDIMM_ARMED>();
+    uint8_t l_tmp = i_nvdimm->getAttr<ATTR_SCRATCH_UINT8_1>();
+    memcpy(&l_armed_state, &l_tmp, sizeof(l_tmp));
+
+    l_armed_state.encryption_error_detected = 1;
+
+    // TODO: RTC 211510 Move ATTR_NVDIMM_ARMED from proc_type to dimm type
+    //i_nvdimm->setAttr<ATTR_NVDIMM_ARMED>(l_armed_state);
+    memcpy(&l_tmp, &l_armed_state, sizeof(l_tmp));
+    i_nvdimm->setAttr<ATTR_SCRATCH_UINT8_1>(l_tmp);
+}
 
 
 bool nvdimm_keyifyRandomNumber(uint8_t* o_genData, uint8_t* i_xtraData)
@@ -1941,7 +1954,6 @@ errlHndl_t nvdimm_handleConflictingKeys(
                                  false);
         if (l_err)
         {
-            // RTC 210689 Handle return values
             break;
         }
 
@@ -1953,7 +1965,6 @@ errlHndl_t nvdimm_handleConflictingKeys(
         if (l_err)
         {
             TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_handleConflictingKeys() nvdimm[%X] error reading ENCRYPTION_KEY_VALIDATION",get_huid(l_nvdimm));
-            // RTC 210689 Handle return values
             break;
         }
         if (l_keyValid.erase_key_valid)
@@ -2155,12 +2166,12 @@ bool nvdimm_gen_keys(void)
         errlCommit( l_err, NVDIMM_COMP_ID );
         l_success = false;
 
-        // Set the status flag for all nvdimms
+        // Set the encryption error for all nvdimms
         TargetHandleList l_nvdimmTargetList;
         nvdimm_getNvdimmList(l_nvdimmTargetList);
         for (const auto & l_nvdimm : l_nvdimmTargetList)
         {
-            nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR_NOBKUP);
+            nvdimmSetEncryptionError(l_nvdimm);
         }
     }
 
@@ -2174,6 +2185,7 @@ bool nvdimm_remove_keys(void)
     TRACFCOMP(g_trac_nvdimm, ENTER_MRK"nvdimm_remove_keys()");
     bool l_success = true;
 
+    // Get the sys pointer, attribute keys are system level
     Target* l_sys = nullptr;
     targetService().getTopLevelTarget( l_sys );
     assert(l_sys, "nvdimm_remove_keys() no TopLevelTarget");
@@ -2351,8 +2363,7 @@ bool nvdimm_encrypt_enable(TargetHandleList &i_nvdimmList)
             {
                 TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_encrypt_enable() nvdimm[%X] error reading ENCRYPTION_CONFIG_STATUS",get_huid(l_nvdimm));
                 errlCommit( l_err, NVDIMM_COMP_ID );
-                // TODO RTC:210689 Handle status flag
-                //nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR_NOBKUP);
+                nvdimmSetEncryptionError(l_nvdimm);
                 l_success = false;
                 continue;
             }
@@ -2383,8 +2394,7 @@ bool nvdimm_encrypt_enable(TargetHandleList &i_nvdimmList)
             if (l_err)
             {
                 errlCommit( l_err, NVDIMM_COMP_ID );
-                // TODO RTC:210689 Handle status flag
-                //nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR_NOBKUP);
+                nvdimmSetEncryptionError(l_nvdimm);
                 l_success = false;
                 continue;
             }
@@ -2398,8 +2408,7 @@ bool nvdimm_encrypt_enable(TargetHandleList &i_nvdimmList)
             if (l_err)
             {
                 errlCommit( l_err, NVDIMM_COMP_ID );
-                // TODO RTC:210689 Handle status flag
-                //nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR_NOBKUP);
+                nvdimmSetEncryptionError(l_nvdimm);
                 l_success = false;
                 continue;
             }
@@ -2413,8 +2422,7 @@ bool nvdimm_encrypt_enable(TargetHandleList &i_nvdimmList)
             if (l_err)
             {
                 errlCommit( l_err, NVDIMM_COMP_ID );
-                // TODO RTC:210689 Handle status flag
-                //nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR_NOBKUP);
+                nvdimmSetEncryptionError(l_nvdimm);
                 l_success = false;
                 continue;
             }
@@ -2427,8 +2435,7 @@ bool nvdimm_encrypt_enable(TargetHandleList &i_nvdimmList)
             {
                 TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_encrypt_enable() nvdimm[%X] error reading ENCRYPTION_CONFIG_STATUS after enable",get_huid(l_nvdimm));
                 errlCommit( l_err, NVDIMM_COMP_ID );
-                // TODO RTC:210689 Handle status flag
-                //nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR_NOBKUP);
+                nvdimmSetEncryptionError(l_nvdimm);
                 l_success = false;
                 continue;
             }
@@ -2459,8 +2466,7 @@ bool nvdimm_encrypt_enable(TargetHandleList &i_nvdimmList)
                                     HWAS::SRCI_PRIORITY_HIGH);
 
                 errlCommit( l_err, NVDIMM_COMP_ID );
-                // TODO RTC:210689 Handle status flag
-                //nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR_NOBKUP);
+                nvdimmSetEncryptionError(l_nvdimm);
                 l_success = false;
             }
             else
@@ -2522,6 +2528,7 @@ bool nvdimm_crypto_erase(TargetHandleList &i_nvdimmList)
             {
                 TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_crypto_erase() nvdimm[%X] error reading ENCRYPTION_CONFIG_STATUS",get_huid(l_nvdimm));
                 errlCommit( l_err, NVDIMM_COMP_ID );
+                nvdimmSetEncryptionError(l_nvdimm);
                 l_success = false;
                 continue;
             }
@@ -2529,7 +2536,7 @@ bool nvdimm_crypto_erase(TargetHandleList &i_nvdimmList)
             if (!l_encStatus.encryption_enabled)
             {
                 TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_crypto_erase() nvdimm[%X] encryption not enabled, will not cypto erase 0x%.02x",get_huid(l_nvdimm),l_encStatus.whole);
-                // TODO RTC:210689 Handle function return pass/fail
+                l_success = false;
                 continue;
             }
             else
@@ -2546,8 +2553,7 @@ bool nvdimm_crypto_erase(TargetHandleList &i_nvdimmList)
             if (l_err)
             {
                 errlCommit( l_err, NVDIMM_COMP_ID );
-                // TODO RTC:210689 Handle status flag
-                //nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR_NOBKUP);
+                nvdimmSetEncryptionError(l_nvdimm);
                 l_success = false;
                 continue;
             }
@@ -2560,8 +2566,7 @@ bool nvdimm_crypto_erase(TargetHandleList &i_nvdimmList)
             {
                 TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_crypto_erase() nvdimm[%X] error reading ENCRYPTION_CONFIG_STATUS",get_huid(l_nvdimm));
                 errlCommit( l_err, NVDIMM_COMP_ID );
-                // TODO RTC:210689 Handle status flag
-                //nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR_NOBKUP);
+                nvdimmSetEncryptionError(l_nvdimm);
                 l_success = false;
                 continue;
             }
@@ -2593,8 +2598,7 @@ bool nvdimm_crypto_erase(TargetHandleList &i_nvdimmList)
                                     HWAS::SRCI_PRIORITY_HIGH);
 
                 errlCommit( l_err, NVDIMM_COMP_ID );
-                // TODO RTC:210689 Handle status flag
-                //nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR_NOBKUP);
+                nvdimmSetEncryptionError(l_nvdimm);
                 l_success = false;
                 continue;
             }
@@ -2609,8 +2613,7 @@ bool nvdimm_crypto_erase(TargetHandleList &i_nvdimmList)
             if (l_err)
             {
                 errlCommit( l_err, NVDIMM_COMP_ID );
-                // TODO RTC:210689 Handle status flag
-                //nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR_NOBKUP);
+                nvdimmSetEncryptionError(l_nvdimm);
                 l_success = false;
                 continue;
             }
@@ -2624,8 +2627,7 @@ bool nvdimm_crypto_erase(TargetHandleList &i_nvdimmList)
             if (l_err)
             {
                 errlCommit( l_err, NVDIMM_COMP_ID );
-                // TODO RTC:210689 Handle status flag
-                //nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR_NOBKUP);
+                nvdimmSetEncryptionError(l_nvdimm);
                 l_success = false;
                 continue;
             }
@@ -2638,8 +2640,7 @@ bool nvdimm_crypto_erase(TargetHandleList &i_nvdimmList)
             {
                 TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_crypto_erase() nvdimm[%X] error reading ENCRYPTION_CONFIG_STATUS",get_huid(l_nvdimm));
                 errlCommit( l_err, NVDIMM_COMP_ID );
-                // TODO RTC:210689 Handle status flag
-                //nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR_NOBKUP);
+                nvdimmSetEncryptionError(l_nvdimm);
                 l_success = false;
                 continue;
             }
@@ -2671,8 +2672,7 @@ bool nvdimm_crypto_erase(TargetHandleList &i_nvdimmList)
                                     HWAS::SRCI_PRIORITY_HIGH);
 
                 errlCommit( l_err, NVDIMM_COMP_ID );
-                // TODO RTC:210689 Handle status flag
-                //nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR_NOBKUP);
+                nvdimmSetEncryptionError(l_nvdimm);
                 l_success = false;
                 continue;
             }

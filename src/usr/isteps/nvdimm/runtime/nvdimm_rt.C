@@ -45,103 +45,170 @@
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
 
+using namespace TARGETING;
+
 namespace NVDIMM
 {
+
+const uint8_t NV_STATUS_UNPROTECTED_SET   = 0x01;
+const uint8_t NV_STATUS_UNPROTECTED_CLEAR = 0xFE;
+const uint8_t NV_STATUS_POSSIBLY_UNPROTECTED_SET   = 0x40;
+const uint8_t NV_STATUS_POSSIBLY_UNPROTECTED_CLEAR = 0xBF;
+
+const uint8_t NV_STATUS_OR_MASK = 0xFB;
+const uint8_t NV_STATUS_AND_MASK = 0x04;
 
 /**
 * @brief Notify PHYP of NVDIMM OCC protection status
 */
-errlHndl_t notifyNvdimmProtectionChange(TARGETING::Target* i_target,
+errlHndl_t notifyNvdimmProtectionChange(Target* i_target,
                                         const nvdimm_protection_t i_state)
 {
-    errlHndl_t l_err = nullptr;
-
-    // default to send a not protected status
-    uint64_t l_nvdimm_protection_state =
-                                hostInterfaces::HBRT_FW_NVDIMM_NOT_PROTECTED;
-
     TRACFCOMP( g_trac_nvdimm, ENTER_MRK
         "notifyNvdimmProtectionChange: Target huid 0x%.8X, state %d",
         get_huid(i_target), i_state);
+
+    errlHndl_t l_err = nullptr;
+
     do
     {
-        TARGETING::TargetHandleList l_nvdimmTargetList =
-            TARGETING::getProcNVDIMMs(i_target);
+        // Get the type of target passed in
+        // It could be proc_type for OCC state
+        // Or dimm_type for ARM/ERROR state
+        ATTR_TYPE_type l_type = i_target->getAttr<ATTR_TYPE>();
+        assert((l_type == TYPE_PROC)||(l_type == TYPE_DIMM),
+               "notifyNvdimmProtectionChange invalid target type");
 
-        // Only send command if the processor has an NVDIMM under it
-        if (l_nvdimmTargetList.empty())
+        // Load the nvdimm list
+        TargetHandleList l_nvdimmTargetList;
+        Target* l_proc = nullptr;
+        if (l_type == TYPE_PROC)
         {
-            TRACFCOMP( g_trac_nvdimm,
-                "notifyNvdimmProtectionChange: No NVDIMM found under processor 0x%.8X",
-                get_huid(i_target));
-            break;
-        }
+            // Get the nvdimms under this proc target
+            l_nvdimmTargetList = getProcNVDIMMs(i_target);
 
-        TARGETING::ATTR_NVDIMM_ARMED_type l_nvdimm_armed_state =
-                              i_target->getAttr<TARGETING::ATTR_NVDIMM_ARMED>();
-
-        // Only notify protected state if NVDIMM controllers are
-        // armed and no error was or is detected
-        if (i_state == NVDIMM::PROTECTED)
-        {
-            // Exit without notifying phyp if in error state
-            if (l_nvdimm_armed_state.error_detected)
+            // Only send command if the processor has an NVDIMM under it
+            if (l_nvdimmTargetList.empty())
             {
-                // State can't go to protected after error is detected
+                TRACFCOMP( g_trac_nvdimm, "notifyNvdimmProtectionChange: "
+                    "No NVDIMM found under processor 0x%.8X",
+                    get_huid(i_target));
                 break;
             }
-            // check if we need to rearm the NVDIMM(s)
-            else if (!l_nvdimm_armed_state.armed)
+
+            // The proc target is the passed-in target
+            l_proc = i_target;
+        }
+        else
+        {
+            // Only a list of one but keep consistent with proc type
+            l_nvdimmTargetList.push_back(i_target);
+
+            // Find the proc target from nvdimm target passed in
+            TargetHandleList l_procList;
+            getParentAffinityTargets(l_procList,
+                                     i_target,
+                                     CLASS_CHIP,
+                                     TYPE_PROC,
+                                     UTIL_FILTER_ALL);
+            assert(l_procList.size() == 1, "notifyNvdimmProtectionChange:"
+                                        "getParentAffinityTargets size != 1");
+            l_proc = l_procList[0];
+        }
+
+
+        // Update the nvdimm status attributes
+        for (auto const l_nvdimm : l_nvdimmTargetList)
+        {
+            // Get the armed status attr and update it
+            ATTR_NVDIMM_ARMED_type l_armed_state = {};
+            // TODO: RTC 211510 Move ATTR_NVDIMM_ARMED from proc_type to dimm type
+            //l_armed_state = l_nvdimm->getAttr<ATTR_NVDIMM_ARMED>();
+            uint8_t l_tmp = l_nvdimm->getAttr<ATTR_SCRATCH_UINT8_1>();
+            memcpy(&l_armed_state, &l_tmp, sizeof(l_tmp));
+
+            switch (i_state)
             {
-                bool nvdimms_armed =
-                    NVDIMM::nvdimmArm(l_nvdimmTargetList);
-                if (nvdimms_armed)
-                {
-                    // NVDIMMs are now armed and ready for backup
-                    l_nvdimm_armed_state.armed = 1;
-                    i_target->setAttr<TARGETING::ATTR_NVDIMM_ARMED>(l_nvdimm_armed_state);
-
-                    l_nvdimm_protection_state = hostInterfaces::HBRT_FW_NVDIMM_PROTECTED;
-                }
-                else
-                {
-                    // If nvdimm arming failed,
-                    // do NOT post that the dimms are now protected.
-
-                    // Remember this error, only try arming once
-                    if (!l_nvdimm_armed_state.error_detected)
-                    {
-                        l_nvdimm_armed_state.error_detected = 1;
-                        i_target->setAttr<TARGETING::ATTR_NVDIMM_ARMED>(l_nvdimm_armed_state);
-                    }
-
-                    // Exit without notifying phyp of any protection change
+                case NVDIMM_ARMED:
+                    l_armed_state.armed = 1;
                     break;
-                }
+                case NVDIMM_DISARMED:
+                    l_armed_state.armed = 0;
+                    break;
+                case OCC_ACTIVE:
+                    l_armed_state.occ_active = 1;
+                    break;
+                case OCC_INACTIVE:
+                    l_armed_state.occ_active = 0;
+                    break;
+                case NVDIMM_FATAL_HW_ERROR:
+                    l_armed_state.fatal_error_detected = 1;
+                    break;
+                case NVDIMM_RISKY_HW_ERROR:
+                    l_armed_state.risky_error_detected = 1;
+                    break;
             }
+
+            // TODO: RTC 211510 Move ATTR_NVDIMM_ARMED from proc_type to dimm type
+            //l_nvdimm->setAttr<ATTR_NVDIMM_ARMED>(l_armed_state);
+            memcpy(&l_tmp, &l_armed_state, sizeof(l_tmp));
+            l_nvdimm->setAttr<ATTR_SCRATCH_UINT8_1>(l_tmp);
+
+
+            // Get the nv status flag attr and update it
+            ATTR_NV_STATUS_FLAG_type l_nv_status =
+                        l_nvdimm->getAttr<ATTR_NV_STATUS_FLAG>();
+
+            // Clear bit 0 if protected nv state
+            if (l_armed_state.armed &&
+                l_armed_state.occ_active &&
+                !l_armed_state.fatal_error_detected)
+            {
+                l_nv_status &= NV_STATUS_UNPROTECTED_CLEAR;
+            }
+
+            // Set bit 0 if unprotected nv state
             else
             {
-                // NVDIMM already armed and no error found
-                l_nvdimm_protection_state = hostInterfaces::HBRT_FW_NVDIMM_PROTECTED;
+                l_nv_status |= NV_STATUS_UNPROTECTED_SET;
             }
-        }
-        else if (i_state == NVDIMM::UNPROTECTED_BECAUSE_ERROR)
-        {
-            // Remember that this NV controller has an error so
-            // we don't rearm this until next IPL
-            if (!l_nvdimm_armed_state.error_detected)
+
+            // Set bit 6 if risky error
+            if (l_armed_state.risky_error_detected)
             {
-                l_nvdimm_armed_state.error_detected = 1;
-                i_target->setAttr<TARGETING::ATTR_NVDIMM_ARMED>(l_nvdimm_armed_state);
+                l_nv_status |= NV_STATUS_POSSIBLY_UNPROTECTED_SET;
             }
-            // still notify phyp that NVDIMM is Not Protected
+
+            l_nvdimm->setAttr<ATTR_NV_STATUS_FLAG>(l_nv_status);
+
+        } // for nvdimm list
+
+
+        // Generate combined nvdimm status for the proc
+        // Bit 2 of NV_STATUS_FLAG is 'Device contents are persisted'
+        //   and must be ANDed for all nvdimms
+        //   the rest of the bits are ORed for all nvdimms
+        ATTR_NV_STATUS_FLAG_type l_combined_or     = 0x00;
+        ATTR_NV_STATUS_FLAG_type l_combined_and    = 0xFF;
+        ATTR_NV_STATUS_FLAG_type l_combined_status = 0x00;
+        l_nvdimmTargetList = getProcNVDIMMs(l_proc);
+        for (auto const l_nvdimm : l_nvdimmTargetList)
+        {
+            l_combined_or  |= l_nvdimm->getAttr<ATTR_NV_STATUS_FLAG>();
+            l_combined_and &= l_nvdimm->getAttr<ATTR_NV_STATUS_FLAG>();
         }
 
+        // Bit 2 of NV_STATUS_FLAG is 'Device contents are persisted'
+        l_combined_status =
+                (l_combined_or  & NV_STATUS_OR_MASK) |
+                (l_combined_and & NV_STATUS_AND_MASK);
 
+
+        // Send combined status to phyp
         // Get the Proc Chip Id
         RT_TARG::rtChipId_t l_chipId = 0;
 
-        l_err = RT_TARG::getRtTarget(i_target, l_chipId);
+        l_err = RT_TARG::getRtTarget(l_proc, l_chipId);
         if(l_err)
         {
             TRACFCOMP( g_trac_nvdimm,
@@ -156,31 +223,24 @@ errlHndl_t notifyNvdimmProtectionChange(TARGETING::Target* i_target,
             TRACFCOMP( g_trac_nvdimm, ERR_MRK"notifyNvdimmProtectionChange: "
                      "Hypervisor firmware_request interface not linked");
 
-            // need to safely convert struct type into uint32_t
-            union {
-                TARGETING::ATTR_NVDIMM_ARMED_type tNvdimmArmed;
-                uint32_t nvdimmArmed_int;
-            } armed_state_union;
-            armed_state_union.tNvdimmArmed = l_nvdimm_armed_state;
-
             /*@
              * @errortype
              * @severity          ERRL_SEV_PREDICTIVE
              * @moduleid          NOTIFY_NVDIMM_PROTECTION_CHG
              * @reasoncode        NVDIMM_NULL_FIRMWARE_REQUEST_PTR
              * @userdata1         HUID of processor target
-             * @userdata2[0:31]   Requested protection state
-             * @userdata2[32:63]  Current armed state
+             * @userdata2[0:31]   NV_STATUS to PHYP
+             * @userdata2[32:63]  In state change
              * @devdesc           Unable to inform PHYP of NVDIMM protection
              * @custdesc          Internal firmware error
              */
              l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE,
                             NOTIFY_NVDIMM_PROTECTION_CHG,
                             NVDIMM_NULL_FIRMWARE_REQUEST_PTR,
-                            get_huid(i_target),
+                            get_huid(l_proc),
                             TWO_UINT32_TO_UINT64(
-                               l_nvdimm_protection_state,
-                               armed_state_union.nvdimmArmed_int)
+                               l_combined_status,
+                               i_state)
                             );
 
             l_err->addProcedureCallout(HWAS::EPUB_PRC_PHYP_CODE,
@@ -190,11 +250,10 @@ errlHndl_t notifyNvdimmProtectionChange(TARGETING::Target* i_target,
         }
 
         TRACFCOMP( g_trac_nvdimm,
-                  "notifyNvdimmProtectionChange: 0x%.8X processor NVDIMMS are "
-                  "%s protected (current armed_state: 0x%02X)",
-                  get_huid(i_target),
-                  (l_nvdimm_protection_state == hostInterfaces::HBRT_FW_NVDIMM_PROTECTED)?"now":"NOT",
-                  l_nvdimm_armed_state );
+                  "notifyNvdimmProtectionChange: 0x%.8X "
+                  "NV_STATUS to PHYP: 0x%02X",
+                  get_huid(l_proc),
+                  l_combined_status );
 
         // Create the firmware_request request struct to send data
         hostInterfaces::hbrt_fw_msg l_req_fw_msg;
@@ -208,8 +267,7 @@ errlHndl_t notifyNvdimmProtectionChange(TARGETING::Target* i_target,
         l_req_fw_msg.io_type =
                         hostInterfaces::HBRT_FW_MSG_TYPE_NVDIMM_PROTECTION;
         l_req_fw_msg.nvdimm_protection_state.i_procId = l_chipId;
-        l_req_fw_msg.nvdimm_protection_state.i_state =
-                                                  l_nvdimm_protection_state;
+        l_req_fw_msg.nvdimm_protection_state.i_state = l_combined_status;
 
         // Create the firmware_request response struct to receive data
         hostInterfaces::hbrt_fw_msg l_resp_fw_msg;
@@ -243,17 +301,17 @@ errlHndl_t notifyNvdimmProtectionChange(TARGETING::Target* i_target,
  * @return errlHndl_t - Null if successful, otherwise a pointer to
  *      the error log.
  */
-errlHndl_t nvdimmPollArmDone(TARGETING::Target* i_nvdimm,
+errlHndl_t nvdimmPollArmDone(Target* i_nvdimm,
                              uint32_t &o_poll)
 {
-    TRACUCOMP(g_trac_nvdimm, ENTER_MRK"nvdimmPollArmDone() nvdimm[%X]", TARGETING::get_huid(i_nvdimm) );
+    TRACUCOMP(g_trac_nvdimm, ENTER_MRK"nvdimmPollArmDone() nvdimm[%X]", get_huid(i_nvdimm) );
 
     errlHndl_t l_err = nullptr;
 
     l_err = nvdimmPollStatus ( i_nvdimm, ARM, o_poll);
 
     TRACUCOMP(g_trac_nvdimm, EXIT_MRK"nvdimmPollArmDone() nvdimm[%X]",
-              TARGETING::get_huid(i_nvdimm));
+              get_huid(i_nvdimm));
 
     return l_err;
 }
@@ -267,10 +325,10 @@ errlHndl_t nvdimmPollArmDone(TARGETING::Target* i_nvdimm,
  * @return errlHndl_t - Null if successful, otherwise a pointer to
  *      the error log.
  */
-errlHndl_t nvdimmCheckArmSuccess(TARGETING::Target *i_nvdimm)
+errlHndl_t nvdimmCheckArmSuccess(Target *i_nvdimm)
 {
     TRACUCOMP(g_trac_nvdimm, ENTER_MRK"nvdimmCheckArmSuccess() nvdimm[%X]",
-                TARGETING::get_huid(i_nvdimm));
+                get_huid(i_nvdimm));
 
     errlHndl_t l_err = nullptr;
     uint8_t l_data = 0;
@@ -280,13 +338,13 @@ errlHndl_t nvdimmCheckArmSuccess(TARGETING::Target *i_nvdimm)
     if (l_err)
     {
         TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmCheckArmSuccess() nvdimm[%X]"
-                  "failed to read arm status reg!",TARGETING::get_huid(i_nvdimm));
+                  "failed to read arm status reg!",get_huid(i_nvdimm));
     }
     else if ((l_data & ARM_SUCCESS) != ARM_SUCCESS)
     {
 
         TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmCheckArmSuccess() nvdimm[%X]"
-                                 "failed to arm!",TARGETING::get_huid(i_nvdimm));
+                                 "failed to arm!",get_huid(i_nvdimm));
         /*@
          *@errortype
          *@reasoncode       NVDIMM_ARM_FAILED
@@ -304,7 +362,7 @@ errlHndl_t nvdimmCheckArmSuccess(TARGETING::Target *i_nvdimm)
         l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE,
                                        NVDIMM_SET_ARM,
                                        NVDIMM_ARM_FAILED,
-                                       TWO_UINT32_TO_UINT64(ARM, TARGETING::get_huid(i_nvdimm)),
+                                       TWO_UINT32_TO_UINT64(ARM, get_huid(i_nvdimm)),
                                        0x0,
                                        ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
 
@@ -325,12 +383,12 @@ errlHndl_t nvdimmCheckArmSuccess(TARGETING::Target *i_nvdimm)
     }
 
     TRACUCOMP(g_trac_nvdimm, EXIT_MRK"nvdimmCheckArmSuccess() nvdimm[%X] ret[%X]",
-                TARGETING::get_huid(i_nvdimm), l_data);
+                get_huid(i_nvdimm), l_data);
 
     return l_err;
 }
 
-bool nvdimmArm(TARGETING::TargetHandleList &i_nvdimmTargetList)
+bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
 {
     bool o_arm_successful = true;
 
@@ -341,6 +399,18 @@ bool nvdimmArm(TARGETING::TargetHandleList &i_nvdimmTargetList)
 
     for (auto const l_nvdimm : i_nvdimmTargetList)
     {
+        // skip if the nvdimm is already armed
+        ATTR_NVDIMM_ARMED_type l_armed_state = {};
+        // TODO: RTC 211510 Move ATTR_NVDIMM_ARMED from proc_type to dimm type
+        //l_armed_state = l_nvdimm->getAttr<ATTR_NVDIMM_ARMED>();
+        uint8_t l_tmp = l_nvdimm->getAttr<ATTR_SCRATCH_UINT8_1>();
+        memcpy(&l_armed_state, &l_tmp, sizeof(l_tmp));
+        if (l_armed_state.armed)
+        {
+            TRACFCOMP(g_trac_nvdimm, "nvdimmArm() nvdimm[%X] called when already armed", get_huid(l_nvdimm));
+            continue;
+        }
+
         // skip if the nvdimm is in error state
         if (NVDIMM::nvdimmInErrorState(l_nvdimm))
         {
@@ -432,13 +502,23 @@ bool nvdimmArm(TARGETING::TargetHandleList &i_nvdimmTargetList)
             if (l_err)
             {
                 TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmArm() nvdimm[%X], error disarming the nvdimm!",
-                          TARGETING::get_huid(l_nvdimm));
+                          get_huid(l_nvdimm));
                 l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
                 l_err->collectTrace(NVDIMM_COMP_NAME);
                 errlCommit(l_err, NVDIMM_COMP_ID);
             }
 
             continue;
+        }
+
+        // Arm successful, update armed status
+        l_err = NVDIMM::notifyNvdimmProtectionChange(l_nvdimm,
+                                                     NVDIMM::NVDIMM_ARMED);
+        if (l_err)
+        {
+            l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+            l_err->collectTrace(NVDIMM_COMP_NAME);
+            errlCommit(l_err, NVDIMM_COMP_ID);
         }
     }
 
@@ -447,7 +527,7 @@ bool nvdimmArm(TARGETING::TargetHandleList &i_nvdimmTargetList)
     return o_arm_successful;
 }
 
-bool nvdimmDisarm(TARGETING::TargetHandleList &i_nvdimmTargetList)
+bool nvdimmDisarm(TargetHandleList &i_nvdimmTargetList)
 {
     bool o_disarm_successful = true;
 
@@ -458,12 +538,15 @@ bool nvdimmDisarm(TARGETING::TargetHandleList &i_nvdimmTargetList)
 
     for (auto const l_nvdimm : i_nvdimmTargetList)
     {
-        // skip if the nvdimm is in error state
-        if (NVDIMM::nvdimmInErrorState(l_nvdimm))
+        // skip if the nvdimm is already disarmed
+        ATTR_NVDIMM_ARMED_type l_armed_state = {};
+        // TODO: RTC 211510 Move ATTR_NVDIMM_ARMED from proc_type to dimm type
+        //l_armed_state = l_nvdimm->getAttr<ATTR_NVDIMM_ARMED>();
+        uint8_t l_tmp = l_nvdimm->getAttr<ATTR_SCRATCH_UINT8_1>();
+        memcpy(&l_armed_state, &l_tmp, sizeof(l_tmp));
+        if (!l_armed_state.armed)
         {
-            // error state means arming not successful
-            // RTC 210689 Handle return values
-            o_disarm_successful = false;
+            TRACFCOMP(g_trac_nvdimm, "nvdimmDisarm() nvdimm[%X] called when already disarmed", get_huid(l_nvdimm));
             continue;
         }
 
@@ -484,6 +567,16 @@ bool nvdimmDisarm(TARGETING::TargetHandleList &i_nvdimmTargetList)
             o_disarm_successful = false;
             continue;
         }
+
+        // Disarm successful, update armed status
+        l_err = NVDIMM::notifyNvdimmProtectionChange(l_nvdimm,
+                                                     NVDIMM::NVDIMM_DISARMED);
+        if (l_err)
+        {
+            l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+            l_err->collectTrace(NVDIMM_COMP_NAME);
+            errlCommit(l_err, NVDIMM_COMP_ID);
+        }
     }
 
     TRACFCOMP(g_trac_nvdimm, EXIT_MRK"nvdimmDisarm() returning %d",
@@ -498,17 +591,39 @@ bool nvdimmDisarm(TARGETING::TargetHandleList &i_nvdimmTargetList)
  *
  * @return bool - true if nvdimm is in any error state, false otherwise
  */
-bool nvdimmInErrorState(TARGETING::Target *i_nvdimm)
+bool nvdimmInErrorState(Target *i_nvdimm)
 {
-    TRACUCOMP(g_trac_nvdimm, ENTER_MRK"nvdimmInErrorState() HUID[%X]",TARGETING::get_huid(i_nvdimm));
+    TRACUCOMP(g_trac_nvdimm, ENTER_MRK"nvdimmInErrorState() HUID[%X]",get_huid(i_nvdimm));
 
-    uint8_t l_statusFlag = i_nvdimm->getAttr<TARGETING::ATTR_NV_STATUS_FLAG>();
+    uint8_t l_statusFlag = i_nvdimm->getAttr<ATTR_NV_STATUS_FLAG>();
     bool l_ret = true;
 
-    if ((l_statusFlag & NSTD_ERR) == 0)
+    // Just checking bit 1 for now, need to investigate these
+    // Should be checking NVDIMM_ARMED instead
+    //if ((l_statusFlag & NSTD_ERR) == 0)
+    if ((l_statusFlag & NSTD_ERR_NOPRSV) == 0)
+    {
         l_ret = false;
+    }
 
-    TRACUCOMP(g_trac_nvdimm, EXIT_MRK"nvdimmInErrorState() HUID[%X]",TARGETING::get_huid(i_nvdimm));
+    // Also check the encryption error status
+    Target* l_sys = nullptr;
+    targetService().getTopLevelTarget( l_sys );
+    assert(l_sys, "nvdimmInErrorState: no TopLevelTarget");
+    if (l_sys->getAttr<ATTR_NVDIMM_ENCRYPTION_ENABLE>())
+    {
+        ATTR_NVDIMM_ARMED_type l_armed_state = {};
+        // TODO: RTC 211510 Move ATTR_NVDIMM_ARMED from proc_type to dimm type
+        //l_armed_state = i_nvdimm->getAttr<ATTR_NVDIMM_ARMED>();
+        uint8_t l_tmp = i_nvdimm->getAttr<ATTR_SCRATCH_UINT8_1>();
+        memcpy(&l_armed_state, &l_tmp, sizeof(l_tmp));
+        if (l_armed_state.encryption_error_detected)
+        {
+            l_ret = true;
+        }
+    }
+
+    TRACUCOMP(g_trac_nvdimm, EXIT_MRK"nvdimmInErrorState() HUID[%X]",get_huid(i_nvdimm));
     return l_ret;
 }
 
@@ -600,5 +715,6 @@ errlHndl_t nvdimm_getRandom(uint8_t* o_genData)
 
     return l_err;
 }
+
 
 } // end NVDIMM namespace

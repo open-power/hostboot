@@ -83,9 +83,6 @@ bool nvdimm_encrypt_unlock(TARGETING::TargetHandleList &i_nvdimmList);
 
 #endif
 
-// TODO RTC:210689 Handle return pass/fail
-//      Need to define what return=false means for the caller
-//      For all of the functions in this file
 /**
  * @brief Entry function to NVDIMM generate keys
  *        Generate encryption keys and set the FW key attribute
@@ -198,23 +195,34 @@ bool nvdimmDisarm(TARGETING::TargetHandleList &i_nvdimmTargetList);
 /**
  * @brief NVDIMM protection state
  *
- *        NOT_PROTECTED - default state
- *        PROTECTED - switches to this when armed & OCC is in control
- *        UNPROTECTED_BECAUSE_ERROR - PRD detected error on NV controller
- *          Note: error will stay with target preventing PROTECTED status
- *                until power is cycled again
+ *        NVDIMM_ARMED - set armed state
+ *        NVDIMM_DISARMED - set disarmed state
+ *        OCC_ACTIVE - set active state
+ *        OCC_INACTIVE - set inactive state
+ *        NVDIMM_FATAL_HW_ERROR - set fatal hw state
+ *        NVDIMM_RISKY_HW_ERROR - set risky hw state
+ *          Note: fatal error will stay with target preventing
+ *                PROTECTED status until power is cycled again
  */
 enum nvdimm_protection_t
 {
-    NOT_PROTECTED             = 0,
-    PROTECTED                 = 1,
-    UNPROTECTED_BECAUSE_ERROR = 2
+    NVDIMM_ARMED              = 0,
+    NVDIMM_DISARMED           = 1,
+    OCC_ACTIVE                = 2,
+    OCC_INACTIVE              = 3,
+    NVDIMM_FATAL_HW_ERROR     = 4,
+    NVDIMM_RISKY_HW_ERROR     = 5,
+    /* deprecated, still used by PRD */
+    UNPROTECTED_BECAUSE_ERROR = 4,
 };
 
 /**
  * @brief Notify PHYP of NVDIMM protection status
  *
- * @param i_target     Processor with NVDIMM
+ * @param i_target     Processor with NVDIMM or NVDIMM itself
+ *                      - ARMED state updated per NVDIMM
+ *                      - ERROR states updated per NVDIMM
+ *                      - OCC state updated per PROC
  * @param i_state      Protection state of NVDIMM
  */
 errlHndl_t notifyNvdimmProtectionChange(TARGETING::Target* i_target,

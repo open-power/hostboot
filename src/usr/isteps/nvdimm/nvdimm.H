@@ -561,6 +561,17 @@ bool nvdimm_keyifyRandomNumber(uint8_t* o_genData, uint8_t* i_xtraData);
  */
 bool nvdimm_validRandomNumber(uint8_t* i_genData);
 
+
+/**
+ * @brief Helper function to set encryption error
+ *        in ATTR_NVDIMM_ARMED
+ *
+ * @param[in] i_nvdimm - nvdimm target
+ *
+ */
+void nvdimmSetEncryptionError(TARGETING::Target *i_nvdimm);
+
+
 #ifndef __HOSTBOOT_RUNTIME
 
 /**

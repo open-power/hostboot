@@ -1015,7 +1015,7 @@ namespace HBPM
 
 #if defined(__HOSTBOOT_RUNTIME) && defined(CONFIG_NVDIMM)
             // Notify PHYP that NVDIMMs are not protected from power off event
-            l_errl = NVDIMM::notifyNvdimmProtectionChange(i_target, NVDIMM::NOT_PROTECTED);
+            l_errl = NVDIMM::notifyNvdimmProtectionChange(i_target, NVDIMM::OCC_INACTIVE);
             if (l_errl)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,

@@ -263,12 +263,12 @@ void occActiveNotification( void * i_data )
         if (*l_active)
         {
             l_err = NVDIMM::notifyNvdimmProtectionChange(l_proc,
-                                                         NVDIMM::PROTECTED);
+                                                         NVDIMM::OCC_ACTIVE);
         }
         else
         {
             l_err = NVDIMM::notifyNvdimmProtectionChange(l_proc,
-                                                         NVDIMM::NOT_PROTECTED);
+                                                         NVDIMM::OCC_INACTIVE);
         }
 
         // commit error if it exists
@@ -479,6 +479,17 @@ void doNvDimmOperation(const hostInterfaces::nvdimm_operation_t& nvDimmOp)
         // Enable encryption on the NVDIMM
         if (nvDimmOp.opType & hostInterfaces::HBRT_FW_NVDIMM_ENABLE_ENCRYPTION)
         {
+            // Set the encryption enable attribute
+            Target* l_sys = nullptr;
+            targetService().getTopLevelTarget( l_sys );
+            assert(l_sys, "doNvDimmOperation: no TopLevelTarget");
+            if (!l_sys->getAttr<ATTR_NVDIMM_ENCRYPTION_ENABLE>())
+            {
+                l_sys->setAttr<ATTR_NVDIMM_ENCRYPTION_ENABLE>(0x1);
+
+                // TODO RTC 210692 Update HWSV with enable attribute value
+            }
+
             // Make call to generate keys before enabling encryption
             if(!nvdimm_gen_keys())
             {

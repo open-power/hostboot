@@ -591,11 +591,24 @@ static void initializeAttributes(TargetService& i_targetService,
                   (HB_INITIATED_PM_RESET_INACTIVE);
 
                 // clear the NVDIMM arming status so it gets redone when OCC is active
-                ATTR_NVDIMM_ARMED_type l_nvdimms_armed_state =
-                                        l_chip->getAttr<ATTR_NVDIMM_ARMED>();
-                // Only force rearming (error setting should persist)
-                l_nvdimms_armed_state.armed = 0;
-                l_chip->setAttr<ATTR_NVDIMM_ARMED>(l_nvdimms_armed_state);
+                TargetHandleList l_nvdimmTargetList = getProcNVDIMMs(l_chip);
+                for (auto const l_nvdimm : l_nvdimmTargetList)
+                {
+                    ATTR_NVDIMM_ARMED_type l_armed_state = {};
+                    // TODO: RTC 211510 Move ATTR_NVDIMM_ARMED from proc_type to dimm type
+                    //l_armed_state = l_nvdimm->getAttr<ATTR_NVDIMM_ARMED>();
+                    uint8_t l_tmp = l_nvdimm->getAttr<ATTR_SCRATCH_UINT8_1>();
+                    memcpy(&l_armed_state, &l_tmp, sizeof(l_tmp));
+
+                    // Only force rearming (error setting should persist)
+                    l_armed_state.armed = 0;
+                    l_armed_state.occ_active = 0;
+
+                    // TODO: RTC 211510 Move ATTR_NVDIMM_ARMED from proc_type to dimm type
+                    //l_nvdimm->setAttr<ATTR_NVDIMM_ARMED>(l_armed_state);
+                    memcpy(&l_tmp, &l_armed_state, sizeof(l_tmp));
+                    l_nvdimm->setAttr<ATTR_SCRATCH_UINT8_1>(l_tmp);
+                }
 
                 if (l_chip == l_pMasterProcChip)
                 {
