@@ -41,6 +41,7 @@
 #include <p9_quad_scom_addresses_fld.H>
 #include <multicast_group_defs.H>
 #include <target_filters.H>
+#include <p10_ringId.H>
 
 enum P10_PERV_SBE_CMN_Private_Constants
 {
@@ -904,6 +905,78 @@ fapi2::ReturnCode p10_enable_ridi(
     }
 
     FAPI_DBG("p10_enable_ridi: Exiting ...");
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+/// @brief putring call from initf procedures
+///
+/// @param[in]     i_target   Reference to TARGET_TYPE_PROC_CHIP target
+/// @param[in]     i_ring_table input ring table with list of rings on which putring call
+/// @param[in]     i_tp_chiplet true for istep S2 putring calls on Tp chiplet, else false.
+/// @return  FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p10_perv_sbe_cmn_setup_putring(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
+    const ring_setup_t* i_ring_table,
+    bool  i_tp_chiplet)
+{
+
+    const ring_setup_t* ring;
+    fapi2::buffer<uint64_t> l_data64;
+
+    FAPI_DBG("p10_perv_sbe_cmn_setup_putring : Entering");
+
+    auto l_chiplet_targets = i_target_chip.getChildren<fapi2::TARGET_TYPE_PERV>(
+                                 static_cast<fapi2::TargetFilter>( fapi2::TARGET_FILTER_ALL_NEST      |
+                                         fapi2::TARGET_FILTER_ALL_PCI | fapi2::TARGET_FILTER_ALL_MC   |
+                                         fapi2::TARGET_FILTER_ALL_PAU | fapi2::TARGET_FILTER_ALL_IOHS |
+                                         fapi2::TARGET_FILTER_ALL_EQ), fapi2::TARGET_STATE_FUNCTIONAL);
+
+    if(i_tp_chiplet)
+    {
+        l_chiplet_targets = i_target_chip.getChildren<fapi2::TARGET_TYPE_PERV>(
+                                static_cast<fapi2::TargetFilter>( fapi2::TARGET_FILTER_TP), fapi2::TARGET_STATE_FUNCTIONAL);
+    }
+
+    for (auto& l_cplt_target : l_chiplet_targets)
+    {
+        uint32_t l_chipletID = l_cplt_target.getChipletNumber();
+        FAPI_TRY(fapi2::getScom(l_cplt_target, 0x00000002, l_data64));
+
+        ring = i_ring_table;
+
+        while(true)
+        {
+            if((l_chipletID >= ring->min_cplt_id) && (l_chipletID <= ring->max_cplt_id))
+            {
+                if((ring->pg_bit == IGNORE_PG) || (l_data64.getBit(ring->pg_bit)))
+                {
+                    if(ring->targ == TARGET_CHIP)
+                    {
+                        FAPI_TRY(fapi2::putRing(i_target_chip, ring->ring_id),
+                                 "Error from Putring on %s, ChipletID : %#010lX",
+                                 ringid_get_ring_name(ring->ring_id), l_chipletID);
+                    }
+                    else
+                    {
+                        FAPI_TRY(fapi2::putRing(l_cplt_target, ring->ring_id),
+                                 "Error from Putring on %s, ChipletID : %#010lX",
+                                 ringid_get_ring_name(ring->ring_id), l_chipletID);
+                    }
+                }
+            }
+
+            if (ring->last)
+            {
+                break;
+            }
+
+            ring++;
+        }
+    }
+
+    FAPI_DBG("p10_perv_sbe_cmn_setup_putring : Exiting");
 
 fapi_try_exit:
     return fapi2::current_err;

@@ -38,6 +38,26 @@
 
 #include <fapi2.H>
 #include <multicast_defs.H>
+#include "p10_ring_id.H"
+
+/// @brief Describes ring table for putring call in initf procedures
+const uint8_t IGNORE_PG = 0xFF;
+
+enum target_type : uint8_t
+{
+    TARGET_CHIP,
+    TARGET_CHIPLET,
+};
+
+struct ring_setup_t
+{
+    RingID ring_id;       ///< Abstract ring ID that will be represented by this
+    uint8_t pg_bit;       ///< pg bit for the ring
+    target_type targ;     ///< the ring can be of type TARGET_CHIP/TARGET_CHIPLET
+    uint8_t min_cplt_id;  ///< Min chiplet id of the chiplet
+    uint8_t max_cplt_id;  ///< Max chiplet id of the chiplet
+    uint8_t last;         ///< Set to 1 for the last entry in an array of this struct
+};
 
 /// @brief Describes a hang pulse configuration
 struct hang_pulse_t
@@ -126,6 +146,11 @@ fapi2::ReturnCode p10_perv_sbe_cmn_eqs_with_good_cores(
 
 fapi2::ReturnCode p10_perv_sbe_cmn_align_chiplets(const
         fapi2::Target < fapi2::TARGET_TYPE_PERV | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_COMPARE > & i_mcast_target);
+
+fapi2::ReturnCode p10_perv_sbe_cmn_setup_putring(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
+    const ring_setup_t* i_ring_table,
+    bool i_tp_chiplet = false);
 
 /// @brief Enable Drivers/Recievers for a pervasive target
 ///
