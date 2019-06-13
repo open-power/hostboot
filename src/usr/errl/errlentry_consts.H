@@ -102,6 +102,13 @@ const epubTargetTypeToSub_t TARGET_TO_SUBSYS_TABLE[] =
     { TARGETING::TYPE_TPM              , EPUB_CEC_HDW_SUBSYS       },
     { TARGETING::TYPE_MC               , EPUB_MEMORY_SUBSYS        },
     { TARGETING::TYPE_SMPGROUP         , EPUB_CEC_HDW_SUBSYS       },
+    { TARGETING::TYPE_OMI              , EPUB_MEMORY_SUBSYS        },
+    { TARGETING::TYPE_MCC              , EPUB_MEMORY_SUBSYS        },
+    { TARGETING::TYPE_OMIC             , EPUB_MEMORY_SUBSYS        },
+    { TARGETING::TYPE_OCMB_CHIP        , EPUB_MEMORY_SUBSYS        },
+    { TARGETING::TYPE_MEM_PORT         , EPUB_MEMORY_SUBSYS        },
+    { TARGETING::TYPE_I2C_MUX          , EPUB_CEC_HDW_SUBSYS       },
+    { TARGETING::TYPE_PMIC             , EPUB_MEMORY_SUBSYS        },
 };
 
 struct epubBusTypeToSub_t
@@ -119,6 +126,7 @@ const epubBusTypeToSub_t BUS_TO_SUBSYS_TABLE[] =
     { HWAS::I2C_BUS_TYPE               , EPUB_CEC_HDW_I2C_DEVS     },
     { HWAS::PSI_BUS_TYPE               , EPUB_CEC_HDW_SP_PHYP_INTF },
     { HWAS::O_BUS_TYPE                 , EPUB_PROCESSOR_BUS_CTL    },
+    { HWAS::OMI_BUS_TYPE               , EPUB_MEMORY_BUS           },
 };
 
 struct epubClockTypeToSub_t

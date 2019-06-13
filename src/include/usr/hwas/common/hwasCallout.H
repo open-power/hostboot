@@ -186,7 +186,8 @@ enum busTypeEnum
     X_BUS_TYPE      = 4,
     I2C_BUS_TYPE    = 5,
     PSI_BUS_TYPE    = 6,
-    O_BUS_TYPE      = 7
+    O_BUS_TYPE      = 7,
+    OMI_BUS_TYPE    = 8,
 };
 
 // Used by Hostboot code where real clock targets do not exist

@@ -860,17 +860,15 @@ private:
      */
     void addVersionInfo(void);
 
-#ifdef CONFIG_BMC_IPMI
     /**
-     * @brief called by addHwCallout to retrieve the serial and part number
-     * from the current target. If the current target does not contain
-     * ATTR_PART_NUMBER or ATTR_SERIAL_NUMBER, find the first parent that does
-     * and adds the attribute to the error log.
+     * @brief called by addHwCallout to retrieve various pieces of card
+     *  and/or chip data, e.g. part number, serial number, ecid.
      *
      * @param[in]       i_target        The target to get the numbers for
      */
-    void addPartAndSerialNumbersToErrLog(const TARGETING::Target * i_target);
+    void addPartIdInfoToErrLog(const TARGETING::Target * i_target);
 
+#ifdef CONFIG_BMC_IPMI
     /**
      * @brief called by addHwCallout to retrieve the FRU ID and sensor ID
      * from the current target. If the current target does not contain
