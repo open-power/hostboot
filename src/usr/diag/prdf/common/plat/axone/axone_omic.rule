@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018
+# Contributors Listed Below - COPYRIGHT 2018,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -226,17 +226,17 @@ group gIOOMIFIR
     /** IOOMIFIR[0]
      *  RX invalid state or parity error
      */
-    (rIOOMIFIR, bit(0)) ? defaultMaskedError;
+    (rIOOMIFIR, bit(0)) ? self_th_1;
 
     /** IOOMIFIR[1]
      *  TX invalid state or parity error
      */
-    (rIOOMIFIR, bit(1)) ? defaultMaskedError;
+    (rIOOMIFIR, bit(1)) ? self_th_1;
 
     /** IOOMIFIR[2]
      *  GCR hang error
      */
-    (rIOOMIFIR, bit(2)) ? defaultMaskedError;
+    (rIOOMIFIR, bit(2)) ? self_th_1;
 
     /** IOOMIFIR[3:47]
      *  Unused
@@ -363,302 +363,302 @@ group gOMIDLFIR
            cs_root_cause
 {
     /** OMIDLFIR[0]
-     *  DL0 fatal error
+     *  OMI-DL0 fatal error
      */
-    (rOMIDLFIR, bit(0)) ? defaultMaskedError;
+    (rOMIDLFIR, bit(0)) ? dl0_fatal_error;
 
     /** OMIDLFIR[1]
-     *  DL0 data UE
+     *  OMI-DL0 UE on data flit
      */
-    (rOMIDLFIR, bit(1)) ? defaultMaskedError;
+    (rOMIDLFIR, bit(1)) ? dl0_omi_th_1;
 
     /** OMIDLFIR[2]
-     *  DL0 flit CE
+     *  OMI-DL0 CE on TL flit
      */
-    (rOMIDLFIR, bit(2)) ? defaultMaskedError;
+    (rOMIDLFIR, bit(2)) ? dl0_omi_th_32perDay;
 
     /** OMIDLFIR[3]
-     *  DL0 CRC error
+     *  OMI-DL0 detected a CRC error
      */
     (rOMIDLFIR, bit(3)) ? defaultMaskedError;
 
     /** OMIDLFIR[4]
-     *  DL0 nack
+     *  OMI-DL0 received a nack
      */
     (rOMIDLFIR, bit(4)) ? defaultMaskedError;
 
     /** OMIDLFIR[5]
-     *  DL0 X4 mode
+     *  OMI-DL0 running in degraded mode
      */
-    (rOMIDLFIR, bit(5)) ? defaultMaskedError;
+    (rOMIDLFIR, bit(5)) ? dl0_omi_bus_th_1;
 
     /** OMIDLFIR[6]
-     *  DL0 EDPL
+     *  OMI-DL0 parity error detection on a lane
      */
     (rOMIDLFIR, bit(6)) ? defaultMaskedError;
 
     /** OMIDLFIR[7]
-     *  DL0 timeout
+     *  OMI-DL0 retrained due to no forward progress
      */
-    (rOMIDLFIR, bit(7)) ? defaultMaskedError;
+    (rOMIDLFIR, bit(7)) ? dl0_omi_bus_th_32perDay;
 
     /** OMIDLFIR[8]
-     *  DL0 remote retrain
+     *  OMI-DL0 remote side initiated a retrain
      */
     (rOMIDLFIR, bit(8)) ? defaultMaskedError;
 
     /** OMIDLFIR[9]
-     *  DL0 error retrain
+     *  OMI-DL0 retrain due to internal error or software initiated
      */
-    (rOMIDLFIR, bit(9)) ? defaultMaskedError;
+    (rOMIDLFIR, bit(9)) ? dl0_omi_bus_th_32perDay;
 
     /** OMIDLFIR[10]
-     *  DL0 EDPL retrain
+     *  OMI-DL0 threshold reached
      */
-    (rOMIDLFIR, bit(10)) ? defaultMaskedError;
+    (rOMIDLFIR, bit(10)) ? dl0_omi_bus_th_32perDay;
 
     /** OMIDLFIR[11]
-     *  DL0 trained
+     *  OMI-DL0 trained
      */
     (rOMIDLFIR, bit(11)) ? defaultMaskedError;
 
     /** OMIDLFIR[12]
-     *  DL0 endpoint bit 0
+     *  OMI-DL0 endpoint error bit 0
      */
     (rOMIDLFIR, bit(12)) ? defaultMaskedError;
 
     /** OMIDLFIR[13]
-     *  DL0 endpoint bit 1
+     *  OMI-DL0 endpoint error bit 1
      */
     (rOMIDLFIR, bit(13)) ? defaultMaskedError;
 
     /** OMIDLFIR[14]
-     *  DL0 endpoint bit 2
+     *  OMI-DL0 endpoint error bit 2
      */
     (rOMIDLFIR, bit(14)) ? defaultMaskedError;
 
     /** OMIDLFIR[15]
-     *  DL0 endpoint bit 3
+     *  OMI-DL0 endpoint error bit 3
      */
     (rOMIDLFIR, bit(15)) ? defaultMaskedError;
 
     /** OMIDLFIR[16]
-     *  DL0 endpoint bit 4
+     *  OMI-DL0 endpoint error bit 4
      */
     (rOMIDLFIR, bit(16)) ? defaultMaskedError;
 
     /** OMIDLFIR[17]
-     *  DL0 endpoint bit 5
+     *  OMI-DL0 endpoint error bit 5
      */
     (rOMIDLFIR, bit(17)) ? defaultMaskedError;
 
     /** OMIDLFIR[18]
-     *  DL0 endpoint bit 6
+     *  OMI-DL0 endpoint error bit 6
      */
     (rOMIDLFIR, bit(18)) ? defaultMaskedError;
 
     /** OMIDLFIR[19]
-     *  DL0 endpoint bit 7
+     *  OMI-DL0 endpoint error bit 7
      */
     (rOMIDLFIR, bit(19)) ? defaultMaskedError;
 
     /** OMIDLFIR[20]
-     *  DL1 fatal error
+     *  OMI-DL1 fatal error
      */
-    (rOMIDLFIR, bit(20)) ? defaultMaskedError;
+    (rOMIDLFIR, bit(20)) ? dl1_fatal_error;
 
     /** OMIDLFIR[21]
-     *  DL1 data UE
+     *  OMI-DL1 UE on data flit
      */
-    (rOMIDLFIR, bit(21)) ? defaultMaskedError;
+    (rOMIDLFIR, bit(21)) ? dl1_omi_th_1;
 
     /** OMIDLFIR[22]
-     *  DL1 flit CE
+     *  OMI-DL1 CE on TL flit
      */
-    (rOMIDLFIR, bit(22)) ? defaultMaskedError;
+    (rOMIDLFIR, bit(22)) ? dl1_omi_th_32perDay;
 
     /** OMIDLFIR[23]
-     *  DL1 CRC error
+     *  OMI-DL1 detected a CRC error
      */
     (rOMIDLFIR, bit(23)) ? defaultMaskedError;
 
     /** OMIDLFIR[24]
-     *  DL1 nack
+     *  OMI-DL1 received a nack
      */
     (rOMIDLFIR, bit(24)) ? defaultMaskedError;
 
     /** OMIDLFIR[25]
-     *  DL1 X4 mode
+     *  OMI-DL1 running in degraded mode
      */
-    (rOMIDLFIR, bit(25)) ? defaultMaskedError;
+    (rOMIDLFIR, bit(25)) ? dl1_omi_bus_th_1;
 
     /** OMIDLFIR[26]
-     *  DL1 EDPL
+     *  OMI-DL1 parity error detection on a lane
      */
     (rOMIDLFIR, bit(26)) ? defaultMaskedError;
 
     /** OMIDLFIR[27]
-     *  DL1 timeout
+     *  OMI-DL1 retrained due to no forward progress
      */
-    (rOMIDLFIR, bit(27)) ? defaultMaskedError;
+    (rOMIDLFIR, bit(27)) ? dl1_omi_bus_th_32perDay;
 
     /** OMIDLFIR[28]
-     *  DL1 remote retrain
+     *  OMI-DL1 remote side initiated a retrain
      */
     (rOMIDLFIR, bit(28)) ? defaultMaskedError;
 
     /** OMIDLFIR[29]
-     *  DL1 error retrain
+     *  OMI-DL1 retrain due to internal error or software initiated
      */
-    (rOMIDLFIR, bit(29)) ? defaultMaskedError;
+    (rOMIDLFIR, bit(29)) ? dl1_omi_bus_th_32perDay;
 
     /** OMIDLFIR[30]
-     *  DL1 EDPL retrain
+     *  OMI-DL1 threshold reached
      */
-    (rOMIDLFIR, bit(30)) ? defaultMaskedError;
+    (rOMIDLFIR, bit(30)) ? dl1_omi_bus_th_32perDay;
 
     /** OMIDLFIR[31]
-     *  DL1 trained
+     *  OMI-DL1 trained
      */
     (rOMIDLFIR, bit(31)) ? defaultMaskedError;
 
     /** OMIDLFIR[32]
-     *  DL1 endpoint bit 0
+     *  OMI-DL1 endpoint error bit 0
      */
     (rOMIDLFIR, bit(32)) ? defaultMaskedError;
 
     /** OMIDLFIR[33]
-     *  DL1 endpoint bit 1
+     *  OMI-DL1 endpoint error bit 1
      */
     (rOMIDLFIR, bit(33)) ? defaultMaskedError;
 
     /** OMIDLFIR[34]
-     *  DL1 endpoint bit 2
+     *  OMI-DL1 endpoint error bit 2
      */
     (rOMIDLFIR, bit(34)) ? defaultMaskedError;
 
     /** OMIDLFIR[35]
-     *  DL1 endpoint bit 3
+     *  OMI-DL1 endpoint error bit 3
      */
     (rOMIDLFIR, bit(35)) ? defaultMaskedError;
 
     /** OMIDLFIR[36]
-     *  DL1 endpoint bit 4
+     *  OMI-DL1 endpoint error bit 4
      */
     (rOMIDLFIR, bit(36)) ? defaultMaskedError;
 
     /** OMIDLFIR[37]
-     *  DL1 endpoint bit 5
+     *  OMI-DL1 endpoint error bit 5
      */
     (rOMIDLFIR, bit(37)) ? defaultMaskedError;
 
     /** OMIDLFIR[38]
-     *  DL1 endpoint bit 6
+     *  OMI-DL1 endpoint error bit 6
      */
     (rOMIDLFIR, bit(38)) ? defaultMaskedError;
 
     /** OMIDLFIR[39]
-     *  DL1 endpoint bit 7
+     *  OMI-DL1 endpoint error bit 7
      */
     (rOMIDLFIR, bit(39)) ? defaultMaskedError;
 
     /** OMIDLFIR[40]
-     *  DL2 fatal error
+     *  OMI-DL2 fatal error
      */
-    (rOMIDLFIR, bit(40)) ? defaultMaskedError;
+    (rOMIDLFIR, bit(40)) ? dl2_fatal_error;
 
     /** OMIDLFIR[41]
-     *  DL2 data UE
+     *  OMI-DL2 UE on data flit
      */
-    (rOMIDLFIR, bit(41)) ? defaultMaskedError;
+    (rOMIDLFIR, bit(41)) ? dl2_omi_th_1;
 
     /** OMIDLFIR[42]
-     *  DL2 flit CE
+     *  OMI-DL2 CE on TL flit
      */
-    (rOMIDLFIR, bit(42)) ? defaultMaskedError;
+    (rOMIDLFIR, bit(42)) ? dl2_omi_th_32perDay;
 
     /** OMIDLFIR[43]
-     *  DL2 CRC error
+     *  OMI-DL2 detected a CRC error
      */
     (rOMIDLFIR, bit(43)) ? defaultMaskedError;
 
     /** OMIDLFIR[44]
-     *  DL2 nack
+     *  OMI-DL2 received a nack
      */
     (rOMIDLFIR, bit(44)) ? defaultMaskedError;
 
     /** OMIDLFIR[45]
-     *  DL2 X4 mode
+     *  OMI-DL2 running in degraded mode
      */
-    (rOMIDLFIR, bit(45)) ? defaultMaskedError;
+    (rOMIDLFIR, bit(45)) ? dl2_omi_bus_th_1;
 
     /** OMIDLFIR[46]
-     *  DL2 EDPL
+     *  OMI-DL2 parity error detection on a lane
      */
     (rOMIDLFIR, bit(46)) ? defaultMaskedError;
 
     /** OMIDLFIR[47]
-     *  DL2 timeout
+     *  OMI-DL2 retrained due to no forward progress
      */
-    (rOMIDLFIR, bit(47)) ? defaultMaskedError;
+    (rOMIDLFIR, bit(47)) ? dl2_omi_bus_th_32perDay;
 
     /** OMIDLFIR[48]
-     *  DL2 remote retrain
+     *  OMI-DL2 remote side initiated a retrain
      */
     (rOMIDLFIR, bit(48)) ? defaultMaskedError;
 
     /** OMIDLFIR[49]
-     *  DL2 error retrain
+     *  OMI-DL2 retrain due to internal error or software initiated
      */
-    (rOMIDLFIR, bit(49)) ? defaultMaskedError;
+    (rOMIDLFIR, bit(49)) ? dl2_omi_bus_th_32perDay;
 
     /** OMIDLFIR[50]
-     *  DL2 EDPL retrain
+     *  OMI-DL2 threshold reached
      */
-    (rOMIDLFIR, bit(50)) ? defaultMaskedError;
+    (rOMIDLFIR, bit(50)) ? dl2_omi_bus_th_32perDay;
 
     /** OMIDLFIR[51]
-     *  DL2 trained
+     *  OMI-DL2 trained
      */
     (rOMIDLFIR, bit(51)) ? defaultMaskedError;
 
     /** OMIDLFIR[52]
-     *  DL2 endpoint bit 0
+     *  OMI-DL2 endpoint error bit 0
      */
     (rOMIDLFIR, bit(52)) ? defaultMaskedError;
 
     /** OMIDLFIR[53]
-     *  DL2 endpoint bit 1
+     *  OMI-DL2 endpoint error bit 1
      */
     (rOMIDLFIR, bit(53)) ? defaultMaskedError;
 
     /** OMIDLFIR[54]
-     *  DL2 endpoint bit 2
+     *  OMI-DL2 endpoint error bit 2
      */
     (rOMIDLFIR, bit(54)) ? defaultMaskedError;
 
     /** OMIDLFIR[55]
-     *  DL2 endpoint bit 3
+     *  OMI-DL2 endpoint error bit 3
      */
     (rOMIDLFIR, bit(55)) ? defaultMaskedError;
 
     /** OMIDLFIR[56]
-     *  DL2 endpoint bit 4
+     *  OMI-DL2 endpoint error bit 4
      */
     (rOMIDLFIR, bit(56)) ? defaultMaskedError;
 
     /** OMIDLFIR[57]
-     *  DL2 endpoint bit 5
+     *  OMI-DL2 endpoint error bit 5
      */
     (rOMIDLFIR, bit(57)) ? defaultMaskedError;
 
     /** OMIDLFIR[58]
-     *  DL2 endpoint bit 6
+     *  OMI-DL2 endpoint error bit 6
      */
     (rOMIDLFIR, bit(58)) ? defaultMaskedError;
 
     /** OMIDLFIR[59]
-     *  DL2 endpoint bit 7
+     *  OMI-DL2 endpoint error bit 7
      */
     (rOMIDLFIR, bit(59)) ? defaultMaskedError;
 
@@ -666,6 +666,21 @@ group gOMIDLFIR
      *  Performance monitor wrapped
      */
     (rOMIDLFIR, bit(60)) ? defaultMaskedError;
+
+    /** OMIDLFIR[61]
+     *  reserved
+     */
+    (rOMIDLFIR, bit(61)) ? defaultMaskedError;
+
+    /** OMIDLFIR[62]
+     *  LFIR internal parity error
+     */
+    (rOMIDLFIR, bit(62)) ? defaultMaskedError;
+
+    /** OMIDLFIR[63]
+     *  SCOM Satellite Error
+     */
+    (rOMIDLFIR, bit(63)) ? defaultMaskedError;
 
 };
 

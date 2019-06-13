@@ -23,47 +23,131 @@
 #
 # IBM_PROLOG_END_TAG
 
-actionclass omi_0_and_explorer_0_th_1_UERE
+################################################################################
+# Callouts
+################################################################################
+
+actionclass chnl0_omi
 {
-    SueSource;
-    callout(connected(TYPE_OMI,       0), MRU_MEDA);
-    callout(connected(TYPE_OCMB_CHIP, 0), MRU_MEDA);
+    callout(connected(TYPE_OMI,0), MRU_MED);
+};
+
+actionclass chnl1_omi
+{
+    callout(connected(TYPE_OMI,1), MRU_MED);
+};
+
+actionclass chnl0_omi_L
+{
+    callout(connected(TYPE_OMI,0), MRU_LOW);
+};
+
+actionclass chnl1_omi_L
+{
+    callout(connected(TYPE_OMI,1), MRU_LOW);
+};
+
+actionclass chnl0_ocmb
+{
+    callout(connected(TYPE_OCMB_CHIP,0), MRU_MED);
+};
+
+actionclass chnl1_ocmb
+{
+    callout(connected(TYPE_OCMB_CHIP,1), MRU_MED);
+};
+
+actionclass chnl0_omi_bus
+{
+    funccall("omiParentCalloutBusInterfacePlugin_0");
+};
+
+actionclass chnl1_omi_bus
+{
+    funccall("omiParentCalloutBusInterfacePlugin_1");
+};
+
+actionclass chnl0_omi_bus_th_1
+{
+    chnl0_omi_bus;
     threshold1;
 };
 
-actionclass omi_0_and_explorer_0_th_32_perDay
+actionclass chnl1_omi_bus_th_1
 {
-    callout(connected(TYPE_OMI,       0), MRU_MEDA);
-    callout(connected(TYPE_OCMB_CHIP, 0), MRU_MEDA);
+    chnl1_omi_bus;
+    threshold1;
+};
+
+actionclass chnl0_omi_bus_th_32_perDay
+{
+    chnl0_omi_bus;
     threshold32pday;
 };
 
-actionclass explorer_0_th_1_UERE
+actionclass chnl1_omi_bus_th_32_perDay
 {
-    SueSource;
-    callout(connected(TYPE_OCMB_CHIP, 0), MRU_MED);
-    threshold1;
-};
-
-actionclass omi_1_and_explorer_1_th_1_UERE
-{
-    SueSource;
-    callout(connected(TYPE_OMI,       1), MRU_MEDA);
-    callout(connected(TYPE_OCMB_CHIP, 1), MRU_MEDA);
-    threshold1;
-};
-
-actionclass omi_1_and_explorer_1_th_32_perDay
-{
-    callout(connected(TYPE_OMI,       1), MRU_MEDA);
-    callout(connected(TYPE_OCMB_CHIP, 1), MRU_MEDA);
+    chnl1_omi_bus;
     threshold32pday;
 };
 
-actionclass explorer_1_th_1_UERE
+actionclass chnl0_omi_th_1
 {
-    SueSource;
-    callout(connected(TYPE_OCMB_CHIP, 1), MRU_MED);
+    chnl0_omi;
+    threshold1;
+};
+
+actionclass chnl1_omi_th_1
+{
+    chnl1_omi;
+    threshold1;
+};
+
+actionclass chnl0_ocmb_th_1
+{
+    chnl0_ocmb;
+    threshold1;
+};
+
+actionclass chnl1_ocmb_th_1
+{
+    chnl1_ocmb;
+    threshold1;
+};
+
+actionclass all_ocmb_and_mcc_th_1
+{
+    chnl0_ocmb;
+    chnl1_ocmb;
+    calloutSelfMed;
+    threshold1;
+};
+
+actionclass chnl0_ocmb_H_omi_L_th_1
+{
+    chnl0_ocmb;
+    chnl0_omi_L;
+    threshold1;
+};
+
+actionclass chnl1_ocmb_H_omi_L_th_1
+{
+    chnl1_ocmb;
+    chnl1_omi_L;
+    threshold1;
+};
+
+actionclass threshold_and_mask_chnl0_ocmb_th_1
+{
+    threshold_and_mask;
+    chnl0_ocmb;
+    threshold1;
+};
+
+actionclass threshold_and_mask_chnl1_ocmb_th_1
+{
+    threshold_and_mask;
+    chnl1_ocmb;
     threshold1;
 };
 
@@ -78,25 +162,25 @@ actionclass analyzeUSTLFIR { analyze(gUSTLFIR); };
 # Analyze connected
 ################################################################################
 
-actionclass analyzeConnectedExplorer_0
+actionclass analyze_ocmb_chnl0
 {
     analyze(connected(TYPE_OCMB_CHIP, 0));
 };
 
-actionclass analyzeConnectedExplorer_1
+actionclass analyze_ocmb_chnl1
 {
     analyze(connected(TYPE_OCMB_CHIP, 1));
 };
 
-actionclass analyzeConnectedExplorer_0_UERE
+actionclass analyze_ocmb_chnl0_UERE
 {
     SueSource;
-    analyzeConnectedExplorer_0;
+    analyze_ocmb_chnl0;
 };
 
-actionclass analyzeConnectedExplorer_1_UERE
+actionclass analyze_ocmb_chnl1_UERE
 {
     SueSource;
-    analyzeConnectedExplorer_1;
+    analyze_ocmb_chnl1;
 };
 

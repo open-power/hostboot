@@ -595,11 +595,13 @@ TargetService::ASSOCIATION_TYPE getAssociationType( TargetHandle_t i_target,
         { TYPE_MCC,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
         { TYPE_MCC,    TYPE_MI,         TargetService::PARENT_BY_AFFINITY },
         { TYPE_MCC,    TYPE_OMI,        TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_MCC,    TYPE_OCMB_CHIP,  TargetService::CHILD_BY_AFFINITY  },
 
         { TYPE_OMI,    TYPE_OMIC,       TargetService::PARENT_BY_AFFINITY },
         { TYPE_OMI,    TYPE_MCC,        TargetService::PARENT_BY_AFFINITY },
         { TYPE_OMI,    TYPE_OCMB_CHIP,  TargetService::CHILD_BY_AFFINITY  },
 
+        { TYPE_OCMB_CHIP, TYPE_MCC,     TargetService::PARENT_BY_AFFINITY },
         { TYPE_OCMB_CHIP, TYPE_OMI,     TargetService::PARENT_BY_AFFINITY },
         { TYPE_OCMB_CHIP, TYPE_MEM_PORT,TargetService::CHILD_BY_AFFINITY  },
         { TYPE_OCMB_CHIP, TYPE_DIMM,    TargetService::CHILD_BY_AFFINITY  },
@@ -941,6 +943,17 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
                         uint32_t omiPos = getTargetPosition(t);
                         return (trgtPos   == (omiPos / MAX_OMI_PER_MCC)) &&
                                (i_connPos == (omiPos % MAX_OMI_PER_MCC));
+                    } );
+        }
+        else if ( TYPE_MCC == trgtType && TYPE_OCMB_CHIP == i_connType )
+        {
+            // i_connPos is position relative to MCC (0-1)
+            itr = std::find_if( list.begin(), list.end(),
+                    [&](const TargetHandle_t & t)
+                    {
+                        uint32_t ocmbPos = getTargetPosition(t);
+                        return (trgtPos   == (ocmbPos / MAX_OCMB_PER_MCC)) &&
+                               (i_connPos == (ocmbPos % MAX_OCMB_PER_MCC));
                     } );
         }
         else if ( TYPE_MC == trgtType && TYPE_OMIC == i_connType )

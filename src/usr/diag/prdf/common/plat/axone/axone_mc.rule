@@ -595,7 +595,7 @@ group gMCMISCFIR
     /** MCMISCFIR[2]
      *  SCOM recoverable register parity error
      */
-    (rMCMISCFIR, bit(2)) ? defaultMaskedError;
+    (rMCMISCFIR, bit(2)) ? self_th_1;
 
     /** MCMISCFIR[3]
      *  Spare

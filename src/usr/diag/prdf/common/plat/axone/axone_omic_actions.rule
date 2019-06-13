@@ -29,32 +29,32 @@
 
 actionclass dl0_omi
 {
-    callout(connected(TYPE_OMI,0), MRU_HIGH);
+    callout(connected(TYPE_OMI,0), MRU_MED);
 };
 
 actionclass dl1_omi
 {
-    callout(connected(TYPE_OMI,1), MRU_HIGH);
+    callout(connected(TYPE_OMI,1), MRU_MED);
 };
 
 actionclass dl2_omi
 {
-    callout(connected(TYPE_OMI,2), MRU_HIGH);
+    callout(connected(TYPE_OMI,2), MRU_MED);
 };
 
 actionclass dl0_omi_bus
 {
-    funccall("omicCalloutBusInterfacePlugin_0");
+    funccall("omiParentCalloutBusInterfacePlugin_0");
 };
 
 actionclass dl1_omi_bus
 {
-    funccall("omicCalloutBusInterfacePlugin_1");
+    funccall("omiParentCalloutBusInterfacePlugin_1");
 };
 
 actionclass dl2_omi_bus
 {
-    funccall("omicCalloutBusInterfacePlugin_2");
+    funccall("omiParentCalloutBusInterfacePlugin_2");
 };
 
 /** OMI-DL0 Fatal Error */
@@ -75,6 +75,78 @@ actionclass dl1_fatal_error
 actionclass dl2_fatal_error
 {
     try( funccall("DlFatalError_2"), dl2_omi_bus );
+    threshold1;
+};
+
+actionclass dl0_omi_th_1
+{
+    dl0_omi;
+    threshold1;
+};
+
+actionclass dl1_omi_th_1
+{
+    dl1_omi;
+    threshold1;
+};
+
+actionclass dl2_omi_th_1
+{
+    dl2_omi;
+    threshold1;
+};
+
+actionclass dl0_omi_th_32perDay
+{
+    dl0_omi;
+    threshold32pday;
+};
+
+actionclass dl1_omi_th_32perDay
+{
+    dl1_omi;
+    threshold32pday;
+};
+
+actionclass dl2_omi_th_32perDay
+{
+    dl2_omi;
+    threshold32pday;
+};
+
+actionclass dl0_omi_bus_th_1
+{
+    dl0_omi_bus;
+    threshold1;
+};
+
+actionclass dl1_omi_bus_th_1
+{
+    dl1_omi_bus;
+    threshold1;
+};
+
+actionclass dl2_omi_bus_th_1
+{
+    dl2_omi_bus;
+    threshold1;
+};
+
+actionclass dl0_omi_bus_th_32perDay
+{
+    dl0_omi_bus;
+    threshold1;
+};
+
+actionclass dl1_omi_bus_th_32perDay
+{
+    dl1_omi_bus;
+    threshold1;
+};
+
+actionclass dl2_omi_bus_th_32perDay
+{
+    dl2_omi_bus;
     threshold1;
 };
 

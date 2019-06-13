@@ -180,22 +180,22 @@ rule rDSTLFIR
 
 group gDSTLFIR
     filter singlebit,
-           cs_root_cause(0,4,12,13,16,17,22,23)
+           cs_root_cause(0,4)
 {
     /** DSTLFIR[0]
      *  AFU initiated Checkstop on Subchannel A
      */
-    (rDSTLFIR, bit(0)) ? analyzeConnectedExplorer_0_UERE;
+    (rDSTLFIR, bit(0)) ? analyze_ocmb_chnl0_UERE;
 
     /** DSTLFIR[1]
      *  AFU initiated Recoverable Attn on Subchannel A
      */
-    (rDSTLFIR, bit(1)) ? analyzeConnectedExplorer_0;
+    (rDSTLFIR, bit(1)) ? analyze_ocmb_chnl0;
 
     /** DSTLFIR[2]
      *  AFU initiated Special Attn on Subchannel A
      */
-    (rDSTLFIR, bit(2)) ? analyzeConnectedExplorer_0;
+    (rDSTLFIR, bit(2)) ? analyze_ocmb_chnl0;
 
     /** DSTLFIR[3]
      *  AFU initiated Application Interrupt Attn on Subchannel A
@@ -205,17 +205,17 @@ group gDSTLFIR
     /** DSTLFIR[4]
      *  AFU initiated Checkstop on Subchannel B
      */
-    (rDSTLFIR, bit(4)) ? analyzeConnectedExplorer_1_UERE;
+    (rDSTLFIR, bit(4)) ? analyze_ocmb_chnl1_UERE;
 
     /** DSTLFIR[5]
      *  AFU initiated Recoverable Attn on Subchannel B
      */
-    (rDSTLFIR, bit(5)) ? analyzeConnectedExplorer_1;
+    (rDSTLFIR, bit(5)) ? analyze_ocmb_chnl1;
 
     /** DSTLFIR[6]
      *  AFU initiated Special Attn on Subchannel B
      */
-    (rDSTLFIR, bit(6)) ? analyzeConnectedExplorer_1;
+    (rDSTLFIR, bit(6)) ? analyze_ocmb_chnl1;
 
     /** DSTLFIR[7]
      *  AFU initiated Application Interrupt Attn on Subchannel B
@@ -245,32 +245,32 @@ group gDSTLFIR
     /** DSTLFIR[12]
      *  Subchannel A counter error
      */
-    (rDSTLFIR, bit(12)) ? omi_0_and_explorer_0_th_1_UERE;
+    (rDSTLFIR, bit(12)) ? chnl0_omi_bus_th_1;
 
     /** DSTLFIR[13]
      *  Subchannel B counter error
      */
-    (rDSTLFIR, bit(13)) ? omi_1_and_explorer_1_th_1_UERE;
+    (rDSTLFIR, bit(13)) ? chnl1_omi_bus_th_1;
 
     /** DSTLFIR[14]
      *  Subchannel A timeout error
      */
-    (rDSTLFIR, bit(14)) ? omi_0_and_explorer_0_th_32_perDay;
+    (rDSTLFIR, bit(14)) ? chnl0_omi_bus_th_32_perDay;
 
     /** DSTLFIR[15]
      *  Subchannel B timeout error
      */
-    (rDSTLFIR, bit(15)) ? omi_1_and_explorer_1_th_32_perDay;
+    (rDSTLFIR, bit(15)) ? chnl1_omi_bus_th_32_perDay;
 
     /** DSTLFIR[16]
      *  Subchannel A buffer overuse error
      */
-    (rDSTLFIR, bit(16)) ? explorer_0_th_1_UERE;
+    (rDSTLFIR, bit(16)) ? chnl0_ocmb_th_1;
 
     /** DSTLFIR[17]
      *  Subchannel B buffer overuse error
      */
-    (rDSTLFIR, bit(17)) ? explorer_1_th_1_UERE;
+    (rDSTLFIR, bit(17)) ? chnl1_ocmb_th_1;
 
     /** DSTLFIR[18]
      *  Subchannel A DL link down
@@ -295,12 +295,12 @@ group gDSTLFIR
     /** DSTLFIR[22]
      *  DSTLFIR channel timeout on subch A
      */
-    (rDSTLFIR, bit(22)) ? omi_0_and_explorer_0_th_1_UERE;
+    (rDSTLFIR, bit(22)) ? chnl0_omi_bus_th_1;
 
     /** DSTLFIR[23]
      *  DSTLFIR channel timeout on subch B
      */
-    (rDSTLFIR, bit(23)) ? omi_1_and_explorer_1_th_1_UERE;
+    (rDSTLFIR, bit(23)) ? chnl1_omi_bus_th_1;
 
     /** DSTLFIR[24:25]
      *  spare
@@ -342,22 +342,22 @@ group gUSTLFIR
     /** USTLFIR[0]
      *  Chan A unexpected data error
      */
-    (rUSTLFIR, bit(0)) ? defaultMaskedError;
+    (rUSTLFIR, bit(0)) ? chnl0_ocmb_th_1;
 
     /** USTLFIR[1]
      *  Chan B unexpected data error
      */
-    (rUSTLFIR, bit(1)) ? defaultMaskedError;
+    (rUSTLFIR, bit(1)) ? chnl1_ocmb_th_1;
 
     /** USTLFIR[2]
      *  Chan A invalid template error
      */
-    (rUSTLFIR, bit(2)) ? defaultMaskedError;
+    (rUSTLFIR, bit(2)) ? chnl0_ocmb_th_1;
 
     /** USTLFIR[3]
      *  Chan B invalid template error
      */
-    (rUSTLFIR, bit(3)) ? defaultMaskedError;
+    (rUSTLFIR, bit(3)) ? chnl1_ocmb_th_1;
 
     /** USTLFIR[4]
      *  Chan A half speed mode
@@ -372,12 +372,12 @@ group gUSTLFIR
     /** USTLFIR[6]
      *  WDF buffer CE
      */
-    (rUSTLFIR, bit(6)) ? defaultMaskedError;
+    (rUSTLFIR, bit(6)) ? self_th_32perDay;
 
     /** USTLFIR[7]
      *  WDF buffer UE
      */
-    (rUSTLFIR, bit(7)) ? defaultMaskedError;
+    (rUSTLFIR, bit(7)) ? self_th_1;
 
     /** USTLFIR[8]
      *  WDF buffer SUE
@@ -387,32 +387,32 @@ group gUSTLFIR
     /** USTLFIR[9]
      *  WDF buffer overrun
      */
-    (rUSTLFIR, bit(9)) ? defaultMaskedError;
+    (rUSTLFIR, bit(9)) ? self_th_1;
 
     /** USTLFIR[10]
      *  WDF tag parity error
      */
-    (rUSTLFIR, bit(10)) ? defaultMaskedError;
+    (rUSTLFIR, bit(10)) ? self_th_1;
 
     /** USTLFIR[11]
      *  WDF scom sequencer error
      */
-    (rUSTLFIR, bit(11)) ? defaultMaskedError;
+    (rUSTLFIR, bit(11)) ? self_th_1;
 
     /** USTLFIR[12]
      *  WDF pwctl sequencer error
      */
-    (rUSTLFIR, bit(12)) ? defaultMaskedError;
+    (rUSTLFIR, bit(12)) ? self_th_1;
 
     /** USTLFIR[13]
      *  WDF misc_reg parity error
      */
-    (rUSTLFIR, bit(13)) ? defaultMaskedError;
+    (rUSTLFIR, bit(13)) ? self_th_1;
 
     /** USTLFIR[14]
      *  WDF MCA async error
      */
-    (rUSTLFIR, bit(14)) ? defaultMaskedError;
+    (rUSTLFIR, bit(14)) ? self_th_1;
 
     /** USTLFIR[15]
      *  WDF Data Syndrome NE0
@@ -422,32 +422,32 @@ group gUSTLFIR
     /** USTLFIR[16]
      *  WDF CMT parity error
      */
-    (rUSTLFIR, bit(16)) ? defaultMaskedError;
+    (rUSTLFIR, bit(16)) ? self_th_1;
 
     /** USTLFIR[17]
-     *  TBD
+     *  spare
      */
     (rUSTLFIR, bit(17)) ? defaultMaskedError;
 
     /** USTLFIR[18]
-     *  TBD
+     *  spare
      */
     (rUSTLFIR, bit(18)) ? defaultMaskedError;
 
     /** USTLFIR[19]
-     *  TBD
+     *  Read Buffers overflowed/underflowed
      */
-    (rUSTLFIR, bit(19)) ? defaultMaskedError;
+    (rUSTLFIR, bit(19)) ? all_ocmb_and_mcc_th_1;
 
     /** USTLFIR[20]
      *  WRT Buffer CE
      */
-    (rUSTLFIR, bit(20)) ? defaultMaskedError;
+    (rUSTLFIR, bit(20)) ? parent_proc_th_32perDay;
 
     /** USTLFIR[21]
      *  WRT Buffer UE
      */
-    (rUSTLFIR, bit(21)) ? defaultMaskedError;
+    (rUSTLFIR, bit(21)) ? parent_proc_th_1;
 
     /** USTLFIR[22]
      *  WRT Buffer SUE
@@ -457,12 +457,12 @@ group gUSTLFIR
     /** USTLFIR[23]
      *  WRT scom sequencer error
      */
-    (rUSTLFIR, bit(23)) ? defaultMaskedError;
+    (rUSTLFIR, bit(23)) ? self_th_1;
 
     /** USTLFIR[24]
      *  WRT misc_reg parity error
      */
-    (rUSTLFIR, bit(24)) ? defaultMaskedError;
+    (rUSTLFIR, bit(24)) ? self_th_1;
 
     /** USTLFIR[25:26]
      *  WRT error information spares
@@ -472,22 +472,22 @@ group gUSTLFIR
     /** USTLFIR[27]
      *  Chan A fail response checkstop
      */
-    (rUSTLFIR, bit(27)) ? defaultMaskedError;
+    (rUSTLFIR, bit(27)) ? chnl0_ocmb_th_1;
 
     /** USTLFIR[28]
      *  Chan B fail response checkstop
      */
-    (rUSTLFIR, bit(28)) ? defaultMaskedError;
+    (rUSTLFIR, bit(28)) ? chnl1_ocmb_th_1;
 
     /** USTLFIR[29]
      *  Chan A fail response recoverable
      */
-    (rUSTLFIR, bit(29)) ? defaultMaskedError;
+    (rUSTLFIR, bit(29)) ? threshold_and_mask_chnl0_ocmb_th_1;
 
     /** USTLFIR[30]
      *  Chan B fail response recoverable
      */
-    (rUSTLFIR, bit(30)) ? defaultMaskedError;
+    (rUSTLFIR, bit(30)) ? threshold_and_mask_chnl1_ocmb_th_1;
 
     /** USTLFIR[31]
      *  Chan A lol drop checkstop
@@ -502,72 +502,72 @@ group gUSTLFIR
     /** USTLFIR[33]
      *  Chan A lol drop recoverable
      */
-    (rUSTLFIR, bit(33)) ? defaultMaskedError;
+    (rUSTLFIR, bit(33)) ? chnl0_ocmb_H_omi_L_th_1;
 
     /** USTLFIR[34]
      *  Chan B lol drop recoverable
      */
-    (rUSTLFIR, bit(34)) ? defaultMaskedError;
+    (rUSTLFIR, bit(34)) ? chnl1_ocmb_H_omi_L_th_1;
 
     /** USTLFIR[35]
      *  Chan A flit parity error
      */
-    (rUSTLFIR, bit(35)) ? defaultMaskedError;
+    (rUSTLFIR, bit(35)) ? chnl0_omi_th_1;
 
     /** USTLFIR[36]
      *  Chan B flit parity error
      */
-    (rUSTLFIR, bit(36)) ? defaultMaskedError;
+    (rUSTLFIR, bit(36)) ? chnl1_omi_th_1;
 
     /** USTLFIR[37]
      *  Chan A fatal parity error
      */
-    (rUSTLFIR, bit(37)) ? defaultMaskedError;
+    (rUSTLFIR, bit(37)) ? chnl0_omi_th_1;
 
     /** USTLFIR[38]
      *  Chan B fatal parity error
      */
-    (rUSTLFIR, bit(38)) ? defaultMaskedError;
+    (rUSTLFIR, bit(38)) ? chnl1_omi_th_1;
 
     /** USTLFIR[39]
      *  Chan A more than 2 data flits for template 9
      */
-    (rUSTLFIR, bit(39)) ? defaultMaskedError;
+    (rUSTLFIR, bit(39)) ? chnl0_ocmb_th_1;
 
     /** USTLFIR[40]
      *  Chan B more than 2 data flits for template 9
      */
-    (rUSTLFIR, bit(40)) ? defaultMaskedError;
+    (rUSTLFIR, bit(40)) ? chnl1_ocmb_th_1;
 
     /** USTLFIR[41]
      *  Chan A excess bad data bits
      */
-    (rUSTLFIR, bit(41)) ? defaultMaskedError;
+    (rUSTLFIR, bit(41)) ? chnl0_ocmb_th_1;
 
     /** USTLFIR[42]
      *  Chan B excess bad data bits
      */
-    (rUSTLFIR, bit(42)) ? defaultMaskedError;
+    (rUSTLFIR, bit(42)) ? chnl1_ocmb_th_1;
 
     /** USTLFIR[43]
      *  Chan A memory read data returned in template 0
      */
-    (rUSTLFIR, bit(43)) ? defaultMaskedError;
+    (rUSTLFIR, bit(43)) ? chnl0_ocmb_th_1;
 
     /** USTLFIR[44]
      *  Chan B memory read data returned in template 0
      */
-    (rUSTLFIR, bit(44)) ? defaultMaskedError;
+    (rUSTLFIR, bit(44)) ? chnl1_ocmb_th_1;
 
     /** USTLFIR[45]
      *  Chan A MMIO in lol mode
      */
-    (rUSTLFIR, bit(45)) ? defaultMaskedError;
+    (rUSTLFIR, bit(45)) ? chnl0_omi_th_1;
 
     /** USTLFIR[46]
      *  Chan B MMIO in lol mode
      */
-    (rUSTLFIR, bit(46)) ? defaultMaskedError;
+    (rUSTLFIR, bit(46)) ? chnl1_omi_th_1;
 
     /** USTLFIR[47]
      *  Chan A bad data
@@ -582,62 +582,62 @@ group gUSTLFIR
     /** USTLFIR[49]
      *  Chan A excess data error
      */
-    (rUSTLFIR, bit(49)) ? defaultMaskedError;
+    (rUSTLFIR, bit(49)) ? chnl0_ocmb_th_1;
 
     /** USTLFIR[50]
      *  Chan B excess data error
      */
-    (rUSTLFIR, bit(50)) ? defaultMaskedError;
+    (rUSTLFIR, bit(50)) ? chnl1_ocmb_th_1;
 
     /** USTLFIR[51]
      *  Chan A Bad CRC data not valid error
      */
-    (rUSTLFIR, bit(51)) ? defaultMaskedError;
+    (rUSTLFIR, bit(51)) ? chnl0_omi_th_1;
 
     /** USTLFIR[52]
      *  Chan B Bad CRC data not valid error
      */
-    (rUSTLFIR, bit(52)) ? defaultMaskedError;
+    (rUSTLFIR, bit(52)) ? chnl1_omi_th_1;
 
     /** USTLFIR[53]
      *  Chan A FIFO overflow error
      */
-    (rUSTLFIR, bit(53)) ? defaultMaskedError;
+    (rUSTLFIR, bit(53)) ? chnl0_omi_th_1;
 
     /** USTLFIR[54]
      *  Chan B FIFO overflow error
      */
-    (rUSTLFIR, bit(54)) ? defaultMaskedError;
+    (rUSTLFIR, bit(54)) ? chnl1_omi_th_1;
 
     /** USTLFIR[55]
      *  Chan A invalid cmd error
      */
-    (rUSTLFIR, bit(55)) ? defaultMaskedError;
+    (rUSTLFIR, bit(55)) ? chnl0_ocmb_th_1;
 
     /** USTLFIR[56]
      *  Chan B invalid cmd error
      */
-    (rUSTLFIR, bit(56)) ? defaultMaskedError;
+    (rUSTLFIR, bit(56)) ? chnl1_ocmb_th_1;
 
     /** USTLFIR[57]
      *  Fatal reg parity error
      */
-    (rUSTLFIR, bit(57)) ? defaultMaskedError;
+    (rUSTLFIR, bit(57)) ? self_th_1;
 
     /** USTLFIR[58]
      *  Recoverable reg parity error
      */
-    (rUSTLFIR, bit(58)) ? defaultMaskedError;
+    (rUSTLFIR, bit(58)) ? self_th_1;
 
     /** USTLFIR[59]
      *  Chan A invalid DL DP combo
      */
-    (rUSTLFIR, bit(59)) ? defaultMaskedError;
+    (rUSTLFIR, bit(59)) ? chnl0_ocmb_th_1;
 
     /** USTLFIR[60]
      *  Chan B invalid DL DP combo
      */
-    (rUSTLFIR, bit(60)) ? defaultMaskedError;
+    (rUSTLFIR, bit(60)) ? chnl1_ocmb_th_1;
 
     /** USTLFIR[61]
      *  spare
