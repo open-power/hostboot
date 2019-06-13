@@ -189,10 +189,6 @@ errlHndl_t sendAttributes(const std::vector<TARGETING::AttributeTank::Attribute>
             break;
         }
 
-        // Make sure mbox is available
-        assert(INITSERVICE::spBaseServicesEnabled(),
-               "ERROR: Cannot perform request 'sendAttributes', mbox is not available");
-
         // Make sure we have all of our function pointers setup right
         if ((nullptr == g_hostInterfaces) ||
             (nullptr == g_hostInterfaces->firmware_request))
@@ -270,7 +266,7 @@ errlHndl_t sendAttributes(const std::vector<TARGETING::AttributeTank::Attribute>
         // Populate the 'message queue' and 'message type' for this message
         l_fwRequestMsg->generic_msg.msgq = MBOX::FSP_NVDIMM_KEYS_MSGQ_ID;
         l_fwRequestMsg->generic_msg.msgType =
-                                  GenericFspMboxMessage_t::MSG_DECONFIG_TARGET;
+                                  GenericFspMboxMessage_t::MSG_ATTR_WRITE_OP;
 
         // Create a useful struct to populate the generic_msg::data field
         AttributeSetter_t* l_attributeSetter =
@@ -288,6 +284,8 @@ errlHndl_t sendAttributes(const std::vector<TARGETING::AttributeTank::Attribute>
         // Create a useful struct to poulate attribute data
         uint8_t* l_attributeData = l_attributeSetter->iv_attrData;
         uint32_t l_sizeOfDataCopied(0);
+
+        // Iterate thru the attribute list and serialize the attributes
         for (const auto & l_attribute: i_attributeList)
         {
             if (l_aggregatedAttributeSize >= l_attribute.getSize())
