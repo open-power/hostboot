@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -173,6 +173,50 @@ void ServiceDataCollector::clearMruListGard()
     {
         i->gardState = NO_GARD;
     }
+}
+
+//------------------------------------------------------------------------------
+
+void ServiceDataCollector::clearNvdimmMruListGard()
+{
+    #define PRDF_FUNC "[ServiceDataCollector::clearNvdimmMruListGard] "
+
+    // Loop through the MRU list.
+    for ( auto & mru : xMruList )
+    {
+        PRDcallout callout = mru.callout;
+        TargetHandle_t trgt = callout.getTarget();
+        if ( TYPE_DIMM == PlatServices::getTargetType(trgt) )
+        {
+            // If the callout target is an NVDIMM, do not gard it and send a
+            // message to PHYP/Hostboot that a save/restore may work.
+            if ( isNVDIMM(trgt) )
+            {
+                mru.gardState = NO_GARD;
+
+                #ifdef __HOSTBOOT_MODULE
+
+                #ifdef __HOSTBOOT_RUNTIME
+                // Hostboot runtime, send the message to PHYP
+                uint32_t l_rc = PlatServices::nvdimmNotifyPhypProtChange( trgt,
+                    NVDIMM::NVDIMM_RISKY_HW_ERROR );
+                if ( SUCCESS != l_rc )
+                {
+                    PRDF_TRAC( PRDF_FUNC "nvdimmNotifyPhypProtChange(0x%08x) "
+                               "failed.", PlatServices::getHuid(trgt) );
+                    continue;
+                }
+                #else
+                // IPL, set the appropriate internal attribute in Hostboot
+                trgt->setAttr<ATTR_NV_STATUS_FLAG>(0x40);
+                #endif
+
+                #endif // __HOSTBOOT_MODULE
+            }
+        }
+    }
+
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------

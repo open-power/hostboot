@@ -241,7 +241,7 @@ group gMCACALFIR
     /** MCACALFIR[0]
      *  A MBA recoverable error has occurred.
      */
-    (rMCACALFIR, bit(0)) ? self_th_1;
+    (rMCACALFIR, bit(0)) ? nvdimm_self_th_1;
 
     /** MCACALFIR[1]
      *  MBA Nonrecoverable Error
@@ -251,7 +251,7 @@ group gMCACALFIR
     /** MCACALFIR[2]
      *  Excessive refreshes to a single rank.
      */
-    (rMCACALFIR, bit(2)) ? self_th_32perDay;
+    (rMCACALFIR, bit(2)) ? nvdimm_self_th_32perDay;
 
     /** MCACALFIR[3]
      *  Err detected in the MBA debug WAT logic
@@ -266,7 +266,7 @@ group gMCACALFIR
     /** MCACALFIR[5]
      *  Calibration complete indication xout
      */
-    (rMCACALFIR, bit(5)) ? self_th_32perDay;
+    (rMCACALFIR, bit(5)) ? nvdimm_self_th_32perDay;
 
     /** MCACALFIR[6]
      *  Emergency Throttle
@@ -533,7 +533,7 @@ group gMCAECCFIR
     /** MCAECCFIR[42]
      *  SCOM_PARITY_CLASS_RECOVERABLE
      */
-    (rMCAECCFIR, bit(42)) ? self_th_1;
+    (rMCAECCFIR, bit(42)) ? nvdimm_self_th_1;
 
     /** MCAECCFIR[43]
      *  SCOM_PARITY_CLASS_UNRECOVERABLE
@@ -548,7 +548,7 @@ group gMCAECCFIR
     /** MCAECCFIR[45]
      *  WRITE_RMW_CE
      */
-    (rMCAECCFIR, bit(45)) ? self_th_32perDay;
+    (rMCAECCFIR, bit(45)) ? nvdimm_self_th_32perDay;
 
     /** MCAECCFIR[46]
      *  WRITE_RMW_UE
@@ -686,12 +686,12 @@ group gDDRPHYFIR
     /** DDRPHYFIR[60]
      *  Register PE 4 bit impact
      */
-    (rDDRPHYFIR, bit(60)) ? self_th_1;
+    (rDDRPHYFIR, bit(60)) ? nvdimm_self_th_1;
 
     /** DDRPHYFIR[61]
      *  Register PE 1 bit impact
      */
-    (rDDRPHYFIR, bit(61)) ? self_th_1;
+    (rDDRPHYFIR, bit(61)) ? nvdimm_self_th_1;
 
 };
 
