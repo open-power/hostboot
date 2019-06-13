@@ -1243,6 +1243,20 @@ int32_t dimmList( TargetHandleList  & i_dimmList )
         sendPredDeallocRequest( ssAddr, seAddr );
         PRDF_TRAC( PRDF_FUNC "Predictive dealloc for start addr: 0x%016llx "
                    "end addr: 0x%016llx", ssAddr, seAddr );
+
+        // If the DIMM is an NVDIMM, send a message to PHYP that a save/restore
+        // may work.
+        if ( isNVDIMM(*it) )
+        {
+            uint32_t l_rc = PlatServices::nvdimmNotifyPhypProtChange( *it,
+                    NVDIMM::NVDIMM_RISKY_HW_ERROR );
+            if ( SUCCESS != l_rc )
+            {
+                PRDF_TRAC( PRDF_FUNC "nvdimmNotifyPhypProtChange(0x%08x) "
+                           "failed.", getHuid(*it) );
+                continue;
+            }
+        }
     }
 
     return o_rc;

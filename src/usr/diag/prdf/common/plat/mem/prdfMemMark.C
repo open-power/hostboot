@@ -689,6 +689,9 @@ uint32_t applyRasPolicies( ExtensibleChip * i_chip, const MemRank & i_rank,
     {
         io_sc.service_data->setServiceCall();
 
+        // We want to try to avoid garding NVDIMMs, so clear gard for them now.
+        io_sc.service_data->clearNvdimmMruListGard();
+
         #ifdef __HOSTBOOT_RUNTIME
         // No more repairs left so no point doing any more TPS procedures.
         MemDbUtils::banTps<T>( i_chip, i_rank );

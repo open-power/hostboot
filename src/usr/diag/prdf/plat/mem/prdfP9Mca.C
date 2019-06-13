@@ -782,9 +782,9 @@ int32_t AnalyzeNvdimmHealthStatRegs( ExtensibleChip * i_chip,
             // and make the log predictive.
             io_sc.service_data->SetThresholdMaskId(0);
 
-            // Send persistency lost message to PHYP
+            // Send message to PHYP that save/restore may work
             l_rc = PlatServices::nvdimmNotifyPhypProtChange( dimm,
-                    NVDIMM::UNPROTECTED_BECAUSE_ERROR );
+                    NVDIMM::NVDIMM_RISKY_HW_ERROR );
             if ( SUCCESS != l_rc ) continue;
 
             // Analyze Health Status0 Reg, Health Status1 Reg,

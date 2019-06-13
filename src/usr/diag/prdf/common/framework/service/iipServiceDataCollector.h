@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -626,6 +626,11 @@ public:
      * @brief Iterates the MRU list and clears gard for all callouts.
      */
     void clearMruListGard();
+
+    /**
+     * @brief Iterates the MRU list and clears gard for any NVDIMM targets.
+     */
+    void clearNvdimmMruListGard();
 
     /**
      * @brief  Iterates the MRU list and returns true if at least on target in

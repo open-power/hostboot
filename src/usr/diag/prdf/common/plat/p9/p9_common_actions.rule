@@ -279,4 +279,3 @@ actionclass chip_to_chip
     calloutSelfMed;
     threshold1;
 };
-

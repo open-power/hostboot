@@ -125,6 +125,66 @@ PRDF_PLUGIN_DEFINE_NS(nimbus_proc,  CommonPlugins, ClearServiceCallFlag_mnfgInfo
 PRDF_PLUGIN_DEFINE_NS(cumulus_proc, CommonPlugins, ClearServiceCallFlag_mnfgInfo);
 PRDF_PLUGIN_DEFINE_NS(axone_proc,   CommonPlugins, ClearServiceCallFlag_mnfgInfo);
 
+/**
+ * @brief   Will change the gard state of any NVDIMMs in the callout list to
+ *          NO_GARD.
+ * @param   i_chip The chip.
+ * @param   io_sc  The step code data struct.
+ * @returns SUCCESS
+ */
+int32_t ClearNvdimmGardState( ExtensibleChip * i_chip,
+                              STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #ifdef __HOSTBOOT_MODULE
+
+    // Call the sdc to clear the NVDIMM mru list.
+    io_sc.service_data->clearNvdimmMruListGard();
+
+    #endif
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE_NS(nimbus_mcs,    CommonPlugins, ClearNvdimmGardState);
+PRDF_PLUGIN_DEFINE_NS(nimbus_mca,    CommonPlugins, ClearNvdimmGardState);
+PRDF_PLUGIN_DEFINE_NS(nimbus_mcbist, CommonPlugins, ClearNvdimmGardState);
+
+/**
+ * @brief   Will check if any of the DIMMs connected to this chip are NVDIMMs
+ *          and callout self, no gard if there are.
+ * @param   i_chip The chip of the DIMM parent.
+ * @param   io_sc  The step code data struct.
+ * @returns SUCCESS if NVDIMMs found, PRD_SCAN_COMM_REGISTER_ZERO if not.
+ */
+int32_t CheckForNvdimms( ExtensibleChip * i_chip,
+                         STEP_CODE_DATA_STRUCT & io_sc )
+{
+    int32_t rc = PRD_SCAN_COMM_REGISTER_ZERO;
+
+    #ifdef __HOSTBOOT_MODULE
+
+    TargetHandleList dimmList = getConnected( i_chip->getTrgt(), TYPE_DIMM );
+
+    for ( auto & dimm : dimmList )
+    {
+        if ( isNVDIMM(dimm) )
+        {
+            // Callout self, no gard
+            io_sc.service_data->SetCallout(i_chip->getTrgt(), MRU_MED, NO_GARD);
+
+            // No need for other actions, so return SUCCESS
+            rc = SUCCESS;
+            break;
+        }
+    }
+
+    #endif
+
+    return rc;
+}
+PRDF_PLUGIN_DEFINE_NS(nimbus_mcs,    CommonPlugins, CheckForNvdimms);
+PRDF_PLUGIN_DEFINE_NS(nimbus_mca,    CommonPlugins, CheckForNvdimms);
+PRDF_PLUGIN_DEFINE_NS(nimbus_mcbist, CommonPlugins, CheckForNvdimms);
+
 } // namespace CommonPlugins ends
 
 }// namespace PRDF ends

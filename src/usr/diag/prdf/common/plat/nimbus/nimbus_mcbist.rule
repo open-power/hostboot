@@ -599,7 +599,7 @@ group gMCBISTFIR
     /** MCBISTFIR[13]
      *  SCOM_RECOVERABLE_REG_PE
      */
-    (rMCBISTFIR, bit(13)) ? self_th_1;
+    (rMCBISTFIR, bit(13)) ? nvdimm_self_th_1;
 
     /** MCBISTFIR[14]
      *  SCOM_FATAL_REG_PE

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018
+# Contributors Listed Below - COPYRIGHT 2018,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -22,6 +22,17 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
+################################################################################
+#                               NVDIMM callouts                                #
+################################################################################
+
+# Simple callouts that will avoid gard for NVDIMMs
+actionclass nvdimm_self_th_1
+{
+    try( funccall("CheckForNvdimms"), calloutSelfMed );
+    threshold1;
+};
 
 ################################################################################
 # Analyze groups

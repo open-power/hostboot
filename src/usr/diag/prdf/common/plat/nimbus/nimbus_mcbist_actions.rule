@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2018
+# Contributors Listed Below - COPYRIGHT 2016,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -34,6 +34,17 @@ actionclass command_addr_timeout
 {
     threshold1;
     funccall("commandAddrTimeout");
+};
+
+################################################################################
+#                               NVDIMM callouts                                #
+################################################################################
+
+# Simple callouts that will avoid gard for NVDIMMs
+actionclass nvdimm_self_th_1
+{
+    try( funccall("CheckForNvdimms"), calloutSelfMed );
+    threshold1;
 };
 
 ###############################################################################

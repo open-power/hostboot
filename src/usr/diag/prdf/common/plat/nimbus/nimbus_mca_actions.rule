@@ -70,6 +70,7 @@ actionclass rcd_parity_error
     calloutSelfLowNoGard;                      # Self LOW
     # Thresholding done in plugin
     funccall("RcdParityError");                # Run TPS on TH for all MCA ranks
+    funccall("ClearNvdimmGardState");          # Clear gard for NVDIMMs
 };
 
 /** Handle Mainline IUEs */
@@ -125,7 +126,7 @@ actionclass maintenance_iaue_handling
 /** MCA/UE algroithm, threshold 5 per day */
 actionclass mca_ue_algorithm_th_5perDay
 {
-    calloutSelfMed;
+    try( funccall("CheckForNvdimms"), calloutSelfMed );
     threshold5pday;
     funccall("mcaUeAlgorithm"); # must be called last
 };
@@ -133,9 +134,26 @@ actionclass mca_ue_algorithm_th_5perDay
 /** MCA/UE algroithm, threshold 1 */
 actionclass mca_ue_algorithm_th_1
 {
-    calloutSelfMed;
+    try( funccall("CheckForNvdimms"), calloutSelfMed );
     threshold1;
     funccall("mcaUeAlgorithm"); # must be called last
+};
+
+################################################################################
+#                               NVDIMM callouts                                #
+################################################################################
+
+# Simple callouts that will avoid gard for NVDIMMs
+actionclass nvdimm_self_th_1
+{
+    try( funccall("CheckForNvdimms"), calloutSelfMed );
+    threshold1;
+};
+
+actionclass nvdimm_self_th_32perDay
+{
+    try( funccall("CheckForNvdimms"), calloutSelfMed );
+    threshold32pday;
 };
 
 ################################################################################
