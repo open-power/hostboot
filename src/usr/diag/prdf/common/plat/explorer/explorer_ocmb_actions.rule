@@ -62,22 +62,6 @@ actionclass threshold5pday
 };
 
 ################################################################################
-#                       Threshold and Mask policy
-################################################################################
-
-/**
- * Threshold 32/day (field) and 1 (mnfg). Do not predictively callout on
- * threshold in the field, instead just mask.
- */
-actionclass threshold_and_mask
-{
-    threshold32pday;
-    funccall("ClearServiceCallFlag");
-};
-
-actionclass threshold_and_mask_self   { calloutSelfMed;   threshold_and_mask; };
-
-################################################################################
 #                               Special Flags                                  #
 ################################################################################
 
@@ -105,11 +89,48 @@ actionclass callout2ndLvlMed
 actionclass calloutSelfLowNoGard
 { callout(MRU_LOW, NO_GARD); };
 
+actionclass level2_M_self_L
+{
+    callout2ndLvlMed;
+    calloutSelfLow;
+};
+
+actionclass omi
+{
+    callout(connected(TYPE_OMI), MRU_MED);
+};
+
 actionclass omi_bus
 {
     calloutSelfMedA;
     callout(connected(TYPE_OMI), MRU_MEDA);
     funccall("calloutBusInterfacePlugin");
+};
+
+actionclass mem_port
+{
+    callout(connected(TYPE_MEM_PORT,0), MRU_MED);
+};
+
+actionclass mem_port_L
+{
+    callout(connected(TYPE_MEM_PORT,0), MRU_LOW);
+};
+
+actionclass all_dimm_H
+{
+    funccall("CalloutAttachedDimmsHigh");
+};
+
+actionclass all_dimm_H_memport_L
+{
+    all_dimm_H;
+    mem_port_L;
+};
+
+actionclass parent_proc
+{
+    callout(connected(TYPE_PROC), MRU_MED);
 };
 
 ################################################################################
@@ -122,15 +143,15 @@ actionclass self_th_1
     threshold1;
 };
 
-actionclass self_th_5perHour
-{
-    calloutSelfMed;
-    threshold5phour;
-};
-
 actionclass self_th_32perDay
 {
     calloutSelfMed;
+    threshold32pday;
+};
+
+actionclass parent_proc_th_32perDay
+{
+    parent_proc;
     threshold32pday;
 };
 
@@ -140,12 +161,83 @@ actionclass level2_th_1
     threshold1;
 };
 
+actionclass level2_th_32perDay
+{
+    callout2ndLvlMed;
+    threshold32pday;
+};
+
+actionclass level2_M_self_L_th_1
+{
+    level2_M_self_L;
+    threshold1;
+};
+
+actionclass omi_th_1
+{
+    omi;
+    threshold1;
+};
+
+actionclass omi_bus_th_1
+{
+    omi_bus;
+    threshold1;
+};
+
+actionclass omi_bus_th_32perDay
+{
+    omi_bus;
+    threshold32pday;
+};
+
+actionclass mem_port_th_1
+{
+    mem_port;
+    threshold1;
+};
+
+actionclass mem_port_th_32perDay
+{
+    mem_port;
+    threshold32pday;
+};
+
+################################################################################
+#                                   Special                                    #
+################################################################################
+
+/**
+ * Threshold 32/day (field) and 1 (mnfg). Do not predictively callout on
+ * threshold in the field, instead just mask.
+ */
+actionclass threshold_and_mask
+{
+    threshold32pday;
+    funccall("ClearServiceCallFlag");
+};
+
+actionclass threshold_and_mask_self   { calloutSelfMed;   threshold_and_mask; };
+
+actionclass threshold_and_mask_level2
+{
+    level2_th_32perDay;
+    threshold_and_mask;
+};
+
+actionclass threshold_and_mask_mem_port
+{
+    mem_port_th_32perDay;
+    threshold_and_mask;
+};
+
 ################################################################################
 #                           Callouts with flags                                #
 ################################################################################
 
-actionclass self_th_1_UERE   { self_th_1;   SueSource; };
-actionclass level2_th_1_UERE { level2_th_1; SueSource; };
+actionclass self_th_1_UERE     { self_th_1;     SueSource; };
+actionclass level2_th_1_UERE   { level2_th_1;   SueSource; };
+actionclass mem_port_th_1_UERE { mem_port_th_1; SueSource; };
 
 ################################################################################
 #                               Default callouts                               #
@@ -169,12 +261,6 @@ actionclass TBDDefaultCallout
 #                                 OCMB Actions                                 #
 ################################################################################
 
-/** MCBIST program complete */
-actionclass mcbist_program_complete
-{
-    funccall("McbistCmdComplete");
-};
-
 /** DDR4 PHY Interrupt */
 actionclass ddr4_phy_interrupt
 {
@@ -197,6 +283,12 @@ actionclass dl_fatal_error
     threshold1;
 };
 
+/** MCBIST program complete */
+actionclass mcbist_program_complete
+{
+    funccall("McbistCmdComplete");
+};
+
 /** Verify Chip Mark */
 actionclass verify_chip_mark_0 { funccall("AnalyzeFetchMpe_0"); };
 actionclass verify_chip_mark_1 { funccall("AnalyzeFetchMpe_1"); };
@@ -211,42 +303,54 @@ actionclass verify_chip_mark_7 { funccall("AnalyzeFetchMpe_7"); };
 /** Mainline NCE/TCE handling */
 actionclass mainline_nce_tce_handling
 {
-    defaultMaskedError;
+    TBDDefaultCallout;
 };
 
 /** Handle Mainline AUEs/IAUEs */
 actionclass mainline_aue_iaue_handling
 {
-    defaultMaskedError;
+    TBDDefaultCallout;
 };
 
 /** Mainline UE handling */
 actionclass mainline_ue_handling
 {
-    defaultMaskedError;
+    TBDDefaultCallout;
+};
+
+actionclass mainline_ue_handling_UERE
+{
+    TBDDefaultCallout;
+    SueSource;
 };
 
 /** Handle Mainline IUEs */
 actionclass mainline_iue_handling
 {
-    defaultMaskedError;
+    TBDDefaultCallout;
+};
+
+/**  Handle Maintenance IUEs */
+actionclass maintenance_iue_handling
+{
+    TBDDefaultCallout;
 };
 
 actionclass memory_impe_handling
 {
-    defaultMaskedError;
+    TBDDefaultCallout;
 };
 
 /** Handle Maintenance AUEs */
 actionclass maintenance_aue_handling
 {
-    defaultMaskedError;
+    TBDDefaultCallout;
 };
 
 /** Handle Maintenance IAUEs */
 actionclass maintenance_iaue_handling
 {
-    defaultMaskedError;
+    TBDDefaultCallout;
 };
 
 /** RDF RCD Parity Error */
@@ -254,6 +358,12 @@ actionclass rdf_rcd_parity_error
 {
     funccall("RdfRcdParityError");
     threshold1;
+};
+
+actionclass rdf_rcd_parity_error_UERE
+{
+    rdf_rcd_parity_error;
+    SueSource;
 };
 
 /** SRQ RCD Parity Error */
@@ -264,16 +374,22 @@ actionclass srq_rcd_parity_error
     threshold32pday;
 };
 
+actionclass srq_rcd_parity_error_UERE
+{
+    srq_rcd_parity_error;
+    SueSource;
+};
+
 actionclass mem_port_failure
 {
-    defaultMaskedError;
+    TBDDefaultCallout;
 };
 
 ################################################################################
 # Analyze groups
 ################################################################################
 
-actionclass analyzeMB_LFIR   { analyze(gMB_LFIR);   };
+actionclass analyzeOCMB_LFIR { analyze(gOCMB_LFIR);   };
 actionclass analyzeMMIOFIR   { analyze(gMMIOFIR);   };
 actionclass analyzeSRQFIR    { analyze(gSRQFIR);    };
 actionclass analyzeMCBISTFIR { analyze(gMCBISTFIR); };
