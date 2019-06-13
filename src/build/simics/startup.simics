@@ -165,6 +165,9 @@ system_cmp0.phys_mem.set address = 0x8200020 size = 8 0x00060300
 $sb_base = (env SANDBOXBASE)
 backplane0.proc0.l3_img.load-file (lookup-file $sb_base+"/obj/ppc/hbfw/img/hbbl.bin") 0x203000
 
+# Enable mambo core to run instructions (previously done in entry.simics)
+(get-master-cpus)[0].enable
+
 ########################### WORKAROUNDS ####################################
 # Setup the mailbox.
 # for mbox on core 0 use:
@@ -172,3 +175,4 @@ backplane0.proc0.l3_img.load-file (lookup-file $sb_base+"/obj/ppc/hbfw/img/hbbl.
 # for mbox on core 5 use:
 #proc_venicechip_cmp0.psi_hb->psihb_xivr_fsi=0x0000A00140000000   #02010917
 #proc_venicechip_cmp0.psi_hb->psihb_irsn=0x00030003FFFF0000 #0201091b
+
