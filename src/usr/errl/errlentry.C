@@ -588,34 +588,6 @@ void ErrlEntry::addHwCallout(const TARGETING::Target *i_target,
         #endif
 
         TARGETING::EntityPath ep;
-        TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
-
-        TARGETING::TYPE l_type_ecid = l_type;
-        const TARGETING::Target* l_parentTarget = i_target;
-        if((l_type_ecid != TARGETING::TYPE_MEMBUF) &&
-              (l_type_ecid != TARGETING::TYPE_PROC) &&
-              (l_type_ecid != TARGETING::TYPE_NODE)
-             )
-        {
-            //since this returns NULL if the parent is not found,
-            // we need a placeholder
-            const TARGETING::Target* l_tempParentTarget =
-                    getParentChip(l_parentTarget);
-            if(l_tempParentTarget != NULL)
-            {
-                l_parentTarget = l_tempParentTarget;
-                l_type_ecid = l_parentTarget->getAttr<TARGETING::ATTR_TYPE>();
-            }
-        }
-        //if we have found a type_membuf or type_proc, store the ecid
-        //otherwise, (type_node), do nothing.
-        if(l_type_ecid == TARGETING::TYPE_MEMBUF ||
-           l_type_ecid == TARGETING::TYPE_PROC)
-        {
-            ErrlUserDetailsAttribute(l_parentTarget,
-                                     TARGETING::ATTR_ECID).addToLog(this);
-        }
-
         ep = i_target->getAttr<TARGETING::ATTR_PHYS_PATH>();
 
         // size is total EntityPath size minus unused path elements
@@ -928,75 +900,142 @@ void ErrlEntry::checkHiddenLogsEnable( )
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Called by addHwCallout to get the part and serial numbers from the current
-// target so that it can be appended to the error log
-#ifdef CONFIG_BMC_IPMI
-    void ErrlEntry::addPartAndSerialNumbersToErrLog
-(const TARGETING::Target * i_target)
+// Called by addHwCallout to retrieve various pieces of card
+//  and/or chip data, e.g. part number, serial number, ecid.
+void ErrlEntry::addPartIdInfoToErrLog
+   (const TARGETING::Target * i_target)
 {
-    TRACDCOMP(g_trac_errl, ENTER_MRK"ErrlEntry::addPartAndSerialNumbersToErrLog()");
+    TRACDCOMP(g_trac_errl, ENTER_MRK"ErrlEntry::addPartIdInfoToErrLog()");
 
-
-    // Get the type of the target
     const TARGETING::Target * l_target = i_target;
-    TARGETING::TYPE l_type = l_target->getAttr<TARGETING::ATTR_TYPE>();
+    const TARGETING::Target * l_targetPrev = nullptr;
+    ErrlUserDetailsAttribute* l_attrdata = nullptr;
 
-    do
+    //Add the part number to the error log.
+    TARGETING::TargetHandleList l_parentList;
+    TARGETING::ATTR_PART_NUMBER_type l_PN = {};
+    while( !l_target->tryGetAttr<TARGETING::ATTR_PART_NUMBER>(l_PN) )
     {
-        if((l_type != TARGETING::TYPE_PROC ) &&
-                (l_type != TARGETING::TYPE_DIMM ) &&
-                (l_type != TARGETING::TYPE_MEMBUF ))
+        // Get immediate parent
+        TARGETING::targetService().getAssociated(
+                              l_parentList,
+                              l_target,
+                              TARGETING::TargetService::PARENT,
+                              TARGETING::TargetService::IMMEDIATE);
+
+        // never found a match...
+        if (l_parentList.size() != 1)
         {
-            TARGETING::PredicatePostfixExpr l_procDimmMembuf;
-            TARGETING::TargetHandleList l_pList;
-
-            TARGETING::PredicateCTM l_procs(TARGETING::CLASS_CHIP,
-                    TARGETING::TYPE_PROC);
-
-            TARGETING::PredicateCTM l_dimms(TARGETING::CLASS_CARD,
-                    TARGETING::TYPE_DIMM);
-
-            TARGETING::PredicateCTM l_membufs(TARGETING::CLASS_CHIP,
-                    TARGETING::TYPE_MEMBUF);
-
-            l_procDimmMembuf.push(&l_procs).push(&l_dimms).Or()
-                .push(&l_membufs).Or();
-
-            // Search for any parents with TYPE_PROC, TYPE_DIMM, or TYPE_MEMBUF
-            TARGETING::targetService().getAssociated( l_pList, l_target,
-                    TARGETING::TargetService::PARENT,
-                    TARGETING::TargetService::ALL,
-                    &l_procDimmMembuf);
-            // If no parent of desired type is present, break
-            if(!l_pList.size())
-            {
-                TRACFCOMP(g_trac_errl, "Error! errlentry.C::addPartAndSerialNumbersToErrLog - No parent containing Serial/Part numbers found.");
-                break;
-            }
-            else
-            {
-                // We have found the parent
-                l_target = l_pList[0];
-            }
-
+            l_target = nullptr;
+            break;
         }
-        // We have made it here so we have found a target that contains
-        // ATTR_SERIAL_NUMBER and ATTR_PART_NUMBER
-        //Add the part number to the error log.
-        ErrlUserDetailsAttribute( l_target,
-                          TARGETING::ATTR_PART_NUMBER).addToLog(this);
 
-        //Add the serial number to the error log.
-        ErrlUserDetailsAttribute( l_target,
-                          TARGETING::ATTR_SERIAL_NUMBER).addToLog(this);
+        l_target = l_parentList[0];
+        l_parentList.clear();  // clear out old entry
+    } // end while
+    if( l_target )
+    {
+        l_attrdata = new ErrlUserDetailsAttribute(l_target);
+        l_attrdata->addData(TARGETING::ATTR_PART_NUMBER);
+        l_targetPrev = l_target;
+    }
 
+    // Note - it is extremely likely that we will end up with the same
+    //  target for PN and SN, but since this is error path only we're
+    //  opting for thoroughness over efficiency.
 
-    }while( 0 );
+    //Add the serial number to the error log.
+    l_target = i_target;
+    TARGETING::ATTR_SERIAL_NUMBER_type l_SN = {};
+    while( !l_target->tryGetAttr<TARGETING::ATTR_SERIAL_NUMBER>(l_SN) )
+    {
+        // Get immediate parent
+        TARGETING::targetService().getAssociated(
+                              l_parentList,
+                              l_target,
+                              TARGETING::TargetService::PARENT,
+                              TARGETING::TargetService::IMMEDIATE);
 
-    TRACDCOMP(g_trac_errl, EXIT_MRK"ErrlEntry::addPartAndSerialNumbersToErrLog()");
+        // never found a match...
+        if (l_parentList.size() != 1)
+        {
+            l_target = nullptr;
+            break;
+        }
+
+        l_target = l_parentList[0];
+        l_parentList.clear();  // clear out old entry
+    } // end while
+    if( l_target )
+    {
+        // not likely to happen, but just in case...
+        if( l_attrdata && (l_targetPrev != l_target) )
+        {
+            // got a new target, commit the previous data and start over
+            l_attrdata->addToLog(this);
+            delete l_attrdata;
+            l_attrdata = nullptr;
+        }
+        if( !l_attrdata )
+        {
+            l_attrdata = new ErrlUserDetailsAttribute(l_target);
+        }
+
+        l_attrdata->addData(TARGETING::ATTR_SERIAL_NUMBER);
+        l_targetPrev = l_target;
+    }
+
+    //Add the ECID to the error log.
+    l_target = i_target;
+    TARGETING::ATTR_ECID_type l_ECID = {};
+    while( !l_target->tryGetAttr<TARGETING::ATTR_ECID>(l_ECID) )
+    {
+        // Get immediate parent
+        TARGETING::targetService().getAssociated(
+                              l_parentList,
+                              l_target,
+                              TARGETING::TargetService::PARENT,
+                              TARGETING::TargetService::IMMEDIATE);
+
+        // never found a match...
+        if (l_parentList.size() != 1)
+        {
+            l_target = nullptr;
+            break;
+        }
+
+        l_target = l_parentList[0];
+        l_parentList.clear();  // clear out old entry
+    } // end while
+    if( l_target )
+    {
+        // not likely to happen, but just in case...
+        if( l_attrdata && (l_targetPrev != l_target) )
+        {
+            // got a new target, commit the previous data and start over
+            l_attrdata->addToLog(this);
+            delete l_attrdata;
+            l_attrdata = nullptr;
+        }
+        if( !l_attrdata )
+        {
+            l_attrdata = new ErrlUserDetailsAttribute(l_target);
+        }
+
+        l_attrdata->addData(TARGETING::ATTR_ECID);
+        l_targetPrev = l_target;
+    }
+
+    if( l_attrdata )
+    {
+        l_attrdata->addToLog(this);
+        delete l_attrdata;
+    }
+
+    TRACDCOMP(g_trac_errl, EXIT_MRK"ErrlEntry::addPartIdInfoToErrLog()");
 }
 
-
+#ifdef CONFIG_BMC_IPMI
 // Find the FRU ID associated with target.
 // Returns first FRU ID found as it navigates the target's parent hierarchy
 TARGETING::ATTR_FRU_ID_type getFRU_ID(TARGETING::Target * i_target)
@@ -1135,8 +1174,8 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
                                                       this);
                     if(!l_err)
                     {
+                        addPartIdInfoToErrLog( l_target );
 #ifdef CONFIG_BMC_IPMI
-                        addPartAndSerialNumbersToErrLog( l_target );
                         addSensorDataToErrLog( l_target, l_ud->priority);
 #endif
                     }
