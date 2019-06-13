@@ -233,7 +233,8 @@ CLEAN_TARGETS += $(addprefix $(GENDIR)/, ${XMLTOHB_SYSTEM_BINARIES:.bin=.xml})
 CLEAN_TARGETS += ${GENDIR}/${HB_PLAT_ATTR_SRVC_H}
 CLEAN_TARGETS += ${GENDIR}/${XMLTOHB_GENERIC_XML}
 CLEAN_TARGETS += ${GENDIR}/${XMLTOHB_FAPI_XML}
-CLEAN_TARGETS += ${GENDIR}/errl/errludattribute.H
+CLEAN_TARGETS += ${GENDIR}/errl/errludattribute_gen.H
+CLEAN_TARGETS += ${GENDIR}/errludattribute_gen.C
 CLEAN_TARGETS += ${GENDIR}/errl/errludtarget.H
 CLEAN_TARGETS += ${GENDIR}/targAttrInfo.csv
 CLEAN_TARGETS += ${GENDIR}/targAttrOverrideData.H
@@ -412,7 +413,7 @@ $(XMLTOHB_RAN_INDICATION): ${XMLTOHB_COMPILER_SCRIPT} \
        $(addprefix --fapi-attributes-xml-file=,${GENDIR}/${XMLTOHB_FAPI_XML}) \
          --src-output-dir=$(GENDIR) --img-output-dir=none \
          --img-output-file=none
-	cp ${GENDIR_ERRL}/errludattribute.H ${GENDIR_PLUGINS}
+	cp ${GENDIR_ERRL}/errludattribute_gen.H ${GENDIR_PLUGINS}
 	cp ${GENDIR_ERRL}/errludtarget.H ${GENDIR_PLUGINS}
 	touch $(XMLTOHB_RAN_INDICATION)
 

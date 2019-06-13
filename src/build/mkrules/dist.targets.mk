@@ -362,7 +362,8 @@ fsp.tar_CONTENTS = \
     src/include/usr/hwas/common/hwasCallout.H:hwas/ \
     src/include/usr/devicefw/driverif.H:devicefw/ \
     src/include/usr/devicefw/userif.H:devicefw/ \
-    obj/genfiles/plugins/errludattribute.H:plugins/ \
+    obj/genfiles/plugins/errludattribute_gen.H:plugins/ \
+    src/include/usr/errl/errludattribute.H:plugins/ \
     obj/genfiles/plugins/errludtarget.H:plugins/ \
     $(addsuffix :plugins/,\
         $(call ROOTPATH_WILDCARD,obj/genfiles/plugins/hbfwSrcParse*.C)) \
