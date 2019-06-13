@@ -44,82 +44,82 @@ chip explorer_ocmb
  #############################################################################
 
     ############################################################################
-    # MB Chiplet FIR
+    # OCMB Chiplet FIR
     ############################################################################
 
-    register MB_CHIPLET_CS_FIR
+    register OCMB_CHIPLET_CS_FIR
     {
-        name        "MB Chiplet Checkstop FIR";
+        name        "OCMB Chiplet Checkstop FIR";
         scomaddr    0x08040000;
         capture     group default;
     };
 
-    register MB_CHIPLET_RE_FIR
+    register OCMB_CHIPLET_RE_FIR
     {
-        name        "MB Chiplet Recoverable FIR";
+        name        "OCMB Chiplet Recoverable FIR";
         scomaddr    0x08040001;
         capture     group default;
     };
 
-    register MB_CHIPLET_FIR_MASK
+    register OCMB_CHIPLET_FIR_MASK
     {
-        name        "MB Chiplet FIR MASK";
+        name        "OCMB Chiplet FIR MASK";
         scomaddr    0x08040002;
         capture     group default;
     };
 
     ############################################################################
-    # MB Chiplet Special Attention FIR
+    # OCMB Chiplet Special Attention FIR
     ############################################################################
 
-    register MB_CHIPLET_SPA_FIR
+    register OCMB_CHIPLET_SPA_FIR
     {
-        name        "MB Chiplet Special Attention FIR";
+        name        "OCMB Chiplet Special Attention FIR";
         scomaddr    0x08040004;
         capture     group default;
     };
 
-    register MB_CHIPLET_SPA_FIR_MASK
+    register OCMB_CHIPLET_SPA_FIR_MASK
     {
-        name        "MB Chiplet Special Attention FIR MASK";
+        name        "OCMB Chiplet Special Attention FIR MASK";
         scomaddr    0x08040007;
         capture     group default;
     };
 
     ############################################################################
-    # Explorer chip MB_LFIR
+    # Explorer chip OCMB_LFIR
     ############################################################################
 
-    register MB_LFIR
+    register OCMB_LFIR
     {
-        name        "Explorer chip MB_LFIR";
+        name        "Explorer chip OCMB_LFIR";
         scomaddr    0x0804000a;
         reset       (&, 0x0804000b);
         mask        (|, 0x0804000f);
         capture     group default;
     };
 
-    register MB_LFIR_MASK
+    register OCMB_LFIR_MASK
     {
-        name        "Explorer chip MB_LFIR MASK";
+        name        "Explorer chip OCMB_LFIR MASK";
         scomaddr    0x0804000d;
         capture     group default;
     };
 
-    register MB_LFIR_ACT0
+    register OCMB_LFIR_ACT0
     {
-        name        "Explorer chip MB_LFIR ACT0";
+        name        "Explorer chip OCMB_LFIR ACT0";
         scomaddr    0x08040010;
         capture     group default;
-        capture     req nonzero("MB_LFIR");
+        capture     req nonzero("OCMB_LFIR");
     };
 
-    register MB_LFIR_ACT1
+    register OCMB_LFIR_ACT1
     {
-        name        "Explorer chip MB_LFIR ACT1";
+        name        "Explorer chip OCMB_LFIR ACT1";
         scomaddr    0x08040011;
         capture     group default;
-        capture     req nonzero("MB_LFIR");
+        capture     req nonzero("OCMB_LFIR");
     };
 
     ############################################################################
@@ -355,178 +355,261 @@ chip explorer_ocmb
  ##############################################################################
 
 ################################################################################
-# MB Chiplet FIR
+# OCMB Chiplet FIR
 ################################################################################
 
-rule rMB_CHIPLET_FIR
+rule rOCMB_CHIPLET_FIR
 {
   UNIT_CS:
-     MB_CHIPLET_CS_FIR       & ~MB_CHIPLET_FIR_MASK & `1fffffffffffffff`;
+     OCMB_CHIPLET_CS_FIR       & ~OCMB_CHIPLET_FIR_MASK & `1fffffffffffffff`;
   RECOVERABLE:
-    (MB_CHIPLET_RE_FIR >> 2) & ~MB_CHIPLET_FIR_MASK & `1fffffffffffffff`;
+    (OCMB_CHIPLET_RE_FIR >> 2) & ~OCMB_CHIPLET_FIR_MASK & `1fffffffffffffff`;
 };
 
 # NOTE: RDFFIR[14|34] are possible side effects of OCMB_LFIR[38], as such,
 #       OCMB_LFIR must be analyzed first for correct handling. If changes are
 #       made so the RDFFIR is analyzed first, additional changes to the handling
 #       of those bits will be required.
-group gMB_CHIPLET_FIR attntype CHECK_STOP, RECOVERABLE
+group gOCMB_CHIPLET_FIR attntype CHECK_STOP, RECOVERABLE
     filter singlebit
 {
-    /** MB_CHIPLET_FIR[3]
-     *  Attention from MB_LFIR
+    /** OCMB_CHIPLET_FIR[3]
+     *  Attention from OCMB_LFIR
      */
-    (rMB_CHIPLET_FIR, bit(3)) ? analyzeMB_LFIR;
+    (rOCMB_CHIPLET_FIR, bit(3)) ? analyzeOCMB_LFIR;
 
-    /** MB_CHIPLET_FIR[4]
+    /** OCMB_CHIPLET_FIR[4]
      *  Attention from MMIOFIR
      */
-    (rMB_CHIPLET_FIR, bit(4)) ? analyzeMMIOFIR;
+    (rOCMB_CHIPLET_FIR, bit(4)) ? analyzeMMIOFIR;
 
-    /** MB_CHIPLET_FIR[7]
+    /** OCMB_CHIPLET_FIR[7]
      *  Attention from SRQFIR
      */
-    (rMB_CHIPLET_FIR, bit(7)) ? analyzeSRQFIR;
+    (rOCMB_CHIPLET_FIR, bit(7)) ? analyzeSRQFIR;
 
-    /** MB_CHIPLET_FIR[8]
+    /** OCMB_CHIPLET_FIR[8]
      *  Attention from MCBISTFIR
      */
-    (rMB_CHIPLET_FIR, bit(8)) ? analyzeMCBISTFIR;
+    (rOCMB_CHIPLET_FIR, bit(8)) ? analyzeMCBISTFIR;
 
-    /** MB_CHIPLET_FIR[9]
+    /** OCMB_CHIPLET_FIR[9]
      *  Attention from RDFFIR
      */
-    (rMB_CHIPLET_FIR, bit(9)) ? analyzeRDFFIR;
+    (rOCMB_CHIPLET_FIR, bit(9)) ? analyzeRDFFIR;
 
-    /** MB_CHIPLET_FIR[11]
+    /** OCMB_CHIPLET_FIR[11]
      *  Attention from TLXFIR
      */
-    (rMB_CHIPLET_FIR, bit(11)) ? analyzeTLXFIR;
+    (rOCMB_CHIPLET_FIR, bit(11)) ? analyzeTLXFIR;
 
-    /** MB_CHIPLET_FIR[12]
+    /** OCMB_CHIPLET_FIR[12]
      *  Attention from OMIDLFIR
      */
-    (rMB_CHIPLET_FIR, bit(12)) ? analyzeOMIDLFIR;
+    (rOCMB_CHIPLET_FIR, bit(12)) ? analyzeOMIDLFIR;
 
 };
 
 ################################################################################
-# MB Chiplet Special Attention FIR
+# OCMB Chiplet Special Attention FIR
 ################################################################################
 
-rule rMB_CHIPLET_SPA_FIR
+rule rOCMB_CHIPLET_SPA_FIR
 {
   HOST_ATTN:
-    MB_CHIPLET_SPA_FIR & ~MB_CHIPLET_SPA_FIR_MASK;
+    OCMB_CHIPLET_SPA_FIR & ~OCMB_CHIPLET_SPA_FIR_MASK;
 };
 
-group gMB_CHIPLET_SPA_FIR attntype HOST_ATTN
+group gOCMB_CHIPLET_SPA_FIR attntype HOST_ATTN
     filter singlebit
 {
-    /** MB_CHIPLET_SPA_FIR[1]
+    /** OCMB_CHIPLET_SPA_FIR[1]
      *  Attention from MMIOFIR
      */
-    (rMB_CHIPLET_SPA_FIR, bit(1)) ? analyzeMMIOFIR;
+    (rOCMB_CHIPLET_SPA_FIR, bit(1)) ? analyzeMMIOFIR;
 
-    /** MB_CHIPLET_SPA_FIR[4]
+    /** OCMB_CHIPLET_SPA_FIR[4]
      *  Attention from SRQFIR
      */
-    (rMB_CHIPLET_SPA_FIR, bit(4)) ? analyzeSRQFIR;
+    (rOCMB_CHIPLET_SPA_FIR, bit(4)) ? analyzeSRQFIR;
 
-    /** MB_CHIPLET_SPA_FIR[5]
+    /** OCMB_CHIPLET_SPA_FIR[5]
      *  Attention from MCBISTFIR
      */
-    (rMB_CHIPLET_SPA_FIR, bit(5)) ? analyzeMCBISTFIR;
+    (rOCMB_CHIPLET_SPA_FIR, bit(5)) ? analyzeMCBISTFIR;
 
-    /** MB_CHIPLET_SPA_FIR[6]
+    /** OCMB_CHIPLET_SPA_FIR[6]
      *  Attention from RDFFIR
      */
-    (rMB_CHIPLET_SPA_FIR, bit(6)) ? analyzeRDFFIR;
+    (rOCMB_CHIPLET_SPA_FIR, bit(6)) ? analyzeRDFFIR;
 
-    /** MB_CHIPLET_SPA_FIR[8]
+    /** OCMB_CHIPLET_SPA_FIR[8]
      *  Attention from TLXFIR
      */
-    (rMB_CHIPLET_SPA_FIR, bit(8)) ? analyzeTLXFIR;
+    (rOCMB_CHIPLET_SPA_FIR, bit(8)) ? analyzeTLXFIR;
 
-    /** MB_CHIPLET_SPA_FIR[9]
+    /** OCMB_CHIPLET_SPA_FIR[9]
      *  Attention from OMIDLFIR
      */
-    (rMB_CHIPLET_SPA_FIR, bit(9)) ? analyzeOMIDLFIR;
+    (rOCMB_CHIPLET_SPA_FIR, bit(9)) ? analyzeOMIDLFIR;
 
 };
 
 ################################################################################
-# Explorer chip MB_LFIR
+# Explorer chip OCMB_LFIR
 ################################################################################
 
-rule rMB_LFIR
+rule rOCMB_LFIR
 {
   UNIT_CS:
-    MB_LFIR & ~MB_LFIR_MASK & ~MB_LFIR_ACT0 & ~MB_LFIR_ACT1;
+    OCMB_LFIR & ~OCMB_LFIR_MASK & ~OCMB_LFIR_ACT0 & ~OCMB_LFIR_ACT1;
   RECOVERABLE:
-    MB_LFIR & ~MB_LFIR_MASK & ~MB_LFIR_ACT0 &  MB_LFIR_ACT1;
-  HOST_ATTN:
-    MB_LFIR & ~MB_LFIR_MASK &  MB_LFIR_ACT0 & ~MB_LFIR_ACT1;
+    OCMB_LFIR & ~OCMB_LFIR_MASK & ~OCMB_LFIR_ACT0 &  OCMB_LFIR_ACT1;
 };
 
-group gMB_LFIR
+group gOCMB_LFIR
     filter singlebit,
            cs_root_cause
 {
-    /** MB_LFIR[0]
+    /** OCMB_LFIR[0]
      *  CFIR access PCB error
      */
-    (rMB_LFIR, bit(0)) ? defaultMaskedError;
+    (rOCMB_LFIR, bit(0)) ? self_th_32perDay;
 
-    /** MB_LFIR[1]
+    /** OCMB_LFIR[1]
      *  CFIR internal parity error
      */
-    (rMB_LFIR, bit(1)) ? defaultMaskedError;
+    (rOCMB_LFIR, bit(1)) ? self_th_32perDay;
 
-    /** MB_LFIR[2]
+    /** OCMB_LFIR[2]
      *  LFIR internal parity error
      */
-    (rMB_LFIR, bit(2)) ? defaultMaskedError;
+    (rOCMB_LFIR, bit(2)) ? self_th_32perDay;
 
-    /** MB_LFIR[3]
+    /** OCMB_LFIR[3]
      *  Debug scom satellite error
      */
-    (rMB_LFIR, bit(3)) ? defaultMaskedError;
+    (rOCMB_LFIR, bit(3)) ? defaultMaskedError;
 
-    /** MB_LFIR[4]
+    /** OCMB_LFIR[4]
      *  PSCOM Logic: PCB Access Error
      */
-    (rMB_LFIR, bit(4)) ? defaultMaskedError;
+    (rOCMB_LFIR, bit(4)) ? defaultMaskedError;
 
-    /** MB_LFIR[5]
+    /** OCMB_LFIR[5]
      *  PSCOM Logic: Summarized internal errors
      */
-    (rMB_LFIR, bit(5)) ? defaultMaskedError;
+    (rOCMB_LFIR, bit(5)) ? defaultMaskedError;
 
-    /** MB_LFIR[6]
+    /** OCMB_LFIR[6]
      *  Trace Logic : Scom Satellite Error - Trace0
      */
-    (rMB_LFIR, bit(6)) ? defaultMaskedError;
+    (rOCMB_LFIR, bit(6)) ? defaultMaskedError;
 
-    /** MB_LFIR[7]
+    /** OCMB_LFIR[7]
      *  Trace Logic : Scom Satellite Error - Trace1
      */
-    (rMB_LFIR, bit(7)) ? defaultMaskedError;
+    (rOCMB_LFIR, bit(7)) ? defaultMaskedError;
 
-    /** MB_LFIR[8]
-     *  unused
+    /** OCMB_LFIR[8]
+     *  PIB2GIF parity error on FSM or Registers
      */
-    (rMB_LFIR, bit(8)) ? defaultMaskedError;
+    (rOCMB_LFIR, bit(8)) ? self_th_32perDay;
 
-    /** MB_LFIR[9]
+    /** OCMB_LFIR[9]
      *  MSG access PCB error
      */
-    (rMB_LFIR, bit(9)) ? defaultMaskedError;
+    (rOCMB_LFIR, bit(9)) ? defaultMaskedError;
 
-    /** MB_LFIR[10:62]
-     *  bits from the microsemi message register (0 to 52)
+    /** OCMB_LFIR[10:18]
+     *  unused
      */
-    (rMB_LFIR, bit(10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|53|54|55|56|57|58|59|60|61|62)) ? defaultMaskedError;
+    (rOCMB_LFIR, bit(10|11|12|13|14|15|16|17|18)) ? defaultMaskedError;
+
+    /** OCMB_LFIR[19]
+     *  DLL IRQ
+     */
+    (rOCMB_LFIR, bit(19)) ? defaultMaskedError;
+
+    /** OCMB_LFIR[20]
+     *  Watchdog timer interrupt
+     */
+    (rOCMB_LFIR, bit(20)) ? self_th_1;
+
+    /** OCMB_LFIR[21]
+     *  internal temp sensor tripped a threshold
+     */
+    (rOCMB_LFIR, bit(21)) ? defaultMaskedError;
+
+    /** OCMB_LFIR[22]
+     *  GPBC_FATAL_ERROR
+     */
+    (rOCMB_LFIR, bit(22)) ? self_th_1;
+
+    /** OCMB_LFIR[23]
+     *  GPBC_NON_FATAL_ERROR
+     */
+    (rOCMB_LFIR, bit(23)) ? self_th_1;
+
+    /** OCMB_LFIR[24]
+     *  early power off warning
+     */
+    (rOCMB_LFIR, bit(24)) ? defaultMaskedError;
+
+    /** OCMB_LFIR[25]
+     *  TOP fatal interrupts
+     */
+    (rOCMB_LFIR, bit(25)) ? self_th_1;
+
+    /** OCMB_LFIR[26]
+     *  TOP non fatal interrupts
+     */
+    (rOCMB_LFIR, bit(26)) ? level2_M_self_L_th_1;
+
+    /** OCMB_LFIR[27:34]
+     *  Interrupt from OPSe to OCMB
+     */
+    (rOCMB_LFIR, bit(27|28|29|30|31|32|33|34)) ? defaultMaskedError;
+
+    /** OCMB_LFIR[35]
+     *  DDR thermal event
+     */
+    (rOCMB_LFIR, bit(35)) ? defaultMaskedError;
+
+    /** OCMB_LFIR[36]
+     *  DDR4 PHY fatal
+     */
+    (rOCMB_LFIR, bit(36)) ? self_th_1;
+
+    /** OCMB_LFIR[37]
+     *  DDR4 PHY non fatal
+     */
+    (rOCMB_LFIR, bit(37)) ? self_th_32perDay;
+
+    /** OCMB_LFIR[38]
+     *  DDR4 PHY interrupt
+     */
+    (rOCMB_LFIR, bit(38)) ? ddr4_phy_interrupt;
+
+    /** OCMB_LFIR[39:46]
+     *  foxhound fatal
+     */
+    (rOCMB_LFIR, bit(39|40|41|42|43|44|45|46)) ? foxhound_fatal;
+
+    /** OCMB_LFIR[47:54]
+     *  foxhound non fatal
+     */
+    (rOCMB_LFIR, bit(47|48|49|50|51|52|53|54)) ? defaultMaskedError;
+
+    /** OCMB_LFIR[55:62]
+     *  foxhound serdes interrupt
+     */
+    (rOCMB_LFIR, bit(55|56|57|58|59|60|61|62)) ? defaultMaskedError;
+
+    /** OCMB_LFIR[63]
+     *  GIF2PCB parity error on FSM or Registers
+     */
+    (rOCMB_LFIR, bit(63)) ? self_th_32perDay;
 
 };
 
@@ -561,27 +644,27 @@ group gMMIOFIR
     /** MMIOFIR[2]
      *  SCOM err
      */
-    (rMMIOFIR, bit(2)) ? defaultMaskedError;
+    (rMMIOFIR, bit(2)) ? self_th_32perDay;
 
     /** MMIOFIR[3]
-     *  FSM err
+     *  FSM perr
      */
-    (rMMIOFIR, bit(3)) ? defaultMaskedError;
+    (rMMIOFIR, bit(3)) ? self_th_1;
 
     /** MMIOFIR[4]
      *  FIFO overflow
      */
-    (rMMIOFIR, bit(4)) ? defaultMaskedError;
+    (rMMIOFIR, bit(4)) ? self_th_1;
 
     /** MMIOFIR[5]
      *  Ctl reg parity err
      */
-    (rMMIOFIR, bit(5)) ? defaultMaskedError;
+    (rMMIOFIR, bit(5)) ? self_th_1;
 
     /** MMIOFIR[6]
      *  Info reg parity error
      */
-    (rMMIOFIR, bit(6)) ? defaultMaskedError;
+    (rMMIOFIR, bit(6)) ? self_th_1;
 
     /** MMIOFIR[7]
      *  SNSC both starts err
@@ -626,22 +709,22 @@ rule rSRQFIR
 
 group gSRQFIR
     filter singlebit,
-           cs_root_cause
+           cs_root_cause(18)
 {
     /** SRQFIR[0]
      *  SRQ recoverable error
      */
-    (rSRQFIR, bit(0)) ? defaultMaskedError;
+    (rSRQFIR, bit(0)) ? mem_port_th_1;
 
     /** SRQFIR[1]
      *  SRQ nonrecoverable error
      */
-    (rSRQFIR, bit(1)) ? defaultMaskedError;
+    (rSRQFIR, bit(1)) ? mem_port_th_1;
 
     /** SRQFIR[2]
      *  Refresh overrun
      */
-    (rSRQFIR, bit(2)) ? defaultMaskedError;
+    (rSRQFIR, bit(2)) ? mem_port_th_32perDay;
 
     /** SRQFIR[3]
      *  WAT error
@@ -651,12 +734,12 @@ group gSRQFIR
     /** SRQFIR[4]
      *  RCD parity error
      */
-    (rSRQFIR, bit(4)) ? defaultMaskedError;
+    (rSRQFIR, bit(4)) ? srq_rcd_parity_error;
 
     /** SRQFIR[5]
      *  MCB logic error
      */
-    (rSRQFIR, bit(5)) ? defaultMaskedError;
+    (rSRQFIR, bit(5)) ? mem_port_th_1;
 
     /** SRQFIR[6]
      *  Emergency throttle
@@ -666,7 +749,7 @@ group gSRQFIR
     /** SRQFIR[7]
      *  NCF MCB parity error
      */
-    (rSRQFIR, bit(7)) ? defaultMaskedError;
+    (rSRQFIR, bit(7)) ? mem_port_th_1;
 
     /** SRQFIR[8]
      *  DDR MBA event n
@@ -676,82 +759,82 @@ group gSRQFIR
     /** SRQFIR[9]
      *  WRQ RRQ hang err
      */
-    (rSRQFIR, bit(9)) ? defaultMaskedError;
+    (rSRQFIR, bit(9)) ? mem_port_th_1;
 
     /** SRQFIR[10]
      *  SM one hot error
      */
-    (rSRQFIR, bit(10)) ? defaultMaskedError;
+    (rSRQFIR, bit(10)) ? mem_port_th_1;
 
     /** SRQFIR[11]
      *  Reg parity error
      */
-    (rSRQFIR, bit(11)) ? defaultMaskedError;
+    (rSRQFIR, bit(11)) ? mem_port_th_1;
 
     /** SRQFIR[12]
      *  Cmd parity error
      */
-    (rSRQFIR, bit(12)) ? defaultMaskedError;
+    (rSRQFIR, bit(12)) ? mem_port_th_1;
 
     /** SRQFIR[13]
      *  Port fail
      */
-    (rSRQFIR, bit(13)) ? defaultMaskedError;
+    (rSRQFIR, bit(13)) ? mem_port_failure;
 
     /** SRQFIR[14]
-     *  Spare
+     *  informational register parity error bit
      */
-    (rSRQFIR, bit(14)) ? defaultMaskedError;
+    (rSRQFIR, bit(14)) ? threshold_and_mask_mem_port;
 
     /** SRQFIR[15]
      *  Debug parity error
      */
-    (rSRQFIR, bit(15)) ? defaultMaskedError;
+    (rSRQFIR, bit(15)) ? threshold_and_mask_mem_port;
 
     /** SRQFIR[16]
      *  WDF unrecoverable mainline error
      */
-    (rSRQFIR, bit(16)) ? defaultMaskedError;
+    (rSRQFIR, bit(16)) ? mem_port_th_1;
 
     /** SRQFIR[17]
      *  WDF mmio error
      */
-    (rSRQFIR, bit(17)) ? defaultMaskedError;
+    (rSRQFIR, bit(17)) ? mem_port_th_1;
 
     /** SRQFIR[18]
      *  WDF array UE on mainline operations (SUE put in mem)
      */
-    (rSRQFIR, bit(18)) ? defaultMaskedError;
+    (rSRQFIR, bit(18)) ? mem_port_th_1_UERE;
 
     /** SRQFIR[19]
      *  WDF mainline dataflow error (SUE not reliably put in mem)
      */
-    (rSRQFIR, bit(19)) ? defaultMaskedError;
+    (rSRQFIR, bit(19)) ? mem_port_th_1;
 
     /** SRQFIR[20]
      *  WDF scom register parity err, affecting mainline config
      */
-    (rSRQFIR, bit(20)) ? defaultMaskedError;
+    (rSRQFIR, bit(20)) ? mem_port_th_1;
 
     /** SRQFIR[21]
      *  WDF scom register parity err, affecting scom ops only
      */
-    (rSRQFIR, bit(21)) ? defaultMaskedError;
+    (rSRQFIR, bit(21)) ? mem_port_th_1;
 
     /** SRQFIR[22]
      *  WDF SCOM fsm parity error
      */
-    (rSRQFIR, bit(22)) ? defaultMaskedError;
+    (rSRQFIR, bit(22)) ? mem_port_th_1;
 
     /** SRQFIR[23]
      *  WDF write buffer array CE
      */
-    (rSRQFIR, bit(23)) ? defaultMaskedError;
+    (rSRQFIR, bit(23)) ? mem_port_th_32perDay;
 
     /** SRQFIR[24]
      *  NCF UE
      */
-    (rSRQFIR, bit(24)) ? defaultMaskedError;
+    (rSRQFIR, bit(24)) ? mem_port_th_1;
 
     /** SRQFIR[25]
      *  TBD
@@ -761,17 +844,17 @@ group gSRQFIR
     /** SRQFIR[26]
      *  NCF logic error
      */
-    (rSRQFIR, bit(26)) ? defaultMaskedError;
+    (rSRQFIR, bit(26)) ? mem_port_th_1;
 
     /** SRQFIR[27]
      *  NCF parity error
      */
-    (rSRQFIR, bit(27)) ? defaultMaskedError;
+    (rSRQFIR, bit(27)) ? mem_port_th_1;
 
     /** SRQFIR[28]
      *  NCF correctable error
      */
-    (rSRQFIR, bit(28)) ? defaultMaskedError;
+    (rSRQFIR, bit(28)) ? mem_port_th_32perDay;
 
     /** SRQFIR[29]
      *  Internal scom error
@@ -811,17 +894,17 @@ group gMCBISTFIR
     /** MCBISTFIR[1]
      *  Command address timeout
      */
-    (rMCBISTFIR, bit(1)) ? defaultMaskedError;
+    (rMCBISTFIR, bit(1)) ? self_th_1;
 
     /** MCBISTFIR[2]
      *  Internal FSM error
      */
-    (rMCBISTFIR, bit(2)) ? defaultMaskedError;
+    (rMCBISTFIR, bit(2)) ? self_th_1;
 
     /** MCBISTFIR[3]
      *  MCBIST broadcast out of sync
      */
-    (rMCBISTFIR, bit(3)) ? defaultMaskedError;
+    (rMCBISTFIR, bit(3)) ? self_th_1;
 
     /** MCBISTFIR[4]
      *  MCBIST data error
@@ -856,7 +939,7 @@ group gMCBISTFIR
     /** MCBISTFIR[10]
      *  MCBIST program complete
      */
-    (rMCBISTFIR, bit(10)) ? defaultMaskedError;
+    (rMCBISTFIR, bit(10)) ? mcbist_program_complete;
 
     /** MCBISTFIR[11]
      *  MCBIST CCS subtest done
@@ -869,14 +952,14 @@ group gMCBISTFIR
     (rMCBISTFIR, bit(12)) ? defaultMaskedError;
 
     /** MCBISTFIR[13]
-     *  SCOM recoverable reg parity error
+     *  SCOM recoverable register parity error
      */
-    (rMCBISTFIR, bit(13)) ? defaultMaskedError;
+    (rMCBISTFIR, bit(13)) ? self_th_1;
 
     /** MCBISTFIR[14]
      *  SCOM fatal reg parity error
      */
-    (rMCBISTFIR, bit(14)) ? defaultMaskedError;
+    (rMCBISTFIR, bit(14)) ? self_th_1;
 
     /** MCBISTFIR[15]
      *  SCOM WAT and debug reg parity error
@@ -921,57 +1004,57 @@ rule rRDFFIR
 
 group gRDFFIR
     filter singlebit,
-           cs_root_cause
+           cs_root_cause(14,15,17,35,37,40)
 {
     /** RDFFIR[0]
      *  Mainline read MPE on rank 0
      */
-    (rRDFFIR, bit(0)) ? defaultMaskedError;
+    (rRDFFIR, bit(0)) ? verify_chip_mark_0;
 
     /** RDFFIR[1]
      *  Mainline read MPE on rank 1
      */
-    (rRDFFIR, bit(1)) ? defaultMaskedError;
+    (rRDFFIR, bit(1)) ? verify_chip_mark_1;
 
     /** RDFFIR[2]
      *  Mainline read MPE on rank 2
      */
-    (rRDFFIR, bit(2)) ? defaultMaskedError;
+    (rRDFFIR, bit(2)) ? verify_chip_mark_2;
 
     /** RDFFIR[3]
-     *  Maineline read MPE on rank 3
+     *  Mainline read MPE on rank 3
      */
-    (rRDFFIR, bit(3)) ? defaultMaskedError;
+    (rRDFFIR, bit(3)) ? verify_chip_mark_3;
 
     /** RDFFIR[4]
      *  Mainline read MPE on rank 4
      */
-    (rRDFFIR, bit(4)) ? defaultMaskedError;
+    (rRDFFIR, bit(4)) ? verify_chip_mark_4;
 
     /** RDFFIR[5]
      *  Mainline read MPE on rank 5
      */
-    (rRDFFIR, bit(5)) ? defaultMaskedError;
+    (rRDFFIR, bit(5)) ? verify_chip_mark_5;
 
     /** RDFFIR[6]
      *  Mainline read MPE on rank 6
      */
-    (rRDFFIR, bit(6)) ? defaultMaskedError;
+    (rRDFFIR, bit(6)) ? verify_chip_mark_6;
 
     /** RDFFIR[7]
      *  Mainline read MPE on rank 7
      */
-    (rRDFFIR, bit(7)) ? defaultMaskedError;
+    (rRDFFIR, bit(7)) ? verify_chip_mark_7;
 
     /** RDFFIR[8]
      *  Mainline read NCE
      */
-    (rRDFFIR, bit(8)) ? defaultMaskedError;
+    (rRDFFIR, bit(8)) ? mainline_nce_tce_handling;
 
     /** RDFFIR[9]
      *  Mainline read TCE
      */
-    (rRDFFIR, bit(9)) ? defaultMaskedError;
+    (rRDFFIR, bit(9)) ? mainline_nce_tce_handling;
 
     /** RDFFIR[10]
      *  Mainline read SCE
@@ -991,27 +1074,27 @@ group gRDFFIR
     /** RDFFIR[13]
      *  Mainline read AUE
      */
-    (rRDFFIR, bit(13)) ? defaultMaskedError;
+    (rRDFFIR, bit(13)) ? mainline_aue_iaue_handling;
 
     /** RDFFIR[14]
      *  Mainline read UE
      */
-    (rRDFFIR, bit(14)) ? defaultMaskedError;
+    (rRDFFIR, bit(14)) ? mainline_ue_handling_UERE;
 
     /** RDFFIR[15]
      *  Mainline read RCD
      */
-    (rRDFFIR, bit(15)) ? defaultMaskedError;
+    (rRDFFIR, bit(15)) ? rdf_rcd_parity_error_UERE;
 
     /** RDFFIR[16]
      *  Mainline read IAUE
      */
-    (rRDFFIR, bit(16)) ? defaultMaskedError;
+    (rRDFFIR, bit(16)) ? mainline_aue_iaue_handling;
 
     /** RDFFIR[17]
      *  Mainline read IUE
      */
-    (rRDFFIR, bit(17)) ? defaultMaskedError;
+    (rRDFFIR, bit(17)) ? mainline_iue_handling;
 
     /** RDFFIR[18]
      *  Mainline read IRCD
@@ -1021,7 +1104,7 @@ group gRDFFIR
     /** RDFFIR[19]
      *  Mainline read IMPE
      */
-    (rRDFFIR, bit(19)) ? defaultMaskedError;
+    (rRDFFIR, bit(19)) ? memory_impe_handling;
 
     /** RDFFIR[20:27]
      *  Maintenance MPE
@@ -1056,7 +1139,7 @@ group gRDFFIR
     /** RDFFIR[33]
      *  Maintenance AUE
      */
-    (rRDFFIR, bit(33)) ? defaultMaskedError;
+    (rRDFFIR, bit(33)) ? maintenance_aue_handling;
 
     /** RDFFIR[34]
      *  Maintenance UE
@@ -1066,72 +1149,72 @@ group gRDFFIR
     /** RDFFIR[35]
      *  Maintenance RCD
      */
-    (rRDFFIR, bit(35)) ? defaultMaskedError;
+    (rRDFFIR, bit(35)) ? rdf_rcd_parity_error_UERE;
 
     /** RDFFIR[36]
      *  Maintenance IAUE
      */
-    (rRDFFIR, bit(36)) ? defaultMaskedError;
+    (rRDFFIR, bit(36)) ? maintenance_iaue_handling;
 
     /** RDFFIR[37]
      *  Maintenance IUE
      */
-    (rRDFFIR, bit(37)) ? defaultMaskedError;
+    (rRDFFIR, bit(37)) ? maintenance_iue_handling;
 
     /** RDFFIR[38]
-     *  Maintenance IRCD
+     *  Maintenance  IRCD
      */
     (rRDFFIR, bit(38)) ? defaultMaskedError;
 
     /** RDFFIR[39]
      *  Maintenance IMPE
      */
-    (rRDFFIR, bit(39)) ? defaultMaskedError;
+    (rRDFFIR, bit(39)) ? memory_impe_handling;
 
     /** RDFFIR[40]
      *  RDDATA valid error
      */
-    (rRDFFIR, bit(40)) ? defaultMaskedError;
+    (rRDFFIR, bit(40)) ? rdf_rcd_parity_error_UERE;
 
     /** RDFFIR[41]
      *  SCOM status register parity error
      */
-    (rRDFFIR, bit(41)) ? defaultMaskedError;
+    (rRDFFIR, bit(41)) ? threshold_and_mask_mem_port;
 
     /** RDFFIR[42]
      *  SCOM recoverable register parity error
      */
-    (rRDFFIR, bit(42)) ? defaultMaskedError;
+    (rRDFFIR, bit(42)) ? mem_port_th_1;
 
     /** RDFFIR[43]
      *  SCOM unrecoverable register parity error
      */
-    (rRDFFIR, bit(43)) ? defaultMaskedError;
+    (rRDFFIR, bit(43)) ? mem_port_th_1;
 
     /** RDFFIR[44]
      *  ECC corrector internal parity error
      */
-    (rRDFFIR, bit(44)) ? defaultMaskedError;
+    (rRDFFIR, bit(44)) ? mem_port_th_1;
 
     /** RDFFIR[45]
      *  Rd Buff ECC CHK Cor CE DW0 Detected
      */
-    (rRDFFIR, bit(45)) ? defaultMaskedError;
+    (rRDFFIR, bit(45)) ? mem_port_th_32perDay;
 
     /** RDFFIR[46]
      *  Rd Buff ECC CHK Cor CE DW1 Detected
      */
-    (rRDFFIR, bit(46)) ? defaultMaskedError;
+    (rRDFFIR, bit(46)) ? mem_port_th_32perDay;
 
     /** RDFFIR[47]
      *  Rd Buff ECC CHK Cor UE DW0 Detected
      */
-    (rRDFFIR, bit(47)) ? defaultMaskedError;
+    (rRDFFIR, bit(47)) ? mem_port_th_1;
 
     /** RDFFIR[48]
      *  Rd Buff ECC CHK Cor UE DW1 Detected
      */
-    (rRDFFIR, bit(48)) ? defaultMaskedError;
+    (rRDFFIR, bit(48)) ? mem_port_th_1;
 
     /** RDFFIR[49:59]
      *  Reserved
@@ -1181,47 +1264,47 @@ group gTLXFIR
     /** TLXFIR[0]
      *  Info reg parity error
      */
-    (rTLXFIR, bit(0)) ? defaultMaskedError;
+    (rTLXFIR, bit(0)) ? threshold_and_mask_self;
 
     /** TLXFIR[1]
      *  Ctrl reg parity error
      */
-    (rTLXFIR, bit(1)) ? defaultMaskedError;
+    (rTLXFIR, bit(1)) ? self_th_1;
 
     /** TLXFIR[2]
      *  TLX VC0 return credit counter overflow
      */
-    (rTLXFIR, bit(2)) ? defaultMaskedError;
+    (rTLXFIR, bit(2)) ? omi_bus_th_1;
 
     /** TLXFIR[3]
      *  TLX VC1 return credit counter overflow
      */
-    (rTLXFIR, bit(3)) ? defaultMaskedError;
+    (rTLXFIR, bit(3)) ? omi_bus_th_1;
 
     /** TLXFIR[4]
      *  TLX dcp0 return credit counter overflow
      */
-    (rTLXFIR, bit(4)) ? defaultMaskedError;
+    (rTLXFIR, bit(4)) ? omi_bus_th_1;
 
     /** TLXFIR[5]
      *  TLX dcp1 return credit counter overflow
      */
-    (rTLXFIR, bit(5)) ? defaultMaskedError;
+    (rTLXFIR, bit(5)) ? omi_bus_th_1;
 
     /** TLXFIR[6]
      *  TLX credit management block error
      */
-    (rTLXFIR, bit(6)) ? defaultMaskedError;
+    (rTLXFIR, bit(6)) ? self_th_1;
 
     /** TLXFIR[7]
      *  TLX credit management block parity error
      */
-    (rTLXFIR, bit(7)) ? defaultMaskedError;
+    (rTLXFIR, bit(7)) ? self_th_1;
 
     /** TLXFIR[8]
      *  TLXT fatal parity error
      */
-    (rTLXFIR, bit(8)) ? defaultMaskedError;
+    (rTLXFIR, bit(8)) ? self_th_1;
 
     /** TLXFIR[9]
      *  TLXT recoverable error
@@ -1231,17 +1314,17 @@ group gTLXFIR
     /** TLXFIR[10]
      *  TLXT configuration error
      */
-    (rTLXFIR, bit(10)) ? defaultMaskedError;
+    (rTLXFIR, bit(10)) ? level2_M_self_L_th_1;
 
     /** TLXFIR[11]
      *  TLXT informational parity error
      */
-    (rTLXFIR, bit(11)) ? defaultMaskedError;
+    (rTLXFIR, bit(11)) ? self_th_1;
 
     /** TLXFIR[12]
      *  TLXT hard error
      */
-    (rTLXFIR, bit(12)) ? defaultMaskedError;
+    (rTLXFIR, bit(12)) ? self_th_1;
 
     /** TLXFIR[13:15]
      *  Reserved
@@ -1261,47 +1344,47 @@ group gTLXFIR
     /** TLXFIR[18]
      *  OC malformed
      */
-    (rTLXFIR, bit(18)) ? defaultMaskedError;
+    (rTLXFIR, bit(18)) ? omi_bus_th_1;
 
     /** TLXFIR[19]
      *  OC protocol error
      */
-    (rTLXFIR, bit(19)) ? defaultMaskedError;
+    (rTLXFIR, bit(19)) ? omi_th_1;
 
     /** TLXFIR[20]
      *  Address translate error
      */
-    (rTLXFIR, bit(20)) ? defaultMaskedError;
+    (rTLXFIR, bit(20)) ? self_th_1;
 
     /** TLXFIR[21]
      *  Metadata unc or data parity error
      */
-    (rTLXFIR, bit(21)) ? defaultMaskedError;
+    (rTLXFIR, bit(21)) ? self_th_1;
 
     /** TLXFIR[22]
      *  OC unsupported group 2
      */
-    (rTLXFIR, bit(22)) ? defaultMaskedError;
+    (rTLXFIR, bit(22)) ? omi_bus_th_1;
 
     /** TLXFIR[23]
      *  OC unsupported group 1
      */
-    (rTLXFIR, bit(23)) ? defaultMaskedError;
+    (rTLXFIR, bit(23)) ? omi_bus_th_1;
 
     /** TLXFIR[24]
      *  Bit flip control error
      */
-    (rTLXFIR, bit(24)) ? defaultMaskedError;
+    (rTLXFIR, bit(24)) ? self_th_1;
 
     /** TLXFIR[25]
      *  Control HW error
      */
-    (rTLXFIR, bit(25)) ? defaultMaskedError;
+    (rTLXFIR, bit(25)) ? self_th_1;
 
     /** TLXFIR[26]
      *  ECC corrected and others
      */
-    (rTLXFIR, bit(26)) ? defaultMaskedError;
+    (rTLXFIR, bit(26)) ? self_th_32perDay;
 
     /** TLXFIR[27]
      *  Trace stop
@@ -1370,112 +1453,112 @@ group gOMIDLFIR
            cs_root_cause
 {
     /** OMIDLFIR[0]
-     *  DL0 fatal error
+     *  OMI-DL0 fatal error
      */
-    (rOMIDLFIR, bit(0)) ? defaultMaskedError;
+    (rOMIDLFIR, bit(0)) ? dl_fatal_error;
 
     /** OMIDLFIR[1]
-     *  Dl0 data UE
+     *  OMI-DL0 UE on data flit
      */
-    (rOMIDLFIR, bit(1)) ? defaultMaskedError;
+    (rOMIDLFIR, bit(1)) ? self_th_1;
 
     /** OMIDLFIR[2]
-     *  Dl0 flit CE
+     *  OMI-DL0 CE on TL flit
      */
-    (rOMIDLFIR, bit(2)) ? defaultMaskedError;
+    (rOMIDLFIR, bit(2)) ? self_th_32perDay;
 
     /** OMIDLFIR[3]
-     *  Dl0 CRC error
+     *  OMI-DL0 detected a CRC error
      */
     (rOMIDLFIR, bit(3)) ? defaultMaskedError;
 
     /** OMIDLFIR[4]
-     *  DL0 nack
+     *  OMI-DL0 received a nack
      */
     (rOMIDLFIR, bit(4)) ? defaultMaskedError;
 
     /** OMIDLFIR[5]
-     *  DL0 X4 mode
+     *  OMI-DL0 running in degraded mode
      */
-    (rOMIDLFIR, bit(5)) ? defaultMaskedError;
+    (rOMIDLFIR, bit(5)) ? omi_bus_th_1;
 
     /** OMIDLFIR[6]
-     *  DL0 EDPL
+     *  OMI-DL0 parity error detection on a lane
      */
     (rOMIDLFIR, bit(6)) ? defaultMaskedError;
 
     /** OMIDLFIR[7]
-     *  DL0 timeout
+     *  OMI-DL0 retrained due to no forward progress
      */
-    (rOMIDLFIR, bit(7)) ? defaultMaskedError;
+    (rOMIDLFIR, bit(7)) ? omi_bus_th_32perDay;
 
     /** OMIDLFIR[8]
-     *  DL0 remote retrain
+     *  OMI-DL0 remote side initiated a retrain
      */
     (rOMIDLFIR, bit(8)) ? defaultMaskedError;
 
     /** OMIDLFIR[9]
-     *  DL0 error retrain
+     *  OMI-DL0 retrain due to internal error or software initiated
      */
-    (rOMIDLFIR, bit(9)) ? defaultMaskedError;
+    (rOMIDLFIR, bit(9)) ? omi_bus_th_32perDay;
 
     /** OMIDLFIR[10]
-     *  DL0 EDPL retrain
+     *  OMI-DL0 threshold reached
      */
-    (rOMIDLFIR, bit(10)) ? defaultMaskedError;
+    (rOMIDLFIR, bit(10)) ? omi_bus_th_32perDay;
 
     /** OMIDLFIR[11]
-     *  DL0 trained
+     *  OMI-DL0 trained
      */
     (rOMIDLFIR, bit(11)) ? defaultMaskedError;
 
     /** OMIDLFIR[12]
-     *  DL0 endpoint bit 0
+     *  OMI-DL0 endpoint error bit 0
      */
     (rOMIDLFIR, bit(12)) ? defaultMaskedError;
 
     /** OMIDLFIR[13]
-     *  DL0 endpoint bit 1
+     *  OMI-DL0 endpoint error bit 1
      */
     (rOMIDLFIR, bit(13)) ? defaultMaskedError;
 
     /** OMIDLFIR[14]
-     *  DL0 endpoint bit 2
+     *  OMI-DL0 endpoint error bit 2
      */
     (rOMIDLFIR, bit(14)) ? defaultMaskedError;
 
     /** OMIDLFIR[15]
-     *  DL0 endpoint bit 3
+     *  OMI-DL0 endpoint error bit 3
      */
     (rOMIDLFIR, bit(15)) ? defaultMaskedError;
 
     /** OMIDLFIR[16]
-     *  DL0 endpoint bit 4
+     *  OMI-DL0 endpoint error bit 4
      */
     (rOMIDLFIR, bit(16)) ? defaultMaskedError;
 
     /** OMIDLFIR[17]
-     *  DL0 endpoint bit 5
+     *  OMI-DL0 endpoint error bit 5
      */
     (rOMIDLFIR, bit(17)) ? defaultMaskedError;
 
     /** OMIDLFIR[18]
-     *  DL0 endpoint bit 6
+     *  OMI-DL0 endpoint error bit 6
      */
     (rOMIDLFIR, bit(18)) ? defaultMaskedError;
 
     /** OMIDLFIR[19]
-     *  DL0 endpoint bit 7
+     *  OMI-DL0 endpoint error bit 7
      */
     (rOMIDLFIR, bit(19)) ? defaultMaskedError;
 
     /** OMIDLFIR[20:39]
-     *  DL1 reserved
+     *  OMI-DL1 reserved
      */
     (rOMIDLFIR, bit(20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39)) ? defaultMaskedError;
 
     /** OMIDLFIR[40:59]
-     *  DL2 reserved
+     *  OMI-DL2 reserved
      */
     (rOMIDLFIR, bit(40|41|42|43|44|45|46|47|48|49|50|51|52|53|54|55|56|57|58|59)) ? defaultMaskedError;
 
@@ -1483,6 +1566,21 @@ group gOMIDLFIR
      *  Performance monitor wrapped
      */
     (rOMIDLFIR, bit(60)) ? defaultMaskedError;
+
+    /** OMIDLFIR[61]
+     *  reserved
+     */
+    (rOMIDLFIR, bit(61)) ? defaultMaskedError;
+
+    /** OMIDLFIR[62]
+     *  LFIR internal parity error
+     */
+    (rOMIDLFIR, bit(62)) ? defaultMaskedError;
+
+    /** OMIDLFIR[63]
+     *  SCOM Satellite Error
+     */
+    (rOMIDLFIR, bit(63)) ? defaultMaskedError;
 
 };
 
@@ -1498,6 +1596,5 @@ group gOMIDLFIR
  ##############################################################################
 
 # Include the actions defined for this target
-.include "p9_common_actions.rule";
 .include "explorer_ocmb_actions.rule";
 
