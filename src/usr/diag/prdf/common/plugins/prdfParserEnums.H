@@ -111,6 +111,7 @@ enum PositionBounds
     MAX_OMI_PER_OMIC    = 3,
 
     MAX_OCMB_PER_OMI    = 1,
+    MAX_OCMB_PER_MCC    = MAX_OCMB_PER_OMI * MAX_OMI_PER_MCC,
 
     MAX_SUB_PORT        = 2,
 

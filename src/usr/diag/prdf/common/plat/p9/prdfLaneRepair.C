@@ -1098,17 +1098,18 @@ PRDF_PLUGIN_DEFINE_NS( cumulus_dmi,    LaneRepair, calloutBusInterfacePlugin );
 PRDF_PLUGIN_DEFINE_NS( centaur_membuf, LaneRepair, calloutBusInterfacePlugin );
 
 /**
- * @brief Add callouts for a BUS interface inputting a OMIC target
- * @param  i_chip OMIC chip
+ * @brief Add callouts for a BUS interface inputting an OMIC or MCC target
+ * @param  i_chip OMIC/MCC chip
  * @param  io_sc  Step code data struct.
- * @param  i_dl   The DL relative to the OMIC.
+ * @param  i_pos  The position of the OMI relative to the OMIC/MCC.
  * @return SUCCESS always
  */
 
-int32_t omicCalloutBusInterfacePlugin( ExtensibleChip * i_chip,
-                                   STEP_CODE_DATA_STRUCT & io_sc, uint8_t i_dl )
+int32_t omiParentCalloutBusInterfacePlugin( ExtensibleChip * i_chip,
+                                            STEP_CODE_DATA_STRUCT & io_sc,
+                                            uint8_t i_pos )
 {
-    ExtensibleChip * omi  = getConnectedChild( i_chip, TYPE_OMI, i_dl );
+    ExtensibleChip * omi  = getConnectedChild( i_chip, TYPE_OMI, i_pos );
     ExtensibleChip * ocmb = getConnectedChild( omi, TYPE_OCMB_CHIP, 0 );
 
     // Callout both ends of the bus as well (OMI and OCMB)
@@ -1119,18 +1120,18 @@ int32_t omicCalloutBusInterfacePlugin( ExtensibleChip * i_chip,
     return SUCCESS;
 }
 
-#define OMIC_CALL_BUS_PLUGIN( POS ) \
-int32_t omicCalloutBusInterfacePlugin_##POS( ExtensibleChip * i_chip, \
-                                             STEP_CODE_DATA_STRUCT & io_sc ) \
+#define OMI_PARENT_CALL_BUS_PLUGIN( POS ) \
+int32_t omiParentCalloutBusInterfacePlugin_##POS( ExtensibleChip * i_chip, \
+                                               STEP_CODE_DATA_STRUCT & io_sc ) \
 { \
-    return omicCalloutBusInterfacePlugin( i_chip, io_sc, POS ); \
+    return omiParentCalloutBusInterfacePlugin( i_chip, io_sc, POS ); \
 } \
 PRDF_PLUGIN_DEFINE_NS( axone_omic, LaneRepair, \
-                       omicCalloutBusInterfacePlugin_##POS );
+                       omiParentCalloutBusInterfacePlugin_##POS );
 
-OMIC_CALL_BUS_PLUGIN( 0 );
-OMIC_CALL_BUS_PLUGIN( 1 );
-OMIC_CALL_BUS_PLUGIN( 2 );
+OMI_PARENT_CALL_BUS_PLUGIN( 0 );
+OMI_PARENT_CALL_BUS_PLUGIN( 1 );
+OMI_PARENT_CALL_BUS_PLUGIN( 2 );
 
 //------------------------------------------------------------------------------
 

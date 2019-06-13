@@ -153,7 +153,7 @@ group gMCFIR
     /** MCFIR[1]
      *  MC internal non recoverable error
      */
-    (rMCFIR, bit(1)) ? self_th_1;
+    (rMCFIR, bit(1)) ? parent_proc_th_1;
 
     /** MCFIR[2]
      *  Powerbus protocol error
@@ -183,7 +183,7 @@ group gMCFIR
     /** MCFIR[8]
      *  Command list timeout
      */
-    (rMCFIR, bit(8)) ? threshold_and_mask_self;
+    (rMCFIR, bit(8)) ? threshold_and_mask_level2;
 
     /** MCFIR[9:10]
      *  reserved
@@ -218,7 +218,7 @@ group gMCFIR
     /** MCFIR[17]
      *  WAT debug config reg error
      */
-    (rMCFIR, bit(17)) ? threshold_and_mask_self;
+    (rMCFIR, bit(17)) ? defaultMaskedError;
 
     /** MCFIR[18:21]
      *  reserved
