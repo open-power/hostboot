@@ -363,17 +363,17 @@ if( !($cfgSrcOutputDir =~ "none") )
     writeFapi2PlatAttrMacrosHeaderFileFooter ($fapi2PlatAttrMacrosHeaderFile);
     close $fapi2PlatAttrMacrosHeaderFile;
 
-    open(ATTR_ATTRERRL_C_FILE,">$cfgSrcOutputDir"."errludattribute.C")
+    open(ATTR_ATTRERRL_C_FILE,">$cfgSrcOutputDir"."errludattribute_gen.C")
       or croak ("Attribute errlog C file: \"$cfgSrcOutputDir"
-        . "errludattribute.C\" could not be opened.");
+        . "errludattribute_gen.C\" could not be opened.");
     my $attrErrlCFile = *ATTR_ATTRERRL_C_FILE;
     writeAttrErrlCFile($attributes,$attrErrlCFile);
     close $attrErrlCFile;
 
     mkdir("$cfgSrcOutputDir/errl");
-    open(ATTR_ATTRERRL_H_FILE,">$cfgSrcOutputDir"."errl/errludattribute.H")
+    open(ATTR_ATTRERRL_H_FILE,">$cfgSrcOutputDir"."errl/errludattribute_gen.H")
       or croak ("Attribute errlog H file: \"$cfgSrcOutputDir"
-        . "errl/errludattribute.H\" could not be opened.");
+        . "errl/errludattribute_gen.H\" could not be opened.");
     my $attrErrlHFile = *ATTR_ATTRERRL_H_FILE;
     writeAttrErrlHFile($attributes,$attrErrlHFile);
     close $attrErrlHFile;
@@ -2750,14 +2750,6 @@ VERBATIM
 sub writeAttrErrlCFile {
     my($attributes,$outFile) = @_;
 
-    #First setup the includes and function definition
-    print $outFile "#include <stdint.h>\n";
-    print $outFile "#include <stdio.h>\n";
-    print $outFile "#include <string.h>\n";
-    print $outFile "#include <errl/errludattribute.H>\n";
-    print $outFile "#include <errl/errlreasoncodes.H>\n";
-    print $outFile "#include <targeting/common/targetservice.H>\n";
-    print $outFile "#include <targeting/common/trace.H>\n";
     print $outFile "\n";
     print $outFile "namespace ERRORLOG\n";
     print $outFile "{\n";
@@ -2774,52 +2766,38 @@ sub writeAttrErrlCFile {
     print $outFile "\n";
     print $outFile "    switch (i_attr) {\n";
 
-    print $outFile "        case (ATTR_SERIAL_NUMBER): { //simpleType:uint, :int...\n";
-    print $outFile "            //TRACDCOMP( g_trac_errl, \"ErrlUserDetailsAttribute: SERIAL_NUMBER entry\");\n";
-    print $outFile "            AttributeTraits<ATTR_SERIAL_NUMBER>::Type tmp;\n";
-    print $outFile "            if( iv_pTarget->tryGetAttr<ATTR_SERIAL_NUMBER>(tmp) ) {\n";
-    print $outFile "                tmpBuffer = new char[sizeof(tmp)];\n";
-    print $outFile "                memcpy(tmpBuffer, &tmp, sizeof(tmp));\n";
-    print $outFile "                attrSize = sizeof(tmp);\n";
-    print $outFile "            }\n";
-    print $outFile "            break;\n";
-    print $outFile "        }\n";
-    print $outFile "        case (ATTR_PART_NUMBER): { //simpleType:uint, :int...\n";
-    print $outFile "            //TRACDCOMP( g_trac_errl, \"ErrlUserDetailsAttribute: PART_NUMBER entry\");\n";
-    print $outFile "            AttributeTraits<ATTR_PART_NUMBER>::Type tmp;\n";
-    print $outFile "            if( iv_pTarget->tryGetAttr<ATTR_PART_NUMBER>(tmp) ) {\n";
-    print $outFile "                tmpBuffer = new char[sizeof(tmp)];\n";
-    print $outFile "                memcpy(tmpBuffer, &tmp, sizeof(tmp));\n";
-    print $outFile "                attrSize = sizeof(tmp);\n";
-    print $outFile "            }\n";
-    print $outFile "            break;\n";
-    print $outFile "        }\n";
-    print $outFile "        case (ATTR_PEC_PCIE_HX_KEYWORD_DATA): { //simpleType:uint, :int...\n";
-    print $outFile "            //TRACDCOMP( g_trac_errl, \"ErrlUserDetailsAttribute: PEC_PCIE_HX_KEYWORD_DATA entry\");\n";
-    print $outFile "            AttributeTraits<ATTR_PEC_PCIE_HX_KEYWORD_DATA>::Type tmp;\n";
-    print $outFile "            if( iv_pTarget->tryGetAttr<ATTR_PEC_PCIE_HX_KEYWORD_DATA>(tmp) ) {\n";
-    print $outFile "                tmpBuffer = new char[sizeof(tmp)];\n";
-    print $outFile "                memcpy(tmpBuffer, &tmp, sizeof(tmp));\n";
-    print $outFile "                attrSize = sizeof(tmp);\n";
-    print $outFile "            }\n";
-    print $outFile "            break;\n";
-    print $outFile "        }\n";
 
-    print $outFile "#if 0 //\@fixme-RTC:152874\n";
+    # List of attributes we want to explicitly support
+    my @allowed_attributes = (
+         "SERIAL_NUMBER",
+         "PART_NUMBER",
+         "PEC_PCIE_HX_KEYWORD_DATA",
+         "ECID",
+         "HUID",
+    );
 
-    # loop through every attribute to make the swith/case
+    # loop through every attribute to make the switch/case
     foreach my $attribute (@{$attributes->{attribute}})
     {
+        my $skippedattr = 0;
+        if( grep { $_ eq $attribute->{id} } @allowed_attributes )
+        {
+            print "Allowing $attribute->{id}\n";
+        }
+        else
+        {
+            print $outFile "#if 0 //\@fixme-RTC:152874\n";
+            $skippedattr = 1;
+        }
+
         # things we'll skip:
         if(!(exists $attribute->{readable}) ||  # write-only attributes
-           !(exists $attribute->{writeable}) || # read-only attributes
            (exists $attribute->{simpleType} && (
            (exists $attribute->{simpleType}->{hbmutex}) ||
            (exists $attribute->{simpleType}->{hbrecrusivemutex}) ||
            (exists $attribute->{simpleType}->{fspmutex}))) # mutex attributes
           ) {
             print $outFile "        case (ATTR_",$attribute->{id},"): { break; }\n";
-            next;
         }
         # any complicated types just get dumped as raw hex binary
         elsif(exists $attribute->{complexType}) {
@@ -2904,6 +2882,11 @@ sub writeAttrErrlCFile {
             print $outFile "            break;\n";
             print $outFile "        }\n";
         }
+
+        if( $skippedattr )
+        {
+            print $outFile "#endif //\@fixme-RTC:152874\n";
+        }
     }
 
     print $outFile "        default: { //Shouldn't be anything here!!\n";
@@ -2911,7 +2894,6 @@ sub writeAttrErrlCFile {
     print $outFile "            break;\n";
     print $outFile "        }\n";
 
-    print $outFile "#endif //\@fixme-RTC:152874\n";
 
     print $outFile "    } //switch\n";
     print $outFile "\n";
@@ -2927,45 +2909,6 @@ sub writeAttrErrlCFile {
     print $outFile "        iv_dataSize += attrSize;\n";
     print $outFile "    }\n";
     print $outFile "    delete [] tmpBuffer;\n";
-    print $outFile "}\n";
-    print $outFile "\n";
-
-    # build constructor that dumps 1 attribute
-    print $outFile "\n";
-    print $outFile "//------------------------------------------------------------------------------\n";
-    print $outFile "ErrlUserDetailsAttribute::ErrlUserDetailsAttribute(\n";
-    print $outFile "    const Target * i_pTarget, uint32_t i_attr)\n";
-    print $outFile "    : iv_pTarget(i_pTarget), iv_dataSize(0)\n";
-    print $outFile "{\n";
-    print $outFile "    // Set up ErrlUserDetails instance variables\n";
-    print $outFile "    iv_CompId = ERRL_COMP_ID;\n";
-    print $outFile "    iv_Version = 1;\n";
-    print $outFile "    iv_SubSection = ERRL_UDT_ATTRIBUTE;\n";
-    print $outFile "    // override the default of false\n";
-    print $outFile "    iv_merge = true;\n";
-    print $outFile "\n";
-    print $outFile "    // first, write out the HUID\n";
-    print $outFile "    addData(ATTR_HUID);\n";
-    print $outFile "    if (i_attr != ATTR_HUID) {\n";
-    print $outFile "        addData(i_attr);\n";
-    print $outFile "    }\n";
-    print $outFile "}\n";
-    print $outFile "\n";
-
-    # build constructor that dumps all attributes
-    print $outFile "//------------------------------------------------------------------------------\n";
-    print $outFile "ErrlUserDetailsAttribute::ErrlUserDetailsAttribute(\n";
-    print $outFile "    const Target * i_pTarget)\n";
-    print $outFile "    : iv_pTarget(i_pTarget), iv_dataSize(0)\n";
-    print $outFile "{\n";
-    print $outFile "    // Set up ErrlUserDetails instance variables\n";
-    print $outFile "    iv_CompId = ERRL_COMP_ID;\n";
-    print $outFile "    iv_Version = 1;\n";
-    print $outFile "    iv_SubSection = ERRL_UDT_ATTRIBUTE;\n";
-    print $outFile "    // override the default of false\n";
-    print $outFile "    iv_merge = true;\n";
-    print $outFile "\n";
-    print $outFile "    dumpAll();\n";
     print $outFile "}\n";
     print $outFile "\n";
 
@@ -2999,10 +2942,7 @@ sub writeAttrErrlCFile {
 
     print $outFile "\n";
 
-    print $outFile "//------------------------------------------------------------------------------\n";
-    print $outFile "ErrlUserDetailsAttribute::~ErrlUserDetailsAttribute()\n";
-    print $outFile "{ }\n";
-    print $outFile "} // namespace\n";
+    print $outFile "} // namespace\n\n";
 } # sub writeAttrErrlCFile
 
 
@@ -3012,44 +2952,7 @@ sub writeAttrErrlCFile {
 sub writeAttrErrlHFile {
     my($attributes,$outFile) = @_;
 
-    #First setup the includes and function definition
-    print $outFile "\n";
-    print $outFile "#ifndef ERRL_UDATTRIBUTE_H\n";
-    print $outFile "#define ERRL_UDATTRIBUTE_H\n";
-    print $outFile "\n";
-    print $outFile "#if !defined(PARSER) && !defined(LOGPARSER)\n";
-    print $outFile "\n";
-    print $outFile "#include <errl/errluserdetails.H>\n";
-    print $outFile "\n";
-    print $outFile "namespace TARGETING // Forward reference\n";
-    print $outFile "{ class Target; }\n";
-    print $outFile "\n";
-    print $outFile "namespace ERRORLOG\n";
-    print $outFile "{\n";
-    print $outFile "class ErrlUserDetailsAttribute : public ErrlUserDetails {\n";
-    print $outFile "public:\n";
-    print $outFile "\n";
-    print $outFile "    ErrlUserDetailsAttribute(const TARGETING::Target * i_pTarget, uint32_t i_attr);\n";
-    print $outFile "    ErrlUserDetailsAttribute(const TARGETING::Target * i_pTarget);\n";
-    print $outFile "    void addData(uint32_t i_attr);\n";
-    print $outFile "    virtual ~ErrlUserDetailsAttribute();\n";
-    print $outFile "\n";
-    print $outFile "private:\n";
-    print $outFile "\n";
-    print $outFile "    // Disabled\n";
-    print $outFile "    ErrlUserDetailsAttribute(const ErrlUserDetailsAttribute &);\n";
-    print $outFile "    ErrlUserDetailsAttribute & operator=(const ErrlUserDetailsAttribute &);\n";
-    print $outFile "\n";
-    print $outFile "    // internal function\n";
-    print $outFile "    void dumpAll();\n";
-    print $outFile "\n";
-    print $outFile "    const TARGETING::Target * iv_pTarget;\n";
-    print $outFile "    uint32_t iv_dataSize;\n";
-    print $outFile "};\n";
-    print $outFile "}\n";
-    print $outFile "#else // if LOGPARSER defined\n";
-    print $outFile "\n";
-    print $outFile "#include \"errluserdetails.H\"\n";
+    # Inserts inside LOGPARSER leg in errludattribute.H
     print $outFile "\n";
     print $outFile "namespace ERRORLOG\n";
     print $outFile "{\n";
@@ -3082,6 +2985,7 @@ sub writeAttrErrlHFile {
     print $outFile "        // first 4 bytes is the attr enum\n";
     print $outFile "        uint32_t attrEnum = ntohl(*(uint32_t *)l_ptr);\n";
     print $outFile "        l_ptr += sizeof(attrEnum);\n";
+    print $outFile "        char* tmplabel = NULL;\n";
     print $outFile "\n";
     print $outFile "        switch (attrEnum) {\n";
 
@@ -3328,7 +3232,9 @@ sub writeAttrErrlHFile {
         print $outFile "          }\n";
     }
     print $outFile "          default: {\n";
-    print $outFile "              pLabel = \"unknown Attribute\";\n";
+    print $outFile "              tmplabel = new char[30];\n";
+    print $outFile "              sprintf( tmplabel, \"Unknown [0x%x]\", attrEnum );\n";
+    print $outFile "              pLabel = tmplabel;\n";
     print $outFile "              break;\n";
     print $outFile "          }\n";
     print $outFile "        } // switch\n";
@@ -3337,6 +3243,7 @@ sub writeAttrErrlHFile {
     print $outFile "        if (pLabel != NULL) {\n";
     print $outFile "            i_parser.PrintString(pLabel, &(l_traceEntry[0]));\n";
     print $outFile "        }\n";
+    print $outFile "        if( tmplabel != NULL ) { delete[] tmplabel; }\n";
     print $outFile "    } // for\n";
     print $outFile "  } // parse\n\n";
     print $outFile "private:\n";
@@ -3345,9 +3252,7 @@ sub writeAttrErrlHFile {
     print $outFile "ErrlUserDetailsParserAttribute(const ErrlUserDetailsParserAttribute &);\n";
     print $outFile "ErrlUserDetailsParserAttribute & operator=(const ErrlUserDetailsParserAttribute &);\n";
     print $outFile "};\n";
-    print $outFile "} // namespace\n";
-    print $outFile "#endif\n";
-    print $outFile "#endif\n";
+    print $outFile "} // namespace\n\n";
 } # sub writeAttrErrlHFile
 
 ######
