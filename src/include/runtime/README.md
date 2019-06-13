@@ -29,8 +29,9 @@ How to create an HBRT to FW request message interface
        TWO switch statements 'switch (l_req_fw_msg->io_type)'.  Look at others
        for examples.
 
-generic_hbrt_fsp_message.H::GenericFspMboxMessage_t
-    Firm Ware request:
+# generic_hbrt_fsp_message.H::GenericFspMboxMessage_t
+# How to create an HBRT Generic FSP Firmware request
+    Firmware request:
         1) The biggest part will be defining the interface.  Inspect the current
            interfaces (AttributeSetter_t, SingleScomOpHbrtFspData_t,
            TargetDeconfigHbrtFspData_t, etc) for inspiration.
@@ -56,7 +57,8 @@ generic_hbrt_fsp_message.H::GenericFspMboxMessage_t
                 ~/src/usr/fsiscom/runtime/rt_fsiscom.C::sendMultiScomReadToFsp
                 ~/src/usr/hwas/hwasPlatDeconfigGard.C::DeconfigGard::platPostDeconfigureTarget
 
-    Firm Ware notify:
+# How to create an HBRT Firmware Notify message
+    Firmware notify:
         1) The biggest part will be defining the interface.  Inspect the current
            interfaces (sbeRetryReqData_t, HbrtAttrSyncData_t, etc) for inspiration.
         2) Once an interface has been designed, add the structure to this file
@@ -78,4 +80,27 @@ generic_hbrt_fsp_message.H::GenericFspMboxMessage_t
         5) Update the case statement 'switch (l_hbrt_fw_msg->io_type)' found in
            method ~/src/usr/util/runtime/rt_fwnotify.C::firmware_notify to
            call method created in step 4.
+
+# Integration testing the Firmware Request/Notify Message
+    This is not a true integration test but a verification that the data is
+    being sent, via the firmware request, in the format that the caller
+    intended.  Ensuring that the data is in the correct format and is correct
+    in of itself.
+
+    Add a test case to the file:
+         ~/src/usr/isteps/pm/runtime/test/firmwareRequestTest.H
+    This is where the message will being sent via the
+    hostInterfaces::firmware_request(...) method.  Here, is where you will
+    create a unique test case for your interface.  Follow the examples in
+    this file.  There are plenty of examples.
+
+    Add stub test code to the file/method:
+         ~/src/usr/testcore/rtloader/loader.H::rt_firmware_request(...)
+    This is where the message will be received and can be tested for
+    correctness. Follow the examples in this file.  There are plenty of
+    examples.
+
+
+
+
 

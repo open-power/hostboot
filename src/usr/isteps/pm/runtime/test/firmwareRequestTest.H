@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,31 +23,96 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include <cxxtest/TestSuite.H>
-#include <runtime/interface.h>
-#include <runtime/hbrt_utilities.H>
-#include <errl/hberrltypes.H>
-#include <string.h>
+#include <cxxtest/TestSuite.H>       // CxxTest::TestSuite
+#include <runtime/interface.h>       // g_hostInterfaces, etc
+#include <runtime/hbrt_utilities.H>  // createGenericFspMsg
+#include <vector>
 
-extern trace_desc_t* g_trac_pnor;
+extern trace_desc_t* g_trac_test;
 
 class FirmwareRequestTest : public CxxTest::TestSuite
 {
     public:
+
+    /**
+     * @brief: testFirmwareRequestHcodeUpdate
+     *      test the firmware_request's Send Attributes
+     */
+    void testFirmwareRequestSendAttributes (void)
+    {
+        TRACFCOMP(g_trac_test, ENTER_MRK
+                  "FirmwareRequestTest::testFirmwareRequestSendAttributes" );
+
+        if (g_hostInterfaces == NULL ||
+            g_hostInterfaces->firmware_request == NULL)
+        {
+            TS_FAIL("FirmwareRequestTest::testFirmwareRequestSendAttributes: "
+                    "Hypervisor firmware_request interface not linked");
+        }
+        else
+        {
+            std::vector<TARGETING::AttributeTank::Attribute> l_attributeList;
+
+            uint32_t l_dataSize(0);
+
+            // Test 1: Create a default attribute and add to list
+            TARGETING::AttributeTank::Attribute l_attribute;
+            l_attributeList.push_back(l_attribute);
+            l_dataSize += l_attribute.getSize();
+            sendAttributes(l_attributeList);
+
+            // Test 2: Modify some of the Attributes data and add to list
+            l_attribute.setId(0x1001);
+            l_attribute.setTargetType(0x2002);
+            l_attribute.setPosition(0x3003);
+            l_attribute.setUnitPosition(0x4);
+            l_attribute.setNode(0x5);
+            l_attribute.setFlags(0x6);
+            l_attributeList.push_back(l_attribute);
+            l_dataSize += l_attribute.getSize();
+            sendAttributes(l_attributeList);
+
+            // Create a buffer to be used to update Value in the Attribute
+            uint32_t l_bufferSize(3);
+            uint8_t l_buffer[l_bufferSize];
+            l_buffer[0] = 0xAA;
+            l_buffer[1] = 0xBB;
+            l_buffer[2] = 0xCC;
+
+            // Test 3: Update the Attribute Values in the Attribute
+            // and add to list
+            l_attribute.setValue(l_buffer, 1);
+            l_attributeList.push_back(l_attribute);
+            l_dataSize += l_attribute.getSize();
+            sendAttributes(l_attributeList);
+
+            // Test 4: Update the Attribute Values in the Attribute
+            // and add to list
+            l_buffer[0] = 0xDD;
+            l_attribute.setValue(l_buffer, l_bufferSize);
+            l_attributeList.push_back(l_attribute);
+            l_dataSize += l_attribute.getSize();
+            sendAttributes(l_attributeList);
+        }
+
+        TRACFCOMP(g_trac_test, EXIT_MRK
+                  "FirmwareRequestTest::testFirmwareRequestSendAttributes");
+    }
+
     /**
      * @brief: testFirmwareRequestHcodeUpdate
      *      test the firmware_request's HCODE update call
      */
     void testFirmwareRequestHcodeUpdate (void)
     {
-        TRACFCOMP(g_trac_pnor, ENTER_MRK
+        TRACFCOMP(g_trac_test, ENTER_MRK
                   "FirmwareRequestTest::testFirmwareRequestHcodeUpdate");
 
         if (g_hostInterfaces == NULL ||
             g_hostInterfaces->firmware_request == NULL)
         {
-           TS_FAIL("FirmwareRequestTest::testFirmwareRequestHcodeUpdate: "
-                   "Hypervisor firmware_request interface not linked");
+            TS_FAIL("FirmwareRequestTest::testFirmwareRequestHcodeUpdate: "
+                    "Hypervisor firmware_request interface not linked");
         }
         else
         {
@@ -62,14 +127,14 @@ class FirmwareRequestTest : public CxxTest::TestSuite
             l_req_fw_msg.req_hcode_update.i_scomAddr = 0x400;
             l_req_fw_msg.req_hcode_update.i_scomData = 0x500;
 
-
             hostInterfaces::hbrt_fw_msg l_resp_fw_msg;
-            size_t l_resp_fw_msg_size = sizeof(l_resp_fw_msg);
+            size_t l_resp_fw_msg_size = hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
+                                        sizeof(l_resp_fw_msg);
             size_t rc = g_hostInterfaces->firmware_request(
                                      sizeof(l_req_fw_msg), &l_req_fw_msg,
                                      &l_resp_fw_msg_size, &l_resp_fw_msg);
 
-            TRACFCOMP(g_trac_pnor,
+            TRACDCOMP(g_trac_test,
                       "FirmwareRequestTest::testFirmwareRequestHcodeUpdate: "
                       "rc:%d, type:%d, resp:%d",
                       rc, l_resp_fw_msg.io_type,
@@ -97,9 +162,8 @@ class FirmwareRequestTest : public CxxTest::TestSuite
                         "received incorrect resp");
             }
         }  // end else
-        TRACFCOMP(g_trac_pnor, EXIT_MRK
+        TRACFCOMP(g_trac_test, EXIT_MRK
                   "FirmwareRequestTest::testFirmwareRequestHcodeUpdate");
-
     }  // end testFirmwareRequestHcodeUpdate
 
     /**
@@ -108,7 +172,7 @@ class FirmwareRequestTest : public CxxTest::TestSuite
      */
     void testFirmwareRequestErrLogToFsp (void)
     {
-        TRACFCOMP(g_trac_pnor, ENTER_MRK
+        TRACFCOMP(g_trac_test, ENTER_MRK
                   "FirmwareRequestTest::testFirmwareRequestErrLogToFsp");
 
         if (g_hostInterfaces == NULL ||
@@ -128,12 +192,13 @@ class FirmwareRequestTest : public CxxTest::TestSuite
             l_req_fw_msg.error_log.i_data = 0xAA;
 
             hostInterfaces::hbrt_fw_msg l_resp_fw_msg;
-            size_t l_resp_fw_msg_size = sizeof(l_resp_fw_msg);
+            size_t l_resp_fw_msg_size = hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
+                                        sizeof(l_resp_fw_msg);
             size_t rc = g_hostInterfaces->firmware_request(
                                      sizeof(l_req_fw_msg), &l_req_fw_msg,
                                      &l_resp_fw_msg_size, &l_resp_fw_msg);
 
-            TRACFCOMP(g_trac_pnor,
+            TRACDCOMP(g_trac_test,
                       "FirmwareRequestTest::testFirmwareRequestErrLogToFsp: "
                       "rc:%d, type:%d, resp:%d",
                       rc, l_resp_fw_msg.io_type,
@@ -161,29 +226,29 @@ class FirmwareRequestTest : public CxxTest::TestSuite
                         "received incorrect resp");
             }
         }  // end else
-        TRACFCOMP(g_trac_pnor, EXIT_MRK
+        TRACFCOMP(g_trac_test, EXIT_MRK
                   "FirmwareRequestTest::testFirmwareRequestErrLogToFsp");
 
     }  // end testFirmwareRequestErrLogToFsp
 
     /**
-     * @brief: testFirmwareRequestHbrtToFsp
-     *      test the firmware_request's HBRT to FSP call
+     * @brief: testFirmwareRequestSbeRetry
+     *      test the firmware_request's SBE retry
      */
-    void testFirmwareRequestHbrtToFsp (void)
+    void testFirmwareRequestSbeRetry (void)
     {
-        TRACFCOMP(g_trac_pnor, ENTER_MRK
-                  "FirmwareRequestTest::testFirmwareRequestHbrtToFsp");
+        TRACFCOMP(g_trac_test, ENTER_MRK
+                  "FirmwareRequestTest::testFirmwareRequestSbeRetry");
 
         if (g_hostInterfaces == NULL ||
             g_hostInterfaces->firmware_request == NULL)
         {
-           TS_FAIL("FirmwareRequestTest::testFirmwareRequestHbrtToFsp: "
+           TS_FAIL("FirmwareRequestTest::testFirmwareRequestSbeRetry: "
                    "Hypervisor firmware_request interface not linked");
         }
         else
         {
-            // Test HBRT to FSP
+            // Test Request SBE Retry
 
             // Handles to the firmware messages
             hostInterfaces::hbrt_fw_msg *l_req_fw_msg = nullptr;
@@ -204,7 +269,7 @@ class FirmwareRequestTest : public CxxTest::TestSuite
             // Populate the firmware_request request struct with given data
             l_req_fw_msg->generic_msg.msgq = 0x300;
             l_req_fw_msg->generic_msg.msgType =
-                            GenericFspMboxMessage_t::MSG_DECONFIG_TARGET;
+                            GenericFspMboxMessage_t::MSG_SBE_ERROR;
 
             // Create a useful struct to populate the generic_msg::data field
             // Setting the PLID and userData
@@ -217,26 +282,26 @@ class FirmwareRequestTest : public CxxTest::TestSuite
             if (l_req_fw_msg->generic_msg.magic !=
                 GenericFspMboxMessage_t::MAGIC_NUMBER)
             {
-                TS_FAIL("FirmwareRequestTest::testFirmwareRequestHbrtToFsp: "
+                TS_FAIL("FirmwareRequestTest::testFirmwareRequestSbeRetry: "
                         "magic was not properly initialized");
             }
 
             if (l_req_fw_msg->generic_msg.dataSize != l_fsp_data_size)
             {
-                TS_FAIL("FirmwareRequestTest::testFirmwareRequestHbrtToFsp: "
+                TS_FAIL("FirmwareRequestTest::testFirmwareRequestSbeRetry: "
                         "dataSize was not properly initialized");
             }
 
             if (l_req_fw_msg->generic_msg.structVer !=
                 GenericFspMboxMessage_t::STRUCT_VERSION_LATEST)
             {
-                TS_FAIL("FirmwareRequestTest::testFirmwareRequestHbrtToFsp: "
+                TS_FAIL("FirmwareRequestTest::testFirmwareRequestSbeRetry: "
                         "structVer was not properly initialized");
             }
 
             if (l_req_fw_msg->generic_msg.seqnum != SeqId_t::getCurrentSeqId())
             {
-                TS_FAIL("FirmwareRequestTest::testFirmwareRequestHbrtToFsp: "
+                TS_FAIL("FirmwareRequestTest::testFirmwareRequestSbeRetry: "
                         "seqnum was not properly initialized");
             }
 
@@ -245,23 +310,27 @@ class FirmwareRequestTest : public CxxTest::TestSuite
             l_req_fw_msg->generic_msg.dataSize = l_fsp_data_size;
             l_req_fw_msg->generic_msg.structVer = 0x20;
             l_req_fw_msg->generic_msg.seqnum = 0x300;
-            l_req_fw_msg->generic_msg.msgq = 0x400;
-            l_req_fw_msg->generic_msg.msgType = 0x500;
             l_req_fw_msg->generic_msg.__req = GenericFspMboxMessage_t::REQUEST;
             l_req_fw_msg->generic_msg.__onlyError =
                                           GenericFspMboxMessage_t::ERROR_ONLY;
 
-            TRACFCOMP(g_trac_pnor,
-                      "FirmwareRequestTest::testFirmwareRequestHbrtToFsp req: "
-                      "type:%d, magic:0x%.8X, dataSize:%d, structVer:0x%.8X, "
-                      "seqnum:%.8X, msgq:0x%.8X, msgType:0x%.8X, __req:%d, "
-                      "__onlyError:%d, data:0x%.8X, plid:0x%.8X, huid:0x%.8X",
+            TRACDCOMP(g_trac_test,
+                      "FirmwareRequestTest::testFirmwareRequestSbeRetry "
+                      "Request data set 1/2: "
+                      "type:%d, magic:0x%.8X, dataSize:%d, "
+                      "structVer:0x%.8X,seqnum:%.8X, msgq:0x%.8X",
                       l_req_fw_msg->io_type,
                       l_req_fw_msg->generic_msg.magic,
                       l_req_fw_msg->generic_msg.dataSize,
                       l_req_fw_msg->generic_msg.structVer,
                       l_req_fw_msg->generic_msg.seqnum,
-                      l_req_fw_msg->generic_msg.msgq,
+                      l_req_fw_msg->generic_msg.msgq);
+
+            TRACDCOMP(g_trac_test,
+                      "FirmwareRequestTest::testFirmwareRequestSbeRetry "
+                      "Request data set 2/2: "
+                      "msgType:0x%.8X, __req:%d, __onlyError:%d, "
+                      "data:0x%.8X, plid:0x%.8X, huid:0x%.8X",
                       l_req_fw_msg->generic_msg.msgType,
                       l_req_fw_msg->generic_msg.__req,
                       l_req_fw_msg->generic_msg.__onlyError,
@@ -269,23 +338,29 @@ class FirmwareRequestTest : public CxxTest::TestSuite
                       l_req_fw_msg->generic_msg.data >> 32,
                       0x0000FFFF & l_req_fw_msg->generic_msg.data);
 
+
             size_t rc = g_hostInterfaces->firmware_request(l_req_fw_msg_size,
                                                            l_req_fw_msg,
                                                            &l_resp_fw_msg_size,
                                                            l_resp_fw_msg);
 
-            TRACFCOMP(g_trac_pnor,
-                      "FirmwareRequestTest::testFirmwareRequestHbrtToFsp resp: "
-                      "type:%d, magic:0x%.8X, dataSize:%d, structVer:0x%.8X, "
-                      "seqnum:%.8X, msgq:0x%.8X, msgType:0x%.8X, __req:%d, "
-                      "__onlyError:%d, data:0x%.8X, plid:0x%.8X, huid:0x%.8X, "
-                      "rc=%d",
+            TRACDCOMP(g_trac_test,
+                      "FirmwareRequestTest::testFirmwareRequestSbeRetry "
+                      "Response data set 1/2: "
+                      "type:%d, magic:0x%.8X, dataSize:%d, "
+                      "structVer:0x%.8X, seqnum:%.8X, msgq:0x%.8X",
                       l_resp_fw_msg->io_type,
                       l_resp_fw_msg->generic_msg.magic,
                       l_resp_fw_msg->generic_msg.dataSize,
                       l_resp_fw_msg->generic_msg.structVer,
                       l_resp_fw_msg->generic_msg.seqnum,
-                      l_resp_fw_msg->generic_msg.msgq,
+                      l_resp_fw_msg->generic_msg.msgq);
+
+            TRACDCOMP(g_trac_test,
+                      "FirmwareRequestTest::testFirmwareRequestSbeRetry "
+                      "Response data set 2/2: "
+                      "msgType:0x%.8X, __req:%d, __onlyError:%d, "
+                      "data:0x%.8X, plid:0x%.8X, huid:0x%.8X, rc=%d",
                       l_resp_fw_msg->generic_msg.msgType,
                       l_resp_fw_msg->generic_msg.__req,
                       l_resp_fw_msg->generic_msg.__onlyError,
@@ -294,9 +369,10 @@ class FirmwareRequestTest : public CxxTest::TestSuite
                       0x0000FFFF & l_resp_fw_msg->generic_msg.data,
                       rc);
 
+
             if (rc != 5)
             {
-                TS_FAIL("FirmwareRequestTest::testFirmwareRequestHbrtToFsp: "
+                TS_FAIL("FirmwareRequestTest::testFirmwareRequestSbeRetry: "
                         "firmware_request - HBRT to FSP failed - "
                         "returned wrong value");
             }
@@ -304,7 +380,7 @@ class FirmwareRequestTest : public CxxTest::TestSuite
             if (l_resp_fw_msg->io_type !=
                                 hostInterfaces::HBRT_FW_MSG_HBRT_FSP_RESP)
             {
-                TS_FAIL("FirmwareRequestTest::testFirmwareRequestHbrtToFsp: "
+                TS_FAIL("FirmwareRequestTest::testFirmwareRequestSbeRetry: "
                         "firmware_request - HBRT to FSP failed - "
                         "received incorrect msg_type");
             }
@@ -312,56 +388,56 @@ class FirmwareRequestTest : public CxxTest::TestSuite
             if (l_resp_fw_msg->generic_msg.magic !=
                                 GenericFspMboxMessage_t::MAGIC_NUMBER)
             {
-                TS_FAIL("FirmwareRequestTest::testFirmwareRequestHbrtToFsp: "
+                TS_FAIL("FirmwareRequestTest::testFirmwareRequestSbeRetry: "
                         "firmware_request - HBRT to FSP failed - "
                         "received incorrect magic");
             }
 
             if (l_resp_fw_msg->generic_msg.dataSize != 32)
             {
-                TS_FAIL("FirmwareRequestTest::testFirmwareRequestHbrtToFsp: "
+                TS_FAIL("FirmwareRequestTest::testFirmwareRequestSbeRetry: "
                         "firmware_request - HBRT to FSP failed - "
                         "received incorrect datSize");
             }
 
             if (l_resp_fw_msg->generic_msg.structVer != 0x020)
             {
-                TS_FAIL("FirmwareRequestTest::testFirmwareRequestHbrtToFsp: "
+                TS_FAIL("FirmwareRequestTest::testFirmwareRequestSbeRetry: "
                         "firmware_request - HBRT to FSP failed - "
                         "received incorrect structVer");
             }
 
             if (l_resp_fw_msg->generic_msg.seqnum != 0x301)
             {
-                TS_FAIL("FirmwareRequestTest::testFirmwareRequestHbrtToFsp: "
+                TS_FAIL("FirmwareRequestTest::testFirmwareRequestSbeRetry: "
                         "firmware_request - HBRT to FSP failed - "
                         "received incorrect seqnum");
             }
 
-            if (l_resp_fw_msg->generic_msg.msgq != 0x400)
+            if (l_resp_fw_msg->generic_msg.msgq != 0x300)
             {
-                TS_FAIL("FirmwareRequestTest::testFirmwareRequestHbrtToFsp: "
+                TS_FAIL("FirmwareRequestTest::testFirmwareRequestSbeRetry: "
                         "firmware_request - HBRT to FSP failed - "
                         "received incorrect msgq");
             }
-
-            if (l_resp_fw_msg->generic_msg.msgType != 0x500)
+            if (l_resp_fw_msg->generic_msg.msgType !=
+                GenericFspMboxMessage_t::MSG_SBE_ERROR)
             {
-                TS_FAIL("FirmwareRequestTest::testFirmwareRequestHbrtToFsp: "
+                TS_FAIL("FirmwareRequestTest::testFirmwareRequestSbeRetry: "
                         "firmware_request - HBRT to FSP failed - "
                         "received incorrect msgType");
             }
 
             if (l_resp_fw_msg->generic_msg.data >> 32 != 0x60)
             {
-                TS_FAIL("FirmwareRequestTest::testFirmwareRequestHbrtToFsp: "
+                TS_FAIL("FirmwareRequestTest::testFirmwareRequestSbeRetry: "
                         "firmware_request - HBRT to FSP failed - "
                         "received incorrect errPlid");
             }
 
             if ((0x0000FFFF & l_resp_fw_msg->generic_msg.data) != 0x70)
             {
-                TS_FAIL("FirmwareRequestTest::testFirmwareRequestHbrtToFsp: "
+                TS_FAIL("FirmwareRequestTest::testFirmwareRequestSbeRetry: "
                         "firmware_request - HBRT to FSP failed - "
                         "received incorrect huid");
             }
@@ -370,8 +446,8 @@ class FirmwareRequestTest : public CxxTest::TestSuite
             delete[] l_resp_fw_msg;
             l_req_fw_msg = l_resp_fw_msg = nullptr;
        }
-       TRACFCOMP(g_trac_pnor, EXIT_MRK
-                  "FirmwareRequestTest::testFirmwareRequestHbrtToFsp");
+       TRACFCOMP(g_trac_test, EXIT_MRK
+                  "FirmwareRequestTest::testFirmwareRequestSbeRetry");
 
-    }  // end testFirmwareRequestHbrtToFsp
+    }  // end testFirmwareRequestSbeRetry
 };  // end class FirmwareRequestTest
