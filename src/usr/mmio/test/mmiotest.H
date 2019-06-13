@@ -56,7 +56,7 @@ class MmioTest : public CxxTest::TestSuite
      */
     void testExplrMMIO(void)
     {
-        TS_INFO("testExplrMMIO> Start" );
+        TS_INFO("testExplrMMIO> Start" );        
 
         errlHndl_t l_err = nullptr;
         uint32_t regdata4 = 0;
@@ -164,6 +164,7 @@ class MmioTest : public CxxTest::TestSuite
             return;
         }
 
+#if 0 //@fixme - RTC:211487
         // Write to an "invalid" scom address.  Should
         // return with failure (now that we've set up the error regs).
         // NOTE: Also, writing MMIO_OCMB_UE_DETECTED to this register
@@ -213,6 +214,8 @@ class MmioTest : public CxxTest::TestSuite
             TS_INFO("testExplrMMIO> recieved expected failure on mmio read");
             errlCommit(l_err, CXXTEST_COMP_ID);
         }
+#endif //@fixme - RTC:211487
+
         TS_INFO("testExplrMMIO> Done");
     };
 };
