@@ -55,8 +55,7 @@
 
 /// function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p10_revert_sbe_mcs_setup_FP_t) (
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
-    bool);
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
 
 
 //------------------------------------------------------------------------------

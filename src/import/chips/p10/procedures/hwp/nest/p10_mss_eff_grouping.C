@@ -71,7 +71,11 @@ const uint8_t MCC_ID_7 = 0x7;
 const uint8_t MAX_HTM_QUEUE_PER_MCC = 16;
 
 // Number of ATTR_MEMORY_BAR_REGS elements
-const uint8_t BAR_REGS_ELEMENTS   = 10;
+const uint8_t BAR_REGS_ELEMENTS = fapi2::ENUM_ATTR_MEMORY_BAR_REGS_NUM_BAR_REGS;
+
+const uint8_t BAR_REGS_INDICES  = 2;
+const uint8_t BAR_REGS_DATA_IDX = 0;
+const uint8_t BAR_REGS_MASK_IDX = 1;
 
 // SMF addr bit
 const uint8_t SECURE_MEMORY_BASE_ADDRESS_BIT = 12;
@@ -3942,13 +3946,13 @@ fapi_try_exit:
 /// @brief Set Interleave Granularity in MCMODE0 register
 ///
 /// @param[in]  i_mcBarDataPair  Target pair <MCC, mcBarData>
-/// @param[out] o_memBarRegsData Bar registers data array
+/// @param[out] o_memBarRegs     BAR register attribute data array
 ///
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 ///
 fapi2::ReturnCode setMCMODE0regData(
     const std::vector<std::pair<fapi2::Target<fapi2::TARGET_TYPE_MCC>, mcBarData_t>>& i_mcBarDataPair,
-    uint64_t o_memBarRegsData[NUM_MC_PER_PROC][BAR_REGS_ELEMENTS])
+    fapi2::ATTR_MEMORY_BAR_REGS_Type o_memBarRegs)
 {
     FAPI_DBG("Entering");
     std::map<fapi2::Target<fapi2::TARGET_TYPE_MI>, bool> l_granule_supported;
@@ -4014,14 +4018,14 @@ fapi2::ReturnCode setMCMODE0regData(
             SET_SCOMFIR_MCMODE0_GROUP_ADDRESS_INTERLEAVE_GRANULARITY((uint64_t)0xF,
                     l_mcmode0_scom_mask_data);
             // Save to buffer
-            o_memBarRegsData[l_miPos][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCMODE0] = l_mcmode0_scom_data;
-            o_memBarRegsData[l_miPos][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCMODE0_mask] = l_mcmode0_scom_mask_data;
+            o_memBarRegs[l_miPos][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCMODE0][BAR_REGS_DATA_IDX] = l_mcmode0_scom_data;
+            o_memBarRegs[l_miPos][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCMODE0][BAR_REGS_MASK_IDX] = l_mcmode0_scom_mask_data;
         }
         // If not supported, set mask to all 0s so MODE0 is untouched
         else
         {
-            o_memBarRegsData[l_miPos][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCMODE0] = 0;
-            o_memBarRegsData[l_miPos][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCMODE0_mask] = 0;
+            o_memBarRegs[l_miPos][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCMODE0][BAR_REGS_DATA_IDX] = 0;
+            o_memBarRegs[l_miPos][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCMODE0][BAR_REGS_MASK_IDX] = 0;
         }
     }
 
@@ -4033,20 +4037,22 @@ fapi_try_exit:
 ///
 /// @brief Set MCFGP register data
 ///
-/// @param[in] i_target          Reference to MCC chiplet target
+/// @param[in]  i_target         Reference to MCC chiplet target
 /// @param[in]  i_mccBarData     MCC Bar data
-/// @param[out] o_memBarRegsData Bar registers data array
+/// @param[out] o_memBarRegs     BAR register attribute data array
 ///
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 ///
-fapi2::ReturnCode setMCFGPregData(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target,
-                                  const mcBarData_t& i_mccBarData,
-                                  uint64_t o_memBarRegsData[NUM_MC_PER_PROC][BAR_REGS_ELEMENTS])
+fapi2::ReturnCode setMCFGPregData(
+    const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target,
+    const mcBarData_t& i_mccBarData,
+    fapi2::ATTR_MEMORY_BAR_REGS_Type o_memBarRegs)
 {
     FAPI_DBG("Entering");
     fapi2::buffer<uint64_t> l_mcfgp_scom_data(0);
     uint8_t l_miPos = 0;
     uint8_t l_mccPos = 0;
+    uint8_t l_reg_idx = fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGP0;
 
     // Get MI target
     fapi2::Target<fapi2::TARGET_TYPE_MI> l_mi_target = i_target.getParent<fapi2::TARGET_TYPE_MI>();
@@ -4067,34 +4073,34 @@ fapi2::ReturnCode setMCFGPregData(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i
         // Group base address
         SET_SCOMFIR_MCFGP0_0_GROUP_BASE_ADDRESS(i_mccBarData.MCFGP_groupBaseAddr,
                                                 l_mcfgp_scom_data);
-    }
 
-    // Channel per group
-    SET_SCOMFIR_MCFGP0_0_MC_CHANNELS_PER_GROUP(i_mccBarData.MCFGP_chan_per_group,
-            l_mcfgp_scom_data);
+        // Channel per group
+        SET_SCOMFIR_MCFGP0_0_MC_CHANNELS_PER_GROUP(i_mccBarData.MCFGP_chan_per_group,
+                l_mcfgp_scom_data);
 
-    // Channel 0 group id
-    SET_SCOMFIR_MCFGP0_0_GROUP_MEMBER_IDENTIFICATION(i_mccBarData.MCFGP_chan0_group_member_id,
-            l_mcfgp_scom_data);
+        // Channel 0 group id
+        SET_SCOMFIR_MCFGP0_0_GROUP_MEMBER_IDENTIFICATION(i_mccBarData.MCFGP_chan0_group_member_id,
+                l_mcfgp_scom_data);
 
-    // R0 Configuration group size
-    SET_SCOMFIR_MCFGP0_R0_CONFIGURATION_GROUP_SIZE(mss::exp::ib::EXPLR_IB_BAR_SIZE,
-            l_mcfgp_scom_data);
-    // R0 MMIO group size
-    SET_SCOMFIR_MCFGP0_R0_MMIO_GROUP_SIZE(mss::exp::ib::EXPLR_IB_BAR_SIZE, l_mcfgp_scom_data);
+        // R0 Configuration group size
+        SET_SCOMFIR_MCFGP0_R0_CONFIGURATION_GROUP_SIZE(mss::exp::ib::EXPLR_IB_BAR_SIZE,
+                l_mcfgp_scom_data);
+        // R0 MMIO group size
+        SET_SCOMFIR_MCFGP0_R0_MMIO_GROUP_SIZE(mss::exp::ib::EXPLR_IB_BAR_SIZE, l_mcfgp_scom_data);
 
-    // Save to buffer
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_mccPos),
-             "Error getting MCC ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
+        // Save to buffer
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_mccPos),
+                 "Error getting MCC ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
+                 (uint64_t)fapi2::current_err);
 
-    if (l_mccPos % 2 == 0)
-    {
-        o_memBarRegsData[l_miPos][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGP0] = l_mcfgp_scom_data;
-    }
-    else
-    {
-        o_memBarRegsData[l_miPos][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGP1] = l_mcfgp_scom_data;
+
+        if (l_mccPos % 2)
+        {
+            l_reg_idx = fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGP1;
+        }
+
+        o_memBarRegs[l_miPos][l_reg_idx][BAR_REGS_DATA_IDX] = l_mcfgp_scom_data;
+        o_memBarRegs[l_miPos][l_reg_idx][BAR_REGS_MASK_IDX] = 0xFFFFFFFFFFFFFFFFULL;
     }
 
 fapi_try_exit:
@@ -4107,18 +4113,20 @@ fapi_try_exit:
 ///
 /// @param[in]  i_target         Reference to MCC chiplet target
 /// @param[in]  i_mccBarData     MCC Bar data
-/// @param[out] o_memBarRegsData Bar registers data array
+/// @param[out] o_memBarRegs     BAR register attribute data array
 ///
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 ///
-fapi2::ReturnCode setMCFGPMregData(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target,
-                                   const mcBarData_t& i_mccBarData,
-                                   uint64_t o_memBarRegsData[NUM_MC_PER_PROC][BAR_REGS_ELEMENTS])
+fapi2::ReturnCode setMCFGPMregData(
+    const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target,
+    const mcBarData_t& i_mccBarData,
+    fapi2::ATTR_MEMORY_BAR_REGS_Type o_memBarRegs)
 {
     FAPI_DBG("Entering");
     fapi2::buffer<uint64_t> l_mcfgpm_scom_data(0);
     uint8_t l_mccPos = 0;
     uint8_t l_miPos = 0;
+    uint8_t l_reg_idx = fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGPM0;
 
     // Get MI target
     fapi2::Target<fapi2::TARGET_TYPE_MI> l_mi_target = i_target.getParent<fapi2::TARGET_TYPE_MI>();
@@ -4140,20 +4148,19 @@ fapi2::ReturnCode setMCFGPMregData(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& 
         // Group size
         SET_SCOMFIR_MCFGPM0_GROUP_SIZE(i_mccBarData.MCFGPM_group_size,
                                        l_mcfgpm_scom_data);
-    }
 
-    // Save to buffer
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_mccPos),
-             "Error getting MCC ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
+        // Save to buffer
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_mccPos),
+                 "Error getting MCC ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
+                 (uint64_t)fapi2::current_err);
 
-    if (l_mccPos % 2 == 0)
-    {
-        o_memBarRegsData[l_miPos][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGPM0] = l_mcfgpm_scom_data;
-    }
-    else
-    {
-        o_memBarRegsData[l_miPos][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGPM1] = l_mcfgpm_scom_data;
+        if (l_mccPos % 2)
+        {
+            l_reg_idx = fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGPM1;
+        }
+
+        o_memBarRegs[l_miPos][l_reg_idx][BAR_REGS_DATA_IDX] = l_mcfgpm_scom_data;
+        o_memBarRegs[l_miPos][l_reg_idx][BAR_REGS_MASK_IDX] = 0xFFFFFFFFFFFFFFFFULL;
     }
 
 fapi_try_exit:
@@ -4166,18 +4173,20 @@ fapi_try_exit:
 ///
 /// @param[in]  i_target         Reference to MCC chiplet target
 /// @param[in]  i_mccBarData     MCC Bar data
-/// @param[out] o_memBarRegsData Bar registers data array
+/// @param[out] o_memBarRegs     BAR register attribute data array
 ///
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 ///
-fapi2::ReturnCode setMCFGPAregData(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target,
-                                   const mcBarData_t& i_mccBarData,
-                                   uint64_t o_memBarRegsData[NUM_MC_PER_PROC][BAR_REGS_ELEMENTS])
+fapi2::ReturnCode setMCFGPAregData(
+    const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target,
+    const mcBarData_t& i_mccBarData,
+    fapi2::ATTR_MEMORY_BAR_REGS_Type o_memBarRegs)
 {
     FAPI_DBG("Entering");
     fapi2::buffer<uint64_t> l_mcfgpa_scom_data(0);
     uint8_t l_mccPos = 0;
     uint8_t l_miPos = 0;
+    uint8_t l_reg_idx = fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGP0A;
 
     // Get MI target
     fapi2::Target<fapi2::TARGET_TYPE_MI> l_mi_target = i_target.getParent<fapi2::TARGET_TYPE_MI>();
@@ -4215,18 +4224,22 @@ fapi2::ReturnCode setMCFGPAregData(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& 
                                               l_mcfgpa_scom_data);
     }
 
-    // Save to buffer
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_mccPos),
-             "Error getting MCC ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
+    if ((i_mccBarData.MCFGPA_HOLE_valid[0] == true) ||
+        (i_mccBarData.MCFGPA_SMF_valid == true))
+    {
+        // Save to buffer
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_mccPos),
+                 "Error getting MCC ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
+                 (uint64_t)fapi2::current_err);
 
-    if (l_mccPos % 2 == 0)
-    {
-        o_memBarRegsData[l_miPos][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGP0A] = l_mcfgpa_scom_data;
-    }
-    else
-    {
-        o_memBarRegsData[l_miPos][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGP1A] = l_mcfgpa_scom_data;
+
+        if (l_mccPos % 2)
+        {
+            l_reg_idx = fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGP1A;
+        }
+
+        o_memBarRegs[l_miPos][l_reg_idx][BAR_REGS_DATA_IDX] = l_mcfgpa_scom_data;
+        o_memBarRegs[l_miPos][l_reg_idx][BAR_REGS_MASK_IDX] = 0xFFFFFFFFFFFFFFFFULL;
     }
 
 fapi_try_exit:
@@ -4239,18 +4252,20 @@ fapi_try_exit:
 ///
 /// @param[in]  i_target         Reference to MCC chiplet target
 /// @param[in]  i_mccBarData     MCC Bar data
-/// @param[out] o_memBarRegsData Bar registers data array
+/// @param[out] o_memBarRegs     BAR register attribute data array
 ///
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 ///
-fapi2::ReturnCode setMCFGPMAregData(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target,
-                                    const mcBarData_t& i_mccBarData,
-                                    uint64_t o_memBarRegsData[NUM_MC_PER_PROC][BAR_REGS_ELEMENTS])
+fapi2::ReturnCode setMCFGPMAregData(
+    const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target,
+    const mcBarData_t& i_mccBarData,
+    fapi2::ATTR_MEMORY_BAR_REGS_Type o_memBarRegs)
 {
     FAPI_DBG("Entering");
     fapi2::buffer<uint64_t> l_mcfgpma_scom_data(0);
     uint8_t l_mccPos = 0;
     uint8_t l_miPos = 0;
+    uint8_t l_reg_idx = fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGPM0A;
 
     fapi2::Target<fapi2::TARGET_TYPE_MI> l_mi_target = i_target.getParent<fapi2::TARGET_TYPE_MI>();
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_mi_target, l_miPos),
@@ -4287,18 +4302,22 @@ fapi2::ReturnCode setMCFGPMAregData(const fapi2::Target<fapi2::TARGET_TYPE_MCC>&
                                                l_mcfgpma_scom_data);
     }
 
-    // Save to buffer
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_mccPos),
-             "Error getting MCC ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
+    if ((i_mccBarData.MCFGPMA_HOLE_valid[0] == true) ||
+        (i_mccBarData.MCFGPMA_SMF_valid == true))
+    {
+        // Save to buffer
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_mccPos),
+                 "Error getting MCC ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
+                 (uint64_t)fapi2::current_err);
 
-    if (l_mccPos % 2 == 0)
-    {
-        o_memBarRegsData[l_miPos][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGPM0A] = l_mcfgpma_scom_data;
-    }
-    else
-    {
-        o_memBarRegsData[l_miPos][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGPM1A] = l_mcfgpma_scom_data;
+        if (l_mccPos % 2)
+        {
+            l_reg_idx = fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGPM1A;
+
+        }
+
+        o_memBarRegs[l_miPos][l_reg_idx][BAR_REGS_DATA_IDX] = l_mcfgpma_scom_data;
+        o_memBarRegs[l_miPos][l_reg_idx][BAR_REGS_MASK_IDX] = 0xFFFFFFFFFFFFFFFFULL;
     }
 
 fapi_try_exit:
@@ -4310,13 +4329,13 @@ fapi_try_exit:
 /// @brief Set BAR registers data.
 ///
 /// @param[in] i_mccBarDataPair  Target pair <target, data>
-/// @param[in] o_memBarRegsData  MC BAR reg data
+/// @param[out] o_memBarRegs     BAR register attribute data array
 ///
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 ///
 fapi2::ReturnCode setBarRegsData(
     const std::vector<std::pair<fapi2::Target<fapi2::TARGET_TYPE_MCC>, mcBarData_t>>& i_mccBarDataPair,
-    uint64_t o_memBarRegsData[NUM_MC_PER_PROC][BAR_REGS_ELEMENTS])
+    fapi2::ATTR_MEMORY_BAR_REGS_Type o_memBarRegs)
 {
     FAPI_DBG("Entering");
 
@@ -4325,12 +4344,15 @@ fapi2::ReturnCode setBarRegsData(
     {
         for (uint8_t jj = 0; jj < BAR_REGS_ELEMENTS; jj++)
         {
-            o_memBarRegsData[ii][jj] = 0;
+            for (uint8_t kk = 0; kk < BAR_REGS_INDICES; kk++)
+            {
+                o_memBarRegs[ii][jj][kk] = 0;
+            }
         }
     }
 
     // 1. ---- Get MCMODE0 reg data -----
-    FAPI_TRY(setMCMODE0regData(i_mccBarDataPair, o_memBarRegsData),
+    FAPI_TRY(setMCMODE0regData(i_mccBarDataPair, o_memBarRegs),
              "setMCMODE0regData() returns an error. l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 
@@ -4345,12 +4367,12 @@ fapi2::ReturnCode setBarRegsData(
         FAPI_INF("Set MC register with data from MCC %s", l_targetStr);
 
         // 2. ---- Set MCFGP reg data -----
-        FAPI_TRY(setMCFGPregData(l_target, l_data, o_memBarRegsData),
+        FAPI_TRY(setMCFGPregData(l_target, l_data, o_memBarRegs),
                  "setMCFGPregData() returns an error. l_rc 0x%.8X",
                  (uint64_t)fapi2::current_err);
 
         // 3. ---- Set MCFGPM reg data -----
-        FAPI_TRY(setMCFGPMregData(l_target, l_data, o_memBarRegsData),
+        FAPI_TRY(setMCFGPMregData(l_target, l_data, o_memBarRegs),
                  "setMCFGPMregData() returns an error. l_rc 0x%.8X",
                  (uint64_t)fapi2::current_err);
 
@@ -4363,7 +4385,7 @@ fapi2::ReturnCode setBarRegsData(
                     .set_SMF_VALID(l_data.MCFGPA_SMF_valid),
                     "Error: MCFGPA HOLE1 and SMF are both valid, settings will overlap");
 
-        FAPI_TRY(setMCFGPAregData(l_target, l_data, o_memBarRegsData),
+        FAPI_TRY(setMCFGPAregData(l_target, l_data, o_memBarRegs),
                  "setMCFGPAregData() returns an error. l_rc 0x%.8X",
                  (uint64_t)fapi2::current_err);
 
@@ -4376,7 +4398,7 @@ fapi2::ReturnCode setBarRegsData(
                     .set_SMF_VALID(l_data.MCFGPMA_SMF_valid),
                     "Error: MCFGPMA HOLE1 and SMF are both valid, settings will overlap");
 
-        FAPI_TRY(setMCFGPMAregData(l_target, l_data, o_memBarRegsData),
+        FAPI_TRY(setMCFGPMAregData(l_target, l_data, o_memBarRegs),
                  "setMCFGPMAregData() returns an error. l_rc 0x%.8X",
                  (uint64_t)fapi2::current_err);
 
@@ -4389,23 +4411,40 @@ fapi_try_exit:
 
 ///
 /// @brief Display the values of the BAR registers (ATTR_MEMORY_BAR_REGS)
-/// @param[in]  i_memBarRegsData   BAR reg data
+/// @param[in]  i_memBarRegs     BAR register attribute data array
 /// @return void
 ///
-void displayMemoryBarRegs(const uint64_t i_memBarRegsData[NUM_MC_PER_PROC][BAR_REGS_ELEMENTS])
+void displayMemoryBarRegs(const fapi2::ATTR_MEMORY_BAR_REGS_Type i_memBarRegs)
 {
     for (uint8_t ii = 0; ii < NUM_MC_PER_PROC; ii++)
     {
-        FAPI_INF("MI %d:  MCFGP0   0x%.16llX", ii, i_memBarRegsData[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGP0]);
-        FAPI_INF("       MCFGP1   0x%.16llX", i_memBarRegsData[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGP1]);
-        FAPI_INF("       MCFGPM0  0x%.16llX", i_memBarRegsData[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGPM0]);
-        FAPI_INF("       MCFGPM1  0x%.16llX", i_memBarRegsData[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGPM1]);
-        FAPI_INF("       MCFGP0A  0x%.16llX", i_memBarRegsData[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGP0A]);
-        FAPI_INF("       MCFGP1A  0x%.16llX", i_memBarRegsData[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGP1A]);
-        FAPI_INF("       MCFGPM0A 0x%.16llX", i_memBarRegsData[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGPM0A]);
-        FAPI_INF("       MCFGPM1A 0x%.16llX", i_memBarRegsData[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGPM1A]);
-        FAPI_INF("       MCMODE0  0x%.16llX", i_memBarRegsData[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCMODE0]);
-        FAPI_INF("       MCMODE0_mask 0x%.16llX", i_memBarRegsData[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCMODE0_mask]);
+        FAPI_INF("MI %d:  MCFGP0   0x%.16llX 0x%.16llX", ii,
+                 i_memBarRegs[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGP0][BAR_REGS_DATA_IDX],
+                 i_memBarRegs[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGP0][BAR_REGS_MASK_IDX]);
+        FAPI_INF("       MCFGP1   0x%.16llX 0x%.16llX",
+                 i_memBarRegs[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGP1][BAR_REGS_DATA_IDX],
+                 i_memBarRegs[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGP1][BAR_REGS_MASK_IDX]);
+        FAPI_INF("       MCFGPM0  0x%.16llX 0x%.16llX",
+                 i_memBarRegs[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGPM0][BAR_REGS_DATA_IDX],
+                 i_memBarRegs[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGPM0][BAR_REGS_MASK_IDX]);
+        FAPI_INF("       MCFGPM1  0x%.16llX 0x%.16llX",
+                 i_memBarRegs[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGPM1][BAR_REGS_DATA_IDX],
+                 i_memBarRegs[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGPM1][BAR_REGS_MASK_IDX]);
+        FAPI_INF("       MCFGP0A  0x%.16llX 0x%.16llX",
+                 i_memBarRegs[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGP0A][BAR_REGS_DATA_IDX],
+                 i_memBarRegs[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGP0A][BAR_REGS_MASK_IDX]);
+        FAPI_INF("       MCFGP1A  0x%.16llX 0x%.16llX",
+                 i_memBarRegs[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGP1A][BAR_REGS_DATA_IDX],
+                 i_memBarRegs[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGP1A][BAR_REGS_MASK_IDX]);
+        FAPI_INF("       MCFGPM0A 0x%.16llX 0x%.16llX",
+                 i_memBarRegs[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGPM0A][BAR_REGS_DATA_IDX],
+                 i_memBarRegs[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGPM0A][BAR_REGS_MASK_IDX]);
+        FAPI_INF("       MCFGPM1A 0x%.16llX 0x%.16llX",
+                 i_memBarRegs[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGPM1A][BAR_REGS_DATA_IDX],
+                 i_memBarRegs[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGPM1A][BAR_REGS_MASK_IDX]);
+        FAPI_INF("       MCMODE0  0x%.16llX 0x%.16llX",
+                 i_memBarRegs[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCMODE0][BAR_REGS_DATA_IDX],
+                 i_memBarRegs[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCMODE0][BAR_REGS_MASK_IDX]);
     }
 
     return;
@@ -4428,7 +4467,7 @@ fapi2::ReturnCode p10_mss_eff_grouping(
     EffGroupingData l_groupData;
     bool l_mirrorIsOn = false;
     // BAR registers values for ATTR_MEMORY_BAR_REGS
-    uint64_t l_memoryBarRegsData[NUM_MC_PER_PROC][BAR_REGS_ELEMENTS];
+    fapi2::ATTR_MEMORY_BAR_REGS_Type l_memoryBarRegs;
 
     // Get MCC chiplets
     auto l_mccChiplets = i_target.getChildren<fapi2::TARGET_TYPE_MCC>();
@@ -4554,14 +4593,14 @@ fapi2::ReturnCode p10_mss_eff_grouping(
              (uint64_t)fapi2::current_err);
 
     // Set MC BAR registers data
-    FAPI_TRY(setBarRegsData(l_mccBarDataPair, l_memoryBarRegsData),
+    FAPI_TRY(setBarRegsData(l_mccBarDataPair, l_memoryBarRegs),
              "setBarRegsData() returns error, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 
     // Write MC BAR registers data to ATTR_MEMORY_BAR_REGS
-    displayMemoryBarRegs(l_memoryBarRegsData);
+    displayMemoryBarRegs(l_memoryBarRegs);
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEMORY_BAR_REGS, i_target,
-                           l_memoryBarRegsData),
+                           l_memoryBarRegs),
              "Error setting ATTR_MEMORY_BAR_REGS, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 

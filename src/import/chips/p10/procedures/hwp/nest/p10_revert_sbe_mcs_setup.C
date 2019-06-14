@@ -111,78 +111,56 @@ p10_revert_sbe_mcs_setup(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     FAPI_DBG("Start");
-    fapi2::ATTR_SYSTEM_IPL_PHASE_Type     l_ipl_type;
-    fapi2::ATTR_PROC_SBE_MASTER_CHIP_Type l_is_master_sbe;
-    fapi2::ATTR_IS_MPIPL_Type             l_is_mpipl;
-    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_SBE_MASTER_CHIP,
-                           i_target,
-                           l_is_master_sbe),
-             "Error from FAPI_ATTR_GET (ATTR_PROC_SBE_MASTER_CHIP)");
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_MPIPL,
-                           FAPI_SYSTEM,
-                           l_is_mpipl),
-             "Error from FAPI_ATTR_GET (ATTR_IS_MPIPL)");
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_IPL_PHASE,
-                           FAPI_SYSTEM,
-                           l_ipl_type),
-             "Error from FAPI_ATTR_GET (ATTR_SYSTEM_IPL_PHASE)");
-
-    if ((l_ipl_type == fapi2::ENUM_ATTR_SYSTEM_IPL_PHASE_HB_IPL) &&
-        (l_is_master_sbe == fapi2::ENUM_ATTR_PROC_SBE_MASTER_CHIP_TRUE) &&
-        (l_is_mpipl == fapi2::ENUM_ATTR_IS_MPIPL_FALSE))
-    {
-        auto l_mi_chiplets = i_target.getChildren<fapi2::TARGET_TYPE_MI>();
-        fapi2::ATTR_PROC_SBE_MCS_SETUP_SELECTED_MC_Type l_mc_setup;
-        fapi2::ATTR_PROC_SBE_MCS_SETUP_SELECTED_MC_Type l_mc_cplt_id;
-        bool l_revert_flag = false;
+    auto l_mi_chiplets = i_target.getChildren<fapi2::TARGET_TYPE_MI>();
+    fapi2::ATTR_PROC_SBE_MCS_SETUP_SELECTED_MC_Type l_mc_setup;
+    fapi2::ATTR_PROC_SBE_MCS_SETUP_SELECTED_MC_Type l_mc_cplt_id;
+    bool l_revert_flag = false;
 
 #ifdef __PPE__
 
-        if (!l_mi_chiplets.size())
-        {
-            FAPI_ASSERT(false,
-                        fapi2::P10_REVERT_SBE_MCS_SETUP_NO_MI_TARGETS_FOUND()
-                        .set_CHIP(i_target)
-                        "No functional MC unit target found on master chip");
-        }
+    if (!l_mi_chiplets.size())
+    {
+        FAPI_ASSERT(false,
+                    fapi2::P10_REVERT_SBE_MCS_SETUP_NO_MI_TARGETS_FOUND()
+                    .set_CHIP(i_target)
+                    "No functional MC unit target found on master chip");
+    }
 
 #endif
 
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_SBE_MCS_SETUP_SELECTED_MC,
-                               i_target,
-                               l_mc_setup),
-                 "Error from FAPI_ATTR_GET (ATTR_PROC_SBE_MCS_SETUP_SELECTED_MC)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_SBE_MCS_SETUP_SELECTED_MC,
+                           i_target,
+                           l_mc_setup),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_SBE_MCS_SETUP_SELECTED_MC)");
 
-        if(l_mi_chiplets.size())
+    if (l_mi_chiplets.size())
+    {
+        for (const auto& l_tgt_mi : l_mi_chiplets)
         {
-            for (auto l_tgt_mi : l_mi_chiplets)
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
+                                   l_tgt_mi,
+                                   l_mc_cplt_id),
+                     "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+
+            if (l_mc_setup == l_mc_cplt_id)
             {
-                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
-                                       l_tgt_mi,
-                                       l_mc_cplt_id),
-                         "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
-
-                if(l_mc_setup == l_mc_cplt_id)
-                {
-                    l_revert_flag = true;
-                    FAPI_TRY(revert_mc_hb_dcbz_config(i_target, l_tgt_mi),
-                             "Error from revert_mi_hb_dcbz_config (MI)");
-                    break;
-                }
+                l_revert_flag = true;
+                FAPI_TRY(revert_mc_hb_dcbz_config(i_target, l_tgt_mi),
+                         "Error from revert_mi_hb_dcbz_config (MI)");
+                break;
             }
+        }
 
-            FAPI_ASSERT(l_revert_flag,
-                        fapi2::P10_REVERT_SBE_MCS_SETUP_SELECTED_MC_NOT_FOUND()
-                        .set_TARGET(i_target)
-                        .set_ATTR_PROC_SBE_MCS_SETUP_SELECTED_MC(l_mc_setup),
-                        "Could not find MC that was setup");
-        }
-        else
-        {
-            FAPI_INF("No MI targets found! Nothing to do!");
-        }
+        FAPI_ASSERT(l_revert_flag,
+                    fapi2::P10_REVERT_SBE_MCS_SETUP_SELECTED_MC_NOT_FOUND()
+                    .set_TARGET(i_target)
+                    .set_ATTR_PROC_SBE_MCS_SETUP_SELECTED_MC(l_mc_setup),
+                    "Could not find MC that was setup");
+    }
+    else
+    {
+        FAPI_INF("No MI targets found! Nothing to do!");
     }
 
 fapi_try_exit:
