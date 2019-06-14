@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p10/procedures/hwp/core/p10_sbe_instruct_start.C $ */
+/* $Source: src/import/chips/p10/procedures/hwp/nest/p10_sbe_purge_hb.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,49 +22,58 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-///----------------------------------------------------------------------------
 ///
-/// @file p10_sbe_instruct_start.C
-///
-/// @brief Start instructions via p10_thread control
-///        Use to start thread instruction execution as part of
-//         istep proc_sbe_instruct_start / proc_exit_cache_contained
-///
-/// *HWP HW Maintainer: Nicholas Landi <nlandi@ibm.com>
-/// *HWP FW Maintainer: Raja Das <rajadas2@in.ibm.com>
-/// *HWP Consumed by  : SBE
-///----------------------------------------------------------------------------
+/// @file p10_sbe_purge_hb.H
+/// @brief Purges active/backing caches and resets contained mode
+///        configuration, as part of HB cache contained
+///        exit sequence
+
+//
+// *HWP HW Maintainer: Nicholas Landi <nlandi@ibm.com>
+// *HWP FW Maintainer: Raja Das <rajadas2@in.ibm.com>
+// *HWP Consumed by  : SBE
+//
+
+#ifndef _P10_SBE_PURGE_HB_H_
+#define _P10_SBE_PURGE_HB_H_
 
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include <p10_sbe_instruct_start.H>
+#include <fapi2.H>
 
 //------------------------------------------------------------------------------
-// Function definitions
+// Structure definitions
 //------------------------------------------------------------------------------
 
+// Function pointer typedef definition for HWP call support
+typedef fapi2::ReturnCode (*p10_sbe_purge_hb_FP_t)(
+    const std::vector<fapi2::Target<fapi2::TARGET_TYPE_CORE>>&,
+    const std::vector<fapi2::Target<fapi2::TARGET_TYPE_CORE>>&);
 
-fapi2::ReturnCode p10_sbe_instruct_start(
-    const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target,
-    const ThreadSpecifier i_thread_mask)
+//------------------------------------------------------------------------------
+// Function prototypes
+//------------------------------------------------------------------------------
+extern "C"
 {
-    fapi2::buffer<uint64_t> l_ras_status;
-    uint64_t l_thread_state;
-    FAPI_DBG("Entering ...");
 
-    FAPI_INF("Starting instruction using thread mask: 0x%X",
-             static_cast<uint8_t>(i_thread_mask));
+///
+/// @brief Purges active/backing caches and resets contained mode
+///        configuration, as part of HB cache contained
+///        exit sequence
+///
+/// @param[in] i_active_core_targets   Set of targets to process which are
+///                                    associated with active cores
+///                                    (running HB code)
+/// @param[in] i_backing_cache_targets Set of targets to process which are
+///                                    associated with backing caches
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+///
+    fapi2::ReturnCode p10_sbe_purge_hb(
+        const std::vector<fapi2::Target<fapi2::TARGET_TYPE_CORE>>& i_active_core_targets,
+        const std::vector<fapi2::Target<fapi2::TARGET_TYPE_CORE>>& i_backing_cache_targets);
 
-    FAPI_TRY(p10_thread_control(i_target,
-                                i_thread_mask,
-                                PTC_CMD_START,
-                                false,
-                                l_ras_status,
-                                l_thread_state),
-             "Error from p10_thread_control");
+} // extern "C"
 
-fapi_try_exit:
-    FAPI_DBG("Exiting ...");
-    return fapi2::current_err;
-}
+#endif // _P10_SBE_PURGE_HB_H_

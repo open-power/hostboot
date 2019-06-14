@@ -26,9 +26,9 @@
 ///
 /// @file p10_sbe_instruct_start.H
 ///
-/// @brief Issues a start instruction using p10_thread control
+/// @brief Start instructions via p10_thread control
 ///        Use to start thread instruction execution as part of
-//         istep 5.2
+//         istep proc_sbe_instruct_start / proc_exit_cache_contained
 ///
 /// *HWP HW Maintainer: Nicholas Landi <nlandi@ibm.com>
 /// *HWP FW Maintainer: Raja Das <rajadas2@in.ibm.com>
@@ -45,8 +45,9 @@
 #include <fapi2.H>
 #include <p10_thread_control.H>
 
-typedef fapi2::ReturnCode
-(*p10_sbe_instruct_start_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_CORE>&);
+typedef fapi2::ReturnCode (*p10_sbe_instruct_start_FP_t)(
+    const fapi2::Target<fapi2::TARGET_TYPE_CORE>&,
+    const ThreadSpecifier);
 
 //------------------------------------------------------------------------------
 // Function prototypes
@@ -54,15 +55,16 @@ typedef fapi2::ReturnCode
 extern "C"
 {
 ///
-/// @brief Calls thread_control to start instruction on master core, thread 0.
-///        This is to be called during IPL (istep 5.2)
+/// @brief Start instructions for specified threads on a single core
 ///
-/// @param[in] i_target   Reference to core target
+/// @param[in] i_target      Reference to core target
+/// @param[in] i_thread_mask Threads to start
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code
 ///
     fapi2::ReturnCode p10_sbe_instruct_start(
-        const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target);
+        const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target,
+        const ThreadSpecifier i_thread_mask);
 
 } // extern "C"
 

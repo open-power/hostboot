@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/import/chips/p10/procedures/hwp/nest/p10_exit_cache_contained.mk $
+# $Source: src/import/chips/p10/procedures/hwp/nest/p10_sbe_exit_cache_contained.mk $
 #
 # OpenPOWER HostBoot Project
 #
@@ -22,9 +22,6 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-PROCEDURE=p10_exit_cache_contained
-OBJS+=p10_fbc_utils.o
-OBJS+=p10_scominfo.o
-$(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/common/scominfo/)
-$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/common/scominfo/)
+PROCEDURE=p10_sbe_exit_cache_contained
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/procedures/hwp/core/)
 $(call BUILD_PROCEDURE)
