@@ -341,12 +341,12 @@
           are considered big or little endian.
         </description>
         <valueType>uint8</valueType>
-        <initToZero></initToZero>
         <enum>
             LITTLE_ENDIAN = 0,
             BIG_ENDIAN = 1
         </enum>
-        <writeable/>
+        <platInit/>
+        <default>LITTLE_ENDIAN</default>
     </attribute>
 
     <attribute>
