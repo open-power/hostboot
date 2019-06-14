@@ -292,7 +292,6 @@ extern "C"
 
             if (l_rc)
             {
-                l_scom.setAddr(FAILED_TRANSLATION);
                 break;
             }
 
@@ -621,6 +620,11 @@ extern "C"
 
         }
         while(0);
+
+        if (l_rc)
+        {
+            l_scom.setAddr(FAILED_TRANSLATION);
+        }
 
         return l_scom.getAddr();
     }
