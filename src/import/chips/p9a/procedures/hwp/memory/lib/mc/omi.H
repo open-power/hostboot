@@ -470,10 +470,11 @@ fapi_try_exit:
 /// @tparam T the fapi2 target type of the target
 /// @tparam TT the class traits for the omi
 /// @param[in] i_target the OMI target to operate on
+/// @param[in] i_train_mode training step to enable
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template< mss::proc_type PROC = DEFAULT_PROC_TYPE, fapi2::TargetType T, typename TT = omiTraits<T, PROC>>
-fapi2::ReturnCode setup_mc_config0_helper(const fapi2::Target<T>& i_target)
+fapi2::ReturnCode setup_mc_config0_helper(const fapi2::Target<T>& i_target, const uint8_t i_train_mode)
 {
     // The value is 0x8200040000152824
     fapi2::buffer<uint64_t> l_val;
@@ -576,7 +577,7 @@ fapi2::ReturnCode setup_mc_config0_helper(const fapi2::Target<T>& i_target)
 
     // CFG_DL0_TRAIN_MODE: dl0 train mode
     l_val.template insertFromRight<TT::MC_REG2_DL0_CONFIG0_CFG_TRAIN_MODE, TT::MC_REG2_DL0_CONFIG0_CFG_TRAIN_MODE_LEN>
-    (ENABLE_AUTO_TRAINING);
+    (i_train_mode);
 
     // CFG_DL0_VERSION: dl0 version number
     l_val.template insertFromRight<TT::MC_REG2_DL0_CONFIG0_CFG_VERSION, TT::MC_REG2_DL0_CONFIG0_CFG_VERSION_LEN>(9);
@@ -614,8 +615,8 @@ fapi2::ReturnCode setup_mc_config1_helper(const fapi2::Target<T>& i_target)
     // CFG_DL0_CFG1_PREIPL_PRBS
     l_val.template insertFromRight<TT::MC_REG2_DL0_CONFIG1_CFG_PREIPL_PRBS_TIME,
                    TT::MC_REG2_DL0_CONFIG1_CFG_PREIPL_PRBS_TIME_LEN>(l_sim ? PREIPL_PRBS_1US : PREIPL_PRBS_256MS);
-
-    l_val.template writeBit<TT::MC_REG2_DL0_CONFIG1_CFG_PREIPL_PRBS_ENA, 1>(1); // Enable
+    // PRE-IPL PRBS Timing is not functional in Axone, so set to disable
+    l_val.template writeBit<TT::MC_REG2_DL0_CONFIG1_CFG_PREIPL_PRBS_ENA, 1>(0); // Disable
 
     l_val.template insertFromRight<TT::MC_REG2_DL0_CONFIG1_CFG_LANE_WIDTH,
                    TT::MC_REG2_DL0_CONFIG1_CFG_LANE_WIDTH_LEN>(TL_CTR_BY_SIDEBAND);

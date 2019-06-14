@@ -62,6 +62,15 @@ fapi2::ReturnCode p9a_omi_train( const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_
     FAPI_INF("%s Start p9a_omi_train", mss::c_str(i_target));
 
     const auto l_mc = mss::find_target<fapi2::TARGET_TYPE_MC>(i_target);
+    uint32_t l_prbs_time;
+    uint64_t PRBS_TIME;
+    uint8_t l_sim = 0;
+
+    FAPI_TRY( mss::attr::get_is_simulation( l_sim) );
+
+    FAPI_TRY(mss::attr::get_omi_dl_preipl_prbs_time(i_target, l_prbs_time),
+             "Error from FAPI_ATTR_GET (ATTR_OMI_DL_PREIPL_PRBS_TIME)");
+    PRBS_TIME = l_prbs_time * mss::common_timings::DELAY_1MS;
 
     FAPI_TRY(mss::mc::setup_mc_mcn_config_helper(l_mc));
     FAPI_TRY(mss::mc::setup_mc_config1_helper(i_target));
@@ -70,8 +79,17 @@ fapi2::ReturnCode p9a_omi_train( const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_
     FAPI_TRY(mss::mc::setup_mc_rmt_config_helper(i_target));
 
     // *_CONFIG0 should be the last one written, since it starts the training.
-    FAPI_TRY(mss::mc::setup_mc_config0_helper(i_target));
-
+    // We are not using the pre-ipl PRBS auto training mode because it doesn't function properly in Axone
+    // Enable training state 6 to send TS3
+    FAPI_TRY(mss::mc::setup_mc_config0_helper(i_target, mss::mc::train_mode::TX_TRAINING_STATE3));
+    // Set configurable delay based on the PRBS ATTR and SIM mode
+    FAPI_TRY(fapi2::delay(PRBS_TIME, mss::common_timings::DELAY_1US));
+    FAPI_DBG("OMI Training Pre-ipl PRBS Time = %dns",
+             (l_sim ? mss::common_timings::DELAY_1US : PRBS_TIME));
+    // Enable training state 1 to send Pattern A
+    FAPI_TRY(mss::mc::setup_mc_config0_helper(i_target, mss::mc::train_mode::TX_PATTERN_A));
+    // Enable training state 8 for auto training
+    FAPI_TRY(mss::mc::setup_mc_config0_helper(i_target, mss::mc::train_mode::ENABLE_AUTO_TRAINING));
 
 fapi_try_exit:
     return fapi2::current_err;
