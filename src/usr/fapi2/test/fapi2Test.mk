@@ -72,6 +72,8 @@ else
 ## All hostboot IPL time tests
 TESTS += ${shell ls ${ROOTPATH}/src/usr/fapi2/test/*Test.H | \
          sort | xargs}
+EXTRAINCDIR += ${ROOTPATH}/src/usr/expaccess/
+
 OBJS += p9_i2ctests.o
 OBJS += p9_mmiotests.o
 
