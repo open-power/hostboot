@@ -281,13 +281,13 @@ sub generateOutputNameAndVersion
     # According to the spec an example filename would be of the form:
     # S R C A80 6 2 IBM H 01 1 B _FULL_ FW_Rev1.03_02282019.txt
     #                        ^    ^        ^
-    # 1: Number of NVDIMM interfaces (1 = 36GB, 2 = 16GB)
+    # 1: Number of NVDIMM interfaces (1 = 32GB, 2 = 16GB)
     # _FULL_: The image contains the firmware and configuration data.
     # Rev1.03: Version of this image file
     my @fileNameComponents = split(/_/, $name);
 
     # The NVDIMM interface types supported
-    my %nvdimmTypes = ( 1 => "36GB",
+    my %nvdimmTypes = ( 1 => "32GB",
                         2 => "16GB", );
 
     # Extract the NVDIMM Interface number from filename
