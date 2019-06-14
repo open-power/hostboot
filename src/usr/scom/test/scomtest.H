@@ -449,9 +449,7 @@ public:
           { scom_targets[myPROC0], 0x80000C010D010C3F ,0x1234432112344321, false, TARGETING::MODEL_POWER9 },
           { scom_targets[myPROC0], 0x80000C0107011C3F, 0x123443211234ABAB, false, TARGETING::MODEL_NIMBUS },
           { scom_targets[myPROC0], 0x80000C0107011C3F, 0x123443211234ABAB, false, TARGETING::MODEL_CUMULUS },
-#ifndef CONFIG_AXONE_BRING_UP
           { scom_targets[myPROC0], 0x800040000701103F, 0x123443211234ABAB, false, TARGETING::MODEL_AXONE },
-#endif
           { scom_targets[myPROC0], 0x8FFFFFFFFFFFFFFF, 0x123443211234ABAB, true,  TARGETING::MODEL_POWER9 },
       };
       const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
@@ -1190,10 +1188,8 @@ public:
      { scom_targets[myMC1],0x07010008, 0x08010008, false, TARGETING::MODEL_AXONE},
      { scom_targets[myMC0],0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_AXONE},
      { scom_targets[myMC1],0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_AXONE},
-#ifndef CONFIG_AXONE_BRING_UP
-     { scom_targets[myMI0],0x02010803, 0x02010803, false, TARGETING::MODEL_AXONE},
-     { scom_targets[myMI3],0x02010803, 0x03010803, false, TARGETING::MODEL_AXONE},
-#endif
+     { scom_targets[myMI0],0x05010810, 0x05010810, false, TARGETING::MODEL_AXONE},
+     { scom_targets[myMI3],0x05010810, 0x06010810, false, TARGETING::MODEL_AXONE},
      { scom_targets[myMI0],0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_AXONE},
      { scom_targets[myMI3],0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_AXONE},
      { scom_targets[myMCC0],0x07010900, 0x07010900, false, TARGETING::MODEL_AXONE},
