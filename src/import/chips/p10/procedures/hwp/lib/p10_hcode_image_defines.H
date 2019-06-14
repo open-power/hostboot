@@ -146,7 +146,7 @@ HCD_HDR_PAD(IMG_HDR_ALIGN_SIZE);
 .endm
 #else
 //QME Header size is 96B
-} __attribute__((packed, aligned(IMG_HDR_ALIGN_SIZE))) QmeHeader_t;
+} __attribute__((packed, aligned(32))) QmeHeader_t;
 #endif
 
 #ifndef __ASSEMBLER__
