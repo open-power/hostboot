@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -506,20 +506,22 @@ static void bn_mul (bn_t *r, const bn_t *a, const bn_t *b)
         a += NWORDS;
         for (i=0; i<NWORDS; i++)
         {
-            asm("mulld   %0,%1,%2"         //pl = *(--a) * tb
+            --a;
+            asm("mulld   %0,%1,%2"         //pl = *(a) * tb
                 : "=r" (pl)
-                : "r" (*(--a)), "r" (tb)
+                : "r" (*(a)), "r" (tb)
                 );
             asm("mulhdu  %0,%1,%2"         //ph = *a * tb
                 : "=r" (ph)
                 : "r" (*a), "r" (tb)
                 );
-            asm("addc    %1,%5,%4\n"       //pl += *(--r)
+            --r;
+            asm("addc    %1,%5,%4\n"       //pl += *(r)
                 "addze   %2,%6\n"          //ph += ca
                 "addc    %0,%5,%7\n"       //*r = pl + th
                 "addze   %3,%6"            //th = ph + ca
                 : "=r" (*r), "=r" (pl), "=r" (ph), "=r" (th)
-                : "0" (*(--r)), "1" (pl), "2" (ph), "3" (th)
+                : "0" (*(r)), "1" (pl), "2" (ph), "3" (th)
                 );
         }
         *(--r) = th;
@@ -674,22 +676,26 @@ static void bn_modred_fast (bn_t *r, bn_t *a)
     for (i=0; i<NWORDS-2; i++) {
         t1 = *(--ah) << 55;
         t2 = *ah >> 9;
-        asm("addc    %3,%7,%5\n"   //t3 = *(--al) + t0;
+        --al;
+        --r;
+        asm("addc    %3,%7,%5\n"   //t3 = *(al) + t0;
             "addze   %2,%6\n"      //t2 += ca;
-            "addc    %0,%4,%8\n"   //*(--r) = t3 + t1;
+            "addc    %0,%4,%8\n"   //*(r) = t3 + t1;
             "addze   %1,%6"        //t0 = t2 + ca;
-            : "=r" (*(--r)), "=r" (t0), "=r" (t2), "=r" (t3)
-            : "3" (t3), "1" (t0), "2" (t2), "r" (*(--al)), "r" (t1)
+            : "=r" (*(r)), "=r" (t0), "=r" (t2), "=r" (t3)
+            : "3" (t3), "1" (t0), "2" (t2), "r" (*(al)), "r" (t1)
             );
     }
     t1 = *(--ah) << 55;
     t2 = (*ah >> 9)&BN_PRIME_MSW_MASK;
-    asm("addc    %3,%7,%5\n"     //t3 = *(--al) + t0;
+    --al;
+    --r;
+    asm("addc    %3,%7,%5\n"     //t3 = *(al) + t0;
         "addze   %2,%6\n"        //t2 += ca;
-        "addc    %0,%4,%8\n"     //*(--r) = t3 + t1;
+        "addc    %0,%4,%8\n"     //*(r) = t3 + t1;
         "addze   %1,%6"          //t0 = t2 + ca;
-        : "=r" (*(--r)), "=r" (t0), "=r" (t2), "=r" (t3)
-        : "3" (t3), "1" (t0), "2" (t2), "r" (*(--al)), "r" (t1)
+        : "=r" (*(r)), "=r" (t0), "=r" (t2), "=r" (t3)
+        : "3" (t3), "1" (t0), "2" (t2), "r" (*(al)), "r" (t1)
         );
     *(--r) = (*(--al)&BN_PRIME_MSW_MASK) + t0;
 }
@@ -702,15 +708,17 @@ static void __attribute__((noinline)) bn_modred_slow (bn_t *r)
         bn_t t0 = *r >> 9;
         *r &= BN_PRIME_MSW_MASK;
         r += NWORDS;
+        --r;
         asm("addc    %0,%1,%2"
             : "=r" (*r)
-            : "0" (*(--r)), "r" (t0)
+            : "0" (*(r)), "r" (t0)
             );
         for (i=0; i<NWORDS-1; i++)
         {
+            --r;
             asm("addze   %0,%1"
                 : "=r" (*r)
-                : "0" (*(--r))
+                : "0" (*(r))
                 );
         }
     }
