@@ -43,12 +43,28 @@ namespace mss
 namespace gem
 {
 
+static constexpr uint64_t GEMINI_ICETRAP4 = 0x08012428;
+static constexpr uint64_t GEMINI_ICECFG1 = 0x0801240D;
+static constexpr uint64_t FLD_ICETRAP4_CALIBRATION_STATUS_BIT_1 = 0x0;
+static constexpr uint64_t FLD_ICETRAP4_CALIBRATION_STATUS_BIT_2 = 0x1;
+static constexpr uint64_t FLD_ICETRAP4_MEMORY_INIT_COMPELTE = 32;
+static constexpr uint64_t FLD_ICECFG1_INIT_ZERO = 8;
+static constexpr uint64_t FLD_ICECFG1_MEMORY_INIT_START = 7;
+
 ///
 /// @brief Polls DRAM calibration register to check for complete
-/// @param[in] i_target the controller
+/// @param[in] i_target gemini target
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode gem_draminit_poll_check_calibration(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+fapi2::ReturnCode poll_check_calibration(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+
+///
+/// @brief Write bit to initialize memory and then poll for completion
+///
+/// @param[in] i_target gemini target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode init_memory(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
 
 }// exp
 }// mss

@@ -50,12 +50,9 @@ namespace gem
 /// @param[in] i_target the controller
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode gem_draminit_poll_check_calibration(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+fapi2::ReturnCode poll_check_calibration(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
     // Address defined here as gemini SCOM address library does not exist
-    constexpr uint64_t GEMINI_CALIBRATION_STATUS_ADDR = 0x08012428;
-    constexpr uint64_t GEMINI_CALIBRATION_STATUS_BIT_1 = 0x0;
-    constexpr uint64_t GEMINI_CALIBRATION_STATUS_BIT_2 = 0x1;
 
     // Using default parameters
     mss::poll_parameters l_poll_params;
@@ -63,26 +60,85 @@ fapi2::ReturnCode gem_draminit_poll_check_calibration(const fapi2::Target<fapi2:
     fapi2::buffer<uint64_t> l_data_buffer;
 
     bool l_poll_success =
-        mss::poll(i_target, GEMINI_CALIBRATION_STATUS_ADDR, l_poll_params,
+        mss::poll(i_target, GEMINI_ICETRAP4, l_poll_params,
                   [&l_data_buffer](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
     {
         FAPI_DBG("Polling: Gemini calibration status 0x%llx, remaining: %d", stat_reg, poll_remaining);
         l_data_buffer = stat_reg;
 
-        return l_data_buffer.getBit<GEMINI_CALIBRATION_STATUS_BIT_1>()
-        && l_data_buffer.getBit<GEMINI_CALIBRATION_STATUS_BIT_2>();
+        return l_data_buffer.getBit<FLD_ICETRAP4_CALIBRATION_STATUS_BIT_1>()
+        && l_data_buffer.getBit<FLD_ICETRAP4_CALIBRATION_STATUS_BIT_2>();
     });
 
     FAPI_ASSERT(l_poll_success == true,
                 fapi2::MSS_GEM_DRAMINIT_CALIBRATION_DID_NOT_COMPLETE()
-                .set_OCMB_TARGET(i_target)
                 .set_TARGET(i_target)
-                .set_REGISTER(GEMINI_CALIBRATION_STATUS_ADDR), "Calibration check timed out for target %s",
-                mss::spd::c_str(i_target));
+                .set_REGISTER(GEMINI_ICETRAP4)
+                .set_CONTENTS(l_data_buffer),
+                "Calibration check timed out for target %s", mss::spd::c_str(i_target));
 
 fapi_try_exit:
     return fapi2::current_err;
 
+}
+
+///
+/// @brief Write bit to initialize memory and then poll for completion
+///
+/// @param[in] i_target gemini target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode init_memory(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+{
+    // Polling needs to occur for at least 5 seconds. Doing 7 seconds with delay of 0.25 seconds
+    static constexpr uint32_t QUARTER_SECOND_POLL_DELAY = 250000000; // NS
+    static constexpr uint32_t SEVEN_SECOND_POLL_COUNT   = 28;
+
+    fapi2::buffer<uint64_t> l_reg_contents;
+    mss::poll_parameters l_poll_params;
+
+    l_poll_params.iv_delay = QUARTER_SECOND_POLL_DELAY;
+    l_poll_params.iv_poll_count = SEVEN_SECOND_POLL_COUNT;
+
+    // Init memory to address as data
+    FAPI_TRY(fapi2::getScom(i_target, GEMINI_ICECFG1, l_reg_contents));
+
+    if (l_reg_contents.getBit<FLD_ICECFG1_MEMORY_INIT_START>())
+    {
+        // Init bit is stuck. We need to clear it before we can set the bit again
+        FAPI_INF("gem_draminit(): Memory appears to be already initialized for %s , Clearing bit before continuing",
+                 mss::c_str(i_target));
+        l_reg_contents.clearBit<FLD_ICECFG1_MEMORY_INIT_START>();
+        FAPI_TRY(fapi2::putScom(i_target, GEMINI_ICECFG1, l_reg_contents));
+    }
+
+    l_reg_contents.clearBit<FLD_ICECFG1_INIT_ZERO>();
+    l_reg_contents.setBit<FLD_ICECFG1_MEMORY_INIT_START>();
+    FAPI_TRY(fapi2::putScom(i_target, GEMINI_ICECFG1, l_reg_contents));
+
+    l_reg_contents.flush<0>();
+    {
+        bool l_poll_success = mss::poll(i_target, GEMINI_ICETRAP4, l_poll_params,
+                                        [&l_reg_contents](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
+        {
+            FAPI_DBG("Polling: Gemini calibration status 0x%016x for memory init, remaining: %d",
+            stat_reg, poll_remaining);
+            l_reg_contents = stat_reg;
+
+            return l_reg_contents.getBit<FLD_ICETRAP4_MEMORY_INIT_COMPELTE>();
+        });
+
+        FAPI_ASSERT(l_poll_success,
+                    fapi2::MSS_GEM_DRAMINIT_MEM_INIT_DID_NOT_COMPLETE()
+                    .set_TARGET(i_target)
+                    .set_REGISTER(GEMINI_ICETRAP4)
+                    .set_CONTENTS(l_reg_contents),
+                    "Calibration check timed out for target %s", mss::spd::c_str(i_target));
+    }
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 }// exp

@@ -23,19 +23,6 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
-  <hwpError>
-    <rc>RC_MSS_GEM_DRAMINIT_DIMM_SIZE_DOESNT_MATCH</rc>
-    <description>
-       DIMM size reported by gemini did not match the expected value of 32GB.
-    </description>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>LOW</priority>
-    </callout>
-    <ffdc>TARGET</ffdc>
-    <ffdc>DIMM</ffdc>
-    <ffdc>SIZE_RETURNED</ffdc>
-  </hwpError>
 
   <hwpError>
     <rc>RC_MSS_GEM_DRAMINIT_CALIBRATION_DID_NOT_COMPLETE</rc>
@@ -45,9 +32,26 @@
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>REGISTER</ffdc>
+    <ffdc>CONTENTS</ffdc>
     <callout>
-      <target>OCMB_TARGET</target>
+      <target>TARGET</target>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_GEM_DRAMINIT_MEM_INIT_DID_NOT_COMPLETE</rc>
+    <description>
+       During gemini dram initialization, the memory initialization process
+       did not complete as reported by the Gemini calibration status register.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>REGISTER</ffdc>
+    <ffdc>CONTENTS</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
 </hwpErrors>

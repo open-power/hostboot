@@ -48,7 +48,8 @@ extern "C"
     {
         mss::display_git_commit_info("gem_draminit");
 
-        FAPI_TRY(mss::gem::gem_draminit_poll_check_calibration(i_target));
+        FAPI_TRY(mss::gem::poll_check_calibration(i_target));
+        FAPI_TRY(mss::gem::init_memory(i_target));
 
         return fapi2::FAPI2_RC_SUCCESS;
 
