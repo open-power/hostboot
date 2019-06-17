@@ -257,6 +257,33 @@ int32_t RdfRcdParityError( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE( explorer_ocmb, RdfRcdParityError );
 
+/**
+ * @brief  RDFFIR[0:7] - Mainline MPE.
+ * @param  i_chip OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+#define PLUGIN_FETCH_MPE_ERROR( RANK ) \
+int32_t AnalyzeFetchMpe_##RANK( ExtensibleChip * i_chip, \
+                                STEP_CODE_DATA_STRUCT & io_sc ) \
+{ \
+    MemRank rank ( RANK ); \
+    MemEcc::analyzeFetchMpe<TYPE_OCMB_CHIP>( i_chip, rank, io_sc ); \
+    return SUCCESS; \
+} \
+PRDF_PLUGIN_DEFINE( explorer_ocmb, AnalyzeFetchMpe_##RANK );
+
+PLUGIN_FETCH_MPE_ERROR( 0 )
+PLUGIN_FETCH_MPE_ERROR( 1 )
+PLUGIN_FETCH_MPE_ERROR( 2 )
+PLUGIN_FETCH_MPE_ERROR( 3 )
+PLUGIN_FETCH_MPE_ERROR( 4 )
+PLUGIN_FETCH_MPE_ERROR( 5 )
+PLUGIN_FETCH_MPE_ERROR( 6 )
+PLUGIN_FETCH_MPE_ERROR( 7 )
+
+#undef PLUGIN_FETCH_MPE_ERROR
+
 //##############################################################################
 //
 //                               TLXFIR
