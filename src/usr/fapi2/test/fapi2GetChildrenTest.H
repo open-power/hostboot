@@ -699,7 +699,7 @@ void test_fapi2GetChildren()
                     TARGET_STATE_PRESENT).size(); } },
         };
 
-        pervasiveChildTestRec* ptr;
+        pervasiveChildTestRec* ptr = nullptr;
         int numPervTests = 0;
         TARGETING::ATTR_MODEL_type l_model = l_proc->getAttr<TARGETING::ATTR_MODEL>();
         if (l_model == TARGETING::MODEL_NIMBUS)

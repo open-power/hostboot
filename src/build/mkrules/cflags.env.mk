@@ -28,7 +28,7 @@
 # Description:
 #     Configuration of the compiler, linker, etc. flags.
 
-OPT_LEVEL ?= -O3
+OPT_LEVEL ?= -Os
 
 ifdef MODULE
 COMMONFLAGS += -fPIC -Bsymbolic -Bsymbolic-functions
