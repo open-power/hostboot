@@ -584,7 +584,16 @@ class Target
             return _trySetAttr(i_attr, i_size, i_pAttrData);
         }
 
-
+        /**
+         *  @brief Returns the target's type as used in a Targeting attribute
+         *         tank.
+         *
+         *  This target type is associated with an attribute in an attribute
+         *  tank and helps identify which target(s) the attribute belongs to
+         *
+         *  @return uint32_t The target type
+         */
+        uint32_t getAttrTankTargetType() const;
 
    private: // Private helper interfaces
 
@@ -807,17 +816,6 @@ class Target
         bool _tryGetHbMutexAttr(
             const ATTRIBUTE_ID i_attribute,
                   mutex_t*&    o_pMutex) const;
-
-        /**
-         *  @brief Returns the target's type as used in a Targeting attribute
-         *         tank.
-         *
-         *  This target type is associated with an attribute in an attribute
-         *  tank and helps identify which target(s) the attribute belongs to
-         *
-         *  @return uint32_t The target type
-         */
-        uint32_t getAttrTankTargetType() const;
 
         /**
          *  @brief enumeration of assert reasons
