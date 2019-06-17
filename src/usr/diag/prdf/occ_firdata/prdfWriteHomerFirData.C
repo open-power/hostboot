@@ -734,14 +734,21 @@ void __initChipInfo( TargetHandle_t i_chip, HOMER_ChipType_t i_chipModel,
     uint32_t chipPos = getTargetPosition( i_chip );
     PRDF_ASSERT( chipPos < i_maxChipsPerNode );
 
-    // Get the chip FSI address.
-    FSI::FsiLinkInfo_t fsiInfo;
-    FSI::getFsiLinkInfo( i_chip, fsiInfo );
+    if( HOMER_CHIP_EXPLORER == i_chipModel )
+    {
+        //@todo - RTC:201781 - Add i2c information
+    }
+    else
+    {
+        // Get the chip FSI address.
+        FSI::FsiLinkInfo_t fsiInfo;
+        FSI::getFsiLinkInfo( i_chip, fsiInfo );
+        o_chipInfo.hChipType.fsiBaseAddr = fsiInfo.baseAddr;
+    }
 
     // Fill in the HOMER chip info.
     o_chipInfo.hChipType             = HOMER_getChip( i_chipModel );
     o_chipInfo.hChipType.chipPos     = chipPos;
-    o_chipInfo.hChipType.fsiBaseAddr = fsiInfo.baseAddr;
     o_chipInfo.hChipType.chipEcLevel = i_chip->getAttr<ATTR_EC>();
 }
 
