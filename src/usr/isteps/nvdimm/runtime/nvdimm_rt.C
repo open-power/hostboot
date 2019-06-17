@@ -122,10 +122,7 @@ errlHndl_t notifyNvdimmProtectionChange(Target* i_target,
         {
             // Get the armed status attr and update it
             ATTR_NVDIMM_ARMED_type l_armed_state = {};
-            // TODO: RTC 211510 Move ATTR_NVDIMM_ARMED from proc_type to dimm type
-            //l_armed_state = l_nvdimm->getAttr<ATTR_NVDIMM_ARMED>();
-            uint8_t l_tmp = l_nvdimm->getAttr<ATTR_SCRATCH_UINT8_1>();
-            memcpy(&l_armed_state, &l_tmp, sizeof(l_tmp));
+            l_armed_state = l_nvdimm->getAttr<ATTR_NVDIMM_ARMED>();
 
             switch (i_state)
             {
@@ -149,10 +146,7 @@ errlHndl_t notifyNvdimmProtectionChange(Target* i_target,
                     break;
             }
 
-            // TODO: RTC 211510 Move ATTR_NVDIMM_ARMED from proc_type to dimm type
-            //l_nvdimm->setAttr<ATTR_NVDIMM_ARMED>(l_armed_state);
-            memcpy(&l_tmp, &l_armed_state, sizeof(l_tmp));
-            l_nvdimm->setAttr<ATTR_SCRATCH_UINT8_1>(l_tmp);
+            l_nvdimm->setAttr<ATTR_NVDIMM_ARMED>(l_armed_state);
 
 
             // Get the nv status flag attr and update it
@@ -401,10 +395,7 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
     {
         // skip if the nvdimm is already armed
         ATTR_NVDIMM_ARMED_type l_armed_state = {};
-        // TODO: RTC 211510 Move ATTR_NVDIMM_ARMED from proc_type to dimm type
-        //l_armed_state = l_nvdimm->getAttr<ATTR_NVDIMM_ARMED>();
-        uint8_t l_tmp = l_nvdimm->getAttr<ATTR_SCRATCH_UINT8_1>();
-        memcpy(&l_armed_state, &l_tmp, sizeof(l_tmp));
+        l_armed_state = l_nvdimm->getAttr<ATTR_NVDIMM_ARMED>();
         if (l_armed_state.armed)
         {
             TRACFCOMP(g_trac_nvdimm, "nvdimmArm() nvdimm[%X] called when already armed", get_huid(l_nvdimm));
@@ -540,10 +531,7 @@ bool nvdimmDisarm(TargetHandleList &i_nvdimmTargetList)
     {
         // skip if the nvdimm is already disarmed
         ATTR_NVDIMM_ARMED_type l_armed_state = {};
-        // TODO: RTC 211510 Move ATTR_NVDIMM_ARMED from proc_type to dimm type
-        //l_armed_state = l_nvdimm->getAttr<ATTR_NVDIMM_ARMED>();
-        uint8_t l_tmp = l_nvdimm->getAttr<ATTR_SCRATCH_UINT8_1>();
-        memcpy(&l_armed_state, &l_tmp, sizeof(l_tmp));
+        l_armed_state = l_nvdimm->getAttr<ATTR_NVDIMM_ARMED>();
         if (!l_armed_state.armed)
         {
             TRACFCOMP(g_trac_nvdimm, "nvdimmDisarm() nvdimm[%X] called when already disarmed", get_huid(l_nvdimm));
@@ -613,10 +601,7 @@ bool nvdimmInErrorState(Target *i_nvdimm)
     if (l_sys->getAttr<ATTR_NVDIMM_ENCRYPTION_ENABLE>())
     {
         ATTR_NVDIMM_ARMED_type l_armed_state = {};
-        // TODO: RTC 211510 Move ATTR_NVDIMM_ARMED from proc_type to dimm type
-        //l_armed_state = i_nvdimm->getAttr<ATTR_NVDIMM_ARMED>();
-        uint8_t l_tmp = i_nvdimm->getAttr<ATTR_SCRATCH_UINT8_1>();
-        memcpy(&l_armed_state, &l_tmp, sizeof(l_tmp));
+        l_armed_state = i_nvdimm->getAttr<ATTR_NVDIMM_ARMED>();
         if (l_armed_state.encryption_error_detected)
         {
             l_ret = true;

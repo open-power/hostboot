@@ -1875,17 +1875,11 @@ bool nvdimm_encrypt_unlock(TargetHandleList &i_nvdimmList)
 void nvdimmSetEncryptionError(Target *i_nvdimm)
 {
     ATTR_NVDIMM_ARMED_type l_armed_state = {};
-    // TODO: RTC 211510 Move ATTR_NVDIMM_ARMED from proc_type to dimm type
-    //l_armed_state = i_nvdimm->getAttr<ATTR_NVDIMM_ARMED>();
-    uint8_t l_tmp = i_nvdimm->getAttr<ATTR_SCRATCH_UINT8_1>();
-    memcpy(&l_armed_state, &l_tmp, sizeof(l_tmp));
+    l_armed_state = i_nvdimm->getAttr<ATTR_NVDIMM_ARMED>();
 
     l_armed_state.encryption_error_detected = 1;
 
-    // TODO: RTC 211510 Move ATTR_NVDIMM_ARMED from proc_type to dimm type
-    //i_nvdimm->setAttr<ATTR_NVDIMM_ARMED>(l_armed_state);
-    memcpy(&l_tmp, &l_armed_state, sizeof(l_tmp));
-    i_nvdimm->setAttr<ATTR_SCRATCH_UINT8_1>(l_tmp);
+    i_nvdimm->setAttr<ATTR_NVDIMM_ARMED>(l_armed_state);
 }
 
 

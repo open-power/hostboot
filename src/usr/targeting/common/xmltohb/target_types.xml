@@ -649,9 +649,6 @@
       <id>LOCATION_CODE</id>
     </attribute>
     <attribute>
-      <id>NVDIMM_ARMED</id>
-    </attribute>
-    <attribute>
       <default>
         <field>
           <id>childRollupAllowed</id>
@@ -1490,6 +1487,9 @@
     </attribute>
     <attribute>
       <id>MEM_PORT</id>
+    </attribute>
+    <attribute>
+      <id>NVDIMM_ARMED</id>
     </attribute>
     <attribute>
       <id>NV_OPS_TIMEOUT_MSEC</id>

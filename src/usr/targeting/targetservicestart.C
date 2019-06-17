@@ -595,19 +595,13 @@ static void initializeAttributes(TargetService& i_targetService,
                 for (auto const l_nvdimm : l_nvdimmTargetList)
                 {
                     ATTR_NVDIMM_ARMED_type l_armed_state = {};
-                    // TODO: RTC 211510 Move ATTR_NVDIMM_ARMED from proc_type to dimm type
-                    //l_armed_state = l_nvdimm->getAttr<ATTR_NVDIMM_ARMED>();
-                    uint8_t l_tmp = l_nvdimm->getAttr<ATTR_SCRATCH_UINT8_1>();
-                    memcpy(&l_armed_state, &l_tmp, sizeof(l_tmp));
+                    l_armed_state = l_nvdimm->getAttr<ATTR_NVDIMM_ARMED>();
 
                     // Only force rearming (error setting should persist)
                     l_armed_state.armed = 0;
                     l_armed_state.occ_active = 0;
 
-                    // TODO: RTC 211510 Move ATTR_NVDIMM_ARMED from proc_type to dimm type
-                    //l_nvdimm->setAttr<ATTR_NVDIMM_ARMED>(l_armed_state);
-                    memcpy(&l_tmp, &l_armed_state, sizeof(l_tmp));
-                    l_nvdimm->setAttr<ATTR_SCRATCH_UINT8_1>(l_tmp);
+                    l_nvdimm->setAttr<ATTR_NVDIMM_ARMED>(l_armed_state);
                 }
 
                 if (l_chip == l_pMasterProcChip)
