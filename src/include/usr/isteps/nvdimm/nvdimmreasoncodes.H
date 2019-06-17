@@ -95,6 +95,7 @@ enum nvdimmModuleId
     NVDIMM_ENCRYPT_UNLOCK                   = 0x2D,
     NVDIMM_GET_DARN_NUMBER                  = 0x2E,
     NVDIMM_KEYIFY_RANDOM_NUMBER             = 0x2F,
+    SET_ATTR_NVDIMM_ENCRYPTION_KEYS_FW      = 0x30,
 };
 
 /**
@@ -157,6 +158,7 @@ enum nvdimmReasonCode
     NVDIMM_ENCRYPTION_KEY_ATTRS_INVALID     = NVDIMM_COMP_ID | 0x36,   // Encryption key attributes are both invalid
     NVDIMM_ENCRYPTION_MAX_DARN_ERRORS       = NVDIMM_COMP_ID | 0x37,   // Darn random key gen reached max errors
     NVDIMM_ENCRYPTION_BAD_RANDOM_DATA       = NVDIMM_COMP_ID | 0x38,   // Generated key data not valid
+    NVDIMM_CANNOT_MAKE_ATTRIBUTE            = NVDIMM_COMP_ID | 0x39,   // Cannot make Attribute
 };
 
 enum UserDetailsTypes

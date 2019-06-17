@@ -67,6 +67,8 @@ namespace RUNTIME
         MOD_INIT_RT_RES_MEM_TRACE_BUF    = 0x27,  /**< rt_rsvdtracebuffer.C */
         MOD_OPEN_UNTRUSTED_SP_AREAS      = 0x28,  /**< populate_hbruntime.C */
         MOD_SEND_ATTRIBUTES_TO_FSP       = 0x29,  /**< hbrt_utilities.H */
+        MOD_RT_DO_NVDIMM_OP              = 0x2A,  /**< rt_fwnotify.C */
+        SET_ATTR_NVDIMM_ENCRYPTION_ENABLE = 0x2B,  /**< rt_fwnotify.C */
     };
 
     enum RuntimeReasonCode
@@ -143,6 +145,7 @@ namespace RUNTIME
         RC_NULL_FIRMWARE_MSG_PTR       = RUNTIME_COMP_ID | 0x45,
         RC_SERIALIZE_ATTRIBUTE_FAILED  = RUNTIME_COMP_ID | 0x46,
         RC_NO_SPACE_FOR_ATTRIBUTE_SERIALIZATION = RUNTIME_COMP_ID | 0x47,
+        RC_CANNOT_MAKE_ATTRIBUTE       = RUNTIME_COMP_ID | 0x47,
     };
 
     enum UserDetailsTypes

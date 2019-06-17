@@ -36,6 +36,8 @@
 
 #ifdef CONFIG_NVDIMM
 #include <isteps/nvdimm/nvdimm.H>          // NVDIMM related activities
+#include <targeting/common/targetUtil.H>   // makeAttribute
+#include <runtime/hbrt_utilities.H>
 using namespace NVDIMM;
 #endif
 
@@ -358,6 +360,60 @@ void attrSyncRequest( void * i_data)
     TRACFCOMP(g_trac_runtime, EXIT_MRK"attrSyncRequest");
 }
 
+#ifdef CONFIG_NVDIMM
+/**
+ * @brief Utility function to set ATTR_NVDIMM_ENCRYPTION_ENABLE
+ *        and send the value to the FSP
+ */
+void set_ATTR_NVDIMM_ENCRYPTION_ENABLE(
+            ATTR_NVDIMM_ENCRYPTION_ENABLE_type i_val )
+{
+    errlHndl_t l_err = nullptr;
+
+    Target* l_sys = nullptr;
+    targetService().getTopLevelTarget( l_sys );
+    assert(l_sys, "set_ATTR_NVDIMM_ENCRYPTION_ENABLE: no TopLevelTarget");
+    l_sys->setAttr<ATTR_NVDIMM_ENCRYPTION_ENABLE>(i_val);
+
+    // Send it down to the FSP
+    AttributeTank::Attribute l_attr = {};
+    if( !makeAttribute<ATTR_NVDIMM_ENCRYPTION_ENABLE>
+        (l_sys, l_attr) )
+    {
+        TRACFCOMP(g_trac_runtime, ERR_MRK"set_ATTR_NVDIMM_ENCRYPTION_ENABLE() Could not create Attribute");
+        /*@
+         *@errortype
+         *@reasoncode       RC_CANNOT_MAKE_ATTRIBUTE
+         *@severity         ERRORLOG_SEV_PREDICTIVE
+         *@moduleid         SET_ATTR_NVDIMM_ENCRYPTION_ENABLE 
+         *@devdesc          Couldn't create an Attribute to send the data
+         *                  to the FSP
+         *@custdesc         NVDIMM encryption error
+         */
+        l_err = new ERRORLOG::ErrlEntry(
+                                        ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                        SET_ATTR_NVDIMM_ENCRYPTION_ENABLE,
+                                        RC_CANNOT_MAKE_ATTRIBUTE,
+                                        ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+        l_err->collectTrace(NVDIMM_COMP_NAME);
+        errlCommit( l_err, NVDIMM_COMP_ID );
+    }
+    else
+    {
+        std::vector<TARGETING::AttributeTank::Attribute> l_attrList;
+        l_attrList.push_back(l_attr);
+        l_err = sendAttributes( l_attrList );
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_runtime, ERR_MRK"set_ATTR_NVDIMM_ENCRYPTION_ENABLE() Error sending ATTR_NVDIMM_ENCRYPTION_ENABLE down to FSP");
+            l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+            l_err->collectTrace(NVDIMM_COMP_NAME);
+            errlCommit( l_err, NVDIMM_COMP_ID );
+        }
+    }
+}
+#endif //CONFIG_NVDIMM
+
 /**
  *  @brief Perform an NVDIMM operation
  *  @param[in] nvDimmOp - A struct that contains the operation(s) to perform
@@ -450,6 +506,10 @@ void doNvDimmOperation(const hostInterfaces::nvdimm_operation_t& nvDimmOp)
             {
                 TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
                               "Call to disable encryption failed, exiting ...");
+
+                // Clear the encryption enable attribute
+                set_ATTR_NVDIMM_ENCRYPTION_ENABLE(0);
+
                 break;
             }
             else
@@ -457,6 +517,9 @@ void doNvDimmOperation(const hostInterfaces::nvdimm_operation_t& nvDimmOp)
                 TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
                                        "Call to disable encryption succeeded.");
             }
+
+            // Clear the encryption enable attribute
+            set_ATTR_NVDIMM_ENCRYPTION_ENABLE(0);
         }
 
         // Remove keys
@@ -480,15 +543,7 @@ void doNvDimmOperation(const hostInterfaces::nvdimm_operation_t& nvDimmOp)
         if (nvDimmOp.opType & hostInterfaces::HBRT_FW_NVDIMM_ENABLE_ENCRYPTION)
         {
             // Set the encryption enable attribute
-            Target* l_sys = nullptr;
-            targetService().getTopLevelTarget( l_sys );
-            assert(l_sys, "doNvDimmOperation: no TopLevelTarget");
-            if (!l_sys->getAttr<ATTR_NVDIMM_ENCRYPTION_ENABLE>())
-            {
-                l_sys->setAttr<ATTR_NVDIMM_ENCRYPTION_ENABLE>(0x1);
-
-                // TODO RTC 210692 Update HWSV with enable attribute value
-            }
+            set_ATTR_NVDIMM_ENCRYPTION_ENABLE(1);
 
             // Make call to generate keys before enabling encryption
             if(!nvdimm_gen_keys())

@@ -43,6 +43,10 @@
 #include <isteps/nvdimm/nvdimm.H>
 #include <vpd/spdenums.H>
 #include <secureboot/trustedbootif.H>
+#include <targeting/common/targetUtil.H>
+#ifdef __HOSTBOOT_RUNTIME
+#include <runtime/hbrt_utilities.H>
+#endif
 
 using namespace TARGETING;
 using namespace DeviceFW;
@@ -111,6 +115,63 @@ typedef union {
         uint8_t erase_key_valid : 1;        // [0]
     } PACKED;
 } encryption_key_validation_t;
+
+/**
+ * @brief Utility function to set ATTR_
+ *        and send the value to the FSP
+ */
+void set_ATTR_NVDIMM_ENCRYPTION_KEYS_FW(
+            ATTR_NVDIMM_ENCRYPTION_KEYS_FW_typeStdArr& i_val )
+{
+#ifdef __HOSTBOOT_RUNTIME
+    errlHndl_t l_err = nullptr;
+
+    Target* l_sys = nullptr;
+    targetService().getTopLevelTarget( l_sys );
+    assert(l_sys, "set_ATTR_NVDIMM_ENCRYPTION_KEYS_FW: no TopLevelTarget");
+
+    l_sys->setAttrFromStdArr
+      <ATTR_NVDIMM_ENCRYPTION_KEYS_FW>(i_val);
+
+    // Send attr to HWSV if at runtime
+    AttributeTank::Attribute l_attr = {};
+    if( !makeAttributeStdArr<ATTR_NVDIMM_ENCRYPTION_KEYS_FW>
+        (l_sys, l_attr) )
+    {
+        TRACFCOMP(g_trac_nvdimm, ERR_MRK"set_ATTR_NVDIMM_ENCRYPTION_KEYS_FW() Could not create Attribute");
+        /*@
+         *@errortype
+         *@reasoncode       NVDIMM_CANNOT_MAKE_ATTRIBUTE
+         *@severity         ERRORLOG_SEV_PREDICTIVE
+         *@moduleid         SET_ATTR_NVDIMM_ENCRYPTION_KEYS_FW
+         *@devdesc          Couldn't create an Attribute to send the data
+         *                  to the FSP
+         *@custdesc         NVDIMM encryption error
+         */
+        l_err = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_PREDICTIVE,
+                            SET_ATTR_NVDIMM_ENCRYPTION_KEYS_FW,
+                            NVDIMM_CANNOT_MAKE_ATTRIBUTE,
+                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+        l_err->collectTrace(NVDIMM_COMP_NAME);
+        errlCommit( l_err, NVDIMM_COMP_ID );
+    }
+    else
+    {
+        std::vector<TARGETING::AttributeTank::Attribute> l_attrList;
+        l_attrList.push_back(l_attr);
+        l_err = sendAttributes( l_attrList );
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"set_ATTR_NVDIMM_ENCRYPTION_KEYS_FW() Error sending ATTR_NVDIMM_ENCRYPTION_KEYS_FW down to FSP");
+            l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+            l_err->collectTrace(NVDIMM_COMP_NAME);
+            errlCommit( l_err, NVDIMM_COMP_ID );
+        }
+    }
+#endif //__HOSTBOOT_RUNTIME
+
+}
 
 /**
  * @brief Wrapper to call deviceOp to read the NV controller via I2C
@@ -1971,8 +2032,6 @@ errlHndl_t nvdimm_handleConflictingKeys(
         {
             TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_handleConflictingKeys() nvdimm[%X] ATTR_NVDIMM_ENCRYPTION_KEYS_FW valid",get_huid(l_nvdimm));
             l_validKeyFound = true;
-            // Send attr to HWSV if at runtime
-            // RTC:210692 Update HWSV with key attribute value
             break;
         }
 
@@ -2002,10 +2061,8 @@ errlHndl_t nvdimm_handleConflictingKeys(
             TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_handleConflictingKeys() nvdimm[%X] ATTR_NVDIMM_ENCRYPTION_KEYS_ANCHOR valid",get_huid(l_nvdimm));
             l_validKeyFound = true;
             // Copy anchor attr value to FW attribute
-            Target* l_sys = nullptr;
-            targetService().getTopLevelTarget( l_sys );
-            assert(l_sys, "nvdimm_handleConflictingKeys: no TopLevelTarget");
-            l_sys->setAttr<ATTR_NVDIMM_ENCRYPTION_KEYS_FW>(reinterpret_cast<ATTR_NVDIMM_ENCRYPTION_KEYS_FW_type&>(i_attrKeysAnchor));
+            set_ATTR_NVDIMM_ENCRYPTION_KEYS_FW(i_attrKeysAnchor);
+
             break;
         }
     }
@@ -2123,8 +2180,7 @@ bool nvdimm_gen_keys(void)
         {
             // Set FW attr = Anchor attr
             TRACFCOMP(g_trac_nvdimm, "nvdimm_gen_keys() Setting ATTR_NVDIMM_ENCRYPTION_KEYS_FW = ATTR_NVDIMM_ENCRYPTION_KEYS_ANCHOR");
-            l_sys->setAttrFromStdArr
-                <ATTR_NVDIMM_ENCRYPTION_KEYS_FW>(l_attrKeysAn);
+            set_ATTR_NVDIMM_ENCRYPTION_KEYS_FW(l_attrKeysAn);
             break;
         }
 
@@ -2156,7 +2212,7 @@ bool nvdimm_gen_keys(void)
         }
 
         // Set the FW attribute
-        l_sys->setAttrFromStdArr<ATTR_NVDIMM_ENCRYPTION_KEYS_FW>(l_attrKeysFw);
+        set_ATTR_NVDIMM_ENCRYPTION_KEYS_FW(l_attrKeysFw);
 
     }while(0);
 
@@ -2192,8 +2248,8 @@ bool nvdimm_remove_keys(void)
 
     // Set the FW attribute = 0
     TRACFCOMP(g_trac_nvdimm, "nvdimm_remove_keys() Setting ATTR_NVDIMM_ENCRYPTION_KEYS_FW=0");
-    ATTR_NVDIMM_ENCRYPTION_KEYS_FW_type l_attrKeysFw = {0};
-    l_sys->setAttr<ATTR_NVDIMM_ENCRYPTION_KEYS_FW>(l_attrKeysFw);
+    ATTR_NVDIMM_ENCRYPTION_KEYS_FW_typeStdArr l_attrKeysFw = {0};
+    set_ATTR_NVDIMM_ENCRYPTION_KEYS_FW(l_attrKeysFw);
 
     TRACFCOMP(g_trac_nvdimm, EXIT_MRK"nvdimm_remove_keys()");
     return l_success;
