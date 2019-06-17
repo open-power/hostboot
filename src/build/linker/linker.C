@@ -123,6 +123,7 @@ struct Object
         string name;                    //!< full path name of file
         bfd* image;                     //!< bfd image of object
         Section text;                   //!< text section of binary
+        Section sfpr;                   //!< sfpr section of binary
         Section rodata;                 //!< rodata section of binary
         Section data;                   //!< data section of binary
         map<string, Symbol> symbols;    //!< symbol map
@@ -594,6 +595,11 @@ bool Object::read_object(const char* i_file)
             {
                 s = &this->text;
             }
+            else if (string(".sfpr") ==
+                     bfd_get_section_name(image, image_section))
+            {
+                s = &this->sfpr;
+            }
             else if (string(".rodata") ==
                      bfd_get_section_name(image, image_section))
             {
@@ -645,6 +651,16 @@ bool Object::write_object()
         {
             int error = errno;
             cout << "Error writing to output." << endl;
+            cout << strerror(error) << endl;
+        }
+
+        // Output sfpr section.
+        fseek(iv_output, offset + sfpr.vma_offset, SEEK_SET);
+        if ((0 != sfpr.size) &&
+            (sfpr.size != fwrite(sfpr.data, 1, sfpr.size, iv_output)))
+        {
+            int error = errno;
+            cout << "Error writing to output for sfpr." << endl;
             cout << strerror(error) << endl;
         }
 
