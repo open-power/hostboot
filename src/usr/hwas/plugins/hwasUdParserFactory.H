@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,7 +38,7 @@ namespace HWAS
         UserDetailsParserFactory()
         {
             registerParser<UdParserPartialGoodIssue>
-                (HWAS_UDT_PARTIAL_GOOD_DATA);
+                (HWAS_UDT_PARTIAL_GOOD_DATA_V2);
         }
     private:
         // Parser isn't compiled with c++11 in all environments, and

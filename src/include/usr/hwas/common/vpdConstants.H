@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,8 +26,32 @@
 #ifndef VPD_CONSTANTS_H
 #define VPD_CONSTANTS_H
 
+#include <targeting/common/commontargeting.H>
+
+#ifdef __HOSTBOOT_MODULE
+#include <array>
+#endif
+
 namespace HWAS
 {
+
+// pg_entry_t represents one entry in the partial-good vector (PGV). A 0 in a
+// particular bit position means that the part is functional; a 1 means that it
+// is nonfunctional. In P10 the PG VPD each row is comprised of 24 bits, so this
+// has some room to grow.
+typedef uint32_t pg_entry_t;
+
+// pg_idx_t represents an index into the PG vector. Max value is 255.
+typedef uint8_t pg_idx_t;
+
+// pg_mask_t represents a mask that will be applied to a pg_entry_t.
+typedef uint32_t pg_mask_t;
+
+// cu_mask_t represents a set of chip units to which a particular PG rule should
+// apply. The value of the bit at displacement N from the LSB represents the
+// presence (1) or absence (0) of chip unit N in the set. Only chip units in the
+// range [0, 63] can be represented.
+typedef uint64_t cu_mask_t;
 
 // NOTE: Many of the VPD_CP00_PG_X constants are used to construct an "All Good"
 //       vector to compare against the PG vector of a system. Changes to
@@ -35,118 +59,273 @@ namespace HWAS
 //       src/usr/hwas/plugins/errludParser_pgData.H
 
 // constants the platReadPartialGood will use for looking at the VPD data
-const uint32_t VPD_CP00_PG_DATA_LENGTH      = 128;
-const uint32_t VPD_CP00_PG_HDR_LENGTH       = 1;
-const uint32_t VPD_CP00_PG_DATA_ENTRIES     = VPD_CP00_PG_DATA_LENGTH / 2;
+const pg_idx_t VPD_CP00_PG_DATA_LENGTH      = 192;
+const pg_idx_t VPD_CP00_PG_HDR_LENGTH       = 1; // TODO RTC 208782: Update if necessary
+const uint32_t VPD_CP00_PG_ENTRY_SIZE       = 3;
+const uint32_t VPD_CP00_PG_DATA_ENTRIES     = VPD_CP00_PG_DATA_LENGTH / VPD_CP00_PG_ENTRY_SIZE;
 
-// components of the partial good vector
-// * = region does not exist in Nimbus
-// + = partial good region
-// '0' = region is good (NOTE: opposite of P8 where '1' represented good)
-// '1' = region is bad or does not exist
+// The pgv type holds the entirety of the PGV after it is read and unpacked from
+// the VPD.
+#ifdef __HOSTBOOT_MODULE
+typedef std::array<pg_entry_t, VPD_CP00_PG_DATA_ENTRIES> partialGoodVector;
+#else
+typedef pg_entry_t partialGoodVector[VPD_CP00_PG_DATA_ENTRIES];
+#endif
 
-const uint32_t VPD_CP00_PG_FSI_INDEX        = 0;
-// all good - 4:FSI0, 5:FSI1, 6:FSIa
-const uint32_t VPD_CP00_PG_FSI_GOOD         = 0xF1FF;
+// Following are ALL_GOOD, ALWAYS_GOOD, and INDEX constants for entries in the
+// PGV; they are defined according to the P10 Partial Good Keyword
+// documentation. Note that these are 32-bit values; they are the 24-bit values
+// from the documentation right-justified and padded on the left with 1-bits (1
+// indicates not-present or not-functional).
+//
+// The *_ALL_GOOD constants are what are found in the PGV (after 4-byte
+// 1-extension) when all subcomponents of the chiplet are good.
+//
+// The *_ALWAYS_GOOD constants are only defined for chiplets that are themselves
+// marked always-good for the entire chip. Bits in the PGV entries corresponding
+// to set (1) bit positions in the *_ALWAYS_GOOD masks must be GOOD (0) or else
+// the entire chip is considered nonfunctional.
+//
+// The *_INDEX constants are the offset in number-of-entries (whether in 3-byte
+// chunks in the VPD or in 4-byte chunks post-extension) from the beginning of the
+// PGV at which the given value is located.
 
-const uint32_t VPD_CP00_PG_PERVASIVE_INDEX  = 1;
-// all good - 3:VITAL, 4:PRV, 5:NET, 6:PIB, 7:OCC, 8:ANPERV, 14:PLLNEST
-const uint32_t VPD_CP00_PG_PERVASIVE_GOOD   = 0xE07D;
+// UNSET: vital, fsia, fsi0, fsi1, fsi0ll, fsi1ll, fsi0inv
+const pg_entry_t VPD_CP00_PG_FSI_ALL_GOOD = 0xFFE03FFFu;
+// SET: fsia, fsi0, fsi1, fsi0ll, fsi1ll, fsi0inv
+const pg_mask_t VPD_CP00_PG_FSI_ALWAYS_GOOD_MASK = 0x000FC000u;
+const pg_idx_t VPD_CP00_PG_FSI_INDEX = 0;
 
-const uint32_t VPD_CP00_PG_N0_INDEX         = 2;
-// all good - 3:VITAL, 4:PRV, 5:NX, 6:CXA0, 7:PBIOE0, 8:PBIOE1, 9:PBIOE2
-const uint32_t VPD_CP00_PG_N0_GOOD          = 0xE03F;
+// UNSET: vital, perv, sbe, pib, occ, net, dpllpau, dpllnest, pllperv
+const pg_entry_t VPD_CP00_PG_PRV_ALL_GOOD = 0xFFE071FFu;
+// SET: perv, sbe, pib, occ, net, dpllpau, dpllnest, pllperv
+const pg_mask_t VPD_CP00_PG_PRV_ALWAYS_GOOD_MASK = 0x000F8E00u;
+const pg_idx_t VPD_CP00_PG_PRV_INDEX = 1;
 
-const uint32_t VPD_CP00_PG_N1_INDEX         = 3;
-// all good - 3:VITAL, 4:PRV, 5:MCD, 6:VA, 7:PBIOO0+, 8:PBIOO1+, 9:MCS23+
-const uint32_t VPD_CP00_PG_N1_GOOD          = 0xE03F;
-const uint32_t VPD_CP00_PG_N1_PG_MASK       = 0x01C0;
-const uint32_t VPD_CP00_PG_N1_PBIOO0        = 0x0100;
-const uint32_t VPD_CP00_PG_N1_PBIOO1        = 0x0080;
-const uint32_t VPD_CP00_PG_N1_MCS23         = 0x0040;
+// This is actually the "vital" bit but the functionality of the PERV targets
+// depend on it rather than the "perv" bit.
+const pg_mask_t VPD_CP00_PG_PERV_BIT = 0x00100000u;
 
-const uint32_t VPD_CP00_PG_N2_INDEX         = 4;
-// all good - 3:VITAL, 4:PRV, 5:CXA1, 6:PCIS0, 7:PCIS1, 8:PCIS2, 9:IOPSI
-const uint32_t VPD_CP00_PG_N2_GOOD          = 0xE03F;
+// UNSET: vital, perv, misc, pe
+const pg_entry_t VPD_CP00_PG_N0_ALL_GOOD = 0xFFE37FFFu;
+// SET: perv, misc, pe
+const pg_mask_t VPD_CP00_PG_N0_ALWAYS_GOOD_MASK = 0x000C8000u;
+const pg_idx_t VPD_CP00_PG_N0_INDEX = 2;
 
-const uint32_t VPD_CP00_PG_N3_INDEX         = 5;
-// all good - 3:VITAL, 4:PRV, 5:PB, 6:BR, 7:NPU+, 8:MM, 9:INT, 10:MCS01+
-const uint32_t VPD_CP00_PG_N3_GOOD          = 0xE01F;
-const uint32_t VPD_CP00_PG_N3_PG_MASK       = 0x0120;
-const uint32_t VPD_CP00_PG_N3_NPU           = 0x0100;
-const uint32_t VPD_CP00_PG_N3_MCS01         = 0x0020;
+// UNSET: vital, perv, fbc, pe, nmmu
+const pg_entry_t VPD_CP00_PG_N1_ALL_GOOD = 0xFFE53FFFu;
+// SET: perv, fbc, pe, nmmu
+const pg_mask_t VPD_CP00_PG_N1_ALWAYS_GOOD_MASK = 0x000AC000u;
+const pg_idx_t VPD_CP00_PG_N1_INDEX = 3;
 
-const uint32_t VPD_CP00_PG_XBUS_INDEX       = 6;
-// all good - 3:VITAL, 4:PRV, 5:IOX0*, 6:IOX1, 7:IOX2, 8:IOPPE
-//            9:PBIOX0*+, 10:PBIOX1+, 11:PBIOX2+, 14:PLLIOX
-// Nimbus doesn't physically have PBIOX0 and IOX0.  IOX0 is
-// taken care of by xbus links, need to handle PBIOX0 as part of
-// the full chiplet good, so full good is E40D instead of E44D
-// Currently, there are two versions of the MVPD PG keyword:
-// 0xE44D == XBUS0 bad
-// 0xE45D and 0xE55D == XBUS 0,2 bad
-// Spec indicates that both iox (second nibble) and pbiox
-// (third nibble) are bad for sforza and monza type modules.
-// We support generically the following cases:
-// 0xE50D --> xbus chiplet good
-// 0xE40D --> xbus chiplet good
-// and rely solely on the pbiox as the Xbus target indicator
-// (0x0040, 0x0020, 0x0010) for all types of chips.
-const uint32_t VPD_CP00_PG_XBUS_GOOD_NIMBUS = 0xE40D;
-const uint32_t VPD_CP00_PG_XBUS_GOOD_CUMULUS= 0xE00D;
-const uint32_t VPD_CP00_PG_XBUS_PG_MASK     = 0x00170;
-const uint32_t VPD_CP00_PG_XBUS_IOX[3] = {0x0040, 0x0020, 0x0010};
+// UNSET: vital, perv, ecl20, ecl21, ecl22, ecl23, l30, l31, l32,
+//        l33, qme, clkadj, mma0, mma1, mma2, mma3
+const pg_entry_t VPD_CP00_PG_EQ_ALL_GOOD = 0xFFE0001Fu;
+// SET: perv, qme, clkadj
+const pg_mask_t VPD_CP00_PG_EQ_ALWAYS_GOOD_MASK = 0x00080600u;
+const pg_idx_t VPD_CP00_PG_EQ_INDEX[] =
+{
+    // These are the indices in the PGV of each EQ entry.
+    32, 33, 34, 35, 36, 37, 38, 39
+};
 
-const uint32_t VPD_CP00_PG_MC01_INDEX       = 7;
-const uint32_t VPD_CP00_PG_MC23_INDEX       = 8;
-const uint32_t VPD_CP00_PG_MCxx_INDEX[4]    = {VPD_CP00_PG_MC01_INDEX,
-                                               VPD_CP00_PG_MC01_INDEX,
-                                               VPD_CP00_PG_MC23_INDEX,
-                                               VPD_CP00_PG_MC23_INDEX}; // by MCS
-// Nimbus:
-// all good - 3:VITAL, 4:PRV, 5:MC01, 6:IOM01+, 7:IOM23+, 14:PLLMEM
-// all good - 3:VITAL, 4:PRV, 5:MC23, 6:IOM45+, 7:IOM67+, 14:PLLMEM
-// Cumulus:
-// all good - 3:VITAL, 4:PRV, 5:MC01, 6:IOM01, 7:IOM01PPE, 14:PLLMEM
-// all good - 3:VITAL, 4:PRV, 5:MC23, 6:IOM23, 7:IOM23PPE, 14:PLLMEM
-const uint32_t VPD_CP00_PG_MCxx_GOOD        = 0xE0FD;
-const uint32_t VPD_CP00_PG_MCxx_PG_MASK     = 0x0300; // Nimbus only
-// iom0 and iom4 need to be good for zqcal to work on any
-// of the MCAs on that side
-const uint32_t VPD_CP00_PG_MCA_MAGIC_PORT_MASK = 0x0200;
-const uint32_t VPD_CP00_PG_MCxx_IOMyy[4]    = {0x0200, 0x0100, 0x0200, 0x0100};
+// UNSET: vital, perv, ph5, pcs0, pcs1, pcs2, pcs3, psm0, psm1,
+//        psm2, psm3, pllpci
+const pg_entry_t VPD_CP00_PG_PCI_ALL_GOOD = 0xFFE001FFu;
+// no always-good constant for PCI since it's not always-good for the chip
 
-const uint32_t VPD_CP00_PG_OB0_INDEX        = 9;
-const uint32_t VPD_CP00_PG_OB3_INDEX        = 12;
-// all good - 3:VITAL, 4:PRV, 5:PLIOOAx, 6:IOOx, 14:PLLIOO; x=0, 1*, 2*, 3
-const uint32_t VPD_CP00_PG_OBUS_GOOD        = 0xE1FD;
+const pg_entry_t VPD_CP00_PG_PCI_INDEX[] =
+{
+    8, 9
+};
 
-const uint32_t VPD_CP00_PG_PCI0_INDEX       = 13;
-// all good - 3:VITAL, 4:PRV, 5:PCI00, 6:IOPCI0, 14:PLLPCI0
-// all good - 3:VITAL, 4:PRV, 5:PCI11, 6:PCI12, 7:IOPCI1, 14:PLLPCI1
-// all good - 3:VITAL, 4:PRV, 5:PCI23, 6:PCI24, 7:PCI25, 8:IOPCI2, 14:PLLPCI2
-const uint32_t VPD_CP00_PG_PCIx_GOOD[3]     = {0xE1FD, 0xE0FD, 0xE07D};
+// UNSET: vital, perv, pau0, tl, ioppe
+const pg_entry_t VPD_CP00_PG_PAUC_SE_NE_ALL_GOOD = 0xFFE39FFFu;
+// UNSET: vital, perv, pau0, pau1, tl, ioppe
+const pg_entry_t VPD_CP00_PG_PAUC_SW_NW_ALL_GOOD = 0xFFE19FFFu;
+// SET: perv, tl, ioppe
+const pg_mask_t VPD_CP00_PG_PAUC_ALWAYS_GOOD_MASK = 0x00086000u;
+const pg_idx_t VPD_CP00_PG_PAUC_INDEX[] = {
+    16, 17, 18, 19
+};
 
-const uint32_t VPD_CP00_PG_EP0_INDEX        = 16;
-const uint32_t VPD_CP00_PG_EP5_INDEX        = 21;
-// all good - 3:VITAL, 4:PRV, 5:EQPB, 6:L30+, 7:L31+,
-//            8:L20+, 9:L21+, 10:AN, 11:PBLEQ, 12:REFR0, 13:REFR1, 14:DPLL
-const uint32_t VPD_CP00_PG_EPx_GOOD         = 0xE001;
-const uint32_t VPD_CP00_PG_EPx_PG_MASK      = 0x03CC;
-const uint32_t VPD_CP00_PG_EPx_L3L2REFR[2]  = {0x0288, 0x0144};
+// UNSET: perv, ioo, pdl/odl, pllaxon
+const pg_entry_t VPD_CP00_PG_IOHS_ALL_GOOD = 0xFFE33DFFu;
 
-const uint32_t VPD_CP00_PG_EC00_INDEX       = 32;
-// all good - 3:VITAL, 4:PRV, 5:C00, 6:C01
-const uint32_t VPD_CP00_PG_ECxx_GOOD        = 0xE1FF;
-const uint32_t VPD_CP00_PG_ECxx_MAX_ENTRIES = 24;
+// UNSET: perv, mc_emo, dl01, dl23, ioo0, ioo1, pllmc
+const pg_entry_t VPD_CP00_PG_MC_ALL_GOOD = 0xFFE21DFFu;
 
-const uint32_t VPD_CP00_PG_MAX_USED_INDEX   = 55;
-const uint32_t VPD_CP00_PG_xxx_VITAL        = 0x1000;
-const uint32_t VPD_CP00_PG_xxx_PERV         = 0x0800;
-const uint32_t VPD_CP00_PG_RESERVED_GOOD    = 0xFFFF;
+// The value representing an empty entry in the PGV
+const uint32_t VPD_CP00_PG_RESERVED_GOOD    = 0xFFFFFFFFu;
 
-// constants the platReadPR will use for looking at the VPD data
-const uint32_t VPD_VINI_PR_DATA_LENGTH      = 8; //@deprecrated
+// The two arrays below enumerate the set of all chiplets whose always-good bits
+// are mandatory for baseline functionality (checked in isChipFunctional); if a
+// chiplet in these arrays fails to pass the ALWAYS GOOD mask check, Hostboot
+// cannot use the chip.
+
+// This is required so that we can compile pre-c++11
+#ifdef __HOSTBOOT_MODULE
+
+// The first contains the chiplet's index in the PGV of the PG data...
+const std::array<pg_idx_t, 16> VPD_CP00_PG_ALWAYS_GOOD_INDEX =
+{
+    VPD_CP00_PG_FSI_INDEX,
+    VPD_CP00_PG_PRV_INDEX,
+    VPD_CP00_PG_N0_INDEX,
+    VPD_CP00_PG_N1_INDEX,
+    VPD_CP00_PG_PAUC_INDEX[0],
+    VPD_CP00_PG_PAUC_INDEX[1],
+    VPD_CP00_PG_PAUC_INDEX[2],
+    VPD_CP00_PG_PAUC_INDEX[3],
+    VPD_CP00_PG_EQ_INDEX[0],
+    VPD_CP00_PG_EQ_INDEX[1],
+    VPD_CP00_PG_EQ_INDEX[2],
+    VPD_CP00_PG_EQ_INDEX[3],
+    VPD_CP00_PG_EQ_INDEX[4],
+    VPD_CP00_PG_EQ_INDEX[5],
+    VPD_CP00_PG_EQ_INDEX[6],
+    VPD_CP00_PG_EQ_INDEX[7],
+};
+
+// ...and the second contains the mask of bits which MUST be GOOD (0) for the
+// part to be considered functional.
+const std::array<pg_mask_t, VPD_CP00_PG_ALWAYS_GOOD_INDEX.size()>
+    VPD_CP00_PG_ALWAYS_GOOD_MASKS =
+{
+    VPD_CP00_PG_FSI_ALWAYS_GOOD_MASK,
+    VPD_CP00_PG_PRV_ALWAYS_GOOD_MASK,
+    VPD_CP00_PG_N0_ALWAYS_GOOD_MASK,
+    VPD_CP00_PG_N1_ALWAYS_GOOD_MASK,
+    VPD_CP00_PG_PAUC_ALWAYS_GOOD_MASK,
+    VPD_CP00_PG_PAUC_ALWAYS_GOOD_MASK,
+    VPD_CP00_PG_PAUC_ALWAYS_GOOD_MASK,
+    VPD_CP00_PG_PAUC_ALWAYS_GOOD_MASK,
+    VPD_CP00_PG_EQ_ALWAYS_GOOD_MASK,
+    VPD_CP00_PG_EQ_ALWAYS_GOOD_MASK,
+    VPD_CP00_PG_EQ_ALWAYS_GOOD_MASK,
+    VPD_CP00_PG_EQ_ALWAYS_GOOD_MASK,
+    VPD_CP00_PG_EQ_ALWAYS_GOOD_MASK,
+    VPD_CP00_PG_EQ_ALWAYS_GOOD_MASK,
+    VPD_CP00_PG_EQ_ALWAYS_GOOD_MASK,
+    VPD_CP00_PG_EQ_ALWAYS_GOOD_MASK,
+};
+
+#define CONSTEXPR constexpr
+#else
+#define CONSTEXPR const
+#endif // #ifdef __HOSTBOOT_MODULE
+
+// This is a P10 Partial-Good Vector with every partial- and always-good bit
+// unset, and every reserved bit set, used for tests.
+// This is defined in this header because it is used by both hwas1test.H and by
+// errludParser_pgData.H
+CONSTEXPR partialGoodVector pgDataAllGood =
+{
+    HWAS::VPD_CP00_PG_FSI_ALL_GOOD,
+    HWAS::VPD_CP00_PG_PRV_ALL_GOOD,
+    HWAS::VPD_CP00_PG_N0_ALL_GOOD,
+    HWAS::VPD_CP00_PG_N1_ALL_GOOD,
+
+    HWAS::VPD_CP00_PG_RESERVED_GOOD,
+    HWAS::VPD_CP00_PG_RESERVED_GOOD,
+    HWAS::VPD_CP00_PG_RESERVED_GOOD,
+    HWAS::VPD_CP00_PG_RESERVED_GOOD,
+
+    HWAS::VPD_CP00_PG_PCI_ALL_GOOD,
+    HWAS::VPD_CP00_PG_PCI_ALL_GOOD,
+
+    HWAS::VPD_CP00_PG_RESERVED_GOOD,
+    HWAS::VPD_CP00_PG_RESERVED_GOOD,
+
+    HWAS::VPD_CP00_PG_MC_ALL_GOOD,
+    HWAS::VPD_CP00_PG_MC_ALL_GOOD,
+    HWAS::VPD_CP00_PG_MC_ALL_GOOD,
+    HWAS::VPD_CP00_PG_MC_ALL_GOOD,
+
+    HWAS::VPD_CP00_PG_PAUC_SE_NE_ALL_GOOD,
+    HWAS::VPD_CP00_PG_PAUC_SE_NE_ALL_GOOD,
+    HWAS::VPD_CP00_PG_PAUC_SW_NW_ALL_GOOD,
+    HWAS::VPD_CP00_PG_PAUC_SW_NW_ALL_GOOD,
+
+    HWAS::VPD_CP00_PG_RESERVED_GOOD,
+    HWAS::VPD_CP00_PG_RESERVED_GOOD,
+    HWAS::VPD_CP00_PG_RESERVED_GOOD,
+    HWAS::VPD_CP00_PG_RESERVED_GOOD,
+
+    HWAS::VPD_CP00_PG_IOHS_ALL_GOOD,
+    HWAS::VPD_CP00_PG_IOHS_ALL_GOOD,
+    HWAS::VPD_CP00_PG_IOHS_ALL_GOOD,
+    HWAS::VPD_CP00_PG_IOHS_ALL_GOOD,
+    HWAS::VPD_CP00_PG_IOHS_ALL_GOOD,
+    HWAS::VPD_CP00_PG_IOHS_ALL_GOOD,
+    HWAS::VPD_CP00_PG_IOHS_ALL_GOOD,
+    HWAS::VPD_CP00_PG_IOHS_ALL_GOOD,
+
+    HWAS::VPD_CP00_PG_EQ_ALL_GOOD,
+    HWAS::VPD_CP00_PG_EQ_ALL_GOOD,
+    HWAS::VPD_CP00_PG_EQ_ALL_GOOD,
+    HWAS::VPD_CP00_PG_EQ_ALL_GOOD,
+    HWAS::VPD_CP00_PG_EQ_ALL_GOOD,
+    HWAS::VPD_CP00_PG_EQ_ALL_GOOD,
+    HWAS::VPD_CP00_PG_EQ_ALL_GOOD,
+    HWAS::VPD_CP00_PG_EQ_ALL_GOOD,
+
+    HWAS::VPD_CP00_PG_RESERVED_GOOD,
+    HWAS::VPD_CP00_PG_RESERVED_GOOD,
+    HWAS::VPD_CP00_PG_RESERVED_GOOD,
+    HWAS::VPD_CP00_PG_RESERVED_GOOD,
+    HWAS::VPD_CP00_PG_RESERVED_GOOD,
+    HWAS::VPD_CP00_PG_RESERVED_GOOD,
+    HWAS::VPD_CP00_PG_RESERVED_GOOD,
+    HWAS::VPD_CP00_PG_RESERVED_GOOD,
+    HWAS::VPD_CP00_PG_RESERVED_GOOD,
+    HWAS::VPD_CP00_PG_RESERVED_GOOD,
+    HWAS::VPD_CP00_PG_RESERVED_GOOD,
+    HWAS::VPD_CP00_PG_RESERVED_GOOD,
+    HWAS::VPD_CP00_PG_RESERVED_GOOD,
+    HWAS::VPD_CP00_PG_RESERVED_GOOD,
+    HWAS::VPD_CP00_PG_RESERVED_GOOD,
+    HWAS::VPD_CP00_PG_RESERVED_GOOD,
+    HWAS::VPD_CP00_PG_RESERVED_GOOD,
+    HWAS::VPD_CP00_PG_RESERVED_GOOD,
+    HWAS::VPD_CP00_PG_RESERVED_GOOD,
+    HWAS::VPD_CP00_PG_RESERVED_GOOD,
+    HWAS::VPD_CP00_PG_RESERVED_GOOD,
+    HWAS::VPD_CP00_PG_RESERVED_GOOD,
+    HWAS::VPD_CP00_PG_RESERVED_GOOD,
+    HWAS::VPD_CP00_PG_RESERVED_GOOD,
+};
+
+// There are no model-specific AG entries as yet.
+const uint8_t MODEL_AG_DATA_ENTRIES = 0;
+
+// We don't want this area to be compiled when we're doing e.g. an FSP build
+// (old compiler doesn't support C++11)
+#ifdef __HOSTBOOT_MODULE
+
+// We need to initialize every element of our test PGV, and by default elements
+// will be initialized to 0, so if the last element is 0 then we know that we
+// used too few initializers. This will catch errors if the number of PGV
+// entries increases in the future.
+static_assert(pgDataAllGood.back() != 0,
+              "pgDataAllGood has too few initializers");
+
+// model_ag_entry represents a model-specific entry in the all-good AGV
+struct model_ag_entry
+{
+    // The index in the AGV that this value is stored at
+    uint32_t index;
+
+    // The model-specific all-good value
+    pg_entry_t value;
+};
+
+// model_ag_entries is used to hold model-specific all-good entries.
+// It is used by the error log for Partial-Good issues (ErrlUdPartialGoodData)
+// so that the parser can reconstruct an all-good AGV for a particular chip
+// model when it prints expected vs. actual pg values.
+typedef std::array<model_ag_entry, MODEL_AG_DATA_ENTRIES> model_ag_entries;
+#endif
 
 // constants the platReadLx will use for looking at the VPD data
 const uint32_t VPD_CRP0_LX_HDR_DATA_LENGTH  = 256;
@@ -156,9 +335,6 @@ const uint32_t VPD_CRP0_LX_PORT_DISABLED    = 0;
 
 const uint8_t  VPD_CRP0_LX_MIN_X            = 1;
 const uint8_t  VPD_CRP0_LX_MAX_X            = 8;
-
-// constants for the error log parser for partial good issues
-const uint8_t MODEL_PG_DATA_ENTRIES = 2;
 
 }
 

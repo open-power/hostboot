@@ -34,6 +34,7 @@
 
 #include <map>
 #include <hwas/common/vpdConstants.H>
+#include <hwas/common/pgLogic.H>
 
 // 'system' headers
 #include <stdint.h>
@@ -109,8 +110,8 @@ errlHndl_t platReadIDEC(const TARGETING::TargetHandle_t &i_target);
  *
  * @param[in]  i_target    target to read the Partial Good keyword from
  * @param[out] o_pgData    pointer to area that will hold the partialGood vector
- *                          read from VPD; must be malloc'ed by the caller,
- *                          and must be VPD_CP00_PG_DATA_LENGTH in size.
+ *                         read from VPD; must be allocated by the caller,
+ *                         and must be VPD_CP00_PG_DATA_LENGTH in size.
  *
  * @return errlHndl_t       valid errlHndl_t handle if there was an error
  *                          NULL if no errors;
@@ -118,23 +119,19 @@ errlHndl_t platReadIDEC(const TARGETING::TargetHandle_t &i_target);
 errlHndl_t platReadPartialGood(const TARGETING::TargetHandle_t &i_target,
                                 void *o_pgData);
 
-
-
 /**
  * @brief Checks the PG keyword data to determine if the target chip is
  *  functional. The caller is responsible for allocating and de-allocating the
  *  PG keyword space.
  *
  * @param[in]  i_target    pointer to target that we're looking at
- * @param[in]  i_pgData    pointer to area holding the PG keyword read from
- *                          VPD; must be malloc'ed by the caller, and must be
- *                          VPD_CP00_PG_DATA_LENGTH in size.
+ * @param[in]  i_pgData    array holding the PG keyword read from VPD
  *
  * @return bool Return true if the chip is functional; false if not.
  *
  */
 bool isChipFunctional(const TARGETING::TargetHandle_t &i_target,
-                      const uint16_t i_pgData[VPD_CP00_PG_DATA_LENGTH]);
+                      const partialGoodVector &i_pgData);
 
 
 // This map is used to track the state of previously checked targets in the
@@ -151,12 +148,11 @@ typedef std::map<const TARGETING::TargetHandle_t, bool> pgState_map;
  *                                is responsible for allocating and
  *                                de-allocating the PG keyword space.
  *
- * @param[in]  i_desc             Pointer to descendant of target we're looking
- *                                at. Must not be nullptr.
+ * @param[in]  i_desc             Reference to descendant of target we're looking
+ *                                at.
  *
- * @param[in]  i_pgData           Reference to area holding the PG keyword read
- *                                from VPD; must be malloc'ed by the caller, and
- *                                must be VPD_CP00_PG_DATA_ENTRIES in size.
+ * @param[in]  i_pgData           Reference to array holding the PG keyword read
+ *                                from VPD
  *
  * @param[io]  io_targetStates    Reference to the target state map to prevent
  *                                re-checking targets.
@@ -166,7 +162,7 @@ typedef std::map<const TARGETING::TargetHandle_t, bool> pgState_map;
  *
  */
 bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
-                      const uint16_t (&i_pgData)[VPD_CP00_PG_DATA_ENTRIES],
+                      const partialGoodVector &i_pgData,
                       pgState_map &io_targetStates);
 
 
@@ -177,11 +173,10 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
  *                                de-allocating the PG keyword space.
  *
  * @param[in]  i_pTarget          The target whose descendants need to be
- *                                checked. Must not be nullptr.
+ *                                checked.
  *
- * @param[in]  i_pgData           Reference to area holding the PG keyword read
- *                                from VPD; must be malloc'ed by the caller, and
- *                                must be VPD_CP00_PG_DATA_ENTRIES in size.
+ * @param[in]  i_pgData           Reference to array holding the PG keyword read
+ *                                from VPD.
  *
  * @param[in]  i_chipFunctional   The functional state of i_pTarget.
  *
@@ -207,7 +202,7 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
  */
 errlHndl_t checkPartialGoodForDescendants(
                 const TARGETING::TargetHandle_t &i_pTarget,
-                const uint16_t (&i_pgData)[VPD_CP00_PG_DATA_ENTRIES],
+                const partialGoodVector &i_pgData,
                 const bool i_chipFunctional,
                 const uint32_t i_errlEid,
                 errlHndl_t io_infoErrl,
@@ -236,7 +231,7 @@ errlHndl_t checkPartialGoodForDescendants(
 *
 */
 void markChildrenNonFunctional(const TARGETING::TargetHandle_t &i_parent,
-                                     pgState_map &io_targetStates);
+                               pgState_map &io_targetStates);
 
 /**
  * @deprecated
@@ -254,7 +249,7 @@ void markChildrenNonFunctional(const TARGETING::TargetHandle_t &i_parent,
  *                          NULL if no errors;
  */
 errlHndl_t platReadPR(const TARGETING::TargetHandle_t &i_target,
-                                void *o_prData);
+                      void *o_prData);
 
 /**
  * @brief platform specific code to determine the Lx vector of the input
@@ -344,16 +339,14 @@ void hwasErrorUpdatePlid(errlHndl_t & io_errl,
  *        log in a platform-specific manner.
  *
  * @param[io] io_errl              A reference to the error log handle.
- * @param[i]  i_modelPgData        A reference to the model-specific xbus and
- *                                 obus entries for pg vector; must be
- *                                 MODEL_PG_DATA_ENTRIES in size.
- * @param[i]  i_pgData             Reference to area holding the PG keyword read
- *                                 from VPD; must be VPD_CP00_PG_DATA_ENTRIES in
- *                                 size.
+
+ * @param[i]  i_modelAgData        A reference to model-specific AG entries
+ * @param[i]  i_pgData             Reference to array holding the PG keyword read
+ *                                 from VPD
  */
 void hwasErrorAddPartialGoodFFDC(errlHndl_t & io_errl,
-            const uint16_t (&i_modelPgData)[MODEL_PG_DATA_ENTRIES],
-            const uint16_t (&i_pgData)[VPD_CP00_PG_DATA_ENTRIES]);
+                                 const model_ag_entries& i_modelAgData,
+                                 const partialGoodVector& i_pgData);
 
 
 /**

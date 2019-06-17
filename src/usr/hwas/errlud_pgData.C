@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,38 +34,40 @@
 #include <util/utilmem.H>
 #include "errlud_pgData.H"
 
+using PARTIAL_GOOD::pg_entry_t;
+
 HWAS::ErrlUdPartialGoodData::ErrlUdPartialGoodData(
-        const uint16_t (&i_modelPgData)[MODEL_PG_DATA_ENTRIES],
-        const uint16_t (&i_pgData)[VPD_CP00_PG_DATA_ENTRIES])
+    const model_ag_entries& i_modelAgData,
+    const partialGoodVector& i_pgData)
 {
     // Setup the User Details instance variables.
     iv_CompId       = HWAS_COMP_ID;
     iv_Version      = HWAS_UDT_VERSION_1;
-    iv_SubSection   = HWAS_UDT_PARTIAL_GOOD_DATA;
+    iv_SubSection   = HWAS_UDT_PARTIAL_GOOD_DATA_V2;
 
     UtilMem l_memBuf;
 
     // ******** HWAS_UDT_VERSION_1 Memory Layout ******** //
-    // 2 Bytes: Model dependent XBUS All Good Value
-    // 2 Bytes: Model dependent OBUS All Good Value
-    // Last 128 bytes
-    // Each 2 Bytes: An entry in the Partial Good Vector.
+    // NUM_MODEL_AG_ENTRIES : uint32_t
+    // MODEL_AG_ENTRIES     : model_ag_entry[NUM_MODEL_AG_ENTRIES]
+    // NUM_PG_ENTRIES       : uint32_t
+    // PG_ENTRIES           : pg_entry_t[NUM_PG_ENTRIES]
 
-    static_assert(2 == MODEL_PG_DATA_ENTRIES,
-                  "Expected MODEL_PG_DATA_ENTRIES == 2 entries");
-    static_assert(64 == VPD_CP00_PG_DATA_ENTRIES,
-                  "Expected VPD_CP00_PG_DATA_ENTRIES == 64 entries");
+    l_memBuf << static_cast<uint32_t>(i_modelAgData.size());
 
-    // Store the All Good values in the buffer
-    for (size_t i = 0; i < MODEL_PG_DATA_ENTRIES; ++i)
+    // Store the model-specific All Good values in the buffer
+    for (const auto entry : i_modelAgData)
     {
-        l_memBuf << i_modelPgData[i];
+        l_memBuf << entry.index;
+        l_memBuf << entry.value;
     }
 
+    l_memBuf << static_cast<uint32_t>(i_pgData.size());
+
     // Store the contents of the partial good vector in the buffer
-    for (size_t i = 0; i < VPD_CP00_PG_DATA_ENTRIES; ++i)
+    for (const auto entry : i_pgData)
     {
-        l_memBuf << i_pgData[i];
+        l_memBuf << entry;
     }
 
     auto l_pError = l_memBuf.getLastError();

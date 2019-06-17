@@ -70,10 +70,10 @@ void hwasErrorUpdatePlid(errlHndl_t & io_errl,
 }
 
 void hwasErrorAddPartialGoodFFDC(errlHndl_t & io_errl,
-                        const uint16_t (&i_modelPgData)[MODEL_PG_DATA_ENTRIES],
-                        const uint16_t (&i_pgData)[VPD_CP00_PG_DATA_ENTRIES])
+                                 const model_ag_entries& i_modelAgData,
+                                 const partialGoodVector& i_pgData)
 {
-    ErrlUdPartialGoodData ffdc(i_modelPgData, i_pgData);
+    ErrlUdPartialGoodData ffdc(i_modelAgData, i_pgData);
     ffdc.addToLog(io_errl);
 }
 

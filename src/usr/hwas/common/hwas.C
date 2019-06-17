@@ -64,6 +64,9 @@ namespace HWAS
 using namespace TARGETING;
 using namespace HWAS::COMMON;
 
+using PARTIAL_GOOD::pg_entry_t;
+using PARTIAL_GOOD::pg_mask_t;
+
 // trace setup; used by HWAS_DBG and HWAS_ERR macros
 HWAS_TD_t g_trac_dbg_hwas   = NULL; // debug - fast
 HWAS_TD_t g_trac_imp_hwas   = NULL; // important - slow
@@ -570,6 +573,37 @@ errlHndl_t discoverMuxTargetsAndEnable(const Target &i_sysTarget)
     return l_err;
 }
 
+// The Partial-good vector is stored in VPD as a series of 24-bit entries. To
+// make them easier to work with and to provide room to grow them in the future,
+// we work with them as 32-bit entries (pg_entry_t). This function converts from
+// an array of bytes which represent 24-bit VPD data into a pgv object (array of
+// 32-bit pg_entry_t).
+// Because a 1-bit in a PG entry means that the part is not represented or not
+// functional, we pad the most significant byte of each pg_entry_t with 0xFF and
+// right-justify the actual data from the VPD.
+// This function presumes that the PG entries are stored in big-endian byte
+// order.
+static partialGoodVector parsePgData(const std::array<uint8_t, VPD_CP00_PG_DATA_LENGTH>& pgData)
+{
+    partialGoodVector expanded_entries = { };
+
+    for (size_t i = 0; i < VPD_CP00_PG_DATA_ENTRIES; ++i)
+    {
+        // We put all 1s in the high byte (this gets shifted over three times as
+        // the three data bytes get read) to indicate that none of the bits are
+        // "functional" because they don't represent hardware
+        expanded_entries[i] = 0xFF;
+
+        for (size_t j = 0; j < VPD_CP00_PG_ENTRY_SIZE; ++j)
+        {
+            expanded_entries[i]
+                = (expanded_entries[i] << 8) | pgData[i * VPD_CP00_PG_ENTRY_SIZE + j];
+        }
+    }
+
+    return expanded_entries;
+}
+
 errlHndl_t discoverTargets()
 {
     HWAS_DBG("discoverTargets entry");
@@ -702,8 +736,11 @@ errlHndl_t discoverTargets()
             bool chipFunctional = true;
             bool createInfoLog = false;
             uint32_t errlEid = 0;
-            uint16_t pgData[VPD_CP00_PG_DATA_ENTRIES];
-            bzero(pgData, sizeof(pgData));
+
+            // First we read the PGV into pgData as packed 3-byte integers,
+            // then we zero-extend the entries into pg_entry_t elements
+            std::array<uint8_t, VPD_CP00_PG_DATA_LENGTH> pgData = { };
+            partialGoodVector pgData_expanded = { };
 
             // Cache the target type
             auto l_targetType = pTarget->getAttr<ATTR_TYPE>();
@@ -761,7 +798,6 @@ errlHndl_t discoverTargets()
                 else if (l_targetType == TYPE_PROC)
                 {
                     // read partialGood vector from these as well.
-
                     // @TODO RTC 212820: Remove this when we have VPD
                     //errl = platReadPartialGood(pTarget, pgData);
                     errl = NULL;
@@ -780,6 +816,8 @@ errlHndl_t discoverTargets()
                     }
                     else
                     {
+                        pgData_expanded = parsePgData(pgData);
+
                         // look at the 'nest' logic to override the
                         //  functionality of this proc
 
@@ -824,7 +862,7 @@ errlHndl_t discoverTargets()
             // Now determine if the descendants of this target are
             // present and/or functional
             checkPartialGoodForDescendants(pTarget,
-                                           pgData,
+                                           pgData_expanded,
                                            chipFunctional,
                                            errlEid,
                                            infoErrl,
@@ -857,19 +895,14 @@ errlHndl_t discoverTargets()
 
                 auto l_model = l_masterProc->getAttr<ATTR_MODEL>();
 
-                // Setup model dependent all good data
-                uint16_t l_modelPgData[MODEL_PG_DATA_ENTRIES] = {0};
+                // Setup model-dependent all good data
+                model_ag_entries l_modelPgData = { };
 
-                l_modelPgData[0] = (MODEL_NIMBUS == l_model)
-                    ? (VPD_CP00_PG_XBUS_GOOD_NIMBUS
-                            | VPD_CP00_PG_XBUS_IOX[0])
-                    : VPD_CP00_PG_XBUS_GOOD_CUMULUS;
+                // Insert model-depdendent entries here (there are none right
+                // now for P10)
+                (void)l_model;
 
-                l_modelPgData[1] = (TARGETING::MODEL_NIMBUS == l_model)
-                    ? VPD_CP00_PG_RESERVED_GOOD
-                    : VPD_CP00_PG_OBUS_GOOD;
-
-                hwasErrorAddPartialGoodFFDC(infoErrl, l_modelPgData, pgData);
+                hwasErrorAddPartialGoodFFDC(infoErrl, l_modelPgData, pgData_expanded);
                 errlCommit(infoErrl, HWAS_COMP_ID);
             }
             else
@@ -976,111 +1009,34 @@ errlHndl_t discoverTargets()
     return errl;
 } // discoverTargets
 
-
 bool isChipFunctional(const TARGETING::TargetHandle_t &i_target,
-                      const uint16_t i_pgData[])
+                      const partialGoodVector& i_pgData)
 {
     bool l_chipFunctional = true;
 
-    ATTR_MODEL_type l_model = i_target->getAttr<ATTR_MODEL>();
-    uint16_t l_xbus = (l_model == MODEL_NIMBUS) ?
-      VPD_CP00_PG_XBUS_GOOD_NIMBUS : VPD_CP00_PG_XBUS_GOOD_CUMULUS;
+    for (size_t i = 0; i < VPD_CP00_PG_ALWAYS_GOOD_INDEX.size(); ++i)
+    {
+        const auto l_index = VPD_CP00_PG_ALWAYS_GOOD_INDEX[i];
+        const auto l_always_good_mask = VPD_CP00_PG_ALWAYS_GOOD_MASKS[i];
 
-    // Check all bits in FSI entry
-    if (i_pgData[VPD_CP00_PG_FSI_INDEX] !=
-        VPD_CP00_PG_FSI_GOOD)
-    {
-        HWAS_INF("pTarget %.8X - FSI pgData[%d]: "
-                 "actual 0x%04X, expected 0x%04X - bad",
-                 i_target->getAttr<ATTR_HUID>(),
-                 VPD_CP00_PG_FSI_INDEX,
-                 i_pgData[VPD_CP00_PG_FSI_INDEX],
-                 VPD_CP00_PG_FSI_GOOD);
-        l_chipFunctional = false;
-    }
-    else
-    // Check all bits in PRV entry
-    if (i_pgData[VPD_CP00_PG_PERVASIVE_INDEX] !=
-        VPD_CP00_PG_PERVASIVE_GOOD)
-    {
-        HWAS_INF("pTarget %.8X - Pervasive pgData[%d]: "
-                 "actual 0x%04X, expected 0x%04X - bad",
-                 i_target->getAttr<ATTR_HUID>(),
-                 VPD_CP00_PG_PERVASIVE_INDEX,
-                 i_pgData[VPD_CP00_PG_PERVASIVE_INDEX],
-                 VPD_CP00_PG_PERVASIVE_GOOD);
-        l_chipFunctional = false;
-    }
-    else
-    // Check all bits in N0 entry
-    if (i_pgData[VPD_CP00_PG_N0_INDEX] != VPD_CP00_PG_N0_GOOD)
-    {
-        HWAS_INF("pTarget %.8X - N0 pgData[%d]: "
-                 "actual 0x%04X, expected 0x%04X - bad",
-                 i_target->getAttr<ATTR_HUID>(),
-                 VPD_CP00_PG_N0_INDEX,
-                 i_pgData[VPD_CP00_PG_N0_INDEX],
-                 VPD_CP00_PG_N0_GOOD);
-        l_chipFunctional = false;
-    }
-    else
-    // Check bits in N1 entry except those in partial good region
-    if ((i_pgData[VPD_CP00_PG_N1_INDEX] &
-         ~VPD_CP00_PG_N1_PG_MASK) != VPD_CP00_PG_N1_GOOD)
-    {
-        HWAS_INF("pTarget %.8X - N1 pgData[%d]: "
-                 "actual 0x%04X, expected 0x%04X - bad",
-                 i_target->getAttr<ATTR_HUID>(),
-                 VPD_CP00_PG_N1_INDEX,
-                 i_pgData[VPD_CP00_PG_N1_INDEX],
-                 VPD_CP00_PG_N1_GOOD);
-        l_chipFunctional = false;
-    }
-    else
-    // Check all bits in N2 entry
-    if (i_pgData[VPD_CP00_PG_N2_INDEX] != VPD_CP00_PG_N2_GOOD)
-    {
-        HWAS_INF("pTarget %.8X - N2 pgData[%d]: "
-                 "actual 0x%04X, expected 0x%04X - bad",
-                 i_target->getAttr<ATTR_HUID>(),
-                 VPD_CP00_PG_N2_INDEX,
-                 i_pgData[VPD_CP00_PG_N2_INDEX],
-                 VPD_CP00_PG_N2_GOOD);
-        l_chipFunctional = false;
-    }
-    else
-    // Check bits in N3 entry except those in partial good region
-    if ((i_pgData[VPD_CP00_PG_N3_INDEX] &
-         ~VPD_CP00_PG_N3_PG_MASK) != VPD_CP00_PG_N3_GOOD)
-    {
-        HWAS_INF("pTarget %.8X - N3 pgData[%d]: "
-                 "actual 0x%04X, expected 0x%04X - bad",
-                 i_target->getAttr<ATTR_HUID>(),
-                 VPD_CP00_PG_N3_INDEX,
-                 i_pgData[VPD_CP00_PG_N3_INDEX],
-                 VPD_CP00_PG_N3_GOOD);
-        l_chipFunctional = false;
-    }
-    else
-    // Check bits in XBUS entry, ignoring individual xbus targets
-    // Note that what is good is different bewteen Nimbus/Cumulus
-    if (((i_pgData[VPD_CP00_PG_XBUS_INDEX] &
-          ~VPD_CP00_PG_XBUS_PG_MASK) != l_xbus))
-    {
-        HWAS_INF("pTarget %.8X - XBUS pgData[%d]: "
-                 "actual 0x%04X, expected 0x%04X - bad",
-                 i_target->getAttr<ATTR_HUID>(),
-                 VPD_CP00_PG_XBUS_INDEX,
-                 i_pgData[VPD_CP00_PG_XBUS_INDEX],
-                 l_xbus);
-        l_chipFunctional = false;
+        if (i_pgData[l_index] & l_always_good_mask)
+        {
+            const char* const l_name = i_target->getAttrAsString<ATTR_TYPE>();
+
+            HWAS_INF("pTarget %.8X - %s pgData[%d]: "
+                     "actual 0x%08X, expected 0x%08X - bad",
+                     i_target->getAttr<ATTR_HUID>(),
+                     l_name, l_index, i_pgData[l_index], l_always_good_mask);
+            l_chipFunctional = false;
+            break;
+        }
     }
 
     return l_chipFunctional;
 } // isChipFunctional
 
 bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
-                      const uint16_t (&i_pgData)[VPD_CP00_PG_DATA_ENTRIES],
+                      const partialGoodVector& i_pgData,
                       pgState_map &io_targetStates)
 {
     bool l_functional = true, l_previouslySeen = false;
@@ -1114,9 +1070,11 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
         // struct. If a target has no associated rules then an NA rule will be
         // returned that was created by the default constructor which will cause
         // the next for loop to function as a no-op.
-        PARTIAL_GOOD::pgLogic_t descPgLogic;
-        errlHndl_t l_returnErrl = PARTIAL_GOOD::pgTable
-            .findRulesForTarget(i_desc, descPgLogic);
+        const PARTIAL_GOOD::PartialGoodRule* pgRule_it = nullptr;
+        size_t numPgRules = 0;
+
+        errlHndl_t l_returnErrl
+            = PARTIAL_GOOD::findRulesForTarget(i_desc, pgRule_it, numPgRules);
 
         if (l_returnErrl != nullptr)
         {
@@ -1124,48 +1082,30 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
             break;
         }
 
+        const auto l_targetCU = i_desc->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+
         // Iterate through the list of partial good logic for this target. If
         // any of them fail then the target is non-functional.
-        for(PARTIAL_GOOD::pgLogic_t::const_iterator pgLogic_it =
-                descPgLogic.begin();
-            pgLogic_it != descPgLogic.end(); ++pgLogic_it)
+        for(size_t i = 0; i < numPgRules; ++i, ++pgRule_it)
         {
-            PARTIAL_GOOD::PartialGoodLogic pgLogic = *pgLogic_it;
-
-            if ((i_pgData[pgLogic.iv_pgIndex]
-                & pgLogic.iv_pgMask) != pgLogic.iv_agMask)
+            if (pgRule_it->isApplicableToChipUnit(l_targetCU)
+                && pgRule_it->isApplicableToCurrentModel())
             {
-                HWAS_INF("pDesc 0x%.8X - pgData[%d]: "
-                         "actual 0x%04X, expected 0x%04X - bad",
-                         i_desc->getAttr<ATTR_HUID>(),
-                         pgLogic.iv_pgIndex,
-                         i_pgData[pgLogic.iv_pgIndex] & pgLogic.iv_pgMask,
-                         pgLogic.iv_agMask);
-                l_functional = false;
-                break;
-            }
-
-            // The final check is to see if there is any additional logic
-            // that cannot be generically included in this loop. If there is
-            // special logic it will be included in a function that is
-            // hard-coded for that particular target and a function pointer will
-            // point to it.
-            //
-            // Any of the structs in the vector could have a pointer to a
-            // special rule so this check is included in the iteration.
-            if (pgLogic.iv_specialRule != nullptr)
-            {
-                // This pgLogic struct has a special rule. Call it to determine
-                // functionality.
-                l_functional = pgLogic.iv_specialRule(i_desc, i_pgData);
+                l_functional = pgRule_it->isFunctional(i_desc, i_pgData);
 
                 if (!l_functional)
                 {
+                    char msg[128] = { };
+                    pgRule_it->formatDebugMessage(i_desc, i_pgData, msg, sizeof(msg));
+
+                    HWAS_INF("pDesc 0x%.8X - %s - bad",
+                             i_desc->getAttr<ATTR_HUID>(),
+                             msg);
+
                     break;
                 }
             }
         }
-
     } while(0);
 
     if (!l_previouslySeen)
@@ -1253,7 +1193,7 @@ void markChildrenNonFunctional(const TARGETING::TargetHandle_t &i_parent,
 
 errlHndl_t checkPartialGoodForDescendants(
         const TARGETING::TargetHandle_t &i_pTarget,
-        const uint16_t (&i_pgData)[VPD_CP00_PG_DATA_ENTRIES],
+        const partialGoodVector& i_pgData,
         const bool i_chipFunctional,
         const uint32_t i_errlEid,
         errlHndl_t io_infoErrl,

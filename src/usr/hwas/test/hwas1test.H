@@ -48,79 +48,115 @@
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
 
-// Buffer with all good data (CUMULUS chip)
-const uint16_t pgDataAllGood[HWAS::VPD_CP00_PG_DATA_ENTRIES] =
-                     {(uint16_t)HWAS::VPD_CP00_PG_FSI_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_PERVASIVE_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_N0_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_N1_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_N2_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_N3_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_XBUS_GOOD_CUMULUS,
-                      (uint16_t)HWAS::VPD_CP00_PG_MCxx_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_MCxx_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_OBUS_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_OBUS_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_OBUS_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_OBUS_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_PCIx_GOOD[0],
-                      (uint16_t)HWAS::VPD_CP00_PG_PCIx_GOOD[1],
-                      (uint16_t)HWAS::VPD_CP00_PG_PCIx_GOOD[2],
-                      (uint16_t)HWAS::VPD_CP00_PG_EPx_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_EPx_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_EPx_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_EPx_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_EPx_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_EPx_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD};
+using PARTIAL_GOOD::pg_entry_t;
+using PARTIAL_GOOD::pg_mask_t;
+
+using namespace HWAS;
+using namespace TARGETING;
+
+// These constants are used in the arrays below to define testcases.
+const pg_mask_t NO_ALWAYS_GOOD_BITS = 0;
+const pg_idx_t USE_CHIP_UNIT = 0xFE;
+const pg_idx_t USE_CHIPLET_ID = 0xFF;
+
+// This structure is used to hold test cases when the test suite checks that,
+// from a parent's perspective, errors in itself propagate to at least one
+// child.
+struct parent_target_info
+{
+    ATTR_TYPE_type target_type; // Type of targets this test applies to
+    pg_mask_t pg_idx;           // Use this number to index PGV (can be USE_CHIPLET_ID)
+    pg_mask_t always_good_mask; // Avoid setting these bits because they're
+                                // already checked in the test for
+                                // isChipFunctional
+};
+
+// The list of test cases for targets that have children which need to go bad
+// when their parent goes bad. (Not an std::array so that we get size deduction)
+const parent_target_info targets_with_children[] =
+{
+    { TYPE_PEC,           // Rule applies to chips of type PEC (which represent
+                          // PCI units)
+      USE_CHIPLET_ID,     // Use the target's chiplet ID to index data from the PGV
+      NO_ALWAYS_GOOD_BITS // There are no always-good bits to avoid setting
+    },
+
+    { TYPE_PAUC, USE_CHIPLET_ID, VPD_CP00_PG_PAUC_ALWAYS_GOOD_MASK },
+    { TYPE_IOHS, USE_CHIPLET_ID, NO_ALWAYS_GOOD_BITS },
+    { TYPE_MC,   USE_CHIPLET_ID, NO_ALWAYS_GOOD_BITS },
+    { TYPE_EQ,   USE_CHIPLET_ID, VPD_CP00_PG_EQ_ALWAYS_GOOD_MASK },
+    { TYPE_PERV, USE_CHIP_UNIT,  VPD_CP00_PG_PERV_BIT },
+};
+
+const pg_idx_t USE_PARENT_CHIPLET_ID = 0xFF;
+
+// This structure is used to hold test cases when the test suite checks that,
+// from the child's perspective, when their parent goes bad, the bad state
+// propagates to themselves go bad.
+struct child_target_info
+{
+    ATTR_TYPE_type target_type; // Type of target this rule applies to
+    pg_idx_t parent_pg_idx;     // Use this number to index PGV (can be
+                                // USE_PARENT_CHIPLET_ID)
+    pg_entry_t parent_pg_entry_bits_to_set; // Set these bits in the parent's PG
+                                            // entry to cause it to go bad
+};
+
+// For targets that have to modify their parent bits to check themselves (not an
+// std::array so that we get size deduction)
+const child_target_info targets_with_parents[] =
+{
+    { TYPE_CORE,             // Rule applies to CORE targets
+      USE_PARENT_CHIPLET_ID, // Use our parent EQ chiplet's ID to set bad bits in
+                             // the PGV
+
+      // Cause the parent to go bad by setting all the bits in the parent EQ's
+      // PGV entry that are optional (i.e. not RESERVED and also not in the
+      // ALWAYS_GOOD_MASK)
+      ~(VPD_CP00_PG_EQ_ALWAYS_GOOD_MASK | VPD_CP00_PG_EQ_ALL_GOOD)
+    },
+
+    { TYPE_FC,        USE_PARENT_CHIPLET_ID, ~(VPD_CP00_PG_EQ_ALWAYS_GOOD_MASK
+                                               | VPD_CP00_PG_EQ_ALL_GOOD) },
+
+    // PHB are children of PEC units (which represent PCI units)
+    { TYPE_PHB,       USE_PARENT_CHIPLET_ID, ~VPD_CP00_PG_PCI_ALL_GOOD },
+
+    // PAU are children of IOHS units
+    { TYPE_PAU,       USE_PARENT_CHIPLET_ID, ~VPD_CP00_PG_IOHS_ALL_GOOD },
+    { TYPE_IOHS,      USE_PARENT_CHIPLET_ID, ~(VPD_CP00_PG_PAUC_ALWAYS_GOOD_MASK
+                                               | VPD_CP00_PG_PAUC_SW_NW_ALL_GOOD) },
+    { TYPE_DIMM,      USE_PARENT_CHIPLET_ID, ~VPD_CP00_PG_MC_ALL_GOOD },
+    { TYPE_MEM_PORT,  USE_PARENT_CHIPLET_ID, ~VPD_CP00_PG_MC_ALL_GOOD },
+    { TYPE_OCMB_CHIP, USE_PARENT_CHIPLET_ID, ~VPD_CP00_PG_MC_ALL_GOOD },
+    { TYPE_OMI,       USE_PARENT_CHIPLET_ID, ~VPD_CP00_PG_MC_ALL_GOOD },
+    { TYPE_MCC,       USE_PARENT_CHIPLET_ID, ~VPD_CP00_PG_MC_ALL_GOOD },
+};
+
+// Look up an entry in one of the arrays above with the given target type.
+template<typename T, size_t Size>
+static const T* lookup_target_info(T(&array)[Size], const ATTR_TYPE_type type)
+{
+    const auto end = array + Size;
+    const auto it = std::find_if(array, end,
+                                 [type](const T& info) {
+                                     return info.target_type == type;
+                                 });
+
+    if (it != end)
+    {
+        return it;
+    }
+
+    return nullptr;
+}
 
 class HWAS1test: public CxxTest::TestSuite
 {
 private:
     bool checkPartialGoodForDescendants(
             const TARGETING::TargetHandle_t &i_pTarget,
-            const uint16_t (&i_pgData)[HWAS::VPD_CP00_PG_DATA_ENTRIES])
+            const partialGoodVector& i_pgData)
     {
         bool result = true;
 
@@ -130,7 +166,7 @@ private:
         const uint32_t NO_ERROR_ID = 0;
         errlHndl_t NO_INFO_ERRL = nullptr;
         bool DO_NOT_CREATE_INFO_LOG = false;
-        bool RUN_IN_TESTCASE_MODE = true;
+        const bool RUN_IN_TESTCASE_MODE = true;
 
         (void)HWAS::checkPartialGoodForDescendants(i_pTarget,
                                              i_pgData,
@@ -147,7 +183,7 @@ private:
     bool checkPropagationOfBadState(
             const TARGETING::TargetHandle_t &i_pParent,
             const TARGETING::TargetHandle_t &i_pChild,
-            const uint16_t (&i_pgData)[HWAS::VPD_CP00_PG_DATA_ENTRIES])
+            const partialGoodVector& i_pgData)
 
     {
         HWAS::pgState_map targetStates;
@@ -161,9 +197,9 @@ private:
         if (!HWAS::isDescFunctional(i_pChild, i_pgData, targetStates))
         {
             TS_FAIL("testHWAScheckPartialGoodForDescendants> "
-                    "i_pChild HUID 0x%.8x "
+                    "i_pChild HUID 0x %.8x "
                     "should be true",
-                    i_pChild->getAttr<TARGETING::ATTR_HUID>());
+                    get_huid(i_pChild));
         }
 
         // Now check the parent. Since the PG bits are wrong it should return
@@ -171,9 +207,9 @@ private:
         else if (HWAS::isDescFunctional(i_pParent, i_pgData, targetStates))
         {
             TS_FAIL("testHWAScheckPartialGoodForDescendants> "
-                    "i_pParent HUID 0x%.8x "
+                    "i_pParent HUID 0x %.8x "
                     "should be false",
-                    i_pParent->getAttr<TARGETING::ATTR_HUID>());
+                    get_huid(i_pParent));
         }
 
         // Now we propagate the non-functional state of the parent to the child.
@@ -300,6 +336,7 @@ public:
         {
             // error log is expected case, delete it
             delete l_errl;
+            l_errl = nullptr;
         }
         else
         {
@@ -332,6 +369,7 @@ public:
         {
             // error log is expected case, delete it
             delete l_errl;
+            l_errl = nullptr;
         }
         else
         {
@@ -347,6 +385,13 @@ public:
      */
     void testHWASisChipFunctional()
     {
+        /* This test ensures that if any bit in any of the targets REQUIRED for
+         * a chip to be considered minimally functional goes bad, then the
+         * entire chip is considered non-functional (i.e. isChipFunctional
+         * evaluates to false). It also tests that if a partial-good bit is set
+         * in one of these targets, then the chip is still considered
+         * functional. */
+
         using namespace HWAS;
         using namespace TARGETING;
 
@@ -361,296 +406,64 @@ public:
              ++pTarget_it
             )
         {
-            TargetHandle_t pTarget = *pTarget_it;
-            ATTR_MODEL_type l_model = pTarget->getAttr<ATTR_MODEL>();
-            uint16_t l_xbus = (MODEL_NIMBUS == l_model)
-                            ? (uint16_t)(VPD_CP00_PG_XBUS_GOOD_NIMBUS |
-                                         VPD_CP00_PG_XBUS_IOX[0])
-                            : (uint16_t)VPD_CP00_PG_XBUS_GOOD_CUMULUS;
-            uint16_t l_obus12 = (MODEL_NIMBUS == l_model)
-                              ? (uint16_t)VPD_CP00_PG_RESERVED_GOOD
-                              : (uint16_t)VPD_CP00_PG_OBUS_GOOD;
-            uint16_t pgData[VPD_CP00_PG_DATA_ENTRIES];
-            memcpy(pgData,
-                   pgDataAllGood,
-                   VPD_CP00_PG_DATA_LENGTH);
-            pgData[VPD_CP00_PG_XBUS_INDEX] = l_xbus;
-            pgData[VPD_CP00_PG_OB0_INDEX + 1] =  l_obus12;
-            pgData[VPD_CP00_PG_OB0_INDEX + 2] =  l_obus12;
-            uint16_t l_mask = 0x8000;
+            const TargetHandle_t pTarget = *pTarget_it;
 
             TS_INFO( "testHWASisChipFunctional: chip is functional");
-            if (!isChipFunctional(pTarget, pgData))
+            if (!isChipFunctional(pTarget, pgDataAllGood))
             {
-                TS_FAIL("testHWASisChipFunctional>"
-                        "functional = 0x%x, should be true.",
-                        isChipFunctional(pTarget, pgData));
+                TS_FAIL("testHWASisChipFunctional>functional = false, should be true.");
             }
 
-            TS_INFO( "testHWASisChipFunctional: partial good all bad");
-            pgData[VPD_CP00_PG_N1_INDEX] |= VPD_CP00_PG_N1_PG_MASK;
-            pgData[VPD_CP00_PG_N3_INDEX] |= VPD_CP00_PG_N3_PG_MASK;
-            pgData[VPD_CP00_PG_XBUS_INDEX] |= VPD_CP00_PG_XBUS_PG_MASK;
-
-            if (!isChipFunctional(pTarget, pgData))
+            // This loop will iterate the bits of every chiplet that is
+            // always-good (i.e. necessary for a chip to be considered even
+            // minimally functional) and set it to BAD, to ensure that
+            // isChipFunctional considers the entire chip to be bad.
+            for (size_t i = 0; i < VPD_CP00_PG_ALWAYS_GOOD_INDEX.size(); ++i)
             {
-                TS_FAIL("testHWASisChipFunctional>"
-                        "functional = 0x%x, should be true.",
-                        isChipFunctional(pTarget, pgData));
-            }
+                const auto l_pgIndex = VPD_CP00_PG_ALWAYS_GOOD_INDEX[i];
+                const auto l_alwaysGoodMask = VPD_CP00_PG_ALWAYS_GOOD_MASKS[i];
+                const char* const l_name = attrToString<ATTR_TYPE>(pTarget->getAttr<ATTR_TYPE>());
 
-            pgData[VPD_CP00_PG_N1_INDEX] &= ~VPD_CP00_PG_N1_PG_MASK;
-            pgData[VPD_CP00_PG_N3_INDEX] &= ~VPD_CP00_PG_N3_PG_MASK;
-            pgData[VPD_CP00_PG_XBUS_INDEX] = l_xbus;
+                const pg_entry_t original_entry = pgDataAllGood[l_pgIndex];
 
-            TS_INFO( "testHWASisChipFunctional: FSI is not functional");
-            for (l_mask = 0x8000;
-                 l_mask > 0;
-                 l_mask >>= 1)
-            {
-                if (pgData[VPD_CP00_PG_FSI_INDEX] & l_mask)
-                {
-                    // Turn off a bit that should be on
-                    pgData[VPD_CP00_PG_FSI_INDEX] &= ~l_mask;
-                }
-                else
-                {
-                    // Turn on a bit that should be off
-                    pgData[VPD_CP00_PG_FSI_INDEX] |= l_mask;
-                }
+                TS_INFO("testHWASisChipFunctional: %s [non-]functionality check",
+                        l_name);
 
-                if (isChipFunctional(pTarget, pgData))
-                {
-                    TS_FAIL("testHWASisChipFunctional>"
-                            "functional = 0x%x, should be false, "
-                            "FSI = 0x%04x, mask = 0x%04x.",
-                            isChipFunctional(pTarget, pgData),
-                            pgData[VPD_CP00_PG_FSI_INDEX],
-                            l_mask);
-                }
+                // The pgdata we will be modifying
+                partialGoodVector bad_pgData = pgDataAllGood;
 
-                // Restore the "all good" data
-                pgData[VPD_CP00_PG_FSI_INDEX] =
-                    (uint16_t)VPD_CP00_PG_FSI_GOOD;
-            }
-
-            TS_INFO( "testHWASisChipFunctional: PRV is not functional");
-            for (l_mask = 0x8000;
-                 l_mask > 0;
-                 l_mask >>= 1)
-            {
-                if (pgData[VPD_CP00_PG_PERVASIVE_INDEX] & l_mask)
+                // Iterate with a mask over every bit of the pg entry of this unit
+                for (pg_mask_t l_mask = 1 << (sizeof(pg_mask_t) * 8 - 1);
+                     l_mask != 0;
+                     l_mask >>= 1)
                 {
-                    // Turn off a bit that should be on
-                    pgData[VPD_CP00_PG_PERVASIVE_INDEX] &= ~l_mask;
-                }
-                else
-                {
-                    // Turn on a bit that should be off
-                    pgData[VPD_CP00_PG_PERVASIVE_INDEX] |= l_mask;
-                }
-
-                if (isChipFunctional(pTarget, pgData))
-                {
-                    TS_FAIL("testHWASisChipFunctional>"
-                            "functional = 0x%x, should be false, "
-                            "PRV = 0x%04x, mask = 0x%04x.",
-                            isChipFunctional(pTarget, pgData),
-                            pgData[VPD_CP00_PG_PERVASIVE_INDEX],
-                            l_mask);
-                }
-
-                // Restore the "all good" data
-                pgData[VPD_CP00_PG_PERVASIVE_INDEX] =
-                    (uint16_t)VPD_CP00_PG_PERVASIVE_GOOD;
-            }
-
-            TS_INFO( "testHWASisChipFunctional: N0 is not functional");
-            for (l_mask = 0x8000;
-                 l_mask > 0;
-                 l_mask >>= 1)
-            {
-                if (pgData[VPD_CP00_PG_N0_INDEX] & l_mask)
-                {
-                    // Turn off a bit that should be on
-                    pgData[VPD_CP00_PG_N0_INDEX] &= ~l_mask;
-                }
-                else
-                {
-                    // Turn on a bit that should be off
-                    pgData[VPD_CP00_PG_N0_INDEX] |= l_mask;
-                }
-
-                if (isChipFunctional(pTarget, pgData))
-                {
-                    TS_FAIL("testHWASisChipFunctional>"
-                            "functional = 0x%x, should be false, "
-                            "N0 = 0x%04x, mask = 0x%04x.",
-                            isChipFunctional(pTarget, pgData),
-                            pgData[VPD_CP00_PG_N0_INDEX],
-                            l_mask);
-                }
-
-                // Restore the "all good" data
-                pgData[VPD_CP00_PG_N0_INDEX] =
-                    (uint16_t)VPD_CP00_PG_N0_GOOD;
-            }
-
-            TS_INFO( "testHWASisChipFunctional: N1 is not functional");
-            for (l_mask = 0x8000;
-                 l_mask > 0;
-                 l_mask >>= 1)
-            {
-                if ((uint16_t)VPD_CP00_PG_N1_PG_MASK & l_mask)
-                {
-                     // Ignore partial good region
-                     continue;
-                }
-                else
-                if (pgData[VPD_CP00_PG_N1_INDEX] & l_mask)
-                {
-                    // Turn off a bit that should be on
-                    pgData[VPD_CP00_PG_N1_INDEX] &= ~l_mask;
-                }
-                else
-                {
-                    // Turn on a bit that should be off
-                    pgData[VPD_CP00_PG_N1_INDEX] |= l_mask;
-                }
-
-                if (isChipFunctional(pTarget, pgData))
-                {
-                    TS_FAIL("testHWASisChipFunctional>"
-                            "functional = 0x%x, should be false, "
-                            "N1 = 0x%04x, mask = 0x%04x.",
-                            isChipFunctional(pTarget, pgData),
-                            pgData[VPD_CP00_PG_N1_INDEX],
-                            l_mask);
-                }
-
-                // Restore the "all good" data
-                pgData[VPD_CP00_PG_N1_INDEX] =
-                    (uint16_t)VPD_CP00_PG_N1_GOOD;
-            }
-
-            TS_INFO( "testHWASisChipFunctional: N2 is not functional");
-            for (l_mask = 0x8000;
-                 l_mask > 0;
-                 l_mask >>= 1)
-            {
-                if (pgData[VPD_CP00_PG_N2_INDEX] & l_mask)
-                {
-                    // Turn off a bit that should be on
-                    pgData[VPD_CP00_PG_N2_INDEX] &= ~l_mask;
-                }
-                else
-                {
-                    // Turn on a bit that should be off
-                    pgData[VPD_CP00_PG_N2_INDEX] |= l_mask;
-                }
-
-                if (isChipFunctional(pTarget, pgData))
-                {
-                    TS_FAIL("testHWASisChipFunctional>"
-                            "functional = 0x%x, should be false, "
-                            "N2 = 0x%04x, mask = 0x%04x.",
-                            isChipFunctional(pTarget, pgData),
-                            pgData[VPD_CP00_PG_N2_INDEX],
-                            l_mask);
-                }
-
-                // Restore the "all good" data
-                pgData[VPD_CP00_PG_N2_INDEX] =
-                    (uint16_t)VPD_CP00_PG_N2_GOOD;
-            }
-
-            TS_INFO( "testHWASisChipFunctional: N3 is not functional");
-            for (l_mask = 0x8000;
-                 l_mask > 0;
-                 l_mask >>= 1)
-            {
-                if ((uint16_t)VPD_CP00_PG_N3_PG_MASK & l_mask)
-                {
-                     // Ignore partial good region
-                     continue;
-                }
-                else
-                if (pgData[VPD_CP00_PG_N3_INDEX] & l_mask)
-                {
-                    // Turn off a bit that should be on
-                    pgData[VPD_CP00_PG_N3_INDEX] &= ~l_mask;
-                }
-                else
-                {
-                    // Turn on a bit that should be off
-                    pgData[VPD_CP00_PG_N3_INDEX] |= l_mask;
-                }
-
-                if (isChipFunctional(pTarget, pgData))
-                {
-                    TS_FAIL("testHWASisChipFunctional>"
-                            "functional = 0x%x, should be false, "
-                            "N3 = 0x%04x, mask = 0x%04x.",
-                            isChipFunctional(pTarget, pgData),
-                            pgData[VPD_CP00_PG_N3_INDEX],
-                            l_mask);
-                }
-
-                // Restore the "all good" data
-                pgData[VPD_CP00_PG_N3_INDEX] =
-                    (uint16_t)VPD_CP00_PG_N3_GOOD;
-            }
-
-            TS_INFO( "testHWASisChipFunctional: XBUS is not functional");
-            for (l_mask = 0x8000;
-                 l_mask > 0;
-                 l_mask >>= 1)
-            {
-                // NOTE: Xbus doesn't have matched pairs anymore
-                //       individual Xbus units (0x0400, 0x0200, and 0x0100)
-                //       can be bad and chip is still functional.  Any
-                //       other bit being incorrect should cause full chip
-                //       deconfig
-                if (pgData[VPD_CP00_PG_XBUS_INDEX] & l_mask)
-                {
-                    // Turn off a bit that should be on
-                    pgData[VPD_CP00_PG_XBUS_INDEX] &= ~l_mask;
-                }
-                else
-                {
-                    // Turn on a bit that should be off
-                    pgData[VPD_CP00_PG_XBUS_INDEX] |= l_mask;
-                }
-
-                if (((uint16_t)(VPD_CP00_PG_XBUS_PG_MASK)) & l_mask)
-                {
-                    //Chip should be functional
-                    if (!isChipFunctional(pTarget, pgData))
+                    // If this bit is set in the always-good mask, then make
+                    // sure the chip is non-functional when it's off. If it's
+                    // NOT set (i.e. GOOD) in the original entry but not in the
+                    // always-good mask, then we ensure that the chip is
+                    // functional when it's off.
+                    if (l_alwaysGoodMask & l_mask || !(original_entry & l_mask))
                     {
-                        TS_FAIL("testHWASisChipFunctional>"
-                            "functional = 0x%x, should be true, "
-                            "XBUS = 0x%04x, mask = 0x%04x.",
-                            isChipFunctional(pTarget, pgData),
-                            pgData[VPD_CP00_PG_XBUS_INDEX],
-                            l_mask);
+                        const bool l_shouldChipBeFunctional = l_alwaysGoodMask & l_mask;
+
+                        const pg_entry_t l_newEntry = original_entry | l_mask;
+
+                        bad_pgData[l_pgIndex] = l_newEntry;
+
+                        if (isChipFunctional(pTarget, bad_pgData)
+                            != l_shouldChipBeFunctional)
+                        {
+                            TS_FAIL("testHWASisChipFunctional>"
+                                    "functional = %d, should be %d, "
+                                    "%s = 0x%08x, mask = 0x%08x, "
+                                    "HUID = 0x %08x",
+                                    !l_shouldChipBeFunctional,
+                                    l_shouldChipBeFunctional,
+                                    l_name, l_newEntry, l_mask,
+                                    get_huid(pTarget));
+                        }
                     }
                 }
-                else
-                {
-                    //Chip should be non functional
-                    if (isChipFunctional(pTarget, pgData))
-                    {
-                        TS_FAIL("testHWASisChipFunctional>"
-                            "functional = 0x%x, should be false, "
-                            "XBUS = 0x%04x, mask = 0x%04x.",
-                            isChipFunctional(pTarget, pgData),
-                            pgData[VPD_CP00_PG_XBUS_INDEX],
-                            l_mask);
-                    }
-                }
-
-                // Restore the "all good" data
-                pgData[VPD_CP00_PG_XBUS_INDEX] = l_xbus;
             }
         }
 
@@ -662,8 +475,9 @@ public:
      */
     void testHWAScheckPartialGoodForDescendants()
     {
-        using namespace HWAS;
-        using namespace TARGETING;
+        /* This test checks that whenever a bit in a target with children is
+         * marked as BAD, then at least one child of the target is also marked
+         * bad. */
 
         // Get list of present targets with type PROC
         TargetHandleList pCheckPres;
@@ -677,22 +491,6 @@ public:
             )
         {
             TargetHandle_t pTarget = *pTarget_it;
-            ATTR_MODEL_type l_model = pTarget->getAttr<ATTR_MODEL>();
-            uint16_t l_xbus = (MODEL_NIMBUS == l_model)
-                            ? (uint16_t)(VPD_CP00_PG_XBUS_GOOD_NIMBUS |
-                                         VPD_CP00_PG_XBUS_IOX[0])
-                            : (uint16_t)VPD_CP00_PG_XBUS_GOOD_CUMULUS;
-            uint16_t l_obus12 = (MODEL_NIMBUS == l_model)
-                              ? (uint16_t)VPD_CP00_PG_RESERVED_GOOD
-                              : (uint16_t)VPD_CP00_PG_OBUS_GOOD;
-            uint16_t pgData[VPD_CP00_PG_DATA_ENTRIES];
-            memcpy(pgData,
-                   pgDataAllGood,
-                   VPD_CP00_PG_DATA_LENGTH);
-            pgData[VPD_CP00_PG_XBUS_INDEX] = l_xbus;
-            pgData[VPD_CP00_PG_OB0_INDEX + 1] =  l_obus12;
-            pgData[VPD_CP00_PG_OB0_INDEX + 2] =  l_obus12;
-            uint16_t l_mask = 0x8000;
 
             TargetHandleList pDescList;
             targetService().getAssociated( pDescList, pTarget,
@@ -702,1599 +500,218 @@ public:
                     pDesc_it != pDescList.end();
                     ++pDesc_it)
             {
-                TargetHandle_t pDesc = *pDesc_it;
-                ATTR_TYPE_type l_type = pDesc->getAttr<ATTR_TYPE>();
-                ATTR_CHIP_UNIT_type l_chipUnit =
-                    pDesc->getAttr<ATTR_CHIP_UNIT>();
-                char l_type_str[9];
-                char l_pgData[] = "";
-                uint8_t core_idx;
+                const TargetHandle_t pDesc = *pDesc_it;
+                const ATTR_TYPE_type l_type = pDesc->getAttr<ATTR_TYPE>();
+                const ATTR_CHIPLET_ID_type l_chipletID = pDesc->getAttr<ATTR_CHIPLET_ID>();
+                const ATTR_CHIP_UNIT_type l_chipUnit = pDesc->getAttr<ATTR_CHIP_UNIT>();
+
+                const auto l_targetInfo
+                    = lookup_target_info(targets_with_children, l_type);
+
+                pg_entry_t l_pgIdx = 0;
+
+                if (l_targetInfo)
+                {
+                    switch (l_targetInfo->pg_idx) {
+                    case USE_CHIPLET_ID:
+                        l_pgIdx = l_chipletID;
+                        break;
+                    case USE_CHIP_UNIT:
+                        l_pgIdx = l_chipUnit;
+                        break;
+                    default:
+                        l_pgIdx = l_targetInfo->pg_idx;
+                        break;
+                    }
+                }
 
                 TS_INFO("testHWAScheckPartialGoodForDescendants: "
                         "descendant functional - "
-                        "attr type 0x%04X, chip unit %d", l_type, l_chipUnit);
-                if (!checkPartialGoodForDescendants(pDesc, pgData))
+                        "attr type 0x%08X, chip unit %d, "
+                        "HUID 0x %08X",
+                        l_type, l_chipUnit, get_huid(pDesc));
+
+                const char* const l_type_str = attrToString<ATTR_TYPE>(l_type);
+
+                if (!checkPartialGoodForDescendants(pDesc, pgDataAllGood))
                 {
-                    switch(l_type)
+                    char l_pgDataStr[32] = { };
+
+                    if (l_targetInfo)
                     {
-                        case TYPE_CORE:
-                            sprintf(l_type_str, "CORE");
-                            sprintf(l_pgData, ", pgData = 0x%04x",
-                                pgData[VPD_CP00_PG_EC00_INDEX + l_chipUnit]);
-                            break;
-
-                        case TYPE_MCS:
-                            sprintf(l_type_str, "MCS");
-                            sprintf(l_pgData, ", pgData = 0x%04x",
-                                pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit]]);
-                            break;
-
-                        case TYPE_XBUS:
-                            if(MODEL_NIMBUS == l_model)
-                            {
-                                // XBUS is not fully functional on Nimbus
-                                continue;
-                            }
-
-                            sprintf(l_type_str, "XBUS");
-                            sprintf(l_pgData, ", pgData = 0x%04x",
-                                pgData[VPD_CP00_PG_XBUS_INDEX]);
-                            break;
-
-                        case TYPE_NX:
-                            sprintf(l_type_str, "NX");
-                            sprintf(l_pgData, ", pgData = 0x%04x",
-                                pgData[VPD_CP00_PG_N0_INDEX + l_chipUnit]);
-                            break;
-
-                        case TYPE_FSI:
-                            sprintf(l_type_str, "FSI");
-                            sprintf(l_pgData, ", pgData = 0x%04x",
-                                pgData[VPD_CP00_PG_FSI_INDEX]);
-                            break;
-
-                        case TYPE_EQ:
-                            sprintf(l_type_str, "EQ");
-                            sprintf(l_pgData, ", pgData = 0x%04x",
-                                pgData[VPD_CP00_PG_EP0_INDEX + l_chipUnit]);
-                            break;
-
-                        case TYPE_OBUS:
-                            if((MODEL_NIMBUS == l_model) &&
-                               ((1 == l_chipUnit) || (2 == l_chipUnit)))
-                            {
-                                // OBUS1 & OBUS2 are not functional on Nimbus
-                                continue;
-                            }
-
-                            sprintf(l_type_str, "OBUS");
-                            sprintf(l_pgData, ", pgData = 0x%04x",
-                                pgData[VPD_CP00_PG_OB0_INDEX + l_chipUnit]);
-                            break;
-
-                        case TYPE_OBUS_BRICK:
-                            sprintf(l_type_str, "OBUS_BRICK");
-                            sprintf(l_pgData, ", pgData = 0x%04x",
-                                pgData[VPD_CP00_PG_N3_INDEX]);
-                            break;
-
-                        case TYPE_NPU:
-                            sprintf(l_type_str, "NPU");
-                            sprintf(l_pgData, ", pgData = 0x%04x",
-                                pgData[VPD_CP00_PG_N3_INDEX]);
-                            break;
-
-                        case TYPE_PERV:
-                            sprintf(l_type_str, "PERV");
-                            sprintf(l_pgData, ", pgData = 0x%04x",
-                                pgData[VPD_CP00_PG_PERVASIVE_INDEX]);
-                            break;
-
-                        case TYPE_PEC:
-                            sprintf(l_type_str, "PEC");
-                            sprintf(l_pgData, ", pgData = 0x%04x",
-                                pgData[VPD_CP00_PG_PCI0_INDEX + l_chipUnit]);
-                            break;
-
-                        default:
-                            sprintf(l_type_str, "%08x", l_type);
-                            break;
+                        sprintf(l_pgDataStr, ", pgData = 0x%08x", pgDataAllGood[l_pgIdx]);
                     }
 
                     TS_FAIL("testHWAScheckPartialGoodForDescendants>"
-                            "functional = 0x%x, should be true, "
-                            "type = %s, chip unit = %d%s. "
-                            "pDesc HUID 0x%.8x",
-                            checkPartialGoodForDescendants(pDesc, pgData),
+                            "functional = false, should be true, "
+                            "type = %s, chip unit = %d%s, chiplet ID = 0x%02x. "
+                            "pDesc HUID 0x %.8x",
                             l_type_str,
                             l_chipUnit,
-                            l_pgData,
-                            pDesc->getAttr<ATTR_HUID>());
-                }
-                else
-                if(MODEL_NIMBUS == l_model)
-                {
-                    bool skipFailCheck = false;
-                    // Nimbus has special cases for XBUS, OBUS1, and OBUS2.
-                    // These should show up as not functional, so fail if they
-                    // come back as functional.
-                    switch(l_type)
-                    {
-                        case TYPE_XBUS:
-                            if((1 == l_chipUnit) || (2 == l_chipUnit))
-                            {
-                                // XBUS1 & XBUS2 should be functional on Nimbus
-                                continue;
-                            }
-
-                            sprintf(l_type_str, "XBUS");
-                            sprintf(l_pgData, ", pgData = 0x%04x",
-                                pgData[VPD_CP00_PG_XBUS_INDEX]);
-                            break;
-
-                        case TYPE_OBUS:
-                            if((0 == l_chipUnit) || (3 == l_chipUnit))
-                            {
-                                // OBUS0 & OBUS3 should be functional on Nimbus
-                                continue;
-                            }
-
-                            sprintf(l_type_str, "OBUS");
-                            sprintf(l_pgData, ", pgData = 0x%04x",
-                                pgData[VPD_CP00_PG_OB0_INDEX + l_chipUnit]);
-                            break;
-
-                        default:
-                            // Most types should be functional on Nimbus
-                            skipFailCheck = true;
-                            break;
-                    }
-
-                    if (!skipFailCheck)
-                    {
-                        TS_FAIL("testHWAScheckPartialGoodForDescendants>"
-                            "functional = 0x%x, should be false, "
-                            "type = %s, chip unit = %d%s. "
-                            "pDesc HUID 0x%.8x",
-                            checkPartialGoodForDescendants(pDesc, pgData),
-                            l_type_str,
-                            l_chipUnit,
-                            l_pgData,
-                            pDesc->getAttr<ATTR_HUID>());
-                    }
+                            l_pgDataStr,
+                            l_chipletID,
+                            get_huid(pDesc));
                 }
 
-
-                switch(l_type)
+                if (l_targetInfo)
                 {
-                    case TYPE_XBUS:
-                        TS_INFO( "testHWAScheckPartialGoodForDescendants: "
-                                  "XBUS%d is not functional", l_chipUnit);
-                        pgData[VPD_CP00_PG_XBUS_INDEX] |=
-                            (uint16_t)VPD_CP00_PG_XBUS_IOX[l_chipUnit];
+                    TS_INFO( "testHWAScheckPartialGoodForDescendants: "
+                             "%s (chiplet ID = 0x%02x) is not functional",
+                             l_type_str,
+                             l_chipletID);
 
-                        if (checkPartialGoodForDescendants(pDesc, pgData))
+                    const pg_entry_t l_original_entry = pgDataAllGood[l_pgIdx];
+
+                    // We don't want to flip the always-good bits of always-good
+                    // targets because if they're not set then the whole chip is
+                    // toast and we already test for that elsewhere. The
+                    // always_good_mask is NO_ALWAYS_GOOD_BITS (0) if there
+                    // aren't any.
+                    const pg_entry_t l_original_entry_without_always_good_bits
+                        = pgDataAllGood[l_pgIdx] | l_targetInfo->always_good_mask;
+
+                    // The pgdata we will be modifying
+                    partialGoodVector bad_pgData = pgDataAllGood;
+
+                    // Iterate with a mask over every bit of the pg entry of this unit
+                    for (pg_mask_t l_mask = 1u << (sizeof(pg_mask_t) * 8 - 1);
+                         l_mask != 0;
+                         l_mask >>= 1)
+                    {
+                        // if a bit is set to GOOD (not including the
+                        // always-good bits of always-good targets, if any),
+                        // then flip it and make sure that at least one child
+                        // turns bad.
+                        if (!(l_mask & l_original_entry_without_always_good_bits))
                         {
-                            TS_FAIL("testHWAScheckPartialGoodForDescendants>"
-                                    "functional = 0x%x, should be false, "
-                                    "XBUS%d = 0x%04x. "
-                                    "pDesc HUID 0x%.8x",
-                                    checkPartialGoodForDescendants(pDesc,
-                                                                   pgData),
-                                    l_chipUnit,
-                                    pgData[VPD_CP00_PG_XBUS_INDEX],
-                                    pDesc->getAttr<ATTR_HUID>());
-                        }
+                            // set the bit to BAD
+                            bad_pgData[l_pgIdx] = l_original_entry | l_mask;
 
-                        pgData[VPD_CP00_PG_XBUS_INDEX] = l_xbus;
-                        break;
-
-                    case TYPE_OBUS:
-                        TS_INFO( "testHWAScheckPartialGoodForDescendants: "
-                                  "OBUS%d is not functional", l_chipUnit);
-                        pgData[VPD_CP00_PG_N1_INDEX] |=
-                            (uint16_t)VPD_CP00_PG_N1_PBIOO0;
-
-                        if (checkPartialGoodForDescendants(pDesc, pgData))
-                        {
-                            TS_FAIL("testHWAScheckPartialGoodForDescendants>"
-                                    "functional = 0x%x, should be false, "
-                                    "N1 for OBUS%d = 0x%04x. "
-                                    "pDesc HUID 0x%.8x",
-                                    checkPartialGoodForDescendants(pDesc,
-                                                                   pgData),
-                                    l_chipUnit,
-                                    pgData[VPD_CP00_PG_N1_INDEX],
-                                    pDesc->getAttr<ATTR_HUID>());
-                        }
-
-                        if ((1 == l_chipUnit) || (2 == l_chipUnit))
-                        {
-                            pgData[VPD_CP00_PG_N1_INDEX] =
-                                (uint16_t)VPD_CP00_PG_N1_GOOD |
-                                (uint16_t)VPD_CP00_PG_N1_PBIOO1;
-
-                            if (checkPartialGoodForDescendants(pDesc, pgData))
+                            if (checkPartialGoodForDescendants(pDesc, bad_pgData))
                             {
                                 TS_FAIL("testHWAScheckPartialGoodForDescendants>"
-                                        "functional = 0x%x, should be false, "
-                                        "N1 for OBUS%d = 0x%04x. "
-                                        "pDesc HUID 0x%.8x",
-                                        checkPartialGoodForDescendants(pDesc,
-                                                                       pgData),
-                                        l_chipUnit,
-                                        pgData[VPD_CP00_PG_N1_INDEX],
-                                        pDesc->getAttr<ATTR_HUID>());
-                            }
-                        }
-
-                        pgData[VPD_CP00_PG_N1_INDEX] =
-                            (uint16_t)VPD_CP00_PG_N1_GOOD;
-
-                        for (l_mask = 0x8000;
-                             l_mask > 0;
-                             l_mask >>= 1)
-                        {
-                            if (pgData[VPD_CP00_PG_OB0_INDEX + l_chipUnit] &
-                                l_mask)
-                            {
-                                // Turn off a bit that should be on
-                                pgData[VPD_CP00_PG_OB0_INDEX + l_chipUnit] &=
-                                    ~l_mask;
-                            }
-                            else
-                            {
-                                // Turn on a bit that should be off
-                                pgData[VPD_CP00_PG_OB0_INDEX + l_chipUnit] |=
-                                    l_mask;
-                            }
-
-                            if (checkPartialGoodForDescendants(pDesc, pgData))
-                            {
-                                TS_FAIL("testHWAScheckPartialGoodForDescendants>"
-                                        "functional = 0x%x, should be false, "
-                                        "OBUS%d = 0x%04x, mask = 0x%04x. "
-                                        "pDesc HUID 0x%.8x",
-                                        checkPartialGoodForDescendants(pDesc,
-                                                                       pgData),
-                                        l_chipUnit,
-                                        pgData[VPD_CP00_PG_OB0_INDEX
-                                               + l_chipUnit],
+                                        "functional = true, should be false, "
+                                        " = 0x%08x, mask = 0x%08x. "
+                                        "pDesc HUID 0x %.8x",
+                                        l_type_str,
+                                        bad_pgData[l_pgIdx],
                                         l_mask,
-                                        pDesc->getAttr<ATTR_HUID>());
+                                        get_huid(pDesc));
                             }
-
-                            // Restore the "all good" data
-                            pgData[VPD_CP00_PG_OB0_INDEX + l_chipUnit]
-                                = ((1 == l_chipUnit) || (2 == l_chipUnit))
-                                ? l_obus12
-                                : (uint16_t)VPD_CP00_PG_OBUS_GOOD;
                         }
-                        break;
-
-                    case TYPE_PEC:
-                        TS_INFO( "testHWAScheckPartialGoodForDescendants: "
-                                  "PCI%d is not functional", l_chipUnit);
-                        for (l_mask = 0x8000;
-                             l_mask > 0;
-                             l_mask >>= 1)
-                        {
-                            if (pgData[VPD_CP00_PG_PCI0_INDEX + l_chipUnit] &
-                                l_mask)
-                            {
-                                // Turn off a bit that should be on
-                                pgData[VPD_CP00_PG_PCI0_INDEX + l_chipUnit] &=
-                                    ~l_mask;
-                            }
-                            else
-                            {
-                                // Turn on a bit that should be off
-                                pgData[VPD_CP00_PG_PCI0_INDEX + l_chipUnit] |=
-                                    l_mask;
-                            }
-
-                            if (checkPartialGoodForDescendants(pDesc, pgData))
-                            {
-                                TS_FAIL("testHWAScheckPartialGoodForDescendants>"
-                                        "functional = 0x%x, should be false, "
-                                        "PCI%d = 0x%04x, mask = 0x%04x. "
-                                        "pDesc HUID 0x%.8x",
-                                        checkPartialGoodForDescendants(pDesc,
-                                                                       pgData),
-                                        l_chipUnit,
-                                        pgData[VPD_CP00_PG_PCI0_INDEX
-                                               + l_chipUnit],
-                                        l_mask,
-                                        pDesc->getAttr<ATTR_HUID>());
-                            }
-
-                            // Restore the "all good" data
-                            pgData[VPD_CP00_PG_PCI0_INDEX + l_chipUnit] =
-                                (uint16_t)VPD_CP00_PG_PCIx_GOOD[l_chipUnit];
-                        }
-                        break;
-                    case TYPE_MI:
-                    {
-                        // This test serves two purposes. The first is to make
-                        // sure that this target is checked correctly, and the
-                        // second is to ensure that non-functional parent state
-                        // is propagated down to a "functional" child.
-                        TS_INFO( "testHWAScheckPartialGoodForDescendants: "
-                                  "MI%d is not functional", l_chipUnit);
-
-                        // First get parent target since there are no PG
-                        // bits for this one
-                        TargetHandleList pParentMCList;
-                        getParentAffinityTargetsByState(pParentMCList, pDesc,
-                                CLASS_UNIT, TYPE_MC, UTIL_FILTER_PRESENT);
-                        HWAS_ASSERT((pParentMCList.size() == 1),
-                                "testHWAScheckPartialGoodForDescendants(): "
-                                "pParentMCList != 1");
-
-                        TargetHandle_t l_parentMC = pParentMCList[0];
-
-                        auto l_indexMC =
-                            l_parentMC->getAttr<ATTR_CHIPLET_ID>();
-
-                        size_t l_unitValue = l_chipUnit / 2;
-
-                        if (l_unitValue)
-                        {
-                            pgData[VPD_CP00_PG_N1_INDEX] |=
-                                (uint16_t)VPD_CP00_PG_N1_MCS23;
-                        }
-                        else
-                        {
-                            pgData[VPD_CP00_PG_N3_INDEX] |=
-                                (uint16_t)VPD_CP00_PG_N3_MCS01;
-                        }
-
-                        if (checkPropagationOfBadState(l_parentMC,
-                                                       pDesc,
-                                                       pgData))
-                        {
-                            TS_FAIL("testHWAScheckPartialGoodForDescendants> "
-                                    "should be false, "
-                                    "N1/N3 for MI%d = 0x%04x. "
-                                    "pDesc HUID 0x%.8x",
-                                    l_chipUnit,
-                                    l_unitValue
-                                        ? pgData[VPD_CP00_PG_N1_INDEX]
-                                        : pgData[VPD_CP00_PG_N3_INDEX],
-                                    pDesc->getAttr<ATTR_HUID>());
-                        }
-
-                        if (l_unitValue)
-                        {
-                            pgData[VPD_CP00_PG_N1_INDEX] =
-                                (uint16_t)VPD_CP00_PG_N1_GOOD;
-                        }
-                        else
-                        {
-                            pgData[VPD_CP00_PG_N3_INDEX] =
-                                (uint16_t)VPD_CP00_PG_N3_GOOD;
-                        }
-
-                        for (l_mask = 0x8000;
-                             l_mask > 0;
-                             l_mask >>= 1)
-                        {
-                            if (pgData[l_indexMC] & l_mask)
-                            {
-                                // Turn off a bit that should be on
-                                pgData[l_indexMC] &= ~l_mask;
-                            }
-                            else
-                            {
-                                // Turn on a bit that should be off
-                                pgData[l_indexMC] |= l_mask;
-                            }
-
-                            if (checkPropagationOfBadState(l_parentMC,
-                                                           pDesc,
-                                                           pgData))
-                            {
-                                TS_FAIL("testHWAS"
-                                        "checkPartialGoodForDescendants> "
-                                        "should be false, "
-                                        "MC%s for MI%d = 0x%04x, "
-                                        "mask = 0x%04x. "
-                                        "pDesc HUID 0x%.8x",
-                                        l_unitValue ? "01" : "23",
-                                        l_chipUnit,
-                                        pgData[l_indexMC],
-                                        l_mask,
-                                        pDesc->getAttr<ATTR_HUID>());
-                            }
-
-                            // Restore the "all good" data
-                            pgData[l_indexMC] = VPD_CP00_PG_MCxx_GOOD;
-
-
-                        }
-                        break;
                     }
-                    case TYPE_DMI:
-                    {
-                        // This test serves two purposes. The first is to make
-                        // sure that this target is checked correctly, and the
-                        // second is to ensure that non-functional parent state
-                        // is propagated down to a "functional" child.
-                        TS_INFO( "testHWAScheckPartialGoodForDescendants: "
-                                  "DMI%d is not functional", l_chipUnit);
-
-                        // First get parent target since there are no PG
-                        // bits for this one
-                        TargetHandleList pParentMCList;
-                        getParentAffinityTargetsByState(pParentMCList, pDesc,
-                                CLASS_UNIT, TYPE_MC, UTIL_FILTER_PRESENT);
-                        HWAS_ASSERT((pParentMCList.size() == 1),
-                                "testHWAScheckPartialGoodForDescendants(): "
-                                "pParentMCList != 1");
-                        TargetHandle_t l_parentMC = pParentMCList[0];
-
-                        auto l_indexMC =
-                            l_parentMC->getAttr<ATTR_CHIPLET_ID>();
-
-                        size_t l_unitValue = l_chipUnit / 4;
-
-                        if (l_unitValue)
-                        {
-                            pgData[VPD_CP00_PG_N1_INDEX] |=
-                                (uint16_t)VPD_CP00_PG_N1_MCS23;
-                        }
-                        else
-                        {
-                            pgData[VPD_CP00_PG_N3_INDEX] |=
-                                (uint16_t)VPD_CP00_PG_N3_MCS01;
-                        }
-
-                        if (checkPropagationOfBadState(l_parentMC,
-                                                       pDesc,
-                                                       pgData))
-                        {
-
-                            TS_FAIL("testHWAScheckPartialGoodForDescendants> "
-                                    "should be false, "
-                                    "N1/N3 for DMI%d = 0x%04x. "
-                                    "pDesc HUID 0x%.8x",
-                                    l_chipUnit,
-                                    l_unitValue
-                                        ? pgData[VPD_CP00_PG_N1_INDEX]
-                                        : pgData[VPD_CP00_PG_N3_INDEX],
-                                    pDesc->getAttr<ATTR_HUID>());
-                        }
-
-                        if (l_unitValue)
-                        {
-                            pgData[VPD_CP00_PG_N1_INDEX] =
-                                (uint16_t)VPD_CP00_PG_N1_GOOD;
-                        }
-                        else
-                        {
-                            pgData[VPD_CP00_PG_N3_INDEX] =
-                                (uint16_t)VPD_CP00_PG_N3_GOOD;
-                        }
-
-                        for (l_mask = 0x8000;
-                             l_mask > 0;
-                             l_mask >>= 1)
-                        {
-                            if (pgData[l_indexMC] & l_mask)
-                            {
-                                // Turn off a bit that should be on
-                                pgData[l_indexMC] &= ~l_mask;
-                            }
-                            else
-                            {
-                                // Turn on a bit that should be off
-                                pgData[l_indexMC] |= l_mask;
-                            }
-
-                            if (checkPropagationOfBadState(l_parentMC,
-                                                           pDesc,
-                                                           pgData))
-                            {
-                                TS_FAIL("testHWAS"
-                                        "checkPartialGoodForDescendants> "
-                                        "should be false, "
-                                        "MC%s for DMI%d = 0x%04x, "
-                                        "mask = 0x%04x. "
-                                        "pDesc HUID 0x%.8x",
-                                        l_unitValue ? "01" : "23",
-                                        l_chipUnit,
-                                        pgData[l_indexMC],
-                                        l_mask,
-                                        pDesc->getAttr<ATTR_HUID>());
-                            }
-
-                            // Restore the "all good" data
-                            pgData[l_indexMC] = VPD_CP00_PG_MCxx_GOOD;
-
-                        }
-                        break;
-                    }
-                    case TYPE_OMI:
-                    {
-                        // This test serves two purposes. The first is to make
-                        // sure that this target is checked correctly, and the
-                        // second is to ensure that non-functional parent state
-                        // is propagated down to a "functional" child.
-                        TS_INFO( "testHWAScheckPartialGoodForDescendants: "
-                                  "OMI%d is not functional", l_chipUnit);
-
-                        // First get parent target since there are no PG
-                        // bits for this one
-                        TargetHandleList pParentMCList;
-                        getParentAffinityTargetsByState(pParentMCList, pDesc,
-                                CLASS_UNIT, TYPE_MC, UTIL_FILTER_PRESENT);
-                        HWAS_ASSERT((pParentMCList.size() == 1),
-                                "testHWAScheckPartialGoodForDescendants(): "
-                                "pParentMCList != 1");
-                        TargetHandle_t l_parentMC = pParentMCList[0];
-
-                        auto l_indexMC =
-                            l_parentMC->getAttr<ATTR_CHIPLET_ID>();
-
-                        size_t l_unitValue = l_chipUnit / 8;
-
-                        if (l_unitValue)
-                        {
-                            pgData[VPD_CP00_PG_N1_INDEX] |=
-                                (uint16_t)VPD_CP00_PG_N1_MCS23;
-                        }
-                        else
-                        {
-                            pgData[VPD_CP00_PG_N3_INDEX] |=
-                                (uint16_t)VPD_CP00_PG_N3_MCS01;
-                        }
-
-                        if (checkPropagationOfBadState(l_parentMC,
-                                                       pDesc,
-                                                       pgData))
-                        {
-                            TS_FAIL("testHWAScheckPartialGoodForDescendants> "
-                                    "should be false, "
-                                    "N1/N3 for OMI%d = 0x%04x. "
-                                    "pDesc HUID 0x%.8x",
-                                    l_chipUnit,
-                                    l_unitValue
-                                        ? pgData[VPD_CP00_PG_N1_INDEX]
-                                        : pgData[VPD_CP00_PG_N3_INDEX],
-                                    pDesc->getAttr<ATTR_HUID>());
-                        }
-
-                        if (l_unitValue)
-                        {
-                            pgData[VPD_CP00_PG_N1_INDEX] =
-                                (uint16_t)VPD_CP00_PG_N1_GOOD;
-                        }
-                        else
-                        {
-                            pgData[VPD_CP00_PG_N3_INDEX] =
-                                (uint16_t)VPD_CP00_PG_N3_GOOD;
-                        }
-
-                        for (l_mask = 0x8000;
-                             l_mask > 0;
-                             l_mask >>= 1)
-                        {
-                            if (pgData[l_indexMC] & l_mask)
-                            {
-                                // Turn off a bit that should be on
-                                pgData[l_indexMC] &= ~l_mask;
-                            }
-                            else
-                            {
-                                // Turn on a bit that should be off
-                                pgData[l_indexMC] |= l_mask;
-                            }
-
-                            if (checkPropagationOfBadState(l_parentMC,
-                                                           pDesc,
-                                                           pgData))
-                            {
-                                TS_FAIL("testHWAS"
-                                        "checkPartialGoodForDescendants>"
-                                        "should be false, "
-                                        "MC%s for OMI%d = 0x%04x, "
-                                        "mask = 0x%04x. "
-                                        "pDesc HUID 0x%.8x",
-                                        l_unitValue ? "01" : "23",
-                                        l_chipUnit,
-                                        pgData[l_indexMC],
-                                        l_mask,
-                                        pDesc->getAttr<ATTR_HUID>());
-                            }
-
-                            // Restore the "all good" data
-                            pgData[l_indexMC] = VPD_CP00_PG_MCxx_GOOD;
-
-                        }
-                        break;
-                    }
-                    case TYPE_OMIC:
-                    {
-                        // This test serves two purposes. The first is to make
-                        // sure that this target is checked correctly, and the
-                        // second is to ensure that non-functional parent state
-                        // is propagated down to a "functional" child.
-                        TS_INFO( "testHWAScheckPartialGoodForDescendants: "
-                                  "OMIC%d is not functional", l_chipUnit);
-
-                        // First get parent target since there are no PG
-                        // bits for this one
-                        TargetHandleList pParentMCList;
-                        getParentAffinityTargetsByState(pParentMCList, pDesc,
-                                CLASS_UNIT, TYPE_MC, UTIL_FILTER_PRESENT);
-                        HWAS_ASSERT((pParentMCList.size() == 1),
-                                "testHWAScheckPartialGoodForDescendants(): "
-                                "pParentMCList != 1");
-                        TargetHandle_t l_parentMC = pParentMCList[0];
-
-                        auto l_indexMC =
-                            l_parentMC->getAttr<ATTR_CHIPLET_ID>();
-
-                        size_t l_unitValue = l_chipUnit / 3;
-
-                        if (l_unitValue)
-                        {
-                            pgData[VPD_CP00_PG_N1_INDEX] |=
-                                (uint16_t)VPD_CP00_PG_N1_MCS23;
-                        }
-                        else
-                        {
-                            pgData[VPD_CP00_PG_N3_INDEX] |=
-                                (uint16_t)VPD_CP00_PG_N3_MCS01;
-                        }
-
-                        if (checkPropagationOfBadState(l_parentMC,
-                                                       pDesc,
-                                                       pgData))
-                        {
-                            TS_FAIL("testHWAScheckPartialGoodForDescendants>"
-                                    "should be false, "
-                                    "N1/N3 for OMIC%d = 0x%04x. "
-                                    "pDesc HUID 0x%.8x",
-                                    l_chipUnit,
-                                    l_unitValue
-                                        ? pgData[VPD_CP00_PG_N1_INDEX]
-                                        : pgData[VPD_CP00_PG_N3_INDEX],
-                                    pDesc->getAttr<ATTR_HUID>());
-                        }
-
-                        if (l_unitValue)
-                        {
-                            pgData[VPD_CP00_PG_N1_INDEX] =
-                                (uint16_t)VPD_CP00_PG_N1_GOOD;
-                        }
-                        else
-                        {
-                            pgData[VPD_CP00_PG_N3_INDEX] =
-                                (uint16_t)VPD_CP00_PG_N3_GOOD;
-                        }
-
-                        for (l_mask = 0x8000;
-                             l_mask > 0;
-                             l_mask >>= 1)
-                        {
-                            if (pgData[l_indexMC] & l_mask)
-                            {
-                                // Turn off a bit that should be on
-                                pgData[l_indexMC] &= ~l_mask;
-                            }
-                            else
-                            {
-                                // Turn on a bit that should be off
-                                pgData[l_indexMC] |= l_mask;
-                            }
-
-                            if (checkPropagationOfBadState(l_parentMC,
-                                                           pDesc,
-                                                           pgData))
-                            {
-                                TS_FAIL("testHWAS"
-                                        "checkPartialGoodForDescendants> "
-                                        "should be false, "
-                                        "MC%s for OMIC%d = 0x%04x, "
-                                        "mask = 0x%04x. "
-                                        "pDesc HUID 0x%.8x",
-                                        l_unitValue ? "01" : "23",
-                                        l_chipUnit,
-                                        pgData[l_indexMC],
-                                        l_mask,
-                                        pDesc->getAttr<ATTR_HUID>());
-                            }
-
-                            // Restore the "all good" data
-                            pgData[l_indexMC] = VPD_CP00_PG_MCxx_GOOD;
-
-                        }
-                        break;
-                    }
-                    case TYPE_MCC:
-                    {
-                        // This test serves two purposes. The first is to make
-                        // sure that this target is checked correctly, and the
-                        // second is to ensure that non-functional parent state
-                        // is propagated down to a "functional" child.
-                        TS_INFO( "testHWAScheckPartialGoodForDescendants: "
-                                  "MCC%d is not functional", l_chipUnit);
-
-                        // First get parent target since there are no PG
-                        // bits for this one
-                        TargetHandleList pParentMCList;
-                        getParentAffinityTargetsByState(pParentMCList, pDesc,
-                                CLASS_UNIT, TYPE_MC, UTIL_FILTER_PRESENT);
-                        HWAS_ASSERT((pParentMCList.size() == 1),
-                                "testHWAScheckPartialGoodForDescendants(): "
-                                "pParentMCList != 1");
-                        TargetHandle_t l_parentMC = pParentMCList[0];
-
-                        auto l_indexMC =
-                            l_parentMC->getAttr<ATTR_CHIPLET_ID>();
-
-                        size_t l_unitValue = l_chipUnit / 4;
-
-                        if (l_unitValue)
-                        {
-                            pgData[VPD_CP00_PG_N1_INDEX] |=
-                                (uint16_t)VPD_CP00_PG_N1_MCS23;
-                        }
-                        else
-                        {
-                            pgData[VPD_CP00_PG_N3_INDEX] |=
-                                (uint16_t)VPD_CP00_PG_N3_MCS01;
-                        }
-
-                        if (checkPropagationOfBadState(l_parentMC,
-                                                       pDesc,
-                                                       pgData))
-                        {
-
-                            TS_FAIL("testHWAScheckPartialGoodForDescendants> "
-                                    "should be false, "
-                                    "N1/N3 for MCC%d = 0x%04x. "
-                                    "pDesc HUID 0x%.8x",
-                                    l_chipUnit,
-                                    l_unitValue
-                                        ? pgData[VPD_CP00_PG_N1_INDEX]
-                                        : pgData[VPD_CP00_PG_N3_INDEX],
-                                    pDesc->getAttr<ATTR_HUID>());
-                        }
-
-                        if (l_unitValue)
-                        {
-                            pgData[VPD_CP00_PG_N1_INDEX] =
-                                (uint16_t)VPD_CP00_PG_N1_GOOD;
-                        }
-                        else
-                        {
-                            pgData[VPD_CP00_PG_N3_INDEX] =
-                                (uint16_t)VPD_CP00_PG_N3_GOOD;
-                        }
-
-                        for (l_mask = 0x8000;
-                             l_mask > 0;
-                             l_mask >>= 1)
-                        {
-                            if (pgData[l_indexMC] & l_mask)
-                            {
-                                // Turn off a bit that should be on
-                                pgData[l_indexMC] &= ~l_mask;
-                            }
-                            else
-                            {
-                                // Turn on a bit that should be off
-                                pgData[l_indexMC] |= l_mask;
-                            }
-
-                            if (checkPropagationOfBadState(l_parentMC,
-                                                           pDesc,
-                                                           pgData))
-                            {
-                                TS_FAIL("testHWAS"
-                                        "checkPartialGoodForDescendants> "
-                                        "should be false, "
-                                        "MC%s for MCC%d = 0x%04x, "
-                                        "mask = 0x%04x. "
-                                        "pDesc HUID 0x%.8x",
-                                        l_unitValue ? "01" : "23",
-                                        l_chipUnit,
-                                        pgData[l_indexMC],
-                                        l_mask,
-                                        pDesc->getAttr<ATTR_HUID>());
-                            }
-
-                            // Restore the "all good" data
-                            pgData[l_indexMC] = VPD_CP00_PG_MCxx_GOOD;
-
-                        }
-                        break;
-                    }
-                    case TYPE_PHB:
-                      {
-                        // This test serves two purposes. The first is to make
-                        // sure that PHB targets are checked correctly, and the
-                        // second is to ensure that non-functional parent state
-                        // is propagated down to a "functional" child.
-                        TS_INFO("testHWAScheckPartialGoodForDescendants: "
-                                "PCI%d is not functional for PHB target",
-                                l_chipUnit);
-
-                        // First get Parent PEC target since there are no PG
-                        // bits for PHB
-                        TargetHandleList pParentPECList;
-                        getParentAffinityTargetsByState(pParentPECList, pDesc,
-                                CLASS_UNIT, TYPE_PEC, UTIL_FILTER_PRESENT);
-                        HWAS_ASSERT((pParentPECList.size() == 1),
-                                "testHWAScheckPartialGoodForDescendants(): "
-                                "pParentPECList != 1");
-                        TargetHandle_t l_parentPEC = pParentPECList[0];
-
-                        auto l_indexPCI =
-                            l_parentPEC->getAttr<ATTR_CHIPLET_ID>();
-                        auto l_parentChipUnit =
-                            l_parentPEC->getAttr<ATTR_CHIP_UNIT>();
-
-                        for (l_mask = 0x8000; l_mask > 0; l_mask >>= 1)
-                        {
-                            if(pgData[l_indexPCI] & l_mask)
-                            {
-                                // Turn off a bit that should be on
-                                pgData[l_indexPCI] &= ~l_mask;
-                            }
-                            else
-                            {
-                                // Turn on a bit that should be off
-                                pgData[l_indexPCI] |= l_mask;
-                            }
-
-                            if (checkPropagationOfBadState(l_parentPEC,
-                                                           pDesc,
-                                                           pgData))
-                            {
-
-                                TS_FAIL("testHWAS"
-                                        "checkPartialGoodForDescendants> "
-                                        "should be false, "
-                                        "PCI%d = 0x%04x, mask = 0x%04x "
-                                        "pDesc HUID 0x%.8x",
-                                        l_parentChipUnit,
-                                        pgData[l_indexPCI],
-                                        l_mask,
-                                        pDesc->getAttr<ATTR_HUID>());
-                            }
-
-                            // Restore the "all good" data
-                            pgData[l_indexPCI] =
-                                VPD_CP00_PG_PCIx_GOOD[l_parentChipUnit];
-                        }
-
-                        break;
-                      }
-                    case TYPE_EQ:
-                        TS_INFO( "testHWAScheckPartialGoodForDescendants: "
-                                  "EQ%d is not functional", l_chipUnit);
-                        for (l_mask = 0x8000;
-                             l_mask > 0;
-                             l_mask >>= 1)
-                        {
-                            // NOTE: Single bits of L2 / L3 matched pairs will
-                            //       be turned on or off individually while
-                            //       going through loop, thus creating and
-                            //       testing mismatched pairs.
-                            if (pgData[VPD_CP00_PG_EP0_INDEX + l_chipUnit] &
-                                    l_mask)
-                            {
-                                // Turn off a bit that should be on
-                                pgData[VPD_CP00_PG_EP0_INDEX + l_chipUnit] &=
-                                    ~l_mask;
-                            }
-                            else
-                            {
-                                // Turn on a bit that should be off
-                                pgData[VPD_CP00_PG_EP0_INDEX + l_chipUnit] |=
-                                    l_mask;
-                            }
-
-                            if (checkPartialGoodForDescendants(pDesc, pgData ))
-                            {
-                                TS_FAIL("testHWAS"
-                                        "checkPartialGoodForDescendants> "
-                                        "functional = 0x%x, should be false, "
-                                        "EQ/EP%d = 0x%04x, mask = 0x%04x. "
-                                        "pDesc HUID 0x%.8x",
-                                        checkPartialGoodForDescendants(pDesc,
-                                                                       pgData),
-                                        l_chipUnit,
-                                        pgData[VPD_CP00_PG_EP0_INDEX
-                                               + l_chipUnit],
-                                        l_mask,
-                                        pDesc->getAttr<ATTR_HUID>());
-                            }
-
-                            // Restore the "all good" data
-                            pgData[VPD_CP00_PG_EP0_INDEX + l_chipUnit] =
-                                (uint16_t)VPD_CP00_PG_EPx_GOOD;
-                        }
-
-                        //////////////////////////////////////
-                        // make children bad to check rollup
-                        //////////////////////////////////////
-
-                        // mark bad EX children
-                        TS_INFO("testHWAScheckPartialGoodForDescendants>"
-                            "Mark EQ%d's EX chiplets bad", l_chipUnit);
-
-                        // Choosing a single failure for each EX out of
-                        // multiple possibilities
-
-                        // Mark l3x, l2x, and/or refrx bad (x = 0 or 1)
-
-                        // 1st EX bad: mark refr0 as bad
-                        pgData[VPD_CP00_PG_EP0_INDEX + l_chipUnit] |=
-                            0x0008;
-
-                        // 2nd EX bad: mark L21 as bad too
-                        pgData[VPD_CP00_PG_EP0_INDEX + l_chipUnit] |=
-                            0x0040;
-
-                        if (checkPartialGoodForDescendants(pDesc, pgData ))
-                        {
-                            TS_FAIL("testHWAScheckPartialGoodForDescendants>"
-                                    "functional = 0x%x, should be false. "
-                                    "EQ/EP%d = 0x%04x (expected 0x%04X), "
-                                    "EX children were marked bad "
-                                    "pDesc HUID 0x%.8x",
-                                    checkPartialGoodForDescendants(pDesc, pgData
-                                        ),
-                                    l_chipUnit,
-                                    pgData[VPD_CP00_PG_EP0_INDEX
-                                           + l_chipUnit],
-                                    VPD_CP00_PG_EPx_GOOD,
-                                    pDesc->getAttr<ATTR_HUID>());
-                        }
-
-                        // Restore the "all good" data
-                        pgData[VPD_CP00_PG_EP0_INDEX + l_chipUnit] =
-                                (uint16_t)VPD_CP00_PG_EPx_GOOD;
-
-
-                        // now try bad CORE rollup
-                        core_idx = (uint8_t)l_chipUnit * 4;
-                        TS_INFO("testHWAScheckPartialGoodForDescendants>"
-                            "Now try marking EQ%d cores EC%d - EC%d bad",
-                            l_chipUnit, core_idx, core_idx+3);
-                        for (int i = 0; i < 4; i++)
-                        {
-                            pgData[VPD_CP00_PG_EC00_INDEX + core_idx + i] |=
-                                ~VPD_CP00_PG_ECxx_GOOD;
-                        }
-                        if (checkPartialGoodForDescendants(pDesc, pgData ))
-                        {
-                            TS_FAIL("testHWAScheckPartialGoodForDescendants>"
-                                "EQ/EP%d functional = 0x%x, should be false. "
-                                "All 4 EC children were marked bad "
-                                "pDesc HUID 0x%.8x",
-                                l_chipUnit,
-                                checkPartialGoodForDescendants(pDesc, pgData ),
-                                pDesc->getAttr<ATTR_HUID>());
-                        }
-                        // Restore the "all good" core data
-                        for (int i = 0; i < 4; i++)
-                        {
-                            pgData[VPD_CP00_PG_EC00_INDEX + core_idx + i] =
-                                VPD_CP00_PG_ECxx_GOOD;
-                        }
-                        break;
-
-                    case TYPE_EX:
-                        TS_INFO( "testHWAScheckPartialGoodForDescendants: "
-                                  "EX%d is not functional", l_chipUnit);
-                        pgData[VPD_CP00_PG_EP0_INDEX + (l_chipUnit / 2)] |=
-                            (uint16_t)VPD_CP00_PG_EPx_L3L2REFR[l_chipUnit % 2];
-
-                        if (checkPartialGoodForDescendants(pDesc, pgData ))
-                        {
-                            TS_FAIL("testHWAScheckPartialGoodForDescendants>"
-                                    "functional = 0x%x, should be false, "
-                                    "EX%d / EP%d = 0x%04x. "
-                                    "pDesc HUID 0x%.8x",
-                                    checkPartialGoodForDescendants(pDesc, pgData
-                                        ),
-                                    l_chipUnit, (l_chipUnit / 2),
-                                    pgData[VPD_CP00_PG_EP0_INDEX
-                                           + (l_chipUnit / 2)],
-                                    pDesc->getAttr<ATTR_HUID>());
-                        }
-
-                        pgData[VPD_CP00_PG_EP0_INDEX + (l_chipUnit / 2)] =
-                            (uint16_t)VPD_CP00_PG_EPx_GOOD;
-
-                        // Now mark its 2 EC cores as bad and check for rollup
-                        core_idx = (uint8_t)l_chipUnit * 2;
-                        TS_INFO("testHWAScheckPartialGoodForDescendants>"
-                            "Now try marking EX%d cores EC%d and EC%d bad",
-                            l_chipUnit, core_idx, core_idx+1);
-
-
-
-                        for (int i = 0; i < 2; i++)
-                        {
-                            pgData[VPD_CP00_PG_EC00_INDEX + core_idx + i] |=
-                                ~VPD_CP00_PG_ECxx_GOOD;
-                        }
-
-
-
-                        if (checkPartialGoodForDescendants(pDesc, pgData ))
-                        {
-                            TS_FAIL("testHWAScheckPartialGoodForDescendants>"
-                                "EX%d functional = 0x%x, should be false. "
-                                "All 2 EC children were marked bad "
-                                "pDesc HUID 0x%.8x",
-                                l_chipUnit,
-                                checkPartialGoodForDescendants(pDesc, pgData ),
-                                pDesc->getAttr<ATTR_HUID>());
-                        }
-                        // Restore the "all good" core data
-                        for (int i = 0; i < 2; i++)
-                        {
-                            pgData[VPD_CP00_PG_EC00_INDEX + core_idx + i] =
-                                VPD_CP00_PG_ECxx_GOOD;
-                        }
-
-                        break;
-
-                    case TYPE_CORE:
-                        TS_INFO( "testHWAScheckPartialGoodForDescendants: "
-                                  "CORE%d is not functional", l_chipUnit);
-                        for (l_mask = 0x8000;
-                             l_mask > 0;
-                             l_mask >>= 1)
-                        {
-                            if (pgData[VPD_CP00_PG_EC00_INDEX + l_chipUnit] &
-                                l_mask)
-                            {
-                                // Turn off a bit that should be on
-                                pgData[VPD_CP00_PG_EC00_INDEX + l_chipUnit] &=
-                                    ~l_mask;
-                            }
-                            else
-                            {
-                                // Turn on a bit that should be off
-                                pgData[VPD_CP00_PG_EC00_INDEX + l_chipUnit] |=
-                                    l_mask;
-                            }
-
-                            if (checkPartialGoodForDescendants(pDesc, pgData ))
-                            {
-                                TS_FAIL("testHWAS"
-                                        "checkPartialGoodForDescendants> "
-                                        "functional = 0x%x, should be false, "
-                                        "CORE%d = 0x%04x, mask = 0x%04x. "
-                                        "pDesc HUID 0x%.8x",
-                                        checkPartialGoodForDescendants(pDesc,
-                                                                       pgData),
-                                        l_chipUnit,
-                                        pgData[VPD_CP00_PG_EC00_INDEX
-                                               + l_chipUnit],
-                                        l_mask,
-                                        pDesc->getAttr<ATTR_HUID>());
-                            }
-
-                            // Restore the "all good" data
-                            pgData[VPD_CP00_PG_EC00_INDEX + l_chipUnit] =
-                                VPD_CP00_PG_ECxx_GOOD;
-                        }
-                        break;
-
-                    case TYPE_MCBIST:
-                        TS_INFO( "testHWAScheckPartialGoodForDescendants: "
-                                  "MCBIST%d is not functional", l_chipUnit);
-                        if (l_chipUnit)
-                        {
-                            pgData[VPD_CP00_PG_N1_INDEX] |=
-                                (uint16_t)VPD_CP00_PG_N1_MCS23;
-                        }
-                        else
-                        {
-                            pgData[VPD_CP00_PG_N3_INDEX] |=
-                                (uint16_t)VPD_CP00_PG_N3_MCS01;
-                        }
-
-                        if (checkPartialGoodForDescendants(pDesc, pgData ))
-                        {
-                            TS_FAIL("testHWAScheckPartialGoodForDescendants>"
-                                    "functional = 0x%x, should be false, "
-                                    "N1/N3 for MCBIST%d = 0x%04x. "
-                                    "pDesc HUID 0x%.8x",
-                                    checkPartialGoodForDescendants(pDesc, pgData
-                                        ),
-                                    l_chipUnit,
-                                    l_chipUnit ? pgData[VPD_CP00_PG_N1_INDEX]
-                                               : pgData[VPD_CP00_PG_N3_INDEX],
-                                    pDesc->getAttr<ATTR_HUID>());
-                        }
-
-                        if (l_chipUnit)
-                        {
-                            pgData[VPD_CP00_PG_N1_INDEX] =
-                                (uint16_t)VPD_CP00_PG_N1_GOOD;
-                        }
-                        else
-                        {
-                            pgData[VPD_CP00_PG_N3_INDEX] =
-                                (uint16_t)VPD_CP00_PG_N3_GOOD;
-                        }
-
-                        for (l_mask = 0x8000;
-                             l_mask > 0;
-                             l_mask >>= 1)
-                        {
-                            if ((uint16_t)VPD_CP00_PG_MCxx_PG_MASK & l_mask)
-                            {
-                                 // Ignore partial good region
-                                 continue;
-                            }
-                            else
-                            if (pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit * 2]]
-                                & l_mask)
-                            {
-                                // Turn off a bit that should be on
-                                pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit * 2]]
-                                    &= ~l_mask;
-                            }
-                            else
-                            {
-                                // Turn on a bit that should be off
-                                pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit * 2]]
-                                    |= l_mask;
-                            }
-
-                            if (checkPartialGoodForDescendants(pDesc, pgData ))
-                            {
-                                TS_FAIL("testHWAS"
-                                        "checkPartialGoodForDescendants> "
-                                        "functional = 0x%x, should be false, "
-                                        "MC%s for MCBIST%d = 0x%04x, "
-                                        "mask = 0x%04x. "
-                                        "pDesc HUID 0x%.8x",
-                                        checkPartialGoodForDescendants(pDesc,
-                                                                       pgData),
-                                        l_chipUnit ? "01" : "23",
-                                        l_chipUnit,
-                                        pgData[VPD_CP00_PG_MCxx_INDEX
-                                                   [l_chipUnit * 2]],
-                                        l_mask,
-                                        pDesc->getAttr<ATTR_HUID>());
-                            }
-
-                            // Restore the "all good" data
-                            pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit * 2]] =
-                            (uint16_t)VPD_CP00_PG_MCxx_GOOD;
-
-                        }
-
-                        // TEST WITH BAD MAGIC PORT
-                        pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit * 2]] |=
-                            VPD_CP00_PG_MCA_MAGIC_PORT_MASK;
-
-
-                        if (checkPartialGoodForDescendants(pDesc, pgData ))
-                        {
-                            TS_FAIL("testHWAScheckPartialGoodForDescendants>"
-                                    "functional = 0x%x, should be false, "
-                                    "MC%s for MCBIST%d = 0x%04x, "
-                                    "mask = 0x%04x - BAD MAGIC PORT. "
-                                    "pDesc HUID 0x%.8x",
-                                    checkPartialGoodForDescendants(pDesc, pgData
-                                        ),
-                                    l_chipUnit ? "01" : "23",
-                                    l_chipUnit,
-                                    pgData[VPD_CP00_PG_MCxx_INDEX
-                                               [l_chipUnit * 2]],
-                                    VPD_CP00_PG_MCA_MAGIC_PORT_MASK,
-                                    pDesc->getAttr<ATTR_HUID>());
-                        }
-
-                        pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit * 2]] &=
-                            ~VPD_CP00_PG_MCA_MAGIC_PORT_MASK;
-
-                        break;
-
-                    case TYPE_MCS:
-                        TS_INFO( "testHWAScheckPartialGoodForDescendants: "
-                                  "MCS%d is not functional", l_chipUnit);
-                        if (l_chipUnit >= 2)
-                        {
-                            pgData[VPD_CP00_PG_N1_INDEX] |=
-                                (uint16_t)VPD_CP00_PG_N1_MCS23;
-                        }
-                        else
-                        {
-                            pgData[VPD_CP00_PG_N3_INDEX] |=
-                                (uint16_t)VPD_CP00_PG_N3_MCS01;
-                        }
-
-                        if (checkPartialGoodForDescendants(pDesc, pgData ))
-                        {
-                            TS_FAIL("testHWAScheckPartialGoodForDescendants>"
-                                    "functional = 0x%x, should be false, "
-                                    "N1/N3 for MCS%d = 0x%04x. "
-                                    "pDesc HUID 0x%.8x",
-                                    checkPartialGoodForDescendants(pDesc, pgData
-                                        ),
-                                    l_chipUnit,
-                                    (l_chipUnit >= 2)
-                                        ? pgData[VPD_CP00_PG_N1_INDEX]
-                                        : pgData[VPD_CP00_PG_N3_INDEX],
-                                    pDesc->getAttr<ATTR_HUID>());
-                        }
-
-                        if (l_chipUnit >= 2)
-                        {
-                            pgData[VPD_CP00_PG_N1_INDEX] =
-                                (uint16_t)VPD_CP00_PG_N1_GOOD;
-                        }
-                        else
-                        {
-                            pgData[VPD_CP00_PG_N3_INDEX] =
-                                (uint16_t)VPD_CP00_PG_N3_GOOD;
-                        }
-
-                        for (l_mask = 0x8000;
-                             l_mask > 0;
-                             l_mask >>= 1)
-                        {
-                            if ((uint16_t)(VPD_CP00_PG_MCxx_PG_MASK &
-                                ~VPD_CP00_PG_MCxx_IOMyy[l_chipUnit]) & l_mask)
-                            {
-                                 // Ignore partial good region
-                                 continue;
-                            }
-                            else
-                            if (pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit]] &
-                                l_mask)
-                            {
-                                // Turn off a bit that should be on
-                                pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit]] &=
-                                    ~l_mask;
-                            }
-                            else
-                            {
-                                // Turn on a bit that should be off
-                                pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit]] |=
-                                    l_mask;
-                            }
-
-                            if (checkPartialGoodForDescendants(pDesc, pgData ))
-                            {
-                                TS_FAIL("testHWAS"
-                                        "checkPartialGoodForDescendants> "
-                                        "functional = 0x%x, should be false, "
-                                        "MC%s for MCS%d = 0x%04x, "
-                                        "mask = 0x%04x. "
-                                        "pDesc HUID 0x%.8x",
-                                        checkPartialGoodForDescendants(pDesc,
-                                                                       pgData),
-                                        (l_chipUnit < 2) ? "01" : "23",
-                                        l_chipUnit,
-                                        pgData[VPD_CP00_PG_MCxx_INDEX
-                                                   [l_chipUnit]],
-                                        l_mask,
-                                        pDesc->getAttr<ATTR_HUID>());
-                            }
-
-                            // Restore the "all good" data
-                            pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit]] =
-                                (uint16_t)VPD_CP00_PG_MCxx_GOOD;
-                        }
-
-                        // TEST WITH BAD MAGIC PORT (MCA0 or MCA4)
-                        pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit]] |=
-                            VPD_CP00_PG_MCA_MAGIC_PORT_MASK;
-
-                        if (checkPartialGoodForDescendants(pDesc, pgData ))
-                        {
-                            TS_FAIL("testHWAScheckPartialGoodForDescendants>"
-                                    "functional = 0x%x, should be false, "
-                                    "MC%s for MCS%d = 0x%04x, "
-                                    "mask = 0x%04x - BAD MAGIC PORT. "
-                                    "pDesc HUID 0x%.8x",
-                                    checkPartialGoodForDescendants(pDesc, pgData
-                                        ),
-                                    l_chipUnit ? "01" : "23",
-                                    l_chipUnit,
-                                    pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit]],
-                                    VPD_CP00_PG_MCA_MAGIC_PORT_MASK,
-                                    pDesc->getAttr<ATTR_HUID>());
-                        }
-
-                        pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit]] &=
-                            ~VPD_CP00_PG_MCA_MAGIC_PORT_MASK;
-
-                        break;
-
-                    case TYPE_MCA:
-                        TS_INFO( "testHWAScheckPartialGoodForDescendants: "
-                                  "MCA%d is not functional", l_chipUnit);
-                        pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit / 2]] |=
-                            (uint16_t)VPD_CP00_PG_MCxx_IOMyy[l_chipUnit / 2];
-
-                        if (checkPartialGoodForDescendants(pDesc, pgData ))
-                        {
-                            TS_FAIL("testHWAScheckPartialGoodForDescendants>"
-                                    "functional = 0x%x, should be false, "
-                                    "MC%s for MCA%d = 0x%04x. "
-                                    "pDesc HUID 0x%.8x",
-                                    checkPartialGoodForDescendants(pDesc, pgData
-                                        ),
-                                    (l_chipUnit < 4) ? "01" : "23",
-                                    l_chipUnit,
-                                    pgData[VPD_CP00_PG_MCxx_INDEX
-                                               [l_chipUnit / 2]],
-                                    pDesc->getAttr<ATTR_HUID>());
-                        }
-
-                        pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit / 2]] =
-                            (uint16_t)VPD_CP00_PG_MCxx_GOOD;
-
-                        // Try bad MCA Port setting for MCA2/3 & MCA6/7
-                        if ( VPD_CP00_PG_MCxx_IOMyy[l_chipUnit / 2] !=
-                             VPD_CP00_PG_MCA_MAGIC_PORT_MASK )
-                        {
-                            pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit / 2]] |=
-                                VPD_CP00_PG_MCA_MAGIC_PORT_MASK;
-
-                            if (checkPartialGoodForDescendants(pDesc, pgData ))
-                            {
-                                TS_FAIL("testHWAS"
-                                        "checkPartialGoodForDescendants> "
-                                        "functional = 0x%x, should be false, "
-                                        "MC%s for MCA%d = 0x%04x "
-                                        "mask = 0x%04x - BAD MAGIC PORT. "
-                                        "pDesc HUID 0x%.8x",
-                                        checkPartialGoodForDescendants(pDesc,
-                                                                       pgData),
-                                        (l_chipUnit < 4) ? "01" : "23",
-                                        l_chipUnit,
-                                        pgData[VPD_CP00_PG_MCxx_INDEX
-                                                   [l_chipUnit / 2]],
-                                        VPD_CP00_PG_MCA_MAGIC_PORT_MASK,
-                                        pDesc->getAttr<ATTR_HUID>());
-                            }
-
-                            pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit / 2]] &=
-                                ~VPD_CP00_PG_MCA_MAGIC_PORT_MASK;
-                        }
-
-                        break;
-
-                    case TYPE_MC:
-                        TS_INFO( "testHWAScheckPartialGoodForDescendants: "
-                                  "MC%d is not functional", l_chipUnit);
-                        if (l_chipUnit)
-                        {
-                            pgData[VPD_CP00_PG_N1_INDEX] |=
-                                (uint16_t)VPD_CP00_PG_N1_MCS23;
-                        }
-                        else
-                        {
-                            pgData[VPD_CP00_PG_N3_INDEX] |=
-                                (uint16_t)VPD_CP00_PG_N3_MCS01;
-                        }
-
-                        if (checkPartialGoodForDescendants(pDesc, pgData ))
-                        {
-                            TS_FAIL("testHWAScheckPartialGoodForDescendants>"
-                                    "functional = 0x%x, should be false, "
-                                    "N1/N3 for MC%d = 0x%04x. "
-                                    "pDesc HUID 0x%.8x",
-                                    checkPartialGoodForDescendants(pDesc, pgData
-                                        ),
-                                    l_chipUnit,
-                                    l_chipUnit ? pgData[VPD_CP00_PG_N1_INDEX]
-                                               : pgData[VPD_CP00_PG_N3_INDEX],
-                                    pDesc->getAttr<ATTR_HUID>());
-                        }
-
-                        if (l_chipUnit)
-                        {
-                            pgData[VPD_CP00_PG_N1_INDEX] =
-                                (uint16_t)VPD_CP00_PG_N1_GOOD;
-                        }
-                        else
-                        {
-                            pgData[VPD_CP00_PG_N3_INDEX] =
-                                (uint16_t)VPD_CP00_PG_N3_GOOD;
-                        }
-
-                        for (l_mask = 0x8000;
-                             l_mask > 0;
-                             l_mask >>= 1)
-                        {
-                            if (pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit * 2]]
-                                & l_mask)
-                            {
-                                // Turn off a bit that should be on
-                                pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit * 2]]
-                                    &= ~l_mask;
-                            }
-                            else
-                            {
-                                // Turn on a bit that should be off
-                                pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit * 2]]
-                                    |= l_mask;
-                            }
-
-                            if (checkPartialGoodForDescendants(pDesc, pgData ))
-                            {
-                                TS_FAIL("testHWAScheckPartialGoodForDescendants>"
-                                        "functional = 0x%x, should be false, "
-                                        "MC%s for MC%d = 0x%04x, "
-                                        "mask = 0x%04x. "
-                                        "pDesc HUID 0x%.8x",
-                                        checkPartialGoodForDescendants(pDesc,
-                                            pgData),
-                                        l_chipUnit ? "01" : "23",
-                                        l_chipUnit,
-                                        pgData[VPD_CP00_PG_MCxx_INDEX
-                                                   [l_chipUnit * 2]],
-                                        l_mask,
-                                        pDesc->getAttr<ATTR_HUID>());
-                            }
-
-                            // Restore the "all good" data
-                            pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit * 2]] =
-                            (uint16_t)VPD_CP00_PG_MCxx_GOOD;
-
-                        }
-
-                        break;
-                    case TYPE_OBUS_BRICK:
-                        {
-                            //Two cases here:
-                            //OBUS==SMP --> Target should be present regardless
-                            //              of PG
-                            //OBUS!=SMP --> Target should follow PG
-                            //marking PG bad
-                            pgData[VPD_CP00_PG_N3_INDEX] |=
-                                (uint16_t)VPD_CP00_PG_N3_NPU;
-
-                            // get parent OBUS and check OPTICS_CONFIG_MODE
-                            auto obusType = TARGETING::TYPE_OBUS;
-                            TARGETING::Target* l_obus_ptr = getParent(pDesc,
-                                                                      obusType);
-                            ATTR_OPTICS_CONFIG_MODE_type config_mode =
-                                l_obus_ptr->getAttr<ATTR_OPTICS_CONFIG_MODE>();
-
-                            if (OPTICS_CONFIG_MODE_SMP == config_mode)
-                            {
-                                //Calling with target set as SMP
-                                TS_INFO("testHWAS"
-                                        "checkPartialGoodForDescendants: "
-                                        "OBUS_BRICK PG is bad and "
-                                        "target is SMP");
-
-                                // Since SMP, should always be true, but fail
-                                // test if false
-                                if (!checkPartialGoodForDescendants(pDesc,
-                                                                    pgData))
-                                {
-                                    TS_FAIL("testHWAS"
-                                            "checkPartialGoodForDescendants> "
-                                            "functional = 0x%x, should be true "
-                                            "because"
-                                            "OBUS_BRICK is SMP: PG = 0x%04x. "
-                                            "pDesc HUID 0x%.8x",
-                                            checkPartialGoodForDescendants(
-                                                pDesc,
-                                                pgData),
-                                            pgData[VPD_CP00_PG_N3_INDEX],
-                                            pDesc->getAttr<ATTR_HUID>());
-                                }
-                            }
-                            else
-                            {
-                                TS_INFO("testHWAS"
-                                        "checkPartialGoodForDescendants: "
-                                        "OBUS_BRICK PG is bad and target is "
-                                        "NVLINK");
-
-                                // Since non-SMP, should return false, but fail
-                                // test if true
-                                if (checkPartialGoodForDescendants(pDesc,
-                                                                   pgData))
-                                {
-                                    TS_FAIL("testHWAS"
-                                            "checkPartialGoodForDescendants> "
-                                            "functional = 0x%x, should be "
-                                            "false because"
-                                            "OBUS_BRICK is NVLINK: PG = "
-                                            "0x%04x. "
-                                            "pDesc HUID 0x%.8x",
-                                            checkPartialGoodForDescendants(
-                                                pDesc,
-                                                pgData),
-                                            pgData[VPD_CP00_PG_N3_INDEX],
-                                            pDesc->getAttr<ATTR_HUID>());
-                                }
-                            }
-
-                            //Setting PG back to good data
-                            pgData[VPD_CP00_PG_N3_INDEX] =
-                                (uint16_t)VPD_CP00_PG_N3_GOOD;
-
-                            break;
-                        }
-
-                    case TYPE_NPU:
-                        TS_INFO( "testHWAScheckPartialGoodForDescendants: "
-                                  "NPU is not functional");
-                        pgData[VPD_CP00_PG_N3_INDEX] |=
-                            (uint16_t)VPD_CP00_PG_N3_NPU;
-
-                        if (checkPartialGoodForDescendants(pDesc, pgData ))
-                        {
-                            TS_FAIL("testHWAScheckPartialGoodForDescendants>"
-                                    "functional = 0x%x, should be false, "
-                                    "NPU = 0x%04x. "
-                                    "pDesc HUID 0x%.8x",
-                                    checkPartialGoodForDescendants(pDesc,
-                                        pgData),
-                                    pgData[VPD_CP00_PG_N3_INDEX],
-                                    pDesc->getAttr<ATTR_HUID>());
-                        }
-
-                        pgData[VPD_CP00_PG_N3_INDEX] =
-                            (uint16_t)VPD_CP00_PG_N3_GOOD;
-                        break;
-
-                    case TYPE_PERV:
-
-                        TS_INFO( "testHWAScheckPartialGoodForDescendants: "
-                                  "PERV is not functional");
-
-                        if (pgData[l_chipUnit] &
-                            (uint16_t)VPD_CP00_PG_xxx_VITAL)
-                        {
-                            // Ignore chiplet lines where VITAL is "1"
-                            continue;
-                        }
-                        else
-                        {
-                            // Turn on VITAL bit that should be off / good
-                            pgData[l_chipUnit] |=
-                                (uint16_t)VPD_CP00_PG_xxx_VITAL;
-                        }
-
-                        if (checkPartialGoodForDescendants(pDesc, pgData))
-                        {
-                            TS_FAIL("testHWAScheckPartialGoodForDescendants>"
-                                    "functional = 0x%x, should be false, "
-                                    "PERV(%d) = 0x%04x. "
-                                    "pDesc HUID 0x%.8x",
-                                    checkPartialGoodForDescendants(pDesc,
-                                        pgData),
-                                    l_chipUnit,
-                                    pgData[l_chipUnit],
-                                    pDesc->getAttr<ATTR_HUID>());
-                        }
-
-                        // Restore the "all good" data
-                        pgData[l_chipUnit] &= ~VPD_CP00_PG_xxx_VITAL;
-
-                        break;
-
-                    default:
-                        break;
                 }
             } // for pDesc_it
         } // for pTarget_it
 
         TS_INFO( "testHWAScheckPartialGoodForDescendants exit" );
+    }
+
+    /**
+     * @brief   test markChildrenNonFunctional
+     */
+    void testHWASMarkChildrenNonFunctional()
+    {
+        // This test ensures that if the parent of a target is marked bad, then
+        // it also is marked bad.
+
+        // Get list of present targets with type PROC
+        TargetHandleList pCheckPres;
+        getAllChips( pCheckPres, TYPE_PROC, true );
+
+        TS_INFO( "testHWAScheckMarkChildrenNonFunctional() entry");
+
+        for (const TargetHandle_t pTarget : pCheckPres)
+        {
+            TargetHandleList pDescList;
+            targetService().getAssociated( pDescList, pTarget,
+                TargetService::CHILD, TargetService::ALL);
+
+            for (const TargetHandle_t pDesc : pDescList)
+            {
+                const ATTR_TYPE_type l_type = pDesc->getAttr<ATTR_TYPE>();
+                const ATTR_CHIPLET_ID_type l_chipletID
+                    = pDesc->getAttr<ATTR_CHIPLET_ID>();
+                const ATTR_CHIP_UNIT_type l_chipUnit
+                    = pDesc->getAttr<ATTR_CHIP_UNIT>();
+
+                const char* const l_type_str = attrToString<ATTR_TYPE>(l_type);
+
+                const TargetHandle_t l_parentTarget
+                    = getImmediateParentByAffinity(pTarget);
+
+                const auto l_parentChipletID
+                    = l_parentTarget->getAttr<ATTR_CHIPLET_ID>();
+
+                const auto l_targetInfo
+                    = lookup_target_info(targets_with_parents, l_type);
+
+                TS_INFO("testHWAScheckMarkChildrenNonFunctional: "
+                        "descendant functional - "
+                        "attr type 0x%08X, chip unit %d",
+                        l_type, l_chipUnit);
+
+                pg_entry_t l_pgIdx = 0;
+
+                if (l_targetInfo)
+                {
+                    l_pgIdx = (l_targetInfo->parent_pg_idx == USE_PARENT_CHIPLET_ID
+                               ? l_parentChipletID
+                               : l_targetInfo->parent_pg_idx);
+                }
+
+                // Make sure we're starting out with good state at the beginning
+                if (!checkPropagationOfBadState(pTarget, pDesc, pgDataAllGood))
+                {
+                    char l_pgDataStr[32] = { };
+
+                    if (l_targetInfo)
+                    {
+                        sprintf(l_pgDataStr, ", pgData = 0x%08x", pgDataAllGood[l_pgIdx]);
+                    }
+
+                    TS_FAIL("testHWAScheckMarkChildrenNonFunctional>"
+                            "functional = false, should be true, "
+                            "type = %s, chip unit = %d%s, chiplet ID = 0x%02x. "
+                            "pDesc HUID 0x %.8x",
+                            l_type_str,
+                            l_chipUnit,
+                            l_pgDataStr,
+                            l_chipletID,
+                            get_huid(pDesc));
+                }
+
+                // If we can modify the bits of the parent, set its state to BAD
+                // and make sure that the bad state propagates to this child
+                if (l_targetInfo)
+                {
+                    TS_INFO( "testHWAScheckMarkChildrenNonFunctional: "
+                             "%s (chiplet ID = 0x%02x) is not functional",
+                             l_type_str,
+                             l_chipletID);
+
+                    // Make a copy we can modify to be bad
+                    auto bad_pgData = pgDataAllGood;
+
+                    // set the parent's entry to some BAD state, then check if
+                    // we're also bad
+                    bad_pgData[l_pgIdx] |= l_targetInfo->parent_pg_entry_bits_to_set;
+
+                    if (checkPropagationOfBadState(pTarget, pDesc, bad_pgData))
+                    {
+                        TS_FAIL("testHWAScheckMarkChildrenNonFunctional>"
+                                "functional = true, should be false, "
+                                " = 0x%08x. "
+                                "pDesc HUID 0x %.8x",
+                                l_type_str,
+                                bad_pgData[l_pgIdx],
+                                get_huid(pDesc));
+                    }
+                }
+            } // for pDesc_it
+        } // for pTarget_it
+
+        TS_INFO( "testHWASMarkChildrenNonFunctional exit" );
     }
 
     /**
@@ -2423,14 +840,14 @@ public:
                 {
                     if (hwasState.present == false)
                     {
-                        TS_FAIL("testHWASpervStates: PERV[%d] HUID: %.8X - is NOT Present",
+                        TS_FAIL("testHWASpervStates: PERV[%d] HUID: 0x %.8X - is NOT Present",
                              chip_unit,
-                            l_target->getAttr<ATTR_HUID>());
+                             get_huid(l_target));
                         break;
                     }
-                    HWAS_DBG("PERV[%d]: HUID: %.8X - %spresent, %sfunctional",
+                    HWAS_DBG("PERV[%d]: HUID: 0x %.8X - %spresent, %sfunctional",
                         chip_unit,
-                        l_target->getAttr<ATTR_HUID>(),
+                        get_huid(l_target),
                         hwasState.present ? "" : "NOT ",
                         hwasState.functional ? "" : "NOT ");
                 }
@@ -2438,14 +855,14 @@ public:
                 {
                     if (hwasState.present == true)
                     {
-                        TS_FAIL("testHWASpervStates: PERV[%d] HUID: %.8X - is Present and Parent is NOT",
+                        TS_FAIL("testHWASpervStates: PERV[%d] HUID: 0x %.8X - is Present and Parent is NOT",
                              chip_unit,
                             l_target->getAttr<ATTR_HUID>());
                         break;
                     }
-                    HWAS_DBG("PERV[%d]: HUID: %.8X - %spresent, %sfunctional",
+                    HWAS_DBG("PERV[%d]: HUID: 0x %.8X - %spresent, %sfunctional",
                         chip_unit,
-                        l_target->getAttr<ATTR_HUID>(),
+                        get_huid(l_target),
                         hwasState.present ? "" : "NOT ",
                         hwasState.functional ? "" : "NOT ");
                 }
@@ -2520,7 +937,7 @@ public:
                     {
                         TS_FAIL("testHWASplatReadLx> No error from "
                                 "platReadLx(l_child_target 0x%8X).",
-                                l_child_target->getAttr<ATTR_HUID>());
+                                get_huid(l_child_target));
                     }
 
                     break;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,8 @@
 
 #include <errl/errluserdetails.H>
 #include <hwas/common/vpdConstants.H>
+#include <hwas/common/pgLogic.H>
+#include <array>
 
 namespace HWAS
 {
@@ -51,15 +53,15 @@ namespace HWAS
         /**
          * @brief Constructor
          *
-         * @param[in] i_modelPgData    The model-specific partial good xbus and
-         *                             obus data. This is used to construct an
+         * @param[in] i_modelAgData    The model-specific all-good data.
+         *                             This is used to construct an
          *                             "all good" vector to compare against the
          *                             i_pgData.
          * @param[in] i_pgData         The partial good data read from the VPD.
          */
         ErrlUdPartialGoodData(
-                const uint16_t (&i_modelPgData)[MODEL_PG_DATA_ENTRIES],
-                const uint16_t (&i_pgData)[VPD_CP00_PG_DATA_ENTRIES]);
+            const model_ag_entries& i_modelAgData,
+            const partialGoodVector& i_pgData);
 
         /**
          * @brief Destructor

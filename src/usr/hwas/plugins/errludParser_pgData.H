@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,6 +27,7 @@
 
 #include "errluserdetails.H"
 #include <targeting/common/utilFilter.H>
+
 #include "../hwas/common/vpdConstants.H"
 #include "../hwas/common/hwas_reasoncodes.H"
 
@@ -64,114 +65,93 @@ namespace HWAS
                            void *          i_pBuffer,
                            const uint32_t  i_buflen) const
         {
-            if (i_version < HWAS_UDT_VERSION_1)
+            if (i_version > HWAS_UDT_VERSION_1)
             {
-                i_parser.PrintHeading("HWAS PG FFDC: Unknown Version");
+                i_parser.PrintHeading("HWAS PG FFDC: Unknown Version (too new)");
             }
             else
             {
+                const int OUTPUT_STRING_LENGTH = 64;
+                char l_outputString[OUTPUT_STRING_LENGTH]={0};
+
                 i_parser.PrintHeading("HWAS PG FFDC");
 
-                // Get the correct all good values for the chip from the buffer.
-                const uint16_t* pData =
-                    reinterpret_cast<const uint16_t*>(i_pBuffer);
+                // Our local copy of the AG vector, which we will update with
+                // the model-specific AG values as we extract them below. We
+                // then take this AGV and compare it against the PG values we
+                // extract, to see which ones differ.
+                partialGoodVector l_pgDataAG;
 
-                uint16_t l_xbus = ERRORLOG::NTH_UINT16(pData);
+                memcpy(&l_pgDataAG, &pgDataAllGood, sizeof(pgDataAllGood));
 
-                ++pData;
+                const uint32_t* l_iterator = static_cast<uint32_t*>(i_pBuffer);
 
-                uint16_t l_obus = ERRORLOG::NTH_UINT16(pData);
-
-                ++pData;
-
-                // Buffer with all good data. All of the following constants are
-                // defined within vpdConstants.H
-                const uint16_t pgDataAllGood[VPD_CP00_PG_DATA_ENTRIES] =
-                    {static_cast<uint16_t>(VPD_CP00_PG_FSI_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_PERVASIVE_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_N0_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_N1_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_N2_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_N3_GOOD),
-                    l_xbus,
-                    static_cast<uint16_t>(VPD_CP00_PG_MCxx_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_MCxx_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_OBUS_GOOD),
-                    l_obus,
-                    l_obus,
-                    static_cast<uint16_t>(VPD_CP00_PG_OBUS_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_PCIx_GOOD[0]),
-                    static_cast<uint16_t>(VPD_CP00_PG_PCIx_GOOD[1]),
-                    static_cast<uint16_t>(VPD_CP00_PG_PCIx_GOOD[2]),
-                    static_cast<uint16_t>(VPD_CP00_PG_EPx_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_EPx_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_EPx_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_EPx_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_EPx_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_EPx_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_RESERVED_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_RESERVED_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_RESERVED_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_RESERVED_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_RESERVED_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_RESERVED_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_RESERVED_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_RESERVED_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_RESERVED_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_RESERVED_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_ECxx_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_ECxx_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_ECxx_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_ECxx_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_ECxx_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_ECxx_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_ECxx_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_ECxx_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_ECxx_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_ECxx_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_ECxx_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_ECxx_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_ECxx_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_ECxx_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_ECxx_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_ECxx_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_ECxx_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_ECxx_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_ECxx_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_ECxx_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_ECxx_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_ECxx_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_ECxx_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_ECxx_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_RESERVED_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_RESERVED_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_RESERVED_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_RESERVED_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_RESERVED_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_RESERVED_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_RESERVED_GOOD),
-                    static_cast<uint16_t>(VPD_CP00_PG_RESERVED_GOOD)};
-
-                const int OUTPUT_STRING_LENGTH = 38;
-                const int LABEL_STRING_LENGTH = 4;
-                char l_outputString[OUTPUT_STRING_LENGTH]={0},
-                     l_labelString[LABEL_STRING_LENGTH]={0};
-
-                for (size_t i = 0; i < VPD_CP00_PG_DATA_ENTRIES; ++i)
+                // Extract the model-specific AG values and put them into
+                // l_pgDataAG at their proper locations
                 {
-                    uint16_t pgValue = ERRORLOG::NTH_UINT16(pData + i);
+                    const uint32_t l_num_ag_entries
+                        = ERRORLOG::NTH_UINT32(l_iterator);
 
-                    sprintf(l_outputString,
-                            "pgData[%d] = 0x%04x; expected 0x%04x",
-                            i, pgValue, pgDataAllGood[i]);
+                    ++l_iterator;
 
-                    sprintf(l_labelString,
-                            "%s",
-                            (pgDataAllGood[i] & pgValue == pgDataAllGood[i])
-                            ? "" : "Bad");
+                    for (uint32_t i = 0; i < l_num_ag_entries; ++i)
+                    {
+                        const uint32_t l_model_ag_index
+                            = ERRORLOG::NTH_UINT32(l_iterator);
+                        ++l_iterator;
+                        const uint32_t l_model_ag_value
+                            = ERRORLOG::NTH_UINT32(l_iterator);
+                        ++l_iterator;
 
-                    i_parser.PrintString(l_labelString, l_outputString);
+                        if (l_model_ag_index < VPD_CP00_PG_DATA_ENTRIES)
+                        {
+                            l_pgDataAG[l_model_ag_index] = l_model_ag_value;
+                        }
+                        else
+                        {
+                            sprintf(l_outputString,
+                                    "Model-specific AG value "
+                                    "out of bounds: [%u] = 0x%08x",
+                                    l_model_ag_index, l_model_ag_value);
 
+                            i_parser.PrintString("Error", l_outputString);
+                        }
+                    }
+                }
+
+                // Extract the PG values and compare them against our AG vector
+                {
+                    const uint32_t l_num_pg_entries
+                        = ERRORLOG::NTH_UINT32(l_iterator);
+
+                    ++l_iterator;
+
+                    if (l_num_pg_entries != VPD_CP00_PG_DATA_ENTRIES)
+                    {
+                        sprintf(l_outputString,
+                                "Expected %u PG entries, got %u",
+                                static_cast<uint32_t>(VPD_CP00_PG_DATA_ENTRIES),
+                                l_num_pg_entries);
+                        i_parser.PrintString("Error", l_outputString);
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < VPD_CP00_PG_DATA_ENTRIES; ++i)
+                        {
+                            const pg_entry_t l_pgValue
+                                = ERRORLOG::NTH_UINT32(l_iterator);
+
+                            ++l_iterator;
+
+                            sprintf(l_outputString,
+                                    "pgData[%d] = 0x%08x; expected 0x%08x",
+                                    i, l_pgValue, l_pgDataAG[i]);
+
+                            i_parser.PrintString((l_pgValue == l_pgDataAG[i]
+                                                  ? "" : "Bad"),
+                                                 l_outputString);
+                        }
+                    }
                 }
             }
         }

@@ -93,7 +93,8 @@ namespace HWAS
 
     enum HwasPlatUserDetailsTypes
     {
-        HWAS_UDT_PARTIAL_GOOD_DATA = 0x01
+        HWAS_UDT_PARTIAL_GOOD_DATA = 0x01,
+        HWAS_UDT_PARTIAL_GOOD_DATA_V2 = 0x02
     };
 
     enum HwasPlatUserDetailsVersions
