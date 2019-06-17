@@ -236,7 +236,8 @@ TESTCASE_MODULES += testscan
 TESTCASE_MODULES += testsecureboot
 TESTCASE_MODULES += testfsiscom
 TESTCASE_MODULES += testlpc
-TESTCASE_MODULES += $(if $(CONFIG_HTMGT),testhtmgt)
+#TODO: RTC 213102 to properly add & execute HTMGT test
+#TESTCASE_MODULES += $(if $(CONFIG_HTMGT),testhtmgt)
 TESTCASE_MODULES += testinitservice
 TESTCASE_MODULES += testfsi
 TESTCASE_MODULES += testibscom

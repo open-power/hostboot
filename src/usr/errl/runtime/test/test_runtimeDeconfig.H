@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,8 +51,8 @@ class deconfigureTargetAtRuntimeTest : public CxxTest::TestSuite
             // pass in a null target pointer
             TARGETING::Target * l_target = nullptr;
 
-            errlHndl_t l_errl =
-                HWAS::theDeconfigGard().deconfigureTargetAtRuntime(
+            errlHndl_t l_errl = nullptr;
+            l_errl = HWAS::theDeconfigGard().deconfigureTargetAtRuntime(
                     l_target,
                     HWAS::DeconfigGard::FULLY_AT_RUNTIME,
                     l_errl);
@@ -118,8 +118,8 @@ class deconfigureTargetAtRuntimeTest : public CxxTest::TestSuite
 
             l_target = l_cores.at(0);
 
-            errlHndl_t l_errl =
-                HWAS::theDeconfigGard().deconfigureTargetAtRuntime(
+            errlHndl_t l_errl = nullptr;
+            l_errl = HWAS::theDeconfigGard().deconfigureTargetAtRuntime(
                     l_target,
                     HWAS::DeconfigGard::SPEC_DECONFIG,
                     l_errl);
@@ -179,8 +179,8 @@ class deconfigureTargetAtRuntimeTest : public CxxTest::TestSuite
 
             TARGETING::Target * l_target = l_proc.at(0);
 
-            errlHndl_t l_errl =
-                HWAS::theDeconfigGard().deconfigureTargetAtRuntime(
+            errlHndl_t l_errl = nullptr;
+            l_errl = HWAS::theDeconfigGard().deconfigureTargetAtRuntime(
                     l_target,
                     HWAS::DeconfigGard::FULLY_AT_RUNTIME,
                     l_errl);

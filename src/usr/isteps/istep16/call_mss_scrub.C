@@ -72,7 +72,7 @@ void* call_mss_scrub (void *io_pArgs)
 
         // Determine which target type runs the maintenance commands.
         TARGETING::MODEL masterProcModel = masterProc->getAttr<ATTR_MODEL>();
-        TARGETING::TYPE maintTrgtType;
+        TARGETING::TYPE maintTrgtType = TYPE_MBA;
         switch ( masterProcModel )
         {
             case MODEL_CUMULUS: maintTrgtType = TYPE_MBA;       break;
