@@ -1127,6 +1127,8 @@ int32_t omiParentCalloutBusInterfacePlugin_##POS( ExtensibleChip * i_chip, \
     return omiParentCalloutBusInterfacePlugin( i_chip, io_sc, POS ); \
 } \
 PRDF_PLUGIN_DEFINE_NS( axone_omic, LaneRepair, \
+                       omiParentCalloutBusInterfacePlugin_##POS );\
+PRDF_PLUGIN_DEFINE_NS( axone_mcc, LaneRepair, \
                        omiParentCalloutBusInterfacePlugin_##POS );
 
 OMI_PARENT_CALL_BUS_PLUGIN( 0 );
