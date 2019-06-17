@@ -5132,6 +5132,22 @@
   </attribute>
 
   <attribute>
+    <id>NVDIMM_AUTO_ARM</id>
+    <description>
+        0 - Do not automatically arm all NVDIMMS in the system at runtime
+        1 - Automatically arm all NVDIMMS in the system at runtime
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
     <id>NVDIMM_ENCRYPTION_ENABLE</id>
     <description>
         0 - Encryption is not enabled on all NVDIMMS in the system

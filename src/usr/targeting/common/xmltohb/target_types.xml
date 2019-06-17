@@ -2038,6 +2038,9 @@
       <id>NUMERIC_POD_TYPE_TEST</id>
     </attribute>
     <attribute>
+      <id>NVDIMM_AUTO_ARM</id>
+    </attribute>
+    <attribute>
       <id>NVDIMM_ENCRYPTION_ENABLE</id>
     </attribute>
     <attribute>
