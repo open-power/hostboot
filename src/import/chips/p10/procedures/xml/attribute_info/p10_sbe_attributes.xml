@@ -335,4 +335,37 @@
       <name>ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID</name>
       <value>0x0</value>
   </entry>
+
+  <entry>
+      <name>ATTR_SBE_HBBL_EXCEPTION_INSTRUCT</name>
+      <value>0x0</value>
+  </entry>
+  <entry>
+     <name>ATTR_HOSTBOOT_HRMOR_OFFSET</name>
+     <value>0x0</value>
+  </entry>
+  <entry>
+      <name>ATTR_SBE_BOOTLOADER_OFFSET</name>
+      <value>0x0</value>
+  </entry>
+ <entry>
+      <name>ATTR_SBE_BOOT_SIDE</name>
+      <value>0x0</value>
+  </entry>
+ <entry>
+      <name>ATTR_PNOR_BOOT_SIDE</name>
+      <value>0x0</value>
+  </entry>
+ <entry>
+      <name>ATTR_PNOR_SIZE</name>
+      <value>0x0</value>
+  </entry>
+ <entry>
+      <name>ATTR_SECURE_SETTINGS</name>
+      <value>0x0</value>
+  </entry>
+ <entry>
+      <name>ATTR_SBE_ADDR_KEY_STASH_ADDR</name>
+      <value>0x0</value>
+ </entry>
 </entries>
