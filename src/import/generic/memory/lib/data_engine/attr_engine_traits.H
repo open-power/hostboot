@@ -1728,7 +1728,7 @@ struct attrEngineTraits<attr_engine_derived_fields, HEIGHT_3DS>
         FAPI_TRY(mss::attr::get_num_master_ranks_per_dimm(i_target, l_master_ranks_per_dimm));
         FAPI_TRY(mss::attr::get_logical_ranks_per_dimm(i_target, l_logical_ranks_per_dimm));
         {
-            uint16_t l_result = l_logical_ranks_per_dimm / l_master_ranks_per_dimm;
+            const uint16_t l_result = l_logical_ranks_per_dimm / l_master_ranks_per_dimm;
 
             static const std::vector< std::pair<uint16_t, uint16_t> > HEIGHT_3DS_MAP =
             {
