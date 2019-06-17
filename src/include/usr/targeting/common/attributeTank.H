@@ -34,13 +34,12 @@
 #include <stdint.h>
 #include <list>
 #include <vector>
+#include <attributeenums.H>       // TARGETING::ATTRIBUTE_ID
 #ifndef STANDALONE_COMPILE
 #include <targeting/adapters/mutexadapter.H>
 #include <targeting/common/error.H>
 namespace TARGETING
 {
-
-
 /**
  * @class AttributeTank
  *
@@ -293,7 +292,7 @@ namespace AttributeTank
          *
          * return A constant pointer to the Attribute Value
          */
-        const void* const getValue() const
+        const void* getValue() const
         {
             return iv_pVal;
         }
@@ -729,7 +728,8 @@ private:
 
     // Lock for thread safety (class provided by platform)
     mutable TARG_MUTEX_TYPE iv_mutex;
-};
+
+};  // end AttributeTank
 
 
 #endif //STANDALONE_COMPILE
