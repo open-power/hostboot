@@ -44,6 +44,11 @@ class rankTraits<mss::mc_type::EXPLORER>
         static constexpr uint8_t MAX_DIMMS_PER_PORT = 2;
         static constexpr uint8_t MAX_RANKS_PER_DIMM = 4;
         static constexpr uint8_t RANK_INDEX_STEP = 4;
+
+        // Note! a configuration of 2 4-rank dimms is not possible.
+        // In this hypothetical scenario, the value for phy-rank would not
+        // be valid / does not apply, as there will be some rollover.
+        static constexpr uint8_t PHY_RANK_INDEX_STEP = 2;
 };
 
 ///

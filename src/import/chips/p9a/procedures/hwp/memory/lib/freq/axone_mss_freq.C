@@ -37,6 +37,10 @@
 #include <vpd_access.H>
 #include <vector>
 
+// Explorer rank API
+#include <lib/shared/exp_defaults.H>
+#include <lib/dimm/exp_rank.H>
+
 // Memory libraries
 #include <lib/freq/axone_freq_traits.H>
 #include <lib/shared/axone_consts.H>
@@ -130,7 +134,7 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 ///
-/// @brief Gets the DIMM type for a specific DIMM - specialization for the NIMBUS processor type
+/// @brief Gets the DIMM type for a specific DIMM - specialization for the AXONE processor type
 /// @param[in] i_target DIMM target
 /// @param[out] o_dimm_type DIMM type on the DIMM target
 /// @return FAPI2_RC_SUCCESS iff ok
@@ -218,55 +222,18 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Return a list of configured ranks on a MEM_PORT
-/// @param[in] i_target the port target
-/// @param[out] o_ranks list of valid ranks on the port
-/// @return FAPI2_RC_SUCCESS iff ok
+/// @brief Determines if rank info object is that of an LR dimm
 ///
-// TK this function should get replaced by our rank API when available
-fapi2::ReturnCode get_ranks_for_vpd(
-    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-    std::vector<uint64_t>& o_ranks)
+/// @param[in] i_rank_info rank info object
+/// @param[out] l_lr_dimm true if LRDIMM, else false
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success
+///
+inline fapi2::ReturnCode rank_is_lr_dimm(const mss::rank::info<> i_rank_info, bool& o_lr_dimm)
 {
-    using TT = mss::frequency_traits<mss::proc_type::AXONE>;
+    uint8_t l_dimm_type = 0;
+    FAPI_TRY(mss::attr::get_dimm_type(i_rank_info.get_dimm_target(), l_dimm_type));
 
-    uint8_t l_rank_count_dimm[TT::MAX_DIMM_PER_PORT] = {};
-    uint8_t l_dimm_type[TT::MAX_DIMM_PER_PORT] = {};
-
-    o_ranks.clear();
-
-    FAPI_TRY( get_master_rank_per_dimm<mss::proc_type::AXONE>(i_target, &(l_rank_count_dimm[0])) );
-    FAPI_TRY( get_dimm_type<mss::proc_type::AXONE>(i_target, &(l_dimm_type[0])) );
-
-    // So for LRDIMM, our SI works a bit differently than for non-LRDIMM
-    // LRDIMM's have buffers that operate on a per-DIMM basis across multiple ranks
-    // As such, they act as a single load, similar to a 1R DIMM would
-    // per the IBM signal integrity team, the 1R DIMM settings should be used for LRDIMM's
-    // So, if we are LRDIMM's and have ranks, we want to only note it as a 1R DIMM for purposes of querying the VPD
-    FAPI_DBG("%s for DIMM 0 rank count %u dimm type %u %s",
-             mss::c_str(i_target), l_rank_count_dimm[0], l_dimm_type[0], l_dimm_type[0] == TT::LRDIMM_TYPE ? "LRDIMM" : "RDIMM");
-    FAPI_DBG("%s for DIMM 1 rank count %u dimm type %u %s",
-             mss::c_str(i_target), l_rank_count_dimm[1], l_dimm_type[1], l_dimm_type[1] == TT::LRDIMM_TYPE ? "LRDIMM" : "RDIMM");
-
-    l_rank_count_dimm[0] = ((l_dimm_type[0] == TT::LRDIMM_TYPE) && (l_rank_count_dimm[0] > 0)) ? 1 : l_rank_count_dimm[0];
-    l_rank_count_dimm[1] = ((l_dimm_type[1] == TT::LRDIMM_TYPE) && (l_rank_count_dimm[1] > 0)) ? 1 : l_rank_count_dimm[1];
-
-    FAPI_DBG("after LR modification %s for DIMM 0 rank count %u dimm type %u %s",
-             mss::c_str(i_target), l_rank_count_dimm[0], l_dimm_type[0], l_dimm_type[0] == TT::LRDIMM_TYPE ? "LRDIMM" : "RDIMM");
-    FAPI_DBG("after LR modification %s for DIMM 1 rank count %u dimm type %u %s",
-             mss::c_str(i_target), l_rank_count_dimm[1], l_dimm_type[1], l_dimm_type[1] == TT::LRDIMM_TYPE ? "LRDIMM" : "RDIMM");
-
-    // Add DIMM0's ranks
-    for (uint64_t l_rank = 0; l_rank < l_rank_count_dimm[0]; ++l_rank)
-    {
-        o_ranks.push_back(l_rank);
-    }
-
-    // Add DIMM1's ranks
-    for (uint64_t l_rank = 0; l_rank < l_rank_count_dimm[1]; ++l_rank)
-    {
-        o_ranks.push_back(l_rank + TT::MAX_PRIMARY_RANK_PER_DIMM);
-    }
+    o_lr_dimm = (l_dimm_type == fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_LRDIMM);
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -288,7 +255,7 @@ fapi2::ReturnCode check_freq_support_vpd<mss::proc_type::AXONE>( const fapi2::Ta
     using TT = mss::frequency_traits<mss::proc_type::AXONE>;
     o_supported = false;
 
-    std::vector<uint64_t> l_ranks;
+    std::vector<mss::rank::info<>> l_ranks;
     fapi2::VPDInfo<TT::VPD_TARGET_TYPE> l_vpd_info(TT::VPD_BLOB);
 
     const auto& l_vpd_target = mss::find_target<TT::VPD_TARGET_TYPE>(i_target);
@@ -304,23 +271,33 @@ fapi2::ReturnCode check_freq_support_vpd<mss::proc_type::AXONE>( const fapi2::Ta
     // DDIMM SPD can contain different SI settings for each master rank.
     // To determine which frequencies are supported, we have to check for each valid
     // master rank on the port's DIMMs
-    FAPI_TRY(get_ranks_for_vpd(i_target, l_ranks));
+    FAPI_TRY(mss::rank::ranks_on_port(i_target, l_ranks));
 
-    for (const auto l_rank : l_ranks)
+    for (const auto& l_rank : l_ranks)
     {
-        l_vpd_info.iv_rank = l_rank;
+        // We will skip LRDIMMs with ranks > 0
+        bool l_is_lr_dimm = false;
+        FAPI_TRY(rank_is_lr_dimm(l_rank, l_is_lr_dimm));
+
+        if (rank_not_supported_in_vpd_config(l_is_lr_dimm, l_rank.get_dimm_rank()))
+        {
+            FAPI_DBG("LRDIMM ranks > 0 are not supported for check_freq_support_vpd. Skipping this rank. Target: %s",
+                     mss::c_str(i_target));
+            continue;
+        }
+
+        l_vpd_info.iv_rank = l_rank.get_port_rank();
         FAPI_INF("%s. VPD info - checking rank: %d",
-                 mss::c_str(i_target), l_rank);
+                 mss::c_str(i_target), l_rank.get_port_rank());
 
         // Check if this VPD configuration is supported
         FAPI_TRY(is_vpd_config_supported<mss::proc_type::AXONE>(l_vpd_target, i_proposed_freq, l_vpd_info, o_supported),
                  "%s failed to determine if %u freq is supported", mss::c_str(i_target), i_proposed_freq);
 
-
         // If we fail any of the ranks, then this VPD configuration is not supported
         if(o_supported == false)
         {
-            FAPI_INF("%s is not supported on rank%u exiting...", mss::c_str(i_target), l_rank);
+            FAPI_INF("%s is not supported on rank %u exiting...", mss::c_str(i_target), l_rank.get_port_rank());
             break;
         }
     }

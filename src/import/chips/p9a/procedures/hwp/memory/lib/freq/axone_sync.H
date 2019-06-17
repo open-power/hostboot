@@ -61,6 +61,18 @@ static const std::vector<uint64_t> AXONE_OMI_FREQS =
 };
 
 ///
+/// @brief determines if rank is not supported in VPD config, will be skipped in check_freq_support_vpd()
+///
+/// @param[in] i_is_lr_dimm is LR
+/// @param[in] i_dimm_rank DIMM rank
+/// @return true if LR & rank > 0, else false
+///
+inline bool rank_not_supported_in_vpd_config(const bool i_is_lr_dimm, const uint8_t i_dimm_rank)
+{
+    return (i_is_lr_dimm && i_dimm_rank > 0);
+}
+
+///
 /// @brief Converts an OMI frequency attribute enum to the corresponding OMI frequency
 /// @param[in] i_omi_enum a frequency enum value that is to be converted
 /// @return the corresponding OMI frequency
