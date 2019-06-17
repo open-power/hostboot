@@ -111,21 +111,33 @@ class TPMDDTest: public CxxTest::TestSuite
             uint32_t data = 0x0;
             size_t dataSize = sizeof(data);
 
+            // default to most common ID
+            uint32_t expected_vendorID = TPMDD::TPM_VENDORID_65x;
+            uint8_t tpmModel = TPM_MODEL_UNDETERMINED;
+
             TRACFCOMP( g_trac_tpmdd,
                        "testTPMReadVendorID - Start" );
 
             do
             {
-#ifdef CONFIG_AXONE_BRING_UP
-                TRACFCOMP( g_trac_tpmdd,"Skipping test on Axone" );
-                break;
-#endif
-
                 // Get a TPM Target
                 TARGETING::Target* testTarget = getTestTarget();
                 if (NULL == testTarget)
                 {
-                    continue;
+                    break;
+                }
+
+                if ( !(testTarget->tryGetAttr<ATTR_TPM_MODEL>(tpmModel)) )
+                {
+                    TS_FAIL("Unable to read ATTR_TPM_MODEL for %.8X target",
+                      get_huid(testTarget));
+                    break;
+                }
+
+                // This should match Axone and later systems
+                if (TPM_MODEL_75x == tpmModel)
+                {
+                    expected_vendorID = TPMDD::TPM_VENDORID_75x;
                 }
 
                 num_ops++;
@@ -144,16 +156,16 @@ class TPMDDTest: public CxxTest::TestSuite
                                 TPMDD_COMP_ID );
                     delete err;
                     err = NULL;
-                    continue;
+                    break;
                 }
                 else if ((data & TPMDD::TPM_VENDORID_MASK)
-                         // Only 65x supported in simics for now:
-                           != TPMDD::TPM_VENDORID_65x)
+                           != expected_vendorID)
                 {
                     fails++;
                     TS_FAIL( "testTPMReadVendorID - Failed to read "
-                             "correct vendor id ID=0x%X", data);
-                    continue;
+                             "correct vendor id ID=0x%X, expected 0x%X", data,
+                             expected_vendorID);
+                    break;
 
                 }
                 else
@@ -161,7 +173,7 @@ class TPMDDTest: public CxxTest::TestSuite
                     TRACUCOMP(g_trac_tpmdd, "testTPMReadVendorID - "
                               "VendorID returned as expected. ID=0x%X",
                               data);
-                    continue;
+                    break;
                 }
             } while( 0 );
             TRACFCOMP( g_trac_tpmdd,
