@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* [+] Inspur Power Systems Corp.                                         */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -535,6 +536,8 @@ fapi2::ReturnCode validateGroupData(
                     l_mcPos, l_mcSizeGroupData, l_mcSize);
 
     } // MC loop
+
+    FAPI_INF("Total memory size= %lu GB", l_mcSize);
 
     // Assert if a PORT_ID is found more than once in any group
     for (uint8_t ii = 0; ii < NUM_MC_PORTS_PER_PROC; ii++)
