@@ -72,11 +72,42 @@ extern "C"
             return mss::index(l_first_pmic) < mss::index(l_second_pmic);
         });
 
+        uint8_t l_pmic_index = 0;
+
+        // If we're enabling via internal settings, we can just run VR ENABLE down the line
+        if (i_mode == mss::pmic::enable_mode::MANUAL)
+        {
+            using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
+            using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
+            using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
+
+            for (const auto& l_pmic : l_pmics)
+            {
+                fapi2::buffer<uint8_t> l_programmable_mode;
+                l_programmable_mode.writeBit<FIELDS::R2F_SECURE_MODE>(CONSTS::PROGRAMMABLE_MODE);
+
+                FAPI_INF("Enabling PMIC %s with default settings", mss::c_str(l_pmic));
+
+                // Make sure power is applied and we can read the PMIC
+                FAPI_TRY(mss::pmic::poll_for_pbulk_good(l_pmic),
+                         "pmic_enable: poll for pbulk good either failed, or returned not good status on PMIC %s",
+                         mss::c_str(l_pmic));
+
+                // Enable programmable mode
+                FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(l_pmic, REGS::R2F, l_programmable_mode));
+
+                // Start VR Enable
+                FAPI_TRY(mss::pmic::start_vr_enable(l_pmic),
+                         "Error starting VR_ENABLE on PMIC %s", mss::c_str(l_pmic));
+            }
+
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
         // Start at PMIC0. If there was ever a weird case where there is a 4U dimm
         // on the same OCMB as a 2U dimm (is this possible?),
         // we would have 6 total PMICs. So, we need to keep
         // track of where we left off for the last pmic we enabled
-        uint8_t l_pmic_index = 0;
 
         // Not asserting vectors non-empty because there could be OCMBs without DIMMs on them
         for (const auto& l_dimm : l_dimms)
@@ -108,9 +139,8 @@ extern "C"
                     // Call the enable procedure
                     FAPI_TRY((mss::pmic::enable_chip
                               <mss::pmic::module_height::HEIGHT_1U>
-                              (l_current_pmic_target, l_dimm, l_vendor_id, i_mode)),
+                              (l_current_pmic_target, l_dimm, l_vendor_id)),
                              "pmic_enable: Error enabling PMIC %s", mss::c_str(l_current_pmic_target));
-
                 }
 
                 // Increment by the number of PMICs that were enabled and move on to the next dimm

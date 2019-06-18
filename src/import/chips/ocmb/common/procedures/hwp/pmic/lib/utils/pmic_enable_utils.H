@@ -748,8 +748,7 @@ fapi_try_exit:
 template <mss::pmic::module_height H>
 fapi2::ReturnCode enable_chip(const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
                               const fapi2::Target<fapi2::TargetType::TARGET_TYPE_DIMM>& i_dimm_target,
-                              const uint16_t i_vendor_id,
-                              const mss::pmic::enable_mode i_mode);
+                              const uint16_t i_vendor_id);
 
 ///
 /// @brief enable procedure for IDT PMIC and 1U or 2U DIMM
@@ -764,44 +763,32 @@ template <>
 inline fapi2::ReturnCode enable_chip<mss::pmic::module_height::HEIGHT_1U>(
     const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
     const fapi2::Target<fapi2::TargetType::TARGET_TYPE_DIMM>& i_dimm_target,
-    const uint16_t i_vendor_id,
-    const mss::pmic::enable_mode i_mode)
+    const uint16_t i_vendor_id)
 {
-    if (i_mode == mss::pmic::enable_mode::SPD)
+    FAPI_INF("Setting PMIC %s settings from SPD", mss::c_str(i_pmic_target));
+
+    // Make sure it is TI or IDT
+    FAPI_ASSERT((i_vendor_id == mss::pmic::vendor::IDT ||
+                 i_vendor_id == mss::pmic::vendor::TI),
+                fapi2::PMIC_CHIP_NOT_RECOGNIZED()
+                .set_TARGET(i_pmic_target)
+                .set_VENDOR_ID(i_vendor_id),
+                "Unknown PMIC: %s with vendor ID 0x%04hhX",
+                mss::c_str(i_pmic_target),
+                uint8_t(i_vendor_id) );
+
+    if (i_vendor_id == mss::pmic::vendor::IDT)
     {
-        FAPI_INF("Setting PMIC settings from SPD");
-
-        // Make sure it is TI or IDT
-        FAPI_ASSERT((i_vendor_id == mss::pmic::vendor::IDT ||
-                     i_vendor_id == mss::pmic::vendor::TI),
-                    fapi2::PMIC_CHIP_NOT_RECOGNIZED()
-                    .set_TARGET(i_pmic_target)
-                    .set_VENDOR_ID(i_vendor_id),
-                    "Unknown PMIC: %s with vendor ID 0x%04hhX",
-                    mss::c_str(i_pmic_target),
-                    uint8_t(i_vendor_id) );
-
-        if (i_vendor_id == mss::pmic::vendor::IDT)
-        {
-            FAPI_TRY(mss::pmic::bias_with_spd_settings<mss::pmic::vendor::IDT>(i_pmic_target, i_dimm_target),
-                     "enable_chip<IDT, 1U/2U>: Error biasing PMIC %s with SPD settings",
-                     mss::c_str(i_pmic_target));
-        }
-        else // assert done in pmic_enable.C that vendor is IDT or TI
-        {
-            FAPI_TRY(mss::pmic::bias_with_spd_settings<mss::pmic::vendor::TI>(i_pmic_target, i_dimm_target),
-                     "enable_chip<TI, 1U/2U>: Error biasing PMIC %s with SPD settings",
-                     mss::c_str(i_pmic_target));
-        }
+        FAPI_TRY(mss::pmic::bias_with_spd_settings<mss::pmic::vendor::IDT>(i_pmic_target, i_dimm_target),
+                 "enable_chip<IDT, 1U/2U>: Error biasing PMIC %s with SPD settings",
+                 mss::c_str(i_pmic_target));
     }
-    else // manual mode
+    else // assert done in pmic_enable.C that vendor is IDT or TI
     {
-        FAPI_INF("Using built-in PMIC settings (defaults or from pmic_update)");
+        FAPI_TRY(mss::pmic::bias_with_spd_settings<mss::pmic::vendor::TI>(i_pmic_target, i_dimm_target),
+                 "enable_chip<TI, 1U/2U>: Error biasing PMIC %s with SPD settings",
+                 mss::c_str(i_pmic_target));
     }
-
-    // Execute VR Enable command
-    FAPI_TRY((mss::pmic::start_vr_enable(i_pmic_target)),
-             "enable_chip: Failed to start VR Enable for %s", mss::c_str(i_pmic_target));
 
     return fapi2::FAPI2_RC_SUCCESS;
 
