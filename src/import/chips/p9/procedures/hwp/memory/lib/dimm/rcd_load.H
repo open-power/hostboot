@@ -169,5 +169,12 @@ inline fapi2::ReturnCode perform_rcd_load_dispatch<DEFAULT_KIND>(const kind_t&,
     return perform_rcd_load<DEFAULT_KIND>(i_target, i_inst);
 }
 
+///
+/// @brief Helper function to bring CKE high and hold for 400 cycles
+/// @param[in] i_target MCA target on which to operate
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+fapi2::ReturnCode draminit_cke_helper( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target);
+
 }
 #endif

@@ -206,4 +206,32 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Helper function to bring CKE high and hold for 400 cycles
+/// @param[in] i_target MCA target on which to operate
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+fapi2::ReturnCode draminit_cke_helper( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
+{
+
+    auto l_des = mss::ccs::des_command();
+    mss::ccs::program l_program;
+
+    // Also a Deselect command must be registered as required from the Spec.
+    // Register DES instruction, which pulls CKE high. Idle 400 cycles, and then begin RCD loading
+    // Note: This only is sent to one of the MCA as we still have the mux_addr_sel bit set, meaning
+    // we'll PDE/DES all DIMM at the same time.
+    l_des.arr1.insertFromRight<MCBIST_CCS_INST_ARR1_00_IDLES, MCBIST_CCS_INST_ARR1_00_IDLES_LEN>(400);
+    l_program.iv_instructions.push_back(l_des);
+
+    FAPI_TRY( mss::ccs::execute(mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target),
+                                l_program,
+                                i_target),
+              "%s Failed execute in p9_mss_draminit",
+              mss::c_str(i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 } // namespace

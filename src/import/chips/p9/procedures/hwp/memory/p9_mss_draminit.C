@@ -60,9 +60,6 @@ extern "C"
     {
         fapi2::buffer<uint64_t> l_data;
 
-        mss::ccs::instruction_t l_des = mss::ccs::des_command();
-        mss::ccs::program l_program;
-
         // Up, down P down, up N. Somewhat magic numbers - came from Centaur and proven to be the
         // same on Nimbus. Why these are what they are might be lost to time ...
         constexpr uint64_t PCLK_INITIAL_VALUE = 0b10;
@@ -157,16 +154,10 @@ extern "C"
                       mss::c_str(i_target) );
         }
 
-        // Also a Deselect command must be registered as required from the Spec.
-        // Register DES instruction, which pulls CKE high. Idle 400 cycles, and then begin RCD loading
-        // Note: This only is sent to one of the MCA as we still have the mux_addr_sel bit set, meaning
-        // we'll PDE/DES all DIMM at the same time.
-        l_des.arr1.insertFromRight<MCBIST_CCS_INST_ARR1_00_IDLES, MCBIST_CCS_INST_ARR1_00_IDLES_LEN>(400);
-        l_program.iv_instructions.push_back(l_des);
-
-        FAPI_TRY( mss::ccs::execute(i_target, l_program, l_mcas[0]),
-                  "%s Failed execute in p9_mss_draminit",
-                  mss::c_str(i_target) );
+        // Holds our CKE high for 400 cycles - required by the JEDEC spec
+        FAPI_TRY( mss::draminit_cke_helper(l_mcas[0]),
+                  "%s Failed to hold CKE high in p9_mss_draminit",
+                  mss::c_str(i_target));
 
         // Per conversation with Shelton and Steve 10/9/15, turn off addr_mux_sel after the CKE CCS but
         // before the RCD/MRS CCSs
