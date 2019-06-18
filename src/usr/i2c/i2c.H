@@ -112,10 +112,10 @@ static uint64_t g_I2C_NEST_FREQ_MHZ = i2cGetNestFreq();
 ALWAYS_INLINE inline uint16_t i2cGetBitRateDivisor(uint64_t i_bus_speed_khz,
                                                    uint64_t i_local_bus_MHZ)
 {
-  // BRD = ( ( ( LocalBus_MHZ / 16 ) / i_bus_speed_khz ) - 1 ) / 4
+  // BRD = ( ( LocalBus_MHZ) / i_bus_speed_khz ) - 1 ) / 4
 
   // Use tmp variable to convert everything to KHZ safely
-  uint64_t tmp = ( i_local_bus_MHZ / 16 ) * 1000;
+  uint64_t tmp = i_local_bus_MHZ * 1000;
 
   return ( ( ( tmp / i_bus_speed_khz ) - 1 ) / 4 );
 }

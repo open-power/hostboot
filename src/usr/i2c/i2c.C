@@ -94,6 +94,7 @@ TRAC_INIT( & g_trac_i2cr, "I2CR", KILOBYTE );
 #define MAX_NACK_RETRIES 3
 #define PAGE_OPERATION 0xffffffff  // Special value use to determine type of op
 #define P9_ENGINE_SCOM_OFFSET 0x1000
+constexpr uint64_t FSI_BUS_SPEED_MHZ = 133; //FSI runs at 133MHz
 
 // Derived from ATTR_I2C_BUS_SPEED_ARRAY[engine][port] attribute
 const TARGETING::ATTR_I2C_BUS_SPEED_ARRAY_type g_var = {{NULL}};
@@ -4316,13 +4317,23 @@ errlHndl_t i2cSetBusVariables ( TARGETING::Target * i_target,
 
         if ( io_args.switches.useFsiI2C == 1 )
         {
-            // @todo RTC 117560 - verify correct frequency
-            local_bus_MHZ = g_I2C_NEST_FREQ_MHZ;
+            // For FSI I2C we should use the FSI clock
+            local_bus_MHZ = FSI_BUS_SPEED_MHZ;
         }
         else
         {
-            // For Host I2C use Nest Frequency
-            local_bus_MHZ = g_I2C_NEST_FREQ_MHZ;
+            // For Host I2C use Nest Frequency as base
+
+            // PIB_CLK = NEST_FREQ / 4
+            uint64_t pib_clk = g_I2C_NEST_FREQ_MHZ / 4;
+
+#ifdef CONFIG_AXONE
+            // Axone has a by-2 internal divider
+            local_bus_MHZ = pib_clk / 2;
+#else
+            // Nimbus/Cumulus have a by-4 internal divider
+            local_bus_MHZ = pib_clk / 4;
+#endif
         }
 
         io_args.bit_rate_divisor = i2cGetBitRateDivisor(io_args.bus_speed,
@@ -5156,8 +5167,13 @@ void getMasterInfo( const TARGETING::Target* i_chip,
         info.engine = engine;
         info.freq = i2cGetNestFreq()*FREQ_CONVERSION::HZ_PER_MHZ;
         // PIB_CLK = NEST_FREQ /4
-        // Local Bus = PIB_CLK / 4
+#ifdef CONFIG_AXONE
+        // Local Bus = PIB_CLK / 2  [Axone]
+        info.freq = info.freq/8; //convert nest to local bus
+#else
+        // Local Bus = PIB_CLK / 4  [Nimbus/Cumulus]
         info.freq = info.freq/16; //convert nest to local bus
+#endif
 
         TRACFCOMP(g_trac_i2c,"getMasterInfo(%.8X): pushing back engine=%d, scomAddr=0x%X",TARGETING::get_huid(i_chip), engine, info.scomAddr);
 
