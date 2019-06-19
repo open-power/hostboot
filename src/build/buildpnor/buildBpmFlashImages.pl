@@ -146,14 +146,17 @@ sub generateFirmwareImage
     # the payload is 16 bytes
     use constant MAXIMUM_DATA_BYTES_FOR_PAYLOAD => 16;
 
-    # images use carriage return which by default chomp doesn't remove so update
-    # local $/ to remove that character.
-    local $/ = "\r\n";
+    # Ensure that the diamond operator ( <> ) is searching for \n to determine
+    # where the end of a line is in the image file.
+    local $/ = "\n";
 
     my $blocks = undef;
     while (my $line = <$inputFileHandle>)
     {
-        chomp($line);
+        # Strip off the end-of-line character \n and optionally \r if it exists.
+        # Since the image files were created on a windows OS and this script
+        # runs on linux this will not be handled properly by chomp.
+        $line =~ s/\r?\n$//;
 
         # The end of the firmware data section is marked by a 'q'
         if (substr($line, 0, 1) eq "q")
@@ -237,6 +240,11 @@ sub generateFirmwareImage
     if ($verbose)
     {
         print "number of blocks: $numberOfBlocks\n";
+    }
+
+    if (!defined($blocks))
+    {
+        die "Unable to process image file: $i_fileName";
     }
 
     # Write the version information to the file.
