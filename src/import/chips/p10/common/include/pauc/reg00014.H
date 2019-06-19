@@ -12387,6 +12387,342 @@ fapi_try_exit:
 #endif
 }
 
+static inline fapi2::buffer<uint64_t>& SET_RCMD_RATE_CFG_X_CMD_GAP_REFERENCE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.insertFromRight<RCMD_RATE_CFG_X_CMD_GAP_REFERENCE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_X_CMD_GAP_REFERENCE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RCMD_RATE_CFG_X_CMD_GAP_REFERENCE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.insertFromRight<RCMD_RATE_CFG_X_CMD_GAP_REFERENCE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_X_CMD_GAP_REFERENCE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RCMD_RATE_CFG_X_CMD_GAP_REFERENCE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.setBit<RCMD_RATE_CFG_X_CMD_GAP_REFERENCE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_X_CMD_GAP_REFERENCE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_RCMD_RATE_CFG_X_CMD_GAP_REFERENCE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.clearBit<RCMD_RATE_CFG_X_CMD_GAP_REFERENCE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_X_CMD_GAP_REFERENCE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_RCMD_RATE_CFG_X_CMD_GAP_REFERENCE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return i_data.extractToRight<RCMD_RATE_CFG_X_CMD_GAP_REFERENCE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_X_CMD_GAP_REFERENCE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_RCMD_RATE_CFG_X_CMD_GAP_REFERENCE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return i_data.getBit<RCMD_RATE_CFG_X_CMD_GAP_REFERENCE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_X_CMD_GAP_REFERENCE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RCMD_RATE_CFG_X_CMD_GAP_MODE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.insertFromRight<RCMD_RATE_CFG_X_CMD_GAP_MODE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_X_CMD_GAP_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RCMD_RATE_CFG_X_CMD_GAP_MODE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.insertFromRight<RCMD_RATE_CFG_X_CMD_GAP_MODE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_X_CMD_GAP_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RCMD_RATE_CFG_X_CMD_GAP_MODE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.setBit<RCMD_RATE_CFG_X_CMD_GAP_MODE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_X_CMD_GAP_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_RCMD_RATE_CFG_X_CMD_GAP_MODE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.clearBit<RCMD_RATE_CFG_X_CMD_GAP_MODE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_X_CMD_GAP_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_RCMD_RATE_CFG_X_CMD_GAP_MODE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return i_data.extractToRight<RCMD_RATE_CFG_X_CMD_GAP_MODE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_X_CMD_GAP_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_RCMD_RATE_CFG_X_CMD_GAP_MODE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return i_data.getBit<RCMD_RATE_CFG_X_CMD_GAP_MODE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_X_CMD_GAP_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RCMD_RATE_CFG_X_CMD_GAP_TABLE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.insertFromRight<RCMD_RATE_CFG_X_CMD_GAP_TABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_X_CMD_GAP_TABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RCMD_RATE_CFG_X_CMD_GAP_TABLE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.insertFromRight<RCMD_RATE_CFG_X_CMD_GAP_TABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_X_CMD_GAP_TABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RCMD_RATE_CFG_X_CMD_GAP_TABLE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.setBit<RCMD_RATE_CFG_X_CMD_GAP_TABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_X_CMD_GAP_TABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_RCMD_RATE_CFG_X_CMD_GAP_TABLE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.clearBit<RCMD_RATE_CFG_X_CMD_GAP_TABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_X_CMD_GAP_TABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_RCMD_RATE_CFG_X_CMD_GAP_TABLE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return i_data.extractToRight<RCMD_RATE_CFG_X_CMD_GAP_TABLE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_X_CMD_GAP_TABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_RCMD_RATE_CFG_X_CMD_GAP_TABLE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return i_data.getBit<RCMD_RATE_CFG_X_CMD_GAP_TABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_X_CMD_GAP_TABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RCMD_RATE_CFG_X_CMD_GAP_SPARE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.insertFromRight<RCMD_RATE_CFG_X_CMD_GAP_SPARE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_X_CMD_GAP_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RCMD_RATE_CFG_X_CMD_GAP_SPARE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.insertFromRight<RCMD_RATE_CFG_X_CMD_GAP_SPARE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_X_CMD_GAP_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RCMD_RATE_CFG_X_CMD_GAP_SPARE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.setBit<RCMD_RATE_CFG_X_CMD_GAP_SPARE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_X_CMD_GAP_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_RCMD_RATE_CFG_X_CMD_GAP_SPARE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.clearBit<RCMD_RATE_CFG_X_CMD_GAP_SPARE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_X_CMD_GAP_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_RCMD_RATE_CFG_X_CMD_GAP_SPARE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return i_data.extractToRight<RCMD_RATE_CFG_X_CMD_GAP_SPARE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_X_CMD_GAP_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_RCMD_RATE_CFG_X_CMD_GAP_SPARE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return i_data.getBit<RCMD_RATE_CFG_X_CMD_GAP_SPARE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_X_CMD_GAP_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
 static inline fapi2::buffer<uint64_t>& SET_RCMD_RATE_CFG_X_CMD_GAP_CFG(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -12512,6 +12848,342 @@ static inline bool GET_RCMD_RATE_CFG_Y_DISABLE_TURBO(fapi2::buffer<uint64_t>& i_
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     FAPI_ERR("Invalid dial access RCMD_RATE_CFG_Y_DISABLE_TURBO chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RCMD_RATE_CFG_Y_CMD_GAP_REFERENCE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.insertFromRight<RCMD_RATE_CFG_Y_CMD_GAP_REFERENCE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_Y_CMD_GAP_REFERENCE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RCMD_RATE_CFG_Y_CMD_GAP_REFERENCE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.insertFromRight<RCMD_RATE_CFG_Y_CMD_GAP_REFERENCE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_Y_CMD_GAP_REFERENCE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RCMD_RATE_CFG_Y_CMD_GAP_REFERENCE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.setBit<RCMD_RATE_CFG_Y_CMD_GAP_REFERENCE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_Y_CMD_GAP_REFERENCE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_RCMD_RATE_CFG_Y_CMD_GAP_REFERENCE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.clearBit<RCMD_RATE_CFG_Y_CMD_GAP_REFERENCE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_Y_CMD_GAP_REFERENCE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_RCMD_RATE_CFG_Y_CMD_GAP_REFERENCE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return i_data.extractToRight<RCMD_RATE_CFG_Y_CMD_GAP_REFERENCE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_Y_CMD_GAP_REFERENCE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_RCMD_RATE_CFG_Y_CMD_GAP_REFERENCE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return i_data.getBit<RCMD_RATE_CFG_Y_CMD_GAP_REFERENCE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_Y_CMD_GAP_REFERENCE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RCMD_RATE_CFG_Y_CMD_GAP_MODE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.insertFromRight<RCMD_RATE_CFG_Y_CMD_GAP_MODE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_Y_CMD_GAP_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RCMD_RATE_CFG_Y_CMD_GAP_MODE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.insertFromRight<RCMD_RATE_CFG_Y_CMD_GAP_MODE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_Y_CMD_GAP_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RCMD_RATE_CFG_Y_CMD_GAP_MODE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.setBit<RCMD_RATE_CFG_Y_CMD_GAP_MODE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_Y_CMD_GAP_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_RCMD_RATE_CFG_Y_CMD_GAP_MODE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.clearBit<RCMD_RATE_CFG_Y_CMD_GAP_MODE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_Y_CMD_GAP_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_RCMD_RATE_CFG_Y_CMD_GAP_MODE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return i_data.extractToRight<RCMD_RATE_CFG_Y_CMD_GAP_MODE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_Y_CMD_GAP_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_RCMD_RATE_CFG_Y_CMD_GAP_MODE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return i_data.getBit<RCMD_RATE_CFG_Y_CMD_GAP_MODE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_Y_CMD_GAP_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RCMD_RATE_CFG_Y_CMD_GAP_TABLE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.insertFromRight<RCMD_RATE_CFG_Y_CMD_GAP_TABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_Y_CMD_GAP_TABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RCMD_RATE_CFG_Y_CMD_GAP_TABLE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.insertFromRight<RCMD_RATE_CFG_Y_CMD_GAP_TABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_Y_CMD_GAP_TABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RCMD_RATE_CFG_Y_CMD_GAP_TABLE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.setBit<RCMD_RATE_CFG_Y_CMD_GAP_TABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_Y_CMD_GAP_TABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_RCMD_RATE_CFG_Y_CMD_GAP_TABLE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.clearBit<RCMD_RATE_CFG_Y_CMD_GAP_TABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_Y_CMD_GAP_TABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_RCMD_RATE_CFG_Y_CMD_GAP_TABLE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return i_data.extractToRight<RCMD_RATE_CFG_Y_CMD_GAP_TABLE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_Y_CMD_GAP_TABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_RCMD_RATE_CFG_Y_CMD_GAP_TABLE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return i_data.getBit<RCMD_RATE_CFG_Y_CMD_GAP_TABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_Y_CMD_GAP_TABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RCMD_RATE_CFG_Y_CMD_GAP_SPARE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.insertFromRight<RCMD_RATE_CFG_Y_CMD_GAP_SPARE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_Y_CMD_GAP_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RCMD_RATE_CFG_Y_CMD_GAP_SPARE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.insertFromRight<RCMD_RATE_CFG_Y_CMD_GAP_SPARE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_Y_CMD_GAP_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RCMD_RATE_CFG_Y_CMD_GAP_SPARE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.setBit<RCMD_RATE_CFG_Y_CMD_GAP_SPARE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_Y_CMD_GAP_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_RCMD_RATE_CFG_Y_CMD_GAP_SPARE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return o_data.clearBit<RCMD_RATE_CFG_Y_CMD_GAP_SPARE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_Y_CMD_GAP_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_RCMD_RATE_CFG_Y_CMD_GAP_SPARE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return i_data.extractToRight<RCMD_RATE_CFG_Y_CMD_GAP_SPARE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_Y_CMD_GAP_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_RCMD_RATE_CFG_Y_CMD_GAP_SPARE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RCMD_RATE_CFG));
+#endif
+    return i_data.getBit<RCMD_RATE_CFG_Y_CMD_GAP_SPARE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RCMD_RATE_CFG_Y_CMD_GAP_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
