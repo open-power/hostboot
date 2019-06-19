@@ -29,14 +29,41 @@
 <!--    defined.                                                            -->
 <entries>
   <!-- ********************************************************************* -->
-  <entry>
-           <name>ATTR_EC</name>
-           <!-- The value needs to be changed as per the EC level  -->
-           <value>0x10</value>
-  </entry>
+  <!-- must have ATTR_NAME and ATTR_EC for fapi2 plat support -->
   <entry>
            <name>ATTR_NAME</name>
-           <value>0xA</value>
+           <value>0x0</value>
+  </entry>
+  <entry>
+           <name>ATTR_EC</name>
+           <value>0x0</value>
+  </entry>
+  <!-- ********************************************************************* -->
+  <!-- needed from nest_attributes_xml for core/cache_scominit -->
+  <entry>
+           <name>ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE</name>
+           <value>0xff</value>
+  </entry>
+  <entry>
+           <name>ATTR_PROC_FABRIC_TOPOLOGY_ID</name>
+           <value>0x0</value>
+  </entry>
+  <entry>
+           <name>ATTR_PROC_FABRIC_TOPOLOGY_MODE</name>
+           <value>0x0</value>
+  </entry>
+  <entry>
+           <name>ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID</name>
+           <value>0x0</value>
+  </entry>
+  <entry>
+           <name>ATTR_PROC_FABRIC_SL_DOMAIN</name>
+           <value>0x0</value>
+  </entry>
+  <!-- needed from pm_hwp_attributes_xml for core/cache_scominit -->
+  <entry>
+           <name>ATTR_PROC_CHIP_LCO_TARGETS</name>
+           <value>0x0</value>
   </entry>
   <entry>
           <name>ATTR_CHIP_UNIT_POS</name>
