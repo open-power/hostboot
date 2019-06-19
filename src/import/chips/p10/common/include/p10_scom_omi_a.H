@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_omi_a_H_
 #define __p10_scom_omi_a_H_
@@ -99,10 +101,12 @@ static const uint32_t RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX70_PL_RX_BD_L
 
 static const uint64_t RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL = 0x8000304010012c3full;
 
-static const uint32_t RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL_COARSE = 48;
-static const uint32_t RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL_COARSE_LEN = 6;
-static const uint32_t RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL_GAIN = 54;
+static const uint32_t RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL_GAIN = 48;
 static const uint32_t RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL_GAIN_LEN = 4;
+static const uint32_t RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL_PEAK1 = 52;
+static const uint32_t RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL_PEAK1_LEN = 4;
+static const uint32_t RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL_PEAK2 = 56;
+static const uint32_t RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL_PEAK2_LEN = 4;
 // omi/reg00020.H
 
 static const uint64_t RXPACKS_0_DEFAULT_RD_1_RX_BIT_REGS_CNTL3_PL = 0x8003704110012c3full;
@@ -178,8 +182,8 @@ static const uint64_t RXPACKS_0_DEFAULT_RD_1_RX_DAC_REGS_CNTL3_PL = 0x8000184110
 
 static const uint32_t RXPACKS_0_DEFAULT_RD_1_RX_DAC_REGS_CNTL3_PL_GAIN = 48;
 static const uint32_t RXPACKS_0_DEFAULT_RD_1_RX_DAC_REGS_CNTL3_PL_GAIN_LEN = 3;
-static const uint32_t RXPACKS_0_DEFAULT_RD_1_RX_DAC_REGS_CNTL3_PL_FREQ = 51;
-static const uint32_t RXPACKS_0_DEFAULT_RD_1_RX_DAC_REGS_CNTL3_PL_FREQ_LEN = 3;
+static const uint32_t RXPACKS_0_DEFAULT_RD_1_RX_DAC_REGS_CNTL3_PL_ZERO = 51;
+static const uint32_t RXPACKS_0_DEFAULT_RD_1_RX_DAC_REGS_CNTL3_PL_ZERO_LEN = 3;
 // omi/reg00020.H
 
 static const uint64_t RXPACKS_0_DEFAULT_RD_2_RX_BIT_REGS_CNTL4_PL = 0x8003784210012c3full;
@@ -290,10 +294,12 @@ static const uint32_t RXPACKS_0_DEFAULT_RD_4_RX_DAC_REGS_LOFF_B_CNTLX71_PL_RX_BD
 
 static const uint64_t RXPACKS_0_DEFAULT_RD_4_RX_DAC_REGS_CNTL13_PL = 0x8000684410012c3full;
 
-static const uint32_t RXPACKS_0_DEFAULT_RD_4_RX_DAC_REGS_CNTL13_PL_COARSE = 48;
-static const uint32_t RXPACKS_0_DEFAULT_RD_4_RX_DAC_REGS_CNTL13_PL_COARSE_LEN = 6;
-static const uint32_t RXPACKS_0_DEFAULT_RD_4_RX_DAC_REGS_CNTL13_PL_GAIN = 54;
+static const uint32_t RXPACKS_0_DEFAULT_RD_4_RX_DAC_REGS_CNTL13_PL_GAIN = 48;
 static const uint32_t RXPACKS_0_DEFAULT_RD_4_RX_DAC_REGS_CNTL13_PL_GAIN_LEN = 4;
+static const uint32_t RXPACKS_0_DEFAULT_RD_4_RX_DAC_REGS_CNTL13_PL_PEAK1 = 52;
+static const uint32_t RXPACKS_0_DEFAULT_RD_4_RX_DAC_REGS_CNTL13_PL_PEAK1_LEN = 4;
+static const uint32_t RXPACKS_0_DEFAULT_RD_4_RX_DAC_REGS_CNTL13_PL_PEAK2 = 56;
+static const uint32_t RXPACKS_0_DEFAULT_RD_4_RX_DAC_REGS_CNTL13_PL_PEAK2_LEN = 4;
 // omi/reg00020.H
 
 static const uint64_t RXPACKS_0_DEFAULT_RD_5_RX_BIT_REGS_CNTL6_PL = 0x8003884510012c3full;
@@ -635,6 +641,8 @@ static const uint32_t TXPACKS_1_DD_3_TX_BIT_REGS_CNTL28_PL_SEL_LEN = 7;
 
 }
 }
-#include "omi/reg00020.H"
-#include "omi/reg00021.H"
+#ifndef __PPE_HCODE__
+    #include "omi/reg00020.H"
+    #include "omi/reg00021.H"
+#endif
 #endif

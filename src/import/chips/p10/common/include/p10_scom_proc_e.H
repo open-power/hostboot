@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_proc_e_H_
 #define __p10_scom_proc_e_H_
@@ -71,18 +73,16 @@ static const uint32_t INT_CQ_XIVE_CAP_INT_CQ_XIVE_CAP_INFO_0_63_LEN = 64;
 
 static const uint64_t INT_CQ_XIVE_CFG = 0x02010803ull;
 
-static const uint32_t INT_CQ_XIVE_CFG_RESERVED_0_5 = 0;
-static const uint32_t INT_CQ_XIVE_CFG_RESERVED_0_5_LEN = 6;
-static const uint32_t INT_CQ_XIVE_CFG_HYP_HARD_RANGE_0_1 = 6;
-static const uint32_t INT_CQ_XIVE_CFG_HYP_HARD_RANGE_0_1_LEN = 2;
-static const uint32_t INT_CQ_XIVE_CFG_RESERVED_8_9 = 8;
-static const uint32_t INT_CQ_XIVE_CFG_RESERVED_8_9_LEN = 2;
-static const uint32_t INT_CQ_XIVE_CFG_INT_PRIORITIES_0_1 = 10;
-static const uint32_t INT_CQ_XIVE_CFG_INT_PRIORITIES_0_1_LEN = 2;
-static const uint32_t INT_CQ_XIVE_CFG_RESERVED_12_13 = 12;
-static const uint32_t INT_CQ_XIVE_CFG_RESERVED_12_13_LEN = 2;
-static const uint32_t INT_CQ_XIVE_CFG_BLOCKID_WIDTH_0_1 = 14;
+static const uint32_t INT_CQ_XIVE_CFG_RESERVED_0_7 = 0;
+static const uint32_t INT_CQ_XIVE_CFG_RESERVED_0_7_LEN = 8;
+static const uint32_t INT_CQ_XIVE_CFG_USER_INT_PRIORITIES_0_1 = 8;
+static const uint32_t INT_CQ_XIVE_CFG_USER_INT_PRIORITIES_0_1_LEN = 2;
+static const uint32_t INT_CQ_XIVE_CFG_VP_INT_PRIORITIES_0_1 = 10;
+static const uint32_t INT_CQ_XIVE_CFG_VP_INT_PRIORITIES_0_1_LEN = 2;
+static const uint32_t INT_CQ_XIVE_CFG_BLOCKID_WIDTH_0_1 = 12;
 static const uint32_t INT_CQ_XIVE_CFG_BLOCKID_WIDTH_0_1_LEN = 2;
+static const uint32_t INT_CQ_XIVE_CFG_HYP_HARD_RANGE_0_1 = 14;
+static const uint32_t INT_CQ_XIVE_CFG_HYP_HARD_RANGE_0_1_LEN = 2;
 static const uint32_t INT_CQ_XIVE_CFG_HYP_HARD_BLKID_OVERRIDE = 16;
 static const uint32_t INT_CQ_XIVE_CFG_HYP_HARD_BLKID_0_6 = 17;
 static const uint32_t INT_CQ_XIVE_CFG_HYP_HARD_BLKID_0_6_LEN = 7;
@@ -97,9 +97,10 @@ static const uint32_t INT_CQ_XIVE_CFG_EN_EQPOST_INTERLEAVE = 32;
 static const uint32_t INT_CQ_XIVE_CFG_RESERVED_33 = 33;
 static const uint32_t INT_CQ_XIVE_CFG_EN_ADAP_ESC_VP = 34;
 static const uint32_t INT_CQ_XIVE_CFG_EN_ADAP_ESC_GROUP = 35;
-static const uint32_t INT_CQ_XIVE_CFG_RESERVED_36_38 = 36;
-static const uint32_t INT_CQ_XIVE_CFG_RESERVED_36_38_LEN = 3;
-static const uint32_t INT_CQ_XIVE_CFG_EN_VP_SAVE_RESTORE = 39;
+static const uint32_t INT_CQ_XIVE_CFG_RESERVED_36_37 = 36;
+static const uint32_t INT_CQ_XIVE_CFG_RESERVED_36_37_LEN = 2;
+static const uint32_t INT_CQ_XIVE_CFG_EN_VP_SAVE_RESTORE = 38;
+static const uint32_t INT_CQ_XIVE_CFG_EN_VP_SAR_CHECK = 39;
 static const uint32_t INT_CQ_XIVE_CFG_RESERVED_40_47 = 40;
 static const uint32_t INT_CQ_XIVE_CFG_RESERVED_40_47_LEN = 8;
 static const uint32_t INT_CQ_XIVE_CFG_EN_HYP_SECURE_MODE = 48;
@@ -931,11 +932,19 @@ static const uint32_t PB_PTLSCOM10_RCMD_RATE_CFG_X_RCMD_RATE_ADDER_LEN = 4;
 static const uint32_t PB_PTLSCOM10_RCMD_RATE_CFG_Y_RCMD_RATE_ADDER = 20;
 static const uint32_t PB_PTLSCOM10_RCMD_RATE_CFG_Y_RCMD_RATE_ADDER_LEN = 4;
 static const uint32_t PB_PTLSCOM10_RCMD_RATE_CFG_X_DISABLE_TURBO = 24;
-static const uint32_t PB_PTLSCOM10_RCMD_RATE_CFG_X_CMD_GAP_CFG = 25;
-static const uint32_t PB_PTLSCOM10_RCMD_RATE_CFG_X_CMD_GAP_CFG_LEN = 2;
-static const uint32_t PB_PTLSCOM10_RCMD_RATE_CFG_Y_DISABLE_TURBO = 27;
-static const uint32_t PB_PTLSCOM10_RCMD_RATE_CFG_Y_CMD_GAP_CFG = 28;
-static const uint32_t PB_PTLSCOM10_RCMD_RATE_CFG_Y_CMD_GAP_CFG_LEN = 2;
+static const uint32_t PB_PTLSCOM10_RCMD_RATE_CFG_X_CMD_GAP_REFERENCE = 25;
+static const uint32_t PB_PTLSCOM10_RCMD_RATE_CFG_X_CMD_GAP_MODE = 26;
+static const uint32_t PB_PTLSCOM10_RCMD_RATE_CFG_X_CMD_GAP_TABLE = 27;
+static const uint32_t PB_PTLSCOM10_RCMD_RATE_CFG_X_CMD_GAP_SPARE = 28;
+static const uint32_t PB_PTLSCOM10_RCMD_RATE_CFG_X_CMD_GAP_CFG = 29;
+static const uint32_t PB_PTLSCOM10_RCMD_RATE_CFG_X_CMD_GAP_CFG_LEN = 3;
+static const uint32_t PB_PTLSCOM10_RCMD_RATE_CFG_Y_DISABLE_TURBO = 32;
+static const uint32_t PB_PTLSCOM10_RCMD_RATE_CFG_Y_CMD_GAP_REFERENCE = 33;
+static const uint32_t PB_PTLSCOM10_RCMD_RATE_CFG_Y_CMD_GAP_MODE = 34;
+static const uint32_t PB_PTLSCOM10_RCMD_RATE_CFG_Y_CMD_GAP_TABLE = 35;
+static const uint32_t PB_PTLSCOM10_RCMD_RATE_CFG_Y_CMD_GAP_SPARE = 36;
+static const uint32_t PB_PTLSCOM10_RCMD_RATE_CFG_Y_CMD_GAP_CFG = 37;
+static const uint32_t PB_PTLSCOM10_RCMD_RATE_CFG_Y_CMD_GAP_CFG_LEN = 3;
 // proc/reg00067.H
 
 static const uint64_t PB_PTLSCOM23_EN_DOB_ECC_ERR_REG = 0x11011818ull;
@@ -1862,10 +1871,10 @@ static const uint32_t TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXIVDR6_7 = 32;
 static const uint32_t TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXIVDR6_7_LEN = 32;
 // proc/reg00068.H
 
-static const uint64_t TP_TPCHIP_OCC_OCI_OCB_ADCCR2 = 0x0006c802ull;
+static const uint64_t TP_TPCHIP_OCC_OCI_OCB_ADC_CR2 = 0x0006c802ull;
 
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADCCR2_OCB_OCI_ADCCR2_HWCTRL_INTER_FRAME_DELAY = 0;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADCCR2_OCB_OCI_ADCCR2_HWCTRL_INTER_FRAME_DELAY_LEN = 17;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_CR2_OCB_OCI_ADC_CR2_HWCTRL_INTER_FRAME_DELAY = 0;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_CR2_OCB_OCI_ADC_CR2_HWCTRL_INTER_FRAME_DELAY_LEN = 17;
 // proc/reg00068.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_ADC_RDATA6 = 0x0006c826ull;
@@ -2187,8 +2196,6 @@ static const uint32_t TP_TPCHIP_TPC_CTRL_ATOMIC_LOCK_REG_ID_LEN = 4;
 static const uint32_t TP_TPCHIP_TPC_CTRL_ATOMIC_LOCK_REG_ACTIVITY = 8;
 static const uint32_t TP_TPCHIP_TPC_CTRL_ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
 // proc/reg00069.H
-
-//ERRCODE: // Some of the name targets not found in address targets: perv
 
 static const uint64_t TP_TPCHIP_TPC_DPLL_CNTL_NEST_REGS_FREQ = 0x01060151ull;
 
@@ -2559,9 +2566,11 @@ static const uint64_t VAS_VA_RG_SCF_WRMON4BAR = 0x02011414ull;
 
 }
 }
-#include "proc/reg00066.H"
-#include "proc/reg00067.H"
-#include "proc/reg00068.H"
-#include "proc/reg00069.H"
-#include "proc/reg00070.H"
+#ifndef __PPE_HCODE__
+    #include "proc/reg00066.H"
+    #include "proc/reg00067.H"
+    #include "proc/reg00068.H"
+    #include "proc/reg00069.H"
+    #include "proc/reg00070.H"
+#endif
 #endif

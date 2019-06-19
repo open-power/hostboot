@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_perv_7_H_
 #define __p10_scom_perv_7_H_
@@ -36,7 +38,7 @@ namespace perv
 
 
 static const uint64_t EPS_THERM_WSUB_CONTROL_REG = 0x00050012ull;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t EPS_THERM_WSUB_SKITTER_CLKSRC_REG = 0x00050016ull;
 
@@ -44,10 +46,10 @@ static const uint32_t EPS_THERM_WSUB_SKITTER_CLKSRC_REG_CLKSRC = 0;
 static const uint32_t EPS_THERM_WSUB_SKITTER_CLKSRC_REG_CLKSRC_LEN = 3;
 static const uint32_t EPS_THERM_WSUB_SKITTER_CLKSRC_REG_DELAY_SELECT = 36;
 static const uint32_t EPS_THERM_WSUB_SKITTER_CLKSRC_REG_DELAY_SELECT_LEN = 2;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t EPS_THERM_WSUB2_SKITTER_DATA0 = 0x00050039ull;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t EPS_THERM_WSUB2_SKITTER_MODE_REG = 0x00050030ull;
 
@@ -61,42 +63,42 @@ static const uint32_t EPS_THERM_WSUB2_SKITTER_MODE_REG_SKITTER_SAMPLE_GUTS = 8;
 static const uint32_t EPS_THERM_WSUB2_SKITTER_MODE_REG_SKITTER_SAMPLE_GUTS_LEN = 2;
 static const uint32_t EPS_THERM_WSUB2_SKITTER_MODE_REG_SKITTER_HOLD_SAMPLE_WITH_TRIGGER = 44;
 static const uint32_t EPS_THERM_WSUB2_SKITTER_MODE_REG_SKITTER_DATA_V_LT = 45;
-// perv/reg00010.H
+// perv/reg00011.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
 static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_14_FSI = 0x0000284eull;
 static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_14_FSI_BYTE = 0x00002938ull;
 static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_14_RW = 0x0005004eull;
-// perv/reg00010.H
+// perv/reg00011.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
 static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_3_FSI = 0x00002843ull;
 static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_3_FSI_BYTE = 0x0000290cull;
 static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_3_RW = 0x00050043ull;
-// perv/reg00010.H
+// perv/reg00011.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
 static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_9_FSI = 0x00002889ull;
 static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_9_FSI_BYTE = 0x00002a24ull;
 static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_9_RW = 0x00050089ull;
-// perv/reg00010.H
+// perv/reg00011.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
 static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_10_FSI = 0x000028caull;
 static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_10_FSI_BYTE = 0x00002b28ull;
 static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_10_RW = 0x000500caull;
-// perv/reg00010.H
+// perv/reg00011.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
 static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_5_FSI = 0x00002905ull;
 static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_5_FSI_BYTE = 0x00002c14ull;
 static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_5_RW = 0x00050105ull;
-// perv/reg00010.H
+// perv/reg00011.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
@@ -136,7 +138,7 @@ static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_SET_PERV_CTRL0_28_RESERVED = 28;
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_SET_PERV_CTRL0_29_RESERVED = 29;
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_SET_PERV_CTRL0_30_RESERVED = 30;
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_SET_PERV_CTRL0_31_SPARE = 31;
-// perv/reg00010.H
+// perv/reg00011.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
@@ -174,7 +176,7 @@ static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL1_SET_PERV_CTRL1_28_RESERVED = 28;
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL1_SET_PERV_CTRL1_29_RESERVED = 29;
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL1_SET_PERV_CTRL1_30_RESERVED = 30;
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL1_SET_TP_PCB_PM_MUX_SEL_DC = 31;
-// perv/reg00010.H
+// perv/reg00011.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
@@ -212,7 +214,7 @@ static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_ROOT_CTRL0_28_SPARE_RESET 
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_TP_IO_OCMB_RESET_B_EN = 29;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_PCB_RESET_DC = 30;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_GLOBAL_EP_RESET_DC = 31;
-// perv/reg00010.H
+// perv/reg00011.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
@@ -228,7 +230,7 @@ static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL6_ROOT_CTRL6_4 = 4;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL6_ROOT_CTRL6_5 = 5;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL6_ROOT_CTRL6_6_31 = 6;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL6_ROOT_CTRL6_6_31_LEN = 26;
-// perv/reg00010.H
+// perv/reg00011.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
@@ -238,59 +240,59 @@ static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_2_RW = 0x00050039ull;
 
 static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_2_SR_SCRATCH_REGISTER_2 = 0;
 static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_2_SR_SCRATCH_REGISTER_2_LEN = 32;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t HANG_PULSE_0_REG = 0x000f0020ull;
 
 static const uint32_t HANG_PULSE_0_REG_HANG_PULSE_REG_0 = 0;
 static const uint32_t HANG_PULSE_0_REG_HANG_PULSE_REG_0_LEN = 6;
 static const uint32_t HANG_PULSE_0_REG_SUPPRESS_HANG_0 = 6;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t HANG_PULSE_1_REG = 0x000f0021ull;
 
 static const uint32_t HANG_PULSE_1_REG_HANG_PULSE_REG_1 = 0;
 static const uint32_t HANG_PULSE_1_REG_HANG_PULSE_REG_1_LEN = 6;
 static const uint32_t HANG_PULSE_1_REG_SUPPRESS_HANG_1 = 6;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t HANG_PULSE_2_REG = 0x000f0022ull;
 
 static const uint32_t HANG_PULSE_2_REG_HANG_PULSE_REG_2 = 0;
 static const uint32_t HANG_PULSE_2_REG_HANG_PULSE_REG_2_LEN = 6;
 static const uint32_t HANG_PULSE_2_REG_SUPPRESS_HANG_2 = 6;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t HANG_PULSE_3_REG = 0x000f0023ull;
 
 static const uint32_t HANG_PULSE_3_REG_HANG_PULSE_REG_3 = 0;
 static const uint32_t HANG_PULSE_3_REG_HANG_PULSE_REG_3_LEN = 6;
 static const uint32_t HANG_PULSE_3_REG_SUPPRESS_HANG_3 = 6;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t HANG_PULSE_4_REG = 0x000f0024ull;
 
 static const uint32_t HANG_PULSE_4_REG_HANG_PULSE_REG_4 = 0;
 static const uint32_t HANG_PULSE_4_REG_HANG_PULSE_REG_4_LEN = 6;
 static const uint32_t HANG_PULSE_4_REG_SUPPRESS_HANG_4 = 6;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t HANG_PULSE_5_REG = 0x000f0025ull;
 
 static const uint32_t HANG_PULSE_5_REG_HANG_PULSE_REG_5 = 0;
 static const uint32_t HANG_PULSE_5_REG_HANG_PULSE_REG_5_LEN = 6;
 static const uint32_t HANG_PULSE_5_REG_SUPPRESS_HANG_5 = 6;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t HANG_PULSE_6_REG = 0x000f0026ull;
 
 static const uint32_t HANG_PULSE_6_REG_HANG_PULSE_REG_6 = 0;
 static const uint32_t HANG_PULSE_6_REG_HANG_PULSE_REG_6_LEN = 6;
 static const uint32_t HANG_PULSE_6_REG_SUPPRESS_HANG_6 = 6;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t HOSTATTN_INTERRUPT_REG = 0x000f002bull;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t L3TRA0_TR1_TRACE_LO_DATA_REG = 0x00018221ull;
 
@@ -305,7 +307,7 @@ static const uint32_t L3TRA0_TR1_TRACE_LO_DATA_REG_WRITE_ON_RUN = 52;
 static const uint32_t L3TRA0_TR1_TRACE_LO_DATA_REG_RUNNING = 53;
 static const uint32_t L3TRA0_TR1_TRACE_LO_DATA_REG_HOLD_ADDRESS = 54;
 static const uint32_t L3TRA0_TR1_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t L3TRA0_TR1_CONFIG_3 = 0x00018226ull;
 
@@ -313,7 +315,7 @@ static const uint32_t L3TRA0_TR1_CONFIG_3_C = 0;
 static const uint32_t L3TRA0_TR1_CONFIG_3_C_LEN = 24;
 static const uint32_t L3TRA0_TR1_CONFIG_3_D = 24;
 static const uint32_t L3TRA0_TR1_CONFIG_3_D_LEN = 24;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t L3TRA1_TR0_CONFIG_5 = 0x00018248ull;
 
@@ -321,7 +323,7 @@ static const uint32_t L3TRA1_TR0_CONFIG_5_C = 0;
 static const uint32_t L3TRA1_TR0_CONFIG_5_C_LEN = 24;
 static const uint32_t L3TRA1_TR0_CONFIG_5_D = 24;
 static const uint32_t L3TRA1_TR0_CONFIG_5_D_LEN = 24;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t L3TRA2_TR0_CONFIG_2 = 0x00018285ull;
 
@@ -329,13 +331,13 @@ static const uint32_t L3TRA2_TR0_CONFIG_2_A = 0;
 static const uint32_t L3TRA2_TR0_CONFIG_2_A_LEN = 24;
 static const uint32_t L3TRA2_TR0_CONFIG_2_B = 24;
 static const uint32_t L3TRA2_TR0_CONFIG_2_B_LEN = 24;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t L3TRA3_TR0_TRACE_HI_DATA_REG = 0x000182c0ull;
 
 static const uint32_t L3TRA3_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
 static const uint32_t L3TRA3_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t L3TRA3_TR1_CONFIG_4 = 0x000182e7ull;
 
@@ -343,7 +345,7 @@ static const uint32_t L3TRA3_TR1_CONFIG_4_A = 0;
 static const uint32_t L3TRA3_TR1_CONFIG_4_A_LEN = 24;
 static const uint32_t L3TRA3_TR1_CONFIG_4_B = 24;
 static const uint32_t L3TRA3_TR1_CONFIG_4_B_LEN = 24;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t OPCG_CAPT2 = 0x00030011ull;
 
@@ -371,24 +373,24 @@ static const uint32_t OPCG_CAPT2_23_06EVEN = 54;
 static const uint32_t OPCG_CAPT2_23_06EVEN_LEN = 5;
 static const uint32_t OPCG_CAPT2_24_06ODD = 59;
 static const uint32_t OPCG_CAPT2_24_06ODD_LEN = 5;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t OTPC_M_MEASURE_REG3 = 0x00010013ull;
 
 static const uint32_t OTPC_M_MEASURE_REG3_SEEPROM_MEASUREMENT3_DATA = 0;
 static const uint32_t OTPC_M_MEASURE_REG3_SEEPROM_MEASUREMENT3_DATA_LEN = 64;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t OTPC_M_RESET_REGISTER = 0x00010001ull;
 
 static const uint32_t OTPC_M_RESET_REGISTER_CHICKEN_SWITCH = 0;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t RECOV_UNMASKED = 0x00040011ull;
 
 static const uint32_t RECOV_UNMASKED_RECOV_UNMASKED_IN = 1;
 static const uint32_t RECOV_UNMASKED_RECOV_UNMASKED_IN_LEN = 53;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t REC_ERR_MST4_REG0 = 0x000f0050ull;
 
@@ -440,70 +442,70 @@ static const uint32_t REC_ERR_MST4_REG0_SLAVE14_MST4_ERROR_CODE_LEN = 3;
 static const uint32_t REC_ERR_MST4_REG0_SLAVE15_MST4_RESPONSE_BIT = 60;
 static const uint32_t REC_ERR_MST4_REG0_SLAVE15_MST4_ERROR_CODE = 61;
 static const uint32_t REC_ERR_MST4_REG0_SLAVE15_MST4_ERROR_CODE_LEN = 3;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t SCAN_UPDATEDR = 0x0003a000ull;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t SINGLE_OTP_ROM_OTPROM_REG0 = 0x00008000ull;
 
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG0_REGISTER0 = 0;
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG0_REGISTER0_LEN = 64;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t SINGLE_OTP_ROM_OTPROM_REG10 = 0x0000800aull;
 
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG10_REGISTER10 = 0;
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG10_REGISTER10_LEN = 64;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t SINGLE_OTP_ROM_OTPROM_REG101 = 0x00008065ull;
 
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG101_REGISTER101 = 0;
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG101_REGISTER101_LEN = 64;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t SINGLE_OTP_ROM_OTPROM_REG27 = 0x0000801bull;
 
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG27_REGISTER27 = 0;
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG27_REGISTER27_LEN = 64;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t SINGLE_OTP_ROM_OTPROM_REG38 = 0x00008026ull;
 
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG38_REGISTER38 = 0;
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG38_REGISTER38_LEN = 64;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t SINGLE_OTP_ROM_OTPROM_REG46 = 0x0000802eull;
 
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG46_REGISTER46 = 0;
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG46_REGISTER46_LEN = 64;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t SINGLE_OTP_ROM_OTPROM_REG59 = 0x0000803bull;
 
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG59_REGISTER59 = 0;
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG59_REGISTER59_LEN = 64;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t SINGLE_OTP_ROM_OTPROM_REG71 = 0x00008047ull;
 
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG71_REGISTER71 = 0;
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG71_REGISTER71_LEN = 64;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t SINGLE_OTP_ROM_OTPROM_REG84 = 0x00008054ull;
 
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG84_REGISTER84 = 0;
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG84_REGISTER84_LEN = 64;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t SPATTN_UNMASKED = 0x00040012ull;
 
 static const uint32_t SPATTN_UNMASKED_SPATTN_UNMASKED_IN = 1;
 static const uint32_t SPATTN_UNMASKED_SPATTN_UNMASKED_IN_LEN = 35;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t SYNC_CONFIG = 0x00030000ull;
 
@@ -521,7 +523,7 @@ static const uint32_t SYNC_CONFIG_REGION_PGOOD_OVERRIDE = 12;
 static const uint32_t SYNC_CONFIG_PHASE_COUNTER_ON_CLKCHANGE_EN = 15;
 static const uint32_t SYNC_CONFIG_PHASE_COUNTER_ON_CLKCHANGE = 16;
 static const uint32_t SYNC_CONFIG_PHASE_COUNTER_ON_CLKCHANGE_LEN = 8;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t TOD_CHIP_CTRL_REG = 0x00040010ull;
 
@@ -549,7 +551,7 @@ static const uint32_t TOD_CHIP_CTRL_REG_M_PATH_CLOCK_OFF_ENABLE = 28;
 static const uint32_t TOD_CHIP_CTRL_REG_REG_0X10_SPARE_29 = 29;
 static const uint32_t TOD_CHIP_CTRL_REG_XSTOP_GATE = 30;
 static const uint32_t TOD_CHIP_CTRL_REG_STICKY_ERROR_INJECT_ENABLE = 31;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t TOD_ERROR_MASK_REG = 0x00040032ull;
 
@@ -616,7 +618,7 @@ static const uint32_t TOD_ERROR_MASK_REG_SPARE_ERROR_MASK_60 = 60;
 static const uint32_t TOD_ERROR_MASK_REG_SPARE_ERROR_MASK_61 = 61;
 static const uint32_t TOD_ERROR_MASK_REG_OSCSWITCH_INTERRUPT_MASK = 62;
 static const uint32_t TOD_ERROR_MASK_REG_SPARE_ERROR_MASK_63 = 63;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t TOD_ERROR_ROUTING_REG = 0x00040033ull;
 
@@ -683,7 +685,7 @@ static const uint32_t TOD_ERROR_ROUTING_REG_SPARE_ERROR_ROUTING_60 = 60;
 static const uint32_t TOD_ERROR_ROUTING_REG_SPARE_ERROR_ROUTING_61 = 61;
 static const uint32_t TOD_ERROR_ROUTING_REG_OSCSWITCH_INTERRUPT_ROUTING = 62;
 static const uint32_t TOD_ERROR_ROUTING_REG_SPARE_ERROR_ROUTING_63 = 63;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t TOD_I_PATH_CTRL_REG = 0x00040006ull;
 
@@ -705,12 +707,12 @@ static const uint32_t TOD_I_PATH_CTRL_REG_I_PATH_DELAY_ADJUST_VALUE = 22;
 static const uint32_t TOD_I_PATH_CTRL_REG_I_PATH_DELAY_ADJUST_VALUE_LEN = 10;
 static const uint32_t TOD_I_PATH_CTRL_REG_I_PATH_CPS = 32;
 static const uint32_t TOD_I_PATH_CTRL_REG_I_PATH_CPS_LEN = 8;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t TOD_MOVE_TO_TB_REG = 0x00040017ull;
 
 static const uint32_t TOD_MOVE_TO_TB_REG_MOVE_TOD_TO_TB_TRIGGER = 0;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t TOD_M_PATH_1_STEP_STEER_REG = 0x0004000full;
 
@@ -720,7 +722,7 @@ static const uint32_t TOD_M_PATH_1_STEP_STEER_REG_RATE_LEN = 31;
 static const uint32_t TOD_M_PATH_1_STEP_STEER_REG_COUNTER_LOAD_FLAG = 32;
 static const uint32_t TOD_M_PATH_1_STEP_STEER_REG_COUNTER_LOAD_VALUE = 33;
 static const uint32_t TOD_M_PATH_1_STEP_STEER_REG_COUNTER_LOAD_VALUE_LEN = 31;
-// perv/reg00011.H
+// perv/reg00012.H
 
 static const uint64_t TRA0_TR1_CONFIG_3 = 0x00010446ull;
 
@@ -728,7 +730,7 @@ static const uint32_t TRA0_TR1_CONFIG_3_C = 0;
 static const uint32_t TRA0_TR1_CONFIG_3_C_LEN = 24;
 static const uint32_t TRA0_TR1_CONFIG_3_D = 24;
 static const uint32_t TRA0_TR1_CONFIG_3_D_LEN = 24;
-// perv/reg00011.H
+// perv/reg00012.H
 
 static const uint64_t TRA1_TR0_CONFIG_5 = 0x00010488ull;
 
@@ -736,7 +738,7 @@ static const uint32_t TRA1_TR0_CONFIG_5_C = 0;
 static const uint32_t TRA1_TR0_CONFIG_5_C_LEN = 24;
 static const uint32_t TRA1_TR0_CONFIG_5_D = 24;
 static const uint32_t TRA1_TR0_CONFIG_5_D_LEN = 24;
-// perv/reg00011.H
+// perv/reg00012.H
 
 static const uint64_t TRA2_TR0_CONFIG_2 = 0x00010505ull;
 
@@ -744,7 +746,7 @@ static const uint32_t TRA2_TR0_CONFIG_2_A = 0;
 static const uint32_t TRA2_TR0_CONFIG_2_A_LEN = 24;
 static const uint32_t TRA2_TR0_CONFIG_2_B = 24;
 static const uint32_t TRA2_TR0_CONFIG_2_B_LEN = 24;
-// perv/reg00011.H
+// perv/reg00012.H
 
 static const uint64_t TRA3_TR1_CONFIG_4 = 0x000105c7ull;
 
@@ -752,7 +754,7 @@ static const uint32_t TRA3_TR1_CONFIG_4_A = 0;
 static const uint32_t TRA3_TR1_CONFIG_4_A_LEN = 24;
 static const uint32_t TRA3_TR1_CONFIG_4_B = 24;
 static const uint32_t TRA3_TR1_CONFIG_4_B_LEN = 24;
-// perv/reg00011.H
+// perv/reg00012.H
 
 static const uint64_t TRA4_TR0_TRACE_LO_DATA_REG = 0x00010601ull;
 
@@ -767,7 +769,7 @@ static const uint32_t TRA4_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN = 52;
 static const uint32_t TRA4_TR0_TRACE_LO_DATA_REG_RUNNING = 53;
 static const uint32_t TRA4_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS = 54;
 static const uint32_t TRA4_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
-// perv/reg00011.H
+// perv/reg00012.H
 
 static const uint64_t TRA4_TR1_CONFIG_5 = 0x00010648ull;
 
@@ -775,7 +777,7 @@ static const uint32_t TRA4_TR1_CONFIG_5_C = 0;
 static const uint32_t TRA4_TR1_CONFIG_5_C_LEN = 24;
 static const uint32_t TRA4_TR1_CONFIG_5_D = 24;
 static const uint32_t TRA4_TR1_CONFIG_5_D_LEN = 24;
-// perv/reg00011.H
+// perv/reg00012.H
 
 static const uint64_t TRA5_TR0_CONFIG_3 = 0x00010686ull;
 
@@ -783,7 +785,7 @@ static const uint32_t TRA5_TR0_CONFIG_3_C = 0;
 static const uint32_t TRA5_TR0_CONFIG_3_C_LEN = 24;
 static const uint32_t TRA5_TR0_CONFIG_3_D = 24;
 static const uint32_t TRA5_TR0_CONFIG_3_D_LEN = 24;
-// perv/reg00011.H
+// perv/reg00012.H
 
 static const uint64_t TRA6_TR0_CONFIG_4 = 0x00010707ull;
 
@@ -791,10 +793,12 @@ static const uint32_t TRA6_TR0_CONFIG_4_A = 0;
 static const uint32_t TRA6_TR0_CONFIG_4_A_LEN = 24;
 static const uint32_t TRA6_TR0_CONFIG_4_B = 24;
 static const uint32_t TRA6_TR0_CONFIG_4_B_LEN = 24;
-// perv/reg00011.H
+// perv/reg00012.H
 
 }
 }
-#include "perv/reg00010.H"
-#include "perv/reg00011.H"
+#ifndef __PPE_HCODE__
+    #include "perv/reg00011.H"
+    #include "perv/reg00012.H"
+#endif
 #endif

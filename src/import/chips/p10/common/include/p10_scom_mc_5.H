@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_mc_5_H_
 #define __p10_scom_mc_5_H_
@@ -205,5 +207,7 @@ static const uint32_t TRA1_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
 
 }
 }
-#include "mc/reg00005.H"
+#ifndef __PPE_HCODE__
+    #include "mc/reg00005.H"
+#endif
 #endif

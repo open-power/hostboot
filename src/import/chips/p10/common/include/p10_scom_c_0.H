@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_c_0_H_
 #define __p10_scom_c_0_H_
@@ -173,5 +175,7 @@ static const uint32_t QME_SSH_SRC_SPC_WKUP_RECENT_DRP_LEN = 2;
 
 }
 }
-#include "c/reg00000.H"
+#ifndef __PPE_HCODE__
+    #include "c/reg00000.H"
+#endif
 #endif

@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_mcc_4_H_
 #define __p10_scom_mcc_4_H_
@@ -80,10 +82,10 @@ static const uint32_t DSTL_DSTLCFG_WR_DBL_THRESHOLD_LEN = 4;
 static const uint32_t DSTL_DSTLCFG_CRITICAL_OW_DIS = 28;
 static const uint32_t DSTL_DSTLCFG_RESERVED_29 = 29;
 static const uint32_t DSTL_DSTLCFG_RESERVED_30 = 30;
-static const uint32_t DSTL_DSTLCFG_DEBUG_EN = 31;
-static const uint32_t DSTL_DSTLCFG_DEBUG_LOCAL_SWAP = 32;
-static const uint32_t DSTL_DSTLCFG_DEBUG_PASSTHRU = 33;
-static const uint32_t DSTL_DSTLCFG_DEBUG_PASSTHRU_LEN = 11;
+static const uint32_t DSTL_DSTLCFG_RESERVED_31 = 31;
+static const uint32_t DSTL_DSTLCFG_RESERVED_32 = 32;
+static const uint32_t DSTL_DSTLCFG_RESERVED_33_43 = 33;
+static const uint32_t DSTL_DSTLCFG_RESERVED_33_43_LEN = 11;
 static const uint32_t DSTL_DSTLCFG_WRAP_MODE_EN = 44;
 static const uint32_t DSTL_DSTLCFG_CREDIT_RETURN_DELAY_THRESH = 45;
 static const uint32_t DSTL_DSTLCFG_CREDIT_RETURN_DELAY_THRESH_LEN = 4;
@@ -94,9 +96,8 @@ static const uint32_t DSTL_DSTLCFG_MMIO_ADDRBIT_POS_LEN = 5;
 static const uint32_t DSTL_DSTLCFG_RESET_CREDITS = 57;
 static const uint32_t DSTL_DSTLCFG_CHANA_DL_CREDIT_RESET = 58;
 static const uint32_t DSTL_DSTLCFG_CHANB_DL_CREDIT_RESET = 59;
-static const uint32_t DSTL_DSTLCFG_CREDITS_ON_DEBUG_BUS = 60;
-static const uint32_t DSTL_DSTLCFG_RESERVED_61_63 = 61;
-static const uint32_t DSTL_DSTLCFG_RESERVED_61_63_LEN = 3;
+static const uint32_t DSTL_DSTLCFG_RESERVED_62_63 = 62;
+static const uint32_t DSTL_DSTLCFG_RESERVED_62_63_LEN = 2;
 // mcc/reg00004.H
 
 static const uint64_t USTL_USTLFIRACT2 = 0x0c010e09ull;
@@ -107,5 +108,7 @@ static const uint32_t USTL_USTLFIRACT2_USTLFIRACT2_ACTION_2_LEN = 62;
 
 }
 }
-#include "mcc/reg00004.H"
+#ifndef __PPE_HCODE__
+    #include "mcc/reg00004.H"
+#endif
 #endif

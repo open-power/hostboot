@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_phb_3_H_
 #define __p10_scom_phb_3_H_
@@ -65,5 +67,7 @@ static const uint32_t RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PASR_FREEZE_INFO = 11;
 
 }
 }
-#include "phb/reg00003.H"
+#ifndef __PPE_HCODE__
+    #include "phb/reg00003.H"
+#endif
 #endif

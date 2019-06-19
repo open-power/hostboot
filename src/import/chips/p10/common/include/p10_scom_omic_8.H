@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_omic_8_H_
 #define __p10_scom_omic_8_H_
@@ -56,14 +58,17 @@ static const uint32_t CTL_REGS_TX_CNTL7_PG_TX_PATTERN_0_15_LEN = 16;
 static const uint64_t CTL_REGS_TX_MODE1_PG = 0x800c0c4010012c3full;
 
 static const uint32_t CTL_REGS_TX_MODE1_PG_CLKDIST_PDWN = 48;
-static const uint32_t CTL_REGS_TX_MODE1_PG_CLKDIST_PDWN_LEN = 3;
-static const uint32_t CTL_REGS_TX_MODE1_PG_BIST_EN = 51;
-static const uint32_t CTL_REGS_TX_MODE1_PG_EXBIST_MODE = 52;
-static const uint32_t CTL_REGS_TX_MODE1_PG_RCTRL = 53;
-static const uint32_t CTL_REGS_TX_MODE1_PG_16TO1 = 54;
-static const uint32_t CTL_REGS_TX_MODE1_PG_BIST_DCC_EN = 55;
-static const uint32_t CTL_REGS_TX_MODE1_PG_BIST_LS_EN = 56;
-static const uint32_t CTL_REGS_TX_MODE1_PG_BIST_HS_EN = 57;
+static const uint32_t CTL_REGS_TX_MODE1_PG_RCTRL = 49;
+static const uint32_t CTL_REGS_TX_MODE1_PG_16TO1 = 50;
+static const uint32_t CTL_REGS_TX_MODE1_PG_BIST_DCC_EN = 54;
+static const uint32_t CTL_REGS_TX_MODE1_PG_BIST_LS_EN = 55;
+static const uint32_t CTL_REGS_TX_MODE1_PG_BIST_HS_EN = 56;
+static const uint32_t CTL_REGS_TX_MODE1_PG_IREF_CLOCK_DAC = 57;
+static const uint32_t CTL_REGS_TX_MODE1_PG_IREF_CLOCK_DAC_LEN = 3;
+static const uint32_t CTL_REGS_TX_MODE1_PG_IREF_VSET_DAC = 60;
+static const uint32_t CTL_REGS_TX_MODE1_PG_IREF_VSET_DAC_LEN = 2;
+static const uint32_t CTL_REGS_TX_MODE1_PG_IREF_BYPASS = 62;
+static const uint32_t CTL_REGS_TX_MODE1_PG_IREF_PDWN_B = 63;
 // omic/reg00008.H
 
 static const uint64_t DATASM_REGS_RX_CNT17_PG = 0x800a084010012c3full;
@@ -113,5 +118,7 @@ static const uint32_t TX_CTL_SM_REGS_CTLSM_STAT6_PG_HS_FAIL = 50;
 
 }
 }
-#include "omic/reg00008.H"
+#ifndef __PPE_HCODE__
+    #include "omic/reg00008.H"
+#endif
 #endif

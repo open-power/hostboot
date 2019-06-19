@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_proc_9_H_
 #define __p10_scom_proc_9_H_
@@ -1513,6 +1515,7 @@ static const uint32_t TP_TPCHIP_NET_PCBSLN0_CTRL0_VITAL_PHASE = 8;
 static const uint32_t TP_TPCHIP_NET_PCBSLN0_CTRL0_FLUSH_ALIGN_OVR = 9;
 static const uint32_t TP_TPCHIP_NET_PCBSLN0_CTRL0_VITAL_AL = 10;
 static const uint32_t TP_TPCHIP_NET_PCBSLN0_CTRL0_ACT_DIS = 11;
+static const uint32_t TP_TPCHIP_NET_PCBSLN0_CTRL0_TOADMODE_EN = 12;
 static const uint32_t TP_TPCHIP_NET_PCBSLN0_CTRL0_SYNC_PULSE = 13;
 static const uint32_t TP_TPCHIP_NET_PCBSLN0_CTRL0_MPW3 = 14;
 static const uint32_t TP_TPCHIP_NET_PCBSLN0_CTRL0_DELAY_LCLKR = 15;
@@ -1550,6 +1553,7 @@ static const uint32_t TP_TPCHIP_NET_PCBSLN1_CTRL0_VITAL_PHASE = 8;
 static const uint32_t TP_TPCHIP_NET_PCBSLN1_CTRL0_FLUSH_ALIGN_OVR = 9;
 static const uint32_t TP_TPCHIP_NET_PCBSLN1_CTRL0_VITAL_AL = 10;
 static const uint32_t TP_TPCHIP_NET_PCBSLN1_CTRL0_ACT_DIS = 11;
+static const uint32_t TP_TPCHIP_NET_PCBSLN1_CTRL0_TOADMODE_EN = 12;
 static const uint32_t TP_TPCHIP_NET_PCBSLN1_CTRL0_SYNC_PULSE = 13;
 static const uint32_t TP_TPCHIP_NET_PCBSLN1_CTRL0_MPW3 = 14;
 static const uint32_t TP_TPCHIP_NET_PCBSLN1_CTRL0_DELAY_LCLKR = 15;
@@ -2125,8 +2129,6 @@ static const uint32_t TP_TPCHIP_TPC_CPLT_CTRL5_18 = 18;
 static const uint32_t TP_TPCHIP_TPC_CPLT_CTRL5_19 = 19;
 // proc/reg00044.H
 
-//ERRCODE: // Some of the name targets not found in address targets: perv
-
 static const uint64_t TP_TPCHIP_TPC_DPLL_CNTL_PAU_REGS_STAT = 0x01060055ull;
 
 static const uint32_t TP_TPCHIP_TPC_DPLL_CNTL_PAU_REGS_STAT_FREQOUT = 1;
@@ -2176,12 +2178,6 @@ static const uint64_t TP_TPCHIP_TPC_ITR_FMU_OSC_CNTR2_REG = 0x01020002ull;
 static const uint32_t TP_TPCHIP_TPC_ITR_FMU_OSC_CNTR2_REG_RESULT_AVAILABLE = 3;
 static const uint32_t TP_TPCHIP_TPC_ITR_FMU_OSC_CNTR2_REG_OSC_PULSE2_CNTR = 4;
 static const uint32_t TP_TPCHIP_TPC_ITR_FMU_OSC_CNTR2_REG_OSC_PULSE2_CNTR_LEN = 24;
-// proc/reg00045.H
-
-static const uint64_t TP_TPCHIP_TPC_ITR_OSCERR_MCODE = 0x0102001bull;
-
-static const uint32_t TP_TPCHIP_TPC_ITR_OSCERR_MCODE_OSCERR_MCODE_IN = 0;
-static const uint32_t TP_TPCHIP_TPC_ITR_OSCERR_MCODE_OSCERR_MCODE_IN_LEN = 4;
 // proc/reg00045.H
 
 static const uint64_t TP_TPCHIP_TPC_SCAN_UPDATEDR = 0x0103a000ull;
@@ -2614,8 +2610,10 @@ static const uint64_t VAS_VA_RG_SCF_WRMON5WID = 0x0201141dull;
 
 }
 }
-#include "proc/reg00042.H"
-#include "proc/reg00043.H"
-#include "proc/reg00044.H"
-#include "proc/reg00045.H"
+#ifndef __PPE_HCODE__
+    #include "proc/reg00042.H"
+    #include "proc/reg00043.H"
+    #include "proc/reg00044.H"
+    #include "proc/reg00045.H"
+#endif
 #endif

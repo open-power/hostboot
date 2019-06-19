@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_eq_9_H_
 #define __p10_scom_eq_9_H_
@@ -229,5 +231,7 @@ static const uint32_t XSTOP_XSTOP_IN53 = 53;
 
 }
 }
-#include "eq/reg00009.H"
+#ifndef __PPE_HCODE__
+    #include "eq/reg00009.H"
+#endif
 #endif

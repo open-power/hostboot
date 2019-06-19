@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_c_f_H_
 #define __p10_scom_c_f_H_
@@ -34,6 +36,24 @@ namespace scomt
 namespace c
 {
 
+
+static const uint64_t CPMS_ACCR = 0x200e0e78ull;
+
+static const uint32_t CPMS_ACCR_COUNT_MODE = 0;
+static const uint32_t CPMS_ACCR_COUNT_MODE_LEN = 2;
+static const uint32_t CPMS_ACCR_COUNT_TYPE = 2;
+static const uint32_t CPMS_ACCR_COUNT_TYPE_LEN = 2;
+static const uint32_t CPMS_ACCR_COUNT_ENABLE_SEL = 4;
+static const uint32_t CPMS_ACCR_COUNT_ENABLE_SEL_LEN = 2;
+static const uint32_t CPMS_ACCR_INVERT_COUNT_ENABLE = 6;
+static const uint32_t CPMS_ACCR_COUNT_ALWAYS_SAMPLED = 7;
+static const uint32_t CPMS_ACCR_HI_THRESHOLD = 8;
+static const uint32_t CPMS_ACCR_HI_THRESHOLD_LEN = 8;
+static const uint32_t CPMS_ACCR_LO_THRESHOLD = 16;
+static const uint32_t CPMS_ACCR_LO_THRESHOLD_LEN = 8;
+static const uint32_t CPMS_ACCR_SPARE = 24;
+static const uint32_t CPMS_ACCR_SPARE_LEN = 2;
+// c/reg00015.H
 
 static const uint64_t CPMS_MMAR_RW = 0x200e0e38ull;
 static const uint64_t CPMS_MMAR_WO_CLEAR = 0x200e0e3aull;
@@ -186,5 +206,7 @@ static const uint32_t NC_NCMISC_NCSCOMS_NCU_MODE_REG_SKIP_GRP_SCOPE_EN = 48;
 
 }
 }
-#include "c/reg00015.H"
+#ifndef __PPE_HCODE__
+    #include "c/reg00015.H"
+#endif
 #endif

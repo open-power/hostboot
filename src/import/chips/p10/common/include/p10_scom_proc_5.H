@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_proc_5_H_
 #define __p10_scom_proc_5_H_
@@ -716,11 +718,19 @@ static const uint32_t PB_PTLSCOM23_RCMD_RATE_CFG_X_RCMD_RATE_ADDER_LEN = 4;
 static const uint32_t PB_PTLSCOM23_RCMD_RATE_CFG_Y_RCMD_RATE_ADDER = 20;
 static const uint32_t PB_PTLSCOM23_RCMD_RATE_CFG_Y_RCMD_RATE_ADDER_LEN = 4;
 static const uint32_t PB_PTLSCOM23_RCMD_RATE_CFG_X_DISABLE_TURBO = 24;
-static const uint32_t PB_PTLSCOM23_RCMD_RATE_CFG_X_CMD_GAP_CFG = 25;
-static const uint32_t PB_PTLSCOM23_RCMD_RATE_CFG_X_CMD_GAP_CFG_LEN = 2;
-static const uint32_t PB_PTLSCOM23_RCMD_RATE_CFG_Y_DISABLE_TURBO = 27;
-static const uint32_t PB_PTLSCOM23_RCMD_RATE_CFG_Y_CMD_GAP_CFG = 28;
-static const uint32_t PB_PTLSCOM23_RCMD_RATE_CFG_Y_CMD_GAP_CFG_LEN = 2;
+static const uint32_t PB_PTLSCOM23_RCMD_RATE_CFG_X_CMD_GAP_REFERENCE = 25;
+static const uint32_t PB_PTLSCOM23_RCMD_RATE_CFG_X_CMD_GAP_MODE = 26;
+static const uint32_t PB_PTLSCOM23_RCMD_RATE_CFG_X_CMD_GAP_TABLE = 27;
+static const uint32_t PB_PTLSCOM23_RCMD_RATE_CFG_X_CMD_GAP_SPARE = 28;
+static const uint32_t PB_PTLSCOM23_RCMD_RATE_CFG_X_CMD_GAP_CFG = 29;
+static const uint32_t PB_PTLSCOM23_RCMD_RATE_CFG_X_CMD_GAP_CFG_LEN = 3;
+static const uint32_t PB_PTLSCOM23_RCMD_RATE_CFG_Y_DISABLE_TURBO = 32;
+static const uint32_t PB_PTLSCOM23_RCMD_RATE_CFG_Y_CMD_GAP_REFERENCE = 33;
+static const uint32_t PB_PTLSCOM23_RCMD_RATE_CFG_Y_CMD_GAP_MODE = 34;
+static const uint32_t PB_PTLSCOM23_RCMD_RATE_CFG_Y_CMD_GAP_TABLE = 35;
+static const uint32_t PB_PTLSCOM23_RCMD_RATE_CFG_Y_CMD_GAP_SPARE = 36;
+static const uint32_t PB_PTLSCOM23_RCMD_RATE_CFG_Y_CMD_GAP_CFG = 37;
+static const uint32_t PB_PTLSCOM23_RCMD_RATE_CFG_Y_CMD_GAP_CFG_LEN = 3;
 // proc/reg00023.H
 
 static const uint64_t PB_PTLSCOM45_PMU1_TLPM_COUNTER = 0x1201181cull;
@@ -859,10 +869,13 @@ static const uint64_t PB_BRIDGE_HCA_CONTROL_REG = 0x03011d4bull;
 
 static const uint32_t PB_BRIDGE_HCA_CONTROL_REG_START_INVALIDATE = 0;
 static const uint32_t PB_BRIDGE_HCA_CONTROL_REG_START_INVALIDATE_LEN = 2;
-static const uint32_t PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_CTRL = 4;
-static const uint32_t PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_CTRL_LEN = 6;
-static const uint32_t PB_BRIDGE_HCA_CONTROL_REG_DEBUG_CTRL = 12;
-static const uint32_t PB_BRIDGE_HCA_CONTROL_REG_DEBUG_CTRL_LEN = 4;
+static const uint32_t PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ENABLE = 4;
+static const uint32_t PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ACTION = 5;
+static const uint32_t PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_MODE = 6;
+static const uint32_t PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_SELECT = 7;
+static const uint32_t PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_SELECT_LEN = 3;
+static const uint32_t PB_BRIDGE_HCA_CONTROL_REG_TRACE_SELECT = 12;
+static const uint32_t PB_BRIDGE_HCA_CONTROL_REG_TRACE_SELECT_LEN = 4;
 static const uint32_t PB_BRIDGE_HCA_CONTROL_REG_RESET_ERRRPT = 63;
 // proc/reg00024.H
 
@@ -2760,9 +2773,11 @@ static const uint64_t VAS_VA_RG_SCF_WRMON6BAR = 0x02011416ull;
 
 }
 }
-#include "proc/reg00023.H"
-#include "proc/reg00024.H"
-#include "proc/reg00025.H"
-#include "proc/reg00026.H"
-#include "proc/reg00027.H"
+#ifndef __PPE_HCODE__
+    #include "proc/reg00023.H"
+    #include "proc/reg00024.H"
+    #include "proc/reg00025.H"
+    #include "proc/reg00026.H"
+    #include "proc/reg00027.H"
+#endif
 #endif

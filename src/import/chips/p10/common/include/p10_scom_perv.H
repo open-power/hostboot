@@ -23,26 +23,28 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_perv_H_
-#define __p10_scom_perv_H_
+    #define __p10_scom_perv_H_
 
-#include "p10_scom_perv_0.H"
-#include "p10_scom_perv_1.H"
-#include "p10_scom_perv_2.H"
-#include "p10_scom_perv_3.H"
-#include "p10_scom_perv_4.H"
-#include "p10_scom_perv_5.H"
-#include "p10_scom_perv_6.H"
-#include "p10_scom_perv_7.H"
-#include "p10_scom_perv_8.H"
-#include "p10_scom_perv_9.H"
-#include "p10_scom_perv_a.H"
-#include "p10_scom_perv_b.H"
-#include "p10_scom_perv_c.H"
-#include "p10_scom_perv_d.H"
-#include "p10_scom_perv_e.H"
-#include "p10_scom_perv_f.H"
+    #include "p10_scom_perv_0.H"
+    #include "p10_scom_perv_1.H"
+    #include "p10_scom_perv_2.H"
+    #include "p10_scom_perv_3.H"
+    #include "p10_scom_perv_4.H"
+    #include "p10_scom_perv_5.H"
+    #include "p10_scom_perv_6.H"
+    #include "p10_scom_perv_7.H"
+    #include "p10_scom_perv_8.H"
+    #include "p10_scom_perv_9.H"
+    #include "p10_scom_perv_a.H"
+    #include "p10_scom_perv_b.H"
+    #include "p10_scom_perv_c.H"
+    #include "p10_scom_perv_d.H"
+    #include "p10_scom_perv_e.H"
+    #include "p10_scom_perv_f.H"
 
 #endif

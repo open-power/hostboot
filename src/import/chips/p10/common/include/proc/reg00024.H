@@ -5238,92 +5238,344 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_CTRL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ENABLE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_CONTROL_REG));
 #endif
-    return o_data.insertFromRight<PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_CTRL,
-           PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_CTRL_LEN>(i_data);
+    return o_data.insertFromRight<PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ENABLE,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_CTRL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_CTRL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ENABLE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_CONTROL_REG));
 #endif
-    return o_data.insertFromRight<PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_CTRL,
-           PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_CTRL_LEN>(i_data);
+    return o_data.insertFromRight<PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ENABLE,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_CTRL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_CTRL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ENABLE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_CONTROL_REG));
+#endif
+    return o_data.setBit<PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ENABLE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_CONTROL_REG));
+#endif
+    return o_data.clearBit<PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ENABLE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_CONTROL_REG));
 #endif
-    return i_data.extractToRight<PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_CTRL,
-           PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_CTRL_LEN>(o_data);
+    return i_data.extractToRight<PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ENABLE,
+           1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_CTRL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_HCA_CONTROL_REG_DEBUG_CTRL(fapi2::buffer<uint64_t>& i_data,
+static inline bool GET_PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ENABLE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_CONTROL_REG));
+#endif
+    return i_data.getBit<PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ACTION(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_CONTROL_REG));
 #endif
-    return o_data.insertFromRight<PB_BRIDGE_HCA_CONTROL_REG_DEBUG_CTRL,
-           PB_BRIDGE_HCA_CONTROL_REG_DEBUG_CTRL_LEN>(i_data);
+    return o_data.insertFromRight<PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ACTION,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_BRIDGE_HCA_CONTROL_REG_DEBUG_CTRL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ACTION chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_HCA_CONTROL_REG_DEBUG_CTRL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ACTION(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_CONTROL_REG));
 #endif
-    return o_data.insertFromRight<PB_BRIDGE_HCA_CONTROL_REG_DEBUG_CTRL,
-           PB_BRIDGE_HCA_CONTROL_REG_DEBUG_CTRL_LEN>(i_data);
+    return o_data.insertFromRight<PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ACTION,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_BRIDGE_HCA_CONTROL_REG_DEBUG_CTRL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ACTION chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_PB_BRIDGE_HCA_CONTROL_REG_DEBUG_CTRL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ACTION(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_CONTROL_REG));
+#endif
+    return o_data.setBit<PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ACTION>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ACTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ACTION(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_CONTROL_REG));
+#endif
+    return o_data.clearBit<PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ACTION>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ACTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ACTION(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_CONTROL_REG));
 #endif
-    return i_data.extractToRight<PB_BRIDGE_HCA_CONTROL_REG_DEBUG_CTRL,
-           PB_BRIDGE_HCA_CONTROL_REG_DEBUG_CTRL_LEN>(o_data);
+    return i_data.extractToRight<PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ACTION,
+           1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_BRIDGE_HCA_CONTROL_REG_DEBUG_CTRL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ACTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ACTION(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_CONTROL_REG));
+#endif
+    return i_data.getBit<PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ACTION>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_ACTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_MODE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_CONTROL_REG));
+#endif
+    return o_data.insertFromRight<PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_MODE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_MODE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_CONTROL_REG));
+#endif
+    return o_data.insertFromRight<PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_MODE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_MODE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_CONTROL_REG));
+#endif
+    return o_data.setBit<PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_MODE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_MODE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_CONTROL_REG));
+#endif
+    return o_data.clearBit<PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_MODE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_MODE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_CONTROL_REG));
+#endif
+    return i_data.extractToRight<PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_MODE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_MODE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_CONTROL_REG));
+#endif
+    return i_data.getBit<PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_MODE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_SELECT(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_CONTROL_REG));
+#endif
+    return o_data.insertFromRight<PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_SELECT,
+           PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_SELECT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_SELECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_SELECT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_CONTROL_REG));
+#endif
+    return o_data.insertFromRight<PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_SELECT,
+           PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_SELECT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_SELECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_SELECT(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_CONTROL_REG));
+#endif
+    return i_data.extractToRight<PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_SELECT,
+           PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_SELECT_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_BRIDGE_HCA_CONTROL_REG_ERRINJ_SELECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_HCA_CONTROL_REG_TRACE_SELECT(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_CONTROL_REG));
+#endif
+    return o_data.insertFromRight<PB_BRIDGE_HCA_CONTROL_REG_TRACE_SELECT,
+           PB_BRIDGE_HCA_CONTROL_REG_TRACE_SELECT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_BRIDGE_HCA_CONTROL_REG_TRACE_SELECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_HCA_CONTROL_REG_TRACE_SELECT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_CONTROL_REG));
+#endif
+    return o_data.insertFromRight<PB_BRIDGE_HCA_CONTROL_REG_TRACE_SELECT,
+           PB_BRIDGE_HCA_CONTROL_REG_TRACE_SELECT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_BRIDGE_HCA_CONTROL_REG_TRACE_SELECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_BRIDGE_HCA_CONTROL_REG_TRACE_SELECT(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_HCA_CONTROL_REG));
+#endif
+    return i_data.extractToRight<PB_BRIDGE_HCA_CONTROL_REG_TRACE_SELECT,
+           PB_BRIDGE_HCA_CONTROL_REG_TRACE_SELECT_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_BRIDGE_HCA_CONTROL_REG_TRACE_SELECT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

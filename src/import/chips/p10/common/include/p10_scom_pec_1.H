@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_pec_1_H_
 #define __p10_scom_pec_1_H_
@@ -151,5 +153,7 @@ static const uint32_t TRA0_TR1_CONFIG_2_B_LEN = 24;
 
 }
 }
-#include "pec/reg00001.H"
+#ifndef __PPE_HCODE__
+    #include "pec/reg00001.H"
+#endif
 #endif

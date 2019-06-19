@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_mcc_c_H_
 #define __p10_scom_mcc_c_H_
@@ -93,26 +95,19 @@ static const uint32_t DSTL_DSTLTRACK_TLXDCP0_CREDIT_TOTAL_SHADOW_LEN = 7;
 
 static const uint64_t USTL_USTLDBG = 0x0c010e0dull;
 
-static const uint32_t USTL_USTLDBG_ENABLE = 0;
-static const uint32_t USTL_USTLDBG_SEL_TOP = 8;
-static const uint32_t USTL_USTLDBG_SEL_WR_TOP = 9;
-static const uint32_t USTL_USTLDBG_SEL_BOT = 10;
-static const uint32_t USTL_USTLDBG_SEL_WR_BOT = 11;
-static const uint32_t USTL_USTLDBG_SEL_FLIT = 12;
-static const uint32_t USTL_USTLDBG_SEL_FLIT_CHANB = 13;
-static const uint32_t USTL_USTLDBG_SEL_MIRRORLOG_VLDS = 14;
-static const uint32_t USTL_USTLDBG_SPARE = 15;
-static const uint32_t USTL_USTLDBG_WAT_ENABLE0 = 16;
-static const uint32_t USTL_USTLDBG_WAT_ENABLE0_LEN = 2;
-static const uint32_t USTL_USTLDBG_WAT_ENABLE1 = 18;
-static const uint32_t USTL_USTLDBG_WAT_ENABLE1_LEN = 2;
-static const uint32_t USTL_USTLDBG_WAT_ENABLE2 = 20;
-static const uint32_t USTL_USTLDBG_WAT_ENABLE2_LEN = 2;
-static const uint32_t USTL_USTLDBG_WAT_ENABLE3 = 22;
-static const uint32_t USTL_USTLDBG_WAT_ENABLE3_LEN = 2;
+static const uint32_t USTL_USTLDBG_0 = 16;
+static const uint32_t USTL_USTLDBG_0_LEN = 2;
+static const uint32_t USTL_USTLDBG_1 = 18;
+static const uint32_t USTL_USTLDBG_1_LEN = 2;
+static const uint32_t USTL_USTLDBG_2 = 20;
+static const uint32_t USTL_USTLDBG_2_LEN = 2;
+static const uint32_t USTL_USTLDBG_3 = 22;
+static const uint32_t USTL_USTLDBG_3_LEN = 2;
 // mcc/reg00012.H
 
 }
 }
-#include "mcc/reg00012.H"
+#ifndef __PPE_HCODE__
+    #include "mcc/reg00012.H"
+#endif
 #endif

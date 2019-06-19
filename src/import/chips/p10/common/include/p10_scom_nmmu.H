@@ -23,26 +23,28 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_nmmu_H_
-#define __p10_scom_nmmu_H_
+    #define __p10_scom_nmmu_H_
 
-#include "p10_scom_nmmu_0.H"
-#include "p10_scom_nmmu_1.H"
-#include "p10_scom_nmmu_2.H"
-#include "p10_scom_nmmu_3.H"
-#include "p10_scom_nmmu_4.H"
-#include "p10_scom_nmmu_5.H"
-#include "p10_scom_nmmu_6.H"
-#include "p10_scom_nmmu_7.H"
-#include "p10_scom_nmmu_8.H"
-#include "p10_scom_nmmu_9.H"
-#include "p10_scom_nmmu_a.H"
-#include "p10_scom_nmmu_b.H"
-#include "p10_scom_nmmu_c.H"
-#include "p10_scom_nmmu_d.H"
-#include "p10_scom_nmmu_e.H"
-#include "p10_scom_nmmu_f.H"
+    #include "p10_scom_nmmu_0.H"
+    #include "p10_scom_nmmu_1.H"
+    #include "p10_scom_nmmu_2.H"
+    #include "p10_scom_nmmu_3.H"
+    #include "p10_scom_nmmu_4.H"
+    #include "p10_scom_nmmu_5.H"
+    #include "p10_scom_nmmu_6.H"
+    #include "p10_scom_nmmu_7.H"
+    #include "p10_scom_nmmu_8.H"
+    #include "p10_scom_nmmu_9.H"
+    #include "p10_scom_nmmu_a.H"
+    #include "p10_scom_nmmu_b.H"
+    #include "p10_scom_nmmu_c.H"
+    #include "p10_scom_nmmu_d.H"
+    #include "p10_scom_nmmu_e.H"
+    #include "p10_scom_nmmu_f.H"
 
 #endif

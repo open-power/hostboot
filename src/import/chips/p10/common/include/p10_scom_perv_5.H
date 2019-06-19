@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_perv_5_H_
 #define __p10_scom_perv_5_H_
@@ -222,6 +224,16 @@ static const uint32_t FSXCOMP_FSXLOG_MAILBOX_SLAVE_B_DOORBELL_ERROR_STATUS_CLEAR
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL7_COPY_FSI = 0x00002917ull;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL7_COPY_FSI_BYTE = 0x00002c5cull;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL7_COPY_RW = 0x00050117ull;
+// perv/reg00007.H
+
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_15_FSI = 0x00002986ull;
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_15_FSI_BYTE = 0x00002e18ull;
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_15_RW = 0x00050186ull;
+
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_15_SR_SCRATCH_REGISTER_15 = 0;
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_15_SR_SCRATCH_REGISTER_15_LEN = 32;
 // perv/reg00007.H
 
 static const uint64_t L3TRA0_TR0_CONFIG_2 = 0x00018205ull;
@@ -643,9 +655,12 @@ static const uint32_t TRA7_TR0_CONFIG_3_C = 0;
 static const uint32_t TRA7_TR0_CONFIG_3_C_LEN = 24;
 static const uint32_t TRA7_TR0_CONFIG_3_D = 24;
 static const uint32_t TRA7_TR0_CONFIG_3_D_LEN = 24;
-// perv/reg00007.H
+// perv/reg00008.H
 
 }
 }
-#include "perv/reg00007.H"
+#ifndef __PPE_HCODE__
+    #include "perv/reg00007.H"
+    #include "perv/reg00008.H"
+#endif
 #endif

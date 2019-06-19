@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_pauc_5_H_
 #define __p10_scom_pauc_5_H_
@@ -284,5 +286,7 @@ static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO8_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XP_
 
 }
 }
-#include "pauc/reg00005.H"
+#ifndef __PPE_HCODE__
+    #include "pauc/reg00005.H"
+#endif
 #endif

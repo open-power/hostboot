@@ -1511,1295 +1511,6 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_DPLL_CNTL_PAU_REGS_CTRL_RW(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = DPLL_CNTL_PAU_REGS_CTRL_RW;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_DPLL_CNTL_PAU_REGS_CTRL_RW(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = DPLL_CNTL_PAU_REGS_CTRL_RW;
-#endif
-    return fapi2::getScom(i_target, DPLL_CNTL_PAU_REGS_CTRL_RW, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_DPLL_CNTL_PAU_REGS_CTRL_RW(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return fapi2::putScom(i_target, DPLL_CNTL_PAU_REGS_CTRL_RW, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR;
-#endif
-    return fapi2::getScom(i_target, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return fapi2::putScom(i_target, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_DPLL_CNTL_PAU_REGS_CTRL_WO_OR(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = DPLL_CNTL_PAU_REGS_CTRL_WO_OR;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_DPLL_CNTL_PAU_REGS_CTRL_WO_OR(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = DPLL_CNTL_PAU_REGS_CTRL_WO_OR;
-#endif
-    return fapi2::getScom(i_target, DPLL_CNTL_PAU_REGS_CTRL_WO_OR, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_DPLL_CNTL_PAU_REGS_CTRL_WO_OR(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return fapi2::putScom(i_target, DPLL_CNTL_PAU_REGS_CTRL_WO_OR, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_DPLL_LOCK_SEL(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_PAU_REGS_CTRL_DPLL_LOCK_SEL,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_DPLL_LOCK_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_DPLL_LOCK_SEL(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_PAU_REGS_CTRL_DPLL_LOCK_SEL,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_DPLL_LOCK_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_DPLL_LOCK_SEL(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.setBit<DPLL_CNTL_PAU_REGS_CTRL_DPLL_LOCK_SEL>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_DPLL_LOCK_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_PAU_REGS_CTRL_DPLL_LOCK_SEL(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.clearBit<DPLL_CNTL_PAU_REGS_CTRL_DPLL_LOCK_SEL>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_DPLL_LOCK_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_PAU_REGS_CTRL_DPLL_LOCK_SEL(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return i_data.extractToRight<DPLL_CNTL_PAU_REGS_CTRL_DPLL_LOCK_SEL,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_DPLL_LOCK_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_DPLL_CNTL_PAU_REGS_CTRL_DPLL_LOCK_SEL(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return i_data.getBit<DPLL_CNTL_PAU_REGS_CTRL_DPLL_LOCK_SEL>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_DPLL_LOCK_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_ENABLE_JUMP_PROTECT(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_PAU_REGS_CTRL_ENABLE_JUMP_PROTECT,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_ENABLE_JUMP_PROTECT chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_ENABLE_JUMP_PROTECT(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_PAU_REGS_CTRL_ENABLE_JUMP_PROTECT,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_ENABLE_JUMP_PROTECT chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_ENABLE_JUMP_PROTECT(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.setBit<DPLL_CNTL_PAU_REGS_CTRL_ENABLE_JUMP_PROTECT>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_ENABLE_JUMP_PROTECT chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_PAU_REGS_CTRL_ENABLE_JUMP_PROTECT(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.clearBit<DPLL_CNTL_PAU_REGS_CTRL_ENABLE_JUMP_PROTECT>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_ENABLE_JUMP_PROTECT chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_PAU_REGS_CTRL_ENABLE_JUMP_PROTECT(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return i_data.extractToRight<DPLL_CNTL_PAU_REGS_CTRL_ENABLE_JUMP_PROTECT,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_ENABLE_JUMP_PROTECT chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_DPLL_CNTL_PAU_REGS_CTRL_ENABLE_JUMP_PROTECT(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return i_data.getBit<DPLL_CNTL_PAU_REGS_CTRL_ENABLE_JUMP_PROTECT>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_ENABLE_JUMP_PROTECT chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_FF_BYPASS(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_PAU_REGS_CTRL_FF_BYPASS,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_FF_BYPASS chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_FF_BYPASS(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_PAU_REGS_CTRL_FF_BYPASS,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_FF_BYPASS chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_FF_BYPASS(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.setBit<DPLL_CNTL_PAU_REGS_CTRL_FF_BYPASS>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_FF_BYPASS chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_PAU_REGS_CTRL_FF_BYPASS(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.clearBit<DPLL_CNTL_PAU_REGS_CTRL_FF_BYPASS>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_FF_BYPASS chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_PAU_REGS_CTRL_FF_BYPASS(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return i_data.extractToRight<DPLL_CNTL_PAU_REGS_CTRL_FF_BYPASS,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_FF_BYPASS chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_DPLL_CNTL_PAU_REGS_CTRL_FF_BYPASS(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return i_data.getBit<DPLL_CNTL_PAU_REGS_CTRL_FF_BYPASS>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_FF_BYPASS chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_DCO_OVERRIDE(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_PAU_REGS_CTRL_DCO_OVERRIDE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_DCO_OVERRIDE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_DCO_OVERRIDE(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_PAU_REGS_CTRL_DCO_OVERRIDE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_DCO_OVERRIDE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_DCO_OVERRIDE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.setBit<DPLL_CNTL_PAU_REGS_CTRL_DCO_OVERRIDE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_DCO_OVERRIDE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_PAU_REGS_CTRL_DCO_OVERRIDE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.clearBit<DPLL_CNTL_PAU_REGS_CTRL_DCO_OVERRIDE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_DCO_OVERRIDE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_PAU_REGS_CTRL_DCO_OVERRIDE(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return i_data.extractToRight<DPLL_CNTL_PAU_REGS_CTRL_DCO_OVERRIDE,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_DCO_OVERRIDE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_DPLL_CNTL_PAU_REGS_CTRL_DCO_OVERRIDE(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return i_data.getBit<DPLL_CNTL_PAU_REGS_CTRL_DCO_OVERRIDE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_DCO_OVERRIDE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_DCO_INCR(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_PAU_REGS_CTRL_DCO_INCR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_DCO_INCR chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_DCO_INCR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_PAU_REGS_CTRL_DCO_INCR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_DCO_INCR chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_DCO_INCR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.setBit<DPLL_CNTL_PAU_REGS_CTRL_DCO_INCR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_DCO_INCR chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_PAU_REGS_CTRL_DCO_INCR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.clearBit<DPLL_CNTL_PAU_REGS_CTRL_DCO_INCR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_DCO_INCR chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_PAU_REGS_CTRL_DCO_INCR(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return i_data.extractToRight<DPLL_CNTL_PAU_REGS_CTRL_DCO_INCR,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_DCO_INCR chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_DPLL_CNTL_PAU_REGS_CTRL_DCO_INCR(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return i_data.getBit<DPLL_CNTL_PAU_REGS_CTRL_DCO_INCR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_DCO_INCR chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_DCO_DECR(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_PAU_REGS_CTRL_DCO_DECR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_DCO_DECR chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_DCO_DECR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_PAU_REGS_CTRL_DCO_DECR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_DCO_DECR chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_DCO_DECR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.setBit<DPLL_CNTL_PAU_REGS_CTRL_DCO_DECR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_DCO_DECR chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_PAU_REGS_CTRL_DCO_DECR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.clearBit<DPLL_CNTL_PAU_REGS_CTRL_DCO_DECR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_DCO_DECR chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_PAU_REGS_CTRL_DCO_DECR(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return i_data.extractToRight<DPLL_CNTL_PAU_REGS_CTRL_DCO_DECR,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_DCO_DECR chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_DPLL_CNTL_PAU_REGS_CTRL_DCO_DECR(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return i_data.getBit<DPLL_CNTL_PAU_REGS_CTRL_DCO_DECR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_DCO_DECR chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_SPARE(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_PAU_REGS_CTRL_SPARE,
-           DPLL_CNTL_PAU_REGS_CTRL_SPARE_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_SPARE(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_PAU_REGS_CTRL_SPARE,
-           DPLL_CNTL_PAU_REGS_CTRL_SPARE_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_PAU_REGS_CTRL_SPARE(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return i_data.extractToRight<DPLL_CNTL_PAU_REGS_CTRL_SPARE,
-           DPLL_CNTL_PAU_REGS_CTRL_SPARE_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_FF_SLEWRATE_UP(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_PAU_REGS_CTRL_FF_SLEWRATE_UP,
-           DPLL_CNTL_PAU_REGS_CTRL_FF_SLEWRATE_UP_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_FF_SLEWRATE_UP chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_FF_SLEWRATE_UP(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_PAU_REGS_CTRL_FF_SLEWRATE_UP,
-           DPLL_CNTL_PAU_REGS_CTRL_FF_SLEWRATE_UP_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_FF_SLEWRATE_UP chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_PAU_REGS_CTRL_FF_SLEWRATE_UP(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return i_data.extractToRight<DPLL_CNTL_PAU_REGS_CTRL_FF_SLEWRATE_UP,
-           DPLL_CNTL_PAU_REGS_CTRL_FF_SLEWRATE_UP_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_FF_SLEWRATE_UP chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_FF_SLEWRATE_DN(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_PAU_REGS_CTRL_FF_SLEWRATE_DN,
-           DPLL_CNTL_PAU_REGS_CTRL_FF_SLEWRATE_DN_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_FF_SLEWRATE_DN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_FF_SLEWRATE_DN(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_PAU_REGS_CTRL_FF_SLEWRATE_DN,
-           DPLL_CNTL_PAU_REGS_CTRL_FF_SLEWRATE_DN_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_FF_SLEWRATE_DN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_PAU_REGS_CTRL_FF_SLEWRATE_DN(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return i_data.extractToRight<DPLL_CNTL_PAU_REGS_CTRL_FF_SLEWRATE_DN,
-           DPLL_CNTL_PAU_REGS_CTRL_FF_SLEWRATE_DN_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_FF_SLEWRATE_DN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_SPARE2(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_PAU_REGS_CTRL_SPARE2,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_SPARE2 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_SPARE2(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_PAU_REGS_CTRL_SPARE2,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_SPARE2 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_SPARE2(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.setBit<DPLL_CNTL_PAU_REGS_CTRL_SPARE2>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_SPARE2 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_PAU_REGS_CTRL_SPARE2(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.clearBit<DPLL_CNTL_PAU_REGS_CTRL_SPARE2>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_SPARE2 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_PAU_REGS_CTRL_SPARE2(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return i_data.extractToRight<DPLL_CNTL_PAU_REGS_CTRL_SPARE2,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_SPARE2 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_DPLL_CNTL_PAU_REGS_CTRL_SPARE2(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return i_data.getBit<DPLL_CNTL_PAU_REGS_CTRL_SPARE2>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_SPARE2 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_DYNAMIC_SLEW_MODE(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_PAU_REGS_CTRL_DYNAMIC_SLEW_MODE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_DYNAMIC_SLEW_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_DYNAMIC_SLEW_MODE(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_PAU_REGS_CTRL_DYNAMIC_SLEW_MODE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_DYNAMIC_SLEW_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_DYNAMIC_SLEW_MODE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.setBit<DPLL_CNTL_PAU_REGS_CTRL_DYNAMIC_SLEW_MODE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_DYNAMIC_SLEW_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_PAU_REGS_CTRL_DYNAMIC_SLEW_MODE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.clearBit<DPLL_CNTL_PAU_REGS_CTRL_DYNAMIC_SLEW_MODE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_DYNAMIC_SLEW_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_PAU_REGS_CTRL_DYNAMIC_SLEW_MODE(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return i_data.extractToRight<DPLL_CNTL_PAU_REGS_CTRL_DYNAMIC_SLEW_MODE,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_DYNAMIC_SLEW_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_DPLL_CNTL_PAU_REGS_CTRL_DYNAMIC_SLEW_MODE(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return i_data.getBit<DPLL_CNTL_PAU_REGS_CTRL_DYNAMIC_SLEW_MODE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_DYNAMIC_SLEW_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_FAST_FMAX_DISABLE(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_PAU_REGS_CTRL_FAST_FMAX_DISABLE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_FAST_FMAX_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_FAST_FMAX_DISABLE(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_PAU_REGS_CTRL_FAST_FMAX_DISABLE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_FAST_FMAX_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_FAST_FMAX_DISABLE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.setBit<DPLL_CNTL_PAU_REGS_CTRL_FAST_FMAX_DISABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_FAST_FMAX_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_PAU_REGS_CTRL_FAST_FMAX_DISABLE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.clearBit<DPLL_CNTL_PAU_REGS_CTRL_FAST_FMAX_DISABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_FAST_FMAX_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_PAU_REGS_CTRL_FAST_FMAX_DISABLE(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return i_data.extractToRight<DPLL_CNTL_PAU_REGS_CTRL_FAST_FMAX_DISABLE,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_FAST_FMAX_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_DPLL_CNTL_PAU_REGS_CTRL_FAST_FMAX_DISABLE(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return i_data.getBit<DPLL_CNTL_PAU_REGS_CTRL_FAST_FMAX_DISABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_FAST_FMAX_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_FAST_FMIN_DISABLE(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_PAU_REGS_CTRL_FAST_FMIN_DISABLE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_FAST_FMIN_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_FAST_FMIN_DISABLE(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_PAU_REGS_CTRL_FAST_FMIN_DISABLE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_FAST_FMIN_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_FAST_FMIN_DISABLE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.setBit<DPLL_CNTL_PAU_REGS_CTRL_FAST_FMIN_DISABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_FAST_FMIN_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_PAU_REGS_CTRL_FAST_FMIN_DISABLE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.clearBit<DPLL_CNTL_PAU_REGS_CTRL_FAST_FMIN_DISABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_FAST_FMIN_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_PAU_REGS_CTRL_FAST_FMIN_DISABLE(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return i_data.extractToRight<DPLL_CNTL_PAU_REGS_CTRL_FAST_FMIN_DISABLE,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_FAST_FMIN_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_DPLL_CNTL_PAU_REGS_CTRL_FAST_FMIN_DISABLE(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return i_data.getBit<DPLL_CNTL_PAU_REGS_CTRL_FAST_FMIN_DISABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_FAST_FMIN_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_N_L(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_N_L,
-           DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_N_L_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_N_L chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_N_L(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_N_L,
-           DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_N_L_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_N_L chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_N_L(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return i_data.extractToRight<DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_N_L,
-           DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_N_L_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_N_L chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_N_S(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_N_S,
-           DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_N_S_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_N_S chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_N_S(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_N_S,
-           DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_N_S_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_N_S chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_N_S(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return i_data.extractToRight<DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_N_S,
-           DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_N_S_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_N_S chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_L_S(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_L_S,
-           DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_L_S_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_L_S chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_L_S(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_L_S,
-           DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_L_S_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_L_S chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_L_S(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return i_data.extractToRight<DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_L_S,
-           DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_L_S_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_L_S chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_S_N(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_S_N,
-           DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_S_N_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_S_N chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_S_N(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_S_N,
-           DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_S_N_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_S_N chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_S_N(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_PAU_REGS_CTRL_RW, DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR, DPLL_CNTL_PAU_REGS_CTRL_WO_OR));
-#endif
-    return i_data.extractToRight<DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_S_N,
-           DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_S_N_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_S_N chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_EPS_FIR_ANY_LOCAL_ERR_MASK(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
@@ -10059,6 +8770,196 @@ fapi_try_exit:
 
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI, FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI_BYTE,
+                           FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_RW));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI_BYTE(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI_BYTE;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI_BYTE;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI_BYTE, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI, FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI_BYTE,
+                           FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_RW));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI_BYTE, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_RW(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_RW;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_RW(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_RW;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_RW, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_RW(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI, FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI_BYTE,
+                           FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_RW));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_RW, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_SR_SCRATCH_REGISTER_14(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI, FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI_BYTE,
+                           FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_RW));
+#endif
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_SR_SCRATCH_REGISTER_14,
+           FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_SR_SCRATCH_REGISTER_14_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_SR_SCRATCH_REGISTER_14 chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_SR_SCRATCH_REGISTER_14(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI, FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI_BYTE,
+                           FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_RW));
+#endif
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_SR_SCRATCH_REGISTER_14,
+           FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_SR_SCRATCH_REGISTER_14_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_SR_SCRATCH_REGISTER_14 chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_SR_SCRATCH_REGISTER_14(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI, FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI_BYTE,
+                           FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_RW));
+#endif
+    return i_data.extractToRight<FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_SR_SCRATCH_REGISTER_14,
+           FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_SR_SCRATCH_REGISTER_14_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_SR_SCRATCH_REGISTER_14 chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_L3TRA0_TR0_CONFIG_3(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
@@ -15874,6 +14775,90 @@ static inline bool GET_NET_CTRL0_ACT_DIS(fapi2::buffer<uint64_t>& i_data)
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     FAPI_ERR("Invalid dial access NET_CTRL0_ACT_DIS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_TOADMODE_EN(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
+#endif
+    return o_data.insertFromRight<NET_CTRL0_TOADMODE_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access NET_CTRL0_TOADMODE_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_TOADMODE_EN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
+#endif
+    return o_data.insertFromRight<NET_CTRL0_TOADMODE_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access NET_CTRL0_TOADMODE_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_TOADMODE_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
+#endif
+    return o_data.setBit<NET_CTRL0_TOADMODE_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access NET_CTRL0_TOADMODE_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_TOADMODE_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
+#endif
+    return o_data.clearBit<NET_CTRL0_TOADMODE_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access NET_CTRL0_TOADMODE_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_TOADMODE_EN(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
+#endif
+    return i_data.extractToRight<NET_CTRL0_TOADMODE_EN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access NET_CTRL0_TOADMODE_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_NET_CTRL0_TOADMODE_EN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
+#endif
+    return i_data.getBit<NET_CTRL0_TOADMODE_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access NET_CTRL0_TOADMODE_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

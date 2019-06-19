@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_eq_1_H_
 #define __p10_scom_eq_1_H_
@@ -272,5 +274,7 @@ static const uint64_t SCAN64 = 0x2003e000ull;
 
 }
 }
-#include "eq/reg00001.H"
+#ifndef __PPE_HCODE__
+    #include "eq/reg00001.H"
+#endif
 #endif

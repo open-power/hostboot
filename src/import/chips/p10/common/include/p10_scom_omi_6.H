@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_omi_6_H_
 #define __p10_scom_omi_6_H_
@@ -146,6 +148,18 @@ static const uint64_t RXPACKS_0_DEFAULT_RD_1_RX_DAC_REGS_LOFF_B_CNTLX86_PL = 0x8
 
 static const uint32_t RXPACKS_0_DEFAULT_RD_1_RX_DAC_REGS_LOFF_B_CNTLX86_PL_RX_BD_LATCH_DAC_W011 = 55;
 static const uint32_t RXPACKS_0_DEFAULT_RD_1_RX_DAC_REGS_LOFF_B_CNTLX86_PL_RX_BD_LATCH_DAC_W011_LEN = 9;
+// omi/reg00012.H
+
+static const uint64_t RXPACKS_0_DEFAULT_RD_1_RX_DAC_REGS_CNTL5_PL = 0x8000284110012c3full;
+
+static const uint32_t RXPACKS_0_DEFAULT_RD_1_RX_DAC_REGS_CNTL5_PL_NS_DATA = 48;
+static const uint32_t RXPACKS_0_DEFAULT_RD_1_RX_DAC_REGS_CNTL5_PL_NS_DATA_LEN = 4;
+static const uint32_t RXPACKS_0_DEFAULT_RD_1_RX_DAC_REGS_CNTL5_PL_EW_DATA = 52;
+static const uint32_t RXPACKS_0_DEFAULT_RD_1_RX_DAC_REGS_CNTL5_PL_EW_DATA_LEN = 4;
+static const uint32_t RXPACKS_0_DEFAULT_RD_1_RX_DAC_REGS_CNTL5_PL_NS_EDGE = 56;
+static const uint32_t RXPACKS_0_DEFAULT_RD_1_RX_DAC_REGS_CNTL5_PL_NS_EDGE_LEN = 4;
+static const uint32_t RXPACKS_0_DEFAULT_RD_1_RX_DAC_REGS_CNTL5_PL_EW_EDGE = 60;
+static const uint32_t RXPACKS_0_DEFAULT_RD_1_RX_DAC_REGS_CNTL5_PL_EW_EDGE_LEN = 4;
 // omi/reg00012.H
 
 static const uint64_t RXPACKS_0_DEFAULT_RD_2_RX_BIT_REGS_CNTL2_PL = 0x8003684210012c3full;
@@ -299,10 +313,12 @@ static const uint32_t RXPACKS_0_DEFAULT_RD_5_RX_DAC_REGS_LOFF_B_CNTLX87_PL_RX_BD
 
 static const uint64_t RXPACKS_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL13_PL = 0x8000684510012c3full;
 
-static const uint32_t RXPACKS_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL13_PL_COARSE = 48;
-static const uint32_t RXPACKS_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL13_PL_COARSE_LEN = 6;
-static const uint32_t RXPACKS_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL13_PL_GAIN = 54;
+static const uint32_t RXPACKS_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL13_PL_GAIN = 48;
 static const uint32_t RXPACKS_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL13_PL_GAIN_LEN = 4;
+static const uint32_t RXPACKS_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL13_PL_PEAK1 = 52;
+static const uint32_t RXPACKS_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL13_PL_PEAK1_LEN = 4;
+static const uint32_t RXPACKS_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL13_PL_PEAK2 = 56;
+static const uint32_t RXPACKS_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL13_PL_PEAK2_LEN = 4;
 // omi/reg00012.H
 
 static const uint64_t RXPACKS_1_RD_2_RX_BIT_REGS_MODE8_PL = 0x8003584710012c3full;
@@ -339,7 +355,7 @@ static const uint64_t RXPACKS_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX25_PL = 0x8000c8471
 
 static const uint32_t RXPACKS_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX25_PL_RX_BE_LATCH_DAC_S = 55;
 static const uint32_t RXPACKS_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX25_PL_RX_BE_LATCH_DAC_S_LEN = 9;
-// omi/reg00012.H
+// omi/reg00013.H
 
 static const uint64_t RXPACKS_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX65_PL = 0x8002084710012c3full;
 
@@ -355,10 +371,11 @@ static const uint32_t RXPACKS_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX75_PL_RX_BD_LATCH_D
 
 static const uint64_t RXPACKS_1_RD_2_RX_DAC_REGS_CNTL8_PL = 0x8000404710012c3full;
 
-static const uint32_t RXPACKS_1_RD_2_RX_DAC_REGS_CNTL8_PL_OCTANT_SELECT = 48;
-static const uint32_t RXPACKS_1_RD_2_RX_DAC_REGS_CNTL8_PL_OCTANT_SELECT_LEN = 3;
-static const uint32_t RXPACKS_1_RD_2_RX_DAC_REGS_CNTL8_PL_SPEED_SELECT = 51;
-static const uint32_t RXPACKS_1_RD_2_RX_DAC_REGS_CNTL8_PL_SPEED_SELECT_LEN = 2;
+static const uint32_t RXPACKS_1_RD_2_RX_DAC_REGS_CNTL8_PL_CLK_PHASE_SELECT = 48;
+static const uint32_t RXPACKS_1_RD_2_RX_DAC_REGS_CNTL8_PL_CLK_PHASE_SELECT_LEN = 2;
+static const uint32_t RXPACKS_1_RD_2_RX_DAC_REGS_CNTL8_PL_DPR_VBN_CAL = 50;
+static const uint32_t RXPACKS_1_RD_2_RX_DAC_REGS_CNTL8_PL_DPR_VBN_CAL_LEN = 2;
+static const uint32_t RXPACKS_1_RD_2_RX_DAC_REGS_CNTL8_PL_OFF_DISABLE_DM_B = 52;
 // omi/reg00013.H
 
 static const uint64_t RXPACKS_1_RD_3_RX_BIT_REGS_CNTL2_PL = 0x8003684610012c3full;
@@ -552,6 +569,8 @@ static const uint32_t TXPACKS_1_DD_3_TX_BIT_REGS_CNTL8_PL_TX_PSEG_MAIN_0_15_HS_E
 
 }
 }
-#include "omi/reg00012.H"
-#include "omi/reg00013.H"
+#ifndef __PPE_HCODE__
+    #include "omi/reg00012.H"
+    #include "omi/reg00013.H"
+#endif
 #endif

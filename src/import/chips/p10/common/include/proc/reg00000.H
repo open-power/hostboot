@@ -5654,86 +5654,86 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_INT_PC_REGS_ERR1_WOF_RESERVED_3(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_INT_PC_REGS_ERR1_WOF_CRESP_PB_INV_PRIO(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(INT_PC_REGS_ERR1_WOF));
 #endif
-    return o_data.insertFromRight<INT_PC_REGS_ERR1_WOF_RESERVED_3,
+    return o_data.insertFromRight<INT_PC_REGS_ERR1_WOF_CRESP_PB_INV_PRIO,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access INT_PC_REGS_ERR1_WOF_RESERVED_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access INT_PC_REGS_ERR1_WOF_CRESP_PB_INV_PRIO chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_INT_PC_REGS_ERR1_WOF_RESERVED_3(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_INT_PC_REGS_ERR1_WOF_CRESP_PB_INV_PRIO(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(INT_PC_REGS_ERR1_WOF));
 #endif
-    return o_data.insertFromRight<INT_PC_REGS_ERR1_WOF_RESERVED_3,
+    return o_data.insertFromRight<INT_PC_REGS_ERR1_WOF_CRESP_PB_INV_PRIO,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access INT_PC_REGS_ERR1_WOF_RESERVED_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access INT_PC_REGS_ERR1_WOF_CRESP_PB_INV_PRIO chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_INT_PC_REGS_ERR1_WOF_RESERVED_3(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_INT_PC_REGS_ERR1_WOF_CRESP_PB_INV_PRIO(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(INT_PC_REGS_ERR1_WOF));
 #endif
-    return o_data.setBit<INT_PC_REGS_ERR1_WOF_RESERVED_3>();
+    return o_data.setBit<INT_PC_REGS_ERR1_WOF_CRESP_PB_INV_PRIO>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access INT_PC_REGS_ERR1_WOF_RESERVED_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access INT_PC_REGS_ERR1_WOF_CRESP_PB_INV_PRIO chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_INT_PC_REGS_ERR1_WOF_RESERVED_3(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_INT_PC_REGS_ERR1_WOF_CRESP_PB_INV_PRIO(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(INT_PC_REGS_ERR1_WOF));
 #endif
-    return o_data.clearBit<INT_PC_REGS_ERR1_WOF_RESERVED_3>();
+    return o_data.clearBit<INT_PC_REGS_ERR1_WOF_CRESP_PB_INV_PRIO>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access INT_PC_REGS_ERR1_WOF_RESERVED_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access INT_PC_REGS_ERR1_WOF_CRESP_PB_INV_PRIO chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_INT_PC_REGS_ERR1_WOF_RESERVED_3(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_INT_PC_REGS_ERR1_WOF_CRESP_PB_INV_PRIO(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(INT_PC_REGS_ERR1_WOF));
 #endif
-    return i_data.extractToRight<INT_PC_REGS_ERR1_WOF_RESERVED_3,
+    return i_data.extractToRight<INT_PC_REGS_ERR1_WOF_CRESP_PB_INV_PRIO,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access INT_PC_REGS_ERR1_WOF_RESERVED_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access INT_PC_REGS_ERR1_WOF_CRESP_PB_INV_PRIO chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_INT_PC_REGS_ERR1_WOF_RESERVED_3(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_INT_PC_REGS_ERR1_WOF_CRESP_PB_INV_PRIO(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(INT_PC_REGS_ERR1_WOF));
 #endif
-    return i_data.getBit<INT_PC_REGS_ERR1_WOF_RESERVED_3>();
+    return i_data.getBit<INT_PC_REGS_ERR1_WOF_CRESP_PB_INV_PRIO>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access INT_PC_REGS_ERR1_WOF_RESERVED_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access INT_PC_REGS_ERR1_WOF_CRESP_PB_INV_PRIO chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

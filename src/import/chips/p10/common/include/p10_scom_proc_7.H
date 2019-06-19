@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_proc_7_H_
 #define __p10_scom_proc_7_H_
@@ -1060,13 +1062,9 @@ static const uint32_t PB_PTLSCOM67_MISC_CFG_TRANSPORT_3_OB_MUX_CTL2 = 34;
 static const uint32_t PB_PTLSCOM67_MISC_CFG_TRANSPORT_3_OB_MUX_CTL3 = 35;
 static const uint32_t PB_PTLSCOM67_MISC_CFG_SCOM_PTLX_EMULATION_MODE = 36;
 static const uint32_t PB_PTLSCOM67_MISC_CFG_SCOM_PTLY_EMULATION_MODE = 37;
-static const uint32_t PB_PTLSCOM67_MISC_CFG_TOD_EVN_IB_MUX_CTL = 38;
-static const uint32_t PB_PTLSCOM67_MISC_CFG_TOD_EVN_IB_MUX_CTL_LEN = 2;
-static const uint32_t PB_PTLSCOM67_MISC_CFG_TOD_ODD_IB_MUX_CTL = 40;
-static const uint32_t PB_PTLSCOM67_MISC_CFG_TOD_ODD_IB_MUX_CTL_LEN = 2;
-static const uint32_t PB_PTLSCOM67_MISC_CFG_TRANSPORT_PRI_BUS_CTL = 42;
-static const uint32_t PB_PTLSCOM67_MISC_CFG_MISC_SPARE = 43;
-static const uint32_t PB_PTLSCOM67_MISC_CFG_MISC_SPARE_LEN = 9;
+static const uint32_t PB_PTLSCOM67_MISC_CFG_TRANSPORT_PRI_BUS_CTL = 38;
+static const uint32_t PB_PTLSCOM67_MISC_CFG_MISC_SPARE = 39;
+static const uint32_t PB_PTLSCOM67_MISC_CFG_MISC_SPARE_LEN = 13;
 // proc/reg00034.H
 
 static const uint64_t PB_PTLSCOM67_PMU2_TLPM_COUNTER = 0x1301181dull;
@@ -1117,9 +1115,9 @@ static const uint32_t PB_BRIDGE_NHTM_NHTM0_SC_HTM_STAT_STATUS_PARITY_ERROR = 18;
 static const uint32_t PB_BRIDGE_NHTM_NHTM0_SC_HTM_STAT_STATUS_INVALID_CRESP = 19;
 // proc/reg00034.H
 
-static const uint64_t TP_LPC_SYNC_FIR_REG_RW = 0x030121c0ull;
-static const uint64_t TP_LPC_SYNC_FIR_REG_WO_AND = 0x030121c1ull;
-static const uint64_t TP_LPC_SYNC_FIR_REG_WO_OR = 0x030121c2ull;
+static const uint64_t TP_LPC_SYNC_FIR_REG_RW = 0x03012000ull;
+static const uint64_t TP_LPC_SYNC_FIR_REG_WO_AND = 0x03012001ull;
+static const uint64_t TP_LPC_SYNC_FIR_REG_WO_OR = 0x03012002ull;
 
 static const uint32_t TP_LPC_SYNC_FIR_REG_INVALID_TRANSFER_SIZE = 0;
 static const uint32_t TP_LPC_SYNC_FIR_REG_INVALID_COMMAND = 1;
@@ -2164,8 +2162,6 @@ static const uint32_t TP_TPCHIP_TPC_DBG_CBS_CC_DBG_PARANOIA_VITL_CLKOFF_CHANGE =
 static const uint32_t TP_TPCHIP_TPC_DBG_CBS_CC_TP_TPFSI_CBS_ACK = 31;
 // proc/reg00036.H
 
-//ERRCODE: // Some of the name targets not found in address targets: perv
-
 static const uint64_t TP_TPCHIP_TPC_DPLL_CNTL_NEST_REGS_TESTSEL = 0x01060159ull;
 
 static const uint32_t TP_TPCHIP_TPC_DPLL_CNTL_NEST_REGS_TESTSEL_DPLL_TESTSEL_TEST_SEL = 0;
@@ -2483,6 +2479,16 @@ static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL8_ROOT_CTRL
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_13_FSI = 0x00002984ull;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_13_FSI_BYTE = 0x00002e10ull;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_13_RW = 0x00050184ull;
+
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_13_SR_SCRATCH_REGISTER_13 = 0;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_13_SR_SCRATCH_REGISTER_13_LEN = 32;
+// proc/reg00036.H
+
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
 static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_5_FSI = 0x0000283cull;
 static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_5_FSI_BYTE = 0x000028f0ull;
 static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_5_RW = 0x0005003cull;
@@ -2585,7 +2591,7 @@ static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_SCMBL = 0x00000840ull;
 // proc/reg00036.H
 
 static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_SCMDT = 0x0000082cull;
-// proc/reg00036.H
+// proc/reg00037.H
 
 static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_SMBL = 0x00000838ull;
 // proc/reg00037.H
@@ -2642,9 +2648,11 @@ static const uint64_t VAS_VA_RG_SCF_WRMON7CMP = 0x02011427ull;
 
 }
 }
-#include "proc/reg00033.H"
-#include "proc/reg00034.H"
-#include "proc/reg00035.H"
-#include "proc/reg00036.H"
-#include "proc/reg00037.H"
+#ifndef __PPE_HCODE__
+    #include "proc/reg00033.H"
+    #include "proc/reg00034.H"
+    #include "proc/reg00035.H"
+    #include "proc/reg00036.H"
+    #include "proc/reg00037.H"
+#endif
 #endif

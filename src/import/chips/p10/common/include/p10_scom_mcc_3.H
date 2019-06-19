@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_mcc_3_H_
 #define __p10_scom_mcc_3_H_
@@ -53,5 +55,7 @@ static const uint32_t USTL_USTLMCHWFM_HWFM_STATUS_LEN = 4;
 
 }
 }
-#include "mcc/reg00003.H"
+#ifndef __PPE_HCODE__
+    #include "mcc/reg00003.H"
+#endif
 #endif

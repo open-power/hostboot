@@ -23,26 +23,28 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_pauc_H_
-#define __p10_scom_pauc_H_
+    #define __p10_scom_pauc_H_
 
-#include "p10_scom_pauc_0.H"
-#include "p10_scom_pauc_1.H"
-#include "p10_scom_pauc_2.H"
-#include "p10_scom_pauc_3.H"
-#include "p10_scom_pauc_4.H"
-#include "p10_scom_pauc_5.H"
-#include "p10_scom_pauc_6.H"
-#include "p10_scom_pauc_7.H"
-#include "p10_scom_pauc_8.H"
-#include "p10_scom_pauc_9.H"
-#include "p10_scom_pauc_a.H"
-#include "p10_scom_pauc_b.H"
-#include "p10_scom_pauc_c.H"
-#include "p10_scom_pauc_d.H"
-#include "p10_scom_pauc_e.H"
-#include "p10_scom_pauc_f.H"
+    #include "p10_scom_pauc_0.H"
+    #include "p10_scom_pauc_1.H"
+    #include "p10_scom_pauc_2.H"
+    #include "p10_scom_pauc_3.H"
+    #include "p10_scom_pauc_4.H"
+    #include "p10_scom_pauc_5.H"
+    #include "p10_scom_pauc_6.H"
+    #include "p10_scom_pauc_7.H"
+    #include "p10_scom_pauc_8.H"
+    #include "p10_scom_pauc_9.H"
+    #include "p10_scom_pauc_a.H"
+    #include "p10_scom_pauc_b.H"
+    #include "p10_scom_pauc_c.H"
+    #include "p10_scom_pauc_d.H"
+    #include "p10_scom_pauc_e.H"
+    #include "p10_scom_pauc_f.H"
 
 #endif

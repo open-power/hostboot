@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_mcc_a_H_
 #define __p10_scom_mcc_a_H_
@@ -90,6 +92,8 @@ static const uint32_t DSTL_DSTLERRRPT_WRDATA_CHANA_QUEUE_META_PARITY_ERR_HOLD_OU
 static const uint32_t DSTL_DSTLERRRPT_WRDATA_CHANB_QUEUE_META_PARITY_ERR_HOLD_OUT = 41;
 static const uint32_t DSTL_DSTLERRRPT_CHANA_CREDIT_RETURN_PARITY_ERR_HOLD_OUT = 42;
 static const uint32_t DSTL_DSTLERRRPT_CHANB_CREDIT_RETURN_PARITY_ERR_HOLD_OUT = 43;
+static const uint32_t DSTL_DSTLERRRPT_CHANA_WRDATA_COUNTER_ASSUMPTION_ERROR_HOLD_OUT = 44;
+static const uint32_t DSTL_DSTLERRRPT_CHANB_WRDATA_COUNTER_ASSUMPTION_ERROR_HOLD_OUT = 45;
 static const uint32_t DSTL_DSTLERRRPT_SUBCHANNEL_A_FAIL_STATE = 62;
 static const uint32_t DSTL_DSTLERRRPT_SUBCHANNEL_B_FAIL_STATE = 63;
 // mcc/reg00010.H
@@ -137,5 +141,7 @@ static const uint32_t DSTL_DSTLPSAVE0_RESERVED_43_47_LEN = 5;
 
 }
 }
-#include "mcc/reg00010.H"
+#ifndef __PPE_HCODE__
+    #include "mcc/reg00010.H"
+#endif
 #endif

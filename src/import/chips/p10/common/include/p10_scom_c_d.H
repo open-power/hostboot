@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_c_d_H_
 #define __p10_scom_c_d_H_
@@ -34,6 +36,26 @@ namespace scomt
 namespace c
 {
 
+
+static const uint64_t CPMS_DCCR = 0x200e0e60ull;
+
+static const uint32_t CPMS_DCCR_0_SELECT = 0;
+static const uint32_t CPMS_DCCR_1_SELECT = 1;
+static const uint32_t CPMS_DCCR__SMALL_OFFSET = 2;
+static const uint32_t CPMS_DCCR__SMALL_OFFSET_LEN = 2;
+static const uint32_t CPMS_DCCR_0_THRESH_SCALE = 4;
+static const uint32_t CPMS_DCCR_0_THRESH_SCALE_LEN = 4;
+static const uint32_t CPMS_DCCR_0_THRESH_VALUE = 8;
+static const uint32_t CPMS_DCCR_0_THRESH_VALUE_LEN = 8;
+static const uint32_t CPMS_DCCR_1_THRESH_SCALE = 16;
+static const uint32_t CPMS_DCCR_1_THRESH_SCALE_LEN = 4;
+static const uint32_t CPMS_DCCR_1_THRESH_VALUE = 20;
+static const uint32_t CPMS_DCCR_1_THRESH_VALUE_LEN = 8;
+static const uint32_t CPMS_DCCR_0_EVENT_SEL = 28;
+static const uint32_t CPMS_DCCR_0_EVENT_SEL_LEN = 3;
+static const uint32_t CPMS_DCCR_1_EVENT_SEL = 31;
+static const uint32_t CPMS_DCCR_1_EVENT_SEL_LEN = 3;
+// c/reg00013.H
 
 static const uint64_t CPMS_MMA_PFETSTAT = 0x200e0e34ull;
 
@@ -55,7 +77,7 @@ static const uint32_t CPMS_PFETDLY_MMA_POWUP_DLY = 12;
 static const uint32_t CPMS_PFETDLY_MMA_POWUP_DLY_LEN = 4;
 // c/reg00013.H
 
-static const uint64_t EC_LS_UNIT_HOLD_OUT0 = 0x200206c0ull;
+static const uint64_t EC_LS_LSU_HOLD_OUT_REG3 = 0x200206c3ull;
 // c/reg00013.H
 
 static const uint64_t EC_PC_COMMON_SPR_MODE = 0x20020484ull;
@@ -76,7 +98,7 @@ static const uint64_t EC_PC_COMMON_SPR_V2_HMER_RW_WAND = 0x20020494ull;
 static const uint64_t EC_PC_COMMON_SPR_V2_HMER_WO_OR = 0x20020490ull;
 
 static const uint32_t EC_PC_COMMON_SPR_V2_HMER_MALFUNCTION_ALERT = 0;
-static const uint32_t EC_PC_COMMON_SPR_V2_HMER_CME_REQUEST = 1;
+static const uint32_t EC_PC_COMMON_SPR_V2_HMER_QME_REQUEST = 1;
 static const uint32_t EC_PC_COMMON_SPR_V2_HMER_PROC_RCVY_DONE = 2;
 static const uint32_t EC_PC_COMMON_SPR_V2_HMER_TFAC_ERR = 4;
 static const uint32_t EC_PC_COMMON_SPR_V2_HMER_XSCOM_FAIL = 8;
@@ -93,6 +115,9 @@ static const uint64_t EC_PC_FIR_CORE_ACTION1 = 0x20020447ull;
 // c/reg00013.H
 
 static const uint64_t EC_PC_PMC_THREAD_INFO = 0x20020413ull;
+// c/reg00013.H
+
+static const uint64_t EC_PC_PMU_SPRCOR_OCC_SCOMC = 0x20020410ull;
 // c/reg00013.H
 
 static const uint64_t EC_PC_SCR1 = 0x20020487ull;
@@ -228,5 +253,7 @@ static const uint32_t QME_PSCRS0_PLS_LEN = 4;
 
 }
 }
-#include "c/reg00013.H"
+#ifndef __PPE_HCODE__
+    #include "c/reg00013.H"
+#endif
 #endif

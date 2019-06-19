@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_pau_b_H_
 #define __p10_scom_pau_b_H_
@@ -1038,5 +1040,7 @@ static const uint32_t XTS_REG_TEST_CERR_TEST_CERR_BITSEL_LEN = 6;
 
 }
 }
-#include "pau/reg00015.H"
+#ifndef __PPE_HCODE__
+    #include "pau/reg00015.H"
+#endif
 #endif

@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_omic_d_H_
 #define __p10_scom_omic_d_H_
@@ -38,11 +40,10 @@ namespace omic
 static const uint64_t CMN_CONFIG = 0x0c01174eull;
 
 static const uint32_t CMN_CONFIG_SPARE = 0;
-static const uint32_t CMN_CONFIG_SPARE_LEN = 4;
-static const uint32_t CMN_CONFIG_PM_CDR_TIMER = 4;
-static const uint32_t CMN_CONFIG_PM_CDR_TIMER_LEN = 4;
-static const uint32_t CMN_CONFIG_PM_DIDT_TIMER = 8;
-static const uint32_t CMN_CONFIG_PM_DIDT_TIMER_LEN = 4;
+static const uint32_t CMN_CONFIG_SPARE_LEN = 6;
+static const uint32_t CMN_CONFIG_RX_EDGE_ENA = 6;
+static const uint32_t CMN_CONFIG_RX_EDGE_MARGIN = 7;
+static const uint32_t CMN_CONFIG_RX_EDGE_MARGIN_LEN = 5;
 static const uint32_t CMN_CONFIG_PSAV_STS_ENABLE = 12;
 static const uint32_t CMN_CONFIG_RECAL_TIMER = 13;
 static const uint32_t CMN_CONFIG_RECAL_TIMER_LEN = 3;
@@ -91,7 +92,6 @@ static const uint32_t CTL_REGS_RX_MODE14_PG_RX_LOFF_LIVEDGE_MODE = 48;
 static const uint64_t CTL_REGS_RX_MODE1_PG = 0x8008084010012c3full;
 
 static const uint32_t CTL_REGS_RX_MODE1_PG_CLKDIST_PDWN = 48;
-static const uint32_t CTL_REGS_RX_MODE1_PG_CLKDIST_PDWN_LEN = 3;
 static const uint32_t CTL_REGS_RX_MODE1_PG_16TO1 = 51;
 // omic/reg00013.H
 
@@ -132,5 +132,7 @@ static const uint32_t TX_CTL_SM_REGS_CTLSM_CNTL7_PG_TX_PSAVE_FORCE_STS_0_15_LEN 
 
 }
 }
-#include "omic/reg00013.H"
+#ifndef __PPE_HCODE__
+    #include "omic/reg00013.H"
+#endif
 #endif

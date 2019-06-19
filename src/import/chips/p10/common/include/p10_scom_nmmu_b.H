@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_nmmu_b_H_
 #define __p10_scom_nmmu_b_H_
@@ -52,5 +54,7 @@ static const uint64_t FIR1_WOF_REG = 0x02010c48ull;
 
 }
 }
-#include "nmmu/reg00011.H"
+#ifndef __PPE_HCODE__
+    #include "nmmu/reg00011.H"
+#endif
 #endif

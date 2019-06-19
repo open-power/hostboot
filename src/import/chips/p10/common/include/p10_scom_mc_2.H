@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_mc_2_H_
 #define __p10_scom_mc_2_H_
@@ -89,13 +91,6 @@ static const uint32_t MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_ARM_SEL_LEN = 20;
 static const uint32_t MBA_SCOMFIR_DBGCFG1Q_RESERVED_63 = 63;
 // mc/reg00002.H
 
-static const uint64_t MBA_SCOMFIR_MCBCFGQ = 0x0c010fe0ull;
-
-static const uint32_t MBA_SCOMFIR_MCBCFGQ_RESET_KEEPER = 10;
-static const uint32_t MBA_SCOMFIR_MCBCFGQ_CFG_ENABLE_SPEC_ATTN = 62;
-static const uint32_t MBA_SCOMFIR_MCBCFGQ_CFG_ENABLE_HOST_ATTN = 63;
-// mc/reg00002.H
-
 static const uint64_t MBA_SCOMFIR_MCWATDATA2 = 0x0c010f9cull;
 
 static const uint32_t MBA_SCOMFIR_MCWATDATA2_PATTERN_B = 0;
@@ -154,5 +149,7 @@ static const uint32_t TRA1_TR0_CONFIG_3_D_LEN = 24;
 
 }
 }
-#include "mc/reg00002.H"
+#ifndef __PPE_HCODE__
+    #include "mc/reg00002.H"
+#endif
 #endif

@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_omic_3_H_
 #define __p10_scom_omic_3_H_
@@ -120,5 +122,7 @@ static const uint64_t TX_CTL_SM_REGS_CTLSM_STAT4_PG = 0x800d5c4010012c3full;
 
 }
 }
-#include "omic/reg00003.H"
+#ifndef __PPE_HCODE__
+    #include "omic/reg00003.H"
+#endif
 #endif

@@ -10159,366 +10159,6 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_TP_TPCHIP_OCC_OCI_OCB_P2SCR0(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = TP_TPCHIP_OCC_OCI_OCB_P2SCR0;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_TP_TPCHIP_OCC_OCI_OCB_P2SCR0(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = TP_TPCHIP_OCC_OCI_OCB_P2SCR0;
-#endif
-    return fapi2::getScom(i_target, TP_TPCHIP_OCC_OCI_OCB_P2SCR0, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_TP_TPCHIP_OCC_OCI_OCB_P2SCR0(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(TP_TPCHIP_OCC_OCI_OCB_P2SCR0));
-#endif
-    return fapi2::putScom(i_target, TP_TPCHIP_OCC_OCI_OCB_P2SCR0, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-
-static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_OCC_OCI_OCB_P2SCR0_FRAME_SIZE(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(TP_TPCHIP_OCC_OCI_OCB_P2SCR0));
-#endif
-    return o_data.insertFromRight<TP_TPCHIP_OCC_OCI_OCB_P2SCR0_FRAME_SIZE,
-           TP_TPCHIP_OCC_OCI_OCB_P2SCR0_FRAME_SIZE_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPCHIP_OCC_OCI_OCB_P2SCR0_FRAME_SIZE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_OCC_OCI_OCB_P2SCR0_FRAME_SIZE(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(TP_TPCHIP_OCC_OCI_OCB_P2SCR0));
-#endif
-    return o_data.insertFromRight<TP_TPCHIP_OCC_OCI_OCB_P2SCR0_FRAME_SIZE,
-           TP_TPCHIP_OCC_OCI_OCB_P2SCR0_FRAME_SIZE_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPCHIP_OCC_OCI_OCB_P2SCR0_FRAME_SIZE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_TP_TPCHIP_OCC_OCI_OCB_P2SCR0_FRAME_SIZE(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(TP_TPCHIP_OCC_OCI_OCB_P2SCR0));
-#endif
-    return i_data.extractToRight<TP_TPCHIP_OCC_OCI_OCB_P2SCR0_FRAME_SIZE,
-           TP_TPCHIP_OCC_OCI_OCB_P2SCR0_FRAME_SIZE_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPCHIP_OCC_OCI_OCB_P2SCR0_FRAME_SIZE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_OCC_OCI_OCB_P2SCR0_OUT_COUNT1(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(TP_TPCHIP_OCC_OCI_OCB_P2SCR0));
-#endif
-    return o_data.insertFromRight<TP_TPCHIP_OCC_OCI_OCB_P2SCR0_OUT_COUNT1,
-           TP_TPCHIP_OCC_OCI_OCB_P2SCR0_OUT_COUNT1_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPCHIP_OCC_OCI_OCB_P2SCR0_OUT_COUNT1 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_OCC_OCI_OCB_P2SCR0_OUT_COUNT1(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(TP_TPCHIP_OCC_OCI_OCB_P2SCR0));
-#endif
-    return o_data.insertFromRight<TP_TPCHIP_OCC_OCI_OCB_P2SCR0_OUT_COUNT1,
-           TP_TPCHIP_OCC_OCI_OCB_P2SCR0_OUT_COUNT1_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPCHIP_OCC_OCI_OCB_P2SCR0_OUT_COUNT1 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_TP_TPCHIP_OCC_OCI_OCB_P2SCR0_OUT_COUNT1(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(TP_TPCHIP_OCC_OCI_OCB_P2SCR0));
-#endif
-    return i_data.extractToRight<TP_TPCHIP_OCC_OCI_OCB_P2SCR0_OUT_COUNT1,
-           TP_TPCHIP_OCC_OCI_OCB_P2SCR0_OUT_COUNT1_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPCHIP_OCC_OCI_OCB_P2SCR0_OUT_COUNT1 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_DELAY1(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(TP_TPCHIP_OCC_OCI_OCB_P2SCR0));
-#endif
-    return o_data.insertFromRight<TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_DELAY1,
-           TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_DELAY1_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_DELAY1 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_DELAY1(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(TP_TPCHIP_OCC_OCI_OCB_P2SCR0));
-#endif
-    return o_data.insertFromRight<TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_DELAY1,
-           TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_DELAY1_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_DELAY1 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_DELAY1(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(TP_TPCHIP_OCC_OCI_OCB_P2SCR0));
-#endif
-    return i_data.extractToRight<TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_DELAY1,
-           TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_DELAY1_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_DELAY1 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_COUNT1(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(TP_TPCHIP_OCC_OCI_OCB_P2SCR0));
-#endif
-    return o_data.insertFromRight<TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_COUNT1,
-           TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_COUNT1_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_COUNT1 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_COUNT1(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(TP_TPCHIP_OCC_OCI_OCB_P2SCR0));
-#endif
-    return o_data.insertFromRight<TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_COUNT1,
-           TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_COUNT1_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_COUNT1 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_COUNT1(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(TP_TPCHIP_OCC_OCI_OCB_P2SCR0));
-#endif
-    return i_data.extractToRight<TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_COUNT1,
-           TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_COUNT1_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_COUNT1 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_OCC_OCI_OCB_P2SCR0_OUT_COUNT2(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(TP_TPCHIP_OCC_OCI_OCB_P2SCR0));
-#endif
-    return o_data.insertFromRight<TP_TPCHIP_OCC_OCI_OCB_P2SCR0_OUT_COUNT2,
-           TP_TPCHIP_OCC_OCI_OCB_P2SCR0_OUT_COUNT2_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPCHIP_OCC_OCI_OCB_P2SCR0_OUT_COUNT2 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_OCC_OCI_OCB_P2SCR0_OUT_COUNT2(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(TP_TPCHIP_OCC_OCI_OCB_P2SCR0));
-#endif
-    return o_data.insertFromRight<TP_TPCHIP_OCC_OCI_OCB_P2SCR0_OUT_COUNT2,
-           TP_TPCHIP_OCC_OCI_OCB_P2SCR0_OUT_COUNT2_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPCHIP_OCC_OCI_OCB_P2SCR0_OUT_COUNT2 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_TP_TPCHIP_OCC_OCI_OCB_P2SCR0_OUT_COUNT2(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(TP_TPCHIP_OCC_OCI_OCB_P2SCR0));
-#endif
-    return i_data.extractToRight<TP_TPCHIP_OCC_OCI_OCB_P2SCR0_OUT_COUNT2,
-           TP_TPCHIP_OCC_OCI_OCB_P2SCR0_OUT_COUNT2_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPCHIP_OCC_OCI_OCB_P2SCR0_OUT_COUNT2 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_DELAY2(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(TP_TPCHIP_OCC_OCI_OCB_P2SCR0));
-#endif
-    return o_data.insertFromRight<TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_DELAY2,
-           TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_DELAY2_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_DELAY2 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_DELAY2(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(TP_TPCHIP_OCC_OCI_OCB_P2SCR0));
-#endif
-    return o_data.insertFromRight<TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_DELAY2,
-           TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_DELAY2_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_DELAY2 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_DELAY2(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(TP_TPCHIP_OCC_OCI_OCB_P2SCR0));
-#endif
-    return i_data.extractToRight<TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_DELAY2,
-           TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_DELAY2_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_DELAY2 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_COUNT2(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(TP_TPCHIP_OCC_OCI_OCB_P2SCR0));
-#endif
-    return o_data.insertFromRight<TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_COUNT2,
-           TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_COUNT2_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_COUNT2 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_COUNT2(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(TP_TPCHIP_OCC_OCI_OCB_P2SCR0));
-#endif
-    return o_data.insertFromRight<TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_COUNT2,
-           TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_COUNT2_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_COUNT2 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_COUNT2(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(TP_TPCHIP_OCC_OCI_OCB_P2SCR0));
-#endif
-    return i_data.extractToRight<TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_COUNT2,
-           TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_COUNT2_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_COUNT2 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG112(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
@@ -11366,6 +11006,1399 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG99
 fapi_try_exit:
     FAPI_ERR("Invalid dial access TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG99_REGISTER99 chip: %x, ec: %x", scomt::chip,
              scomt::ec);
+    return i_data;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_TP_TPCHIP_TPC_CPLT_CTRL3_RW(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = TP_TPCHIP_TPC_CPLT_CTRL3_RW;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_TP_TPCHIP_TPC_CPLT_CTRL3_RW(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = TP_TPCHIP_TPC_CPLT_CTRL3_RW;
+#endif
+    return fapi2::getScom(i_target, TP_TPCHIP_TPC_CPLT_CTRL3_RW, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_TP_TPCHIP_TPC_CPLT_CTRL3_RW(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return fapi2::putScom(i_target, TP_TPCHIP_TPC_CPLT_CTRL3_RW, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR;
+#endif
+    return fapi2::getScom(i_target, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return fapi2::putScom(i_target, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR;
+#endif
+    return fapi2::getScom(i_target, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return fapi2::putScom(i_target, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_0_PSCOM_EN(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.insertFromRight<TP_TPCHIP_TPC_CPLT_CTRL3_0_PSCOM_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_0_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_0_PSCOM_EN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.insertFromRight<TP_TPCHIP_TPC_CPLT_CTRL3_0_PSCOM_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_0_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_0_PSCOM_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.setBit<TP_TPCHIP_TPC_CPLT_CTRL3_0_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_0_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPCHIP_TPC_CPLT_CTRL3_0_PSCOM_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.clearBit<TP_TPCHIP_TPC_CPLT_CTRL3_0_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_0_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TP_TPCHIP_TPC_CPLT_CTRL3_0_PSCOM_EN(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return i_data.extractToRight<TP_TPCHIP_TPC_CPLT_CTRL3_0_PSCOM_EN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_0_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TP_TPCHIP_TPC_CPLT_CTRL3_0_PSCOM_EN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return i_data.getBit<TP_TPCHIP_TPC_CPLT_CTRL3_0_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_0_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_1_PSCOM_EN(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.insertFromRight<TP_TPCHIP_TPC_CPLT_CTRL3_1_PSCOM_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_1_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_1_PSCOM_EN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.insertFromRight<TP_TPCHIP_TPC_CPLT_CTRL3_1_PSCOM_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_1_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_1_PSCOM_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.setBit<TP_TPCHIP_TPC_CPLT_CTRL3_1_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_1_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPCHIP_TPC_CPLT_CTRL3_1_PSCOM_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.clearBit<TP_TPCHIP_TPC_CPLT_CTRL3_1_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_1_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TP_TPCHIP_TPC_CPLT_CTRL3_1_PSCOM_EN(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return i_data.extractToRight<TP_TPCHIP_TPC_CPLT_CTRL3_1_PSCOM_EN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_1_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TP_TPCHIP_TPC_CPLT_CTRL3_1_PSCOM_EN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return i_data.getBit<TP_TPCHIP_TPC_CPLT_CTRL3_1_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_1_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_2_PSCOM_EN(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.insertFromRight<TP_TPCHIP_TPC_CPLT_CTRL3_2_PSCOM_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_2_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_2_PSCOM_EN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.insertFromRight<TP_TPCHIP_TPC_CPLT_CTRL3_2_PSCOM_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_2_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_2_PSCOM_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.setBit<TP_TPCHIP_TPC_CPLT_CTRL3_2_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_2_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPCHIP_TPC_CPLT_CTRL3_2_PSCOM_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.clearBit<TP_TPCHIP_TPC_CPLT_CTRL3_2_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_2_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TP_TPCHIP_TPC_CPLT_CTRL3_2_PSCOM_EN(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return i_data.extractToRight<TP_TPCHIP_TPC_CPLT_CTRL3_2_PSCOM_EN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_2_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TP_TPCHIP_TPC_CPLT_CTRL3_2_PSCOM_EN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return i_data.getBit<TP_TPCHIP_TPC_CPLT_CTRL3_2_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_2_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_3_PSCOM_EN(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.insertFromRight<TP_TPCHIP_TPC_CPLT_CTRL3_3_PSCOM_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_3_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_3_PSCOM_EN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.insertFromRight<TP_TPCHIP_TPC_CPLT_CTRL3_3_PSCOM_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_3_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_3_PSCOM_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.setBit<TP_TPCHIP_TPC_CPLT_CTRL3_3_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_3_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPCHIP_TPC_CPLT_CTRL3_3_PSCOM_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.clearBit<TP_TPCHIP_TPC_CPLT_CTRL3_3_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_3_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TP_TPCHIP_TPC_CPLT_CTRL3_3_PSCOM_EN(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return i_data.extractToRight<TP_TPCHIP_TPC_CPLT_CTRL3_3_PSCOM_EN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_3_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TP_TPCHIP_TPC_CPLT_CTRL3_3_PSCOM_EN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return i_data.getBit<TP_TPCHIP_TPC_CPLT_CTRL3_3_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_3_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_4_PSCOM_EN(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.insertFromRight<TP_TPCHIP_TPC_CPLT_CTRL3_4_PSCOM_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_4_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_4_PSCOM_EN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.insertFromRight<TP_TPCHIP_TPC_CPLT_CTRL3_4_PSCOM_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_4_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_4_PSCOM_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.setBit<TP_TPCHIP_TPC_CPLT_CTRL3_4_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_4_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPCHIP_TPC_CPLT_CTRL3_4_PSCOM_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.clearBit<TP_TPCHIP_TPC_CPLT_CTRL3_4_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_4_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TP_TPCHIP_TPC_CPLT_CTRL3_4_PSCOM_EN(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return i_data.extractToRight<TP_TPCHIP_TPC_CPLT_CTRL3_4_PSCOM_EN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_4_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TP_TPCHIP_TPC_CPLT_CTRL3_4_PSCOM_EN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return i_data.getBit<TP_TPCHIP_TPC_CPLT_CTRL3_4_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_4_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_5_PSCOM_EN(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.insertFromRight<TP_TPCHIP_TPC_CPLT_CTRL3_5_PSCOM_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_5_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_5_PSCOM_EN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.insertFromRight<TP_TPCHIP_TPC_CPLT_CTRL3_5_PSCOM_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_5_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_5_PSCOM_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.setBit<TP_TPCHIP_TPC_CPLT_CTRL3_5_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_5_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPCHIP_TPC_CPLT_CTRL3_5_PSCOM_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.clearBit<TP_TPCHIP_TPC_CPLT_CTRL3_5_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_5_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TP_TPCHIP_TPC_CPLT_CTRL3_5_PSCOM_EN(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return i_data.extractToRight<TP_TPCHIP_TPC_CPLT_CTRL3_5_PSCOM_EN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_5_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TP_TPCHIP_TPC_CPLT_CTRL3_5_PSCOM_EN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return i_data.getBit<TP_TPCHIP_TPC_CPLT_CTRL3_5_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_5_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_6_PSCOM_EN(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.insertFromRight<TP_TPCHIP_TPC_CPLT_CTRL3_6_PSCOM_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_6_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_6_PSCOM_EN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.insertFromRight<TP_TPCHIP_TPC_CPLT_CTRL3_6_PSCOM_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_6_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_6_PSCOM_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.setBit<TP_TPCHIP_TPC_CPLT_CTRL3_6_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_6_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPCHIP_TPC_CPLT_CTRL3_6_PSCOM_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.clearBit<TP_TPCHIP_TPC_CPLT_CTRL3_6_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_6_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TP_TPCHIP_TPC_CPLT_CTRL3_6_PSCOM_EN(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return i_data.extractToRight<TP_TPCHIP_TPC_CPLT_CTRL3_6_PSCOM_EN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_6_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TP_TPCHIP_TPC_CPLT_CTRL3_6_PSCOM_EN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return i_data.getBit<TP_TPCHIP_TPC_CPLT_CTRL3_6_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_6_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_7_PSCOM_EN(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.insertFromRight<TP_TPCHIP_TPC_CPLT_CTRL3_7_PSCOM_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_7_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_7_PSCOM_EN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.insertFromRight<TP_TPCHIP_TPC_CPLT_CTRL3_7_PSCOM_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_7_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_7_PSCOM_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.setBit<TP_TPCHIP_TPC_CPLT_CTRL3_7_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_7_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPCHIP_TPC_CPLT_CTRL3_7_PSCOM_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.clearBit<TP_TPCHIP_TPC_CPLT_CTRL3_7_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_7_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TP_TPCHIP_TPC_CPLT_CTRL3_7_PSCOM_EN(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return i_data.extractToRight<TP_TPCHIP_TPC_CPLT_CTRL3_7_PSCOM_EN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_7_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TP_TPCHIP_TPC_CPLT_CTRL3_7_PSCOM_EN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return i_data.getBit<TP_TPCHIP_TPC_CPLT_CTRL3_7_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_7_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_8_PSCOM_EN(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.insertFromRight<TP_TPCHIP_TPC_CPLT_CTRL3_8_PSCOM_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_8_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_8_PSCOM_EN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.insertFromRight<TP_TPCHIP_TPC_CPLT_CTRL3_8_PSCOM_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_8_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_8_PSCOM_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.setBit<TP_TPCHIP_TPC_CPLT_CTRL3_8_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_8_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPCHIP_TPC_CPLT_CTRL3_8_PSCOM_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.clearBit<TP_TPCHIP_TPC_CPLT_CTRL3_8_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_8_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TP_TPCHIP_TPC_CPLT_CTRL3_8_PSCOM_EN(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return i_data.extractToRight<TP_TPCHIP_TPC_CPLT_CTRL3_8_PSCOM_EN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_8_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TP_TPCHIP_TPC_CPLT_CTRL3_8_PSCOM_EN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return i_data.getBit<TP_TPCHIP_TPC_CPLT_CTRL3_8_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_8_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_9_PSCOM_EN(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.insertFromRight<TP_TPCHIP_TPC_CPLT_CTRL3_9_PSCOM_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_9_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_9_PSCOM_EN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.insertFromRight<TP_TPCHIP_TPC_CPLT_CTRL3_9_PSCOM_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_9_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_9_PSCOM_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.setBit<TP_TPCHIP_TPC_CPLT_CTRL3_9_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_9_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPCHIP_TPC_CPLT_CTRL3_9_PSCOM_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.clearBit<TP_TPCHIP_TPC_CPLT_CTRL3_9_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_9_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TP_TPCHIP_TPC_CPLT_CTRL3_9_PSCOM_EN(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return i_data.extractToRight<TP_TPCHIP_TPC_CPLT_CTRL3_9_PSCOM_EN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_9_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TP_TPCHIP_TPC_CPLT_CTRL3_9_PSCOM_EN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return i_data.getBit<TP_TPCHIP_TPC_CPLT_CTRL3_9_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_9_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_10_PSCOM_EN(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.insertFromRight<TP_TPCHIP_TPC_CPLT_CTRL3_10_PSCOM_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_10_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_10_PSCOM_EN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.insertFromRight<TP_TPCHIP_TPC_CPLT_CTRL3_10_PSCOM_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_10_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_10_PSCOM_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.setBit<TP_TPCHIP_TPC_CPLT_CTRL3_10_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_10_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPCHIP_TPC_CPLT_CTRL3_10_PSCOM_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.clearBit<TP_TPCHIP_TPC_CPLT_CTRL3_10_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_10_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TP_TPCHIP_TPC_CPLT_CTRL3_10_PSCOM_EN(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return i_data.extractToRight<TP_TPCHIP_TPC_CPLT_CTRL3_10_PSCOM_EN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_10_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TP_TPCHIP_TPC_CPLT_CTRL3_10_PSCOM_EN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return i_data.getBit<TP_TPCHIP_TPC_CPLT_CTRL3_10_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_10_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_11_PSCOM_EN(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.insertFromRight<TP_TPCHIP_TPC_CPLT_CTRL3_11_PSCOM_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_11_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_11_PSCOM_EN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.insertFromRight<TP_TPCHIP_TPC_CPLT_CTRL3_11_PSCOM_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_11_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_11_PSCOM_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.setBit<TP_TPCHIP_TPC_CPLT_CTRL3_11_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_11_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPCHIP_TPC_CPLT_CTRL3_11_PSCOM_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.clearBit<TP_TPCHIP_TPC_CPLT_CTRL3_11_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_11_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TP_TPCHIP_TPC_CPLT_CTRL3_11_PSCOM_EN(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return i_data.extractToRight<TP_TPCHIP_TPC_CPLT_CTRL3_11_PSCOM_EN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_11_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TP_TPCHIP_TPC_CPLT_CTRL3_11_PSCOM_EN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return i_data.getBit<TP_TPCHIP_TPC_CPLT_CTRL3_11_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_11_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_12_PSCOM_EN(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.insertFromRight<TP_TPCHIP_TPC_CPLT_CTRL3_12_PSCOM_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_12_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_12_PSCOM_EN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.insertFromRight<TP_TPCHIP_TPC_CPLT_CTRL3_12_PSCOM_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_12_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_12_PSCOM_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.setBit<TP_TPCHIP_TPC_CPLT_CTRL3_12_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_12_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPCHIP_TPC_CPLT_CTRL3_12_PSCOM_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.clearBit<TP_TPCHIP_TPC_CPLT_CTRL3_12_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_12_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TP_TPCHIP_TPC_CPLT_CTRL3_12_PSCOM_EN(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return i_data.extractToRight<TP_TPCHIP_TPC_CPLT_CTRL3_12_PSCOM_EN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_12_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TP_TPCHIP_TPC_CPLT_CTRL3_12_PSCOM_EN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return i_data.getBit<TP_TPCHIP_TPC_CPLT_CTRL3_12_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_12_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_13_PSCOM_EN(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.insertFromRight<TP_TPCHIP_TPC_CPLT_CTRL3_13_PSCOM_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_13_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_13_PSCOM_EN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.insertFromRight<TP_TPCHIP_TPC_CPLT_CTRL3_13_PSCOM_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_13_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_13_PSCOM_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.setBit<TP_TPCHIP_TPC_CPLT_CTRL3_13_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_13_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPCHIP_TPC_CPLT_CTRL3_13_PSCOM_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.clearBit<TP_TPCHIP_TPC_CPLT_CTRL3_13_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_13_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TP_TPCHIP_TPC_CPLT_CTRL3_13_PSCOM_EN(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return i_data.extractToRight<TP_TPCHIP_TPC_CPLT_CTRL3_13_PSCOM_EN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_13_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TP_TPCHIP_TPC_CPLT_CTRL3_13_PSCOM_EN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return i_data.getBit<TP_TPCHIP_TPC_CPLT_CTRL3_13_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_13_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_14_PSCOM_EN(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.insertFromRight<TP_TPCHIP_TPC_CPLT_CTRL3_14_PSCOM_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_14_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_14_PSCOM_EN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.insertFromRight<TP_TPCHIP_TPC_CPLT_CTRL3_14_PSCOM_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_14_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL3_14_PSCOM_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.setBit<TP_TPCHIP_TPC_CPLT_CTRL3_14_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_14_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPCHIP_TPC_CPLT_CTRL3_14_PSCOM_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return o_data.clearBit<TP_TPCHIP_TPC_CPLT_CTRL3_14_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_14_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TP_TPCHIP_TPC_CPLT_CTRL3_14_PSCOM_EN(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return i_data.extractToRight<TP_TPCHIP_TPC_CPLT_CTRL3_14_PSCOM_EN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_14_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TP_TPCHIP_TPC_CPLT_CTRL3_14_PSCOM_EN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL3_RW, TP_TPCHIP_TPC_CPLT_CTRL3_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL3_WO_OR));
+#endif
+    return i_data.getBit<TP_TPCHIP_TPC_CPLT_CTRL3_14_PSCOM_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_TPC_CPLT_CTRL3_14_PSCOM_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

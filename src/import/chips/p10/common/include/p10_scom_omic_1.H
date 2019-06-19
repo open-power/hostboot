@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_omic_1_H_
 #define __p10_scom_omic_1_H_
@@ -44,10 +46,14 @@ static const uint32_t CTL_REGS_RX_CNTL1_PG_TIMER_SEL_LEN = 4;
 
 static const uint64_t CTL_REGS_RX_MODE12_PG = 0x8008604010012c3full;
 
-static const uint32_t CTL_REGS_RX_MODE12_PG_RES_DAC = 50;
-static const uint32_t CTL_REGS_RX_MODE12_PG_RES_DAC_LEN = 3;
-static const uint32_t CTL_REGS_RX_MODE12_PG_BYPASS = 53;
-static const uint32_t CTL_REGS_RX_MODE12_PG_PDWN_B = 54;
+static const uint32_t CTL_REGS_RX_MODE12_PG_CLOCK_DAC = 48;
+static const uint32_t CTL_REGS_RX_MODE12_PG_CLOCK_DAC_LEN = 3;
+static const uint32_t CTL_REGS_RX_MODE12_PG_DATA_DAC = 51;
+static const uint32_t CTL_REGS_RX_MODE12_PG_DATA_DAC_LEN = 3;
+static const uint32_t CTL_REGS_RX_MODE12_PG_VSET_DAC = 54;
+static const uint32_t CTL_REGS_RX_MODE12_PG_VSET_DAC_LEN = 2;
+static const uint32_t CTL_REGS_RX_MODE12_PG_BYPASS = 56;
+static const uint32_t CTL_REGS_RX_MODE12_PG_PDWN_B = 57;
 // omic/reg00001.H
 
 static const uint64_t CTL_REGS_RX_MODE22_PG = 0x8008b04010012c3full;
@@ -121,5 +127,7 @@ static const uint32_t TX_CTL_SM_REGS_CTLSM_CNTL1_PG_TX_PSAVE_FENCE_REQ_DL_IO_0_1
 
 }
 }
-#include "omic/reg00001.H"
+#ifndef __PPE_HCODE__
+    #include "omic/reg00001.H"
+#endif
 #endif

@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_omic_0_H_
 #define __p10_scom_omic_0_H_
@@ -68,5 +70,7 @@ static const uint32_t MC_OMI_FIR_WOF_REG_MC_OMI_FIR_WOF_LEN = 62;
 
 }
 }
-#include "omic/reg00000.H"
+#ifndef __PPE_HCODE__
+    #include "omic/reg00000.H"
+#endif
 #endif

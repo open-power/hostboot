@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_mcc_8_H_
 #define __p10_scom_mcc_8_H_
@@ -104,12 +106,19 @@ static const uint64_t USTL_USTLERRPT = 0x0c010e16ull;
 
 static const uint32_t USTL_USTLERRPT_WDF_CMT_PAR_ERR = 0;
 static const uint32_t USTL_USTLERRPT_WDF_CMD_PAR_ERR = 1;
-static const uint32_t USTL_USTLERRPT_WRT_NO_BUFF_ERR = 2;
-static const uint32_t USTL_USTLERRPT_WRT_BUFF_MGR_PAR_ERR = 3;
-static const uint32_t USTL_USTLERRPT_WDF_BUFF_MGR_PAR_ERR = 4;
-static const uint32_t USTL_USTLERRPT_WDF_NO_BUFF_ERR = 5;
-static const uint32_t USTL_USTLERRPT_RESERVED = 6;
-static const uint32_t USTL_USTLERRPT_RESERVED_LEN = 10;
+static const uint32_t USTL_USTLERRPT_WDF_BUFF_MGR_PAR_ERR = 2;
+static const uint32_t USTL_USTLERRPT_WDF_NO_BUFF_ERR = 3;
+static const uint32_t USTL_USTLERRPT_WDF_DSTL_WB_READ_TAG_PAR_ERR = 4;
+static const uint32_t USTL_USTLERRPT_WRT_NO_BUFF_ERR = 5;
+static const uint32_t USTL_USTLERRPT_WRT_BUFF_MGR_PAR_ERR = 6;
+static const uint32_t USTL_USTLERRPT_WRT_MCS_SLICE0_WRITE_DISP_PAR_ERR = 7;
+static const uint32_t USTL_USTLERRPT_WRT_MCS_SLICE1_WRITE_DISP_PAR_ERR = 8;
+static const uint32_t USTL_USTLERRPT_WRT_MCS_SLICE2_WRITE_DISP_PAR_ERR = 9;
+static const uint32_t USTL_USTLERRPT_WRT_MCS_SLICE3_WRITE_DISP_PAR_ERR = 10;
+static const uint32_t USTL_USTLERRPT_WRT_MCS_WB_DONE_PAR_ERR = 11;
+static const uint32_t USTL_USTLERRPT_WRT_DSTL_WB_READ_TAG_PAR_ERR = 12;
+static const uint32_t USTL_USTLERRPT_RESERVED = 13;
+static const uint32_t USTL_USTLERRPT_RESERVED_LEN = 3;
 // mcc/reg00008.H
 
 static const uint64_t USTL_USTLFIRACT0 = 0x0c010e06ull;
@@ -179,5 +188,7 @@ static const uint32_t WDF_WDFDBG_WAT1_EVENT_SELECT_LEN = 4;
 
 }
 }
-#include "mcc/reg00008.H"
+#ifndef __PPE_HCODE__
+    #include "mcc/reg00008.H"
+#endif
 #endif

@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_c_c_H_
 #define __p10_scom_c_c_H_
@@ -51,6 +53,27 @@ static const uint32_t CPMS_CGCSR_L3_CACHE_SB_CTRL = 12;
 static const uint32_t CPMS_CGCSR_L3_CACHE_SB_CTRL_LEN = 4;
 static const uint32_t CPMS_CGCSR_L3_CLK_SYNC_DONE = 32;
 static const uint32_t CPMS_CGCSR_CL2_CLK_SYNC_DONE = 33;
+// c/reg00012.H
+
+static const uint64_t CPMS_DCSR = 0x200e0e64ull;
+
+static const uint32_t CPMS_DCSR_0_COUNT = 0;
+static const uint32_t CPMS_DCSR_0_COUNT_LEN = 24;
+static const uint32_t CPMS_DCSR_1_COUNT = 32;
+static const uint32_t CPMS_DCSR_1_COUNT_LEN = 24;
+// c/reg00012.H
+
+static const uint64_t CPMS_DHCR = 0x200e0e54ull;
+
+static const uint32_t CPMS_DHCR_FREEZE_HISTORY_ON_LARGE = 0;
+static const uint32_t CPMS_DHCR_RESET_DHDR_ON_FDIR_WRITE = 1;
+static const uint32_t CPMS_DHCR_ADJACENT_WARN_RECORD_MODE = 2;
+static const uint32_t CPMS_DHCR_SPARE = 3;
+static const uint32_t CPMS_DHCR_SPARE_LEN = 2;
+static const uint32_t CPMS_DHCR_EVENT_HISTORY_SELECT = 5;
+static const uint32_t CPMS_DHCR_EVENT_HISTORY_SELECT_LEN = 3;
+static const uint32_t CPMS_DHCR_EVENT_COUNT = 8;
+static const uint32_t CPMS_DHCR_EVENT_COUNT_LEN = 8;
 // c/reg00012.H
 
 static const uint64_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT0 = 0x20020600ull;
@@ -117,5 +140,7 @@ static const uint32_t NC_NCMISC_NCSCOMS_NCU_DARN_BAR_REG_ADDR_LEN = 40;
 
 }
 }
-#include "c/reg00012.H"
+#ifndef __PPE_HCODE__
+    #include "c/reg00012.H"
+#endif
 #endif

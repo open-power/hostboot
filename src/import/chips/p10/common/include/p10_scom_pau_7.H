@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_pau_7_H_
 #define __p10_scom_pau_7_H_
@@ -1099,5 +1101,7 @@ static const uint32_t XTS_ATSD_HYP7_LPARID_LEN = 12;
 
 }
 }
-#include "pau/reg00009.H"
+#ifndef __PPE_HCODE__
+    #include "pau/reg00009.H"
+#endif
 #endif

@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_proc_3_H_
 #define __p10_scom_proc_3_H_
@@ -882,11 +884,19 @@ static const uint32_t PB_PTLSCOM45_RCMD_RATE_CFG_X_RCMD_RATE_ADDER_LEN = 4;
 static const uint32_t PB_PTLSCOM45_RCMD_RATE_CFG_Y_RCMD_RATE_ADDER = 20;
 static const uint32_t PB_PTLSCOM45_RCMD_RATE_CFG_Y_RCMD_RATE_ADDER_LEN = 4;
 static const uint32_t PB_PTLSCOM45_RCMD_RATE_CFG_X_DISABLE_TURBO = 24;
-static const uint32_t PB_PTLSCOM45_RCMD_RATE_CFG_X_CMD_GAP_CFG = 25;
-static const uint32_t PB_PTLSCOM45_RCMD_RATE_CFG_X_CMD_GAP_CFG_LEN = 2;
-static const uint32_t PB_PTLSCOM45_RCMD_RATE_CFG_Y_DISABLE_TURBO = 27;
-static const uint32_t PB_PTLSCOM45_RCMD_RATE_CFG_Y_CMD_GAP_CFG = 28;
-static const uint32_t PB_PTLSCOM45_RCMD_RATE_CFG_Y_CMD_GAP_CFG_LEN = 2;
+static const uint32_t PB_PTLSCOM45_RCMD_RATE_CFG_X_CMD_GAP_REFERENCE = 25;
+static const uint32_t PB_PTLSCOM45_RCMD_RATE_CFG_X_CMD_GAP_MODE = 26;
+static const uint32_t PB_PTLSCOM45_RCMD_RATE_CFG_X_CMD_GAP_TABLE = 27;
+static const uint32_t PB_PTLSCOM45_RCMD_RATE_CFG_X_CMD_GAP_SPARE = 28;
+static const uint32_t PB_PTLSCOM45_RCMD_RATE_CFG_X_CMD_GAP_CFG = 29;
+static const uint32_t PB_PTLSCOM45_RCMD_RATE_CFG_X_CMD_GAP_CFG_LEN = 3;
+static const uint32_t PB_PTLSCOM45_RCMD_RATE_CFG_Y_DISABLE_TURBO = 32;
+static const uint32_t PB_PTLSCOM45_RCMD_RATE_CFG_Y_CMD_GAP_REFERENCE = 33;
+static const uint32_t PB_PTLSCOM45_RCMD_RATE_CFG_Y_CMD_GAP_MODE = 34;
+static const uint32_t PB_PTLSCOM45_RCMD_RATE_CFG_Y_CMD_GAP_TABLE = 35;
+static const uint32_t PB_PTLSCOM45_RCMD_RATE_CFG_Y_CMD_GAP_SPARE = 36;
+static const uint32_t PB_PTLSCOM45_RCMD_RATE_CFG_Y_CMD_GAP_CFG = 37;
+static const uint32_t PB_PTLSCOM45_RCMD_RATE_CFG_Y_CMD_GAP_CFG_LEN = 3;
 // proc/reg00015.H
 
 static const uint64_t PB_PTLSCOM67_DOB23_DIB23_INT_ERR_REG = 0x1301182aull;
@@ -1440,6 +1450,7 @@ static const uint32_t TP_TPCHIP_NET_PCBSLPERV_CTRL0_VITAL_PHASE = 8;
 static const uint32_t TP_TPCHIP_NET_PCBSLPERV_CTRL0_FLUSH_ALIGN_OVR = 9;
 static const uint32_t TP_TPCHIP_NET_PCBSLPERV_CTRL0_VITAL_AL = 10;
 static const uint32_t TP_TPCHIP_NET_PCBSLPERV_CTRL0_ACT_DIS = 11;
+static const uint32_t TP_TPCHIP_NET_PCBSLPERV_CTRL0_TOADMODE_EN = 12;
 static const uint32_t TP_TPCHIP_NET_PCBSLPERV_CTRL0_SYNC_PULSE = 13;
 static const uint32_t TP_TPCHIP_NET_PCBSLPERV_CTRL0_MPW3 = 14;
 static const uint32_t TP_TPCHIP_NET_PCBSLPERV_CTRL0_DELAY_LCLKR = 15;
@@ -1985,8 +1996,6 @@ static const uint32_t TP_TPCHIP_TPC_CC_PROTECT_MODE_REG_READ_PROTECT_ENABLE = 0;
 static const uint32_t TP_TPCHIP_TPC_CC_PROTECT_MODE_REG_WRITE_PROTECT_ENABLE = 1;
 // proc/reg00017.H
 
-//ERRCODE: // Some of the name targets not found in address targets: perv
-
 static const uint64_t TP_TPCHIP_TPC_DPLL_CNTL_PAU_REGS_TESTSEL = 0x01060059ull;
 
 static const uint32_t TP_TPCHIP_TPC_DPLL_CNTL_PAU_REGS_TESTSEL_DPLL_TESTSEL_TEST_SEL = 0;
@@ -2359,9 +2368,11 @@ static const uint32_t VAS_VA_RG_SCF_BUFCTL_CONSUMED_BUF_COUNT_LEN = 7;
 
 }
 }
-#include "proc/reg00014.H"
-#include "proc/reg00015.H"
-#include "proc/reg00016.H"
-#include "proc/reg00017.H"
-#include "proc/reg00018.H"
+#ifndef __PPE_HCODE__
+    #include "proc/reg00014.H"
+    #include "proc/reg00015.H"
+    #include "proc/reg00016.H"
+    #include "proc/reg00017.H"
+    #include "proc/reg00018.H"
+#endif
 #endif

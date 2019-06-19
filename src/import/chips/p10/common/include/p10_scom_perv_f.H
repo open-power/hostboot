@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_perv_f_H_
 #define __p10_scom_perv_f_H_
@@ -91,20 +93,6 @@ static const uint32_t CPLT_CTRL5_16 = 16;
 static const uint32_t CPLT_CTRL5_17 = 17;
 static const uint32_t CPLT_CTRL5_18 = 18;
 static const uint32_t CPLT_CTRL5_19 = 19;
-// perv/reg00022.H
-
-//ERRCODE: // Some of the name targets not found in address targets: perv
-
-static const uint64_t DPLL_CNTL_NEST_REGS_ECHAR = 0x00060158ull;
-
-static const uint32_t DPLL_CNTL_NEST_REGS_ECHAR_DYNAMIC_ENCODED_DATA = 1;
-static const uint32_t DPLL_CNTL_NEST_REGS_ECHAR_DYNAMIC_ENCODED_DATA_LEN = 3;
-static const uint32_t DPLL_CNTL_NEST_REGS_ECHAR_MIN_ENCODED_DATA = 5;
-static const uint32_t DPLL_CNTL_NEST_REGS_ECHAR_MIN_ENCODED_DATA_LEN = 3;
-static const uint32_t DPLL_CNTL_NEST_REGS_ECHAR_MAX_ENCODED_DATA = 9;
-static const uint32_t DPLL_CNTL_NEST_REGS_ECHAR_MAX_ENCODED_DATA_LEN = 3;
-static const uint32_t DPLL_CNTL_NEST_REGS_ECHAR_INVERTED_DYNAMIC_ENCODE_INJECT = 61;
-static const uint32_t DPLL_CNTL_NEST_REGS_ECHAR_INVERTED_DYNAMIC_ENCODE_INJECT_LEN = 3;
 // perv/reg00022.H
 
 static const uint64_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2 = 0x00040082ull;
@@ -454,6 +442,26 @@ static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL7_SET_ROOT_CTRL7_28_SPARE_RESONANT
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL7_SET_ROOT_CTRL7_29_SPARE_RESONANT_CLOCKING_CONTROL = 29;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL7_SET_ROOT_CTRL7_30_SPARE_RESONANT_CLOCKING_CONTROL = 30;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL7_SET_ROOT_CTRL7_31_SPARE_RESONANT_CLOCKING_CONTROL = 31;
+// perv/reg00022.H
+
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_16_FSI = 0x00002987ull;
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_16_FSI_BYTE = 0x00002e1cull;
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_16_RW = 0x00050187ull;
+
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_16_SR_SCRATCH_REGISTER_16 = 0;
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_16_SR_SCRATCH_REGISTER_16_LEN = 32;
+// perv/reg00022.H
+
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_9_FSI = 0x00002980ull;
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_9_FSI_BYTE = 0x00002e00ull;
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_9_RW = 0x00050180ull;
+
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_9_SR_SCRATCH_REGISTER_9 = 0;
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_9_SR_SCRATCH_REGISTER_9_LEN = 32;
 // perv/reg00022.H
 
 static const uint64_t INTERRUPT_TYPE_REG = 0x000f001aull;
@@ -890,7 +898,7 @@ static const uint32_t TRA7_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63_LEN = 64;
 // perv/reg00022.H
 
 static const uint64_t VITAL_SCAN_OUT = 0x000f0017ull;
-// perv/reg00022.H
+// perv/reg00023.H
 
 static const uint64_t XSTOP_UNMASKED = 0x00040010ull;
 
@@ -900,6 +908,8 @@ static const uint32_t XSTOP_UNMASKED_XSTOP_UNMASKED_IN_LEN = 53;
 
 }
 }
-#include "perv/reg00022.H"
-#include "perv/reg00023.H"
+#ifndef __PPE_HCODE__
+    #include "perv/reg00022.H"
+    #include "perv/reg00023.H"
+#endif
 #endif

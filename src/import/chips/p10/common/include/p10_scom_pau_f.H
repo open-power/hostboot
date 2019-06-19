@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_pau_f_H_
 #define __p10_scom_pau_f_H_
@@ -1083,5 +1085,7 @@ static const uint32_t XSL_MAIN_WRAP_CFG_XSLO_OTL_REQ_LIMIT_LEN = 4;
 
 }
 }
-#include "pau/reg00021.H"
+#ifndef __PPE_HCODE__
+    #include "pau/reg00021.H"
+#endif
 #endif

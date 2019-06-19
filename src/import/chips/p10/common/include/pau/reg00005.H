@@ -4366,6 +4366,276 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_AME_ATL_MISC_CERR_RPT_FIRST(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = AME_ATL_MISC_CERR_RPT_FIRST;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_AME_ATL_MISC_CERR_RPT_FIRST(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = AME_ATL_MISC_CERR_RPT_FIRST;
+#endif
+    return fapi2::getScom(i_target, AME_ATL_MISC_CERR_RPT_FIRST, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_AME_ATL_MISC_CERR_RPT_FIRST(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(AME_ATL_MISC_CERR_RPT_FIRST));
+#endif
+    return fapi2::putScom(i_target, AME_ATL_MISC_CERR_RPT_FIRST, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+static inline fapi2::buffer<uint64_t>& SET_AME_ATL_MISC_CERR_RPT_FIRST_DATUE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AME_ATL_MISC_CERR_RPT_FIRST));
+#endif
+    return o_data.insertFromRight<AME_ATL_MISC_CERR_RPT_FIRST_DATUE,
+           AME_ATL_MISC_CERR_RPT_FIRST_DATUE_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AME_ATL_MISC_CERR_RPT_FIRST_DATUE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AME_ATL_MISC_CERR_RPT_FIRST_DATUE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AME_ATL_MISC_CERR_RPT_FIRST));
+#endif
+    return o_data.insertFromRight<AME_ATL_MISC_CERR_RPT_FIRST_DATUE,
+           AME_ATL_MISC_CERR_RPT_FIRST_DATUE_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AME_ATL_MISC_CERR_RPT_FIRST_DATUE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_AME_ATL_MISC_CERR_RPT_FIRST_DATUE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AME_ATL_MISC_CERR_RPT_FIRST));
+#endif
+    return i_data.extractToRight<AME_ATL_MISC_CERR_RPT_FIRST_DATUE,
+           AME_ATL_MISC_CERR_RPT_FIRST_DATUE_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AME_ATL_MISC_CERR_RPT_FIRST_DATUE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AME_ATL_MISC_CERR_RPT_FIRST_CE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AME_ATL_MISC_CERR_RPT_FIRST));
+#endif
+    return o_data.insertFromRight<AME_ATL_MISC_CERR_RPT_FIRST_CE,
+           AME_ATL_MISC_CERR_RPT_FIRST_CE_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AME_ATL_MISC_CERR_RPT_FIRST_CE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AME_ATL_MISC_CERR_RPT_FIRST_CE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AME_ATL_MISC_CERR_RPT_FIRST));
+#endif
+    return o_data.insertFromRight<AME_ATL_MISC_CERR_RPT_FIRST_CE,
+           AME_ATL_MISC_CERR_RPT_FIRST_CE_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AME_ATL_MISC_CERR_RPT_FIRST_CE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_AME_ATL_MISC_CERR_RPT_FIRST_CE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AME_ATL_MISC_CERR_RPT_FIRST));
+#endif
+    return i_data.extractToRight<AME_ATL_MISC_CERR_RPT_FIRST_CE,
+           AME_ATL_MISC_CERR_RPT_FIRST_CE_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AME_ATL_MISC_CERR_RPT_FIRST_CE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AME_ATL_MISC_CERR_RPT_FIRST_UE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AME_ATL_MISC_CERR_RPT_FIRST));
+#endif
+    return o_data.insertFromRight<AME_ATL_MISC_CERR_RPT_FIRST_UE,
+           AME_ATL_MISC_CERR_RPT_FIRST_UE_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AME_ATL_MISC_CERR_RPT_FIRST_UE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AME_ATL_MISC_CERR_RPT_FIRST_UE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AME_ATL_MISC_CERR_RPT_FIRST));
+#endif
+    return o_data.insertFromRight<AME_ATL_MISC_CERR_RPT_FIRST_UE,
+           AME_ATL_MISC_CERR_RPT_FIRST_UE_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AME_ATL_MISC_CERR_RPT_FIRST_UE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_AME_ATL_MISC_CERR_RPT_FIRST_UE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AME_ATL_MISC_CERR_RPT_FIRST));
+#endif
+    return i_data.extractToRight<AME_ATL_MISC_CERR_RPT_FIRST_UE,
+           AME_ATL_MISC_CERR_RPT_FIRST_UE_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AME_ATL_MISC_CERR_RPT_FIRST_UE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AME_ATL_MISC_CERR_RPT_FIRST_LOG(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AME_ATL_MISC_CERR_RPT_FIRST));
+#endif
+    return o_data.insertFromRight<AME_ATL_MISC_CERR_RPT_FIRST_LOG,
+           AME_ATL_MISC_CERR_RPT_FIRST_LOG_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AME_ATL_MISC_CERR_RPT_FIRST_LOG chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AME_ATL_MISC_CERR_RPT_FIRST_LOG(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AME_ATL_MISC_CERR_RPT_FIRST));
+#endif
+    return o_data.insertFromRight<AME_ATL_MISC_CERR_RPT_FIRST_LOG,
+           AME_ATL_MISC_CERR_RPT_FIRST_LOG_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AME_ATL_MISC_CERR_RPT_FIRST_LOG chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_AME_ATL_MISC_CERR_RPT_FIRST_LOG(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AME_ATL_MISC_CERR_RPT_FIRST));
+#endif
+    return i_data.extractToRight<AME_ATL_MISC_CERR_RPT_FIRST_LOG,
+           AME_ATL_MISC_CERR_RPT_FIRST_LOG_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AME_ATL_MISC_CERR_RPT_FIRST_LOG chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AME_ATL_MISC_CERR_RPT_FIRST_XFAIL(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AME_ATL_MISC_CERR_RPT_FIRST));
+#endif
+    return o_data.insertFromRight<AME_ATL_MISC_CERR_RPT_FIRST_XFAIL,
+           AME_ATL_MISC_CERR_RPT_FIRST_XFAIL_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AME_ATL_MISC_CERR_RPT_FIRST_XFAIL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AME_ATL_MISC_CERR_RPT_FIRST_XFAIL(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AME_ATL_MISC_CERR_RPT_FIRST));
+#endif
+    return o_data.insertFromRight<AME_ATL_MISC_CERR_RPT_FIRST_XFAIL,
+           AME_ATL_MISC_CERR_RPT_FIRST_XFAIL_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AME_ATL_MISC_CERR_RPT_FIRST_XFAIL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_AME_ATL_MISC_CERR_RPT_FIRST_XFAIL(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AME_ATL_MISC_CERR_RPT_FIRST));
+#endif
+    return i_data.extractToRight<AME_ATL_MISC_CERR_RPT_FIRST_XFAIL,
+           AME_ATL_MISC_CERR_RPT_FIRST_XFAIL_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AME_ATL_MISC_CERR_RPT_FIRST_XFAIL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_CS_CTL_MISC_BDF2PE_10_CONFIG(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
@@ -70902,230 +71172,6 @@ static inline bool GET_NTL1_REGS_CERR_MASK1_63(fapi2::buffer<uint64_t>& i_data)
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     FAPI_ERR("Invalid dial access NTL1_REGS_CERR_MASK1_63 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_NTL1_REGS_RSP_DA_PTR(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = NTL1_REGS_RSP_DA_PTR;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_NTL1_REGS_RSP_DA_PTR(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = NTL1_REGS_RSP_DA_PTR;
-#endif
-    return fapi2::getScom(i_target, NTL1_REGS_RSP_DA_PTR, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_NTL1_REGS_RSP_DA_PTR(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(NTL1_REGS_RSP_DA_PTR));
-#endif
-    return fapi2::putScom(i_target, NTL1_REGS_RSP_DA_PTR, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-
-static inline fapi2::buffer<uint64_t>& SET_NTL1_REGS_RSP_DA_PTR_RESERVED1(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NTL1_REGS_RSP_DA_PTR));
-#endif
-    return o_data.insertFromRight<NTL1_REGS_RSP_DA_PTR_RESERVED1,
-           NTL1_REGS_RSP_DA_PTR_RESERVED1_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access NTL1_REGS_RSP_DA_PTR_RESERVED1 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_NTL1_REGS_RSP_DA_PTR_RESERVED1(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NTL1_REGS_RSP_DA_PTR));
-#endif
-    return o_data.insertFromRight<NTL1_REGS_RSP_DA_PTR_RESERVED1,
-           NTL1_REGS_RSP_DA_PTR_RESERVED1_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access NTL1_REGS_RSP_DA_PTR_RESERVED1 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_NTL1_REGS_RSP_DA_PTR_RESERVED1(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NTL1_REGS_RSP_DA_PTR));
-#endif
-    return i_data.extractToRight<NTL1_REGS_RSP_DA_PTR_RESERVED1,
-           NTL1_REGS_RSP_DA_PTR_RESERVED1_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access NTL1_REGS_RSP_DA_PTR_RESERVED1 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_NTL1_REGS_RSP_DA_PTR_START(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NTL1_REGS_RSP_DA_PTR));
-#endif
-    return o_data.insertFromRight<NTL1_REGS_RSP_DA_PTR_START,
-           NTL1_REGS_RSP_DA_PTR_START_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access NTL1_REGS_RSP_DA_PTR_START chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_NTL1_REGS_RSP_DA_PTR_START(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NTL1_REGS_RSP_DA_PTR));
-#endif
-    return o_data.insertFromRight<NTL1_REGS_RSP_DA_PTR_START,
-           NTL1_REGS_RSP_DA_PTR_START_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access NTL1_REGS_RSP_DA_PTR_START chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_NTL1_REGS_RSP_DA_PTR_START(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NTL1_REGS_RSP_DA_PTR));
-#endif
-    return i_data.extractToRight<NTL1_REGS_RSP_DA_PTR_START,
-           NTL1_REGS_RSP_DA_PTR_START_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access NTL1_REGS_RSP_DA_PTR_START chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_NTL1_REGS_RSP_DA_PTR_RESERVED2(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NTL1_REGS_RSP_DA_PTR));
-#endif
-    return o_data.insertFromRight<NTL1_REGS_RSP_DA_PTR_RESERVED2,
-           NTL1_REGS_RSP_DA_PTR_RESERVED2_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access NTL1_REGS_RSP_DA_PTR_RESERVED2 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_NTL1_REGS_RSP_DA_PTR_RESERVED2(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NTL1_REGS_RSP_DA_PTR));
-#endif
-    return o_data.insertFromRight<NTL1_REGS_RSP_DA_PTR_RESERVED2,
-           NTL1_REGS_RSP_DA_PTR_RESERVED2_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access NTL1_REGS_RSP_DA_PTR_RESERVED2 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_NTL1_REGS_RSP_DA_PTR_RESERVED2(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NTL1_REGS_RSP_DA_PTR));
-#endif
-    return i_data.extractToRight<NTL1_REGS_RSP_DA_PTR_RESERVED2,
-           NTL1_REGS_RSP_DA_PTR_RESERVED2_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access NTL1_REGS_RSP_DA_PTR_RESERVED2 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_NTL1_REGS_RSP_DA_PTR_END(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NTL1_REGS_RSP_DA_PTR));
-#endif
-    return o_data.insertFromRight<NTL1_REGS_RSP_DA_PTR_END,
-           NTL1_REGS_RSP_DA_PTR_END_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access NTL1_REGS_RSP_DA_PTR_END chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_NTL1_REGS_RSP_DA_PTR_END(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NTL1_REGS_RSP_DA_PTR));
-#endif
-    return o_data.insertFromRight<NTL1_REGS_RSP_DA_PTR_END,
-           NTL1_REGS_RSP_DA_PTR_END_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access NTL1_REGS_RSP_DA_PTR_END chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_NTL1_REGS_RSP_DA_PTR_END(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NTL1_REGS_RSP_DA_PTR));
-#endif
-    return i_data.extractToRight<NTL1_REGS_RSP_DA_PTR_END,
-           NTL1_REGS_RSP_DA_PTR_END_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access NTL1_REGS_RSP_DA_PTR_END chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

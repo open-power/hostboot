@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_nmmu_c_H_
 #define __p10_scom_nmmu_c_H_
@@ -68,5 +70,7 @@ static const uint32_t CFG_NMMU_CTL_MISC_NCU_SNP_TLBIE_DEC_RATE_LEN = 8;
 
 }
 }
-#include "nmmu/reg00012.H"
+#ifndef __PPE_HCODE__
+    #include "nmmu/reg00012.H"
+#endif
 #endif

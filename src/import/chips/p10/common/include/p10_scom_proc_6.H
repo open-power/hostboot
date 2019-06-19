@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_proc_6_H_
 #define __p10_scom_proc_6_H_
@@ -1927,6 +1929,24 @@ static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C8_PAYLOAD = 15;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C8_PAYLOAD_LEN = 17;
 // proc/reg00031.H
 
+static const uint64_t TP_TPCHIP_OCC_OCI_OCB_P2S_CR0 = 0x0006c840ull;
+
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2S_CR0_FRAME_SIZE = 0;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2S_CR0_FRAME_SIZE_LEN = 6;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2S_CR0_OUT_COUNT1 = 6;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2S_CR0_OUT_COUNT1_LEN = 6;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2S_CR0_IN_DELAY1 = 12;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2S_CR0_IN_DELAY1_LEN = 6;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2S_CR0_IN_COUNT1 = 18;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2S_CR0_IN_COUNT1_LEN = 6;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2S_CR0_OUT_COUNT2 = 24;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2S_CR0_OUT_COUNT2_LEN = 6;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2S_CR0_IN_DELAY2 = 30;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2S_CR0_IN_DELAY2_LEN = 6;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2S_CR0_IN_COUNT2 = 36;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2S_CR0_IN_COUNT2_LEN = 6;
+// proc/reg00031.H
+
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_WOFICWD = 0x0006c784ull;
 
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_WOFICWD_HIGH = 0;
@@ -2124,18 +2144,6 @@ static const uint32_t TP_TPCHIP_TPC_CPLT_CTRL0_FREE_USAGE_60A = 60;
 static const uint32_t TP_TPCHIP_TPC_CPLT_CTRL0_FREE_USAGE_61A = 61;
 static const uint32_t TP_TPCHIP_TPC_CPLT_CTRL0_FREE_USAGE_62A = 62;
 static const uint32_t TP_TPCHIP_TPC_CPLT_CTRL0_FREE_USAGE_63A = 63;
-// proc/reg00031.H
-
-static const uint64_t TP_TPCHIP_TPC_ITR_OSCERR_MASK = 0x0102001aull;
-
-static const uint32_t TP_TPCHIP_TPC_ITR_OSCERR_MASK_0_MASK = 0;
-static const uint32_t TP_TPCHIP_TPC_ITR_OSCERR_MASK_0_MASK_LEN = 4;
-static const uint32_t TP_TPCHIP_TPC_ITR_OSCERR_MASK_1_MASK = 4;
-static const uint32_t TP_TPCHIP_TPC_ITR_OSCERR_MASK_1_MASK_LEN = 4;
-static const uint32_t TP_TPCHIP_TPC_ITR_OSCERR_MASK_2_MASK = 8;
-static const uint32_t TP_TPCHIP_TPC_ITR_OSCERR_MASK_2_MASK_LEN = 4;
-static const uint32_t TP_TPCHIP_TPC_ITR_OSCERR_MASK_3_MASK = 12;
-static const uint32_t TP_TPCHIP_TPC_ITR_OSCERR_MASK_3_MASK_LEN = 4;
 // proc/reg00031.H
 
 static const uint64_t TP_TPCHIP_TPC_OPCG_ALIGN = 0x01030001ull;
@@ -2583,9 +2591,11 @@ static const uint32_t VAS_VA_RG_SCF_MMIODATA_MMIO_DATA_LEN = 64;
 
 }
 }
-#include "proc/reg00028.H"
-#include "proc/reg00029.H"
-#include "proc/reg00030.H"
-#include "proc/reg00031.H"
-#include "proc/reg00032.H"
+#ifndef __PPE_HCODE__
+    #include "proc/reg00028.H"
+    #include "proc/reg00029.H"
+    #include "proc/reg00030.H"
+    #include "proc/reg00031.H"
+    #include "proc/reg00032.H"
+#endif
 #endif

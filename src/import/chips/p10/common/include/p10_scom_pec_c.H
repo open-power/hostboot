@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_pec_c_H_
 #define __p10_scom_pec_c_H_
@@ -169,5 +171,7 @@ static const uint64_t XSTOP_INTERRUPT_REG = 0x080f001cull;
 
 }
 }
-#include "pec/reg00012.H"
+#ifndef __PPE_HCODE__
+    #include "pec/reg00012.H"
+#endif
 #endif

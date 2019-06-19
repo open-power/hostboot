@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_omic_6_H_
 #define __p10_scom_omic_6_H_
@@ -37,12 +39,14 @@ namespace omic
 
 static const uint64_t CTL_REGS_RX_CNTL5_PG = 0x8009204010012c3full;
 
-static const uint32_t CTL_REGS_RX_CNTL5_PG_PERVASIVE_CAPT = 48;
-static const uint32_t CTL_REGS_RX_CNTL5_PG_BIST_SHARED_OVRD = 49;
-static const uint32_t CTL_REGS_RX_CNTL5_PG_BIST_OPCG_GO_OVRD = 50;
-static const uint32_t CTL_REGS_RX_CNTL5_PG_BIST_MAX_OVRD = 51;
-static const uint32_t CTL_REGS_RX_CNTL5_PG_BIST_MAX_LANES_OVRD = 52;
-static const uint32_t CTL_REGS_RX_CNTL5_PG_BIST_MAX_LANES_OVRD_LEN = 5;
+static const uint32_t CTL_REGS_RX_CNTL5_PG_RX_PERVASIVE_CAPT = 48;
+static const uint32_t CTL_REGS_RX_CNTL5_PG_TC_BIST_SHARED_OVRD = 49;
+static const uint32_t CTL_REGS_RX_CNTL5_PG_TC_BIST_OPCG_GO_OVRD = 50;
+static const uint32_t CTL_REGS_RX_CNTL5_PG_RX_BIST_MAX_OVRD = 51;
+static const uint32_t CTL_REGS_RX_CNTL5_PG_RX_BIST_MAX_LANES_OVRD = 52;
+static const uint32_t CTL_REGS_RX_CNTL5_PG_RX_BIST_MAX_LANES_OVRD_LEN = 5;
+static const uint32_t CTL_REGS_RX_CNTL5_PG_TC_BIST_CODE_GO = 57;
+static const uint32_t CTL_REGS_RX_CNTL5_PG_SYSTEM_MANU_SEL = 58;
 // omic/reg00006.H
 
 static const uint64_t CTL_REGS_RX_MODE16_PG = 0x8008804010012c3full;
@@ -122,5 +126,7 @@ static const uint64_t TX_CTL_SM_REGS_CTLSM_STAT5_PG = 0x800d644010012c3full;
 
 }
 }
-#include "omic/reg00006.H"
+#ifndef __PPE_HCODE__
+    #include "omic/reg00006.H"
+#endif
 #endif

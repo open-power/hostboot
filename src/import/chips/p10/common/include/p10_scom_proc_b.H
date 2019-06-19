@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_proc_b_H_
 #define __p10_scom_proc_b_H_
@@ -1247,6 +1249,74 @@ static const uint32_t TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCA
 static const uint32_t TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP15 = 26;
 // proc/reg00052.H
 
+static const uint64_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2 = 0x03040109ull;
+
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_00 = 0;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_01 = 1;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_02 = 2;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_03 = 3;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_04 = 4;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_05 = 5;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_06 = 6;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_07 = 7;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_08 = 8;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_09 = 9;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_10 = 10;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_11 = 11;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_12 = 12;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_13 = 13;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_14 = 14;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_15 = 15;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_16 = 16;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_17 = 17;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_18 = 18;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_19 = 19;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_20 = 20;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_21 = 21;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_22 = 22;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_23 = 23;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_24 = 24;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_25 = 25;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_26 = 26;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_27 = 27;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_28 = 28;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_29 = 29;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_30 = 30;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_31 = 31;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_32 = 32;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_33 = 33;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_34 = 34;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_35 = 35;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_36 = 36;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_37 = 37;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_38 = 38;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_39 = 39;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_40 = 40;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_41 = 41;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_42 = 42;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_43 = 43;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_44 = 44;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_45 = 45;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_46 = 46;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_47 = 47;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_48 = 48;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_49 = 49;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_50 = 50;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_51 = 51;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_52 = 52;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_53 = 53;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_54 = 54;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_55 = 55;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_56 = 56;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_57 = 57;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_58 = 58;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_59 = 59;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_60 = 60;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_61 = 61;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_62 = 62;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION2_63 = 63;
+// proc/reg00052.H
+
 static const uint64_t TP_TCN1_N1_EPS_PSC_WRITE_PROTECT_ENABLE_REG = 0x03010005ull;
 
 static const uint32_t TP_TCN1_N1_EPS_PSC_WRITE_PROTECT_ENABLE_REG_ENABLE_RING_LOCKING = 0;
@@ -1546,7 +1616,7 @@ static const uint32_t TP_TPBR_PSIHB_DMA_UP_ADDR_BASE_UPPER_BITS = 0;
 static const uint32_t TP_TPBR_PSIHB_DMA_UP_ADDR_BASE_UPPER_BITS_LEN = 8;
 static const uint32_t TP_TPBR_PSIHB_DMA_UP_ADDR_ESCAPE_ADDRESS = 16;
 static const uint32_t TP_TPBR_PSIHB_DMA_UP_ADDR_ESCAPE_ADDRESS_LEN = 48;
-// proc/reg00052.H
+// proc/reg00053.H
 
 static const uint64_t TP_TPBR_PSIHB_INTERRUPT_LEVEL = 0x03011d19ull;
 // proc/reg00053.H
@@ -1926,7 +1996,7 @@ static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT8C5RR_SOURCE_CORE = 13;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT8C5RR_SOURCE_CORE_LEN = 2;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT8C5RR_PAYLOAD = 15;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT8C5RR_PAYLOAD_LEN = 17;
-// proc/reg00053.H
+// proc/reg00054.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C14 = 0x0006c46eull;
 
@@ -2114,8 +2184,6 @@ static const uint64_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG97 = 0x00008061ull;
 static const uint32_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG97_REGISTER97 = 0;
 static const uint32_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG97_REGISTER97_LEN = 64;
 // proc/reg00054.H
-
-//ERRCODE: // Some of the name targets not found in address targets: perv
 
 static const uint64_t TP_TPCHIP_TPC_DPLL_CNTL_NEST_REGS_ECHAR = 0x01060158ull;
 
@@ -2421,6 +2489,16 @@ static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_M2B_DATA_AREA_5_RW =
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_11_FSI = 0x00002982ull;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_11_FSI_BYTE = 0x00002e08ull;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_11_RW = 0x00050182ull;
+
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_11_SR_SCRATCH_REGISTER_11 = 0;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_11_SR_SCRATCH_REGISTER_11_LEN = 32;
+// proc/reg00054.H
+
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
 static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_7_FSI = 0x0000283eull;
 static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_7_FSI_BYTE = 0x000028f8ull;
 static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_7_RW = 0x0005003eull;
@@ -2517,10 +2595,10 @@ static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_MST_1_MSTAP4_1 = 5;
 static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_MST_1_MSTAP4_1_LEN = 3;
 static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_MST_1_MSTAP4_2 = 9;
 static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_MST_1_MSTAP4_2_LEN = 3;
-// proc/reg00054.H
+// proc/reg00055.H
 
 static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_SI1S = 0x0000081cull;
-// proc/reg00054.H
+// proc/reg00055.H
 
 static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_SI2M = 0x00000824ull;
 // proc/reg00055.H
@@ -2604,9 +2682,11 @@ static const uint64_t VAS_VA_RG_SCF_WRMON5BAR = 0x02011415ull;
 
 }
 }
-#include "proc/reg00051.H"
-#include "proc/reg00052.H"
-#include "proc/reg00053.H"
-#include "proc/reg00054.H"
-#include "proc/reg00055.H"
+#ifndef __PPE_HCODE__
+    #include "proc/reg00051.H"
+    #include "proc/reg00052.H"
+    #include "proc/reg00053.H"
+    #include "proc/reg00054.H"
+    #include "proc/reg00055.H"
+#endif
 #endif

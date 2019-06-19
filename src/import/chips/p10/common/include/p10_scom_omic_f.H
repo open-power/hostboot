@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_omic_f_H_
 #define __p10_scom_omic_f_H_
@@ -196,5 +198,7 @@ static const uint32_t TX_CTL_SM_REGS_FIR_ERROR_INJECT_PG_TX_PG_FIR_ERR_INJ_LEN =
 
 }
 }
-#include "omic/reg00015.H"
+#ifndef __PPE_HCODE__
+    #include "omic/reg00015.H"
+#endif
 #endif

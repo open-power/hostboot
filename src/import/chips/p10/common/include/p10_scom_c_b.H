@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_c_b_H_
 #define __p10_scom_c_b_H_
@@ -34,6 +36,16 @@ namespace scomt
 namespace c
 {
 
+
+static const uint64_t CPMS_DHDR = 0x200e0e58ull;
+
+static const uint32_t CPMS_DHDR_DPLL_ENCODED_DATA = 32;
+static const uint32_t CPMS_DHDR_DPLL_ENCODED_DATA_LEN = 3;
+static const uint32_t CPMS_DHDR_DDS_DATA = 35;
+static const uint32_t CPMS_DHDR_DDS_DATA_LEN = 5;
+static const uint32_t CPMS_DHDR_STOP_STATE_ACTIVE = 60;
+static const uint32_t CPMS_DHDR_CORE_SAMPLE_DISABLED = 61;
+// c/reg00011.H
 
 static const uint64_t CPMS_L3_PFETSTAT = 0x200e0e24ull;
 
@@ -46,6 +58,9 @@ static const uint32_t CPMS_L3_PFETSTAT_VDD_PFET_ENABLE_ACTUAL_LEN = 8;
 static const uint32_t CPMS_L3_PFETSTAT_VCS_PFET_ENABLE_ACTUAL = 24;
 static const uint32_t CPMS_L3_PFETSTAT_VCS_PFET_ENABLE_ACTUAL_LEN = 8;
 static const uint32_t CPMS_L3_PFETSTAT_SRAM_ENABLE_ACTUAL = 63;
+// c/reg00011.H
+
+static const uint64_t EC_LS_LSU_HOLD_OUT_REG2 = 0x200206c2ull;
 // c/reg00011.H
 
 static const uint64_t EC_PC_COMMON_SPR_SPATTN_RW = 0x20020499ull;
@@ -204,5 +219,7 @@ static const uint32_t RING_FENCE_MASK_LATCH_REG_RING_FENCE_ENABLE_MASK_LEN = 31;
 
 }
 }
-#include "c/reg00011.H"
+#ifndef __PPE_HCODE__
+    #include "c/reg00011.H"
+#endif
 #endif

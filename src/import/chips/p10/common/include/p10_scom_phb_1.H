@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_phb_1_H_
 #define __p10_scom_phb_1_H_
@@ -63,5 +65,7 @@ static const uint32_t RSB_REGS_UVI_PHB5_SCOM_UV_SEC_INCL_MSK_PHB5_SCOM_UV_SEC_IN
 
 }
 }
-#include "phb/reg00001.H"
+#ifndef __PPE_HCODE__
+    #include "phb/reg00001.H"
+#endif
 #endif

@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_proc_c_H_
 #define __p10_scom_proc_c_H_
@@ -823,7 +825,7 @@ static const uint32_t PSI_MAC_SCOM_FIR_MASK_REG_INTERNAL_SCOM_ERROR_MASK = 5;
 static const uint32_t PSI_MAC_SCOM_FIR_MASK_REG_INTERNAL_SCOM_ERROR_MASK_CLONE = 6;
 // proc/reg00057.H
 
-static const uint64_t TP_LPC_SYNC_FIR_ACTION0_REG = 0x030121c6ull;
+static const uint64_t TP_LPC_SYNC_FIR_ACTION0_REG = 0x03012006ull;
 
 static const uint32_t TP_LPC_SYNC_FIR_ACTION0_REG_INVALID_TRANSFER_SIZE_ACTION0 = 0;
 static const uint32_t TP_LPC_SYNC_FIR_ACTION0_REG_INVALID_COMMAND_ACTION0 = 1;
@@ -837,7 +839,7 @@ static const uint32_t TP_LPC_SYNC_FIR_ACTION0_REG_RETURNQ_ERR_ACTION0 = 8;
 static const uint32_t TP_LPC_SYNC_FIR_ACTION0_REG_RESERVED_ACTION0 = 9;
 // proc/reg00057.H
 
-static const uint64_t TP_LPC_SYNC_FIR_ACTION1_REG = 0x030121c7ull;
+static const uint64_t TP_LPC_SYNC_FIR_ACTION1_REG = 0x03012007ull;
 
 static const uint32_t TP_LPC_SYNC_FIR_ACTION1_REG_INVALID_TRANSFER_SIZE_ACTION1 = 0;
 static const uint32_t TP_LPC_SYNC_FIR_ACTION1_REG_INVALID_COMMAND_ACTION1 = 1;
@@ -1875,24 +1877,6 @@ static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPITESV_7 = 28;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPITESV_7_LEN = 4;
 // proc/reg00058.H
 
-static const uint64_t TP_TPCHIP_OCC_OCI_OCB_P2SCR0 = 0x0006c840ull;
-
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2SCR0_FRAME_SIZE = 0;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2SCR0_FRAME_SIZE_LEN = 6;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2SCR0_OUT_COUNT1 = 6;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2SCR0_OUT_COUNT1_LEN = 6;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_DELAY1 = 12;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_DELAY1_LEN = 6;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_COUNT1 = 18;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_COUNT1_LEN = 6;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2SCR0_OUT_COUNT2 = 24;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2SCR0_OUT_COUNT2_LEN = 6;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_DELAY2 = 30;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_DELAY2_LEN = 6;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_COUNT2 = 36;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2SCR0_IN_COUNT2_LEN = 6;
-// proc/reg00058.H
-
 static const uint64_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG112 = 0x00008070ull;
 
 static const uint32_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG112_REGISTER112 = 0;
@@ -1966,9 +1950,7 @@ static const uint32_t TP_TPCHIP_TPC_CPLT_CTRL3_11_PSCOM_EN = 15;
 static const uint32_t TP_TPCHIP_TPC_CPLT_CTRL3_12_PSCOM_EN = 16;
 static const uint32_t TP_TPCHIP_TPC_CPLT_CTRL3_13_PSCOM_EN = 17;
 static const uint32_t TP_TPCHIP_TPC_CPLT_CTRL3_14_PSCOM_EN = 18;
-// proc/reg00059.H
-
-//ERRCODE: // Some of the name targets not found in address targets: perv
+// proc/reg00058.H
 
 static const uint64_t TP_TPCHIP_TPC_DPLL_CNTL_PAU_REGS_ICHAR = 0x01060057ull;
 
@@ -1985,8 +1967,6 @@ static const uint32_t TP_TPCHIP_TPC_DPLL_CNTL_PAU_REGS_ICHAR_FREQIN_MIN_LEN = 11
 static const uint32_t TP_TPCHIP_TPC_DPLL_CNTL_PAU_REGS_ICHAR_HIRES_FREQIN_MIN = 52;
 static const uint32_t TP_TPCHIP_TPC_DPLL_CNTL_PAU_REGS_ICHAR_HIRES_FREQIN_MIN_LEN = 5;
 // proc/reg00059.H
-
-//ERRCODE: // Some of the name targets not found in address targets: perv
 
 static const uint64_t TP_TPCHIP_TPC_DPLL_CNTL_PAU_REGS_OCHAR = 0x01060056ull;
 
@@ -2309,6 +2289,16 @@ static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL8_COPY_FSI_
 static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL8_COPY_RW = 0x00050118ull;
 // proc/reg00059.H
 
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_9_FSI = 0x00002980ull;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_9_FSI_BYTE = 0x00002e00ull;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_9_RW = 0x00050180ull;
+
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_9_SR_SCRATCH_REGISTER_9 = 0;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_9_SR_SCRATCH_REGISTER_9_LEN = 32;
+// proc/reg00059.H
+
 static const uint64_t TP_TPVSB_FSI_W_SBE_FIFO_FSB_HDOWNFIFO_DATA_IN = 0x000b0030ull;
 // proc/reg00059.H
 
@@ -2588,9 +2578,11 @@ static const uint64_t VAS_VA_RG_SCF_WRMON5CMP = 0x02011425ull;
 
 }
 }
-#include "proc/reg00056.H"
-#include "proc/reg00057.H"
-#include "proc/reg00058.H"
-#include "proc/reg00059.H"
-#include "proc/reg00060.H"
+#ifndef __PPE_HCODE__
+    #include "proc/reg00056.H"
+    #include "proc/reg00057.H"
+    #include "proc/reg00058.H"
+    #include "proc/reg00059.H"
+    #include "proc/reg00060.H"
+#endif
 #endif

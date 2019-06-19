@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_mc_a_H_
 #define __p10_scom_mc_a_H_
@@ -297,5 +299,7 @@ static const uint32_t SCOMFIR_MCMODE1_RESERVED_63 = 63;
 
 }
 }
-#include "mc/reg00010.H"
+#ifndef __PPE_HCODE__
+    #include "mc/reg00010.H"
+#endif
 #endif

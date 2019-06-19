@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_nmmu_e_H_
 #define __p10_scom_nmmu_e_H_
@@ -154,5 +156,7 @@ static const uint32_t NMMU_PMU1_CTL_REG_MM_PMU1_CTL_LEN = 64;
 
 }
 }
-#include "nmmu/reg00014.H"
+#ifndef __PPE_HCODE__
+    #include "nmmu/reg00014.H"
+#endif
 #endif

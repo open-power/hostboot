@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_pauc_e_H_
 #define __p10_scom_pauc_e_H_
@@ -249,11 +251,19 @@ static const uint32_t RCMD_RATE_CFG_X_RCMD_RATE_ADDER_LEN = 4;
 static const uint32_t RCMD_RATE_CFG_Y_RCMD_RATE_ADDER = 20;
 static const uint32_t RCMD_RATE_CFG_Y_RCMD_RATE_ADDER_LEN = 4;
 static const uint32_t RCMD_RATE_CFG_X_DISABLE_TURBO = 24;
-static const uint32_t RCMD_RATE_CFG_X_CMD_GAP_CFG = 25;
-static const uint32_t RCMD_RATE_CFG_X_CMD_GAP_CFG_LEN = 2;
-static const uint32_t RCMD_RATE_CFG_Y_DISABLE_TURBO = 27;
-static const uint32_t RCMD_RATE_CFG_Y_CMD_GAP_CFG = 28;
-static const uint32_t RCMD_RATE_CFG_Y_CMD_GAP_CFG_LEN = 2;
+static const uint32_t RCMD_RATE_CFG_X_CMD_GAP_REFERENCE = 25;
+static const uint32_t RCMD_RATE_CFG_X_CMD_GAP_MODE = 26;
+static const uint32_t RCMD_RATE_CFG_X_CMD_GAP_TABLE = 27;
+static const uint32_t RCMD_RATE_CFG_X_CMD_GAP_SPARE = 28;
+static const uint32_t RCMD_RATE_CFG_X_CMD_GAP_CFG = 29;
+static const uint32_t RCMD_RATE_CFG_X_CMD_GAP_CFG_LEN = 3;
+static const uint32_t RCMD_RATE_CFG_Y_DISABLE_TURBO = 32;
+static const uint32_t RCMD_RATE_CFG_Y_CMD_GAP_REFERENCE = 33;
+static const uint32_t RCMD_RATE_CFG_Y_CMD_GAP_MODE = 34;
+static const uint32_t RCMD_RATE_CFG_Y_CMD_GAP_TABLE = 35;
+static const uint32_t RCMD_RATE_CFG_Y_CMD_GAP_SPARE = 36;
+static const uint32_t RCMD_RATE_CFG_Y_CMD_GAP_CFG = 37;
+static const uint32_t RCMD_RATE_CFG_Y_CMD_GAP_CFG_LEN = 3;
 // pauc/reg00014.H
 
 static const uint64_t SLAVE_CONFIG_REG = 0x100f001eull;
@@ -309,5 +319,7 @@ static const uint32_t XSTOP2_XSTOP2_WAIT_CYCLES_LEN = 12;
 
 }
 }
-#include "pauc/reg00014.H"
+#ifndef __PPE_HCODE__
+    #include "pauc/reg00014.H"
+#endif
 #endif

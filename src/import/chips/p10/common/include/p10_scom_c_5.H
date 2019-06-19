@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_c_5_H_
 #define __p10_scom_c_5_H_
@@ -49,6 +51,44 @@ static const uint32_t ADDR_TRAP_REG_SATELLITE_ACKNOWLEDGE_BIT_ACCESS_VIOLATION =
 static const uint32_t ADDR_TRAP_REG_SATELLITE_ACKNOWLEDGE_BIT_INVALID_REGISTER = 34;
 static const uint32_t ADDR_TRAP_REG_LAST_MASTERID = 35;
 static const uint32_t ADDR_TRAP_REG_LAST_MASTERID_LEN = 4;
+// c/reg00005.H
+
+static const uint64_t CPMS_FLMR = 0x200e0e48ull;
+
+static const uint32_t CPMS_FLMR_LARGE_INITIAL_CYCLES = 0;
+static const uint32_t CPMS_FLMR_LARGE_INITIAL_CYCLES_LEN = 6;
+static const uint32_t CPMS_FLMR_LARGE_INITIAL_ACTION = 6;
+static const uint32_t CPMS_FLMR_LARGE_INITIAL_ACTION_LEN = 5;
+static const uint32_t CPMS_FLMR_LARGE_PREFETCH_ACTION = 11;
+static const uint32_t CPMS_FLMR_LARGE_PREFETCH_ACTION_LEN = 2;
+static const uint32_t CPMS_FLMR_LARGE_RESPONSE_DISABLE = 13;
+static const uint32_t CPMS_FLMR_LARGE_FLUSH_TYPE = 14;
+static const uint32_t CPMS_FLMR_LARGE_DITHER_WINDOW_SEL = 15;
+static const uint32_t CPMS_FLMR_LARGE_DITHER_INITIAL = 16;
+static const uint32_t CPMS_FLMR_LARGE_DITHER_INITIAL_LEN = 4;
+static const uint32_t CPMS_FLMR_LARGE_DITHER_REPEAT = 20;
+static const uint32_t CPMS_FLMR_LARGE_DITHER_REPEAT_LEN = 4;
+static const uint32_t CPMS_FLMR_LARGE_DITHER_INCREASE = 24;
+static const uint32_t CPMS_FLMR_LARGE_DITHER_INCREASE_LEN = 4;
+static const uint32_t CPMS_FLMR_PHASE1_RECOVERY_ACTION = 28;
+static const uint32_t CPMS_FLMR_PHASE1_RECOVERY_ACTION_LEN = 3;
+static const uint32_t CPMS_FLMR_PHASE1_RECOVERY_PREFETCH = 31;
+static const uint32_t CPMS_FLMR_PHASE1_RECOVERY_PREFETCH_LEN = 2;
+static const uint32_t CPMS_FLMR_PHASE1_RECOVERY_VECTOR = 33;
+static const uint32_t CPMS_FLMR_PHASE1_RECOVERY_VECTOR_LEN = 3;
+static const uint32_t CPMS_FLMR_PHASE2_RECOVERY_ACTION = 36;
+static const uint32_t CPMS_FLMR_PHASE2_RECOVERY_ACTION_LEN = 3;
+static const uint32_t CPMS_FLMR_PHASE2_RECOVERY_PREFETCH = 39;
+static const uint32_t CPMS_FLMR_PHASE2_RECOVERY_PREFETCH_LEN = 2;
+static const uint32_t CPMS_FLMR_PHASE2_RECOVERY_VECTOR = 41;
+static const uint32_t CPMS_FLMR_PHASE2_RECOVERY_VECTOR_LEN = 3;
+static const uint32_t CPMS_FLMR_PHASE2_RECOVERY_CYCLES = 44;
+static const uint32_t CPMS_FLMR_PHASE2_RECOVERY_CYCLES_LEN = 8;
+static const uint32_t CPMS_FLMR_SPARE2 = 52;
+static const uint32_t CPMS_FLMR_SPARE2_LEN = 2;
+// c/reg00005.H
+
+static const uint64_t EC_LS_LSU_HOLD_OUT_REG8 = 0x200206c8ull;
 // c/reg00005.H
 
 static const uint64_t EC_PC_PMU_SPRCOR_CORE_FUSES = 0x2002040eull;
@@ -195,5 +235,7 @@ static const uint32_t QME_SCR_QME_SCR_DATA_LEN = 64;
 
 }
 }
-#include "c/reg00005.H"
+#ifndef __PPE_HCODE__
+    #include "c/reg00005.H"
+#endif
 #endif

@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_proc_d_H_
 #define __p10_scom_proc_d_H_
@@ -1877,8 +1879,6 @@ static const uint32_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG96_REGISTER96 = 0;
 static const uint32_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG96_REGISTER96_LEN = 64;
 // proc/reg00063.H
 
-//ERRCODE: // Some of the name targets not found in address targets: perv
-
 static const uint64_t TP_TPCHIP_TPC_DPLL_CNTL_PAU_REGS_ECHAR = 0x01060058ull;
 
 static const uint32_t TP_TPCHIP_TPC_DPLL_CNTL_PAU_REGS_ECHAR_DYNAMIC_ENCODED_DATA = 1;
@@ -1890,8 +1890,6 @@ static const uint32_t TP_TPCHIP_TPC_DPLL_CNTL_PAU_REGS_ECHAR_MAX_ENCODED_DATA_LE
 static const uint32_t TP_TPCHIP_TPC_DPLL_CNTL_PAU_REGS_ECHAR_INVERTED_DYNAMIC_ENCODE_INJECT = 61;
 static const uint32_t TP_TPCHIP_TPC_DPLL_CNTL_PAU_REGS_ECHAR_INVERTED_DYNAMIC_ENCODE_INJECT_LEN = 3;
 // proc/reg00063.H
-
-//ERRCODE: // Some of the name targets not found in address targets: perv
 
 static const uint64_t TP_TPCHIP_TPC_DPLL_CNTL_PAU_REGS_FREQ = 0x01060051ull;
 
@@ -2294,6 +2292,16 @@ static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_10_FSI = 0x00002981ull;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_10_FSI_BYTE = 0x00002e04ull;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_10_RW = 0x00050181ull;
+
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_10_SR_SCRATCH_REGISTER_10 = 0;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_10_SR_SCRATCH_REGISTER_10_LEN = 32;
+// proc/reg00064.H
+
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
 static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI = 0x0000283dull;
 static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI_BYTE = 0x000028f4ull;
 static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_RW = 0x0005003dull;
@@ -2465,7 +2473,7 @@ static const uint32_t TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_ERROR_INJECT__ERROR_R
 // proc/reg00064.H
 
 static const uint64_t VAS_VA_EG_SCF_PGMIG4 = 0x02011444ull;
-// proc/reg00064.H
+// proc/reg00065.H
 
 static const uint64_t VAS_VA_RG_SCF_MISCCTL = 0x0201140dull;
 
@@ -2489,9 +2497,11 @@ static const uint32_t VAS_VA_RG_SCF_MISCCTL_RG_IS_IDLE = 59;
 
 }
 }
-#include "proc/reg00061.H"
-#include "proc/reg00062.H"
-#include "proc/reg00063.H"
-#include "proc/reg00064.H"
-#include "proc/reg00065.H"
+#ifndef __PPE_HCODE__
+    #include "proc/reg00061.H"
+    #include "proc/reg00062.H"
+    #include "proc/reg00063.H"
+    #include "proc/reg00064.H"
+    #include "proc/reg00065.H"
+#endif
 #endif

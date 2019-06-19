@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_c_1_H_
 #define __p10_scom_c_1_H_
@@ -34,6 +36,9 @@ namespace scomt
 namespace c
 {
 
+
+static const uint64_t EC_LS_LSU_HOLD_OUT_REG1 = 0x200206c1ull;
+// c/reg00001.H
 
 static const uint64_t EC_PC_COMMON_SPR_SPATTN_MASK = 0x2002049aull;
 // c/reg00001.H
@@ -248,5 +253,7 @@ static const uint32_t QME_PSCRS2_PLS_LEN = 4;
 
 }
 }
-#include "c/reg00001.H"
+#ifndef __PPE_HCODE__
+    #include "c/reg00001.H"
+#endif
 #endif

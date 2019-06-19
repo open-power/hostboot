@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_proc_2_H_
 #define __p10_scom_proc_2_H_
@@ -1216,6 +1218,74 @@ static const uint32_t TP_TCN0_N0_EPS_DBG_TRACE_REG_1_2_CHECKSTOP_MODE_LT_LEN = 3
 static const uint32_t TP_TCN0_N0_EPS_DBG_TRACE_REG_1_2_CHECKSTOP_MODE_SELECTOR = 55;
 // proc/reg00010.H
 
+static const uint64_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2 = 0x02040109ull;
+
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_00 = 0;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_01 = 1;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_02 = 2;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_03 = 3;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_04 = 4;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_05 = 5;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_06 = 6;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_07 = 7;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_08 = 8;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_09 = 9;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_10 = 10;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_11 = 11;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_12 = 12;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_13 = 13;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_14 = 14;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_15 = 15;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_16 = 16;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_17 = 17;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_18 = 18;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_19 = 19;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_20 = 20;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_21 = 21;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_22 = 22;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_23 = 23;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_24 = 24;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_25 = 25;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_26 = 26;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_27 = 27;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_28 = 28;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_29 = 29;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_30 = 30;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_31 = 31;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_32 = 32;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_33 = 33;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_34 = 34;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_35 = 35;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_36 = 36;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_37 = 37;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_38 = 38;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_39 = 39;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_40 = 40;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_41 = 41;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_42 = 42;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_43 = 43;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_44 = 44;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_45 = 45;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_46 = 46;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_47 = 47;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_48 = 48;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_49 = 49;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_50 = 50;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_51 = 51;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_52 = 52;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_53 = 53;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_54 = 54;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_55 = 55;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_56 = 56;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_57 = 57;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_58 = 58;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_59 = 59;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_60 = 60;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_61 = 61;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_62 = 62;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION2_63 = 63;
+// proc/reg00010.H
+
 static const uint64_t TP_TCN0_N0_EPS_THERM_WSUB_INJECT_REG = 0x02050011ull;
 
 static const uint32_t TP_TCN0_N0_EPS_THERM_WSUB_INJECT_REG_TRIP = 0;
@@ -1830,7 +1900,7 @@ static const uint64_t TP_TPCHIP_NET_PCBSLN1_HANG_PULSE_1_REG = 0x030f0021ull;
 static const uint32_t TP_TPCHIP_NET_PCBSLN1_HANG_PULSE_1_REG_HANG_PULSE_REG_1 = 0;
 static const uint32_t TP_TPCHIP_NET_PCBSLN1_HANG_PULSE_1_REG_HANG_PULSE_REG_1_LEN = 6;
 static const uint32_t TP_TPCHIP_NET_PCBSLN1_HANG_PULSE_1_REG_SUPPRESS_HANG_1 = 6;
-// proc/reg00010.H
+// proc/reg00011.H
 
 static const uint64_t TP_TPCHIP_NET_PCBSLN1_HANG_PULSE_2_REG = 0x030f0022ull;
 
@@ -1980,16 +2050,16 @@ static const uint32_t TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXIVDR4_5 = 32;
 static const uint32_t TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXIVDR4_5_LEN = 32;
 // proc/reg00011.H
 
-static const uint64_t TP_TPCHIP_OCC_OCI_OCB_ADCCR0 = 0x0006c800ull;
+static const uint64_t TP_TPCHIP_OCC_OCI_OCB_ADC_CR0 = 0x0006c800ull;
 
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADCCR0_FRAME_SIZE = 0;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADCCR0_FRAME_SIZE_LEN = 6;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADCCR0_OUT_COUNT = 6;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADCCR0_OUT_COUNT_LEN = 6;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADCCR0_IN_DELAY = 12;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADCCR0_IN_DELAY_LEN = 6;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADCCR0_IN_COUNT = 18;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADCCR0_IN_COUNT_LEN = 6;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_CR0_FRAME_SIZE = 0;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_CR0_FRAME_SIZE_LEN = 6;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_CR0_OUT_COUNT = 6;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_CR0_OUT_COUNT_LEN = 6;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_CR0_IN_DELAY = 12;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_CR0_IN_DELAY_LEN = 6;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_CR0_IN_COUNT = 18;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_CR0_IN_COUNT_LEN = 6;
 // proc/reg00011.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_ADC_RDATA4 = 0x0006c824ull;
@@ -2159,7 +2229,7 @@ static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OPIT7Q5 = 0x0006c43dull;
 
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT7Q5_OCB_OCI_OPIT7Q5RR_PCB_INTR_PAYLOAD = 13;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT7Q5_OCB_OCI_OPIT7Q5RR_PCB_INTR_PAYLOAD_LEN = 19;
-// proc/reg00011.H
+// proc/reg00012.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OPIT8C16 = 0x0006c450ull;
 
@@ -2347,8 +2417,6 @@ static const uint64_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG93 = 0x0000805dull;
 static const uint32_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG93_REGISTER93 = 0;
 static const uint32_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG93_REGISTER93_LEN = 64;
 // proc/reg00012.H
-
-//ERRCODE: // Some of the name targets not found in address targets: perv
 
 static const uint64_t TP_TPCHIP_TPC_DPLL_CNTL_PAU_REGS_CTRL_RW = 0x01060052ull;
 static const uint64_t TP_TPCHIP_TPC_DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR = 0x01060053ull;
@@ -2585,6 +2653,16 @@ static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL5_COPY_RW =
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_15_FSI = 0x00002986ull;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_15_FSI_BYTE = 0x00002e18ull;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_15_RW = 0x00050186ull;
+
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_15_SR_SCRATCH_REGISTER_15 = 0;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_15_SR_SCRATCH_REGISTER_15_LEN = 32;
+// proc/reg00012.H
+
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
 static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI = 0x0000283aull;
 static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI_BYTE = 0x000028e8ull;
 static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RW = 0x0005003aull;
@@ -2611,7 +2689,7 @@ static const uint64_t TP_TPVSB_FSI_W_SLAVE_CMFSI_INCLUDE_MFSI_A_PIB2OPB_COMP_P_1
 // proc/reg00012.H
 
 static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_LLSTAT = 0x00000904ull;
-// proc/reg00012.H
+// proc/reg00013.H
 
 static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_MST_0_MMODE_FSI0 = 0x00003000ull;
 static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_MST_0_MMODE_RW = 0x00000c00ull;
@@ -2629,7 +2707,7 @@ static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_MST_0_MMODE_TIMEOUT_SEL = 26;
 static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_MST_0_MMODE_TIMEOUT_SEL_LEN = 2;
 static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_MST_0_MMODE_RECEIVER_MODE = 29;
 static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_MST_0_MMODE_RECEIVER_MODE_LEN = 3;
-// proc/reg00012.H
+// proc/reg00013.H
 
 static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_MST_0_MRESP3_FSI0 = 0x000030dcull;
 static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_MST_0_MRESP3_WO = 0x00000c37ull;
@@ -2814,9 +2892,11 @@ static const uint64_t VAS_VA_RG_SCF_WRMON7WID = 0x0201141full;
 
 }
 }
-#include "proc/reg00009.H"
-#include "proc/reg00010.H"
-#include "proc/reg00011.H"
-#include "proc/reg00012.H"
-#include "proc/reg00013.H"
+#ifndef __PPE_HCODE__
+    #include "proc/reg00009.H"
+    #include "proc/reg00010.H"
+    #include "proc/reg00011.H"
+    #include "proc/reg00012.H"
+    #include "proc/reg00013.H"
+#endif
 #endif

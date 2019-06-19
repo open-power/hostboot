@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_phb_e_H_
 #define __p10_scom_phb_e_H_
@@ -66,5 +68,7 @@ static const uint32_t RSB_SCOM_SSR_PHB5_UVIAR_REQ_ADDR_VALUE_LEN = 11;
 
 }
 }
-#include "phb/reg00014.H"
+#ifndef __PPE_HCODE__
+    #include "phb/reg00014.H"
+#endif
 #endif

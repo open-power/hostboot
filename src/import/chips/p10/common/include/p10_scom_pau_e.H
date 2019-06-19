@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_pau_e_H_
 #define __p10_scom_pau_e_H_
@@ -937,20 +939,20 @@ static const uint32_t MISC_REGS_INT_REQ_00 = 0;
 static const uint32_t MISC_REGS_INT_REQ_01 = 1;
 static const uint32_t MISC_REGS_INT_REQ_02 = 2;
 static const uint32_t MISC_REGS_INT_REQ_03 = 3;
-static const uint32_t MISC_REGS_INT_REQ_04 = 4;
-static const uint32_t MISC_REGS_INT_REQ_05 = 5;
-static const uint32_t MISC_REGS_INT_REQ_06 = 6;
-static const uint32_t MISC_REGS_INT_REQ_07 = 7;
-static const uint32_t MISC_REGS_INT_REQ_08 = 8;
-static const uint32_t MISC_REGS_INT_REQ_09 = 9;
-static const uint32_t MISC_REGS_INT_REQ_10 = 10;
-static const uint32_t MISC_REGS_INT_REQ_11 = 11;
+static const uint32_t MISC_REGS_INT_REQ_04_RSVD = 4;
+static const uint32_t MISC_REGS_INT_REQ_05_RSVD = 5;
+static const uint32_t MISC_REGS_INT_REQ_06_RSVD = 6;
+static const uint32_t MISC_REGS_INT_REQ_07_RSVD = 7;
+static const uint32_t MISC_REGS_INT_REQ_08_RSVD = 8;
+static const uint32_t MISC_REGS_INT_REQ_09_RSVD = 9;
+static const uint32_t MISC_REGS_INT_REQ_10_RSVD = 10;
+static const uint32_t MISC_REGS_INT_REQ_11_RSVD = 11;
 static const uint32_t MISC_REGS_INT_REQ_12 = 12;
 static const uint32_t MISC_REGS_INT_REQ_13 = 13;
-static const uint32_t MISC_REGS_INT_REQ_14 = 14;
-static const uint32_t MISC_REGS_INT_REQ_15 = 15;
-static const uint32_t MISC_REGS_INT_REQ_16 = 16;
-static const uint32_t MISC_REGS_INT_REQ_17 = 17;
+static const uint32_t MISC_REGS_INT_REQ_14_RSVD = 14;
+static const uint32_t MISC_REGS_INT_REQ_15_RSVD = 15;
+static const uint32_t MISC_REGS_INT_REQ_16_RSVD = 16;
+static const uint32_t MISC_REGS_INT_REQ_17_RSVD = 17;
 static const uint32_t MISC_REGS_INT_REQ_18 = 18;
 static const uint32_t MISC_REGS_INT_REQ_19 = 19;
 static const uint32_t MISC_REGS_INT_REQ_20 = 20;
@@ -958,41 +960,41 @@ static const uint32_t MISC_REGS_INT_REQ_21 = 21;
 static const uint32_t MISC_REGS_INT_REQ_22_RSVD = 22;
 static const uint32_t MISC_REGS_INT_REQ_23 = 23;
 static const uint32_t MISC_REGS_INT_REQ_24 = 24;
-static const uint32_t MISC_REGS_INT_REQ_25 = 25;
-static const uint32_t MISC_REGS_INT_REQ_26 = 26;
-static const uint32_t MISC_REGS_INT_REQ_27 = 27;
-static const uint32_t MISC_REGS_INT_REQ_28 = 28;
-static const uint32_t MISC_REGS_INT_REQ_29 = 29;
-static const uint32_t MISC_REGS_INT_REQ_30 = 30;
-static const uint32_t MISC_REGS_INT_REQ_31 = 31;
-static const uint32_t MISC_REGS_INT_REQ_32 = 32;
-static const uint32_t MISC_REGS_INT_REQ_33 = 33;
-static const uint32_t MISC_REGS_INT_REQ_34 = 34;
+static const uint32_t MISC_REGS_INT_REQ_25_RSVD = 25;
+static const uint32_t MISC_REGS_INT_REQ_26_RSVD = 26;
+static const uint32_t MISC_REGS_INT_REQ_27_RSVD = 27;
+static const uint32_t MISC_REGS_INT_REQ_28_RSVD = 28;
+static const uint32_t MISC_REGS_INT_REQ_29_RSVD = 29;
+static const uint32_t MISC_REGS_INT_REQ_30_RSVD = 30;
+static const uint32_t MISC_REGS_INT_REQ_31_RSVD = 31;
+static const uint32_t MISC_REGS_INT_REQ_32_RSVD = 32;
+static const uint32_t MISC_REGS_INT_REQ_33_RSVD = 33;
+static const uint32_t MISC_REGS_INT_REQ_34_RSVD = 34;
 static const uint32_t MISC_REGS_INT_REQ_35 = 35;
 static const uint32_t MISC_REGS_INT_REQ_36 = 36;
 static const uint32_t MISC_REGS_INT_REQ_37 = 37;
 static const uint32_t MISC_REGS_INT_REQ_38 = 38;
 static const uint32_t MISC_REGS_INT_REQ_39 = 39;
 static const uint32_t MISC_REGS_INT_REQ_40 = 40;
-static const uint32_t MISC_REGS_INT_REQ_41 = 41;
-static const uint32_t MISC_REGS_INT_REQ_42 = 42;
-static const uint32_t MISC_REGS_INT_REQ_43 = 43;
-static const uint32_t MISC_REGS_INT_REQ_44 = 44;
-static const uint32_t MISC_REGS_INT_REQ_45 = 45;
-static const uint32_t MISC_REGS_INT_REQ_46 = 46;
-static const uint32_t MISC_REGS_INT_REQ_47 = 47;
-static const uint32_t MISC_REGS_INT_REQ_48 = 48;
-static const uint32_t MISC_REGS_INT_REQ_49 = 49;
-static const uint32_t MISC_REGS_INT_REQ_50 = 50;
-static const uint32_t MISC_REGS_INT_REQ_51 = 51;
-static const uint32_t MISC_REGS_INT_REQ_52 = 52;
-static const uint32_t MISC_REGS_INT_REQ_53 = 53;
-static const uint32_t MISC_REGS_INT_REQ_54 = 54;
-static const uint32_t MISC_REGS_INT_REQ_55 = 55;
-static const uint32_t MISC_REGS_INT_REQ_56 = 56;
-static const uint32_t MISC_REGS_INT_REQ_57 = 57;
-static const uint32_t MISC_REGS_INT_REQ_58 = 58;
-static const uint32_t MISC_REGS_INT_REQ_59 = 59;
+static const uint32_t MISC_REGS_INT_REQ_41_RSVD = 41;
+static const uint32_t MISC_REGS_INT_REQ_42_RSVD = 42;
+static const uint32_t MISC_REGS_INT_REQ_43_RSVD = 43;
+static const uint32_t MISC_REGS_INT_REQ_44_RSVD = 44;
+static const uint32_t MISC_REGS_INT_REQ_45_RSVD = 45;
+static const uint32_t MISC_REGS_INT_REQ_46_RSVD = 46;
+static const uint32_t MISC_REGS_INT_REQ_47_RSVD = 47;
+static const uint32_t MISC_REGS_INT_REQ_48_RSVD = 48;
+static const uint32_t MISC_REGS_INT_REQ_49_RSVD = 49;
+static const uint32_t MISC_REGS_INT_REQ_50_RSVD = 50;
+static const uint32_t MISC_REGS_INT_REQ_51_RSVD = 51;
+static const uint32_t MISC_REGS_INT_REQ_52_RSVD = 52;
+static const uint32_t MISC_REGS_INT_REQ_53_RSVD = 53;
+static const uint32_t MISC_REGS_INT_REQ_54_RSVD = 54;
+static const uint32_t MISC_REGS_INT_REQ_55_RSVD = 55;
+static const uint32_t MISC_REGS_INT_REQ_56_RSVD = 56;
+static const uint32_t MISC_REGS_INT_REQ_57_RSVD = 57;
+static const uint32_t MISC_REGS_INT_REQ_58_RSVD = 58;
+static const uint32_t MISC_REGS_INT_REQ_59_RSVD = 59;
 // pau/reg00019.H
 
 static const uint64_t MISC_REGS_PESTB_ADDR_PE9 = 0x10010b89ull;
@@ -1413,6 +1415,8 @@ static const uint32_t XTS_REG_DEBUG0_CONFIG_ACT = 63;
 
 }
 }
-#include "pau/reg00019.H"
-#include "pau/reg00020.H"
+#ifndef __PPE_HCODE__
+    #include "pau/reg00019.H"
+    #include "pau/reg00020.H"
+#endif
 #endif

@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_mcc_b_H_
 #define __p10_scom_mcc_b_H_
@@ -74,7 +76,7 @@ static const uint32_t DSTL_DSTLFIR_SUBCHANNEL_B_TLX_RECOVERABLE_ATTENTION = 5;
 static const uint32_t DSTL_DSTLFIR_SUBCHANNEL_B_TLX_SPECIAL_ATTENTION = 6;
 static const uint32_t DSTL_DSTLFIR_SUBCHANNEL_B_TLX_APPLICATION_INTERRUPT = 7;
 static const uint32_t DSTL_DSTLFIR_MCS_DSTL_CMD_PARITY_ERROR = 8;
-static const uint32_t DSTL_DSTLFIR_SPARE9 = 9;
+static const uint32_t DSTL_DSTLFIR_RESET_CREDITS_RD_WDF_BUFFER_NONZERO = 9;
 static const uint32_t DSTL_DSTLFIR_CONFIG_REG_RECOVERABLE_PARITY_ERROR = 10;
 static const uint32_t DSTL_DSTLFIR_CONFIG_REG_FATAL_PARITY_ERROR = 11;
 static const uint32_t DSTL_DSTLFIR_SUBCHANNEL_A_COUNTER_ERROR = 12;
@@ -89,15 +91,16 @@ static const uint32_t DSTL_DSTLFIR_SUBCHANNEL_A_FAIL_ACTION = 20;
 static const uint32_t DSTL_DSTLFIR_SUBCHANNEL_B_FAIL_ACTION = 21;
 static const uint32_t DSTL_DSTLFIR_SUBCHANNEL_A_CHANNEL_TIMEOUT = 22;
 static const uint32_t DSTL_DSTLFIR_SUBCHANNEL_B_CHANNEL_TIMEOUT = 23;
-static const uint32_t DSTL_DSTLFIR_SPARE24 = 24;
-static const uint32_t DSTL_DSTLFIR_DECRYPT_ERR_INFO = 25;
-static const uint32_t DSTL_DSTLFIR_DECRYPT_ERR_INFO_LEN = 4;
+static const uint32_t DSTL_DSTLFIR_DECRYPT_ERR_INFO = 24;
+static const uint32_t DSTL_DSTLFIR_DECRYPT_ERR_INFO_LEN = 5;
 static const uint32_t DSTL_DSTLFIR_ENCRYPT_ERR_INFO = 29;
 static const uint32_t DSTL_DSTLFIR_ENCRYPT_ERR_INFO_LEN = 4;
 static const uint32_t DSTL_DSTLFIR_SUBCHANNEL_A_TLX_APPLICATION_INTERRUPT_RETRIED = 33;
 static const uint32_t DSTL_DSTLFIR_SUBCHANNEL_B_TLX_APPLICATION_INTERRUPT_RETRIED = 34;
 static const uint32_t DSTL_DSTLFIR_SUBCHANNEL_A_PARITY_ERROR = 35;
 static const uint32_t DSTL_DSTLFIR_SUBCHANNEL_B_PARITY_ERROR = 36;
+static const uint32_t DSTL_DSTLFIR_SPARE37 = 37;
+static const uint32_t DSTL_DSTLFIR_SPARE38 = 38;
 // mcc/reg00011.H
 
 static const uint64_t USTL_USTLERRRPT = 0x0c010e0eull;
@@ -151,5 +154,7 @@ static const uint32_t USTL_USTLFIRWOF_USTLFIRWOF_WOF_LEN = 62;
 
 }
 }
-#include "mcc/reg00011.H"
+#ifndef __PPE_HCODE__
+    #include "mcc/reg00011.H"
+#endif
 #endif

@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_phb_f_H_
 #define __p10_scom_phb_f_H_
@@ -65,5 +67,7 @@ static const uint32_t REGS_PBAIBTXDCR_REG_R_LEN = 4;
 
 }
 }
-#include "phb/reg00015.H"
+#ifndef __PPE_HCODE__
+    #include "phb/reg00015.H"
+#endif
 #endif

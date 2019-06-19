@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_proc_8_H_
 #define __p10_scom_proc_8_H_
@@ -2139,6 +2141,16 @@ TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SLAVE_B_DOORBELL_ERROR_STATUS_PIB_SLAVE_A_
 static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SLAVE_B_DOORBELL_ERROR_STATUS_CLEAR_STATUS_2 = 31;
 // proc/reg00041.H
 
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_16_FSI = 0x00002987ull;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_16_FSI_BYTE = 0x00002e1cull;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_16_RW = 0x00050187ull;
+
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_16_SR_SCRATCH_REGISTER_16 = 0;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_16_SR_SCRATCH_REGISTER_16_LEN = 32;
+// proc/reg00041.H
+
 static const uint32_t TP_TPVSB_FSI_W_SHIFT_COMPLEMENT_MASK_FSI = 0x00000c0cull;
 static const uint32_t TP_TPVSB_FSI_W_SHIFT_COMPLEMENT_MASK_FSI_BYTE = 0x00000c30ull;
 
@@ -2372,8 +2384,10 @@ static const uint32_t VAS_VA_RG_SCF_WCMBAR_WCMBAR_BASE_ADDR_LEN = 31;
 
 }
 }
-#include "proc/reg00038.H"
-#include "proc/reg00039.H"
-#include "proc/reg00040.H"
-#include "proc/reg00041.H"
+#ifndef __PPE_HCODE__
+    #include "proc/reg00038.H"
+    #include "proc/reg00039.H"
+    #include "proc/reg00040.H"
+    #include "proc/reg00041.H"
+#endif
 #endif

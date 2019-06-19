@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_mcc_0_H_
 #define __p10_scom_mcc_0_H_
@@ -43,5 +45,7 @@ static const uint32_t DSTL_DSTLFIRACT2_DSTLFIRACT2_ACTION_2_LEN = 37;
 
 }
 }
-#include "mcc/reg00000.H"
+#ifndef __PPE_HCODE__
+    #include "mcc/reg00000.H"
+#endif
 #endif

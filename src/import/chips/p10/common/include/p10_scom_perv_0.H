@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_perv_0_H_
 #define __p10_scom_perv_0_H_
@@ -392,6 +394,16 @@ static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL8_CLEAR_ROOT_CTRL8_24_31_LEN = 8;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL8_COPY_FSI = 0x00002918ull;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL8_COPY_FSI_BYTE = 0x00002c60ull;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL8_COPY_RW = 0x00050118ull;
+// perv/reg00000.H
+
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_13_FSI = 0x00002984ull;
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_13_FSI_BYTE = 0x00002e10ull;
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_13_RW = 0x00050184ull;
+
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_13_SR_SCRATCH_REGISTER_13 = 0;
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_13_SR_SCRATCH_REGISTER_13_LEN = 32;
 // perv/reg00000.H
 
 static const uint64_t HOSTATTN = 0x00040004ull;
@@ -985,7 +997,7 @@ static const uint32_t TRA2_TR1_CONFIG_5_C = 0;
 static const uint32_t TRA2_TR1_CONFIG_5_C_LEN = 24;
 static const uint32_t TRA2_TR1_CONFIG_5_D = 24;
 static const uint32_t TRA2_TR1_CONFIG_5_D_LEN = 24;
-// perv/reg00000.H
+// perv/reg00001.H
 
 static const uint64_t TRA3_TR0_CONFIG_3 = 0x00010586ull;
 
@@ -1128,6 +1140,8 @@ static const uint32_t XSTOP_MASK_53 = 53;
 
 }
 }
-#include "perv/reg00000.H"
-#include "perv/reg00001.H"
+#ifndef __PPE_HCODE__
+    #include "perv/reg00000.H"
+    #include "perv/reg00001.H"
+#endif
 #endif

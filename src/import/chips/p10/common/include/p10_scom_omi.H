@@ -23,26 +23,28 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_omi_H_
-#define __p10_scom_omi_H_
+    #define __p10_scom_omi_H_
 
-#include "p10_scom_omi_0.H"
-#include "p10_scom_omi_1.H"
-#include "p10_scom_omi_2.H"
-#include "p10_scom_omi_3.H"
-#include "p10_scom_omi_4.H"
-#include "p10_scom_omi_5.H"
-#include "p10_scom_omi_6.H"
-#include "p10_scom_omi_7.H"
-#include "p10_scom_omi_8.H"
-#include "p10_scom_omi_9.H"
-#include "p10_scom_omi_a.H"
-#include "p10_scom_omi_b.H"
-#include "p10_scom_omi_c.H"
-#include "p10_scom_omi_d.H"
-#include "p10_scom_omi_e.H"
-#include "p10_scom_omi_f.H"
+    #include "p10_scom_omi_0.H"
+    #include "p10_scom_omi_1.H"
+    #include "p10_scom_omi_2.H"
+    #include "p10_scom_omi_3.H"
+    #include "p10_scom_omi_4.H"
+    #include "p10_scom_omi_5.H"
+    #include "p10_scom_omi_6.H"
+    #include "p10_scom_omi_7.H"
+    #include "p10_scom_omi_8.H"
+    #include "p10_scom_omi_9.H"
+    #include "p10_scom_omi_a.H"
+    #include "p10_scom_omi_b.H"
+    #include "p10_scom_omi_c.H"
+    #include "p10_scom_omi_d.H"
+    #include "p10_scom_omi_e.H"
+    #include "p10_scom_omi_f.H"
 
 #endif

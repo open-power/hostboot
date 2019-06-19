@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_eq_6_H_
 #define __p10_scom_eq_6_H_
@@ -227,5 +229,7 @@ static const uint32_t QME_SCOM_XIVDR2_3_LEN = 32;
 
 }
 }
-#include "eq/reg00006.H"
+#ifndef __PPE_HCODE__
+    #include "eq/reg00006.H"
+#endif
 #endif

@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_omic_c_H_
 #define __p10_scom_omic_c_H_
@@ -43,5 +45,7 @@ static const uint64_t DATASM_REGS_RX_STAT20_PG = 0x800b284010012c3full;
 
 }
 }
-#include "omic/reg00012.H"
+#ifndef __PPE_HCODE__
+    #include "omic/reg00012.H"
+#endif
 #endif

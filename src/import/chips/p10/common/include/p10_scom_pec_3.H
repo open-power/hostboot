@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_pec_3_H_
 #define __p10_scom_pec_3_H_
@@ -140,6 +142,7 @@ static const uint32_t NET_CTRL0_VITAL_PHASE = 8;
 static const uint32_t NET_CTRL0_FLUSH_ALIGN_OVR = 9;
 static const uint32_t NET_CTRL0_VITAL_AL = 10;
 static const uint32_t NET_CTRL0_ACT_DIS = 11;
+static const uint32_t NET_CTRL0_TOADMODE_EN = 12;
 static const uint32_t NET_CTRL0_SYNC_PULSE = 13;
 static const uint32_t NET_CTRL0_MPW3 = 14;
 static const uint32_t NET_CTRL0_DELAY_LCLKR = 15;
@@ -246,5 +249,7 @@ static const uint32_t TRA0_TR0_CONFIG_3_D_LEN = 24;
 
 }
 }
-#include "pec/reg00003.H"
+#ifndef __PPE_HCODE__
+    #include "pec/reg00003.H"
+#endif
 #endif

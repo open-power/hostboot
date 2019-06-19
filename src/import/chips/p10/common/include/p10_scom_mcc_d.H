@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_mcc_d_H_
 #define __p10_scom_mcc_d_H_
@@ -213,5 +215,7 @@ static const uint32_t USTL_USTLLOLMASK_CHECKSTOP_ENABLE_MASK_LEN = 16;
 
 }
 }
-#include "mcc/reg00013.H"
+#ifndef __PPE_HCODE__
+    #include "mcc/reg00013.H"
+#endif
 #endif

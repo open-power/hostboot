@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_mc_f_H_
 #define __p10_scom_mc_f_H_
@@ -175,10 +177,6 @@ static const uint32_t SCOMFIR_MCERPT2_MCFGP1A_PARITY_ERROR = 8;
 static const uint32_t SCOMFIR_MCERPT2_MCMODE3_PARITY_ERROR = 9;
 static const uint32_t SCOMFIR_MCERPT2_MCFGPR0_BAD_TTYPE = 11;
 static const uint32_t SCOMFIR_MCERPT2_MCFGPR1_BAD_TTYPE = 12;
-static const uint32_t SCOMFIR_MCERPT2_CH0_TIMEOUT = 13;
-static const uint32_t SCOMFIR_MCERPT2_CH1_TIMEOUT = 14;
-static const uint32_t SCOMFIR_MCERPT2_CH0_TIMEOUT_MEM_CONTROL = 15;
-static const uint32_t SCOMFIR_MCERPT2_CH1_TIMEOUT_MEM_CONTROL = 16;
 static const uint32_t SCOMFIR_MCERPT2_MCFGPM0A_PARITY_ERROR = 17;
 static const uint32_t SCOMFIR_MCERPT2_MCFGPM1A_PARITY_ERROR = 18;
 static const uint32_t SCOMFIR_MCERPT2_POP_RCMD0_NOHIT = 19;
@@ -246,5 +244,7 @@ static const uint32_t XSTOP_UNMASKED_XSTOP_UNMASKED_IN_LEN = 53;
 
 }
 }
-#include "mc/reg00015.H"
+#ifndef __PPE_HCODE__
+    #include "mc/reg00015.H"
+#endif
 #endif

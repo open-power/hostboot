@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_pau_5_H_
 #define __p10_scom_pau_5_H_
@@ -197,42 +199,6 @@ static const uint32_t CS_CTL_MISC_GPU4_BAR_SECURE_A12 = 48;
 static const uint32_t CS_CTL_MISC_GPU4_BAR_CHIP_EQ_GROUP = 49;
 static const uint32_t CS_CTL_MISC_GPU4_BAR_EXTENDED_MODE = 50;
 static const uint32_t CS_CTL_MISC_GPU4_BAR_RESERVED = 51;
-// pau/reg00007.H
-
-static const uint64_t CS_CTL_MISC_RLX_CONFIG = 0x100109a6ull;
-
-static const uint32_t CS_CTL_MISC_RLX_CONFIG_BRK0_CLUSTER = 0;
-static const uint32_t CS_CTL_MISC_RLX_CONFIG_BRK0_CLUSTER_LEN = 3;
-static const uint32_t CS_CTL_MISC_RLX_CONFIG_BRK1_CLUSTER = 3;
-static const uint32_t CS_CTL_MISC_RLX_CONFIG_BRK1_CLUSTER_LEN = 3;
-static const uint32_t CS_CTL_MISC_RLX_CONFIG_BRK2_CLUSTER = 6;
-static const uint32_t CS_CTL_MISC_RLX_CONFIG_BRK2_CLUSTER_LEN = 3;
-static const uint32_t CS_CTL_MISC_RLX_CONFIG_BRK3_CLUSTER = 9;
-static const uint32_t CS_CTL_MISC_RLX_CONFIG_BRK3_CLUSTER_LEN = 3;
-static const uint32_t CS_CTL_MISC_RLX_CONFIG_BRK4_CLUSTER = 12;
-static const uint32_t CS_CTL_MISC_RLX_CONFIG_BRK4_CLUSTER_LEN = 3;
-static const uint32_t CS_CTL_MISC_RLX_CONFIG_BRK5_CLUSTER = 15;
-static const uint32_t CS_CTL_MISC_RLX_CONFIG_BRK5_CLUSTER_LEN = 3;
-static const uint32_t CS_CTL_MISC_RLX_CONFIG_BRK6_CLUSTER = 18;
-static const uint32_t CS_CTL_MISC_RLX_CONFIG_BRK6_CLUSTER_LEN = 3;
-static const uint32_t CS_CTL_MISC_RLX_CONFIG_BRK7_CLUSTER = 21;
-static const uint32_t CS_CTL_MISC_RLX_CONFIG_BRK7_CLUSTER_LEN = 3;
-static const uint32_t CS_CTL_MISC_RLX_CONFIG_BRK8_CLUSTER = 24;
-static const uint32_t CS_CTL_MISC_RLX_CONFIG_BRK8_CLUSTER_LEN = 3;
-static const uint32_t CS_CTL_MISC_RLX_CONFIG_BRK9_CLUSTER = 27;
-static const uint32_t CS_CTL_MISC_RLX_CONFIG_BRK9_CLUSTER_LEN = 3;
-static const uint32_t CS_CTL_MISC_RLX_CONFIG_BRK10_CLUSTER = 30;
-static const uint32_t CS_CTL_MISC_RLX_CONFIG_BRK10_CLUSTER_LEN = 3;
-static const uint32_t CS_CTL_MISC_RLX_CONFIG_BRK11_CLUSTER = 33;
-static const uint32_t CS_CTL_MISC_RLX_CONFIG_BRK11_CLUSTER_LEN = 3;
-static const uint32_t CS_CTL_MISC_RLX_CONFIG_BRK12_CLUSTER = 36;
-static const uint32_t CS_CTL_MISC_RLX_CONFIG_BRK12_CLUSTER_LEN = 3;
-static const uint32_t CS_CTL_MISC_RLX_CONFIG_BRK13_CLUSTER = 39;
-static const uint32_t CS_CTL_MISC_RLX_CONFIG_BRK13_CLUSTER_LEN = 3;
-static const uint32_t CS_CTL_MISC_RLX_CONFIG_BRK14_CLUSTER = 42;
-static const uint32_t CS_CTL_MISC_RLX_CONFIG_BRK14_CLUSTER_LEN = 3;
-static const uint32_t CS_CTL_MISC_RLX_CONFIG_RLX_RESERVED = 45;
-static const uint32_t CS_CTL_MISC_RLX_CONFIG_RLX_RESERVED_LEN = 3;
 // pau/reg00007.H
 
 static const uint64_t CS_CTL_MISC_SCOPE_PREDICT3 = 0x100109aeull;
@@ -1014,5 +980,7 @@ static const uint32_t XTS_ATSD_HYP15_LPARID_LEN = 12;
 
 }
 }
-#include "pau/reg00007.H"
+#ifndef __PPE_HCODE__
+    #include "pau/reg00007.H"
+#endif
 #endif

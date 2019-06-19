@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_pauc_a_H_
 #define __p10_scom_pauc_a_H_
@@ -225,5 +227,7 @@ static const uint64_t TXIRLM_REGS_TX_IMPCAL2_PB = 0x800f0c0010012c3full;
 
 }
 }
-#include "pauc/reg00010.H"
+#ifndef __PPE_HCODE__
+    #include "pauc/reg00010.H"
+#endif
 #endif

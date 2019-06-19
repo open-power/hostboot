@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_omic_a_H_
 #define __p10_scom_omic_a_H_
@@ -105,22 +107,21 @@ static const uint32_t DATASM_REGS_RX_CNT12_PG_RX_PSAVE_FORCE_STS_16_23_LEN = 8;
 
 static const uint64_t DATASM_REGS_RX_CNT22_PG = 0x800a304010012c3full;
 
-static const uint32_t DATASM_REGS_RX_CNT22_PG_RX_CTLE_GAIN_CHECK_EN = 48;
-static const uint32_t DATASM_REGS_RX_CNT22_PG_RX_LATCHOFF_CHECK_EN = 49;
-static const uint32_t DATASM_REGS_RX_CNT22_PG_RX_EOFF_CHECK_EN = 50;
-static const uint32_t DATASM_REGS_RX_CNT22_PG_RX_EOFF_POFF_CHECK_EN = 51;
-static const uint32_t DATASM_REGS_RX_CNT22_PG_RX_CTLE_PEAK1_CHECK_EN = 52;
-static const uint32_t DATASM_REGS_RX_CNT22_PG_RX_CTLE_PEAK2_CHECK_EN = 53;
-static const uint32_t DATASM_REGS_RX_CNT22_PG_RX_LTE_GAIN_CHECK_EN = 54;
-static const uint32_t DATASM_REGS_RX_CNT22_PG_RX_LTE_FREQ_CHECK_EN = 55;
-static const uint32_t DATASM_REGS_RX_CNT22_PG_RX_BANK_SYNC_CHECK_EN = 56;
-static const uint32_t DATASM_REGS_RX_CNT22_PG_RX_QUAD_PHASE_CHECK_EN = 57;
-static const uint32_t DATASM_REGS_RX_CNT22_PG_RX_DFE_H1_CHECK_EN = 58;
-static const uint32_t DATASM_REGS_RX_CNT22_PG_RX_DFE_CHECK_EN = 59;
-static const uint32_t DATASM_REGS_RX_CNT22_PG_RX_DDC_CHECK_EN = 60;
-static const uint32_t DATASM_REGS_RX_CNT22_PG_RX_BER_CHECK_EN = 61;
-static const uint32_t DATASM_REGS_RX_CNT22_PG_RX_LINK_LAYER_CHECK_EN = 62;
-static const uint32_t DATASM_REGS_RX_CNT22_PG_SYSTEM_DFT_CHECK_SEL = 63;
+static const uint32_t DATASM_REGS_RX_CNT22_PG_CTLE_GAIN_CHECK_EN = 48;
+static const uint32_t DATASM_REGS_RX_CNT22_PG_LATCHOFF_CHECK_EN = 49;
+static const uint32_t DATASM_REGS_RX_CNT22_PG_EOFF_CHECK_EN = 50;
+static const uint32_t DATASM_REGS_RX_CNT22_PG_EOFF_POFF_CHECK_EN = 51;
+static const uint32_t DATASM_REGS_RX_CNT22_PG_CTLE_PEAK1_CHECK_EN = 52;
+static const uint32_t DATASM_REGS_RX_CNT22_PG_CTLE_PEAK2_CHECK_EN = 53;
+static const uint32_t DATASM_REGS_RX_CNT22_PG_LTE_GAIN_CHECK_EN = 54;
+static const uint32_t DATASM_REGS_RX_CNT22_PG_LTE_ZERO_CHECK_EN = 55;
+static const uint32_t DATASM_REGS_RX_CNT22_PG_BANK_SYNC_CHECK_EN = 56;
+static const uint32_t DATASM_REGS_RX_CNT22_PG_QUAD_PHASE_CHECK_EN = 57;
+static const uint32_t DATASM_REGS_RX_CNT22_PG_DFE_H1_CHECK_EN = 58;
+static const uint32_t DATASM_REGS_RX_CNT22_PG_DFE_CHECK_EN = 59;
+static const uint32_t DATASM_REGS_RX_CNT22_PG_DDC_CHECK_EN = 60;
+static const uint32_t DATASM_REGS_RX_CNT22_PG_PR_BER_CHECK_EN = 61;
+static const uint32_t DATASM_REGS_RX_CNT22_PG_LINK_LAYER_CHECK_EN = 62;
 // omic/reg00010.H
 
 static const uint64_t DATASM_REGS_RX_CNT32_PG = 0x800a804010012c3full;
@@ -152,5 +153,7 @@ static const uint64_t TX_CTL_SM_REGS_CTLSM_STAT3_PG = 0x800d544010012c3full;
 
 }
 }
-#include "omic/reg00010.H"
+#ifndef __PPE_HCODE__
+    #include "omic/reg00010.H"
+#endif
 #endif

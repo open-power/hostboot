@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_nmmu_5_H_
 #define __p10_scom_nmmu_5_H_
@@ -61,5 +63,7 @@ static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_TOP_ID_XLAT_TBL3_REG_TOP_ID_XLAT_TBL
 
 }
 }
-#include "nmmu/reg00005.H"
+#ifndef __PPE_HCODE__
+    #include "nmmu/reg00005.H"
+#endif
 #endif

@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_pau_6_H_
 #define __p10_scom_pau_6_H_
@@ -40,14 +42,14 @@ static const uint64_t AME_AME1_MISC_CERR_RPT_HOLD = 0x10010bd8ull;
 static const uint32_t AME_AME1_MISC_CERR_RPT_HOLD_FIRMWARE = 47;
 static const uint32_t AME_AME1_MISC_CERR_RPT_HOLD_CREGA_PERR = 48;
 static const uint32_t AME_AME1_MISC_CERR_RPT_HOLD_CREGM_PERR = 49;
-static const uint32_t AME_AME1_MISC_CERR_RPT_HOLD_LDW_UE = 50;
-static const uint32_t AME_AME1_MISC_CERR_RPT_HOLD_FU_UE = 51;
-static const uint32_t AME_AME1_MISC_CERR_RPT_HOLD_WB_UE = 52;
-static const uint32_t AME_AME1_MISC_CERR_RPT_HOLD_PCT_UE = 53;
-static const uint32_t AME_AME1_MISC_CERR_RPT_HOLD_CBA_UE = 54;
-static const uint32_t AME_AME1_MISC_CERR_RPT_HOLD_ERAT_UE = 55;
-static const uint32_t AME_AME1_MISC_CERR_RPT_HOLD_PE_UE = 56;
-static const uint32_t AME_AME1_MISC_CERR_RPT_HOLD_XCT_UE = 57;
+static const uint32_t AME_AME1_MISC_CERR_RPT_HOLD_FU_UE = 50;
+static const uint32_t AME_AME1_MISC_CERR_RPT_HOLD_PCT_UE = 51;
+static const uint32_t AME_AME1_MISC_CERR_RPT_HOLD_CBA_UE = 52;
+static const uint32_t AME_AME1_MISC_CERR_RPT_HOLD_ERAT_UE = 53;
+static const uint32_t AME_AME1_MISC_CERR_RPT_HOLD_PE_UE = 54;
+static const uint32_t AME_AME1_MISC_CERR_RPT_HOLD_XCT_UE = 55;
+static const uint32_t AME_AME1_MISC_CERR_RPT_HOLD_LDW_UE = 56;
+static const uint32_t AME_AME1_MISC_CERR_RPT_HOLD_WB_UE = 57;
 static const uint32_t AME_AME1_MISC_CERR_RPT_HOLD_WB_CE = 58;
 static const uint32_t AME_AME1_MISC_CERR_RPT_HOLD_PCT_CE = 59;
 static const uint32_t AME_AME1_MISC_CERR_RPT_HOLD_CBA_CE = 60;
@@ -92,6 +94,17 @@ static const uint32_t AME_AME1_MISC_PMU_CONFIG2_PCR_S = 38;
 static const uint32_t AME_AME1_MISC_PMU_CONFIG2_PCR_S_LEN = 13;
 static const uint32_t AME_AME1_MISC_PMU_CONFIG2_PCR_E = 51;
 static const uint32_t AME_AME1_MISC_PMU_CONFIG2_PCR_E_LEN = 13;
+// pau/reg00008.H
+
+static const uint64_t AME_ATL_MISC_ID_FENCE_STATUS = 0x10010bf0ull;
+
+static const uint32_t AME_ATL_MISC_ID_FENCE_STATUS_ATL_ID = 0;
+static const uint32_t AME_ATL_MISC_ID_FENCE_STATUS_ATL_ID_LEN = 8;
+static const uint32_t AME_ATL_MISC_ID_FENCE_STATUS_FENCE_IN = 8;
+static const uint32_t AME_ATL_MISC_ID_FENCE_STATUS_FENCE_DONE = 9;
+static const uint32_t AME_ATL_MISC_ID_FENCE_STATUS_DAT_IN_FENCE = 10;
+static const uint32_t AME_ATL_MISC_ID_FENCE_STATUS_AMM_FENCE_DONE = 11;
+static const uint32_t AME_ATL_MISC_ID_FENCE_STATUS_AMM_FENCE_DONE_LEN = 3;
 // pau/reg00008.H
 
 static const uint64_t ATS_REG_MASK = 0x10010ab6ull;
@@ -1036,7 +1049,7 @@ static const uint32_t MISC_REGS_INT_LOG_1_PE2_RSVD0_LEN = 7;
 static const uint64_t MISC_REGS_MASK = 0x10010b35ull;
 
 static const uint32_t MISC_REGS_MASK_IDIAL_MISC_MASK = 0;
-static const uint32_t MISC_REGS_MASK_IDIAL_MISC_MASK_LEN = 12;
+static const uint32_t MISC_REGS_MASK_IDIAL_MISC_MASK_LEN = 11;
 // pau/reg00008.H
 
 static const uint64_t MISC_REGS_PESTB_ADDR_PE2 = 0x10010b82ull;
@@ -1164,5 +1177,7 @@ static const uint32_t XTS_ATSD_HYP8_LPARID_LEN = 12;
 
 }
 }
-#include "pau/reg00008.H"
+#ifndef __PPE_HCODE__
+    #include "pau/reg00008.H"
+#endif
 #endif

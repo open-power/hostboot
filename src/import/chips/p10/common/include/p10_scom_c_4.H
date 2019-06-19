@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_c_4_H_
 #define __p10_scom_c_4_H_
@@ -35,16 +37,39 @@ namespace c
 {
 
 
+static const uint64_t CPMS_CCCR = 0x200e0e70ull;
+
+static const uint32_t CPMS_CCCR_COUNT_MODE = 0;
+static const uint32_t CPMS_CCCR_COUNT_MODE_LEN = 2;
+static const uint32_t CPMS_CCCR_COUNT_TYPE = 2;
+static const uint32_t CPMS_CCCR_COUNT_TYPE_LEN = 2;
+static const uint32_t CPMS_CCCR_COUNT_ENABLE_SEL = 4;
+static const uint32_t CPMS_CCCR_COUNT_ENABLE_SEL_LEN = 2;
+static const uint32_t CPMS_CCCR_INVERT_COUNT_ENABLE = 6;
+static const uint32_t CPMS_CCCR_COUNT_ALWAYS_SAMPLED = 7;
+static const uint32_t CPMS_CCCR_HI_THRESHOLD = 8;
+static const uint32_t CPMS_CCCR_HI_THRESHOLD_LEN = 8;
+static const uint32_t CPMS_CCCR_LO_THRESHOLD = 16;
+static const uint32_t CPMS_CCCR_LO_THRESHOLD_LEN = 8;
+static const uint32_t CPMS_CCCR_SPARE = 24;
+static const uint32_t CPMS_CCCR_SPARE_LEN = 2;
+// c/reg00004.H
+
 static const uint64_t CPMS_RVCSR = 0x200e0e04ull;
 static const uint64_t CPMS_RVCSR_WO_CLEAR = 0x200e0e06ull;
 static const uint64_t CPMS_RVCSR_WO_OR = 0x200e0e07ull;
 
 static const uint32_t CPMS_RVCSR_RVID_ENABLE = 0;
 static const uint32_t CPMS_RVCSR_RVID_OVERRIDE = 1;
+static const uint32_t CPMS_RVCSR_ACS_CALIBRATE = 2;
 static const uint32_t CPMS_RVCSR_RVRM_TUNE = 6;
 static const uint32_t CPMS_RVCSR_RVRM_TUNE_LEN = 6;
 static const uint32_t CPMS_RVCSR_RVID_ACTIVE = 32;
 static const uint32_t CPMS_RVCSR_BYPASS_ACTIVE = 33;
+static const uint32_t CPMS_RVCSR_RVID_ENABLED = 34;
+// c/reg00004.H
+
+static const uint64_t EC_LS_LSU_HOLD_OUT_REG7 = 0x200206c7ull;
 // c/reg00004.H
 
 static const uint64_t EC_PC_FIR_RECOV_THOLD = 0x2002044cull;
@@ -55,43 +80,17 @@ static const uint32_t EC_PC_FIR_RECOV_THOLD_THRESHOLD_RESET_LEN = 2;
 
 static const uint64_t EC_PC_IMA_EVENT_MASK = 0x20020400ull;
 
-static const uint32_t EC_PC_IMA_EVENT_MASK_ECONL_0 = 0;
-static const uint32_t EC_PC_IMA_EVENT_MASK_ECRL_0 = 1;
-static const uint32_t EC_PC_IMA_EVENT_MASK_ECH_0 = 2;
-static const uint32_t EC_PC_IMA_EVENT_MASK_ECP_0 = 3;
-static const uint32_t EC_PC_IMA_EVENT_MASK_ECS_0 = 4;
-static const uint32_t EC_PC_IMA_EVENT_MASK_ECA_0 = 5;
-static const uint32_t EC_PC_IMA_EVENT_MASK_ECTA0_0 = 6;
-static const uint32_t EC_PC_IMA_EVENT_MASK_ECTA1_0 = 7;
-static const uint32_t EC_PC_IMA_EVENT_MASK_ECUS0_0 = 8;
-static const uint32_t EC_PC_IMA_EVENT_MASK_ECUS1_0 = 9;
-static const uint32_t EC_PC_IMA_EVENT_MASK_ECONL_1 = 10;
-static const uint32_t EC_PC_IMA_EVENT_MASK_ECRL_1 = 11;
-static const uint32_t EC_PC_IMA_EVENT_MASK_ECH_1 = 12;
-static const uint32_t EC_PC_IMA_EVENT_MASK_ECP_1 = 13;
-static const uint32_t EC_PC_IMA_EVENT_MASK_ECS_1 = 14;
-static const uint32_t EC_PC_IMA_EVENT_MASK_ECA_1 = 15;
-static const uint32_t EC_PC_IMA_EVENT_MASK_ECTA0_1 = 16;
-static const uint32_t EC_PC_IMA_EVENT_MASK_ECTA1_1 = 17;
-static const uint32_t EC_PC_IMA_EVENT_MASK_ECUS0_1 = 18;
-static const uint32_t EC_PC_IMA_EVENT_MASK_ECUS1_1 = 19;
-static const uint32_t EC_PC_IMA_EVENT_MASK_ECONL_2 = 20;
-static const uint32_t EC_PC_IMA_EVENT_MASK_ECRL_2 = 21;
-static const uint32_t EC_PC_IMA_EVENT_MASK_ECH_2 = 22;
-static const uint32_t EC_PC_IMA_EVENT_MASK_ECP_2 = 23;
-static const uint32_t EC_PC_IMA_EVENT_MASK_ECS_2 = 24;
-static const uint32_t EC_PC_IMA_EVENT_MASK_ECA_2 = 25;
-static const uint32_t EC_PC_IMA_EVENT_MASK_ECTA0_2 = 26;
-static const uint32_t EC_PC_IMA_EVENT_MASK_ECTA1_2 = 27;
-static const uint32_t EC_PC_IMA_EVENT_MASK_ECUS0_2 = 28;
-static const uint32_t EC_PC_IMA_EVENT_MASK_ECUS1_2 = 29;
 static const uint32_t EC_PC_IMA_EVENT_MASK_IC_TAP = 30;
 static const uint32_t EC_PC_IMA_EVENT_MASK_IC_TAP_LEN = 3;
 static const uint32_t EC_PC_IMA_EVENT_MASK_DIS_WRAP = 33;
 static const uint32_t EC_PC_IMA_EVENT_MASK_FREEZE = 34;
-static const uint32_t EC_PC_IMA_EVENT_MASK_ONL_OVR = 35;
-static const uint32_t EC_PC_IMA_EVENT_MASK_DIS_D_PRE = 36;
-static const uint32_t EC_PC_IMA_EVENT_MASK_DIS_I_PRE = 37;
+static const uint32_t EC_PC_IMA_EVENT_MASK_EN_D_PRE = 36;
+static const uint32_t EC_PC_IMA_EVENT_MASK_EN_I_PRE = 37;
+static const uint32_t EC_PC_IMA_EVENT_MASK_ONE_EVENT = 38;
+static const uint32_t EC_PC_IMA_EVENT_MASK_EVENT_VTID = 39;
+static const uint32_t EC_PC_IMA_EVENT_MASK_EVENT_VTID_LEN = 2;
+static const uint32_t EC_PC_IMA_EVENT_MASK_EVENT_SELECT = 41;
+static const uint32_t EC_PC_IMA_EVENT_MASK_EVENT_SELECT_LEN = 5;
 // c/reg00004.H
 
 static const uint64_t EC_PC_SCR5 = 0x2002048bull;
@@ -368,5 +367,7 @@ static const uint32_t WRITE_PROTECT_ENABLE_REG_RESERVED_RING_LOCKING = 1;
 
 }
 }
-#include "c/reg00004.H"
+#ifndef __PPE_HCODE__
+    #include "c/reg00004.H"
+#endif
 #endif

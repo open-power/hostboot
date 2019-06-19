@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_c_9_H_
 #define __p10_scom_c_9_H_
@@ -34,6 +36,61 @@ namespace scomt
 namespace c
 {
 
+
+static const uint64_t CPMS_DDSR = 0x200e0e50ull;
+
+static const uint32_t CPMS_DDSR_DDS_DATA = 3;
+static const uint32_t CPMS_DDSR_DDS_DATA_LEN = 5;
+static const uint32_t CPMS_DDSR_DDS_MIN = 11;
+static const uint32_t CPMS_DDSR_DDS_MIN_LEN = 5;
+static const uint32_t CPMS_DDSR_DDS_MAX = 19;
+static const uint32_t CPMS_DDSR_DDS_MAX_LEN = 5;
+static const uint32_t CPMS_DDSR_DPLL_ENCODED_DATA = 33;
+static const uint32_t CPMS_DDSR_DPLL_ENCODED_DATA_LEN = 3;
+static const uint32_t CPMS_DDSR_DPLL_ENCODED_MIN = 37;
+static const uint32_t CPMS_DDSR_DPLL_ENCODED_MIN_LEN = 3;
+static const uint32_t CPMS_DDSR_DPLL_ENCODED_MAX = 41;
+static const uint32_t CPMS_DDSR_DPLL_ENCODED_MAX_LEN = 3;
+static const uint32_t CPMS_DDSR_STOP_STATE_ACTIVE = 60;
+static const uint32_t CPMS_DDSR_CORE_SAMPLE_DISABLED = 61;
+static const uint32_t CPMS_DDSR_STOP_STATE_OCCURRED = 62;
+static const uint32_t CPMS_DDSR_SAMPLE_DISABLE_OCCURRED = 63;
+// c/reg00009.H
+
+static const uint64_t CPMS_FDIR = 0x200e0e44ull;
+static const uint64_t CPMS_FDIR_WO_CLEAR = 0x200e0e46ull;
+static const uint64_t CPMS_FDIR_WO_OR = 0x200e0e47ull;
+
+static const uint32_t CPMS_FDIR_INJECT_ENABLE = 0;
+static const uint32_t CPMS_FDIR_HALT_INJECT = 1;
+static const uint32_t CPMS_FDIR_HALT_TOGGLE_INJECT = 2;
+static const uint32_t CPMS_FDIR_FETCH_THROTTLE01_INJECT = 3;
+static const uint32_t CPMS_FDIR_FETCH_THROTTLE10_INJECT = 4;
+static const uint32_t CPMS_FDIR_ISSUE_NTC_INJECT = 5;
+static const uint32_t CPMS_FDIR_PREFETCH_THROTTLE_INJECT = 6;
+static const uint32_t CPMS_FDIR_PREFETCH_THROTTLE_INJECT_LEN = 2;
+static const uint32_t CPMS_FDIR_SLOW_FETCH_INJECT = 8;
+static const uint32_t CPMS_FDIR_VECTOR_LIMIT_INJECT = 9;
+static const uint32_t CPMS_FDIR_VECTOR_LIMIT_INJECT_LEN = 3;
+static const uint32_t CPMS_FDIR_SLOW_COMPLETION_INJECT = 12;
+static const uint32_t CPMS_FDIR_SPARE = 13;
+static const uint32_t CPMS_FDIR_MMA_LIMIT = 14;
+static const uint32_t CPMS_FDIR_MMA_LIMIT_LEN = 2;
+static const uint32_t CPMS_FDIR_TOGGLE_HALT_AMOUNT = 16;
+static const uint32_t CPMS_FDIR_TOGGLE_HALT_AMOUNT_LEN = 4;
+static const uint32_t CPMS_FDIR_IRRITATE_INJECT_RESPONSE = 20;
+static const uint32_t CPMS_FDIR_IRRITATE_INJECT_RESPONSE_LEN = 2;
+static const uint32_t CPMS_FDIR_IRRITATE_LFSR_SELECT = 22;
+static const uint32_t CPMS_FDIR_IRRITATE_LFSR_SELECT_LEN = 2;
+static const uint32_t CPMS_FDIR_IRRITATE_SMALL_SELECT = 24;
+static const uint32_t CPMS_FDIR_IRRITATE_SMALL_SELECT_LEN = 2;
+static const uint32_t CPMS_FDIR_IRRITATE_LARGE_SELECT = 26;
+static const uint32_t CPMS_FDIR_IRRITATE_LARGE_SELECT_LEN = 2;
+static const uint32_t CPMS_FDIR_IRRITATE_SPARE = 28;
+static const uint32_t CPMS_FDIR_IRRITATE_WEIGHT_SELECT = 29;
+static const uint32_t CPMS_FDIR_IRRITATE_WEIGHT_SELECT_LEN = 2;
+static const uint32_t CPMS_FDIR_INJECT_DPT_SUSPEND = 31;
+// c/reg00009.H
 
 static const uint64_t EC_PC_COMMON_SPR_CTRL = 0x20020485ull;
 
@@ -53,10 +110,10 @@ static const uint32_t EC_PC_IMA_TRACE_SAMPSEL = 0;
 static const uint32_t EC_PC_IMA_TRACE_SAMPSEL_LEN = 2;
 static const uint32_t EC_PC_IMA_TRACE_CPMC_LOAD = 2;
 static const uint32_t EC_PC_IMA_TRACE_CPMC_LOAD_LEN = 32;
-static const uint32_t EC_PC_IMA_TRACE_CPMC1SEL = 34;
-static const uint32_t EC_PC_IMA_TRACE_CPMC1SEL_LEN = 7;
-static const uint32_t EC_PC_IMA_TRACE_CPMC2SEL = 41;
-static const uint32_t EC_PC_IMA_TRACE_CPMC2SEL_LEN = 7;
+static const uint32_t EC_PC_IMA_TRACE_CPMC1SEL = 36;
+static const uint32_t EC_PC_IMA_TRACE_CPMC1SEL_LEN = 5;
+static const uint32_t EC_PC_IMA_TRACE_CPMC2SEL = 43;
+static const uint32_t EC_PC_IMA_TRACE_CPMC2SEL_LEN = 5;
 static const uint32_t EC_PC_IMA_TRACE_BUFFERSIZE = 48;
 static const uint32_t EC_PC_IMA_TRACE_BUFFERSIZE_LEN = 3;
 // c/reg00009.H
@@ -142,5 +199,7 @@ static const uint32_t QME_CDBB_QME_CDBB_MESSAGE_NUMBER_LEN = 8;
 
 }
 }
-#include "c/reg00009.H"
+#ifndef __PPE_HCODE__
+    #include "c/reg00009.H"
+#endif
 #endif

@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_nmmu_6_H_
 #define __p10_scom_nmmu_6_H_
@@ -63,5 +65,7 @@ static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_LINK_ABORT_FIR = 19;
 
 }
 }
-#include "nmmu/reg00006.H"
+#ifndef __PPE_HCODE__
+    #include "nmmu/reg00006.H"
+#endif
 #endif

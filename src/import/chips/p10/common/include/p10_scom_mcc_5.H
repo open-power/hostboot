@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_mcc_5_H_
 #define __p10_scom_mcc_5_H_
@@ -66,5 +68,7 @@ static const uint32_t USTL_USTLOCAPIERROR_OCAPIERROR_ERROR_INFORMATION_LEN = 31;
 
 }
 }
-#include "mcc/reg00005.H"
+#ifndef __PPE_HCODE__
+    #include "mcc/reg00005.H"
+#endif
 #endif

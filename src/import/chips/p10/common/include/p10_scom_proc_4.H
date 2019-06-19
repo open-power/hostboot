@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_proc_4_H_
 #define __p10_scom_proc_4_H_
@@ -1601,19 +1603,19 @@ static const uint32_t TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXILR_OCB_OCI_GPEXIDBGINF_LR 
 static const uint32_t TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXILR_OCB_OCI_GPEXIDBGINF_LR_LEN = 32;
 // proc/reg00020.H
 
-static const uint64_t TP_TPCHIP_OCC_OCI_OCB_ADCCR1 = 0x0006c801ull;
+static const uint64_t TP_TPCHIP_OCC_OCI_OCB_ADC_CR1 = 0x0006c801ull;
 
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADCCR1_HWCTRL_FSM_ENABLE = 0;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADCCR1_HWCTRL_DEVICE = 1;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADCCR1_HWCTRL_CPOL = 2;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADCCR1_HWCTRL_CPHA = 3;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADCCR1_HWCTRL_CLOCK_DIVIDER = 4;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADCCR1_HWCTRL_CLOCK_DIVIDER_LEN = 10;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADCCR1_HWCTRL_NR_OF_FRAMES = 14;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADCCR1_HWCTRL_NR_OF_FRAMES_LEN = 5;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADCCR1_HWCTRL_WRITE_WHILE_BRIDGE_BUSY_SCRESP_EN = 19;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADCCR1_BUSY_RESPONSE_CODE = 20;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADCCR1_BUSY_RESPONSE_CODE_LEN = 3;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_CR1_HWCTRL_FSM_ENABLE = 0;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_CR1_HWCTRL_DEVICE = 1;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_CR1_HWCTRL_CPOL = 2;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_CR1_HWCTRL_CPHA = 3;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_CR1_HWCTRL_CLOCK_DIVIDER = 4;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_CR1_HWCTRL_CLOCK_DIVIDER_LEN = 10;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_CR1_HWCTRL_NR_OF_FRAMES = 14;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_CR1_HWCTRL_NR_OF_FRAMES_LEN = 5;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_CR1_HWCTRL_WRITE_WHILE_BRIDGE_BUSY_SCRESP_EN = 19;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_CR1_BUSY_RESPONSE_CODE = 20;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_CR1_BUSY_RESPONSE_CODE_LEN = 3;
 // proc/reg00020.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_ADC_RDATA5 = 0x0006c825ull;
@@ -2154,6 +2156,16 @@ static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_ROOT_
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI = 0x00002985ull;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI_BYTE = 0x00002e14ull;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_RW = 0x00050185ull;
+
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_SR_SCRATCH_REGISTER_14 = 0;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_SR_SCRATCH_REGISTER_14_LEN = 32;
+// proc/reg00022.H
+
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
 static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_2_FSI = 0x00002839ull;
 static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_2_FSI_BYTE = 0x000028e4ull;
 static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_2_RW = 0x00050039ull;
@@ -2336,8 +2348,10 @@ static const uint32_t TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST3_ERROR_INJECT__ERROR_R
 
 }
 }
-#include "proc/reg00019.H"
-#include "proc/reg00020.H"
-#include "proc/reg00021.H"
-#include "proc/reg00022.H"
+#ifndef __PPE_HCODE__
+    #include "proc/reg00019.H"
+    #include "proc/reg00020.H"
+    #include "proc/reg00021.H"
+    #include "proc/reg00022.H"
+#endif
 #endif

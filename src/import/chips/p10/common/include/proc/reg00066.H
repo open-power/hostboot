@@ -704,227 +704,137 @@ fapi_try_exit:
 }
 
 
-static inline fapi2::buffer<uint64_t>& SET_INT_CQ_XIVE_CFG_RESERVED_0_5(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_INT_CQ_XIVE_CFG_RESERVED_0_7(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(INT_CQ_XIVE_CFG));
 #endif
-    return o_data.insertFromRight<INT_CQ_XIVE_CFG_RESERVED_0_5,
-           INT_CQ_XIVE_CFG_RESERVED_0_5_LEN>(i_data);
+    return o_data.insertFromRight<INT_CQ_XIVE_CFG_RESERVED_0_7,
+           INT_CQ_XIVE_CFG_RESERVED_0_7_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_RESERVED_0_5 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_RESERVED_0_7 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_INT_CQ_XIVE_CFG_RESERVED_0_5(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_INT_CQ_XIVE_CFG_RESERVED_0_7(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(INT_CQ_XIVE_CFG));
 #endif
-    return o_data.insertFromRight<INT_CQ_XIVE_CFG_RESERVED_0_5,
-           INT_CQ_XIVE_CFG_RESERVED_0_5_LEN>(i_data);
+    return o_data.insertFromRight<INT_CQ_XIVE_CFG_RESERVED_0_7,
+           INT_CQ_XIVE_CFG_RESERVED_0_7_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_RESERVED_0_5 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_RESERVED_0_7 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_INT_CQ_XIVE_CFG_RESERVED_0_5(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_INT_CQ_XIVE_CFG_RESERVED_0_7(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(INT_CQ_XIVE_CFG));
 #endif
-    return i_data.extractToRight<INT_CQ_XIVE_CFG_RESERVED_0_5,
-           INT_CQ_XIVE_CFG_RESERVED_0_5_LEN>(o_data);
+    return i_data.extractToRight<INT_CQ_XIVE_CFG_RESERVED_0_7,
+           INT_CQ_XIVE_CFG_RESERVED_0_7_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_RESERVED_0_5 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_RESERVED_0_7 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_INT_CQ_XIVE_CFG_HYP_HARD_RANGE_0_1(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_INT_CQ_XIVE_CFG_USER_INT_PRIORITIES_0_1(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(INT_CQ_XIVE_CFG));
 #endif
-    return o_data.insertFromRight<INT_CQ_XIVE_CFG_HYP_HARD_RANGE_0_1,
-           INT_CQ_XIVE_CFG_HYP_HARD_RANGE_0_1_LEN>(i_data);
+    return o_data.insertFromRight<INT_CQ_XIVE_CFG_USER_INT_PRIORITIES_0_1,
+           INT_CQ_XIVE_CFG_USER_INT_PRIORITIES_0_1_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_HYP_HARD_RANGE_0_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_USER_INT_PRIORITIES_0_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_INT_CQ_XIVE_CFG_HYP_HARD_RANGE_0_1(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_INT_CQ_XIVE_CFG_USER_INT_PRIORITIES_0_1(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(INT_CQ_XIVE_CFG));
 #endif
-    return o_data.insertFromRight<INT_CQ_XIVE_CFG_HYP_HARD_RANGE_0_1,
-           INT_CQ_XIVE_CFG_HYP_HARD_RANGE_0_1_LEN>(i_data);
+    return o_data.insertFromRight<INT_CQ_XIVE_CFG_USER_INT_PRIORITIES_0_1,
+           INT_CQ_XIVE_CFG_USER_INT_PRIORITIES_0_1_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_HYP_HARD_RANGE_0_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_USER_INT_PRIORITIES_0_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_INT_CQ_XIVE_CFG_HYP_HARD_RANGE_0_1(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_INT_CQ_XIVE_CFG_USER_INT_PRIORITIES_0_1(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(INT_CQ_XIVE_CFG));
 #endif
-    return i_data.extractToRight<INT_CQ_XIVE_CFG_HYP_HARD_RANGE_0_1,
-           INT_CQ_XIVE_CFG_HYP_HARD_RANGE_0_1_LEN>(o_data);
+    return i_data.extractToRight<INT_CQ_XIVE_CFG_USER_INT_PRIORITIES_0_1,
+           INT_CQ_XIVE_CFG_USER_INT_PRIORITIES_0_1_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_HYP_HARD_RANGE_0_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_USER_INT_PRIORITIES_0_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_INT_CQ_XIVE_CFG_RESERVED_8_9(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_INT_CQ_XIVE_CFG_VP_INT_PRIORITIES_0_1(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(INT_CQ_XIVE_CFG));
 #endif
-    return o_data.insertFromRight<INT_CQ_XIVE_CFG_RESERVED_8_9,
-           INT_CQ_XIVE_CFG_RESERVED_8_9_LEN>(i_data);
+    return o_data.insertFromRight<INT_CQ_XIVE_CFG_VP_INT_PRIORITIES_0_1,
+           INT_CQ_XIVE_CFG_VP_INT_PRIORITIES_0_1_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_RESERVED_8_9 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_VP_INT_PRIORITIES_0_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_INT_CQ_XIVE_CFG_RESERVED_8_9(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_INT_CQ_XIVE_CFG_VP_INT_PRIORITIES_0_1(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(INT_CQ_XIVE_CFG));
 #endif
-    return o_data.insertFromRight<INT_CQ_XIVE_CFG_RESERVED_8_9,
-           INT_CQ_XIVE_CFG_RESERVED_8_9_LEN>(i_data);
+    return o_data.insertFromRight<INT_CQ_XIVE_CFG_VP_INT_PRIORITIES_0_1,
+           INT_CQ_XIVE_CFG_VP_INT_PRIORITIES_0_1_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_RESERVED_8_9 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_VP_INT_PRIORITIES_0_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_INT_CQ_XIVE_CFG_RESERVED_8_9(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_INT_CQ_XIVE_CFG_VP_INT_PRIORITIES_0_1(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(INT_CQ_XIVE_CFG));
 #endif
-    return i_data.extractToRight<INT_CQ_XIVE_CFG_RESERVED_8_9,
-           INT_CQ_XIVE_CFG_RESERVED_8_9_LEN>(o_data);
+    return i_data.extractToRight<INT_CQ_XIVE_CFG_VP_INT_PRIORITIES_0_1,
+           INT_CQ_XIVE_CFG_VP_INT_PRIORITIES_0_1_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_RESERVED_8_9 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_INT_CQ_XIVE_CFG_INT_PRIORITIES_0_1(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(INT_CQ_XIVE_CFG));
-#endif
-    return o_data.insertFromRight<INT_CQ_XIVE_CFG_INT_PRIORITIES_0_1,
-           INT_CQ_XIVE_CFG_INT_PRIORITIES_0_1_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_INT_PRIORITIES_0_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_INT_CQ_XIVE_CFG_INT_PRIORITIES_0_1(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(INT_CQ_XIVE_CFG));
-#endif
-    return o_data.insertFromRight<INT_CQ_XIVE_CFG_INT_PRIORITIES_0_1,
-           INT_CQ_XIVE_CFG_INT_PRIORITIES_0_1_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_INT_PRIORITIES_0_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_INT_CQ_XIVE_CFG_INT_PRIORITIES_0_1(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(INT_CQ_XIVE_CFG));
-#endif
-    return i_data.extractToRight<INT_CQ_XIVE_CFG_INT_PRIORITIES_0_1,
-           INT_CQ_XIVE_CFG_INT_PRIORITIES_0_1_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_INT_PRIORITIES_0_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_INT_CQ_XIVE_CFG_RESERVED_12_13(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(INT_CQ_XIVE_CFG));
-#endif
-    return o_data.insertFromRight<INT_CQ_XIVE_CFG_RESERVED_12_13,
-           INT_CQ_XIVE_CFG_RESERVED_12_13_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_RESERVED_12_13 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_INT_CQ_XIVE_CFG_RESERVED_12_13(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(INT_CQ_XIVE_CFG));
-#endif
-    return o_data.insertFromRight<INT_CQ_XIVE_CFG_RESERVED_12_13,
-           INT_CQ_XIVE_CFG_RESERVED_12_13_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_RESERVED_12_13 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_INT_CQ_XIVE_CFG_RESERVED_12_13(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(INT_CQ_XIVE_CFG));
-#endif
-    return i_data.extractToRight<INT_CQ_XIVE_CFG_RESERVED_12_13,
-           INT_CQ_XIVE_CFG_RESERVED_12_13_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_RESERVED_12_13 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_VP_INT_PRIORITIES_0_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -970,6 +880,51 @@ static inline fapi2::buffer<uint64_t>& GET_INT_CQ_XIVE_CFG_BLOCKID_WIDTH_0_1(fap
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_BLOCKID_WIDTH_0_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_INT_CQ_XIVE_CFG_HYP_HARD_RANGE_0_1(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(INT_CQ_XIVE_CFG));
+#endif
+    return o_data.insertFromRight<INT_CQ_XIVE_CFG_HYP_HARD_RANGE_0_1,
+           INT_CQ_XIVE_CFG_HYP_HARD_RANGE_0_1_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_HYP_HARD_RANGE_0_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_INT_CQ_XIVE_CFG_HYP_HARD_RANGE_0_1(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(INT_CQ_XIVE_CFG));
+#endif
+    return o_data.insertFromRight<INT_CQ_XIVE_CFG_HYP_HARD_RANGE_0_1,
+           INT_CQ_XIVE_CFG_HYP_HARD_RANGE_0_1_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_HYP_HARD_RANGE_0_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_INT_CQ_XIVE_CFG_HYP_HARD_RANGE_0_1(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(INT_CQ_XIVE_CFG));
+#endif
+    return i_data.extractToRight<INT_CQ_XIVE_CFG_HYP_HARD_RANGE_0_1,
+           INT_CQ_XIVE_CFG_HYP_HARD_RANGE_0_1_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_HYP_HARD_RANGE_0_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -1904,47 +1859,47 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_INT_CQ_XIVE_CFG_RESERVED_36_38(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_INT_CQ_XIVE_CFG_RESERVED_36_37(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(INT_CQ_XIVE_CFG));
 #endif
-    return o_data.insertFromRight<INT_CQ_XIVE_CFG_RESERVED_36_38,
-           INT_CQ_XIVE_CFG_RESERVED_36_38_LEN>(i_data);
+    return o_data.insertFromRight<INT_CQ_XIVE_CFG_RESERVED_36_37,
+           INT_CQ_XIVE_CFG_RESERVED_36_37_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_RESERVED_36_38 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_RESERVED_36_37 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_INT_CQ_XIVE_CFG_RESERVED_36_38(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_INT_CQ_XIVE_CFG_RESERVED_36_37(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(INT_CQ_XIVE_CFG));
 #endif
-    return o_data.insertFromRight<INT_CQ_XIVE_CFG_RESERVED_36_38,
-           INT_CQ_XIVE_CFG_RESERVED_36_38_LEN>(i_data);
+    return o_data.insertFromRight<INT_CQ_XIVE_CFG_RESERVED_36_37,
+           INT_CQ_XIVE_CFG_RESERVED_36_37_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_RESERVED_36_38 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_RESERVED_36_37 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_INT_CQ_XIVE_CFG_RESERVED_36_38(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_INT_CQ_XIVE_CFG_RESERVED_36_37(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(INT_CQ_XIVE_CFG));
 #endif
-    return i_data.extractToRight<INT_CQ_XIVE_CFG_RESERVED_36_38,
-           INT_CQ_XIVE_CFG_RESERVED_36_38_LEN>(o_data);
+    return i_data.extractToRight<INT_CQ_XIVE_CFG_RESERVED_36_37,
+           INT_CQ_XIVE_CFG_RESERVED_36_37_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_RESERVED_36_38 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_RESERVED_36_37 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -2029,6 +1984,90 @@ static inline bool GET_INT_CQ_XIVE_CFG_EN_VP_SAVE_RESTORE(fapi2::buffer<uint64_t
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_EN_VP_SAVE_RESTORE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_INT_CQ_XIVE_CFG_EN_VP_SAR_CHECK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(INT_CQ_XIVE_CFG));
+#endif
+    return o_data.insertFromRight<INT_CQ_XIVE_CFG_EN_VP_SAR_CHECK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_EN_VP_SAR_CHECK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_INT_CQ_XIVE_CFG_EN_VP_SAR_CHECK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(INT_CQ_XIVE_CFG));
+#endif
+    return o_data.insertFromRight<INT_CQ_XIVE_CFG_EN_VP_SAR_CHECK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_EN_VP_SAR_CHECK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_INT_CQ_XIVE_CFG_EN_VP_SAR_CHECK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(INT_CQ_XIVE_CFG));
+#endif
+    return o_data.setBit<INT_CQ_XIVE_CFG_EN_VP_SAR_CHECK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_EN_VP_SAR_CHECK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_INT_CQ_XIVE_CFG_EN_VP_SAR_CHECK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(INT_CQ_XIVE_CFG));
+#endif
+    return o_data.clearBit<INT_CQ_XIVE_CFG_EN_VP_SAR_CHECK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_EN_VP_SAR_CHECK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_INT_CQ_XIVE_CFG_EN_VP_SAR_CHECK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(INT_CQ_XIVE_CFG));
+#endif
+    return i_data.extractToRight<INT_CQ_XIVE_CFG_EN_VP_SAR_CHECK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_EN_VP_SAR_CHECK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_INT_CQ_XIVE_CFG_EN_VP_SAR_CHECK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(INT_CQ_XIVE_CFG));
+#endif
+    return i_data.getBit<INT_CQ_XIVE_CFG_EN_VP_SAR_CHECK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access INT_CQ_XIVE_CFG_EN_VP_SAR_CHECK chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

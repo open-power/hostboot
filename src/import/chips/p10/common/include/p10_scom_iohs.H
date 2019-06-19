@@ -23,26 +23,28 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_iohs_H_
-#define __p10_scom_iohs_H_
+    #define __p10_scom_iohs_H_
 
-#include "p10_scom_iohs_0.H"
-#include "p10_scom_iohs_1.H"
-#include "p10_scom_iohs_2.H"
-#include "p10_scom_iohs_3.H"
-#include "p10_scom_iohs_4.H"
-#include "p10_scom_iohs_5.H"
-#include "p10_scom_iohs_6.H"
-#include "p10_scom_iohs_7.H"
-#include "p10_scom_iohs_8.H"
-#include "p10_scom_iohs_9.H"
-#include "p10_scom_iohs_a.H"
-#include "p10_scom_iohs_b.H"
-#include "p10_scom_iohs_c.H"
-#include "p10_scom_iohs_d.H"
-#include "p10_scom_iohs_e.H"
-#include "p10_scom_iohs_f.H"
+    #include "p10_scom_iohs_0.H"
+    #include "p10_scom_iohs_1.H"
+    #include "p10_scom_iohs_2.H"
+    #include "p10_scom_iohs_3.H"
+    #include "p10_scom_iohs_4.H"
+    #include "p10_scom_iohs_5.H"
+    #include "p10_scom_iohs_6.H"
+    #include "p10_scom_iohs_7.H"
+    #include "p10_scom_iohs_8.H"
+    #include "p10_scom_iohs_9.H"
+    #include "p10_scom_iohs_a.H"
+    #include "p10_scom_iohs_b.H"
+    #include "p10_scom_iohs_c.H"
+    #include "p10_scom_iohs_d.H"
+    #include "p10_scom_iohs_e.H"
+    #include "p10_scom_iohs_f.H"
 
 #endif

@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_phb_4_H_
 #define __p10_scom_phb_4_H_
@@ -48,5 +50,7 @@ static const uint64_t RSB_REGS_PHB5_PMON_EVENT_SEL = 0x08010918ull;
 
 }
 }
-#include "phb/reg00004.H"
+#ifndef __PPE_HCODE__
+    #include "phb/reg00004.H"
+#endif
 #endif

@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_c_3_H_
 #define __p10_scom_c_3_H_
@@ -34,6 +36,9 @@ namespace scomt
 namespace c
 {
 
+
+static const uint64_t CPMS_CCDR = 0x200e0e74ull;
+// c/reg00003.H
 
 static const uint64_t CPMS_CL2_PFETCNTL = 0x200e0e28ull;
 static const uint64_t CPMS_CL2_PFETCNTL_WO_CLEAR = 0x200e0e2aull;
@@ -64,14 +69,61 @@ static const uint32_t CPMS_CL2_PFETCNTL_VCS_PG_STATE = 50;
 static const uint32_t CPMS_CL2_PFETCNTL_VCS_PG_STATE_LEN = 4;
 static const uint32_t CPMS_CL2_PFETCNTL_VCS_PG_SEL = 54;
 static const uint32_t CPMS_CL2_PFETCNTL_VCS_PG_SEL_LEN = 4;
+static const uint32_t CPMS_CL2_PFETCNTL_ACS_MINMAX_SEL = 58;
+static const uint32_t CPMS_CL2_PFETCNTL_ACS_MINMAX_SEL_LEN = 4;
+static const uint32_t CPMS_CL2_PFETCNTL_ACS_ENABLE = 62;
 static const uint32_t CPMS_CL2_PFETCNTL_SRAM_ENABLE = 63;
+// c/reg00003.H
+
+static const uint64_t CPMS_FDCR = 0x200e0e40ull;
+static const uint64_t CPMS_FDCR_SCOM1 = 0x200e0e42ull;
+static const uint64_t CPMS_FDCR_SCOM2 = 0x200e0e43ull;
+
+static const uint32_t CPMS_FDCR_DISABLE = 0;
+static const uint32_t CPMS_FDCR_FORCE_SAMPLE = 1;
+static const uint32_t CPMS_FDCR_STICKY_CONTROL = 2;
+static const uint32_t CPMS_FDCR_STICKY_CONTROL_LEN = 2;
+static const uint32_t CPMS_FDCR_CONTROL_UPDATE_DISABLE = 4;
+static const uint32_t CPMS_FDCR_SUPPRESS_FTC_UPDATE = 5;
+static const uint32_t CPMS_FDCR_CAL_ADJUST = 6;
+static const uint32_t CPMS_FDCR_CAL_ADJUST_LEN = 2;
+static const uint32_t CPMS_FDCR_DELAY = 8;
+static const uint32_t CPMS_FDCR_DELAY_LEN = 8;
+static const uint32_t CPMS_FDCR_THRESHOLD_UPDATE_DISABLE = 16;
+static const uint32_t CPMS_FDCR_TRIP_OFFSET = 17;
+static const uint32_t CPMS_FDCR_TRIP_OFFSET_LEN = 3;
+static const uint32_t CPMS_FDCR_DATA0_DETECT = 20;
+static const uint32_t CPMS_FDCR_DATA0_DETECT_LEN = 4;
+static const uint32_t CPMS_FDCR_DATA1_DETECT = 24;
+static const uint32_t CPMS_FDCR_DATA1_DETECT_LEN = 4;
+static const uint32_t CPMS_FDCR_DATA2_DETECT = 28;
+static const uint32_t CPMS_FDCR_DATA2_DETECT_LEN = 4;
+static const uint32_t CPMS_FDCR_LARGE_DROOP_DETECT = 32;
+static const uint32_t CPMS_FDCR_LARGE_DROOP_DETECT_LEN = 4;
+static const uint32_t CPMS_FDCR_SMALL_DROOP_DETECT = 36;
+static const uint32_t CPMS_FDCR_SMALL_DROOP_DETECT_LEN = 4;
+static const uint32_t CPMS_FDCR_SLOPEA_START_DETECT = 40;
+static const uint32_t CPMS_FDCR_SLOPEA_START_DETECT_LEN = 4;
+static const uint32_t CPMS_FDCR_SLOPEA_END_DETECT = 44;
+static const uint32_t CPMS_FDCR_SLOPEA_END_DETECT_LEN = 4;
+static const uint32_t CPMS_FDCR_SLOPEB_START_DETECT = 48;
+static const uint32_t CPMS_FDCR_SLOPEB_START_DETECT_LEN = 4;
+static const uint32_t CPMS_FDCR_SLOPEB_END_DETECT = 52;
+static const uint32_t CPMS_FDCR_SLOPEB_END_DETECT_LEN = 4;
+static const uint32_t CPMS_FDCR_SLOPEA_CYCLES = 56;
+static const uint32_t CPMS_FDCR_SLOPEA_CYCLES_LEN = 4;
+static const uint32_t CPMS_FDCR_SLOPEB_CYCLES = 60;
+static const uint32_t CPMS_FDCR_SLOPEB_CYCLES_LEN = 4;
+// c/reg00003.H
+
+static const uint64_t EC_LS_LSU_HOLD_OUT_REG9 = 0x200206c9ull;
 // c/reg00003.H
 
 static const uint64_t EC_PC_COMMON_SPR_V1_HMER_RW_WAND = 0x20020493ull;
 static const uint64_t EC_PC_COMMON_SPR_V1_HMER_WO_OR = 0x2002048full;
 
 static const uint32_t EC_PC_COMMON_SPR_V1_HMER_MALFUNCTION_ALERT = 0;
-static const uint32_t EC_PC_COMMON_SPR_V1_HMER_CME_REQUEST = 1;
+static const uint32_t EC_PC_COMMON_SPR_V1_HMER_QME_REQUEST = 1;
 static const uint32_t EC_PC_COMMON_SPR_V1_HMER_PROC_RCVY_DONE = 2;
 static const uint32_t EC_PC_COMMON_SPR_V1_HMER_TFAC_ERR = 4;
 static const uint32_t EC_PC_COMMON_SPR_V1_HMER_XSCOM_FAIL = 8;
@@ -359,5 +411,7 @@ static const uint32_t QME_CSIR_QME_CSIR_PMSR_INSTR_DATA_LEN = 23;
 
 }
 }
-#include "c/reg00003.H"
+#ifndef __PPE_HCODE__
+    #include "c/reg00003.H"
+#endif
 #endif

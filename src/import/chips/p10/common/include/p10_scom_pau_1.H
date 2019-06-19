@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_pau_1_H_
 #define __p10_scom_pau_1_H_
@@ -43,12 +45,8 @@ static const uint32_t AME_AME1_MISC_CERR_RPT_MASK_CONFIG_CERR_RPT_MASK_LEN = 17;
 
 static const uint64_t AME_ATL_MISC_CERR_RPT_CONTROL = 0x10010bf9ull;
 
-static const uint32_t AME_ATL_MISC_CERR_RPT_CONTROL_FIRSEL_UE = 19;
-static const uint32_t AME_ATL_MISC_CERR_RPT_CONTROL_FIRSEL_UE_LEN = 8;
-static const uint32_t AME_ATL_MISC_CERR_RPT_CONTROL_FIRSEL_DATA_UE = 27;
-static const uint32_t AME_ATL_MISC_CERR_RPT_CONTROL_FIRSEL_DATA_UE_LEN = 5;
-static const uint32_t AME_ATL_MISC_CERR_RPT_CONTROL_RPT_MASK = 32;
-static const uint32_t AME_ATL_MISC_CERR_RPT_CONTROL_RPT_MASK_LEN = 32;
+static const uint32_t AME_ATL_MISC_CERR_RPT_CONTROL_CONFIG_CERR_RPT_MASK = 33;
+static const uint32_t AME_ATL_MISC_CERR_RPT_CONTROL_CONFIG_CERR_RPT_MASK_LEN = 31;
 // pau/reg00001.H
 
 static const uint64_t AME_ATL_MISC_PMU_CONFIG = 0x10010bf3ull;
@@ -319,8 +317,13 @@ static const uint32_t CS_SM2_MCP_MISC_CONFIG2__BRK1_FENCE_TO_INHIBIT_MASK = 13;
 static const uint32_t CS_SM2_MCP_MISC_CONFIG2__BRK2_FENCE_TO_INHIBIT_MASK = 14;
 static const uint32_t CS_SM2_MCP_MISC_CONFIG2__BRK3_FENCE_TO_INHIBIT_MASK = 15;
 static const uint32_t CS_SM2_MCP_MISC_CONFIG2__BRK4_FENCE_TO_INHIBIT_MASK = 16;
-static const uint32_t CS_SM2_MCP_MISC_CONFIG2_2_RESERVED = 17;
-static const uint32_t CS_SM2_MCP_MISC_CONFIG2_2_RESERVED_LEN = 47;
+static const uint32_t CS_SM2_MCP_MISC_CONFIG2__ENABLE_PHASE1_DCBF = 17;
+static const uint32_t CS_SM2_MCP_MISC_CONFIG2__ENABLE_PHASE1_CLEAN = 18;
+static const uint32_t CS_SM2_MCP_MISC_CONFIG2__ENABLE_PHASE1_AMO = 19;
+static const uint32_t CS_SM2_MCP_MISC_CONFIG2__DCARM_TIMER = 20;
+static const uint32_t CS_SM2_MCP_MISC_CONFIG2__DCARM_TIMER_LEN = 12;
+static const uint32_t CS_SM2_MCP_MISC_CONFIG2_2_RESERVED = 32;
+static const uint32_t CS_SM2_MCP_MISC_CONFIG2_2_RESERVED_LEN = 32;
 // pau/reg00001.H
 
 static const uint64_t CS_SM2_MCP_MISC_SM_STATUS = 0x100108ceull;
@@ -557,10 +560,9 @@ static const uint32_t MISC_REGS_HOLD_MISC_RING_ERRP = 4;
 static const uint32_t MISC_REGS_HOLD_MISC_IBAR_ERRP = 5;
 static const uint32_t MISC_REGS_HOLD_MISC_SCOMDAA_ERRP = 6;
 static const uint32_t MISC_REGS_HOLD_MISC_CNTL_ERRP = 7;
-static const uint32_t MISC_REGS_HOLD_RESERVED = 8;
-static const uint32_t MISC_REGS_HOLD_RX00_FAULT = 9;
-static const uint32_t MISC_REGS_HOLD_RX01_FAULT = 10;
-static const uint32_t MISC_REGS_HOLD_RX20_FAULT = 11;
+static const uint32_t MISC_REGS_HOLD_RX00_FAULT = 8;
+static const uint32_t MISC_REGS_HOLD_RX01_FAULT = 9;
+static const uint32_t MISC_REGS_HOLD_RX20_FAULT = 10;
 // pau/reg00001.H
 
 static const uint64_t NTL1_REGS_CONFIG1 = 0x10010a18ull;
@@ -686,5 +688,7 @@ static const uint32_t XTS_ATSD_HYP6_LPARID_LEN = 12;
 
 }
 }
-#include "pau/reg00001.H"
+#ifndef __PPE_HCODE__
+    #include "pau/reg00001.H"
+#endif
 #endif

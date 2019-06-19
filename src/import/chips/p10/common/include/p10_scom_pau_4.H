@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_pau_4_H_
 #define __p10_scom_pau_4_H_
@@ -157,6 +159,20 @@ static const uint32_t AME_AME2_MISC_PMU_CONFIG2_PCR_S = 38;
 static const uint32_t AME_AME2_MISC_PMU_CONFIG2_PCR_S_LEN = 13;
 static const uint32_t AME_AME2_MISC_PMU_CONFIG2_PCR_E = 51;
 static const uint32_t AME_AME2_MISC_PMU_CONFIG2_PCR_E_LEN = 13;
+// pau/reg00005.H
+
+static const uint64_t AME_ATL_MISC_CERR_RPT_FIRST = 0x10010bfaull;
+
+static const uint32_t AME_ATL_MISC_CERR_RPT_FIRST_DATUE = 33;
+static const uint32_t AME_ATL_MISC_CERR_RPT_FIRST_DATUE_LEN = 5;
+static const uint32_t AME_ATL_MISC_CERR_RPT_FIRST_CE = 38;
+static const uint32_t AME_ATL_MISC_CERR_RPT_FIRST_CE_LEN = 11;
+static const uint32_t AME_ATL_MISC_CERR_RPT_FIRST_UE = 49;
+static const uint32_t AME_ATL_MISC_CERR_RPT_FIRST_UE_LEN = 9;
+static const uint32_t AME_ATL_MISC_CERR_RPT_FIRST_LOG = 58;
+static const uint32_t AME_ATL_MISC_CERR_RPT_FIRST_LOG_LEN = 4;
+static const uint32_t AME_ATL_MISC_CERR_RPT_FIRST_XFAIL = 62;
+static const uint32_t AME_ATL_MISC_CERR_RPT_FIRST_XFAIL_LEN = 2;
 // pau/reg00005.H
 
 static const uint64_t CS_CTL_MISC_BDF2PE_10_CONFIG = 0x100109baull;
@@ -1396,7 +1412,7 @@ static const uint32_t NTL1_REGS_RSP_DA_PTR_RESERVED2 = 12;
 static const uint32_t NTL1_REGS_RSP_DA_PTR_RESERVED2_LEN = 3;
 static const uint32_t NTL1_REGS_RSP_DA_PTR_END = 15;
 static const uint32_t NTL1_REGS_RSP_DA_PTR_END_LEN = 9;
-// pau/reg00005.H
+// pau/reg00006.H
 
 static const uint64_t OTL1_MISC_HAPPI_BAR2 = 0x10010a6dull;
 
@@ -1545,6 +1561,8 @@ static const uint32_t XTS_REG_CONFIG2_ATR_TIMEOUT_LEN = 4;
 
 }
 }
-#include "pau/reg00005.H"
-#include "pau/reg00006.H"
+#ifndef __PPE_HCODE__
+    #include "pau/reg00005.H"
+    #include "pau/reg00006.H"
+#endif
 #endif

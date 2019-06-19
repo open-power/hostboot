@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_nmmu_4_H_
 #define __p10_scom_nmmu_4_H_
@@ -78,5 +80,7 @@ static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_MMCQ_LCO_CONFIG_REG_CRED_MASK_LEN = 
 
 }
 }
-#include "nmmu/reg00004.H"
+#ifndef __PPE_HCODE__
+    #include "nmmu/reg00004.H"
+#endif
 #endif

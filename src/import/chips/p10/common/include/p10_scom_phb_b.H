@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_phb_b_H_
 #define __p10_scom_phb_b_H_
@@ -52,5 +54,7 @@ static const uint64_t RSB_REGS_MASK_REG_WO_OR = 0x0801090dull;
 
 }
 }
-#include "phb/reg00011.H"
+#ifndef __PPE_HCODE__
+    #include "phb/reg00011.H"
+#endif
 #endif

@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_mcc_f_H_
 #define __p10_scom_mcc_f_H_
@@ -43,16 +45,8 @@ static const uint32_t ATCL_CL_CLSCOM_MCEBUSCL_SEL_EBUS_CLS2 = 2;
 static const uint32_t ATCL_CL_CLSCOM_MCEBUSCL_SEL_EBUS_CLS3 = 3;
 static const uint32_t ATCL_CL_CLSCOM_MCEBUSCL_SEL_EBUS_EVENTA = 4;
 static const uint32_t ATCL_CL_CLSCOM_MCEBUSCL_SEL_EBUS_EVENTB = 5;
-static const uint32_t ATCL_CL_CLSCOM_MCEBUSCL_RESERVED6_7 = 6;
-static const uint32_t ATCL_CL_CLSCOM_MCEBUSCL_RESERVED6_7_LEN = 2;
-static const uint32_t ATCL_CL_CLSCOM_MCEBUSCL_LAT_THRESHA = 8;
-static const uint32_t ATCL_CL_CLSCOM_MCEBUSCL_LAT_THRESHA_LEN = 8;
-static const uint32_t ATCL_CL_CLSCOM_MCEBUSCL_LAT_THRESHB = 16;
-static const uint32_t ATCL_CL_CLSCOM_MCEBUSCL_LAT_THRESHB_LEN = 8;
-static const uint32_t ATCL_CL_CLSCOM_MCEBUSCL_LAT_THRESHC = 24;
-static const uint32_t ATCL_CL_CLSCOM_MCEBUSCL_LAT_THRESHC_LEN = 8;
-static const uint32_t ATCL_CL_CLSCOM_MCEBUSCL_RESERVED32_35 = 32;
-static const uint32_t ATCL_CL_CLSCOM_MCEBUSCL_RESERVED32_35_LEN = 4;
+static const uint32_t ATCL_CL_CLSCOM_MCEBUSCL_RESERVED6_15 = 6;
+static const uint32_t ATCL_CL_CLSCOM_MCEBUSCL_RESERVED6_15_LEN = 10;
 // mcc/reg00015.H
 
 static const uint64_t CRYPTO_DECRYPT_CRYPTONONCEB = 0x0c010f5full;
@@ -77,5 +71,7 @@ static const uint32_t USTL_USTLLOLDROP_B_DROP_REASON_LEN = 18;
 
 }
 }
-#include "mcc/reg00015.H"
+#ifndef __PPE_HCODE__
+    #include "mcc/reg00015.H"
+#endif
 #endif

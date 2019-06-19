@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_pauc_9_H_
 #define __p10_scom_pauc_9_H_
@@ -233,13 +235,9 @@ static const uint32_t PB_MISC_CFG_TRANSPORT_3_OB_MUX_CTL2 = 34;
 static const uint32_t PB_MISC_CFG_TRANSPORT_3_OB_MUX_CTL3 = 35;
 static const uint32_t PB_MISC_CFG_SCOM_PTLX_EMULATION_MODE = 36;
 static const uint32_t PB_MISC_CFG_SCOM_PTLY_EMULATION_MODE = 37;
-static const uint32_t PB_MISC_CFG_TOD_EVN_IB_MUX_CTL = 38;
-static const uint32_t PB_MISC_CFG_TOD_EVN_IB_MUX_CTL_LEN = 2;
-static const uint32_t PB_MISC_CFG_TOD_ODD_IB_MUX_CTL = 40;
-static const uint32_t PB_MISC_CFG_TOD_ODD_IB_MUX_CTL_LEN = 2;
-static const uint32_t PB_MISC_CFG_TRANSPORT_PRI_BUS_CTL = 42;
-static const uint32_t PB_MISC_CFG_MISC_SPARE = 43;
-static const uint32_t PB_MISC_CFG_MISC_SPARE_LEN = 9;
+static const uint32_t PB_MISC_CFG_TRANSPORT_PRI_BUS_CTL = 38;
+static const uint32_t PB_MISC_CFG_MISC_SPARE = 39;
+static const uint32_t PB_MISC_CFG_MISC_SPARE_LEN = 13;
 // pauc/reg00009.H
 
 static const uint64_t PB_PERFTRACE_CFG_REG = 0x1001182bull;
@@ -379,5 +377,7 @@ static const uint32_t XSTOP_XSTOP_IN53 = 53;
 
 }
 }
-#include "pauc/reg00009.H"
+#ifndef __PPE_HCODE__
+    #include "pauc/reg00009.H"
+#endif
 #endif

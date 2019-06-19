@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_pau_a_H_
 #define __p10_scom_pau_a_H_
@@ -1134,6 +1136,8 @@ static const uint32_t XTS_REG_ERR_FIRST_ERR_FIRST_BITS_LEN = 64;
 
 }
 }
-#include "pau/reg00013.H"
-#include "pau/reg00014.H"
+#ifndef __PPE_HCODE__
+    #include "pau/reg00013.H"
+    #include "pau/reg00014.H"
+#endif
 #endif

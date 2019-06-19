@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_c_a_H_
 #define __p10_scom_c_a_H_
@@ -127,5 +129,7 @@ static const uint32_t L3_MISC_L3CERRS_LRU_VIC_ALLOC_REG_ALLOC_MD_CFG_LEN = 2;
 
 }
 }
-#include "c/reg00010.H"
+#ifndef __PPE_HCODE__
+    #include "c/reg00010.H"
+#endif
 #endif

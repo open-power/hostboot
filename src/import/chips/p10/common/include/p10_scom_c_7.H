@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_c_7_H_
 #define __p10_scom_c_7_H_
@@ -44,6 +46,9 @@ static const uint32_t CPMS_CERRMSK_DPT_ACCESS_MASK = 3;
 static const uint32_t CPMS_CERRMSK_SPARE_MASK = 4;
 static const uint32_t CPMS_CERRMSK_FTC_EVENT_MASK = 5;
 static const uint32_t CPMS_CERRMSK_FTC_EVENT_MASK_LEN = 3;
+// c/reg00007.H
+
+static const uint64_t EC_LS_LSU_HOLD_OUT_REG0 = 0x200206c0ull;
 // c/reg00007.H
 
 static const uint64_t EC_PC_FIR_HOLD_OUT = 0x20020451ull;
@@ -274,5 +279,7 @@ static const uint32_t QME_TFCSR_DEC_MSB_LEN = 4;
 
 }
 }
-#include "c/reg00007.H"
+#ifndef __PPE_HCODE__
+    #include "c/reg00007.H"
+#endif
 #endif

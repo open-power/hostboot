@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_proc_0_H_
 #define __p10_scom_proc_0_H_
@@ -135,7 +137,7 @@ static const uint64_t INT_PC_REGS_ERR1_WOF = 0x02010acaull;
 static const uint32_t INT_PC_REGS_ERR1_WOF_CMD_ARB_CONFIG_ERROR = 0;
 static const uint32_t INT_PC_REGS_ERR1_WOF_CMD_ARB_PARITY_ERROR = 1;
 static const uint32_t INT_PC_REGS_ERR1_WOF_CMD_ARB_NXC_RSP_ERROR = 2;
-static const uint32_t INT_PC_REGS_ERR1_WOF_RESERVED_3 = 3;
+static const uint32_t INT_PC_REGS_ERR1_WOF_CRESP_PB_INV_PRIO = 3;
 static const uint32_t INT_PC_REGS_ERR1_WOF_CRESP_BLK_GRP_ERROR = 4;
 static const uint32_t INT_PC_REGS_ERR1_WOF_CRESP_CAM_ALLOC_ERROR = 5;
 static const uint32_t INT_PC_REGS_ERR1_WOF_CRESP_CAM_STATE_ERROR = 6;
@@ -1569,10 +1571,27 @@ static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPITFPRD_6 = 6;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPITFPRD_7 = 7;
 // proc/reg00002.H
 
-static const uint64_t TP_TPCHIP_OCC_OCI_OCB_P2SCR2 = 0x0006c842ull;
+static const uint64_t TP_TPCHIP_OCC_OCI_OCB_P2S_CR1 = 0x0006c841ull;
 
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2SCR2_OCB_OCI_P2SCR2_P2S_INTER_FRAME_DELAY = 0;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2SCR2_OCB_OCI_P2SCR2_P2S_INTER_FRAME_DELAY_LEN = 17;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2S_CR1__BRIDGE_ENABLE = 0;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2S_CR1__DEVICE = 1;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2S_CR1__CPOL = 2;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2S_CR1__CPHA = 3;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2S_CR1__CLOCK_DIVIDER = 4;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2S_CR1__CLOCK_DIVIDER_LEN = 10;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2S_CR1_CR1_RESERVED_2 = 14;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2S_CR1_CR1_RESERVED_2_LEN = 3;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2S_CR1__NR_OF_FRAMES = 17;
+// proc/reg00002.H
+
+static const uint64_t TP_TPCHIP_OCC_OCI_OCB_P2S_STAT = 0x0006c843ull;
+
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2S_STAT_P2S_ONGOING = 0;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2S_STAT_RESERVED_1_4 = 1;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2S_STAT_RESERVED_1_4_LEN = 4;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2S_STAT_P2S_WRITE_WHILE_BRIDGE_BUSY_ERR = 5;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2S_STAT_RESERVED_6 = 6;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2S_STAT_P2S_FSM_ERR = 7;
 // proc/reg00002.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_WOFICDCM1 = 0x0006c785ull;
@@ -1688,6 +1707,74 @@ static const uint32_t TP_TPCHIP_TPC_CPLT_CTRL1_REGION13_FENCE_DC = 17;
 static const uint32_t TP_TPCHIP_TPC_CPLT_CTRL1_REGION14_FENCE_DC = 18;
 // proc/reg00002.H
 
+static const uint64_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2 = 0x01040109ull;
+
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_00 = 0;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_01 = 1;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_02 = 2;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_03 = 3;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_04 = 4;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_05 = 5;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_06 = 6;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_07 = 7;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_08 = 8;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_09 = 9;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_10 = 10;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_11 = 11;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_12 = 12;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_13 = 13;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_14 = 14;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_15 = 15;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_16 = 16;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_17 = 17;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_18 = 18;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_19 = 19;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_20 = 20;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_21 = 21;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_22 = 22;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_23 = 23;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_24 = 24;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_25 = 25;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_26 = 26;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_27 = 27;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_28 = 28;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_29 = 29;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_30 = 30;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_31 = 31;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_32 = 32;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_33 = 33;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_34 = 34;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_35 = 35;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_36 = 36;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_37 = 37;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_38 = 38;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_39 = 39;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_40 = 40;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_41 = 41;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_42 = 42;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_43 = 43;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_44 = 44;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_45 = 45;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_46 = 46;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_47 = 47;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_48 = 48;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_49 = 49;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_50 = 50;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_51 = 51;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_52 = 52;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_53 = 53;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_54 = 54;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_55 = 55;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_56 = 56;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_57 = 57;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_58 = 58;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_59 = 59;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_60 = 60;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_61 = 61;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_62 = 62;
+static const uint32_t TP_TPCHIP_TPC_EPS_FIR_LOCAL_ACTION2_63 = 63;
+// proc/reg00002.H
+
 static const uint64_t TP_TPCHIP_TPC_EPS_THERM_WSUB_INJECT_REG = 0x01050011ull;
 
 static const uint32_t TP_TPCHIP_TPC_EPS_THERM_WSUB_INJECT_REG_TRIP = 0;
@@ -1756,7 +1843,7 @@ static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_CS_STATE_MACHINE
 static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_CS_STATE_MACHINE_TRANSITION_DELAY_LEN = 10;
 static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_CS_INTERNAL_STATE_VECTOR = 16;
 static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_CS_INTERNAL_STATE_VECTOR_LEN = 16;
-// proc/reg00002.H
+// proc/reg00003.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
@@ -1771,7 +1858,7 @@ static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_ENVSTAT_FSI_IN_E
 static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_ENVSTAT_CHIP_MASTER = 4;
 static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_ENVSTAT_SMD = 5;
 static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_ENVSTAT_JTAG_TMS = 6;
-// proc/reg00002.H
+// proc/reg00003.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
@@ -2042,8 +2129,10 @@ static const uint64_t VAS_VA_RG_SCF_WRMON7BAR = 0x02011417ull;
 
 }
 }
-#include "proc/reg00000.H"
-#include "proc/reg00001.H"
-#include "proc/reg00002.H"
-#include "proc/reg00003.H"
+#ifndef __PPE_HCODE__
+    #include "proc/reg00000.H"
+    #include "proc/reg00001.H"
+    #include "proc/reg00002.H"
+    #include "proc/reg00003.H"
+#endif
 #endif

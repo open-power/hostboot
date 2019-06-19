@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_c_6_H_
 #define __p10_scom_c_6_H_
@@ -50,6 +52,41 @@ static const uint32_t CPMS_CERR_FTC_DEBUG_EVENT = 9;
 static const uint32_t CPMS_CERR_FTC_DEBUG_EVENT_LEN = 3;
 // c/reg00006.H
 
+static const uint64_t CPMS_CUCR = 0x200e0e3cull;
+static const uint64_t CPMS_CUCR_SCOM1 = 0x200e0e3eull;
+static const uint64_t CPMS_CUCR_SCOM2 = 0x200e0e3full;
+
+static const uint32_t CPMS_CUCR_ENABLE_CORE_SHADOW = 0;
+static const uint32_t CPMS_CUCR_ENABLE_CORE_SAMPLE = 1;
+static const uint32_t CPMS_CUCR_DPT_PER_THREAD_MODE = 2;
+static const uint32_t CPMS_CUCR_SPARE = 3;
+static const uint32_t CPMS_CUCR_SPARE_LEN = 2;
+static const uint32_t CPMS_CUCR_REFRESH_FTC_SHADOW = 9;
+static const uint32_t CPMS_CUCR_REFRESH_PP_SHADOW = 10;
+static const uint32_t CPMS_CUCR_REFRESH_DPT_SETTINGS = 11;
+static const uint32_t CPMS_CUCR_INDUCED_DROOP_COUNT = 12;
+static const uint32_t CPMS_CUCR_INDUCED_DROOP_COUNT_LEN = 3;
+static const uint32_t CPMS_CUCR_PCB_SKEW_ADJ = 17;
+static const uint32_t CPMS_CUCR_PCB_SKEW_ADJ_LEN = 3;
+static const uint32_t CPMS_CUCR_FTC_SHADOW_STATE = 33;
+static const uint32_t CPMS_CUCR_FTC_SHADOW_STATE_LEN = 3;
+static const uint32_t CPMS_CUCR_FTC_SHADOW_PENDING = 36;
+static const uint32_t CPMS_CUCR_FTC_SHADOW_PENDING_LEN = 4;
+static const uint32_t CPMS_CUCR_PP_SHADOW_STATE = 40;
+static const uint32_t CPMS_CUCR_PP_SHADOW_STATE_LEN = 2;
+static const uint32_t CPMS_CUCR_PP_SHADOW_PENDING = 42;
+static const uint32_t CPMS_CUCR_PP_SHADOW_PENDING_LEN = 3;
+static const uint32_t CPMS_CUCR_DPT_UPDATE_STATE = 45;
+static const uint32_t CPMS_CUCR_DPT_UPDATE_STATE_LEN = 2;
+static const uint32_t CPMS_CUCR_DPT_UPDATE_PENDING = 47;
+static const uint32_t CPMS_CUCR_DPT_UPDATE_PENDING_LEN = 3;
+static const uint32_t CPMS_CUCR_CORE_REFRESH_ACTIVE = 50;
+static const uint32_t CPMS_CUCR_CORE_REFRESH_ACTIVE_LEN = 3;
+static const uint32_t CPMS_CUCR_FDCR_UPDATE_INPROGRESS = 56;
+static const uint32_t CPMS_CUCR_QME_EVENTS_PENDING = 57;
+static const uint32_t CPMS_CUCR_QME_EVENTS_PENDING_LEN = 7;
+// c/reg00006.H
+
 static const uint64_t CPMS_MMA_PFETCNTL = 0x200e0e30ull;
 static const uint64_t CPMS_MMA_PFETCNTL_WO_CLEAR = 0x200e0e32ull;
 static const uint64_t CPMS_MMA_PFETCNTL_WO_OR = 0x200e0e33ull;
@@ -73,7 +110,7 @@ static const uint64_t EC_PC_COMMON_SPR_V0_HMER_RW_WAND = 0x20020492ull;
 static const uint64_t EC_PC_COMMON_SPR_V0_HMER_WO_OR = 0x2002048eull;
 
 static const uint32_t EC_PC_COMMON_SPR_V0_HMER_MALFUNCTION_ALERT = 0;
-static const uint32_t EC_PC_COMMON_SPR_V0_HMER_CME_REQUEST = 1;
+static const uint32_t EC_PC_COMMON_SPR_V0_HMER_QME_REQUEST = 1;
 static const uint32_t EC_PC_COMMON_SPR_V0_HMER_PROC_RCVY_DONE = 2;
 static const uint32_t EC_PC_COMMON_SPR_V0_HMER_TFAC_ERR = 4;
 static const uint32_t EC_PC_COMMON_SPR_V0_HMER_XSCOM_FAIL = 8;
@@ -294,5 +331,7 @@ static const uint32_t WRITE_PROTECT_RINGS_REG_WRITE_PROTECT_RINGS_LEN = 32;
 
 }
 }
-#include "c/reg00006.H"
+#ifndef __PPE_HCODE__
+    #include "c/reg00006.H"
+#endif
 #endif

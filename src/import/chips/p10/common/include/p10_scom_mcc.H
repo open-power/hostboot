@@ -23,26 +23,28 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_mcc_H_
-#define __p10_scom_mcc_H_
+    #define __p10_scom_mcc_H_
 
-#include "p10_scom_mcc_0.H"
-#include "p10_scom_mcc_1.H"
-#include "p10_scom_mcc_2.H"
-#include "p10_scom_mcc_3.H"
-#include "p10_scom_mcc_4.H"
-#include "p10_scom_mcc_5.H"
-#include "p10_scom_mcc_6.H"
-#include "p10_scom_mcc_7.H"
-#include "p10_scom_mcc_8.H"
-#include "p10_scom_mcc_9.H"
-#include "p10_scom_mcc_a.H"
-#include "p10_scom_mcc_b.H"
-#include "p10_scom_mcc_c.H"
-#include "p10_scom_mcc_d.H"
-#include "p10_scom_mcc_e.H"
-#include "p10_scom_mcc_f.H"
+    #include "p10_scom_mcc_0.H"
+    #include "p10_scom_mcc_1.H"
+    #include "p10_scom_mcc_2.H"
+    #include "p10_scom_mcc_3.H"
+    #include "p10_scom_mcc_4.H"
+    #include "p10_scom_mcc_5.H"
+    #include "p10_scom_mcc_6.H"
+    #include "p10_scom_mcc_7.H"
+    #include "p10_scom_mcc_8.H"
+    #include "p10_scom_mcc_9.H"
+    #include "p10_scom_mcc_a.H"
+    #include "p10_scom_mcc_b.H"
+    #include "p10_scom_mcc_c.H"
+    #include "p10_scom_mcc_d.H"
+    #include "p10_scom_mcc_e.H"
+    #include "p10_scom_mcc_f.H"
 
 #endif

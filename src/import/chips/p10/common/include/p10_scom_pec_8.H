@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_pec_8_H_
 #define __p10_scom_pec_8_H_
@@ -321,5 +323,7 @@ static const uint32_t XSTOP3_XSTOP3_WAIT_CYCLES_LEN = 12;
 
 }
 }
-#include "pec/reg00008.H"
+#ifndef __PPE_HCODE__
+    #include "pec/reg00008.H"
+#endif
 #endif

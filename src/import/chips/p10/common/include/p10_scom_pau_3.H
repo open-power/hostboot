@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_pau_3_H_
 #define __p10_scom_pau_3_H_
@@ -382,8 +384,13 @@ static const uint32_t CS_SM1_MCP_MISC_CONFIG2__BRK1_FENCE_TO_INHIBIT_MASK = 13;
 static const uint32_t CS_SM1_MCP_MISC_CONFIG2__BRK2_FENCE_TO_INHIBIT_MASK = 14;
 static const uint32_t CS_SM1_MCP_MISC_CONFIG2__BRK3_FENCE_TO_INHIBIT_MASK = 15;
 static const uint32_t CS_SM1_MCP_MISC_CONFIG2__BRK4_FENCE_TO_INHIBIT_MASK = 16;
-static const uint32_t CS_SM1_MCP_MISC_CONFIG2_2_RESERVED = 17;
-static const uint32_t CS_SM1_MCP_MISC_CONFIG2_2_RESERVED_LEN = 47;
+static const uint32_t CS_SM1_MCP_MISC_CONFIG2__ENABLE_PHASE1_DCBF = 17;
+static const uint32_t CS_SM1_MCP_MISC_CONFIG2__ENABLE_PHASE1_CLEAN = 18;
+static const uint32_t CS_SM1_MCP_MISC_CONFIG2__ENABLE_PHASE1_AMO = 19;
+static const uint32_t CS_SM1_MCP_MISC_CONFIG2__DCARM_TIMER = 20;
+static const uint32_t CS_SM1_MCP_MISC_CONFIG2__DCARM_TIMER_LEN = 12;
+static const uint32_t CS_SM1_MCP_MISC_CONFIG2_2_RESERVED = 32;
+static const uint32_t CS_SM1_MCP_MISC_CONFIG2_2_RESERVED_LEN = 32;
 // pau/reg00004.H
 
 static const uint64_t CS_SM1_MCP_MISC_PERF_MASK_CONFIG = 0x10010879ull;
@@ -948,5 +955,7 @@ static const uint32_t XTS_REG_ATRMISSCLR_ENA = 63;
 
 }
 }
-#include "pau/reg00004.H"
+#ifndef __PPE_HCODE__
+    #include "pau/reg00004.H"
+#endif
 #endif

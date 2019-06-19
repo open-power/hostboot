@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_pau_c_H_
 #define __p10_scom_pau_c_H_
@@ -98,14 +100,14 @@ static const uint64_t AME_AME2_MISC_CERR_RPT_HOLD = 0x10010be8ull;
 static const uint32_t AME_AME2_MISC_CERR_RPT_HOLD_FIRMWARE = 47;
 static const uint32_t AME_AME2_MISC_CERR_RPT_HOLD_CREGA_PERR = 48;
 static const uint32_t AME_AME2_MISC_CERR_RPT_HOLD_CREGM_PERR = 49;
-static const uint32_t AME_AME2_MISC_CERR_RPT_HOLD_LDW_UE = 50;
-static const uint32_t AME_AME2_MISC_CERR_RPT_HOLD_FU_UE = 51;
-static const uint32_t AME_AME2_MISC_CERR_RPT_HOLD_WB_UE = 52;
-static const uint32_t AME_AME2_MISC_CERR_RPT_HOLD_PCT_UE = 53;
-static const uint32_t AME_AME2_MISC_CERR_RPT_HOLD_CBA_UE = 54;
-static const uint32_t AME_AME2_MISC_CERR_RPT_HOLD_ERAT_UE = 55;
-static const uint32_t AME_AME2_MISC_CERR_RPT_HOLD_PE_UE = 56;
-static const uint32_t AME_AME2_MISC_CERR_RPT_HOLD_XCT_UE = 57;
+static const uint32_t AME_AME2_MISC_CERR_RPT_HOLD_FU_UE = 50;
+static const uint32_t AME_AME2_MISC_CERR_RPT_HOLD_PCT_UE = 51;
+static const uint32_t AME_AME2_MISC_CERR_RPT_HOLD_CBA_UE = 52;
+static const uint32_t AME_AME2_MISC_CERR_RPT_HOLD_ERAT_UE = 53;
+static const uint32_t AME_AME2_MISC_CERR_RPT_HOLD_PE_UE = 54;
+static const uint32_t AME_AME2_MISC_CERR_RPT_HOLD_XCT_UE = 55;
+static const uint32_t AME_AME2_MISC_CERR_RPT_HOLD_LDW_UE = 56;
+static const uint32_t AME_AME2_MISC_CERR_RPT_HOLD_WB_UE = 57;
 static const uint32_t AME_AME2_MISC_CERR_RPT_HOLD_WB_CE = 58;
 static const uint32_t AME_AME2_MISC_CERR_RPT_HOLD_PCT_CE = 59;
 static const uint32_t AME_AME2_MISC_CERR_RPT_HOLD_CBA_CE = 60;
@@ -199,8 +201,9 @@ static const uint32_t ATS_REG_CTRL_ATS_TCE_CACHE_1W = 3;
 static const uint32_t ATS_REG_CTRL_ATS_CONFIG_BRAZOS = 4;
 static const uint32_t ATS_REG_CTRL_CONFIG_SYNC_WAIT = 5;
 static const uint32_t ATS_REG_CTRL_CONFIG_SYNC_WAIT_LEN = 5;
-static const uint32_t ATS_REG_CTRL_ATS_CTRL_SPARE = 10;
-static const uint32_t ATS_REG_CTRL_ATS_CTRL_SPARE_LEN = 54;
+static const uint32_t ATS_REG_CTRL_ATS_CONFIG_NVLINK_16CHIP_MODE = 10;
+static const uint32_t ATS_REG_CTRL_ATS_CTRL_SPARE = 11;
+static const uint32_t ATS_REG_CTRL_ATS_CTRL_SPARE_LEN = 53;
 // pau/reg00016.H
 
 static const uint64_t ATS_REG_PAU_AT_FESMR = 0x10010adaull;
@@ -1564,6 +1567,8 @@ static const uint32_t XTS_REG_ATRMISS_ENA = 63;
 
 }
 }
-#include "pau/reg00016.H"
-#include "pau/reg00017.H"
+#ifndef __PPE_HCODE__
+    #include "pau/reg00016.H"
+    #include "pau/reg00017.H"
+#endif
 #endif

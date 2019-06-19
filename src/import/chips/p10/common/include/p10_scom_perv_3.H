@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_perv_3_H_
 #define __p10_scom_perv_3_H_
@@ -59,38 +61,6 @@ static const uint64_t DEVICE_ID_REG = 0x000f000full;
 static const uint32_t DEVICE_ID_REG_SOCKET_ID = 36;
 static const uint32_t DEVICE_ID_REG_SOCKET_ID_LEN = 3;
 static const uint32_t DEVICE_ID_REG_CHIPPOS_ID = 39;
-// perv/reg00004.H
-
-//ERRCODE: // Some of the name targets not found in address targets: perv
-
-static const uint64_t DPLL_CNTL_PAU_REGS_CTRL_RW = 0x00060052ull;
-static const uint64_t DPLL_CNTL_PAU_REGS_CTRL_WO_CLEAR = 0x00060053ull;
-static const uint64_t DPLL_CNTL_PAU_REGS_CTRL_WO_OR = 0x00060054ull;
-
-static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_DPLL_LOCK_SEL = 0;
-static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_ENABLE_JUMP_PROTECT = 1;
-static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_FF_BYPASS = 2;
-static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_DCO_OVERRIDE = 3;
-static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_DCO_INCR = 4;
-static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_DCO_DECR = 5;
-static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_SPARE = 6;
-static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_SPARE_LEN = 2;
-static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_FF_SLEWRATE_UP = 8;
-static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_FF_SLEWRATE_UP_LEN = 8;
-static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_FF_SLEWRATE_DN = 16;
-static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_FF_SLEWRATE_DN_LEN = 8;
-static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_SPARE2 = 24;
-static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_DYNAMIC_SLEW_MODE = 25;
-static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_FAST_FMAX_DISABLE = 26;
-static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_FAST_FMIN_DISABLE = 27;
-static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_N_L = 33;
-static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_N_L_LEN = 3;
-static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_N_S = 37;
-static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_N_S_LEN = 3;
-static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_L_S = 41;
-static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_L_S_LEN = 3;
-static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_S_N = 45;
-static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_S_N_LEN = 3;
 // perv/reg00004.H
 
 static const uint64_t EPS_FIR_ANY_LOCAL_ERR_MASK = 0x00040080ull;
@@ -272,6 +242,16 @@ static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL3_COPY_FSI_BYTE = 0x00002c4cull;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL3_COPY_RW = 0x00050113ull;
 // perv/reg00004.H
 
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI = 0x00002985ull;
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI_BYTE = 0x00002e14ull;
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_RW = 0x00050185ull;
+
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_SR_SCRATCH_REGISTER_14 = 0;
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_SR_SCRATCH_REGISTER_14_LEN = 32;
+// perv/reg00004.H
+
 static const uint64_t L3TRA0_TR0_CONFIG_3 = 0x00018206ull;
 
 static const uint32_t L3TRA0_TR0_CONFIG_3_C = 0;
@@ -410,6 +390,7 @@ static const uint32_t NET_CTRL0_VITAL_PHASE = 8;
 static const uint32_t NET_CTRL0_FLUSH_ALIGN_OVR = 9;
 static const uint32_t NET_CTRL0_VITAL_AL = 10;
 static const uint32_t NET_CTRL0_ACT_DIS = 11;
+static const uint32_t NET_CTRL0_TOADMODE_EN = 12;
 static const uint32_t NET_CTRL0_SYNC_PULSE = 13;
 static const uint32_t NET_CTRL0_MPW3 = 14;
 static const uint32_t NET_CTRL0_DELAY_LCLKR = 15;
@@ -826,6 +807,8 @@ static const uint32_t TRA7_TR0_CONFIG_2_B_LEN = 24;
 
 }
 }
-#include "perv/reg00004.H"
-#include "perv/reg00005.H"
+#ifndef __PPE_HCODE__
+    #include "perv/reg00004.H"
+    #include "perv/reg00005.H"
+#endif
 #endif

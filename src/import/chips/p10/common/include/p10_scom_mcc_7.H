@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_mcc_7_H_
 #define __p10_scom_mcc_7_H_
@@ -159,5 +161,7 @@ static const uint32_t WRITE_WRT_DSTL_ECC_3_SYNDROME_LEN = 8;
 
 }
 }
-#include "mcc/reg00007.H"
+#ifndef __PPE_HCODE__
+    #include "mcc/reg00007.H"
+#endif
 #endif

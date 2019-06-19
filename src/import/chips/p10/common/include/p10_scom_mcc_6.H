@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_mcc_6_H_
 #define __p10_scom_mcc_6_H_
@@ -92,5 +94,7 @@ static const uint32_t DSTL_DSTLPSAVE2_RESERVED_59_63_LEN = 5;
 
 }
 }
-#include "mcc/reg00006.H"
+#ifndef __PPE_HCODE__
+    #include "mcc/reg00006.H"
+#endif
 #endif

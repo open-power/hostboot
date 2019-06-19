@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_pau_8_H_
 #define __p10_scom_pau_8_H_
@@ -81,109 +83,99 @@ static const uint32_t AME_AME2_MISC_DEBUG_CONFIG0_1_ENABLE = 63;
 
 static const uint64_t AME_ATL_MISC_CERR_RPT_HOLD = 0x10010bf8ull;
 
-static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_AUXT_CE = 32;
-static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_LISB_CE = 33;
-static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_RSPT_CE = 34;
-static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_UCTBL_CE = 35;
-static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_CFH_CE = 36;
-static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_SMF_CE = 37;
-static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_LPTBL_CE = 38;
-static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_WBO_CE = 39;
-static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_PCT_CE = 40;
-static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_INJB_CE = 41;
-static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_DATO_CE = 42;
-static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_CREG_PE = 43;
-static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_FLMAP_PE = 44;
-static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_AUXT_UE = 45;
-static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_LISB_UE = 46;
-static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_RSPT_UE = 47;
-static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_UCTBL_UE = 48;
-static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_CFH_UE = 49;
-static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_SMF_UE = 50;
-static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_LPTBL_UE = 51;
-static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_WBO_UE = 52;
-static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_PCT_UE = 53;
-static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_INJB_UE = 54;
-static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_DATO_UE = 55;
-static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_DATO_SUE = 56;
-static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_PBC_UFL = 57;
-static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_EAC_UFL = 58;
-static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_EAC_TOUT = 59;
-static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_UEXP_XRS = 60;
-static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_AMM0_FIR = 61;
-static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_AMM1_FIR = 62;
-static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_AMM2_FIR = 63;
+static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_WBO_UE = 33;
+static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_PCT_UE = 34;
+static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_INJB_UE = 35;
+static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_DATO_UE = 36;
+static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_DATO_SUE = 37;
+static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_AUXT_CE = 38;
+static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_LISB_CE = 39;
+static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_RSPT_CE = 40;
+static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_UCTBL_CE = 41;
+static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_CFH_CE = 42;
+static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_SMF_CE = 43;
+static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_LPTBL_CE = 44;
+static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_WBO_CE = 45;
+static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_PCT_CE = 46;
+static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_INJB_CE = 47;
+static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_DATO_CE = 48;
+static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_CREG_PE = 49;
+static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_FLMAP_PE = 50;
+static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_AUXT_UE = 51;
+static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_LISB_UE = 52;
+static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_RSPT_UE = 53;
+static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_UCTBL_UE = 54;
+static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_CFH_UE = 55;
+static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_SMF_UE = 56;
+static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_LPTBL_UE = 57;
+static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_PBC_UFL = 58;
+static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_EAC_UFL = 59;
+static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_EAC_TOUT = 60;
+static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_UEXP_XRS = 61;
+static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_RD_FAILED = 62;
+static const uint32_t AME_ATL_MISC_CERR_RPT_HOLD_WR_FAILED = 63;
 // pau/reg00010.H
 
-static const uint64_t AME_ATL_MISC_CERR_RPT_INFO = 0x10010bfaull;
+static const uint64_t AME_ATL_MISC_CERR_RPT_INFO = 0x10010bffull;
 
-static const uint32_t AME_ATL_MISC_CERR_RPT_INFO_ECC_AMM = 25;
+static const uint32_t AME_ATL_MISC_CERR_RPT_INFO_ECC_AMM = 27;
 static const uint32_t AME_ATL_MISC_CERR_RPT_INFO_ECC_AMM_LEN = 3;
-static const uint32_t AME_ATL_MISC_CERR_RPT_INFO_ECC_BANKS = 28;
+static const uint32_t AME_ATL_MISC_CERR_RPT_INFO_ECC_BANKS = 30;
 static const uint32_t AME_ATL_MISC_CERR_RPT_INFO_ECC_BANKS_LEN = 4;
-static const uint32_t AME_ATL_MISC_CERR_RPT_INFO_FIRST_CE = 32;
-static const uint32_t AME_ATL_MISC_CERR_RPT_INFO_FIRST_CE_LEN = 11;
-static const uint32_t AME_ATL_MISC_CERR_RPT_INFO_FIRST_UE = 43;
-static const uint32_t AME_ATL_MISC_CERR_RPT_INFO_FIRST_UE_LEN = 14;
-static const uint32_t AME_ATL_MISC_CERR_RPT_INFO_FIRST_LOG = 57;
-static const uint32_t AME_ATL_MISC_CERR_RPT_INFO_FIRST_LOG_LEN = 4;
-static const uint32_t AME_ATL_MISC_CERR_RPT_INFO_FIRST_AME = 61;
-static const uint32_t AME_ATL_MISC_CERR_RPT_INFO_FIRST_AME_LEN = 3;
+static const uint32_t AME_ATL_MISC_CERR_RPT_INFO_XFAIL_TAG = 34;
+static const uint32_t AME_ATL_MISC_CERR_RPT_INFO_XFAIL_TAG_LEN = 16;
+static const uint32_t AME_ATL_MISC_CERR_RPT_INFO_XFAIL_SMID = 50;
+static const uint32_t AME_ATL_MISC_CERR_RPT_INFO_XFAIL_SMID_LEN = 8;
+static const uint32_t AME_ATL_MISC_CERR_RPT_INFO_XFAIL_RCODE = 58;
+static const uint32_t AME_ATL_MISC_CERR_RPT_INFO_XFAIL_RCODE_LEN = 4;
+static const uint32_t AME_ATL_MISC_CERR_RPT_INFO_XFAIL_DPART = 62;
+static const uint32_t AME_ATL_MISC_CERR_RPT_INFO_XFAIL_DPART_LEN = 2;
 // pau/reg00010.H
 
 static const uint64_t AME_ATL_MISC_CONFIG1 = 0x10010bf1ull;
 
 static const uint32_t AME_ATL_MISC_CONFIG1_1_RESERVED = 0;
-static const uint32_t AME_ATL_MISC_CONFIG1_1_RESERVED_LEN = 11;
-static const uint32_t AME_ATL_MISC_CONFIG1__LS_CRD = 11;
+static const uint32_t AME_ATL_MISC_CONFIG1_1_RESERVED_LEN = 12;
+static const uint32_t AME_ATL_MISC_CONFIG1__LS_CRD = 12;
 static const uint32_t AME_ATL_MISC_CONFIG1__LS_CRD_LEN = 2;
-static const uint32_t AME_ATL_MISC_CONFIG1__VC2_CRD = 13;
+static const uint32_t AME_ATL_MISC_CONFIG1__VC2_CRD = 14;
 static const uint32_t AME_ATL_MISC_CONFIG1__VC2_CRD_LEN = 2;
-static const uint32_t AME_ATL_MISC_CONFIG1__INJ_CRD = 15;
+static const uint32_t AME_ATL_MISC_CONFIG1__INJ_CRD = 16;
 static const uint32_t AME_ATL_MISC_CONFIG1__INJ_CRD_LEN = 2;
-static const uint32_t AME_ATL_MISC_CONFIG1__XLT_CRD = 17;
+static const uint32_t AME_ATL_MISC_CONFIG1__XLT_CRD = 18;
 static const uint32_t AME_ATL_MISC_CONFIG1__XLT_CRD_LEN = 2;
-static const uint32_t AME_ATL_MISC_CONFIG1__DMR_CRD = 19;
+static const uint32_t AME_ATL_MISC_CONFIG1__DMR_CRD = 20;
 static const uint32_t AME_ATL_MISC_CONFIG1__DMR_CRD_LEN = 2;
-static const uint32_t AME_ATL_MISC_CONFIG1__AMM_UC_CRD = 21;
+static const uint32_t AME_ATL_MISC_CONFIG1__AMM_UC_CRD = 22;
 static const uint32_t AME_ATL_MISC_CONFIG1__AMM_UC_CRD_LEN = 2;
-static const uint32_t AME_ATL_MISC_CONFIG1__CPL_CRD = 23;
+static const uint32_t AME_ATL_MISC_CONFIG1__CPL_CRD = 24;
 static const uint32_t AME_ATL_MISC_CONFIG1__CPL_CRD_LEN = 3;
-static const uint32_t AME_ATL_MISC_CONFIG1__RSO_CRD = 26;
+static const uint32_t AME_ATL_MISC_CONFIG1__RSO_CRD = 27;
 static const uint32_t AME_ATL_MISC_CONFIG1__RSO_CRD_LEN = 3;
-static const uint32_t AME_ATL_MISC_CONFIG1__RQO_CRD = 29;
+static const uint32_t AME_ATL_MISC_CONFIG1__RQO_CRD = 30;
 static const uint32_t AME_ATL_MISC_CONFIG1__RQO_CRD_LEN = 3;
-static const uint32_t AME_ATL_MISC_CONFIG1__XSL_ITR_CRD = 32;
+static const uint32_t AME_ATL_MISC_CONFIG1__XSL_ITR_CRD = 33;
 static const uint32_t AME_ATL_MISC_CONFIG1__XSL_ITR_CRD_LEN = 3;
-static const uint32_t AME_ATL_MISC_CONFIG1__XSL_XLT_CRD = 35;
+static const uint32_t AME_ATL_MISC_CONFIG1__XSL_XLT_CRD = 36;
 static const uint32_t AME_ATL_MISC_CONFIG1__XSL_XLT_CRD_LEN = 3;
-static const uint32_t AME_ATL_MISC_CONFIG1__EAC_TLIM = 38;
+static const uint32_t AME_ATL_MISC_CONFIG1__EAC_TLIM = 39;
 static const uint32_t AME_ATL_MISC_CONFIG1__EAC_TLIM_LEN = 4;
-static const uint32_t AME_ATL_MISC_CONFIG1__CF_HASH = 42;
+static const uint32_t AME_ATL_MISC_CONFIG1__CF_HASH = 43;
 static const uint32_t AME_ATL_MISC_CONFIG1__CF_HASH_LEN = 2;
-static const uint32_t AME_ATL_MISC_CONFIG1__XL_HASH = 44;
+static const uint32_t AME_ATL_MISC_CONFIG1__XL_HASH = 45;
 static const uint32_t AME_ATL_MISC_CONFIG1__XL_HASH_LEN = 2;
-static const uint32_t AME_ATL_MISC_CONFIG1__VC_PEND_THRESH1 = 46;
+static const uint32_t AME_ATL_MISC_CONFIG1__VC_PEND_THRESH1 = 47;
 static const uint32_t AME_ATL_MISC_CONFIG1__VC_PEND_THRESH1_LEN = 4;
-static const uint32_t AME_ATL_MISC_CONFIG1__VC_PEND_THRESH2 = 50;
+static const uint32_t AME_ATL_MISC_CONFIG1__VC_PEND_THRESH2 = 51;
 static const uint32_t AME_ATL_MISC_CONFIG1__VC_PEND_THRESH2_LEN = 4;
-static const uint32_t AME_ATL_MISC_CONFIG1__COSM_UC_WAIT = 54;
+static const uint32_t AME_ATL_MISC_CONFIG1__COSM_UC_WAIT = 55;
 static const uint32_t AME_ATL_MISC_CONFIG1__COSM_UC_WAIT_LEN = 2;
-static const uint32_t AME_ATL_MISC_CONFIG1__XRTY_WAIT_BASE = 56;
+static const uint32_t AME_ATL_MISC_CONFIG1__XRTY_WAIT_BASE = 57;
 static const uint32_t AME_ATL_MISC_CONFIG1__XRTY_WAIT_BASE_LEN = 2;
-static const uint32_t AME_ATL_MISC_CONFIG1__XRTY_WAIT_SCALE = 58;
+static const uint32_t AME_ATL_MISC_CONFIG1__XRTY_WAIT_SCALE = 59;
 static const uint32_t AME_ATL_MISC_CONFIG1__XRTY_WAIT_SCALE_LEN = 3;
 static const uint32_t AME_ATL_MISC_CONFIG1__WBI_PWR_WAIT = 62;
 static const uint32_t AME_ATL_MISC_CONFIG1__WBI_PWR_WAIT_LEN = 2;
-// pau/reg00010.H
-
-static const uint64_t AME_ATL_MISC_FENCE_STATUS = 0x10010bfdull;
-
-static const uint32_t AME_ATL_MISC_FENCE_STATUS_FENCE_IN = 0;
-static const uint32_t AME_ATL_MISC_FENCE_STATUS_FENCE_DONE = 1;
-static const uint32_t AME_ATL_MISC_FENCE_STATUS_DAT_IN_FENCE = 2;
-static const uint32_t AME_ATL_MISC_FENCE_STATUS_AMM_FENCE_DONE = 3;
-static const uint32_t AME_ATL_MISC_FENCE_STATUS_AMM_FENCE_DONE_LEN = 3;
 // pau/reg00010.H
 
 static const uint64_t CS_CTL_MISC_BDF2PE_4_CONFIG = 0x100109b4ull;
@@ -250,8 +242,18 @@ static const uint32_t CS_CTL_MISC_CONFIG2_ONFIG_WRITE_MEM_OS_BIT_BRK3 = 28;
 static const uint32_t CS_CTL_MISC_CONFIG2_S_CTL_MISC_CONFIG_WRITE_MEM_OS_BIT_BRK3 = 28;
 static const uint32_t CS_CTL_MISC_CONFIG2_ONFIG_WRITE_MEM_OS_BIT_BRK4 = 29;
 static const uint32_t CS_CTL_MISC_CONFIG2_S_CTL_MISC_CONFIG_WRITE_MEM_OS_BIT_BRK4 = 29;
-static const uint32_t CS_CTL_MISC_CONFIG2_S_CTL_MISC_CONFIG2_RESERVED1 = 30;
-static const uint32_t CS_CTL_MISC_CONFIG2_S_CTL_MISC_CONFIG2_RESERVED1_LEN = 34;
+static const uint32_t CS_CTL_MISC_CONFIG2_ONFIG_GENID_SYNC_SCOPE = 30;
+static const uint32_t CS_CTL_MISC_CONFIG2_ONFIG_GENID_SYNC_SCOPE_LEN = 2;
+static const uint32_t CS_CTL_MISC_CONFIG2_S_CTL_MISC_CONFIG_GENID_SYNC_SCOPE = 30;
+static const uint32_t CS_CTL_MISC_CONFIG2_S_CTL_MISC_CONFIG_GENID_SYNC_SCOPE_LEN = 2;
+static const uint32_t CS_CTL_MISC_CONFIG2_ONFIG_GENID_SYNC_FORCE_RCMD0 = 32;
+static const uint32_t CS_CTL_MISC_CONFIG2_S_CTL_MISC_CONFIG_GENID_SYNC_FORCE_RCMD0 = 32;
+static const uint32_t CS_CTL_MISC_CONFIG2_S_CTL_MISC_CONFIG2_RESERVED1 = 33;
+static const uint32_t CS_CTL_MISC_CONFIG2_S_CTL_MISC_CONFIG2_RESERVED1_LEN = 15;
+static const uint32_t CS_CTL_MISC_CONFIG2_ONFIG_GENID_RATE_INC = 48;
+static const uint32_t CS_CTL_MISC_CONFIG2_ONFIG_GENID_RATE_INC_LEN = 8;
+static const uint32_t CS_CTL_MISC_CONFIG2_ONFIG_GENID_RATE_DEC = 56;
+static const uint32_t CS_CTL_MISC_CONFIG2_ONFIG_GENID_RATE_DEC_LEN = 8;
 // pau/reg00010.H
 
 static const uint64_t CS_CTL_MISC_FENCE_CONTROL3 = 0x100109a4ull;
@@ -1177,7 +1179,7 @@ static const uint32_t XSL_MAIN_PMU_CONTROL0_EVENTS_C3 = 48;
 static const uint32_t XSL_MAIN_PMU_CONTROL0_EVENTS_C3_LEN = 8;
 static const uint32_t XSL_MAIN_PMU_CONTROL0_RESERVED0 = 56;
 static const uint32_t XSL_MAIN_PMU_CONTROL0_RESERVED0_LEN = 8;
-// pau/reg00011.H
+// pau/reg00010.H
 
 static const uint64_t XSL_MAIN_XSLOP_VLOG_RGS_OSL_XLATE_CFG1 = 0x10010a89ull;
 
@@ -1210,6 +1212,8 @@ static const uint32_t XTS_REG_PMU_CNT_3_LEN = 16;
 
 }
 }
-#include "pau/reg00010.H"
-#include "pau/reg00011.H"
+#ifndef __PPE_HCODE__
+    #include "pau/reg00010.H"
+    #include "pau/reg00011.H"
+#endif
 #endif

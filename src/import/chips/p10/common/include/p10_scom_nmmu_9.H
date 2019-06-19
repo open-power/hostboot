@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_nmmu_9_H_
 #define __p10_scom_nmmu_9_H_
@@ -42,5 +44,7 @@ static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_PB_ERR_RPT_0_NX_PBI_WRITE_IDLE = 
 
 }
 }
-#include "nmmu/reg00009.H"
+#ifndef __PPE_HCODE__
+    #include "nmmu/reg00009.H"
+#endif
 #endif

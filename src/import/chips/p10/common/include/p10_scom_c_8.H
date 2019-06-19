@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_c_8_H_
 #define __p10_scom_c_8_H_
@@ -34,6 +36,9 @@ namespace scomt
 namespace c
 {
 
+
+static const uint64_t CPMS_ACDR = 0x200e0e7cull;
+// c/reg00008.H
 
 static const uint64_t CPMS_CL2_PFETSTAT = 0x200e0e2cull;
 
@@ -48,11 +53,74 @@ static const uint32_t CPMS_CL2_PFETSTAT_VCS_PFET_ENABLE_ACTUAL_LEN = 8;
 static const uint32_t CPMS_CL2_PFETSTAT_SRAM_ENABLE_ACTUAL = 63;
 // c/reg00008.H
 
+static const uint64_t CPMS_DTCR = 0x200e0e84ull;
+
+static const uint32_t CPMS_DTCR_DPT_MODE = 0;
+static const uint32_t CPMS_DTCR_DPT_MODE_LEN = 2;
+static const uint32_t CPMS_DTCR_DPT_MODE_UPDATE = 2;
+static const uint32_t CPMS_DTCR_DPT_RATE_UPDATE = 3;
+static const uint32_t CPMS_DTCR_DPT_INFLIGHT_UPDATE = 4;
+static const uint32_t CPMS_DTCR_DPT_WINDOW_SEL = 5;
+static const uint32_t CPMS_DTCR_DPT_WINDOW_SEL_LEN = 3;
+static const uint32_t CPMS_DTCR_CORE_DPT_RATE_LIMIT = 8;
+static const uint32_t CPMS_DTCR_CORE_DPT_RATE_LIMIT_LEN = 8;
+static const uint32_t CPMS_DTCR_CORE_DPT_INFLIGHT_LIMIT = 16;
+static const uint32_t CPMS_DTCR_CORE_DPT_INFLIGHT_LIMIT_LEN = 8;
+static const uint32_t CPMS_DTCR_DISABLE_DPT_ON_UPDATE = 24;
+static const uint32_t CPMS_DTCR_CORE_SMT_MODE = 34;
+static const uint32_t CPMS_DTCR_CORE_SMT_MODE_LEN = 2;
+// c/reg00008.H
+
+static const uint64_t CPMS_ESCR = 0x200e0e6cull;
+
+static const uint32_t CPMS_ESCR_DURATION_MODE = 0;
+static const uint32_t CPMS_ESCR_DURATION_MODE_LEN = 2;
+static const uint32_t CPMS_ESCR_DURATION_EVENT_INVERT = 2;
+static const uint32_t CPMS_ESCR_DURATION_EVENT_INVERT_LEN = 2;
+static const uint32_t CPMS_ESCR_DURATION_RANGE = 4;
+static const uint32_t CPMS_ESCR_DURATION_RANGE_LEN = 3;
+static const uint32_t CPMS_ESCR_DURATION_START_SEL = 7;
+static const uint32_t CPMS_ESCR_DURATION_START_SEL_LEN = 5;
+static const uint32_t CPMS_ESCR_DURATION_TIMEOUT_SEL = 12;
+static const uint32_t CPMS_ESCR_DURATION_TIMEOUT_SEL_LEN = 3;
+static const uint32_t CPMS_ESCR_DURATION_STOP_SEL = 15;
+static const uint32_t CPMS_ESCR_DURATION_STOP_SEL_LEN = 5;
+static const uint32_t CPMS_ESCR_STATEW_SELECT = 20;
+static const uint32_t CPMS_ESCR_STATEW_SELECT_LEN = 3;
+static const uint32_t CPMS_ESCR_STATEW_INVERT = 23;
+static const uint32_t CPMS_ESCR_STATEZ_SELECT = 24;
+static const uint32_t CPMS_ESCR_STATEZ_SELECT_LEN = 3;
+static const uint32_t CPMS_ESCR_STATEZ_PULSE = 27;
+static const uint32_t CPMS_ESCR_EVENTX_PULSE = 28;
+static const uint32_t CPMS_ESCR_EVENTY_PULSE = 29;
+static const uint32_t CPMS_ESCR_STATEX_PULSE = 30;
+static const uint32_t CPMS_ESCR_STATEY_PULSE = 31;
+static const uint32_t CPMS_ESCR_STATEX_COMPARE = 32;
+static const uint32_t CPMS_ESCR_STATEX_COMPARE_LEN = 4;
+static const uint32_t CPMS_ESCR_STATEX_DONTCARE = 36;
+static const uint32_t CPMS_ESCR_STATEX_DONTCARE_LEN = 4;
+static const uint32_t CPMS_ESCR_STATEY_COMPARE = 40;
+static const uint32_t CPMS_ESCR_STATEY_COMPARE_LEN = 4;
+static const uint32_t CPMS_ESCR_STATEY_DONTCARE = 44;
+static const uint32_t CPMS_ESCR_STATEY_DONTCARE_LEN = 4;
+static const uint32_t CPMS_ESCR_EVENTX_COMPARE = 48;
+static const uint32_t CPMS_ESCR_EVENTX_COMPARE_LEN = 4;
+static const uint32_t CPMS_ESCR_EVENTX_DONTCARE = 52;
+static const uint32_t CPMS_ESCR_EVENTX_DONTCARE_LEN = 4;
+static const uint32_t CPMS_ESCR_EVENTY_COMPARE = 56;
+static const uint32_t CPMS_ESCR_EVENTY_COMPARE_LEN = 4;
+static const uint32_t CPMS_ESCR_EVENTY_DONTCARE = 60;
+static const uint32_t CPMS_ESCR_EVENTY_DONTCARE_LEN = 4;
+// c/reg00008.H
+
+static const uint64_t EC_LS_LSU_HOLD_OUT_REG5 = 0x200206c5ull;
+// c/reg00008.H
+
 static const uint64_t EC_PC_COMMON_SPR_V3_HMER_RW_WAND = 0x20020495ull;
 static const uint64_t EC_PC_COMMON_SPR_V3_HMER_WO_OR = 0x20020491ull;
 
 static const uint32_t EC_PC_COMMON_SPR_V3_HMER_MALFUNCTION_ALERT = 0;
-static const uint32_t EC_PC_COMMON_SPR_V3_HMER_CME_REQUEST = 1;
+static const uint32_t EC_PC_COMMON_SPR_V3_HMER_QME_REQUEST = 1;
 static const uint32_t EC_PC_COMMON_SPR_V3_HMER_PROC_RCVY_DONE = 2;
 static const uint32_t EC_PC_COMMON_SPR_V3_HMER_TFAC_ERR = 4;
 static const uint32_t EC_PC_COMMON_SPR_V3_HMER_XSCOM_FAIL = 8;
@@ -183,5 +251,7 @@ static const uint32_t PSCOM_STATUS_ERROR_REG_TRAPPED_SATELLITE_ACKNOWLEDGE_INVAL
 
 }
 }
-#include "c/reg00008.H"
+#ifndef __PPE_HCODE__
+    #include "c/reg00008.H"
+#endif
 #endif

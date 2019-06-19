@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_pec_6_H_
 #define __p10_scom_pec_6_H_
@@ -248,5 +250,7 @@ static const uint32_t TRA0_TR1_CONFIG_MASTER_CLOCK_ENABLE_INT = 23;
 
 }
 }
-#include "pec/reg00006.H"
+#ifndef __PPE_HCODE__
+    #include "pec/reg00006.H"
+#endif
 #endif

@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_pau_0_H_
 #define __p10_scom_pau_0_H_
@@ -40,14 +42,14 @@ static const uint64_t AME_AME0_MISC_CERR_RPT_HOLD = 0x10010bc8ull;
 static const uint32_t AME_AME0_MISC_CERR_RPT_HOLD_FIRMWARE = 47;
 static const uint32_t AME_AME0_MISC_CERR_RPT_HOLD_CREGA_PERR = 48;
 static const uint32_t AME_AME0_MISC_CERR_RPT_HOLD_CREGM_PERR = 49;
-static const uint32_t AME_AME0_MISC_CERR_RPT_HOLD_LDW_UE = 50;
-static const uint32_t AME_AME0_MISC_CERR_RPT_HOLD_FU_UE = 51;
-static const uint32_t AME_AME0_MISC_CERR_RPT_HOLD_WB_UE = 52;
-static const uint32_t AME_AME0_MISC_CERR_RPT_HOLD_PCT_UE = 53;
-static const uint32_t AME_AME0_MISC_CERR_RPT_HOLD_CBA_UE = 54;
-static const uint32_t AME_AME0_MISC_CERR_RPT_HOLD_ERAT_UE = 55;
-static const uint32_t AME_AME0_MISC_CERR_RPT_HOLD_PE_UE = 56;
-static const uint32_t AME_AME0_MISC_CERR_RPT_HOLD_XCT_UE = 57;
+static const uint32_t AME_AME0_MISC_CERR_RPT_HOLD_FU_UE = 50;
+static const uint32_t AME_AME0_MISC_CERR_RPT_HOLD_PCT_UE = 51;
+static const uint32_t AME_AME0_MISC_CERR_RPT_HOLD_CBA_UE = 52;
+static const uint32_t AME_AME0_MISC_CERR_RPT_HOLD_ERAT_UE = 53;
+static const uint32_t AME_AME0_MISC_CERR_RPT_HOLD_PE_UE = 54;
+static const uint32_t AME_AME0_MISC_CERR_RPT_HOLD_XCT_UE = 55;
+static const uint32_t AME_AME0_MISC_CERR_RPT_HOLD_LDW_UE = 56;
+static const uint32_t AME_AME0_MISC_CERR_RPT_HOLD_WB_UE = 57;
 static const uint32_t AME_AME0_MISC_CERR_RPT_HOLD_WB_CE = 58;
 static const uint32_t AME_AME0_MISC_CERR_RPT_HOLD_PCT_CE = 59;
 static const uint32_t AME_AME0_MISC_CERR_RPT_HOLD_CBA_CE = 60;
@@ -820,8 +822,13 @@ static const uint32_t CS_SM3_MCP_MISC_CONFIG2__BRK1_FENCE_TO_INHIBIT_MASK = 13;
 static const uint32_t CS_SM3_MCP_MISC_CONFIG2__BRK2_FENCE_TO_INHIBIT_MASK = 14;
 static const uint32_t CS_SM3_MCP_MISC_CONFIG2__BRK3_FENCE_TO_INHIBIT_MASK = 15;
 static const uint32_t CS_SM3_MCP_MISC_CONFIG2__BRK4_FENCE_TO_INHIBIT_MASK = 16;
-static const uint32_t CS_SM3_MCP_MISC_CONFIG2_2_RESERVED = 17;
-static const uint32_t CS_SM3_MCP_MISC_CONFIG2_2_RESERVED_LEN = 47;
+static const uint32_t CS_SM3_MCP_MISC_CONFIG2__ENABLE_PHASE1_DCBF = 17;
+static const uint32_t CS_SM3_MCP_MISC_CONFIG2__ENABLE_PHASE1_CLEAN = 18;
+static const uint32_t CS_SM3_MCP_MISC_CONFIG2__ENABLE_PHASE1_AMO = 19;
+static const uint32_t CS_SM3_MCP_MISC_CONFIG2__DCARM_TIMER = 20;
+static const uint32_t CS_SM3_MCP_MISC_CONFIG2__DCARM_TIMER_LEN = 12;
+static const uint32_t CS_SM3_MCP_MISC_CONFIG2_2_RESERVED = 32;
+static const uint32_t CS_SM3_MCP_MISC_CONFIG2_2_RESERVED_LEN = 32;
 // pau/reg00000.H
 
 static const uint64_t CS_SM3_SNP_MISC_CERR_MASK0 = 0x10010974ull;
@@ -1250,5 +1257,7 @@ static const uint32_t XTS_REG_CONFIG_PREF_THRSH3_LEN = 4;
 
 }
 }
-#include "pau/reg00000.H"
+#ifndef __PPE_HCODE__
+    #include "pau/reg00000.H"
+#endif
 #endif

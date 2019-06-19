@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_proc_a_H_
 #define __p10_scom_proc_a_H_
@@ -980,13 +982,9 @@ static const uint32_t PB_PTLSCOM23_MISC_CFG_TRANSPORT_3_OB_MUX_CTL2 = 34;
 static const uint32_t PB_PTLSCOM23_MISC_CFG_TRANSPORT_3_OB_MUX_CTL3 = 35;
 static const uint32_t PB_PTLSCOM23_MISC_CFG_SCOM_PTLX_EMULATION_MODE = 36;
 static const uint32_t PB_PTLSCOM23_MISC_CFG_SCOM_PTLY_EMULATION_MODE = 37;
-static const uint32_t PB_PTLSCOM23_MISC_CFG_TOD_EVN_IB_MUX_CTL = 38;
-static const uint32_t PB_PTLSCOM23_MISC_CFG_TOD_EVN_IB_MUX_CTL_LEN = 2;
-static const uint32_t PB_PTLSCOM23_MISC_CFG_TOD_ODD_IB_MUX_CTL = 40;
-static const uint32_t PB_PTLSCOM23_MISC_CFG_TOD_ODD_IB_MUX_CTL_LEN = 2;
-static const uint32_t PB_PTLSCOM23_MISC_CFG_TRANSPORT_PRI_BUS_CTL = 42;
-static const uint32_t PB_PTLSCOM23_MISC_CFG_MISC_SPARE = 43;
-static const uint32_t PB_PTLSCOM23_MISC_CFG_MISC_SPARE_LEN = 9;
+static const uint32_t PB_PTLSCOM23_MISC_CFG_TRANSPORT_PRI_BUS_CTL = 38;
+static const uint32_t PB_PTLSCOM23_MISC_CFG_MISC_SPARE = 39;
+static const uint32_t PB_PTLSCOM23_MISC_CFG_MISC_SPARE_LEN = 13;
 // proc/reg00047.H
 
 static const uint64_t PB_PTLSCOM45_DOB01_DIB01_INT_ERR_REG = 0x12011828ull;
@@ -1094,7 +1092,7 @@ static const uint32_t PSI_MAC_SCOM_REGS_RX_CNTL_DEGLITCH_DATA_DLY = 26;
 static const uint32_t PSI_MAC_SCOM_REGS_RX_CNTL_DEGLITCH_DATA_DLY_LEN = 5;
 // proc/reg00047.H
 
-static const uint64_t TP_LPC_SYNC_FIR_WOF_REG = 0x030121c8ull;
+static const uint64_t TP_LPC_SYNC_FIR_WOF_REG = 0x03012008ull;
 
 static const uint32_t TP_LPC_SYNC_FIR_WOF_REG_SYNC_FIR_WOF = 0;
 static const uint32_t TP_LPC_SYNC_FIR_WOF_REG_SYNC_FIR_WOF_LEN = 6;
@@ -2071,27 +2069,10 @@ static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPITAPRC_6 = 6;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPITAPRC_7 = 7;
 // proc/reg00048.H
 
-static const uint64_t TP_TPCHIP_OCC_OCI_OCB_P2SCR1 = 0x0006c841ull;
+static const uint64_t TP_TPCHIP_OCC_OCI_OCB_P2S_CR2 = 0x0006c842ull;
 
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2SCR1__BRIDGE_ENABLE = 0;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2SCR1__DEVICE = 1;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2SCR1__CPOL = 2;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2SCR1__CPHA = 3;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2SCR1__CLOCK_DIVIDER = 4;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2SCR1__CLOCK_DIVIDER_LEN = 10;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2SCR1_CR1_RESERVED_2 = 14;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2SCR1_CR1_RESERVED_2_LEN = 3;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2SCR1__NR_OF_FRAMES = 17;
-// proc/reg00048.H
-
-static const uint64_t TP_TPCHIP_OCC_OCI_OCB_PMC_SPIPSS_P2S_STATUS_REG = 0x0006c843ull;
-
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_PMC_SPIPSS_P2S_STATUS_REG_P2S_ONGOING = 0;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_PMC_SPIPSS_P2S_STATUS_REG_RESERVED_1_4 = 1;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_PMC_SPIPSS_P2S_STATUS_REG_RESERVED_1_4_LEN = 4;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_PMC_SPIPSS_P2S_STATUS_REG_P2S_WRITE_WHILE_BRIDGE_BUSY_ERR = 5;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_PMC_SPIPSS_P2S_STATUS_REG_RESERVED_6 = 6;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_PMC_SPIPSS_P2S_STATUS_REG_P2S_FSM_ERR = 7;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2S_CR2_OCB_OCI_P2S_CR2_INTER_FRAME_DELAY = 0;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2S_CR2_OCB_OCI_P2S_CR2_INTER_FRAME_DELAY_LEN = 17;
 // proc/reg00048.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_WOFICDCM2 = 0x0006c786ull;
@@ -2122,7 +2103,7 @@ static const uint64_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG113 = 0x00008071ull;
 
 static const uint32_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG113_REGISTER113 = 0;
 static const uint32_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG113_REGISTER113_LEN = 64;
-// proc/reg00049.H
+// proc/reg00048.H
 
 static const uint64_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG124 = 0x0000807cull;
 
@@ -2199,8 +2180,6 @@ static const uint32_t TP_TPCHIP_TPC_CPLT_MASK0_ITR_MASK = 0;
 static const uint32_t TP_TPCHIP_TPC_CPLT_MASK0_ITR_MASK_LEN = 32;
 // proc/reg00049.H
 
-//ERRCODE: // Some of the name targets not found in address targets: perv
-
 static const uint64_t TP_TPCHIP_TPC_DPLL_CNTL_NEST_REGS_ICHAR = 0x01060157ull;
 
 static const uint32_t TP_TPCHIP_TPC_DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_AVG = 1;
@@ -2217,8 +2196,6 @@ static const uint32_t TP_TPCHIP_TPC_DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_MIN =
 static const uint32_t TP_TPCHIP_TPC_DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_MIN_LEN = 5;
 // proc/reg00049.H
 
-//ERRCODE: // Some of the name targets not found in address targets: perv
-
 static const uint64_t TP_TPCHIP_TPC_DPLL_CNTL_NEST_REGS_OCHAR = 0x01060156ull;
 
 static const uint32_t TP_TPCHIP_TPC_DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_MAX = 1;
@@ -2234,8 +2211,6 @@ static const uint32_t TP_TPCHIP_TPC_DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_MIN_LEN = 
 static const uint32_t TP_TPCHIP_TPC_DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_MIN = 52;
 static const uint32_t TP_TPCHIP_TPC_DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_MIN_LEN = 5;
 // proc/reg00049.H
-
-//ERRCODE: // Some of the name targets not found in address targets: perv
 
 static const uint64_t TP_TPCHIP_TPC_DPLL_CNTL_NEST_REGS_STAT = 0x01060155ull;
 
@@ -2646,7 +2621,7 @@ static const uint32_t TP_TPVSB_FSI_W_SLAVE_B_MST_0_MRESP4_WO = 0x00000c38ull;
 
 static const uint32_t TP_TPVSB_FSI_W_SLAVE_B_MST_0_MRESP4_GENERAL_RESET_4 = 0;
 static const uint32_t TP_TPVSB_FSI_W_SLAVE_B_MST_0_MRESP4_ERROR_RESET_4 = 1;
-// proc/reg00050.H
+// proc/reg00049.H
 
 static const uint32_t TP_TPVSB_FSI_W_SLAVE_B_MST_0_MSIEP7_FSI1 = 0x0000304cull;
 static const uint32_t TP_TPVSB_FSI_W_SLAVE_B_MST_0_MSIEP7_SCOMFSI1 = 0x00000c13ull;
@@ -2765,9 +2740,11 @@ static const uint32_t VAS_VA_RG_SCF_FIR_ACTION1_REG_VAS_FIR_ACTION1_LEN = 52;
 
 }
 }
-#include "proc/reg00046.H"
-#include "proc/reg00047.H"
-#include "proc/reg00048.H"
-#include "proc/reg00049.H"
-#include "proc/reg00050.H"
+#ifndef __PPE_HCODE__
+    #include "proc/reg00046.H"
+    #include "proc/reg00047.H"
+    #include "proc/reg00048.H"
+    #include "proc/reg00049.H"
+    #include "proc/reg00050.H"
+#endif
 #endif

@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_nmmu_8_H_
 #define __p10_scom_nmmu_8_H_
@@ -45,5 +47,7 @@ static const uint32_t FIR1_MASK_REG_MM_FIR1_MASK_LEN = 46;
 
 }
 }
-#include "nmmu/reg00008.H"
+#ifndef __PPE_HCODE__
+    #include "nmmu/reg00008.H"
+#endif
 #endif

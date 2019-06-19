@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "proc_scomt.H"
+#ifndef __PPE_HCODE__
+    #include "proc_scomt.H"
+#endif
 
 #ifndef __p10_scom_proc_f_H_
 #define __p10_scom_proc_f_H_
@@ -720,13 +722,9 @@ static const uint32_t PB_PTLSCOM10_MISC_CFG_TRANSPORT_3_OB_MUX_CTL2 = 34;
 static const uint32_t PB_PTLSCOM10_MISC_CFG_TRANSPORT_3_OB_MUX_CTL3 = 35;
 static const uint32_t PB_PTLSCOM10_MISC_CFG_SCOM_PTLX_EMULATION_MODE = 36;
 static const uint32_t PB_PTLSCOM10_MISC_CFG_SCOM_PTLY_EMULATION_MODE = 37;
-static const uint32_t PB_PTLSCOM10_MISC_CFG_TOD_EVN_IB_MUX_CTL = 38;
-static const uint32_t PB_PTLSCOM10_MISC_CFG_TOD_EVN_IB_MUX_CTL_LEN = 2;
-static const uint32_t PB_PTLSCOM10_MISC_CFG_TOD_ODD_IB_MUX_CTL = 40;
-static const uint32_t PB_PTLSCOM10_MISC_CFG_TOD_ODD_IB_MUX_CTL_LEN = 2;
-static const uint32_t PB_PTLSCOM10_MISC_CFG_TRANSPORT_PRI_BUS_CTL = 42;
-static const uint32_t PB_PTLSCOM10_MISC_CFG_MISC_SPARE = 43;
-static const uint32_t PB_PTLSCOM10_MISC_CFG_MISC_SPARE_LEN = 9;
+static const uint32_t PB_PTLSCOM10_MISC_CFG_TRANSPORT_PRI_BUS_CTL = 38;
+static const uint32_t PB_PTLSCOM10_MISC_CFG_MISC_SPARE = 39;
+static const uint32_t PB_PTLSCOM10_MISC_CFG_MISC_SPARE_LEN = 13;
 // proc/reg00071.H
 
 static const uint64_t PB_PTLSCOM10_PMU3_TLPM_COUNTER = 0x1001181eull;
@@ -827,9 +825,9 @@ static const uint32_t PB_BRIDGE_NHTM_NHTM1_SC_HTM_TRIG_MARK_TYPE = 6;
 static const uint32_t PB_BRIDGE_NHTM_NHTM1_SC_HTM_TRIG_MARK_TYPE_LEN = 10;
 // proc/reg00071.H
 
-static const uint64_t TP_LPC_SYNC_FIR_MASK_REG_RW = 0x030121c3ull;
-static const uint64_t TP_LPC_SYNC_FIR_MASK_REG_WO_AND = 0x030121c4ull;
-static const uint64_t TP_LPC_SYNC_FIR_MASK_REG_WO_OR = 0x030121c5ull;
+static const uint64_t TP_LPC_SYNC_FIR_MASK_REG_RW = 0x03012003ull;
+static const uint64_t TP_LPC_SYNC_FIR_MASK_REG_WO_AND = 0x03012004ull;
+static const uint64_t TP_LPC_SYNC_FIR_MASK_REG_WO_OR = 0x03012005ull;
 
 static const uint32_t TP_LPC_SYNC_FIR_MASK_REG_INVALID_TRANSFER_SIZE_MASK = 0;
 static const uint32_t TP_LPC_SYNC_FIR_MASK_REG_INVALID_COMMAND_MASK = 1;
@@ -1651,6 +1649,17 @@ static const uint32_t TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXIIAR_OCB_OCI_GPEXIIAR_IAR_L
 static const uint64_t TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXISPRG0 = 0x00066022ull;
 // proc/reg00073.H
 
+static const uint64_t TP_TPCHIP_OCC_OCI_OCB_ADC_STAT = 0x0006c803ull;
+
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_STAT_HWCTRL_ONGOING = 0;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_STAT_RESERVED_1_3 = 1;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_STAT_RESERVED_1_3_LEN = 3;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_STAT_HWCTRL_INVALID_NUMBER_OF_FRAMES = 4;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_STAT_HWCTRL_WRITE_WHILE_BRIDGE_BUSY_ERR = 5;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_STAT_RESERVED_6 = 6;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_STAT_HWCTRL_FSM_ERR = 7;
+// proc/reg00073.H
+
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_O2SCMD1B = 0x0006c737ull;
 
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_O2SCMD1B_CMD1B_RESERVED_0 = 0;
@@ -1886,17 +1895,6 @@ static const uint64_t TP_TPCHIP_OCC_OCI_OCB_P2S_WDATA = 0x0006c850ull;
 
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2S_WDATA_OCB_OCI_P2S_WDATA = 0;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_P2S_WDATA_OCB_OCI_P2S_WDATA_LEN = 32;
-// proc/reg00073.H
-
-static const uint64_t TP_TPCHIP_OCC_OCI_OCB_SPIPSS_ADC_STATUS_REG = 0x0006c803ull;
-
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_SPIPSS_ADC_STATUS_REG_HWCTRL_ONGOING = 0;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_SPIPSS_ADC_STATUS_REG_RESERVED_1_3 = 1;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_SPIPSS_ADC_STATUS_REG_RESERVED_1_3_LEN = 3;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_SPIPSS_ADC_STATUS_REG_HWCTRL_INVALID_NUMBER_OF_FRAMES = 4;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_SPIPSS_ADC_STATUS_REG_HWCTRL_WRITE_WHILE_BRIDGE_BUSY_ERR = 5;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_SPIPSS_ADC_STATUS_REG_RESERVED_6 = 6;
-static const uint32_t TP_TPCHIP_OCC_OCI_OCB_SPIPSS_ADC_STATUS_REG_HWCTRL_FSM_ERR = 7;
 // proc/reg00073.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_PIB_OCBCSR1_RO = 0x0006d031ull;
@@ -2501,8 +2499,10 @@ static const uint32_t VAS_VA_RG_SCF_FIR_REG_CQ_RG_FIR_TOPO_INDEX_ERR = 50;
 
 }
 }
-#include "proc/reg00071.H"
-#include "proc/reg00072.H"
-#include "proc/reg00073.H"
-#include "proc/reg00074.H"
+#ifndef __PPE_HCODE__
+    #include "proc/reg00071.H"
+    #include "proc/reg00072.H"
+    #include "proc/reg00073.H"
+    #include "proc/reg00074.H"
+#endif
 #endif
