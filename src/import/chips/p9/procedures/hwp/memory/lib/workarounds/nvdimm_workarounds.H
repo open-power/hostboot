@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,20 +65,31 @@ fapi2::ReturnCode trigger_csave( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHI
 /// @brief Helper for trigger_csave. This subroutine assert RESET_n to trigger
 /// the backup on nvdimm
 /// @param[in] i_target - PROC_CHIP target
-/// @param[in] l_mca_pos - The MCA position relative to the PROC
+/// @param[in] i_mca_pos - The MCA position relative to the PROC
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 
-fapi2::ReturnCode assert_resetn( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, uint8_t l_mca_pos);
+fapi2::ReturnCode assert_resetn( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, uint8_t i_mca_pos);
+
+///
+/// @brief change the BAR valid state on MCS with NVDIMM installed
+/// @param[in] i_target - PROC_CHIP target
+/// @param[in] i_port_bitmap - port bitmap that indicates port with nvdimm
+/// @param[in] i_state - BAR state to change to
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+fapi2::ReturnCode change_bar_valid_state( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+        const fapi2::buffer<uint8_t> i_port_bitmap,
+        const uint64_t i_state);
 
 ///
 /// @brief Helper for trigger_csave. This subroutine puts the MCA into STR
 /// @param[in] i_target - PROC_CHIP target
-/// @param[in] l_mca_pos - The MCA position relative to the PROC
+/// @param[in] i_mca_pos - The MCA position relative to the PROC
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 
-fapi2::ReturnCode self_refresh_entry( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, uint8_t l_mca_pos);
+fapi2::ReturnCode self_refresh_entry( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, uint8_t i_mca_pos);
 
 }//ns nvdimm
 }//ns workarounds
