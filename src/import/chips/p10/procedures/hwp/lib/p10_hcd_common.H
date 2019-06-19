@@ -38,13 +38,11 @@
 
 #include <stdint.h>
 
-
-#define CPMS_CUCR                    0xC000E3C0
-//TODO HW487147 these 2 address needs to swaped.
-#define CPMS_CUCR_WO_CLEAR           0xC000E3E0
-#define CPMS_CUCR_WO_OR              0xC000E3F0
-
 #ifndef __PPE_QME
+
+    //TODO HW487147 these 2 address needs to swaped.
+    #define CPMS_CUCR_WO_CLEAR           CPMS_CUCR_SCOM1
+    #define CPMS_CUCR_WO_OR              CPMS_CUCR_SCOM2
 
     #define QME_SCSR_WO_CLEAR            QME_SCSR_SCOM1
     #define QME_SCSR_WO_OR               QME_SCSR_SCOM2
@@ -54,6 +52,10 @@
 
 #else
     #ifndef QME_IMAGE_SOURCE
+
+        //TODO HW487147 these 2 address needs to swaped.
+        #define CPMS_CUCR_WO_CLEAR           CPMS_CUCR_PPE1
+        #define CPMS_CUCR_WO_OR              CPMS_CUCR_PPE2
 
         #define QME_SCSR_WO_CLEAR            QME_SCSR_PPE1
         #define QME_SCSR_WO_OR               QME_SCSR_PPE2
