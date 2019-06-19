@@ -368,4 +368,40 @@
       <name>ATTR_SBE_ADDR_KEY_STASH_ADDR</name>
       <value>0x0</value>
  </entry>
+ <entry>
+      <name>ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE</name>
+      <!-- Initialize all 32 entries to 0xff (INVALID) -->
+      <value>0xff</value> <!-- 00 -->
+      <value>0xff</value> <!-- 01 -->
+      <value>0xff</value> <!-- 02 -->
+      <value>0xff</value> <!-- 03 -->
+      <value>0xff</value> <!-- 04 -->
+      <value>0xff</value> <!-- 05 -->
+      <value>0xff</value> <!-- 06 -->
+      <value>0xff</value> <!-- 07 -->
+      <value>0xff</value> <!-- 08 -->
+      <value>0xff</value> <!-- 09 -->
+      <value>0xff</value> <!-- 10 -->
+      <value>0xff</value> <!-- 11 -->
+      <value>0xff</value> <!-- 12 -->
+      <value>0xff</value> <!-- 13 -->
+      <value>0xff</value> <!-- 14 -->
+      <value>0xff</value> <!-- 15 -->
+      <value>0xff</value> <!-- 16 -->
+      <value>0xff</value> <!-- 17 -->
+      <value>0xff</value> <!-- 18 -->
+      <value>0xff</value> <!-- 19 -->
+      <value>0xff</value> <!-- 20 -->
+      <value>0xff</value> <!-- 21 -->
+      <value>0xff</value> <!-- 22 -->
+      <value>0xff</value> <!-- 23 -->
+      <value>0xff</value> <!-- 24 -->
+      <value>0xff</value> <!-- 25 -->
+      <value>0xff</value> <!-- 26 -->
+      <value>0xff</value> <!-- 27 -->
+      <value>0xff</value> <!-- 28 -->
+      <value>0xff</value> <!-- 29 -->
+      <value>0xff</value> <!-- 30 -->
+      <value>0xff</value> <!-- 31 -->
+ </entry>
 </entries>
