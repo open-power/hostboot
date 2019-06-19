@@ -266,7 +266,7 @@ fapi2::ReturnCode get_topology_table_scoms(
                      idx, val, regval);
         }
 
-        o_topology_id_table_scoms.emplace_back(regval);
+        o_topology_id_table_scoms.push_back(regval);
     }
 
 fapi_try_exit:
