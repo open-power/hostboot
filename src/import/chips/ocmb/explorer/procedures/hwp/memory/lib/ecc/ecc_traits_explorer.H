@@ -234,6 +234,7 @@ class eccTraits<mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>
         static constexpr uint64_t ECC_MAX_SYMBOLS = exp::MAX_SYMBOLS_PER_PORT;
 
         // Stores the symbol counter registers in a vector for easier access for MCBIST
+        static constexpr uint64_t REQUIRED_NUMBER_OF_SYMBOL_REGS = 10;
         static const std::vector<uint64_t> SYMBOL_COUNT_REG;
 
         // Fields, can be any size.
