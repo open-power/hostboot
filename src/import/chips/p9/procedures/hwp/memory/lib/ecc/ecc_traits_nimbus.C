@@ -35,7 +35,7 @@
 
 #include <fapi2.H>
 #include <lib/shared/mss_const.H>
-#include <chips/p9/procedures/hwp/memory/lib/shared/nimbus_defaults.H>
+#include <lib/shared/nimbus_defaults.H>
 #include <lib/ecc/ecc_traits_nimbus.H>
 
 namespace mss
