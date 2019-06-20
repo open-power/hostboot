@@ -36,6 +36,12 @@ namespace MMIO
         MOD_MMIO_PERFORM_OP          = 0x02,
         MOD_MMIO_GET_PROC_SCOM       = 0x03,
         MOD_MMIO_SET_PROC_SCOM       = 0x04,
+        MOD_VALIDATE_OCMB_MMIO_OP    = 0x05,
+        MOD_MMIO_CHAN_CHECKSTOP      = 0x06,
+        MOD_CHECK_OCMB_ERROR         = 0x07,
+        MOD_DETERMINE_CALLOUTS       = 0x08,
+        MOD_DETERMINE_EXP_CALLOUTS   = 0x09,
+        RT_OCMB_MMIO_PERFORM_OP      = 0x0A,
     };
 
     enum MMIOReasonCode

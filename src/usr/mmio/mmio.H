@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,6 +24,10 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #ifndef __MMIO_H
 #define __MMIO_H
+
+#include <errl/errlentry.H>
+#include <devicefw/driverif.H>
+#include <targeting/common/target.H>
 
 /** @file  mmio.H
  *  @brief Provides interface to perform MMIO operations to Explorer chips

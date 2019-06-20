@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/expaccess/runtime/makefile $
+# $Source: src/usr/mmio/runtime/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2019
+# Contributors Listed Below - COPYRIGHT 2019
 # [+] International Business Machines Corp.
 #
 #
@@ -23,15 +23,11 @@
 #
 # IBM_PROLOG_END_TAG
 HOSTBOOT_RUNTIME = 1
-
 ROOTPATH = ../../../..
-MODULE = expaccess_rt
+MODULE = mmio_rt
 
-SUBDIRS += test.d
+#include unique object modules
+OBJS += rt_mmio.o
 
-EXTRAINCDIR += ../
-
-VPATH += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
-VPATH += ${ROOTPATH}/src/usr/expaccess/
-
-include ${ROOTPATH}/config.mk
+VPATH += ..
+include $(ROOTPATH)/config.mk

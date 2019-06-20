@@ -231,6 +231,79 @@ errlHndl_t computeNonPhypRtTarget(
             o_rtTargetId = PIR_t::createCoreId(o_rtTargetId,pos);
             o_rtTargetId |= HBRT_CORE_TYPE;
         }
+        else if( targetingTargetType == TARGETING::TYPE_OCMB_CHIP)
+        {
+            // OCMB (This layout mimics MEMBUF)
+            // 0b1000.0000.0000.0000.0000.0GGG.GCCC.UUUU
+            // where GGGG is group, CCC is chip, UUUU is OMI chip unit
+            //
+            TARGETING::TargetHandleList targetList;
+
+            getParentAffinityTargets(targetList,
+                                    i_pTarget,
+                                    TARGETING::CLASS_UNIT,
+                                    TARGETING::TYPE_OMI,
+                                    TARGETING::UTIL_FILTER_ALL);
+
+            if( targetList.empty() )
+            {
+                auto huid = get_huid(i_pTarget);
+                TRACFCOMP(g_trac_runtime, ERR_MRK
+                    "No associated OMI targeting target(s) found for OCMB_CHIP "
+                    "targeting target with HUID of 0x%08X",
+                    huid);
+                /*@
+                 * @error
+                 * @moduleid    RUNTIME::MOD_CUST_COMP_NON_PHYP_RT_TARGET
+                 * @reasoncode  RUNTIME::RT_NO_OMI_TARGET_FOUND
+                 * @userdata1   OCMB targeting target's HUID
+                 * @devdesc     No associated OMI targeting target(s) found for
+                 *              given OCMB targeting target
+                 */
+                pError = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                    RUNTIME::MOD_CUST_COMP_NON_PHYP_RT_TARGET,
+                    RUNTIME::RT_NO_OMI_TARGET_FOUND,
+                    huid,
+                    0,
+                    true);
+
+                ERRORLOG::ErrlUserDetailsTarget(i_pTarget,"Targeting Target").
+                    addToLog(pError);
+
+                break;
+            }
+
+            auto target = targetList[0];
+            auto pos = target->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+
+            targetList.clear();
+            getParentAffinityTargets(targetList,
+                                     target,
+                                     TARGETING::CLASS_CHIP,
+                                     TARGETING::TYPE_PROC,
+                                     TARGETING::UTIL_FILTER_ALL);
+
+            if(targetList.empty())
+            {
+                pError = createProcNotFoundError(target);
+                break;
+            }
+
+            auto procTarget = targetList[0];
+            pError = computeNonPhypRtTarget(procTarget, o_rtTargetId);
+            if(pError)
+            {
+                break;
+            }
+
+            // GGGG = 0 by default, CCC = o_rtTargetId, UUUU = pos
+            // HBRT_MEMBUF_TYPE distinguishes this target as a MEMBUF/OCMB
+            // Reusing MEMBUF for OCMB type as the two can't coexist
+            o_rtTargetId = (o_rtTargetId << RT_TARG::MEMBUF_ID_SHIFT);
+            o_rtTargetId += pos;  // OMI chip unit acts as unique target position
+            o_rtTargetId |= HBRT_MEMBUF_TYPE;
+        }
         else
         {
             auto huid = get_huid(i_pTarget);
@@ -308,6 +381,10 @@ errlHndl_t getRtTypeForTarget(
         case TARGETING::TYPE_CORE:
             rtType = HBRT_CORE_TYPE;
             break;
+        case TARGETING::TYPE_OCMB_CHIP:
+            // reusing MEMBUF type as it is not present
+            rtType = HBRT_MEMBUF_TYPE;
+            break;
         default:
             found = false;
             break;
@@ -359,13 +436,15 @@ errlHndl_t configureHbrtHypIds(const bool i_configForPhyp)
         TARGETING::CLASS_CHIP, TARGETING::TYPE_MEMBUF);
     TARGETING::PredicateCTM isaCore(
         TARGETING::CLASS_UNIT, TARGETING::TYPE_CORE);
-    TARGETING::PredicatePostfixExpr isaProcMembufOrCore;
-    isaProcMembufOrCore.push(&isaProc).push(&isaMembuf).Or()
-        .push(&isaCore).Or();
+    TARGETING::PredicateCTM isanOcmbChip(
+        TARGETING::CLASS_CHIP, TARGETING::TYPE_OCMB_CHIP);
+    TARGETING::PredicatePostfixExpr isaProcMembufCoreorOcmb;
+    isaProcMembufCoreorOcmb.push(&isaProc).push(&isaMembuf).Or()
+        .push(&isaCore).Or().push(&isanOcmbChip).Or();
     TARGETING::TargetRangeFilter pIt(
         TARGETING::targetService().begin(),
         TARGETING::targetService().end(),
-        &isaProcMembufOrCore);
+        &isaProcMembufCoreorOcmb);
     for (; pIt; ++pIt)
     {
         auto hbrtHypId = HBRT_HYP_ID_UNKNOWN;
@@ -382,7 +461,7 @@ errlHndl_t configureHbrtHypIds(const bool i_configForPhyp)
 
             switch ((*pIt)->getAttr<TARGETING::ATTR_TYPE>())
             {
-                case TARGETING::TYPE_CORE:
+              case TARGETING::TYPE_CORE:
                 {
                     if(TARGETING::is_fused_mode())
                     {
@@ -403,7 +482,7 @@ errlHndl_t configureHbrtHypIds(const bool i_configForPhyp)
                     }
                     break;
                 }
-                case TARGETING::TYPE_MEMBUF:
+              case TARGETING::TYPE_MEMBUF:
                 {
                     //MEMBUF
                     // 0b1000.0000.0000.0000.0000.0PPP.PPPP.MMMM
@@ -433,12 +512,47 @@ errlHndl_t configureHbrtHypIds(const bool i_configForPhyp)
                     hbrtHypId += pos;
                     break;
                 }
-                case TARGETING::TYPE_PROC:
+              case TARGETING::TYPE_OCMB_CHIP:
+                {
+                    TRACDCOMP( g_trac_runtime, "configureHbrtHypIds> "
+                      "Set ATTR_HBRT_HYP_ID attribute for OCMB target "
+                      "with HUID of 0x%08X", TARGETING::get_huid(*pIt));
+
+                    // TYPE_OCMB_CHIP (mimics MEMBUF layout)
+                    // 0b1000.0000.0000.0000.0000.0PPP.PPPP.UUUU
+                    // where PP is the parent proc's id, UUUU is OMI chip unit
+                    //
+                    TARGETING::TargetHandleList targetList;
+
+                    getParentAffinityTargets(targetList,
+                                             (*pIt),
+                                             TARGETING::CLASS_UNIT,
+                                             TARGETING::TYPE_OMI, false);
+                    assert( !targetList.empty() );
+
+                    auto omi_target = targetList[0];
+                    auto pos = omi_target->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+
+                    targetList.clear();
+                    getParentAffinityTargets(targetList,
+                                             omi_target,
+                                             TARGETING::CLASS_CHIP,
+                                             TARGETING::TYPE_PROC, false);
+                    assert( !targetList.empty() );
+
+                    auto procTarget = targetList[0];
+                    // Reusing MEMBUF for OCMB Chip communication
+                    hbrtHypId = procTarget->getAttr<TARGETING::ATTR_ORDINAL_ID>();
+                    hbrtHypId = (hbrtHypId << RT_TARG::MEMBUF_ID_SHIFT);
+                    hbrtHypId += pos; // Add OMI chip unit to end
+                    break;
+                }
+              case TARGETING::TYPE_PROC:
                 {
                     hbrtHypId = (*pIt)->getAttr<TARGETING::ATTR_ORDINAL_ID>();
                     break;
                 }
-                default:
+              default:
                 {
                     auto huid = get_huid(*pIt);
                     auto targetType = (*pIt)->getAttr<TARGETING::ATTR_TYPE>();

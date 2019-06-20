@@ -84,6 +84,12 @@
   <targetTypeExtension>
     <id>chip-ocmb</id>
     <attribute>
+      <id>HBRT_HYP_ID</id>
+    </attribute>
+    <attribute>
+      <id>IBSCOM_MUTEX</id>
+    </attribute>
+    <attribute>
       <default>0</default>
       <id>MMIO_VM_ADDR</id>
     </attribute>

@@ -25,6 +25,9 @@
 ROOTPATH = ../../..
 MODULE = mmio
 
+SUBDIRS += test.d
+SUBDIRS += runtime.d
+
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
