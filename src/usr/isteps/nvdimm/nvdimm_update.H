@@ -56,8 +56,13 @@ const uint32_t NVDIMM_SIGNATURE_LIDID = 0x80D00025; // ignore this one
 const uint32_t NVDIMM_16GB_LIDID = 0x81e00640;
 const uint32_t NVDIMM_32GB_LIDID = 0x81e00641;
 
+const uint32_t NVDIMM_16GB_BPM_FW_LIDID = 0x81e00642;
+const uint32_t NVDIMM_16GB_BPM_CONFIG_LIDID = 0x81e00644;
 
-// Firmware Update Mode settings for FIRMWARE_OPS_CMD
+const uint32_t NVDIMM_32GB_BPM_FW_LIDID = 0x81e00643;
+const uint32_t NVDIMM_32GB_BPM_CONFIG_LIDID = 0x81e00645;
+
+
 enum fw_update_mode : uint8_t
 {
     FW_UPDATE_MODE_DISABLED = 0x00,

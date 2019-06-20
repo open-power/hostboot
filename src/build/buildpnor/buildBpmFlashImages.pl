@@ -145,6 +145,8 @@ sub generateFirmwareImage
 
     # The address offsets in the file are prefixed with the @ symbol.
     use constant ADDRESS_LINE => "\@";
+    use constant FW_START_ADDRESS_8000 => "\@8000";
+    use constant FW_START_ADDRESS_A000 => "\@A000";
 
     # Each line is plain text where each byte is separated by spaces.
     # To determine how many bytes are on the line divide by characters per byte
@@ -173,8 +175,9 @@ sub generateFirmwareImage
             last;
         }
 
-        # Ignore data from addresses below @8000 because the firmware data
-        # only begins from @8000 onward.
+        # There are two possible addresses where the firmware data section can
+        # start: @8000 or @A000. Ignore all data until we reach either of those
+        # addresses since it's only after that, that the firmware data begins.
         if (substr($line, 0, 1) eq ADDRESS_LINE)
         {
             $currentAddress = hex substr($line, 1, 4);
@@ -183,7 +186,8 @@ sub generateFirmwareImage
                 printf("Found address offset: 0x%04x\n", $currentAddress);
             }
 
-            if ($line eq "\@8000")
+            if (  ($line eq FW_START_ADDRESS_8000)
+               || ($line eq FW_START_ADDRESS_A000))
             {
                 $inFirmwareSection = 1;
             }

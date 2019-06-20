@@ -496,6 +496,16 @@ const char EXPUPD_COMP_NAME[] = "expupd";
 //@}
 
 //
+/** @name BPM
+ *  BPM flash update component
+ */
+//@{
+const compId_t BPM_COMP_ID = 0x4300;
+const char BPM_COMP_NAME[] = "bpm";
+
+//@}
+
+//
 //
 /** @name HDAT
  *  HDAT component
