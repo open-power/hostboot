@@ -465,25 +465,43 @@ typedef struct __attribute__((packed)) user_input_msdg
     uint16_t InitPhyVref[MSDG_MAX_PSTATE];
 
     // Enter desired ODT[3:0] value when writing to ranks
-    // OdtWrMapCs[i][3:0] ODT value when writing to rank 0
-    // OdtWrMapCs[i][7:4] ODT value when writing to rank 1
-    // OdtWrMapCs[i][11:8] ODT value when writing to rank 2
-    // OdtWrMapCs[i][15:12] ODT value when writing to rank 3
-    // [0] - ODT value for P0
-    // [1] - ODT value for P1
-    // [2] - ODT value for P2
-    // [3] - ODT value for P3
+    // in normal mode (2 rank)
+    // OdtWrMapCs BIT [1:0] ODT_A/B[1:0] value when writing to rank 0
+    // OdtWrMapCs BIT [5:4] ODT_A/B[1:0] value when writing to rank 1
+    // If EncodedQuadCs = 1
+    // OdtWrMapCs BIT [1:0] ODT_A/B[1:0] value when writing to rank 0
+    // OdtWrMapCs BIT [5:4] ODT_A/B[1:0] value when writing to rank 1
+    // OdtWrMapCs BIT [9:8] ODT_A/B[1:0] value when writing to rank 2
+    // OdtWrMapCs BIT [13:12] ODT_A/B[1:0] value when writing to rank 3
+    // If Rank4Mode = 1
+    // OdtWrMapCs BIT [1:0] ODT_A[1:0] value when writing to rank 0
+    // OdtWrMapCs BIT [3:2] ODT_B[1:0] value when writing to rank 0
+    // OdtWrMapCs BIT [5:4] ODT_A[1:0] value when writing to rank 1
+    // OdtWrMapCs BIT [7:6] ODT_B[1:0] value when writing to rank 1
+    // OdtWrMapCs BIT [9:8] ODT_A[1:0] value when writing to rank 2
+    // OdtWrMapCs BIT [11:10] ODT_B[1:0] value when writing to rank 2
+    // OdtWrMapCs BIT [13:12] ODT_A[1:0] value when writing to rank 3
+    // OdtWrMapCs BIT [15:14] ODT_B[1:0] value when writing to rank 3
     uint16_t OdtWrMapCs[MSDG_MAX_PSTATE];
 
-    // Enter desired ODT[3:0] value when writing to ranks
-    // OdtRdMapCs[i][3:0] ODT value when writing to rank 0
-    // OdtRdMapCs[i][7:4] ODT value when writing to rank 1
-    // OdtRdMapCs[i][11:8] ODT value when writing to rank 2
-    // OdtRdMapCs[i][15:12] ODT value when writing to rank 3
-    // [0] - ODT value for P0
-    // [1] - ODT value for P1
-    // [2] - ODT value for P2
-    // [3] - ODT value for P3
+    // Enter desired ODT[3:0] value when reading from ranks
+    // in normal mode (2 rank)
+    // OdtRdMapCs BIT [1:0] ODT_A/B[1:0] value when reading from rank 0
+    // OdtRdMapCs BIT [5:4] ODT_A/B[1:0] value when reading from rank 1
+    // If EncodedQuadCs = 1
+    // OdtRdMapCs BIT [1:0] ODT_A/B[1:0] value when reading from rank 0
+    // OdtRdMapCs BIT [5:4] ODT_A/B[1:0] value when reading from rank 1
+    // OdtRdMapCs BIT [9:8] ODT_A/B[1:0] value when reading from rank 2
+    // OdtRdMapCs BIT [13:12] ODT_A/B[1:0] value when reading from rank 3
+    // If Rank4Mode = 1
+    // OdtRdMapCs BIT [1:0] ODT_A[1:0] value when reading from rank 0
+    // OdtRdMapCs BIT [3:2] ODT_B[1:0] value when reading from rank 0
+    // OdtRdMapCs BIT [5:4] ODT_A[1:0] value when reading from rank 1
+    // OdtRdMapCs BIT [7:6] ODT_B[1:0] value when reading from rank 1
+    // OdtRdMapCs BIT [9:8] ODT_A[1:0] value when reading from rank 2
+    // OdtRdMapCs BIT [11:10] ODT_B[1:0] value when reading from rank 2
+    // OdtRdMapCs BIT [13:12] ODT_A[1:0] value when reading from rank 3
+    // OdtRdMapCs BIT [15:14] ODT_B[1:0] value when reading from rank 3
     uint16_t OdtRdMapCs[MSDG_MAX_PSTATE];
 
     // Enable geardown mode during training/dfi_bist.

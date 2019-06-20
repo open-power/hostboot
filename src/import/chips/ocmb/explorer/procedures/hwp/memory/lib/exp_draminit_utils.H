@@ -134,6 +134,18 @@ enum msdg_enable
 };
 
 ///
+/// @brief defines fields for the ODT RD/WR params
+///
+enum odt_fields
+{
+    FLD_LENGTH = 4,
+    RANK3 = 12,
+    RANK2 = 8,
+    RANK1 = 4,
+    RANK0 = 0,
+};
+
+///
 /// @brief host_fw_command_struct structure setup
 /// @param[in] i_cmd_data_crc the command data CRC
 /// @param[out] o_cmd the command parameters to set
@@ -180,8 +192,8 @@ struct phy_params_t
     uint8_t iv_num_pstate[MAX_DIMM_PER_PORT];
     uint64_t iv_frequency;
     uint8_t iv_odt_impedance[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
-    uint8_t iv_drv_impedance_pu[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
-    uint8_t iv_drv_impedance_pd[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
+    uint16_t iv_drv_impedance_pu[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
+    uint16_t iv_drv_impedance_pd[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
     uint8_t iv_slew_rate[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
     uint8_t iv_atx_impedance[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
     uint8_t iv_atx_slew_rate[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
@@ -834,7 +846,17 @@ class phy_params
         ///
         fapi2::ReturnCode set_OdtWrMapCs(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.OdtWrMapCs[0] = iv_params.iv_odt_wr_map_cs[0][0];
+            fapi2::buffer<uint16_t> odt_wr_map_cs_buff;
+
+            // TK - Changes needed for Dual Drop / 4U in the future.
+            // Will likely require ODT RD/WR attribute changes
+            odt_wr_map_cs_buff.insert<odt_fields::RANK3, odt_fields::FLD_LENGTH>(iv_params.iv_odt_wr_map_cs[0][3]);
+            odt_wr_map_cs_buff.insert<odt_fields::RANK2, odt_fields::FLD_LENGTH>(iv_params.iv_odt_wr_map_cs[0][2]);
+            odt_wr_map_cs_buff.insert<odt_fields::RANK1, odt_fields::FLD_LENGTH>(iv_params.iv_odt_wr_map_cs[0][1]);
+            odt_wr_map_cs_buff.insert<odt_fields::RANK0, odt_fields::FLD_LENGTH>(iv_params.iv_odt_wr_map_cs[0][0]);
+
+            odt_wr_map_cs_buff.reverse();
+            io_phy_params.OdtWrMapCs[0] = odt_wr_map_cs_buff;
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -845,7 +867,17 @@ class phy_params
         ///
         fapi2::ReturnCode set_OdtRdMapCs(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.OdtRdMapCs[0] = iv_params.iv_odt_rd_map_cs[0][0];
+            fapi2::buffer<uint16_t> odt_rd_map_cs_buff;
+
+            // TK - Changes needed for Dual Drop / 4U in the future.
+            // Will likely require ODT RD/WR attribute changes
+            odt_rd_map_cs_buff.insert<odt_fields::RANK3, odt_fields::FLD_LENGTH>(iv_params.iv_odt_rd_map_cs[0][3]);
+            odt_rd_map_cs_buff.insert<odt_fields::RANK2, odt_fields::FLD_LENGTH>(iv_params.iv_odt_rd_map_cs[0][2]);
+            odt_rd_map_cs_buff.insert<odt_fields::RANK1, odt_fields::FLD_LENGTH>(iv_params.iv_odt_rd_map_cs[0][1]);
+            odt_rd_map_cs_buff.insert<odt_fields::RANK0, odt_fields::FLD_LENGTH>(iv_params.iv_odt_rd_map_cs[0][0]);
+
+            odt_rd_map_cs_buff.reverse();
+            io_phy_params.OdtRdMapCs[0] = odt_rd_map_cs_buff;
             return fapi2::FAPI2_RC_SUCCESS;
         }
 

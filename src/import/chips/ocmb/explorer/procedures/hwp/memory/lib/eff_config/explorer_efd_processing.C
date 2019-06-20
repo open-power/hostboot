@@ -129,13 +129,13 @@ fapi2::ReturnCode init_vref_dq(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_t
     static const uint8_t VREF_RANGE_BIT_LEFT_ALGINED = 1;
 
     // Get the data
-    uint8_t l_phy_vref[mss::exp::sizes::MAX_RANK_PER_DIMM] = {0};
+    uint8_t l_vref_dq[mss::exp::sizes::MAX_RANK_PER_DIMM] = {0};
 
     uint8_t l_range = 0;
     uint8_t l_value = 0;
     fapi2::buffer<uint8_t> l_combined_vref;
 
-    FAPI_TRY(mss::attr::get_exp_init_vref_dq(i_target, l_phy_vref));
+    FAPI_TRY(mss::attr::get_exp_init_vref_dq(i_target, l_vref_dq));
 
     // Piece together the field
     FAPI_TRY(i_efd_data->wr_vref_dq_range(l_range));
@@ -145,10 +145,10 @@ fapi2::ReturnCode init_vref_dq(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_t
     l_combined_vref.writeBit<VREF_RANGE_BIT_LEFT_ALGINED>(l_range);
 
     // Insert
-    l_phy_vref[i_efd_data->get_rank()] = l_combined_vref;
+    l_vref_dq[i_efd_data->get_rank()] = l_combined_vref;
 
     // Set the attribute
-    FAPI_TRY(mss::attr::set_exp_init_vref_dq(i_target, l_phy_vref));
+    FAPI_TRY(mss::attr::set_exp_init_vref_dq(i_target, l_vref_dq));
 
 fapi_try_exit:
     return fapi2::current_err;

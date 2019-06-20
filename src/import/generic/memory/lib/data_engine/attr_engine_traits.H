@@ -595,7 +595,28 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_RCV_IMP_DQ_DQS>
     static inline fapi2::ReturnCode get_value_to_set(const std::shared_ptr<efd::base_decoder>& i_efd_data,
             attr_integral_type& o_setting)
     {
-        return i_efd_data->phy_odt_impedance(o_setting);
+        uint8_t l_odt_impedance = 0;
+
+        static const std::vector< std::pair<uint8_t, uint8_t> > ODT_IMP_MAP =
+        {
+            // {key byte, PHY ODT IMP (ohms)}
+            {0b00000, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_DISABLE},
+            {0b00001, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_40},
+            {0b00010, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_60},
+            {0b00011, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_80},
+            {0b00100, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_120},
+            {0b00101, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_240},
+
+            // All others reserved
+        };
+        const auto l_ocmb = i_efd_data->get_ocmb_target();
+
+        FAPI_TRY(i_efd_data->phy_odt_impedance(l_odt_impedance));
+        // Map SPD value to desired setting
+        FAPI_TRY(lookup_table_check(l_ocmb, ODT_IMP_MAP, mss::SET_SI_MC_RCV_IMP_DQ_DQS, l_odt_impedance, o_setting));
+
+    fapi_try_exit:
+        return fapi2::current_err;
     }
 };
 
@@ -645,7 +666,41 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_IMP_DQ_DQS_PULL_UP>
     static inline fapi2::ReturnCode get_value_to_set(const std::shared_ptr<efd::base_decoder>& i_efd_data,
             attr_integral_type& o_setting)
     {
-        return i_efd_data->phy_drive_impedance_pull_up(o_setting);
+        uint8_t l_phy_drv_imp_pu;
+
+        static const std::vector< std::pair<uint16_t, uint16_t> > PHY_DRV_IMP_PU_MAP =
+        {
+            // {key byte, DRV IMP PU (ohms)}
+            {0b000000, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_DISABLE},
+            {0b000001, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_OHM_28},
+            {0b000010, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_OHM_30},
+            {0b000011, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_OHM_32},
+            {0b000100, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_OHM_34},
+            {0b000101, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_OHM_36},
+            {0b000110, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_OHM_40},
+            {0b000111, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_OHM_43},
+            {0b001000, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_OHM_48},
+            {0b001001, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_OHM_53},
+            {0b001010, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_OHM_60},
+            {0b001011, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_OHM_68},
+            {0b001100, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_OHM_80},
+            {0b001101, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_OHM_96},
+            {0b001110, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_OHM_120},
+            {0b001111, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_OHM_160},
+            {0b010000, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_OHM_240},
+            {0b010001, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_OHM_480},
+
+            // All others reserved
+        };
+        const auto l_ocmb = i_efd_data->get_ocmb_target();
+
+        FAPI_TRY(i_efd_data->phy_drive_impedance_pull_up(l_phy_drv_imp_pu));
+        // Map SPD value to desired setting
+        FAPI_TRY(lookup_table_check(l_ocmb, PHY_DRV_IMP_PU_MAP, mss::SET_SI_MC_DRV_IMP_DQ_DQS_PULL_UP,
+                                    static_cast<uint16_t>(l_phy_drv_imp_pu), o_setting));
+
+    fapi_try_exit:
+        return fapi2::current_err;
     }
 };
 
@@ -695,7 +750,41 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN>
     static inline fapi2::ReturnCode get_value_to_set(const std::shared_ptr<efd::base_decoder>& i_efd_data,
             attr_integral_type& o_setting)
     {
-        return i_efd_data->phy_drive_impedance_pull_down(o_setting);
+        uint8_t l_phy_drv_imp_pd = 0;
+
+        static const std::vector< std::pair<uint16_t, uint16_t> > PHY_DRV_IMP_PD_MAP =
+        {
+            // {key byte, DRV IMP PD (ohms)}
+            {0b000000, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_DISABLE},
+            {0b000001, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_OHM_28},
+            {0b000010, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_OHM_30},
+            {0b000011, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_OHM_32},
+            {0b000100, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_OHM_34},
+            {0b000101, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_OHM_36},
+            {0b000110, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_OHM_40},
+            {0b000111, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_OHM_43},
+            {0b001000, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_OHM_48},
+            {0b001001, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_OHM_53},
+            {0b001010, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_OHM_60},
+            {0b001011, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_OHM_68},
+            {0b001100, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_OHM_80},
+            {0b001101, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_OHM_96},
+            {0b001110, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_OHM_120},
+            {0b001111, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_OHM_160},
+            {0b010000, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_OHM_240},
+            {0b010001, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_OHM_480},
+
+            // All others reserved
+        };
+        const auto l_ocmb = i_efd_data->get_ocmb_target();
+
+        FAPI_TRY(i_efd_data->phy_drive_impedance_pull_down(l_phy_drv_imp_pd));
+        // Map SPD value to desired setting
+        FAPI_TRY(lookup_table_check(l_ocmb, PHY_DRV_IMP_PD_MAP, mss::SET_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN,
+                                    static_cast<uint16_t>(l_phy_drv_imp_pd), o_setting));
+
+    fapi_try_exit:
+        return fapi2::current_err;
     }
 };
 
@@ -796,7 +885,29 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_IMP_CMD_ADDR>
     static inline fapi2::ReturnCode get_value_to_set(const std::shared_ptr<efd::base_decoder>& i_efd_data,
             attr_integral_type& o_setting)
     {
-        return i_efd_data->atx_impedance(o_setting);
+        uint8_t l_atx_impedance = 0;
+
+        static const std::vector< std::pair<uint8_t, uint8_t> > ATX_IMP_MAP =
+        {
+            // {key byte, ATX IMP (ohm)}
+            {0b0000, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR_DISABLE},
+            {0b0001, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR_OHM_20},
+            {0b0010, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR_OHM_24},
+            {0b0011, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR_OHM_30},
+            {0b0100, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR_OHM_40},
+            {0b0101, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR_OHM_60},
+            {0b0110, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR_OHM_120},
+
+            // All others reserved
+        };
+        const auto l_ocmb = i_efd_data->get_ocmb_target();
+
+        FAPI_TRY(i_efd_data->atx_impedance(l_atx_impedance));
+        // Map SPD value to desired setting
+        FAPI_TRY(lookup_table_check(l_ocmb, ATX_IMP_MAP, mss::SET_SI_MC_DRV_IMP_CMD_ADDR, l_atx_impedance, o_setting));
+
+    fapi_try_exit:
+        return fapi2::current_err;
     }
 };
 
@@ -896,7 +1007,29 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_IMP_CLK>
     static inline fapi2::ReturnCode get_value_to_set(const std::shared_ptr<efd::base_decoder>& i_efd_data,
             attr_integral_type& o_setting)
     {
-        return i_efd_data->ck_impedance(o_setting);
+        uint8_t l_ck_impedance = 0;
+
+        static const std::vector< std::pair<uint8_t, uint8_t> > CK_IMP_MAP =
+        {
+            // {key byte, CK IMP (ohm)}
+            {0b0000, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_CLK_DISABLE},
+            {0b0001, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_CLK_OHM_20},
+            {0b0010, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_CLK_OHM_24},
+            {0b0011, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_CLK_OHM_30},
+            {0b0100, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_CLK_OHM_40},
+            {0b0101, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_CLK_OHM_60},
+            {0b0110, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_CLK_OHM_120},
+
+            // All others reserved
+        };
+        const auto l_ocmb = i_efd_data->get_ocmb_target();
+
+        FAPI_TRY(i_efd_data->ck_impedance(l_ck_impedance));
+        // Map SPD value to desired setting
+        FAPI_TRY(lookup_table_check(l_ocmb, CK_IMP_MAP, mss::SET_SI_MC_DRV_IMP_CLK, l_ck_impedance, o_setting));
+
+    fapi_try_exit:
+        return fapi2::current_err;
     }
 };
 
@@ -996,7 +1129,29 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_RCV_IMP_ALERT_N>
     static inline fapi2::ReturnCode get_value_to_set(const std::shared_ptr<efd::base_decoder>& i_efd_data,
             attr_integral_type& o_setting)
     {
-        return i_efd_data->alert_odt_impedance(o_setting);
+        uint8_t l_alert_odt_imp = 0;
+
+        static const std::vector< std::pair<uint8_t, uint8_t> > ALERT_ODT_IMP_MAP =
+        {
+            // {key byte, ALERT ODT IMP (ohms)}
+            {0b0000, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_DISABLE},
+            {0b0001, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_OHM_40},
+            {0b0010, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_OHM_48},
+            {0b0011, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_OHM_60},
+            {0b0100, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_OHM_80},
+            {0b0101, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_OHM_120},
+            {0b0110, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_OHM_240},
+
+            // All others reserved
+        };
+        const auto l_ocmb = i_efd_data->get_ocmb_target();
+
+        FAPI_TRY(i_efd_data->alert_odt_impedance(l_alert_odt_imp));
+        // Map SPD value to desired setting
+        FAPI_TRY(lookup_table_check(l_ocmb, ALERT_ODT_IMP_MAP, mss::SET_SI_MC_RCV_IMP_ALERT_N, l_alert_odt_imp, o_setting));
+
+    fapi_try_exit:
+        return fapi2::current_err;
     }
 };
 
@@ -1046,7 +1201,27 @@ struct attrEngineTraits<attr_si_engine_fields, SI_DRAM_RTT_NOM>
     static inline fapi2::ReturnCode get_value_to_set(const std::shared_ptr<efd::base_decoder>& i_efd_data,
             attr_integral_type& o_setting)
     {
-        return i_efd_data->dram_rtt_nom(o_setting);
+        uint8_t l_rtt_nom = 0;
+
+        static const std::vector< std::pair<uint8_t, uint8_t> > RTT_NOM_MAP =
+        {
+            {0b0000, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_NOM_DISABLE},
+            {0b0001, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_NOM_OHM34},
+            {0b0010, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_NOM_OHM40},
+            {0b0011, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_NOM_OHM60},
+            {0b0100, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_NOM_OHM80},
+            {0b0101, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_NOM_OHM120},
+            {0b0110, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_NOM_OHM240},
+            // All others reserved
+        };
+        const auto l_ocmb = i_efd_data->get_ocmb_target();
+
+        FAPI_TRY(i_efd_data->dram_rtt_nom(l_rtt_nom));
+        // Map SPD value to desired setting
+        FAPI_TRY(lookup_table_check(l_ocmb, RTT_NOM_MAP, mss::SET_SI_DRAM_RTT_NOM, l_rtt_nom, o_setting));
+
+    fapi_try_exit:
+        return fapi2::current_err;
     }
 };
 
@@ -1096,7 +1271,24 @@ struct attrEngineTraits<attr_si_engine_fields, SI_DRAM_RTT_WR>
     static inline fapi2::ReturnCode get_value_to_set(const std::shared_ptr<efd::base_decoder>& i_efd_data,
             attr_integral_type& o_setting)
     {
-        return i_efd_data->dram_rtt_wr(o_setting);
+        uint8_t l_rtt_wr = 0;
+
+        static const std::vector< std::pair<uint8_t, uint8_t> > RTT_WR_MAP =
+        {
+            {0b0000, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_WR_DISABLE},
+            {0b0001, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_WR_OHM80},
+            {0b0010, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_WR_OHM120},
+            {0b0011, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_WR_OHM240},
+            // All others reserved
+        };
+        const auto l_ocmb = i_efd_data->get_ocmb_target();
+
+        FAPI_TRY(i_efd_data->dram_rtt_wr(l_rtt_wr));
+        // Map SPD value to desired setting
+        FAPI_TRY(lookup_table_check(l_ocmb, RTT_WR_MAP, mss::SET_SI_DRAM_RTT_WR, l_rtt_wr, o_setting));
+
+    fapi_try_exit:
+        return fapi2::current_err;
     }
 };
 
@@ -1146,7 +1338,29 @@ struct attrEngineTraits<attr_si_engine_fields, SI_DRAM_RTT_PARK>
     static inline fapi2::ReturnCode get_value_to_set(const std::shared_ptr<efd::base_decoder>& i_efd_data,
             attr_integral_type& o_setting)
     {
-        return i_efd_data->dram_rtt_park(o_setting);
+        uint8_t l_rtt_park = 0;
+
+        static const std::vector< std::pair<uint8_t, uint8_t> > RTT_PARK_MAP =
+        {
+            // {key byte, RTT PARK (ohms)}
+            {0b0000, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_DISABLE},
+            {0b0001, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM34},
+            {0b0010, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM40},
+            {0b0011, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM48},
+            {0b0100, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM60},
+            {0b0101, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM80},
+            {0b0110, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM120},
+            {0b0111, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM240},
+            // All others reserved
+        };
+        const auto l_ocmb = i_efd_data->get_ocmb_target();
+
+        FAPI_TRY(i_efd_data->dram_rtt_park(l_rtt_park));
+        // Map SPD value to desired setting
+        FAPI_TRY(lookup_table_check(l_ocmb, RTT_PARK_MAP, mss::SET_SI_DRAM_RTT_PARK, l_rtt_park, o_setting));
+
+    fapi_try_exit:
+        return fapi2::current_err;
     }
 };
 
@@ -1299,7 +1513,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_DRAM_DRV_IMP_DQ_DQS>
     {
         static const std::vector< std::pair<uint8_t, uint8_t> > DRAM_DIC_MAP =
         {
-            // {key byte, capacity in GBs}
+            // {key byte, DRAM DIC (ohms)}
             {0, fapi2::ENUM_ATTR_MEM_SI_DRAM_DRV_IMP_DQ_DQS_DISABLE},
             {1, fapi2::ENUM_ATTR_MEM_SI_DRAM_DRV_IMP_DQ_DQS_OHM34},
             {2, fapi2::ENUM_ATTR_MEM_SI_DRAM_DRV_IMP_DQ_DQS_OHM48},
@@ -1364,7 +1578,6 @@ struct attrEngineTraits<attr_si_engine_fields, SI_ODT_WR>
     static fapi2::ReturnCode get_value_to_set(const std::shared_ptr<efd::base_decoder>& i_efd_data,
             attr_integral_type& o_setting)
     {
-        fapi2::buffer<uint8_t> l_buffer;
         uint8_t l_value = 0;
 
         switch(i_efd_data->get_rank())
@@ -1735,7 +1948,7 @@ struct attrEngineTraits<attr_engine_derived_fields, HEIGHT_3DS>
 
             static const std::vector< std::pair<uint16_t, uint16_t> > HEIGHT_3DS_MAP =
             {
-                // {key byte, device width (bits)}
+                // {key byte, 3DS HEIGHT}
                 {1, fapi2::ENUM_ATTR_MEM_3DS_HEIGHT_PLANAR},
                 {2, fapi2::ENUM_ATTR_MEM_3DS_HEIGHT_H2},
                 {4, fapi2::ENUM_ATTR_MEM_3DS_HEIGHT_H4},
