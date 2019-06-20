@@ -40,6 +40,13 @@
 #include <multicast_defs.H>
 #include "p10_ring_id.H"
 
+enum mux_type : int
+{
+    FSI2PCB = 16,
+    PIB2PCB = 18,
+    PCB2PCB = 19,
+};
+
 /// @brief Describes ring table for putring call in initf procedures
 const uint8_t IGNORE_PG = 0xFF;
 
@@ -157,5 +164,13 @@ fapi2::ReturnCode p10_perv_sbe_cmn_setup_putring(
 /// @param[in]     i_target  Reference to TARGET_TYPE_PERV target
 /// @return  FAPI2_RC_SUCCESS if success, else error code.
 fapi2::ReturnCode p10_enable_ridi(const fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target);
+
+fapi2::ReturnCode p10_perv_sbe_cmn_switch_mux_scom(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip, mux_type i_mux_setup);
+
+#ifndef __PPE__
+fapi2::ReturnCode p10_perv_sbe_cmn_switch_mux_cfam(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip, mux_type i_mux_setup);
+#endif
 
 #endif

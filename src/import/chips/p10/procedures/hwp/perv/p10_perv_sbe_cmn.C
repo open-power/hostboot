@@ -997,3 +997,105 @@ fapi2::ReturnCode p10_perv_sbe_cmn_setup_putring(
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+/// @brief mux setup
+//
+/// @param[in]     i_target_chip      Reference to TARGET_TYPE_PROC_CHIP
+/// @param[in]     i_mux_setup        mux type to switch the mux settings(FSI2PCB(16), PIB2PCB(18), PCB2PCB(19))
+/// @return  FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p10_perv_sbe_cmn_switch_mux_scom(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip, mux_type i_mux_setup)
+{
+    using namespace scomt;
+    using namespace scomt::perv;
+
+    fapi2::buffer<uint64_t> l_data64_root_ctrl0;
+
+    FAPI_DBG("p10_perv_sbe_cmn_switch_mux_scom : Entering");
+
+    FAPI_DBG("Raise OOB Mux");
+    l_data64_root_ctrl0.flush<0>().setBit<FSXCOMP_FSXLOG_ROOT_CTRL0_OOB_MUX>();
+    FAPI_TRY(fapi2::putScom(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL0_SET_WO_OR, l_data64_root_ctrl0));
+
+    FAPI_DBG("Enabling PCB_RESET");
+    l_data64_root_ctrl0.flush<0>().setBit<FSXCOMP_FSXLOG_ROOT_CTRL0_PCB_RESET_DC>();
+    FAPI_TRY(fapi2::putScom(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL0_SET_WO_OR, l_data64_root_ctrl0));
+
+    // FSI2PCB (Bit16: 1, Bit18: 0, Bit19: 0)
+    // PIB2PCB (Bit16: 0, Bit18: 1, Bit19: 0)
+    // PCB2PCB (Bit16: 0, Bit18: 0, Bit19: 1)
+    l_data64_root_ctrl0.flush<0>().setBit(i_mux_setup);
+    FAPI_TRY(fapi2::putScom(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL0_SET_WO_OR, l_data64_root_ctrl0));
+
+    l_data64_root_ctrl0.flush<0>()
+    .setBit<16>()
+    .setBit<18>()
+    .setBit<19>()
+    .clearBit(i_mux_setup);
+    FAPI_TRY(fapi2::putScom(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_WO_CLEAR, l_data64_root_ctrl0));
+
+    FAPI_DBG("Clearing PCB RESET bit in  ROOT_CTRL0_REG");
+    l_data64_root_ctrl0.flush<0>().setBit<FSXCOMP_FSXLOG_ROOT_CTRL0_PCB_RESET_DC>();
+    FAPI_TRY(fapi2::putScom(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_WO_CLEAR, l_data64_root_ctrl0));
+
+    FAPI_DBG("Drop OOB Mux");
+    l_data64_root_ctrl0.flush<0>().setBit<FSXCOMP_FSXLOG_ROOT_CTRL0_OOB_MUX>();
+    FAPI_TRY(fapi2::putScom(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_WO_CLEAR, l_data64_root_ctrl0));
+
+    FAPI_DBG("p10_perv_sbe_cmn_switch_mux_scom : Exiting");
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+#ifndef __PPE__
+/// @brief mux setup
+//
+/// @param[in]     i_target_chip      Reference to TARGET_TYPE_PROC_CHIP
+/// @param[in]     i_mux_setup        mux type to switch the mux settings(FSI2PCB(16), PIB2PCB(18), PCB2PCB(19))
+/// @return  FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p10_perv_sbe_cmn_switch_mux_cfam(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip, mux_type i_mux_setup)
+{
+    using namespace scomt;
+    using namespace scomt::perv;
+
+    fapi2::buffer<uint32_t> l_data32_root_ctrl0;
+
+    FAPI_DBG("p10_perv_sbe_cmn_switch_mux_cfam : Entering");
+
+    FAPI_DBG("Raise OOB Mux");
+    l_data32_root_ctrl0.flush<0>().setBit<FSXCOMP_FSXLOG_ROOT_CTRL0_OOB_MUX>();
+    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL0_SET_FSI, l_data32_root_ctrl0));
+
+    FAPI_DBG("Enabling PCB_RESET");
+    l_data32_root_ctrl0.flush<0>().setBit<FSXCOMP_FSXLOG_ROOT_CTRL0_PCB_RESET_DC>();
+    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL0_SET_FSI, l_data32_root_ctrl0));
+
+    // FSI2PCB (Bit16: 1, Bit18: 0, Bit19: 0)
+    // PIB2PCB (Bit16: 0, Bit18: 1, Bit19: 0)
+    // PCB2PCB (Bit16: 0, Bit18: 0, Bit19: 1)
+    l_data32_root_ctrl0.flush<0>().setBit(i_mux_setup);
+    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL0_SET_FSI, l_data32_root_ctrl0));
+
+    l_data32_root_ctrl0.flush<0>()
+    .setBit<16>()
+    .setBit<18>()
+    .setBit<19>()
+    .clearBit(i_mux_setup);
+    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_FSI, l_data32_root_ctrl0));
+
+    FAPI_DBG("Clearing PCB RESET bit in  ROOT_CTRL0_REG");
+    l_data32_root_ctrl0.flush<0>().setBit<FSXCOMP_FSXLOG_ROOT_CTRL0_PCB_RESET_DC>();
+    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_FSI, l_data32_root_ctrl0));
+
+    FAPI_DBG("Drop OOB Mux");
+    l_data32_root_ctrl0.flush<0>().setBit<FSXCOMP_FSXLOG_ROOT_CTRL0_OOB_MUX>();
+    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_FSI, l_data32_root_ctrl0));
+
+    FAPI_DBG("p10_perv_sbe_cmn_switch_mux_cfam : Exiting");
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+#endif
