@@ -353,11 +353,7 @@
       <value>0x0</value>
   </entry>
  <entry>
-      <name>ATTR_PNOR_BOOT_SIDE</name>
-      <value>0x0</value>
-  </entry>
- <entry>
-      <name>ATTR_PNOR_SIZE</name>
+      <name>ATTR_LPC_CONSOLE_INITIALIZED</name>
       <value>0x0</value>
   </entry>
  <entry>
@@ -411,5 +407,9 @@
       <value>0xff</value> <!-- 29 -->
       <value>0xff</value> <!-- 30 -->
       <value>0xff</value> <!-- 31 -->
+ </entry>
+ <entry>
+      <name>ATTR_NUM_KEY_ADDR_PAIR</name>
+      <value>0x0</value>
  </entry>
 </entries>

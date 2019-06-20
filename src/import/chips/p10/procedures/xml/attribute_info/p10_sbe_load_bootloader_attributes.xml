@@ -55,15 +55,6 @@
   <initToZero/>
 </attribute>
 <attribute>
-  <id>ATTR_PNOR_SIZE</id>
-  <targetType>TARGET_TYPE_SYSTEM</targetType>
-  <description>Defines size of PNOR that will be put into the exception vector if written</description>
-  <valueType>uint16</valueType>
-  <persistRuntime/>
-  <platInit/>
-  <initToZero/>
-</attribute>
-<attribute>
   <id>ATTR_SBE_BOOT_SIDE</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>Defines sbe boot side that will be put into the exception vector if written</description>
@@ -73,9 +64,9 @@
   <initToZero/>
 </attribute>
 <attribute>
-  <id>ATTR_PNOR_BOOT_SIDE</id>
+  <id>ATTR_LPC_CONSOLE_INITIALIZED</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
-  <description>Defines boot side of PNOR that will be put into the exception vector if written</description>
+  <description>Defines if the lpc console is initialized for Hostboot to use</description>
   <valueType>uint8</valueType>
   <persistRuntime/>
   <platInit/>
@@ -110,6 +101,15 @@
   <description>Instruction for HB Boatloader to pick the Add-Key Stash Pair
     from this memory into the exception vector</description>
   <valueType>uint64</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <initToZero/>
+</attribute>
+<attribute>
+  <id>ATTR_NUM_KEY_ADDR_PAIR</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>Defines the number of key-addr pair available to hostboot</description>
+  <valueType>uint8</valueType>
   <persistRuntime/>
   <platInit/>
   <initToZero/>
