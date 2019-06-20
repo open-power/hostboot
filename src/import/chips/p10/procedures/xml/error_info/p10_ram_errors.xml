@@ -28,17 +28,29 @@
   <!-- This has all the Ram core registers that we need to collect for debug -->
   <registerFfdc>
     <id>REG_FFDC_RAM_CORE_REGISTERS</id>
-<!-- FIXME @RTC 202251 port over to P10
-    <scomRegister>C_RAS_STATUS</scomRegister>
-    <scomRegister>C_RAM_MODEREG</scomRegister>
-    <scomRegister>C_RAM_CTRL</scomRegister>
-    <scomRegister>C_RAM_STATUS</scomRegister>
-    <scomRegister>C_THRCTL_HOLD_OUT</scomRegister>
-    <scomRegister>C_FIR_HOLD_OUT</scomRegister>
-    <scomRegister>C_THREAD_INFO</scomRegister>
--->
+    <scomRegister>scomt::c::EC_PC_THRCTL_TCTLCOM_RAS_STATUS</scomRegister>
+    <scomRegister>scomt::c::EC_PC_FIR_RAM_MODEREG</scomRegister>
+    <scomRegister>scomt::c::EC_PC_FIR_RAM_CTRL</scomRegister>
+    <scomRegister>scomt::c::EC_PC_FIR_RAM_STATUS</scomRegister>
+    <scomRegister>scomt::c::EC_PC_THRCTL_TCTLCOM_HOLD_OUT</scomRegister>
+    <scomRegister>scomt::c::EC_PC_FIR_HOLD_OUT</scomRegister>
+    <scomRegister>scomt::c::EC_PC_PMC_THREAD_INFO</scomRegister>
   </registerFfdc>
 
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P10_RAM_THREAD_INVALID_ERR</rc>
+    <description>
+      Invalid ram thread specified
+    </description>
+    <ffdc>CORE_TARGET</ffdc>
+    <ffdc>THREAD</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <sbeError/>
