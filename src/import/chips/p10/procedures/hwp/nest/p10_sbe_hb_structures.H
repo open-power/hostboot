@@ -51,13 +51,8 @@ keyAddrPair_t;
 // Used for version checking as the BootloaderConfigData_t structure changes
 enum SbeBootloaderVersion
 {
-    // Keep initial version formatted as it was originally
-    INIT = 0x901,
-    // Later versions use format [release:2][version:2]
-    SAB_ADDED = 0x00090002,
-    MMIO_BARS_ADDED = 0x00090003,
-    ADDR_STASH_SUPPORT_ADDED = 0x00090004,
-    SBE_BACKDOOR_BIT_ADDED = 0x00090005,
+    // versions format [release:2bytes][version:2bytes]
+    INIT = 0x00100001,
 };
 
 union BootloaderSecureSettings
@@ -80,20 +75,22 @@ union BootloaderSecureSettings
 //          maintain compatibility with Hostboot
 struct BootloaderConfigData_t
 {
-    uint32_t version;         // bytes  4:7  Version identifier
-    uint8_t sbeBootSide;      // byte   8    0=SBE side 0, 1=SBE side 1
-    //                                         [ATTR_SBE_BOOT_SIDE]
-    uint8_t pnorBootSide;     // byte   9    0=PNOR side A, 1=PNOR side B
-    //                                         [ATTR_PNOR_BOOT_SIDE]
-    uint16_t pnorSizeMB;      // bytes 10:11 Size of PNOR in MB
-    //                                         [ATTR_PNOR_SIZE]
-    uint64_t blLoadSize;      // bytes 12:19 Size of Load
-    //                                         Exception vectors and Bootloader
-    BootloaderSecureSettings  secureSettings  ; // byte  20
-    uint8_t reserved[7];      // bytes 21:27 Reserved space to maintain 64-bit alignment
-    uint64_t xscomBAR;        // bytes 28:35 XSCOM MMIO BAR
-    uint64_t lpcBAR;          // bytes 36:43 LPC MMIO BAR
-    keyAddrPair_t pair;       // total of 72 Bytes (8+8*8) for Key/Addr Pair
+    uint32_t version;          // bytes 4:7   Version identifier
+    uint8_t sbeBootSide;       // byte  8     0=SBE side 0, 1=SBE side 1
+    //             [ATTR_SBE_BOOT_SIDE]
+    uint8_t lpcConsoleEnable;  // byte  9     If LPC console is enabled by SBE
+    //             1 = Enabled, 0 = Not
+    uint16_t cacheSizeMB;      // bytes 10:11 Size of Cache available for Host
+    uint64_t blLoadSize;       // bytes 12:19 Size of Load
+    // Exception vectors and Bootloader
+    BootloaderSecureSettings  secureSettings; // byte  20
+    uint8_t reserved[6];      // bytes 21:26  Reserved space to maintain 64-bit
+    //              alignment
+    uint8_t numKeyAddrPair;   // byte  27     Number of Key-Add pair
+    uint64_t xscomBAR;        // bytes 28:35  XSCOM MMIO BAR
+    uint64_t lpcBAR;          // bytes 36:43  LPC MMIO BAR
+    keyAddrPair_t pair;       // X Bytes allocated basis the numKeyAddrPair
+    //                           (numKeyAddrPair + 8*numKeyAddrPair)
 }; // Note: Want to use '__attribute__((packed))' but compiler won't let us
 
 #endif // _SBE_HB_STRUCTURES_H_
