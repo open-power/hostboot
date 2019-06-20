@@ -45,6 +45,24 @@ namespace explorer_ocmb
 
 //##############################################################################
 //
+//                             Special plugins
+//
+//##############################################################################
+
+/**
+ * @brief  Plugin that initializes the data bundle.
+ * @param  i_chip An OCMB chip.
+ * @return SUCCESS
+ */
+int32_t Initialize( ExtensibleChip * i_chip )
+{
+    i_chip->getDataBundle() = new OcmbDataBundle( i_chip );
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE( explorer_ocmb, Initialize );
+
+//##############################################################################
+//
 //                               OCMB_LFIR
 //
 //##############################################################################
