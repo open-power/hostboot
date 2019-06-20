@@ -35,11 +35,18 @@
 
 // Platform includes
 #include <prdfPlatServices.H>
+#include <prdfMemCeTable.H>
+#include <prdfMemUeTable.H>
 
 #ifdef __HOSTBOOT_MODULE
 
 #include <prdfMemTdFalseAlarm.H>
+#include <prdfMemThresholds.H>
 #include <prdfMemTdCtlr.H>
+
+#ifndef __HOSTBOOT_RUNTIME
+#include <prdfMemIplCeStats.H>
+#endif
 
 #endif // __HOSTBOOT_MODULE
 

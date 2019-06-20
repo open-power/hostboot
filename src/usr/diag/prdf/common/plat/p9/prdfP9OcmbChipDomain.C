@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/p9/prdfP9OcmbChipDomain.H $     */
+/* $Source: src/usr/diag/prdf/common/plat/p9/prdfP9OcmbChipDomain.C $     */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2019                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,49 +23,56 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef __prdfP9OcmbChipDomain_H
-#define __prdfP9OcmbChipDomain_H
+/**
+ * @file prdfP9OcmbChipDomain.C
+ * @brief chip Plug-in code for OCMB domain
+ */
 
-#include <prdfRuleChipDomain.H>
+#include <prdfP9OcmbChipDomain.H>
+
+// Framework includes
+#include <prdfExtensibleChip.H>
+#include <prdfPlatServices.H>
+#include <prdfTrace.H>
+#include <prdfOcmbDataBundle.H>
+
+using namespace TARGETING;
 
 namespace PRDF
 {
 
-class OcmbChipDomain : public RuleChipDomain
+using namespace PlatServices;
+
+#ifdef __HOSTBOOT_RUNTIME
+void OcmbChipDomain::handleRrFo()
 {
-  public:
+    #define PRDF_FUNC "[OcmbChipDomain::handleRrFo] "
 
-    /**
-     * @brief Constructor
-     * @param i_did  The domain ID
-     * @param i_size The projected size of the domain
-     */
-    OcmbChipDomain( DOMAIN_ID i_did, uint32_t i_size = OCMB_DOMAIN_SIZE ) :
-                    RuleChipDomain( i_did, i_size )
-    {}
+    do
+    {
+        uint32_t domainSize = GetSize();
+        // Iterate all OCMBs in the domain.
+        for ( uint32_t i = 0; i < domainSize; ++i )
+        {
+            RuleChip * ocmbChip = LookUp(i);
 
-    /**
-     * @brief  Query for an attention of a specific type in this domain
-     * @param  i_attnType [MACHINE_CHECK | RECOVERABLE | SPECIAL]
-     * @return false
-     * @note   This function will always return false. That way PRD will look
-     *         for the attention via the processor chip.
-     */
-    virtual bool Query( ATTENTION_TYPE i_attnType )
-    {  return false;  }
+            // Start background scrub if required.
+            OcmbDataBundle * ocmbdb = getOcmbDataBundle( ocmbChip );
+            int32_t l_rc = ocmbdb->getTdCtlr()->handleRrFo();
+            if ( SUCCESS != l_rc )
+            {
+                // Let us not fail here. If problem is contained within an OCMB
+                // we will discover it again during normal TD procedures.
+                PRDF_ERR( PRDF_FUNC "handleRrFo() failed: OCMB=0x%08x",
+                          ocmbChip->GetId() );
+                continue; // Keep going.
+            }
+        }
 
-    #ifdef __HOSTBOOT_RUNTIME
+    } while (0);
 
-    /**
-     * @brief Starts memory background scrubbing or VCM procedure for OCMB
-     *        during R/R and F/O if required.
-     */
-    void handleRrFo();
-
-    #endif
-
-};
+    #undef PRDF_FUNC
+}
+#endif
 
 } // end namespace PRDF
-
-#endif /* __prdfP9OcmbChipDomain_H */

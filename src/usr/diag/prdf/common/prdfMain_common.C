@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,7 @@
 
 #ifdef __HOSTBOOT_RUNTIME
 #include <prdfP9McbistDomain.H>
+#include <prdfP9OcmbChipDomain.H>
 #include <prdfCenMbaDomain.H>
 #endif
 
@@ -171,6 +172,10 @@ errlHndl_t noLock_initialize()
     else if ( MODEL_CUMULUS == procModel )
     {
         ((MbaDomain *)systemPtr->GetDomain(MBA_DOMAIN))->handleRrFo();
+    }
+    else if ( MODEL_AXONE == procModel )
+    {
+        ((OcmbChipDomain *)systemPtr->GetDomain(OCMB_DOMAIN))->handleRrFo();
     }
     else
     {
