@@ -427,11 +427,9 @@ ALWAYS_INLINE
 inline uint64_t getDarn()
 {
     register uint64_t rt = 0;
-    register uint64_t  L = 1;  // L=1 conditioned random number
-    asm volatile(".long 0x7C0005E6 | "
-                 "((%0 & 0x1F) << 21)  | "
-                 "((%1 & 0x3)  << 16)" :
-                 "=r" (rt), "=r" (L));
+    asm volatile(".long 0x7C0105E6 | "
+                 "((%0 & 0x1F) << 21)" :
+                 "=r" (rt));
     return rt;
 }
 
