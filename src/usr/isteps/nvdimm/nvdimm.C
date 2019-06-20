@@ -94,7 +94,8 @@ typedef union {
     uint8_t whole;
     struct
     {
-        uint8_t reserved : 2;               // [7:6
+        uint8_t reserved : 1;               // [7]
+        uint8_t unsupported_field : 1;      // [6]
         uint8_t erase_pending : 1;          // [5]
         uint8_t encryption_unlocked : 1;    // [4]
         uint8_t encryption_enabled : 1;     // [3]
@@ -103,6 +104,9 @@ typedef union {
         uint8_t encryption_supported : 1;   // [0]
     } PACKED;
 } encryption_config_status_t;
+
+// Valid bits to check against (skips reserved and unsupported) 
+static constexpr uint8_t ENCRYPTION_STATUS_CHECK_MASK = 0x3F;
 
 // Definition of ENCRYPTION_KEY_VALIDATION -- page 5 offset 0x2A
 typedef union {
@@ -2435,7 +2439,8 @@ bool nvdimm_encrypt_enable(TargetHandleList &i_nvdimmList)
             }
 
             // Need to handle these cases?
-            if (!(l_encStatus.whole == 0x01))
+            if (!((l_encStatus.whole & ENCRYPTION_STATUS_CHECK_MASK)
+                  == 0x01))
             {
                 TRACFCOMP(g_trac_nvdimm, "nvdimm_encrypt_enable() nvdimm[%X] unsupported state 0x%.02X",get_huid(l_nvdimm),l_encStatus.whole);
                 continue;
@@ -2497,7 +2502,8 @@ bool nvdimm_encrypt_enable(TargetHandleList &i_nvdimmList)
                 l_success = false;
                 continue;
             }
-            if (!(l_encStatus.whole == 0x1F))
+            if (!((l_encStatus.whole & ENCRYPTION_STATUS_CHECK_MASK)
+                  == 0x1F))
             {
                 TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_encrypt_enable() nvdimm[%X] encryption enable failed, ENCRYPTION_CONFIG_STATUS=0x%.02X, expected=0x1F ",get_huid(l_nvdimm),l_encStatus.whole);
                 /*@
