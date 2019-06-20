@@ -323,6 +323,7 @@ RUNTIME_MODULES += imageprocs_rt
 RUNTIME_MODULES += $(if $(CONFIG_NVDIMM),nvdimm_rt)
 RUNTIME_MODULES += mss_rt
 RUNTIME_MODULES += expaccess_rt
+RUNTIME_MODULES += mmio_rt
 
 # This is exported so that gcov knows the list of runtime modules to
 # exclude from instrumentation. We can't simply export RUNTIME_MODULES or

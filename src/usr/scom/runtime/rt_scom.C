@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -169,9 +169,9 @@ errlHndl_t sendScomToHyp(DeviceFW::OperationType i_opType,
     do
     {
         // Convert target to something Sapphire understands
-        RT_TARG::rtChipId_t proc_id = 0;
+        RT_TARG::rtChipId_t target_id = 0;
         l_err = RT_TARG::getRtTarget(i_target,
-                                    proc_id);
+                                    target_id);
         if(l_err)
         {
             break;
@@ -185,7 +185,7 @@ errlHndl_t sendScomToHyp(DeviceFW::OperationType i_opType,
             if(i_opType == DeviceFW::READ)
             {
                 l_hostRC =
-                    g_hostInterfaces->scom_read(proc_id,
+                    g_hostInterfaces->scom_read(target_id,
                                                 i_scomAddr,
                                                 io_buffer
                                             );
@@ -193,7 +193,7 @@ errlHndl_t sendScomToHyp(DeviceFW::OperationType i_opType,
             else if (i_opType == DeviceFW::WRITE)
             {
                 l_hostRC =
-                    g_hostInterfaces->scom_write(proc_id,
+                    g_hostInterfaces->scom_write(target_id,
                                                 i_scomAddr,
                                                 io_buffer
                                                 );
@@ -203,8 +203,8 @@ errlHndl_t sendScomToHyp(DeviceFW::OperationType i_opType,
             {
                 TRACFCOMP(g_trac_scom,ERR_MRK
                     "Hypervisor scom read/write failed. "
-                    "rc 0x%X target 0x%llX proc_id 0x%llX addr 0x%llX r/w %d",
-                    l_hostRC, get_huid(i_target), proc_id, i_scomAddr, i_opType);
+                    "rc 0x%X target 0x%llX target_id 0x%llX addr 0x%llX r/w %d",
+                    l_hostRC, get_huid(i_target), target_id, i_scomAddr, i_opType);
 
                 // Use an unused bit in the 64-bit scom range to indicate
                 //  read/write. Cannot use bit0 since that is part of an

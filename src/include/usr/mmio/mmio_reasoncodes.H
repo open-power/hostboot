@@ -41,6 +41,7 @@ namespace MMIO
         MOD_CHECK_OCMB_ERROR         = 0x07,
         MOD_DETERMINE_CALLOUTS       = 0x08,
         MOD_DETERMINE_EXP_CALLOUTS   = 0x09,
+        RT_OCMB_MMIO_PERFORM_OP      = 0x0A,
     };
 
     enum MMIOReasonCode

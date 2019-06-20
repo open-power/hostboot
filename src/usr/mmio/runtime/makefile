@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/mmio/makefile $
+# $Source: src/usr/mmio/runtime/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2019
+# Contributors Listed Below - COPYRIGHT 2019
 # [+] International Business Machines Corp.
 #
 #
@@ -22,25 +22,12 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../..
-MODULE = mmio
-
-SUBDIRS += test.d
-SUBDIRS += runtime.d
-
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/
-EXTRAINCDIR += ${ROOTPATH}/src/import/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
-EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
+HOSTBOOT_RUNTIME = 1
+ROOTPATH = ../../../..
+MODULE = mmio_rt
 
 #include unique object modules
-OBJS += mmio.o
-OBJS += mmio_explorer.o
+OBJS += rt_mmio.o
 
 VPATH += ..
 include $(ROOTPATH)/config.mk

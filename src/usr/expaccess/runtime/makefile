@@ -22,6 +22,7 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+HOSTBOOT_RUNTIME = 1
 
 ROOTPATH = ../../../..
 MODULE = expaccess_rt
@@ -29,6 +30,8 @@ MODULE = expaccess_rt
 SUBDIRS += test.d
 
 include ../expaccess.mk
+
+EXTRAINCDIR += ../
 
 VPATH += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 VPATH += ${ROOTPATH}/src/usr/expaccess/
