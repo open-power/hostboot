@@ -28,6 +28,5 @@ $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH))
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/generic/memory/lib/utils/)
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/ocmb/explorer/procedures/hwp/memory/)
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/ocmb/explorer/procedures/hwp/memory/lib/shared/)
-lib$(PROCEDURE)_DEPLIBS += mss_explorer
 OBJS+=p10_fbc_utils.o
 $(call BUILD_PROCEDURE)
