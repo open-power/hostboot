@@ -916,13 +916,15 @@ errlHndl_t nvdimmRestore(TargetHandleList i_nvdimmList, uint8_t &i_mpipl)
         for (TargetHandleList::iterator it = i_nvdimmList.begin();
              it != i_nvdimmList.end();)
         {
+            // Default state during boot is unarmed, therefore not preserved
+            nvdimmSetStatusFlag(*it, NSTD_ERR_NOBKUP);
+
             l_err = nvdimmValidImage(*it, l_imgValid);
 
             // No reason to run if we can't figure out
             // if there is an image or not
             if (l_err)
             {
-                nvdimmSetStatusFlag(*it, NSTD_ERR_NOPRSV);
                 break;
             }
 
