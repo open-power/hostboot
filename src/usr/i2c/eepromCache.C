@@ -30,6 +30,7 @@
 #include <devicefw/driverif.H>
 #include <errl/errlmanager.H>
 #include <fsi/fsiif.H>
+#include <hwas/hwasPlat.H>
 #include "i2c.H"
 #include "eepromCache.H"
 #include <i2c/i2cif.H>
@@ -64,9 +65,10 @@ uint64_t g_eecachePnorSize  = 0;
 // Global map which is used as a way to quickly look up the virtual address
 // of a given eeprom's cached data in EECACHE section
 // Key   = eepromRecordHeader with unique info filled out
-// Value = A struct of 2 virtual addresses , one points to header address
-//         and other points to the location of the cache
-std::map<eepromRecordHeader, RecordAddresses_t> g_cachedEeproms;
+// Value = A struct of 2 uint64_t virtual addresses ,one points to header address
+//         and other points to the location of the cache, and a byte indicating
+//         if this eeprom's hardware has changed this IPL
+std::map<eepromRecordHeader, EeepromEntryMetaData_t> g_cachedEeproms;
 
 // Any time we access either any of the global variables defined above we want
 // to wrap the call in this mutex to avoid multi-threading issues
@@ -75,7 +77,7 @@ mutex_t g_eecacheMutex = MUTEX_INITIALIZER;
 uint64_t lookupEepromCacheAddr(const eepromRecordHeader& i_eepromRecordHeader)
 {
     uint64_t l_vaddr = 0;
-    std::map<eepromRecordHeader, RecordAddresses_t>::iterator l_it;
+    std::map<eepromRecordHeader, EeepromEntryMetaData_t>::iterator l_it;
 
     // Wrap lookup in mutex because reads are not thread safe
     mutex_lock(&g_eecacheMutex);
@@ -86,29 +88,13 @@ uint64_t lookupEepromCacheAddr(const eepromRecordHeader& i_eepromRecordHeader)
     {
         l_vaddr = l_it->second.cache_entry_address;
     }
-
-    if(l_vaddr == 0)
-    {
-        TRACFCOMP( g_trac_eeprom,
-                   "lookupEepromCacheAddr() failed to find"
-                    " I2CM Huid: 0x%.08X, Port: 0x%.02X,"
-                    " Engine: 0x%.02X, Dev Addr: 0x%.02X,"
-                    " Mux Select: 0x%.02X, Size: 0x%.08X"
-                    " in g_cachedEeproms",
-                    i_eepromRecordHeader.completeRecord.i2c_master_huid,
-                    i_eepromRecordHeader.completeRecord.port,
-                    i_eepromRecordHeader.completeRecord.engine,
-                    i_eepromRecordHeader.completeRecord.devAddr,
-                    i_eepromRecordHeader.completeRecord.mux_select,
-                    i_eepromRecordHeader.completeRecord.cache_copy_size);
-    }
     return l_vaddr;
 }
 
 uint64_t lookupEepromHeaderAddr(const eepromRecordHeader& i_eepromRecordHeader)
 {
     uint64_t l_vaddr = 0;
-    std::map<eepromRecordHeader, RecordAddresses_t>::iterator l_it;
+    std::map<eepromRecordHeader, EeepromEntryMetaData_t>::iterator l_it;
 
     // Wrap lookup in mutex because reads are not thread safe
     mutex_lock(&g_eecacheMutex);
@@ -278,6 +264,58 @@ void printTableOfContents(void)
 
 }
 
+/**
+*
+* @brief Lookup a given i_eepromRecordHeader in the global map of eeprom
+*        caches and check if the eeprom has changed this IPL or not
+*
+* @param[in] i_eepromRecordHeader we want to look up
+*
+* @return bool Return TRUE if eeprom is found in map AND mark_target_changed
+               was set to true for the eeprom entry. Return FALSE otherwise.
+*
+*/
+bool hasEeepromChanged(const eepromRecordHeader & i_eepromRecordHeader)
+{
+    bool l_eepromHasChanged = false;
+
+    // Map accesses are not thread safe, make sure this is always wrapped in mutex
+    mutex_lock(&g_eecacheMutex);
+
+    if(g_cachedEeproms.find(i_eepromRecordHeader) != g_cachedEeproms.end())
+    {
+        l_eepromHasChanged = g_cachedEeproms[i_eepromRecordHeader].mark_target_changed;
+    }
+
+    mutex_unlock(&g_eecacheMutex);
+
+    return l_eepromHasChanged;
+}
+
+/**
+*
+* @brief Lookup a given i_eepromRecordHeader in the global map of eeprom
+*        caches and mark that it has changed this IPL
+*
+* @param[in] i_eepromRecordHeader we want to mark as changed
+*
+* @return void
+*/
+void setEeepromChanged(const eepromRecordHeader & i_eepromRecordHeader)
+{
+
+    // Map accesses are not thread safe, make sure this is always wrapped in mutex
+    mutex_lock(&g_eecacheMutex);
+
+    if(g_cachedEeproms.find(i_eepromRecordHeader) != g_cachedEeproms.end())
+    {
+        g_cachedEeproms[i_eepromRecordHeader].mark_target_changed = true;
+    }
+
+    mutex_unlock(&g_eecacheMutex);
+
+}
+
 bool addEepromToCachedList(const eepromRecordHeader & i_eepromRecordHeader,
                            const uint64_t i_recordHeaderVaddr)
 {
@@ -347,7 +385,10 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
         l_eepromInfo.eepromRole = i_eepromType;
 
         // if the target is present, then this record is valid
-        l_eepromRecordHeader.completeRecord.cached_copy_valid = i_present;
+        if(i_present)
+        {
+            l_eepromRecordHeader.completeRecord.cached_copy_valid = 1;
+        }
 
         // buildEepromRecordHeader will call eepromReadAttributes to fill in l_eepromInfo
         // with info looked up in attributes and also fill in l_eepromRecordHeader
@@ -502,7 +543,8 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
 
                     #ifdef CONFIG_CONSOLE
                         CONSOLE::displayf(EEPROM_COMP_NAME,
-                              "New EEPROM size detected for an existing part, clearing EEPROM cache and performing reconfig loop");
+                              "New EEPROM size detected for an existing part,"
+                              "clearing EEPROM cache and performing reconfig loop");
                     #endif
 
                     INITSERVICE::doShutdown(INITSERVICE::SHUTDOWN_DO_RECONFIG_LOOP);
@@ -514,7 +556,8 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
                         l_recordHeaderToUpdate->completeRecord.internal_offset;
 
                 TRACSSCOMP(g_trac_eeprom,
-                          "cacheEeprom() already found copy for eeprom role %d for target w/ HUID 0x.%08X",
+                          "cacheEeprom() already found copy for eeprom role %d "
+                          "for target w/ HUID 0x.%08X in EECACHE table of contents",
                           i_eepromType , TARGETING::get_huid(i_target));
                 break;
             }
@@ -527,14 +570,24 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
                                   reinterpret_cast<uint64_t>(l_recordHeaderToUpdate)))
         {
             TRACSSCOMP( g_trac_eeprom,
-                      "cacheEeprom() Eeprom w/ Role %d, HUID 0x.%08X added to cached list",
-                      i_eepromType , TARGETING::get_huid(i_target));
+                        "cacheEeprom() Eeprom w/ Role %d, HUID 0x.%08X added to the global map of cached eeproms",
+                        i_eepromType , TARGETING::get_huid(i_target));
         }
         else
         {
+            // If this target's eeprom has already been cached in PNOR and our global map
+            // indicates the cache entry was updated this boot, then  we must also
+            // mark this target associated with the cached eeprom as changed for hwas
+            if( hasEeepromChanged( l_eepromRecordHeader ) )
+            {
+                HWAS::markTargetChanged(i_target);
+            }
             TRACSSCOMP( g_trac_eeprom,
-                      "cacheEeprom() Eeprom w/ Role %d, HUID 0x.%08X already in cached list",
+                      "cacheEeprom() Eeprom w/ Role %d, HUID 0x.%08X already in global map of cached eeproms",
                       i_eepromType , TARGETING::get_huid(i_target));
+
+            // Cache entry has already been updated via another target, just break out
+            break;
         }
 
         // Only check if the cache is in sync with HARDWARE if there is an
@@ -574,11 +627,6 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
                            l_eepromVpd.eepromContentType);
             }
 
-            TRACSSCOMP(g_trac_eeprom,
-                       "cacheEeprom() Target 0x%.8X "
-                       "EEPROM_CONTENT_TYPE 0x%X",
-                       T::get_huid(i_target),
-                       l_eepromContentType);
 
             bool l_isInSync = false;
 
@@ -610,10 +658,27 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
                     reinterpret_cast<uint8_t *>(l_eecacheSectionHeaderPtr) +
                     l_eepromRecordHeader.completeRecord.internal_offset;
 
-                 memset( l_internalSectionAddr, 0xFF ,
+                memset( l_internalSectionAddr, 0xFF ,
                         (l_recordHeaderToUpdate->completeRecord.cache_copy_size * KILOBYTE));
 
-                 l_updateContents = false;
+                l_updateContents = false;
+
+                setIsValidCacheEntry(l_eepromRecordHeader, false);
+
+                TRACFCOMP( g_trac_eeprom, "Detected Master 0x%.08X"
+                           " Engine 0x%.02X Port 0x%.02X"
+                           " MuxSelect 0x%.02X DevAddr 0x%.02X"
+                           " no longer present, clearing cache and marking cache as invalid",
+                           l_recordHeaderToUpdate->completeRecord.i2c_master_huid,
+                           l_recordHeaderToUpdate->completeRecord.engine,
+                           l_recordHeaderToUpdate->completeRecord.port,
+                           l_recordHeaderToUpdate->completeRecord.mux_select,
+                           l_recordHeaderToUpdate->completeRecord.devAddr);
+
+                setEeepromChanged(l_eepromRecordHeader);
+                // We have cleared the cache entry, this indicates we have found a part has been removed.
+                // Mark that the target is changed in hwas.
+                HWAS::markTargetChanged(i_target);
             }
 
             // If target is present there is nothing in the
@@ -630,14 +695,33 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
             l_updateContents = false;
             l_updateHeader = false;
         }
+        // The check below makes sure that is isnt a new entry, because
+        // new entries do not have internal_offset set in header.
+        // If there is a matching header entry in PNOR marked 'invalid'
+        // but we now see the target as present, this indicates a replacement
+        // part has been added where a part was removed
+        else if(l_recordHeaderToUpdate->completeRecord.internal_offset != UNSET_INTERNAL_OFFSET_VALUE)
+        {
+            TRACFCOMP(g_trac_eeprom, "cacheEeprom() Detected replacement of a part"
+                      " Master 0x%.08X Engine 0x%.02X"
+                      " Port 0x%.02X MuxSelect 0x%.02X DevAddr 0x%.02X"
+                      " that was previously removed, we will update the cache with new part's eeproms contents",
+                      l_recordHeaderToUpdate->completeRecord.i2c_master_huid,
+                      l_recordHeaderToUpdate->completeRecord.engine,
+                      l_recordHeaderToUpdate->completeRecord.port,
+                      l_recordHeaderToUpdate->completeRecord.mux_select,
+                      l_recordHeaderToUpdate->completeRecord.devAddr);
+        }
 
         // Above we have determined whether the contents of the eeprom at
         // hand need to have their contents updated. Only do the following
         // steps that update the eeprom's cached data if we were told to do so.
-        if(l_updateContents )
+        if( l_updateContents )
         {
             assert(l_recordHeaderToUpdateIndex != INVALID_EEPROM_INDEX,
                     "More than MAX_EEPROMS_VERSION_1 in system XML");
+
+            TRACFCOMP( g_trac_eeprom, "cacheEeprom() updating cache entry");
 
             void * l_tmpBuffer;
 
@@ -704,13 +788,18 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
                 break;
             }
 
-            // If cache copy was not valid before, it is now valid, we must update the header
-            if (!l_recordHeaderToUpdate->completeRecord.cached_copy_valid)
-            {
-                  l_eepromRecordHeader.completeRecord.cached_copy_valid = 0x01;
-                  l_updateHeader = true;
-            }
-
+            // Set mark_target_changed and cached_copy_valid and update set updateHeader
+            // Since we have copied stuff in the cache is valid, and been updated.
+            // Even if this is a replacement ( cached_copy_valid was already 1) we
+            // must set mark_target_changed so just always update the header
+            setEeepromChanged(l_eepromRecordHeader);
+            // We will update header in PNOR below so no need to call
+            // setIsValidCacheEntry right here
+            l_eepromRecordHeader.completeRecord.cached_copy_valid = 1;
+            l_updateHeader = true;
+            // We have updated the cache entry, this indicates we have found a "new" part.
+            // Mark that the target is changed in hwas.
+            HWAS::markTargetChanged(i_target);
         }
 
         // Above we have determined whether the header entry for the eeprom at
@@ -718,6 +807,7 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
         // the eeprom's header entry if we were told to do so.
         if(l_updateHeader)
         {
+            TRACFCOMP( g_trac_eeprom, "cacheEeprom() updating header entry");
             TRACDBIN( g_trac_eeprom, "cacheEeprom: l_eecacheSectionHeaderPtr currently ",
                       l_eecacheSectionHeaderPtr,
                       sizeof(eecacheSectionHeader));
@@ -832,31 +922,43 @@ errlHndl_t setIsValidCacheEntry(const TARGETING::Target * i_target,
 {
     errlHndl_t l_errl = nullptr;
     eepromRecordHeader l_eepromRecordHeader;
-    eepromRecordHeader * l_eepromRecordHeaderToUpdate;
-    std::map<eepromRecordHeader, RecordAddresses_t>::iterator l_headerMapIterator;
-
     eeprom_addr_t l_eepromInfo;
-    l_eepromInfo.eepromRole = i_eepromRole;
 
     do{
 
-        TRACFCOMP( g_trac_eeprom, ENTER_MRK"setIsValidCacheEntry() "
+        TRACDCOMP( g_trac_eeprom, ENTER_MRK"setIsValidCacheEntry() "
                     "Target HUID 0x%.08X  Eeprom Role = %d  Enter",
                     TARGETING::get_huid(i_target), l_eepromInfo.eepromRole);
 
-        // Take the input paramters and use them to build a eeprom record header we can search with
-        l_errl = buildEepromRecordHeader(const_cast<TARGETING::Target *>(i_target),
-                                         l_eepromInfo,
-                                         l_eepromRecordHeader);
+        l_eepromInfo.eepromRole = i_eepromRole;
+        l_errl = buildEepromRecordHeader(const_cast<TARGETING::Target *>(i_target), l_eepromInfo, l_eepromRecordHeader);
 
         if(l_errl)
         {
             break;
         }
 
+        l_errl = setIsValidCacheEntry(l_eepromRecordHeader, i_isValid);
+
+    }while(0);
+
+    return l_errl;
+}
+
+errlHndl_t setIsValidCacheEntry(const eepromRecordHeader& i_eepromRecordHeader, bool i_isValid)
+{
+    errlHndl_t l_errl = nullptr;
+    eepromRecordHeader * l_eepromRecordHeaderToUpdate;
+    std::map<eepromRecordHeader, EeepromEntryMetaData_t>::iterator l_headerMapIterator;
+
+    do{
+
+        TRACDCOMP( g_trac_eeprom, ENTER_MRK"setIsValidCacheEntry() ");
+
+
         // Find the address of the header entry in the table of contents of the EECACHE pnor section
         l_eepromRecordHeaderToUpdate =
-            reinterpret_cast<eepromRecordHeader *>(lookupEepromHeaderAddr(l_eepromRecordHeader));
+            reinterpret_cast<eepromRecordHeader *>(lookupEepromHeaderAddr(i_eepromRecordHeader));
 
         if(l_eepromRecordHeaderToUpdate == 0)
         {
@@ -880,22 +982,22 @@ errlHndl_t setIsValidCacheEntry(const TARGETING::Target * i_target,
                               EEPROM_INVALIDATE_CACHE,
                               EEPROM_CACHE_NOT_FOUND_IN_MAP,
                               TWO_UINT32_TO_UINT64(
-                                  l_eepromRecordHeader.completeRecord.i2c_master_huid,
+                                  i_eepromRecordHeader.completeRecord.i2c_master_huid,
                                   TWO_UINT16_TO_UINT32(
                                       TWO_UINT8_TO_UINT16(
-                                          l_eepromRecordHeader.completeRecord.port,
-                                          l_eepromRecordHeader.completeRecord.engine),
+                                          i_eepromRecordHeader.completeRecord.port,
+                                          i_eepromRecordHeader.completeRecord.engine),
                                       TWO_UINT8_TO_UINT16(
-                                          l_eepromRecordHeader.completeRecord.devAddr,
-                                          l_eepromRecordHeader.completeRecord.mux_select))),
-                              l_eepromRecordHeader.completeRecord.cache_copy_size,
+                                          i_eepromRecordHeader.completeRecord.devAddr,
+                                          i_eepromRecordHeader.completeRecord.mux_select))),
+                              i_eepromRecordHeader.completeRecord.cache_copy_size,
                               ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
               break;
         }
 
         // Ensure that information at the address we just looked up matches the record we built up
         if( memcmp(&l_eepromRecordHeaderToUpdate->uniqueRecord.uniqueID,
-                   &l_eepromRecordHeader.uniqueRecord.uniqueID,
+                   &i_eepromRecordHeader.uniqueRecord.uniqueID,
                    NUM_BYTE_UNIQUE_ID ) != 0 )
         {
               TRACFCOMP(g_trac_eeprom,ERR_MRK"setIsValidCacheEntry:  Attempting to invalidate cache for an"
@@ -917,15 +1019,15 @@ errlHndl_t setIsValidCacheEntry(const TARGETING::Target * i_target,
                               EEPROM_INVALIDATE_CACHE,
                               EEPROM_CACHE_NOT_FOUND_IN_PNOR,
                               TWO_UINT32_TO_UINT64(
-                                  l_eepromRecordHeader.completeRecord.i2c_master_huid,
+                                  i_eepromRecordHeader.completeRecord.i2c_master_huid,
                                   TWO_UINT16_TO_UINT32(
                                       TWO_UINT8_TO_UINT16(
-                                          l_eepromRecordHeader.completeRecord.port,
-                                          l_eepromRecordHeader.completeRecord.engine),
+                                          i_eepromRecordHeader.completeRecord.port,
+                                          i_eepromRecordHeader.completeRecord.engine),
                                       TWO_UINT8_TO_UINT16(
-                                          l_eepromRecordHeader.completeRecord.devAddr,
-                                          l_eepromRecordHeader.completeRecord.mux_select))),
-                              l_eepromRecordHeader.completeRecord.cache_copy_size,
+                                          i_eepromRecordHeader.completeRecord.devAddr,
+                                          i_eepromRecordHeader.completeRecord.mux_select))),
+                              i_eepromRecordHeader.completeRecord.cache_copy_size,
                               ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
               break;
         }

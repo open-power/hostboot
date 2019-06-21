@@ -124,7 +124,10 @@ union eepromRecordHeader
         uint32_t cache_copy_size;   // Size of data saved in cache (in KB)
         uint32_t internal_offset;   // offset from start of EECACHE section where cached
                                     // data exists
-        uint8_t  cached_copy_valid; // if == 0 , cached data is invalid
+        uint8_t  cached_copy_valid : 1,   // This bit is set when we think the contents of the
+                                          // cache is valid.
+                 unused            : 7;
+
     } PACKED completeRecord;
 
     struct uniqueRecord
@@ -238,16 +241,24 @@ struct EepromInfo_t
 /**
  * @brief Define a set of information that describes the
           different virtual addresses associated with a given
-          cache entry
+          cache entry along with a byte telling us if there has been
+          an update detected on the eeprom this boot
  */
-struct RecordAddresses_t
+struct EeepromEntryMetaData_t
 {
     uint64_t header_entry_address;
     uint64_t cache_entry_address;
+    uint8_t  mark_target_changed;  // This byte is set after we detect a target has changed.
+                                   // Either removed, replaced, or added we don't care. But
+                                   // we need to use this bits so future targets associated
+                                   // with this eeprom can know they need to notify HWAS that
+                                   // they have been changed. This bit should get cleared after
+                                   // all eeproms have been cached.
 
-    RecordAddresses_t()
+    EeepromEntryMetaData_t()
       : header_entry_address(0),
-        cache_entry_address(0)
+        cache_entry_address(0),
+        mark_target_changed(0)
     {
     }
 };

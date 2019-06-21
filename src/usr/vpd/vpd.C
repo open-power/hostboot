@@ -786,9 +786,12 @@ errlHndl_t ensureEepromCacheIsInSync(TARGETING::Target           * i_target,
             TRACFCOMP(g_trac_vpd,
                       "VPD::ensureEepromCacheIsInSync: CACHE_PN/SN != HARDWARE_PN/SN,CACHE must be loaded from HARDWARE for target %.8X",
                       TARGETING::get_huid(i_target));
-
+#ifndef CONFIG_SUPPORT_EEPROM_CACHING
             //Set the targets as changed since the p/n's don't match
             HWAS::markTargetChanged(i_target);
+#else
+            //No need to mark target changed here, it will be handled by eecache code
+#endif
         }
 
     } while(0);

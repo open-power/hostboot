@@ -151,6 +151,21 @@ errlHndl_t setIsValidCacheEntry(const TARGETING::Target * i_target,
 
 /**
 *
+* @brief Update the record entry in the Table of Contents of the EECACHE
+*        section of pnor to either mark the contents of the cache to be
+*        valid or invalid
+*
+* @param[in] i_eepromRecordHeader eepromRecord oject already filled in (including eepromRole)
+*
+* @param[in] i_isValid    Mark eeprom cache valid or invalid ? 
+*
+* @return errlHndl_t - nullptr if successful, otherwise a pointer to the
+*       error log.
+*
+*/
+errlHndl_t setIsValidCacheEntry(const eepromRecordHeader& i_eepromRecordHeader, bool i_isValid);
+/**
+*
 * @brief Print the info found in the Table of Contents of the EECACHE
 *        section of pnor to trace buffer
 *

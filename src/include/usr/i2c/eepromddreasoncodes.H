@@ -90,7 +90,7 @@ enum eepromReasonCode
                                                                        // been installed on the system.
     EEPROM_CACHE_NOT_FOUND_IN_MAP           = EEPROM_COMP_ID | 0x0F,   // An entry we thought would be in the global map that keeps track of
                                                                        // what eeproms have been cached was not found
-    EEPROM_CACHE_NOT_FOUND_IN_PNOR           = EEPROM_COMP_ID | 0x10,  // An entry we thought would be in the the EECACHE section of PNOR seems
+    EEPROM_CACHE_NOT_FOUND_IN_PNOR          = EEPROM_COMP_ID | 0x10,   // An entry we thought would be in the the EECACHE section of PNOR seems
                                                                        // to be missing
 };
 
