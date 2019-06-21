@@ -246,17 +246,5 @@ enum min_max_domains : uint64_t
     MAX1_MIN0 = 0b100,
 };
 
-
-enum class shmoo_edge : std::size_t
-{
-    LEFT,
-    RIGHT
-};
-
-enum visual_max : uint64_t
-{
-    MAX_VISUAL_VALUE = 9999
-};
-
 } // namespace mss
 #endif
