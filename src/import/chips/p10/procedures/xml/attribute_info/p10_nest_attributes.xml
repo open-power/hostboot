@@ -25,6 +25,18 @@
 <attributes>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_OMI_REFCLOCK_SWIZZLE</id>
+  <targetType>TARGET_TYPE_OMI</targetType>
+  <description>
+      Define OMI Ref clock/Swizzle for OCMB/Explorer..
+      Mapper from OMI unit id -> ROOT CNTL 7 refclk drive enable bit
+      consumer: p10_ocmb_enable
+      </description>
+  <valueType>uint8</valueType>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
@@ -226,6 +238,23 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_IOHS_FABRIC_LANE_REVERSAL</id>
+  <targetType>TARGET_TYPE_IOHS</targetType>
+  <description>
+     Specify the lane reversal for an IOHS target.
+     bit 0: overall tx lane reversal (18 tx lane reversal)
+            For link pairs only, not for 50G
+     bit 1: link 0 rx lane reversal (9 rx lanes)
+     bit 2: link 0 tx lane reversal (9 tx lanes)
+     bit 3: link 1 rx lane reversal (9 rx lanes)
+     bit 4: link 1 tx lane reversal (9 tx lanes)
+  </description>
+  <valueType>uint8</valueType>
+  <writeable/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_PROC_FABRIC_LINK_ACTIVE</id>
   <targetType>TARGET_TYPE_IOHS</targetType>
   <description>
@@ -277,6 +306,25 @@
   </enum>
   <writeable/>
   <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_LINK_SPEED</id>
+  <targetType>TARGET_TYPE_IOHS</targetType>
+  <description>
+    Indicates the bitrate for the link.
+  </description>
+  <valueType>uint16</valueType>
+  <enum>
+    25G  = 25,
+    32G  = 32,
+    50G  = 50
+  </enum>
+  <platInit/>
+  <default>
+    25G
+  </default>
+  <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
