@@ -1,0 +1,347 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/import/chips/p10/procedures/hwp/io/p10_io_init_start_ppe.C $ */
+/*                                                                        */
+/* OpenPOWER HostBoot Project                                             */
+/*                                                                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
+/*                                                                        */
+/* Licensed under the Apache License, Version 2.0 (the "License");        */
+/* you may not use this file except in compliance with the License.       */
+/* You may obtain a copy of the License at                                */
+/*                                                                        */
+/*     http://www.apache.org/licenses/LICENSE-2.0                         */
+/*                                                                        */
+/* Unless required by applicable law or agreed to in writing, software    */
+/* distributed under the License is distributed on an "AS IS" BASIS,      */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        */
+/* implied. See the License for the specific language governing           */
+/* permissions and limitations under the License.                         */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+///
+/// @file p10_io_init_start_ppe.C
+/// @brief Start PHY PPE's and begin bringing up configured lanes/links
+///-----------------------------------------------------------------------------
+/// *HW HW Maintainer: Chris Steffen <cwsteffen@us.ibm.com>
+/// *HW FW Maintainer: Ilya Smirnov <ismirno@us.ibm.com>
+/// *HW Consumed by  : HB
+///-----------------------------------------------------------------------------
+
+#include <p10_io_init_start_ppe.H>
+#include <p10_io_ppe_lib.H>
+#include <p10_io_ppe_regs.H>
+#include <p10_scom_pauc_0.H>
+#include <p10_scom_iohs_8.H>
+#include <p10_io_lib.H>
+
+///
+/// @brief Setup lane reversal as needed prior to init.
+///
+/// @param[in] i_target Chip target to setup
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p10_io_init_lane_reversal(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    FAPI_DBG("Begin");
+    fapi2::buffer<uint64_t> l_data;
+    using namespace scomt::iohs;
+    auto l_iohs_targets = i_target.getChildren<fapi2::TARGET_TYPE_IOHS>();
+
+    for (auto l_iohs_target : l_iohs_targets)
+    {
+        fapi2::ATTR_IOHS_FABRIC_LANE_REVERSAL_Type l_lane_reversal;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_FABRIC_LANE_REVERSAL, l_iohs_target, l_lane_reversal),
+                 "Error from FAPI_ATTR_GET (ATTR_IOHS_FABRIC_LANE_REVERSAL)");
+        FAPI_TRY(GET_DLP_OPTICAL_CONFIG(l_iohs_target, l_data));
+        SET_DLP_OPTICAL_CONFIG_FULL_18_TX_LANE_SWAP((l_lane_reversal & 0x80) >> 7, l_data);
+        SET_DLP_OPTICAL_CONFIG_LINK0_RX_LANE_SWAP((l_lane_reversal & 0x40) >> 6, l_data);
+        SET_DLP_OPTICAL_CONFIG_LINK0_TX_LANE_SWAP((l_lane_reversal & 0x20) >> 5, l_data);
+        SET_DLP_OPTICAL_CONFIG_LINK1_RX_LANE_SWAP((l_lane_reversal & 0x10) >> 4, l_data);
+        SET_DLP_OPTICAL_CONFIG_LINK1_TX_LANE_SWAP((l_lane_reversal & 0x08) >> 3, l_data);
+        FAPI_TRY(PUT_DLP_OPTICAL_CONFIG(l_iohs_target, l_data));
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+///
+/// @brief Flushes the fw_regs cached values
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p10_io_init_flush_fw_regs()
+{
+    FAPI_DBG("Begin");
+
+    for (auto i = 0; i < P10_IO_LIB_NUMBER_OF_THREADS; i++)
+    {
+        FAPI_TRY(p10_io_ppe_fw_regs[i].flush());
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+///
+/// @brief Setup threads, gcr_ids, serdies, number of lanes, and start ppes
+///
+/// @param[in] i_target Chip target to start
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p10_io_init_img_regs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    FAPI_DBG("Begin");
+    fapi2::buffer<uint64_t> l_data = 0;
+    using namespace scomt::pauc;
+    auto l_pauc_targets = i_target.getChildren<fapi2::TARGET_TYPE_PAUC>();
+
+    for (auto l_pauc_target : l_pauc_targets)
+    {
+        auto l_iohs_targets = l_pauc_target.getChildren<fapi2::TARGET_TYPE_IOHS>();
+        auto l_omic_targets = l_pauc_target.getChildren<fapi2::TARGET_TYPE_OMIC>();
+
+        //Note the supervisor thread does not +1 to the ppe_num_threads. (as of 7/9/2019)
+        FAPI_TRY(p10_io_ppe_ppe_num_threads.putData(l_pauc_target, P10_IO_LIB_NUMBER_OF_THREADS));
+
+        //Set the GCR for all threads and set stop_thread for all of them
+        //Bellow we turn off stop_thread for configured
+        for (int l_gcr_thrd = 0; l_gcr_thrd < P10_IO_LIB_NUMBER_OF_THREADS; l_gcr_thrd++)
+        {
+            //Set the gcr bus id for this thread.
+            FAPI_TRY(p10_io_ppe_fw_gcr_bus_id[l_gcr_thrd].putData(l_pauc_target, l_gcr_thrd));
+            FAPI_TRY(p10_io_ppe_fw_stop_thread[l_gcr_thrd].putData(l_pauc_target, 1));
+        }
+
+
+        for (auto l_iohs_target : l_iohs_targets)
+        {
+            fapi2::ATTR_IOHS_LINK_TRAIN_Type l_link_train;
+            fapi2::ATTR_LINK_SPEED_Type l_link_speed;
+            int l_num_lanes = P10_IO_LIB_NUMBER_OF_IOHS_LANES;
+            int l_thread = 0;
+
+            FAPI_TRY(p10_io_get_iohs_thread(l_iohs_target, l_thread));
+            FAPI_DBG("Setting number of lanes and turning off stop_thread for IOHS thread %d", l_thread);
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_TRAIN, l_iohs_target, l_link_train),
+                     "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_TRAIN)");
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_LINK_SPEED, l_iohs_target, l_link_speed),
+                     "Error from FAPI_ATTR_GET (ATTR_LINK_SPEED)");
+
+            if (l_link_speed == fapi2::ENUM_ATTR_LINK_SPEED_50G || l_link_train != fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH)
+            {
+                l_num_lanes /= 2;
+            }
+
+            //Set the number of lanes
+            FAPI_TRY(p10_io_ppe_fw_num_lanes[l_thread].putData(l_pauc_target, l_num_lanes));
+
+            //Set the serdes_16_to_1
+            FAPI_TRY(p10_io_ppe_fw_serdes_16_to_1_mode[l_thread].putData(l_pauc_target, P10_IO_PPE_IOHS_SERDES_16_TO_1));
+
+            //Turn off stop_thread
+            FAPI_TRY(p10_io_ppe_fw_stop_thread[l_thread].putData(l_pauc_target, 0));
+
+        }
+
+        for (auto l_omic_target : l_omic_targets)
+        {
+            int l_thread;
+            auto l_omi_targets = l_omic_target.getChildren<fapi2::TARGET_TYPE_OMI>();
+            int l_num_lanes = l_omi_targets.size() * P10_IO_LIB_NUMBER_OF_OMI_LANES;
+
+            FAPI_TRY(p10_io_get_omic_thread(l_omic_target, l_thread));
+            FAPI_DBG("Setting number of lanes and turning off stop_thread for OMIC thread %d", l_thread);
+
+            //Set the number of lanes
+            FAPI_TRY(p10_io_ppe_fw_num_lanes[l_thread].putData(l_pauc_target, l_num_lanes));
+
+            //Set the serdes_16_to_1
+            FAPI_TRY(p10_io_ppe_fw_serdes_16_to_1_mode[l_thread].putData(l_pauc_target, P10_IO_PPE_OMIC_SERDES_16_TO_1));
+
+            //Turn off stop_thread
+            FAPI_TRY(p10_io_ppe_fw_stop_thread[l_thread].putData(l_pauc_target, 0));
+        }
+
+        // Flush the data to the sram
+        FAPI_TRY(p10_io_ppe_img_regs.flush());
+        FAPI_TRY(p10_io_init_flush_fw_regs());
+
+        // Start the ppe's
+        FAPI_TRY(PREP_PHY_PPE_WRAP_XIXCR(l_pauc_target));
+        SET_PHY_PPE_WRAP_XIXCR_PPE_XIXCR_XCR(6, l_data); //Hard reset
+        FAPI_TRY(PUT_PHY_PPE_WRAP_XIXCR(l_pauc_target, l_data));
+
+        SET_PHY_PPE_WRAP_XIXCR_PPE_XIXCR_XCR(2, l_data); //Resume
+        FAPI_TRY(PUT_PHY_PPE_WRAP_XIXCR(l_pauc_target, l_data));
+
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+///
+/// @brief Set the ext_cmd_req bits for reg_init, dccal, power on, and fifo init and
+///        write them to the chip.
+///
+/// @param[in] i_target Chip target to work with
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p10_io_ext_req_all(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    FAPI_DBG("Begin");
+    auto l_pauc_targets = i_target.getChildren<fapi2::TARGET_TYPE_PAUC>();
+
+    //TODO: REMOVE ME WHEN DCC/ZCAL WORKING
+    for (auto l_pauc_target : l_pauc_targets)
+    {
+        //Set the reg_init bit
+        for (auto i = 0; i < P10_IO_LIB_NUMBER_OF_THREADS; i++)
+        {
+            FAPI_TRY(p10_io_ppe_rx_dc_enable_dcc[i].putData(l_pauc_target, 0, true));
+            FAPI_TRY(p10_io_ppe_rx_dc_enable_zcal[i].putData(l_pauc_target, 0, true));
+        }
+    }
+
+    //TODO FIXME << REMOVE WHEN DCC/ZCAL WORKING
+
+    for (auto l_pauc_target : l_pauc_targets)
+    {
+        //Set the reg_init bit
+        for (auto i = 0; i < P10_IO_LIB_NUMBER_OF_THREADS; i++)
+        {
+            FAPI_TRY(p10_io_ppe_ext_cmd_req_hw_reg_init_pg[i].putData(l_pauc_target, 1));
+            //TODO: Add zcal once implemented/documented
+            FAPI_TRY(p10_io_ppe_ext_cmd_req_dccal_pl[i].putData(l_pauc_target, 1));
+        }
+    }
+
+    //Write cached values to the chip
+    FAPI_TRY(p10_io_init_flush_fw_regs());
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+///
+/// @brief Set the lane bits for each target
+///
+/// @param[in] i_pauc_target The PAUC to to set lane bits for
+/// @param[in] i_lanes A vector of lanes configured
+/// @param[in] i_thread The thread to set lane bits for
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p10_io_ext_req_set_lane_bits(const fapi2::Target<fapi2::TARGET_TYPE_PAUC>& i_pauc_target,
+        const std::vector<int>& i_lanes,
+        const int& i_thread)
+{
+    FAPI_DBG("Begin");
+    fapi2::buffer<uint64_t> l_lane_bits_00_15;
+    fapi2::buffer<uint64_t> l_lane_bits_16_31;
+
+    //Set bits for each lane
+    for (int l_lane : i_lanes)
+    {
+        if (l_lane < 16)
+        {
+            l_lane_bits_00_15.setBit(48 + l_lane);
+        }
+        else
+        {
+            l_lane_bits_16_31.setBit(48 + (l_lane - 16));
+        }
+    }
+
+    FAPI_TRY(p10_io_ppe_ext_cmd_lanes_00_15[i_thread]
+             .putData(i_pauc_target, l_lane_bits_00_15));
+    FAPI_TRY(p10_io_ppe_ext_cmd_lanes_16_31[i_thread]
+             .putData(i_pauc_target, l_lane_bits_16_31));
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+///
+/// @brief Set the lane bits for each target and write them to the chip
+///
+/// @param[in] i_target Chip target to work with
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p10_io_ext_req_lanes(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    FAPI_DBG("Begin");
+    auto l_pauc_targets = i_target.getChildren<fapi2::TARGET_TYPE_PAUC>();
+
+    for (auto l_pauc_target : l_pauc_targets)
+    {
+        auto l_iohs_targets = l_pauc_target.getChildren<fapi2::TARGET_TYPE_IOHS>();
+        auto l_omic_targets = l_pauc_target.getChildren<fapi2::TARGET_TYPE_OMIC>();
+
+        for (auto l_iohs_target : l_iohs_targets)
+        {
+            std::vector<int> l_lanes;
+            int l_thread = 0;
+
+            FAPI_TRY(p10_io_get_iohs_thread(l_iohs_target, l_thread));
+            FAPI_DBG("Starting DCCAL for IOHS thread %d", l_thread);
+
+            FAPI_TRY(p10_io_get_iohs_lanes(l_iohs_target, l_lanes));
+
+            FAPI_TRY(p10_io_ext_req_set_lane_bits(l_pauc_target, l_lanes, l_thread));
+        }
+
+        for (auto l_omic_target : l_omic_targets)
+        {
+            std::vector<int> l_lanes;
+            int l_thread = 0;
+
+            FAPI_TRY(p10_io_get_omic_thread(l_omic_target, l_thread));
+            FAPI_DBG("Starting DCCAL for OMIC thread %d", l_thread);
+
+            FAPI_TRY(p10_io_get_omic_lanes(l_omic_target, l_lanes));
+
+            FAPI_TRY(p10_io_ext_req_set_lane_bits(l_pauc_target, l_lanes, l_thread));
+        }
+
+    }
+
+    //Write cached values to the chip
+    FAPI_TRY(p10_io_init_flush_fw_regs());
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+///
+/// @brief Setup PHY PPE registers and start reg init, dccal, lane power-up and fifo init
+///
+/// @param[in] i_target Chip target to start
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p10_io_init_start_ppe(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    FAPI_TRY(p10_io_init_lane_reversal(i_target));
+
+    FAPI_TRY(p10_io_init_img_regs(i_target));
+
+    //Wait for reset to finish
+    //FIXME: is there a way to tell when it's done?
+    fapi2::delay(100, 8000000);
+
+    FAPI_TRY(p10_io_ext_req_lanes(i_target));
+    FAPI_TRY(p10_io_ext_req_all(i_target));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
