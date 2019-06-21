@@ -250,20 +250,21 @@ class MemDqBitmap
 
 /**
  * @brief  Sets the inputted dram in DRAM repairs VPD.
- * @param  i_chip MBA or MCA chip.
+ * @param  i_trgt MBA, MCA, MEM_PORT, or OCMB chip.
  * @param  i_rank Target rank.
  * @return Non-SUCCESS if an internal function fails. SUCCESS otherwise.
  */
-uint32_t setDramInVpd( ExtensibleChip * i_chip, const MemRank & i_rank,
+uint32_t setDramInVpd( TARGETING::TargetHandle_t i_trgt, const MemRank & i_rank,
                        MemSymbol i_symbol );
 
 /**
  * @brief  Clears the inputted dram in DRAM repairs VPD.
- * @param  i_chip MBA or MCA chip.
+ * @param  i_trgt MBA, MCA, MEM_PORT, or OCMB chip.
  * @param  i_rank Target rank.
  * @return Non-SUCCESS if an internal function fails. SUCCESS otherwise.
  */
-uint32_t clearDramInVpd( ExtensibleChip * i_chip, const MemRank & i_rank,
+uint32_t clearDramInVpd( TARGETING::TargetHandle_t i_trgt,
+                         const MemRank & i_rank,
                          MemSymbol i_symbol );
 
 } // end namespace PRDF
