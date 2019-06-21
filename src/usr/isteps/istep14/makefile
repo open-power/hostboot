@@ -29,16 +29,19 @@ PROCEDURE_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
 AXONE_PROCEDURE_PATH = ${ROOTPATH}/src/import/chips/p9a/procedures
 CEN_PROC_PATH = ${ROOTPATH}/src/import/chips/centaur/procedures
 EXP_COMMON_PATH = ${ROOTPATH}/src/import/chips/ocmb/explorer/common
+EXPLORER_HWP_PATH  = ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 
 #Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/generic/memory/lib
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
+EXTRAINCDIR += ${ROOTPATH}/src/import/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/nest
-EXTRAINCDIR += ${ROOTPATH}/src/import/
 EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/lib/eff_config/
@@ -53,6 +56,7 @@ EXTRAINCDIR += ${EXP_COMMON_PATH}/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils
 EXTRAINCDIR += ${AXONE_PROCEDURE_PATH}/hwp/memory/
+EXTRAINCDIR += ${EXPLORER_HWP_PATH}
 
 OBJS += call_mss_memdiag.o
 OBJS += call_mss_thermal_init.o
@@ -108,6 +112,9 @@ VPATH    += ${CEN_PROC_PATH}/hwp/memory/
 VPATH    += ${PROCEDURE_PATH}/hwp/memory/lib/dimm/ddr4/
 
 # Axone vs non-Axone specific HWP
+VPATH += $(if $(CONFIG_AXONE),${EXPLORER_HWP_PATH},)
 OBJS += $(if $(CONFIG_AXONE),p9a_throttle_sync.o,p9_throttle_sync.o)
+OBJS += $(if $(CONFIG_AXONE),exp_mss_thermal_init.o,)
 
 include ${ROOTPATH}/config.mk
+

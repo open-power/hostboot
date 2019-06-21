@@ -39,7 +39,7 @@
 #include    <fapi2/plat_hwp_invoker.H>
 
 #ifdef CONFIG_AXONE
-    //@TODO RTC:195557 #include    <exp_thermal_init.H>
+   #include    <exp_mss_thermal_init.H>
     #include    <chipids.H> // for EXPLORER ID
     #include    <p9a_throttle_sync.H>
 #else
@@ -230,11 +230,11 @@ void axone_call_mss_thermal_init(IStepError & io_istepError)
 
             // Dump current run on target
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "Running exp_thermal_init HWP on target HUID %.8X",
+                "Running exp_mss_thermal_init HWP on target HUID %.8X",
                 TARGETING::get_huid(l_ocmb_target));
 
             // call the HWP with each fapi2::Target
-            // @todo RTC 195557 FAPI_INVOKE_HWP(l_err, exp_thermal_init, l_fapi_ocmb_target);
+            FAPI_INVOKE_HWP(l_err, exp_mss_thermal_init, l_fapi_ocmb_target);
         }
         else
         {
@@ -247,7 +247,7 @@ void axone_call_mss_thermal_init(IStepError & io_istepError)
         if (l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR 0x%.8X: exp_thermalinit HWP returns error",
+                      "ERROR 0x%.8X: exp_mss_thermal_init HWP returns error",
                       l_err->reasonCode());
 
             // capture the target data in the elog
@@ -265,7 +265,7 @@ void axone_call_mss_thermal_init(IStepError & io_istepError)
         else if (chipId == POWER_CHIPID::EXPLORER_16)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                  "SUCCESS running exp_thermalinit HWP on target HUID %.8X",
+                  "SUCCESS running exp_mss_thermal_init HWP on target HUID %.8X",
                   TARGETING::get_huid(l_ocmb_target));
         }
     } // end OCMB loop
@@ -274,7 +274,7 @@ void axone_call_mss_thermal_init(IStepError & io_istepError)
 void axone_call_mss_thermal_init(IStepError & io_istepError)
 {
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-              "Error: Trying to call 'exp_thermal_init' but Axone code is not compiled in");
+              "Error: Trying to call 'exp_mss_thermal_init' but Axone code is not compiled in");
     assert(0, "Calling wrong Model's HWPs");
 }
 #endif
