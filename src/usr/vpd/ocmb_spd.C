@@ -209,7 +209,9 @@ errlHndl_t ocmbFetchData(T::TargetHandle_t    i_target,
     errlHndl_t err = nullptr;
 
     TRACSSCOMP(g_trac_spd,
-               ENTER_MRK"ocmbFetchData()" );
+               ENTER_MRK"ocmbFetchData()"
+               " i_byteAddr = 0x%x i_numBytes = %d i_location = 0x%x",
+               i_byteAddr, i_numBytes, i_location);
 
     do
     {

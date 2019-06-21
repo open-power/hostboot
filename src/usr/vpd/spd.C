@@ -2317,6 +2317,10 @@ errlHndl_t readFromEepromSource(TARGETING::Target*          i_target,
 {
     errlHndl_t err = nullptr;
 
+    TRACSSCOMP(g_trac_spd, ENTER_MRK
+               "readFromEepromSource: i_eepromSource %d , i_memType %d, i_eepromType %d",
+               i_eepromSource, i_memType, i_eepromType);
+
 // @TODO RTC 204341 Implement for runtime
 #ifndef __HOSTBOOT_RUNTIME
     if (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_ISDIMM)
@@ -2484,6 +2488,9 @@ errlHndl_t cmpEecacheToEeprom(TARGETING::Target * i_target,
         o_match = true;
 
     } while(0);
+
+    TRACDBIN(g_trac_spd, "Hardware data : ", dataHardware, sizeHardware);
+    TRACDBIN(g_trac_spd, "Cache data : ", dataCache, sizeCache);
 
     TRACSSCOMP( g_trac_spd, EXIT_MRK"cmpEecacheToEeprom(): returning %s errors. o_match = 0x%X ",
                 (err ? "with" : "with no"), o_match );
