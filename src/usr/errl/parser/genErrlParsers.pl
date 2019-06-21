@@ -996,9 +996,9 @@ close(SUBSYSTEM_TYPES_FILE);
 # Generate a list of all possible SRCs and their descriptions
 # ------------------------------------------------------------------
 open(OFILE, ">", $srcFileName) or die ("Cannot open: $srcFileName: $!");
-foreach my $sub (sort keys %subsysList)
+foreach my $rcVal (sort keys %srcList)
 {
-    foreach my $rcVal (sort keys %srcList)
+    foreach my $sub (sort keys %subsysList)
     {
         my $src = "BC$sub$rcVal";
         print OFILE "//////////////////////////////////////////////////////\n";
