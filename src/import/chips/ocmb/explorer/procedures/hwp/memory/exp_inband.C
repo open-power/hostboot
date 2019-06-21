@@ -538,6 +538,11 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode poll_for_response_ready(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
+    // NUM_LOOPS is based on EXP_FW_DDR_PHY_INIT command, which completes in ~10ms in HW.
+    // We initially delay 8ms, so we should only need to poll for ~2ms here.
+    // We're waiting 100us between polls, so we should only need about 20 loops here,
+    // but we make it 50 to be safe
+
     constexpr uint64_t NUM_LOOPS = 50;
     // So, why aren't we using the memory team's polling API?
     // This is a base function that will be utilized by the platform code
@@ -552,7 +557,7 @@ fapi2::ReturnCode poll_for_response_ready(const fapi2::Target<fapi2::TARGET_TYPE
     {
         FAPI_TRY(fapi2::getScom(i_target, EXPLR_MIPS_TO_OCMB_INTERRUPT_REGISTER1, l_data));
         l_doorbell_response = l_data.getBit<EXPLR_MIPS_TO_OCMB_INTERRUPT_REGISTER1_DOORBELL>();
-        FAPI_TRY( fapi2::delay( DELAY_100NS, 200) );
+        FAPI_TRY( fapi2::delay(DELAY_100US, 200) );
     }
 
     FAPI_DBG("%s stopped on loop%u/%u data:0x%016lx %u",

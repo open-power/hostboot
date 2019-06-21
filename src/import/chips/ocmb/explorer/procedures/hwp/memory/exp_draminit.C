@@ -72,6 +72,11 @@ extern "C"
                       "Failed putCMD() for  %s", mss::c_str(i_target) );
         }
 
+        // Wait a bit for the command (and training) to complete
+        // Value based on initial Explorer hardware in Cronus in i2c mode.
+        // Training takes ~10ms with no trace, ~450ms with Explorer UART debug
+        FAPI_TRY( fapi2::delay( (mss::DELAY_1MS * 8), 200) );
+
         // Read the response message from EXP-FW RESP buffer
         {
             host_fw_response_struct l_response;
