@@ -420,7 +420,7 @@ void __addCallout( ExtensibleChip * i_chip, const MemRank & i_rank,
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>
-uint32_t __addRowRepairCallout( ExtensibleChip * i_chip,
+uint32_t __addRowRepairCallout( TargetHandle_t i_trgt,
                                 const MemRank & i_rank,
                                 STEP_CODE_DATA_STRUCT & io_sc )
 {
@@ -429,7 +429,7 @@ uint32_t __addRowRepairCallout( ExtensibleChip * i_chip,
     uint32_t o_rc = SUCCESS;
 
     // Get the dimms on this rank on either port.
-    TargetHandleList dimmList = getConnectedDimms( i_chip->getTrgt(), i_rank );
+    TargetHandleList dimmList = getConnectedDimms( i_trgt, i_rank );
 
     // Check for row repairs on each dimm.
     for ( auto const & dimm : dimmList )
@@ -504,17 +504,17 @@ uint32_t __applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         const uint8_t ps   = i_chipMark.getSymbol().getPortSlct();
         const uint8_t dram = i_chipMark.getSymbol().getDram();
 
-        ExtensibleChip * memPort = getConnectedChild(i_chip, TYPE_MEM_PORT, ps);
+        TargetHandle_t memPort = getConnectedChild( i_chip->getTrgt(),
+                                                    TYPE_MEM_PORT, ps );
 
-        TargetHandle_t dimmTrgt = getConnectedDimm( memPort->getTrgt(), i_rank,
-                                                    ps );
+        TargetHandle_t dimmTrgt = getConnectedDimm( memPort, i_rank, ps );
 
         const bool isX4 = isDramWidthX4( dimmTrgt );
 
         // Determine if DRAM sparing is enabled.
         bool isEnabled = false;
-        o_rc = isDramSparingEnabled<TYPE_MEM_PORT>( memPort->getTrgt(), i_rank,
-                                                    ps, isEnabled );
+        o_rc = isDramSparingEnabled<TYPE_MEM_PORT>( memPort, i_rank, ps,
+                                                    isEnabled );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "isDramSparingEnabled() failed." );
@@ -567,7 +567,7 @@ uint32_t __applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
             // Certain DIMMs may have had spares intentially made unavailable by
             // the manufacturer. Check the VPD for available spares.
             bool spAvail, eccAvail;
-            o_rc = isSpareAvailable<TYPE_MEM_PORT>( memPort->getTrgt(), i_rank,
+            o_rc = isSpareAvailable<TYPE_MEM_PORT>( memPort, i_rank,
                                                     ps, spAvail, eccAvail );
             if ( spAvail )
             {
@@ -764,13 +764,14 @@ uint32_t chipMarkCleanup( ExtensibleChip * i_chip, const MemRank & i_rank,
         {
             if ( TYPE_OCMB_CHIP == i_chip->getType() )
             {
-                ExtensibleChip * memPort = getConnectedChild( i_chip,
+                TargetHandle_t memPort = getConnectedChild( i_chip->getTrgt(),
                     TYPE_MEM_PORT, chipMark.getSymbol().getPortSlct() );
                 o_rc = setDramInVpd( memPort, i_rank, chipMark.getSymbol() );
             }
             else
             {
-                o_rc = setDramInVpd( i_chip, i_rank, chipMark.getSymbol() );
+                o_rc = setDramInVpd( i_chip->getTrgt(), i_rank,
+                                     chipMark.getSymbol() );
             }
             if ( SUCCESS != o_rc )
             {

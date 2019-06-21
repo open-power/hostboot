@@ -173,7 +173,8 @@ void getMnfgMemCeTh( ExtensibleChip * i_chip, const MemRank & i_rank,
     else
     {
         // Get DRAM size
-        uint8_t size = MemUtils::getDramSize<T>( i_chip, i_rank.getDimmSlct() );
+        uint8_t size = MemUtils::getDramSize<T>( i_chip->getTrgt(),
+                                                 i_rank.getDimmSlct() );
 
         // Get number of ranks per DIMM select.
         uint8_t rankCount = getNumRanksPerDimm<T>( i_chip->getTrgt(),

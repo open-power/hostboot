@@ -304,24 +304,8 @@ uint32_t __analyzeCmdComplete<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
     do
     {
-        // Get all ports in which the command was run.
-        ExtensibleChipList portList;
-        o_rc = getMcbistMaintPort<TYPE_OCMB_CHIP>( i_chip, portList );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getMcbistMaintPort(0x%08x) failed",
-                      i_chip->getHuid() );
-            break;
-        }
-
-        // In broadcast mode, the rank configuration for all ports will be the
-        // same. In non-broadcast mode, there will only be one MEM_PORT in
-        // the list. Therefore, we can simply use the first MEM_PORT in the
-        // list for all configs.
-        ExtensibleChip * stopChip = portList.front();
-
         // Update iv_stoppedRank.
-        o_stoppedRank = __getStopRank<TYPE_MEM_PORT>( stopChip, i_addr );
+        o_stoppedRank = __getStopRank<TYPE_OCMB_CHIP>( i_chip, i_addr );
 
         // Check the OCMB for ECC errors.
         bool errorsFound;

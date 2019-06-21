@@ -102,12 +102,12 @@ int32_t collectCeStats( ExtensibleChip * i_chip, const MemRank & i_rank,
 
 /**
  * @brief  Gets DRAM size for an MBA, MCA, or MEM_PORT.
- * @param  i_chip     MBA, MCA, or MEM_PORT chip.
+ * @param  i_trgt     MBA, MCA, or MEM_PORT target.
  * @param  i_dimmSlct DIMM select. Optional for MBA chip.
  * @return size for a DRAM
  */
 template<TARGETING::TYPE T>
-uint8_t getDramSize( ExtensibleChip * i_chip, uint8_t i_dimmSlct = 0 );
+uint8_t getDramSize( TARGETING::TargetHandle_t i_trgt, uint8_t i_dimmSlct = 0 );
 
 /**
  * @brief  When handling attentions on a memory buffer, there will be FIR bits

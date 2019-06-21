@@ -80,7 +80,7 @@ class TdRankListEntry
 
   private:
 
-    ExtensibleChip * iv_chip = nullptr;    ///< MCA, MBA, or MEM_PORT chip.
+    ExtensibleChip * iv_chip = nullptr;    ///< MCA, MBA, or OCMB chip.
     MemRank          iv_rank = MemRank(0); ///< Any rank on the MCA/MBA/MEM_PORT
 };
 
@@ -95,7 +95,7 @@ class TdRankList
 
     /**
      * @brief Constructor.
-     * @param MCBIST or MBA chip.
+     * @param MCBIST, OCMB, or MBA chip.
      */
     explicit TdRankList( ExtensibleChip * i_chip );
 
@@ -191,17 +191,13 @@ inline TdRankList<TARGETING::TYPE_OCMB_CHIP>::TdRankList(
 
     PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
 
-    ExtensibleChipList memPortChipList = getConnected( i_chip, TYPE_MEM_PORT );
-    for ( auto & memPortChip : memPortChipList )
-    {
-        std::vector<MemRank> rankList;
-        getSlaveRanks<TYPE_MEM_PORT>( memPortChip->getTrgt(), rankList );
-        PRDF_ASSERT( !rankList.empty() ); // target configured with no ranks
+    std::vector<MemRank> rankList;
+    getSlaveRanks<TYPE_OCMB_CHIP>( i_chip->getTrgt(), rankList );
+    PRDF_ASSERT( !rankList.empty() ); // target configured with no ranks
 
-        for ( auto & rank : rankList )
-        {
-            iv_list.push_back( TdRankListEntry(memPortChip, rank) );
-        }
+    for ( auto & rank : rankList )
+    {
+        iv_list.push_back( TdRankListEntry(i_chip, rank) );
     }
 }
 

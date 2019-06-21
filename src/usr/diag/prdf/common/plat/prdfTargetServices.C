@@ -988,7 +988,12 @@ ExtensibleChipList getConnected( ExtensibleChip * i_chip, TYPE i_connType )
     TargetHandleList list = getConnected( i_chip->getTrgt(), i_connType );
     for ( auto & trgt : list )
     {
-        o_list.push_back( (ExtensibleChip *)systemPtr->GetChip(trgt) );
+        // Check to make sure that if we have a non-null Target, we also
+        // get back a non-null ExtensibleChip.
+        ExtensibleChip * chip = (ExtensibleChip *)systemPtr->GetChip(trgt);
+        PRDF_ASSERT( nullptr != chip );
+
+        o_list.push_back( chip );
     }
 
     return o_list;
@@ -1004,7 +1009,12 @@ ExtensibleChip * getConnectedParent( ExtensibleChip * i_child,
     TargetHandle_t trgt = getConnectedParent( i_child->getTrgt(),
                                               i_parentType );
 
-    return (ExtensibleChip *)systemPtr->GetChip( trgt );
+    // Check to make sure that if we have a non-null Target, we also
+    // get back a non-null ExtensibleChip.
+    ExtensibleChip * chip = (ExtensibleChip *)systemPtr->GetChip( trgt );
+    PRDF_ASSERT( nullptr != chip );
+
+    return chip;
 }
 
 //------------------------------------------------------------------------------
@@ -1023,6 +1033,10 @@ ExtensibleChip * getConnectedChild( ExtensibleChip * i_parent,
     if ( nullptr != trgt )
     {
         o_child = (ExtensibleChip *)systemPtr->GetChip( trgt );
+
+        // Check to make sure that if we have a non-null Target, we also
+        // get back a non-null ExtensibleChip.
+        PRDF_ASSERT( nullptr != o_child );
     }
 
     return o_child;
@@ -1604,11 +1618,15 @@ void getSlaveRanks<TYPE_MCA>( TargetHandle_t i_trgt,
 }
 
 template<>
-void getSlaveRanks<TYPE_MEM_PORT>( TargetHandle_t i_trgt,
-                                   std::vector<MemRank> & o_ranks,
-                                   uint8_t i_ds )
+void getSlaveRanks<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
+                                    std::vector<MemRank> & o_ranks,
+                                    uint8_t i_ds )
 {
-    __getSlaveRanks<TYPE_MEM_PORT>( i_trgt, o_ranks, i_ds );
+    // TODO RTC 210072 - Explorer only has one port, however, multiple ports
+    // will be supported in the future. Updates will need to be made here so we
+    // can get the relevant port.
+    TargetHandle_t memPort = getConnectedChild( i_trgt, TYPE_MEM_PORT, 0 );
+    __getSlaveRanks<TYPE_MEM_PORT>( memPort, o_ranks, i_ds );
 }
 
 //------------------------------------------------------------------------------

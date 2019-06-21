@@ -346,22 +346,21 @@ bool isBroadcastModeCapable<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
 //------------------------------------------------------------------------------
 
 template<>
-uint32_t startSfRead<TYPE_MEM_PORT>( ExtensibleChip * i_memPort,
-                                     const MemRank & i_rank )
+uint32_t startSfRead<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
+                                      const MemRank & i_rank )
 {
-    #define PRDF_FUNC "[PlatServices::startSfRead<TYPE_MCA>] "
+    #define PRDF_FUNC "[PlatServices::startSfRead<TYPE_OCMB_CHIP>] "
 
     PRDF_ASSERT( isInMdiaMode() ); // MDIA must be running.
 
-    PRDF_ASSERT( nullptr != i_memPort );
-    PRDF_ASSERT( TYPE_MEM_PORT == i_memPort->getType() );
+    PRDF_ASSERT( nullptr != i_ocmb );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_ocmb->getType() );
 
     uint32_t o_rc = SUCCESS;
 
     /* TODO RTC 207273 - no HWP support yet
     // Get the OCMB_CHIP fapi target
-    ExtensibleChip * ocmbChip = getConnectedParent( i_memPort, TYPE_OCMB_CHIP );
-    fapi2::Target<fapi2::TYPE_OCMB_CHIP> fapiTrgt ( ocmbChip->getTrgt() );
+    fapi2::Target<fapi2::TYPE_OCMB_CHIP> fapiTrgt ( i_ocmb->getTrgt() );
 
     // Get the stop conditions.
     mss::mcbist::stop_conditions<> stopCond;
@@ -379,21 +378,21 @@ uint32_t startSfRead<TYPE_MEM_PORT>( ExtensibleChip * i_memPort,
     {
         // Get the first address of the given rank.
         mss::mcbist::address saddr, eaddr;
-        o_rc = getMemAddrRange<TYPE_MEM_PORT>( i_memPort, i_rank, saddr, eaddr,
-                                               SLAVE_RANK );
+        o_rc = getMemAddrRange<TYPE_OCMB_CHIP>( i_ocmb, i_rank, saddr, eaddr,
+                                                SLAVE_RANK );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
-                      i_memPort->getHuid(), i_rank.getKey() );
+                      i_ocmb->getHuid(), i_rank.getKey() );
             break;
         }
 
         // Clear all of the counters and maintenance ECC attentions.
-        o_rc = prepareNextCmd<TYPE_OCMB_CHIP>( ocmbChip );
+        o_rc = prepareNextCmd<TYPE_OCMB_CHIP>( i_ocmb );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "prepareNextCmd(0x%08x) failed",
-                      ocmbChip->getHuid() );
+                      i_ocmb->getHuid() );
             break;
         }
 
@@ -404,7 +403,7 @@ uint32_t startSfRead<TYPE_MEM_PORT>( ExtensibleChip * i_memPort,
         if ( nullptr != errl )
         {
             PRDF_ERR( PRDF_FUNC "mss::memdiags::sf_read(0x%08x,%d) failed",
-                      ocmbChip->getHuid(), i_rank.getMaster() );
+                      i_ocmb->getHuid(), i_rank.getMaster() );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
             o_rc = FAIL; break;
         }
@@ -416,17 +415,6 @@ uint32_t startSfRead<TYPE_MEM_PORT>( ExtensibleChip * i_memPort,
     return o_rc;
 
     #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-// This specialization only exists to avoid a lot of extra code in some classes.
-// The input chip must still be an MEM_PORT chip.
-template<>
-uint32_t startSfRead<TYPE_OCMB_CHIP>( ExtensibleChip * i_memPort,
-                                      const MemRank & i_rank )
-{
-    return startSfRead<TYPE_MEM_PORT>( i_memPort, i_rank );
 }
 
 //------------------------------------------------------------------------------

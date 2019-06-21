@@ -518,42 +518,33 @@ void addEccData<TYPE_MCBIST>( ExtensibleChip * i_chip,
 }
 
 template<>
-void addEccData<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
-                                STEP_CODE_DATA_STRUCT & io_sc )
+void addEccData<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                 STEP_CODE_DATA_STRUCT & io_sc )
 {
-    PRDF_ASSERT( TYPE_MEM_PORT == i_chip->getType() );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
 
     CaptureData & cd = io_sc.service_data->GetCaptureData();
-
-    TargetHandle_t trgt = i_chip->getTrgt();
-    ExtensibleChip * ocmb = getConnectedParent( i_chip, TYPE_OCMB_CHIP );
-    OcmbDataBundle * db = getOcmbDataBundle( ocmb );
+    OcmbDataBundle * db = getOcmbDataBundle( i_chip );
+    TargetHandle_t ocmbTrgt = i_chip->getTrgt();
 
     // Add DRAM repairs data from hardware.
-    captureDramRepairsData<TYPE_OCMB_CHIP>( ocmb->getTrgt(), cd );
+    captureDramRepairsData<TYPE_OCMB_CHIP>( ocmbTrgt, cd );
 
     // Add DRAM repairs data from VPD.
-    captureDramRepairsVpd<TYPE_MEM_PORT>( trgt, cd );
+    // TODO RTC 210072 - Explorer only has one port, however, multiple ports
+    // will be supported in the future. Updates will need to be made here so we
+    // can get the relevant port.
+    TargetHandle_t memPort = getConnectedChild( ocmbTrgt, TYPE_MEM_PORT, 0 );
+    captureDramRepairsVpd<TYPE_MEM_PORT>( memPort, cd );
 
     // Add IUE counts to capture data.
-    captureIueCounts<OcmbDataBundle*>( ocmb->getTrgt(), db, cd );
+    captureIueCounts<OcmbDataBundle*>( ocmbTrgt, db, cd );
 
     // Add CE table to capture data.
     db->iv_ceTable.addCapData( cd );
 
     // Add UE table to capture data.
     db->iv_ueTable.addCapData( cd );
-}
-
-template<>
-void addEccData<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-                                 STEP_CODE_DATA_STRUCT & io_sc )
-{
-    PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
-
-    // Add data for each connected MEM_PORT.
-    ExtensibleChipList list = getConnected( i_chip, TYPE_MEM_PORT );
-    for ( auto & port : list ) { addEccData<TYPE_MEM_PORT>(port, io_sc); }
 }
 
 //------------------------------------------------------------------------------
@@ -568,6 +559,27 @@ void addEccData<TYPE_MCA>( TargetHandle_t i_trgt, errlHndl_t io_errl )
 
     // Add DRAM repairs data from VPD.
     captureDramRepairsVpd<TYPE_MCA>( i_trgt, cd );
+
+    ErrDataService::AddCapData( cd, io_errl );
+}
+
+template<>
+void addEccData<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
+                                 errlHndl_t io_errl )
+{
+    PRDF_ASSERT( TYPE_OCMB_CHIP == getTargetType(i_trgt) );
+
+    CaptureData cd;
+
+    // Add DRAM repairs data from hardware.
+    captureDramRepairsData<TYPE_OCMB_CHIP>( i_trgt, cd );
+
+    // Add DRAM repairs data from VPD.
+    // TODO RTC 210072 - Explorer only has one port, however, multiple ports
+    // will be supported in the future. Updates will need to be made here so we
+    // can get the relevant port.
+    TargetHandle_t memPort = getConnectedChild( i_trgt, TYPE_MEM_PORT, 0 );
+    captureDramRepairsVpd<TYPE_MEM_PORT>( memPort, cd );
 
     ErrDataService::AddCapData( cd, io_errl );
 }

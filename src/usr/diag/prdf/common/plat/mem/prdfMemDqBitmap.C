@@ -687,7 +687,7 @@ uint32_t MemDqBitmap::setEccSpare( uint8_t i_pins )
 //                              Utility Functions
 //##############################################################################
 
-uint32_t setDramInVpd( ExtensibleChip * i_chip, const MemRank & i_rank,
+uint32_t setDramInVpd( TargetHandle_t i_trgt, const MemRank & i_rank,
                        MemSymbol i_symbol )
 {
     #define PRDF_FUNC "[MemDqBitmap::__setDramInVpd] "
@@ -696,14 +696,12 @@ uint32_t setDramInVpd( ExtensibleChip * i_chip, const MemRank & i_rank,
 
     do
     {
-        TARGETING::TargetHandle_t trgt = i_chip->getTrgt();
-
         MemDqBitmap dqBitmap;
-        o_rc = getBadDqBitmap( trgt, i_rank, dqBitmap );
+        o_rc = getBadDqBitmap( i_trgt, i_rank, dqBitmap );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getBadDqBitmap(0x%08x, 0x%02x) failed.",
-                      getHuid(trgt), i_rank.getKey() );
+                      getHuid(i_trgt), i_rank.getKey() );
             break;
         }
 
@@ -714,11 +712,11 @@ uint32_t setDramInVpd( ExtensibleChip * i_chip, const MemRank & i_rank,
             break;
         }
 
-        o_rc = setBadDqBitmap( trgt, i_rank, dqBitmap );
+        o_rc = setBadDqBitmap( i_trgt, i_rank, dqBitmap );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "setBadDqBitmap(0x%08x, 0x%02x) failed.",
-                      getHuid(trgt), i_rank.getKey() );
+                      getHuid(i_trgt), i_rank.getKey() );
             break;
         }
     }while(0);
@@ -730,7 +728,7 @@ uint32_t setDramInVpd( ExtensibleChip * i_chip, const MemRank & i_rank,
 
 //------------------------------------------------------------------------------
 
-uint32_t clearDramInVpd( ExtensibleChip * i_chip, const MemRank & i_rank,
+uint32_t clearDramInVpd( TargetHandle_t i_trgt, const MemRank & i_rank,
                          MemSymbol i_symbol )
 {
     #define PRDF_FUNC "[MemDqBitmap::__clearDramInVpd] "
@@ -739,14 +737,12 @@ uint32_t clearDramInVpd( ExtensibleChip * i_chip, const MemRank & i_rank,
 
     do
     {
-        TARGETING::TargetHandle_t trgt = i_chip->getTrgt();
-
         MemDqBitmap dqBitmap;
-        o_rc = getBadDqBitmap( trgt, i_rank, dqBitmap );
+        o_rc = getBadDqBitmap( i_trgt, i_rank, dqBitmap );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getBadDqBitmap(0x%08x, 0x%02x) failed.",
-                      getHuid(trgt), i_rank.getKey() );
+                      getHuid(i_trgt), i_rank.getKey() );
             break;
         }
 
@@ -757,11 +753,11 @@ uint32_t clearDramInVpd( ExtensibleChip * i_chip, const MemRank & i_rank,
             break;
         }
 
-        o_rc = setBadDqBitmap( trgt, i_rank, dqBitmap );
+        o_rc = setBadDqBitmap( i_trgt, i_rank, dqBitmap );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "setBadDqBitmap(0x%08x, 0x%02x) failed.",
-                      getHuid(trgt), i_rank.getKey() );
+                      getHuid(i_trgt), i_rank.getKey() );
             break;
         }
     }while(0);

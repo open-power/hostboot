@@ -31,7 +31,9 @@
 
 // Framework includes
 #include <iipServiceDataCollector.h>
+#include <iipSystem.h>
 #include <prdfExtensibleChip.H>
+#include <prdfGlobal_common.H>
 #include <UtilHash.H>
 
 // Platform includes
@@ -342,19 +344,18 @@ int32_t collectCeStats<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 //------------------------------------------------------------------------------
 
 template<>
-uint8_t getDramSize<TYPE_MCA>(ExtensibleChip *i_chip, uint8_t i_dimmSlct)
+uint8_t getDramSize<TYPE_MCA>( TargetHandle_t i_trgt, uint8_t i_dimmSlct )
 {
     #define PRDF_FUNC "[MemUtils::getDramSize] "
 
-    PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
+    PRDF_ASSERT( TYPE_MCA == getTargetType(i_trgt) );
     PRDF_ASSERT( i_dimmSlct < DIMM_SLCT_PER_PORT );
 
-    TargetHandle_t mcaTrgt = i_chip->getTrgt();
-    TargetHandle_t mcsTrgt = getConnectedParent( mcaTrgt, TYPE_MCS );
+    TargetHandle_t mcsTrgt = getConnectedParent( i_trgt, TYPE_MCS );
 
     PRDF_ASSERT( nullptr != mcsTrgt );
 
-    uint8_t mcaRelPos = i_chip->getPos() % MAX_MCA_PER_MCS;
+    uint8_t mcaRelPos = getTargetPosition(i_trgt) % MAX_MCA_PER_MCS;
 
     uint8_t tmp[MAX_MCA_PER_MCS][DIMM_SLCT_PER_PORT];
 
@@ -370,18 +371,16 @@ uint8_t getDramSize<TYPE_MCA>(ExtensibleChip *i_chip, uint8_t i_dimmSlct)
 }
 
 template<>
-uint8_t getDramSize<TYPE_MEM_PORT>(ExtensibleChip *i_chip, uint8_t i_dimmSlct)
+uint8_t getDramSize<TYPE_MEM_PORT>( TargetHandle_t i_trgt, uint8_t i_dimmSlct )
 {
     #define PRDF_FUNC "[MemUtils::getDramSize] "
 
-    PRDF_ASSERT( TYPE_MEM_PORT == i_chip->getType() );
+    PRDF_ASSERT( TYPE_MEM_PORT == getTargetType(i_trgt) );
     PRDF_ASSERT( i_dimmSlct < DIMM_SLCT_PER_PORT );
-
-    TargetHandle_t memPortTrgt = i_chip->getTrgt();
 
     uint8_t tmp[DIMM_SLCT_PER_PORT];
 
-    if ( !memPortTrgt->tryGetAttr<TARGETING::ATTR_MEM_EFF_DRAM_DENSITY>(tmp) )
+    if ( !i_trgt->tryGetAttr<TARGETING::ATTR_MEM_EFF_DRAM_DENSITY>(tmp) )
     {
         PRDF_ERR( PRDF_FUNC "Failed to get ATTR_MEM_EFF_DRAM_DENSITY" );
         PRDF_ASSERT( false );
@@ -393,18 +392,18 @@ uint8_t getDramSize<TYPE_MEM_PORT>(ExtensibleChip *i_chip, uint8_t i_dimmSlct)
 }
 
 template<>
-uint8_t getDramSize<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip, uint8_t i_dimmSlct)
+uint8_t getDramSize<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt, uint8_t i_dimmSlct )
 {
     #define PRDF_FUNC "[MemUtils::getDramSize] "
 
-    PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == getTargetType(i_trgt) );
     PRDF_ASSERT( i_dimmSlct < DIMM_SLCT_PER_PORT );
 
     // TODO RTC 210072 - Explorer only has one port, however, multiple ports
     // will be supported in the future. Updates will need to be made here so we
     // can get the relevant port.
 
-    ExtensibleChip * memPort = getConnectedChild( i_chip, TYPE_MEM_PORT, 0 );
+    TargetHandle_t memPort = getConnectedChild( i_trgt, TYPE_MEM_PORT, 0 );
 
     return getDramSize<TYPE_MEM_PORT>( memPort, i_dimmSlct );
 

@@ -905,10 +905,8 @@ uint32_t __findChipMarks<TYPE_MEM_PORT>(
 
     for ( auto & entry : i_rankList.getList() )
     {
-        ExtensibleChip * memPort = entry.getChip();
+        ExtensibleChip * ocmb = entry.getChip();
         MemRank          rank = entry.getRank();
-
-        ExtensibleChip * ocmb = getConnectedParent( memPort, TYPE_OCMB_CHIP );
 
         // Call readChipMark to get MemMark.
         MemMark chipMark;
@@ -922,13 +920,19 @@ uint32_t __findChipMarks<TYPE_MEM_PORT>(
 
         if ( !chipMark.isValid() ) continue; // no chip mark present
 
+        // TODO RTC 210072 - Explorer only has one port, however, multiple ports
+        // will be supported in the future. Updates will need to be made here
+        // so we can get the relevant port.
+        TargetHandle_t memPort = getConnectedChild( ocmb->getTrgt(),
+                                                    TYPE_MEM_PORT, 0 );
+
         // Get the DQ Bitmap data.
         MemDqBitmap dqBitmap;
-        o_rc = getBadDqBitmap( memPort->getTrgt(), rank, dqBitmap );
+        o_rc = getBadDqBitmap( memPort, rank, dqBitmap );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getBadDqBitmap(0x%08x,0x%02x)",
-                      memPort->getHuid(), rank.getKey() );
+                      getHuid(memPort), rank.getKey() );
             break;
         }
 
@@ -938,7 +942,7 @@ uint32_t __findChipMarks<TYPE_MEM_PORT>(
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "dqBitmap.isChipMark() failed on 0x%08x "
-                      "0x%02x", memPort->getHuid(), rank.getKey() );
+                      "0x%02x", getHuid(memPort), rank.getKey() );
             break;
         }
 
@@ -1221,31 +1225,36 @@ uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::handleRrFo()
 
         for ( auto & entry : vectorList )
         {
-            ExtensibleChip * memPortChip = entry.getChip();
+            ExtensibleChip * ocmbChip = entry.getChip();
             MemRank rank = entry.getRank();
 
             // Get the chip mark
             MemMark chipMark;
-            o_rc = MarkStore::readChipMark<TYPE_OCMB_CHIP>( iv_chip, rank,
+            o_rc = MarkStore::readChipMark<TYPE_OCMB_CHIP>( ocmbChip, rank,
                                                             chipMark );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "readChipMark<TYPE_MEM_PORT>(0x%08x,%d) "
-                          "failed", memPortChip->getHuid(), rank.getMaster() );
+                          "failed", ocmbChip->getHuid(), rank.getMaster() );
                 break;
             }
 
             if ( !chipMark.isValid() ) continue; // no chip mark present
 
+            // TODO RTC 210072 - Explorer only has one port, however,
+            // multiple ports will be supported in the future. Updates will
+            // need to be made here so we can get the relevant port.
+
             // Get the DQ Bitmap data.
-            TargetHandle_t memPortTrgt = memPortChip->GetChipHandle();
+            TargetHandle_t memPort = getConnectedChild( ocmbChip->getTrgt(),
+                                                        TYPE_MEM_PORT, 0 );
             MemDqBitmap dqBitmap;
 
-            o_rc = getBadDqBitmap( memPortTrgt, rank, dqBitmap );
+            o_rc = getBadDqBitmap( memPort, rank, dqBitmap );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "getBadDqBitmap(0x%08x, %d)",
-                          getHuid(memPortTrgt), rank.getMaster() );
+                          getHuid(memPort), rank.getMaster() );
                 break;
             }
 

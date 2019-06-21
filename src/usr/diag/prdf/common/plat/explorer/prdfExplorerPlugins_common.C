@@ -241,18 +241,18 @@ int32_t RdfRcdParityError( ExtensibleChip * i_chip,
         if ( rdffir->IsBitSet(40) )
         {
             // callout MEM_PORT on 1st occurrence
-            ExtensibleChip * memPort =
-                getConnectedChild( i_chip, TYPE_MEM_PORT, 0 );
-            io_sc.service_data->SetCallout( memPort->getTrgt() );
+            TargetHandle_t memPort =
+                getConnectedChild( i_chip->getTrgt(), TYPE_MEM_PORT, 0 );
+            io_sc.service_data->SetCallout( memPort );
         }
         // Else this is 'confirmed RCD parity error' case
         else
         {
             // callout DIMM high priority, MEM_PORT low on 1st occurrence
             CalloutAttachedDimmsHigh( i_chip, io_sc );
-            ExtensibleChip * memPort =
-                getConnectedChild( i_chip, TYPE_MEM_PORT, 0 );
-            io_sc.service_data->SetCallout( memPort->getTrgt(), MRU_LOW );
+            TargetHandle_t memPort =
+                getConnectedChild( i_chip->getTrgt(), TYPE_MEM_PORT, 0 );
+            io_sc.service_data->SetCallout( memPort, MRU_LOW );
         }
 
         // Mask bit 40 as well

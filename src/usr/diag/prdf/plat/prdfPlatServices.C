@@ -773,20 +773,19 @@ uint32_t startTdScrub<TYPE_MCA>( ExtensibleChip * i_chip,
 //##############################################################################
 
 template<>
-uint32_t startBgScrub<TYPE_MEM_PORT>( ExtensibleChip * i_memPort,
-                                      const MemRank & i_rank )
+uint32_t startBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
+                                       const MemRank & i_rank )
 {
-    #define PRDF_FUNC "[PlatServices::startBgScrub<TYPE_MEM_PORT>] "
+    #define PRDF_FUNC "[PlatServices::startBgScrub<TYPE_OCMB_CHIP>] "
 
-    PRDF_ASSERT( nullptr != i_memPort );
-    PRDF_ASSERT( TYPE_MEM_PORT == i_memPort->getType() );
+    PRDF_ASSERT( nullptr != i_ocmb );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_ocmb->getType() );
 
     uint32_t o_rc = SUCCESS;
 
     /* TODO RTC 207273 - no HWP support yet
     // Get the OCMB fapi target
-    ExtensibleChip * ocmbChip = getConnectedParent( i_memPort, TYPE_OCMB_CHIP );
-    fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiTrgt (ocmbChip->getTrgt());
+    fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiTrgt (i_ocmb->getTrgt());
 
     // Get the stop conditions.
     // NOTE: If HBRT_PRD is not configured, we want to use the defaults so that
@@ -840,11 +839,11 @@ uint32_t startBgScrub<TYPE_MEM_PORT>( ExtensibleChip * i_memPort,
         }
 
         // Clear all of the counters and maintenance ECC attentions.
-        o_rc = prepareNextCmd<TYPE_OCMB_CHIP>( ocmbChip );
+        o_rc = prepareNextCmd<TYPE_OCMB_CHIP>( i_ocmb );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "prepareNextCmd(0x%08x) failed",
-                      ocmbChip->getHuid() );
+                      i_ocmb->getHuid() );
             break;
         }
 
@@ -856,7 +855,7 @@ uint32_t startBgScrub<TYPE_MEM_PORT>( ExtensibleChip * i_memPort,
         if ( nullptr != errl )
         {
             PRDF_ERR( PRDF_FUNC "mss::memdiags::background_scrub(0x%08x,%d) "
-                      "failed", ocmbChip->getHuid(), i_rank.getMaster() );
+                      "failed", i_ocmb->getHuid(), i_rank.getMaster() );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
             o_rc = FAIL; break;
         }
@@ -867,17 +866,6 @@ uint32_t startBgScrub<TYPE_MEM_PORT>( ExtensibleChip * i_memPort,
     return o_rc;
 
     #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-// This specialization only exists to avoid a lot of extra code in some classes.
-// The input chip must still be a MEM_PORT.
-template<>
-uint32_t startBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_memPort,
-                                       const MemRank & i_rank )
-{
-    return startBgScrub<TYPE_MEM_PORT>( i_memPort, i_rank );
 }
 
 //------------------------------------------------------------------------------
