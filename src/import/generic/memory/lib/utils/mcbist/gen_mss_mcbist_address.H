@@ -162,14 +162,14 @@ class address
         template< mss::mc_type MC = DEFAULT_MC_TYPE >
         address( const ecc::trap_address<MC>& i_address )
         {
-            this->set_field<PORT      >(i_address.get_field<ecc::trap_address<MC>::PORT>());
-            this->set_field<DIMM      >(i_address.get_field<ecc::trap_address<MC>::DIMM>());
-            this->set_field<MRANK     >(i_address.get_field<ecc::trap_address<MC>::MRANK>());
-            this->set_field<SRANK     >(i_address.get_field<ecc::trap_address<MC>::SRANK>());
-            this->set_field<ROW       >(i_address.get_field<ecc::trap_address<MC>::ROW>());
-            this->set_field<COL       >(i_address.get_field<ecc::trap_address<MC>::COL>());
-            this->set_field<BANK      >(i_address.get_field<ecc::trap_address<MC>::BANK>());
-            this->set_field<BANK_GROUP>(i_address.get_field<ecc::trap_address<MC>::BANK_GROUP>());
+            this->set_field<PORT      >(i_address.template get_field<ecc::trap_address<MC>::PORT>());
+            this->set_field<DIMM      >(i_address.template get_field<ecc::trap_address<MC>::DIMM>());
+            this->set_field<MRANK     >(i_address.template get_field<ecc::trap_address<MC>::MRANK>());
+            this->set_field<SRANK     >(i_address.template get_field<ecc::trap_address<MC>::SRANK>());
+            this->set_field<ROW       >(i_address.template get_field<ecc::trap_address<MC>::ROW>());
+            this->set_field<COL       >(i_address.template get_field<ecc::trap_address<MC>::COL>());
+            this->set_field<BANK      >(i_address.template get_field<ecc::trap_address<MC>::BANK>());
+            this->set_field<BANK_GROUP>(i_address.template get_field<ecc::trap_address<MC>::BANK_GROUP>());
         }
 
         ///
@@ -180,11 +180,11 @@ class address
         template< mss::mc_type MC = DEFAULT_MC_TYPE >
         address( const ecc::fwms::address<MC>& i_address )
         {
-            this->set_field<DIMM      >(i_address.get_field<ecc::fwms::address<MC>::DIMM>());
-            this->set_field<MRANK     >(i_address.get_field<ecc::fwms::address<MC>::MRANK>());
-            this->set_field<SRANK     >(i_address.get_field<ecc::fwms::address<MC>::SRANK>());
-            this->set_field<BANK_GROUP>(i_address.get_field<ecc::fwms::address<MC>::BANK_GROUP>());
-            this->set_field<BANK      >(i_address.get_field<ecc::fwms::address<MC>::BANK>());
+            this->set_field<DIMM      >(i_address.template get_field<ecc::fwms::address<MC>::DIMM>());
+            this->set_field<MRANK     >(i_address.template get_field<ecc::fwms::address<MC>::MRANK>());
+            this->set_field<SRANK     >(i_address.template get_field<ecc::fwms::address<MC>::SRANK>());
+            this->set_field<BANK_GROUP>(i_address.template get_field<ecc::fwms::address<MC>::BANK_GROUP>());
+            this->set_field<BANK      >(i_address.template get_field<ecc::fwms::address<MC>::BANK>());
         }
 
         ///
