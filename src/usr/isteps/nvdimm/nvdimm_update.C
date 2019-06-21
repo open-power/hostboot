@@ -1843,6 +1843,10 @@ bool NvdimmsUpdate::runUpdate(void)
                 ERRL_GETPLID_SAFE(l_err));
             commitPredictiveNvdimmError(l_err);
             o_no_error_found = false;
+
+            // Delete the unused NvdimmInstalledImage pointer
+            delete l_installed_image;
+
             continue;
         }
 
@@ -1895,6 +1899,10 @@ bool NvdimmsUpdate::runUpdate(void)
             l_err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
                                         HWAS::SRCI_PRIORITY_LOW );
             ERRORLOG::errlCommit(l_err, NVDIMM_COMP_ID);
+
+            // Delete the unused NvdimmInstalledImage object
+            delete l_installed_image;
+
             continue;
         }
     }
@@ -1986,6 +1994,16 @@ bool NvdimmsUpdate::runUpdate(void)
             break;
         }
     } while (0); // end of flash update section
+
+    // Clean up the pointers used in v_NVDIMM_16GB_list and v_NVDIMM_32GB_list
+    for (const auto& pInstalledImage : v_NVDIMM_16GB_list)
+    {
+        delete pInstalledImage;
+    }
+    for (const auto& pInstalledImage : v_NVDIMM_32GB_list)
+    {
+        delete pInstalledImage;
+    }
 
     return o_no_error_found;
 }
