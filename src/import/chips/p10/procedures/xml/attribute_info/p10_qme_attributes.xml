@@ -34,15 +34,31 @@
            <!-- The value needs to be changed as per the EC level  -->
            <value>0x10</value>
   </entry>
-
   <entry>
            <name>ATTR_NAME</name>
            <value>0xA</value>
   </entry>
-
   <entry>
-    <name>ATTR_CHIP_UNIT_POS</name>
-    <value>0x0</value>
+          <name>ATTR_CHIP_UNIT_POS</name>
+          <value>0x0</value>
+  </entry>
+  <!-- needed for contained mode and runn mode -->
+  <entry>
+          <name>ATTR_SYSTEM_IPL_PHASE</name>
+          <value>0x0</value>
+  </entry>
+  <entry>
+          <name>ATTR_CONTAINED_IPL_TYPE</name>
+          <value>0x0</value>
+  </entry>
+  <entry>
+          <name>ATTR_RUNN_MODE</name>
+          <value>0x0</value>
+  </entry>
+  <!-- needed for qme sim -->
+  <entry>
+          <name>ATTR_QME_BROADSIDE_SCAN</name>
+          <value>0x0</value>
   </entry>
   <!-- ********************************************************************* -->
 </entries>
