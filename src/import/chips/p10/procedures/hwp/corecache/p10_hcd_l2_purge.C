@@ -56,6 +56,7 @@
 
 #ifdef __PPE_QME
 
+    extern void qme_l2_purge_catchup_detect(uint32_t&);
     extern void qme_l2_purge_abort_detect();
 
 #endif
@@ -67,9 +68,12 @@
 
 enum P10_HCD_L2_PURGE_CONSTANTS
 {
-    HCD_L2_PURGE_DONE_POLL_TIMEOUT_HW_NS    = 100000, // 10^5ns = 100us timeout
-    HCD_L2_PURGE_DONE_POLL_DELAY_HW_NS      = 1000,   // 1us poll loop delay
-    HCD_L2_PURGE_DONE_POLL_DELAY_SIM_CYCLE  = 32000,  // 32k sim cycle delay
+    HCD_L2_PURGE_DONE_POLL_TIMEOUT_HW_NS        = 100000, // 10^5ns = 100us timeout
+    HCD_L2_PURGE_DONE_POLL_DELAY_HW_NS          = 1000,   // 1us poll loop delay
+    HCD_L2_PURGE_DONE_POLL_DELAY_SIM_CYCLE      = 32000,  // 32k sim cycle delay
+    HCD_PMSR_SHIFT_ACTIVE_POLL_TIMEOUT_HW_NS    = 100000, // 10^5ns = 100us timeout
+    HCD_PMSR_SHIFT_ACTIVE_POLL_DELAY_HW_NS      = 1000,   // 1us poll loop delay
+    HCD_PMSR_SHIFT_ACTIVE_POLL_DELAY_SIM_CYCLE  = 32000,  // 32k sim cycle delay
 };
 
 //------------------------------------------------------------------------------
@@ -80,6 +84,7 @@ fapi2::ReturnCode
 p10_hcd_l2_purge(
     const fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > & i_target)
 {
+    fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_OR > l_target_or = i_target;
     fapi2::buffer<buffer_t> l_mmioData = 0;
     uint32_t                l_timeout  = 0;
     uint32_t                l_l2_purge_done = 0;
@@ -98,11 +103,31 @@ p10_hcd_l2_purge(
 
 #ifdef __PPE_QME
 
+        fapi2::Target< fapi2::TARGET_TYPE_PROC_CHIP > l_chip =
+            i_target.getParent< fapi2::TARGET_TYPE_PROC_CHIP >();
+        uint32_t l_core_select = 0;
+
+        qme_l2_purge_catchup_detect(l_core_select);
+
+        if (!l_core_select)
+        {
+            l_core_select = i_target.getCoreSelect();
+        }
+
+        fapi2::Target < fapi2::TARGET_TYPE_CORE |
+        fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > l_target =
+            l_chip.getMulticast<fapi2::MULTICAST_AND>(fapi2::MCGROUP_GOOD_EQ,
+                    static_cast<fapi2::MulticastCoreSelect>(l_core_select));
+
         qme_l2_purge_abort_detect();
 
-#endif
+        FAPI_TRY( HCD_GETMMIO_C( l_target, MMIO_LOWADDR(QME_SCSR), l_mmioData ) );
+
+#else
 
         FAPI_TRY( HCD_GETMMIO_C( i_target, MMIO_LOWADDR(QME_SCSR), l_mmioData ) );
+
+#endif
 
         // use multicastAND to check 1
         MMIO_GET32L(l_l2_purge_done);
@@ -128,6 +153,32 @@ p10_hcd_l2_purge(
                 .set_QME_SCSR(l_mmioData)
                 .set_CORE_TARGET(i_target),
                 "L2 Purge Done Timeout");
+
+    FAPI_DBG("Wait for PMSR_SHIFT_ACTIVE to drop via PCR_SCSR[56]");
+    l_timeout = HCD_PMSR_SHIFT_ACTIVE_POLL_TIMEOUT_HW_NS /
+                HCD_PMSR_SHIFT_ACTIVE_POLL_DELAY_HW_NS;
+
+    do
+    {
+        FAPI_TRY( HCD_GETMMIO_C( l_target_or, MMIO_LOWADDR(QME_SCSR), l_mmioData ) );
+
+        // use multicastOR to check 0
+        if( MMIO_GET(MMIO_LOWBIT(56)) == 0 )
+        {
+            break;
+        }
+
+        fapi2::delay(HCD_PMSR_SHIFT_ACTIVE_POLL_DELAY_HW_NS,
+                     HCD_PMSR_SHIFT_ACTIVE_POLL_DELAY_SIM_CYCLE);
+    }
+    while( (--l_timeout) != 0 );
+
+    FAPI_ASSERT((l_timeout != 0),
+                fapi2::PMSR_SHIFT_ACTIVE_TIMEOUT()
+                .set_PMSR_SHIFT_ACTIVE_POLL_TIMEOUT_HW_NS(HCD_PMSR_SHIFT_ACTIVE_POLL_TIMEOUT_HW_NS)
+                .set_QME_SCSR(l_mmioData)
+                .set_CORE_TARGET(i_target),
+                "PMSR_SHIFT_ACTIVE Timeout");
 
     FAPI_DBG("Drop L2_PURGE_REQ/ABORT via PCR_SCSR[5, 6]");
     FAPI_TRY( HCD_PUTMMIO_C( i_target, QME_SCSR_WO_CLEAR, MMIO_LOAD32H( BITS32(5, 2) ) ) );

@@ -80,13 +80,12 @@ p10_hcd_corecache_clock_control(
     uint32_t i_command)
 
 {
-
     fapi2::buffer<uint64_t> l_scomData              = 0;
     uint32_t                l_timeout               = 0;
 #ifndef EQ_CLOCK_STAT_DISABLE
-    fapi2::Target < fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST > l_mc_or = i_target;//default OR
     uint32_t                l_clk_stat              = 0;
     uint32_t                l_clk_stat_expected     = 0;
+    fapi2::Target < fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST > l_mc_or = i_target;//default OR
 #endif
 
     FAPI_INF(">>p10_hcd_corecache_clock_control[%x](b0:stop/b1:start) on regions[0x%08X]", i_command, i_regions);

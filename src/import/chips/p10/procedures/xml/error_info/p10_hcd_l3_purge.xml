@@ -1,7 +1,7 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/import/chips/p10/procedures/xml/error_info/p10_hcd_l2_purge.xml $ -->
+<!-- $Source: src/import/chips/p10/procedures/xml/error_info/p10_hcd_l3_purge.xml $ -->
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
@@ -27,41 +27,10 @@
   <!-- ********************************************************************* -->
   <hwpError>
     <sbeError/>
-    <rc>RC_L2_PURGE_DONE_TIMEOUT</rc>
-    <description>L2 Purge Done Timeout.</description>
-    <ffdc>L2_PURGE_DONE_POLL_TIMEOUT_HW_NS</ffdc>
-    <ffdc>QME_SCSR</ffdc>
-    <ffdc>CORE_TARGET</ffdc>
-    <callout>
-      <childTargets>
-        <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_CORE</childType>
-        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
-      </childTargets>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <childTargets>
-        <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_CORE</childType>
-        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
-      </childTargets>
-    </deconfigure>
-    <gard>
-      <childTargets>
-        <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_CORE</childType>
-        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
-      </childTargets>
-    </gard>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_PMSR_SHIFT_ACTIVE_TIMEOUT</rc>
-    <description>poll for drop of PMSR_SHIFT_ACTIVE Timeout.</description>
-    <ffdc>PMSR_SHIFT_ACTIVE_POLL_TIMEOUT_HW_NS</ffdc>
-    <ffdc>QME_SCSR</ffdc>
+    <rc>RC_L3_PURGE_DONE_TIMEOUT</rc>
+    <description>L3 Purge Done Timeout.</description>
+    <ffdc>L3_PURGE_DONE_POLL_TIMEOUT_HW_NS</ffdc>
+    <ffdc>PM_PURGE_REG</ffdc>
     <ffdc>CORE_TARGET</ffdc>
     <callout>
       <childTargets>

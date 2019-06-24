@@ -114,6 +114,7 @@ p10_hcd_core_shadows_disable(
                 "Shadow Disable FTC/PP/DPT Shadow State Timeout");
 
 #ifndef XFER_SENT_DONE_DISABLE
+
     FAPI_DBG("Wait on XFER_RECEIVE_DONE via PCR_TFCSR[32]");
     l_timeout = HCD_SHADOW_DIS_XFER_RECEIVE_DONE_POLL_TIMEOUT_HW_NS /
                 HCD_SHADOW_DIS_XFER_RECEIVE_DONE_POLL_DELAY_HW_NS;
@@ -142,6 +143,7 @@ p10_hcd_core_shadows_disable(
 
     FAPI_DBG("Drop XFER_RECEIVE_DONE via PCR_TFCSR[32]");
     FAPI_TRY( HCD_GETMMIO_C( i_target, MMIO_LOWADDR(QME_TFCSR_WO_CLEAR), MMIO_1BIT( MMIO_LOWBIT(32) ) ) );
+
 #endif
 
     FAPI_DBG("Assert CTFS_WKUP_ENABLE via PCR_SCSR[27]");

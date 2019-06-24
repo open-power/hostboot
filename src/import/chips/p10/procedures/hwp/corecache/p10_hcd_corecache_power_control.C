@@ -115,14 +115,17 @@ p10_hcd_corecache_power_control(
 {
     fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST > l_mc_or = i_target;//default OR
     fapi2::buffer<buffer_t> l_mmioData        = 0;
-#ifndef PFET_SENSE_POLL_DISABLE
-    uint32_t                l_timeout         = 0;
-    uint32_t                l_pfet_senses     = 0;
-#endif
     uint32_t                l_pfet_seq_states = 0;
     uint32_t                l_isL3            = (i_command & HCD_PFET_L3_MASK)  >> 1;
     uint32_t                l_isON            = (i_command & HCD_PFET_ON_MASK);
     uint32_t                l_isVCS           = l_isON;
+#ifndef PFET_SENSE_POLL_DISABLE
+    uint32_t                l_timeout         = 0;
+    uint32_t                l_pfet_senses     = 0;
+    fapi2::Target < fapi2::TARGET_TYPE_SYSTEM > l_sys;
+    fapi2::ATTR_RUNN_MODE_Type                  l_attr_runn_mode;
+    FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_RUNN_MODE, l_sys, l_attr_runn_mode ) );
+#endif
 
     FAPI_INF(">>p10_hcd_corecache_power_control[%x](b1x:L3,bx1:ON)", i_command);
 
@@ -160,20 +163,24 @@ p10_hcd_corecache_power_control(
                                  MMIO_LOAD32H( HCD_PFET_SEQ_STATES[l_isON][l_isVCS] ) ) );
 
 #ifndef PFET_SENSE_POLL_DISABLE
+
         FAPI_DBG("Poll for PFET senses to be proper in PFETSTAT[]");
         l_timeout = HCD_CORECACHE_POW_CTRL_POLL_TIMEOUT_HW_NS /
                     HCD_CORECACHE_POW_CTRL_POLL_DELAY_HW_NS;
 
         do
         {
-            FAPI_TRY( HCD_GETMMIO_C( i_target, HCD_CPMS_PFETSTAT[l_isL3], l_mmioData ) );
-
-            MMIO_GET32H(l_pfet_senses);
-
-            //use multicastAND to check 1
-            if( l_pfet_senses & HCD_PFET_SENSE_BITS[l_isON][l_isVCS] )
+            if (!l_attr_runn_mode)
             {
-                break;
+                FAPI_TRY( HCD_GETMMIO_C( i_target, HCD_CPMS_PFETSTAT[l_isL3], l_mmioData ) );
+
+                MMIO_GET32H(l_pfet_senses);
+
+                //use multicastAND to check 1
+                if( l_pfet_senses & HCD_PFET_SENSE_BITS[l_isON][l_isVCS] )
+                {
+                    break;
+                }
             }
 
             // Debug read
@@ -193,6 +200,7 @@ p10_hcd_corecache_power_control(
                     .set_POW_DOMAINS(l_isL3)
                     .set_CORE_TARGET(i_target),
                     "Core/Cache PFET Control Timeout");
+
 #endif
 
         FAPI_DBG("Reset PFET Sequencer State via PFETCNTL[0,1/2,3]");
