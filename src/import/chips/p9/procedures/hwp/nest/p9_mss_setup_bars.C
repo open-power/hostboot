@@ -2211,11 +2211,11 @@ fapi2::ReturnCode writeMCBarData(
 
             // SMF lower addr
             l_norAddr = 0;
-            l_norAddr.insertFromRight<22, 14>(l_data.MCFGPA_SMF_LOWER_addr);
+            l_norAddr.insertFromRight<17, 19>(l_data.MCFGPA_SMF_LOWER_addr);
             FAPI_TRY(extendBarAddress(l_ext_mask, l_norAddr, l_extAddr));
             l_scomData.insert<P9A_MI_MCFGP0A_SMF_LOWER_ADDRESS,
                               P9A_MI_MCFGP0A_SMF_LOWER_ADDRESS_LEN>(
-                                  (l_extAddr << 14)); //matches 22:35 extendBarAddress shifts left 8 (22-8) = 14
+                                  (l_extAddr << 9)); //matches 17:35 extendBarAddress shifts left 8 (17-8) = 9
             // SMF upper addr
             l_norAddr = 0;
             l_norAddr.insertFromRight<22, 14>(l_data.MCFGPA_SMF_UPPER_addr);
@@ -2277,11 +2277,11 @@ fapi2::ReturnCode writeMCBarData(
 
             // SMF lower addr
             l_norAddr = 0;
-            l_norAddr.insertFromRight<22, 14>(l_data.MCFGPMA_SMF_LOWER_addr);
+            l_norAddr.insertFromRight<17, 19>(l_data.MCFGPMA_SMF_LOWER_addr);
             FAPI_TRY(extendBarAddress(l_ext_mask, l_norAddr, l_extAddr));
             l_scomData.insert<P9A_MI_MCFGPM0A_SMF_LOWER_ADDRESS,
                               P9A_MI_MCFGPM0A_SMF_LOWER_ADDRESS_LEN>(
-                                  (l_extAddr << 14 )); //matches 22:35 extendBarAddress shifts left 8 (22-8) = 14
+                                  (l_extAddr << 9 )); //matches 17:35 extendBarAddress shifts left 8 (17-8) = 9
             // SMF upper addr
             l_norAddr = 0;
             l_norAddr.insertFromRight<22, 14>(l_data.MCFGPMA_SMF_UPPER_addr);

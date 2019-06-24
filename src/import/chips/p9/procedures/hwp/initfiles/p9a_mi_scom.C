@@ -44,6 +44,10 @@ fapi2::ReturnCode p9a_mi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MI>& TGT0,
         fapi2::ATTR_ENABLE_MEM_EARLY_DATA_SCOM_Type l_TGT1_ATTR_ENABLE_MEM_EARLY_DATA_SCOM;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ENABLE_MEM_EARLY_DATA_SCOM, TGT1, l_TGT1_ATTR_ENABLE_MEM_EARLY_DATA_SCOM));
         uint64_t l_def_ENABLE_AMO_CACHING = literal_1;
+        fapi2::ATTR_FABRIC_ADDR_EXTENSION_GROUP_ID_Type l_TGT1_ATTR_FABRIC_ADDR_EXTENSION_GROUP_ID;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FABRIC_ADDR_EXTENSION_GROUP_ID, TGT1, l_TGT1_ATTR_FABRIC_ADDR_EXTENSION_GROUP_ID));
+        fapi2::ATTR_FABRIC_ADDR_EXTENSION_CHIP_ID_Type l_TGT1_ATTR_FABRIC_ADDR_EXTENSION_CHIP_ID;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FABRIC_ADDR_EXTENSION_CHIP_ID, TGT1, l_TGT1_ATTR_FABRIC_ADDR_EXTENSION_CHIP_ID));
         uint64_t l_def_ENABLE_MCU_TIMEOUTS = literal_1;
         fapi2::buffer<uint64_t> l_scom_buffer;
         {
@@ -101,6 +105,8 @@ fapi2::ReturnCode p9a_mi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MI>& TGT0,
                 l_scom_buffer.insert<24, 16, 48, uint64_t>(literal_0b0000000000001000 );
             }
 
+            l_scom_buffer.insert<46, 4, 60, uint64_t>(l_TGT1_ATTR_FABRIC_ADDR_EXTENSION_GROUP_ID );
+            l_scom_buffer.insert<50, 3, 61, uint64_t>(l_TGT1_ATTR_FABRIC_ADDR_EXTENSION_CHIP_ID );
             FAPI_TRY(fapi2::putScom(TGT0, 0x5010813ull, l_scom_buffer));
         }
         {
