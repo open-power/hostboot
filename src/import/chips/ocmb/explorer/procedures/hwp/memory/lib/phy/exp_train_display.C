@@ -260,7 +260,7 @@ fapi2::ReturnCode display_response_timing(const fapi2::Target<fapi2::TARGET_TYPE
     FAPI_INF("%s DFIMRL_DDRCLK_trained: %u", mss::c_str(i_target), i_training_info.tm_resp.DFIMRL_DDRCLK_trained);
 
     // RD to RD
-    FAPI_DBG("%s RD-to-RD     :  0  1  2  3", mss::c_str(i_target));
+    FAPI_DBG("%s RD-to-RD      :  0  1  2  3", mss::c_str(i_target));
 
     for(uint8_t l_rank_n = 0; l_rank_n < l_num_rank_per_ocmb; ++l_rank_n)
     {
@@ -270,7 +270,7 @@ fapi2::ReturnCode display_response_timing(const fapi2::Target<fapi2::TARGET_TYPE
     }
 
     // WR to WR
-    FAPI_DBG("%s WR-to-WR     :  0  1  2  3", mss::c_str(i_target));
+    FAPI_DBG("%s WR-to-WR      :  0  1  2  3", mss::c_str(i_target));
 
     for(uint8_t l_rank_n = 0; l_rank_n < l_num_rank_per_ocmb; ++l_rank_n)
     {
@@ -280,7 +280,7 @@ fapi2::ReturnCode display_response_timing(const fapi2::Target<fapi2::TARGET_TYPE
     }
 
     // WR to RD
-    FAPI_DBG("%s WR-to-RD     :  0  1  2  3", mss::c_str(i_target));
+    FAPI_DBG("%s WR-to-RD      :  0  1  2  3", mss::c_str(i_target));
 
     for(uint8_t l_rank_n = 0; l_rank_n < l_num_rank_per_ocmb; ++l_rank_n)
     {
@@ -290,7 +290,7 @@ fapi2::ReturnCode display_response_timing(const fapi2::Target<fapi2::TARGET_TYPE
     }
 
     // RD to WR
-    FAPI_DBG("%s RD-to-WR     :  0  1  2  3", mss::c_str(i_target));
+    FAPI_DBG("%s RD-to-WR      :  0  1  2  3", mss::c_str(i_target));
 
     for(uint8_t l_rank_n = 0; l_rank_n < l_num_rank_per_ocmb; ++l_rank_n)
     {
