@@ -96,6 +96,9 @@ use constant LICENSE_PROLOG => "LICENSE_PROLOG";
 # When adding a new company add constant here and to %fileContributorsCompany
 use constant IBM => 'International Business Machines Corp.';
 use constant GOOGLE => 'Google Inc.';
+use constant INSPUR => 'Inspur Power Systems Corp.';
+use constant SUPERMICRO => 'Super Micro Computer, Inc.';
+use constant YADRO => 'YADRO';
 
 # Create mapping for git contrubitors to companies
 my %fileContributorsCompany = (
@@ -103,6 +106,9 @@ my %fileContributorsCompany = (
     "ozlabs.org" => IBM,
     "google.com" => GOOGLE,
     "Google Shared Technology" => GOOGLE,
+    "inspur.com" => INSPUR,
+    "supermicro.com" => SUPERMICRO,
+    "yadro.com" => YADRO,
 );
 
 #------------------------------------------------------------------------------
