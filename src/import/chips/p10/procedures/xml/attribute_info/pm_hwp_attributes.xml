@@ -507,4 +507,23 @@
     <writeable/>
   </attribute>
 
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_QME_BROADSIDE_SCAN</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Enable trap function upon broadside scan
+
+    Consumers: p10_hcd_core/cache_*_initf 
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+          FALSE=0,
+          TRUE=1
+    </enum>
+    <initToZero/>
+    <writeable/>
+    <group>enablement</group>
+  </attribute>
+
 </attributes>
