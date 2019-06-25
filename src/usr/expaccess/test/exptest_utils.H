@@ -57,6 +57,11 @@ errlHndl_t unloadModule(const char * i_modName);
  */
 TARGETING::HB_MUTEX_SERIALIZE_TEST_LOCK_ATTR getTestMutex(void);
 
+/**
+ * @brief Enable inband scoms on an OCMB target
+ * @param[in] i_ocmbTarget The target OCMB chip
+ */
+void enableInbandScomsOcmb(const TARGETING::TargetHandle_t i_ocmbTarget);
 }
 
 #endif

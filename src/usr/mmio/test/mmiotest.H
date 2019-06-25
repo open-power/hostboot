@@ -47,6 +47,7 @@ static const uint64_t EXPLR_IB_MMIO_OFFSET   = 0x0000000100000000ull; // 4GB
 static const uint64_t EXPLR_INVALID_SCOM_ADDR =
                             EXPLR_TP_MB_UNIT_TOP_TRACE_TRDATA_CONFIG_0;
 
+using namespace TARGETING;
 
 class MmioTest : public CxxTest::TestSuite
 {
@@ -65,7 +66,7 @@ class MmioTest : public CxxTest::TestSuite
         uint64_t l_buffer64;
 
         // Needed since the device operations could be using inband communication in error path
-        TARGETING::HB_MUTEX_SERIALIZE_TEST_LOCK_ATTR l_mutex = exptest::getTestMutex();
+        HB_MUTEX_SERIALIZE_TEST_LOCK_ATTR l_mutex = exptest::getTestMutex();
         if (l_mutex == nullptr)
         {
             TS_FAIL("testExplrMMIO: unable to get test mutex");
@@ -75,24 +76,28 @@ class MmioTest : public CxxTest::TestSuite
         // >> atomic section
         mutex_lock(l_mutex);
 
+        TargetHandle_t   explr_target = nullptr;
+
         do {
 
             // Get OCMB target, return if there is no OCMB
-            TARGETING::TargetHandle_t   explr_target = nullptr;
-            TARGETING::TargetHandleList ocmb_target_list;
-            TARGETING::getAllChips(ocmb_target_list, TARGETING::TYPE_OCMB_CHIP);
+            TargetHandleList ocmb_target_list;
+            getAllChips(ocmb_target_list, TYPE_OCMB_CHIP);
             if (ocmb_target_list.size() == 0)
             {
                 TS_INFO("testExplrMMIO> No OCMB targets found.  Exiting.");
                 break;
             }
             explr_target = ocmb_target_list[0];
-            if(explr_target->getAttr<TARGETING::ATTR_CHIP_ID>() !=
+            if(explr_target->getAttr<ATTR_CHIP_ID>() !=
                                                      POWER_CHIPID::EXPLORER_16)
             {
                 TS_INFO("testExplrMMIO> No explorer targets found.  Exiting.");
                 break;
             }
+
+            // Make sure we're using MMIO to this explorer chip
+            exptest::enableInbandScomsOcmb(explr_target);
 
             // valid read from config space register
             op_size = sizeof(regdata4);
@@ -180,59 +185,77 @@ class MmioTest : public CxxTest::TestSuite
                 break;
             }
 
-#if 0 //@fixme - RTC:211487
-          // Write to an "invalid" scom address.  Should
-          // return with failure (now that we've set up the error regs).
-          // NOTE: Also, writing MMIO_OCMB_UE_DETECTED to this register
-          //       sets up the following read to the same register
-          //       to fail.
-          l_buffer64 = MMIO_OCMB_UE_DETECTED;
-          op_size = sizeof(l_buffer64);
-          l_err = DeviceFW::deviceWrite(
-                            explr_target,
-                            &l_buffer64,
-                            op_size,
-                            DEVICE_MMIO_ADDRESS(
-                                SCOM2MMIO_ADDR(EXPLR_INVALID_SCOM_ADDR),
-                                op_size));
-          if(l_err == nullptr)
-          {
-              TS_FAIL("testExplrMMIO> "
-                      "did not recieve expected failure on mmio write");
-              break;
-          }
-          else
-          {
-              TS_INFO("testExplrMMIO> received expected failure on mmio write");
-              errlCommit(l_err, CXXTEST_COMP_ID);
-          }
+            // Write to an "invalid" scom address.  Should
+            // return with failure (now that we've set up the error regs).
+            // NOTE: Also, writing MMIO_OCMB_UE_DETECTED to this register
+            //       sets up the following read to the same register
+            //       to fail.
+            l_buffer64 = MMIO_OCMB_UE_DETECTED;
+            op_size = sizeof(l_buffer64);
+            l_err = DeviceFW::deviceWrite(
+                              explr_target,
+                              &l_buffer64,
+                              op_size,
+                              DEVICE_MMIO_ADDRESS(
+                                  SCOM2MMIO_ADDR(EXPLR_INVALID_SCOM_ADDR),
+                                  op_size));
+            if(l_err == nullptr)
+            {
+                ScomSwitches l_switches =
+                    explr_target->getAttr<ATTR_SCOM_SWITCHES>();
+                TS_INFO("testExplrMMIO: Current SCOM mode: %s",
+                        (l_switches.useInbandScom)? "MMIO": "I2C");
+                TS_FAIL("testExplrMMIO> "
+                        "did not recieve expected failure on mmio write");
+                break;
+            }
+            else
+            {
+                TS_INFO("testExplrMMIO> "
+                        "received expected failure on mmio write");
+                errlCommit(l_err, CXXTEST_COMP_ID);
+            }
 
-          // Read from an "invalid" scom address.  Should
-          // return with failure (now that we've se up the error regs).
-          op_size = sizeof(l_buffer64);
-          l_err = DeviceFW::deviceRead(
-                            explr_target,
-                            &l_buffer64,
-                            op_size,
-                            DEVICE_MMIO_ADDRESS(
-                                SCOM2MMIO_ADDR(EXPLR_INVALID_SCOM_ADDR),
-                                op_size));
+            // Re-enable inband scoms after failure disables it
+            exptest::enableInbandScomsOcmb(explr_target);
 
-          if(l_err == nullptr)
-          {
-              TS_INFO("testExplrMMIO> data read from invalid address: 0x%016llx",
-                      l_buffer64);
-              TS_FAIL("testExplrMMIO> "
-                      "did not recieve expected failure on mmio read");
-          }
-          else
-          {
-              TS_INFO("testExplrMMIO> received expected failure on mmio read");
-              errlCommit(l_err, CXXTEST_COMP_ID);
-          }
-#endif //@fixme - RTC:211487
+            // Read from an "invalid" scom address.  Should
+            // return with failure (now that we've set up the error regs).
+            op_size = sizeof(l_buffer64);
+            l_err = DeviceFW::deviceRead(
+                              explr_target,
+                              &l_buffer64,
+                              op_size,
+                              DEVICE_MMIO_ADDRESS(
+                                  SCOM2MMIO_ADDR(EXPLR_INVALID_SCOM_ADDR),
+                                  op_size));
+
+            if(l_err == nullptr)
+            {
+                ScomSwitches l_switches =
+                    explr_target->getAttr<ATTR_SCOM_SWITCHES>();
+                TS_INFO("testExplrMMIO> "
+                        "data read from invalid address: 0x%016llx",
+                        l_buffer64);
+                TS_INFO("testExplrMMIO: Current SCOM mode: %s",
+                        (l_switches.useInbandScom)? "MMIO": "I2C");
+                TS_FAIL("testExplrMMIO> "
+                        "did not recieve expected failure on mmio read");
+            }
+            else
+            {
+                TS_INFO("testExplrMMIO> "
+                        "received expected failure on mmio read");
+                errlCommit(l_err, CXXTEST_COMP_ID);
+            }
 
         } while (0);
+
+        // Re-enable inband scoms after failure disables it
+        if(explr_target != nullptr)
+        {
+            exptest::enableInbandScomsOcmb(explr_target);
+        }
 
         // << atomic section
         mutex_unlock(l_mutex);
