@@ -2909,6 +2909,23 @@ sub processI2C
             {
                 $type = "0xFF";
             }
+            # TPM types can vary by MODEL number
+            elsif ($type_str eq "NUVOTON_TPM")
+            {
+                # Model values can be found in tpmddif.H and are kept in
+                # sync with TPM_MODEL attribute in attribute_types_hb.xml
+                my $tpm_model = $targetObj->getAttribute($i2c->{DEST_PARENT},"TPM_MODEL");
+                if ($tpm_model eq 1)
+                {
+                    $type = $targetObj->getEnumValue("HDAT_I2C_DEVICE_TYPE",$type_str);
+                }
+                if ($tpm_model eq 2)
+                {
+                    # @TODO RTC 212201 use proper enum when <system>.xml supports it
+                    #$type = $targetObj->getEnumValue("HDAT_I2C_DEVICE_TYPE","TCG_I2C_TPM");
+                    $type = 0x15;
+                }
+            }
             else
             {
                 $type = $targetObj->getEnumValue("HDAT_I2C_DEVICE_TYPE",$type_str);

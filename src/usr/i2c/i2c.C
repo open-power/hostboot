@@ -5475,20 +5475,21 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
                 l_currentDI.slavePort = 0xFF;
                 l_currentDI.busFreqKhz = (tpmInfo.busFreq)
                     / FREQ_CONVERSION::HZ_PER_KHZ;
-                l_currentDI.deviceType =
-                        TARGETING::HDAT_I2C_DEVICE_TYPE_NUVOTON_TPM;
                 l_currentDI.devicePurpose =
                     TARGETING::HDAT_I2C_DEVICE_PURPOSE_TPM;
 
-
-                // Read TPM Model attribute to determine the label
+                // Read TPM Model attribute to determine some values
                 if (tpmInfo.model == TPMDD::TPM_MODEL_65x)
                 {
                     strcpy(l_currentDI.deviceLabel,"?nuvoton,npct601,tpm,host");
+                    l_currentDI.deviceType =
+                        TARGETING::HDAT_I2C_DEVICE_TYPE_NUVOTON_TPM;
                 }
                 else if (tpmInfo.model == TPMDD::TPM_MODEL_75x)
                 {
                     strcpy(l_currentDI.deviceLabel,"?tcg,tpm_i2c_ptp,tpm,host");
+                    l_currentDI.deviceType =
+                        TARGETING::HDAT_I2C_DEVICE_TYPE_TCG_I2C_TPM;
                 }
                 else
                 {
