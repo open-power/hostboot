@@ -123,6 +123,7 @@ class throttle_traits<mss::mc_type::EXPLORER>
             POWER_SLOPE_LENGTH = 12,
             POWER_INTERCEPT_START = 52,
             POWER_INTERCEPT_LENGTH = 12,
+            POWER_LENGTH = 32,
         };
 
         //Positions and lengths of the encodings

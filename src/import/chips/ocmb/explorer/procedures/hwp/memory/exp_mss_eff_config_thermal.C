@@ -142,6 +142,7 @@ extern "C"
                     FAPI_TRY(mss::attr::set_total_pwr_slope(l_port, l_slope));
                     FAPI_TRY(mss::attr::set_total_pwr_intercept(l_port, l_intercept));
                     FAPI_TRY(mss::attr::set_dimm_thermal_limit(l_port, l_limit));
+                    FAPI_TRY(mss::attr::set_mem_watt_target(l_port, l_limit));
 
                     FAPI_INF( "PMIC current curve slope is %d, intercept is %d, limit is %d for %s", l_slope[0], l_intercept[0],
                               l_limit[0], mss::c_str(l_port));

@@ -215,14 +215,17 @@ fapi2::ReturnCode get_power_attrs (const mss::throttle_type i_throttle_type,
         const auto l_dimm_pos = mss::index (l_dimm);
         mss::dimm::kind<> l_kind (l_dimm);
         mss::power_thermal::decoder<> l_decoder(l_kind);
+        fapi2::buffer<uint64_t> l_attr_value;
 
         FAPI_TRY( l_decoder.generate_encoding(), "%s Error in get_power_attrs", mss::c_str(l_dimm) );
 
         // The first entry into these arrays must be valid
         // If we don't find any values, the attributes aren't found so go with some defaults
-        if (i_slope.empty() || i_slope[0] == 0)
+        l_attr_value = i_slope[0];
+
+        if (i_slope.empty() || !l_attr_value.getBit<TT::POWER_LIMIT_START, TT::POWER_LENGTH>())
         {
-            FAPI_INF("%s ATTR_MSS_MRW_OCMB_PWR_SLOPE not found!!", mss::c_str(l_dimm));
+            FAPI_INF("%s ATTR_MSS_MRW_OCMB_PWR_SLOPE not found or has zero values", mss::c_str(l_dimm));
 
             o_slope[l_dimm_pos] =
                 (i_throttle_type == mss::throttle_type::POWER) ? TT::POWER_SLOPE : TT::TOTAL_SLOPE;
@@ -237,9 +240,11 @@ fapi2::ReturnCode get_power_attrs (const mss::throttle_type i_throttle_type,
                 (i_throttle_type == mss::throttle_type::POWER) ? l_decoder.iv_vddr_slope : l_decoder.iv_total_slope;
         }
 
-        if (i_intercept.empty() || i_intercept[0] == 0)
+        l_attr_value = i_intercept[0];
+
+        if (i_intercept.empty() || !l_attr_value.getBit<TT::POWER_LIMIT_START, TT::POWER_LENGTH>())
         {
-            FAPI_INF("%s ATTR_MSS_MRW_OCMB_PWR_INTERCEPT not found!!", mss::c_str(l_dimm));
+            FAPI_INF("%s ATTR_MSS_MRW_OCMB_PWR_INTERCEPT not found or has zero values", mss::c_str(l_dimm));
 
             o_intercept[l_dimm_pos] =
                 (i_throttle_type == mss::throttle_type::POWER) ? TT::POWER_INT : TT::TOTAL_INT;
@@ -254,9 +259,11 @@ fapi2::ReturnCode get_power_attrs (const mss::throttle_type i_throttle_type,
                 (i_throttle_type == mss::throttle_type::POWER) ? l_decoder.iv_vddr_intercept : l_decoder.iv_total_intercept;
         }
 
-        if (i_thermal_power_limit.empty() || i_thermal_power_limit[0] == 0)
+        l_attr_value = i_thermal_power_limit[0];
+
+        if (i_thermal_power_limit.empty() || !l_attr_value.getBit<TT::THERMAL_START, TT::THERMAL_LENGTH>())
         {
-            FAPI_INF("%s ATTR_MSS_MRW_OCMB_THERMAL_MEMORY_POWER_LIMIT not found!!", mss::c_str(l_dimm));
+            FAPI_INF("%s ATTR_MSS_MRW_OCMB_THERMAL_MEMORY_POWER_LIMIT not found or has zero values", mss::c_str(l_dimm));
 
             // The unit of limit and intercept is cA but limit is dA in mss::throttle_type::POWER
             // So we need to transfer them to the same unit

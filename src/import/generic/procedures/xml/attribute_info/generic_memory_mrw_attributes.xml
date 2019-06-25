@@ -251,7 +251,7 @@
     <valueType>uint32</valueType>
     <platInit/>
     <mssUnits>c%</mssUnits>
-    <default>0x00002328</default>
+    <default>0x00002710</default>
     <initToZero/>
     <mssAccessorName>mrw_max_dram_databus_util</mssAccessorName>
   </attribute>

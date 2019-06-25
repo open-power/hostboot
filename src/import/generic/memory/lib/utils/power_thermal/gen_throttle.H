@@ -590,7 +590,7 @@ fapi2::ReturnCode throttle<MC, TT>::power_regulator_throttles ()
                               l_port_power_calc_max,
                               l_port_power_slope,
                               l_port_power_int),
-             "Failed to calculate the power curve for port %s, calculated port power max is %d, idle is %d",
+             "Failed to calculate the power curve for port %s, calculated port power max is %f, idle is %f",
              mss::c_str(iv_target),
              l_port_power_calc_max,
              l_port_power_calc_idle);
@@ -606,7 +606,7 @@ fapi2::ReturnCode throttle<MC, TT>::power_regulator_throttles ()
 
     //Calculate the new slot values and the max power value for the port
     FAPI_TRY( calc_slots_and_power( l_calc_util_port),
-              "%s Error calculating the final throttles and power values for target with passed in port utilization %d",
+              "%s Error calculating the final throttles and power values for target with passed in port utilization %f",
               mss::c_str(iv_target),
               l_calc_util_port);
 
@@ -880,15 +880,16 @@ void throttle<MC, TT>::calc_util_usage(const uint32_t i_slope,
                                        const uint32_t i_power_limit,
                                        double& o_util) const
 {
-    o_util = ((static_cast<double>(i_power_limit) - i_int) / i_slope ) * UTIL_CONVERSION;
+    // Return 0 utilization if our intercept is above the power limit
+    o_util = (i_power_limit > i_int) ? (((static_cast<double>(i_power_limit) - i_int) / i_slope ) * UTIL_CONVERSION) : 0;
 
-    //Cast to uint32 for edge case where it has decimals
+    // Cast to uint32 for edge case where it has decimals
     o_util = (static_cast<uint32_t>(o_util) < iv_databus_port_max) ? static_cast<uint32_t>(o_util) : iv_databus_port_max;
 
     // Check for the minimum threshnold and update if need be
     if(o_util < TT::MIN_UTIL)
     {
-        FAPI_INF("Calculated utilization (%lu) is less than the minimum utilization: %lu. Setting to minimum value for %s",
+        FAPI_INF("Calculated utilization (%f) is less than the minimum utilization: %lu. Setting to minimum value for %s",
                  o_util,
                  TT::MIN_UTIL, mss::c_str(iv_target));
         o_util = TT::MIN_UTIL;
@@ -927,7 +928,7 @@ fapi2::ReturnCode throttle<MC, TT>::calc_power_from_n (const uint16_t i_n_slot,
 
     //Determine the utilization for each DIMM that will maximize the port power
     FAPI_TRY( calc_split_util(l_calc_util_slot, l_calc_util_port, l_calc_databus_port_max),
-              "Error splitting the utilization for target %s with slot utilizatio %d and port util %d",
+              "Error splitting the utilization for target %s with slot utilizatio %f and port util %f",
               mss::c_str(iv_target),
               l_calc_util_slot,
               l_calc_util_port);
