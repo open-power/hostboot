@@ -192,6 +192,8 @@ bool nvdimmArm(TARGETING::TargetHandleList &i_nvdimmTargetList);
  */
 bool nvdimmDisarm(TARGETING::TargetHandleList &i_nvdimmTargetList);
 
+#endif
+
 /**
  * @brief NVDIMM protection state
  *
@@ -227,7 +229,7 @@ enum nvdimm_protection_t
  */
 errlHndl_t notifyNvdimmProtectionChange(TARGETING::Target* i_target,
                                   const nvdimm_protection_t i_state);
-#endif
+
 /**
  * @brief Entry function to NVDIMM initialization
  *        - Checks for ready state
