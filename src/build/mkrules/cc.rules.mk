@@ -54,6 +54,20 @@ $(OBJDIR)/%.o : %.C
 	            -o $@.trace $(INCLUDE_DIRS) -iquote .
 	$(C1)$(TRACE_HASHER) $@ $(TRACE_FLAGS)
 	@rm $@.trace
+	$(C2) "    CPPCHECK        $(notdir $<)"
+# TODO RTC 215692
+# The following script is used to run the cppcheck tool when enabled. If one
+# cppcheck error is found, the make process will stop here, the error will be
+# printed out to the terminal and stored in a file .`basename $<`.cppcheck in
+# the directory where the original file is located
+	$(C1) set -o pipefail && cd `dirname $<` && timeout 2m $(CXX_CHECK) `basename $<` 2>&1 | tee .`basename $<`.cppcheck; exit_code=$$? ; \
+	if [ "$$exit_code" -ne 1 ]; then \
+		rm -f .`basename $<`.cppcheck; \
+		if [ "$$exit_code" -eq 127 ]; then \
+# Error code 127 means that the command timed-out. We do not fail for timeouts.\
+			exit_code=0; \
+		fi; \
+	fi; exit "$$exit_code"
 
 # Compiling *.cc files
 $(OBJDIR)/%.o : %.cc
@@ -63,6 +77,15 @@ $(OBJDIR)/%.o : %.cc
 	               $(INCLUDE_DIRS) -iquote .
 	$(C1)$(TRACE_HASHER) $@ $(TRACE_FLAGS)
 	@rm $@.trace
+	$(C2) "    CPPCHECK        $(notdir $<)"
+# TODO RTC 215692
+	$(C1) set -o pipefail && cd `dirname $<` && timeout 2m $(CXX_CHECK) `basename $<` 2>&1 | tee .`basename $<`.cppcheck; exit_code=$$? ; \
+	if [ "$$exit_code" -ne 1 ]; then \
+		rm -f .`basename $<`.cppcheck; \
+		if [ "$$exit_code" -eq 127 ]; then \
+			exit_code=0; \
+		fi; \
+	fi; exit "$$exit_code"
 
 
 $(OBJDIR)/%.o : %.c
@@ -73,10 +96,28 @@ ifndef CC_OVERRIDE
 	$(C2) "    CC         $(notdir $<)"
 	$(C1)$(CC) -c $(call FLAGS_FILTER, $(CFLAGS), $<) $(SOURCE_FILE) \
 	           -o $@.trace $(INCLUDE_DIRS) -iquote .
+	$(C2) "    CPPCHECK        $(notdir $<)"
+# TODO RTC 215692
+	$(C1) set -o pipefail && cd `dirname $<` && timeout 2m $(C_CHECK) `basename $<` 2>&1 | tee .`basename $<`.cppcheck; exit_code=$$? ; \
+	if [ "$$exit_code" -ne 1 ]; then \
+		rm -f .`basename $<`.cppcheck; \
+		if [ "$$exit_code" -eq 127 ]; then \
+			exit_code=0; \
+		fi; \
+	fi; exit "$$exit_code"
 else
 	$(C2) "    CXX        $(notdir $<)"
 	$(C1)$(CXX) -c $(call FLAGS_FILTER, $(CXXFLAGS), $<) $(SOURCE_FILE) \
 	            -o $@.trace $(INCLUDE_DIRS) -iquote .
+	$(C2) "    CPPCHECK        $(notdir $<)"
+# TODO RTC 215692
+	$(C1) set -o pipefail && cd `dirname $<` && timeout 2m $(CXX_CHECK) `basename $<` 2>&1 | tee .`basename $<`.cppcheck; exit_code=$$? ; \
+	if [ "$$exit_code" -ne 1 ]; then \
+		rm -f .`basename $<`.cppcheck; \
+		if [ "$$exit_code" -eq 127 ]; then \
+			exit_code=0; \
+		fi; \
+	fi; exit "$$exit_code"
 endif
 	$(C1)$(TRACE_HASHER) $@ $(TRACE_FLAGS)
 	@rm $@.trace

@@ -22,3 +22,6 @@ _SYNCAPP/
 gcov_report
 lcov_data
 standalone/
+objdump/
+*.cppcheck
+cpptools/

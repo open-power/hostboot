@@ -45,6 +45,16 @@ IMAGE_PASS_POST += cscope ctags
 endif
 IMAGE_PASS_POST += check_istep_modules
 
+# Variables used when running cppcheck tool.
+# The actual commands are stored in CXX_CHECK and C_CHECK, which are created as
+# dummy variables here, but will be set to the actual tool in the "cppcheck" rule
+BUILDCPPCHECK := $(PROJECT_ROOT)/src/build/tools/build-cppcheck
+CPPCHECKTOOL := $(PROJECT_ROOT)/src/build/tools/cpptools/cppcheck/cppcheck
+CPPCHECKFLAGS := --inline-suppr --error-exitcode=1 --template='Error CPPCHECK {file}: line {line}\nSyntax error string: {id}\n{message}'
+CPPCHECK := $(CPPCHECKTOOL) $(CPPCHECKFLAGS)
+export CXX_CHECK ?= true
+export C_CHECK ?= true
+
 include ./config.mk
 
 .PHONY: docs
@@ -74,6 +84,15 @@ lcov:
 	rm -rf obj/gcov_report
 	genhtml obj/lcov_data -o obj/gcov_report --ignore-errors source
 	@echo Coverage report now available in obj/gcov_report
+
+.PHONY: cppcheck
+cppcheck:
+	@echo Building with CPPCHECK tool
+# TODO RTC: 215692
+	${BUILDCPPCHECK}
+	export CXX_CHECK="$(CPPCHECK) $(filter -D%, $(CXXFLAGS)) $(INCFLAGS)" && \
+	export C_CHECK="$(CPPCHECK) $(filter -D%, $(CFLAGS)) $(INCFLAGS)" && \
+	${MAKE}
 
 .PHONY: gcda_clean
 gcda_clean:
