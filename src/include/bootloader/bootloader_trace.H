@@ -27,6 +27,9 @@
 #define __BOOT_LOADER_TRACE_H
 
 #include <arch/ppc.H>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 /**
  * @file    bootloader_trace.H

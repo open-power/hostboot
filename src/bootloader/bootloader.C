@@ -31,11 +31,12 @@
 #include <bootloader/hbblreasoncodes.H>
 #include <bootloader/bl_pnorAccess.H>
 #include <bootloader/bootloaderif.H>
+#include <bootloader/bl_console.H>
 
 #include <lpc_const.H>
 #include <pnor_utils.H>
 #include <arch/pvrformat.H>
-
+#include <arch/ppc.H>
 
 #include <ecc.H>
 
@@ -43,6 +44,7 @@
 #include <util/align.H>
 #include <string.h>
 #include <limits.h>
+#include <math.h>
 
 #include <securerom/ROM.H>
 #include <config.h>
@@ -296,6 +298,7 @@ namespace Bootloader{
         }
         else
         {
+            bl_console::putString("Validating boot firmware\r\n");
             // Set startAddr to ROM_verify() function at an offset of Secure ROM
             uint64_t l_rom_verify_startAddr =
                 reinterpret_cast<const uint64_t>(g_blData->blToHbData.secureRom)
@@ -365,7 +368,6 @@ namespace Bootloader{
             }
 
             BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_SUCCESS);
-
             verifyComponentId(i_pContainer,
                             PNOR::SectionIdToString(PNOR::HB_BASE_CODE));
         }
@@ -415,6 +417,12 @@ namespace Bootloader{
         l_memstate.size = g_blData->blToHbData.cacheSizeMb;
         writeScratchReg(MMIO_SCRATCH_MEMORY_STATE, l_memstate.fullData);
 
+        bl_console::init();
+
+        // start of istep 6.1
+        bl_console::putString("istep6.1\r\n");
+
+
         //We dont know what the start of pnor is because we dont know the size
         uint64_t l_pnorStart = 0;
 
@@ -423,6 +431,7 @@ namespace Bootloader{
 
         // Get location of HB base code in PNOR from TOC
         // @TODO RTC:138268 Support multiple sides of PNOR in bootloader
+        bl_console::putString("Loading boot firmware\r\n");
         bl_pnorAccess::getHBBSection(g_blData->blToHbData.lpcBAR,
                                      g_blData->bl_hbbSection,
                                      l_errCode,
@@ -471,10 +480,11 @@ namespace Bootloader{
             }
 
             // Copy HB base code from PNOR to working location
-            handleMMIO(l_pnorStart + l_hbbFlashOffset,
-                       (l_hbbEcc) ? HBB_ECC_WORKING_ADDR : HBB_WORKING_ADDR,
+            handleMMIO((l_pnorStart + l_hbbFlashOffset),
+                       ((l_hbbEcc) ? HBB_ECC_WORKING_ADDR : HBB_WORKING_ADDR),
                        workingLength,
-                       WORDSIZE);
+                       WORDSIZE,
+                       READ);
             BOOTLOADER_TRACE(BTLDR_TRC_MAIN_WORKING_HANDLEMMIO_RTN);
 
             PNOR::ECC::eccStatus rc = PNOR::ECC::CLEAN;
@@ -542,6 +552,7 @@ namespace Bootloader{
                                 hostboot_string);
 
                 // Start executing HBB
+                bl_console::putString("Invoking boot firmware\r\n");
                 enterHBB(HBB_HRMOR, HBB_RUNNING_OFFSET);
             }
             else
@@ -573,20 +584,21 @@ namespace Bootloader{
         return 0;
     }
 
-
     /** Handle MMIO to copy code/data from location to another.
      *
      * @param[in] i_srcAddr - The source location.
      * @param[in] i_destAddr - The destination location.
      * @param[in] i_size - The size of the code/data.
      * @param[in] i_ld_st_size - The size of each load/store operation.
+     * @param[in] i_mmioOp - The opcode for read/write operation
      *
      * @return void.
      */
     void handleMMIO(uint64_t i_srcAddr,
                     uint64_t i_destAddr,
                     uint32_t i_size,
-                    MMIOLoadStoreSizes i_ld_st_size)
+                    MMIOLoadStoreSizes i_ld_st_size,
+                    MMIOReadWrite i_mmioOp)
     {
         BOOTLOADER_TRACE(BTLDR_TRC_HANDLEMMIO_START + i_ld_st_size);
 
@@ -606,17 +618,29 @@ namespace Bootloader{
 
             if(i_ld_st_size == BYTESIZE)
             {
-                // Cache-inhibited load byte from hypervisor state.
-                // lbzcix      BOP1,Ref_G0,BOP2
-                asm volatile("lbzcix %0, 0, %1"
-                             : "=r" (l_targetGPR)    // output, %0
-                             : "r" (l_srcAddr)       // input,  %1
-                             : );                    // no impacts
+                if (i_mmioOp == READ)
+                {
+                    // Cache-inhibited load byte from hypervisor state.
+                    // lbzcix      BOP1,Ref_G0,BOP2
+                    asm volatile("lbzcix %0, 0, %1"
+                                : "=r" (l_targetGPR)    // output, %0
+                                : "r" (l_srcAddr)       // input,  %1
+                                : );                    // no impacts
 
-                // Store byte.
-                // stbx      BOP1,Ref_G0,BOP2
-                asm volatile("stbx %0,0,%1"
-                             :: "r" (l_targetGPR) , "r" (l_destAddr));
+                    // Store byte.
+                    // stbx      BOP1,Ref_G0,BOP2
+                    asm volatile("stbx %0,0,%1"
+                                :: "r" (l_targetGPR) , "r" (l_destAddr));
+                }
+                else
+                {
+                    asm volatile("lbzx %0, 0, %1"
+                                : "=r" (l_targetGPR)
+                                : "r" (l_srcAddr));
+
+                    asm volatile("stbcix %0, 0, %1"
+                                :: "r" (l_targetGPR), "r" (l_destAddr));
+                }
             }
             else if(i_ld_st_size == WORDSIZE)
             {

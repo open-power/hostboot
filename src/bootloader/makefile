@@ -29,6 +29,7 @@ HOSTBOOT_PROFILE=
 
 EXTRAINCDIR += ${ROOTPATH}/src/usr/pnor/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/lpc/
+EXTRAINCDIR += ${ROOTPATH}/src/usr/console/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/pnor/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/lpc/
@@ -45,8 +46,10 @@ OBJS += bl_pnor_ecc.o
 OBJS += bl_builtins.o
 OBJS += bl_terminate.o
 OBJS += bl_string_utils.o
+OBJS += bl_console.o
 
 OPT_LEVEL = -Os
 
 include ${ROOTPATH}/config.mk
 
+vpath ${ROOTPATH}/src/usr/console/uart.H

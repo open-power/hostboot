@@ -186,6 +186,15 @@ namespace Bootloader{
         DBLWORDSIZE = 8
     };
 
+    /** @enum MMIOReadWrite
+      * @brief Opcode for handleMMIO to read/write
+      */
+    enum MMIOReadWrite
+    {
+        READ =  1,
+        WRITE = 2
+    };
+
     /**
      * @brief Handle MMIO to copy code/data from one location to another
      *
@@ -196,11 +205,15 @@ namespace Bootloader{
      *        BYTESIZE     => copy 1 byte at a time
      *        WORDSIZE     => copy 4 bytes at a time
      *        DBLWORDSIZE  => copy 8 bytes at a time
+     * @param[in] i_opcode      opcode to perform MMIO read/write
+     *        READ         => MMIO read
+     *        WRITE        => MMIO write
      */
     extern void handleMMIO(uint64_t i_srcAddr,
                            uint64_t i_destAddr,
                            uint32_t i_size,
-                           MMIOLoadStoreSizes i_ld_st_size);
+                           MMIOLoadStoreSizes i_ld_st_size,
+                           MMIOReadWrite i_opcode);
 
     /** @enum HbbLengths
      *  @brief List of HBB lengths.

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,7 +24,9 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #include <bootloader/bootloader.H>
 #include <bootloader/hbblreasoncodes.H>
+#include <bootloader/bl_console.H>
 #include <arch/ppc.H>
+#include <stddef.h>
 
 #define bl_terminate_C
 
@@ -58,6 +60,17 @@ void bl_terminate(uint8_t  i_moduleID,
     HB_TI_DataArea *TI_DataAreaPtr = reinterpret_cast<HB_TI_DataArea*>(
         (HBB_WORKING_ADDR | Bootloader::IGNORE_HRMOR_MASK) + 0x2008);
     *TI_DataAreaPtr = g_blData->bl_TIDataArea;
+
+    bl_console::putString("Fatal Error SRC: 0xBC8A");
+    // convert int reasoncode to hex
+    const unsigned char* start_addr = reinterpret_cast<unsigned char*>(&i_reasoncode);
+    bl_console::displayHex(start_addr, sizeof(i_reasoncode));
+
+    // display the progress buffer along with TI area dump
+    bl_console::putString("\r\n\nDump:\r\n");
+    start_addr = reinterpret_cast<const unsigned char*>(g_blData);
+    size_t offset = offsetof(Bootloader::blData, bl_hbbSection);
+    bl_console::displayHex(start_addr, offset);
 
     if(i_executeTI)
     {

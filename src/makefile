@@ -70,6 +70,7 @@ BOOTLDR_OBJECTS += bl_terminate.o
 BOOTLDR_OBJECTS += forceattn_p9.o
 BOOTLDR_OBJECTS += bl_string_utils.o
 BOOTLDR_OBJECTS += rom_entry.o
+BOOTLDR_OBJECTS += bl_console.o
 
 SECUREROM_OBJECTS += ROM.o
 SECUREROM_OBJECTS += ecverify.o

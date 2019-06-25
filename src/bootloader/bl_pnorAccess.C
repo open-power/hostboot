@@ -193,13 +193,15 @@ void bl_pnorAccess::findTOC(uint64_t i_lpcBar, PNOR::SectionData_t * o_TOC,
         Bootloader::handleMMIO(l_mmioAddr,
                     reinterpret_cast<uint64_t>(l_tocBuffer),
                     Bootloader::WORDSIZE,
-                    Bootloader::WORDSIZE);
+                    Bootloader::WORDSIZE,
+                    Bootloader::READ);
 
         // Now Read OPB Master Status Reg offset (LPC Addr 0xC0010000)
         Bootloader::handleMMIO(l_mmioStatusAddr,
                                reinterpret_cast<uint64_t>(l_tocBuffer),
                                Bootloader::WORDSIZE,
-                               Bootloader::WORDSIZE);
+                               Bootloader::WORDSIZE,
+                               Bootloader::READ);
 
         uint32_t *l_val = reinterpret_cast<uint32_t *>(l_tocBuffer);
 
@@ -234,7 +236,8 @@ void bl_pnorAccess::findTOC(uint64_t i_lpcBar, PNOR::SectionData_t * o_TOC,
         Bootloader::handleMMIO(l_mmioAddr,
                     reinterpret_cast<uint64_t>(l_tocBuffer),
                     (PNOR::TOC_SIZE),
-                    Bootloader::WORDSIZE);
+                    Bootloader::WORDSIZE,
+                    Bootloader::READ);
 
         BOOTLOADER_TRACE(BTLDR_TRC_PA_FINDTOC_TOC1_HANDLEMMIO_RTN);
 
