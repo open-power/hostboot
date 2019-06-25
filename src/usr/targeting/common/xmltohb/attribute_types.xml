@@ -2270,6 +2270,46 @@
       <value>0xB</value>
     </enumerator>
     <enumerator>
+      <name>THERMAL_SENSOR</name>
+      <value>0x0C</value>
+    </enumerator>
+    <enumerator>
+      <name>SEEPROM_Atmel24c04</name>
+      <value>0x0D</value>
+    </enumerator>
+    <enumerator>
+      <name>SEEPROM_Atmel24c412</name>
+      <value>0x0E</value>
+    </enumerator>
+    <enumerator>
+      <name>SEEPROM_Atmel24c32</name>
+      <value>0x0F</value>
+    </enumerator>
+    <enumerator>
+      <name>SEEPROM_Atmel24c64</name>
+      <value>0x10</value>
+    </enumerator>
+    <enumerator>
+      <name>SEEPROM_Atmel24c16</name>
+      <value>0x11</value>
+    </enumerator>
+    <enumerator>
+      <name>NVDIA_GPU</name>
+      <value>0x12</value>
+    </enumerator>
+    <enumerator>
+      <name>NXP_LPC_Microcontroller_LPC11U35</name>
+      <value>0x13</value>
+    </enumerator>
+    <enumerator>
+      <name>9550</name>
+      <value>0x14</value>
+    </enumerator>
+    <enumerator>
+      <name>TCG_I2C_TPM</name>
+      <value>0x15</value>
+    </enumerator>
+    <enumerator>
       <name>UNKNOWN</name>
       <value>0xFF</value>
     </enumerator>
