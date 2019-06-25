@@ -1,0 +1,351 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p10/procedures/xml/error_info/ddimm_get_efd.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<hwpErrors>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_DDIMM_GET_EFD_VPD_BUFFER_INADEQUATE_TO_GET_DDR_TYPE</rc>
+    <description>The VPD buffer needs to be large enough to
+                 retrieve the DDR type.</description>
+    <ffdc>VPD_BUFFER_SIZE</ffdc>
+    <ffdc>REQUIRED_MIN_BUFFER_SIZE</ffdc>
+    <ffdc>OCMB_CHIP_TARGET</ffdc>
+    <ffdc>VPD_TYPE</ffdc>
+    <!-- This is always a code bug -->
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_DDIMM_GET_EFD_VPD_BUFFER_INADEQUATE_FOR_DDR</rc>
+    <description>The VPD buffer size is less than the DDR size or
+                 the DDR type is incorrect.</description>
+    <ffdc>VPD_BUFFER_SIZE</ffdc>
+    <ffdc>DDR_TYPE</ffdc>
+    <ffdc>REQUIRED_MIN_BUFFER_SIZE</ffdc>
+    <ffdc>REQUIRED_DDR_TYPE</ffdc>
+    <ffdc>OCMB_CHIP_TARGET</ffdc>
+    <ffdc>VPD_TYPE</ffdc>
+    <!-- Most likely scenario is an unsupported card getting plugged in -->
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>OCMB_CHIP_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+    <!-- Could also be a code bug -->
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_DDIMM_GET_EFD_EFD_MEMORY_SPACE_OFFSET_ERROR</rc>
+    <description>The EFD memory space offset resides
+                 within the DDR4 memory space.</description>
+    <ffdc>EFD_MEMORY_SPACE_OFFSET</ffdc>
+    <ffdc>DDR4_MEMORY_SIZE</ffdc>
+    <ffdc>OCMB_CHIP_TARGET</ffdc>
+    <ffdc>VPD_TYPE</ffdc>
+    <ffdc>DDR_TYPE</ffdc>
+    <!-- The SPD itself has invalid data -->
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>OCMB_CHIP_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_DDIMM_GET_EFD_EFD_MEMORY_SIZE_MAPPING_ERROR</rc>
+    <description>Unable to map the EFD memory space size.</description>
+    <ffdc>EFD_MEMORY_SPACE_MAPPING_VALUE</ffdc>
+    <ffdc>OCMB_CHIP_TARGET</ffdc>
+    <ffdc>VPD_TYPE</ffdc>
+    <ffdc>DDR_TYPE</ffdc>
+    <!-- The SPD itself has invalid data -->
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>OCMB_CHIP_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_DDIMM_GET_EFD_EFD_MEMORY_SPACE_SIZE_ERROR</rc>
+    <description>The VPD buffer size is inadequate for the EFD memory space
+                 size with the given EFD memory space offest.</description>
+    <ffdc>EFD_MEMORY_SPACE_OFFSET</ffdc>
+    <ffdc>EFD_MEMORY_SPACE_SIZE</ffdc>
+    <ffdc>VPD_BUFFER_SIZE</ffdc>
+    <ffdc>OCMB_CHIP_TARGET</ffdc>
+    <ffdc>VPD_TYPE</ffdc>
+    <ffdc>DDR_TYPE</ffdc>
+    <!-- The SPD itself has invalid data -->
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>OCMB_CHIP_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_DDIMM_GET_EFD_NUMBER_OF_EFD_IS_ZERO</rc>
+    <description>No EFDs to work with. The number of EFDs is zero.
+                 Need at least 1 EFD to work with.</description>
+    <ffdc>OCMB_CHIP_TARGET</ffdc>
+    <ffdc>VPD_TYPE</ffdc>
+    <ffdc>DDR_TYPE</ffdc>
+    <!-- The SPD itself has invalid data -->
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>OCMB_CHIP_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_DDIMM_GET_EFD_INADEQUATE_EFD_BUFFER_SIZE</rc>
+    <description>The size of the return EFD buffer size is insufficient
+                 to accommodate an EFD block size.</description>
+    <ffdc>EFD_BUFFER_SIZE</ffdc>
+    <ffdc>EFD_BLOCK_SIZE</ffdc>
+    <ffdc>OCMB_CHIP_TARGET</ffdc>
+    <ffdc>VPD_TYPE</ffdc>
+    <ffdc>DDR_TYPE</ffdc>
+    !-- This is always a code bug -->
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_DDIMM_GET_EFD_UNSUPPORTED_DMB_MFG_ID</rc>
+    <description>DMB manufacturer ID is not the expected ID and
+                 therefore not supported.</description>
+    <ffdc>DMB_MFG_ID</ffdc>
+    <ffdc>EXPECTED</ffdc>
+    <ffdc>OCMB_CHIP_TARGET</ffdc>
+    <ffdc>VPD_TYPE</ffdc>
+    <ffdc>DDR_TYPE</ffdc>
+    <!-- Most likely scenario is a new type of DDIMM got installed, so callout
+         the OCMB as the problem.  Deconfigure it so we can keep booting. -->
+    <callout>
+      <target>OCMB_CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_CHIP_TARGET</target>
+    </deconfigure>
+    <!-- We could have down-level code installed. -->
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <!-- It could also be bogus SPD content -->
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>OCMB_CHIP_TARGET</refTarget>
+      </hw>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_DDIMM_GET_EFD_UNSUPPORTED_DMB_REVISION</rc>
+    <description>DMB revision is not the expected revision and
+                 therefore not supported.</description>
+    <ffdc>DMB_REVISION</ffdc>
+    <ffdc>EXPECTED</ffdc>
+    <ffdc>OCMB_CHIP_TARGET</ffdc>
+    <ffdc>VPD_TYPE</ffdc>
+    <ffdc>DDR_TYPE</ffdc>
+    <!-- Most likely scenario is a new type of DDIMM got installed, so callout
+         the OCMB as the problem.  Deconfigure it so we can keep booting. -->
+    <callout>
+      <target>OCMB_CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_CHIP_TARGET</target>
+    </deconfigure>
+    <!-- We could have down-level code installed. -->
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <!-- It could also be bogus SPD content -->
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>OCMB_CHIP_TARGET</refTarget>
+      </hw>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_DDIMM_GET_EFD_UNSUPPORTED_FREQUENCY</rc>
+    <description>Invalid Frequency. Valid values are 12800, 14930, 17060,
+                 19200, 21330, 23460 and 25600.</description>
+    <ffdc>UNSUPPORTED_FREQ</ffdc>
+    <ffdc>FREQ0</ffdc>
+    <ffdc>FREQ1</ffdc>
+    <ffdc>FREQ2</ffdc>
+    <ffdc>FREQ3</ffdc>
+    <ffdc>FREQ4</ffdc>
+    <ffdc>FREQ5</ffdc>
+    <ffdc>FREQ6</ffdc>
+    <ffdc>OCMB_CHIP_TARGET</ffdc>
+    <ffdc>VPD_TYPE</ffdc>
+    <ffdc>DDR_TYPE</ffdc>
+    <!-- This is always a code bug. -->
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_DDIMM_GET_EFD_UNSUPPORTED_RANK</rc>
+    <description>Invalid Rank. Valid values are 0,1,2 and 3.</description>
+    <ffdc>UNSUPPORTED_RANK</ffdc>
+    <ffdc>RANK0</ffdc>
+    <ffdc>RANK1</ffdc>
+    <ffdc>RANK2</ffdc>
+    <ffdc>RANK3</ffdc>
+    <ffdc>OCMB_CHIP_TARGET</ffdc>
+    <ffdc>VPD_TYPE</ffdc>
+    <ffdc>DDR_TYPE</ffdc>
+    <!-- This is always a code bug. -->
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_DDIMM_GET_EFD_EFD_BLOCK_SIZE_IS_OUT_OF_BOUNDS</rc>
+    <description>The EFD block size resides outside the bounds
+                 of the EFD memory space.</description>
+    <ffdc>EFD_MEMORY_SPACE_OFFSET</ffdc>
+    <ffdc>EFD_MEMORY_SPACE_SIZE</ffdc>
+    <ffdc>EFD_BLOCK</ffdc>
+    <ffdc>EFD_BLOCK_SIZE</ffdc>
+    <ffdc>OCMB_CHIP_TARGET</ffdc>
+    <ffdc>VPD_TYPE</ffdc>
+    <ffdc>DDR_TYPE</ffdc>
+    <!-- The SPD is misconfigured -->
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>OCMB_CHIP_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_DDIMM_GET_EFD_EFD_NOT_FOUND</rc>
+    <description>No EFD found to match frequency and MR criteria.</description>
+    <ffdc>FREQUENCY</ffdc>
+    <ffdc>FREQUENCY_MAPPED_VALUE</ffdc>
+    <ffdc>MASTER_RANK</ffdc>
+    <ffdc>MASTER_RANK_MAPPED_VALUE</ffdc>
+    <ffdc>OCMB_CHIP_TARGET</ffdc>
+    <ffdc>VPD_TYPE</ffdc>
+    <ffdc>DDR_TYPE</ffdc>
+    <!-- EFD metadata - 8 bytes per entry -->
+    <ffdc>EFD_METADATA0</ffdc>
+    <ffdc>EFD_METADATA1</ffdc>
+    <ffdc>EFD_METADATA2</ffdc>
+    <ffdc>EFD_METADATA3</ffdc>
+    <ffdc>EFD_METADATA4</ffdc>
+    <ffdc>EFD_METADATA5</ffdc>
+    <ffdc>EFD_METADATA6</ffdc>
+    <ffdc>EFD_METADATA7</ffdc>
+    <ffdc>EFD_METADATA8</ffdc>
+    <ffdc>EFD_METADATA9</ffdc>
+    <ffdc>EFD_METADATA10</ffdc>
+    <ffdc>EFD_METADATA11</ffdc>
+    <ffdc>EFD_METADATA12</ffdc>
+    <ffdc>EFD_METADATA13</ffdc>
+    <ffdc>EFD_METADATA14</ffdc>
+    <ffdc>EFD_METADATA15</ffdc>
+    <ffdc>EFD_METADATA16</ffdc>
+    <ffdc>EFD_METADATA17</ffdc>
+    <ffdc>EFD_METADATA18</ffdc>
+    <ffdc>EFD_METADATA19</ffdc>
+    <ffdc>EFD_METADATA20</ffdc>
+    <ffdc>EFD_METADATA21</ffdc>
+    <ffdc>EFD_METADATA22</ffdc>
+    <ffdc>EFD_METADATA23</ffdc>
+    <ffdc>EFD_METADATA24</ffdc>
+    <ffdc>EFD_METADATA25</ffdc>
+    <ffdc>EFD_METADATA26</ffdc>
+    <ffdc>EFD_METADATA27</ffdc>
+    <ffdc>EFD_METADATA28</ffdc>
+    <ffdc>EFD_METADATA29</ffdc>
+    <ffdc>EFD_METADATA30</ffdc>
+    <ffdc>EFD_METADATA31</ffdc>
+    <!-- Assuming a stable codebase, the most likely cause of this error
+         would be installing a DDIMM that doesn't support the system parameters.
+         Callout the SPD contents as being the problem. -->
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>OCMB_CHIP_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+    <!-- This might be buggy or down-level code. -->
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <!-- Deconfigure the OCMB itself to let us keep booting. -->
+    <callout>
+      <target>OCMB_CHIP_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_CHIP_TARGET</target>
+    </deconfigure>
+  </hwpError>
+  <!-- ********************************************************************* -->
+</hwpErrors>
