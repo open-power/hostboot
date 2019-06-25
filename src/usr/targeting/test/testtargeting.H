@@ -721,6 +721,9 @@ class TargetingTestSuite : public CxxTest::TestSuite
                 {
                     // Mask off upper 8 bits in case of multiple nodes
                     uint32_t l_huid = get_huid(*l_targetList) & 0x00FFFFFF;
+
+                    // Only keep lower bits for instance num
+                    uint8_t l_instanceNum = l_huid & 0xFF;
                     // Extract the type, drop instance info
                     l_huid = l_huid >> 16;
                     if (TARGETING::TYPE_I2C_MUX != l_huid)
@@ -744,14 +747,30 @@ class TargetingTestSuite : public CxxTest::TestSuite
 
                     char * l_pathAsString =
                                   l_i2cMuxInfo.i2cMasterPath.toString();
-                    if (0 != strcmp(l_pathAsString,
-                                    "Physical:/Sys0/Node0/Proc0"))
+
+                    // There is 1 mux per MC, so 2 muxes per proc
+                    if (l_instanceNum >= 0 && l_instanceNum < 2)
                     {
-                        TS_FAIL("testI2cMux::i2cMuxPath path "
-                                "returned(%s), "
-                                "expected(Physical:/Sys0/Node0/Proc0)",
-                                l_pathAsString);
-                    } // end if (TARGETING
+                        if (0 != strcmp(l_pathAsString,
+                                        "Physical:/Sys0/Node0/Proc0"))
+                        {
+                            TS_FAIL("testI2cMux::i2cMuxPath path "
+                                    "returned(%s), "
+                                    "expected(Physical:/Sys0/Node0/Proc0)",
+                                    l_pathAsString);
+                        }
+                    }
+                    else
+                    {
+                        if (0 != strcmp(l_pathAsString,
+                                        "Physical:/Sys0/Node0/Proc1"))
+                        {
+                            TS_FAIL("testI2cMux::i2cMuxPath path "
+                                    "returned(%s), "
+                                    "expected(Physical:/Sys0/Node0/Proc1)",
+                                    l_pathAsString);
+                        }
+                    }
 
                     free (l_pathAsString);
                     l_pathAsString = nullptr;

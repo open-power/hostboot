@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1242,29 +1242,6 @@ public:
               TS_FAIL( "ScomTest::test__MultiChipScomWrite_proc> ERROR : Data mismatch between read and expected data" );
               fails++;
           }
-
-          // Read the data back using FSIscom to make sure the data is the same.
-          l_err = deviceOp(    DeviceFW::READ,
-                               test_data[x].target,
-                               &(read_data[x]),
-                               op_size,
-                               DEVICE_FSISCOM_ADDRESS(test_data[x].addr) );
-
-
-          if( l_err )
-          {
-              TRACFCOMP(g_trac_scom, "ScomTest::test__MultiChipScomWrite_proc> [%d] FSISCOM Read: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
-              TS_FAIL( "ScomTest::test__MultiChipScomWrite_proc> ERROR : Unexpected error log from write1" );
-              fails++;
-              errlCommit(l_err,SCOM_COMP_ID);
-          }
-          else if(read_data[x] != test_data[x].data)
-          {
-              TRACFCOMP(g_trac_scom, "ScomTest::test__MultiChipScomWrite_proc> [%d] FSISCOM Read: Data mismatch : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
-              TS_FAIL( "ScomTest::test__MultiChipScomWrite_proc> ERROR : Data mismatch between read and expected data" );
-              fails++;
-          }
-
       }
 
       TRACFCOMP( g_trac_scom, "ScomTest::test__MultiChipScomWrite_proc> %d/%d fails", fails, total );

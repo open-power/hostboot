@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -629,7 +629,8 @@ class TargetingTestSuite : public CxxTest::TestSuite
                 // Compare the complete set of memory
                 if( memcmp( l_lidStruct, l_rsvdMemPtr, l_attr_size ) )
                 {
-                    TS_FAIL( "testSaveRestoreAttrs> Data does not match" );
+                    TS_FAIL( "testSaveRestoreAttrs> Data does not match. Attr size = 0x%lx",
+                                l_attr_size );
                 }
 
                 uint64_t l_memcmpOffset = 0;
@@ -757,7 +758,6 @@ class TargetingTestSuite : public CxxTest::TestSuite
                 if(l_memcmpFailed != 0)
                 {
                     TS_FAIL("testSaveRestoreAttrs FAILED memcmp %d "
-                              ERR_MRK"testSaveRestoreAttrs FAILED memcmp %d "
                               "(0x%.8x) times out of %d (0x%.8x)",
                               l_memcmpFailed,
                               l_memcmpFailed,

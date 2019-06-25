@@ -122,7 +122,7 @@ errlHndl_t mmioSetup()
             //  Apply the MMIO base offset so we get the final address
             l_realAddr += l_omiBaseAddr;
 
-            // Map the device with a kernal call, each device, the MC,  is 32 GB
+            // Map the device with a kernel call, each device, the MC,  is 32 GB
             uint64_t l_virtAddr = reinterpret_cast<uint64_t>
                          (mmio_dev_map(reinterpret_cast<void *>(l_realAddr),
                                        THIRTYTWO_GB));

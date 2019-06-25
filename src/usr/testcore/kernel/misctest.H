@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,8 +64,8 @@ class MiscTest : public CxxTest::TestSuite
             phys = mm_virt_to_phys( heap );
             if( phys != (reinterpret_cast<uint64_t>(heap)|hrmor) )
             {
-                TS_FAIL("Unexpected Physical Address for Heap.");
                 TS_TRACE( "heap> virt=%p, phys=%lX", (void*)heap, phys );
+                TS_FAIL("Unexpected Physical Address for Heap.");
             }
             free(heap);
 
@@ -78,18 +78,23 @@ class MiscTest : public CxxTest::TestSuite
             }
 
             // Verify a MMIO (XSCOM)
-            TARGETING::EntityPath epath(TARGETING::EntityPath::PATH_PHYSICAL);
-            epath.addLast(TARGETING::TYPE_SYS,0);
-            epath.addLast(TARGETING::TYPE_NODE,0);
-            epath.addLast(TARGETING::TYPE_PROC,1);
-            TARGETING::Target* l_targ =
-              TARGETING::targetService().toTarget(epath);
-            if(l_targ != NULL)
+            TARGETING::Target * l_masterProc =   nullptr;
+            TARGETING::Target * l_masterNode =   nullptr;
+            bool l_onlyFunctional = true; // Make sure masterproc is functional
+            errlHndl_t l_err(nullptr);
+            l_err = TARGETING::targetService().queryMasterProcChipTargetHandle(
+                                                 l_masterProc,
+                                                 l_masterNode,
+                                                 l_onlyFunctional);
+
+            //Validate we found a master proc and
+            //  didn't encounter any error finding it
+            if(l_masterProc != nullptr && !l_err)
             {
                 uint64_t xscom =
-                  l_targ->getAttr<TARGETING::ATTR_XSCOM_VIRTUAL_ADDR>();
+                  l_masterProc->getAttr<TARGETING::ATTR_XSCOM_VIRTUAL_ADDR>();
                 phys = mm_virt_to_phys( (void*)xscom );
-                if( (phys != (1020*TERABYTE+32*GIGABYTE))
+                  if( (phys != (1020*TERABYTE+32*GIGABYTE))
                     && (xscom != 0) ) //never got set
                 {
                     TS_FAIL("Unexpected Physical Address for MMIO.");

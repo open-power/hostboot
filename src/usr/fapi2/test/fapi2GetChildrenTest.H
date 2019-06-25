@@ -224,7 +224,7 @@ void test_fapi2GetChildren()
             numTests++;
             if(l_actualSize != l_expectedSize)
             {
-                TS_FAIL("test_fapi2GetChildren:: OMIs per proc mismatch");
+                TS_FAIL("test_fapi2GetChildren:: OMIs per proc mismatch. Actual size: %d, Expected size: %d", l_actualSize, l_expectedSize);
                 numFails++;
                 break;
             }

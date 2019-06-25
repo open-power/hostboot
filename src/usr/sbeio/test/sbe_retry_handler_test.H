@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,6 +78,8 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
                 // we are just looking at Slave SBE's
                 continue;
             }
+            /* TODO RTC:214913 -- Re-enable/Fixup as in its current state
+                  it causes an infinite loop
             SbeRetryHandler l_SBEobj = SbeRetryHandler(
                     SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT);
 
@@ -85,6 +87,7 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
 
             SBE_TRACF_RHT("testSBEReturns: returned from main_sbe_handler "
                            "SUCCESS");
+            **/
         }
     }
 
@@ -117,6 +120,9 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
                 // we are just looking at Slave SBE's
                 continue;
             }
+            /* TODO RTC:214913 -- Re-enable/Fixup as in its current state
+               it causes an infinite loop
+
             SbeRetryHandler l_SBEobj = SbeRetryHandler(
                     SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT);
 
@@ -136,6 +142,7 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
                        "that the SBE started is false, then the SBE attribute "
                        "also needs to be false");
             }
+            **/
         }
     }
 
