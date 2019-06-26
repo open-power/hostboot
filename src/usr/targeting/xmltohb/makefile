@@ -59,11 +59,13 @@ FAPIATTRSRVC_SOURCE = \
 
 
 # Attribute XML files.
-FAPI2_ATTR_XML += $(wildcard $(ROOTPATH)/src/import/chips/p9/procedures/xml/attribute_info/*)
-FAPI2_ATTR_XML += $(wildcard $(ROOTPATH)/src/import/hwpf/fapi2/xml/attribute_info/*)
-FAPI2_ATTR_XML += $(wildcard $(ROOTPATH)/src/import/chips/centaur/procedures/xml/attribute_info/*)
-FAPI2_ATTR_XML += $(wildcard $(ROOTPATH)/src/import/generic/procedures/xml/attribute_info/*)
-FAPI2_ATTR_XML += $(wildcard $(ROOTPATH)/src/import/chips/ocmb/explorer/procedures/xml/attribute_info/*)
+FAPI2_ATTR_XML += $(wildcard $(ROOTPATH)/src/import/chips/p9/procedures/xml/attribute_info/*.xml)
+FAPI2_ATTR_XML += $(wildcard $(ROOTPATH)/src/import/hwpf/fapi2/xml/attribute_info/*.xml)
+FAPI2_ATTR_XML += $(wildcard $(ROOTPATH)/src/import/chips/centaur/procedures/xml/attribute_info/*.xml)
+FAPI2_ATTR_XML += $(wildcard $(ROOTPATH)/src/import/generic/procedures/xml/attribute_info/*.xml)
+FAPI2_ATTR_XML += $(wildcard $(ROOTPATH)/src/import/chips/ocmb/explorer/procedures/xml/attribute_info/*.xml)
+FAPI2_ATTR_XML += $(wildcard $(ROOTPATH)/src/import/chips/ocmb/common/procedures/xml/attribute_info/*.xml)
+
 
 # Filter out Temp defaults XML file from Attribute XML files.
 # NOTE: The hb_temp_defaults.xml file is not a normal attribute file with the
