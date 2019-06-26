@@ -39,4 +39,8 @@
 
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
+const uint8_t MAX_MC_SIDES_PER_PROC = 2; // MC01, MC23
+const uint8_t MAX_MC_PER_PROC = 4; // MC0, MC1, MC2, MC3
+const uint8_t MAX_MC_PER_SIDE = 2; // MC0, MC1 or MC2, MC3
+
 #endif
