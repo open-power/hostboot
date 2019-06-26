@@ -39,6 +39,7 @@ execute_in_sandbox()
 
     echo $1 > ${SANDBOXBASE}/src/sandbox_execute_cmd
     chmod 700 ${SANDBOXBASE}/src/sandbox_execute_cmd
+    echo "Sandbox :: $1"
 
     ${WORKON_CMD} -c ./sandbox_execute_cmd
 
@@ -361,7 +362,6 @@ hb_simsetup()
     if [ "${MACHINE}" == "P10_STANDALONE" ]; then
         echo "mkdir -p ${SANDBOXBASE}/simics"
         execute_in_sandbox "mkdir -p ${SANDBOXBASE}/simics" "ppc"
-        echo "tar ${SIMICS_LEVEL}  -C ${SANDBOXBASE}/simics/"
         execute_in_sandbox "tar -xf ${SIMICS_LEVEL} -C ${SANDBOXBASE}/simics/" "ppc"
         execute_in_sandbox "cd ${SANDBOXBASE}/simics/ && ./INSTALL.sh" "ppc"
     else
