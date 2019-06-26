@@ -430,3 +430,22 @@
         capture     group default;
     };
 
+    ############################################################################
+    # Misc
+    ############################################################################
+
+    register FARB0
+    {
+        name        "MB_SIM.SRQ.MBA_FARB0Q";
+        scomaddr    0x08011415;
+        capture     group default;
+    };
+
+    register EXP_MSR
+    {
+        name        "Explorer Mark Shadow Register";
+        scomaddr    0x08011C0C;
+        capture     group default;
+    };
+
+

@@ -396,7 +396,7 @@ uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     #define PRDF_FUNC "[PlatServices::getMemAddrRange<TYPE_MEM_PORT>] "
 
     PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MEM_PORT == i_chip->getType() );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
 
     /* TODO RTC 207273 - no HWP support yet
     uint32_t port = i_chip->getPos() % MAX_PORT_PER_OCMB;

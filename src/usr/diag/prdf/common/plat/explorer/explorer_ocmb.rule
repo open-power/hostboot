@@ -1004,7 +1004,7 @@ rule rRDFFIR
 
 group gRDFFIR
     filter singlebit,
-           cs_root_cause(14,15,17,35,37,40)
+           cs_root_cause(14,15,17,35,37)
 {
     /** RDFFIR[0]
      *  Mainline read MPE on rank 0
@@ -1174,7 +1174,7 @@ group gRDFFIR
     /** RDFFIR[40]
      *  RDDATA valid error
      */
-    (rRDFFIR, bit(40)) ? rdf_rcd_parity_error_UERE;
+    (rRDFFIR, bit(40)) ? mem_port_th_32perDay;
 
     /** RDFFIR[41]
      *  SCOM status register parity error

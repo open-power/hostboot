@@ -114,6 +114,8 @@ int32_t Ddr4PhyInterrupt( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE( explorer_ocmb, Ddr4PhyInterrupt );
 
+//------------------------------------------------------------------------------
+
 /**
  * @brief  OCMB_LFIR[39:46] - Foxhound Fatal
  * @param  i_chip An OCMB chip.
@@ -215,6 +217,8 @@ int32_t CalloutAttachedDimmsHigh( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE( explorer_ocmb, CalloutAttachedDimmsHigh );
 
+//------------------------------------------------------------------------------
+
 /**
  * @brief  RDF RCD Parity Error
  * @param  i_chip An OCMB chip.
@@ -275,6 +279,8 @@ int32_t RdfRcdParityError( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE( explorer_ocmb, RdfRcdParityError );
 
+//------------------------------------------------------------------------------
+
 /**
  * @brief  RDFFIR[0:7] - Mainline MPE.
  * @param  i_chip OCMB chip.
@@ -301,6 +307,170 @@ PLUGIN_FETCH_MPE_ERROR( 6 )
 PLUGIN_FETCH_MPE_ERROR( 7 )
 
 #undef PLUGIN_FETCH_MPE_ERROR
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  RDFFIR[8:9] - Mainline NCE and/or TCE.
+ * @param  i_chip OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t AnalyzeFetchNceTce( ExtensibleChip * i_chip,
+                            STEP_CODE_DATA_STRUCT & io_sc )
+{
+    MemEcc::analyzeFetchNceTce<TYPE_OCMB_CHIP>( i_chip, io_sc );
+    return SUCCESS; // nothing to return to rule code
+}
+PRDF_PLUGIN_DEFINE( explorer_ocmb, AnalyzeFetchNceTce );
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  RDFFIR[14] - Mainline UE.
+ * @param  i_chip OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t AnalyzeFetchUe( ExtensibleChip * i_chip,
+                        STEP_CODE_DATA_STRUCT & io_sc )
+{
+    MemEcc::analyzeFetchUe<TYPE_OCMB_CHIP>( i_chip, io_sc );
+    return SUCCESS; // nothing to return to rule code
+}
+PRDF_PLUGIN_DEFINE( explorer_ocmb, AnalyzeFetchUe );
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  RDFFIR[17] - Mainline read IUE.
+ * @param  i_chip OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return PRD_NO_CLEAR_FIR_BITS if IUE threshold is reached, else SUCCESS.
+ */
+int32_t AnalyzeMainlineIue( ExtensibleChip * i_chip,
+                            STEP_CODE_DATA_STRUCT & io_sc )
+{
+    int32_t rc = SUCCESS;
+    MemEcc::analyzeMainlineIue<TYPE_OCMB_CHIP>( i_chip, io_sc );
+
+    #ifdef __HOSTBOOT_MODULE
+
+    if ( MemEcc::queryIueTh<TYPE_OCMB_CHIP>(i_chip, io_sc) )
+        rc = PRD_NO_CLEAR_FIR_BITS;
+
+    #endif
+
+    return rc; // nothing to return to rule code
+}
+PRDF_PLUGIN_DEFINE( explorer_ocmb, AnalyzeMainlineIue );
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  RDFFIR[37] - Maint IUE.
+ * @param  i_chip OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return PRD_NO_CLEAR_FIR_BITS if IUE threshold is reached, else SUCCESS.
+ */
+int32_t AnalyzeMaintIue( ExtensibleChip * i_chip,
+                         STEP_CODE_DATA_STRUCT & io_sc )
+{
+    int32_t rc = SUCCESS;
+    MemEcc::analyzeMaintIue<TYPE_OCMB_CHIP>( i_chip, io_sc );
+
+    #ifdef __HOSTBOOT_MODULE
+
+    if ( MemEcc::queryIueTh<TYPE_OCMB_CHIP>(i_chip, io_sc) )
+        rc = PRD_NO_CLEAR_FIR_BITS;
+
+    #endif
+
+    return rc; // nothing to return to rule code
+}
+PRDF_PLUGIN_DEFINE( explorer_ocmb, AnalyzeMaintIue );
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  RDFFIR[19,39] - Mainline and Maint IMPE
+ * @param  i_chip OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t AnalyzeImpe( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
+{
+    MemEcc::analyzeImpe<TYPE_OCMB_CHIP>( i_chip, io_sc );
+    return SUCCESS; // nothing to return to rule code
+}
+PRDF_PLUGIN_DEFINE( explorer_ocmb, AnalyzeImpe );
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  RDFFIR[13,16] - Mainline AUE and IAUE
+ * @param  i_chip OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t AnalyzeFetchAueIaue( ExtensibleChip * i_chip,
+                             STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[explorer_ocmb::AnalyzeFetchAueIaue] "
+
+    MemAddr addr;
+    if ( SUCCESS != getMemReadAddr<TYPE_OCMB_CHIP>(i_chip,
+                                                   MemAddr::READ_AUE_ADDR,
+                                                   addr) )
+    {
+        PRDF_ERR( PRDF_FUNC "getMemReadAddr(0x%08x,READ_AUE_ADDR) failed",
+                  i_chip->getHuid() );
+    }
+    else
+    {
+        MemRank rank = addr.getRank();
+        MemoryMru mm { i_chip->getTrgt(), rank, MemoryMruData::CALLOUT_RANK };
+        io_sc.service_data->SetCallout( mm, MRU_HIGH );
+    }
+
+    return SUCCESS; // nothing to return to rule code
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( explorer_ocmb, AnalyzeFetchAueIaue );
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  RDFFIR[33] - Maintenance AUE
+ * @param  i_chip OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t AnalyzeMaintAue( ExtensibleChip * i_chip,
+                         STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[explorer_ocmb::AnalyzeMaintAue] "
+
+    MemAddr addr;
+    if ( SUCCESS != getMemMaintAddr<TYPE_OCMB_CHIP>(i_chip, addr) )
+    {
+        PRDF_ERR( PRDF_FUNC "getMemMaintAddr(0x%08x) failed",
+                  i_chip->getHuid() );
+    }
+    else
+    {
+        MemRank rank = addr.getRank();
+        MemoryMru mm { i_chip->getTrgt(), rank, MemoryMruData::CALLOUT_RANK };
+        io_sc.service_data->SetCallout( mm, MRU_HIGH );
+    }
+
+    return SUCCESS; // nothing to return to rule code
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( explorer_ocmb, AnalyzeMaintAue );
+
 
 //##############################################################################
 //

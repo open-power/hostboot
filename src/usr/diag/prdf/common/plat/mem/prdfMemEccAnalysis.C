@@ -150,23 +150,22 @@ uint32_t handleMemUe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     uint32_t o_rc = SUCCESS;
 
     PRDF_ERR( PRDF_FUNC "Function not supported yet" );
-    /* TODO RTC 208211
     do
     {
         // First check to see if this is a side-effect UE.
-        SCAN_COMM_REGISTER_CLASS * fir  = i_chip->getRegister("DDRPHYFIR");
+        SCAN_COMM_REGISTER_CLASS * fir  = i_chip->getRegister("OCMB_LFIR");
         o_rc = fir->Read();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "Read() failed on DDRPHYFIR: i_chip=0x%08x",
+            PRDF_ERR( PRDF_FUNC "Read() failed on OCMB_LFIR: i_chip=0x%08x",
                       i_chip->getHuid() );
             break;
         }
 
-        // Check DDRPHYFIR[54:55,57:59] to determine if this is a side-effect.
-        if ( 0 != (fir->GetBitFieldJustified(54,6) & 0x37) )
+        // Check OCMB_LFIR[38] to determine if this is a side-effect.
+        if ( fir->IsBitSet(38) )
         {
-            // This is a side-effect. Callout the MCA.
+            // This is a side-effect. Callout the OCMB.
             PRDF_TRAC( PRDF_FUNC "Memory UE is side-effect of DDRPHY error" );
             io_sc.service_data->SetCallout( i_chip->getTrgt() );
             io_sc.service_data->setServiceCall();
@@ -174,7 +173,8 @@ uint32_t handleMemUe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         else
         {
             // Handle the memory UE.
-            o_rc = __handleMemUe<TYPE_MCA>( i_chip, i_addr, i_type, io_sc );
+            o_rc = __handleMemUe<TYPE_OCMB_CHIP>( i_chip, i_addr, i_type,
+                                                  io_sc );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "__handleMemUe(0x%08x,%d) failed",
@@ -184,7 +184,6 @@ uint32_t handleMemUe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         }
 
     } while (0);
-    */
 
     return o_rc;
 
@@ -383,6 +382,52 @@ uint32_t maskMemPort<TYPE_MCA>( ExtensibleChip * i_chip )
     #undef PRDF_FUNC
 }
 
+template<>
+uint32_t maskMemPort<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
+{
+    #define PRDF_FUNC "[MemEcc::maskMemPort<TYPE_OCMB_CHIP>] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        // Mask all FIRs on the OCMB in the chiplet FIRs.
+        SCAN_COMM_REGISTER_CLASS * chipletMask =
+            i_chip->getRegister("OCMB_CHIPLET_FIR_MASK");
+        SCAN_COMM_REGISTER_CLASS * chipletSpaMask =
+            i_chip->getRegister("OCMB_CHIPLET_SPA_FIR_MASK");
+
+        chipletMask->setAllBits();
+        chipletSpaMask->setAllBits();
+
+        o_rc = chipletMask->Write() | chipletSpaMask->Write();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Write() failed on 0x%08x", i_chip->getHuid() );
+            break;
+        }
+
+        #ifdef __HOSTBOOT_RUNTIME
+
+        // Dynamically deallocate the port.
+        if ( SUCCESS != MemDealloc::port<TYPE_OCMB_CHIP>( i_chip ) )
+        {
+            PRDF_ERR( PRDF_FUNC "MemDealloc::port<TYPE_OCMB_CHIP>(0x%08x) "
+                      "failed", i_chip->getHuid() );
+        }
+
+        #endif
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
 #endif // __HOSTBOOT_MODULE
 
 //------------------------------------------------------------------------------
@@ -445,6 +490,62 @@ uint32_t triggerPortFail<TYPE_MCA>( ExtensibleChip * i_chip )
     #undef PRDF_FUNC
 }
 
+template<>
+uint32_t triggerPortFail<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
+{
+    #define PRDF_FUNC "[MemEcc::triggerPortFail<TYPE_OCMB_CHIP>] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    OcmbDataBundle * db = getOcmbDataBundle( i_chip );
+
+    do
+    {
+        // trigger a port fail
+        // set FARB0[59] - MBA_FARB0Q_CFG_INJECT_PARITY_ERR_CONSTANT and
+        //     FARB0[40] - MBA_FARB0Q_CFG_INJECT_PARITY_ERR_ADDR5
+        SCAN_COMM_REGISTER_CLASS * farb0 = i_chip->getRegister("FARB0");
+
+        o_rc = farb0->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() FARB0 failed: i_chip=0x%08x",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        farb0->SetBit(59);
+        farb0->SetBit(40);
+
+        o_rc = farb0->Write();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Write() FARB0 failed: i_chip=0x%08x",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        // reset thresholds to prevent issuing multiple port failures on
+        // the same port
+        for ( auto & resetTh : db->iv_iueTh )
+        {
+            resetTh.second.reset();
+        }
+
+        db->iv_iuePortFail = true;
+
+        break;
+    }while(0);
+
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
 #endif // __HOSTBOOT_RUNTIME
 
 //------------------------------------------------------------------------------
@@ -461,6 +562,30 @@ bool queryIueTh<TYPE_MCA>( ExtensibleChip * i_chip,
     bool iueAtTh = false;
 
     McaDataBundle * db = getMcaDataBundle( i_chip );
+
+    // Loop through all our thresholds
+    for ( auto & th : db->iv_iueTh )
+    {
+        // If threshold reached
+        if ( th.second.thReached(io_sc) )
+        {
+            iueAtTh = true;
+        }
+    }
+
+    return iueAtTh;
+}
+
+template<>
+bool queryIueTh<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                 STEP_CODE_DATA_STRUCT & io_sc )
+{
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
+
+    bool iueAtTh = false;
+
+    OcmbDataBundle * db = getOcmbDataBundle( i_chip );
 
     // Loop through all our thresholds
     for ( auto & th : db->iv_iueTh )
@@ -938,6 +1063,9 @@ uint32_t analyzeFetchUe<TYPE_MCA>( ExtensibleChip * i_chip,
 template
 uint32_t analyzeFetchUe<TYPE_MBA>( ExtensibleChip * i_chip,
                                    STEP_CODE_DATA_STRUCT & io_sc );
+template
+uint32_t analyzeFetchUe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                         STEP_CODE_DATA_STRUCT & io_sc );
 
 //------------------------------------------------------------------------------
 
@@ -1022,8 +1150,6 @@ uint32_t handleMemIue<TYPE_MCA>( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 
-//------------------------------------------------------------------------------
-
 template<>
 uint32_t handleMemIue<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                        const MemRank & i_rank,
@@ -1035,9 +1161,6 @@ uint32_t handleMemIue<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
 
     uint32_t o_rc = SUCCESS;
-
-    PRDF_ERR( PRDF_FUNC "Function not supported yet" );
-    /* TODO RTC 208211
 
     // Add the DIMM to the callout list.
     MemoryMru mm { i_chip->getTrgt(), i_rank, MemoryMruData::CALLOUT_RANK };
@@ -1051,13 +1174,13 @@ uint32_t handleMemIue<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         if ( CHECK_STOP == io_sc.service_data->getPrimaryAttnType() ) break;
 
         // Get the data bundle from chip.
-        McaDataBundle * db = getMcaDataBundle( i_chip );
+        OcmbDataBundle * db = getOcmbDataBundle( i_chip );
 
         // If we have already caused a port fail, mask the IUE bits.
         if ( true == db->iv_iuePortFail )
         {
             SCAN_COMM_REGISTER_CLASS * mask_or =
-                i_chip->getRegister("MCAECCFIR_MASK_OR");
+                i_chip->getRegister("RDFFIR_MASK_OR");
 
             mask_or->SetBit(17);
             mask_or->SetBit(37);
@@ -1090,7 +1213,7 @@ uint32_t handleMemIue<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
             // the error log has been committed.
 
             // Mask off the entire port to avoid collateral.
-            o_rc = MemEcc::maskMemPort<TYPE_MCA>( i_chip );
+            o_rc = MemEcc::maskMemPort<TYPE_OCMB_CHIP>( i_chip );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "MemEcc::maskMemPort(0x%08x) failed",
@@ -1103,8 +1226,6 @@ uint32_t handleMemIue<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
     #endif // __HOSTBOOT_MODULE
 
-    */
-
     return o_rc;
 
     #undef PRDF_FUNC
@@ -1112,14 +1233,14 @@ uint32_t handleMemIue<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
 //------------------------------------------------------------------------------
 
-template<>
-uint32_t analyzeMainlineIue<TYPE_MCA>( ExtensibleChip * i_chip,
-                                       STEP_CODE_DATA_STRUCT & io_sc )
+template<TARGETING::TYPE T>
+uint32_t analyzeMainlineIue( ExtensibleChip * i_chip,
+                             STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[MemEcc::analyzeMainlineIue] "
 
     PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
+    PRDF_ASSERT( T == i_chip->getType() );
 
     uint32_t o_rc = SUCCESS;
 
@@ -1129,7 +1250,7 @@ uint32_t analyzeMainlineIue<TYPE_MCA>( ExtensibleChip * i_chip,
         // not likely that we will have two independent failure modes at the
         // same time. So we just assume the address is correct.
         MemAddr addr;
-        o_rc = getMemReadAddr<TYPE_MCA>( i_chip, MemAddr::READ_RCE_ADDR, addr );
+        o_rc = getMemReadAddr<T>( i_chip, MemAddr::READ_RCE_ADDR, addr );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getMemReadAddr(0x%08x, READ_RCE_ADDR) failed",
@@ -1138,7 +1259,7 @@ uint32_t analyzeMainlineIue<TYPE_MCA>( ExtensibleChip * i_chip,
         }
         MemRank rank = addr.getRank();
 
-        o_rc = handleMemIue<TYPE_MCA>( i_chip, rank, io_sc );
+        o_rc = handleMemIue<T>( i_chip, rank, io_sc );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "handleMemIue(0x%08x,m%ds%d) failed",
@@ -1153,16 +1274,23 @@ uint32_t analyzeMainlineIue<TYPE_MCA>( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 
+template
+uint32_t analyzeMainlineIue<TYPE_MCA>( ExtensibleChip * i_chip,
+                                       STEP_CODE_DATA_STRUCT & io_sc );
+template
+uint32_t analyzeMainlineIue<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                             STEP_CODE_DATA_STRUCT & io_sc );
+
 //------------------------------------------------------------------------------
 
-template<>
-uint32_t analyzeMaintIue<TYPE_MCA>( ExtensibleChip * i_chip,
-                                    STEP_CODE_DATA_STRUCT & io_sc )
+template<TARGETING::TYPE T>
+uint32_t analyzeMaintIue( ExtensibleChip * i_chip,
+                          STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[MemEcc::analyzeMaintIue] "
 
     PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
+    PRDF_ASSERT( T == i_chip->getType() );
 
     uint32_t o_rc = SUCCESS;
 
@@ -1170,7 +1298,7 @@ uint32_t analyzeMaintIue<TYPE_MCA>( ExtensibleChip * i_chip,
     {
         // Use the current address in the MCBMCAT.
         MemAddr addr;
-        o_rc = getMemMaintAddr<TYPE_MCA>( i_chip, addr );
+        o_rc = getMemMaintAddr<T>( i_chip, addr );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getMemMaintAddr(0x%08x) failed",
@@ -1179,7 +1307,7 @@ uint32_t analyzeMaintIue<TYPE_MCA>( ExtensibleChip * i_chip,
         }
         MemRank rank = addr.getRank();
 
-        o_rc = handleMemIue<TYPE_MCA>( i_chip, rank, io_sc );
+        o_rc = handleMemIue<T>( i_chip, rank, io_sc );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "handleMemIue(0x%08x,m%ds%d) failed",
@@ -1193,6 +1321,13 @@ uint32_t analyzeMaintIue<TYPE_MCA>( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
+
+template
+uint32_t analyzeMaintIue<TYPE_MCA>( ExtensibleChip * i_chip,
+                                    STEP_CODE_DATA_STRUCT & io_sc );
+template
+uint32_t analyzeMaintIue<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                          STEP_CODE_DATA_STRUCT & io_sc );
 
 //------------------------------------------------------------------------------
 
@@ -1293,6 +1428,117 @@ uint32_t analyzeImpe<TYPE_MCA>( ExtensibleChip * i_chip,
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "Write() failed on MCAECCFIR_MASK_OR: "
+                          "0x%08x", i_chip->getHuid() );
+                break;
+            }
+        }
+        #endif // __HOSTBOOT_MODULE
+
+    } while (0);
+
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+template<>
+uint32_t analyzeImpe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                      STEP_CODE_DATA_STRUCT & io_sc )
+{
+
+    #define PRDF_FUNC "[MemEcc::analyzeImpe] "
+
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        // get the mark shadow register
+        SCAN_COMM_REGISTER_CLASS * msr = i_chip->getRegister("EXP_MSR");
+
+        o_rc = msr->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on EXP_MSR: i_chip=0x%08x",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        TargetHandle_t trgt = i_chip->getTrgt();
+
+        // get galois field code - bits 8:15 of MSR
+        uint8_t galois = msr->GetBitFieldJustified( 8, 8 );
+
+        // get rank - bits 16:18 of MSR
+        uint8_t mrnk = msr->GetBitFieldJustified( 16, 3 );
+        MemRank rank( mrnk );
+
+        // get symbol and DRAM
+        MemSymbol symbol = MemSymbol::fromGalois( trgt, rank, galois );
+        if ( !symbol.isValid() )
+        {
+            PRDF_ERR( PRDF_FUNC "Galois 0x%02x from EXP_MSR is invalid: 0x%08x,"
+                      "0x%02x", galois, i_chip->getHuid(), rank.getKey() );
+            o_rc = FAIL;
+            break;
+        }
+
+        // Add the DIMM to the callout list
+        MemoryMru memmru( trgt, rank, MemoryMruData::CALLOUT_RANK );
+        io_sc.service_data->SetCallout( memmru );
+
+        #ifdef __HOSTBOOT_MODULE
+        // get data bundle from chip
+        OcmbDataBundle * db = getOcmbDataBundle( i_chip );
+        uint8_t dram = symbol.getDram();
+
+        // Increment the count and check threshold.
+        if ( db->getImpeThresholdCounter()->inc(rank, dram, io_sc) )
+        {
+            // Make the error log predictive if DRAM Repairs are disabled or if
+            // the number of DRAMs on this rank with IMPEs has reached threshold
+            if ( areDramRepairsDisabled() ||
+                 db->getImpeThresholdCounter()->queryDrams(rank, dram, io_sc) )
+            {
+                io_sc.service_data->setServiceCall();
+            }
+            else // Otherwise, place a chip mark on the failing DRAM.
+            {
+                MemMark chipMark( trgt, rank, galois );
+                o_rc = MarkStore::writeChipMark<TYPE_OCMB_CHIP>( i_chip, rank,
+                                                                 chipMark );
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x,0x%02x) failed",
+                              i_chip->getHuid(), rank.getKey() );
+                    break;
+                }
+
+                o_rc = MarkStore::chipMarkCleanup<TYPE_OCMB_CHIP>( i_chip, rank,
+                                                                   io_sc );
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "chipMarkCleanup(0x%08x,0x%02x) failed",
+                              i_chip->getHuid(), rank.getKey() );
+                    break;
+                }
+            }
+        }
+
+        // If a predictive callout is made, mask both mainline and maintenance
+        // attentions.
+        if ( io_sc.service_data->queryServiceCall() )
+        {
+            SCAN_COMM_REGISTER_CLASS * mask
+                                  = i_chip->getRegister( "RDFFIR_MASK_OR" );
+            mask->SetBit(19); // mainline
+            mask->SetBit(39); // maintenance
+            o_rc = mask->Write();
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "Write() failed on RDFFIR_MASK_OR: "
                           "0x%08x", i_chip->getHuid() );
                 break;
             }
