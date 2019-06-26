@@ -362,10 +362,12 @@ uint32_t __addBpmCallout( TargetHandle_t i_dimm,
 /**
  * @brief  Adds a callout of the cable connecting an NVDIMM to its
  *         backup power module (BPM)
+ * @param  i_dimm     The target dimm.
  * @param  i_priority The callout priority.
  * @return FAIL if unable to get the global error log, else SUCCESS
  */
-uint32_t __addNvdimmCableCallout( HWAS::callOutPriority i_priority )
+uint32_t __addNvdimmCableCallout( TargetHandle_t i_dimm,
+                                  HWAS::callOutPriority i_priority )
 {
     #define PRDF_FUNC "[__addNvdimmCableCallout] "
 
@@ -382,7 +384,8 @@ uint32_t __addNvdimmCableCallout( HWAS::callOutPriority i_priority )
             break;
         }
 
-        mainErrl->addProcedureCallout( HWAS::EPUB_PRC_NVDIMM_ERR, i_priority );
+        mainErrl->addPartCallout( i_dimm, HWAS::BPM_CABLE_PART_TYPE,
+                                  i_priority );
 
     }while(0);
 
@@ -529,7 +532,7 @@ uint32_t __analyzeHealthStatus1Reg( STEP_CODE_DATA_STRUCT & io_sc,
             // Callout BPM (backup power module) high, cable high
             o_rc = __addBpmCallout( i_dimm, HWAS::SRCI_PRIORITY_HIGH );
             if ( SUCCESS != o_rc ) break;
-            o_rc = __addNvdimmCableCallout( HWAS::SRCI_PRIORITY_HIGH );
+            o_rc = __addNvdimmCableCallout( i_dimm, HWAS::SRCI_PRIORITY_HIGH );
             if ( SUCCESS != o_rc ) break;
 
             // Callout NVDIMM low, no gard
@@ -557,7 +560,7 @@ uint32_t __analyzeHealthStatus1Reg( STEP_CODE_DATA_STRUCT & io_sc,
             // Callout BPM (backup power module) high, cable high
             o_rc = __addBpmCallout( i_dimm, HWAS::SRCI_PRIORITY_HIGH );
             if ( SUCCESS != o_rc ) break;
-            o_rc = __addNvdimmCableCallout( HWAS::SRCI_PRIORITY_HIGH );
+            o_rc = __addNvdimmCableCallout( i_dimm, HWAS::SRCI_PRIORITY_HIGH );
             if ( SUCCESS != o_rc ) break;
 
             // Callout NVDIMM low, no gard
@@ -582,7 +585,7 @@ uint32_t __analyzeHealthStatus1Reg( STEP_CODE_DATA_STRUCT & io_sc,
             // Callout BPM (backup power module) high, cable high
             o_rc = __addBpmCallout( i_dimm, HWAS::SRCI_PRIORITY_HIGH );
             if ( SUCCESS != o_rc ) break;
-            o_rc = __addNvdimmCableCallout( HWAS::SRCI_PRIORITY_HIGH );
+            o_rc = __addNvdimmCableCallout( i_dimm, HWAS::SRCI_PRIORITY_HIGH );
             if ( SUCCESS != o_rc ) break;
 
             // Callout NVDIMM low, no gard
@@ -596,7 +599,7 @@ uint32_t __analyzeHealthStatus1Reg( STEP_CODE_DATA_STRUCT & io_sc,
             // Callout BPM (backup power module) high, cable high
             o_rc = __addBpmCallout( i_dimm, HWAS::SRCI_PRIORITY_HIGH );
             if ( SUCCESS != o_rc ) break;
-            o_rc = __addNvdimmCableCallout( HWAS::SRCI_PRIORITY_HIGH );
+            o_rc = __addNvdimmCableCallout( i_dimm, HWAS::SRCI_PRIORITY_HIGH );
             if ( SUCCESS != o_rc ) break;
 
             // Callout NVDIMM low, no gard
@@ -811,7 +814,7 @@ int32_t AnalyzeNvdimmHealthStatRegs( ExtensibleChip * i_chip,
             io_sc.service_data->SetCallout( dimm, MRU_HIGH, NO_GARD );
             l_rc = __addBpmCallout( dimm, HWAS::SRCI_PRIORITY_HIGH );
             if ( SUCCESS != l_rc ) continue;
-            l_rc = __addNvdimmCableCallout( HWAS::SRCI_PRIORITY_HIGH );
+            l_rc = __addNvdimmCableCallout( dimm, HWAS::SRCI_PRIORITY_HIGH );
             if ( SUCCESS != l_rc ) continue;
         }
         // BIT 3: Below Warning Threshold -- ignore
