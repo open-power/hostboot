@@ -1033,6 +1033,7 @@ int32_t rank( ExtensibleChip * i_chip, MemRank i_rank )
     #undef PRDF_FUNC
 }
 template int32_t rank<TYPE_MCA>( ExtensibleChip * i_chip, MemRank i_rank );
+template int32_t rank<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip, MemRank i_rank);
 
 //------------------------------------------------------------------------------
 
@@ -1081,6 +1082,7 @@ int32_t port( ExtensibleChip * i_chip )
     #undef PRDF_FUNC
 }
 template int32_t port<TYPE_MCA>( ExtensibleChip * i_chip );
+template int32_t port<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip );
 
 //------------------------------------------------------------------------------
 

@@ -246,17 +246,6 @@ void banTps<TARGETING::TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     getOcmbDataBundle(i_chip)->iv_maskMainlineNceTce = true;
 }
 
-template<> inline
-void banTps<TARGETING::TYPE_MEM_PORT>( ExtensibleChip * i_chip,
-                                       const MemRank & i_rank )
-{
-    // Call banTps for the parent OCMB
-    ExtensibleChip * ocmbChip = PlatServices::getConnectedParent( i_chip,
-                                                    TARGETING::TYPE_OCMB_CHIP );
-    banTps<TARGETING::TYPE_OCMB_CHIP>( ocmbChip, i_rank );
-}
-
-
 #endif // Hostboot Runtime only
 
 } // end namespace MemDbUtils
