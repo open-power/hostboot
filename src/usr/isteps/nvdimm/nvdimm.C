@@ -130,21 +130,28 @@ typedef union {
 } encryption_key_validation_t;
 
 /**
- * @brief Utility function to set ATTR_
+ * @brief Utility function to send the value of
+ *   ATTR_NVDIMM_ARMED to the FSP
+ */
+void send_ATTR_NVDIMM_ARMED( Target* i_nvdimm,
+                             ATTR_NVDIMM_ARMED_type& i_val );
+
+/**
+ * @brief Utility function to set ATTR_NVDIMM_ENCRYPTION_KEYS_FW
  *        and send the value to the FSP
  */
 void set_ATTR_NVDIMM_ENCRYPTION_KEYS_FW(
             ATTR_NVDIMM_ENCRYPTION_KEYS_FW_typeStdArr& i_val )
 {
-#ifdef __HOSTBOOT_RUNTIME
-    errlHndl_t l_err = nullptr;
-
     Target* l_sys = nullptr;
     targetService().getTopLevelTarget( l_sys );
     assert(l_sys, "set_ATTR_NVDIMM_ENCRYPTION_KEYS_FW: no TopLevelTarget");
 
     l_sys->setAttrFromStdArr
       <ATTR_NVDIMM_ENCRYPTION_KEYS_FW>(i_val);
+
+#ifdef __HOSTBOOT_RUNTIME
+    errlHndl_t l_err = nullptr;
 
     // Send attr to HWSV if at runtime
     AttributeTank::Attribute l_attr = {};
@@ -2841,13 +2848,18 @@ errlHndl_t notifyNvdimmProtectionChange(Target* i_target,
             ATTR_NVDIMM_ARMED_type l_armed_state = {};
             l_armed_state = l_nvdimm->getAttr<ATTR_NVDIMM_ARMED>();
 
+            // If we change the armed state, need to tell FSP
+            bool l_armed_change = false;
+
             switch (i_state)
             {
                 case NVDIMM_ARMED:
                     l_armed_state.armed = 1;
+                    l_armed_change = true;
                     break;
                 case NVDIMM_DISARMED:
                     l_armed_state.armed = 0;
+                    l_armed_change = true;
                     break;
                 case OCC_ACTIVE:
                     l_armed_state.occ_active = 1;
@@ -2863,8 +2875,12 @@ errlHndl_t notifyNvdimmProtectionChange(Target* i_target,
                     break;
             }
 
+            // Set the attribute and send it to the FSP if needed
             l_nvdimm->setAttr<ATTR_NVDIMM_ARMED>(l_armed_state);
-
+            if( l_armed_change )
+            {
+                send_ATTR_NVDIMM_ARMED( l_nvdimm, l_armed_state );
+            }
 
             // Get the nv status flag attr and update it
             ATTR_NV_STATUS_FLAG_type l_nv_status =
@@ -3005,6 +3021,55 @@ errlHndl_t notifyNvdimmProtectionChange(Target* i_target,
         ERRL_GETEID_SAFE(l_err), ERRL_GETRC_SAFE(l_err) );
 
     return l_err;
+}
+
+/*
+ * @brief Utility function to send the value of
+ *   ATTR_NVDIMM_ARMED to the FSP
+ */
+void send_ATTR_NVDIMM_ARMED( Target* i_nvdimm,
+                             ATTR_NVDIMM_ARMED_type& i_val )
+{
+#ifdef __HOSTBOOT_RUNTIME
+    errlHndl_t l_err = nullptr;
+
+    // Send attr to HWSV if at runtime
+    AttributeTank::Attribute l_attr = {};
+    if( !makeAttribute<ATTR_NVDIMM_ENCRYPTION_ENABLE>
+        (i_nvdimm, l_attr) )
+    {
+        TRACFCOMP(g_trac_nvdimm, ERR_MRK"send_ATTR_NVDIMM_ARMED() Could not create Attribute");
+        /*@
+         *@errortype
+         *@reasoncode       NVDIMM_CANNOT_MAKE_ATTRIBUTE
+         *@severity         ERRORLOG_SEV_PREDICTIVE
+         *@moduleid         SEND_ATTR_NVDIMM_ARMED
+         *@devdesc          Couldn't create an Attribute to send the data
+         *                  to the FSP
+         *@custdesc         NVDIMM encryption error
+         */
+        l_err = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_PREDICTIVE,
+                            SEND_ATTR_NVDIMM_ARMED,
+                            NVDIMM_CANNOT_MAKE_ATTRIBUTE,
+                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+        l_err->collectTrace(NVDIMM_COMP_NAME);
+        errlCommit( l_err, NVDIMM_COMP_ID );
+    }
+    else
+    {
+        std::vector<TARGETING::AttributeTank::Attribute> l_attrList;
+        l_attrList.push_back(l_attr);
+        l_err = sendAttributes( l_attrList );
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"send_ATTR_NVDIMM_ARMED() Error sending ATTR_NVDIMM_ARMED down to FSP");
+            l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+            l_err->collectTrace(NVDIMM_COMP_NAME);
+            errlCommit( l_err, NVDIMM_COMP_ID );
+        }
+    }
+#endif //__HOSTBOOT_RUNTIME
 }
 
 

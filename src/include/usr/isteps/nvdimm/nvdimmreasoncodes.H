@@ -96,6 +96,7 @@ enum nvdimmModuleId
     NVDIMM_GET_DARN_NUMBER                  = 0x2E,
     NVDIMM_KEYIFY_RANDOM_NUMBER             = 0x2F,
     SET_ATTR_NVDIMM_ENCRYPTION_KEYS_FW      = 0x30,
+    SEND_ATTR_NVDIMM_ARMED                  = 0x31,
 };
 
 /**
