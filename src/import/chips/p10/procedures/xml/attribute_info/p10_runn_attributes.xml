@@ -97,4 +97,22 @@
   </enum>
 </attribute>
 <!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_RUNN_DO_CONFIG_CHECKS</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Perform RUNN configuration checks after starting RUNN counter(s):
+     - confirm RUNN clocks are running
+     - (if chip-contained) confirm all clocks started in-phase by comparing
+       clock controller phase-counter values captured at clock start
+    Note: this may compromise cycle-reproduceability!
+  </description>
+  <valueType>uint8</valueType>
+  <initToZero/>
+  <enum>
+    OFF = 0x0,
+    ON  = 0x1,
+  </enum>
+</attribute>
+<!-- ********************************************************************** -->
 </attributes>
