@@ -2206,6 +2206,15 @@ fapi2::ReturnCode writeMCBarData(
         // SMF
         if (l_data.MCFGPA_SMF_valid == true)
         {
+            FAPI_DBG("Writing SMF bit into address extension now");
+            // Set up Extension Address for SMF
+            FAPI_TRY(fapi2::getScom(l_target.getParent<fapi2::TARGET_TYPE_MI>(), P9A_MI_MCMODE2, l_scomData),
+                     "Error reading to P9A_MI_MCMODE2 reg");
+            l_scomData.setBit<46>();
+            FAPI_TRY(fapi2::putScom(l_target.getParent<fapi2::TARGET_TYPE_MI>(), P9A_MI_MCMODE2, l_scomData),
+                     "Error writing to P9A_MI_MCMODE2 reg");
+
+            l_scomData = 0;
             // MCFGPA SMF valid (bit 0)
             l_scomData.setBit<P9A_MI_MCFGP0A_SMF_VALID>();
 
@@ -2221,11 +2230,12 @@ fapi2::ReturnCode writeMCBarData(
                                   (l_extAddr << 9)); //matches 17:35 extendBarAddress shifts left 8 (17-8) = 9
             // SMF upper addr
             l_norAddr = 0;
-            l_norAddr.insertFromRight<22, 14>(l_data.MCFGPA_SMF_UPPER_addr);
+            l_norAddr.insertFromRight<17, 19>(l_data.MCFGPA_SMF_UPPER_addr);
             FAPI_TRY(extendBarAddress(l_ext_mask, l_norAddr, l_extAddr));
             l_scomData.insert<P9A_MI_MCFGP0A_SMF_UPPER_ADDRESS,
                               P9A_MI_MCFGP0A_SMF_UPPER_ADDRESS_LEN>(
-                                  (l_extAddr << 14)); //matches 22:35 extendBarAddress shifts left 8 (22-8) = 14
+                                  (l_extAddr << 9)); //matches 17:35 extendBarAddress shifts left 8 (17-8) = 9
+
         }
 
         // Write to reg
@@ -2287,11 +2297,11 @@ fapi2::ReturnCode writeMCBarData(
                                   (l_extAddr << 9 )); //matches 17:35 extendBarAddress shifts left 8 (17-8) = 9
             // SMF upper addr
             l_norAddr = 0;
-            l_norAddr.insertFromRight<22, 14>(l_data.MCFGPMA_SMF_UPPER_addr);
+            l_norAddr.insertFromRight<17, 19>(l_data.MCFGPMA_SMF_UPPER_addr);
             FAPI_TRY(extendBarAddress(l_ext_mask, l_norAddr, l_extAddr));
             l_scomData.insert<P9A_MI_MCFGPM0A_SMF_UPPER_ADDRESS,
                               P9A_MI_MCFGPM0A_SMF_UPPER_ADDRESS_LEN>(
-                                  (l_extAddr << 14)); //matches 22:35 extendBarAddress shifts left 8 (22-8) = 14
+                                  (l_extAddr << 9)); //matches 17:35 extendBarAddress shifts left 8 (17-8) = 9
         }
 
         // Write to reg
@@ -2352,7 +2362,8 @@ fapi2::ReturnCode unmaskMCFIR(const fapi2::Target<T> i_target)
     }
 
     l_mcfirmask_and.clearBit<MCS_MCFIR_MC_INTERNAL_RECOVERABLE_ERROR>();
-    l_mcfirmask_and.clearBit<MCS_MCFIR_MC_INTERNAL_NONRECOVERABLE_ERROR>();
+    //Temporary mask to enable other teams for bringup
+    //l_mcfirmask_and.clearBit<MCS_MCFIR_MC_INTERNAL_NONRECOVERABLE_ERROR>();
     l_mcfirmask_and.clearBit<MCS_MCFIR_POWERBUS_PROTOCOL_ERROR>();
     l_mcfirmask_and.clearBit<MCS_MCFIR_MULTIPLE_BAR>();
 
@@ -2365,7 +2376,8 @@ fapi2::ReturnCode unmaskMCFIR(const fapi2::Target<T> i_target)
 
     if (T == fapi2::TARGET_TYPE_MI)
     {
-        l_mcfirmask_and.clearBit<MCS_MCFIR_MS_WAT_DEBUG_CONFIG_REG_ERROR>();
+        //Temporary mask to enable other teams for bringup
+        //l_mcfirmask_and.clearBit<MCS_MCFIR_MS_WAT_DEBUG_CONFIG_REG_ERROR>();
     }
 
     // Defect HW451708, HW451711

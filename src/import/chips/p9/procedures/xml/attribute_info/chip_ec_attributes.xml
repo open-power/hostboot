@@ -8949,4 +8949,21 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_AXONE_GEMINI_OVERRUN</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+     Setup Memory controller to hold back too many operations from being passed to Gemini
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_AXONE</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
 </attributes>
