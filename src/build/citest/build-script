@@ -24,28 +24,81 @@
 #
 # IBM_PROLOG_END_TAG
 
+usage="
+$(basename "$0") [-h|--help] [--skipCxxTests] [--skipCopyrightCheck]
+
+Description:
+    The original use of this script was for the Hostboot standalone CI job,
+    so by default it will run a copyright check, then compile hostboot and
+    populate an ODE sandbox and run the CXX test suite in standalone simics.
+
+    Flags have been added to skip the copyright checks and the cxx tests
+    for cases where we only want to get a populated sandbox.
+
+Expectations:
+    This script is expected to be ran from the top level of the
+    hostboot directory. (ie src/build/citest/build-script <params>). It will
+    look at env variables PROJECT_ROOT, WORKSPACE, SANDBOXNAME, SANDBOXROOT,
+    CHIP, PNOR, CONFIG_FILE, and HOSTBOOT_PROFILE.
+
+Optional Flags:
+    -h|--help             shows this help text
+    --skipCxxTests        skips the execution of the cxx test suite
+    --skipCopyrightCheck  skips the execution of the copyright check
+"
+
 if [ -z $PROJECT_ROOT ]; then
     source "$WORKSPACE/env.bash"
 fi
+
+while [[ $# -gt 0 ]]
+do
+key="$1"
+
+case $key in
+    --skipCopyrightCheck)
+    SKIP_CR_CHECK=1
+    shift # past argument
+    ;;
+    --skipCxxTests)
+    SKIP_CXX_TESTS=1
+    shift # past argument
+    ;;
+    -h|--help)
+    echo "$usage"
+    exit 0
+    ;;
+    *)
+    echo "
+!!! Invalid argument \"$1\" passed into ${0} !!!!"
+    echo "$usage"
+    exit 22
+    ;;
+esac
+done
+
+echo "SKIP_CR_CHECK  = ${SKIP_CR_CHECK}"
+echo "SKIP_CXX_TESTS  = ${SKIP_CXX_TESTS}"
 
 source "$PROJECT_ROOT/src/build/citest/setup-env"
 
 # Force simics into Secure Mode
 export SECURITY_HW_POLICY="1"
 
-# Check copyright.
-check-copyright > copyright.log 2>&1
-if [ $? -eq 0 ]; then
-    echo "----Copyright check succeeded."
-    cat copyright.log
-else
-    echo "----Copyright check failed."
-    cat copyright.log
-    exit -1
+if [ -z "$SKIP_CR_CHECK" ]; then
+    # Check copyright.
+    check-copyright > copyright.log 2>&1
+    if [ $? -eq 0 ]; then
+        echo "----Copyright check succeeded."
+        cat copyright.log
+    else
+        echo "----Copyright check failed."
+        cat copyright.log
+        exit -1
+    fi
 fi
 
 # Create holding environment, build HB, and populate holding environment
-
 echo "#--------------------------------"
 if [ "$CHIP" == "P10" ];then
     echo "As things stand, when doing a P10 Standalone build, a Sandbox is "
@@ -78,14 +131,14 @@ elif [[ ! -z "${HOSTBOOT_CPPCHECK}" ]]; then
     COMPILE_ONLY=1
 fi
 # Build Hostboot
-my_date=$(date)
+start_time=$(date)
 echo "#--------------------------------"
-printf "\n\n$(date): STARTED running \"make -j32 $build_opt\"\n\n"
+printf "\n\n$start_time: STARTED running \"make -j32 $build_opt\"\n\n"
 echo "#--------------------------------"
 make -j32 $build_opt || exit -1
 make_rc=$?
 echo "#--------------------------------"
-printf "\n\nrc=$make_rc: $(date): FINISHED running (\"make -j32 $build_opt\" was started at $my_date)\n\n"
+printf "\n\nrc=$make_rc: $(date): FINISHED running (\"make -j32 $build_opt\" was started at $start_time)\n\n"
 echo "#--------------------------------"
 
 if [[ ! -z "${COMPILE_ONLY}" ]]; then
@@ -104,58 +157,63 @@ else
     exit -1
 fi
 
-# Add Hostboot files to simics sandbox
+# Add Hostboot files to simics workspace
 # If SETUP_FOR_STANDALONE = 1, Hostboot files will be added under
 # ${PROJECT_ROOT}/standalone
-my_date=$(date)
+start_time=$(date)
 echo "#--------------------------------"
-printf "\n\n$(date): STARTED running \"populate-environment\"....\n\n"
+printf "\n\n$start_time: STARTED running \"populate-environment\"....\n\n"
 echo "#--------------------------------"
 populate-environment || exit -1
 echo "#--------------------------------"
-printf "\n\nrc=$?: $(date): FINISHED running (\"populate-environment\" was started at $my_date)\n\n"
+printf "\n\nrc=$?: $(date): FINISHED running (\"populate-environment\" was started at $start_time)\n\n"
 echo "#--------------------------------"
 
-if [ "$CHIP" == "FSPBUILD" ]; then
-    # Start errl parser building.
-    my_date=$(date)
-    printf "\n\n$(date): STARTED running \"build-errl-parsers\"\n\n"
-    build-errl-parsers > errl-parsers.log 2>&1 &
-    ERRLPARSERS_PID=$!
+if [ -z "$SKIP_CXX_TESTS" ]; then
 
-    # Check errl parser completion.
-    wait $ERRLPARSERS_PID
-    if [ $? -ne 0 ]; then
-        echo "----Error parsers failed."
-        cat errl-parsers.log
-        exit -1
+    if [ "$CHIP" == "FSPBUILD" ]; then
+            # Start errl parser building.
+            start_time=$(date)
+            printf "\n\n$start_time: STARTED running \"build-errl-parsers\"\n\n"
+            build-errl-parsers > errl-parsers.log 2>&1 &
+            ERRLPARSERS_PID=$!
+
+            # Check errl parser completion.
+            wait $ERRLPARSERS_PID
+            if [ $? -ne 0 ]; then
+                echo "----Error parsers failed."
+                cat errl-parsers.log
+                exit -1
+            else
+                printf "\n\n$(date): FINISHED running (\"build-errl-parsers\" was started at $start_time)\n\n"
+            fi
+
     else
-        printf "\n\n$(date): FINISHED running (\"build-errl-parsers\" was started at $my_date)\n\n"
-    fi
-else
-    printf "2) CHIP=$CHIP"
-    echo "CHIP=$CHIP"
+            printf "2) CHIP=$CHIP"
+            echo "CHIP3=$CHIP"
 
-    # Start CxxTest Simics execution.
-    my_date=$(date)
-    echo "#--------------------------------"
-    printf "\n\n$(date): STARTED running \"cxxtest-start.sh\"....\n\n"
-    echo "#--------------------------------"
-    cxxtest-start.sh || exit -1
-    echo "#--------------------------------"
-    printf "\n\nrc=$?: $(date): FINISHED running (\"cxxtest-start.sh\" was started at  $my_date)\n\n"
-    echo "#--------------------------------"
+            # Start CxxTest Simics execution.
+            start_time=$(date)
+            echo "#--------------------------------"
+            printf "\n\n$start_time: STARTED running cxxtest-start.sh....\n\n"
+            echo "#--------------------------------"
+            cxxtest-start.sh || exit -1
+            echo "#--------------------------------"
+            printf "\n\nrc=$?: $(date): FINISHED running (\"cxxtest-start.sh\" was started at  $start_time)\n\n"
+            echo "#--------------------------------"
+
+    fi
 fi
 
 if [[ ! -z "${HOSTBOOT_PROFILE}" ]]; then
     # Generate the code coverage report. Located obj/gcov_report
     # Jenkins will artifact and can display html report
-    my_date=$(date)
+    start_time=$(date)
     echo "#--------------------------------"
-    printf "\n\n$(date): STARTED running \"make lcov\"\n\n"
+    printf "\n\n$start_time: STARTED running \"make lcov\"\n\n"
     echo "#--------------------------------"
     make lcov || exit -1
     echo "#--------------------------------"
-    printf "\n\nrc=$?: $(date): FINISHED running (\"make lcov\" was started at  $my_date)\n\n"
+    printf "\n\nrc=$?: $(date): FINISHED running (\"make lcov\" was started at  $start_time)\n\n"
     echo "#--------------------------------"
 fi
