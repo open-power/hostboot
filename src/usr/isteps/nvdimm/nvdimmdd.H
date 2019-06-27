@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,6 +69,7 @@ struct nvdimm_addr_t
     uint64_t devSize_KB;     // in kilobytes
     uint64_t chipCount;      // number of chips making up nvdimm device
     uint64_t writeCycleTime;  // in milliseconds
+    uint8_t  blockSize;  // size of write block supported for this nvdimm
     uint8_t  i2cMuxBusSelector;
     TARGETING::EntityPath i2cMuxPath;
 
@@ -86,6 +87,7 @@ struct nvdimm_addr_t
           devSize_KB(0),
           chipCount(0),
           writeCycleTime(0),
+          blockSize(0),
           i2cMuxBusSelector(I2C_MUX::NOT_APPLICABLE),
           i2cMuxPath()
     {

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -271,7 +271,8 @@ NvdimmInstalledImage::NvdimmInstalledImage(TARGETING::Target * i_nvDimm) :
     iv_timeout(INVALID_TIMEOUT),
     iv_max_blocks_per_region(INVALID_REGION_BLOCK_SIZE),
     iv_fw_update_mode_enabled(false),
-    iv_region_write_retries(0)
+    iv_region_write_retries(0),
+    iv_blockSizeSupported(INVALID_BLOCK_SIZE)
 {
     // initialize to invalid values
 }
@@ -354,6 +355,46 @@ errlHndl_t NvdimmInstalledImage::getVersion(uint16_t & o_version,
       }
     } while (0);
     o_version = iv_version;
+    return l_err;
+}
+
+errlHndl_t NvdimmInstalledImage::getBlockWriteSizeSupported(uint64_t & o_blockSize)
+{
+    errlHndl_t l_err = nullptr;
+
+    do {
+        if (iv_blockSizeSupported == INVALID_BLOCK_SIZE)
+        {
+            uint16_t version = INVALID_VERSION;
+            l_err = getVersion(version, 0);
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_nvdimm_upd, ERR_MRK"getBlockWriteSizeSupported: "
+                    "Failed to get version for 0x%.8X NVDIMM",
+                    TARGETING::get_huid(iv_dimm));
+                break;
+            }
+
+            // The block write is more prone to random system interrupt
+            // which does something funny to the i2c bus.
+            // v3.A has the timeout increased to mitigate that
+            if (version >= 0x3A00)
+            {
+                // version supports 32-byte block size
+                iv_blockSizeSupported = 32;
+            }
+            else
+            {
+                // default to word size max write
+                iv_blockSizeSupported = sizeof(uint16_t);
+            }
+            TRACFCOMP( g_trac_nvdimm_upd, ERR_MRK"getBlockWriteSizeSupported: "
+                "block size %d supported for 0x%.8X NVDIMM (version 0x%04X)",
+                iv_blockSizeSupported, TARGETING::get_huid(iv_dimm),
+                version );
+        }
+    } while (0);
+    o_blockSize = iv_blockSizeSupported;
     return l_err;
 }
 
@@ -1081,8 +1122,9 @@ errlHndl_t NvdimmInstalledImage::waitFwOpsBlockReceived()
 {
     errlHndl_t l_err = nullptr;
 
-    // retry for a total of 100ms
-    uint32_t timeout_ms_val = 100;
+    // retry for a total of 500ms
+    const uint32_t MAX_WAIT_FOR_OPS_BLOCK_RECEIVED = 500;
+    uint32_t timeout_ms_val = MAX_WAIT_FOR_OPS_BLOCK_RECEIVED;
 
     bool blockReceived = false;
     fw_ops_status_t opStatus;
@@ -1098,6 +1140,7 @@ errlHndl_t NvdimmInstalledImage::waitFwOpsBlockReceived()
                 TARGETING::get_huid(iv_dimm), timeout_ms_val);
             break;
         }
+
         if (!opStatus.fw_ops_block_received)
         {
             // wait 1 millisecond between checking status
@@ -1122,6 +1165,12 @@ errlHndl_t NvdimmInstalledImage::waitFwOpsBlockReceived()
 
     if (!blockReceived && !l_err)
     {
+        TRACFCOMP(g_trac_nvdimm_upd, ERR_MRK"waitFwOpsBlockReceived: "
+            "NVDIMM 0x%.8X FIRMWARE_OPS_STATUS (timeout: %d ms) "
+            "-- Last status: 0x%02X",
+            TARGETING::get_huid(iv_dimm), MAX_WAIT_FOR_OPS_BLOCK_RECEIVED,
+            opStatus.whole);
+
         /*@
          *@errortype
          *@moduleid         WAIT_FW_OPS_BLOCK_RECEIVED
@@ -1142,7 +1191,7 @@ errlHndl_t NvdimmInstalledImage::waitFwOpsBlockReceived()
                                (
                                   TWO_UINT8_TO_UINT16( 0x00,
                                                   opStatus.whole),
-                                  100,
+                                  MAX_WAIT_FOR_OPS_BLOCK_RECEIVED,
                                   timeout_ms_val
                                ),
                                ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
@@ -1580,15 +1629,29 @@ errlHndl_t NvdimmInstalledImage::byteRegionBlockTransfer(const uint8_t * i_data,
                 TRACFCOMP(g_trac_nvdimm_upd, ERR_MRK"byteRegionBlockTransfer: "
                     "Unable to open page for BLOCK %d transfer of NVDIMM "
                     "0x%.8X", blockNum, TARGETING::get_huid(iv_dimm));
+                break;
             }
 
             size_t l_numBytes = BYTES_PER_BLOCK;
             uint8_t l_reg_addr = ADDRESS(TYPED_BLOCK_DATA_BYTE0);
+
+            // Grab whether word or 32-byte block write is supported
+            uint64_t blockSizeSupported = INVALID_BLOCK_SIZE;
+            l_err = getBlockWriteSizeSupported(blockSizeSupported);
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_nvdimm_upd, ERR_MRK"byteRegionBlockTransfer: "
+                    "Unable to grab maximum block write size for NVDIMM 0x%.8X",
+                    TARGETING::get_huid(iv_dimm));
+                break;
+            }
+
             l_err = DeviceFW::deviceOp( DeviceFW::WRITE,
                                         iv_dimm,
                                         pCurrentBlockData,
                                         l_numBytes,
-                                        DEVICE_NVDIMM_RAW_ADDRESS(l_reg_addr) );
+                                        DEVICE_NVDIMM_RAW_ADDRESS_WITH_BLOCKSIZE(l_reg_addr, blockSizeSupported)
+                                       );
             if (l_err)
             {
                 TRACFCOMP(g_trac_nvdimm_upd, ERR_MRK"byteRegionBlockTransfer: "
@@ -1596,24 +1659,49 @@ errlHndl_t NvdimmInstalledImage::byteRegionBlockTransfer(const uint8_t * i_data,
                     blockNum, l_reg_addr, TARGETING::get_huid(iv_dimm));
                 break;
             }
-            // increment to next block
-            pCurrentBlockData += BYTES_PER_BLOCK;
 
             // After a block has been transferred, verify that the 32-byte block
             // was received by polling FIRMWARE_OPS_STATUS offset for
             // FIRMWARE_BLOCK_RECEIVED.
-            TRACUCOMP(g_trac_nvdimm_upd, ">> waitFwOpsBlockReceived");
             l_err = waitFwOpsBlockReceived();
             if (l_err)
             {
                 TRACFCOMP(g_trac_nvdimm_upd, ERR_MRK"byteRegionBlockTransfer: "
                     "Block %d read of FIRMWARE_OPS_STATUS failed on NVDIMM "
                     " 0x%.8X", blockNum, TARGETING::get_huid(iv_dimm));
+
+                size_t tmpNumBytes = l_numBytes;
+                uint8_t tmpBuffer[tmpNumBytes];
+                errlHndl_t l_err2 = DeviceFW::deviceOp( DeviceFW::READ,
+                                           iv_dimm,
+                                           tmpBuffer,
+                                           tmpNumBytes,
+                                           DEVICE_NVDIMM_ADDRESS(l_reg_addr) );
+                if (l_err2)
+                {
+                    TRACFCOMP(g_trac_nvdimm_upd, ERR_MRK"byteRegionBlockTransfer: "
+                    "Block %d read from 0x%02X failed on NVDIMM 0x%.8X",
+                    blockNum, l_reg_addr, TARGETING::get_huid(iv_dimm));
+                    l_err2->plid(l_err->plid());
+                    l_err2->collectTrace(NVDIMM_COMP_NAME);
+                    l_err2->collectTrace(NVDIMM_UPD);
+                    errlCommit(l_err2, NVDIMM_COMP_ID);
+                    break;
+                }
+                else
+                {
+                    TRACFBIN(g_trac_nvdimm_upd, "byteRegionBlockTransfer: Wrote block", pCurrentBlockData, l_numBytes);
+                    TRACFBIN(g_trac_nvdimm_upd, "byteRegionBlockTransfer: Read-back block", tmpBuffer, l_numBytes);
+                }
+
                 break;
             }
 
             // block of data successfully sent to NV controller
             TRACUCOMP(g_trac_nvdimm_upd,"byteRegionBlockTransfer: block 0x%02X successfully sent to NV controller", blockNum);
+
+            // increment to next block
+            pCurrentBlockData += BYTES_PER_BLOCK;
             blockNum++;
         }
 

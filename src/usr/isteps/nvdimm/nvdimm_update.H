@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,7 @@ const uint16_t INVALID_ID       = 0xFFFF;
 const uint16_t INVALID_VERSION  = 0xFFFF;
 const uint16_t INVALID_TIMEOUT  = 0xFFFF;
 const uint32_t INVALID_TYPE     = 0xFFFFFFFF;
+const uint8_t  INVALID_BLOCK_SIZE = 0x00;
 
 // Type is combination of manufacturer id and product id
 const uint32_t SMART_NVDIMM_16GB_TYPE = 0x01945377;
@@ -245,6 +246,15 @@ class NvdimmInstalledImage
     }
 
     /**
+     * @brief Accessor for what write size is supported for this installed nvdimm
+     *        Prior to level 0x3A, only word size supported
+     *        Level 0x3A and beyond support 32 byte block writes
+     * @param[out] maximum number of bytes allowed per write
+     * @return block write size supported for this current nvdimm level
+     */
+    errlHndl_t getBlockWriteSizeSupported(uint64_t & o_blockSize);
+
+    /**
      * @brief Update the current NV Controller
      * @param Update using this image
      * @return error pointer if failure to update, else nullptr
@@ -276,6 +286,9 @@ class NvdimmInstalledImage
 
       // retry attempts for all regions
       uint8_t iv_region_write_retries;
+
+      // what size block can be written (2 or 32 byte)
+      uint64_t iv_blockSizeSupported;
 
 
       // Helper functions for updating the installed lid

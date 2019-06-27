@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -189,6 +189,7 @@ errlHndl_t nvdimmPerformOp( DeviceFW::OperationType i_opType,
     nvdimm_addr_t i2cInfo;
 
     i2cInfo.offset = va_arg( i_args, uint64_t );
+    i2cInfo.blockSize = va_arg( i_args, uint64_t );
 
     TRACDCOMP( g_trac_nvdimm,
                ENTER_MRK"nvdimmPerformOp()" );
@@ -399,7 +400,7 @@ errlHndl_t crossesNvdimmPageBoundary( uint64_t i_offset,
 
     errlHndl_t err = nullptr;
 
-    if(i_offset >= NVDIMM_PAGE_SIZE || (i_offset+i_buflen) >= NVDIMM_PAGE_SIZE)
+    if(i_offset >= NVDIMM_PAGE_SIZE || (i_offset+i_buflen) > NVDIMM_PAGE_SIZE)
     {
         TRACFCOMP( g_trac_nvdimm,
                    ERR_MRK"crossesNvdimmPageBoundary() - offset 0x%X, buflen 0x%X"
@@ -800,11 +801,13 @@ errlHndl_t nvdimmWrite ( TARGETING::Target * i_target,
         // Setup a max-size buffer of writePageSize
         size_t newBufLen = i_i2cInfo.writePageSize;
 
-        // Break data into word size transfers if possible
-        if ( (io_buflen > sizeof(uint16_t)) &&
-             ((io_buflen % sizeof(uint16_t)) == 0) )
+        // Break data into max supported i2c transfer size, if possible
+        // (speeds up i2c operation)
+        if ( (i_i2cInfo.blockSize != 0) &&
+             (io_buflen >= i_i2cInfo.blockSize) &&
+             ((io_buflen % i_i2cInfo.blockSize) == 0) )
         {
-            newBufLen = sizeof(uint16_t);
+            newBufLen = i_i2cInfo.blockSize;
         }
         assert(newBufLen > 0, "Unable to allocate 0 buffer size for nvdimmWrite()");
 
@@ -937,15 +940,16 @@ errlHndl_t nvdimmWriteData( TARGETING::Target * i_target,
     errlHndl_t err = nullptr;
     errlHndl_t err_retryable = nullptr;
     size_t data_length;
+
     do
     {
         /***********************************************************/
         /* Attempt write multiple times ONLY on retryable fails    */
         /***********************************************************/
-        for (uint8_t retry = 0;
-              retry <= NVDIMM_MAX_RETRIES;
-              retry++)
+        for ( uint8_t retry = 0; retry <= NVDIMM_MAX_RETRIES; retry++)
         {
+            // use a temporary variable to allow retry as the
+            // data_length could be altered by deviceOp() failure
             data_length = i_dataLen;
 
             // Do the actual data write
@@ -958,6 +962,23 @@ errlHndl_t nvdimmWriteData( TARGETING::Target * i_target,
                                 DeviceFW::I2C,
                                 I2C_SMBUS_RW_W_CMD_PARAMS(
                                     DeviceFW::I2C_SMBUS_WORD_NO_PEC,
+                                    i_i2cInfo.engine,
+                                    i_i2cInfo.port,
+                                    i_i2cInfo.devAddr,
+                                    *(reinterpret_cast<uint8_t*>(i_byteAddress)
+                                        + (i_byteAddressSize-1)),
+                                    i_i2cInfo.i2cMuxBusSelector,
+                                    &(i_i2cInfo.i2cMuxPath)) );
+            }
+            else if ( i_dataLen == 32 )
+            {
+                err = deviceOp( DeviceFW::WRITE,
+                                i_target,
+                                i_dataToWrite,
+                                data_length,
+                                DeviceFW::I2C,
+                                I2C_SMBUS_RW_W_CMD_PARAMS(
+                                    DeviceFW::I2C_SMBUS_BLOCK_NO_BYTE_COUNT,
                                     i_i2cInfo.engine,
                                     i_i2cInfo.port,
                                     i_i2cInfo.devAddr,

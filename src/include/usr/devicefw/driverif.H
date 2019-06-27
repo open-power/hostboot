@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -104,6 +104,7 @@ namespace DeviceFW
         I2C_SMBUS_BYTE         = 4, ///< I2c SMBUS Read/Write Byte
         I2C_SMBUS_SEND_OR_RECV = 5, ///< I2c SMBUS Send/Receive Byte
         I2C_SMBUS_WORD_NO_PEC  = 6, ///< I2c SMBUS Read/Write Word without PEC byte
+        I2C_SMBUS_BLOCK_NO_BYTE_COUNT = 7, ///< I2c SMBUS Block Read/Write without first byte being a byte count
     };
 
 #ifndef PARSER

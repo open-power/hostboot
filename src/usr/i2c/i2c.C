@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -448,10 +448,11 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
     // Else this is not a page operation, call the normal common function
     else
     {
-        if(   (subop==DeviceFW::I2C_SMBUS_BLOCK)
-           || (subop==DeviceFW::I2C_SMBUS_BYTE)
-           || (subop==DeviceFW::I2C_SMBUS_WORD)
-           || (subop == DeviceFW::I2C_SMBUS_WORD_NO_PEC) )
+        if(   (subop == DeviceFW::I2C_SMBUS_BLOCK)
+           || (subop == DeviceFW::I2C_SMBUS_BYTE)
+           || (subop == DeviceFW::I2C_SMBUS_WORD)
+           || (subop == DeviceFW::I2C_SMBUS_WORD_NO_PEC)
+           || (subop == DeviceFW::I2C_SMBUS_BLOCK_NO_BYTE_COUNT) )
         {
             args.smbus.commandCode =
                 static_cast<decltype(args.smbus.commandCode)>(
@@ -486,6 +487,11 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
         {
             args.smbus.usePec = false;
             args.subop = DeviceFW::I2C_SMBUS_WORD;
+        }
+        else if (subop == DeviceFW::I2C_SMBUS_BLOCK_NO_BYTE_COUNT)
+        {
+            args.smbus.usePec = false;
+            args.subop=subop;
         }
         else
         {
@@ -1450,7 +1456,8 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
         /*******************************************************/
         /*  Perform the I2C Operation                          */
         /*******************************************************/
-
+        TRACUCOMP( g_trac_i2c, INFO_MRK "i2cCommonOp() -- opType: %d, subOp: %d",
+               static_cast<uint64_t>(i_opType), i_args.subop);
         /***********************************************/
         /* I2C SMBUS Send Byte                         */
         /***********************************************/
@@ -1618,14 +1625,16 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
         /***********************************************/
         /* I2C SMBUS Block Write                       */
         /***********************************************/
-        else if(   (i_opType  == DeviceFW::WRITE )
-                && (i_args.subop == DeviceFW::I2C_SMBUS_BLOCK))
+        else if(   (i_opType  == DeviceFW::WRITE ) &&
+                   ((i_args.subop == DeviceFW::I2C_SMBUS_BLOCK) ||
+                   (i_args.subop == DeviceFW::I2C_SMBUS_BLOCK_NO_BYTE_COUNT)) )
         {
             TRACUCOMP(g_trac_i2c, INFO_MRK
-                      "I2C SMBUS Block Write: Command code = 0x%02X, "
-                      "Use PEC = %d. io_buflen = %lu",
-                      i_args.smbus.commandCode,
-                      i_args.smbus.usePec, io_buflen);
+                      "I2C SMBUS Block Write: Command code = 0x%02X, SubCmd = 0x%02X "
+                      "Use PEC = %d. io_buflen = %lu, io_buffer byte0: 0x%02X",
+                      i_args.smbus.commandCode, i_args.subop,
+                      i_args.smbus.usePec, io_buflen,
+                      *reinterpret_cast<uint8_t*>(io_buffer));
 
             // If requested length is for < 1 byte or > 255 bytes for a block
             // write transaction, throw an error.
@@ -1669,12 +1678,29 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
                                               io_buflen,
                                               io_buffer,
                                               i_args.smbus.usePec);
+            void * writeStart = &blockWrite.commandCode;
+
+            // byteCount might be altered into commandCode, so store its value
+            size_t dataByteCount = blockWrite.byteCount;
+            if (i_args.subop == DeviceFW::I2C_SMBUS_BLOCK_NO_BYTE_COUNT)
+            {
+                // Moving commandCode down a byte so it is followed
+                // immediately by dataBytes[] instead of byteCount
+                // (this removes byteCount from the block write)
+                writeStart = &blockWrite.byteCount;
+                blockWrite.byteCount = blockWrite.commandCode;
+                blockWrite.messageSize -= sizeof(blockWrite.commandCode);
+                TRACUCOMP(g_trac_i2c, INFO_MRK
+                  "I2C SMBUS Block Write no-byte-count: removing byteCount,"
+                  " msgSize = %d", blockWrite.messageSize);
+            }
+
             do {
 
             size_t writeSize = blockWrite.messageSize;
             const auto writeSizeExp = writeSize;
             err = i2cWrite(i_target,
-                           &blockWrite.commandCode,
+                           writeStart,
                            writeSize,
                            i_args);
             if(err)
@@ -1686,7 +1712,8 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
                    "Write size mismatch; expected %d but got %d",
                    writeSizeExp,writeSize);
 
-            io_buflen = blockWrite.byteCount;
+
+            io_buflen = dataByteCount;
 
             } while(0);
 

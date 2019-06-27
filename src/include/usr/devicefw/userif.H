@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -393,6 +393,21 @@ namespace DeviceFW
 
     /**
      * @brief Construct the device addressing parameters for the
+     *        NVDIMM RAW device ops + use block size specified
+     * @details This a raw call to read/write a NVDIMM address which means it
+     *          will not set the page before it does the read/write call. Hence,
+     *          for this call to work properly, the page must have been set
+     *          properly beforehand.
+     * @see DEVICE_NVDIMM_ADDRESS for a NVDIMM read/write call with
+     *                            page setting.
+     * @param[i] i_address   - NVDIMM address to an internal register
+     * @param[i] i_blockSize - maximum block size for operation (0 = default size, 2 and 32 valid)
+     */
+    #define DEVICE_NVDIMM_RAW_ADDRESS_WITH_BLOCKSIZE(i_address, i_blockSize)\
+        DeviceFW::NVDIMM_RAW, static_cast<uint64_t>((i_address)), static_cast<uint64_t>((i_blockSize))
+
+    /**
+     * @brief Construct the device addressing parameters for the
      *        NVDIMM RAW device ops.
      * @details This a raw call to read/write a NVDIMM address which means it
      *          will not set the page before it does the read/write call. Hence,
@@ -403,7 +418,7 @@ namespace DeviceFW
      * @param[i] i_address - NVDIMM address to an internal register
      */
     #define DEVICE_NVDIMM_RAW_ADDRESS(i_address)\
-        DeviceFW::NVDIMM_RAW, static_cast<uint64_t>((i_address))
+        DEVICE_NVDIMM_RAW_ADDRESS_WITH_BLOCKSIZE(i_address, 0)
 
     /**
      * Construct the device addressing parameters for the FAPI I2C operation
