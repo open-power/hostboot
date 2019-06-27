@@ -57,8 +57,8 @@ trace_desc_t* g_trac_nvdimm = NULL;
 TRAC_INIT(&g_trac_nvdimm, NVDIMM_COMP_NAME, 2*KILOBYTE);
 
 // Easy macro replace for unit testing
-#define TRACUCOMP(args...)  TRACFCOMP(args)
-//#define TRACUCOMP(args...)
+//#define TRACUCOMP(args...)  TRACFCOMP(args)
+#define TRACUCOMP(args...)
 
 
 namespace NVDIMM
