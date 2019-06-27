@@ -401,4 +401,15 @@ enum SLAVE_CONFIG_DEFS
     CFG_PM_MUX_DISABLE = 7
 };
 
+/**
+ * @brief  various SCOM operations supported for QME
+ */
+enum QME_SCOM_CONTROLS
+{
+    QME_SCOM_NOP                    = 0,
+    QME_SCOM_OR                     = 1,
+    QME_SCOM_AND                    = 2,
+    QME_SCOM_QUEUED                 = 3
+};
+
 #endif  // __P10_HCD_COMMON_H__
