@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -85,6 +85,18 @@ enum nvdimmModuleId
     VALIDATE_FW_IMAGE                       = 0x23,
     WAIT_FW_OPS_BLOCK_RECEIVED              = 0x24,
     NVDIMM_IS_UPDATE_NEEDED                 = 0x25,
+    NVDIMM_RUN_UPDATE_USING_LID             = 0x26,
+    NVDIMM_GET_TPM                          = 0x27,
+    NVDIMM_SET_KEY_REG                      = 0x28,
+    NVDIMM_ENCRYPT_ENABLE                   = 0x29,
+    NVDIMM_CRYPTO_ERASE                     = 0x2A,
+    NVDIMM_CHECK_VALID_ATTR_DATA            = 0x2B,
+    NVDIMM_HANDLE_CONFLICTING_KEYS          = 0x2C,
+    NVDIMM_ENCRYPT_UNLOCK                   = 0x2D,
+    NVDIMM_GET_DARN_NUMBER                  = 0x2E,
+    NVDIMM_KEYIFY_RANDOM_NUMBER             = 0x2F,
+    SET_ATTR_NVDIMM_ENCRYPTION_KEYS_FW      = 0x30,
+    SEND_ATTR_NVDIMM_ARMED                  = 0x31,
 };
 
 /**

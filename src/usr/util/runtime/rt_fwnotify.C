@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -97,6 +97,9 @@ uint16_t SeqId_t::getCurrentSeqId()
  **/
 void sbeAttemptRecovery(uint64_t i_data)
 {
+// TODO: RTC 244854 Re-enable call below, when can
+#if 0
+
    // Create a useful struct to get to the data
    // The data is expected to be a HUID (in the first 4 bytes)
    // followed by a PLID (in the last 4 bytes).
@@ -232,6 +235,7 @@ void sbeAttemptRecovery(uint64_t i_data)
     }
 
     TRACFCOMP(g_trac_runtime, EXIT_MRK"sbeAttemptRecovery");
+#endif
 }
 
 /**
@@ -377,7 +381,8 @@ void logGardEvent(const hostInterfaces::gard_event_t& i_gardEvent)
                        i_gardEvent.i_plid,
                        i_gardEvent.i_sub_unit_mask,
                        i_gardEvent.i_recovery_level);
-
+// TODO: RTC 244854 Re-enable call below, when can
+#if 0
     errlHndl_t l_err{nullptr};
 
     do
@@ -464,7 +469,7 @@ void logGardEvent(const hostInterfaces::gard_event_t& i_gardEvent)
 
     // Commit any error log that occurred.
     errlCommit(l_err, RUNTIME_COMP_ID);
-
+#endif
     TRACFCOMP(g_trac_runtime, EXIT_MRK"logGardEvent")
 }
 
@@ -554,31 +559,6 @@ void firmware_notify( uint64_t i_len, void *i_data )
                                     l_hbrt_fw_msg->generic_msg.msgType);
                 } // END if ( (l_hbrt_fw_msg->generic_msg.msgType ... else ...
             } // END case hostInterfaces::HBRT_FW_MSG_HBRT_FSP_REQ:
-            break;
-
-            case hostInterfaces::HBRT_FW_MSG_TYPE_NVDIMM_OPERATION:
-            {
-                uint64_t l_minMsgSize = hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
-                sizeof(hostInterfaces::hbrt_fw_msg::nvdimm_operation);
-                if (i_len < l_minMsgSize)
-                {
-                    l_badMessage = true;
-
-                    TRACFCOMP(g_trac_runtime, ERR_MRK"firmware_notify: "
-                     "Received message HBRT_FW_MSG_TYPE_NVDIMM_OPERATION, "
-                     "but size of message data(%d) is not adequate for a "
-                     "complete message of this type, with size requirement of "
-                     "%d", i_len, l_minMsgSize );
-
-                    // Pack user data 1 with the message input type, the only
-                    // data that can be safely retrieved
-                    l_userData1 = l_hbrt_fw_msg->io_type;
-
-                    break;
-                }
-
-                doNvDimmOperation(l_hbrt_fw_msg->nvdimm_operation);
-            } // END case hostInterfaces::HBRT_FW_MSG_TYPE_NVDIMM_OPERATION:
             break;
 
             case hostInterfaces::HBRT_FW_MSG_TYPE_GARD_EVENT:
