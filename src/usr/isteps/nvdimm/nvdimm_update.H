@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -316,13 +316,6 @@ class NvdimmInstalledImage
        * @return error if unable to read register, else nullptr
        */
       errlHndl_t isFwOpsSuccess(bool & o_success);
-
-      /**
-       * @brief Reset NV controller. Resets controller and waits for it to
-       *        come back online
-       * @return error if reset failed, else nullptr
-       */
-      errlHndl_t resetController();
 
       /**
        * @brief Updates the NV controller with the lid's image data

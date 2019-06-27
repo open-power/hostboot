@@ -513,6 +513,11 @@ errlHndl_t nvdimmResetController(Target *i_nvdimm)
 
     }while(0);
 
+    // Reset will lock encryption so unlock again
+    TargetHandleList l_nvdimmTargetList;
+    l_nvdimmTargetList.push_back(i_nvdimm);
+    nvdimm_encrypt_unlock(l_nvdimmTargetList);
+
     TRACUCOMP(g_trac_nvdimm, EXIT_MRK"nvdimmResetController() HUID[%X]",get_huid(i_nvdimm));
 
     return l_err;
@@ -1746,6 +1751,9 @@ errlHndl_t nvdimm_getTPM(Target*& o_tpm)
 }
 
 
+#endif
+
+
 bool nvdimm_encrypt_unlock(TargetHandleList &i_nvdimmList)
 {
     TRACFCOMP(g_trac_nvdimm, ENTER_MRK"nvdimm_encrypt_unlock()");
@@ -1754,17 +1762,14 @@ bool nvdimm_encrypt_unlock(TargetHandleList &i_nvdimmList)
 
     do
     {
+        // Do not check ATTR_NVDIMM_ENCRYPTION_ENABLE
+        // The attribute could have been reset by flashing the FSP
+        // Unlock if the keys are valid and NVDIMM hw encryption is enabled
+
         // Get the sys pointer, attribute keys are system level
         Target* l_sys = nullptr;
         targetService().getTopLevelTarget( l_sys );
         assert(l_sys, "nvdimm_encrypt_unlock() no TopLevelTarget");
-
-        // Exit if encryption is not enabled via the attribute
-        if (!l_sys->getAttr<ATTR_NVDIMM_ENCRYPTION_ENABLE>())
-        {
-            TRACFCOMP(g_trac_nvdimm,"ATTR_NVDIMM_ENCRYPTION_ENABLE=0");
-            break;
-        }
 
         // Get the FW key attributes
         auto l_attrKeysFw =
@@ -1774,22 +1779,14 @@ bool nvdimm_encrypt_unlock(TargetHandleList &i_nvdimmList)
         nvdimmKeyData_t* l_keysFw =
                 reinterpret_cast<nvdimmKeyData_t*>(&l_attrKeysFw);
 
-        // Check for valid key attribute data
-        l_err = nvdimm_checkValidAttrKeys(l_keysFw);
-        if (l_err)
-        {
-            break;
-        }
-
         // Check encryption unlock for all nvdimms
         for (const auto & l_nvdimm : i_nvdimmList)
         {
             // Get encryption state in the config/status reg
-            encryption_config_status_t l_encStatus;
-            l_encStatus.whole = 0;
+            encryption_config_status_t l_encStatus = {0};
             l_err = nvdimmReadReg(l_nvdimm,
-                                ENCRYPTION_CONFIG_STATUS,
-                                l_encStatus.whole);
+                                  ENCRYPTION_CONFIG_STATUS,
+                                  l_encStatus.whole);
             if (l_err)
             {
                 TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_encrypt_unlock() nvdimm[%X] error reading ENCRYPTION_CONFIG_STATUS",get_huid(l_nvdimm));
@@ -1803,6 +1800,16 @@ bool nvdimm_encrypt_unlock(TargetHandleList &i_nvdimmList)
             if (l_encStatus.encryption_unlocked ||
                 !l_encStatus.encryption_enabled)
             {
+                break;
+            }
+
+            // Check for valid key attribute data
+            l_err = nvdimm_checkValidAttrKeys(l_keysFw);
+            if (l_err)
+            {
+                errlCommit( l_err, NVDIMM_COMP_ID );
+                nvdimmSetEncryptionError(l_nvdimm);
+                l_success = false;
                 break;
             }
 
@@ -1876,9 +1883,6 @@ bool nvdimm_encrypt_unlock(TargetHandleList &i_nvdimmList)
     TRACFCOMP(g_trac_nvdimm, EXIT_MRK"nvdimm_encrypt_unlock()");
     return l_success;
 }
-
-
-#endif
 
 
 void nvdimmSetEncryptionError(Target *i_nvdimm)
@@ -2016,6 +2020,31 @@ errlHndl_t nvdimm_handleConflictingKeys(
     nvdimm_getNvdimmList(l_nvdimmTargetList);
     for (const auto & l_nvdimm : l_nvdimmTargetList)
     {
+        // Check encryption state in the config/status reg
+        encryption_config_status_t l_encStatus = {0};
+        l_err = nvdimmReadReg(l_nvdimm,
+                              ENCRYPTION_CONFIG_STATUS,
+                              l_encStatus.whole);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_handleConflictingKeys() nvdimm[%X] error reading ENCRYPTION_CONFIG_STATUS",get_huid(l_nvdimm));
+            errlCommit( l_err, NVDIMM_COMP_ID );
+            nvdimmSetEncryptionError(l_nvdimm);
+            continue;
+        }
+
+        // Encryption is not enabled
+        // Keys are not in use so could use either set of keys
+        // Use the ANCHOR card keys
+        if (!l_encStatus.encryption_enabled)
+        {
+            TRACFCOMP(g_trac_nvdimm, "nvdimm_handleConflictingKeys() nvdimm[%X] copying ANCHOR keys to FW",get_huid(l_nvdimm));
+            l_validKeyFound = true;
+            set_ATTR_NVDIMM_ENCRYPTION_KEYS_FW(i_attrKeysAnchor);
+            continue;
+        }
+
+        // Encryption is enabled, test the keys
         // Write the EK test reg with the FW attr value
         l_err = nvdimm_setKeyReg(l_nvdimm,
                                  l_keysFw->ek,
@@ -2041,6 +2070,8 @@ errlHndl_t nvdimm_handleConflictingKeys(
         {
             TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_handleConflictingKeys() nvdimm[%X] ATTR_NVDIMM_ENCRYPTION_KEYS_FW valid",get_huid(l_nvdimm));
             l_validKeyFound = true;
+            // Re-write the FW keys, this will also update the ANCHOR keys
+            set_ATTR_NVDIMM_ENCRYPTION_KEYS_FW(i_attrKeysFw);
             break;
         }
 
@@ -2131,13 +2162,6 @@ bool nvdimm_gen_keys(void)
         Target* l_sys = nullptr;
         targetService().getTopLevelTarget( l_sys );
         assert(l_sys, "nvdimm_gen_keys: no TopLevelTarget");
-
-        // Exit if encryption is not enabled via the attribute
-        if (!l_sys->getAttr<ATTR_NVDIMM_ENCRYPTION_ENABLE>())
-        {
-            TRACFCOMP(g_trac_nvdimm,"ATTR_NVDIMM_ENCRYPTION_ENABLE=0");
-            break;
-        }
 
         // Key size must be less that max TPM random generator size
         static_assert(ENC_KEY_SIZE <= MAX_TPM_SIZE,
@@ -2419,8 +2443,7 @@ bool nvdimm_encrypt_enable(TargetHandleList &i_nvdimmList)
         for (const auto & l_nvdimm : i_nvdimmList)
         {
             // Check encryption state in the config/status reg
-            encryption_config_status_t l_encStatus;
-            l_encStatus.whole = 0;
+            encryption_config_status_t l_encStatus = {0};
             l_err = nvdimmReadReg(l_nvdimm,
                                 ENCRYPTION_CONFIG_STATUS,
                                 l_encStatus.whole);

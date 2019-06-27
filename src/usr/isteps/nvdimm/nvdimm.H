@@ -572,6 +572,17 @@ bool nvdimm_validRandomNumber(uint8_t* i_genData);
 void nvdimmSetEncryptionError(TARGETING::Target *i_nvdimm);
 
 
+/**
+ * @brief Helper function to reset the NVDIMM controller
+ *
+ * @param[in] i_nvdimm - nvdimm target
+ *
+ * @return errlHndl_t - Null if successful, otherwise a pointer to
+ *                      the error log
+ */
+errlHndl_t nvdimmResetController(TARGETING::Target *i_nvdimm);
+
+
 #ifndef __HOSTBOOT_RUNTIME
 
 /**

@@ -71,6 +71,9 @@ void nvdimm_restore(TARGETING::TargetHandleList &i_nvdimmList);
 bool nvdimm_update(TARGETING::TargetHandleList &i_nvdimmList);
 
 
+#endif
+
+
 /**
  * @brief Entry function to NVDIMM unlock encryption
  *
@@ -80,8 +83,6 @@ bool nvdimm_update(TARGETING::TargetHandleList &i_nvdimmList);
  */
 bool nvdimm_encrypt_unlock(TARGETING::TargetHandleList &i_nvdimmList);
 
-
-#endif
 
 /**
  * @brief Entry function to NVDIMM generate keys

@@ -668,7 +668,7 @@ errlHndl_t NvdimmInstalledImage::updateImage(NvdimmLidImage * i_lidImage)
 
         // Reset controller to activate new firmware
         TRACUCOMP(g_trac_nvdimm_upd, "updateImage: resetController");
-        l_err = resetController();
+        l_err = nvdimmResetController(iv_dimm);
         if (l_err)
         {
             TRACFCOMP(g_trac_nvdimm_upd, ERR_MRK "updateImage:  "
@@ -1694,34 +1694,6 @@ errlHndl_t NvdimmInstalledImage::validateFwImage()
 
                 }
             }
-        }
-    }
-    return l_err;
-}
-
-errlHndl_t NvdimmInstalledImage::resetController()
-{
-    errlHndl_t l_err = nullptr;
-
-    // If bit 0 is set, the module shall start a Reset Controller operation
-    l_err = nvdimmWriteReg(iv_dimm, NVDIMM_MGT_CMD0, 0x01);
-    if (l_err)
-    {
-        TRACFCOMP(g_trac_nvdimm_upd,ERR_MRK"resetController: NVDIMM 0x%.8X "
-            "write of 0x01 to NVDIMM_MGT_CMD0 register failed",
-            TARGETING::get_huid(iv_dimm));
-    }
-    else
-    {
-        // Now wait until NV controller is ready again after reset
-        // nvdimmReady will retry NACK calls
-        l_err = nvdimmReady(iv_dimm);
-        if (l_err)
-        {
-            TRACFCOMP(g_trac_nvdimm_upd,ERR_MRK"resetController: NV controller for "
-                "NVDIMM 0x%.8X is not reporting as ready after reset",
-                TARGETING::get_huid(iv_dimm));
-
         }
     }
     return l_err;
