@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -120,7 +120,7 @@ SbeRetryHandler::SbeRetryHandler(SBE_MODE_OF_OPERATION i_sbeMode,
 , iv_secureModeDisabled(false) //Per HW team this should always be 0
 , iv_masterErrorLogPLID(i_plid)
 , iv_switchSidesCount(0)
-, iv_currentAction(P9_EXTRACT_SBE_RC::ERROR_RECOVERED)
+//, iv_currentAction(P9_EXTRACT_SBE_RC::ERROR_RECOVERED)  FIXME RTC: 210975
 , iv_currentSBEState(SBE_REG_RETURN::SBE_NOT_AT_RUNTIME)
 , iv_shutdownReturnCode(0)
 , iv_currentSideBootAttempts(1) // It is safe to assume that the current side has attempted to boot
@@ -131,7 +131,8 @@ SbeRetryHandler::SbeRetryHandler(SBE_MODE_OF_OPERATION i_sbeMode,
     SBE_TRACF(ENTER_MRK "SbeRetryHandler::SbeRetryHandler()");
 
     // Initialize members that have no default initialization
-    iv_sbeRegister.reg = 0;
+    // FIXME RTC: 210975
+    //iv_sbeRegister.reg = 0;
 
     SBE_TRACF(EXIT_MRK "SbeRetryHandler::SbeRetryHandler()");
 }
@@ -167,7 +168,8 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
         // In this case we have been told by the caller that the sbe just powered on
         // so it is safe to assume that the currState value is legit and we can trust that
         // the sbe has booted successfully to runtime.
-        if( this->iv_initialPowerOn && (this->iv_sbeRegister.currState == SBE_STATE_RUNTIME))
+        if( this->iv_initialPowerOn)
+        /* FIXME RTC: 210975 && (this->iv_sbeRegister.currState == SBE_STATE_RUNTIME))*/
         {
             //We have successfully powered on the SBE
             SBE_TRACF("main_sbe_handler(): Initial power on of the SBE was a success!!");
@@ -202,7 +204,7 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                             SBEIO_EXTRACT_RC_HANDLER,
                             SBEIO_SLAVE_FAILED_TO_BOOT,
-                            this->iv_sbeRegister.asyncFFDC,
+                            /* FIXME RTC: 210975 this->iv_sbeRegister.asyncFFDC*/ 0,
                             TARGETING::get_huid(i_target));
 
                 l_errl->collectTrace( "ISTEPS_TRACE", 256);
@@ -224,7 +226,7 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
 
         // if the sbe is not booted at all extract_rc will fail so we only
         // will run extract RC if we know the sbe has at least tried to boot
-        if(this->iv_sbeRegister.sbeBooted)
+        if(/* FIXME RTC: 210975 this->iv_sbeRegister.sbeBooted*/ 0)
         {
             SBE_TRACF("main_sbe_handler(): No async ffdc found and sbe says it has been booted, running run p9_sbe_extract_rc.");
             // Call the function that runs extract_rc, this needs to run to determine
@@ -237,7 +239,8 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
         else
         {
             SBE_TRACF("main_sbe_handler(): SBE reports it was never booted, calling p9_sbe_extract_rc will fail. Setting action to be RESTART_SBE");
-            this->iv_currentAction = P9_EXTRACT_SBE_RC::RESTART_SBE;
+            // FIXME RTC: 210975
+            //this->iv_currentAction = P9_EXTRACT_SBE_RC::RESTART_SBE;
         }
 
         // If the mode was marked as informational that means the caller did not want
@@ -282,11 +285,13 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
             SBE_TRACF("main_sbe_handler(): iv_sbeRegister.currState: %d , "
                         "iv_currentSideBootAttempts: %d , "
                         "iv_currentAction: %d , ",
-                        this->iv_sbeRegister.currState,
+                        /* FIXME RTC: 210975 this->iv_sbeRegister.currState*/ 0,
                         this->iv_currentSideBootAttempts,
-                        this->iv_currentAction);
+                        // FIXME RTC: 210975
+                        /*this->iv_currentAction*/ 0);
 
-            if(this->iv_currentAction == P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION)
+            // FIXME RTC: 210975
+            if(0 /*this->iv_currentAction == P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION*/)
             {
                 SBE_TRACF("main_sbe_handler(): We have concluded there are no further recovery actions to take, deconfiguring proc and exiting handler");
                 // There is no action possible. Gard and Callout the proc
@@ -326,10 +331,13 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
             // This is also dependent on the iv_switchSideCount.
             // Note: we do this for upd_seeprom because we don't support
             //       updating the seeprom during IPL time
+            /* FIXME RTC: 210975
             if((this->iv_currentAction ==
                             P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM ||
                 this->iv_currentAction ==
                             P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM))
+            */
+            if(0)
             {
                 // We cannot switch sides and perform an hreset if the seeprom's
                 // versions do not match. If this happens, log an error and stop
@@ -558,12 +566,12 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
             // If the currState of the SBE is not RUNTIME then we will assume
             // our attempt to boot the SBE has failed, so run extract rc again
             // to determine why we have failed
-            if (this->iv_sbeRegister.currState != SBE_STATE_RUNTIME)
+            if (/* FIXME RTC: 210975 this->iv_sbeRegister.currState != SBE_STATE_RUNTIME*/ 0)
             {
                 this->sbe_run_extract_rc(i_target);
             }
 
-        } while((this->iv_sbeRegister).currState != SBE_STATE_RUNTIME);
+        } while(/* FIXME RTC: 210975 (this->iv_sbeRegister).currState != SBE_STATE_RUNTIME*/ 0);
 
         // If we ended up switching sides we want to mark it down as
         // as informational log
@@ -616,9 +624,12 @@ bool SbeRetryHandler::sbe_run_extract_msg_reg(TARGETING::Target * i_target)
     // If there is no error getting the status register, and the SBE
     // did not make it to runtime AND the asyncFFDC bit is set, we will
     // use the FFDC to decide our actions rather than using p9_extract_sbe_rc
-    if((!l_errl) &&
+    if((!l_errl))
+/* FIXME RTC: 210975
+        &&
        (this->iv_sbeRegister.currState != SBE_STATE_RUNTIME) &&
        this->iv_sbeRegister.asyncFFDC)
+*/
     {
         SBE_TRACF("WARNING: sbe_run_extract_msg_reg completed without error for proc 0x%.8X .  "
                     "However, there was asyncFFDC found though so we will run the FFDC parser",
@@ -691,6 +702,7 @@ errlHndl_t SbeRetryHandler::sbe_poll_status_reg(TARGETING::Target * i_target)
 
     for( uint64_t l_loops = 0; l_loops < SBE_RETRY_NUM_LOOPS; l_loops++ )
     {
+/* FIXME RTC: 210975
         fapi2::ReturnCode l_rc;
 
         // We cannot use FAPI_INVOKE in this case because it is possible
@@ -701,7 +713,7 @@ errlHndl_t SbeRetryHandler::sbe_poll_status_reg(TARGETING::Target * i_target)
                         l_fapi2_proc_target, this->iv_sbeRegister);
 
         l_errl = rcToErrl(l_rc, ERRORLOG::ERRL_SEV_UNRECOVERABLE);
-
+*/
         if (l_errl)
         {
             SBE_TRACF("ERROR : call p9_get_sbe_msg_register, PLID=0x%x, "
@@ -717,22 +729,22 @@ errlHndl_t SbeRetryHandler::sbe_poll_status_reg(TARGETING::Target * i_target)
                     SbeRetryHandler::SBE_REG_RETURN::FAILED_COLLECTING_REG;
             break;
         }
-        else if ((this->iv_sbeRegister).currState == SBE_STATE_RUNTIME)
+        else if (/* FIXME RTC: 210975 (this->iv_sbeRegister).currState == SBE_STATE_RUNTIME*/ 0)
         {
             SBE_TRACF("SBE 0x%.8X booted and at runtime, "
                       "iv_sbeRegister=0x%.8X, on loop %d",
                       TARGETING::get_huid(i_target),
-                      (this->iv_sbeRegister).reg,
+                      /* FIXME RTC: 210975 (this->iv_sbeRegister).reg*/ 0,
                       l_loops);
             this->iv_currentSBEState =
                   SbeRetryHandler::SBE_REG_RETURN::SBE_AT_RUNTIME;
             break;
         }
-        else if ((this->iv_sbeRegister).asyncFFDC)
+        else if (/* FIXME RTC: 210975 (this->iv_sbeRegister).asyncFFDC*/ 0)
         {
             SBE_TRACF("SBE 0x%.8X has async FFDC bit set, "
                       "iv_sbeRegister=0x%.8X",TARGETING::get_huid(i_target),
-                      (this->iv_sbeRegister).reg);
+                      /* FIXME RTC: 210975 (this->iv_sbeRegister).reg*/ 0);
             // Async FFDC is indicator that SBE is failing to boot, and if
             // in DUMP state, that SBE is done dumping, so leave loop
             break;
@@ -744,7 +756,7 @@ errlHndl_t SbeRetryHandler::sbe_poll_status_reg(TARGETING::Target * i_target)
                 SBE_TRACF("%d> SBE 0x%.8X NOT booted yet, "
                           "iv_sbeRegister=0x%.8X", l_loops,
                           TARGETING::get_huid(i_target),
-                           (this->iv_sbeRegister).reg);
+                           /* FIXME RTC: 210975 (this->iv_sbeRegister).reg*/ 0);
             }
             l_loops++;
 #ifndef __HOSTBOOT_RUNTIME
@@ -755,7 +767,7 @@ errlHndl_t SbeRetryHandler::sbe_poll_status_reg(TARGETING::Target * i_target)
         }
     }
 
-    if ((this->iv_sbeRegister).currState != SBE_STATE_RUNTIME)
+    if (/* FIXME RTC: 210975 (this->iv_sbeRegister).currState != SBE_STATE_RUNTIME*/ 0)
     {
         // Switch to using FSI SCOM if we are not using xscom
         TARGETING::ScomSwitches l_switches =
@@ -787,7 +799,7 @@ void SbeRetryHandler::handleFspIplTimeFail(TARGETING::Target * i_target)
     // If we found that there was async FFDC available we need to notify hwsv of this
     // even if we did not find anything useful in the ffdc for us, its possible hwsv
     // will be able to use it.
-    if ((this->iv_sbeRegister).asyncFFDC)
+    if (/* FIXME RTC: 210975 (this->iv_sbeRegister).asyncFFDC*/ 0)
     {
         iv_shutdownReturnCode = SBEIO_HWSV_COLLECT_SBE_RC;
     }
@@ -800,7 +812,7 @@ void SbeRetryHandler::handleFspIplTimeFail(TARGETING::Target * i_target)
     }
     SBE_TRACF("handleFspIplTimeFail(): During IPL time on FSP system hostboot will TI so that HWSV can handle the error. "
               "Shutting down w/ the error code %s" ,
-              this->iv_sbeRegister.asyncFFDC ? "SBEIO_HWSV_COLLECT_SBE_RC" : "SBEIO_DEAD_SBE"  );
+              /* FIXME RTC: 210975 this->iv_sbeRegister.asyncFFDC*/ 0 ? "SBEIO_HWSV_COLLECT_SBE_RC" : "SBEIO_DEAD_SBE"  );
 
     // On FSP systems if we failed to recover the SBE then we should shutdown w/ the
     // correct error so that HWSV will know what FFDC to collect
@@ -1031,7 +1043,8 @@ void SbeRetryHandler::sbe_run_extract_rc(TARGETING::Target * i_target)
     // Convert the returnCode into an UNRECOVERABLE error log which we will
     // associate w/ the caller's errlog via plid
     l_errl = rcToErrl(l_rc, ERRORLOG::ERRL_SEV_UNRECOVERABLE);
-    this->iv_currentAction = l_ret;
+    // FIXME RTC: 210975
+    //this->iv_currentAction = l_ret;
 
     // This call will look at what p9_extact_sbe_rc had set the return action to
     // checks on how many times we have attempted to boot this side,
@@ -1050,7 +1063,7 @@ void SbeRetryHandler::sbe_run_extract_rc(TARGETING::Target * i_target)
     {
         SBE_TRACF("Error: sbe_boot_fail_handler : p9_extract_sbe_rc HWP "
                   " returned action %d and errorlog PLID=0x%x, rc=0x%.4X",
-                  this->iv_currentAction, l_errl->plid(), l_errl->reasonCode());
+                  /* FIXME RTC: 210975 this->iv_currentAction*/ 0, l_errl->plid(), l_errl->reasonCode());
 
         l_errl->collectTrace(SBEIO_COMP_NAME,256);
         l_errl->collectTrace(FAPI_IMP_TRACE_NAME, 256);
@@ -1068,7 +1081,7 @@ void SbeRetryHandler::sbe_run_extract_rc(TARGETING::Target * i_target)
     }
 
     SBE_TRACF(EXIT_MRK "sbe_run_extract_rc() current action is %llx",
-                        this->iv_currentAction);
+                        /* FIXME RTC: 210975 this->iv_currentAction*/ 0);
 }
 
 void SbeRetryHandler::bestEffortCheck()
@@ -1078,6 +1091,7 @@ void SbeRetryHandler::bestEffortCheck()
     // sure we have tried booting on this seeprom twice, and that we
     // have tried the other seeprom twice as well. If we have tried all of
     // those cases then we will fail out
+/* FIXME RTC: 210975
     if(this->iv_currentAction == P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION)
     {
         if (this->iv_currentSideBootAttempts < MAX_SIDE_BOOT_ATTEMPTS)
@@ -1129,6 +1143,7 @@ void SbeRetryHandler::bestEffortCheck()
             }
         }
     }
+*/
 }
 
 errlHndl_t SbeRetryHandler::switch_sbe_sides(TARGETING::Target * i_target)

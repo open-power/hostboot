@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2017
+# Contributors Listed Below - COPYRIGHT 2013,2019
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -26,7 +26,7 @@
 # IBM_PROLOG_END_TAG
 
 #Builds an SBE partition for PNOR based on user-provided SBE images
-#It works for both Processor SBE-IPL images and Centaur SBE images
+#It works for Processor SBE-IPL images
 
 use strict;
 use File::Basename;

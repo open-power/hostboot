@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2016,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -26,10 +26,12 @@ HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
 MODULE = fsi_rt
 
-OBJS += rt_fsi.o
-OBJS += fsi_common.o
+# FIXME RTC: 210975
+
+#OBJS += rt_fsi.o
+#OBJS += fsi_common.o
 
 EXTRAINCDIR += ${ROOTPATH}/src/usr/fsi
 
-VPATH += ../
+#VPATH += ../
 include $(ROOTPATH)/config.mk

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -92,9 +92,6 @@ class AttnSvcTest: public CxxTest::TestSuite
             hostAttnGfir.install(system);
             unitCsGfir.install(system);
 
-            // @TODO RTC: 164827
-            // When we get CENTAURS, we may need to add host/unit cs
-            // here and install them right below.
             FakeMcs rec(PRDF::RECOVERABLE),
                     xstp(PRDF::CHECK_STOP),
                     special(PRDF::SPECIAL);
@@ -134,16 +131,6 @@ class AttnSvcTest: public CxxTest::TestSuite
                     &procs[0],
                     &procs[0] + procs.size());
 
-            // @TODO RTC: 164827
-            // We don't have Centaurs yet
-            /* ATTN::RandSource memSource(
-                    iterations,
-                    maxAttnsPerIteration,
-                    system,
-                    &membufs[0],
-                    &membufs[0] + membufs.size());
-            */
-
             targetSvc.installTargetService();
 
             ATTN::FakePrd prd(system);
@@ -168,15 +155,6 @@ class AttnSvcTest: public CxxTest::TestSuite
                     break;
                 }
 
-                // @TODO RTC: 164827
-                // We don't have Centaurs yet
-                /* if(!memSource.start())
-                   {
-                       TS_FAIL("unexpected error starting source");
-                       break;
-                   }
-                */
-
                 if(!procSource.start())
                 {
                     TS_FAIL("unexpected error starting source");
@@ -184,15 +162,6 @@ class AttnSvcTest: public CxxTest::TestSuite
                 }
 
                 // wait for the testcase to finish injecting attentions
-
-                // @TODO RTC: 164827
-                // We don't have Centaurs yet on NIMBUS P9
-                /* if(!memSource.wait())
-                   {
-                       TS_FAIL("unexpected error waiting for source");
-                        break;
-                   }
-                */
 
                 if(!procSource.wait())
                 {

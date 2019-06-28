@@ -226,7 +226,7 @@ uint32_t clearEccFirs<TYPE_MCBIST>( ExtensibleChip * i_chip )
             uint64_t              mask  = 0xfffff0004dffffffull;
             if ( mfgMode() )      mask &= 0xfffffffffbffffffull;
             #ifndef __HOSTBOOT_RUNTIME
-            if ( isInMdiaMode() ) mask &= 0xfffffffffbffffffull;
+            if ( /* FIXME RTC: 210975 isInMdiaMode()*/ 1 ) mask &= 0xfffffffffbffffffull;
             #endif
 
             o_rc = __clearFir<TYPE_MCA>( mcaChip, "MCAECCFIR_AND", mask );
@@ -274,7 +274,7 @@ uint32_t clearEccFirs<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
         uint64_t              mask  = 0xfffff0004dffffffull;
         if ( mfgMode() )      mask &= 0xfffffffffbffffffull;
         #ifndef __HOSTBOOT_RUNTIME
-        if ( isInMdiaMode() ) mask &= 0xfffffffffbffffffull;
+        if ( /* FIXME RTC: 210975 isInMdiaMode() */ 1) mask &= 0xfffffffffbffffffull;
         #endif
 
         o_rc = __clearFir<TYPE_OCMB_CHIP>( i_chip, "RDFFIR_AND", mask );
@@ -449,8 +449,10 @@ uint32_t didCmdStopOnLastAddr( ExtensibleChip * i_chip,
 
         // Get the end address of the current rank.
         MemAddr junk, endAddr;
+/* FIXME RTC: 210975
         o_rc = getMemAddrRange<T>( i_chip, curAddr.getRank(), junk,
                                           endAddr, i_rangeType );
+*/
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%02x) failed",

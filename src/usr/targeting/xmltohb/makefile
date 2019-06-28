@@ -59,13 +59,12 @@ FAPIATTRSRVC_SOURCE = \
 
 
 # Attribute XML files.
-FAPI2_ATTR_XML += $(wildcard $(ROOTPATH)/src/import/chips/p9/procedures/xml/attribute_info/*.xml)
-FAPI2_ATTR_XML += $(wildcard $(ROOTPATH)/src/import/hwpf/fapi2/xml/attribute_info/*.xml)
-FAPI2_ATTR_XML += $(wildcard $(ROOTPATH)/src/import/chips/centaur/procedures/xml/attribute_info/*.xml)
-FAPI2_ATTR_XML += $(wildcard $(ROOTPATH)/src/import/generic/procedures/xml/attribute_info/*.xml)
-FAPI2_ATTR_XML += $(wildcard $(ROOTPATH)/src/import/chips/ocmb/explorer/procedures/xml/attribute_info/*.xml)
-FAPI2_ATTR_XML += $(wildcard $(ROOTPATH)/src/import/chips/ocmb/common/procedures/xml/attribute_info/*.xml)
-
+FAPI2_ATTR_XML += $(wildcard $(ROOTPATH)/src/import/chips/p10/procedures/xml/attribute_info/*)
+FAPI2_ATTR_XML += $(wildcard $(ROOTPATH)/src/import/hwpf/fapi2/xml/attribute_info/*)
+FAPI2_ATTR_XML += $(wildcard $(ROOTPATH)/src/import/generic/procedures/xml/attribute_info/*)
+FAPI2_ATTR_XML += $(wildcard $(ROOTPATH)/src/import/chips/ocmb/explorer/procedures/xml/attribute_info/*)
+FAPI2_ATTR_XML += $(wildcard $(ROOTPATH)/src/import/chips/ocmb/common/procedures/xml/attribute_info/*)
+FAPI2_ATTR_XML += $(wildcard $(ROOTPATH)/src/usr/targeting/common/xmltohb/deleteme_temp_hb_attrs.xml)
 
 # Filter out Temp defaults XML file from Attribute XML files.
 # NOTE: The hb_temp_defaults.xml file is not a normal attribute file with the
@@ -74,7 +73,6 @@ FAPI2_ATTR_XML += $(wildcard $(ROOTPATH)/src/import/chips/ocmb/common/procedures
 FAPI2_ATTR_XML := $(filter-out $(ROOTPATH)/src/import/hwpf/fapi2/xml/attribute_info/hb_temp_defaults.xml,$(FAPI2_ATTR_XML))
 FAPI2_ATTR_XML := $(filter-out $(wildcard $(ROOTPATH)/src/import/hwpf/fapi2/xml/attribute_info/*~) ,$(FAPI2_ATTR_XML))
 FAPI2_ATTR_XML := $(filter-out $(wildcard $(ROOTPATH)/src/import/chips/p9/procedures/xml/attribute_info/*~),$(FAPI2_ATTR_XML))
-FAPI2_ATTR_XML := $(filter-out $(wildcard $(ROOTPATH)/src/import/chips/centaur/procedures/xml/attribute_info/*~),$(FAPI2_ATTR_XML))
 
 
 XMLTOHB_FAPIATTR_SOURCES += ${FAPI2_ATTR_XML}
@@ -190,18 +188,6 @@ VMM_CONSTS_FILE = \
     ${ROOTPATH}/src/include/usr/vmmconst.h
 
 GENFILES = ${XMLTOHB_TARGETS}
-
-XMLTOHB_SYSTEM_BINARIES += simics_NIMBUS_targeting.bin.protected
-XMLTOHB_SYSTEM_BINARIES += simics_NIMBUS_targeting.bin.unprotected
-
-XMLTOHB_SYSTEM_BINARIES += simics_CUMULUS_targeting.bin.protected
-XMLTOHB_SYSTEM_BINARIES += simics_CUMULUS_targeting.bin.unprotected
-
-XMLTOHB_SYSTEM_BINARIES += simics_CUMULUS_CDIMM_targeting.bin.protected
-XMLTOHB_SYSTEM_BINARIES += simics_CUMULUS_CDIMM_targeting.bin.unprotected
-
-XMLTOHB_SYSTEM_BINARIES += simics_AXONE_targeting.bin.protected
-XMLTOHB_SYSTEM_BINARIES += simics_AXONE_targeting.bin.unprotected
 
 XMLTOHB_SYSTEM_BINARIES += simics_P10_targeting.bin.protected
 XMLTOHB_SYSTEM_BINARIES += simics_P10_targeting.bin.unprotected

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,7 +27,6 @@
 
 #include <devicefw/driverif.H>
 #include <p9_cu.H>
-#include <centaur_scominfo.H>
 
 /** @file  scomtrans.H
  *  @brief Provides the interfaces to perform a SCom
@@ -79,21 +78,6 @@ errlHndl_t p9_translation (TARGETING::Target * &i_target,
                            uint64_t i_opMode = 0);
 
 /**
- * @brief This function translates a centaur scom address using
- *        the interface that the HW team provided.
- *
- * @param[in]      i_target      SCom target is passed in
- * @param[in]      i_type        Type of the target
- * @param[in|out]  io_addr       Address to be translated
- * @param[in]      i_opMode      Defaults to 0 (Standard)
- * @return         errlHndl_t
- */
-errlHndl_t centaur_translation (TARGETING::Target * &i_target,
-                                TARGETING::TYPE i_type,
-                                uint64_t &io_addr,
-                                uint64_t i_opMode = 0);
-
-/**
  * @brief This function gets the p9 chip unit for this target type.
  *
  * @param[in]      i_type        Type of the target
@@ -103,17 +87,6 @@ errlHndl_t centaur_translation (TARGETING::Target * &i_target,
  */
 bool getChipUnitP9 (TARGETING::TYPE i_type,
                     p9ChipUnits_t &o_chipUnit);
-
-/**
- * @brief This function gets the centaur chip unit for this target type.
- *
- * @param[in]      i_type        Type of the target
- * @param[out]     o_chipUnit    Chip unit related to target type
- * @return         bool          True if there was an error trying to find
- *                               a chipUnit related to the inputed target type
- */
-bool getChipUnitCentaur (TARGETING::TYPE i_type,
-                         centaurChipUnits_t &o_chipUnit);
 
 /**
  * @brief Computes the chip/ddlevel value to be passed into translator

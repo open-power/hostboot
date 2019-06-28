@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2015
+# Contributors Listed Below - COPYRIGHT 2013,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -27,6 +27,7 @@ ROOTPATH = ../../../../..
 
 MODULE = testutil_rt
 EXTRAINCDIR += ${ROOTPATH}/src/usr/util/
-TESTS = *.H
+# FIXME RTC: 210975
+#TESTS = *.H
 
 include $(ROOTPATH)/config.mk

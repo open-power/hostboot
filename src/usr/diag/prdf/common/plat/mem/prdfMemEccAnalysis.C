@@ -393,7 +393,7 @@ uint32_t handleMpe( ExtensibleChip * i_chip, const MemAddr & i_addr,
         #ifdef __HOSTBOOT_MODULE
 
         #ifndef __HOSTBOOT_RUNTIME
-        if ( isInMdiaMode() )
+        if ( /* FIXME RTC: 210975 isInMdiaMode()*/ 0 )
         {
         #endif
 

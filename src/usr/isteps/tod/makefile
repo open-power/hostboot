@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2016,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -27,12 +27,13 @@ ROOTPATH = ../../../..
 
 MODULE = tod
 
-OBJS += TodControls.o
-OBJS += TodDrawer.o
-OBJS += TodProc.o
-OBJS += TodSvc.o
-OBJS += TodHwpIntf.o
-OBJS += TodTopologyManager.o
+# FIXME RTC: 210975 Re-enable this module when EKB is mirrorred
+#OBJS += TodControls.o
+#OBJS += TodDrawer.o
+#OBJS += TodProc.o
+#OBJS += TodSvc.o
+#OBJS += TodHwpIntf.o
+#OBJS += TodTopologyManager.o
 
 SUBDIRS += runtime.d
 

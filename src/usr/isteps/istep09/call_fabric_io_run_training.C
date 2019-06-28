@@ -46,8 +46,10 @@
 #include <initservice/isteps_trace.H>   // g_trac_isteps_trace
 #include <initservice/initserviceif.H>  // isSMPWrapConfig
 //  Targeting support
+/* FIXME RTC: 210975
 #include <fapi2/target.H>               // fapi2::Target
 #include <target.H>                     // TARGETING::Target
+*/
 
 //  Error handling support
 #include <errl/errlentry.H>             // errlHndl_t
@@ -56,10 +58,12 @@
 //  Pbus link service support
 #include <pbusLinkSvc.H>                // TargetPairs_t, PbusLinkSvc
 
+/* FIXME RTC: 210975
 //  HWP call support
 #include <istepHelperFuncs.H>           // captureError
 #include <istep09/istep09HelperFuncs.H> // trainBusHandler
 #include <p9_io_xbus_linktrain.H>       // p9_io_xbus_linktrain
+*/
 
 namespace   ISTEP_09
 {
@@ -67,11 +71,13 @@ using   namespace   ISTEP_ERROR;
 using   namespace   ISTEPS_TRACE;
 using   namespace   TARGETING;
 
+/* FIXME RTC: 210975
 // helper function prototypes
 uint8_t run_linktraining(
                 const fapi2::Target<fapi2::TARGET_TYPE_XBUS> &i_master_target,
                 const fapi2::Target<fapi2::TARGET_TYPE_XBUS> &i_slave_target,
                 ISTEP_ERROR::IStepError & o_step_error );
+*/
 
 //******************************************************************************
 // Wrapper function to call fabric_io_run_training
@@ -83,7 +89,8 @@ void* call_fabric_io_run_training( void *io_pArgs )
 
     TRACFCOMP(g_trac_isteps_trace,ENTER_MRK"call_fabric_io_run_training entry");
 
-    uint32_t l_numberOfTrainFailures(0);
+    // FIXME RTC: 210975
+    //uint32_t l_numberOfTrainFailures(0);
     EDI_EI_INITIALIZATION::TargetPairs_t l_pbusConnections;
     TYPE l_busSet[] = { TYPE_XBUS, TYPE_OBUS };
     constexpr uint32_t l_maxBusSet(sizeof(l_busSet)/sizeof(TYPE));
@@ -98,10 +105,12 @@ void* call_fabric_io_run_training( void *io_pArgs )
                 "ERROR 0x%.8X : getPbusConnections TYPE_%cBUS returns error",
                 l_err->reasonCode(), (ii ? 'O':'X') );
 
+/* FIXME RTC: 210975
             // Capture error and then
             captureError(l_err,
                          l_stepError,
                          HWPF_COMP_ID);
+*/
 
             // Don't continue with a potential bad connection set
             break;
@@ -109,6 +118,7 @@ void* call_fabric_io_run_training( void *io_pArgs )
 
         if (TYPE_XBUS == l_busSet[ii])
         {
+/* FIXME RTC: 210975
             for (const auto & l_pbusConnection: l_pbusConnections)
             {
                 // Default the master and slave fapi2 targets
@@ -161,10 +171,12 @@ void* call_fabric_io_run_training( void *io_pArgs )
                         l_master_target_name, l_slave_target_name);
                 }
             }  // end for (const auto & l_pbusConnection: l_pbusConnections)
+*/
         }  // end if (TYPE_XBUS == l_busSet[ii])
         else if (INITSERVICE::isSMPWrapConfig() &&
                 (TYPE_OBUS == l_busSet[ii]))
         {
+/* FIXME RTC: 210975
             // Make the FAPI call to p9_io_obus_linktrain
             if (!trainBusHandler(l_busSet[ii],
                                  P9_IO_OBUS_LINKTRAIN,
@@ -174,6 +186,7 @@ void* call_fabric_io_run_training( void *io_pArgs )
             {
                 break;
             }
+*/
         }  // end else if (TYPE_OBUS == l_busSet[ii])
     } // end for (uint32_t ii = 0; ii < l_maxBusSet; ++ii)
 
@@ -195,6 +208,7 @@ void* call_fabric_io_run_training( void *io_pArgs )
  *  @return uint8_t Number of failures (maximum failures = 4)
  *  @retval 4 Means all attempts to train links failed
  */
+/* FIXME RTC: 210975
 uint8_t run_linktraining(
                 const fapi2::Target<fapi2::TARGET_TYPE_XBUS> &i_master_target,
                 const fapi2::Target<fapi2::TARGET_TYPE_XBUS> &i_slave_target,
@@ -249,4 +263,5 @@ uint8_t run_linktraining(
     }
     return o_failures;
 }
+*/
 };   // end namespace   ISTEP_09

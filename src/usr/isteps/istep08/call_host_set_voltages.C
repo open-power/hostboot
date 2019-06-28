@@ -42,10 +42,12 @@
 #include <trace/interface.H>           // TRACFCOMP
 #include <initservice/isteps_trace.H>  // g_trac_isteps_trace
 
+/* FIXME RTC: 210975
 //  HWP call support
 #include <p9_setup_evid.H>
 #include <nest/nestHwpHelperFuncs.H>   // fapiHWPCallWrapperForChip
 #include <hbToHwsvVoltageMsg.H>        // platform_set_nest_voltages
+*/
 
 //  Init Service support
 #include <initservice/initserviceif.H> // INITSERVICE::spBaseServicesEnabled
@@ -78,6 +80,7 @@ void* call_host_set_voltages(void *io_pArgs)
                      TYPE_PROC,
                      true ); // true: return functional procs
 
+/* FIXME RTC: 210975
         // Iterate over the found procs calling p9_setup_evid
         for( const auto & l_procTarget : l_procList )
         {
@@ -109,6 +112,7 @@ void* call_host_set_voltages(void *io_pArgs)
 
             TRACFCOMP(g_trac_isteps_trace, "Done with p9_setup_evid" );
         } // Processor Loop
+*/
 
         // Exit if FAPI call failed or returned an error
         if (!l_stepError.isNull())
@@ -121,7 +125,8 @@ void* call_host_set_voltages(void *io_pArgs)
         // send voltage information to HWSV
         if (INITSERVICE::spBaseServicesEnabled())
         {
-            l_err = platform_set_nest_voltages();
+            // FIXME RTC: 210975
+            //l_err = platform_set_nest_voltages();
 
             if( l_err )
             {
@@ -141,6 +146,7 @@ void* call_host_set_voltages(void *io_pArgs)
             break;
         }
 
+/* FIXME RTC: 210975
         if (INITSERVICE::isSMPWrapConfig())
         {
             // Make the FAPI call to p9_fbc_eff_config_links
@@ -156,6 +162,8 @@ void* call_host_set_voltages(void *io_pArgs)
             fapiHWPCallWrapperHandler(P9_IO_XBUS_IMAGE_BUILD, l_stepError,
                                       HWPF_COMP_ID, TYPE_PROC);
         }
+*/
+
     }while( 0 );
 
 

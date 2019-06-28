@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -275,70 +275,8 @@ fapi2::ReturnCode getMBvpdField
                  uint8_t * const i_pBuffer,
                  size_t& io_fieldSize)
 {
-    uint8_t l_recIndex = MBVPD_INVALID_CHIP_UNIT;
-    uint8_t l_keyIndex = MBVPD_INVALID_CHIP_UNIT;
-    errlHndl_t l_errl = NULL;
+    //TODO RTC: 210975 remove the references to this function elsewhere
     fapi2::ReturnCode l_rc;
-    FAPI_DBG("getMBvpdField entry");
-
-    do
-    {
-        // Translate the FAPI record to a Hostboot record
-        CVPD::cvpdRecord l_hbRecord = CVPD::CVPD_INVALID_RECORD;
-
-        l_rc = fapi2::CvpdRecordXlate(i_record, l_hbRecord, l_recIndex);
-
-        if (l_rc)
-        {
-            break;
-        }
-
-        // Translate the FAPI keyword to a Hostboot keyword
-        CVPD::cvpdKeyword l_hbKeyword = CVPD::CVPD_INVALID_KEYWORD;
-
-        l_rc = fapi2::CvpdKeywordXlate(i_keyword, l_hbKeyword, l_keyIndex);
-
-        if (l_rc)
-        {
-            break;
-        }
-
-        // deviceRead will return the size of the field if the
-        // pointer is NULL
-        size_t l_fieldLen = io_fieldSize;
-
-        l_errl = deviceRead(
-                reinterpret_cast< TARGETING::Target*>(i_target.get()),
-                i_pBuffer,
-                l_fieldLen,
-                DEVICE_CVPD_ADDRESS(l_hbRecord, l_hbKeyword));
-
-        if (l_errl)
-        {
-            FAPI_ERR("getMBvpdField: ERROR: deviceRead : errorlog PLID=0x%x",
-                    l_errl->plid());
-
-            // Add the error log pointer as data to the ReturnCode
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
-
-            break;
-        }
-
-        // Success, update callers io_fieldSize for the case where the
-        // pointer is NULL and deviceRead returned the actual size
-        io_fieldSize = l_fieldLen;
-
-        FAPI_DBG("getMBvpdField: returning field len=0x%x", io_fieldSize);
-
-    } while(0);
-
-    if( l_rc)
-    {
-        io_fieldSize = 0;
-    }
-
-    FAPI_DBG( "getMBvpdField: exit" );
-
     return  l_rc;
 }
 
@@ -352,56 +290,8 @@ fapi2::ReturnCode setMBvpdField
                  const uint8_t * const i_pBuffer,
                  const size_t i_fieldSize)
 {
+    //TODO RTC: 210975 remove the references to this function elsewhere
     fapi2::ReturnCode l_rc;
-    uint8_t l_recIndex = MBVPD_INVALID_CHIP_UNIT;
-    uint8_t l_keyIndex = MBVPD_INVALID_CHIP_UNIT;
-    errlHndl_t l_errl = NULL;
-    FAPI_DBG("setMBvpdField entry");
-
-    do
-    {
-        // Translate the FAPI record to a Hostboot record
-        CVPD::cvpdRecord l_hbRecord = CVPD::CVPD_INVALID_RECORD;
-
-        l_rc = fapi2::CvpdRecordXlate(i_record, l_hbRecord, l_recIndex);
-
-        if (l_rc)
-        {
-            break;
-        }
-
-        // Translate the FAPI keyword to a Hostboot keyword
-        CVPD::cvpdKeyword l_hbKeyword = CVPD::CVPD_INVALID_KEYWORD;
-
-        l_rc = fapi2::CvpdKeywordXlate(i_keyword, l_hbKeyword, l_keyIndex);
-
-        if (l_rc)
-        {
-            break;
-        }
-
-        size_t l_fieldLen = i_fieldSize;
-
-        l_errl = deviceWrite(
-                reinterpret_cast< TARGETING::Target*>(i_target.get()),
-                const_cast<uint8_t *>(i_pBuffer),
-                l_fieldLen,
-                DEVICE_CVPD_ADDRESS(l_hbRecord, l_hbKeyword));
-
-    } while(0);
-
-    if (l_errl)
-    {
-        FAPI_ERR("setMBvpdField: ERROR: deviceWrite : errorlog PLID=0x%x",
-                l_errl->plid());
-
-        // Add the error log pointer as data to the ReturnCode
-        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
-
-    }
-
-    FAPI_DBG( "setMBvpdField: exit" );
-
     return  l_rc;
 }
 

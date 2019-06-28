@@ -84,6 +84,11 @@
 #include <secureboot/smf_utils.H>
 #include <secureboot/smf.H>
 
+// TODO RTC: 210975 these two symbols normally live inside the RUNTIME namespace
+// and were moved out to help with linking errors.
+trace_desc_t *g_trac_runtime = nullptr;
+TRAC_INIT(&g_trac_runtime, RUNTIME_COMP_NAME, KILOBYTE);
+
 namespace RUNTIME
 {
 
@@ -103,8 +108,8 @@ const uint64_t HB_RES_MEM_UPPER_LIMIT = 256*MEGABYTE;
 // any memory below this limit.
 const uint64_t HB_RES_MEM_LOWER_LIMIT = VMM_MEMORY_SIZE + VMM_HRMOR_OFFSET;
 
-trace_desc_t *g_trac_runtime = nullptr;
-TRAC_INIT(&g_trac_runtime, RUNTIME_COMP_NAME, KILOBYTE);
+//trace_desc_t *g_trac_runtime = nullptr;
+//TRAC_INIT(&g_trac_runtime, RUNTIME_COMP_NAME, KILOBYTE);
 
 //
 uint16_t calculateNodeInstance(const uint8_t i_node,
@@ -194,6 +199,7 @@ uint16_t getHdatNodeInstance(void)
 errlHndl_t getNextRhbAddrRange(hdatMsVpdRhbAddrRange_t* & o_rngPtr)
 {
     errlHndl_t l_elog = nullptr;
+/* FIXME RTC: 210975 not needed for now
 
     mutex_lock( &g_rhbMutex );
 
@@ -247,6 +253,7 @@ errlHndl_t getNextRhbAddrRange(hdatMsVpdRhbAddrRange_t* & o_rngPtr)
     } while(0);
 
     mutex_unlock( &g_rhbMutex );
+*/
 
     return(l_elog);
 }
@@ -428,6 +435,7 @@ errlHndl_t setNextHbRsvMemEntry(const HDAT::hdatMsVpdRhbAddrRangeType i_type,
 {
     errlHndl_t l_elog = nullptr;
 
+/* FIXME RTC: 210975 not needed right now
     do {
 
     // Check whether hostboot is trying to access memory outside of its allowed
@@ -463,6 +471,7 @@ errlHndl_t setNextHbRsvMemEntry(const HDAT::hdatMsVpdRhbAddrRangeType i_type,
 
     } while(0);
 
+*/
     return l_elog;
 }
 
@@ -506,6 +515,8 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
                 io_start_address, io_end_address, i_startAddressValid?1:0 );
 
     errlHndl_t l_elog = nullptr;
+// FIXME RTC: 210975 not needed for now
+#if 0
     uint64_t l_vAddr = 0x0;
     uint64_t l_prevDataAddr = 0;
     uint64_t l_prevDataSize = 0;
@@ -957,6 +968,7 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
     TRACFCOMP( g_trac_runtime,EXIT_MRK"fill_RsvMem_hbData> io_start_address=0x%.16llX,io_end_address=0x%.16llX,size=%lld",
                 io_start_address, io_end_address, io_size );
 
+#endif
     return l_elog;
 }
 
@@ -1090,6 +1102,8 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
 {
     TRACFCOMP( g_trac_runtime, ENTER_MRK"populate_HbRsvMem> i_nodeId=%d", i_nodeId );
     errlHndl_t l_elog = nullptr;
+//FIXME RTC: 210975 don't need to populate reserved mem yet
+#if 0
     bool l_preVerLidMgrLock = false;
 
 #ifdef CONFIG_SECUREBOOT
@@ -1222,8 +1236,9 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
                     break;
                 }
             }
+// FIXME RTC: 210975 don't need get_top_homer_mem_addr for now
             // Opal data goes at top_of_mem
-            l_topMemAddr = ISTEP::get_top_homer_mem_addr();
+            l_topMemAddr = 0; //ISTEP::get_top_homer_mem_addr();
             assert (l_topMemAddr != 0,
                     "populate_HbRsvMem: Top of memory was 0!");
 
@@ -1689,9 +1704,10 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
                 {
                     continue;
                 }
-
+/* FIXME RTC: 2109875
                 l_elog = hbResvLoadSecureSection(secIdPair.first,
                                                  secIdPair.second);
+*/
                 if (l_elog)
                 {
                     break;
@@ -1715,7 +1731,9 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
                 }
             }
 
-            if(SECUREBOOT::SMF::isSmfEnabled())
+// FIXME RTC: 210975 don't need SMF right now
+//            if(SECUREBOOT::SMF::isSmfEnabled())
+            if(0)
             {
                 auto l_unsecureHomerSize = l_sys->
                                  getAttr<TARGETING::ATTR_UNSECURE_HOMER_SIZE>();
@@ -1808,6 +1826,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
         PreVerifiedLidMgr::unlock();
     }
 
+#endif
     TRACFCOMP( g_trac_runtime, EXIT_MRK"populate_HbRsvMem> l_elog=%.8X", ERRL_GETRC_SAFE(l_elog) );
     return(l_elog);
 } // end populate_HbRsvMem
@@ -1818,6 +1837,7 @@ errlHndl_t populate_hbSecurebootData ( void )
 
     errlHndl_t l_elog = nullptr;
 
+/* FIXME RTC: 210975 not needed for now
     do {
         // pass 0 since sys parms has only one record
         const uint64_t l_instance = 0;
@@ -1883,7 +1903,7 @@ errlHndl_t populate_hbSecurebootData ( void )
         l_sysParmsPtr->hdatTpmConfBits = tpmRequired? TPM_REQUIRED_BIT: 0;
 
         // get max # of TPMs per drawer and populate hdat with it
-        auto l_maxTpms = HDAT::hdatCalcMaxTpmsPerNode();
+        uint8_t l_maxTpms = HDAT::hdatCalcMaxTpmsPerNode();
 
         l_sysParmsPtr->hdatTpmDrawer = l_maxTpms;
         TRACFCOMP(g_trac_runtime,"Max TPMs = 0x%04X", l_maxTpms);
@@ -1904,13 +1924,15 @@ errlHndl_t populate_hbSecurebootData ( void )
 
     } while(0);
 
+*/
     return (l_elog);
 } // end populate_hbRuntime
 
 errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
 {
     errlHndl_t l_elog = nullptr;
-
+//FIXME RTC: 210975 not needed at the moment
+#if 0
     do {
 
         uint64_t l_baseAddr = 0;
@@ -2858,6 +2880,7 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
 
     } while (0);
 
+#endif
     return (l_elog);
 }
 
@@ -3400,6 +3423,7 @@ errlHndl_t populate_hbRuntimeData( void )
 {
     errlHndl_t  l_elog = nullptr;
 
+/* FIXME RTC: 210975 not needed right now
     do {
         TRACFCOMP(g_trac_runtime, "Running populate_hbRuntimeData");
 
@@ -3584,6 +3608,7 @@ errlHndl_t populate_hbRuntimeData( void )
 
     } while(0);
 
+*/
     return(l_elog);
 
 } // end populate_hbRuntimeData
@@ -3691,6 +3716,8 @@ errlHndl_t openUntrustedSpCommArea(const uint64_t i_commBase)
     TRACFCOMP( g_trac_runtime, ENTER_MRK "openUntrustedSpCommArea()");
     errlHndl_t l_err = nullptr;
 
+// FIXME RTC: 210975 not needed for now
+#if 0
     do {
     TARGETING::Target * l_sys = nullptr;
     TARGETING::targetService().getTopLevelTarget(l_sys);
@@ -3928,6 +3955,7 @@ errlHndl_t openUntrustedSpCommArea(const uint64_t i_commBase)
 
     TRACFCOMP( g_trac_runtime, EXIT_MRK"openUntrustedSpCommArea()");
 
+#endif
     return l_err;
 }
 
@@ -3941,6 +3969,8 @@ void setPayloadBaseAddress(uint64_t i_payloadAddress)
 errlHndl_t getRsvdMemTraceBuf(uint64_t& o_RsvdMemAddress, uint64_t& o_size)
 {
     errlHndl_t l_elog = nullptr;
+
+/* FIXME RTC: 210975 not needed right now
     uint64_t l_rsvMemDataAddr = 0;
     uint64_t l_rsvMemDataSize = 0;
     hdatMsVpdRhbAddrRange_t* l_rngPtr = nullptr;
@@ -4006,6 +4036,7 @@ errlHndl_t getRsvdMemTraceBuf(uint64_t& o_RsvdMemAddress, uint64_t& o_size)
         }
 
     }while(0);
+*/
 
     return l_elog;
 

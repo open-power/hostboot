@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,7 +57,6 @@ class Fapi2ChipEcTest : public CxxTest::TestSuite
         FAPI_TRY(FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_TEST1,
                                l_fapi2_procTarget, l_valChipEcTest1));
         // Returns if a chip contains the TEST1 feature. True if either:
-        //  Centaur EC 1.0
         //  Cumulus EC greater than 3.0
         if(l_valChipEcTest1)
         {

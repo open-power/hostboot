@@ -1,0 +1,960 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/targeting/common/xmltohb/deleteme_temp_hb_attrs.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- FIXME RTC: 210975 -->
+<!-- The attributes in this file either need to be removed from Hostboot or added to P10 EKB XMLs -->
+<attributes>
+<attribute>
+  <id>ATTR_FREQ_PB_MHZ</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    The frequency of a processor's nest mesh clock, in MHz.
+    This is the same for all chips in the system.
+    Provided by the MRW.
+  </description>
+  <valueType>uint32</valueType>
+  <enum>
+    1600 = 1600,
+    1866 = 1866,
+    2000 = 2000,
+    2133 = 2133,
+    2400 = 2400
+  </enum>
+  <platInit/>
+  <writeable/>
+  <mssAccessorName>freq_pb_mhz</mssAccessorName>
+</attribute>
+
+<attribute>
+  <id>ATTR_FREQ_X_MHZ</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    The frequency of a processor's Xbus mesh clocks, in MHz.
+    This is the same for all chips in the system.
+  </description>
+  <valueType>uint32</valueType>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_MC_SYNC_MODE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>MC mesh to use Nest mesh or not</description>
+  <valueType>uint8</valueType>
+  <writeable/>
+  <initToZero/>
+  <enum>IN_SYNC = 1, NOT_IN_SYNC = 0</enum>
+</attribute>
+
+<attribute>
+  <id>ATTR_BOOT_FREQ_MHZ</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>EQ boot frequency</description>
+  <valueType>uint32</valueType>
+  <platInit/>
+  <default>2400</default>
+</attribute>
+
+<attribute>
+  <id>ATTR_NEST_PLL_BUCKET</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>Select Nest I2C and pll setting from one of the supported frequencies</description>
+  <valueType>uint8</valueType>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_RISK_LEVEL</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>HWP/Init "risk level" enabled. Used by HB to pass to HB driven
+      HWPs</description>
+  <valueType>uint8</valueType>
+  <enum>RL0 = 0x0,RL1 = 0x1,RL2 = 0x2,RL3 = 0x3,RL4 = 0x4, RL5 = 0x5</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+
+<attribute>
+  <id>ATTR_LPC_CONSOLE_CNFG</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Indicates if LPC console is enabled on system</description>
+  <valueType>uint8</valueType>
+  <enum>ENABLE = 0x1,DISABLE = 0x0</enum>
+  <default>DISABLE</default>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+
+<attribute>
+  <id>ATTR_PM_RESET_FFDC_ENABLE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+  Switch to enable or disable Power Management Complex FFDC collection to HOMER.
+  When set, the PM Complex Reset flow will collect PM Complex data to the chip
+  HOMER region to assist with failure analysis and recovery.
+
+  Producer: HB must set or reset this based on the platform use-case and state.
+  Consumer: p9_pm_reset.C, p9_pm_callout.C
+  </description>
+  <valueType>uint8</valueType>
+  <enum>FALSE = 0x00, TRUE = 0x01</enum>
+  <writeable/>
+  <initToZero/>
+</attribute>
+
+<attribute>
+  <id>ATTR_PROC_EFF_FABRIC_GROUP_ID</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Effective fabric group ID associated with this chip.
+    Directly drives programming of chip memory map layout.
+    Compared with ATTR_PROC_FABRIC_GROUP_ID to configure FBC XOR masking.
+  </description>
+  <valueType>uint8</valueType>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+
+<attribute>
+  <id>ATTR_FABRIC_PRESENT_GROUPS</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Bit mask of group IDs which will be present in the fully configured
+    CEC configuration.
+      Bit 0 -> group 0 present
+      Bit 1 -> group 1 present
+      ...
+      Bit 6 -> group 6 present
+      Bit 7 -> group 7 present
+  </description>
+  <valueType>uint8</valueType>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+
+<attribute>
+    <id>ATTR_HB_HRMOR_BYTES</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+        Hostboot load address, in bytes, for a given node, replicated
+        for each processor within a node.  A value of 0xFFFFFFFFFFFFFFFF
+        implies the Hostboot load address is invalid and should be ignored.
+        Hostboot is responsible for updating the load address to a valid
+        value on every boot, and invalidating it just prior to shutdown.
+        Used by p9_query_host_meminfo as a backup in case Hostboot's core
+        scratch register is unavailable.
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <default>0xFFFFFFFFFFFFFFFF</default>
+</attribute>
+
+<attribute>
+  <id>ATTR_PROC_EFF_FABRIC_CHIP_ID</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Effective fabric chip ID associated with this chip.
+    Directly drives programming of chip memory map layout.
+    Compared with ATTR_PROC_FABRIC_CHIP_ID to configure FBC XOR masking.
+  </description>
+  <valueType>uint8</valueType>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+
+<attribute>
+  <id>ATTR_FREQ_O_MHZ</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    The frequency of a processor's Obus mesh clocks, in MHz.
+    Provided by the MRW.
+  </description>
+  <valueType>uint32</valueType>
+  <platInit/>
+  <array>4</array>
+</attribute>
+
+<attribute>
+  <id>ATTR_PROC_MEM_TO_USE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>This attribute denotes where our master proc's memory is
+    located. In the case that the master-proc does not have usable memory,
+    we are going to use another proc's memory to boot. The attribute will be
+    set to the chip and group ID of which proc we want to use.</description>
+  <valueType>uint8</valueType>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+
+<attribute>
+  <id>ATTR_EQ_GARD</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Capturing EQ Gard value</description>
+  <valueType>uint8</valueType>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+
+<attribute>
+  <id>ATTR_EC_GARD</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Capturing EC Gard Value</description>
+  <valueType>uint32</valueType>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+
+<attribute>
+  <id>ATTR_OPTICS_CONFIG_MODE</id>
+  <targetType>TARGET_TYPE_OBUS</targetType>
+  <description>
+    Per-link optics configuration
+    0 = default = SMP
+    1 = CAPI 2.0
+    2 = NV 2.0
+    3 = OPENCAPI
+    Provided by the MRW.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    SMP = 0x0,
+    CAPI = 0x1,
+    NV = 0x2,
+    OCAPI = 0x3
+  </enum>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_PROC_FABRIC_PUMP_MODE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Processor SMP Fabric broadcast scope configuration.
+    CHIP_IS_NODE = MODE1 = default
+    CHIP_IS_GROUP = MODE2
+    Provided by the MRW.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    CHIP_IS_NODE = 0x01,
+    CHIP_IS_GROUP = 0x02
+  </enum>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_MSS_VPD_DQ_MAP</id>
+  <targetType>TARGET_TYPE_MCS</targetType>
+  <description>
+    [PORT][Dimm DQ PIN]  The map from the Dual Inline Memory Module (DIMM) Data (DQ) Pin to the Module Package Data (DQ) Pinout
+  </description>
+  <initToZero></initToZero>
+  <valueType>uint8</valueType>
+  <writeable/>
+  <mssUnits></mssUnits>
+  <mssBlobStart>0</mssBlobStart>
+  <mssBlobLength>144</mssBlobLength>
+  <mssAccessorName>vpd_dq_map</mssAccessorName>
+  <array>2 72</array>
+</attribute>
+
+<attribute>
+  <id>ATTR_EFF_DIMM_SPARE</id>
+  <targetType>TARGET_TYPE_MCS</targetType>
+  <description>
+      Spare DRAM availability. Used in various locations and is computed in mss_eff_cnfg.
+      creator: mss_eff_cnfg consumer: various firmware notes: load from spd
+      OBSOLETE: Use ATTR_VPD_DIMM_SPARE
+  </description>
+  <initToZero></initToZero>
+  <valueType>uint8</valueType>
+  <enum>NO_SPARE = 0, LOW_NIBBLE = 1, HIGH_NIBBLE = 2, FULL_BYTE = 3</enum>
+  <writeable/>
+  <array> 2 2 4</array>
+</attribute>
+
+<attribute>
+  <id>ATTR_FREQ_MCA_MHZ</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    The frequency of the memory controller channel. In synchronous mode,
+    this is equivalent to ATTR_FREQ_PB_MHZ. This may be independently set
+    per pair of memory channels if operating in asynchronous mode,
+    but this configuration is not anticipated. This clock drives the MCU queues,
+    and all the associated logic that drives the inputs to the DMI and reads
+    its outputs.
+  </description>
+  <valueType>uint32</valueType>
+  <enum>
+    2000 = 2000,
+    2400 = 2400
+  </enum>
+  <platInit/>
+</attribute>
+
+<!-- Referenced by hb errlparser -->
+<attribute>
+  <id>ATTR_MSS_RDVREF_CAL_ENABLE</id>
+  <targetType>TARGET_TYPE_MCS</targetType>
+  <description>
+     A bit vector denoting bits in every DP16 on the port to be calibrated.
+     That is, all of the set bits will be calibrated for all DP16. A value
+     of zero indicates the calibration should not be run.
+  </description>
+  <initToZero></initToZero>
+  <valueType>uint16</valueType>
+  <writeable/>
+  <array>2</array>
+  <mssAccessorName>rdvref_cal_enable</mssAccessorName>
+</attribute>
+
+<attribute>
+  <id>ATTR_SKIP_HW_VREF_CAL</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    In sub DD1.02 Nimbus the HW VREF calibrations should not be run
+  </description>
+  <initToZero></initToZero>
+  <valueType>uint8</valueType>
+  <enum>RUN = 0, SKIP = 1</enum>
+  <writeable/>
+</attribute>
+
+
+<attribute>
+  <id>ATTR_SKIP_RD_VREF_VREFSENSE_OVERRIDE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    In sub DD1.03 Nimbus the HW VREF calibrations should not be run
+  </description>
+  <initToZero></initToZero>
+  <valueType>uint8</valueType>
+  <enum>RUN = 0, SKIP = 1</enum>
+  <writeable/>
+</attribute>
+
+<attribute>
+  <id>ATTR_MSS_RTT_NOM_OVERRIDE_DISABLE</id>
+  <targetType>TARGET_TYPE_MCS</targetType>
+  <description>
+    Set equal to 1 to disable setting of RTT_NOM to use RTT_WR values
+    during WR_LEVEL calibration.
+  </description>
+  <initToZero></initToZero>
+  <valueType>uint8</valueType>
+  <writeable/>
+  <enum>NO = 0, YES = 1</enum>
+  <mssUnits> bool </mssUnits>
+  <array> 2 2 </array>
+  <mssAccessorName>rtt_nom_override_disable</mssAccessorName>
+</attribute>
+
+<attribute>
+   <id>ATTR_PERF_24x7_INVOCATION_TIME_MS</id>
+   <description>
+   Time between invocations of the 24x7 performance collection function on
+   GPE1.  The time (in milliseconds) is derived as  2^PERF_24x7_INVOCATION_TIME_MS
+   with 0 indicating the function is OFF.
+
+   Consumer: p9_hcode_image_build.c ->
+                SGPE Header field
+
+   Provided by the Machine Readable Workbook to tune the collection.
+
+   Platform default:  1
+   </description>
+   <targetType>TARGET_TYPE_SYSTEM</targetType>
+   <valueType>uint8</valueType>
+   <initToZero/>
+   <platInit/>
+</attribute>
+
+<attribute>
+   <id>ATTR_CME_INSTRUCTION_TRACE_ENABLE</id>
+   <description>
+   Enables the SGPE Hcode to enable the CME instruction traces into the L3
+   Trace array for debug.  Note:  all configured CMEs will be put into this
+   mode if this attribute is ON.
+
+   Consumer: p9_hcode_image_build.c ->
+                SGPE Header field
+
+   Platform default:  OFF
+   </description>
+   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+   <valueType>uint8</valueType>
+   <enum>
+      OFF = 0x00, ON = 0x01
+  </enum>
+  <platInit/>
+  <initToZero/>
+</attribute>
+
+<attribute>
+   <id>ATTR_SYS_VFRT_STATIC_DATA_ENABLE</id>
+   <description>
+
+   Enables pstate parameter block code to use the static system vfrt data
+   Consumer: p9_pstate_parameter_block.C ->
+
+   Platform default:  OFF
+   <!--
+      @todo RTC 169662 at some point in the program, this default may be switched to
+       the opposite setting.  However, coordination needs to occur with all CIs
+       as this will enable functions that may not be modeled across the board.
+   -->
+   </description>
+   <targetType>TARGET_TYPE_SYSTEM</targetType>
+   <valueType>uint8</valueType>
+   <enum>
+      OFF = 0x00, ON = 0x01, VDN_STEP_OFF = 0x02
+  </enum>
+  <initToZero/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_IO_OBUS_DCCAL_FLAGS</id>
+  <targetType>TARGET_TYPE_OBUS</targetType>
+  <description>
+    Flags to indicate if rx / tx dccal has been run.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    NONE = 0x0,
+    TX = 0x1,
+    RX = 0x2
+  </enum>
+  <writeable/>
+  <initToZero/>
+</attribute>
+
+<attribute>
+  <id>ATTR_IO_O_DEBUG</id>
+  <targetType>TARGET_TYPE_OBUS</targetType>
+  <description>
+    Indicate if debug data should be taken pre / post linktraining.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    FALSE = 0x0,
+    TRUE = 0x1
+  </enum>
+  <initToZero/>
+  <platInit/>
+  <overrideOnly/>
+</attribute>
+
+<attribute>
+  <id>ATTR_IO_OBUS_TX_MARGIN_RATIO</id>
+  <targetType>TARGET_TYPE_OBUS</targetType>
+  <description>
+    Value to select amount of margin to be applied.
+  </description>
+  <valueType>uint8</valueType>
+  <initToZero/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_IO_OBUS_TX_FFE_PRECURSOR</id>
+  <targetType>TARGET_TYPE_OBUS</targetType>
+  <description>
+    Value to select amount of tx ffe precusor to apply.
+  </description>
+  <valueType>uint8</valueType>
+  <initToZero/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_IO_OBUS_TX_FFE_POSTCURSOR</id>
+  <targetType>TARGET_TYPE_OBUS</targetType>
+  <description>
+    Value to select amount of tx ffe postcusor to apply.
+  </description>
+  <valueType>uint8</valueType>
+  <initToZero/>
+  <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_RANK_GROUP_OVERRIDE</id>
+    <targetType>TARGET_TYPE_MCS</targetType>
+    <description>
+      Override PHY rank group settings. The two uint16 values map to rank
+      group0/1(Pri/Sec ranks) for unt16[X][0] and rank group2/3(Pri/Sec ranks)
+      for uint16[X][1]. Bits map as follows: uint16[X][0]: (0:2)=RP0_primary,
+      (3)=RP0_primary_valid, (4:6)=RP0_secondary, (7)=RP0_secondary_valid,
+      (8:10)=RP1_primary, (11)=RP1_primary_valid, (12:14)=RP1_secondary,
+      (15)=RP1_secondary_valid, uint16[X][1]: (0:2)=RP2_primary,
+      (3)=RP2_primary_valid, (4:6)=RP2_secondary, (7)=RP2_secondary_valid,
+      (8:10)=RP3_primary, (11)=RP3_primary_valid, (12:14)=RP3_secondary,
+      (15)=RP3_secondary_valid. Note: that the DIMM1 ranks in a dual-drop
+      config are stored in the attribute as the centaur canonical number (4,5).
+      The code will automatically do the conversion from the Centaur canonical
+      to the correct PHY nomenclature (2,3 for 4,5 respectively). Set this
+      attribute to zero to use default settings.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint16</valueType>
+    <writeable/>
+    <array> 2 2 </array>
+    <mssAccessorName>eff_rank_group_override</mssAccessorName>
+</attribute>
+
+<attribute>
+  <id>ATTR_IO_X_MFG_CHK</id>
+  <targetType>TARGET_TYPE_XBUS</targetType>
+  <description>
+    Indicate if manufacturing tests should be taken pre / post linktraining.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    FALSE = 0x0,
+    TRUE = 0x1
+  </enum>
+  <initToZero/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_IO_X_MFG_MIN_EYE_WIDTH</id>
+  <targetType>TARGET_TYPE_XBUS</targetType>
+  <description>
+    Minimum eye width to allow passing through manufacturing.
+  </description>
+  <valueType>uint8</valueType>
+  <initToZero/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_IO_O_MFG_STRESS_PR_OFFSET_EVEN</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    This attribute provides an a way to stress the SMP Abus Even Lanes
+    in Manufacturing. By applying a phase rotator offset we can further
+    stress the phy.  This is a 6-bit 2's complement value that would be
+    right justified in the 8 bit UINT attribute value.
+  </description>
+  <valueType>uint8</valueType>
+  <initToZero/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_IO_O_MFG_STRESS_PR_OFFSET_ODD</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>i
+    This attribute provides an a way to stress the SMP Abus Odd Lanes
+    in Manufacturing. By applying a phase rotator offset we can further
+    stress the phy.  This is a 6-bit 2's complement value that would be
+    right justified in the 8 bit UINT attribute value.
+  </description>
+  <valueType>uint8</valueType>
+  <initToZero/>
+  <platInit/>
+</attribute>
+
+<attribute>
+   <id>ATTR_CME_CHTM_TRACE_ENABLE</id>
+   <description>
+   Enables the SGPE Hcode to enable the CME instruction traces into the CHTM
+   for debug.  Note:  all configured CMEs will be put into this
+   mode if this attribute is ON.
+
+   Consumer: p9_hcode_image_build.c ->
+                SGPE Header field
+
+   Platform default:  OFF
+   </description>
+   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+   <valueType>uint8</valueType>
+   <enum>
+      OFF = 0x00, ON = 0x01
+  </enum>
+  <platInit/>
+  <initToZero/>
+</attribute>
+
+<attribute>
+   <id>ATTR_CME_CHTM_TRACE_MEMORY_CONFIG</id>
+   <description>
+   CHTM Trace Memory Configuration value goes directly into CHTM_MEM register.
+   User is responsible to put correct data for each bit field of the register.
+
+   Consumer: p9_hcode_image_build.c ->
+                SGPE Header field
+
+   Platform default:  0
+   </description>
+   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+   <valueType>uint64</valueType>
+  <platInit/>
+  <initToZero/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SYSTEM_VDM_DISABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Disables the enablement of Voltage Droop Monitors (VDM) in the system.
+
+    Producer:  MRW
+
+    Consumers:
+      p9_pstate_parameter_block to clear flag for CME QuadManager Hcode
+          reaction
+    </description>
+    <valueType>uint8</valueType>
+    <enum>OFF = 0x00, ON = 0x01</enum>
+    <initToZero/>
+    <platInit/>
+    <default>OFF</default>
+</attribute>
+
+<attribute>
+  <id>ATTR_VDM_ENABLED</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Indicator that all relevant attributes and required data for
+  Voltage Droop Monitors (VDM) to be enabled is present and valid
+
+  Producer: p9_build_pstate_datablock
+
+  Consumers: p9_hcode_image_build ->
+                    SGPE Header
+                    CME Header
+  </description>
+  <valueType>uint8</valueType>
+  <enum>FALSE=0, TRUE=1</enum>
+  <writeable/>
+  <initToZero/>
+</attribute>
+
+<attribute>
+  <id>ATTR_IO_XBUS_GRP0_PRE_BAD_LANE_DATA</id>
+  <targetType>TARGET_TYPE_XBUS</targetType>
+  <description>
+    Pre-training bad lane data vector.  This data is persistant from previous
+    IPLs so that the interface does not need to re-discover bad lanes.
+  </description>
+  <valueType>uint32</valueType>
+  <initToZero/>
+  <writeable/>
+</attribute>
+
+<attribute>
+  <id>ATTR_IO_XBUS_GRP1_PRE_BAD_LANE_DATA</id>
+  <targetType>TARGET_TYPE_XBUS</targetType>
+  <description>
+    Pre-training bad lane data vector.  This data is persistant from previous
+    IPLs so that the interface does not need to re-discover bad lanes.
+  </description>
+  <valueType>uint32</valueType>
+  <initToZero/>
+  <writeable/>
+</attribute>
+
+<attribute>
+  <id>ATTR_SYSTEM_IVRM_DISABLE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>Disables IVRM enablement in the system
+
+  Producer: Override
+
+  Consumers: p9_build_pstate_datablock ->
+                    Pstate Parameter Block (PSPB) for PGPE/OCC
+                    CME Quad Pstate Region (CQPR) for CM Quad Manager
+
+  </description>
+  <valueType>uint8</valueType>
+  <enum>OFF=0, ON=1</enum>
+  <platInit/>
+  <initToZero/>
+</attribute>
+
+<attribute>
+  <id>ATTR_IVRM_ENABLED</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Indicator that all relevant attributes and required data for
+  Internal Voltage Regulator Macros (IVRMs) to be enabled is present and valid
+
+  Producer: p9_build_pstate_datablock
+
+  Consumers: p9_hcode_image_build ->
+                    PGPE Header
+                    CME Header
+  </description>
+  <valueType>uint8</valueType>
+  <enum>FALSE=0, TRUE=1</enum>
+  <writeable/>
+  <initToZero/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_PHY_SEQ_REFRESH</id>
+    <targetType>TARGET_TYPE_MCS</targetType>
+    <description>
+      Controls ENABLE/DISABLE of workaround that sets
+      the PHY sequencer to trigger refresh after draminit.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <enum>DISABLE = 0, ENABLE = 1</enum>
+    <mssUnits> bool </mssUnits>
+    <array> 2 </array>
+    <mssAccessorName>phy_seq_refresh</mssAccessorName>
+</attribute>
+
+<attribute>
+  <id>ATTR_WOF_ENABLE_FRATIO</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+  If wof_enabled, defines the Frequency Ratio calculation performed.
+  (THIS IS NOT SUPPORTED IN P9 GA1!).
+  </description>
+  <valueType>uint8</valueType>
+  <enum>FIXED=0, STEPPED=1</enum>
+  <platInit/>
+  <initToZero/>
+</attribute>
+
+<attribute>
+  <id>ATTR_WOF_ENABLE_VRATIO</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+  If wof_enabled, defines the Voltage Ratio calculation performed.
+  THIS IS NOT SUPPORTED AT PRESENT. GA1 SUPPORT IS TBD).
+  </description>
+  <valueType>uint8</valueType>
+  <enum>FIXED=0, CALCULATED=1</enum>
+  <platInit/>
+  <initToZero/>
+</attribute>
+
+<attribute>
+  <id>ATTR_WOF_VRATIO_SELECT</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+  If wof_enabled AND ATTR_WOF_ENABLE_VRATIO = CALCULATED, this attribute
+  selects the Vratio calculation type.
+  ACTIVE_CORES: Vratio is the number of active cores to the
+  number of good cores
+  FULL: Vratio is Vaverage to Vclip(Fclip) where Vclip(Fclip) is
+  the normal interpolated regulator voltage (including load line uplife @ RDP
+  current) derated with presently measured Idd current (from the AVSBus) and
+  the loadline.
+
+  </description>
+  <valueType>uint8</valueType>
+  <enum>ACTIVE_CORES=0, FULL=1</enum>
+  <platInit/>
+  <initToZero/>
+</attribute>
+
+<attribute>
+   <id>ATTR_NEST_LEAKAGE_PERCENT</id>
+   <description>
+   SYSTEM Attribute
+   Nest leakage percentage used to calculate the Core leakage.
+   Will eventually be read into OCC Pstate Parameter Block
+   so the OCC can see it for it's calculations.
+   Valid Values: 0% thru 100%
+   Producer: Machine Readable Workbook
+   Consumer: OCC Firmware
+   </description>
+   <targetType>TARGET_TYPE_SYSTEM</targetType>
+   <valueType>uint8</valueType>
+   <initToZero/>
+   <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_MSS_RUN_DCD_CALIBRATION</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Selects whether or not DCD should be run
+  </description>
+  <initToZero></initToZero>
+  <valueType>uint8</valueType>
+  <enum>NO = 0, YES = 1</enum>
+  <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_EFF_WR_CRC</id>
+    <targetType>TARGET_TYPE_MCS</targetType>
+    <description>
+      Controls ENABLE/DISABLE of Write CRC
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <enum>DISABLE = 0, ENABLE = 1</enum>
+    <mssUnits> bool </mssUnits>
+    <array> 2 </array>
+    <mssAccessorName>eff_wr_crc</mssAccessorName>
+</attribute>
+
+<attribute>
+  <id>ATTR_IO_O_MFG_CHK</id>
+  <targetType>TARGET_TYPE_OBUS</targetType>
+  <description>
+    Indicate if manufcaturing tests should be taken pre / post linktraining.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    FALSE = 0x0,
+    TRUE = 0x1
+  </enum>
+  <initToZero/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_IO_O_MFG_MIN_EYE_WIDTH</id>
+  <targetType>TARGET_TYPE_OBUS</targetType>
+  <description>
+    Minimum eye width to allow passing through manufacturing.
+  </description>
+  <valueType>uint8</valueType>
+  <initToZero/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_SYSTEM_CORECACHE_SKEWADJ_DISABLE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>To allow for selective enablement for lab testing
+  To allow skew function to be enabled/disabled. </description>
+  <valueType>uint8</valueType>
+  <enum>FALSE = 0x0,TRUE = 0x1</enum>
+  <initToZero/>
+  <writeable/>
+</attribute>
+
+<attribute>
+  <id>ATTR_SYSTEM_CORECACHE_DCADJ_DISABLE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>To allow for selective enablement for lab testing
+  To allow dcadj function to be enabled/disabled. </description>
+  <valueType>uint8</valueType>
+  <enum>FALSE = 0x0,TRUE = 0x1</enum>
+  <initToZero/>
+  <writeable/>
+</attribute>
+
+<attribute>
+  <id>ATTR_EQ_INSIDE_SPECIAL_WAKEUP</id>
+  <targetType>TARGET_TYPE_EQ</targetType>
+  <description>Indicates that a special wakeup is in progress for an EQ
+
+  Producer: p9_cpu_special_wakeup_eq.C
+
+  Consumers: p9_cpu_special_wakeup_eq.C
+  </description>
+  <valueType>uint8</valueType>
+  <enum>FALSE=0, TRUE=1</enum>
+  <writeable/>
+  <initToZero/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_VPD_MT_MC_BIAS_TRIM</id>
+    <targetType>TARGET_TYPE_MCS</targetType>
+    <description>
+        Adjusts the receiver internal current bias. ONLY set range 0-7. Default value is 3.
+        [VPD Value] = [Binary bit value set in register]
+        0 = 110 (Minimal power)
+        1 = 010
+        2 = 100
+        3 = 000 (Default)
+        4 = 111
+        5 = 011
+        6 = 101
+        7 = 001 (Maximum power)
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssBlobStart>86</mssBlobStart>
+    <mssBlobLength>2</mssBlobLength>
+    <mssAccessorName>vpd_mt_mc_bias_trim</mssAccessorName>
+    <array>2</array>
+</attribute>
+
+<attribute>
+  <id>ATTR_EX_INSIDE_SPECIAL_WAKEUP</id>
+  <targetType>TARGET_TYPE_EX</targetType>
+  <description>Indicates that a special wakeup is in progress for an EX.
+
+  Producer: p9_cpu_special_wakeup_ex.C
+
+  Consumers: p9_cpu_special_wakeup_ex.C
+  </description>
+  <valueType>uint8</valueType>
+  <enum>FALSE=0, TRUE=1</enum>
+  <writeable/>
+  <initToZero/>
+</attribute>
+
+<attribute>
+  <id>ATTR_IO_XBUS_CHAN_EQ</id>
+  <targetType>TARGET_TYPE_XBUS</targetType>
+  <description>
+    Alternate settings for short Xbus channels
+    bit 0 -- Disable RX LTE
+    bit 1 -- Disable AC BOOST
+    bit 2 -- Low Gain/Peaking Init Settings
+    bit 3 -- Lower VGA Gain Target -10%
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    DIS_RX_LTE            = 0x01,
+    DIS_TX_AC_BOOST       = 0x02,
+    LOWER_GAIN_PEAK_INITS = 0x04,
+    LOWER_VGA_GAIN_TARGET = 0x08
+  </enum>
+  <initToZero/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_IO_O_CHANNEL_TYPE</id>
+  <targetType>TARGET_TYPE_OBUS</targetType>
+  <description>
+    Indicates if the Obus channel is a board or a cable
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    BOARD = 0x0,
+    CABLE = 0x1
+  </enum>
+  <initToZero/>
+  <platInit/>
+</attribute>
+
+</attributes>

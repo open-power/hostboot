@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -25,16 +25,18 @@
 ROOTPATH = ../../../..
 MODULE = p9_stop_util
 
-PROCEDURES_PATH    = ${ROOTPATH}/src/import/chips/p9/procedures
+# FIXME RTC: 210975
 
-EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/lib/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
-EXTRAINCDIR += ${PROCEDURES_PATH}/utils/stopreg/
+#PROCEDURES_PATH    = ${ROOTPATH}/src/import/chips/p9/procedures
 
-OBJS += p9_stop_util.o
+#EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/lib/
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
+#EXTRAINCDIR += ${PROCEDURES_PATH}/utils/stopreg/
 
-include ${ROOTPATH}/procedure.rules.mk
-include $(PROCEDURES_PATH)/utils/stopreg/p9_stop_api.mk
+#OBJS += p9_stop_util.o
+
+#include ${ROOTPATH}/procedure.rules.mk
+#include $(PROCEDURES_PATH)/utils/stopreg/p9_stop_api.mk
 include ${ROOTPATH}/config.mk
 
-VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/utils/stopreg/
+#VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/utils/stopreg/

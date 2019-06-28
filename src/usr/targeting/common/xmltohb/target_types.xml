@@ -1668,9 +1668,6 @@
     <id>lcard-dimm-jedec</id>
     <parent>lcard-dimm</parent>
     <attribute>
-      <id>CEN_DQ_TO_DIMM_CONN_DQ</id>
-    </attribute>
-    <attribute>
       <default>JEDEC</default>
       <id>MODEL</id>
     </attribute>

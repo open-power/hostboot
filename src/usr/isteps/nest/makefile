@@ -25,73 +25,77 @@
 ROOTPATH = ../../../..
 MODULE = isteps_nest
 
-PROCEDURES_PATH += ${ROOTPATH}/src/import/chips/p9/procedures
+# FIXME RTC: 210975 Uncomment EKB paths
 
-EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/initfiles
-EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/io
-EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/perv
-EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/nest
+#PROCEDURES_PATH += ${ROOTPATH}/src/import/chips/p9/procedures
+
+#EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/initfiles
+#EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/io
+#EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/perv
+#EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/nest
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/xip/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/xip/
 
-EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/initfiles
+#EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/initfiles
 
-OBJS += nestHwpHelperFuncs.o
-OBJS += p9_io_obus_firmask_save_restore.o
+#OBJS += nestHwpHelperFuncs.o
+#OBJS += p9_io_obus_firmask_save_restore.o
 
-VPATH += ${PROCEDURES_PATH}/hwp/initfiles
-VPATH += ${PROCEDURES_PATH}/hwp/io
-VPATH += ${PROCEDURES_PATH}/hwp/nest
-VPATH += ${PROCEDURES_PATH}/hwp/perv
+#VPATH += ${PROCEDURES_PATH}/hwp/initfiles
+#VPATH += ${PROCEDURES_PATH}/hwp/io
+#VPATH += ${PROCEDURES_PATH}/hwp/nest
+#VPATH += ${PROCEDURES_PATH}/hwp/perv
 
 # Required include before all the procedure.mk are included
-include ${ROOTPATH}/procedure.rules.mk
+#include ${ROOTPATH}/procedure.rules.mk
 
 # proc_chiplet_scominit : Scom inits to all chiplets (sans Quad)
-include ${PROCEDURES_PATH}/hwp/initfiles/p9_psi_scom.mk
-include ${PROCEDURES_PATH}/hwp/initfiles/p9_fbc_ioo_tl_scom.mk
-include ${PROCEDURES_PATH}/hwp/initfiles/p9_fbc_ioo_dl_scom.mk
-include ${PROCEDURES_PATH}/hwp/initfiles/p9_nx_scom.mk
-include ${PROCEDURES_PATH}/hwp/initfiles/p9_cxa_scom.mk
-include ${PROCEDURES_PATH}/hwp/initfiles/p9_mmu_scom.mk
-include ${PROCEDURES_PATH}/hwp/initfiles/p9_vas_scom.mk
-include ${PROCEDURES_PATH}/hwp/initfiles/p9c_dmi_scom.mk
-include ${PROCEDURES_PATH}/hwp/initfiles/p9c_mi_scom.mk
-include ${PROCEDURES_PATH}/hwp/initfiles/p9c_mc_scom.mk
-include ${PROCEDURES_PATH}/hwp/nest/p9_chiplet_scominit.mk
-include ${PROCEDURES_PATH}/hwp/nest/p9_psi_scominit.mk
-include ${PROCEDURES_PATH}/hwp/initfiles/p9n_mcs_scom.mk
-include ${PROCEDURES_PATH}/hwp/initfiles/p9_int_scom.mk
-include ${PROCEDURES_PATH}/hwp/initfiles/p9a_mcc_omi_scom.mk
-include ${PROCEDURES_PATH}/hwp/initfiles/p9a_omi_init_scom.mk
-include ${PROCEDURES_PATH}/hwp/initfiles/p9a_omi_scom.mk
-include ${PROCEDURES_PATH}/hwp/initfiles/p9a_mc_scom.mk
-include ${PROCEDURES_PATH}/hwp/initfiles/p9a_mi_omi_scom.mk
-include ${PROCEDURES_PATH}/hwp/initfiles/p9a_mi_scom.mk
+#include ${PROCEDURES_PATH}/hwp/initfiles/p9_psi_scom.mk
+#include ${PROCEDURES_PATH}/hwp/initfiles/p9_fbc_ioo_tl_scom.mk
+#include ${PROCEDURES_PATH}/hwp/initfiles/p9_fbc_ioo_dl_scom.mk
+#include ${PROCEDURES_PATH}/hwp/initfiles/p9_nx_scom.mk
+#include ${PROCEDURES_PATH}/hwp/initfiles/p9_cxa_scom.mk
+#include ${PROCEDURES_PATH}/hwp/initfiles/p9_mmu_scom.mk
+#include ${PROCEDURES_PATH}/hwp/initfiles/p9_vas_scom.mk
+#include ${PROCEDURES_PATH}/hwp/initfiles/p9c_dmi_scom.mk
+#include ${PROCEDURES_PATH}/hwp/initfiles/p9c_mi_scom.mk
+#include ${PROCEDURES_PATH}/hwp/initfiles/p9c_mc_scom.mk
+#include ${PROCEDURES_PATH}/hwp/nest/p9_chiplet_scominit.mk
+#include ${PROCEDURES_PATH}/hwp/nest/p9_psi_scominit.mk
+#include ${PROCEDURES_PATH}/hwp/initfiles/p9n_mcs_scom.mk
+#include ${PROCEDURES_PATH}/hwp/initfiles/p9_int_scom.mk
+#include ${PROCEDURES_PATH}/hwp/initfiles/p9a_mcc_omi_scom.mk
+#include ${PROCEDURES_PATH}/hwp/initfiles/p9a_omi_init_scom.mk
+#include ${PROCEDURES_PATH}/hwp/initfiles/p9a_omi_scom.mk
+#include ${PROCEDURES_PATH}/hwp/initfiles/p9a_mc_scom.mk
+#include ${PROCEDURES_PATH}/hwp/initfiles/p9a_mi_omi_scom.mk
+#include ${PROCEDURES_PATH}/hwp/initfiles/p9a_mi_scom.mk
 
 # call_host_p9_fbc_eff_config_links: Determine powerbus config
-include ${PROCEDURES_PATH}/hwp/nest/p9_fbc_eff_config_links.mk
+#include ${PROCEDURES_PATH}/hwp/nest/p9_fbc_eff_config_links.mk
 
 # call_host_set_voltages: Set correct chip voltages
-include ${PROCEDURES_PATH}/hwp/nest/p9_sys_chiplet_scominit.mk
+#include ${PROCEDURES_PATH}/hwp/nest/p9_sys_chiplet_scominit.mk
 
 # proc_chiplet_enable_ridi : Apply RI/DI chip wide
-include ${PROCEDURES_PATH}/hwp/perv/p9_chiplet_enable_ridi.mk
+#include ${PROCEDURES_PATH}/hwp/perv/p9_chiplet_enable_ridi.mk
 
 # proc_obus_scominit : Apply scom inits to Obus
-include ${PROCEDURES_PATH}/hwp/io/p9_io_obus_scominit.mk
-include ${PROCEDURES_PATH}/hwp/initfiles/p9_obus_scom.mk
+#include ${PROCEDURES_PATH}/hwp/io/p9_io_obus_scominit.mk
+#include ${PROCEDURES_PATH}/hwp/initfiles/p9_obus_scom.mk
 
 # proc_npu_scominit : Apply scom inits to NPU bus
-include ${PROCEDURES_PATH}/hwp/initfiles/p9_npu_scom.mk
-include ${PROCEDURES_PATH}/hwp/nest/p9_npu_scominit.mk
-include ${PROCEDURES_PATH}/hwp/perv/p9_nv_ref_clk_enable.mk
+#include ${PROCEDURES_PATH}/hwp/initfiles/p9_npu_scom.mk
+#include ${PROCEDURES_PATH}/hwp/nest/p9_npu_scominit.mk
+#include ${PROCEDURES_PATH}/hwp/perv/p9_nv_ref_clk_enable.mk
 
 # p9_io_obus_image_build & p9_io_xbus_image_build
-include ${PROCEDURES_PATH}/hwp/io/p9_io_obus_image_build.mk
-include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_image_build.mk
+#include ${PROCEDURES_PATH}/hwp/io/p9_io_obus_image_build.mk
+#include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_image_build.mk
 
 include ${ROOTPATH}/config.mk

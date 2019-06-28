@@ -48,11 +48,6 @@ XMLTOHB_SOURCE_TARGETS += errludtarget.C
 XMLTOHB_SOURCE_TARGETS += mapattrmetadata.C
 XMLTOHB_SOURCE_TARGETS += mapsystemattrsize.C
 
-XMLTOHB_SYSTEM_BINARIES += vbu_NIMBUS_targeting.bin
-XMLTOHB_SYSTEM_BINARIES += simics_NIMBUS_targeting.bin
-XMLTOHB_SYSTEM_BINARIES += simics_CUMULUS_targeting.bin
-XMLTOHB_SYSTEM_BINARIES += simics_CUMULUS_CDIMM_targeting.bin
-XMLTOHB_SYSTEM_BINARIES += simics_AXONE_targeting.bin
 XMLTOHB_SYSTEM_BINARIES += simics_P10_targeting.bin
 
 XMLTOHB_TARGETS += ${XMLTOHB_HEADER_TARGETS}

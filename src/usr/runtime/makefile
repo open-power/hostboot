@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2017
+# Contributors Listed Below - COPYRIGHT 2012,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -36,13 +36,14 @@ VPATH += ${ROOTPATH}/src/usr/hdat
 VPATH += common
 
 OBJS += populate_hbruntime.o
-OBJS += hdatservice.o
-OBJS += fakepayload.o
-OBJS += errlud_hdat.o
-OBJS += customize_attrs_for_payload.o
-OBJS += hdatcommonutil.o
+# FIXME RTC: 210975
+#OBJS += hdatservice.o
+#OBJS += fakepayload.o
+#OBJS += errlud_hdat.o
+#OBJS += customize_attrs_for_payload.o
+#OBJS += hdatcommonutil.o
 OBJS += preverifiedlidmgr.o
-OBJS += ${RUNTIME_COMMON_OBJS}
+#OBJS += ${RUNTIME_COMMON_OBJS}
 
 SUBDIRS += test.d
 

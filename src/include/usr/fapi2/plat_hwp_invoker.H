@@ -39,9 +39,11 @@
 #ifndef PLATHWPINVOKER_H_
 #define PLATHWPINVOKER_H_
 
+/* FIXME RTC: 210975
 #include <return_code.H>
 #include <hw_access_def.H>
 #include <plat_utils.H>
+*/
 #include <xscom/piberror.H>
 
 namespace fapi2 {
@@ -66,6 +68,7 @@ void hwpResetGlobals(void);
 
 #define FAPI_INVOKE_HWP(ERRHNDL, FUNC, _args_...) \
     {\
+/* FIXME RTC: 210975
         fapi2::hwpResetGlobals(); \
         fapi2::ReturnCode invoke_rc; \
         FAPI_EXEC_HWP(invoke_rc, FUNC, ##_args_); \
@@ -75,6 +78,7 @@ void hwpResetGlobals(void);
             ERRHNDL->collectTrace(FAPI_TRACE_NAME,384);\
         }\
         fapi2::hwpResetGlobals(); \
+*/ \
     }
 
 /**
@@ -93,6 +97,7 @@ void hwpResetGlobals(void);
 
 #define FAPI_INVOKE_HWP_RC(ERRHNDL, _RC, FUNC, _args_...) \
     {\
+/* FIXME RTC: 210975
         fapi2::hwpResetGlobals(); \
         FAPI_EXEC_HWP(_RC, FUNC, ##_args_); \
         ERRHNDL = fapi2::rcToErrl(_RC);\
@@ -101,6 +106,7 @@ void hwpResetGlobals(void);
             ERRHNDL->collectTrace(FAPI_TRACE_NAME,384);\
         }\
         fapi2::hwpResetGlobals(); \
+*/ \
     }
 
 /**
@@ -115,9 +121,11 @@ void hwpResetGlobals(void);
  */
 #define FAPI_CALL_HWP( RETURN, FUNC, _args_...) \
    {\
+/* FIXME RTC: 210975
         fapi2::hwpResetGlobals(); \
         RETURN = FUNC(_args_); \
         fapi2::hwpResetGlobals(); \
+*/ \
    }
 
 /**
@@ -131,9 +139,11 @@ void hwpResetGlobals(void);
  */
 #define FAPI_CALL_HWP_NORETURN( FUNC, _args_...) \
    {\
+/* FIXME RTC: 210975
         fapi2::hwpResetGlobals(); \
         FUNC(_args_); \
         fapi2::hwpResetGlobals(); \
+*/ \
    }
 
 

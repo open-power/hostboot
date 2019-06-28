@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,8 +51,10 @@
 #include <targeting/namedtarget.H>
 #include <targeting/attrsync.H>
 
+/* FIXME RTC: 210975
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
+*/
 
 #include <errl/errlmanager.H>
 
@@ -60,7 +62,8 @@
 
 #include <errl/errludtarget.H>
 
-#include <p9_set_fsi_gp_shadow.H>
+// FIXME RTC: 210975
+//#include <p9_set_fsi_gp_shadow.H>
 
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
@@ -75,8 +78,9 @@ namespace ISTEP_08
 //******************************************************************************
 void* call_host_setup_sbe(void *io_pArgs)
 {
-    errlHndl_t l_errl = NULL;
     IStepError  l_stepError;
+/* FIXME RTC: 210975
+    errlHndl_t l_errl = NULL;
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_setup_sbe entry" );
 
@@ -117,6 +121,7 @@ void* call_host_setup_sbe(void *io_pArgs)
         }
 
     } // end of cycling through all processor chips
+*/
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_host_setup_sbe exit" );

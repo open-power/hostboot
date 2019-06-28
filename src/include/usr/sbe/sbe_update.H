@@ -34,7 +34,8 @@
 #include <i2c/eepromif.H>             // EEPROM_ROLE
 #include <pnor/ecc.H>                 // PNOR::ECC::eccStatus
 #include <util/utilxipimage.H>        // Util::imageBuild_t
-#include <p9_infrastruct_help.H>      // MAX_RING_BUF_SIZE, etc
+// FIXME RTC: 210975
+//#include <p9_infrastruct_help.H>      // MAX_RING_BUF_SIZE, etc
 
 #include <vector>
 
@@ -95,13 +96,16 @@ namespace SBE
         FIXED_SEEPROM_WORK_SPACE = 256 * 1024,
         SBE_IMG_VADDR = VMM_VADDR_SBE_UPDATE,
         RING_BUF1_VADDR = FIXED_SEEPROM_WORK_SPACE + SBE_IMG_VADDR,
-        RING_BUF2_VADDR = RING_BUF1_VADDR + MAX_RING_BUF_SIZE,
-        RING_BUF3_VADDR = RING_BUF2_VADDR + MAX_RING_BUF_SIZE,
-        RING_SEC_VADDR  = RING_BUF3_VADDR + MAX_RING_BUF_SIZE,
+        // FIXME RTC: 210975
+        RING_BUF2_VADDR = RING_BUF1_VADDR + 60000,//MAX_RING_BUF_SIZE,
+        RING_BUF3_VADDR = RING_BUF2_VADDR + 60000,//MAX_RING_BUF_SIZE,
+        RING_SEC_VADDR  = RING_BUF3_VADDR + 60000,//MAX_RING_BUF_SIZE,
         //NOTE: recycling the same memory space for different
         //steps in the process.
         SBE_ECC_IMG_VADDR = RING_BUF1_VADDR,
-        SBE_ECC_IMG_MAX_SIZE = (MAX_SEEPROM_IMAGE_SIZE * 9 / 8) +
+        // FIXME RTC: 210975
+        SBE_ECC_IMG_MAX_SIZE =
+        (/*MAX_SEEPROM_IMAGE_SIZE*/ (4 * ((64 * 1024) / 9 * 8) - 256) * 9 / 8) +
                                (3 * SBE_SEEPROM_ECC_PAD),
         SBE_HBBL_IMG_VADDR = RING_SEC_VADDR + FIXED_SEEPROM_WORK_SPACE,
     };

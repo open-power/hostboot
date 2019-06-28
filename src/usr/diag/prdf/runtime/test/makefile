@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2016
+# Contributors Listed Below - COPYRIGHT 2014,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -26,10 +26,11 @@
 HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../../../..
 MODULE = testprdf_rt
-VPATH += ../../test
+# FIXME RTC: 210975
+#VPATH += ../../test
 
 #ROOTPATH must be defined before including prdf_hb_common_test.mk
-include ../../test/prdf_hb_common_test.mk
+#include ../../test/prdf_hb_common_test.mk
 
 #------------------------------------------------------------------------------
 # objects

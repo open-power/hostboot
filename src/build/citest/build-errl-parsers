@@ -37,29 +37,32 @@ then
     exit -1
 fi
 
+# FIXME RTC: 210975 Currently the errlparser build fails due to incompatibility
+# of some HWP code with c++0x in FSP.
+
 # If return code is not 0 (indicating failure),
 # then perpetuate the return code up the call chain.
 # For sh/bash, should use 0 for success and 1 to 255 for failures, don't use
 # negative numbers (-1).  A negative number will be interpreted as a
 # positive number (-1 will become 255.)
 
-echo "----Creating directories"
-mkdir -p ${SANDBOXBASE}/src/srci || exit $?
-mkdir -p ${SANDBOXBASE}/src/errl || exit $?
+#echo "----Creating directories"
+#mkdir -p ${SANDBOXBASE}/src/srci || exit $?
+#mkdir -p ${SANDBOXBASE}/src/errl || exit $?
 
-echo "----Building hbfw"
-execute_in_sandbox "cd ${SANDBOXBASE}/src/hbfw && mk -a -j32" "x86.nfp" \
-        || exit $?
+#echo "----Building hbfw"
+#execute_in_sandbox "cd ${SANDBOXBASE}/src/hbfw && mk -a -j32" "x86.nfp" \
+#        || exit $?
 
-echo "----Building srci"
-execute_in_sandbox "cd ${SANDBOXBASE}/src/srci && mk -a -j32" "x86.nfp" \
-        || exit $?
+#echo "----Building srci"
+#execute_in_sandbox "cd ${SANDBOXBASE}/src/srci && mk -a -j32" "x86.nfp" \
+#        || exit $?
 
-echo "----Building errl"
-execute_in_sandbox "cd ${SANDBOXBASE}/src/errl && mk -a -j32" "x86.nfp" \
-        || exit $?
+#echo "----Building errl"
+#execute_in_sandbox "cd ${SANDBOXBASE}/src/errl && mk -a -j32" "x86.nfp" \
+#        || exit $?
 
-echo "----Extracting errl tool"
-mkdir -p ${SANDBOXBASE}/simics || exit $?
-tar -xvf ${SANDBOXBASE}/obj/x86.nfp/errl/nfp/tool/errl.tar \
-         -C ${SANDBOXBASE}/simics errl  || exit $?
+#echo "----Extracting errl tool"
+#mkdir -p ${SANDBOXBASE}/simics || exit $?
+#tar -xvf ${SANDBOXBASE}/obj/x86.nfp/errl/nfp/tool/errl.tar \
+#         -C ${SANDBOXBASE}/simics errl  || exit $?

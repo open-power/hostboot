@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2018
+# Contributors Listed Below - COPYRIGHT 2011,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -25,7 +25,9 @@
 ROOTPATH = ../../..
 MODULE = fsiscom
 
-OBJS += fsiscom.o
+# FIXME RTC: 210975
+
+#OBJS += fsiscom.o
 
 SUBDIRS += test.d
 SUBDIRS += runtime.d

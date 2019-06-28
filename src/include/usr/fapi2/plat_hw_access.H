@@ -255,17 +255,6 @@ ReturnCode platPutRing(const Target<T>& i_target,
 
 }
 
-/// @brief Writes a ring to a chip. For MEMBUF targets the ring data will
-///        be extracted from the centaur hw image using the ring id.
-///
-/// @param[in] i_target   Target to operate on.
-/// @param[in] i_ringID   Ring ID that will identify the Ring to be scanned
-/// @param[in] i_ringMode Ring operation mode.
-/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-ReturnCode platPutRing(const Target<TARGET_TYPE_MEMBUF_CHIP>& i_target,
-                       const RingId_t i_ringID,
-                       const RingMode i_ringMode);
-
 //--------------------------------------------------------------------------
 // Operational Mode Error Functions
 //--------------------------------------------------------------------------

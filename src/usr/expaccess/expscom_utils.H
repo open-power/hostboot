@@ -30,7 +30,9 @@
  *         Explorer OCMB scom drivers
  */
 #include <stdint.h>
-
+#include <devicefw/driverif.H>
+#include <targeting/common/target.H>
+#include <errl/errlentry.H>
 
 namespace EXPSCOM
 {

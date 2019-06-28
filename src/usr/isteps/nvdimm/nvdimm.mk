@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018
+# Contributors Listed Below - COPYRIGHT 2018,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -25,24 +25,26 @@
 # nvdimmm.mk should only be called when CONFIG_NVDIMM is set
 # Called by src/makefile with the condition that CONFIG_NVDIMM is defined
 
-PROCEDURE_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
+# FIXME RTC: 210975
+
+#PROCEDURE_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
 
 #Add all the extra include paths
 
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
-EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
-EXTRAINCDIR += ${ROOTPATH}/src/import/
-EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
-EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/lib/eff_config/
-EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/lib/
-EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/lib/mcbist/
-EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/lib/dimm/
-EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/lib/dimm/ddr4/
-EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/
-EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/ffdc/
+#EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
+#EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
+#EXTRAINCDIR += ${ROOTPATH}/src/import/
+#EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
+#EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/lib/eff_config/
+#EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/lib/
+#EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/lib/mcbist/
+#EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/lib/dimm/
+#EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/lib/dimm/ddr4/
+#EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/
+#EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/ffdc/
 
 OBJS += nvdimm.o
 OBJS += nvdimmdd.o
@@ -55,4 +57,4 @@ OBJS += nvdimm_update.o
 
 endif
 
-VPATH    += ${PROCEDURE_PATH}/hwp/memory/lib/dimm/ddr4/
+#VPATH    += ${PROCEDURE_PATH}/hwp/memory/lib/dimm/ddr4/

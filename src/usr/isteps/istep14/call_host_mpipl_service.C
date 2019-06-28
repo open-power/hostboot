@@ -38,8 +38,10 @@
 
 #include <runtime/runtime.H>
 
+/* FIXME RTC: 210975
 #include <p9_mpipl_chip_cleanup.H>
 #include <fapi2/plat_hwp_invoker.H>
+*/
 
 #include <vfs/vfs.H>
 #include <dump/dumpif.H>
@@ -69,6 +71,7 @@ void* call_host_mpipl_service (void *io_pArgs)
     else
     {
         errlHndl_t l_err = NULL;
+/* FIXME RTC: 210975
         // call proc_mpipl_chip_cleanup.C
         TARGETING::TargetHandleList l_procTargetList;
         getAllChips(l_procTargetList, TYPE_PROC );
@@ -98,8 +101,8 @@ void* call_host_mpipl_service (void *io_pArgs)
                 // since we are doing an mpipl break out, the mpipl has failed
                 break;
             }
-
         }
+*/
 
         // No error on the procedure.. proceed to collect the dump.
         if (!l_err)

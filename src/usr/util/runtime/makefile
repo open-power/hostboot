@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2017
+# Contributors Listed Below - COPYRIGHT 2013,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -39,23 +39,25 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 
-OBJS += utilbase.o
-OBJS += utilstream.o
-OBJS += utilmem.o
-OBJS += utillidmgr_rt.o
-OBJS += utilfile.o
-OBJS += utillidpnor.o
-OBJS += rt_cmds.o
-OBJS += util_rt.o
-OBJS += utilrsvdmem.o
-OBJS += utilxipimage.o
-OBJS += utilcommonattr.o
-OBJS += rt_fwnotify.o
-OBJS += rt_fwreq_helper.o
+# FIXME RTC: 210975
+#OBJS += utilbase.o
+#OBJS += utilstream.o
+#OBJS += utilmem.o
+#OBJS += utillidmgr_rt.o
+#OBJS += utilfile.o
+#OBJS += utillidpnor.o
+#OBJS += rt_cmds.o
+#OBJS += util_rt.o
+#OBJS += utilrsvdmem.o
+#OBJS += utilxipimage.o
+#OBJS += utilcommonattr.o
+#OBJS += rt_fwnotify.o
+#OBJS += rt_fwreq_helper.o
 
 SUBDIRS += test.d
 
-VPATH += ..
+#VPATH += ..
 include $(ROOTPATH)/config.mk

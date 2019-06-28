@@ -171,7 +171,7 @@ errlHndl_t PreVerifiedLidMgr::_loadFromPnor(const PNOR::SectionId i_sec,
     // If SB compiled in, only add fake secure header if the section is never
     // signed. e.g. RINGOVD section
     // Otherwise always add fake secure header when SB compiled out
-    if (!RUNTIME::isPreVerifiedSectionSecure(i_sec))
+    if (!1 /* FIXME RTC: 210975 RUNTIME::isPreVerifiedSectionSecure(i_sec)*/)
     {
 #endif
         // Check if Header is mising

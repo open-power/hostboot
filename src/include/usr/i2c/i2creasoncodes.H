@@ -85,7 +85,7 @@ enum i2cReasonCode
     I2C_CMD_COMP_TIMEOUT                  = I2C_COMP_ID | 0x05,   // Timeout waiting for Cmd Complete
     I2C_HW_ERROR_FOUND                    = I2C_COMP_ID | 0x06,   // Error found in status register
     I2C_MASTER_SENTINEL_TARGET            = I2C_COMP_ID | 0x07,   // Master Sentinel used as target
-    I2C_NO_CENTAUR_FOUND                  = I2C_COMP_ID | 0x08,   // No Centaur chip found
+    // 0x08 Unused
     I2C_NO_PROC_FOUND                     = I2C_COMP_ID | 0x09,   // No Processor chip found
     I2C_ATTRIBUTE_NOT_FOUND               = I2C_COMP_ID | 0x0A,   // Needed I2C-related Attribute not found
     I2C_NACK_ONLY_FOUND                   = I2C_COMP_ID | 0x0B,   // Only NACK found in status register

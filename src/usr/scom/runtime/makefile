@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2018
+# Contributors Listed Below - COPYRIGHT 2013,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -26,13 +26,14 @@ HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
 MODULE = scom_rt
 
+# FIXME RTC: 210975
 #include common ojects between hostboot and runtime hostboot
-include ../scom.mk
+#include ../scom.mk
 
 #include unique object modules
-OBJS += rt_scom.o
+#OBJS += rt_scom.o
 
 SUBDIRS += test.d
 
-VPATH += ..
+#VPATH += ..
 include $(ROOTPATH)/config.mk

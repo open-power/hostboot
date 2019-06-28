@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2018
+# Contributors Listed Below - COPYRIGHT 2013,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -29,8 +29,10 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 
-#include unique object modules
-OBJS += mmio.o
+# FIXME RTC: 210975
 
-VPATH += ..
+#include unique object modules
+#OBJS += mmio.o
+
+#VPATH += ..
 include $(ROOTPATH)/config.mk

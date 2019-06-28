@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2018
+# Contributors Listed Below - COPYRIGHT 2013,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -28,6 +28,7 @@ ROOTPATH = ../../../../..
 EXTRAINCDIR +=${ROOTPATH}/src/usr
 
 MODULE = testrsvdtracebuf_rt
-TESTS =  testrsvdtracebuf.H
+# FIXME RTC: 210975
+#TESTS =  testrsvdtracebuf.H
 
 include ${ROOTPATH}/config.mk

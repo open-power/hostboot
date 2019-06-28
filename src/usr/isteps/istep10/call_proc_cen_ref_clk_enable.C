@@ -44,7 +44,10 @@
 #include <sys/time.h>
 #include <devicefw/userif.H>
 #include <i2c/i2cif.H>
+
+/* FIXME RTC: 210975
 #include <p9_cen_ref_clk_enable.H>
+*/
 
 //  targeting support
 #include <targeting/common/commontargeting.H>
@@ -52,9 +55,11 @@
 #include <targeting/namedtarget.H>
 #include <targeting/attrsync.H>
 
+/* FIXME RTC: 210975
 //  fapi support
 #include <fapi2.H>
 #include <plat_hwp_invoker.H>
+*/
 #include <isteps/hwpisteperror.H>
 
 #include <errl/errludtarget.H>
@@ -84,11 +89,13 @@
 #include <util/align.H>
 #include <util/algorithm.H>
 
+#include <attributeenums.H>
+
+/* FIXME RTC: 210975
 // Fapi Support
 #include <fapi2.H>
 #include <target_types.H>
 #include <plat_hwp_invoker.H>
-#include <attributeenums.H>
 #include <istepHelperFuncs.H>
 
 //HWP
@@ -98,6 +105,7 @@
 #include <p9a_ocmb_enable.H>
 #include <exp_check_for_ready.H>
 #endif
+*/
 
 // secureboot
 #include <secureboot/service.H>
@@ -109,7 +117,6 @@
 
 #ifdef CONFIG_SECUREBOOT
 #include <secureboot/service.H>
-#include <scom/centaurScomCache.H>
 #endif
 
 // end includes for post sbe secureboot steps
@@ -391,9 +398,11 @@ void validateSecuritySettings()
                                                                 >(l_protectTpm);
         }
 
+/* FIXME RTC: 210975
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapiTarg(*pProcItr);
 
         FAPI_INVOKE_HWP(err, p9_update_security_ctrl, l_fapiTarg, l_force);
+*/
 
         if (err)
         {
@@ -949,24 +958,13 @@ void fenceAttachedMembufs( TARGETING::Target * i_procChipHandle  );
 //******************************************************************************
 void* call_proc_cen_ref_clk_enable(void *io_pArgs )
 {
-    errlHndl_t  l_errl = NULL;
-
     IStepError  l_stepError;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_cen_ref_clock_enable enter" );
 
     validateSecuritySettings();
-
-#ifdef CONFIG_SECUREBOOT
-    if(SECUREBOOT::enabled())
-    {
-        SECUREBOOT::CENTAUR_SECURITY::ScomCache& centaurCache =
-            SECUREBOOT::CENTAUR_SECURITY::ScomCache::getInstance();
-        centaurCache.init();
-        centaurCache.enableCache();
-    }
-#endif
+/* FIXME RTC: 210975
 
     TARGETING::TargetHandleList functionalProcChipList;
 
@@ -978,46 +976,14 @@ void* call_proc_cen_ref_clk_enable(void *io_pArgs )
             l_proc_iter != functionalProcChipList.end();
             ++l_proc_iter)
     {
-        //Raise fences on centaurs to prevent FSP from analyzing
-        // if HB TIs for recoverable errors
-        fenceAttachedMembufs( *l_proc_iter );
-
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                 "START: p9_cen_ref_clk_enable started on target HUID %.8X",
                 TARGETING::get_huid( *l_proc_iter ) );
 
-        // Cumulus only
         fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapiProcTarget( *l_proc_iter );
 
-        // Invoke the HWP passing in the proc target
-        // Cumulus only
-        FAPI_INVOKE_HWP(l_errl,
-                        p9_cen_ref_clk_enable,
-                        l_fapiProcTarget);
-
-        if (l_errl)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR : proc_cen_ref_clk_enable"
-                    "failed, returning errorlog" );
-
-            // capture the target data in the elog
-            ErrlUserDetailsTarget( *l_proc_iter ).addToLog( l_errl );
-
-            // Create IStep error log and cross ref error that occurred
-            l_stepError.addErrorDetails( l_errl );
-
-            // Commit error log
-            errlCommit( l_errl, HWPF_COMP_ID );
-        }
-        else
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "SUCCESS : proc_cen_ref_clk_enable"
-                    "completed ok");
-        }
-
 #ifdef CONFIG_AXONE
+        errlHndl_t  l_errl = NULL;
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                     "START : p9a_ocmb_enable"
                     "starting on 0x%.08X", TARGETING::get_huid( *l_proc_iter ));
@@ -1127,6 +1093,7 @@ void* call_proc_cen_ref_clk_enable(void *io_pArgs )
 
     }   // endfor
 
+*/
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_cen_ref_clock_enable exit" );
 
@@ -1139,68 +1106,7 @@ void* call_proc_cen_ref_clk_enable(void *io_pArgs )
 //******************************************************************************
 uint8_t getMembufsAttachedBitMask( TARGETING::Target * i_procTarget  )
 {
-    const uint8_t DMI_WITH_ATTACHED_CENTAUR_MASK = 0x80;
-
-    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-            "Finding functional membuf chips downstream from "
-            "proc chip with HUID of 0x%08X",
-            i_procTarget->getAttr<TARGETING::ATTR_HUID>());
-
     uint8_t l_attachedMembufs = 0;
-
-    // Get list of functional membuf chips downstream from the given
-    // proc chip
-    TARGETING::TargetHandleList functionalMembufChipList;
-
-    getChildAffinityTargets( functionalMembufChipList,
-                      const_cast<TARGETING::Target*>(i_procTarget ),
-                      TARGETING::CLASS_CHIP,
-                      TARGETING::TYPE_MEMBUF,
-                      true);
-
-    // loop through the functional membufs
-    for(TARGETING::TargetHandleList::const_iterator pTargetItr
-                            = functionalMembufChipList.begin();
-                            pTargetItr != functionalMembufChipList.end();
-                            pTargetItr++)
-    {
-        // Find each functional membuf chip's upstream functional DMI
-        // unit, if any, and accumulate it into the attached membuf
-        // chips mask
-        TARGETING::TargetHandleList functionalDmiUnitList;
-
-        getParentAffinityTargets( functionalDmiUnitList, *pTargetItr,
-                                  TARGETING::CLASS_UNIT, TARGETING::TYPE_DMI,
-                                  true );
-
-        if(functionalDmiUnitList.empty())
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "Functional membuf chip with HUID of 0x%08X "
-                    "is not attached to an upstream functional DMI",
-                    (*pTargetItr)->getAttr<
-                    TARGETING::ATTR_HUID>());
-            continue;
-        }
-
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "Found functional DMI unit with HUID of 0x%08X "
-                "upstream from functional membuf chip with HUID of 0x%08X",
-                ((*functionalDmiUnitList.begin())->getAttr<
-                 TARGETING::ATTR_CHIP_UNIT>()),
-                (*pTargetItr)->getAttr<
-                TARGETING::ATTR_HUID>());
-        l_attachedMembufs |=
-            ((DMI_WITH_ATTACHED_CENTAUR_MASK) >>
-             ((*functionalDmiUnitList.begin())->getAttr<
-              TARGETING::ATTR_CHIP_UNIT>()));
-    }
-
-    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-            "Proc chip with HUID of 0x%08X has attached membuf "
-            "mask (l_attachedMembufs) of 0x%02X",
-            i_procTarget->getAttr<TARGETING::ATTR_HUID>(),
-            l_attachedMembufs);
 
     // return the bitmask
     return l_attachedMembufs;

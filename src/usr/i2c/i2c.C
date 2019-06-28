@@ -90,7 +90,6 @@ TRAC_INIT( & g_trac_i2cr, "I2CR", KILOBYTE );
 #define I2C_RESET_POLL_DELAY_TOTAL_NS (500 * NS_PER_MSEC) // Total time to poll
 
 #define P9_MASTER_PORTS 13          // Number of Ports used in P9
-#define CENTAUR_MASTER_ENGINES 1   // Number of Engines in a Centaur
 #define MAX_NACK_RETRIES 3
 #define PAGE_OPERATION 0xffffffff  // Special value use to determine type of op
 #define P9_ENGINE_SCOM_OFFSET 0x1000
@@ -2881,8 +2880,6 @@ errlHndl_t i2cSetup ( TARGETING::Target * i_target,
             //  Engine 3, port 0 = FSI 13
             //            port 1 = FSI 14
             //            port 2,3 are not connected
-            // @TODO RTC 167460 -- account for centaur and other
-            //        and this same mapping other places in I2C DD
             if ( i_args.switches.useFsiI2C &&
                  0 == i_args.engine)
             {
@@ -5128,18 +5125,10 @@ void getMasterInfo( const TARGETING::Target* i_chip,
                     std::list<MasterInfo_t>& o_info )
 {
     TRACFCOMP(g_trac_i2c,"getMasterInfo(%.8X)",TARGETING::get_huid(i_chip));
-    TARGETING::TYPE l_type = i_chip->getAttr<TARGETING::ATTR_TYPE>();
     for( uint32_t engine = 0;
          engine < I2C_BUS_ATTR_MAX_ENGINE;
          engine++ )
     {
-        // Only support engine 0 for centaur
-        if ( ( engine != 0 ) &&
-             ( l_type == TARGETING::TYPE_MEMBUF ) )
-        {
-            continue;
-        }
-
         MasterInfo_t info;
 
         //For P9, the base scom address for each i2c engine
@@ -5363,6 +5352,7 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
 
         //Find all NVDIMMs
     #ifdef CONFIG_NVDIMM
+/* FIXME RTC: 210975 the NVDIMM code isn't compiled yet
         TARGETING::ATTR_MODEL_type l_chipModel =
             pProc->getAttr<TARGETING::ATTR_MODEL>();
         std::list<EEPROM::EepromInfo_t> l_nvdimmInfo;
@@ -5370,6 +5360,7 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
         {
             NVDIMM::getNVDIMMs( l_nvdimmInfo );
         }
+*/
     #endif
 
         for(auto const& i2cm : l_i2cInfo)
@@ -5509,6 +5500,7 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
     #endif
 
     #ifdef CONFIG_NVDIMM
+/* FIXME RTC: 210975 NVDIMM code isn't compiled yet
             for (auto& l_nv : l_nvdimmInfo)
             {
                 TRACUCOMP(g_trac_i2c,"nvdimm loop - eng=%.8X, port=%.8X", TARGETING::get_huid(l_nv.i2cMaster), l_nv.engine );
@@ -5543,6 +5535,7 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
                 TRACUCOMP(g_trac_i2c,"Adding addr=0x%X", l_nv.devAddr);
                 o_deviceInfo.push_back(l_currentDI);
             } //end of nvdimm iter
+*/
     #endif
 
         } //end of i2cm

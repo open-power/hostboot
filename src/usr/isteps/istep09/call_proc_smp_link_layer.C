@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,11 +58,14 @@
 #include    <targeting/common/utilFilter.H>
 #include    <targeting/common/trace.H>
 
+/* FIXME RTC: 210975
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
+*/
 #include <errl/errlmanager.H>
 
-#include <p9_smp_link_layer.H>
+// FIXME RTC: 210975
+//#include <p9_smp_link_layer.H>
 
 namespace   ISTEP_09
 {
@@ -79,8 +82,9 @@ using   namespace   HWAS;
 //
 void*   call_proc_smp_link_layer( void    *io_pArgs )
 {
-    errlHndl_t  l_errl  =   NULL;
     IStepError  l_StepError;
+/* FIXME RTC: 210975
+    errlHndl_t  l_errl  =   NULL;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_smp_link_layer entry" );
@@ -123,6 +127,7 @@ void*   call_proc_smp_link_layer( void    *io_pArgs )
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_smp_link_layer exit" );
 
+*/
     return l_StepError.getErrorHandle();
 }
 

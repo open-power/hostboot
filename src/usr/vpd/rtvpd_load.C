@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -128,8 +128,9 @@ errlHndl_t VPD::vpd_load_rt_image(uint64_t & i_vpd_addr)
             break;
         }
 
+       //@TODO RTC: 210975 CENTAUR_VPD fix
         vpd_ptr += VMM_MODULE_VPD_SIZE;
-        err = bld_vpd_image(PNOR::CENTAUR_VPD,
+        err = bld_vpd_image(PNOR::EECACHE, // TODO RTC: 210975
                                  vpd_ptr,
                                  VMM_CENTAUR_VPD_SIZE);
         if(err)

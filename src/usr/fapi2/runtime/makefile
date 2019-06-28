@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2018
+# Contributors Listed Below - COPYRIGHT 2015,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -35,8 +35,10 @@ MODULE = fapi2_rt
 
 SUBDIRS += test.d
 
-include ../fapi2.mk
+# FIXME RTC: 210975
+
+#include ../fapi2.mk
 
 include ${ROOTPATH}/config.mk
 
-VPATH += ..
+#VPATH += ..

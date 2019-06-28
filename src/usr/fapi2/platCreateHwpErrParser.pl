@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2018
+# Contributors Listed Below - COPYRIGHT 2015,2019
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -224,8 +224,6 @@ print EDISFILE "#include <p9_obus_scom_addresses.H>\n";
 print EDISFILE "#include <p9_perv_scom_addresses.H>\n";
 print EDISFILE "#include <p9_quad_scom_addresses.H>\n";
 print EDISFILE "#include <p9_xbus_scom_addresses.H>\n";
-print EDISFILE "#include <cen_gen_scom_addresses.H>\n";
-print EDISFILE "#include <centaur_misc_constants.H>\n";
 print EDISFILE "namespace fapi2\n";
 print EDISFILE "{\n\n";
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,20 +30,23 @@
 #include <initservice/isteps_trace.H>
 #include <initservice/initserviceif.H>
 #include <isteps/hwpisteperror.H>
+/* FIXME RTC: 210975
 #include <fapi2/plat_hwp_invoker.H>
 #include <p9_fbc_eff_config.H>
+*/
 
 namespace ISTEP_08
 {
 
 void* call_host_p9_fbc_eff_config( void *io_pArgs )
 {
-    errlHndl_t l_errl = NULL;
+    // FIXME RTC: 210975
+    //errlHndl_t l_errl = NULL;
     ISTEP_ERROR::IStepError l_stepError;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_p9_fbc_eff_config entry" );
-
+/* FIXME RTC: 210975
    FAPI_INVOKE_HWP(l_errl,p9_fbc_eff_config);
    if(l_errl)
    {
@@ -53,7 +56,7 @@ void* call_host_p9_fbc_eff_config( void *io_pArgs )
                 l_errl->plid() );
        errlCommit(l_errl, HWPF_COMP_ID);
    }
-
+*/
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_p9_fbc_eff_config exit" );

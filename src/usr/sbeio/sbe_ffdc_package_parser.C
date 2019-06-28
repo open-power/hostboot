@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,7 +24,8 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #include <sbeio/sbe_ffdc_package_parser.H>
 
-#include <hwp_return_codes.H>
+// FIXME RTC: 210975
+//#include <hwp_return_codes.H>
 #include <trace/interface.H>
 #include <xscom/piberror.H>
 
@@ -42,6 +43,7 @@ FfdcParsedPackage::rcToParsedType(uint32_t fapiRc)
 {
     ParsedType retval{ParsedType::NONE};
 
+/* FIXME RTC: 210975
     switch(fapiRc)
     {
         case fapi2::RC_SBE_SCOM_FAILURE:
@@ -57,6 +59,7 @@ FfdcParsedPackage::rcToParsedType(uint32_t fapiRc)
             break;
         }
     }
+*/
 
     return retval;
 }

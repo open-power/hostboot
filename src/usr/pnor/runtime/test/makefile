@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2016
+# Contributors Listed Below - COPYRIGHT 2014,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -25,7 +25,9 @@
 HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../../..
 
+# FIXME RTC: 210975
+
 MODULE = testpnor_rt
-TESTS = *.H
+#TESTS = *.H
 
 include ${ROOTPATH}/config.mk

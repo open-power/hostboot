@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018
+# Contributors Listed Below - COPYRIGHT 2018,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -25,12 +25,8 @@
 # xip image processing functions
 HWP_XIP_PATH := ${ROOTPATH}/src/import/chips/p9/xip
 
-# p9 ring id
-HWP_IMAGEPROCS_PATH := ${ROOTPATH}/src/import/chips/p9/utils/imageProcs
-
-# centaur ring id
-HWP_CEN_IMAGEPROCS_PATH += \
-		${ROOTPATH}/src/import/chips/centaur/utils/imageProcs
+# p10 ring id
+HWP_IMAGEPROCS_PATH := ${ROOTPATH}/src/import/chips/p10/utils/imageProcs
 
 # common ring id
 HWP_COMMON_IMAGEPROCS_PATH += \
@@ -55,14 +51,14 @@ EXTRAINCDIR += ${HWP_ACC_PATH}
 
 include ${ROOTPATH}/procedure.rules.mk
 
-include ${XIP_CUSTOMIZE_PATH}/p9_xip_customize.mk
+# FIXME RTC: 210975
+#include ${XIP_CUSTOMIZE_PATH}/p9_xip_customize.mk
 include ${XIP_CUSTOMIZE_PATH}/p9_xip_section_append.mk
 include ${HWP_XIP_PATH}/p9_xip_image.mk
 include ${HWP_IMAGEPROCS_PATH}/p9_dd_container.mk
 include ${HWP_IMAGEPROCS_PATH}/p9_tor.mk
 include ${HWP_IMAGEPROCS_PATH}/p9_ring_identification.mk
 include ${HWP_IMAGEPROCS_PATH}/p9_ringId.mk
-include ${HWP_CEN_IMAGEPROCS_PATH}/cen_ringId.mk
 include ${HWP_COMMON_IMAGEPROCS_PATH}/common_ringId.mk
 include ${HWP_IMAGEPROCS_PATH}/p9_scan_compression.mk
 include ${HWP_ACC_PATH}/p9_get_mvpd_ring.mk

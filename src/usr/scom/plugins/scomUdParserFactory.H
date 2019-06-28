@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,9 +39,6 @@ namespace SCOM
             {
                 registerParser<SCOM::UdParserPib>
                     (SCOM_UDT_PIB);
-                registerParser<
-                   ::SECUREBOOT::CENTAUR_SECURITY::UdParserCentaurCacheMismatch>
-                        (SCOM_UDT_CENTAUR_CACHE_MISMATCH);
             }
 
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,20 +32,26 @@
 #include    <isteps/hwpisteperror.H>
 #include    <initservice/isteps_trace.H>
 
+/* FIXME RTC: 210975
 //HWP Invoker
 #include    <fapi2/plat_hwp_invoker.H>
+*/
 
 //Targeting Support
 #include    <targeting/common/utilFilter.H>
+/* FIXME RTC: 210975
 #include    <fapi2/target.H>
 
 //From Import Directory (EKB Repository)
 #include    <p9_update_ec_eq_state.H>
+*/
 
 //Namespaces
 using namespace ERRORLOG;
 using namespace TARGETING;
+/* FIXME RTC: 210975
 using namespace fapi2;
+*/
 
 namespace ISTEP_15
 {
@@ -53,6 +59,7 @@ void* host_establish_ex_chiplet (void *io_pArgs)
 {
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_establish_ex_chiplet entry" );
     ISTEP_ERROR::IStepError l_StepError;
+/* FIXME RTC: 210975
     #ifndef CONFIG_AXONE_BRING_UP
     errlHndl_t l_errl = NULL;
     do {
@@ -79,6 +86,7 @@ void* host_establish_ex_chiplet (void *io_pArgs)
         }
     }while(0);
     #endif
+*/
 
     // end task, returning any errorlogs to IStepDisp
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_establish_ex_chiplet exit" );

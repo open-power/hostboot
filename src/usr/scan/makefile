@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2016
+# Contributors Listed Below - COPYRIGHT 2012,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -26,10 +26,11 @@ ROOTPATH = ../../..
 MODULE = scan
 
 EXTRAINCDIR +=${ROOTPATH}/src/import/chips/p9/utils/imageProcs
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR +=${ROOTPATH}/src/import/hwpf/fapi2/include
 
-
-OBJS += scandd.o
+# FIXME RTC: 210975
+#OBJS += scandd.o
 
 SUBDIRS += test.d
 

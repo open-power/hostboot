@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -171,19 +171,6 @@ class I2CTest: public CxxTest::TestSuite
                 { 0x00, 0x00, 0xAE, 0xef97120000000000,
                      3, true, TARGETING::TYPE_PROC  }, // Read data back
 
-
-                // MEMBUF TESTS
-                // Use the following commands when Centaur devices are
-                // supported in simics.  No target date.
-                // Real Centaur Devices
-//                { 0x00, 0x00, 0x51, 0x1111000000000000,
-//                    2, false, TARGETING::TYPE_MEMBUF }, // Write addr 0x0000
-//                { 0x00, 0x00, 0x51, 0x0000000000000000,
-//                    8, true, TARGETING::TYPE_MEMBUF  }, // Read 8 bytes
-//                { 0x00, 0x00, 0x53, 0x0000000000000000,
-//                    2, false, TARGETING::TYPE_MEMBUF }, // Write addr 0x0000
-//                { 0x00, 0x00, 0x53, 0x0000000000000000,
-//                    8, true, TARGETING::TYPE_MEMBUF  }, // Read 8 bytes
             };
 
             const uint32_t NUM_CMDS = sizeof(testData)/sizeof(testData[0]);
@@ -207,16 +194,6 @@ class I2CTest: public CxxTest::TestSuite
                 // Get the Proc Target
                 TARGETING::Target* procTarget = NULL;
                 tS.masterProcChipTargetHandle( procTarget );
-
-                // Get a Centaur Target
-                TargetHandleList centList;
-                TARGETING::PredicateCTM predCent( TARGETING::CLASS_CHIP,
-                                                  TARGETING::TYPE_MEMBUF );
-                tS.getAssociated( centList,
-                                  sysTarget,
-                                  TARGETING::TargetService::CHILD,
-                                  TARGETING::TargetService::ALL,
-                                  &predCent );
 
                 for( uint32_t i = 0; i < NUM_CMDS; i++ )
                 {
@@ -256,20 +233,6 @@ class I2CTest: public CxxTest::TestSuite
                             }
 
                             theTarget = procTarget;
-                            break;
-
-                        case TARGETING::TYPE_MEMBUF:
-                            if( ( 0 == centList.size() ) ||
-                                ( NULL == centList[0] ) )
-                            {
-                                TRACFCOMP( g_trac_i2c,
-                                           ERR_MRK"Centaur List has %d entries.  Either "
-                                           "empty or first target is NULL!",
-                                           centList.size() );
-                                continue;
-                            }
-
-                            theTarget = centList[0];
                             break;
 
                         default:
@@ -415,16 +378,6 @@ class I2CTest: public CxxTest::TestSuite
                 TARGETING::Target* procTarget = NULL;
                 tS.masterProcChipTargetHandle( procTarget );
 
-                // Get a Centaur Target
-                TargetHandleList centList;
-                TARGETING::PredicateCTM predCent( TARGETING::CLASS_CHIP,
-                                                  TARGETING::TYPE_MEMBUF );
-                tS.getAssociated( centList,
-                                  sysTarget,
-                                  TARGETING::TargetService::CHILD,
-                                  TARGETING::TargetService::ALL,
-                                  &predCent );
-
                 for ( uint32_t i = 0; i < NUM_CMDS; i++ )
                 {
                     TRACUCOMP( g_trac_i2c,"testI2COffset: Outer Loop i= "
@@ -454,21 +407,6 @@ class I2CTest: public CxxTest::TestSuite
                             }
 
                             theTarget = procTarget;
-                            break;
-
-                        case TARGETING::TYPE_MEMBUF:
-                            if( ( 0 == centList.size() ) ||
-                                ( NULL == centList[0] ) )
-                            {
-                                TRACFCOMP( g_trac_i2c,
-                                           ERR_MRK"Centaur List has %d entries."
-                                           "  Either empty or first target is "
-                                           "NULL!",
-                                           centList.size() );
-                                continue;
-                            }
-
-                            theTarget = centList[0];
                             break;
 
                         default:

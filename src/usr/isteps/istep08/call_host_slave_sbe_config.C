@@ -52,8 +52,10 @@
 #include <targeting/namedtarget.H>
 #include <targeting/attrsync.H>
 
+/* FIXME RTC: 210975
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
+*/
 
 #include <errl/errlmanager.H>
 
@@ -61,7 +63,8 @@
 
 #include <errl/errludtarget.H>
 
-#include <p9_setup_sbe_config.H>
+// FIXME RTC: 210975
+//#include <p9_setup_sbe_config.H>
 #include <initservice/mboxRegs.H>
 
 using namespace ISTEP_ERROR;
@@ -131,14 +134,17 @@ void* call_host_slave_sbe_config(void *io_pArgs)
         // do not call HWP on master processor
         if (l_cpu_target != l_pMasterProcTarget)
         {
+/* FIXME RTC: 210975
             const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                 l_fapi2_proc_target (l_cpu_target);
+*/
 
             // @TODO RTC: 210612
             // mcSyncMode is removed in P10, need to find a
             // replacement here
             l_cpu_target->setAttr<ATTR_MC_SYNC_MODE>(l_scratch5.deprecated.mcSyncMode);
 
+/* FIXME RTC: 210975
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                      "Running p9_setup_sbe_config HWP on processor target %.8X",
                      TARGETING::get_huid(l_cpu_target) );
@@ -159,6 +165,7 @@ void* call_host_slave_sbe_config(void *io_pArgs)
                 // Commit Error
                 errlCommit( l_errl, ISTEP_COMP_ID );
             }
+*/
 
             l_errl = SBE::updateSbeBootSeeprom(l_cpu_target);
 

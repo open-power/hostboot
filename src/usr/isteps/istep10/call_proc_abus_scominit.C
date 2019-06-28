@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,8 +51,10 @@
 #include    <targeting/common/utilFilter.H>
 
 #include  <pbusLinkSvc.H>
+/* FIXME RTC: 210975
 #include  <fapi2/target.H>
 #include  <fapi2/plat_hwp_invoker.H>
+*/
 
 //  MVPD
 #include <devicefw/userif.H>
@@ -111,6 +113,7 @@ void* call_proc_abus_scominit( void    *io_pArgs )
             break;
         }
 
+/* FIXME RTC: 210975
         // For each ABUS pair
         for (const auto & l_AbusConnection: l_AbusConnections)
         {
@@ -162,6 +165,7 @@ void* call_proc_abus_scominit( void    *io_pArgs )
                 errlCommit(l_err, HWPF_COMP_ID);
             }
         } // End abus pair list loop
+*/
     } while (0);
 
     return l_StepError.getErrorHandle();

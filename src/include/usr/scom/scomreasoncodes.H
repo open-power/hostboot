@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,12 +39,10 @@ namespace SCOM
         SCOM_TRANSLATE_P9               = 0x05,
         SCOM_DO_FORM_1_INDIRECT_SCOM    = 0x06,
         SCOM_HANDLE_SPECIAL_WAKEUP      = 0x07,
-        SCOM_TRANSLATE_CENTAUR          = 0x08,
+        // 0x08 unused
         SCOM_RT_SEND_SCOM_TO_HYP        = 0x09,
         SCOM_OP_SANITY_CHECK            = 0x0A,
-        SCOM_VERIFY_CENTAUR_CACHE       = 0x0B,
-        SCOM_WRITE_CENTAUR_CACHE        = 0x0C,
-        SCOM_READ_CENTAUR_CACHE         = 0x0D,
+        // 0x0B->0x0D unused
         SCOM_CALL_WAKEUP_HYP            = 0x0E,
         SCOM_CALL_WAKEUP_HWP            = 0x0F,
         SCOM_DO_MULTICAST_WORKAROUND    = 0x10,
@@ -88,7 +86,6 @@ namespace SCOM
     enum UserDetailsTypes
     {
         SCOM_UDT_PIB                    = 0x01,
-        SCOM_UDT_CENTAUR_CACHE_MISMATCH = 0x02,
     };
 
     enum UserDetailsVersions

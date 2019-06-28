@@ -341,12 +341,13 @@ bool DVPD::dvpdPresent( TARGETING::Target * i_target )
  * Planar VPD is included in the Centaur PNOR section.
  * Including with Centaur vpd minimizes the number of PNOR sections.
  */
+//TODO RTC: 210975 CENTAUR_VPD FIX
 DvpdFacade::DvpdFacade() :
 IpVpdFacade(DVPD::dvpdRecords,
             (sizeof(DVPD::dvpdRecords)/sizeof(DVPD::dvpdRecords[0])),
             DVPD::dvpdKeywords,
             (sizeof(DVPD::dvpdKeywords)/sizeof(DVPD::dvpdKeywords[0])),
-            PNOR::CENTAUR_VPD,  // note use of CVPD
+            PNOR::EECACHE,  // TODO RTC: 210975 note use of CVPD
             DVPD::g_mutex,
             VPD::VPD_WRITE_MCS) // Direct access memory
 {

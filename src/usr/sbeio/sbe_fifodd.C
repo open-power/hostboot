@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,8 +42,9 @@
 #include <sbeio/sbe_ffdc_package_parser.H>
 #include <sbeio/sbe_ffdc_parser.H>
 #include <kernel/pagemgr.H>
-#include <fapi2.H>
-#include <set_sbe_error.H>
+// FIXME RTC: 210975
+//#include <fapi2.H>
+//#include <set_sbe_error.H>
 #include <sbeio/sbe_sp_intf.H>
 #include <xscom/piberror.H>
 #include <sbeio/sbe_retry_handler.H>
@@ -511,6 +512,8 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
                      continue;
                  }
 
+// FIXME RTC: 210975
+#if 0
                  uint32_t l_rc = l_package.rc;
                  // If fapiRC, add data to errorlog
                  if(l_rc ==  fapi2::FAPI2_RC_PLAT_ERR_SEE_DATA)
@@ -548,6 +551,7 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
                          ERRORLOG::errlCommit( sbe_errl, SBEIO_COMP_ID );
                      }
                  }
+#endif
 
                  //If FFDC schema is known and a processing routine
                  //is defined then perform the processing.
@@ -605,7 +609,8 @@ errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target * i_target,
                            uint32_t          & o_status)
 {
     errlHndl_t errl = NULL;
-
+// FIXME RTC: 210975 no SbeRetryHandler yet
+#if 0
     SBE_TRACD(ENTER_MRK "waitDnFifoReady");
 
     uint64_t l_elapsed_time_ns = 0;
@@ -679,7 +684,6 @@ errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target * i_target,
                                      HWAS::GARD_NULL );
             }
 
-
             // Set the retry handler's mode to be informational, this will run
             // p9_extract_rc then TI the system on fsp-systems.
             // On open power systems if mode is set to informational we will run
@@ -717,6 +721,7 @@ errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target * i_target,
 
     SBE_TRACD(EXIT_MRK "waitDnFifoReady");
 
+#endif
     return errl;
 }
 

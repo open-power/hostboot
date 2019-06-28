@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -31,6 +31,7 @@ CFLAGS += -iquote${ROOTPATH}/src/usr/secureboot
 
 MODULE = testsecureboot_rt
 
-TESTS = *.H
+# FIXME RTC: 210975
+#TESTS = *.H
 
 include ${ROOTPATH}/config.mk

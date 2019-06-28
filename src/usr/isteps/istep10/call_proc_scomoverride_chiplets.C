@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,8 +50,10 @@
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
 
+/* FIXME RTC: 210975
 #include    <fapi2/target.H>
 #include    <fapi2/plat_hwp_invoker.H>
+*/
 #include    <errl/errlmanager.H>
 
 //  MVPD
@@ -60,7 +62,8 @@
 
 #include <config.h>
 
-#include <p9_scomoverride_chiplets.H>
+// FIXME RTC: 210975
+//#include <p9_scomoverride_chiplets.H>
 
 
 namespace   ISTEP_10
@@ -76,9 +79,10 @@ using   namespace   TARGETING;
 //*****************************************************************************
 void* call_proc_scomoverride_chiplets( void *io_pArgs )
 {
-    errlHndl_t l_errl = NULL;
     IStepError l_StepError;
 
+/* FIXME RTC: 210975
+    errlHndl_t l_errl = NULL;
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
              "call_proc_scomoverride_chiplets entry" );
 
@@ -122,6 +126,7 @@ void* call_proc_scomoverride_chiplets( void *io_pArgs )
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
              "call_proc_scomoverride_chiplets exit" );
+*/
 
     // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();

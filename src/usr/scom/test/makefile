@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2017
+# Contributors Listed Below - COPYRIGHT 2011,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -25,9 +25,10 @@
 ROOTPATH = ../../../..
 
 MODULE = testscom
-TESTS = *.H
+# FIXME RTC: 210975
+#TESTS = *.H
 
-OBJS+=retryWorkaroundTestData.o
+#OBJS+=retryWorkaroundTestData.o
 
 #To enable tracing of SCOM Unit Tests
 # TRACE_SCOM_UNIT_TEST=1 make -j32

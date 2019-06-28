@@ -46,23 +46,25 @@
 #include    <targeting/common/utilFilter.H>
 
 #include    <config.h>
-#include    <fapi2.H>
-#include    <fapi2/plat_hwp_invoker.H>
+// FIXME RTC: 210975
+//#include    <fapi2.H>
+//#include    <fapi2/plat_hwp_invoker.H>
 #include    <util/utilmbox_scratch.H>
 
 
 // SBE
 #include    <sbeif.H>
 
+/* FIXME RTC: 210975
 // HWP
 #include    <p9_mss_freq.H>
 #include    <p9_mss_freq_system.H>
-#include    <p9c_mss_freq.H>
 
 #ifdef CONFIG_AXONE
 #include    <p9a_mss_freq.H>
 #include    <p9a_mss_freq_system.H>
 #endif
+*/
 
 namespace   ISTEP_07
 {
@@ -108,52 +110,10 @@ void*    call_mss_freq( void *io_pArgs )
         }
         #endif
 
+/* FIXME RTC: 210975
         ATTR_MODEL_type l_procModel = TARGETING::targetService().getProcessorModel();
 
-        if(l_procModel == TARGETING::MODEL_CUMULUS)
-        {
-            TARGETING::TargetHandleList l_membufTargetList;
-            getAllChips(l_membufTargetList, TYPE_MEMBUF);
-
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_freq: %d membufs found",
-                    l_membufTargetList.size());
-
-            for (const auto & l_membuf_target : l_membufTargetList)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "p9c_mss_freq HWP target HUID %.8x",
-                    TARGETING::get_huid(l_membuf_target));
-
-                //  call the HWP with each target
-                fapi2::Target <fapi2::TARGET_TYPE_MEMBUF_CHIP> l_fapi_membuf_target
-                        (l_membuf_target);
-
-                FAPI_INVOKE_HWP(l_err, p9c_mss_freq, l_fapi_membuf_target);
-
-                //  process return code.
-                if ( l_err )
-                {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                        "ERROR 0x%.8X:  p9c_mss_freq HWP on target HUID %.8x",
-                        l_err->reasonCode(), TARGETING::get_huid(l_membuf_target) );
-
-                    // capture the target data in the elog
-                    ErrlUserDetailsTarget(l_membuf_target).addToLog( l_err );
-
-                    // Create IStep error log and cross reference to error that occurred
-                    l_StepError.addErrorDetails( l_err );
-
-                    // Commit Error
-                    errlCommit( l_err, ISTEP_COMP_ID );
-                }
-                else
-                {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                            "SUCCESS :  p9c_mss_freq HWP");
-                }
-            } // end membuf loop
-        }
-        else if (l_procModel == TARGETING::MODEL_NIMBUS)
+        if (l_procModel == TARGETING::MODEL_NIMBUS)
         {
             TARGETING::TargetHandleList l_mcsTargetList;
             getAllChiplets(l_mcsTargetList, TYPE_MCS);
@@ -244,6 +204,8 @@ void*    call_mss_freq( void *io_pArgs )
         }
 #endif
 
+*/
+
         // PB frequency was set in istep 6 for non MC SYNC mode
         // allow it to change here
         TARGETING::Target * l_sys = nullptr;
@@ -268,6 +230,8 @@ void*    call_mss_freq( void *io_pArgs )
             errlCommit( l_err, ISTEP_COMP_ID );
             break;
         }
+
+/* FIXME RTC: 210975
 
         TARGETING::Target * l_masterProc = nullptr;
         TARGETING::targetService()
@@ -351,6 +315,8 @@ void*    call_mss_freq( void *io_pArgs )
         }
 #endif
 
+*/
+
         if(l_StepError.getErrorHandle() != NULL)
         {
             // If we have encountered an error, bail out now
@@ -360,6 +326,11 @@ void*    call_mss_freq( void *io_pArgs )
         // TODO RTC: 207596 Get nest boot freq for OMIs
         #ifndef CONFIG_AXONE_BRING_UP
         // Get latest MC_SYNC_MODE and FREQ_PB_MHZ
+        // FIXME RTC: 210975 This master proc fetch needs to be removed, and
+        // uncommented above
+        TARGETING::Target * l_masterProc = nullptr;
+        TARGETING::targetService()
+            .masterProcChipTargetHandle( l_masterProc );
         uint8_t l_mcSyncMode = l_masterProc->getAttr<TARGETING::ATTR_MC_SYNC_MODE>();
         uint32_t l_newNest = l_sys->getAttr<TARGETING::ATTR_FREQ_PB_MHZ>();
 

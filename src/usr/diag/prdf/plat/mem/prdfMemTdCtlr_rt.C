@@ -203,7 +203,9 @@ uint32_t MemTdCtlr<T>::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc )
         }
 
         // Move onto the next step in the state machine.
+/* FIXME RTC: 210975
         o_rc = nextStep( io_sc );
+*/
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "nextStep() failed on 0x%08x",
@@ -281,7 +283,9 @@ uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
                    nextRank.getRank().getMaster(),
                    nextRank.getRank().getSlave() );
 
+/* FIXME RTC: 210975 linking error
         o_rc = startBgScrub<T>( nextRank.getChip(), nextRank.getRank() );
+*/
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "startBgScrub<T>(0x%08x,m%ds%d) failed",

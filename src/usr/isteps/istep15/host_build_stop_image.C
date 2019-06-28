@@ -49,11 +49,14 @@
 //PNOR Resource Provider
 #include    <pnor/pnorif.H>
 
+/* FIXME RTC: 210975
 #include    <fapi2.H>
+*/
 #include    <kernel/cpumgr.H>
 
 //Targeting Support
 #include    <targeting/common/utilFilter.H>
+/* FIXME RTC: 210975
 #include    <fapi2/target.H>
 
 //HWP Invoker
@@ -68,6 +71,7 @@
 #include    <p9_hcode_image_defines.H>
 #include    <p9_xip_section_append.H>
 #include    <p9n2_quad_scom_addresses_fld.H>
+*/
 
 #include    <secureboot/smf_utils.H>
 #include    <secureboot/smf.H>
@@ -81,8 +85,10 @@ using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
 using   namespace   TARGETING;
 using   namespace   PNOR;
+/* FIXME RTC: 210975
 using   namespace   stopImageSection;
 using   namespace   fapi2;
+*/
 
 namespace ISTEP_15
 {
@@ -154,6 +160,8 @@ errlHndl_t  applyHcodeGenCpuRegs(  TARGETING::Target *i_procChipTarg,
 {
     errlHndl_t  l_errl = nullptr;
 
+// FIXME RTC: 210975
+#if 0
     do
     {
 
@@ -389,13 +397,17 @@ errlHndl_t  applyHcodeGenCpuRegs(  TARGETING::Target *i_procChipTarg,
 
     }while(0);
 
+#endif
     return  l_errl;
 }
 
 void* host_build_stop_image (void *io_pArgs)
 {
-    errlHndl_t  l_errl           = NULL;
     ISTEP_ERROR::IStepError     l_StepError;
+
+// FIXME RTC: 210975
+#if 0
+    errlHndl_t  l_errl           = NULL;
 
     // unload of HCODE PNOR section only necessary if SECUREBOOT compiled in
 #ifdef CONFIG_SECUREBOOT
@@ -794,6 +806,7 @@ void* host_build_stop_image (void *io_pArgs)
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "host_build_stop_image exit" );
 
+#endif
     // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();
 }

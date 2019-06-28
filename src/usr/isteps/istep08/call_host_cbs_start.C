@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,11 +56,14 @@
 
 #include <errl/errludtarget.H>
 
+/* FIXME RTC: 210975
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
+*/
 #include <errl/errlmanager.H>
 
-#include <p9_start_cbs.H>
+// FIXME RTC: 210975
+//#include <p9_start_cbs.H>
 
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
@@ -111,6 +114,7 @@ void* call_host_cbs_start(void *io_pArgs)
                 continue; //Don't continue on this chip if failed
             }
 
+/* FIXME RTC: 210975
             const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                 l_fapi2_proc_target (l_cpu_target);
 
@@ -127,6 +131,7 @@ void* call_host_cbs_start(void *io_pArgs)
                 l_stepError.addErrorDetails(l_errl);
                 errlCommit(l_errl, HWPF_COMP_ID);
             }
+*/
         }
     }
 

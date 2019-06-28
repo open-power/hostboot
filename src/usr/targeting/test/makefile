@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2015
+# Contributors Listed Below - COPYRIGHT 2011,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -37,9 +37,11 @@ ROOTPATH = ../../../..
 COMMON_TARGETING_REL_PATH = ../common
 COMMON_MAKEFILE = ${COMMON_TARGETING_REL_PATH}/test/common.mk
 
+# FIXME RTC: 210975
+
 # Suck in the common targeting makefile, verbatim
 
-include ${COMMON_MAKEFILE}
+#include ${COMMON_MAKEFILE}
 
 # Defines from the common makefile included above:
 # - COMMON_TESTCASES (name of common testcase .H's)
@@ -48,7 +50,7 @@ include ${COMMON_MAKEFILE}
 # Point "make" to find sources and includes in the common and platform
 # specific trees
 
-VPATH += ${COMMON_TARGETING_REL_PATH}/test
+#VPATH += ${COMMON_TARGETING_REL_PATH}/test
 
 HWPF_REL_PATH = ${ROOTPATH}/src/include/usr/hwpf
 
@@ -64,12 +66,12 @@ MODULE = testtargeting
 COMMON_TESTCASE_REL_PATHS = \
     $(addprefix ${COMMON_TARGETING_REL_PATH}/test/,${COMMON_TESTCASES})
 
-TESTS += testtargeting.H
-TESTS += testattrsync.H
-TESTS += testattrtank.H
-TESTS += ${COMMON_TESTCASE_REL_PATHS}
+#TESTS += testtargeting.H
+#TESTS += testattrsync.H
+#TESTS += testattrtank.H
+#TESTS += ${COMMON_TESTCASE_REL_PATHS}
 
-OBJS += attributestrings.o
+#OBJS += attributestrings.o
 
 #debug :
 #	@echo EXTRAINCDIR = ${EXTRAINCDIR}
@@ -84,4 +86,4 @@ OBJS += attributestrings.o
 
 include ${ROOTPATH}/config.mk
 
-vpath %.C ${GENDIR}
+#vpath %.C ${GENDIR}

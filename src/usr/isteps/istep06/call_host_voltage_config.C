@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,8 +28,10 @@
 #include <errl/errlmanager.H>
 #include <isteps/hwpisteperror.H>
 #include <initservice/isteps_trace.H>
-#include <fapi2.H>
-#include <fapi2/plat_hwp_invoker.H>
+// FIXME RTC: 210975
+#include <devicefw/userif.H>
+//#include <fapi2.H>
+//#include <fapi2/plat_hwp_invoker.H>
 #include <arch/pirformat.H>
 #include <sys/task.h>
 #include <sys/mmio.h>
@@ -42,10 +44,11 @@
 #include    <targeting/common/utilFilter.H>
 #include    <targeting/common/target.H>
 
-#include    <p9_pm_get_poundv_bucket_attr.H>
-#include    <p9_pm_get_poundv_bucket.H>
-#include    <p9_setup_evid.H>
-#include    <p9_frequency_buckets.H>
+// FIXME RTC: 210975
+//#include    <p9_pm_get_poundv_bucket_attr.H>
+//#include    <p9_pm_get_poundv_bucket.H>
+//#include    <p9_setup_evid.H>
+//#include    <p9_frequency_buckets.H>
 
 #include    <util/utilmbox_scratch.H>
 #include    <vpd/mvpdenums.H>
@@ -142,7 +145,7 @@ errlHndl_t get_first_valid_pdV_pbFreq(uint32_t& o_firstPBFreq)
                                                theKeyword ) );
         if( l_errl ) { break; }
 
-
+/* FIXME RTC: 210975
         //Version 3:
         //#V record is laid out as follows:
         //Name:     0x2 byte
@@ -181,6 +184,7 @@ errlHndl_t get_first_valid_pdV_pbFreq(uint32_t& o_firstPBFreq)
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "Invalid #V version, default powerbus freq to boot freq");
         }
+*/
     } while(0);
 
     free(theData);
@@ -287,8 +291,9 @@ void* call_host_voltage_config( void *io_pArgs )
     Target * l_sys = nullptr;
     TargetHandleList l_procList;
     TargetHandleList l_eqList;
-    fapi2::voltageBucketData_t l_voltageData;
-    fapi2::ReturnCode l_rc;
+    // FIXME RTC: 210975
+    //fapi2::voltageBucketData_t l_voltageData;
+    //fapi2::ReturnCode l_rc;
 
     uint32_t l_nominalFreq = 0;     //ATTR_NOMINAL_FREQ_MHZ
     uint32_t l_floorFreq = 0;       //ATTR_FREQ_FLOOR_MHZ
@@ -299,7 +304,8 @@ void* call_host_voltage_config( void *io_pArgs )
     uint32_t l_powerModeNom = 0;    //ATTR_SOCKET_POWER_NOMINAL
     uint32_t l_powerModeTurbo = 0;  //ATTR_SOCKET_POWER_TURBO
 
-    bool l_firstPass = true;
+    // FIXME RTC:210975
+    //bool l_firstPass = true;
 
     PredicateCTM l_eqFilter(CLASS_UNIT, TYPE_EQ);
     PredicateHwas l_predPres;
@@ -332,6 +338,7 @@ void* call_host_voltage_config( void *io_pArgs )
         // for each proc target
         for( const auto & l_proc : l_procList )
         {
+/* FIXME RTC: 210975
             //Nimbus DD1 only supports XBUS with freq 1800MHz
             //DD2 supports 2000MHz freq
             //ATTR_CHIP_EC_FEATURE_HW393297 is used to pick the lower
@@ -351,7 +358,7 @@ void* call_host_voltage_config( void *io_pArgs )
                     "call_host_voltage_config.C::"
                     "ATTR_FREQ_X_MHZ = %d",
                     l_sys->getAttr<ATTR_FREQ_X_MHZ>());
-
+*/
             //Nimbus DD21 only supports OBUS PLL of 1563(versus product of 1611)
             //Force it because of a chip bug instead of letting MRW control
             PVR_t l_pvr( mmio_pvr_read() & 0xFFFFFFFF );
@@ -361,13 +368,14 @@ void* call_host_voltage_config( void *io_pArgs )
                           "call_host_voltage_config.C::"
                           "Nimbus DD2.1 -- Forcing ATTR_FREQ_X_MHZ = %d",
                           l_sys->getAttr<ATTR_FREQ_X_MHZ>());
-
+/* FIXME RTC: 210975
                 TARGETING::ATTR_FREQ_O_MHZ_type l_freq_array =
                 {OBUS_PLL_FREQ_LIST_P9N_21[0],OBUS_PLL_FREQ_LIST_P9N_21[0],
                 OBUS_PLL_FREQ_LIST_P9N_21[0], OBUS_PLL_FREQ_LIST_P9N_21[0]};
                 assert(l_proc->
                        trySetAttr<TARGETING::ATTR_FREQ_O_MHZ>(l_freq_array),
                        "call_host_voltage_config.C failed to set ATTR_FREQ_O_MHZ");
+*/
             }
 
 
@@ -422,6 +430,8 @@ void* call_host_voltage_config( void *io_pArgs )
 
                 continue;
             }
+// FIXME RTC: 210975
+#if 0
             //  for each child EQ target
             for( const auto & l_eq : l_eqList )
             {
@@ -576,6 +586,7 @@ void* call_host_voltage_config( void *io_pArgs )
                           l_voltageData.uTurboFreq );
 
             } // EQ for-loop
+#endif
 
             // Don't set the boot voltage ATTR -- instead the
             // setup_evid will calculate from each chips #V and factor
@@ -627,7 +638,7 @@ void* call_host_voltage_config( void *io_pArgs )
         l_sys->setAttr<ATTR_SOCKET_POWER_NOMINAL>(l_powerModeNom);
         l_sys->setAttr<ATTR_SOCKET_POWER_TURBO>(l_powerModeTurbo);
 
-
+/* FIXME RTC: 210975
         // for each proc target
         for( const auto & l_proc : l_procList )
         {
@@ -649,7 +660,7 @@ void* call_host_voltage_config( void *io_pArgs )
             }
 
         } // PROC for-loop
-
+*/
         // If we hit an error from p9_setup_evid, quit
         if( l_err )
         {

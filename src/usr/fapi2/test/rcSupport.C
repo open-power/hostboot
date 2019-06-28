@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -105,13 +105,17 @@ fapi2::ReturnCode p9_procedureFfdc_fail()
 {
     FAPI_INF("Enter p9_procedureFfdc_fail...");
 
+/* FIXME RTC: 210975
     uint32_t pib = 0x0001;
+*/
     fapi2::ReturnCode l_rc;
 
+/* FIXME RTC: 210975
     FAPI_ASSERT(0, fapi2::TEST_PROC_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED,
                                           l_rc).set_parm1(pib));
 
   fapi_try_exit:
+*/
 
     FAPI_INF("Exiting p9_procedureFfdc_fail...");
 
@@ -221,13 +225,16 @@ fapi2::ReturnCode p9ErrorWithBuffer(
 
     fapi2::buffer<uint64_t> l_userBuffer{FAPI2_TEST_BUFFER_VALUE};
 
+/* FIXME RTC: 210975
     //Parameter type for the p9_collect_some_ffdc function.
     //Can be 0x01 or 0x02. Has relevence for ErrorInfo objects
     //not related to this test.
     uint32_t l_paramValue = 0x01;
+*/
 
     fapi2::current_err = fapi2::FAPI2_RC_INVALID_PARAMETER;
 
+/* FIXME RTC: 210975
     FAPI_ASSERT(false,
                 fapi2::PROC_EXAMPLE_ERROR().set_BUFFER(l_userBuffer)
                                     .set_parm1(l_paramValue)
@@ -236,6 +243,7 @@ fapi2::ReturnCode p9ErrorWithBuffer(
                );
 
 fapi_try_exit:
+*/
     FAPI_INF("Exiting p9ErrorWithBuffer");
     return fapi2::current_err;
 }
@@ -254,13 +262,16 @@ fapi2::ReturnCode p9ErrorWithVariableBuffer(
                                         VARIABLE_BUFFER_ELEMENTS*32
                                         );
 
+/* FIXME RTC: 210975
     //Parameter type for the p9_collect_some_ffdc function.
     //Can be 0x01 or 0x02. Has relevence for ErrorInfo objects
     //not related to this test
     uint32_t l_paramValue = 0x01;
+*/
 
     fapi2::current_err = fapi2::FAPI2_RC_INVALID_PARAMETER;
 
+/* FIXME RTC: 210975
     FAPI_ASSERT(false,
                 fapi2::PROC_EXAMPLE_ERROR().set_BUFFER(l_userBuffer)
                                     .set_parm1(l_paramValue)
@@ -269,6 +280,7 @@ fapi2::ReturnCode p9ErrorWithVariableBuffer(
                );
 
 fapi_try_exit:
+*/
     FAPI_INF("Exiting p9ErrorWithVariableBuffer");
     return fapi2::current_err;
 }

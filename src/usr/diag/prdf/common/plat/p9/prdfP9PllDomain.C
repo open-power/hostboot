@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -168,8 +168,10 @@ void mfClockResolution( STEP_CODE_DATA_STRUCT &io_sc,
 
         if ( !bothClocksFailed )
         {
-            TargetHandle_t l_ptargetClock =
+            TargetHandle_t l_ptargetClock = nullptr;
+/* FIXME RTC: 210975
                 PlatServices::getActiveRefClk(chipTgt, TYPE_OSCPCICLK);
+*/
 
             // Callout this chip if nothing else.
             if(NULL == l_ptargetClock)

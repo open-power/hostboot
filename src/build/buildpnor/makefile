@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2017
+# Contributors Listed Below - COPYRIGHT 2012,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -41,8 +41,6 @@ ROOTPATH = ../../..
 # from somewhere else with the buildpnor target as well.
 .DEFAULT_GOAL := buildpnor
 
-
-PNOR_VBU_TARGETS = vbu_NIMBUS
 
 define PNOR_vbu_template
 $${IMGDIR}/$(1).pnor: $${IMGDIR}/hbicore_extended.bin $${IMGDIR}/$(1)_targeting.bin

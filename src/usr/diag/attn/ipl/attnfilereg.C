@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,7 +47,7 @@ errlHndl_t FileRegSvc::putScom(
         uint64_t i_address,
         uint64_t i_data)
 {
-
+/* FIXME RTC: 210975 PRDF is disabled for now
     using namespace PRDF;
 
     ATTN_DBG("FileRegSvc::putScom: huid: 0x%08X, add: %016x, data: %016x",
@@ -55,7 +55,7 @@ errlHndl_t FileRegSvc::putScom(
 
     PnorFirDataReader & firData = PnorFirDataReader::getPnorFirDataReader();
     firData.putScom( i_target, i_address, i_data );
-
+*/
     return NULL;
 }
 
@@ -64,6 +64,7 @@ errlHndl_t FileRegSvc::getScom(
                 uint64_t i_address,
                 uint64_t & o_data)
 {
+/* FIXME RTC: 210975 PRDF is disabled for now
     using namespace PRDF;
 
     PnorFirDataReader & firData = PnorFirDataReader::getPnorFirDataReader();
@@ -72,6 +73,7 @@ errlHndl_t FileRegSvc::getScom(
     ATTN_DBG("FileRegSvc::getScom: huid: 0x%08X, add: %016x, data: %016x",
              get_huid(i_target), i_address, o_data);
 
+*/
     return NULL;
 }
 
@@ -84,6 +86,7 @@ errlHndl_t FileRegSvc::modifyScom(
 {
     errlHndl_t err = 0;
 
+/* FIXME RTC: 210975 PRDF is disabled for now
     uint64_t data = 0;
 
     do
@@ -108,6 +111,7 @@ errlHndl_t FileRegSvc::modifyScom(
         ATTN_ERR("FileRegSvc::modifyScom() failed. huid: 0x%08X, add: %016x, "
                  "data: %016x", get_huid(i_target), i_address, i_data);
     }
+*/
     return err;
 }
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,12 +39,14 @@
 
 ////Targeting support
   #include    <targeting/common/utilFilter.H>
+/* FIXME RTC: 210975
   #include    <fapi2/plat_hwp_invoker.H>
   #include    <fapi2/target.H>
 
 //From Import Directory (EKB Repository)
 #include    <return_code.H>
 #include    <p9_pm_set_homer_bar.H>
+*/
 
 //Namespaces
 using namespace ERRORLOG;
@@ -62,6 +64,7 @@ void* proc_set_pba_homer_bar (void *io_pArgs)
 {
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_set_pba_homer_bar entry" );
     ISTEP_ERROR::IStepError l_StepError;
+/* FIXME RTC: 210975
     errlHndl_t l_errl = NULL;
     TARGETING::TargetHandleList l_procChips;
 
@@ -94,6 +97,7 @@ void* proc_set_pba_homer_bar (void *io_pArgs)
         }
     }
 
+*/
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_set_pba_homer_bar exit" );
     // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();

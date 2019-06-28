@@ -28,10 +28,11 @@ MODULE = targeting_rt
 SUBDIRS += test.d
 
 TARGETING_REL_PATH = ..
-include ${TARGETING_REL_PATH}/hostboot_common.mk
+# FIXME RTC: 210975
+#include ${TARGETING_REL_PATH}/hostboot_common.mk
 ROOTPATH = ../../../..
 
-vpath %.C ${TARGETING_REL_PATH}
+#vpath %.C ${TARGETING_REL_PATH}
 
 HOSTBOOT_RUNTIME_SPECIFIC_OBJS += attrrp_rt.o
 HOSTBOOT_RUNTIME_SPECIFIC_OBJS += start_rt.o
@@ -42,10 +43,10 @@ HOSTBOOT_RUNTIME_SPECIFIC_OBJS += attributestrings.o
 HOSTBOOT_RUNTIME_SPECIFIC_OBJS += attrsync.o
 HOSTBOOT_RUNTIME_SPECIFIC_OBJS += rt_startup.o
 
-OBJS += ${COMMON_TARGETING_OBJS}
-OBJS += ${HOSTBOOT_RT_IPL_COMMON_OBJS}
-OBJS += ${HOSTBOOT_RUNTIME_SPECIFIC_OBJS}
-OBJS += persistrwattrcheck.o
+#OBJS += ${COMMON_TARGETING_OBJS}
+#OBJS += ${HOSTBOOT_RT_IPL_COMMON_OBJS}
+#OBJS += ${HOSTBOOT_RUNTIME_SPECIFIC_OBJS}
+#OBJS += persistrwattrcheck.o
 
 
 include $(ROOTPATH)/config.mk
@@ -53,4 +54,4 @@ include $(ROOTPATH)/config.mk
 
 # To find errludattribute.[CH], etc.  They are generated
 # by src/usr/targeting/common/xmltohb/xmltohb.pl
-vpath %.C ${GENDIR}
+#vpath %.C ${GENDIR}

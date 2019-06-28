@@ -90,19 +90,6 @@
   </attribute>
 
   <attribute>
-    <id>CENTAUR_REGISTER_CACHE_PTR</id>
-    <description>
-        Pointer to Secure Boot Centaur SCOM register cache
-    </description>
-    <simpleType>
-      <uint64_t/>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-  </attribute>
-
-  <attribute>
     <description>
       Are we doing checkstop analysis on
       systems as we are booting back up based

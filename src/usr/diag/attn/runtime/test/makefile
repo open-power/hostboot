@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2016
+# Contributors Listed Below - COPYRIGHT 2014,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -30,11 +30,13 @@ ROOTPATH = ../../../../../..
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag
 CFLAGS += -iquote${ROOTPATH}/src/usr/diag/attn
 
-OBJS += attnfakeprd.o
-OBJS += attnfakereg.o
+# FIXME RTC: 210975
+
+#OBJS += attnfakeprd.o
+#OBJS += attnfakereg.o
 
 MODULE = testattn_rt
 
-TESTS = *.H
+#TESTS = *.H
 
 include ${ROOTPATH}/config.mk

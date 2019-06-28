@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2016
+# Contributors Listed Below - COPYRIGHT 2014,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -27,25 +27,24 @@ ROOTPATH = ../../../../../..
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag
 CFLAGS += -iquote${ROOTPATH}/src/usr/diag/attn
 
-OBJS += attnfakesys.o
-OBJS += attntest.o
-OBJS += attnrand.o
-OBJS += attnfakepresenter.o
-OBJS += attnfakeprd.o
-OBJS += attnfaketarget.o
-OBJS += attnrandsource.o
-OBJS += attnfakegfir.o
-OBJS += attnfakeipoll.o
-OBJS += attnvalidate.o
-OBJS += attnfakemcs.o
-OBJS += attnfakegp1.o
-OBJS += attnmeminject.o
+# FIXME RTC: 210975 Re-enable when the time comes
+
+#OBJS += attnfakesys.o
+#OBJS += attntest.o
+#OBJS += attnrand.o
+#OBJS += attnfakepresenter.o
+#OBJS += attnfakeprd.o
+#OBJS += attnfaketarget.o
+#OBJS += attnrandsource.o
+#OBJS += attnfakegfir.o
+#OBJS += attnfakeipoll.o
+#OBJS += attnvalidate.o
+#OBJS += attnfakemcs.o
+#OBJS += attnfakegp1.o
+#OBJS += attnmeminject.o
 
 MODULE = testattn
 
-# @TODO RTC: 164827
-#  attntestmem.H  is only for CENTAUR so can't do this yet
-
-TESTS = attntestipl.H attntestproc.H attntestscom.H attntesttrace.H attntesttest.H attntestlist.H attntestops.H attntestsvc.H
+#TESTS = attntestipl.H attntestproc.H attntestscom.H attntesttrace.H attntesttest.H attntestlist.H attntestops.H attntestsvc.H
 
 include ${ROOTPATH}/config.mk

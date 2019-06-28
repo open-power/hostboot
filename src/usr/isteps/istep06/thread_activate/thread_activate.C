@@ -43,7 +43,8 @@
 #include    <sys/misc.h>
 #include    <sys/mm.h>
 #include    <sys/mmio.h>
-#include    <p9_thread_control.H>
+// FIXME RTC: 210975
+//#include    <p9_thread_control.H>
 #include    <arch/pirformat.H>
 #include    <arch/pvrformat.H>
 #include    <arch/ppc.H>
@@ -54,11 +55,12 @@
 #include    <targeting/common/utilFilter.H>
 #include    <targeting/common/util.H>
 
+// FIXME RTC: 210975
 //  fapi support
-#include    <fapi2.H>
-#include    <fapi2/target.H>
-#include    <fapi2_hw_access.H>
-#include    <plat_hwp_invoker.H>
+//#include    <fapi2.H>
+//#include    <fapi2/target.H>
+//#include    <fapi2_hw_access.H>
+//#include    <plat_hwp_invoker.H>
 #include    <istep_reasoncodes.H>
 
 #include    <pnor/pnorif.H>
@@ -73,9 +75,10 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
     errlHndl_t  l_errl  =   NULL;
     bool l_wakeup_lib_loaded = false;
 
+/* FIXME RTC: 210975
     TRACFCOMP( g_fapiTd,
                "activate_threads entry" );
-
+*/
     do
     {
         // get the sys target
@@ -88,8 +91,10 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
         TARGETING::targetService().masterProcChipTargetHandle( l_masterProc );
         if( l_masterProc == NULL )
         {
+/* FIXME RTC: 210975
             TRACFCOMP( g_fapiImpTd,
                     "Could not find master proc!!!" );
+*/
             assert(false);
         }
 
@@ -117,8 +122,10 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
 
         if(l_errl)
         {
+/* FIXME RTC: 210975
             TRACFCOMP( g_fapiTd,ERR_MRK"activate_threads: Failed reading fused bits!" );
             // break from do loop if error occured
+*/
             break;
         }
 
@@ -160,7 +167,8 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
         task_affinity_unpin();
 
         uint64_t l_masterCoreID = PIR_t::coreFromPir(cpuid);
-        uint64_t l_masterThreadID = PIR_t::threadFromPir(cpuid);
+        // FIXME RTC: 210975
+        //uint64_t l_masterThreadID = PIR_t::threadFromPir(cpuid);
 
         // find the master core
         const TARGETING::Target* l_masterCore = NULL;
@@ -177,9 +185,11 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
 
         if( l_masterCore == NULL )
         {
+/* FIXME RTC: 210975
             TRACFCOMP( g_fapiImpTd,
                        "Could not find a target for core %d",
                        l_masterCoreID );
+*/
             /*@
              * @errortype
              * @moduleid     ISTEP::MOD_THREAD_ACTIVATE
@@ -197,12 +207,15 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
                                              cpuid,
                                              TARGETING::get_huid(l_masterProc));
             l_errl->collectTrace("TARG",256);
+/* FIXME RTC: 210975
             l_errl->collectTrace(FAPI_TRACE_NAME,256);
             l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
+*/
 
             break;
         }
 
+/* FIXME RTC: 210975
         TRACFCOMP( g_fapiTd,
                    "Master CPU : c%d t%d (HUID=%.8X)",
                    l_masterCoreID, l_masterThreadID,
@@ -214,6 +227,7 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
 
         //  AVPs might enable a subset of the available threads
         uint64_t max_threads = cpu_thread_count();
+*/
         uint64_t en_threads, en_threads_master;
         en_threads = en_threads_master =
                     sys->getAttr<TARGETING::ATTR_ENABLED_THREADS>();
@@ -224,7 +238,8 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
         // * E=enable, Core0_t0=master already enabled
         const uint64_t SMT8_ENABLE_THREADS_MASK = 0xC000000000000000;
         const uint64_t SMT8_FUSE0_THREADS_MASK  = 0xA000000000000000;
-        const uint64_t SMT8_FUSE1_THREADS_MASK  = 0x5000000000000000;
+        // FIXME RTC: 210975
+        //const uint64_t SMT8_FUSE1_THREADS_MASK  = 0x5000000000000000;
         if( l_smt8 )
         {
             // First capture if threads 0,2 are enabled.  Then eliminate
@@ -234,6 +249,7 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
             en_threads_master |= (threads << 1) & SMT8_ENABLE_THREADS_MASK;//T2
         }
 
+/* FIXME RTC: 210975
         TRACFCOMP( g_fapiTd,
                    "activate_threads max_threads=%d, en_threads_master=0x%016X",
                    max_threads, en_threads_master );
@@ -297,7 +313,7 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
         {
             break;
         }
-
+*/
         // -----------------------------------------
         // Activate threads on the master-fused core
         // -----------------------------------------
@@ -321,9 +337,11 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
 
             if( l_fusedCore == NULL )
             {
+/* FIXME RTC: 210975
                 TRACFCOMP( g_fapiImpTd,
                         "Could not find a target for core %d",
                         l_fusedCoreID );
+*/
                 /*@
                 * @errortype
                 * @moduleid     ISTEP::MOD_THREAD_ACTIVATE
@@ -342,12 +360,15 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
                                     l_fusedCoreID,
                                     TARGETING::get_huid(l_masterProc));
                 l_errl->collectTrace("TARG",256);
+/* FIXME RTC: 210975
                 l_errl->collectTrace(FAPI_TRACE_NAME,256);
                 l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
+*/
 
                 break;
             }
 
+/* FIXME RTC: 210975
             TRACFCOMP( g_fapiTd,
                        "Master-Fused CPU : c%d (HUID=%.8X)",
                        l_fusedCoreID, TARGETING::get_huid(l_fusedCore) );
@@ -406,7 +427,7 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
             {
                 break;
             }
-
+*/
         }  // end if( l_smt8 )
 
 
@@ -416,11 +437,12 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
 
         if(is_mpipl)
         {
+/* FIXME RTC: 210975
             TRACFCOMP( g_fapiTd,
                     "activate_threads: We are in MPIPL, extending cache to be real memory" );
+*/
             mm_extend(MM_EXTEND_REAL_MEMORY);
         }
-
     } while(0);
 
     //make sure we always unload the module if we loaded it
@@ -430,7 +452,9 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
           VFS::module_unload( "libp9_cpuWkup.so" );
         if ( l_tmpErrl )
         {
+/* FIXME RTC: 210975
             TRACFCOMP( g_fapiTd,ERR_MRK"thread_activate: Error unloading libp9_cpuWkup module" );
+*/
             if(l_errl)
             {
                 errlCommit( l_tmpErrl, ISTEP_COMP_ID );
@@ -442,8 +466,10 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
         }
     }
 
+/* FIXME RTC: 210975
     TRACFCOMP( g_fapiTd,
                "activate_threads exit" );
+*/
 
     io_rtaskRetErrl = l_errl;
     return;

@@ -34,23 +34,21 @@
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/util.H>
 #include <targeting/common/utilFilter.H>
+/* FIXME RTC: 210975
 #include <fapi2/target.H>
 
 #include <p9_setup_bars.H>
 #include <p9_mss_setup_bars.H>
-#include <p9c_mss_secure_boot.H>
+*/
 
 #include <initservice/initserviceif.H>
+/* FIXME RTC: 21097
 #include <p9_revert_sbe_mcs_setup.H>
 
 //HWP Invoker
 #include    <fapi2/plat_hwp_invoker.H>
-
 #include   <attribute_ids.H>
-
-#ifdef CONFIG_SECUREBOOT
-#include <scom/centaurScomCache.H>
-#endif
+*/
 
 using   namespace   ISTEP_ERROR;
 using   namespace   ERRORLOG;
@@ -60,6 +58,7 @@ namespace ISTEP_14
 void* call_proc_setup_bars (void *io_pArgs)
 {
     IStepError  l_stepError;
+/* FIXME RTC: 21097
 
     errlHndl_t  l_errl  =   NULL;
 
@@ -193,77 +192,6 @@ void* call_proc_setup_bars (void *io_pArgs)
 
     }   // end if !l_errl
 
-#ifdef CONFIG_SECUREBOOT
-    // Assuming no errors, secure any Centaurs
-    if ( l_stepError.isNull() )
-    {
-        bool secureCentaurs = false;
-
-        if(SECUREBOOT::enabled())
-        {
-            secureCentaurs = true;
-        }
-
-        // Any feature that would add [force disable|force enable|no force]
-        // behavior would naturally go here
-
-        if(secureCentaurs)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "call_proc_setup_bars: Securing node's functional Centaurs");
-
-            TARGETING::TargetHandleList functionalCentaurs;
-            getAllChips(functionalCentaurs, TARGETING::TYPE_MEMBUF);
-            for (const auto & pCentaur: functionalCentaurs)
-            {
-                if(   pCentaur->getAttr<TARGETING::ATTR_MODEL>()
-                   != TARGETING::MODEL_CENTAUR)
-                {
-                    continue;
-                }
-
-                const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>
-                    fapiCentaurTarget(pCentaur);
-
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "call_proc_setup_bars: Invoking p9c_mss_secure_boot on "
-                    "Centaur with HUID of 0x%08X",
-                    TARGETING::get_huid(pCentaur));
-
-                FAPI_INVOKE_HWP(l_errl,
-                                p9c_mss_secure_boot,
-                                fapiCentaurTarget);
-                if (l_errl)
-                {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              "ERROR : p9c_mss_secure_boot failure for "
-                              "Centaur with HUID of 0x%08X",
-                              TARGETING::get_huid(pCentaur));
-
-                    ErrlUserDetailsTarget(pCentaur).addToLog(l_errl);
-                    l_stepError.addErrorDetails(l_errl);
-                    errlCommit(l_errl, HWPF_COMP_ID);
-                }
-                else
-                {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              "SUCCESS : p9c_mss_secure_boot succeeded for "
-                              "Centaur with HUID of 0x%08X",
-                              TARGETING::get_huid(pCentaur));
-                }
-            }
-        }
-
-        if(SECUREBOOT::CENTAUR_SECURITY::ScomCache::getInstance().
-                cacheEnabled())
-        {
-            SECUREBOOT::CENTAUR_SECURITY::ScomCache::getInstance().
-                disableCache();
-        }
-
-    }
-#endif
-
     if ( l_errl )
     {
 
@@ -274,6 +202,7 @@ void* call_proc_setup_bars (void *io_pArgs)
         errlCommit( l_errl, HWPF_COMP_ID );
     }
 
+*/
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_setup_bars exit" );
 

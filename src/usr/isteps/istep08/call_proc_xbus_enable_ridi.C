@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,8 +51,10 @@
 #include <initservice/isteps_trace.H>  // g_trac_isteps_trace
 #include <initservice/initserviceif.H>
 
+/* FIXME RTC: 210975
 //  HWP call support
 #include <nest/nestHwpHelperFuncs.H>   // fapiHWPCallWrapper
+*/
 
 namespace ISTEP_08
 {
@@ -69,6 +71,7 @@ void* call_proc_xbus_enable_ridi( void *io_pArgs )
 {
     IStepError l_stepError;
 
+/* FIXME RTC: 210975
     TRACFCOMP(g_trac_isteps_trace, ENTER_MRK"call_proc_xbus_enable_ridi entry");
 
     do {
@@ -102,6 +105,7 @@ void* call_proc_xbus_enable_ridi( void *io_pArgs )
         }
     } while (0);
     TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_proc_xbus_enable_ridi exit");
+*/
 
     return l_stepError.getErrorHandle();
 }

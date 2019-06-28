@@ -1465,16 +1465,7 @@ void __getMasterRanks( TargetHandle_t i_trgt, std::vector<MemRank> & o_ranks,
     uint8_t info[2][2];
 
     ATTR_MODEL_type l_procModel = getChipModel( getMasterProc() );
-    if ( MODEL_CUMULUS == l_procModel )
-    {
-        if ( !i_trgt->tryGetAttr<ATTR_CEN_EFF_DIMM_RANKS_CONFIGED>(info) )
-        {
-            PRDF_ERR( PRDF_FUNC "tryGetAttr<ATTR_CEN_EFF_DIMM_RANKS_CONFIGED> "
-                      "failed: i_trgt=0x%08x", getHuid(i_trgt) );
-            PRDF_ASSERT( false ); // attribute does not exist for target
-        }
-    }
-    else if ( MODEL_NIMBUS == l_procModel )
+    if ( MODEL_NIMBUS == l_procModel )
     {
         if ( !i_trgt->tryGetAttr<ATTR_EFF_DIMM_RANKS_CONFIGED>(info) )
         {
@@ -1636,20 +1627,7 @@ uint8_t __getNumMasterRanksPerDimm( TargetHandle_t i_trgt,
 
 
     ATTR_MODEL_type l_procModel = getChipModel( getMasterProc() );
-    if ( MODEL_CUMULUS == l_procModel )
-    {
-        ATTR_CEN_EFF_NUM_MASTER_RANKS_PER_DIMM_type attr;
-        if ( !i_trgt->tryGetAttr<ATTR_CEN_EFF_NUM_MASTER_RANKS_PER_DIMM>(attr) )
-        {
-            PRDF_ERR( PRDF_FUNC
-                      "tryGetAttr<ATTR_CEN_EFF_NUM_MASTER_RANKS_PER_DIMM> "
-                      "failed: i_trgt=0x%08x", getHuid(i_trgt) );
-            PRDF_ASSERT( false ); // attribute does not exist for target
-        }
-
-        num = attr[i_pos][i_ds];
-    }
-    else if ( MODEL_NIMBUS == l_procModel )
+    if ( MODEL_NIMBUS == l_procModel )
     {
         ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_type attr;
         if ( !i_trgt->tryGetAttr<ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM>(attr) )
@@ -1735,20 +1713,7 @@ uint8_t __getNumRanksPerDimm( TargetHandle_t i_trgt,
     uint8_t num = 0;
 
     ATTR_MODEL_type l_procModel = getChipModel( getMasterProc() );
-    if ( MODEL_CUMULUS == l_procModel )
-    {
-        ATTR_CEN_EFF_NUM_RANKS_PER_DIMM_type attr;
-        if ( !i_trgt->tryGetAttr<ATTR_CEN_EFF_NUM_RANKS_PER_DIMM>(attr) )
-        {
-            PRDF_ERR( PRDF_FUNC
-                      "tryGetAttr<ATTR_CEN_EFF_NUM_RANKS_PER_DIMM> "
-                      "failed: i_trgt=0x%08x", getHuid(i_trgt) );
-            PRDF_ASSERT( false ); // attribute does not exist for target
-        }
-
-        num = attr[i_pos][i_ds];
-    }
-    else if ( MODEL_NIMBUS == l_procModel )
+    if ( MODEL_NIMBUS == l_procModel )
     {
         ATTR_EFF_NUM_RANKS_PER_DIMM_type attr;
         if ( !i_trgt->tryGetAttr<ATTR_EFF_NUM_RANKS_PER_DIMM>(attr) )

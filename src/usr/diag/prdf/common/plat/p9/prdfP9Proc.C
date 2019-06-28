@@ -376,13 +376,13 @@ PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, isUcsFirAccessible );
 int32_t handleDeadmanTimer( ExtensibleChip * i_chip,
                             STEP_CODE_DATA_STRUCT & io_sc )
 {
+/* FIXME RTC: 210975
     TARGETING::TargetHandle_t  l_target = i_chip->getTrgt();
-
 
     // This routine adds FFDC information to the elog
     // and will also do the callouts as needed.
     deadmanTimerFFDC( l_target, io_sc );
-
+*/
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, handleDeadmanTimer );

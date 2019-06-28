@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,8 +50,10 @@
 //  targeting support
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
+/* FIXME RTC: 210975
 #include    <fapi2/target.H>
 #include    <fapi2/plat_hwp_invoker.H>
+*/
 
 //  MVPD
 #include <devicefw/userif.H>
@@ -59,7 +61,8 @@
 
 #include <config.h>
 
-#include <p9_attr_update.H>
+// FIXME RTC: 210975
+//#include <p9_attr_update.H>
 
 namespace   ISTEP_08
 {
@@ -75,6 +78,7 @@ using   namespace   TARGETING;
 void * call_proc_attr_update( void * io_pArgs )
 {
     IStepError l_StepError;
+/* FIXME RTC: 210975
     errlHndl_t l_err = NULL;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -111,6 +115,7 @@ void * call_proc_attr_update( void * io_pArgs )
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
              "call_proc_attr_update exit" );
+*/
 
     return l_StepError.getErrorHandle();
 }

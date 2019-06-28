@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,13 +59,17 @@
 
 #include    <pbusLinkSvc.H>
 
+/* FIXME RTC: 210975
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
+*/
 #include <errl/errlmanager.H>
 
+/* FIXME RTC: 210975
 // HWP procedure
 #include <p9_io_xbus_restore_erepair.H>
 #include <p9_io_erepairAccessorHwpFuncs.H>
+*/
 
 namespace   ISTEP_09
 {
@@ -77,6 +81,7 @@ using   namespace   TARGETING;
 using   namespace   HWAS;
 
 
+#if 0// FIXME RTC: 210975
 // prototype
 /**
  *  @brief Try to restore target's endpoints
@@ -102,6 +107,7 @@ uint8_t restore_endpoint(const fapi2::Target<fapi2::TARGET_TYPE_XBUS> &i_target,
                          const std::vector< uint8_t >& i_rx_bad_lanes,
                          const std::vector< uint8_t >& i_tx_bad_lanes,
                          ISTEP_ERROR::IStepError& o_step_error);
+#endif
 
 //
 //  Wrapper function to call fabric_erepair
@@ -124,8 +130,10 @@ void*    call_fabric_erepair( void    *io_pArgs )
     const uint32_t MaxBusSet = 1;
     TYPE busSet[MaxBusSet] = { TYPE_XBUS }; // TODO RTC:152304 - add TYPE_OBUS
 
+/* FIXME RTC: 210975
     uint32_t l_count = 0;
-    fapi2::TargetType l_tgtType = fapi2::TARGET_TYPE_NONE;
+    //fapi2::TargetType l_tgtType = fapi2::TARGET_TYPE_NONE;
+*/
 
     TARGETING::ATTR_FAPI_NAME_type  l_target_name = {0};
 
@@ -151,12 +159,14 @@ void*    call_fabric_erepair( void    *io_pArgs )
             const TARGETING::Target* l_connectedPbusTarget =
                                                     l_PbusConnection.second;
 
+/* FIXME RTC: 210975
             // TODO-RTC:152304 - need to adjust target types if adding OBUS/ABUS
             const fapi2::Target<fapi2::TARGET_TYPE_XBUS> l_fapi_endp1_target
               (const_cast<TARGETING::Target*>(l_thisPbusTarget));
 
             const fapi2::Target<fapi2::TARGET_TYPE_XBUS> l_fapi_endp2_target
               (const_cast<TARGETING::Target*>(l_connectedPbusTarget));
+*/
 
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "===== " );
 
@@ -164,7 +174,7 @@ void*    call_fabric_erepair( void    *io_pArgs )
             uint8_t l_group_loop = 0;
             for (l_group_loop = 0; l_group_loop < 2; l_group_loop++)
             {
-
+/* FIXME RTC: 210975
                 // Get the repair lanes from the VPD
                 fapi2::ReturnCode l_rc;
                 l_endp1_txFaillanes.clear();
@@ -179,14 +189,17 @@ void*    call_fabric_erepair( void    *io_pArgs )
                                               l_endp1_rxFaillanes,
                                               l_endp2_txFaillanes,
                                               l_endp2_rxFaillanes);
+*/
 
-                if(l_rc)
+                if(/* FIXME RTC: 210975 l_rc*/ 0)
                 {
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Unable to"
                           " retrieve fabric eRepair data from the VPD");
 
+/* FIXME RTC: 210975
                     // convert the FAPI return code to an err handle
                     l_errl = rcToErrl(l_rc);
+*/
 
                     // capture the target data in the elog
                     ErrlUserDetailsTarget(l_thisPbusTarget).addToLog( l_errl );
@@ -207,6 +220,7 @@ void*    call_fabric_erepair( void    *io_pArgs )
 
                 if(l_endp1_txFaillanes.size() || l_endp1_rxFaillanes.size())
                 {
+/* FIXME RTC: 210975
                     // call the io_xbus_restore_erepair HWP to restore eRepair
                     // lanes of endp1
                     l_restore_failures = restore_endpoint(l_fapi_endp1_target,
@@ -214,11 +228,13 @@ void*    call_fabric_erepair( void    *io_pArgs )
                                                           l_endp1_rxFaillanes,
                                                           l_endp1_txFaillanes,
                                                           l_StepError);
+*/
                 }
-
+/* FIXME RTC: 210975
                 fapi2::toString(l_fapi_endp1_target,
                                 l_target_name,
                                 sizeof(l_target_name));
+*/
 
                 if (l_restore_failures)
                 {
@@ -228,6 +244,7 @@ void*    call_fabric_erepair( void    *io_pArgs )
                 }
                 else
                 {
+/* FIXME RTC: 210975
                     l_tgtType = l_fapi_endp1_target.getType();
 
                     for(l_count = 0; l_count < l_endp1_txFaillanes.size();
@@ -254,10 +271,12 @@ void*    call_fabric_erepair( void    *io_pArgs )
                             l_tgtType == fapi2::TARGET_TYPE_XBUS_ENDPOINT ?
                                 "X-Bus":"O-Bus", l_target_name);
                     }
+*/
                 }
 
                 if(l_endp2_txFaillanes.size() || l_endp2_rxFaillanes.size())
                 {
+/* FIXME RTC: 210975
                     // call the io_xbus_restore_erepair HWP to restore eRepair
                     // lanes of endp2
                     l_restore_failures = restore_endpoint(l_fapi_endp2_target,
@@ -265,11 +284,13 @@ void*    call_fabric_erepair( void    *io_pArgs )
                                                       l_endp2_rxFaillanes,
                                                       l_endp2_txFaillanes,
                                                       l_StepError);
+*/
                 }
-
+/* FIXME RTC: 210975
                 fapi2::toString(l_fapi_endp2_target,
                                 l_target_name,
                                 sizeof(l_target_name));
+*/
 
                 if ( l_restore_failures )
                 {
@@ -280,6 +301,7 @@ void*    call_fabric_erepair( void    *io_pArgs )
                     continue;
                 }
 
+/* FIXME RTC: 210975
                 l_tgtType = l_fapi_endp2_target.getType();
                 for(l_count = 0; l_count < l_endp2_txFaillanes.size();
                     l_count++)
@@ -300,6 +322,7 @@ void*    call_fabric_erepair( void    *io_pArgs )
                       l_tgtType == fapi2::TARGET_TYPE_XBUS_ENDPOINT ? "X-Bus" :
                       "O-Bus", l_target_name);
                 }
+*/
             } // end for l_group_loop
         } // end for l_PbusConnections
     } // end for MaxBusSet
@@ -311,7 +334,7 @@ void*    call_fabric_erepair( void    *io_pArgs )
     return l_StepError.getErrorHandle();
 }
 
-
+#if 0 // FIXME RTC: 210975
 uint8_t restore_endpoint(const fapi2::Target<fapi2::TARGET_TYPE_XBUS> &i_target,
                          uint8_t i_grp,
                          const std::vector< uint8_t >& i_rx_bad_lanes,
@@ -362,5 +385,6 @@ uint8_t restore_endpoint(const fapi2::Target<fapi2::TARGET_TYPE_XBUS> &i_target,
 
     return o_failures;
 }
+#endif
 
 };

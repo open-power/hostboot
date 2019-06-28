@@ -54,31 +54,11 @@ if ($hb_skip_vpd_preload == 0) {
     } except { echo "ERROR: Failed to preload VPD into PNOR." }
 }
 
-
 # Turn on all processor cec-chips
-if ($hb_mode == 1) {
-    # Nimbus/Cumulus
-    foreach $cc in (get-object-list p9_proc) {
-        echo $cc
-        #Trigger a power on to cec-chip
-        echo "-Trigger power on"
-        @mp="%s.proc_chip"%simenv.cc
-        @SIM_get_interface(SIM_get_object(mp),"signal").signal_raise()
+foreach $proc in (get-component-list -all proc_pib) {
+    foreach $cc in (get-object-list component=$proc type=cec-chip -recursive) {
+        @SIM_get_interface(SIM_get_object(simenv.cc), "signal").signal_raise()
     }
-} else {
-    # Axone and Beyond:
-    foreach $proc in (get-component-list -all proc_pib){
-        foreach $cc in (get-object-list component=$proc type=cec-chip -recursive) {
-            @SIM_get_interface(SIM_get_object(simenv.cc), "signal").signal_raise()
-        }
-    }
-}
-
-#Power on cec-chip on memory controllers if present
-foreach $cp in (get-object-list p9_centaur_cfam -recursive){
-    echo $cp
-    @cc="%s.membuf_chip"%simenv.cp
-    @ignore=SIM_get_interface(SIM_get_object(cc),"signal").signal_raise()
 }
 
 ###################################

@@ -32,9 +32,13 @@
 // I n c l u d e s
 /*****************************************************************************/
 #include <errl/errlmanager.H>      // errlCommit
+/* FIXME RTC: 210975
 #include <lib/i2c/exp_i2c_scom.H>  // i2c_get_scom
+*/
 #include <errl/errludtarget.H>     // ErrlUserDetailsTarget
+/* FIXME RTC: 210975
 #include <hwpf/fapi2/include/fapi2_hwp_executor.H> // FAPI_EXEC_HWP
+*/
 #include <expscom/expscom_reasoncodes.H> //  EXPSCOM::MOD_I2CSCOM_PERFORM_OP
 #include "i2cscomdd.H" //i2cScomPerformOp
 #include "expscom_trace.H" //g_trac_expscom
@@ -59,6 +63,7 @@ errlHndl_t i2cScomPerformOp(DeviceFW::OperationType i_opType,
                           va_list i_args)
 {
     errlHndl_t l_err = nullptr;
+/* FIXME RTC: 210975
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     // The only extra arg should be the scomAddress
     uint64_t l_scomAddr = va_arg(i_args,uint64_t);
@@ -169,6 +174,7 @@ errlHndl_t i2cScomPerformOp(DeviceFW::OperationType i_opType,
         }
 
     } while (0);
+*/
     return l_err;
 }
 }

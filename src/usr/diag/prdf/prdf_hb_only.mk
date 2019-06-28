@@ -74,12 +74,15 @@ prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/utils/stopreg/
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib/
 prd_incpath += ${ROOTPATH}/src/import/generic/memory/lib/utils/
+prd_incpath += ${ROOTPATH}/src/import/generic/memory/
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
+prd_incpath += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 prd_incpath += ${ROOTPATH}/src/import/chips/common/utils/
 prd_incpath += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 prd_incpath += ${ROOTPATH}/src/import/hwpf/fapi2/include
 prd_incpath += ${ROOTPATH}/src/import/
 prd_incpath += ${ROOTPATH}/src/import/chips/centaur/procedures/hwp/io/
+prd_incpath += ${ROOTPATH}/src/import/generic/memory/lib/utils/mcbist/
 
 ################################################################################
 # Hostboot only object files common to both IPL and runtime
@@ -95,7 +98,8 @@ prd_obj += prdfDumpResolution.o
 prd_obj += $(if $(CONFIG_ENABLE_CHECKSTOP_ANALYSIS), prdfWriteHomerFirData.o)
 
 # plat/
-prd_obj += prdfPlatServices.o
+# FIXME RTC: 210975
+#prd_obj += prdfPlatServices.o
 prd_obj += prdfRasServices.o
 
 ################################################################################
@@ -118,7 +122,8 @@ prd_obj += $(if $(CONFIG_ENABLE_CHECKSTOP_ANALYSIS), prdfPnorFirDataReader.o)
 prd_obj += $(if $(CONFIG_ENABLE_CHECKSTOP_ANALYSIS), prdfReadPnorFirData.o)
 
 # plat/
-prd_obj += prdfPlatServices_ipl.o
+# FIXME RTC: 210975
+#prd_obj += prdfPlatServices_ipl.o
 
 endif
 
@@ -176,20 +181,12 @@ prd_obj_no_sim += p9_io_dmi_pdwn_lanes.o
 prd_obj_no_sim += p9_io_dmi_clear_firs.o
 
 prd_vpath += ${ROOTPATH}/src/import/chips/centaur/procedures/hwp/io/
-prd_obj_no_sim += p9_io_cen_read_erepair.o
-prd_obj_no_sim += p9_io_cen_pdwn_lanes.o
 
 prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/
 prd_obj_no_sim += p9_proc_gettracearray.o
 prd_obj_no_sim += p9_sbe_tracearray.o
 prd_obj_no_sim += p9_io_xbus_clear_firs.o
 prd_obj_no_sim += p9_io_xbus_pdwn_lanes.o
-
-prd_vpath += ${ROOTPATH}/src/import/chips/centaur/procedures/hwp/memory
-prd_obj_no_sim += p9c_mss_maint_cmds.o
-prd_obj_no_sim += p9c_dimmBadDqBitmapFuncs.o
-prd_obj_no_sim += p9c_query_channel_failure.o
-prd_obj_no_sim += p9c_mss_rowRepairFuncs.o
 
 ################################################################################
 # The following are hardware procedure utilities that we are pulling into the

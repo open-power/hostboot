@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -172,10 +172,6 @@ public:
                         break;
                     case DeviceFW::MAILBOX:     // userif.H
                         i_parser.PrintString("AccessType", "DeviceFW::MAILBOX "
-                                                    "- not logged");
-                        break;
-                    case DeviceFW::CVPD:     // userif.H
-                        i_parser.PrintString("AccessType", "DeviceFW::CVPD "
                                                     "- not logged");
                         break;
                     case DeviceFW::SCAN:     // userif.H

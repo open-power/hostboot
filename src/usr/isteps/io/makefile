@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2018
+# Contributors Listed Below - COPYRIGHT 2016,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -24,27 +24,29 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
 
+# FIXME RTC: 210975
+
 ## ./import/chips/p9/procedures/hwp/io/p9_io_common.H
 
-PROCEDURES_PATH    = ${ROOTPATH}/src/import/chips/p9/procedures
+#PROCEDURES_PATH    = ${ROOTPATH}/src/import/chips/p9/procedures
 
 #Add all the extra include paths
-EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
+#EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
+#EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 
-COMMON_LIB += ${PROCEDURES_PATH}/hwp/io
+#COMMON_LIB += ${PROCEDURES_PATH}/hwp/io
 
-EXTRAINCDIR += ${COMMON_LIB}
+#EXTRAINCDIR += ${COMMON_LIB}
 
 # Add common and generated parts to object list.
 MODULE = isteps_io
-OBJS += p9_io_common.o
-$(call BUILD_MODULE)
+#OBJS += p9_io_common.o
+#$(call BUILD_MODULE)
 
 #HWP build tool
-include ${ROOTPATH}/procedure.rules.mk
+#include ${ROOTPATH}/procedure.rules.mk
 include ${ROOTPATH}/config.mk
 
 ## Needed?
-VPATH += ${COMMON_LIB}
+#VPATH += ${COMMON_LIB}

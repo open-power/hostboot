@@ -35,9 +35,9 @@
 #include <targeting/common/utilFilter.H>
 
 #include    <config.h>
+/* FIXME RTC: 210975
 #include    <fapi2.H>
 #include    <fapi2/plat_hwp_invoker.H>
-#include    <p9c_mss_thermal_init.H>
 #include    <p9_mss_thermal_init.H>
 #include    <p9_throttle_sync.H>
 
@@ -45,6 +45,7 @@
     //@TODO RTC:195557 #include    <exp_thermal_init.H>
     #include    <chipids.H> // for EXPLORER ID
 #endif
+*/
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -92,6 +93,7 @@ void* call_mss_thermal_init (void *io_pArgs)
 #ifndef CONFIG_AXONE
 void nimbus_call_mss_thermal_init(IStepError & io_istepError)
 {
+/* FIXME RTC: 210975
     errlHndl_t  l_errl  =   nullptr;
 
     // -- Nimbus only ---
@@ -138,58 +140,12 @@ void nimbus_call_mss_thermal_init(IStepError & io_istepError)
                        TARGETING::get_huid(l_pMcs) );
         }
     } // end MCS loop
-
+*/
 }
 
 void cumulus_call_mss_thermal_init(IStepError & io_istepError)
 {
-    errlHndl_t  l_errl  =   nullptr;
 
-    // -- Cumulus only ---
-    // Get all Centaur targets
-    TARGETING::TargetHandleList l_memBufTargetList;
-    getAllChips(l_memBufTargetList, TYPE_MEMBUF);
-
-    //  --------------------------------------------------------------------
-    //  run mss_thermal_init on all functional Centaur chips
-    //  --------------------------------------------------------------------
-    for (const auto & l_pCentaur : l_memBufTargetList)
-    {
-        fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> l_fapi_pCentaur
-          (l_pCentaur);
-
-        // Current run on target
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Running p9c_mss_thermal_init HWP on target HUID %.8X",
-                   TARGETING::get_huid(l_pCentaur) );
-
-        FAPI_INVOKE_HWP( l_errl, p9c_mss_thermal_init, l_fapi_pCentaur );
-
-        if ( l_errl )
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR 0x%.8X: p9c_mss_thermal_init HWP returns error",
-                      l_errl->reasonCode());
-
-            // capture the target data in the elog
-            ErrlUserDetailsTarget(l_pCentaur).addToLog( l_errl );
-
-            // Create IStep error log and cross reference
-            // to error that occurred
-            io_istepError.addErrorDetails( l_errl );
-
-            // Commit Error
-            errlCommit( l_errl, HWPF_COMP_ID );
-
-            break;
-        }
-        else
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "SUCCESS : p9c_mss_thermal_init HWP( ) on 0x%.8X target",
-                       TARGETING::get_huid(l_pCentaur) );
-        }
-    } // end MEMBUF loop
 }
 #else
 void nimbus_call_mss_thermal_init(IStepError & io_istepError)
@@ -210,6 +166,7 @@ void cumulus_call_mss_thermal_init(IStepError & io_istepError)
 #ifdef CONFIG_AXONE
 void axone_call_mss_thermal_init(IStepError & io_istepError)
 {
+/* FIXME RTC: 210975
     errlHndl_t l_err = nullptr;
 
     // Get all OCMB targets
@@ -266,6 +223,7 @@ void axone_call_mss_thermal_init(IStepError & io_istepError)
                   TARGETING::get_huid(l_ocmb_target));
         }
     } // end OCMB loop
+*/
 }
 #else
 void axone_call_mss_thermal_init(IStepError & io_istepError)
@@ -278,6 +236,7 @@ void axone_call_mss_thermal_init(IStepError & io_istepError)
 
 void run_proc_throttle_sync(IStepError & io_istepError)
 {
+/* FIXME RTC: 210975
     errlHndl_t  l_errl  =   nullptr;
 
     // Run proc throttle sync
@@ -325,6 +284,7 @@ void run_proc_throttle_sync(IStepError & io_istepError)
                        TARGETING::get_huid(l_procChip) );
         }
     }
+*/
 }
 
 };

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2018
+# Contributors Listed Below - COPYRIGHT 2015,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -24,33 +24,37 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
 MODULE = istep15
-PROCEDURES_PATH    = ${ROOTPATH}/src/import/chips/p9/procedures
 
-EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/nest/
-EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/pm/
-EXTRAINCDIR += ${PROCEDURES_PATH}/stop_reg/
-EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/lib/
-EXTRAINCDIR += ${PROCEDURES_PATH}/utils/stopreg/
-EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/customize/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
-EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/xip/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
+# FIXME RTC: 210975
+
+#PROCEDURES_PATH    = ${ROOTPATH}/src/import/chips/p9/procedures
+
+#EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/nest/
+#EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/pm/
+#EXTRAINCDIR += ${PROCEDURES_PATH}/stop_reg/
+#EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/lib/
+#EXTRAINCDIR += ${PROCEDURES_PATH}/utils/stopreg/
+#EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/customize/
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
+#EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/xip/
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
+#EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/pmlib/include/registers/
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/pmlib/include/registers/
 
-OBJS += host_build_stop_image.o
-OBJS += proc_set_pba_homer_bar.o
-OBJS += host_establish_ex_chiplet.o
-OBJS += host_start_stop_engine.o
+#OBJS += host_build_stop_image.o
+#OBJS += proc_set_pba_homer_bar.o
+#OBJS += host_establish_ex_chiplet.o
+#OBJS += host_start_stop_engine.o
 
 
-include ${ROOTPATH}/procedure.rules.mk
-include $(PROCEDURES_PATH)/hwp/pm/p9_pm_set_homer_bar.mk
-include $(PROCEDURES_PATH)/hwp/pm/p9_update_ec_eq_state.mk
+#include ${ROOTPATH}/procedure.rules.mk
+#include $(PROCEDURES_PATH)/hwp/pm/p9_pm_set_homer_bar.mk
+#include $(PROCEDURES_PATH)/hwp/pm/p9_update_ec_eq_state.mk
 include ${ROOTPATH}/config.mk
 
-VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
+#VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/

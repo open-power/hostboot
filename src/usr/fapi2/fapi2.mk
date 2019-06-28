@@ -29,30 +29,21 @@
 #
 GENPATH?=$(ROOTPATH)/obj/genfiles
 
-HWP_PATH_1   += ${ROOTPATH}/src/import/chips/p9/procedures
-HWP_PATH_2   += ${ROOTPATH}/src/import/chips/centaur/procedures
-HWP_PATH += ${HWP_PATH_1}/ ${HWP_PATH_2}/
+HWP_PATH_1   += ${ROOTPATH}/src/import/chips/p10/procedures
+HWP_PATH += ${HWP_PATH_1}/
 
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/xip/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/centaur/common/include/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/centaur/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
-EXTRAINCDIR += $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/
-EXTRAINCDIR += $(ROOTPATH)/src/import/chips/p9/procedures/hwp/memory/
-EXTRAINCDIR += $(ROOTPATH)/src/import/chips/p9/procedures/hwp/sbe/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/accessors/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/initfiles/
+EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/lib/utils/shared/
 EXTRAINCDIR += ${HWP_PATH}
 EXTRAINCDIR += ${HWP_PATH_1}/hwp/memory/lib/rosetta_map
 EXTRAINCDIR += ${HWP_PATH_1}/hwp/perv
+EXTRAINCDIR += ${HWP_PATH_1}/hwp/pm
+EXTRAINCDIR += ${HWP_PATH_1}/hwp/ffdc
 EXTRAINCDIR += ${HWP_PATH_2}/hwp/memory
 EXTRAINCDIR += ${HWP_PATH_2}/hwp/memory/lib/
 EXTRAINCDIR += ${HWP_PATH_2}/hwp/memory/lib/shared/
@@ -60,6 +51,8 @@ EXTRAINCDIR += ${HWP_PATH_2}/hwp/memory/lib/utils/
 EXTRAINCDIR += ${HWP_PATH_2}/vpd_accessors/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/scom/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/
 
 include ${ROOTPATH}/src/build/mkrules/verbose.rules.mk
 define __CLEAN_TARGET
@@ -69,60 +62,60 @@ endef
 #Hostboot objects
 OBJS += plat_utils.o
 OBJS += attribute_service.o
-OBJS += plat_attribute_service.o
+#OBJS += plat_attribute_service.o
 OBJS += plat_attr_override_sync.o
-OBJS += plat_hwp_invoker.o
+#OBJS += plat_hwp_invoker.o
 OBJS += target.o
 OBJS += plat_hw_access.o
-OBJS += plat_spd_access.o
-OBJS += plat_mvpd_access.o
-OBJS += plat_mbvpd_access.o
-OBJS += plat_vpd_access.o
-OBJS += plat_wof_access.o
-OBJS += dimmBadDqBitmapFuncs.o
-OBJS += rowRepairsFuncs.o
-OBJS += plat_i2c_access.o
-OBJS += plat_mmio_access.o
+#OBJS += plat_spd_access.o
+#OBJS += plat_mvpd_access.o
+#OBJS += plat_mbvpd_access.o
+#OBJS += plat_vpd_access.o
+#OBJS += plat_wof_access.o
+#OBJS += dimmBadDqBitmapFuncs.o
+#OBJS += rowRepairsFuncs.o
+#OBJS += plat_i2c_access.o
+#OBJS += plat_mmio_access.o
 
 
 #Required include before all the procedure.mk are included
-include ${ROOTPATH}/procedure.rules.mk
+#include ${ROOTPATH}/procedure.rules.mk
 
-include ${HWP_PATH_1}/hwp/accessors/p9_get_mem_vpd_keyword.mk
-include ${HWP_PATH_1}/hwp/accessors/ddimm_get_efd.mk
+#include ${HWP_PATH_1}/hwp/accessors/p9_get_mem_vpd_keyword.mk
+#include ${HWP_PATH_1}/hwp/accessors/ddimm_get_efd.mk
+
+# FIXME RTC: 210975
 
 #EKB Objects (mirrored in src/import)
 OBJS += error_info.o
-OBJS += ffdc.o
-OBJS += fapi2_utils.o
-OBJS += p9_collect_some_ffdc.o
-OBJS += p9_pib2pcb_mux_seq.o
-OBJS += p9_collect_ppe_state.o
-OBJS += p9_lpc_utils.o
-OBJS += p9_collect_lpc_regs.o
-OBJS += p9_ppe_state.o
-OBJS += p9_ppe_utils.o
-OBJS += p9_eq_clear_atomic_lock.o
-VPATH += $(HWP_PATH_1)/hwp/memory/lib/rosetta_map
-OBJS += rosetta_map.o
+#OBJS += ffdc.o
+#OBJS += fapi2_utils.o
+#OBJS += p9_collect_some_ffdc.o
+#OBJS += p9_pib2pcb_mux_seq.o
+#OBJS += p9_collect_ppe_state.o
+#OBJS += p9_lpc_utils.o
+#OBJS += p9_collect_lpc_regs.o
+#OBJS += p9_ppe_state.o
+#OBJS += p9_ppe_utils.o
+#OBJS += p9_eq_clear_atomic_lock.o
+#VPATH += $(HWP_PATH_1)/hwp/memory/lib/rosetta_map
+#OBJS += rosetta_map.o
 
 #Generated Objects
 OBJS += fapi2_attribute_service.o
-OBJS += collect_reg_ffdc_regs.o
+#OBJS += collect_reg_ffdc_regs.o
 
 #------------------------------------------------------------------------------
 # Set fapi2 build environment
 #------------------------------------------------------------------------------
 
 # Chip directory
-CHIPS += p9
+CHIPS += p10
 
-FAPI2_ERROR_XML += $(wildcard \
+#FAPI2_ERROR_XML += $(wildcard \
   $(ROOTPATH)/src/import/chips/p9/procedures/xml/error_info/*.xml)
 FAPI2_ERROR_XML += $(wildcard \
   $(ROOTPATH)/src/import/hwpf/fapi2/xml/error_info/*.xml)
-FAPI2_ERROR_XML += $(wildcard \
-  $(ROOTPATH)/src/import/chips/centaur/procedures/xml/error_info/*.xml)
 FAPI2_ERROR_XML += $(wildcard \
   $(ROOTPATH)/src/import/generic/procedures/xml/error_info/*.xml)
 FAPI2_ERROR_XML += $(wildcard \
@@ -131,21 +124,25 @@ FAPI2_ERROR_XML += $(wildcard \
   $(ROOTPATH)/src/import/chips/p9a/procedures/xml/error_info/*.xml)
 FAPI2_ERROR_XML += $(wildcard \
   $(ROOTPATH)/src/import/chips/ocmb/gemini/procedures/xml/error_info/*.xml)
+FAPI2_ERROR_XML += $(wildcard \
+  $(ROOTPATH)/src/import/chips/p10/procedures/xml/error_info/*.xml)
 
 
 # Attribute XML files.
 FAPI2_ATTR_XML += $(wildcard \
   $(ROOTPATH)/src/import/hwpf/fapi2/xml/attribute_info/*.xml)
-FAPI2_ATTR_XML += $(wildcard \
+#FAPI2_ATTR_XML += $(wildcard \
   $(ROOTPATH)/src/import/chips/p9/procedures/xml/attribute_info/*.xml)
-FAPI2_ATTR_XML += $(wildcard \
-  $(ROOTPATH)/src/import/chips/centaur/procedures/xml/attribute_info/*.xml)
 FAPI2_ATTR_XML += $(wildcard \
   $(ROOTPATH)/src/import/generic/procedures/xml/attribute_info/*.xml)
 FAPI2_ATTR_XML += $(wildcard \
   $(ROOTPATH)/src/import/chips/ocmb/explorer/procedures/xml/attribute_info/*.xml)
 FAPI2_ATTR_XML += $(wildcard \
   $(ROOTPATH)/src/import/chips/ocmb/gemini/procedures/xml/attribute_info/*.xml)
+FAPI2_ATTR_XML += $(wildcard \
+  $(ROOTPATH)/src/import/chips/p10/procedures/xml/attribute_info/*.xml)
+FAPI2_ATTR_XML += $(wildcard \
+  $(ROOTPATH)/src/usr/targeting/common/xmltohb/deleteme_temp_hb_attrs.xml)
 
 # Filter out Temp defaults XML file from Attribute XML files.
 # NOTE: The hb_temp_defaults.xml file is not a normal attribute file with the
@@ -175,38 +172,20 @@ $(call GENPLUGINTARGET, ${PLAT_HWP_ERR_PARSER}) : \
 GEN_PASS_BODY += $(GEN_TARGETS)
 CLEAN_TARGETS += $(GEN_TARGETS)
 
-include ${ROOTPATH}/procedure.rules.mk
+#include ${ROOTPATH}/procedure.rules.mk
 include ${ROOTPATH}/src/import/tools/build/common.dir/script.rules.mk
 include ${ROOTPATH}/src/import/hwpf/fapi2/tools/parseErrorInfo.mk
 include ${ROOTPATH}/src/import/hwpf/fapi2/tools/parseAttributeInfo.mk
 include ${ROOTPATH}/src/import/hwpf/fapi2/tools/createIfAttrService.mk
-include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/p9_pm_get_poundv_bucket.mk
-include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/p9_pm_get_poundv_bucket_attr.mk
-include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/p9_pm_get_poundw_bucket.mk
-include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/p9_pm_get_poundw_bucket_attr.mk
-include $(ROOTPATH)/src/import/chips/centaur/utils/imageProcs/cen_ringId.mk
+#include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/p9_pm_get_poundv_bucket.mk
+#include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/p9_pm_get_poundv_bucket_attr.mk
+#include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/p9_pm_get_poundw_bucket.mk
+#include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/p9_pm_get_poundw_bucket_attr.mk
 
 # We specifically removed this from the istep10.so and placed it here because
 # we have to reapply this init on the shutdown path after the interrupt resource
 # provider is shutdown
-include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/initfiles/p9_int_scom.mk
-
-CENTAUR_VPD_PATH=${HWP_PATH_2}/vpd_accessors
-include ${CENTAUR_VPD_PATH}/getControlCapableData.mk
-include ${CENTAUR_VPD_PATH}/getDecompressedISDIMMAttrs.mk
-include ${CENTAUR_VPD_PATH}/getISDIMMTOC4DAttrs.mk
-include ${CENTAUR_VPD_PATH}/getDQAttrISDIMM.mk
-include ${CENTAUR_VPD_PATH}/getDQSAttrISDIMM.mk
-include ${CENTAUR_VPD_PATH}/getMBvpdSensorMap.mk
-include ${CENTAUR_VPD_PATH}/getMBvpdAddrMirrorData.mk
-include ${CENTAUR_VPD_PATH}/getMBvpdAttr.mk
-include ${CENTAUR_VPD_PATH}/getMBvpdDram2NModeEnabled.mk
-include ${CENTAUR_VPD_PATH}/getMBvpdMemoryDataVersion.mk
-include ${CENTAUR_VPD_PATH}/getMBvpdSlopeInterceptData.mk
-include ${CENTAUR_VPD_PATH}/getMBvpdSpareDramData.mk
-include ${CENTAUR_VPD_PATH}/getMBvpdSPDXRecordVersion.mk
-include ${CENTAUR_VPD_PATH}/getMBvpdVersion.mk
-include ${CENTAUR_VPD_PATH}/getMBvpdVoltageSettingData.mk
+#include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/initfiles/p9_int_scom.mk
 
 VPATH += ${HWP_PATH_1}/hwp/accessors
 VPATH += ${ROOTPATH}/src/import/hwpf/fapi2/src/
@@ -215,6 +194,4 @@ VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib/
 VPATH += ${HWP_PATH_1}/hwp/perv/
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/initfiles/
-VPATH += ${ROOTPATH}/src/import/chips/centaur/utils/imageProcs/
-VPATH += ${CENTAUR_VPD_PATH}/
 VPATH += ${GENPATH}

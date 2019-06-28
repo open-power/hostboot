@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -53,29 +53,32 @@
 #include <ipmi/ipmifruinv.H>
 #include <ipmi/ipmisensor.H>
 #endif
-#include <fapi2/plat_hwp_invoker.H>
-#include <fapi2/target.H>
+// FIXME RTC: 210975
+//#include <fapi2/plat_hwp_invoker.H>
+//#include <fapi2/target.H>
 
 //SBE interfacing
 #include <sbeio/sbeioif.H>
 #include <sys/misc.h>
 
-#include <p9_query_core_access_state.H>
-#include <p9_setup_sbe_config.H>
-#include <p9_query_cache_access_state.H>
-#include <p9_hcd_core_stopclocks.H>
-#include <p9_hcd_cache_stopclocks.H>
-#include <p9_hcd_common.H>
-#include <p9_quad_power_off.H>
-#include <p9_perv_scom_addresses.H>
+// FIXME RTC: 210975
+//#include <p9_query_core_access_state.H>
+//#include <p9_setup_sbe_config.H>
+//#include <p9_query_cache_access_state.H>
+//#include <p9_hcd_core_stopclocks.H>
+//#include <p9_hcd_cache_stopclocks.H>
+//#include <p9_hcd_common.H>
+//#include <p9_quad_power_off.H>
+//#include <p9_perv_scom_addresses.H>
 
 #ifdef CONFIG_PRINT_SYSTEM_INFO
 #include <stdio.h>
 #include <attributetraits.H>
 #endif
 
+// FIXME RTC: 210975
 //  HWP call support
-#include <nest/nestHwpHelperFuncs.H>   // fapiHWPCallWrapperHandler
+//#include <nest/nestHwpHelperFuncs.H>   // fapiHWPCallWrapperHandler
 
 
 namespace ISTEP_06
@@ -224,7 +227,7 @@ errlHndl_t sendContinueMpiplChipOp()
 errlHndl_t updateSlaveSbeScratchRegs()
 {
     errlHndl_t l_err = nullptr;
-
+/* FIXME RTC: 210975
     TARGETING::TargetHandleList l_procChips;
     TARGETING::getAllChips(l_procChips, TARGETING::TYPE_PROC, true);
     TARGETING::PROC_SBE_MASTER_CHIP_ATTR l_is_master_chip = 1;
@@ -251,6 +254,7 @@ errlHndl_t updateSlaveSbeScratchRegs()
             }
         }
     }
+*/
     return l_err;
 }
 
@@ -263,9 +267,10 @@ errlHndl_t updateSlaveSbeScratchRegs()
 */
 errlHndl_t powerDownSlaveQuads()
 {
+    errlHndl_t l_err = NULL;
+/* FIXME RTC: 210975
     TARGETING::Target* l_sys_target = nullptr;
     TARGETING::targetService().getTopLevelTarget(l_sys_target);
-    errlHndl_t l_err = NULL;
 
     bool l_isMasterEq = false;
     bool l_masterFound = false;
@@ -462,7 +467,7 @@ errlHndl_t powerDownSlaveQuads()
             break;
         }
     }//end EQ for-loop
-
+*/
     return l_err;
 }
 
@@ -493,7 +498,7 @@ void* host_discover_targets( void *io_pArgs )
             {
                 break;
             }
- 
+
             // Need to ensure slave SBE's scratch registers are
             // up to date prior to sending continueMPIPL op
             l_err = updateSlaveSbeScratchRegs();
@@ -509,6 +514,7 @@ void* host_discover_targets( void *io_pArgs )
                 break;
             }
 
+/* FIXME RTC: 210975
             // Mask off the OBUS FIRs (normally part of proc_chiplet_scominit
             // Make the FAPI call to p9_io_obus_firmask_save_restore
             bool l_success = ISTEP::fapiHWPCallWrapperHandler(
@@ -521,7 +527,7 @@ void* host_discover_targets( void *io_pArgs )
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                           ERR_MRK"Error calling p9_io_obus_firmask_save_restore");
             }
-
+*/
         }while(0);
 
     }

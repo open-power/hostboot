@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2018
+# Contributors Listed Below - COPYRIGHT 2015,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -26,10 +26,12 @@ HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
 MODULE = ipmi_rt
 
-#include common ojects between hostboot and runtime hostboot
-include ../ipmi.mk
+# FIXME RTC: 210975
 
-OBJS += rt_ipmirp.o
+#include common ojects between hostboot and runtime hostboot
+#include ../ipmi.mk
+
+#OBJS += rt_ipmirp.o
 
 SUBDIRS += test.d
 

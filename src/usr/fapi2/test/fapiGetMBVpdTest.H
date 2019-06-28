@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -168,9 +168,6 @@ public:
 
             //getDQAttrISDIMM attribute function
             TEST_GET_ATTR(ATTR_CEN_VPD_ISDIMMTOC4DQ, iv_targ_membuf);
-
-            //getDQSAttrISDIMM attribute function
-            TEST_GET_ATTR(ATTR_CEN_VPD_ISDIMMTOC4DQS, iv_targ_membuf);
 
             //getMBvpdMemoryDataVersion attribute function
             TEST_GET_ATTR(ATTR_CEN_VPD_VM_KEYWORD, iv_targ_membuf);

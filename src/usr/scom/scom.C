@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,10 +53,6 @@
 #include <config.h>
 
 #ifndef __HOSTBOOT_RUNTIME
-#ifdef CONFIG_SECUREBOOT
-#include <secureboot/service.H>
-#include <scom/centaurScomCache.H>
-#endif
 #endif
 
 // Trace definition
@@ -172,48 +168,6 @@ errlHndl_t scomMemBufPerformOp(DeviceFW::OperationType i_opType,
                                va_list i_args)
 {
     errlHndl_t l_err = NULL;
-
-    uint64_t l_scomAddr = va_arg(i_args,uint64_t);
-
-    l_err = checkIndirectAndDoScom(i_opType,
-                                   i_target,
-                                   io_buffer,
-                                   io_buflen,
-                                   i_accessType,
-                                   l_scomAddr);
-
-    // Check for ATTR_CENTAUR_EC_ENABLE_RCE_WITH_OTHER_ERRORS_HW246685
-    // if ATTR set and MBSECCQ being read then set bit 16
-    // See RTC 97286
-    //
-    if(!l_err && (i_opType == DeviceFW::READ))
-    {
-        const uint64_t MBS_ECC0_MBSECCQ_0x0201144A = 0x000000000201144Aull;
-        const uint64_t MBS_ECC1_MBSECCQ_0x0201148A = 0x000000000201148Aull;
-
-        uint64_t addr = l_scomAddr & 0x000000007FFFFFFFull;
-        if(addr == MBS_ECC0_MBSECCQ_0x0201144A ||
-           addr == MBS_ECC1_MBSECCQ_0x0201148A)
-        {
-            uint8_t enabled = 0;
-            //FAPI_ATTR_GET      @todo RTC 101877 - access FAPI attributes
-            //    (ATTR_CENTAUR_EC_ENABLE_RCE_WITH_OTHER_ERRORS_HW246685,
-            //     i_target,
-            //     enabled);
-            //   For now use:   if ec >= 0x20
-            if(i_target->getAttr<TARGETING::ATTR_EC>() >= 0x20)
-            {
-                enabled = true;
-            }
-
-            if(enabled)
-            {
-                uint64_t * data = reinterpret_cast<uint64_t *>(io_buffer);
-                *data |= 0x0000800000000000ull; // Force on bit 16
-            }
-        }
-    }
-
     return l_err;
 }
 
@@ -230,38 +184,6 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
     errlHndl_t l_err = NULL;
 
     do {
-
-#ifndef __HOSTBOOT_RUNTIME
-#ifdef CONFIG_SECUREBOOT
-    if(   (i_opType == DeviceFW::READ)
-       && (i_target != TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
-       && SECUREBOOT::enabled()
-       && SECUREBOOT::CENTAUR_SECURITY::ScomCache::getInstance().cacheEnabled()
-       && (i_target->getAttr<TARGETING::ATTR_TYPE>()==TARGETING::TYPE_MEMBUF))
-    {
-        bool skipScom=true;
-        uint64_t cacheData=0;
-        l_err=SECUREBOOT::CENTAUR_SECURITY::ScomCache::getInstance().
-            read(i_target,i_addr,skipScom,cacheData);
-        if(l_err)
-        {
-            TRACFCOMP(g_trac_scom, ERR_MRK
-                "checkIndirectAndDoScom: failed in call to ScomCache::read() "
-                "for HUID = 0x%08X, address = 0x%016llX",
-                TARGETING::get_huid(i_target),
-                i_addr);
-            break;
-        }
-
-        if(skipScom)
-        {
-            *reinterpret_cast<uint64_t*>(io_buffer) = cacheData;
-            io_buflen=sizeof(cacheData);
-            break;
-        }
-    }
-#endif
-#endif
 
         // Do we need to do the indirect logic or not?
         bool l_runIndirectLogic = true;
@@ -372,30 +294,6 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
         }
 
     } while(0);
-
-#ifndef __HOSTBOOT_RUNTIME
-#ifdef CONFIG_SECUREBOOT
-    if(   !l_err
-       && (i_opType == DeviceFW::WRITE)
-       && (i_target!=TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
-       && SECUREBOOT::enabled()
-       && SECUREBOOT::CENTAUR_SECURITY::ScomCache::getInstance().cacheEnabled()
-       && (i_target->getAttr<TARGETING::ATTR_TYPE>()==TARGETING::TYPE_MEMBUF) )
-    {
-        l_err = SECUREBOOT::CENTAUR_SECURITY::ScomCache::getInstance().
-            write(i_target,i_addr,
-            *reinterpret_cast<uint64_t*>(io_buffer));
-        if(l_err)
-        {
-            TRACFCOMP(g_trac_scom, ERR_MRK
-                "checkIndirectAndDoScom: failed in call to ScomCache::write() "
-                "for HUID = 0x%08X, address = 0x%016llX",
-                TARGETING::get_huid(i_target),
-                i_addr);
-        }
-    }
-#endif
-#endif
 
     return l_err;
 }

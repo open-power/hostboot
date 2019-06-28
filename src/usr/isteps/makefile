@@ -24,7 +24,10 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH=../../..
 MODULE = isteps
-PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
+
+# FIXME RTC: 210975
+
+#PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
 
 SUBDIRS+=istep06.d
 SUBDIRS+=istep07.d
@@ -43,7 +46,6 @@ SUBDIRS+=istep21.d
 SUBDIRS+=pm.d
 SUBDIRS+=p9_stop_util.d
 SUBDIRS+=mss.d
-SUBDIRS+=cen.d
 SUBDIRS+=cpuWkup.d
 SUBDIRS+=p9_phbPerst.d
 SUBDIRS+=tod.d
@@ -58,22 +60,24 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/perv/
 EXTRAINCDIR += ${PROCEDURES_PATH}/utils/stopreg/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/isteps/pm/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/initservice/istepdispatcher
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
 
-OBJS += mem_utils.o
+#OBJS += mem_utils.o
 OBJS += hwpisteperror.o
 OBJS += hwpistepud.o
-OBJS += istepHelperFuncs.o
-OBJS += pbusLinkSvc.o
+#OBJS += istepHelperFuncs.o
+#OBJS += pbusLinkSvc.o
 
-OBJS += $(if $(CONFIG_OPENPOWER_VOLTMSG),openpower_vddr.o,hbToHwsvVoltageMsg.o)
+#OBJS += $(if $(CONFIG_OPENPOWER_VOLTMSG),openpower_vddr.o,hbToHwsvVoltageMsg.o)
 
-include ${ROOTPATH}/procedure.rules.mk
+#include ${ROOTPATH}/procedure.rules.mk
 include ${ROOTPATH}/config.mk
 

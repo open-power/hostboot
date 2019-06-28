@@ -33,7 +33,7 @@
 
 //Flow of the file:
 //Call startScomProcess --which calls--> scomTranslate
-// --which calls--> p9/centaur translate --which returns to-->
+// --which calls--> p9 translate --which returns to-->
 //startScomProcces --which then calls--> SCOM::checkIndirectAndDoScom
 
 /****************************************************************************/
@@ -296,24 +296,12 @@ errlHndl_t scomTranslate(TARGETING::Target * &i_target,
     // Get the type attribute.
     TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
 
-    centaurChipUnits_t l_chipUnit = CENTAUR_CHIP;
+    l_err = p9_translation(i_target,
+                           l_type,
+                           io_addr,
+                           o_needsWakeup,
+                           i_opMode);
 
-    if(false == getChipUnitCentaur(l_type,l_chipUnit))
-    {
-        l_err = centaur_translation(i_target,
-                                    l_type,
-                                    io_addr,
-                                    i_opMode);
-        o_needsWakeup = false;
-    }
-    else
-    {
-        l_err = p9_translation(i_target,
-                            l_type,
-                            io_addr,
-                            o_needsWakeup,
-                            i_opMode);
-    }
     return l_err;
 }
 
@@ -597,255 +585,6 @@ errlHndl_t p9_translation (TARGETING::Target * &i_target,
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-errlHndl_t centaur_translation (TARGETING::Target * &i_target,
-                                TARGETING::TYPE i_type,
-                                uint64_t &io_addr,
-                                uint64_t i_opMode)
-{
-    errlHndl_t l_err = NULL;
-    do  {
-        uint64_t l_original_addr = io_addr;
-        uint32_t l_chip_mode = STANDARD_MODE;
-        bool l_scomAddrIsRelatedToUnit = false;
-        bool l_scomAddrAndTargetTypeMatch = false;
-
-        uint16_t l_instance = 0;
-        centaurChipUnits_t l_chipUnit = CENTAUR_CHIP;
-        std::vector<centaur_chipUnitPairing_t> l_scomPairings;
-
-        //Make sure that scom addr is related to a chip unit
-        uint32_t isChipUnitScomRC = centaur_scominfo_isChipUnitScom(
-                                        io_addr,
-                                        l_scomAddrIsRelatedToUnit,
-                                        l_scomPairings,
-                                        l_chip_mode);
-
-        if(isChipUnitScomRC)
-        {
-                /*@
-                * @errortype
-                * @moduleid     SCOM::SCOM_TRANSLATE_CENTAUR
-                * @reasoncode   SCOM::SCOM_ISCHIPUNITSCOM_INVALID
-                * @userdata1    Input address
-                * @userdata2[0:31] Target huid
-                * @userdata2[32:63] Target Type
-                * @devdesc      EKB code has detected and error in the scom
-                * @custdesc     Firmware error during system IPL
-                */
-                l_err = new ERRORLOG::ErrlEntry(
-                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                SCOM_TRANSLATE_CENTAUR,
-                                SCOM_ISCHIPUNITSCOM_INVALID,
-                                l_original_addr,
-                                TWO_UINT32_TO_UINT64(
-                                i_target->getAttr<TARGETING::ATTR_HUID>(),
-                                i_type),
-                                true/*SW Error*/);
-                //Add this target to the FFDC
-                ERRORLOG::ErrlUserDetailsTarget(i_target,"SCOM Target")
-                  .addToLog(l_err);
-                l_err->collectTrace(SCOM_COMP_NAME,1024);
-                break;
-        }
-
-
-        if(!l_scomAddrIsRelatedToUnit)
-        {
-            TRACFCOMP(g_trac_scom, "Address provided does not match any Centaur targets.");
-            TRACFCOMP(g_trac_scom, "centaur_translation-Invalid Address io_addr=0x%X, Type 0x%.8X, HUID 0x%.8X",
-            io_addr, i_type, TARGETING::get_huid(i_target));
-
-
-            uint32_t userdata32_1 = TWO_UINT16_TO_UINT32(
-                                      i_type,
-                                      l_instance);
-            uint16_t userdata16_1 = TWO_UINT8_TO_UINT16(
-                                      l_scomAddrIsRelatedToUnit,
-                                      l_scomAddrAndTargetTypeMatch);
-            uint16_t userdata16_2 = TWO_UINT8_TO_UINT16(
-                                      l_chipUnit,
-                                      TARGETING::MODEL_CENTAUR);
-            uint32_t userdata32_2 = TWO_UINT16_TO_UINT32(
-                                      userdata16_1,
-                                      userdata16_2);
-            uint64_t userdata64_1 = TWO_UINT32_TO_UINT64(
-                                      userdata32_1,
-                                      userdata32_2);
-            /*@
-            * @errortype
-            * @moduleid     SCOM::SCOM_TRANSLATE_CENTAUR
-            * @reasoncode   SCOM::SCOM_INVALID_ADDR
-            * @userdata1    Address
-            * @userdata2[0:15] Target's Type
-            * @userdata2[16:31] Instance of this type
-            * @userdata2[32:39] Is this SCOM addr related to a chip unit?
-            * @userdata2[40:47] Does the target type and addr type match?
-            * @userdata2[48:55] Chip unit of the target
-            * @userdata2[56:63] Model of the target (ex: POWER9)
-            * @devdesc      The scom address provided was invalid, check
-            *               to see if the address matches a target in the
-            *               scomdef file.
-            * @custdesc     Firmware error during system IPL
-            */
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                            SCOM_TRANSLATE_CENTAUR,
-                                            SCOM_INVALID_ADDR,
-                                            io_addr,
-                                            userdata64_1,
-                                            true/*SW Error*/);
-            //Add this target to the FFDC
-            ERRORLOG::ErrlUserDetailsTarget(i_target,"SCOM Target")
-              .addToLog(l_err);
-            l_err->collectTrace(SCOM_COMP_NAME,1024);
-            break;
-        }
-
-        if(getChipUnitCentaur (i_type, l_chipUnit))
-        {
-            //Send an errorlog because we are targeting an unsupported type.
-            TRACFCOMP(g_trac_scom, "SCOM_TRANSLATE.. Invalid Centaur target type=0x%X", i_type);
-
-            /*@
-            * @errortype
-            * @moduleid     SCOM::SCOM_TRANSLATE_CENTAUR
-            * @reasoncode   SCOM::SCOM_CEN_TRANS_INVALID_TYPE
-            * @userdata1    Address
-            * @userdata2[0:31] Target's Type
-            * @userdata2[32:63] Target's Huid
-            * @devdesc      Scom Translate not supported for this type
-            */
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                              SCOM_TRANSLATE_CENTAUR,
-                                              SCOM_CEN_TRANS_INVALID_TYPE,
-                                              io_addr,
-                                              TWO_UINT32_TO_UINT64(i_type,
-                                              TARGETING::get_huid(i_target)),
-                                              true/*SW Error*/);
-            //Add this target to the FFDC
-            ERRORLOG::ErrlUserDetailsTarget(i_target,"SCOM Target")
-            .addToLog(l_err);
-            l_err->collectTrace(SCOM_COMP_NAME,1024);
-            break;
-        }
-
-        //Check that the target_type that the scom was requested
-        //for matches up with one of the possible targets allowed
-        //for this particular scom.
-        for(uint32_t i = 0; i < l_scomPairings.size(); i++)
-        {
-            if( (l_scomPairings[i].chipUnitType == l_chipUnit) &&
-                (l_scomPairings[i].chipUnitNum == 0))
-            {
-                l_scomAddrAndTargetTypeMatch = true;
-                break;
-            }
-
-        }
-
-        if(!l_scomAddrAndTargetTypeMatch)
-        {
-            TRACFCOMP(g_trac_scom, "Target type and scom Addr do not match.");
-            TRACFCOMP(g_trac_scom, "scomTranslate-Invalid Address io_addr=0x%X, Type 0x%.8X, HUID 0x%.8X",
-            io_addr, i_type, TARGETING::get_huid(i_target));
-
-
-            uint32_t userdata32_1 = TWO_UINT16_TO_UINT32(
-                                      i_type,
-                                      l_instance);
-            uint16_t userdata16_1 = TWO_UINT8_TO_UINT16(
-                                      l_scomAddrIsRelatedToUnit,
-                                      l_scomAddrAndTargetTypeMatch);
-            uint16_t userdata16_2 = TWO_UINT8_TO_UINT16(
-                                      l_chipUnit,
-                                      TARGETING::MODEL_CENTAUR);
-            uint32_t userdata32_2 = TWO_UINT16_TO_UINT32(
-                                      userdata16_1,
-                                      userdata16_2);
-            uint64_t userdata64_1 = TWO_UINT32_TO_UINT64(
-                                      userdata32_1,
-                                      userdata32_2);
-            /*@
-            * @errortype
-            * @moduleid     SCOM::SCOM_TRANSLATE_CENTAUR
-            * @reasoncode   SCOM::SCOM_TARGET_ADDR_MISMATCH
-            * @userdata1    Address
-            * @userdata2[0:15]  Target's Type
-            * @userdata2[16:31] Instance of this type
-            * @userdata2[32:39] Is this SCOM addr related to a chip unit?
-            * @userdata2[40:47] Does the target type and addr type match?
-            * @userdata2[48:55] Chip unit of the target
-            * @userdata2[56:63] Model of the target (ex: POWER9)
-            * @devdesc      The scom target did not match the provided
-            *               address
-            * @custdesc     Firmware error during system IPL
-            */
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                            SCOM_TRANSLATE_CENTAUR,
-                                            SCOM_TARGET_ADDR_MISMATCH,
-                                            io_addr,
-                                            userdata64_1,
-                                            true/*SW Error*/);
-            //Add this target to the FFDC
-            ERRORLOG::ErrlUserDetailsTarget(i_target,"SCOM Target")
-              .addToLog(l_err);
-            l_err->collectTrace(SCOM_COMP_NAME,1024);
-            break;
-        }
-
-        l_instance = i_target->getAttr<TARGETING::ATTR_CHIP_UNIT>();
-        io_addr = centaur_scominfo_createChipUnitScomAddr(
-                                                    l_chipUnit,
-                                                    l_instance,
-                                                    io_addr,
-                                                    l_chip_mode);
-
-        if(io_addr == FAILED_TRANSLATION)
-        {
-            TRACFCOMP(g_trac_scom, "Address failed to translate.");
-            TRACFCOMP(g_trac_scom, "Scom Target HUID: 0x%x", TARGETING::get_huid(i_target));
-            TRACFCOMP(g_trac_scom, "Scom Address: 0x%lx", io_addr);
-            TRACFCOMP(g_trac_scom, "Scom Target Type: 0x%x", i_type);
-            for(uint32_t i = 0; i < l_scomPairings.size(); i++)
-            {
-                TRACFCOMP(g_trac_scom, "Scom Pairing %d: %d",
-                          i, l_scomPairings[i].chipUnitType);
-            }
-            uint32_t userdata32 = TWO_UINT16_TO_UINT32(
-                                    l_chipUnit,
-                                    l_instance);
-            uint64_t userdata64 = TWO_UINT32_TO_UINT64(
-                                    userdata32,
-                                    TARGETING::get_huid(i_target));
-            /*@
-            * @errortype
-            * @moduleid     SCOM::SCOM_TRANSLATE_CENTAUR
-            * @reasoncode   SCOM::SCOM_INVALID_TRANSLATION
-            * @userdata1    Original Address
-            * @userdata2[0:15]  l_chipUnit
-            * @userdata2[16:31] instance of target
-            * @userdata2[32:63] HUID of target
-            * @devdesc      Scom Translation did not modify the address
-            */
-            l_err = new ERRORLOG::ErrlEntry(
-                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                    SCOM_TRANSLATE_CENTAUR,
-                                    SCOM_INVALID_TRANSLATION,
-                                    l_original_addr,
-                                    userdata64,
-                                    true/*SW Error*/);
-            //Add this target to the FFDC
-            ERRORLOG::ErrlUserDetailsTarget(i_target,"SCOM Target")
-            .addToLog(l_err);
-            l_err->collectTrace(SCOM_COMP_NAME,1024);
-            break;
-        }
-
-    } while (0);
-    return l_err;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
 /**
  * @brief Gets p9 chip unit for this target type
  */
@@ -969,39 +708,6 @@ bool getChipUnitP9 (TARGETING::TYPE i_type,
 
     return l_isError;
 }
-
-
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-/**
- * @brief Gets centaur chip unit for this target type
- */
-bool getChipUnitCentaur (TARGETING::TYPE i_type,
-                         centaurChipUnits_t &o_chipUnit)
-{
-    bool l_isError = false;
-    switch(i_type)
-    {
-        case(TARGETING::TYPE_MEMBUF) :
-        {
-            o_chipUnit = CENTAUR_CHIP;
-            break;
-        }
-        case(TARGETING::TYPE_MBA) :
-        {
-            o_chipUnit = MBA_CHIPUNIT;
-            break;
-        }
-        default:
-        {
-            l_isError = true;
-            break;
-        }
-    }
-
-    return l_isError;
-}
-
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////

@@ -95,14 +95,6 @@ Layout Description
     </section>
     <section>
         <!-- NOTE: smaller than official layout  for fake-PNOR  -->
-        <description>Board/Centaur VPD (64K) - 1 board</description>
-        <eyeCatch>CVPD</eyeCatch>
-        <physicalOffset>0x2A000</physicalOffset>
-        <physicalRegionSize>0x10000</physicalRegionSize>
-        <side>sideless</side>
-    </section>
-    <section>
-        <!-- NOTE: smaller than official layout  for fake-PNOR  -->
         <description>Hostboot Error Logs (64K)</description>
         <eyeCatch>HBEL</eyeCatch>
         <physicalOffset>0x3A000</physicalOffset>
@@ -134,13 +126,5 @@ Layout Description
         <physicalRegionSize>0x800000</physicalRegionSize>
         <side>sideless</side>
     </section>
-    <section>
-        <!-- NOTE: smaller than official layout  for fake-PNOR  -->
-        <description>Centaur Hw Image (12K)</description>
-        <eyeCatch>CENHWIMG</eyeCatch>
-        <physicalOffset>0x90A000</physicalOffset>
-        <physicalRegionSize>0x3000</physicalRegionSize>
-        <sha512Version/>
-        <side>sideless</side>
-    </section>
+
 </pnor>

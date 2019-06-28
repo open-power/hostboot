@@ -31,11 +31,12 @@
 #define I2C_BUS_MAX_ENGINE(var) (sizeof(var)/sizeof(var[0]))
 #define I2C_BUS_MAX_PORT(var)   (sizeof(var[0])/sizeof(var[0][0]))
 
+// TODO RTC: 210975 Revisit I2C to determine if MEMBUF support is needed in P10.
+// Clean up the I2C code otherwise.
+
 namespace I2C
 {
 
-// @todo RTC 125540 - Ensure no possible Centaur i2c collisions during HB IPL
-//                    Need to re-evaluate the ifdef/ifndef in this file
 #ifndef __HOSTBOOT_RUNTIME
 /**
  * @enum i2cProcessType

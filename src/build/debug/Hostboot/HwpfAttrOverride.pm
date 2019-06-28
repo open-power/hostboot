@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2018
+# Contributors Listed Below - COPYRIGHT 2012,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -596,11 +596,6 @@ sub main
                 $targType = TARGET_TYPE_DMI;
                 $targ =~ s/^.*pu.dmi//;
             }
-            elsif ($targ =~ /centaur.mba/)
-            {
-                $targType = TARGET_TYPE_MBA_CHIPLET;
-                $targ =~ s/^.*centaur.mba//;
-            }
             elsif ($targ =~ /pu.mcs/)
             {
                 $targType = TARGET_TYPE_MCS_CHIPLET;
@@ -615,11 +610,6 @@ sub main
             {
                 $targType = TARGET_TYPE_ABUS_ENDPOINT;
                 $targ =~ s/^.*pu.abus//;
-            }
-            elsif ($targ =~ /centaur/)
-            {
-                $targType = TARGET_TYPE_MEMBUF_CHIP;
-                $targ =~ s/^.*centaur//;
             }
             elsif ($targ =~ /dimm/)
             {

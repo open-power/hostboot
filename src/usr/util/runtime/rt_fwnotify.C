@@ -35,6 +35,7 @@
 
 #ifdef CONFIG_NVDIMM
 #include <isteps/nvdimm/nvdimm.H>  // notify NVDIMM protection change
+#include <targeting/common/utilFilter.H>
 #endif
 
 using namespace TARGETING;

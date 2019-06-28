@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2016
+# Contributors Listed Below - COPYRIGHT 2014,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -26,12 +26,14 @@ HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
 MODULE = pnor_rt
 
-OBJS += rt_pnor.o
-OBJS += pnor_utils.o
-OBJS += pnor_common.o
-OBJS += ecc.o
+# FIXME RTC: 210975
+
+#OBJS += rt_pnor.o
+#OBJS += pnor_utils.o
+#OBJS += pnor_common.o
+#OBJS += ecc.o
 
 SUBDIRS += test.d
 
-VPATH += ../
+#VPATH += ../
 include $(ROOTPATH)/config.mk

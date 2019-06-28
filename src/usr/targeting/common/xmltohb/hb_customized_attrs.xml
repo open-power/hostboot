@@ -660,6 +660,11 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO</id>
+        <persistency>volatile-zeroed</persistency>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MSS_MRW_MEMDIAGS_BCMODE</id>
         <no_export/>
     </attribute>
@@ -687,9 +692,7 @@
     </attribute>
 
     <!-- Delete the redundant values from SW2 -->
-    <attribute><id>CEN_MBA_PORT</id><no_export/></attribute>
     <attribute><id>MBA_PORT</id><no_export/></attribute>
-    <attribute><id>CEN_MBA_DIMM</id><no_export/></attribute>
     <attribute><id>MBA_DIMM</id><no_export/></attribute>
 
     <attribute>
@@ -761,6 +764,46 @@
     <attribute>
         <id>ATTR_UNSECURE_HOMER_ADDRESS</id>
         <writeable/>
+        <persistency>volatile-zeroed</persistency>
+    </attribute>
+    <attribute>
+        <id>ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE</id>
+        <persistency>volatile-zeroed</persistency>
+    </attribute>
+    <attribute>
+        <id>ATTR_PGPE_HCODE_FUNCTION_ENABLE</id>
+        <persistency>volatile-zeroed</persistency>
+    </attribute>
+    <attribute>
+        <id>ATTR_AVSBUS_BUSNUM</id>
+        <persistency>volatile-zeroed</persistency>
+    </attribute>
+    <attribute>
+        <id>ATTR_AVSBUS_RAIL</id>
+        <persistency>volatile-zeroed</persistency>
+    </attribute>
+    <attribute>
+        <id>ATTR_EXTERNAL_VRM_STEPSIZE</id>
+        <persistency>volatile-zeroed</persistency>
+    </attribute>
+    <attribute>
+        <id>ATTR_FREQ_PB_MHZ_POUNDV_FALLBACK</id>
+        <persistency>volatile-zeroed</persistency>
+    </attribute>
+    <attribute>
+        <id>ATTR_SYSTEM_MMA_POWEROFF_DELAY_POWEROF2_MS</id>
+        <persistency>volatile-zeroed</persistency>
+    </attribute>
+    <attribute>
+        <id>ATTR_RVRM_VID</id>
+        <persistency>volatile-zeroed</persistency>
+    </attribute>
+    <attribute>
+        <id>ATTR_BOOT_VOLTAGE_BIAS_0P5PCT</id>
+        <persistency>volatile-zeroed</persistency>
+    </attribute>
+    <attribute>
+        <id>ATTR_XGPE_PM_SUSPEND_DISABLE</id>
         <persistency>volatile-zeroed</persistency>
     </attribute>
     <!-- =====================================================================

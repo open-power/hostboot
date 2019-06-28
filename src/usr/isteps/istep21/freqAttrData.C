@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,9 +51,11 @@
 #include <config.h>
 #include <mbox/ipc_msg_types.H>
 
+/* FIXME RTC: 210975
 #include <fapi2.H>
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
+*/
 #include <errl/errlreasoncodes.H>
 
 #define INTR_TRACE_NAME INTR_COMP_NAME

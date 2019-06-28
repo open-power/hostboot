@@ -29,6 +29,9 @@
  *  @brief Provides the interfaces to perform mmioscom to OCMB chip
  */
 #include <stdint.h>
+#include <devicefw/driverif.H>
+#include <targeting/common/target.H>
+#include <errl/errlentry.H>
 
 
 namespace MMIOSCOMDD

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,7 +26,8 @@
 // Includes
 /******************************************************************************/
 #include <stdint.h>
-#include <fapi2/target.H>
+// FIXME RTC: 210975
+//#include <fapi2/target.H>
 #include <targeting/targplatutil.H>
 #include "ipmi/ipmisensor.H"
 

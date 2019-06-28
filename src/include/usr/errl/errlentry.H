@@ -1144,4 +1144,10 @@ inline bool ErrlEntry::getDoHbDump()
  */
 #define ERRL_GETEID_SAFE(errhdl) (errhdl == NULL ? 0 : errhdl->eid())
 
+// These defines allow standard logging of error information in traces
+#define TRACE_ERR_FMT "Error info: PLID=0x%08X, EID=0x%08X, Reason=0x%04X. "
+
+#define TRACE_ERR_ARGS(pError) \
+    ERRL_GETPLID_SAFE(pError), ERRL_GETEID_SAFE(pError), ERRL_GETRC_SAFE(pError)
+
 #endif //ERRLENTRY_H

@@ -39,18 +39,21 @@
 
 //Fapi Support
 #include    <config.h>
+/* FIXME RTC: 210975
 #include    <fapi2.H>
 #include    <fapi2/plat_hwp_invoker.H>
+*/
 #include    <util/utilmbox_scratch.H>
 
+/* FIXME RTC: 210975
 // HWP (only bring in model-specific HWP headers to save space)
 #ifdef CONFIG_AXONE
 #include    <p9a_io_omi_dccal.H>
 #include    <p9a_io_omi_scominit.H>
 #else
 #include    <p9_io_dmi_dccal.H>
-#include    <p9_io_cen_dccal.H>
 #endif
+*/
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -70,7 +73,7 @@ void axone_dccal_setup(IStepError & io_istepError);
 void* call_dmi_io_dccal (void *io_pArgs)
 {
     IStepError l_StepError;
-
+/* FIXME RTC: 210975
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_io_dccal entry" );
 
     do
@@ -96,7 +99,7 @@ void* call_dmi_io_dccal (void *io_pArgs)
 
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_io_dccal exit" );
-
+*/
     // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();
 }
@@ -104,6 +107,7 @@ void* call_dmi_io_dccal (void *io_pArgs)
 #ifndef CONFIG_AXONE
 void cumulus_dccal_setup(IStepError & io_istepError)
 {
+#if 0
     errlHndl_t l_err = nullptr;
     TARGETING::TargetHandleList l_procTargetList;
     getAllChips(l_procTargetList, TYPE_PROC);
@@ -177,6 +181,7 @@ void cumulus_dccal_setup(IStepError & io_istepError)
         }
 
     }
+#endif
 }
 #else
 void cumulus_dccal_setup(IStepError & io_istepError)
@@ -190,6 +195,7 @@ void cumulus_dccal_setup(IStepError & io_istepError)
 #ifdef CONFIG_AXONE
 void axone_dccal_setup(IStepError & io_istepError)
 {
+/* FIXME RTC: 210975
     errlHndl_t l_err = nullptr;
     TargetHandleList l_omic_target_list;
     getAllChiplets(l_omic_target_list, TYPE_OMIC);
@@ -286,6 +292,7 @@ void axone_dccal_setup(IStepError & io_istepError)
         }
 
     }
+*/
 }
 #else
 void axone_dccal_setup(IStepError & io_istepError)

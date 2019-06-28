@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2016
+# Contributors Listed Below - COPYRIGHT 2011,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -27,11 +27,12 @@ ROOTPATH = ../../../..
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 
 MODULE = testhwas
-TESTS = *.H
+# FIXME RTC: 210975
+#TESTS = *.H
 
-OBJS += attributestrings.o
+#OBJS += attributestrings.o
 
 include ${ROOTPATH}/config.mk
 
-vpath %.C ${GENDIR}
+#vpath %.C ${GENDIR}
 

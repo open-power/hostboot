@@ -24,25 +24,30 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
 MODULE = istep21
-PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
 
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/initfiles/
+# FIXME RTC: 210975
+
+#PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
+
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/initfiles/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
-EXTRAINCDIR += ${PROCEDURES_PATH}/utils/stopreg/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
+#EXTRAINCDIR += ${PROCEDURES_PATH}/utils/stopreg/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/runtime/
 
-OBJS += call_host_runtime_setup.o
-OBJS += freqAttrData.o
-OBJS += call_host_verify_hdat.o
-OBJS += call_host_start_payload.o
-OBJS += $(if $(CONFIG_UCD_FLASH_UPDATES),call_update_ucd_flash.o,)
-OBJS += $(if $(CONFIG_NVDIMM),call_nvdimm_update.o,)
+#OBJS += call_host_runtime_setup.o
+#OBJS += freqAttrData.o
+#OBJS += call_host_verify_hdat.o
+#OBJS += call_host_start_payload.o
+#OBJS += $(if $(CONFIG_UCD_FLASH_UPDATES),call_update_ucd_flash.o,)
+#OBJS += $(if $(CONFIG_NVDIMM),call_nvdimm_update.o,)
 
 include ${ROOTPATH}/config.mk

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,6 +59,7 @@ public:
 
     void TestScomInterfaces(void)
     {
+/* FIXME RTC: 210975
         TS_TRACE(ENTER_MRK "-Scom Access Interface Test 1 - Put Scom - Start-");
 
         uint32_t rc = SUCCESS;
@@ -116,6 +117,7 @@ public:
         }while(0);
 
         TS_TRACE(EXIT_MRK "- Scom Access Interface Test 1 - Put Scom - End -");
+*/
     }
 
 };

@@ -53,8 +53,10 @@
 #include    <initservice/initserviceif.H>
 
 #include <arch/ppc.H>
+/* FIXME RTC: 210975
 #include <fapi2.H>
 #include <fapi2/plat_hwp_invoker.H>
+*/
 
 #include <pnorif.H>
 #include <pnor_const.H>
@@ -65,8 +67,10 @@
   #include <diag/prdf/prdfWriteHomerFirData.H>
 #endif
 
+/* FIXME RTC: 210975
 #include <p9_pm_utils.H>
 #include <p9_pm_init.H>
+*/
 
 // Easy macro replace for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
@@ -74,8 +78,10 @@
 #define OCB_OITR0 0x6C008
 #define OCB_OIEPR0 0x6C00C
 
+/* FIXME RTC: 210975
 extern trace_desc_t* g_fapiTd;
 extern trace_desc_t* g_fapiImpTd;
+*/
 
 using namespace TARGETING;
 
@@ -103,22 +109,29 @@ namespace HBOCC
         // set manual.
         *o_instr = OCC_BRANCH_INSTR |
                               (((uint64_t)(BRANCH_ADDR_MASK & l_epAddr)) << 32);
+/* FIXME RTC: 210975
         TRACFCOMP(g_fapiTd, "makeStart405Instruction instruction = %16x",
                                                                       *o_instr);
+*/
         return l_errl;
     }
 
     errlHndl_t startOCCFromSRAM(TARGETING::Target* i_proc)
     {
+/* FIXME RTC: 210975
         TRACUCOMP(g_fapiTd, ENTER_MRK"startOCCFromSRAM");
+*/
 
         errlHndl_t l_errl = NULL;
         uint64_t l_start405MainInstr = 0;
 
+/* FIXME RTC: 210975
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_target(i_proc);
         fapi2::ReturnCode l_rc;
+*/
 
         do {
+/* FIXME RTC: 210975
             //  ************************************************************
             //  Issue init to OCB
             //  ************************************************************
@@ -172,6 +185,7 @@ namespace HBOCC
                 TRACFCOMP(g_fapiTd, "ERROR: Failed to clear off the wakeup");
                 break;
             }
+*/
 
             // Hack provided by Doug Gilbert (@dgilbert). The following six
             // scoms set up the communications between GPE0 and the 405. This
@@ -189,8 +203,10 @@ namespace HBOCC
                                  DEVICE_SCOM_ADDRESS(l_writeAddress));
             if(l_errl)
             {
+/* FIXME RTC: 210975
                 TRACFCOMP(g_fapiTd, "SCOM to address 0x%08x failed",
                                                                l_writeAddress);
+*/
                 break;
             }
 
@@ -200,8 +216,10 @@ namespace HBOCC
                                  DEVICE_SCOM_ADDRESS(l_writeAddress));
             if(l_errl)
             {
+/* FIXME RTC: 210975
                 TRACFCOMP(g_fapiTd, "SCOM to address 0x%08x failed",
                                                                l_writeAddress);
+*/
                 break;
             }
 
@@ -211,8 +229,10 @@ namespace HBOCC
                                  DEVICE_SCOM_ADDRESS(l_writeAddress));
             if(l_errl)
             {
+/* FIXME RTC: 210975
                 TRACFCOMP(g_fapiTd, "SCOM to address 0x%08x failed",
                                                                l_writeAddress);
+*/
                 break;
             }
 
@@ -222,8 +242,10 @@ namespace HBOCC
                                  DEVICE_SCOM_ADDRESS(l_writeAddress));
             if(l_errl)
             {
+/* FIXME RTC: 210975
                 TRACFCOMP(g_fapiTd, "SCOM to address 0x%08x failed",
                                                                l_writeAddress);
+*/
                 break;
             }
 
@@ -233,8 +255,10 @@ namespace HBOCC
                                  DEVICE_SCOM_ADDRESS(l_writeAddress));
             if(l_errl)
             {
+/* FIXME RTC: 210975
                 TRACFCOMP(g_fapiTd, "SCOM to address 0x%08x failed",
                                                                l_writeAddress);
+*/
                 break;
             }
 
@@ -244,8 +268,10 @@ namespace HBOCC
                                  DEVICE_SCOM_ADDRESS(l_writeAddress));
             if(l_errl)
             {
+/* FIXME RTC: 210975
                 TRACFCOMP(g_fapiTd, "SCOM to address 0x%08x failed",
                                                                l_writeAddress);
+*/
                 break;
             }
 
@@ -255,10 +281,13 @@ namespace HBOCC
             l_errl = makeStart405Instruction(i_proc, &l_start405MainInstr);
             if(l_errl)
             {
+/* FIXME RTC: 210975
                 TRACFCOMP(g_fapiTd, "startOCCFromSRAM: could not make instr"
                                     " to start 405 main");
+*/
                 break;
             }
+/* FIXME RTC: 210975
             FAPI_DBG("Executing p9_pm_occ_control to start OCC PPC405");
             FAPI_INVOKE_HWP(l_errl, p9_pm_occ_control, l_target,
                           p9occ_ctrl::PPC405_START,// Operation on PPC405
@@ -269,6 +298,7 @@ namespace HBOCC
                 TRACFCOMP(g_fapiTd, "ERROR: Failed to initialize OCC PPC405");
                 break;
             }
+*/
 
             // Set checkstop interrupt to be active-high and rising edge
             // TODO RTC:178798 Remove the following workaround
@@ -278,8 +308,10 @@ namespace HBOCC
                                  DEVICE_SCOM_ADDRESS(l_writeAddress));
             if(l_errl)
             {
+/* FIXME RTC: 210975
                 TRACFCOMP(g_fapiTd, "SCOM to address 0x%08x failed",
                                                                l_writeAddress);
+*/
                 break;
             }
 
@@ -289,8 +321,10 @@ namespace HBOCC
                                  DEVICE_SCOM_ADDRESS(l_writeAddress));
             if(l_errl)
             {
+/* FIXME RTC: 210975
                 TRACFCOMP(g_fapiTd, "SCOM to address 0x%08x failed",
                                                                l_writeAddress);
+*/
                 break;
             }
 
@@ -310,9 +344,11 @@ namespace HBOCC
     errlHndl_t loadOCCImageDuringIpl(TARGETING::Target* i_target,
                                                             void* i_occVirtAddr)
     {
+/* FIXME RTC: 210975
         TRACUCOMP(g_fapiTd,
                   ENTER_MRK"loadOCCImageDuringIpl(%p)",
                   i_occVirtAddr);
+*/
 
         errlHndl_t l_errl = NULL;
         uint8_t* l_occImage = NULL;
@@ -358,8 +394,10 @@ namespace HBOCC
                                       l_length);
             if(l_errl)
             {
+/* FIXME RTC: 210975
                 TRACFCOMP(g_fapiImpTd, "loadOCCImageDuringIpl:"
                                            " failed to write Main app to SRAM");
+*/
                 break;
             }
 
@@ -385,9 +423,11 @@ namespace HBOCC
                                        sizeof(l_nestFreq));
             if(l_errl)
             {
+/* FIXME RTC: 210975
                 TRACFCOMP( g_fapiImpTd,
                            ERR_MRK"loadOCCImageDuringIpl: "
                            "Failed to overwrite OCC Main app in SRAM");
+*/
                 break;
             }
 
@@ -402,9 +442,11 @@ namespace HBOCC
                                       l_length);
             if(l_errl)
             {
+/* FIXME RTC: 210975
                 TRACFCOMP( g_fapiImpTd,
                            ERR_MRK"loadOCCImageDuringIpl: "
                            "Failed to load GPE0 app to SRAM");
+*/
                 break;
             }
 
@@ -418,9 +460,11 @@ namespace HBOCC
                                       l_length);
             if(l_errl)
             {
+/* FIXME RTC: 210975
                 TRACFCOMP( g_fapiImpTd,
                            ERR_MRK"loadOCCImageDuringIpl: "
                            "Failed to load GPE1 app to SRAM");
+*/
                 break;
             }
 
@@ -428,8 +472,10 @@ namespace HBOCC
         } while(0);
         free(l_modifiedSectionPtr);
 
+/* FIXME RTC: 210975
         TRACUCOMP(g_fapiTd,
                    EXIT_MRK"loadOCCImageDuringIpl");
+*/
         return l_errl;
     }
 
@@ -443,7 +489,9 @@ namespace HBOCC
     errlHndl_t loadHostDataToSRAM( TARGETING::Target* i_proc,
                                     const PRDF::HwInitialized_t i_curHw)
     {
+/* FIXME RTC: 210975
         TRACUCOMP(g_fapiTd, ENTER_MRK"loadHostDataToSRAM i_curHw=%d",i_curHw);
+*/
 
         errlHndl_t  l_errl  =   NULL;
 
@@ -489,8 +537,10 @@ namespace HBOCC
 
         if (l_errl)
         {
+/* FIXME RTC: 210975
             TRACFCOMP( g_fapiImpTd,
                        ERR_MRK"loadHostDataToSRAM: Error in writeHomerFirData");
+*/
         }
         else
         {
@@ -499,11 +549,15 @@ namespace HBOCC
                                       sizeof(config_data->firdataConfig));
             if(l_errl)
             {
+/* FIXME RTC: 210975
                 TRACFCOMP( g_fapiImpTd,
                            ERR_MRK"loadHostDataToSRAM: Error in writeSRAM");
+*/
             }
         }
+/* FIXME RTC: 210975
         TRACUCOMP( g_fapiTd, EXIT_MRK"loadHostDataToSRAM");
+*/
         delete(config_data);
 
         return l_errl;

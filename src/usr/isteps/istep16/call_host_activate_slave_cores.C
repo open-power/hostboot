@@ -36,13 +36,17 @@
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
 #include    <targeting/namedtarget.H>
+/* FIXME RTC: 210975
 #include    <fapi2/target.H>
+*/
 #include    <errl/errlmanager.H>
 #include    <sys/task.h>
 #include    <sys/misc.h>
 
+/* FIXME RTC: 210975
 #include    <fapi2/plat_hwp_invoker.H>
 #include    <p9_check_idle_stop_done.H>
+*/
 
 #ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
   #include <isteps/pm/occCheckstop.H>
@@ -57,7 +61,9 @@ using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
+/* FIXME RTC: 210975
 using   namespace   p9_check_idle_stop;
+*/
 
 namespace ISTEP_16
 {
@@ -65,7 +71,9 @@ void* call_host_activate_slave_cores (void *io_pArgs)
 {
     IStepError  l_stepError;
 
+/* FIXME RTC: 210975
     errlHndl_t  l_timeout_errl  =   NULL;
+*/
     errlHndl_t  l_errl          =   NULL;
 
 
@@ -108,8 +116,10 @@ void* call_host_activate_slave_cores (void *io_pArgs)
           l_processor->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
 
 
+/* FIXME RTC: 210975
         const fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapi2_coreTarget(
               const_cast<TARGETING::Target*> (*l_core));
+*/
 
         //Determine PIR and threads to enable for this core
         uint64_t pir = PIR_t(l_logicalGroupId, l_chipId, l_coreId).word;
@@ -142,6 +152,7 @@ void* call_host_activate_slave_cores (void *io_pArgs)
             uint32_t l_checkidle_eid = 0;
             if (-ETIME == rc)
             {
+/* FIXME RTC: 210975
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                         "call_host_activate_slave_cores: "
                         "Time out rc from kernel %d on core 0x%x",
@@ -181,6 +192,7 @@ void* call_host_activate_slave_cores (void *io_pArgs)
                     // Commit error
                     errlCommit( l_timeout_errl, HWPF_COMP_ID );
                 }
+*/
             } // End of handle time out error
 
             // Check if this core failed last time
@@ -316,7 +328,7 @@ void* call_host_activate_slave_cores (void *io_pArgs)
 
                 break;
             }
-            // Zero out the counter if we passed 
+            // Zero out the counter if we passed
             else if( l_prevFail > 0 )
             {
                 // Add to the list of passing cores so we can

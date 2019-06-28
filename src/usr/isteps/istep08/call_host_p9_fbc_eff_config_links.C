@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,8 +40,10 @@
 #include <trace/interface.H>           // TRACFCOMP
 #include <initservice/isteps_trace.H>  // g_trac_isteps_trace
 
+/* FIXME RTC: 210975
 //  HWP call support
 #include <nest/nestHwpHelperFuncs.H>   // fapiHWPCallWrapperForChip
+*/
 
 namespace ISTEP_08
 {
@@ -59,11 +61,12 @@ void* call_host_p9_fbc_eff_config_links( void *io_pArgs )
 
     TRACFCOMP(g_trac_isteps_trace,
               ENTER_MRK"call_host_p9_fbc_eff_config_links entry" );
-
+/* FIXME RTC: 210975
     // Make the FAPI call to p9_fbc_eff_config_links
     // process electrical = true and process optical = false
     fapiHWPCallWrapperHandler(P9_FBC_EFF_CONFIG_LINKS_T_F, l_stepError,
                               HWPF_COMP_ID, TYPE_PROC);
+*/
 
     TRACFCOMP(g_trac_isteps_trace,
               EXIT_MRK"call_host_p9_fbc_eff_config_links exit" );

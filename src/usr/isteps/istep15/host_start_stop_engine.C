@@ -32,22 +32,28 @@
 #include    <errl/errluserdetails.H>
 #include    <errl/errludtarget.H>
 
+/* FIXME RTC: 210975
 //HWP Invoker
 #include    <fapi2/plat_hwp_invoker.H>
 
 ////Targeting support
 #include    <fapi2/target.H>
+*/
 #include    <targeting/common/utilFilter.H>
 
+/* FIXME RTC: 210975
 //From Import Directory (EKB Repository)
 #include <p9_pm.H>
 #include <p9_pm_stop_gpe_init.H>
+*/
 
 //Namespaces
 using namespace ERRORLOG;
 using namespace TARGETING;
+/* FIXME RTC: 210975
 using namespace p9pm;
 using namespace fapi2;
+*/
 
 namespace ISTEP_15
 {
@@ -55,6 +61,7 @@ void* host_start_stop_engine (void *io_pArgs)
 {
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_start_stop_engine entry" );
     ISTEP_ERROR::IStepError     l_StepError;
+/* FIXME RTC: 210975
     errlHndl_t l_errl = NULL;
 
     // Cast to void just to get around unused var warning if #ifdef's dont work
@@ -124,6 +131,7 @@ void* host_start_stop_engine (void *io_pArgs)
 #endif
       }while (0);
 
+*/
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_start_stop_engine exit" );
     // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();

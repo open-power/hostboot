@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,10 +32,12 @@
 #include    <attributetraits.H>
 #include    <attributeenums.H>
 #include    <initservice/isteps_trace.H>
-#include    <fapi2.H>
+// FIXME RTC: 210975
+//#include    <fapi2.H>
 
+// FIXME RTC: 210975
 // fapi2 HWP invoker
-#include  <fapi2/plat_hwp_invoker.H>
+//#include  <fapi2/plat_hwp_invoker.H>
 
 // IStep Error support
 #include  <isteps/hwpisteperror.H>
@@ -151,12 +153,13 @@ errlHndl_t computeDynamicMemoryVoltage()
         "INFO: Offset voltage processing enabled for domain type 0x%08X.",
         OFFSET_DISABLEMENT_ATTR);
 
-    typedef fapi2::ReturnCode (*pOffsetFn_t)(std::vector<fapi2::Target<fapi2::TARGET_TYPE_MCS>>&);
+    // FIXME RTC: 210975
+    //typedef fapi2::ReturnCode (*pOffsetFn_t)(std::vector<fapi2::Target<fapi2::TARGET_TYPE_MCS>>&);
 
     struct {
 
         TARGETING::ATTRIBUTE_ID domain;
-        pOffsetFn_t             fn;
+        //pOffsetFn_t             fn; FIXME RTC: 210975
         const char*             fnName;
         bool                    callIfAllNonFunc;
 
@@ -200,7 +203,8 @@ errlHndl_t computeDynamicMemoryVoltage()
     std::sort(l_mcbistTargetList.begin(), l_mcbistTargetList.end(),
         _compareMcbistWrtVoltageDomain< VOLTAGE_DOMAIN_ID_ATTR >);
 
-    std::vector<fapi2::Target<fapi2::TARGET_TYPE_MCS>> l_mcsFapiTargetsList;
+/* FIXME RTC: 210975
+    //std::vector<fapi2::Target<fapi2::TARGET_TYPE_MCS>> l_mcsFapiTargetsList;
     typename TARGETING::AttributeTraits< VOLTAGE_DOMAIN_ID_ATTR >::Type lastDomainId
         = 0;
 
@@ -345,6 +349,7 @@ errlHndl_t computeDynamicMemoryVoltage()
     {
         break;
     }
+*/
 
   } while(0);
 

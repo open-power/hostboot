@@ -41,7 +41,7 @@
 #include <sys/task.h>
 #include <sys/misc.h>
 #include <util/utilmbox_scratch.H>
-#include <p9_frequency_buckets.H>
+#include <p10_frequency_buckets.H>
 #include <targeting/common/attributes.H>
 
 #include "utilbase.H"
@@ -121,6 +121,7 @@ namespace Util
 
     uint32_t getBootNestFreq()
     {
+/* FIXME RTC: 210975 NEST_PLL_FREQ_LIST DNE in P10 yet
         TARGETING::Target * l_sys = nullptr;
         (void) TARGETING::targetService().getTopLevelTarget( l_sys );
         assert( l_sys, "getBootNestFreq() system target is NULL");
@@ -141,6 +142,8 @@ namespace Util
                 l_nestPllBucket );
 
         return l_bootNestFreq;
+*/
+        return 0;
     }
 
 

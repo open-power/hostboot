@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,7 +44,9 @@
 
 #include <isteps/pm/pm_common_ext.H>
 #include <pnor/pnorif.H>
+/* FIXME RTC: 210975
 #include <stopreg/p9_stop_api.H>
+*/
 
 //trace
 extern trace_desc_t* g_trac_isteps_trace;

@@ -32,20 +32,25 @@
 //  STD support
 #include <map>
 
+/* FIXME RTC: 210975
 //  Support for all istep common functions
 #include "istepHelperFuncs.H"          // captureError
+*/
 
 //  Tracing support
 #include <trace/interface.H>           // TRACFCOMP
 #include <initservice/isteps_trace.H>  // g_trac_isteps_trace
 
+/* FIXME RTC: 210975
 //  Targeting support
 #include <fapi2/target.H>              // fapi2::Target
 #include <target.H>                    // Target
+*/
 
 //  Error handling support
 #include <errl/errlentry.H>            // errlHndl_t
 
+/* FIXME RTC: 210975
 //  HWP call support
 #include <fapi2/plat_hwp_invoker.H>    // FAPI_INVOKE_HWP
 #include <p9_io_xbus_pre_trainadv.H>   // p9_io_xbus_pre_trainadv
@@ -54,6 +59,7 @@
 #include <p9_io_obus_pre_trainadv.H>   // p9_io_obus_pre_trainadv
 #include <p9_io_obus_linktrain.H>      // p9_io_obus_link_train
 #include <p9_io_obus_post_trainadv.H>  // p9_io_obus_post_trainadv
+*/
 
 namespace ISTEP_09
 {
@@ -67,6 +73,7 @@ using namespace TARGETING;
  */
 const char * hwpCallToString( HWP_CALL_TYPE i_hwpCall )
 {
+/* FIXME RTC: 210975
     const static std::map<HWP_CALL_TYPE, const char*> hwpCallToStringMap =
     {
         { P9_IO_XBUS_PRE_TRAINADV, "p9_io_xbus_pre_trainadv" },
@@ -83,13 +90,17 @@ const char * hwpCallToString( HWP_CALL_TYPE i_hwpCall )
     }
     else
     {
+*/
         return "";
+/* FIXME RTC: 210975
     }
+*/
 }
 
 /**
  *   trainXbus
  */
+/* FIXME RTC: 210975
 uint32_t trainXbus(HWP_CALL_TYPE   i_hwpCall,
                    IStepError     &o_stepError,
                    compId_t        i_componentId,
@@ -193,10 +204,12 @@ uint32_t trainXbus(HWP_CALL_TYPE   i_hwpCall,
 
     return l_numberOfTrainFailures;
 }
+*/
 
 /**
  *   trainObus
  */
+/* FIXME RTC: 210975
 uint32_t trainObus(HWP_CALL_TYPE   i_hwpCall,
                    IStepError     &o_stepError,
                    compId_t        i_componentId,
@@ -299,10 +312,12 @@ uint32_t trainObus(HWP_CALL_TYPE   i_hwpCall,
 
     return l_numberOfTrainFailures;
 }
+*/
 
 /**
  *   trainBusHandler
  */
+/* FIXME RTC: 210975
 bool trainBusHandler(TYPE                     i_busType,
                      HWP_CALL_TYPE            i_hwpCall,
                      ISTEP_ERROR::IStepError &o_stepError,
@@ -368,6 +383,7 @@ bool trainBusHandler(TYPE                     i_busType,
 
     return retSuccess;
 }
+*/
 
 
 }  // end namespace ISTEP_09

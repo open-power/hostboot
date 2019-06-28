@@ -163,6 +163,7 @@ static void hdatGetNumberOfCores(uint32_t &o_numCores)
  */
 static void hdatGetEnlargedIOCapacity(uint32_t &o_EnlargedSlotCount)
 {
+/* FIXME RTC: 210975 ATTR_ENLARGED_IO_SLOT_COUNT DNE anymore
     TARGETING::PredicateCTM l_nodePredicate(TARGETING::CLASS_ENC,
                                              TARGETING::TYPE_NODE);
     TARGETING::PredicateHwas l_predHwas;
@@ -196,6 +197,7 @@ static void hdatGetEnlargedIOCapacity(uint32_t &o_EnlargedSlotCount)
         }
         l_nodeindex--;
     }
+*/
 }
 
 /**
@@ -223,6 +225,7 @@ static void hdatPopulateOtherIPLAttributes(hdatOtherIPLAttributes_t &o_hdatOTA)
         assert(l_pSysTarget != NULL);
     }
 
+/* FIXME RTC: 210975
     TARGETING::ATTR_IPL_ATTRIBUTES_type l_iplAttributes;
     l_iplAttributes = l_pSysTarget->getAttr<TARGETING::ATTR_IPL_ATTRIBUTES>();
 
@@ -235,6 +238,7 @@ static void hdatPopulateOtherIPLAttributes(hdatOtherIPLAttributes_t &o_hdatOTA)
     o_hdatOTA.hdatResetPCINOs = l_iplAttributes.resetPCINumbers;
 
     o_hdatOTA.hdatClrPhypNvram = l_iplAttributes.clearHypNVRAM;
+*/
 
     TARGETING::ATTR_PRESERVE_MDC_PARTITION_VPD_type l_preserveMDCPartitionVPD;
     if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_PRESERVE_MDC_PARTITION_VPD>

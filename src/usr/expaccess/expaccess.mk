@@ -22,16 +22,17 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-EXTRAINCDIR += ${ROOTPATH}/src/import
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
-EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
+# FIXME RTC: 210975
+#EXTRAINCDIR += ${ROOTPATH}/src/import
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
+#EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
+#EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
 
 # Need to build exp_indband to use EKB's getMMIO/putMMIO/getCMD/getRSP
-OBJS += exp_inband.o
+#OBJS += exp_inband.o
 OBJS += expscom_trace.o
 OBJS += expscom_utils.o
 OBJS += i2cscomdd.o

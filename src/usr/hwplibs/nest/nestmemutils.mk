@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017,2018
+# Contributors Listed Below - COPYRIGHT 2017,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -33,8 +33,10 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 
-VPATH += ${HWP_NEST_MEM_UTILS_PATH}
+# FIXME RTC: 210975
 
-include ${ROOTPATH}/procedure.rules.mk
+#VPATH += ${HWP_NEST_MEM_UTILS_PATH}
 
-include ${HWP_NEST_MEM_UTILS_PATH}/p9_putmemproc.mk
+#include ${ROOTPATH}/procedure.rules.mk
+
+#include ${HWP_NEST_MEM_UTILS_PATH}/p9_putmemproc.mk

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,15 +51,18 @@
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
 
+/* FIXME RTC: 210975
 // fapi2 support
 #include <fapi2.H>
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
+*/
 
 #include <config.h>
 
 // HWP
-#include <p9c_mss_attr_cleanup.H>
+//@TODO RTC 210975 Remove when possible.
+// #include <p9c_mss_attr_cleanup.H>
 
 namespace   ISTEP_07
 {
@@ -75,6 +78,7 @@ using   namespace   TARGETING;
 void*    host_mss_attr_cleanup( void *io_pArgs )
 {
     IStepError l_StepError;
+/* FIXME RTC: 210975
     errlHndl_t l_err = NULL;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_mss_attr_cleanup entry");
@@ -111,6 +115,7 @@ void*    host_mss_attr_cleanup( void *io_pArgs )
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "Running p9c_mss_attr_cleanup HWP on "
                   "DIMM target HUID %.8X", TARGETING::get_huid(l_Dimm));
+
         FAPI_INVOKE_HWP(l_err, p9c_mss_attr_cleanup, l_fapi2_dimm_target);
         if(l_err)
         {
@@ -125,7 +130,7 @@ void*    host_mss_attr_cleanup( void *io_pArgs )
 
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_mss_attr_cleanup exit" );
-
+*/
     return l_StepError.getErrorHandle();
 }
 

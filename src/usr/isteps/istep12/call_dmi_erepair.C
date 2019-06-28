@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,14 +39,17 @@
 
 //Fapi Support
 #include    <config.h>
+/* FIXME RTC: 210975
 #include    <fapi2.H>
 #include    <fapi2/plat_hwp_invoker.H>
+*/
 #include    <util/utilmbox_scratch.H>
 
+/* FIXME RTC: 210975
 //HWP
 #include    <p9_io_dmi_restore_erepair.H>
-#include    <p9_io_cen_restore_erepair.H>
 #include    <p9_io_erepairAccessorHwpFuncs.H>
+*/
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -61,8 +64,11 @@ void* call_dmi_erepair (void *io_pArgs)
     IStepError l_StepError;
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_erepair entry" );
 
-    errlHndl_t l_errPtr = NULL;
+/* FIXME RTC: 210975
     fapi2::ReturnCode l_rc;
+*/
+#if 0
+    errlHndl_t l_errPtr = NULL;
     std::vector<uint8_t> l_endp1_txFaillanes;
     std::vector<uint8_t> l_endp1_rxFaillanes;
     std::vector<uint8_t> l_endp2_txFaillanes;
@@ -247,7 +253,7 @@ void* call_dmi_erepair (void *io_pArgs)
         } // end of if(l_endp2_txFaillanes.size() || l_endp2_rxFaillanes.size())
     } // end for l_dmi_target
 
-
+#endif
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_erepair exit" );
 
 

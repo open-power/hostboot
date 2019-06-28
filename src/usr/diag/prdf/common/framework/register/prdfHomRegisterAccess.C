@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -148,7 +148,9 @@ uint32_t ScomAccessor::Access(TargetHandle_t i_target,
         {
             case MopRegisterAccess::WRITE:
             {
+/* FIXME RTC: 210975
                 rc = PRDF::PlatServices::putScom(i_target, bs, registerId);
+*/
 
                 #ifdef __HOSTBOOT_RUNTIME
                 using namespace stopImageSection;
@@ -201,7 +203,9 @@ uint32_t ScomAccessor::Access(TargetHandle_t i_target,
             case MopRegisterAccess::READ:
                 bs.clearAll(); // clear all bits
 
+/* FIXME RTC: 210975
                 rc = PRDF::PlatServices::getScom(i_target, bs, registerId);
+*/
 
                 break;
 

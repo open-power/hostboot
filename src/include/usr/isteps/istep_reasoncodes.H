@@ -40,7 +40,7 @@ namespace ISTEP
         MOD_BUILD_HCODE_IMAGES                            = 0x04,
         MOD_PROC_SET_PORE_BAR                             = 0x05,
         MOD_HOST_ACTIVATE_MASTER                          = 0x06,
-        MOD_SBE_CENTAUR_INIT                              = 0x07,
+        // 0x07 Unused
         MOD_ENABLE_CORE_CHECKSTOPS                        = 0x08,
         MOD_DECONFIG_PHBS_BASED_ON_PCI_STATE              = 0x09,
         MOD_COMPUTE_PCIE_CONFIG_ATTRS                     = 0x0A,

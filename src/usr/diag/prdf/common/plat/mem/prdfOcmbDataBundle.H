@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -184,25 +184,13 @@ class OcmbDataBundle : public DataBundle
     /** Bool to indicate if we've triggered a port fail because of IUEs. */
     bool iv_iuePortFail = false;
 
-    #ifdef __HOSTBOOT_RUNTIME
 
-    /** VCM false alarm counter. */
-    VcmFalseAlarm * iv_vcmFalseAlarmCounter = nullptr;
-
-    /** TPS false alarm counter. */
-    TpsFalseAlarm * iv_tpsFalseAlarmCounter = nullptr;
-
-    /** Set to true if mainline NCEs and TCEs should be permanently masked. This
-     *  is checked at the end of targeted diagnostics before background
-     *  scrubbing is resumed. */
-    bool iv_maskMainlineNceTce = false;
-
-    #else // IPL only
+    #if defined(__HOSTBOOT_MODULE) && defined(__HOSTBOOT_RUNTIME)
 
     /** MNFG IPL CE statistics. */
     MemIplCeStats<TARGETING::TYPE_OCMB_CHIP> * iv_iplCeStats = nullptr;
 
-    #endif
+    #endif // __HOSTBOOT_MODULE && __HOSTBOOT_RUNTIME
 
     #endif // __HOSTBOOT_MODULE
 

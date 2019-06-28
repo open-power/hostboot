@@ -284,7 +284,9 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_priAttnType,
 
         // Set the time in which PRD handled the error.
         Timer timeOfError;
+/* FIXME RTC: 210975
         PlatServices::getCurrentTime( timeOfError );
+*/
         serviceData.SetTOE( timeOfError );
 
         ServiceDataCollector l_tempSdc = serviceData;
@@ -374,7 +376,9 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_priAttnType,
     // Sleep for 20msec to let attention lines settle if we are at threshold.
     if ( (g_prd_errlHndl == NULL) && serviceData.IsAtThreshold() )
     {
+/* FIXME RTC: 210975
         PlatServices::milliSleep( 0, 20 );
+*/
     }
 
     retErrl = g_prd_errlHndl.release();

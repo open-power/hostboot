@@ -32,10 +32,12 @@
 #include <targeting/common/targetservice.H>
 #include <util/misc.H>
 
+/* FIXME RTC: 210975
 #include <plat_hwp_invoker.H>     // for FAPI_INVOKE_HWP
 #include <lib/shared/nimbus_defaults.H> // Needed before memdiags_fir.H
 #include <lib/fir/memdiags_fir.H> // for mss::unmask::after_memdiags
 #include <lib/mc/port.H>          // for mss::reset_reorder_queue_settings
+*/
 
 #if defined(CONFIG_IPLTIME_CHECKSTOP_ANALYSIS) && !defined(__HOSTBOOT_RUNTIME)
   #include <isteps/pm/occCheckstop.H>
@@ -121,6 +123,7 @@ void* call_mss_memdiag (void* io_pArgs)
                 if ( nullptr != errl ) break;
             }
 
+/* FIXME RTC: 210975
             for ( auto & tt : trgtList )
             {
                 fapi2::Target<fapi2::TARGET_TYPE_MCBIST> ft ( tt );
@@ -145,6 +148,7 @@ void* call_mss_memdiag (void* io_pArgs)
                     break;
                 }
             }
+*/
             if ( nullptr != errl ) break;
         }
         else if ( MODEL_CUMULUS == procType )

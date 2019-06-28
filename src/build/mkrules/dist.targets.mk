@@ -65,7 +65,6 @@ COPY_FILES = \
     img/isteplist.csv:tools,vpo,openpower \
     img/dimmspd.dat:vpo \
     img/procmvpd.dat:vpo \
-    img/cvpd.dat:vpo \
     img/dvpd.dat:vpo \
     obj/genfiles/attrInfo.csv:vpo,openpower \
     obj/genfiles/attrEnumInfo.csv:vpo \
@@ -95,10 +94,6 @@ COPY_FILES = \
     src/usr/targeting/common/xmltohb/attribute_types.xml:openpower \
     src/usr/targeting/common/xmltohb/attribute_types_hb.xml:openpower \
     src/usr/targeting/common/xmltohb/target_types_hb.xml:openpower \
-    src/usr/targeting/common/xmltohb/simics_NIMBUS.system.xml:openpower \
-    src/usr/targeting/common/xmltohb/simics_CUMULUS.system.xml:openpower \
-    src/usr/targeting/common/xmltohb/simics_CUMULUS_CDIMM.system.xml:openpower \
-    src/usr/targeting/common/xmltohb/simics_AXONE.system.xml:openpower \
     src/usr/targeting/common/xmltohb/simics_P10.system.xml:openpower \
     src/usr/targeting/common/xmltohb/xmltohb.pl:openpower \
     src/usr/hdat/hdatBinLayout.xml:openpower \
@@ -282,9 +277,7 @@ simics.tar_CONTENTS = \
     img/procmvpd_p9n.dat \
     img/procmvpd_p9c.dat \
     img/procmvpd_p9a.dat \
-    img/cvpd.dat \
     img/dvpd.dat \
-    img/cvpd_cdimm.dat \
     img/dimmspd_cdimm.dat \
     obj/genfiles/attrInfo.csv \
     obj/genfiles/attrEnumInfo.csv \
@@ -313,25 +306,10 @@ fsp.tar_CONTENTS = \
     src/build/buildpnor/pnorLayoutFSP.xml \
     src/build/buildpnor/pnorLayoutP10.xml \
     $(if $(FAKEPNOR), src/build/buildpnor/pnorLayoutFake.xml, ) \
-    $(if $(FAKEPNOR), img/vbu_NIMBUS_targeting.bin, ) \
-    $(if $(FAKEPNOR), img/vbu_NIMBUS_targeting.bin.protected, ) \
-    $(if $(FAKEPNOR), img/vbu_NIMBUS_targeting.bin.unprotected, ) \
     $(if $(FAKEPNOR), img/vpo_sysmvpd.dat, ) \
     $(if $(FAKEPNOR), img/vpo_djvpd.dat, ) \
     $(if $(FAKEPNOR), img/dvpd.dat, ) \
-    img/simics_NIMBUS_targeting.bin \
-    img/simics_CUMULUS_targeting.bin \
-    img/simics_CUMULUS_CDIMM_targeting.bin \
-    img/simics_AXONE_targeting.bin \
     img/simics_P10_targeting.bin \
-    img/simics_NIMBUS_targeting.bin.protected \
-    img/simics_NIMBUS_targeting.bin.unprotected \
-    img/simics_CUMULUS_targeting.bin.protected \
-    img/simics_CUMULUS_targeting.bin.unprotected \
-    img/simics_CUMULUS_CDIMM_targeting.bin.protected \
-    img/simics_CUMULUS_CDIMM_targeting.bin.unprotected \
-    img/simics_AXONE_targeting.bin.protected \
-    img/simics_AXONE_targeting.bin.unprotected \
     img/simics_P10_targeting.bin.protected \
     img/simics_P10_targeting.bin.unprotected \
     obj/genfiles/fapiattrs.xml \

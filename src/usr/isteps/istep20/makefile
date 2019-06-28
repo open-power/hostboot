@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -25,6 +25,8 @@
 ROOTPATH = ../../../..
 MODULE = istep20
 
-OBJS += call_host_load_payload.o
+# FIXME RTC: 210975
+
+#OBJS += call_host_load_payload.o
 
 include ${ROOTPATH}/config.mk

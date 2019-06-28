@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2018
+# Contributors Listed Below - COPYRIGHT 2013,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -28,20 +28,22 @@ MODULE = trace_rt
 
 EXTRAINCDIR +=${ROOTPATH}/src/usr
 
-OBJS += interface.o
-OBJS += assert.o
-OBJS += compdesc.o
-OBJS += complist.o
-OBJS += rt_service.o
-OBJS += bufferpage.o
-OBJS += rt_daemon.o
-OBJS += rt_buffer.o
-OBJS += rt_rsvdtracebuffer.o
-OBJS += rt_rsvdtracebufservice.o
+# FIXME RTC: 210975
+
+#OBJS += interface.o
+#OBJS += assert.o
+#OBJS += compdesc.o
+#OBJS += complist.o
+#OBJS += rt_service.o
+#OBJS += bufferpage.o
+#OBJS += rt_daemon.o
+#OBJS += rt_buffer.o
+#OBJS += rt_rsvdtracebuffer.o
+#OBJS += rt_rsvdtracebufservice.o
 
 
-VPATH += ..
-VPATH += ../daemon
+#VPATH += ..
+#VPATH += ../daemon
 
 SUBDIRS += test.d
 

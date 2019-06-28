@@ -56,28 +56,6 @@
 namespace fapi2
 {
 
-// CDIMM attribute table
-const uint8_t NUM_OF_CDIMM_ATTRS = 8;
-uint32_t CDIMM_ATTR_ID[NUM_OF_CDIMM_ATTRS] =
-{
-   ATTR_CEN_CDIMM_VPD_SUPPLIER_POWER_INTERCEPT,
-   ATTR_CEN_CDIMM_VPD_MASTER_TOTAL_POWER_INTERCEPT,
-   ATTR_CEN_CDIMM_VPD_SUPPLIER_TOTAL_POWER_INTERCEPT,
-   ATTR_CEN_CDIMM_VPD_MASTER_POWER_SLOPE,
-   ATTR_CEN_CDIMM_VPD_MASTER_TOTAL_POWER_SLOPE,
-   ATTR_CEN_CDIMM_VPD_SUPPLIER_TOTAL_POWER_SLOPE,
-   ATTR_CEN_CDIMM_VPD_MASTER_POWER_INTERCEPT,
-   ATTR_CEN_CDIMM_VPD_SUPPLIER_POWER_SLOPE
-};
-
-// ISDIMM attribute table
-const uint8_t NUM_OF_ISDIMM_ATTRS = 2;
-uint32_t ISDIMM_ATTR_ID[NUM_OF_ISDIMM_ATTRS] =
-{
-    ATTR_CEN_VPD_ISDIMMTOC4DQS,
-    ATTR_CEN_VPD_ISDIMMTOC4DQ
-};
-
 //******************************************************************************
 // Global Variables
 //******************************************************************************
@@ -847,20 +825,6 @@ void AttrOverrideSync::triggerAttrSync(fapi2::TargetType i_type,
         //Need a generic fapi target to use later
         fapi2::Target<TARGET_TYPE_ALL> l_fapiTarget( l_pTarget);
 
-        // For membuf, see if it has CDIMMs
-        uint8_t l_cdimm = 0;
-        if (l_fType == TARGET_TYPE_MEMBUF_CHIP)
-        {
-            const auto l_mbas = l_fapiTarget.getChildren<fapi2::TARGET_TYPE_MBA>();
-            if ( !l_mbas.empty() )
-            {
-                // Debug tool, ignore error handling
-                fapi2::Target<TARGET_TYPE_MBA> l_mbaTarget(l_mbas[0]);
-                FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_CUSTOM_DIMM,
-                              l_mbaTarget, l_cdimm);
-            }
-        }
-
         //Determine the target location info
         uint16_t l_pos = 0;
         uint8_t l_unitPos = 0;
@@ -889,41 +853,6 @@ void AttrOverrideSync::triggerAttrSync(fapi2::TargetType i_type,
                (l_attrs[i].iv_attrId == fapi2::ATTR_BAD_DQ_BITMAP))
             {
                 continue;
-            }
-
-            // Skip CDIMM specific attributes for non-cdimms
-            if (l_fType == TARGET_TYPE_MEMBUF_CHIP)
-            {
-                bool skip_attr = false;
-                if (l_cdimm) // CDIMM
-                {
-                    for (uint8_t ii = 0; ii < NUM_OF_ISDIMM_ATTRS; ii++)
-                    {
-                         if (l_attrs[i].iv_attrId == ISDIMM_ATTR_ID[ii])
-                         {
-                             skip_attr = true;
-                             break;
-                         }
-                    }
-                }
-                else // ISDIMM
-                {
-                    for (uint8_t ii = 0; ii < NUM_OF_CDIMM_ATTRS; ii++)
-                    {
-                         if (l_attrs[i].iv_attrId == CDIMM_ATTR_ID[ii])
-                         {
-                             skip_attr = true;
-                             break;
-                         }
-                    }
-                }
-
-                // Skip attr if wrong dimm type to avoid error
-                if (skip_attr == true)
-                {
-                    continue;
-                }
-
             }
 
             // Write the attribute to the SyncAttributeTank to sync to Cronus

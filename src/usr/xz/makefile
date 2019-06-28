@@ -11,8 +11,9 @@ MODULE = xz
 
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/xz
 
-OBJS += xz_crc32.o
-OBJS += xz_dec_lzma2.o
-OBJS += xz_dec_stream.o
+# TODO RTC: 210975
+#OBJS += xz_crc32.o
+#OBJS += xz_dec_lzma2.o
+#OBJS += xz_dec_stream.o
 
 include ${ROOTPATH}/config.mk

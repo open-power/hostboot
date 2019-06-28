@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,8 +51,10 @@
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
 
+/* FIXME RTC: 210975
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
+*/
 
 //  MVPD
 #include <devicefw/userif.H>
@@ -60,7 +62,8 @@
 
 #include <config.h>
 #include "host_proc_pcie_scominit.H"
-#include <p9_pcie_scominit.H>
+// FIXME RTC: 210975
+//#include <p9_pcie_scominit.H>
 
 namespace   ISTEP_10
 {
@@ -102,6 +105,7 @@ void*    call_proc_pcie_scominit( void    *io_pArgs )
             errlCommit( l_errl, ISTEP_COMP_ID );
         }
 
+/* FIXME RTC: 210975
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi2_proc_target(
                                                                  l_cpu_target);
 
@@ -133,6 +137,7 @@ void*    call_proc_pcie_scominit( void    *io_pArgs )
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "SUCCESS :  proc_pcie_scominit HWP" );
         }
+*/
     } // end of looping through all processors
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,

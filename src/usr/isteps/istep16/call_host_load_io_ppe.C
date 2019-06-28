@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,14 +32,18 @@
 //  targeting support
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
+/* FIXME RTC: 210975
 #include    <fapi2/target.H>
 #include    <fapi2/plat_hwp_invoker.H>
+*/
 
 // isSMPWrapConfig call support
 #include <initservice/initserviceif.H>
 
+/* FIXME RTC: 210975
 //  HWP call support
 #include <nest/nestHwpHelperFuncs.H>   // fapiHWPCallWrapperForChip
+*/
 
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
@@ -55,6 +59,7 @@ void* call_host_load_io_ppe (void *io_pArgs)
     IStepError  l_stepError;
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "host_load_io_ppe entry" );
+/* FIXME RTC: 210975
     do
     {
         if (!INITSERVICE::isSMPWrapConfig())
@@ -68,6 +73,7 @@ void* call_host_load_io_ppe (void *io_pArgs)
         }
 
     } while( 0 );
+*/
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "host_load_io_ppe exit ");

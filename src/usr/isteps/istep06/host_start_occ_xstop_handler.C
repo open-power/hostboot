@@ -50,6 +50,9 @@ void* host_start_occ_xstop_handler( void *io_pArgs )
 {
     ISTEP_ERROR::IStepError l_stepError;
 
+// FIXME RTC: 210975
+#if 0
+
     errlHndl_t l_err = nullptr;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -181,6 +184,7 @@ void* host_start_occ_xstop_handler( void *io_pArgs )
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "host_start_occ_xstop_handler exit" );
 
+#endif
     return l_stepError.getErrorHandle();
 }
 

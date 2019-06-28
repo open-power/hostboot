@@ -35,19 +35,22 @@
 #include    <targeting/common/util.H>
 #include    <targeting/common/utilFilter.H>
 
+/* FIXME RTC: 210975
 // fapi2 HWP invoker
 #include    <fapi2/plat_hwp_invoker.H>
+*/
 
 //From Import Directory (EKB Repository)
 #include    <config.h>
+/* FIXME RTC: 210975
 #include    <fapi2.H>
 #include    <p9_mss_scominit.H>
 #include    <p9_throttle_sync.H>
-#include    <p9c_mss_scominit.H>
 #ifdef CONFIG_AXONE
 #include    <exp_scominit.H>
 #include    <chipids.H> // for EXPLORER ID
 #endif
+*/
 
 using   namespace   ERRORLOG;
 using   namespace   ISTEP;
@@ -94,6 +97,7 @@ void* call_mss_scominit (void *io_pArgs)
 
 void nimbus_call_mss_scominit(IStepError & io_istepError)
 {
+/* FIXME RTC: 210975
     errlHndl_t l_err = nullptr;
 
     // Get all MCBIST targets
@@ -138,54 +142,13 @@ void nimbus_call_mss_scominit(IStepError & io_istepError)
                     TARGETING::get_huid(l_target));
         }
     }
+*/
 }
 
 void cumulus_call_mss_scominit(IStepError & io_istepError)
 {
-    errlHndl_t l_err = nullptr;
 
-    // Get all MBA targets
-    TARGETING::TargetHandleList l_membufTargetList;
-    getAllChips(l_membufTargetList, TYPE_MEMBUF);
 
-    for (const auto & l_membuf_target : l_membufTargetList)
-    {
-        // Dump current run on target
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "Running p9c_mss_scominit HWP on target HUID %.8X",
-                TARGETING::get_huid(l_membuf_target));
-
-        fapi2::Target <fapi2::TARGET_TYPE_MEMBUF_CHIP> l_fapi_membuf_target
-            (l_membuf_target);
-
-        //  call the HWP with each fapi2::Target
-        FAPI_INVOKE_HWP(l_err, p9c_mss_scominit, l_fapi_membuf_target);
-
-        if (l_err)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR 0x%.8X: p9c_mss_scominit HWP returns error",
-                      l_err->reasonCode());
-
-            // capture the target data in the elog
-            ErrlUserDetailsTarget(l_membuf_target).addToLog(l_err);
-
-            // Create IStep error log and cross reference to error that
-            // occurred
-            io_istepError.addErrorDetails( l_err );
-
-            // Commit Error
-            errlCommit( l_err, HWPF_COMP_ID );
-
-            break;
-        }
-        else
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                  "SUCCESS running p9c_mss_scominit HWP on target HUID %.8X",
-                  TARGETING::get_huid(l_membuf_target));
-        }
-    }
 }
 #else
 void nimbus_call_mss_scominit(IStepError & io_istepError)
@@ -207,6 +170,7 @@ void cumulus_call_mss_scominit(IStepError & io_istepError)
 #ifdef CONFIG_AXONE
 void axone_call_mss_scominit(IStepError & io_istepError)
 {
+/* FIXME RTC: 210975
     errlHndl_t l_err = nullptr;
 
     // Get all OCMB targets
@@ -263,6 +227,7 @@ void axone_call_mss_scominit(IStepError & io_istepError)
                   "target HUID %.8X", TARGETING::get_huid(l_ocmb_target));
         }
     }
+*/
 }
 #else
 void axone_call_mss_scominit(IStepError & io_istepError)

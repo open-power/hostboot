@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,12 +41,16 @@
 #include    <targeting/common/utilFilter.H>
 #include    <targeting/common/trace.H>
 
+/* FIXME RTC: 210975
 #include    <fapi2/target.H>
 #include    <fapi2/plat_hwp_invoker.H>
+*/
 #include    <errl/errlmanager.H>
 
+/* FIXME RTC: 210975
 #include <fapi2/target.H>
 #include <p9_fbc_eff_config_aggregate.H>
+*/
 
 namespace   ISTEP_09
 {
@@ -56,8 +60,9 @@ namespace   ISTEP_09
 //
 void*   call_host_fbc_eff_config_aggregate( void    *io_pArgs )
 {
-    errlHndl_t l_errl = NULL;
     ISTEP_ERROR::IStepError l_stepError;
+/* FIXME RTC: 210975
+    errlHndl_t l_errl = NULL;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_fbc_eff_config_aggregate entry" );
@@ -81,6 +86,7 @@ void*   call_host_fbc_eff_config_aggregate( void    *io_pArgs )
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_fbc_eff_config_aggregate exit" );
 
+*/
     return l_stepError.getErrorHandle();
 }
 

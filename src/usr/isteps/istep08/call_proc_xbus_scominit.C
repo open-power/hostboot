@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,15 +52,18 @@
 #include    <targeting/common/utilFilter.H>
 
 #include  <pbusLinkSvc.H>
+/* FIXME RTC: 210975
 #include  <fapi2/target.H>
 #include  <fapi2/plat_hwp_invoker.H>
+*/
 
 //  MVPD
 #include <devicefw/userif.H>
 #include <vpd/mvpdenums.H>
 
 #include <config.h>
-#include <p9_io_xbus_scominit.H>
+// FIXME RTC: 210975
+//#include <p9_io_xbus_scominit.H>
 
 namespace   ISTEP_08
 {
@@ -113,6 +116,7 @@ void* call_proc_xbus_scominit( void *io_pArgs )
             break;
         }
 
+/* FIXME RTC: 210975
         for (const auto & l_XbusConnection: l_XbusConnections)
         {
             const TARGETING::Target* l_thisXbusTarget = l_XbusConnection.first;
@@ -167,6 +171,7 @@ void* call_proc_xbus_scominit( void *io_pArgs )
                 }
             }
         } // end of going through pairs
+*/
 
     } while (0);
 

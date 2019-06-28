@@ -142,18 +142,18 @@ void* host_set_ipl_parms( void *io_pArgs )
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "HIOMAP PNOR-IPMI not enabled, BMC firmware needs to be updated.");
-      
+
 #ifdef CONFIG_PNORDD_IS_BMCMBOX
         bool l_IS_BMCMBOX = true;
 #else
         bool l_IS_BMCMBOX = false;
-#endif      
+#endif
 
 #ifdef CONFIG_PNORDD_IS_IPMI
         bool l_IS_IPMI = true;
 #else
         bool l_IS_IPMI = false;
-#endif      
+#endif
 
         /*@
          * @errortype

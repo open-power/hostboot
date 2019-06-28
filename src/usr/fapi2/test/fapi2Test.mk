@@ -28,11 +28,14 @@
 # @brief Common makefile for fapi2 and runtime test directory
 #
 
+# FIXME RTC: 210975
+
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/fapi2/test/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
@@ -40,9 +43,6 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/accessors/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/targeting/common/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
-
-CENTAUR_PROC_PATH=${ROOTPATH}/src/import/chips/centaur/procedures
-EXTRAINCDIR += ${CENTAUR_PROC_PATH}/hwp/memory/lib/shared/
 
 # Procedures
 OBJS += p9_sample_procedure.o
@@ -58,7 +58,7 @@ OBJS += fapi2PlatGetVpdOcmbChipTest.o
 ifeq (${HOSTBOOT_RUNTIME},1)
 ################################################################################
 ## Remove non-runtime tests (grep -v testname.H)
-TESTS += ${shell ls ${ROOTPATH}/src/usr/fapi2/test/*Test.H | \
+#TESTS += ${shell ls ${ROOTPATH}/src/usr/fapi2/test/*Test.H | \
          grep -v fapi2PlatGetVpdOcmbChipTest.H | \
          grep -v fapi2I2cAccessTest.H | \
          grep -v fapi2MmioAccessTest.H | \
@@ -70,15 +70,15 @@ else
 
 ################################################################################
 ## All hostboot IPL time tests
-TESTS += ${shell ls ${ROOTPATH}/src/usr/fapi2/test/*Test.H | \
+#TESTS += ${shell ls ${ROOTPATH}/src/usr/fapi2/test/*Test.H | \
          sort | xargs}
-OBJS += p9_i2ctests.o
-OBJS += p9_mmiotests.o
+#OBJS += p9_i2ctests.o
+#OBJS += p9_mmiotests.o
 
 ################################################################################
 endif
 
-TESTS += ${shell ls ${ROOTPATH}/src/usr/fapi2/test/*TestCxx.H | sort | xargs}
+#TESTS += ${shell ls ${ROOTPATH}/src/usr/fapi2/test/*TestCxx.H | sort | xargs}
 
 
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/

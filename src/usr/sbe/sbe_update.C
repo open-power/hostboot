@@ -224,9 +224,11 @@ namespace SBE
             assert((FIXED_SEEPROM_WORK_SPACE <= VMM_SBE_UPDATE_SIZE/2),
                    "updateProcessorSbeSeeproms() FIXED_SEEPROM_WORK_SPACE "
                    "too large");
+            /* FIXME RTC: 210975
             assert((MAX_RING_BUF_SIZE <= VMM_SBE_UPDATE_SIZE/4),
                    "updateProcessorSbeSeeproms() MAX_RING_BUF_SIZE too "
                    "large");
+            */
 
             // reset global variables for MBOX Ipl Query
             g_mbox_query_done   = false;
@@ -895,7 +897,9 @@ namespace SBE
                                uint32_t& io_image_size)
     {
         errlHndl_t err = NULL;
+/* FIXME RTC: 210975
         P9XipItem l_xipItem;
+*/
 
         TRACFCOMP( g_trac_sbe,
                    ENTER_MRK"appendHbblToSbe(): i_section=%p, "
@@ -906,9 +910,9 @@ namespace SBE
 
         do{
             // Call p9_xip_find to find HBBL image in SBE image
-            const char* l_sectionId = ".hbbl";
+            //const char* l_sectionId = ".hbbl"; // FIXME RTC: 210975
             // Note - this is not a fapi2 function
-            int xip_rc = p9_xip_find( i_image, l_sectionId, &l_xipItem );
+            int xip_rc = 0; // FIXME RTC: 210975 p9_xip_find( i_image, l_sectionId, &l_xipItem );*/
 
             // Check the return code
             if( xip_rc == P9_XIP_ITEM_NOT_FOUND )
@@ -920,6 +924,8 @@ namespace SBE
             }
             else if( xip_rc == P9_XIP_DATA_NOT_PRESENT )
             {
+// FIXME RTC: 210975
+#if 0
                 TRACFCOMP( g_trac_sbe, "appendHbblToSbe(): "
                            "p9_xip_find located %s, rc=0x%X",
                            xip_rc ? "TOC only" : "TOC and section data",
@@ -962,6 +968,7 @@ namespace SBE
                     // exit loop
                     break;
                 }
+#endif
             }
             else
             {
@@ -1183,7 +1190,7 @@ namespace SBE
                          tmpImgSize);
 
                 procIOMask = coreMask;
-
+/* FIXME RTC: 210975
                 uint32_t l_ringSectionBufSize = MAX_SEEPROM_IMAGE_SIZE;
                 FAPI_INVOKE_HWP( err,
                                  p9_xip_customize,
@@ -1299,6 +1306,7 @@ namespace SBE
                     // break from inner while loop
                     break;
                 }  // end if (nullptr == err) ... else ...
+*/
             }  // end of inner while loop
 
             if(err)
@@ -2441,7 +2449,9 @@ namespace SBE
 
             // Pass in the larger of our custom size or MAX_SEEPROM_IMAGE_SIZE
             // -- p9_xip_customize is expecting at least MAX_SEEPROM_IMAGE_SIZE
+            /* FIXME RTC: 210975
             sbeHbblImgSize = std::max(sbeHbblImgSize, MAX_SEEPROM_IMAGE_SIZE);
+            */
 
             /*******************************************/
             /*  Customize SBE/HBBL Image and           */
@@ -2585,9 +2595,10 @@ namespace SBE
                             Util::crc32_calc(pCustomizedBfr,
                                              sbeImgSize) ;
 
+            // FIXME RTC: 210975
             TRACFCOMP( g_trac_sbe, "getSbeInfoState() - procCustomizeSbeImg(): "
                        "maxSize=0x%X, actSize=0x%X, crc=0x%X",
-                       MAX_SEEPROM_IMAGE_SIZE, sbeImgSize,
+                       /*MAX_SEEPROM_IMAGE_SIZE*/0, sbeImgSize,
                        io_sbeState.customizedImage_crc);
 
             // restore the hbbl ID string
@@ -4559,8 +4570,10 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
             //Make sure procedure constants keep within expected range.
             assert((FIXED_SEEPROM_WORK_SPACE <= VMM_SBE_UPDATE_SIZE/2),
                 "createSbeImageVmmSpace() FIXED_SEEPROM_WORK_SPACE too large");
+/* FIXME RTC: 210975
             assert((MAX_RING_BUF_SIZE <= VMM_SBE_UPDATE_SIZE/4),
                 "createSbeImageVmmSpace() MAX_RING_BUF_SIZE too large");
+*/
 
 
             // Create a memory block to serve as XIP Customize scratch space
@@ -5909,10 +5922,12 @@ errlHndl_t getHwKeyHashFromSbeImage(
         // in SBE Image
         P9XipSection l_xipSection = {0};
 
+/* FIXME RTC: 210975
         // Call p9_xip_find to find HBBL image in SBE image
         auto l_sectionId = P9_XIP_SECTION_SBE_HBBL;
+*/
 
-        int xip_rc = p9_xip_get_section( tmp_data, l_sectionId, &l_xipSection );
+        int xip_rc = 0; /* FIXME RTC: 210975 p9_xip_get_section( tmp_data, l_sectionId, &l_xipSection );*/
 
         TRACUCOMP( g_trac_sbe, "getHwKeyHashFromSbeImage: xip_rc=%d: "
                    "Section iv_offset=0x%X, iv_size=0x%X, iv_alignment=0x%X",

@@ -29,9 +29,11 @@ HOSTBOOT_RUNTIME = 1
 # to instrument this too.
 HOSTBOOT_PROFILE=
 
+# FIXME RTC: 210975
+
 ROOTPATH = ../..
-include ../usr/runtime/common/common.mk
-VPATH += ../usr/runtime/common
+#include ../usr/runtime/common/common.mk
+#VPATH += ../usr/runtime/common
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/
 
 OBJS += rt_start.o

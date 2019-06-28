@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,10 +35,12 @@
 //  targeting support
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
+/* FIXME RTC: 210975
 #include    <fapi2/target.H>
 #include    <fapi2/plat_hwp_invoker.H>
 
 #include   <p9_switch_rec_attn.H>
+*/
 
 #include    <targeting/attrrp.H>
 #include    <sys/internode.h>
@@ -59,7 +61,9 @@ using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
+/* FIXME RTC: 210975
 using   namespace   fapi2;
+*/
 
 
 namespace ISTEP_16
@@ -175,69 +179,7 @@ void* call_host_ipl_complete (void *io_pArgs)
         }
         sys->setAttr<ATTR_HDAT_HBRT_SECTION_SIZE>(l_secSize);
 
-
-//@TODO RTC:150266 HWPs for Centuar+Cumulus
-// Need cen_switch_rec_attn for mem_chips
-#if 0
-        if ( INITSERVICE::spBaseServicesEnabled())
-        {
-            // For FSP based systems, do not route centaur
-            // attentions through host after this step.
-            // Loop through all the centaurs in the system
-            // and run cen_switch_rec_attn
-            TARGETING::TargetHandleList l_memTargetList;
-            getAllChips(l_memTargetList, TYPE_MEMBUF );
-
-            for ( TargetHandleList::iterator l_iter = l_memTargetList.begin();
-                  l_iter != l_memTargetList.end();
-                  ++l_iter )
-            {
-                TARGETING::Target * l_memChip  =   (*l_iter) ;
-
-                //  dump physical path to target
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                         "Running cen_switch_rec_attn HWP on target HUID %.8X",
-                         TARGETING::get_huid(l_memChip) );
-
-
-                const fapi2::Target<TARGET_TYPE_MEMBUF_CHIP> l_fap2_centTarget(
-                            const_cast<TARGETING::Target*> (l_memChip));
-                FAPI_INVOKE_HWP( l_err,
-                                 cen_switch_rec_attn,
-                                 l_fap2_centTarget );
-
-
-                if (l_err)
-                {
-                    // log error for this centaur and continue
-
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              "ERROR 0x%.8X: cen_switch_rec_attn HWP( )",
-                              l_err->reasonCode() );
-
-                    // Add all the details for this centaur
-                    ErrlUserDetailsTarget myDetails(l_memChip);
-
-                    // capture the target data in the elog
-                    myDetails.addToLog(l_err);
-
-                    // Create IStep error log and cross ref error that occurred
-                    l_stepError.addErrorDetails( l_err );
-
-                    // Commit Error
-                    errlCommit( l_err, HWPF_COMP_ID );
-                }
-                else
-                {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                               "SUCCESS: cen_switch_rec_attn HWP( )" );
-                }
-            }   // endfor
-
-        } // end if ( INITSERVICE::spBaseServicesEnabled())
-
-#endif
-
+/* FIXME RTC: 210975
         TARGETING::TargetHandleList l_procChips;
         //Use targeting code to get a list of all processors
         getAllChips( l_procChips, TARGETING::TYPE_PROC   );
@@ -279,6 +221,7 @@ void* call_host_ipl_complete (void *io_pArgs)
                     TARGETING::get_huid(l_procChip) );
             }
         }
+*/
 
         //if an error occurred during for loop, break to error handling
         if( l_err )

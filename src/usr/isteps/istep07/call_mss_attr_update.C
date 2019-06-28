@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,15 +57,17 @@
 // HWAS
 #include    <hwas/common/hwas.H>
 
+/* FIXME RTC: 210975
 // fapi2 support
 #include <fapi2.H>
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
+*/
 
 #include <config.h>
 
 // HWP
-#include <p9_mss_attr_update.H>
+//#include <p9_mss_attr_update.H>
 
 //HRMOR
 #include <sys/misc.h>
@@ -564,6 +566,7 @@ void*    call_mss_attr_update( void *io_pArgs )
             }
         }
 
+/* FIXME RTC:210975
         // Get all functional MCS chiplets
         TARGETING::TargetHandleList l_mcsTargetList;
         getAllChiplets(l_mcsTargetList, TYPE_MCS);
@@ -587,6 +590,7 @@ void*    call_mss_attr_update( void *io_pArgs )
                 errlCommit( l_err, HWPF_COMP_ID );
             }
         }
+*/
     } while (0);
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_attr_update exit" );
 

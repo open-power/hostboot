@@ -55,6 +55,8 @@
 // Interface
 //******************************************************************************
 
+// TODO RTC: 210975 revisit the CEN (Centaur) references in this file.
+
 namespace fapi2
 {
 
@@ -331,139 +333,6 @@ ReturnCode platGetSecurityMode(uint8_t & o_securityMode);
 ///
 /// @return ReturnCode           Always FAPI2_RC_SUCCESS, this cannot fail.
 ReturnCode platSetSecurityMode();
-
-/// @brief This function is called by the FAPI_ATTR_GET macro when getting
-//  the VPD_POWER_CONTROL_CAPABLE attribute. It should not be called directly.
-//
-//  @param[in] i_fapiTarget The target for the attribute operation.
-//  @param[out] o_vpdPowerControlCapableVal   The retrieved attribute value.
-//  @return ReturnCode       Zero on success, else platform specified error.
-ReturnCode platGetControlCapableData(
-                                const Target<TARGET_TYPE_ALL>& i_fapiTarget,
-        ATTR_CEN_VPD_POWER_CONTROL_CAPABLE_Type& o_vpdPowerControlCapableVal
-                                    );
-
-/// @brief This function is called by the FAPI_ATTR_GET macro when getting
-//  the VPD_ISDIMMTOC4DQ attribute. It should not be called directly.
-//
-//  @param[in] i_fapiTarget The target for the attribute operation.
-//  @param[out] o_vpdIsDimmTOC4DQVal  The retrieved attribute value.
-//  @return ReturnCode       Zero on success, else platform specified error.
-ReturnCode platGetDQAttrISDIMM(
-                           const Target<TARGET_TYPE_ALL>& i_fapiTarget,
-                   ATTR_CEN_VPD_ISDIMMTOC4DQ_Type &o_vpdIsDimmTOC4DQVal
-                              );
-
-/// @brief This function is called by the FAPI_ATTR_GET macro when getting
-//  the VPD_ISDIMMTOC4DQS attribute. It should not be called directly.
-//
-//  @param[in] i_fapiTarget The target for the attribute operation.
-//  @param[out] o_vpdIsDimmTOC4DQSVal The retrieved attribute value.
-//  @return ReturnCode       Zero on success, else platform specified error.
-ReturnCode platGetDQSAttrISDIMM(
-                                const Target<TARGET_TYPE_ALL>& i_fapiTarget,
-                      ATTR_CEN_VPD_ISDIMMTOC4DQS_Type &o_vpdIsDimmTOC4DQSVal
-                               );
-
-/// @brief This function is called by the FAPI_ATTR_GET macro when getting
-//  the CEN_VPD_CDIMM_SENSOR_MAP_PRIMARY attribute. It should not be called directly.
-//
-//  @param[in] i_fapiTarget The target for the attribute operation.
-//  @param[out] o_SensorMapType   The retrieved attribute value.
-//  @return ReturnCode       Zero on success, else platform specified error.
-ReturnCode platGetMBvpdSensorMapPrimary(
-                                   const Target<TARGET_TYPE_ALL>& i_fapiTarget,
-                   ATTR_CEN_VPD_CDIMM_SENSOR_MAP_PRIMARY_Type& o_SensorMapType
-                                        );
-
-/// @brief This function is called by the FAPI_ATTR_GET macro when getting
-//  the CEN_VPD_CDIMM_SENSOR_MAP_SECONDARY attribute. It should not be called directly.
-//
-//  @param[in] i_fapiTarget The target for the attribute operation.
-//  @param[out] o_SensorMapType   The retrieved attribute value.
-//  @return ReturnCode       Zero on success, else platform specified error.
-ReturnCode platGetMBvpdSensorMapSecondary(
-                                   const Target<TARGET_TYPE_ALL>& i_fapiTarget,
-                   ATTR_CEN_VPD_CDIMM_SENSOR_MAP_SECONDARY_Type& o_SensorMapType
-                                        );
-
-
-/// @brief This function is called by the FAPI_ATTR_GET macro when getting
-//  the CEN_VPD_DRAM_ADDRESS_MIRRORING attribute. It should not be called directly.
-//
-//  @param[in] i_fapiTarget The target for the attribute operation.
-//  @param[out] o_dramAddressMirroring   The retrieved attribute value.
-//  @return ReturnCode       Zero on success, else platform specified error.
-ReturnCode platGetMBvpdDramAddressMirroring(
-                                   const Target<TARGET_TYPE_ALL>& i_fapiTarget,
-                    ATTR_CEN_VPD_DRAM_ADDRESS_MIRRORING_Type& o_dramAddressMirroring
-                                        );
-
-/// @brief This function is called by the FAPI_ATTR_GET macro when getting
-//  the DRAM_2N_MODE_ENABLED attribute. It should not be called directly.
-//
-//  @param[in] i_fapiTarget The target for the attribute operation.
-//  @param[out] o_dram2NModeEnabled   The retrieved attribute value.
-//  @return ReturnCode       Zero on success, else platform specified error.
-ReturnCode platGetMBvpdDram2NModeEnabled(
-                                   const Target<TARGET_TYPE_ALL>& i_fapiTarget,
-                    ATTR_CEN_VPD_DRAM_2N_MODE_ENABLED_Type& o_dram2NModeEnabled
-                                        );
-
-/// @brief This function is called by the FAPI_ATTR_GET macro when getting
-//  the VPD_VM_KEYWORD attribute. It should not be called directly.
-//
-//  @param[in] i_fapiTarget The target for the attribute operation.
-//  @param[out] o_vpdVMKeywordVal       The retrieved attribute value.
-//  @return ReturnCode       Zero on success, else platform specified error.
-ReturnCode platGetMBvpdMemoryDataVersion(
-                                   const Target<TARGET_TYPE_ALL>& i_fapiTarget,
-                                ATTR_CEN_VPD_VM_KEYWORD_Type& o_vpdVMKeywordVal
-                                        );
-
-/// @brief This function is called by the FAPI_ATTR_GET macro when getting
-//  the VPD_VD_KEYWORD attribute. It should not be called directly.
-//
-//  @param[in] i_fapiTarget The target for the attribute operation.
-//  @param[out] o_vpdVDKeywordVal        The retrieved attribute value.
-//  @return ReturnCode       Zero on success, else platform specified error.
-ReturnCode platGetMBvpdSPDXRecordVersion(
-                                   const Target<TARGET_TYPE_ALL>& i_fapiTarget,
-                                ATTR_CEN_VPD_VD_KEYWORD_Type& o_vpdVDKeywordVal
-                                        );
-
-/// @brief This function is called by the FAPI_ATTR_GET macro when getting
-//  the VPD_DIMM_SPARE attribute. It should not be called directly.
-//
-//  @param[in] i_fapiTarget The target for the attribute operation.
-//  @param[out] o_vpdDimmSpare  The retrieved attribute value.
-//  @return ReturnCode       Zero on success, else platform specified error.
-ReturnCode platGetMBvpdSpareDramData(
-                                  const Target<TARGET_TYPE_ALL>& i_fapiTarget,
-                                 ATTR_CEN_VPD_DIMM_SPARE_Type &o_vpdDimmSpare
-                                    );
-
-/// @brief This function is called by the FAPI_ATTR_GET macro when getting
-//  the VPD_VERSION attribute. It should not be called directly.
-//
-//  @param[in] i_fapiTarget The target for the attribute operation.
-//  @param[out] o_vpdVersion The retrieved attribute value.
-//  @return ReturnCode       Zero on success, else platform specified error.
-ReturnCode platGetMBvpdVersion(
-                                 const Target<TARGET_TYPE_ALL>& i_fapiTarget,
-                                 ATTR_CEN_VPD_VERSION_Type& o_vpdVersion
-                               );
-
-/// @brief This function is called by the FAPI_ATTR_GET macro when getting
-//  the VPD_DW_KEYWORD attribute. It should not be called directly.
-//
-//  @param[in] i_fapiTarget The target for the attribute operation.
-//  @param[out] o_vpdDWKeyword  The retrieved attribute value.
-//  @return ReturnCode       Zero on success, else platform specified error.
-ReturnCode platGetMBvpdVoltageSettingData(
-                                const Target<TARGET_TYPE_ALL>& i_fapiTarget,
-                                ATTR_CEN_VPD_DW_KEYWORD_Type& o_vpdDWKeyword
-                                         );
 
 /// @brief This function is called by the FAPI_ATTR_GET macro when getting
 //  a Memory Buffer vpd attribute. It should not be called directly.
@@ -1596,16 +1465,6 @@ fapiToTargeting::ID, sizeof(VAL), &(VAL))
     ? fapi2::ReturnCode() : \
     fapi2::platAttrSvc::\
     platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_MT_DATA_CONTROL_BYTE_Type>(ID, TARGET, VAL)
-
-//----------------------------------------------------------------------------
-// MACRO to route ATTR_CEN_CDIMM_VPD_MASTER_POWER_INTERCEPT access to the correct
-// HB function
-//----------------------------------------------------------------------------
-#define ATTR_CEN_CDIMM_VPD_MASTER_POWER_INTERCEPT_GETMACRO(ID, TARGET, VAL) \
-    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
-    ? fapi2::ReturnCode() : \
-    fapi2::platAttrSvc::\
-    platGetMBvpdSlopeInterceptData(TARGET, ID, VAL)
 
 //----------------------------------------------------------------------------
 // MACRO to route ATTR_CEN_CDIMM_VPD_MASTER_POWER_SLOPE access to the correct

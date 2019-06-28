@@ -35,14 +35,18 @@
 #include <trace/interface.H>           // TRACFCOMP
 #include <initservice/isteps_trace.H>  // g_trac_isteps_trace
 
+/* FIXME RTC: 210975
 //  Targeting support
 #include <fapi2/target.H>              // fapi2::Target
 #include <target.H>                    // TARGETING::Target
+*/
+#include <pnor/pnorif.H>
 
 //  Error handling support
 #include <istepHelperFuncs.H>          // captureError
 #include <errl/errlentry.H>            // errlHndl_t
 
+/* FIXME RTC: 210975
 //  HWP call support
 #include <fapi2/plat_hwp_invoker.H>    // FAPI_INVOKE_HWP
 #include <p9_chiplet_enable_ridi.H>
@@ -57,6 +61,7 @@
 #include <p9_io_obus_firmask_save_restore.H>
 #include <p9_io_obus_image_build.H>
 #include <p9_io_xbus_image_build.H>
+*/
 
 namespace ISTEP
 {
@@ -206,7 +211,7 @@ void fapiHWPCallWrapper(HWP_CALL_TYPE    i_hwpCall,
             TRACFCOMP(g_trac_isteps_trace, "Target list empty, no targets "
                       "found. HWP call %s will not be called", l_hwpCallStr);
         }
-
+/* FIXME RTC: 210975
         // Loop through all processors including master
         for (const auto & l_target: l_targetList)
         {
@@ -359,6 +364,7 @@ void fapiHWPCallWrapper(HWP_CALL_TYPE    i_hwpCall,
             }
 
         } // end for (const auto & l_target: l_targetList)
+*/
 
     } while (0);
 
@@ -395,6 +401,7 @@ bool fapiHWPCallWrapperHandler(HWP_CALL_TYPE    i_hwpCall,
 {
     bool l_retSuccess = true;
 
+/* FIXME RTC: 210975
     fapiHWPCallWrapper(i_hwpCall, o_stepError, i_componentId, i_targetType);
 
     if (!o_stepError.isNull())
@@ -404,6 +411,7 @@ bool fapiHWPCallWrapperHandler(HWP_CALL_TYPE    i_hwpCall,
 
         l_retSuccess = false;
     }
+*/
 
     return l_retSuccess;
 }

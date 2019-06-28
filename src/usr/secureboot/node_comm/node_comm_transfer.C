@@ -30,7 +30,6 @@
 #include <time.h>
 #include <devicefw/userif.H>
 #include <trace/interface.H>
-#include <scom/centaurScomCache.H> // for TRACE_ERR_FMT, TRACE_ERR_ARGS
 #include <targeting/targplatutil.H>
 #include <secureboot/nodecommif.H>
 #include <secureboot/secure_reasoncodes.H>

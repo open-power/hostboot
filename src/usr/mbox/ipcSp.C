@@ -392,6 +392,7 @@ void IpcSp::msgHandler()
 
                 if(!err)
                 {
+/* FIXME RTC: 210975 don't need istep21 stuff yet
                     uint64_t l_freqData1 =
                         reinterpret_cast<uint64_t>(msg->data[1]);
 
@@ -401,6 +402,7 @@ void IpcSp::msgHandler()
                     //  Function checks frequency attribute data. Returns an error
                     //  if there is a mismatch with that of HB master data
                     err = ISTEP_21::callCheckFreqAttrData(l_freqData1, l_freqData2);
+*/
                 }
 
                 if (err)
@@ -469,6 +471,7 @@ void IpcSp::msgHandler()
 
                 if (err) break;
 
+/* FIXME RTC: 210975 don't need istep21 stuff yet
                 err = ISTEP_21::enableCoreCheckstops();
 
                 if (err)
@@ -480,6 +483,7 @@ void IpcSp::msgHandler()
                 //  Function will not return unless error
                 err = ISTEP_21::callShutdown(msg->data[0],false,
                                              msg->data[1]);
+*/
 
                 if(err)
                 {

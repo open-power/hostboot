@@ -32,6 +32,7 @@
 prd_vpath += ${PRD_SRC_PATH}/plat/mem
 
 prd_incpath += ${PRD_SRC_PATH}/plat/mem
+prd_incpath += ${ROOTPATH}/src/import/generic/memory
 
 ################################################################################
 # Hostboot only object files common to both IPL and runtime
@@ -40,7 +41,8 @@ prd_incpath += ${PRD_SRC_PATH}/plat/mem
 # plat/mem/ (non-rule plugin related)
 prd_obj += prdfMemScrubUtils.o
 prd_obj += prdfMemTdCtlr.o
-prd_obj += prdfMemVcm.o
+# FIXME RTC: 210975
+#prd_obj += prdfMemVcm.o
 prd_obj += prdfP9McbistDomain.o
 
 # plat/mem/ (rule plugin related)
@@ -55,8 +57,8 @@ ifneq (${HOSTBOOT_RUNTIME},1)
 
 # plat/mem/ (non-rule plugin related)
 prd_obj += prdfMemTdCtlr_ipl.o
-prd_obj += prdfMemDsd_ipl.o
-prd_obj += prdfMemTps_ipl.o
+#prd_obj += prdfMemDsd_ipl.o
+#prd_obj += prdfMemTps_ipl.o
 prd_obj += prdfMemVcm_ipl.o
 prd_obj += prdfMemIplCeStats.o
 prd_obj += prdfRestoreDramRepairs.o
@@ -71,8 +73,8 @@ ifeq (${HOSTBOOT_RUNTIME},1)
 
 # plat/mem/ (non-rule plugin related)
 prd_obj += prdfMemTdCtlr_rt.o
-prd_obj += prdfMemDsd_rt.o
-prd_obj += prdfMemTps_rt.o
+#prd_obj += prdfMemDsd_rt.o
+#prd_obj += prdfMemTps_rt.o
 prd_obj += prdfMemVcm_rt.o
 prd_obj += prdfMemDynDealloc.o
 

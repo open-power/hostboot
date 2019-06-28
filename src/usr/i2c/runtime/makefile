@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/vpd/runtime/makefile $
+# $Source: src/usr/i2c/runtime/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2015
+# Contributors Listed Below - COPYRIGHT 2013,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -27,13 +27,15 @@ HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
 MODULE = i2c_rt
 
+# FIXME RTC: 210975
+
 #include common objects between hostboot and runtime hostboot
-include ../i2c.mk
+#include ../i2c.mk
 
 #add unique object modules
-OBJS += rt_i2c.o
+#OBJS += rt_i2c.o
 
-VPATH += ..
+#VPATH += ..
 
 include $(ROOTPATH)/config.mk
 

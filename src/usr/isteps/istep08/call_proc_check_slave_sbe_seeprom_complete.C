@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,6 +57,7 @@
 #include <isteps/hwpisteperror.H>
 #include <errl/errludtarget.H>
 
+/* FIXME RTC: 210975
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
 #include <return_code.H>
@@ -64,6 +65,7 @@
 #include <p9_extract_sbe_rc.H>
 #include <p9_get_sbe_msg_register.H>
 #include <p9_getecid.H>
+*/
 #include <sbeio/sbe_retry_handler.H>
 #include <sbeio/sbeioif.H>
 
@@ -122,8 +124,10 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
                 "Processor target HUID %.8X",
                 TARGETING::get_huid(l_cpu_target));
 
+/* FIXME RTC: 210975
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi2ProcTarget(
                             const_cast<TARGETING::Target*> (l_cpu_target));
+*/
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "Running p9_get_sbe_msg_register HWP"
@@ -228,6 +232,7 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
     //  store them in an attribute.
     for (const auto & l_cpu_target: l_cpuTargetList)
     {
+/* FIXME RTC: 210975
       const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi2ProcTarget(
                           const_cast<TARGETING::Target*> (l_cpu_target));
 
@@ -244,6 +249,7 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
                       p9_getecid,
                       l_fapi2ProcTarget,
                       l_fuseString  );
+*/
 
       if (l_errl)
       {

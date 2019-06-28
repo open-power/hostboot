@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,13 +58,16 @@
 #include    <targeting/common/utilFilter.H>
 #include    <targeting/common/trace.H>
 
+/* FIXME RTC: 210975
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
+*/
 #include <errl/errlmanager.H>
 #include <errl/errlentry.H>
 
+// FIXME RTC: 210975
 // HWP
-#include <p9_fab_iovalid.H>
+//#include <p9_fab_iovalid.H>
 
 #ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
   #include <isteps/pm/occCheckstop.H>
@@ -152,13 +155,15 @@ void calloutOBUS(TargetHandle_t i_proc,
 void*    call_proc_fab_iovalid( void    *io_pArgs )
 {
     IStepError l_StepError;
-    errlHndl_t l_errl = NULL;
-    std::vector<fapi2::ReturnCode> l_fapiRcs;
+    // FIXME RTC: 210975
+    //std::vector<fapi2::ReturnCode> l_fapiRcs;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_fab_iovalid entry" );
 
 #ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
+    // FIXME RTC: 210975 This needs to be taken out of the ifdef block
+    errlHndl_t l_errl = NULL;
     // Before all of the slave processors are enabled, update the FIRDATA inputs
     // for OCC. It should include all PROCs and the master CORE.
     TARGETING::TargetHandle_t masterProc = nullptr;
@@ -187,6 +192,8 @@ void*    call_proc_fab_iovalid( void    *io_pArgs )
     OBUSHuidAttrMap_t l_attrMapBeforeHWP;
     fillAttrMap(l_attrMapBeforeHWP);
 
+// FIXME RTC: 210975
+#if 0
     // Loop through all processors including master
     for (const auto & l_cpu_target: l_cpuTargetList)
     {
@@ -273,6 +280,7 @@ void*    call_proc_fab_iovalid( void    *io_pArgs )
             l_errl = NULL;
         }
     } // end of going through all processors//
+#endif
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_fab_iovalid exit" );

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,8 +41,10 @@
 #include <initservice/initserviceif.H>
 #include <isteps/hwpisteperror.H>
 
+/* FIXME RTC: 210975
 #include <tod/TodTrace.H>
 #include <tod/TodSvc.H>
+*/
 
 using namespace ISTEP_ERROR;
 
@@ -52,6 +54,7 @@ namespace   ISTEP_18
 void * call_tod_setup(void *dummy)
 {
     IStepError l_stepError;
+/* FIXME RTC: 210975
     errlHndl_t l_errl = NULL;
 
     TOD_ENTER("call_tod_setup");
@@ -67,6 +70,7 @@ void * call_tod_setup(void *dummy)
             errlCommit( l_errl, TOD_COMP_ID );
         }
     }
+*/
     return l_stepError.getErrorHandle();
 }
 

@@ -39,11 +39,14 @@
 
 //Fapi Support
 #include    <config.h>
+/* FIXME RTC: 210975
 #include    <fapi2.H>
 #include    <fapi2/plat_hwp_invoker.H>
+*/
 #include    <util/utilmbox_scratch.H>
 #include <util/misc.H>
 
+/* FIXME RTC: 210975
 //HWP
 #include    <p9c_set_inband_addr.H>
 
@@ -51,6 +54,7 @@
 #include    <exp_omi_init.H>
 #include    <p9a_omi_init.H>
 #endif
+*/
 
 //Inband SCOM
 #include    <ibscom/ibscomif.H>
@@ -66,6 +70,7 @@ namespace ISTEP_12
 void* call_cen_set_inband_addr (void *io_pArgs)
 {
     IStepError l_StepError;
+/* FIXME RTC: 210975
     errlHndl_t l_err = NULL;
     auto l_procModel = TARGETING::targetService().getProcessorModel();
 
@@ -116,14 +121,6 @@ void* call_cen_set_inband_addr (void *io_pArgs)
             }
 
         }
-    }
-
-    // @todo RTC 187913 inband centaur scom in P9
-    // Re-enable when support available in simics
-    if ( Util::isSimicsRunning() == false )
-    {
-        //Now enable Inband SCOM for all membuf chips.
-        IBSCOM::enableInbandScoms();
     }
 
 #ifdef CONFIG_AXONE
@@ -219,6 +216,7 @@ void* call_cen_set_inband_addr (void *io_pArgs)
 
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_set_inband_addr exit" );
+*/
 
     // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();

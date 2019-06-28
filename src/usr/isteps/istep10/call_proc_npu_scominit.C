@@ -50,8 +50,10 @@
 #include <initservice/isteps_trace.H>  // g_trac_isteps_trace
 #include <initservice/initserviceif.H>  // isSMPWrapConfig
 
+/* FIXME RTC: 210975
 //  HWP call support
 #include <nest/nestHwpHelperFuncs.H>   // fapiHWPCallWrapperForChip
+*/
 
 namespace ISTEP_10
 {
@@ -66,6 +68,7 @@ using   namespace   TARGETING;
 void* call_proc_npu_scominit( void *io_pArgs )
 {
     IStepError l_stepError;
+/* FIXME RTC: 210975
 
     #ifndef CONFIG_AXONE_BRING_UP
     TRACFCOMP(g_trac_isteps_trace, ENTER_MRK"call_proc_npu_scominit entry");
@@ -79,6 +82,7 @@ void* call_proc_npu_scominit( void *io_pArgs )
     #else
     TRACFCOMP(g_trac_isteps_trace, "Skipping call_proc_npu_scominit in Axone during bringup");
     #endif
+*/
 
     return l_stepError.getErrorHandle();
 }

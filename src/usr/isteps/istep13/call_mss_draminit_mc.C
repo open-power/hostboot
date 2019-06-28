@@ -38,6 +38,7 @@
 // Istep 13 framework
 #include "istep13consts.H"
 
+/* FIXME RTC: 210975
 // fapi2 HWP invoker
 #include  <fapi2/plat_hwp_invoker.H>
 
@@ -49,8 +50,8 @@
 #include  <chipids.H> // for EXPLORER ID
 #else
 #include  <p9_mss_draminit_mc.H>
-#include  <p9c_mss_draminit_mc.H>
 #endif
+*/
 
 
 
@@ -63,10 +64,9 @@ namespace ISTEP_13
 {
 void* call_mss_draminit_mc (void *io_pArgs)
 {
-    errlHndl_t l_err = NULL;
-
     IStepError l_stepError;
-
+/* FIXME RTC: 210975
+    errlHndl_t l_err = NULL;
     TARGETING::Target * sys = NULL;
     TARGETING::targetService().getTopLevelTarget( sys );
 
@@ -112,55 +112,6 @@ void* call_mss_draminit_mc (void *io_pArgs)
         }
 
     } // End; memBuf loop
-
-
-    if(l_stepError.getErrorHandle() == NULL)
-    {
-
-        // Get all Centaur targets
-        TARGETING::TargetHandleList l_membufTargetList;
-        getAllChips(l_membufTargetList, TYPE_MEMBUF);
-
-        for (const auto & l_membuf_target : l_membufTargetList)
-        {
-            // Dump current run on target
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "Running p9_mss_draminit_mc HWP on target HUID %.8X",
-                TARGETING::get_huid(l_membuf_target) );
-
-            fapi2::Target <fapi2::TARGET_TYPE_MEMBUF_CHIP> l_fapi_membuf_target
-                (l_membuf_target);
-
-            //  call the HWP with each fapi2::Target
-            FAPI_INVOKE_HWP(l_err, p9c_mss_draminit_mc, l_fapi_membuf_target);
-
-            if (l_err)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                        "ERROR 0x%.8X : p9c_mss_draminit_mc HWP returns error",
-                        l_err->reasonCode());
-
-                // capture the target data in the elog
-                ErrlUserDetailsTarget(l_membuf_target).addToLog( l_err );
-
-                // Create IStep error log and cross reference to error
-                // that occurred
-                l_stepError.addErrorDetails( l_err );
-
-                // Commit Error
-                errlCommit( l_err, HWPF_COMP_ID );
-
-                break;
-            }
-            else
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "SUCCESS running p9c_mss_draminit_mc HWP on "
-                           "target HUID %.8X",
-                           TARGETING::get_huid(l_membuf_target));
-            }
-        }
-    }
 
 #else
 
@@ -221,6 +172,7 @@ void* call_mss_draminit_mc (void *io_pArgs)
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_mc exit" );
 
+*/
     return l_stepError.getErrorHandle();
 }
 

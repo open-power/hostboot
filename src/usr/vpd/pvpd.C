@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -319,12 +319,13 @@ bool VPD::pvpdPresent( TARGETING::Target * i_target )
  * Planar VPD is included in the Centaur PNOR section.
  * Including with Centaur vpd minimizes the number of PNOR sections.
  */
+//@TODO RTC: 210975: CENATUR_VPD fix
 PvpdFacade::PvpdFacade() :
 IpVpdFacade(PVPD::pvpdRecords,
             (sizeof(PVPD::pvpdRecords)/sizeof(PVPD::pvpdRecords[0])),
             PVPD::pvpdKeywords,
             (sizeof(PVPD::pvpdKeywords)/sizeof(PVPD::pvpdKeywords[0])),
-            PNOR::CENTAUR_VPD,  // note use of CVPD
+            PNOR::EECACHE,  // TODO RTC: 210975 note use of CVPD
             PVPD::g_mutex,
             VPD::VPD_WRITE_NODE)
 {

@@ -348,7 +348,6 @@ bool PNOR::isEnforcedSecureSection(const uint32_t i_section)
                i_section == SBKT ||
                i_section == OCC ||
                i_section == HCODE ||
-               i_section == CENTAUR_HW_IMG ||
                i_section == HB_RUNTIME ||
                i_section == WOFDATA ||
                i_section == MEMD ||
@@ -403,7 +402,6 @@ const char * PNOR::SectionIdToString( uint32_t i_secIdIndex )
         "HBEL",        /**< PNOR::HB_ERRLOGS     : Hostboot Error log Repository */
         "DJVPD",       /**< PNOR::DIMM_JEDEC_VPD : Dimm JEDEC VPD */
         "MVPD",        /**< PNOR::MODULE_VPD     : Module VPD */
-        "CVPD",        /**< PNOR::CENTAUR_VPD    : Centaur VPD */
         "NVRAM",       /**< PNOR::NVRAM          : OPAL Storage */
         "OCC",         /**< PNOR::OCC            : OCC LID */
         "FIRDATA",     /**< PNOR::FIRDATA        : FIRs for checkstop analysis */
@@ -422,7 +420,6 @@ const char * PNOR::SectionIdToString( uint32_t i_secIdIndex )
         "HB_VOLATILE", /**< PNOR::HB_VOLATILE    : Semi volatile partition */
         "MEMD",        /**< PNOR::MEMD           : Memory configuration data */
         "TESTLOAD",    /**< PNOR::TESTLOAD       : Secureboot Test Load */
-        "CENHWIMG",    /**< PNOR::CENTAUR_HW_IMG : Centaur HCODE ref image   */
         "HDAT",        /**< PNOR::HDAT           : Hdat Data */
         "EECACHE",     /**< PNOR::EECACHE        : Cached data from various EEPROMs */
         "OCMBFW",      /**< PNOR::OCMBFW         : OCMB image */

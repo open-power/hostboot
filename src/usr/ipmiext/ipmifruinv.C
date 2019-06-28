@@ -1653,111 +1653,9 @@ errlHndl_t membufIpmiFruInv::buildChassisInfoArea(
 errlHndl_t membufIpmiFruInv::buildBoardInfoArea(
                                               std::vector<uint8_t> &io_data)
 {
+    // TODO RTC: 210975 revisit this function and either implement it or remove
+    // the references to it
     errlHndl_t l_errl = NULL;
-
-    do {
-        //Set formatting data that goes at the beginning of the record
-        preFormatProcessing(io_data, true);
-
-        // Set Mfg Build date
-        // Grab VPD data into seperate data vector
-        std::vector<uint8_t> mfgDateData;
-        l_errl = addVpdData(mfgDateData, PVPD::OPFR, PVPD::MB, false, false);
-        if (l_errl) { break; }
-
-        // Pass that to the function that sets the Build date
-        setMfgData(io_data, mfgDateData);
-
-        uint8_t l_fru_id = 0xFF;
-        // if the centaur_ecid_fru_id is not valid then the centaur is on a
-        // riser card, grab its vpd and populate the record
-        l_fru_id = iv_target->getAttr<TARGETING::ATTR_CENTAUR_ECID_FRU_ID>();
-
-        if( l_fru_id == 0xFF )
-        {
-            //Set Vendor Name - ascii formatted data
-            l_errl = addVpdData(io_data, CVPD::OPFR, CVPD::VN, true);
-            if (l_errl) { break; }
-
-            //Set Product Name - ascii formatted data
-            l_errl = addVpdData(io_data, CVPD::OPFR, CVPD::DR, true);
-            if (l_errl) { break; }
-
-            //Set Product Serial number - ascii formatted data
-            TARGETING::ATTR_SERIAL_NUMBER_type l_sn = {'0'};
-            if( !( iv_target->
-                        tryGetAttr<TARGETING::ATTR_SERIAL_NUMBER>
-                        ( l_sn) ) )
-            {
-                // Should not fail. Need to use tryGetAttr due to complex type.
-                // Use zeros if fails.
-                TRACFCOMP(g_trac_ipmi,"membufIpmiFruInv::buildBoardInfoArea - "
-                        "Error getting serial number attribute");
-            }
-            // The attribute size is 18. The vpd is 16. Only use 16.
-            addCommonAttrData(io_data,
-                    (uint8_t *)&l_sn,
-                    VPD_SN_PN_VPD_SIZE);
-
-            //Set Product Part number - ascii formatted data
-            TARGETING::ATTR_PART_NUMBER_type l_pn = {'0'};
-            if( !( iv_target->
-                        tryGetAttr<TARGETING::ATTR_PART_NUMBER>
-                        ( l_pn) ) )
-            {
-                // Should not fail. Need to use tryGetAttr due to complex type.
-                // Use zeros if fails.
-                TRACFCOMP(g_trac_ipmi,"membufIpmiFruInv::buildBoardInfoArea - "
-                        "Error getting part number attribute");
-            }
-            // The attribute size is 18. The vpd is 16. Only use 16.
-            addCommonAttrData(io_data,
-                    (uint8_t *)&l_pn,
-                    VPD_SN_PN_VPD_SIZE);
-
-            //Push Fru File ID Byte - NULL
-            io_data.push_back(IPMIFRUINV::TYPELENGTH_BYTE_NULL);
-
-        }
-        else
-        {
-            //Set Vendor Name - NULL
-            io_data.push_back(IPMIFRUINV::TYPELENGTH_BYTE_NULL);
-
-            //Set Product Name - NULL
-            io_data.push_back(IPMIFRUINV::TYPELENGTH_BYTE_NULL);
-
-            //Set Product Serial number - NULL
-            io_data.push_back(IPMIFRUINV::TYPELENGTH_BYTE_NULL);
-
-            //Set Product Part number - NULL
-            io_data.push_back(IPMIFRUINV::TYPELENGTH_BYTE_NULL);
-
-            //Push Fru File ID Byte - NULL
-            io_data.push_back(IPMIFRUINV::TYPELENGTH_BYTE_NULL);
-
-        }
-
-        //Only set the ECID Data during an update scenario
-        if (iv_isUpdate == true)
-        {
-            customData (iv_extraTargets, io_data);
-        }
-
-        //Indicate End of Custom Fields
-        io_data.push_back(IPMIFRUINV::END_OF_CUSTOM_FIELDS);
-
-    } while (0);
-
-    //Complete record data formatting
-    postFormatProcessing(io_data);
-
-    if (l_errl)
-    {
-        TRACFCOMP(g_trac_ipmi,"membufIpmiFruInv::buildBoardInfoArea - "
-                "Errors collecting board info data");
-    }
-
     return l_errl;
 }
 
@@ -1884,15 +1782,10 @@ errlHndl_t membufIpmiFruInv::addVpdData(std::vector<uint8_t> &io_data,
         bool i_ascii,
         bool i_typeLengthByte)
 {
+    // TODO RTC: 210975 revisit this function and either implement it or remove
+    // the references to it
     errlHndl_t l_errl = NULL;
 
-    l_errl = addCommonVpdData(iv_target,
-            io_data,
-            DeviceFW::CVPD,
-            i_record,
-            i_keyword,
-            i_ascii,
-            i_typeLengthByte);
     return l_errl;
 }
 //##############################################################################

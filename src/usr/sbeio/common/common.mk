@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018
+# Contributors Listed Below - COPYRIGHT 2018,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -23,11 +23,13 @@
 #
 # IBM_PROLOG_END_TAG
 
+# FIXME RTC: 210975
+
 #Common .mk files to include
-include ${ROOTPATH}/procedure.rules.mk
-include ${PROCEDURES_PATH}/hwp/sbe/p9_get_sbe_msg_register.mk
-include ${PROCEDURES_PATH}/hwp/perv/p9_start_cbs.mk
-include ${PROCEDURES_PATH}/hwp/perv/p9_sbe_hreset.mk
+#include ${ROOTPATH}/procedure.rules.mk
+#include ${PROCEDURES_PATH}/hwp/sbe/p9_get_sbe_msg_register.mk
+#include ${PROCEDURES_PATH}/hwp/perv/p9_start_cbs.mk
+#include ${PROCEDURES_PATH}/hwp/perv/p9_sbe_hreset.mk
 
 #Common Include Paths
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/ffdc
@@ -36,18 +38,19 @@ EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/lib
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/sbe
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 
 #Common Objects
-OBJS += p9_extract_sbe_rc.o
-OBJS += p9_ppe_common.o
+#OBJS += p9_extract_sbe_rc.o
+#OBJS += p9_ppe_common.o
 OBJS += sbe_attn.o
-OBJS += sbe_retry_handler.o
+#OBJS += sbe_retry_handler.o
 
 #Common VPATHs
 VPATH += ${ROOTPATH}/src/usr/sbeio/common
-VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/sbe/
-VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib/
-VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/
+#VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/sbe/
+#VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib/
+#VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/

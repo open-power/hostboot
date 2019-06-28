@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2016
+# Contributors Listed Below - COPYRIGHT 2013,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -26,6 +26,7 @@ HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../../..
 
 MODULE = testvpd_rt
-TESTS = ../../test/*.H
+# TODO RTC: 210975
+#TESTS = ../../test/*.H
 
 include ${ROOTPATH}/config.mk

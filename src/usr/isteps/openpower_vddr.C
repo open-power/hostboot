@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -158,36 +158,9 @@ bool areTargetsGpioInfoEqual(
 static errlHndl_t for_each_vddr_domain_with_functional_memory(
     errlHndl_t (*func)(Target *))
 {
-    // Get all functional Centaur targets
-    TargetHandleList l_membufTargetList;
-    getAllChips(l_membufTargetList, TYPE_MEMBUF);
-
-    errlHndl_t l_err = NULL;
-
-    // Sort chips in order of GPIO info
-    std::sort(l_membufTargetList.begin(), l_membufTargetList.end(),
-        compareTargetsGpioInfos);
-
-    // Prune out targets with non-unique GPIO info
-    std::vector<TARGETING::TargetHandle_t>::iterator
-        pInvalidEntries = std::unique(
-            l_membufTargetList.begin(),
-            l_membufTargetList.end(),
-            areTargetsGpioInfoEqual);
-    l_membufTargetList.erase(pInvalidEntries,l_membufTargetList.end());
-
-    // Invoke callback for one Centaur per unique VDDR domain
-    for (const auto & l_membuf_iter: l_membufTargetList)
-    {
-        Target* l_pCentaur = *l_membuf_iter;
-
-        l_err = (*func)(l_pCentaur);
-
-        if( l_err )
-        {
-            break;
-        }
-    }
+    // TODO RTC: 210975 revisit this function and either implement it or
+    // remove the references to it
+    errlHndl_t l_err = nullptr;
 
     return l_err;
 }

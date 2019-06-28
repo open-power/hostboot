@@ -52,22 +52,23 @@
 #include    <util/align.H>
 #include    <util/algorithm.H>
 
+/* FIXME RTC: 210975
 //Fapi Support
 #include    <fapi2.H>
 #include    <target_types.H>
 #include    <plat_hwp_invoker.H>
+*/
 #include    <attributeenums.H>
 #include    <istepHelperFuncs.H>
 
+/* FIXME RTC:210975
 // HWP
 #include    <p9_mss_volt.H>
-#include    <p9c_mss_volt.H>
-#include    <p9c_mss_volt_vddr_offset.H>
-#include    <p9c_mss_volt_dimm_count.H>
 
 #ifdef CONFIG_AXONE
 #include    <p9a_mss_volt.H>
 #endif
+*/
 
 namespace   ISTEP_07
 {
@@ -76,62 +77,9 @@ using   namespace   ISTEP_ERROR;
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 
+/* FIXME RTC: 210975
 typedef std::map<ATTR_VDDR_ID_type, std::vector<fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>>> MembufTargetMap_t;
 typedef std::vector<ATTR_VDDR_ID_type> VDDR_ID_vect_t;
-
-/**
- *  @brief
- *     A macro that wraps call_mss_volt_hwps used to stringify the FAPI HWP call
- *
- *  @see
- *      call_mss_volt_hwps below for parameter definitions
- */
-#define FAPI_MSS_VOLT_CALL_MACRO(FUNC, MEMBUF_MAP, UNIQUE_VDDRS, STEP_ERROR)   \
-    call_mss_volt_hwps(FUNC, #FUNC, MEMBUF_MAP, UNIQUE_VDDRS, STEP_ERROR)
-
-void call_mss_volt_hwps (p9c_mss_volt_FP_t i_mss_volt_hwps,
-                         const char* i_mss_volt_hwp_str,
-                         MembufTargetMap_t & i_membufFapiTargetMap,
-                         VDDR_ID_vect_t & i_unique_vddrs,
-                         IStepError & io_err)
-{
-    errlHndl_t l_err = NULL;
-    for (auto & l_vddr : i_unique_vddrs)
-    {
-
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-              "Calling %s hwp with list of MEMBUF targets"
-              " with VDDR_ID=%d, list size=%d",
-              i_mss_volt_hwp_str, l_vddr,
-              i_membufFapiTargetMap[l_vddr].size());
-
-        // p9c_mss_volt.C (vector of centaurs with same VDDR_ID)
-        FAPI_INVOKE_HWP(l_err, i_mss_volt_hwps,
-                i_membufFapiTargetMap[l_vddr]);
-
-        // process return code
-        if ( l_err )
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR 0x%.8X:  %s HWP() failed",
-                    i_mss_volt_hwp_str,
-                    l_err->reasonCode());
-
-            // Create IStep error log and cross reference to error
-            // that occurred
-            io_err.addErrorDetails(l_err);
-
-            // Commit Error
-            errlCommit( l_err, HWPF_COMP_ID );
-
-        }
-        else
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "SUCCESS : %s HWP", i_mss_volt_hwp_str);
-        }
-    }
-}
 
 void buildMembufLists(TargetHandleList & i_membufTargetList,
                       MembufTargetMap_t & o_membufFapiTargetMap,
@@ -168,7 +116,7 @@ void buildMembufLists(TargetHandleList & i_membufTargetList,
         }
     }
 }
-
+*/
 
 void* call_mss_volt( void *io_pArgs )
 {
@@ -186,61 +134,7 @@ void* call_mss_volt( void *io_pArgs )
     {
         ATTR_MODEL_type l_procModel =  targetService().getProcessorModel();
 
-        if(l_procModel == MODEL_CUMULUS)
-        {
-            TargetHandleList l_membufTargetList;
-            getAllChips(l_membufTargetList, TYPE_MEMBUF);
-
-            if (l_membufTargetList.size() == 0)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "ERROR: No MEMBUF targets found, skipping p9c_mss_volt HWP");
-                break;
-            }
-
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "Calling p9c_mss_volt HWPs on list of MEMBUF %d targets",
-                    l_membufTargetList.size());
-
-            MembufTargetMap_t l_membufFapiTargetMap {};
-            VDDR_ID_vect_t l_unique_vddrs {};
-            buildMembufLists(l_membufTargetList, l_membufFapiTargetMap,
-                    l_unique_vddrs);
-
-            FAPI_MSS_VOLT_CALL_MACRO(p9c_mss_volt,
-                                      l_membufFapiTargetMap,
-                                      l_unique_vddrs,
-                                      l_StepError);
-            if (l_StepError.getErrorHandle())
-            {
-                  TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "ERROR: p9c_mss_volt HWP failed");
-                  break;
-            }
-
-            FAPI_MSS_VOLT_CALL_MACRO(p9c_mss_volt_vddr_offset,
-                                      l_membufFapiTargetMap,
-                                      l_unique_vddrs,
-                                      l_StepError);
-            if (l_StepError.getErrorHandle())
-            {
-                  TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "ERROR: p9c_mss_volt_vddr_offset HWP failed");
-                  break;
-            }
-
-            FAPI_MSS_VOLT_CALL_MACRO(p9c_mss_volt_dimm_count,
-                                      l_membufFapiTargetMap,
-                                      l_unique_vddrs,
-                                      l_StepError);
-            if (l_StepError.getErrorHandle())
-            {
-                  TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "ERROR: p9c_mss_volt_vddr_offset HWP failed");
-                  break;
-            }
-        }
-        else if(l_procModel == MODEL_NIMBUS)
+        if(l_procModel == MODEL_NIMBUS)
         {
 
             TargetHandleList l_mcsTargetList;
@@ -252,6 +146,8 @@ void* call_mss_volt( void *io_pArgs )
                           "ERROR: No MCS targets found, skipping p9_mss_volt HWP");
                 break;
             }
+
+/* FIXME RTC: 210975
 
             std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCS> >
                 l_mcsFapiTargetsList;
@@ -286,6 +182,7 @@ void* call_mss_volt( void *io_pArgs )
             }
             else
             {
+*/
                 // No need to compute dynamic values if mss_volt failed
 
                 // Calculate Dynamic Offset voltages for each domain
@@ -363,7 +260,7 @@ void* call_mss_volt( void *io_pArgs )
                         errlCommit(l_err,HWPF_COMP_ID);
                     }
                 }
-            }
+            //} FIXME RTC: 210975
         }
 #ifdef CONFIG_AXONE
         else if( l_procModel ==  MODEL_AXONE)
@@ -381,7 +278,7 @@ void* call_mss_volt( void *io_pArgs )
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                       "Calling p9a_mss_volt HWPs on list %d of MEM_PORT targets",
                       l_memportTargetList.size());
-
+/* FIXME RTC: 210975
             std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >
                 l_memportFapiTargetsList;
 
@@ -410,6 +307,7 @@ void* call_mss_volt( void *io_pArgs )
 
                 l_memportFapiTargetsList.clear();
             }
+*/
         }
 #endif
    }while(0);

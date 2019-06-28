@@ -155,7 +155,7 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_trgt,
             break;
         }
 
-        uint8_t spareConfig = CEN_VPD_DIMM_SPARE_NO_SPARE;
+        uint8_t spareConfig = MEM_EFF_DIMM_SPARE_NO_SPARE;
         // check for spare DRAM. Port does not matter.
         rc = getDimmSpareConfig<T>( i_trgt, masterRanks[0], 0, spareConfig );
         if( SUCCESS != rc )
@@ -164,7 +164,7 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_trgt,
             break;
         }
 
-        if( CEN_VPD_DIMM_SPARE_NO_SPARE != spareConfig )
+        if( MEM_EFF_DIMM_SPARE_NO_SPARE != spareConfig )
             data.header.isSpareDram = true;
 
         // Iterate all ranks to get DRAM repair data

@@ -27,17 +27,19 @@ HOSTBOOT_RUNTIME = 1
 
 ROOTPATH = ../../../../..
 
-VPATH += ../
-VPATH += ${ROOTPATH}/src/usr/secureboot/smf
+# FIXME RTC: 210975
+
+#VPATH += ../
+#VPATH += ${ROOTPATH}/src/usr/secureboot/smf
 
 MODULE = pm_rt
 
 ## Objects unique to HBRT
-OBJS += rt_pm.o
-OBJS += smf_utils.o
+#OBJS += rt_pm.o
+#OBJS += smf_utils.o
 
 SUBDIRS += test.d
 
 ## Objects common to HBRT and HB IPL
-include ../pm.mk
+#include ../pm.mk
 include ${ROOTPATH}/config.mk

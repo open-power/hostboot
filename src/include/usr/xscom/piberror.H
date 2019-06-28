@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,6 +26,9 @@
 #ifndef __PIB_ERROR_H
 #define __PIB_ERROR_H
 
+#include <errl/errlentry.H>
+#include <targeting/common/target.H>
+#include <stdint.h>
 
 namespace PIB
 {

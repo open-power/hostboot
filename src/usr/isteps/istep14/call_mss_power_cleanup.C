@@ -35,10 +35,11 @@
 #include <targeting/common/utilFilter.H>
 
 #include    <config.h>
+/* FIXME RTC: 210975
 #include    <fapi2.H>
 #include    <fapi2/plat_hwp_invoker.H>
 #include    <p9_mss_power_cleanup.H>
-#include    <p9c_mss_power_cleanup.H>
+*/
 
 #ifdef CONFIG_NVDIMM
 // NVDIMM support
@@ -54,8 +55,9 @@ namespace ISTEP_14
 {
 void* call_mss_power_cleanup (void *io_pArgs)
 {
-    errlHndl_t  l_err  =   NULL;
     IStepError  l_stepError;
+/* FIXME RTC: 210975
+    errlHndl_t  l_err  =   NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_mss_power_cleanup entry" );
@@ -136,86 +138,10 @@ void* call_mss_power_cleanup (void *io_pArgs)
     }
 #endif
 
-    // -- Cumulus only
-    // Get a list of all present Centaurs
-    if (!l_mpipl)
-    {
-        TargetHandleList l_presCentaurs;
-        getAllChips(l_presCentaurs, TYPE_MEMBUF);
-        // For each present Centaur
-        for (TargetHandleList::const_iterator
-                l_cenIter = l_presCentaurs.begin();
-                l_cenIter != l_presCentaurs.end();
-                ++l_cenIter)
-        {
-            // Make a local copy of the target for ease of use
-            TARGETING::Target * l_pCentaur = *l_cenIter;
-            // Retrieve HUID of current Centaur
-            TARGETING::ATTR_HUID_type l_currCentaurHuid =
-                TARGETING::get_huid(l_pCentaur);
-
-            // Find all present MBAs associated with this Centaur
-            TARGETING::TargetHandleList l_presMbas;
-            getChildChiplets(l_presMbas, l_pCentaur,TYPE_MBA);
-
-            // If not at least two MBAs found
-            if (l_presMbas.size() < 2)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "Not enough MBAs found for Centaur target HUID %.8X, "
-                  "skipping this Centaur.",
-                   l_currCentaurHuid);
-                continue;
-            }
-
-            // Cache current MBA HUIDs for tracing
-            TARGETING::ATTR_HUID_type l_currMBA0Huid =
-                        TARGETING::get_huid(l_presMbas[0]);
-            TARGETING::ATTR_HUID_type l_currMBA1Huid =
-                        TARGETING::get_huid(l_presMbas[1]);
-
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "Running mss_power_cleanup HWP on "
-                    "Centaur HUID %.8X, MBA0 HUID %.8X, "
-                    "MBA1 HUID %.8X, ", l_currCentaurHuid,
-                            l_currMBA0Huid, l_currMBA1Huid);
-
-            // Create FAPI Targets.
-            fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> l_fapiCentaurTarget( l_pCentaur );
-            fapi2::Target<fapi2::TARGET_TYPE_MBA_CHIPLET> l_fapiMba0Target( l_presMbas[0] );
-            fapi2::Target<fapi2::TARGET_TYPE_MBA_CHIPLET> l_fapiMba1Target( l_presMbas[1] );
-
-            //  Call the HWP with each fapi::Target
-            FAPI_INVOKE_HWP(l_err, p9c_mss_power_cleanup, l_fapiCentaurTarget,
-                            l_fapiMba0Target, l_fapiMba1Target);
-
-            if (l_err)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "mss_power_cleanup HWP failed to perform"
-                          " cleanup on centaur: 0x%.8X HWP_ERROR: 0x%.8X",
-                          l_currCentaurHuid,l_err->reasonCode());
-                // Capture the target data in the error log
-                ErrlUserDetailsTarget(l_pCentaur).addToLog(l_err);
-                // Create IStep error log and cross reference error that occurred
-                l_stepError.addErrorDetails(l_err);
-                // Commit error
-                errlCommit(l_err, HWPF_COMP_ID);
-            }
-            else
-            {
-                // Success
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                        "Successfully ran mss_power_cleanup HWP on "
-                        "Centaur HUID %.8X, MBA0 HUID %.8X, "
-                        "MBA1 HUID %.8X, ", l_currCentaurHuid,
-                               l_currMBA0Huid, l_currMBA1Huid);
-            }
-        }
-    }
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_mss_power_cleanup exit" );
 
+*/
     // end task, returning any errorlogs to IStepDisp
     return l_stepError.getErrorHandle();
 }

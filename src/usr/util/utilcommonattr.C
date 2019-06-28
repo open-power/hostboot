@@ -28,7 +28,7 @@
 #include <util/util_reasoncodes.H>
 #include <errl/errlmanager.H>
 
-#include <p9_frequency_buckets.H>
+#include <p10_frequency_buckets.H>
 namespace Util
 {
 
@@ -37,7 +37,8 @@ errlHndl_t getObusPllBucket(TARGETING::Target * i_chipTarget,
                             const uint8_t i_index)
 {
     errlHndl_t l_errl = nullptr;
-
+// FIXME RTC: 210975 most of constants used in this function DNE in P10 (example - OBUS_PLL_FREQ_LIST_P9N_10)
+#if 0
     // Get the corresponding FREQ_O_MHZ frequency number
     TARGETING::ATTR_FREQ_O_MHZ_type l_freq_array;
     assert(i_chipTarget->
@@ -182,6 +183,7 @@ errlHndl_t getObusPllBucket(TARGETING::Target * i_chipTarget,
                  );
     }
 
+#endif
     return l_errl;
 }
 

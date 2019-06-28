@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -217,20 +217,10 @@ errlHndl_t getWorkFlow(
 
 /*
  *  Local helper function to return a list of DIMMs, MCS, and
- *  MCA/Centaur associated with the input MBA/MCBIST target
+ *  MCA associated with the input MCBIST target
  *
- *  If i_queryOnly = true (Query) or MCBIST case
- *    - Return a list of DIMMs, Centaur/MCA, and
- *      MCS connected to this MBA/MCBIST
- *
- *  Else (Clear) - Centaur case only
- *   - Return a list of DIMMs and
- *     (Centaur + MCS) if all the DIMMs behind this
- *     Centaur have hwchangedState flags cleared
- *     or about to be cleared by this MBA
  */
-TargetHandleList getMemTargetsForQueryOrClear(
-                    TargetHandle_t i_trgt, bool i_queryOnly)
+TargetHandleList getMemTargetsForQueryOrClear(TargetHandle_t i_trgt)
 {
     #define FUNC "getMemTargetsForQueryOrClear: "
     TargetHandleList o_list;
@@ -268,128 +258,6 @@ TargetHandleList getMemTargetsForQueryOrClear(
             getChildAffinityTargets( mcaList, i_trgt, CLASS_UNIT, TYPE_MCA );
             if ( !mcaList.empty() )
                 o_list.insert( o_list.end(), mcaList.begin(), mcaList.end() );
-
-        }
-        // MBA target
-        else if ( TYPE_MBA == trgtType )
-        {
-            // add associated Centaur
-            TargetHandleList targetList;
-            getParentAffinityTargets(targetList,
-                    i_trgt,
-                    CLASS_CHIP,
-                    TYPE_MEMBUF);
-
-            if( targetList.empty() )
-            {
-                MDIA_FAST(FUNC "no connected centaur "
-                        "for mba: %x", get_huid(i_trgt));
-                break;
-            }
-
-            TargetHandle_t centaur = targetList[0];
-
-            // if query flag is not set, check to make sure
-            // all of the dimms connected to this centaur
-            // have cleared hw chagned state attributes
-            // before adding this centaur/mcs to the list.
-            // This is needed because we only clear
-            // the centaur/mcs attribute when all of the
-            // dimms' attributes from both mbas have cleared.
-            if(false == i_queryOnly)
-            {
-                targetList.clear();
-                getChildAffinityTargets(targetList,
-                        centaur,
-                        CLASS_NA,
-                        TYPE_DIMM);
-
-                if( ! targetList.empty() )
-                {
-                    TargetHandleList::iterator target;
-
-                    for(target = targetList.begin();
-                            target != targetList.end(); ++target)
-                    {
-                        // exclude dimms belong to the current mba
-                        // because their attributes will be cleared
-                        if(dimmList.end() !=
-                                std::find(dimmList.begin(),
-                                    dimmList.end(), *target))
-                        {
-                            continue;
-                        }
-
-                        ATTR_HWAS_STATE_CHANGED_FLAG_type hwChangeFlag;
-                        hwChangeFlag =
-                            (*target)->getAttr<ATTR_HWAS_STATE_CHANGED_FLAG>();
-
-                        if(HWAS_CHANGED_BIT_MEMDIAG & hwChangeFlag)
-                        {
-                            MDIA_FAST(FUNC "hwChangedState is not cleared "
-                                    "for dimm: %x", get_huid(*target));
-                            centaur = NULL; // don't add centaur and mcs and mba
-                            break;
-                        }
-                    }
-                }
-            }
-
-            if(NULL == centaur)
-            {
-                break;
-            }
-
-            o_list.push_back(centaur);
-
-            // get connected dmi target
-            TargetHandleList dmiList;
-            getParentAffinityTargets(dmiList,
-                                     centaur,
-                                     CLASS_UNIT,
-                                     TYPE_DMI);
-
-            if( !dmiList.empty() )
-            {
-                o_list.push_back(dmiList[0]);
-            }
-
-            // add associated MI
-            TargetHandleList miList;
-            getParentAffinityTargets( miList, dmiList[0], CLASS_UNIT, TYPE_MI );
-            if ( miList.size() == 1 )
-            {
-                o_list.push_back( miList[0] );
-            }
-            else
-            {
-                MDIA_FAST( FUNC "Could not find parent MI." );
-                break;
-            }
-
-            // add associated MC
-            TargetHandleList mcList;
-            getParentAffinityTargets( mcList, miList[0], CLASS_UNIT, TYPE_MC );
-            if ( mcList.size() == 1 )
-            {
-                o_list.push_back( mcList[0] );
-            }
-            else
-            {
-                MDIA_FAST( FUNC "Could not find parent MC." );
-                break;
-            }
-
-            // add associated MBAs
-            targetList.clear();
-
-            getChildAffinityTargets(targetList, i_trgt, CLASS_UNIT, TYPE_MBA);
-
-            if ( !targetList.empty() )
-            {
-                o_list.insert( o_list.end(), targetList.begin(),
-                               targetList.end() );
-            }
 
         }
         // OCMB target
@@ -491,7 +359,7 @@ bool isHWStateChanged(TargetHandle_t i_trgt)
 
     // Get a list of associated targets for attribute query
     TargetHandleList targetList =
-        getMemTargetsForQueryOrClear(i_trgt, true);
+        getMemTargetsForQueryOrClear(i_trgt);
 
     for(TargetHandleList::iterator target = targetList.begin();
         target != targetList.end(); ++target )
@@ -516,7 +384,7 @@ void clearHWStateChanged(TargetHandle_t i_trgt)
     TargetHandleList targetList;
 
     // Get a list of associated targets for attribute clearing
-    targetList = getMemTargetsForQueryOrClear(i_trgt, false);
+    targetList = getMemTargetsForQueryOrClear(i_trgt);
 
     for(TargetHandleList::iterator target = targetList.begin();
         target != targetList.end(); ++target)

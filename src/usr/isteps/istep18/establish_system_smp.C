@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,11 +61,13 @@
 #include <targeting/common/attributes.H>
 #include <targeting/targplatutil.H>
 
+/* FIXME RTC: 210975
 //  fapi support
 
 #include <fapi2.H>
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
+*/
 #include <arch/pirformat.H>
 #include <isteps/hwpf_reasoncodes.H>
 
@@ -74,14 +76,19 @@
 #include <intr/interrupt.H>
 #include <secureboot/nodecommif.H>
 
+/* FIXME RTC: 210975
 //  Uncomment these files as they become available:
 // #include    "host_coalesce_host/host_coalesce_host.H"
 #include <p9_block_wakeup_intr.H>
+*/
 #include <initservice/istepdispatcherif.H>
 #include <isteps/hwpf_reasoncodes.H>
 
+
 #include "smp_unfencing_inter_enclosure_abus_links.H"
+/* FIXME RTC: 210975
 #include "p9_obus_extfir_setup.H"
+*/
 #include "establish_system_smp.H"
 
 #include <secureboot/service_ext.H>
@@ -258,6 +265,7 @@ errlHndl_t call_host_coalesce_host( )
                 get_huid(pObus), get_huid(pProc));
         }
 
+/* FIXME RTC: 210975
         fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> fapi2Proc(pProc);
 
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -293,6 +301,8 @@ errlHndl_t call_host_coalesce_host( )
                 ISTEPS_TRACE::g_trac_isteps_trace,
                 INFO_MRK "SUCCESS : p9_obus_extfir_setup" );
         }
+*/
+
     }
 
     if (hb_existing_image == 0)
@@ -717,6 +727,7 @@ errlHndl_t blockInterrupts()
 {
     errlHndl_t l_errl = NULL;
 
+/* FIXME RTC: 210975
     // Get all functional core units
     TARGETING::TargetHandleList l_coreList;
     getAllChiplets(l_coreList, TYPE_CORE);
@@ -750,6 +761,7 @@ errlHndl_t blockInterrupts()
     }
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "SUCCESS : p9_block_wakeup_intr(SET) on ALL cores" );
+*/
 
     return l_errl;
 }

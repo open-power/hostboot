@@ -84,14 +84,15 @@
 #include <util/utilmbox_scratch.H>
 #include <secureboot/service.H>
 #include <secureboot/trustedbootif.H>
-#include <p9_perst_phb.H>
-#include <plat_hwp_invoker.H>
+// FIXME RTC: 210975
+//#include <p9_perst_phb.H>
+//#include <plat_hwp_invoker.H>
 #include <ipcSp.H>
 // ---------------------------
 // Used to grab SBE boot side
 #include <sbe/sbe_update.H>
 #include <devicefw/userif.H>
-#include <p9_perv_scom_addresses.H>
+//#include <p9_perv_scom_addresses.H>
 // ---------------------------
 #include <initservice/extinitserviceif.H>
 
@@ -277,6 +278,7 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
 #endif
 
 
+/* FIXME RTC: 210975
         //////////////////
         // Send to console which SBE side we are currently on
         //////////////////
@@ -331,6 +333,7 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
             #endif
         }
         ////////////////
+*/
 
 
         if(iv_mailboxEnabled)
@@ -424,6 +427,7 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
 
                 if (l_attrOverridesExist && SECUREBOOT::allowAttrOverrides())
                 {
+
                     fapi2::theAttrOverrideSync().getAttrOverridesFromFsp();
                 }
 
@@ -2259,10 +2263,13 @@ void IStepDispatcher::handleProcFabIovalidMsg(msg_t * & io_pMsg)
             errlCommit(err, INITSVC_COMP_ID);
             break;
         }
+/* FIXME RTC: 210975 istep 18 stuff
         // Create child thread so that if there are problems, the istep
         //  dispatcher code continues
         tid_t l_progTid = task_create(
                 ESTABLISH_SYSTEM_SMP::host_sys_fab_iovalid_processing,io_pMsg);
+*/
+        tid_t l_progTid = 0;
 
         assert( l_progTid > 0 );
         //  wait here for the task to end.
@@ -2303,11 +2310,14 @@ void IStepDispatcher::handleProcFabIovalidMsg(msg_t * & io_pMsg)
                 // keep going, since we already responded back to the FSP
             }
 
+/* FIXME RTC: 210975 Disabling interrupt stuff
             //All interrupt sources are blocked, but intrp could have
             //pending EOI in message queue.  Send message to drain
             //the interrupt queue
             INTR::drainQueue();
+*/
 
+/* FIXME RTC: 210975 HWPs required for blockInterrupts aren't supported in P10 yet
             //Before stopping all the cores, we need to disable interrupts
             err = ESTABLISH_SYSTEM_SMP::blockInterrupts();
             if (err)
@@ -2316,6 +2326,7 @@ void IStepDispatcher::handleProcFabIovalidMsg(msg_t * & io_pMsg)
                            "ERROR: ESTABLISH_SYSTEM_SMP::blockInterrupts");
                 errlCommit(err, INITSVC_COMP_ID);
             }
+*/
 
             err = TRUSTEDBOOT::flushTpmQueue();
             if(err)
@@ -2410,12 +2421,15 @@ void IStepDispatcher::handlePerstMsg(msg_t * & io_pMsg)
             }
         } // end load libraries
 
+/* FIXME RTC: 210975
         // translate message inputs to fapi target and HWP Perst action
         const TARGETING::ATTR_HUID_type huid =
                 static_cast <const TARGETING::ATTR_HUID_type>(io_pMsg->data[0]);
         TARGETING::Target * pInputTarget =
                 TARGETING::Target::getTargetFromHuid( huid );
+*/
 
+/* FIXME RTC: 210975
         const fapi2::Target<fapi2::TARGET_TYPE_PHB> fapi2_target(pInputTarget);
 
         uint32_t msgPerstAction = io_pMsg->type;
@@ -2440,6 +2454,7 @@ void IStepDispatcher::handlePerstMsg(msg_t * & io_pMsg)
 
             io_pMsg->data[1] = ERRL_GETRC_SAFE(l_errl);
         }
+*/
     } while(0);
 
     if (msg_is_async(io_pMsg))
@@ -2794,6 +2809,7 @@ errlHndl_t  IStepDispatcher::handleCoalesceHostMsg()
     }
     else
     {
+/* FIXME RTC: 210975 this is istep 18 stuff; not needed right now
         err = ESTABLISH_SYSTEM_SMP::call_host_coalesce_host();
         if (err)
         {
@@ -2801,6 +2817,7 @@ errlHndl_t  IStepDispatcher::handleCoalesceHostMsg()
                       "call_host_coalese_host function LID = 0x%x",
                       err->plid());
         }
+*/
     }
 
     TRACFCOMP( g_trac_initsvc, EXIT_MRK"IStepDispatcher::handleCoalesceHostMsg");

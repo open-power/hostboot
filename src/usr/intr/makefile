@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2016
+# Contributors Listed Below - COPYRIGHT 2011,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -29,6 +29,7 @@ OBJS += intrrp.o
 
 SUBDIRS += test.d
 
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
+# FIXME RTC: 210975
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 
 include ${ROOTPATH}/config.mk

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,7 +35,7 @@ namespace IPMIFRUINV
      * @param[in]  updateData, Boolean indicating whether the data
      *             is being updated. If false, this function will send
      *             all the IPMI FRU Data. If True, it will only send
-     *             updated data for procs/centaurs.
+     *             updated data for procs.
      */
     void setData(bool i_updateData=false);
 

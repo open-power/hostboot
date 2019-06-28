@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,10 +38,6 @@
 
 namespace fapi2
 {
-
-// max ring size in centaur is 76490 bits - allocate a 10k byte
-// buffer as the max size
-#define MAX_CENTAUR_RING_SIZE 10 * 1024
 
 ///
 ///  @brief This function answers the question, is scand tracing turned on?
@@ -89,28 +85,6 @@ errlHndl_t rcToErrl(ReturnCode & io_rc,
 ///
 ReturnCode platSpecialWakeup( const Target<TARGET_TYPE_ALL>& i_target,
                               bool i_enable );
-
-///
-/// @brief return uncompressed ring data from the hardware image for a
-///        given ring ID.
-///
-/// @param[in] i_target -
-///              TARGET_TYPE_MEMB_CHIP: uses centaur hw image data
-/// @param[in] i_ringId      - which ring to get data for
-/// @param[in] o_ringData    - ring data
-/// @param[in] o_ringAddress - scan address
-///
-/// @return ReturnCode. FAPI2_RC_SUCCESS on success, else platform
-///                     specified error.
-///
-/// NODE: Currenlty only supported for centaur membuf targets
-///
-template<fapi2::TargetType T>
-ReturnCode get_ring(fapi2::Target<T> i_target,
-        const RingId_t i_ringId,
-        unsigned char *&o_ringData,
-        uint64_t &o_ringLength,
-        uint64_t &o_ringAddress);
 
 ///
 /// @brief Returns child targets to Callout/Deconfigure/GARD

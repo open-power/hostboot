@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,7 @@ namespace ATTN
 errlHndl_t ProcOps::query(AttnData & i_attnToCheck, bool & o_active)
 {
     errlHndl_t err = 0;
+/* FIXME RTC: 210975 no PRD attn yet
     uint64_t address = 0, checkbits = 0, scomData = 0;
     AttnData  l_cenAttnData;
     bool      l_cenAttnFound = false;
@@ -102,6 +103,7 @@ errlHndl_t ProcOps::query(AttnData & i_attnToCheck, bool & o_active)
         }
     }
 
+*/
     return err;
 }
 

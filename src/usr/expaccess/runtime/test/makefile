@@ -28,10 +28,11 @@ HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../../..
 MODULE = testexpaccess_rt
 
-include ../../test/test.mk
+#include ../../test/test.mk
 
 #TODO RTC:196806 re-enable mmio communication tests when mmio works
-TESTS = ../../test/expscomtest.H
+#  FIXME RTC: 210975 Re-enable once P10 EKB is updated
+# TESTS = ../../test/expscomtest.H
 
 include ${ROOTPATH}/config.mk
 

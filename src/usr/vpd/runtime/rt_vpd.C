@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -178,10 +178,6 @@ errlHndl_t getPnorAddr( pnorInformation & i_pnorInfo,
 
             case PNOR::MODULE_VPD:
                 vpd_addr += VMM_DIMM_JEDEC_VPD_SIZE;
-                break;
-
-            case PNOR::CENTAUR_VPD:
-                vpd_addr += (VMM_DIMM_JEDEC_VPD_SIZE + VMM_MODULE_VPD_SIZE);
                 break;
 
             default: // Huh?

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,7 +64,11 @@
 
 //  isteps 1-5 run before hostboot
 
+//FIXME RTC: 210975 istepdispatcher.C includes this file and references all of
+// the isteps' function names, which creates many undefined symbols, since we're
+// only compiling istep06 at this time.
 #include    "istep06list.H"
+/*
 #include    "istep07list.H"
 #include    "istep08list.H"
 #include    "istep09list.H"
@@ -80,6 +84,7 @@
 // istep 19, FSP only
 #include    "istep20list.H"
 #include    "istep21list.H"
+*/
 
 #include    "config.h"
 
@@ -95,6 +100,18 @@ const  ExtTaskInfo  g_isteps[]    =   {
         { NULL, 0, NULL },                              //  dummy IStep 4
         { NULL, 0, NULL },                              //  dummy IStep 5
         INITSERVICE::g_istep06TaskList,                 //  HWAS  IStep 6
+        { NULL, 0, NULL },                              //  dummy IStep 7
+        { NULL, 0, NULL },                              //  dummy IStep 8
+        { NULL, 0, NULL },                              //  dummy IStep 9
+        { NULL, 0, NULL },                              //  dummy IStep 10
+        { NULL, 0, NULL },                              //  dummy IStep 11
+        { NULL, 0, NULL },                              //  dummy IStep 12
+        { NULL, 0, NULL },                              //  dummy IStep 13
+        { NULL, 0, NULL },                              //  dummy IStep 14
+        { NULL, 0, NULL },                              //  dummy IStep 15
+        { NULL, 0, NULL },                              //  dummy IStep 16
+
+/*
         INITSERVICE::g_istep07TaskList,                 //        IStep 7
         INITSERVICE::g_istep08TaskList,                 //        IStep 8
         INITSERVICE::g_istep09TaskList,                 //        IStep 9
@@ -105,19 +122,23 @@ const  ExtTaskInfo  g_isteps[]    =   {
         INITSERVICE::g_istep14TaskList,                 //        IStep 14
         INITSERVICE::g_istep15TaskList,                 //        IStep 15
         INITSERVICE::g_istep16TaskList,                 //        IStep 16
+*/
         { NULL, 0, NULL},                               //  FSP   IStep 17
 #ifdef CONFIG_FSP_BUILD
         { NULL, 0, NULL},                               //  FSP   IStep 18
 #else
-        INITSERVICE::g_istep18TaskList,                 //        IStep 18
+        { NULL, 0, NULL },                              //  dummy IStep 18
+//        INITSERVICE::g_istep18TaskList,                 //        IStep 18
 #endif
         { NULL, 0, NULL },                              //  FSP   IStep 19
 #ifdef CONFIG_FSP_BUILD
         { NULL, 0, NULL},                               //  FSP   IStep 20
 #else
-        INITSERVICE::g_istep20TaskList,                 //        IStep 20
+        { NULL, 0, NULL },                              //  dummy IStep 20
+//        INITSERVICE::g_istep20TaskList,                 //        IStep 20
 #endif
-        INITSERVICE::g_istep21TaskList                  //        IStep 21
+        { NULL, 0, NULL },                              //  dummy IStep 21
+//        INITSERVICE::g_istep21TaskList                  //        IStep 21
         //
         // add further istep lists at the end.
 };

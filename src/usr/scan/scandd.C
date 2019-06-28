@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -447,24 +447,6 @@ errlHndl_t scanDoPibScan(  DeviceFW::OperationType i_opType,
         // local flag indicating the target is a centaur
         uint64_t l_isCentaur = 0;
 
-        if ((i_target->getAttr<TARGETING::ATTR_MODEL>()) == TARGETING::MODEL_CENTAUR)
-        {
-            l_isCentaur = 1;
-        }
-
-        // If working with a Centaur chip and the chipselect is
-        // 0 need to set the chipselect to 1.
-        // Here is the info from Cedric Lichtanau with regard to
-        // this check:   "you need to use a different ring modifier/SCOM
-        //   addresses with chiplet 1 instead of 0 for pervasive chiplet
-        //   where the ring you want to scan is located. All other chiplet rings
-        //   eg. 0203xxxx 0303xxxx stays the same. This is only special with
-        //   0003xxxx"
-        if ((l_isCentaur) && ((l_scanTypeAddr & 0x03000000) == 0x0))
-        {
-           l_scanTypeAddr |= 0x01000000;
-        }
-
         // bits 16-31 select the scan type select register
         l_scanTypeAddr |= 0x00000007;
 
@@ -527,31 +509,6 @@ errlHndl_t scanDoPibScan(  DeviceFW::OperationType i_opType,
         {
             l_headerDataAddr = l_headerDataAddr & 0xFFFFE000;
         }
-
-        // If this is a centaur chip need to read the header
-        // data area first before the header Write.
-        if (l_isCentaur)
-        {
-            // Do a scom write to the scan type select register
-            l_err = deviceOp( DeviceFW::READ,
-                              i_target,
-                              l_buffer,
-                              op_size,
-                              DEVICE_SCOM_ADDRESS(l_headerDataAddr));
-
-             TRACDCOMP( g_trac_scandd,"SCAN:(Cent Headr) GETSCOM %lX = %.8x %.8x",l_headerDataAddr , l_buffer[0], l_buffer[1]);
-
-             if(l_err)
-             {
-                 TRACFCOMP( g_trac_scandd, ERR_MRK"SCAN::scanDoPibScan> ERROR i_ring=%.8X, target=%.8X , scanTypeData=%.8X, l_HeaderDataAddr=%.8X", i_ring, TARGETING::get_huid(i_target), l_buffer[0], l_headerDataAddr);
-                 //Add this target to the FFDC
-                 ERRORLOG::ErrlUserDetailsTarget(i_target,"Scan Target")
-                   .addToLog(l_err);
-                 l_err->collectTrace(SCANDD_TRACE_BUF,1024);
-                 break;
-             }
-        }
-
 
         // Set the header data value
         l_buffer[0] = HEADER_CHECK_DATA;
@@ -803,19 +760,6 @@ errlHndl_t scanDoPibScan(  DeviceFW::OperationType i_opType,
         else
         {
             l_headerDataAddr = l_headerDataAddr & 0xFFFFE000;
-
-            // If this is a Centaur chip during a write operation need to do the
-            // set pulse on the header read
-            if (l_isCentaur)
-            {
-                // If this is the last iteration and set pulse is requested
-                // then set bit 18
-                if (l_setPulse)
-                {
-                    l_headerDataAddr |= 0x00002000;
-                    l_setPulse = 0;
-                }
-            }
         }
 
         // read the Header Data

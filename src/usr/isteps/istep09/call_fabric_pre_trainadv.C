@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,9 +52,11 @@
 //  Pbus link service support
 #include <pbusLinkSvc.H>                // TargetPairs_t, PbusLinkSvc
 
+/* FIXME RTC: 210975
 //  HWP call support
 #include <istepHelperFuncs.H>           // captureError
 #include <istep09/istep09HelperFuncs.H> // trainBusHandler
+*/
 
 namespace   ISTEP_09
 {
@@ -87,10 +89,12 @@ void* call_fabric_pre_trainadv( void *io_pArgs )
                 "ERROR 0x%.8X : getPbusConnections TYPE_%cBUS returns error",
                 l_err->reasonCode(), (ii ? 'O':'X') );
 
+/* FIXME RTC: 210975
             // Capture error and then exit
             captureError(l_err,
                          l_stepError,
                          HWPF_COMP_ID);
+*/
 
             // Don't continue with a potential bad connection set
             break;
@@ -98,6 +102,7 @@ void* call_fabric_pre_trainadv( void *io_pArgs )
 
         if (TYPE_XBUS == l_busSet[ii])
         {
+/* FIXME RTC: 210975
             // Make the FAPI call to p9_io_xbus_pre_trainadv
             if (!trainBusHandler(l_busSet[ii],
                                  P9_IO_XBUS_PRE_TRAINADV,
@@ -107,10 +112,12 @@ void* call_fabric_pre_trainadv( void *io_pArgs )
             {
                 break;
             }
+*/
         }  // end if (TYPE_XBUS == l_busSet[ii])
         else if (INITSERVICE::isSMPWrapConfig() &&
                 (TYPE_OBUS == l_busSet[ii]))
         {
+/* FIXME RTC: 210975
             // Make the FAPI call to p9_io_obus_pre_trainadv
             if (!trainBusHandler(l_busSet[ii],
                                  P9_IO_OBUS_PRE_TRAINADV,
@@ -120,6 +127,7 @@ void* call_fabric_pre_trainadv( void *io_pArgs )
             {
                 break;
             }
+*/
         }  // end else if (TYPE_OBUS == l_busSet[ii])
     } // end for (uint32_t ii = 0; (!l_err) && (ii < l_maxBusSet); ii++)
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,8 +66,6 @@ class FsiDDTest : public CxxTest::TestSuite
             PROCWRAP,
             PROC1,
             PROC2,
-            CENTAUR0,
-            CENTAUR8,
             SENTINEL,
             NUM_TARGETS
         };
@@ -105,19 +103,6 @@ class FsiDDTest : public CxxTest::TestSuite
         fsi_target = TARGETING::targetService().toTarget(epath);
         fsi_targets[PROC2] = fsi_target;
 
-
-        // local centaur target (physical:sys-0/node-0/membuf-0)
-        epath.removeLast();
-        epath.addLast(TARGETING::TYPE_MEMBUF,0);
-        fsi_target = TARGETING::targetService().toTarget(epath);
-        fsi_targets[CENTAUR0] = fsi_target;
-
-        // remote centaur target (physical:sys-0/node-0/membuf-8)
-        epath.removeLast();
-        epath.addLast(TARGETING::TYPE_MEMBUF,8);
-        fsi_target = TARGETING::targetService().toTarget(epath);
-        fsi_targets[CENTAUR8] = fsi_target;
-
         // scratch data to use
         struct {
             int fsitarget;
@@ -154,20 +139,6 @@ class FsiDDTest : public CxxTest::TestSuite
             //** Slave Regs
             //FEL from SHIFT off MFSI-2
             { PROC2, 0x001000, 0x12345678, true, false },
-
-            //** Slave Regs
-            //Config Table entry for slave0 off cMFSI-0
-            { CENTAUR0, 0x000000, 0xC0020E95, false, false },
-            //CHIPID from FSI2PIB off cMFSI-0
-            { CENTAUR0, 0x001028, 0x260E9049, false, false },
-            //FEL from SHIFT off cMFSI-0
-            { CENTAUR0, 0x000C08, 0x12344321, true, false },
-
-            //** Slave Regs
-            //FEL from SHIFT off cMFSI-0 of MFSI-1
-            { CENTAUR8, 0x001000, 0x33333333, true, false },
-            //CHIPID from FSI2PIB off cMFSI-0 of MFSI-1
-            { CENTAUR8, 0x001028, 0x160E9049, false, false },
         };
         const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
 
@@ -187,13 +158,6 @@ class FsiDDTest : public CxxTest::TestSuite
                     && (fsi_targets[PROCWRAP] != NULL)
                     && (fsi_targets[PROCWRAP]->
                         getAttr<TARGETING::ATTR_HWAS_STATE>().functional))
-                {
-                    test_data[x].present = true;
-                }
-                else if( ((0xFF0000 & test_data[x].addr) == 0x040000)
-                         && (fsi_targets[CENTAUR0] != NULL)
-                         && (fsi_targets[CENTAUR0]->
-                             getAttr<TARGETING::ATTR_HWAS_STATE>().functional))
                 {
                     test_data[x].present = true;
                 }
@@ -404,54 +368,6 @@ class FsiDDTest : public CxxTest::TestSuite
     };
 
     /**
-     * @brief FSI DD test - FFDC Collection
-     *        Verify FFDC for errors
-     */
-    void test_FFDC(void)
-    {
-        TRACFCOMP( g_trac_fsi, "FsiDDTest::test_FFDC> Start" );
-
-        errlHndl_t l_err = NULL;
-
-        // Find any Centaur target
-        TARGETING::TargetHandleList l_memTargetList;
-        getAllChips( l_memTargetList, TYPE_MEMBUF, true );
-        if( l_memTargetList.empty() )
-        {
-            TRACFCOMP( g_trac_fsi, "FsiDDTest::test_FFDC> No Centaurs found..." );
-        }
-        else
-        {
-            TARGETING::Target* fsi_target = *(l_memTargetList.begin());
-
-            l_err =  new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                            FSI::MOD_FSIDD_INVALID,
-                                            FSI::RC_BAD_REASONCODE,
-                                            TARGETING::get_huid(fsi_target),
-                                            FSI::FFDC_PRESENCE_FAIL);
-            FSI::getFsiFFDC( FSI::FFDC_PRESENCE_FAIL, l_err, fsi_target );
-            errlCommit(l_err,CXXTEST_COMP_ID);
-
-            l_err =  new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                            FSI::MOD_FSIDD_INVALID,
-                                            FSI::RC_BAD_REASONCODE,
-                                            TARGETING::get_huid(fsi_target),
-                                            FSI::FFDC_READWRITE_FAIL);
-            FSI::getFsiFFDC( FSI::FFDC_READWRITE_FAIL, l_err, fsi_target );
-            errlCommit(l_err,CXXTEST_COMP_ID);
-
-            l_err =  new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                            FSI::MOD_FSIDD_INVALID,
-                                            FSI::RC_BAD_REASONCODE,
-                                            TARGETING::get_huid(fsi_target),
-                                            FSI::FFDC_PIB_FAIL);
-            FSI::getFsiFFDC( FSI::FFDC_PIB_FAIL, l_err, fsi_target );
-            errlCommit(l_err,CXXTEST_COMP_ID);
-        }
-        TRACFCOMP( g_trac_fsi, "FsiDDTest::test_FFDC> Finish" );
-    };
-
-    /**
      * @brief FSI DD test - FSI Link Info
      *        Spot check getFsiLinkInfo results
      */
@@ -461,7 +377,6 @@ class FsiDDTest : public CxxTest::TestSuite
 
         enum {
             PROC0,
-            CENTAUR4,
             NUM_TARGETS
         };
         TARGETING::Target* fsi_targets[NUM_TARGETS];
@@ -479,12 +394,6 @@ class FsiDDTest : public CxxTest::TestSuite
         epath.addLast(TARGETING::TYPE_PROC,0);
         fsi_target = TARGETING::targetService().toTarget(epath);
         fsi_targets[PROC0] = fsi_target;
-
-        // local centaur target (physical:sys-0/node-0/membuf-4)
-        epath.removeLast();
-        epath.addLast(TARGETING::TYPE_MEMBUF,4);
-        fsi_target = TARGETING::targetService().toTarget(epath);
-        fsi_targets[CENTAUR4] = fsi_target;
 
         // loop through all of the targets we defined to
         //  check the data

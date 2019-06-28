@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -347,70 +347,6 @@ void HBToHwsvVoltageMsg::createVddrData(
                              i_requestType,
                              l_mcbistTargetList.size());
 
-        TARGETING::TargetHandleList l_membufTargetList;
-        if(i_requestType == HB_VOLT_DISABLE)
-        {
-            //When request is a disable command, disable all present Centaurs
-            // in case we go through a reconfigure loop
-            getAllChips(l_membufTargetList, TYPE_MEMBUF, false);
-        }
-        else
-        {
-            //When the request is an enable command, enable only functional
-            // centaurs.
-            getAllChips(l_membufTargetList, TYPE_MEMBUF);
-        }
-
-        for (const auto & pMembuf: l_membufTargetList)
-        {
-            if(i_requestType == HB_VOLT_ENABLE)
-            {
-                (void)addMemoryVoltageDomains<
-                  TARGETING::ATTR_MSS_VDD_PROGRAM,
-                TARGETING::ATTR_CEN_MSS_VOLT_VDD_MILLIVOLTS,
-                TARGETING::ATTR_CEN_MSS_VOLT_VDD_OFFSET_MILLIVOLTS,
-                TARGETING::ATTR_VDD_ID>(
-                                        pMembuf,
-                                        io_request);
-
-                (void)addMemoryVoltageDomains<
-                  TARGETING::ATTR_MSS_AVDD_PROGRAM,
-                TARGETING::ATTR_CEN_MSS_VOLT_AVDD_MILLIVOLTS,
-                TARGETING::ATTR_CEN_MSS_VOLT_AVDD_OFFSET_MILLIVOLTS,
-                TARGETING::ATTR_AVDD_ID>(
-                                         pMembuf,
-                                         io_request);
-
-                (void)addMemoryVoltageDomains<
-                  TARGETING::ATTR_MSS_VCS_PROGRAM,
-                TARGETING::ATTR_CEN_MSS_VOLT_VCS_MILLIVOLTS,
-                TARGETING::ATTR_CEN_MSS_VOLT_VCS_OFFSET_MILLIVOLTS,
-                TARGETING::ATTR_VCS_ID>(
-                                        pMembuf,
-                                        io_request);
-
-                (void)addMemoryVoltageDomains<
-                  TARGETING::ATTR_MSS_VPP_PROGRAM,
-                TARGETING::ATTR_CEN_MSS_VOLT_VPP_MILLIVOLTS,
-                TARGETING::ATTR_CEN_MSS_VOLT_VPP_OFFSET_MILLIVOLTS,
-                TARGETING::ATTR_VPP_ID>(
-                                        pMembuf,
-                                        io_request);
-            }
-
-            (void)addMemoryVoltageDomains<
-              TARGETING::ATTR_MSS_VDDR_PROGRAM,
-            TARGETING::ATTR_CEN_MSS_VOLT_VDDR_MILLIVOLTS,
-            TARGETING::ATTR_CEN_MSS_VOLT_VDDR_OFFSET_MILLIVOLTS,
-            TARGETING::ATTR_VDDR_ID>(
-                                     pMembuf,
-                                     io_request);
-        }
-
-        // Remove duplicate records and requests containing invalid voltages
-        removeExtraRequests( io_request,
-                             i_requestType,
-                             l_membufTargetList.size());
     } while(0);
 
     TRACFCOMP( g_trac_volt, EXIT_MRK "HBToHwsvVoltageMsg::createVddrData" );

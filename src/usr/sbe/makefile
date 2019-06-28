@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2018
+# Contributors Listed Below - COPYRIGHT 2013,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -33,11 +33,12 @@ EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
 ## pointer to common HWP files
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/centaur/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/utils/stopreg/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 HWP_CUSTOMIZE_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/customize
 EXTRAINCDIR += ${HWP_CUSTOMIZE_PATH}/
 HWP_ACCESSORS_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/accessors
@@ -45,10 +46,11 @@ EXTRAINCDIR += ${HWP_ACCESSORS_PATH}/
 HWP_XIP_PATH += ${ROOTPATH}/src/import/chips/p9/xip
 EXTRAINCDIR += ${HWP_XIP_PATH}/
 UTILS_PATH  += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs
-CEN_UTILS_PATH  += ${ROOTPATH}/src/import/chips/centaur/utils/imageProcs
 COMMON_UTILS_PATH += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 
-OBJS += sbe_update.o
+# FIXME RTC: 210975
+
+#OBJS += sbe_update.o
 
 SUBDIRS += test.d
 

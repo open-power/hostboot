@@ -26,11 +26,13 @@ HOSTBOOT_RUNTIME = 1
 
 ROOTPATH = ../../../../..
 
-VPATH += ../
+# FIXME RTC: 210975
+
+#VPATH += ../
 MODULE = nvdimm_rt
 
-include ../nvdimm.mk
+#include ../nvdimm.mk
 
-OBJS += nvdimm_rt.o
+#OBJS += nvdimm_rt.o
 
 include ${ROOTPATH}/config.mk

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,10 +32,12 @@
 
 #include "../common/securetrace.H"
 
+/* FIXME RTC: 210975
 #include <fapi2.H>
 #include <fapi2/plat_hwp_invoker.H>
 
 #include <p9_update_security_ctrl.H>
+*/
 #include <config.h>
 
 namespace SECUREBOOT
@@ -43,6 +45,8 @@ namespace SECUREBOOT
 
 void lockAbusSecMailboxes()
 {
+// FIXME RTC: 210975
+#if 0
 #ifdef CONFIG_TPMDD
     errlHndl_t l_errl = nullptr;
     TARGETING::TargetHandleList l_procs;
@@ -99,6 +103,7 @@ void lockAbusSecMailboxes()
         ++l_pProc;
 
     } // while
+#endif
 #endif
 }
 

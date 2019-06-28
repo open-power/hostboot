@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,7 +44,7 @@ namespace ISTEP_12
 void* call_host_startprd_dmi (void *io_pArgs)
 {
     IStepError l_StepError;
-   
+
    // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();
 }

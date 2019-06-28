@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2016,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -34,6 +34,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/isteps
 EXTRAINCDIR += ${ROOTPATH}/src/usr/errl
 #EXTRAINCDIR += ${ROOTPATH}/src/include/usr/util
 
-OBJS += rt_todintf.o
+# FIXME RTC: 210975 Re-enable this module when EKB is mirrorred
+# OBJS += rt_todintf.o
 
 include ../tod.mk

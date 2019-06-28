@@ -31,9 +31,11 @@
 /*****************************************************************************/
 // I n c l u d e s
 /*****************************************************************************/
+/* FIXME RTC: 210975
 #include <exp_inband.H>              // mmio_get_scom
 #include <lib/shared/exp_consts.H>   // IBM_SCOM_INDICATOR
 #include <hwpf/fapi2/include/fapi2_hwp_executor.H>// FAPI_EXEC_HWP
+*/
 #include "mmioscomdd.H"   //mmioScomPerformOp
 #include "expscom_trace.H" //g_trac_expscom
 #include "expscom_utils.H" //validateInputs
@@ -57,6 +59,7 @@ errlHndl_t mmioScomPerformOp(DeviceFW::OperationType i_opType,
                           va_list i_args)
 {
     errlHndl_t l_err = nullptr;
+/* FIXME RTC: 210975
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     // The only extra arg should be the scomAddress
     uint64_t l_expAddr = va_arg(i_args,uint64_t);
@@ -153,6 +156,7 @@ errlHndl_t mmioScomPerformOp(DeviceFW::OperationType i_opType,
         }
 
     } while (0);
+*/
     return l_err;
 }
 }

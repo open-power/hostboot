@@ -53,8 +53,10 @@ int32_t ClockResolution::Resolve(STEP_CODE_DATA_STRUCT & serviceData)
     // callout clock osc
     if ( iv_targetType == TYPE_PROC )
     {
-        TargetHandle_t l_ptargetClock =
+        TargetHandle_t l_ptargetClock = nullptr;
+/* FIXME RTC: 210975
             getActiveRefClk(iv_ptargetClock, TYPE_OSCREFCLK);
+*/
 
         // Callout this chip if nothing else.
         // Or in the case of hostboot, use this chip for addClockCallout
@@ -122,8 +124,10 @@ int32_t ClockResolution::Resolve(STEP_CODE_DATA_STRUCT & serviceData)
 
         if ( !bothClocksFailed )
         {
-            TargetHandle_t l_ptargetClock =
+            TargetHandle_t l_ptargetClock = nullptr;
+/* FIXME RTC: 210975
                 PlatServices::getActiveRefClk(iv_ptargetClock, TYPE_OSCPCICLK);
+*/
 
             // Callout this chip if nothing else.
             if(NULL == l_ptargetClock)

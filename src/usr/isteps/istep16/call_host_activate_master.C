@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,20 +42,26 @@
 //  targeting support
 #include    <targeting/namedtarget.H>
 #include    <targeting/attrsync.H>
+/* FIXME RTC: 210975
 #include    <fapi2/target.H>
+*/
 
 //SBE interfacing
 #include    <sbeio/sbeioif.H>
 #include    <sys/misc.h>
 #include    <pm/pm_common.H>
 
+/* FIXME RTC: 210975
 //Import directory (EKB)
 #include    <p9_block_wakeup_intr.H>
+*/
 
 #include <scom/scomif.H>
 
+/* FIXME RTC: 210975
 //HWP invoker
 #include    <fapi2/plat_hwp_invoker.H>
+*/
 
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
@@ -91,9 +97,11 @@ void* call_host_activate_master (void *io_pArgs)
         TARGETING::Target* l_proc_target = const_cast<TARGETING::Target *>
                                           ( getParentChip( l_masterCore ) );
 
+/* FIXME RTC: 210975
         // Cast OUR type of target to a FAPI2 type of target.
         const fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapi2_coreTarget(
                                 const_cast<TARGETING::Target*> (l_masterCore));
+*/
 
         bool l_isDD1 = false;
         PVR_t l_pvr( mmio_pvr_read() & 0xFFFFFFFF );
@@ -102,7 +110,9 @@ void* call_host_activate_master (void *io_pArgs)
             l_isDD1 = true;
         }
 
+/* FIXME RTC: 210975
         fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapi2_fusedTarget = NULL;
+*/
         const TARGETING::Target* l_fusedCore = NULL;
 
         if(l_isFusedMode && !l_isDD1)
@@ -155,14 +165,18 @@ void* call_host_activate_master (void *io_pArgs)
                                     l_fusedCoreID,
                                     TARGETING::get_huid(l_proc_target));
                 l_errl->collectTrace("TARG",256);
+/* FIXME RTC: 210975
                 l_errl->collectTrace(FAPI_TRACE_NAME,256);
                 l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
+*/
 
                 break;
             }
 
+/* FIXME RTC: 210975
             // Cast OUR type of target to a FAPI2 type of target.
             l_fapi2_fusedTarget = const_cast<TARGETING::Target*> (l_fusedCore);
+*/
         }
 
         //Because of a bug in how the SBE injects the IPI used to wake
@@ -237,9 +251,9 @@ void* call_host_activate_master (void *io_pArgs)
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "call_host_activated_master: call p9_block_wakeup_intr(SET) "
                    "Target HUID %.8x",
-                   TARGETING::get_huid(l_fapi2_coreTarget) );
+                   /* FIXME RTC: 210975 TARGETING::get_huid(l_fapi2_coreTarget)*/ 0 );
 
-
+/* FIXME RTC: 210975
         FAPI_INVOKE_HWP( l_errl,
                         p9_block_wakeup_intr,
                         l_fapi2_coreTarget,
@@ -291,6 +305,7 @@ void* call_host_activate_master (void *io_pArgs)
                         "p9_block_wakeup_intr SUCCESS"  );
             }
         }
+*/
 
         //  put the master into winkle.
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -362,7 +377,7 @@ void* call_host_activate_master (void *io_pArgs)
                    "Call proc_stop_deadman_timer. Target %.8X",
                    TARGETING::get_huid(l_proc_target) );
 
-
+/* FIXME RTC: 210975
         // Save off original checkstop values and override them
         // to disable core xstops and enable sys xstops.
         l_errl = HBPM::core_checkstop_helper_hwp(l_masterCore, true);
@@ -398,6 +413,7 @@ void* call_host_activate_master (void *io_pArgs)
                        "core_checkstop_helper_homer ERROR: returning.");
             break;
         }
+*/
 
     }   while ( 0 );
 

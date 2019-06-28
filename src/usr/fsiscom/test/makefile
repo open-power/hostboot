@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2019
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,8 +24,10 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
 
+# FIXME RTC: 210975
+
 MODULE = testfsiscom
-TESTS = *.H
+#TESTS = *.H
 
 
 include ${ROOTPATH}/config.mk

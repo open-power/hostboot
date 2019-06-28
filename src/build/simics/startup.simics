@@ -99,8 +99,11 @@ if ($hb_mode == 1) {
     }
 } else {
     foreach $cc in (get-all-procs) {
-        ($cc).seeprom1_image.set 0x3FED9 0x5A5A5A5A 8 -l
-        ($cc).seeprom3_image.set 0x3FED9 0x5A5A5A5A 8 -l
+# These commands cause P10 simics to fail because the seeprom*_image component
+# is not yet implemented in P10 simics. The lines need to be uncommented when
+# the SBE is implemented in the P10 model.
+        #($cc).seeprom1_image.set 0x3FED9 0x5A5A5A5A 8 -l
+        #($cc).seeprom3_image.set 0x3FED9 0x5A5A5A5A 8 -l
     }
 }
 
@@ -167,12 +170,4 @@ backplane0.proc0.l3_img.load-file (lookup-file $sb_base+"/obj/ppc/hbfw/img/hbbl.
 
 # Enable mambo core to run instructions (previously done in entry.simics)
 (get-master-cpus)[0].enable
-
-########################### WORKAROUNDS ####################################
-# Setup the mailbox.
-# for mbox on core 0 use:
-# proc_venicechip_cmp0.psi_hb->psihb_xivr_fsi=0x0140000000     #02010917
-# for mbox on core 5 use:
-#proc_venicechip_cmp0.psi_hb->psihb_xivr_fsi=0x0000A00140000000   #02010917
-#proc_venicechip_cmp0.psi_hb->psihb_irsn=0x00030003FFFF0000 #0201091b
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,17 +30,21 @@
 #include <isteps/hwpisteperror.H>
 #include <initservice/isteps_trace.H>
 
+/* FIXME RTC: 210975
 //HWP Invoker
 #include <fapi2/plat_hwp_invoker.H>
+*/
 
 //  targeting support
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/util.H>
 #include <targeting/common/utilFilter.H>
+/* FIXME RTC: 210975
 #include <fapi2/target.H>
 
 //From Import Directory (EKB Repository)
 #include <p9_mem_startclocks.H>
+*/
 
 #include    <scom/scomif.H>
 
@@ -53,10 +57,9 @@ namespace ISTEP_13
 {
 void* call_mem_startclocks (void *io_pArgs)
 {
-    errlHndl_t l_err = NULL;
-
     IStepError l_StepError;
-
+/* FIXME RTC: 210975
+    errlHndl_t l_err = NULL;
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"call_mem_startclocks entry" );
 
     // Get all Centaur targets
@@ -107,7 +110,7 @@ void* call_mem_startclocks (void *io_pArgs)
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_mem_startclocks exit" );
-
+*/
     return l_StepError.getErrorHandle();
 }
 

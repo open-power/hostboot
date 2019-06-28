@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,17 +43,21 @@
 
 #include    <sbe/sbeif.H>
 
+/* FIXME RTC: 210975
 //HWP
 #include    <p9_fab_iovalid.H>
+*/
 
 //  targeting support
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
 #include    <targeting/common/trace.H>
 
+/* FIXME RTC: 210975
 //  fapi support
 #include    <fapi2.H>
 #include    <fapi2/plat_hwp_invoker.H>
+*/
 #include    <isteps/hwpf_reasoncodes.H>
 #include    <isteps/hwpisteperror.H>
 #include <config.h>
@@ -184,6 +188,8 @@ namespace   EDI_EI_INITIALIZATION
     errlHndl_t  smp_unfencing_inter_enclosure_abus_links()
     {
         errlHndl_t l_errl = NULL;
+
+/* FIXME RTC: 210975
         std::vector<fapi2::ReturnCode> l_fapiRcs;
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -226,7 +232,7 @@ namespace   EDI_EI_INITIALIZATION
                 l_errl = NULL;
             }
         } // end of going through all processors//
-
+*/
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "smp_unfencing_inter_enclosure_abus_links exit" );

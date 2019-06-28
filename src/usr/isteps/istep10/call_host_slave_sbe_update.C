@@ -47,11 +47,13 @@
 #include    <sys/time.h>
 #include    <hwas/common/hwasCommon.H>
 
+/* FIXME RTC: 210975
 // fapi2 HWP invoker
 #include    <fapi2/plat_hwp_invoker.H>
 
 #include    <fapi2.H>
 #include    <p9_sbe_lpc_init.H>
+*/
 
 // Easy macro replace for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
@@ -308,6 +310,7 @@ void* call_host_slave_sbe_update (void *io_pArgs)
 
             if ( type_enum == TARGETING::PROC_MASTER_TYPE_MASTER_CANDIDATE )
             {
+/* FIXME RTC: 210975
                 // Initialize the LPC Bus by calling the p9_sbe_lpc_init hwp
                 fapi2::Target <fapi2::TARGET_TYPE_PROC_CHIP> l_fapi_target (l_target);
                 FAPI_INVOKE_HWP(l_errl, p9_sbe_lpc_init, l_fapi_target);
@@ -332,6 +335,7 @@ void* call_host_slave_sbe_update (void *io_pArgs)
                            "SUCCESS running p9_sbe_lpc_init HWP on "
                            "target HUID %.8X", TARGETING::get_huid(l_target));
                 }
+*/
             }
         }
 

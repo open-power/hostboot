@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2017
+# Contributors Listed Below - COPYRIGHT 2012,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -42,22 +42,23 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/targeting/common
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
+EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/lib/utils/mcbist
 ##########################################################
 # Following is needed to include p9c_mss_maint_cmds.H
 ##########################################################
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/centaur/common/include
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/centaur/procedures/hwp/memory
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/centaur/procedures/hwp/memory/lib/shared
 
 MODULE = mdia
 
-OBJS += mdiamonitor.o
-OBJS += mdiatrace.o
-OBJS += mdiaworkitem.o
-OBJS += mdiamba.o
-OBJS += mdia.o
-OBJS += mdiasm.o
+# FIXME RTC: 210975
+
+#OBJS += mdiamonitor.o
+#OBJS += mdiatrace.o
+#OBJS += mdiaworkitem.o
+#OBJS += mdiamba.o
+#OBJS += mdia.o
+#OBJS += mdiasm.o
 
 SUBDIRS += test.d
 

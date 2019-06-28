@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014
+# Contributors Listed Below - COPYRIGHT 2014,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -32,16 +32,18 @@ CFLAGS += -iquote${ROOTPATH}/src/usr/diag/attn
 
 MODULE = attn_rt
 
-include attn_rt.mk
-include ../common/attn_common.mk
+# FIXME RTC: 210975
 
-OBJS += ${ATTN_RT_OBJS}
-OBJS += ${ATTN_COMMON_OBJS}
+#include attn_rt.mk
+#include ../common/attn_common.mk
+
+#OBJS += ${ATTN_RT_OBJS}
+#OBJS += ${ATTN_COMMON_OBJS}
 
 SUBDIRS += test.d
 
-VPATH += ..
-VPATH += ../..
-VPATH += ../common
+#VPATH += ..
+#VPATH += ../..
+#VPATH += ../common
 
 include ${ROOTPATH}/config.mk

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,16 +29,20 @@
 #include <initservice/isteps_trace.H>
 #include <initservice/initserviceif.H>
 
+/* FIXME RTC: 210975
 //HWP Invoker
 #include    <fapi2/plat_hwp_invoker.H>
+*/
 
 //  targeting support
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/util.H>
 #include <targeting/common/utilFilter.H>
+/* FIXME RTC: 210975
 #include <fapi2/target.H>
 
 #include <p9_pcie_config.H>
+*/
 
 
 using   namespace   ISTEP;
@@ -51,10 +55,10 @@ namespace ISTEP_14
 
 void* call_proc_pcie_config (void *io_pArgs)
 {
-    errlHndl_t  l_errl  =   NULL;
-
     IStepError  l_stepError;
 
+/* FIXME RTC: 210975
+    errlHndl_t  l_errl  =   NULL;
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_pcie_config entry" );
 
@@ -97,7 +101,7 @@ void* call_proc_pcie_config (void *io_pArgs)
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_pcie_config exit" );
-
+*/
     // end task, returning any errorlogs to IStepDisp
     return l_stepError.getErrorHandle();
 }

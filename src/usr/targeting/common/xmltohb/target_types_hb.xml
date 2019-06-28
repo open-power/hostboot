@@ -33,9 +33,6 @@
   <targetTypeExtension>
     <id>chip-membuf-centaur</id>
     <attribute>
-      <id>CENTAUR_REGISTER_CACHE_PTR</id>
-    </attribute>
-    <attribute>
       <id>EEPROM_PAGE_ARRAY</id>
       <default>2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2</default>
     </attribute>

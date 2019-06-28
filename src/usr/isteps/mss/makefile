@@ -35,6 +35,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 EXTRAINCDIR += ${IMPORT_PATH}/chips/ocmb/explorer/common/include/
@@ -91,8 +92,10 @@ MSS_LIB += ${GEMINI_PROCEDURES_PATH}/hwp/memory/lib/
 
 EXTRAINCDIR += ${MSS_LIB}
 
-include ${ROOTPATH}/src/build/mkrules/script.rules.mk
-include ${ROOTPATH}/src/build/mkrules/verbose.rules.mk
+# FIXME RTC: 210975
+
+#include ${ROOTPATH}/src/build/mkrules/script.rules.mk
+#include ${ROOTPATH}/src/build/mkrules/verbose.rules.mk
 
 # Generate generic_system_accessors header file
 MSS_GENERIC_PATH := $(IMPORT_PATH)/generic/memory/lib
@@ -212,15 +215,15 @@ MSS_MODULE_OBJS += $(if $(CONFIG_AXONE),$(patsubst %.C,%.o,$(MSS_GEMINI_SOURCE))
 
 MODULE = isteps_mss
 
-OBJS += $(MSS_MODULE_OBJS)
-$(call BUILD_MODULE)
+#OBJS += $(MSS_MODULE_OBJS)
+#$(call BUILD_MODULE)
 
-VPATH += ${MSS_LIB}
+#VPATH += ${MSS_LIB}
 
 SUBDIRS += runtime
 
 #HWP build tool
-include ${ROOTPATH}/procedure.rules.mk
+#include ${ROOTPATH}/procedure.rules.mk
 include ${ROOTPATH}/config.mk
 
 

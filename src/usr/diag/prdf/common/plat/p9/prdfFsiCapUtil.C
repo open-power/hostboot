@@ -45,7 +45,7 @@ void __captureFsiReg( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
 {
     uint32_t data = 0;
 
-    if ( SUCCESS == getCfam(i_chip, i_wordAddr, data) )
+    if ( /* FIXME RTC: 210975 SUCCESS == getCfam(i_chip, i_wordAddr, data) */ 0)
     {
         BitString bs { 32, (CPU_WORD *) &data };
 

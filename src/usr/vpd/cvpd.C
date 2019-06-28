@@ -205,18 +205,6 @@ namespace CVPD
         return err;
     }
 
-    // Register with the routing code
-    DEVICE_REGISTER_ROUTE( DeviceFW::READ,
-                           DeviceFW::CVPD,
-                           TARGETING::TYPE_MEMBUF,
-                           cvpdRead );
-    DEVICE_REGISTER_ROUTE( DeviceFW::WRITE,
-                           DeviceFW::CVPD,
-                           TARGETING::TYPE_MEMBUF,
-                           cvpdWrite );
-
-
-
 }; // end namespace CVPD
 
 // --------------------------------------------------------
@@ -243,14 +231,16 @@ bool VPD::cvpdPresent( TARGETING::Target * i_target )
 /**
  * @brief  Constructor
  */
+//@TODO  RTC: 210975: CENTAUR_VPD FIX
+//@TODO: Fix VPD_WRITE_MEMBUF
 CvpdFacade::CvpdFacade() :
 IpVpdFacade(CVPD::cvpdRecords,
             (sizeof(CVPD::cvpdRecords)/sizeof(CVPD::cvpdRecords[0])),
             CVPD::cvpdKeywords,
             (sizeof(CVPD::cvpdKeywords)/sizeof(CVPD::cvpdKeywords[0])),
-            PNOR::CENTAUR_VPD,
+            PNOR::EECACHE, // TODO RTC: 210975
             CVPD::g_mutex,
-            VPD::VPD_WRITE_MEMBUF)
+            VPD::VPD_INVALID) // TODO RTC: 210975
 {
     TRACUCOMP(g_trac_vpd, "CvpdFacade::CvpdFacade> " );
 

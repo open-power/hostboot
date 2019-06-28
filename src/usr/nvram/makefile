@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018
+# Contributors Listed Below - COPYRIGHT 2018,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -29,10 +29,12 @@ MODULE = nvram
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/nvram/import
 
-OBJS += nvram_interface.o
-OBJS += nvram-format.o
+# FIXME RTC: 210975
 
-VPATH += import
+#OBJS += nvram_interface.o
+#OBJS += nvram-format.o
+
+#VPATH += import
 
 SUBDIRS += test.d
 

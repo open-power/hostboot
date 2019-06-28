@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2019
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -196,9 +198,9 @@ use lib dirname (__FILE__);
 #----------------------------------------------------------------------
 #   Globals
 #----------------------------------------------------------------------
+# TODO RTC: 210975 potentially update the search path for P10 (or remove)
 my  @SearchDirs     =
 (   "/afs/awd/projects/eclipz/KnowledgeBase/eclipz/chips/p8/working/procedures",
-    "/afs/awd/projects/eclipz/KnowledgeBase/eclipz/chips/centaur/working/procedures",
     );
 
 my  $HBDIR          =   "src/usr/hwpf/hwp";

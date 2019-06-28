@@ -54,8 +54,8 @@
 #include <arch/pirformat.H>
 #include <arch/pvrformat.H>
 #include <config.h>
-#include <p9_misc_scom_addresses.H>
-#include <p9n2_misc_scom_addresses_fld.H>
+//#include <p9_misc_scom_addresses.H>
+//#include <p9n2_misc_scom_addresses_fld.H>
 #include <util/utilmbox_scratch.H>
 #include <util/align.H>
 #include <errl/errludprintk.H>
@@ -250,6 +250,8 @@ errlHndl_t IntrRp::resetIntpForMpipl()
 
 errlHndl_t IntrRp::clearAllIntFirs()
 {
+    errlHndl_t l_err = nullptr;
+/* FIXME RTC: 210975 the constants used in this function aren't defined in P10 yet
     // Per scom definition all of these register will be cleared on any read
     const uint64_t l_fir_reg_addrs_to_read_to_clear[] =
     {
@@ -326,6 +328,7 @@ errlHndl_t IntrRp::clearAllIntFirs()
         }
     } while(0);
 
+*/
     return l_err;
 
 }
@@ -333,6 +336,7 @@ errlHndl_t IntrRp::clearAllIntFirs()
 errlHndl_t setHbModeOnP3PCReg()
 {
     errlHndl_t l_err = nullptr;
+/* FIXME RTC: 210975 the constants used in this function aren't defined in P10 yet
     do{
         TARGETING::TargetHandleList l_funcProcs;
         getAllChips(l_funcProcs, TYPE_PROC);
@@ -362,6 +366,7 @@ errlHndl_t setHbModeOnP3PCReg()
             }
         }
     }while(0);
+*/
 
     return l_err;
 }
@@ -820,6 +825,7 @@ errlHndl_t IntrRp::resetIntUnit(intr_hdlr_t* i_proc)
             //Needed because the HW XIVE reset clears too much HW state
             if (is_fused_mode())
             {
+/* FIXME RTC: 210975 the constants don't exist in P10 yet
                 //Do a Read-Modify-Write on INT Thread Context Register
                 //setting the FUSED_CORE_EN bit as the 'modify' part
                 uint64_t l_int_tctxt_reg = 0x0;
@@ -847,6 +853,7 @@ errlHndl_t IntrRp::resetIntUnit(intr_hdlr_t* i_proc)
                               l_int_tctxt_reg, PU_INT_TCTXT_CFG );
                     break;
                 }
+*/
             }
         }
         else
@@ -3061,12 +3068,14 @@ errlHndl_t IntrRp::setFspBAR(
         pProc->getAttr<TARGETING::ATTR_FSP_BASE_ADDR>();
 
     const size_t expSize = sizeof(fspBAR);
+/* FIXME RTC: 210975 PU_PSI_BRIDGE_FSP_BAR_REG DNE in P10 yet
     auto size = expSize;
     pError = deviceWrite(
                  pProc,
                  &fspBAR,
                  size,
                  DEVICE_SCOM_ADDRESS(PU_PSI_BRIDGE_FSP_BAR_REG));
+*/
     if(pError)
     {
         TRACFCOMP(g_trac_intr,ERR_MRK "Failed writing %d bytes of FSP BAR "
@@ -3075,8 +3084,8 @@ errlHndl_t IntrRp::setFspBAR(
         break;
     }
 
-    assert(size == expSize,"Actual SCOM write size (%d) does not match "
-        "expected SCOM write size (%d)",size,expSize);
+    //assert(size == expSize,"Actual SCOM write size (%d) does not match "
+    //    "expected SCOM write size (%d)",size,expSize);
 
     } while(0);
 
@@ -3291,6 +3300,7 @@ errlHndl_t IntrRp::setXiveIcBAR(intr_hdlr_t *i_proc, bool i_enable)
 errlHndl_t IntrRp::disableVPCPullErr(intr_hdlr_t * i_proc)
 {
     errlHndl_t l_err = NULL;
+/* FIXME RTC: 210975 PU_INT_PC_VPC_ERR_CFG1 DNE yet
     TARGETING::Target *l_target = i_proc->proc;
     size_t size;
 
@@ -3322,6 +3332,7 @@ errlHndl_t IntrRp::disableVPCPullErr(intr_hdlr_t * i_proc)
 
 
     } while(0);
+*/
 
     return l_err;
 }
@@ -3329,6 +3340,7 @@ errlHndl_t IntrRp::disableVPCPullErr(intr_hdlr_t * i_proc)
 errlHndl_t IntrRp::enableVPCPullErr(TARGETING::Target * i_target)
 {
     errlHndl_t l_err = NULL;
+/* FIXME RTC: 210975 PU_INT_PC_VPC_ERR_CFG1 DNE yet
     size_t size;
 
     do {
@@ -3358,6 +3370,7 @@ errlHndl_t IntrRp::enableVPCPullErr(TARGETING::Target * i_target)
         }
     } while(0);
 
+*/
     return l_err;
 }
 

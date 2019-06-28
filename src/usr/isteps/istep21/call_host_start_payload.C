@@ -49,17 +49,23 @@
 #include <devicefw/userif.H>
 #include <arch/pirformat.H>
 #include <isteps/hwpf_reasoncodes.H>
+/* FIXME RTC: 210975
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
 #include <p9n2_quad_scom_addresses_fld.H>
 #include <p9_quad_scom_addresses.H>
+*/
 #include <ipmi/ipmiwatchdog.H>
 #include <config.h>
 #include <errno.h>
+/* FIXME RTC: 210975
 #include <p9_int_scom.H>
+*/
 #include <sbeio/sbeioif.H>
 #include <runtime/runtime.H>
+/* FIXME RTC: 210975
 #include <p9_stop_api.H>
+*/
 #include <kernel/memstate.H>
 #include "../hdat/hdattpmdata.H"
 #include "hdatstructs.H"
@@ -146,6 +152,7 @@ void msgHandler(msg_q_t i_msgQ)
             case MSG_PRE_SHUTDOWN_INITS:
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"Pre-Shutdown Inits event received");
+/* FIXME RTC: 210975
                 errlHndl_t l_errl = nullptr;
                 TARGETING::TargetHandleList l_cpuTargetList;
                 getAllChips(l_cpuTargetList, TYPE_PROC);
@@ -166,6 +173,7 @@ void msgHandler(msg_q_t i_msgQ)
                 }
 
                 msg_respond(i_msgQ, msg);
+*/
                 break;
             }
             default:
@@ -540,7 +548,7 @@ errlHndl_t callShutdown ( uint64_t i_masterInstance,
         {
             // opal load, Set the ATTN enable bit in the HID register
             uint64_t  l_enblAttnMask =
-                    0x8000000000000000ull >> P9N2_C_HID_EN_ATTN;
+                    0x8000000000000000ull /* FIXME RTC: 210975 >> P9N2_C_HID_EN_ATTN*/;
 
             uint64_t l_curHidVal =  cpu_spr_value( CPU_SPR_HID );
             uint64_t l_newHidVal = l_curHidVal | l_enblAttnMask;
@@ -730,6 +738,7 @@ errlHndl_t enableCoreCheckstops()
 {
     errlHndl_t l_errl = nullptr;
 
+/* FIXME RTC: 210975
     // If we're running on a PHYP system, we need
     // to switch back to running unit checkstops
     if(! is_sapphire_load() )
@@ -755,6 +764,7 @@ errlHndl_t enableCoreCheckstops()
             }
         }
     }
+*/
     return l_errl;
 }
 

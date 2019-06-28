@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018
+# Contributors Listed Below - COPYRIGHT 2018,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -26,9 +26,10 @@ ROOTPATH = ../../../../..
 
 MODULE = testsmf
 
-TESTS = testsmfutils.H
-TESTS += testmemutils.H
-TESTS += testsmf.H
+# FIXME RTC: 210975
+#TESTS = testsmfutils.H
+#TESTS += testmemutils.H
+#TESTS += testsmf.H
 
 include ${ROOTPATH}/config.mk
 

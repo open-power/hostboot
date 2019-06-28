@@ -39,8 +39,6 @@
 #include <prdfTrace.H>
 #include <prdfErrlUtil.H>
 
-#include <p9c_query_channel_failure.H>
-
 #ifdef __HOSTBOOT_MODULE
 #include <prdfParserUtils.H>
 #include <dimmBadDqBitmapFuncs.H>
@@ -49,11 +47,6 @@
 #include <p9_io_xbus_clear_firs.H>
 #include <p9_io_erepairAccessorHwpFuncs.H>
 #include <config.h>
-#include <p9_io_cen_read_erepair.H>
-#include <p9_io_cen_pdwn_lanes.H>
-#include <p9_io_dmi_read_erepair.H>
-#include <p9_io_dmi_clear_firs.H>
-#include <p9_io_dmi_pdwn_lanes.H>
 #endif
 
 using namespace TARGETING;
@@ -128,27 +121,6 @@ int32_t readErepair<TYPE_DMI>(TargetHandle_t i_rxBusTgt,
                               uint8_t i_clkGrp)
 {
     int32_t o_rc = SUCCESS;
-
-    #ifdef __HOSTBOOT_MODULE
-    PRDF_ASSERT( nullptr != i_rxBusTgt);
-    PRDF_ASSERT( TYPE_DMI == getTargetType(i_rxBusTgt) );
-    errlHndl_t err = nullptr;
-
-    fapi2::Target<fapi2::TARGET_TYPE_DMI> fapiTrgt (i_rxBusTgt);
-    FAPI_INVOKE_HWP(err,
-                    p9_io_dmi_read_erepair,
-                    fapiTrgt,
-                    o_rxFailLanes);
-
-    if (nullptr != err)
-    {
-        PRDF_ERR( "[PlatServices::readErepairDmi] HUID: 0x%08x "
-                  "p9_io_dmi_read_erepair failed", getHuid(i_rxBusTgt) );
-        PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
-        o_rc = FAIL;
-    }
-
-    #endif
     return o_rc;
 }
 
@@ -187,28 +159,6 @@ template<>
 int32_t clearIOFirs<TYPE_DMI>(TargetHandle_t  i_rxBusTgt)
 {
     int32_t o_rc = SUCCESS;
-
-    #ifdef __HOSTBOOT_MODULE
-    PRDF_ASSERT( nullptr != i_rxBusTgt);
-    PRDF_ASSERT( TYPE_DMI == getTargetType(i_rxBusTgt) );
-
-    errlHndl_t err = nullptr;
-
-    fapi2::Target<fapi2::TARGET_TYPE_DMI> fapiTrgt (i_rxBusTgt);
-
-    FAPI_INVOKE_HWP(err,
-                    p9_io_dmi_proc_clear_firs,
-                    fapiTrgt);
-
-    if (nullptr != err)
-    {
-        PRDF_ERR( "[PlatServices::clearIOFirs<TYPE_DMI>] HUID: 0x%08x "
-                  "p9_io_dmi_proc_clear_firs failed", getHuid(i_rxBusTgt) );
-        PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
-        o_rc = FAIL;
-    }
-
-    #endif
     return o_rc;
 }
 
@@ -253,28 +203,6 @@ int32_t powerDownLanes<TYPE_DMI>(TargetHandle_t i_rxBusTgt,
                                  uint8_t i_clkGrp )
 {
     int32_t o_rc = SUCCESS;
-
-    #ifdef __HOSTBOOT_MODULE
-    PRDF_ASSERT( nullptr != i_rxBusTgt);
-    PRDF_ASSERT( TYPE_DMI == getTargetType(i_rxBusTgt) );
-    errlHndl_t err = nullptr;
-
-    fapi2::Target<fapi2::TARGET_TYPE_DMI> fapiTrgt (i_rxBusTgt);
-    FAPI_INVOKE_HWP(err,
-                    p9_io_dmi_pdwn_lanes,
-                    fapiTrgt,
-                    i_rxFailLanes,
-                    i_txFailLanes);
-
-    if(nullptr != err)
-    {
-        PRDF_ERR( "[PlatServices::powerDownLanesDmi] HUID: 0x%08x "
-                  "p9_io_dmi_pdwn_lanes failed", getHuid(i_rxBusTgt) );
-        PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
-        o_rc = FAIL;
-    }
-
-    #endif
     return o_rc;
 }
 
@@ -322,32 +250,6 @@ int32_t getVpdFailedLanes<TYPE_DMI>( TargetHandle_t i_rxBusTgt,
                                      uint8_t i_clkGrp )
 {
     int32_t o_rc = SUCCESS;
-
-    #ifdef __HOSTBOOT_MODULE
-    PRDF_ASSERT( nullptr != i_rxBusTgt);
-    PRDF_ASSERT( TYPE_DMI == getTargetType(i_rxBusTgt) );
-
-    errlHndl_t err = nullptr;
-
-    fapi2::Target<fapi2::TARGET_TYPE_DMI> fapiTrgt (i_rxBusTgt);
-
-    FAPI_INVOKE_HWP(err,
-                    erepairGetFailedLanes,
-                    fapiTrgt,
-                    i_clkGrp,
-                    o_txFailLanes,
-                    o_rxFailLanes);
-
-    if(nullptr != err)
-    {
-        PRDF_ERR( "[PlatServices::getVpdFailedLanesDmi] HUID: 0x%08x "
-                  "erepairGetFailedLanes failed",
-                  getHuid(i_rxBusTgt));
-        PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
-        o_rc = FAIL;
-    }
-
-    #endif
     return o_rc;
 }
 
@@ -648,23 +550,6 @@ template<>
 void getDimmDqAttr<TYPE_DIMM>( TargetHandle_t i_target,
                                uint8_t (&o_dqMapPtr)[DQS_PER_DIMM] )
 {
-    #define PRDF_FUNC "[PlatServices::getDimmDqAttr<TYPE_DIMM>] "
-
-    PRDF_ASSERT( TYPE_DIMM == getTargetType(i_target) );
-
-    const uint8_t DIMM_BAD_DQ_SIZE_BYTES = 80;
-
-    uint8_t tmpData[DIMM_BAD_DQ_SIZE_BYTES];
-
-    if ( !i_target->tryGetAttr<ATTR_CEN_DQ_TO_DIMM_CONN_DQ>(tmpData) )
-    {
-        PRDF_ERR( PRDF_FUNC "Failed to get ATTR_CEN_DQ_TO_DIMM_CONN_DQ" );
-        PRDF_ASSERT( false );
-    }
-
-    memcpy( &o_dqMapPtr[0], &tmpData[0], DQS_PER_DIMM );
-
-    #undef PRDF_FUNC
 } // end function getDimmDqAttr
 
 
@@ -770,7 +655,7 @@ int32_t getDimmSpareConfig<TYPE_MCA>( TargetHandle_t i_mca, MemRank i_rank,
                                       uint8_t i_ps, uint8_t & o_spareConfig )
 {
     // No spares for MCAs
-    o_spareConfig = CEN_VPD_DIMM_SPARE_NO_SPARE;
+    o_spareConfig = MEM_EFF_DIMM_SPARE_NO_SPARE;
     return SUCCESS;
 }
 
@@ -785,7 +670,7 @@ int32_t getDimmSpareConfig<TYPE_MEM_PORT>( TargetHandle_t i_memPort,
     using namespace fapi2;
 
     ATTR_MEM_EFF_DIMM_SPARE_Type attr;
-    o_spareConfig = ENUM_ATTR_MEM_EFF_DIMM_SPARE_NO_SPARE;
+    o_spareConfig = fapi2::ENUM_ATTR_MEM_EFF_DIMM_SPARE_NO_SPARE;
     do
     {
         if( TYPE_MEM_PORT != getTargetType( i_memPort ) )
@@ -811,7 +696,7 @@ int32_t getDimmSpareConfig<TYPE_MEM_PORT>( TargetHandle_t i_memPort,
         // For X4 DRAM, we can not have full byte as spare config. Also for X8
         // DRAM we can not have nibble as spare.
 
-        if( ENUM_ATTR_MEM_EFF_DIMM_SPARE_NO_SPARE == o_spareConfig) break;
+        if( fapi2::ENUM_ATTR_MEM_EFF_DIMM_SPARE_NO_SPARE == o_spareConfig) break;
 
         bool isFullByte = ( ENUM_ATTR_MEM_EFF_DIMM_SPARE_FULL_BYTE ==
                             o_spareConfig );
@@ -986,29 +871,8 @@ uint32_t isSpareAvailable<TYPE_MEM_PORT>( TARGETING::TargetHandle_t i_trgt,
 template<>
 uint32_t queryChnlFail<TYPE_DMI>( ExtensibleChip * i_chip, bool & o_chnlFail )
 {
-    #define PRDF_FUNC "[PlatServices::queryChnlFail] "
-
-    PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_DMI == i_chip->getType() );
-
     uint32_t o_rc = SUCCESS;
-
-    errlHndl_t errl = nullptr;
-
-    fapi2::Target<fapi2::TARGET_TYPE_DMI> fapiTrgt ( i_chip->getTrgt() );
-
-    FAPI_INVOKE_HWP( errl, p9c_query_channel_failure, fapiTrgt, o_chnlFail );
-    if ( nullptr != errl )
-    {
-        PRDF_ERR( PRDF_FUNC "p9c_query_channel_failure(0x%08x) failed",
-                  i_chip->getHuid() );
-        PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-        o_rc = FAIL;
-    }
-
     return o_rc;
-
-    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
@@ -1046,9 +910,12 @@ int32_t  getSpdModspecComRefRawCard(
     uint8_t * l_blobData = nullptr;
 
     do{
+
+/* FIXME RTC: 210975
       // Grab the SPD data for this DIMM
       // This has an FSP and Hostboot implementation
       rc = getSpdData(i_pTarget, l_blobData, l_size);
+*/
       if (rc != SUCCESS)
       {
         break;

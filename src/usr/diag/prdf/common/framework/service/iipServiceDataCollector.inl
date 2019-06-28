@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,7 +45,7 @@ ServiceDataCollector::ServiceDataCollector() :
     ivpDumpRequestChipHandle(NULL),
     causeAttentionType(INVALID_ATTENTION_TYPE)
 {
-    PlatServices::getCurrentTime(ivCurrentEventTime);
+    /* FIXME RTC: 210975 PlatServices::getCurrentTime(ivCurrentEventTime);*/
 }
 
 // ---------------------------------------------------------------

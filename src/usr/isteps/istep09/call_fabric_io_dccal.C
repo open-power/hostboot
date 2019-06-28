@@ -42,8 +42,10 @@
 #include <hbotcompid.H>                 // HWPF_COMP_ID
 
 //  Targeting support
+/* FIXME RTC: 210975
 #include <fapi2/target.H>               // fapi2::Target
 #include <target.H>                     // TARGETING::Target
+*/
 
 //  Error handling support
 #include <errl/errlentry.H>             // errlHndl_t
@@ -57,10 +59,12 @@
 //  Pbus link service support
 #include <pbusLinkSvc.H>                // TargetPairs_t, PbusLinkSvc
 
+/* FIXME RTC: 210975
 //  HWP call support
 #include <istepHelperFuncs.H>           // captureError
 #include <istep09/istep09HelperFuncs.H> // trainBusHandler
 #include <p9_io_xbus_dccal.H>           // p9_io_xbus_dccal
+*/
 
 namespace ISTEP_09
 {
@@ -78,10 +82,12 @@ using   namespace   TARGETING;
  *  @param[in]  i_group       clock group
  *  @return  True if NO errors occurred, false otherwise
  */
+/* FIXME RTC: 210975
 bool configureXbusConnections(IStepError          &o_stepError,
                               const XbusDccalMode  i_dccalMode,
                               const XBUS_TGT       i_fapi2Target,
                               const uint8_t        i_group);
+*/
 
 /**
  *  @brief This function explicitly makes the FAPI call for XbusDccalMode
@@ -105,9 +111,11 @@ bool configureXbusConnectionsRunBusMode(IStepError &o_stepError,
  *  @param[in]  i_dccalMode   XbusDccalMode -- selects what operation to perform
  *  @return  True if NO errors occurred, false otherwise
  */
+/* FIXME RTC: 210975
 bool configureXbusConnectionsMode(IStepError &o_stepError,
              const EDI_EI_INITIALIZATION::TargetPairs_t &i_PbusConnections,
              XbusDccalMode i_dccalMode);
+*/
 
 //******************************************************************************
 // Wrapper function to call fabric_io_dccal
@@ -140,10 +148,12 @@ void* call_fabric_io_dccal( void *io_pArgs )
                 "ERROR 0x%.8X : getPbusConnections TYPE_%cBUS returns error",
                 l_errl->reasonCode(), (ii ? 'O':'X') );
 
+/* FIXME RTC: 210975
             // Capture error and then exit
             captureError(l_errl,
                          l_stepError,
                          HWPF_COMP_ID);
+*/
 
             // Don't continue with a potential bad connection set
             break;
@@ -159,17 +169,20 @@ void* call_fabric_io_dccal( void *io_pArgs )
 
             // if any one of these returns an error then just move on to the next Bus Set
             configureXbusConnectionsRunBusMode(l_stepError,
-                                               l_pbusConnections) &&
+                                               l_pbusConnections);
+            /* FIXME RTC: 210975 &&
             configureXbusConnectionsMode(l_stepError,
                                          l_pbusConnections,
                                          XbusDccalMode::RxDccalStartGrp) &&
             configureXbusConnectionsMode(l_stepError,
                                          l_pbusConnections,
                                          XbusDccalMode::RxDccalCheckGrp);
+            */
         }  // end if (TYPE_XBUS == l_busSet[ii])
         else if (INITSERVICE::isSMPWrapConfig() &&
                 (TYPE_OBUS == l_busSet[ii]))
         {
+/* FIXME RTC: 210975
             // Make the FAPI call to p9_io_obus_dccal
             if (!trainBusHandler(l_busSet[ii],
                                  P9_IO_OBUS_DCCAL,
@@ -179,6 +192,7 @@ void* call_fabric_io_dccal( void *io_pArgs )
             {
                 break;
             }
+*/
         }  // end else if (TYPE_OBUS == l_busSet[ii])
     } // end  for (uint32_t ii = 0; ii < l_maxBusSet; ii++)
 
@@ -209,6 +223,7 @@ bool configureXbusConnectionsRunBusMode(IStepError &o_stepError,
         // Iterate over the targets
         for (const auto l_target: l_targets)
         {
+/* FIXME RTC: 210975
             // Convert current target to a fapi2 target
             const fapi2::Target <fapi2::TARGET_TYPE_XBUS>
                 l_pbusFapi2Target
@@ -225,6 +240,7 @@ bool configureXbusConnectionsRunBusMode(IStepError &o_stepError,
                                                     XbusDccalMode::TxZcalRunBus,
                                                     l_pbusFapi2Target,
                                                     l_groups[0]);
+*/
 
             if (!l_retSuccess) break; // Don't continue if an error occurred
 
@@ -233,15 +249,16 @@ bool configureXbusConnectionsRunBusMode(IStepError &o_stepError,
                 TRACFCOMP(g_trac_isteps_trace,
                           "Running p9_io_xbus_dccal HWP with mode = %.8X on "
                           "XBUS target %.8X on group %d",
-                          XbusDccalMode::TxZcalSetGrp,
+                          /* FIXME RTC: 210975 XbusDccalMode::TxZcalSetGrp*/ 0,
                           TARGETING::get_huid(l_target),
                           l_group);
-
+/* FIXME RTC: 210975
                 l_retSuccess =
                        configureXbusConnections(o_stepError,
                                                 XbusDccalMode::TxZcalSetGrp,
                                                 l_pbusFapi2Target,
                                                 l_group);
+*/
                 if (!l_retSuccess) break; // Don't continue if an error occurred
             }
 
@@ -263,6 +280,7 @@ bool configureXbusConnectionsRunBusMode(IStepError &o_stepError,
 /**
  *  configureXbusConnectionsMode
  */
+/* FIXME RTC: 210975
 bool configureXbusConnectionsMode(IStepError &o_stepError,
              const EDI_EI_INITIALIZATION::TargetPairs_t &i_PbusConnections,
              XbusDccalMode i_dccalMode)
@@ -306,7 +324,6 @@ bool configureXbusConnectionsMode(IStepError &o_stepError,
                 {
                     l_retSuccess = true;
                 }
-
                 TRACFCOMP(g_trac_isteps_trace,
                           "%s : XBUS connection p9_io_xbus_dccal, target 0x%.8X",
                           (l_retSuccess ? "SUCCESS" : "ERROR"),
@@ -323,10 +340,12 @@ bool configureXbusConnectionsMode(IStepError &o_stepError,
     // return true if call was successful, else false
     return l_retSuccess;
 }
+*/
 
 /**
  *  configureXbusConnections
  */
+/* FIXME RTC: 210975
 bool configureXbusConnections(IStepError          &o_stepError,
                               const XbusDccalMode  i_dccalMode,
                               const XBUS_TGT       i_fapi2Target,
@@ -356,5 +375,6 @@ bool configureXbusConnections(IStepError          &o_stepError,
    // return true if call was successful, else false
    return l_retSuccess;
 }
+*/
 
 };   // end namespace ISTEP_09

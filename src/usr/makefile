@@ -46,7 +46,6 @@ SUBDIRS += $(if $(CONFIG_HTMGT),htmgt.d)
 SUBDIRS += hwas.d
 SUBDIRS += hwplibs.d
 SUBDIRS += i2c.d
-SUBDIRS += ibscom.d
 SUBDIRS += imageprocs.d
 SUBDIRS += $(if $(CONFIG_BMC_BT_LPC_IPMI),ipmibase.d)
 SUBDIRS += $(if $(CONFIG_BMC_BT_LPC_IPMI),ipmiext.d)

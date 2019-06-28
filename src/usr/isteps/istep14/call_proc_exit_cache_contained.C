@@ -35,6 +35,7 @@
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/util.H>
 #include <targeting/common/utilFilter.H>
+/* FIXME RTC: 210975
 #include <fapi2/target.H>
 
 
@@ -42,6 +43,7 @@
 #include    <fapi2/plat_hwp_invoker.H>
 #include    <p9_misc_scom_addresses.H>
 #include    <p9_exit_cache_contained.H>
+*/
 
 #include <sys/mm.h>
 #include <arch/pirformat.H>
@@ -52,11 +54,6 @@
 #include <hwas/common/hwas.H>
 #include <sys/misc.h>
 #include <vmmconst.h>
-
-#ifdef CONFIG_SECUREBOOT
-#include <secureboot/service.H>
-#include <scom/centaurScomCache.H>
-#endif
 
 #include <isteps/mem_utils.H>
 #include <arch/ppc.H>
@@ -80,23 +77,6 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_exit_cache_contained entry" );
     errlHndl_t  l_errl = nullptr;
-
-#ifdef CONFIG_SECUREBOOT
-    if(SECUREBOOT::enabled())
-    {
-        SECUREBOOT::CENTAUR_SECURITY::ScomCache& centaurCache =
-            SECUREBOOT::CENTAUR_SECURITY::ScomCache::getInstance();
-
-        l_errl = centaurCache.verify();
-        if(l_errl)
-        {
-            l_stepError.addErrorDetails(l_errl);
-            errlCommit(l_errl, HWPF_COMP_ID );
-        }
-
-        centaurCache.destroy();
-    }
-#endif
 
     // @@@@@    CUSTOM BLOCK:   @@@@@
     //  figure out what targets we need
@@ -212,6 +192,7 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
 
         if(l_mirrored)
         {
+#if 0
             ATTR_MIRROR_BASE_ADDRESS_type l_mirrorBaseAddr = 0;
             if(!is_sapphire_load())
             {
@@ -351,6 +332,7 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
                      0,
                      true); // callout firmware
             }
+#endif
         }
         // If we're not mirrored, payloadBase is the lowest mem_base.
         // Note that if we are mirrored, finding the correct mirror
@@ -404,6 +386,7 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
         }
         else
         {
+/* FIXME RTC: 210975
             for (const auto & l_procChip: l_procList)
             {
                 const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
@@ -421,6 +404,7 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
                     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_exit_cache_contained:: failed on proc with HUID : %d", TARGETING::get_huid(l_procChip)  );
                 }
             }
+*/
         }
 
         // no errors so extend Virtual Memory Map

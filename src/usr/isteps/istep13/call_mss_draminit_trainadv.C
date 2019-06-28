@@ -39,10 +39,11 @@
 #include "istep13consts.H"
 #include <util/misc.H>
 
+/* FIXME RTC: 210975
 #include    <fapi2.H>
 #include    <fapi2/plat_hwp_invoker.H>
 #include    <p9_mss_draminit_training_adv.H>
-#include    <p9c_mss_draminit_training_advanced.H>
+*/
 
 using   namespace   ERRORLOG;
 using   namespace   ISTEP;
@@ -110,72 +111,16 @@ class MembufWorkItem: public IStepWorkItem
 //******************************************************************************
 void MembufWorkItem::operator()()
 {
-    errlHndl_t l_err = nullptr;
-
-    // reset watchdog for each memb as this function can be very slow
-    INITSERVICE::sendProgressCode();
-
-    TARGETING::TargetHandleList l_mbaTargetList;
-    getChildChiplets(l_mbaTargetList,
-                    iv_pMembuf,
-                    TYPE_MBA);
-
-    for (auto l_mbaTarget : l_mbaTargetList)
-    {
-        // Dump current run on target
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "Running p9c_mss_draminit_training_advanced HWP on target HUID %.8X.",
-            TARGETING::get_huid(l_mbaTarget));
-
-        //  call the HWP with each target
-        fapi2::Target <fapi2::TARGET_TYPE_MBA_CHIPLET>
-                            l_fapi_mba_target(l_mbaTarget);
-
-        FAPI_INVOKE_HWP(l_err,
-                       p9c_mss_draminit_training_advanced,
-                       l_fapi_mba_target);
-
-        //  process return code.
-        if ( l_err )
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR 0x%.8X : p9c_mss_draminit_training_advanced HWP returns error.",
-                l_err->reasonCode());
-
-            // capture the target data in the elog
-            ErrlUserDetailsTarget(l_mbaTarget).addToLog(l_err);
-
-            //addErrorDetails may not be thread-safe.  Protect with mutex.
-            mutex_lock(&g_stepErrorMutex);
-
-            // Create IStep error log and cross reference to error that occurred
-            iv_pStepError->addErrorDetails( l_err );
-
-            mutex_unlock(&g_stepErrorMutex);
-
-            // Commit Error
-            errlCommit( l_err, ISTEP_COMP_ID );
-
-            break;
-        }
-        else
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "SUCCESS running p9c_mss_draminit_training_advanced HWP on target HUID %.8X.",
-                   TARGETING::get_huid(l_mbaTarget));
-        }
-    }
 }
 
 
 //******************************************************************************
 void* call_mss_draminit_trainadv (void *io_pArgs)
 {
-    errlHndl_t l_err = nullptr;
     IStepError l_stepError;
+/* FIXME RTC: 210975
+    errlHndl_t l_err = nullptr;
     Util::ThreadPool<IStepWorkItem> tp;
-    uint32_t l_maxThreads = ISTEP13_MAX_THREADS;
-    uint32_t l_numThreads = 0;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_mss_draminit_trainingadv entry");
@@ -224,47 +169,11 @@ void* call_mss_draminit_trainadv (void *io_pArgs)
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "Skipping p9c_mss_draminit_training_advanced HWP in Simics");
     }
-    else if(l_stepError.getErrorHandle() == nullptr)
-    {
-        // Get all Centaur targets
-        TARGETING::TargetHandleList l_membufTargetList;
-        getAllChips(l_membufTargetList, TYPE_MEMBUF);
-
-        for (const auto & l_membuf : l_membufTargetList)
-        {
-            //  Create a new workitem from this membuf and feed it to the
-            //  thread pool for processing.  Thread pool handles workitem
-            //  cleanup.
-            tp.insert(new MembufWorkItem(*l_membuf, l_stepError));
-        }
-
-        //Don't create more threads than we have targets
-        size_t l_numTargets = l_membufTargetList.size();
-        l_numThreads = std::min((size_t)l_maxThreads, l_numTargets);
-
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                  "Starting %u thread(s) to handle %u membuf target(s)", l_numThreads, l_numTargets);
-
-        //Set the number of threads to use in the threadpool
-        Util::ThreadPoolManager::setThreadCount(l_numThreads);
-
-        //create and start worker threads
-        tp.start();
-
-        //wait for all workitems to complete, then clean up all threads.
-        l_err = tp.shutdown();
-        if(l_err)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      ERR_MRK"call_mss_draminit_trainadv: thread pool returned an error");
-            l_stepError.addErrorDetails(l_err);
-            errlCommit(l_err, ISTEP_COMP_ID);
-        }
-    }
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                                 "call_mss_draminit_trainingadv exit" );
 
+*/
     return l_stepError.getErrorHandle();
 }
 

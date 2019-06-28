@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2017
+# Contributors Listed Below - COPYRIGHT 2013,2019
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -27,24 +27,25 @@
 ROOTPATH = ../../..
 MODULE = errldisplay
 
-OBJS += errldisplay.o
-OBJS += errldisplaydata.o
+# FIXME RTC: 210975
+
+#OBJS += errldisplay.o
+#OBJS += errldisplaydata.o
 
 #PRDF Error Sigs
-include ${ROOTPATH}/src/usr/diag/prdf/common/rule/prdf_rule.mk
-prd_rule_disp_targets = ${PRDR_RULE_TABLES:.prf=.prf.disp.o}
-OBJS += $(if $(CONFIG_CONSOLE_OUTPUT_FFDCDISPLAY),${prd_rule_disp_targets})
+#include ${ROOTPATH}/src/usr/diag/prdf/common/rule/prdf_rule.mk
+#prd_rule_disp_targets = ${PRDR_RULE_TABLES:.prf=.prf.disp.o}
+#OBJS += $(if $(CONFIG_CONSOLE_OUTPUT_FFDCDISPLAY),${prd_rule_disp_targets})
 
 include ${ROOTPATH}/config.mk
 
 # To find errldisplaydata.C - it is generated
 # by ../errl/parser/genErrlParsers.pl
-vpath %.C ${GENDIR} ${GENDIR}/plugins/prdf/
-vpath %.C ${GENDIR} ${GENDIR}/plugins/prdf/rule
+#vpath %.C ${GENDIR} ${GENDIR}/plugins/prdf/
+#vpath %.C ${GENDIR} ${GENDIR}/plugins/prdf/rule
 
 #To find hbfwErrDisplayPlatHwpErr add extra include paths
 EXTRAINCDIR += ${GENDIR}/plugins
 EXTRAINCDIR += ${GENDIR}/plugins/prdf/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/diag/prdf/plugins/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/centaur/common/include/

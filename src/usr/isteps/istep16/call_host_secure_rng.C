@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,8 +59,10 @@
 #include <vpd/mvpdenums.H>
 
 #include <config.h>
+/* FIXME RTC: 210975
 #include <fapi2/plat_hwp_invoker.H>
 #include <p9_rng_init_phase2.H>
+*/
 
 namespace   ISTEP_16
 {
@@ -76,11 +78,12 @@ using   namespace   TARGETING;
 void* call_host_secure_rng( void *io_pArgs )
 {
 
-    errlHndl_t l_err = NULL;
     IStepError l_StepError;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_secure_rng entry" );
+/* FIXME RTC: 210975
+    errlHndl_t l_err = NULL;
     //
     //  get a list of all the procs in the system
     //
@@ -132,6 +135,7 @@ void* call_host_secure_rng( void *io_pArgs )
             errlCommit(l_err, HWPF_COMP_ID);
         }
     } // end of going through all processors
+*/
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_secure_rng exit");

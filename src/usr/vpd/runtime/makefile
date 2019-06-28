@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2017
+# Contributors Listed Below - COPYRIGHT 2013,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -27,15 +27,16 @@ HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
 MODULE = vpd_rt
 
+# TODO RTC: 210975
 #include common objects between hostboot and runtime hostboot
-include ../vpd.mk
+#include ../vpd.mk
 
 #add unique object modules
-OBJS += rt_vpd.o
+#OBJS += rt_vpd.o
 
 SUBDIRS += test.d
 
-VPATH += ..
+#VPATH += ..
 CFLAGS += -iquote ../
 
 include $(ROOTPATH)/config.mk

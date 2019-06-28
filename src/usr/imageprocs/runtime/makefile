@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018
+# Contributors Listed Below - COPYRIGHT 2018,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -28,8 +28,9 @@ ROOTPATH = ../../../..
 
 MODULE = imageprocs_rt
 
-VPATH += ../
+# FIXME RTC: 210975
+#VPATH += ../
 
-include ../imageprocs.mk
+#include ../imageprocs.mk
 
 include ${ROOTPATH}/config.mk

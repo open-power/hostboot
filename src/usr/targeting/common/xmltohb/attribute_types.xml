@@ -3213,6 +3213,7 @@
     </description>
     <simpleType>
       <uint8_t/>
+      <array>4</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -5881,7 +5882,7 @@
     Chiplet Partial good info attribute. Provided by Ring scans
   </description>
     <simpleType>
-      <uint16_t/>
+      <uint32_t/>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>

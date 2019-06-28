@@ -767,7 +767,7 @@ void* call_host_runtime_setup (void *io_pArgs)
             uint8_t l_skip_fir_attr_reset = 1;
             // Since we are not leaving the PM complex alive, we will
             //  explicitly put it into reset and clean up any memory
-            l_err = HBPM::resetPMAll(HBPM::RESET_AND_CLEAR_ATTRIBUTES, 
+            l_err = HBPM::resetPMAll(HBPM::RESET_AND_CLEAR_ATTRIBUTES,
                                      l_skip_fir_attr_reset);
             if (l_err)
             {
@@ -846,7 +846,7 @@ void* call_host_runtime_setup (void *io_pArgs)
                 break;
             }
         }
-        
+
         // Update the MDRT Count and PDA Table Entries from Attribute
         TargetService& l_targetService = targetService();
         Target* l_sys = nullptr;

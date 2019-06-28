@@ -197,7 +197,6 @@ enum BlockPriority
 #define VMM_CENTAUR_VPD_SIZE (256*KILOBYTE)         /* must be 64KB aligned */
 #define VMM_DIMM_JEDEC_VPD_SIZE (256*KILOBYTE)      /* must be 64KB aligned */
 #define VMM_RT_VPD_SIZE ( VMM_MODULE_VPD_SIZE + \
-                          VMM_CENTAUR_VPD_SIZE + \
                           VMM_DIMM_JEDEC_VPD_SIZE )
 
 

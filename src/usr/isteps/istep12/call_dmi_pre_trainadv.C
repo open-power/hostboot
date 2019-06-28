@@ -39,6 +39,7 @@
 
 //Fapi Support
 #include    <config.h>
+/* FIXME RTC: 210975
 #include    <fapi2.H>
 #include    <fapi2/plat_hwp_invoker.H>
 #include    <util/utilmbox_scratch.H>
@@ -48,6 +49,7 @@
 #ifdef CONFIG_AXONE
 #include    <p9a_omi_train.H>
 #endif
+*/
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -60,74 +62,13 @@ namespace ISTEP_12
 void* call_dmi_pre_trainadv (void *io_pArgs)
 {
     IStepError l_StepError;
-    errlHndl_t l_err = NULL;
+/* FIXME RTC: 210975
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_pre_trainadv entry" );
 
-    TARGETING::TargetHandleList l_dmiTargetList;
-    getAllChiplets(l_dmiTargetList, TYPE_DMI);
-
-    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_pre_trainadv: %d DMIs found",
-            l_dmiTargetList.size());
-
-    for (const auto & l_dmi_target : l_dmiTargetList)
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "p9_io_dmi_pre_trainadv HWP target HUID %.8x",
-            TARGETING::get_huid(l_dmi_target));
-
-        //get the membuf associated with this DMI.
-        TARGETING::TargetHandleList l_pChildMembufList;
-        getChildAffinityTargetsByState(l_pChildMembufList,
-                                       l_dmi_target,
-                                       CLASS_CHIP,
-                                       TYPE_MEMBUF,
-                                       UTIL_FILTER_PRESENT);
-        // call the HWP p9_io_dmi_pre_trainadv only if membuf connected.
-        //we can't expect more than one membufs connected to a DMI
-        if (l_pChildMembufList.size() == 1)
-        {
-            //  call the HWP with each DMI target
-            fapi2::Target<fapi2::TARGET_TYPE_DMI> l_fapi_dmi_target
-                (l_dmi_target);
-
-            fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> l_fapi_membuf_target
-                (l_pChildMembufList[0]);
-
-            FAPI_INVOKE_HWP(l_err, p9_io_dmi_pre_trainadv, l_fapi_dmi_target, l_fapi_membuf_target );
-
-            //  process return code.
-            if ( l_err )
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR 0x%.8X:  p9_io_dmi_pre_trainadv HWP on target HUID %.8x",
-                    l_err->reasonCode(), TARGETING::get_huid(l_dmi_target) );
-
-                // capture the target data in the elog
-                ErrlUserDetailsTarget(l_dmi_target).addToLog( l_err );
-
-                // Create IStep error log and cross reference to error that occurred
-                l_StepError.addErrorDetails( l_err );
-
-                // Commit Error
-                errlCommit( l_err, ISTEP_COMP_ID );
-            }
-            else
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                         "SUCCESS :  p9_io_dmi_pre_trainadv HWP on target 0x%.08X", TARGETING::get_huid(l_dmi_target));
-            }
-        }
-        else    //No associated membuf
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                      "p9_io_dmi_pre_trainadv HWP skipped, HUID 0x%.08X has no associated membufs"
-                      ,TARGETING::get_huid(l_dmi_target));
-        }
-
-    }
-
 #ifdef CONFIG_AXONE
+    errlHndl_t l_err = NULL;
+
     TARGETING::TargetHandleList l_omiTargetList;
     getAllChiplets(l_omiTargetList, TYPE_OMI);
 
@@ -169,7 +110,7 @@ void* call_dmi_pre_trainadv (void *io_pArgs)
     }
 #endif
 
-
+*/
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_pre_trainadv exit" );
     // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();

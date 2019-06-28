@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,13 +43,17 @@
 #include <devicefw/userif.H>
 #include <hwas/common/deconfigGard.H>
 
+/* FIXME RTC: 210975
 //HWPF
 #include <plat_hwp_invoker.H>
 #include <p9_perv_scom_addresses.H>
 #include <p9_tod_setup.H>
+*/
 #include <errl/errlentry.H>
 #include <errl/errludtarget.H>
+/* FIXME RTC: 210975
 #include <p9_tod_utils.H>
+*/
 #include <isteps/tod_init_reasoncodes.H>
 
 using namespace TARGETING;
@@ -97,6 +101,8 @@ errlHndl_t TodControls ::pickMdmt(const p9_tod_setup_tod_sel i_config)
    TOD_ENTER("Input config is 0x%.2X", i_config);
 
    errlHndl_t l_errHdl = NULL;
+// FIXME RTC: 210975
+#if 0
 
    //MDMT is the master processor that drives TOD signals to all the remaining
    //processors on the system, as such wherever possible algorithm will try to
@@ -278,9 +284,12 @@ errlHndl_t TodControls ::pickMdmt(const p9_tod_setup_tod_sel i_config)
 
     TOD_EXIT();
 
+#endif
     return l_errHdl;
 }
 
+// FIXME RTC: 210975
+#if 0
 //******************************************************************************
 //TodControls::buildTodDrawers
 //******************************************************************************
@@ -467,6 +476,7 @@ errlHndl_t  TodControls::buildTodDrawers(
     TOD_EXIT("buildTodDrawers");
     return l_errHdl;
 }
+#endif
 
 //******************************************************************************
 //TodControls::isTodRunning
@@ -1754,11 +1764,13 @@ void destroy(const p9_tod_setup_tod_sel i_config)
     Singleton<TodControls>::instance().destroy(i_config);
 }
 
+/* FIXME RTC: 210975
 // Wrapper function for TodControls::buildTodDrawers instance
 errlHndl_t buildTodDrawers(const p9_tod_setup_tod_sel i_config)
 {
     return Singleton<TodControls>::instance().buildTodDrawers(i_config);
 }
+*/
 
 // Wrapper function for TodControls::buildGardedTargetsList instance
 errlHndl_t buildGardedTargetsList()

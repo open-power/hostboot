@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018
+# Contributors Listed Below - COPYRIGHT 2018,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -26,8 +26,10 @@ HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
 MODULE = fsiscom_rt
 
-OBJS += rt_fsiscom.o
+# FIXME RTC: 210975
+
+#OBJS += rt_fsiscom.o
 
 EXTRAINCDIR += ${ROOTPATH}/src/usr/diag/prdf/
-VPATH += ..
+#VPATH += ..
 include $(ROOTPATH)/config.mk

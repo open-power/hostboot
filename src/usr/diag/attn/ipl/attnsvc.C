@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -300,6 +300,7 @@ void Service::processIntrQMsg(msg_t & i_msg)
 errlHndl_t Service::processCheckstop()
 {
     errlHndl_t err = NULL;
+/* FIXME RTC: 210975 PRD is not enabled yet
     AttentionList attentions;
 
     assert(!Singleton<Service>::instance().running());
@@ -341,6 +342,7 @@ errlHndl_t Service::processCheckstop()
         }
     }
 
+*/
     return err;
 }
 

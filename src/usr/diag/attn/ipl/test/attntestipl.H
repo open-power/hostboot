@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -95,8 +95,6 @@ class AttnCheckForIplAttentionsTest : public CxxTest::TestSuite
             recGfir.install(system);
             lxstpGfir.install(system);
             hostGfir.install(system);
-
-            // No Centaurs to mess with for now
 
             system.installScomImpl();
             FakeMemTargetService targetSvc(targetPoolSize);
@@ -189,8 +187,6 @@ class AttnCheckForIplAttentionsTest : public CxxTest::TestSuite
             recGfir.install(system);
             lxstpGfir.install(system);
             hostGfir.install(system);
-
-            // No Centaurs to mess with for now
 
             system.installScomImpl();
             FakeMemTargetService targetSvc(targetPoolSize);

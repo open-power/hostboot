@@ -53,7 +53,6 @@ enum SectionId
     HB_ERRLOGS,     /**< Hostboot Error log Repository */
     DIMM_JEDEC_VPD, /**< DIMM JEDEC VPD */
     MODULE_VPD,     /**< Module VPD */
-    CENTAUR_VPD,    /**< Centaur VPD */
     NVRAM,          /**< Opal NVRAM */
     OCC,            /**< OCC image */
     FIRDATA,        /**< FIR data for checkstop analysis */
@@ -72,7 +71,6 @@ enum SectionId
     HB_VOLATILE,    /**< Semi volatile partition for reconfig */
     MEMD,           /**< Memory configuration data */
     TESTLOAD,       /**< Secureboot test load */
-    CENTAUR_HW_IMG, /**< Centaur HCODE Reference image */
     HDAT,           /**< HDAT data */
     EECACHE,
     OCMBFW,         /**< OCMB image */

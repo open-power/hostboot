@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017
+# Contributors Listed Below - COPYRIGHT 2017,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -29,9 +29,11 @@ ROOTPATH = ../../../../../..
 
 MODULE = testpm_rt
 
-EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/pm
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/utils
+# FIXME RTC: 210975
 
-TESTS = *.H
+#EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/pm
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/utils
+
+#TESTS = *.H
 
 include ${ROOTPATH}/config.mk

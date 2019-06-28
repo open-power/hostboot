@@ -113,15 +113,6 @@ Layout Description - Used when building an FSP driver
         <ecc/>
     </section>
     <section>
-        <description>Centaur VPD (288K)</description>
-        <eyeCatch>CVPD</eyeCatch>
-        <!--NOTE: MUST update standalone.simics if offset changes -->
-        <physicalOffset>0x109000</physicalOffset>
-        <physicalRegionSize>0x48000</physicalRegionSize>
-        <side>sideless</side>
-        <ecc/>
-    </section>
-    <section>
         <description>Hostboot Base (1MB)</description>
         <eyeCatch>HBB</eyeCatch>
         <physicalOffset>0x151000</physicalOffset>
@@ -234,16 +225,7 @@ Layout Description - Used when building an FSP driver
         <ecc/>
     </section>
     <section>
-        <description>Centaur Hw Ref Image (12K)</description>
-        <eyeCatch>CENHWIMG</eyeCatch>
-        <physicalOffset>0x297E000</physicalOffset>
-        <physicalRegionSize>0x3000</physicalRegionSize>
-        <sha512Version/>
-        <side>sideless</side>
-        <ecc/>
-    </section>
-    <section>
-        <description>Secure Boot (144K)</description>
+       <description>Secure Boot (144K)</description>
         <eyeCatch>SECBOOT</eyeCatch>
         <physicalOffset>0x2981000</physicalOffset>
         <physicalRegionSize>0x24000</physicalRegionSize>

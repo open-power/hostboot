@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018
+# Contributors Listed Below - COPYRIGHT 2018,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -26,7 +26,9 @@ ROOTPATH = ../../../..
 
 MODULE = testnvram
 
-TESTS = testnvram.H
+# FIXME RTC: 210975
+
+#TESTS = testnvram.H
 
 include ${ROOTPATH}/config.mk
 

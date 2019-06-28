@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -101,7 +101,6 @@ TargStrToType CHIP_TYPE_TARG_STR_TO_TYPE [] =
     {"p9n"        , fapi2::TARGET_TYPE_PROC_CHIP   , TARGETING::TYPE_PROC},
     {"p9c"        , fapi2::TARGET_TYPE_PROC_CHIP   , TARGETING::TYPE_PROC},
     {"pu"         , fapi2::TARGET_TYPE_PROC_CHIP   , TARGETING::TYPE_PROC},
-    {"centaur"    , fapi2::TARGET_TYPE_MEMBUF_CHIP , TARGETING::TYPE_MEMBUF},
     {"dimm"       , fapi2::TARGET_TYPE_DIMM        , TARGETING::TYPE_DIMM},
     {"p8"         , fapi2::TARGET_TYPE_PROC_CHIP   , TARGETING::TYPE_PROC},
     {"p9"         , fapi2::TARGET_TYPE_PROC_CHIP   , TARGETING::TYPE_PROC},

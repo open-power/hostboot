@@ -31,14 +31,17 @@ ROOTPATH = ../../../../..
 IMPORT_PATH        = ${ROOTPATH}/src/import
 PROCEDURES_PATH    = ${IMPORT_PATH}/chips/p9/procedures
 
-include ${ROOTPATH}/src/build/mkrules/script.rules.mk
-include ${ROOTPATH}/src/build/mkrules/verbose.rules.mk
+# FIXME RTC: 210975
+
+#include ${ROOTPATH}/src/build/mkrules/script.rules.mk
+#include ${ROOTPATH}/src/build/mkrules/verbose.rules.mk
 
 #Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 EXTRAINCDIR += ${IMPORT_PATH}/
@@ -69,6 +72,7 @@ MSS_LIB += ${IMPORT_PATH}/generic/memory/lib/utils/
 MSS_LIB += ${IMPORT_PATH}/generic/memory/lib/utils/shared/
 MSS_LIB += ${IMPORT_PATH}/generic/memory/lib/utils/freq/
 MSS_LIB += ${IMPORT_PATH}/generic/memory/lib/utils/mcbist
+MSS_LIB += ${IMPORT_PATH}/generic/memory/
 
 # Axone
 MSS_LIB += ${IMPORT_PATH}/chips/p9a/procedures/hwp/memory/lib/utils/
@@ -78,23 +82,22 @@ MSS_LIB += ${IMPORT_PATH}/chips/p9/procedures/hwp/memory/lib/utils/
 
 EXTRAINCDIR += ${MSS_LIB}
 
-VPATH += ${MSS_LIB}
+#VPATH += ${MSS_LIB}
 
 #######
 # Add the specific files we need for HBRT
-OBJS += c_str.o
-OBJS += axone_c_str.o
-OBJS += nimbus_c_str.o
-OBJS += mcbist.o
-OBJS += mcbist_workarounds.o
-OBJS += rank.o
-OBJS += memory_size.o
-OBJS += gen_patterns.o
-OBJS += axone_pos.o
-OBJS += nimbus_pos.o
+#OBJS += c_str.o
+#OBJS += axone_c_str.o
+#OBJS += nimbus_c_str.o
+#OBJS += mcbist.o
+#OBJS += mcbist_workarounds.o
+#OBJS += rank.o
+#OBJS += memory_size.o
+#OBJS += axone_pos.o
+#OBJS += nimbus_pos.o
 
 
 
 #HWP build tool
-include ${ROOTPATH}/procedure.rules.mk
+#include ${ROOTPATH}/procedure.rules.mk
 include ${ROOTPATH}/config.mk

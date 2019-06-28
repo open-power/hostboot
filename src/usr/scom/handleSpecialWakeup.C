@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,8 +41,10 @@
 #include <runtime/interface.h>
 #endif // __HOSTBOOT_RUNTIME
 
+/* FIXME RTC: 210975
 #include <fapi2/plat_hwp_invoker.H>
 #include <p9_cpu_special_wakeup.H>
+*/
 #include <scom/wakeup.H>
 
 // Trace definition
@@ -272,7 +274,7 @@ errlHndl_t callWakeupHwp(TARGETING::Target* i_target,
                          HandleOptions_t i_enable)
 {
     errlHndl_t l_errl = NULL;
-    fapi2::ReturnCode l_rc;
+    //fapi2::ReturnCode l_rc;
 
     TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
 
@@ -362,6 +364,7 @@ errlHndl_t callWakeupHwp(TARGETING::Target* i_target,
         // special wakeup (FSP,HOST,OCC), we are using the FSP
         // bit because HOST/OCC are already in use.
 
+/* FIXME RTC: 210975
         p9specialWakeup::PROC_SPCWKUP_OPS l_spcwkupType;
         p9specialWakeup::PROC_SPCWKUP_ENTITY l_spcwkupSrc;
         if(! INITSERVICE::spBaseServicesEnabled())
@@ -381,9 +384,11 @@ errlHndl_t callWakeupHwp(TARGETING::Target* i_target,
         {
             l_spcwkupType = p9specialWakeup::SPCWKUP_DISABLE;
         }
+*/
 
         if(l_type == TARGETING::TYPE_EQ)
         {
+/* FIXME RTC: 210975
             fapi2::Target<fapi2::TARGET_TYPE_EQ>
                 l_fapi_target(const_cast<TARGETING::Target*>(i_target));
 
@@ -393,9 +398,11 @@ errlHndl_t callWakeupHwp(TARGETING::Target* i_target,
                           l_spcwkupType,
                           l_spcwkupSrc );
             l_errl = rcToErrl(l_rc, ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+*/
         }
         else if(l_type == TARGETING::TYPE_EX)
         {
+/* FIXME RTC: 210975
             fapi2::Target<fapi2::TARGET_TYPE_EX_CHIPLET>
                 l_fapi_target(const_cast<TARGETING::Target*>(i_target));
 
@@ -405,9 +412,11 @@ errlHndl_t callWakeupHwp(TARGETING::Target* i_target,
                           l_spcwkupType,
                           l_spcwkupSrc );
             l_errl = rcToErrl(l_rc, ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+*/
         }
         else if(l_type == TARGETING::TYPE_CORE)
         {
+/* FIXME RTC: 210975
             fapi2::Target<fapi2::TARGET_TYPE_CORE>
                 l_fapi_target(const_cast<TARGETING::Target*>(i_target));
 
@@ -417,6 +426,7 @@ errlHndl_t callWakeupHwp(TARGETING::Target* i_target,
                           l_spcwkupType,
                           l_spcwkupSrc );
             l_errl = rcToErrl(l_rc, ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+*/
         }
 
         if(l_errl)

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,17 +36,21 @@
 #include <targeting/common/target.H>
 #include <pbusLinkSvc.H>
 
+/* FIXME RTC: 210975
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
+*/
 #include <intr/interrupt.H>
-#include <p9_io_xbus_clear_firs.H>
+// FIXME RTC: 210975
+//#include <p9_io_xbus_clear_firs.H>
 
 //@TODO RTC:150562 - Remove when BAR setting handled by INTRRP
 #include <devicefw/userif.H>
 #include <sys/misc.h>
 #include <sbeio/sbeioif.H>
 #include <usr/vmmconst.h>
-#include <p9_build_smp.H>
+// FIXME RTC: 210975
+//#include <p9_build_smp.H>
 
 using   namespace   ISTEP_ERROR;
 using   namespace   ISTEP;
@@ -92,6 +96,7 @@ void* call_proc_build_smp (void *io_pArgs)
             break;
         }
 
+/* FIXME RTC: 210975
         std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>> l_procList;
 
         // Loop through all proc chips and convert them to FAPI targets
@@ -124,6 +129,7 @@ void* call_proc_build_smp (void *io_pArgs)
 
             break;
         }
+*/
 
         // At the point where we can now change the proc chips to use
         // XSCOM rather than SBESCOM which is the default.
@@ -211,6 +217,7 @@ void* call_proc_build_smp (void *io_pArgs)
                 }
             }
 
+/* FIXME RTC: 210975
             // Clear XBUS FIR bits for bad lanes that existed prior to
             // link training
             TARGETING::TargetHandleList xbusTargets;
@@ -243,6 +250,7 @@ void* call_proc_build_smp (void *io_pArgs)
                     errlCommit(l_errl,HWPF_COMP_ID);
                 }
             }
+*/
 
             ++curproc;
         }

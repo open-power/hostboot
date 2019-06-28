@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018
+# Contributors Listed Below - COPYRIGHT 2018,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -26,20 +26,22 @@
 ROOTPATH = ../../../..
 MODULE = fab_iovalid
 
-PROCEDURES_PATH    = ${ROOTPATH}/src/import/chips/p9/procedures
+# FIXME RTC: 210975
+
+#PROCEDURES_PATH    = ${ROOTPATH}/src/import/chips/p9/procedures
 
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
-EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
+#EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
-EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/lib/
-EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/nest
+#EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
+#EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/lib/
+#EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/nest
 
 
 #OBJS += p9_fab_iovalid.o
 
-include ${ROOTPATH}/procedure.rules.mk
-include $(PROCEDURES_PATH)/hwp/nest/p9_fab_iovalid.mk
+#include ${ROOTPATH}/procedure.rules.mk
+#include $(PROCEDURES_PATH)/hwp/nest/p9_fab_iovalid.mk
 include ${ROOTPATH}/config.mk
 
-VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest/
+#VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest/

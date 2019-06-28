@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2019
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,9 +26,10 @@ ROOTPATH = ../../../..
 
 MODULE = testvfs
 
-TESTS = *.H
+# FIXME RTC: 210975
+#TESTS = *.H
 
-${ROOTPATH}/img/testdata: 
+${ROOTPATH}/img/testdata:
 	echo "This is a test image" > ${ROOTPATH}/img/testdata
 
 code_pass: ${ROOTPATH}/img/testdata

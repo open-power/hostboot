@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -449,6 +449,7 @@ void ErrlManager::errlogMsgHndlr ()
                 }
             case ERRLOG_ACCESS_ERRLDISP_TYPE:
                 {
+#if 0 //FIXME RTC: 210975 errLogDisplay has ties to PRD
 #ifdef CONFIG_CONSOLE_OUTPUT_ERRORDISPLAY
                     // Errldisplay now ready
                     iv_isErrlDisplayEnabled = true;
@@ -475,7 +476,7 @@ void ErrlManager::errlogMsgHndlr ()
 #endif
                     //We are done with the msg
                     msg_free(theMsg);
-
+#endif
                     break;
                 }
             case ERRLOG_NEEDS_TO_BE_COMMITTED_TYPE:
@@ -490,6 +491,7 @@ void ErrlManager::errlogMsgHndlr ()
                     // Pair with all flags set to add to the errlList
                     ErrlFlagPair_t l_pair(l_err, ALL_FLAGS);
 
+#if 0 // FIXME RTC: 210975 errLogDisplay has ties to PRD
 #ifdef CONFIG_CONSOLE_OUTPUT_ERRORDISPLAY
                     // Display errl to errldisplay
                     if (iv_isErrlDisplayEnabled)
@@ -500,6 +502,7 @@ void ErrlManager::errlogMsgHndlr ()
                         // Mark ERRLDISP processing complete on this error
                         _clearFlag(l_pair, ERRLDISP_FLAG);
                     }
+#endif
 #endif
                     //Save the error log to PNOR
                     bool l_savedToPnor = saveErrLogToPnor(l_err);

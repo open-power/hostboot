@@ -26,7 +26,9 @@ ROOTPATH = ../../../..
 
 MODULE = nvdimm
 
-SUBDIRS+=runtime.d
+# FIXME RTC: 210975
 
-include nvdimm.mk
+#SUBDIRS+=runtime.d
+
+#include nvdimm.mk
 include ${ROOTPATH}/config.mk

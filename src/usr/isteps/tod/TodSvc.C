@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -127,6 +127,7 @@ errlHndl_t TodSvc::todSetup()
             break;
         }
 
+/* FIXME RTC: 210975
         //Build a set of datastructures to setup creation of the TOD topology
 
         //We're going to setup TOD for this IPL
@@ -139,6 +140,7 @@ errlHndl_t TodSvc::todSetup()
                     "for primary topology.");
             break;
         }
+*/
 
         //2) Ask the topology manager to setup the primary topology
         l_errHdl = l_primary.create();
@@ -169,6 +171,7 @@ errlHndl_t TodSvc::todSetup()
         //Primary successfully configured
         TOD::setConfigStatus(TOD_PRIMARY,true);
 
+/* FIXME RTC: 210975
         //Build datastructures for secondary topology
         l_errHdl = TOD::buildTodDrawers(TOD_SECONDARY);
         if(l_errHdl)
@@ -180,6 +183,7 @@ errlHndl_t TodSvc::todSetup()
             errlCommit(l_errHdl, TOD_COMP_ID);
             break;
         }
+*/
 
         //4) Ask the topology manager to setup the secondary topology
         TodTopologyManager l_secondary(TOD_SECONDARY);
@@ -408,6 +412,7 @@ errlHndl_t TodSvc::setActiveMdmtForResetBackup(
 
     do{
 
+/* FIXME RTC: 210975
         l_errHdl = TOD::buildTodDrawers(i_activeConfig);
         if ( l_errHdl )
         {
@@ -416,6 +421,7 @@ errlHndl_t TodSvc::setActiveMdmtForResetBackup(
                      topologyTypeToString(i_activeConfig)));
             break;
         }
+*/
 
         TARGETING::Target* l_primaryMdmt = NULL;
         TARGETING::Target* l_secondaryMdmt = NULL;

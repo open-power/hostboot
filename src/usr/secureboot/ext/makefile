@@ -26,22 +26,23 @@ ROOTPATH = ../../../..
 MODULE = secureboot_ext
 SUBDIRS +=
 
-PERV_HWP_PATH = $(ROOTPATH)/src/import/chips/p9/procedures/hwp/perv
+# FIXME RTC: 210975
+#PERV_HWP_PATH = $(ROOTPATH)/src/import/chips/p9/procedures/hwp/perv
 
-OBJS += $(if $(CONFIG_SECUREBOOT), service_ext.o)
+#OBJS += $(if $(CONFIG_SECUREBOOT), service_ext.o)
 
-VPATH += $(PERV_HWP_PATH)
+#VPATH += $(PERV_HWP_PATH)
 
 EXTRAINCDIR += $(ROOTPATH)/src/include/usr
-EXTRAINCDIR += $(ROOTPATH)/src/include/usr/fapi2/
-EXTRAINCDIR += $(ROOTPATH)/src/import/hwpf/fapi2/include
-EXTRAINCDIR += $(ROOTPATH)/src/import/chips/common/utils/imageProcs
-EXTRAINCDIR += $(ROOTPATH)/src/import/chips/p9/procedures/hwp/ffdc
-EXTRAINCDIR += $(PERV_HWP_PATH)
+#EXTRAINCDIR += $(ROOTPATH)/src/include/usr/fapi2/
+#EXTRAINCDIR += $(ROOTPATH)/src/import/hwpf/fapi2/include
+#EXTRAINCDIR += $(ROOTPATH)/src/import/chips/common/utils/imageProcs
+#EXTRAINCDIR += $(ROOTPATH)/src/import/chips/p9/procedures/hwp/ffdc
+#EXTRAINCDIR += $(PERV_HWP_PATH)
 
 #Include HWP procedure makefiles
-include $(ROOTPATH)/procedure.rules.mk
-include $(PERV_HWP_PATH)/p9_update_security_ctrl.mk
+#include $(ROOTPATH)/procedure.rules.mk
+#include $(PERV_HWP_PATH)/p9_update_security_ctrl.mk
 
 CFLAGS += -iquote ../
 include ${ROOTPATH}/config.mk

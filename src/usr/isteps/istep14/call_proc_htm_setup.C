@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,15 +31,19 @@
 #include    <isteps/hwpisteperror.H>
 #include    <initservice/isteps_trace.H>
 
+/* FIXME RTC: 210975
 //HWP Invoker
 #include    <fapi2/plat_hwp_invoker.H>
+*/
 
 //Targeting Support
 #include    <targeting/common/utilFilter.H>
+/* FIXME RTC: 210975
 #include    <fapi2/target.H>
 
 //From Import Directory (EKB Repository)
 #include    <p9_htm_setup.H>
+*/
 
 //Namespaces
 using namespace ERRORLOG;
@@ -52,6 +56,7 @@ void* call_proc_htm_setup (void *io_pArgs)
 {
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_htm_setup entry" );
     ISTEP_ERROR::IStepError l_StepError;
+/* FIXME RTC: 210975
     errlHndl_t l_errl = NULL;
     do {
         //Use targeting code to get a list of all processors
@@ -76,7 +81,7 @@ void* call_proc_htm_setup (void *io_pArgs)
             }
         }
     }while(0);
-
+*/
     // end task, returning any errorlogs to IStepDisp
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_htm_setup exit" );
     return l_StepError.getErrorHandle();

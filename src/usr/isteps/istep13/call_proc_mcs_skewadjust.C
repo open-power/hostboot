@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,14 +35,18 @@
 #include    <targeting/common/util.H>
 #include    <targeting/common/utilFilter.H>
 
+/* FIXME RTC: 210975
 // fapi2 HWP invoker
 #include    <fapi2/plat_hwp_invoker.H>
+*/
 
 //From Import Directory (EKB Repository)
 #include    <config.h>
+/* FIXME RTC: 210975
 #include    <fapi2.H>
 #include    <p9_mss_scominit.H>
 #include    <p9_throttle_sync.H>
+*/
 
 using   namespace   ERRORLOG;
 using   namespace   ISTEP;
@@ -52,9 +56,9 @@ using   namespace   TARGETING;
 namespace ISTEP_13
 {
 void* call_proc_mcs_skewadjust (void *io_pArgs)
-{   
+{
     IStepError l_stepError;
-    
+
     return l_stepError.getErrorHandle();
 }
 

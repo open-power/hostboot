@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -162,7 +162,9 @@ public:
      *     any returned error created by this function will be a non-reported
      *     tracing event error log.
      */
+/* FIXME RTC: 210975
     errlHndl_t buildTodDrawers(const p9_tod_setup_tod_sel i_config);
+*/
 
     /**
      * @brief This method will pick MDMT chip for the configuration
@@ -897,8 +899,10 @@ errlHndl_t checkGardStatusOfTarget(
 // Wrapper function for TodControls::destroy instance
 void destroy(const p9_tod_setup_tod_sel i_config);
 
+/* FIXME RTC: 210975
 // Wrapper function for TodControls::buildTodDrawers instance
 errlHndl_t buildTodDrawers(const p9_tod_setup_tod_sel i_config);
+*/
 
 // Wrapper function for TodControls::buildGardedTargetsList instance
 errlHndl_t buildGardedTargetsList();

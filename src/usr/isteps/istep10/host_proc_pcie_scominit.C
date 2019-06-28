@@ -41,8 +41,10 @@
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
 
+/* FIXME RTC: 210975
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
+*/
 #include <devicefw/userif.H>
 #include <config.h>
 #include "host_proc_pcie_scominit.H"
@@ -599,6 +601,7 @@ void setup_pcie_iovalid_enable(const TARGETING::Target * i_procTarget)
         // arrange phb targets from largest to smallest based on unit
         // ex.  PHB5, PHB4, PHB3
         std::sort(l_phbList.begin(),l_phbList.end(),compareChipUnits);
+/* FIXME RTC: 210975
         for(uint32_t k = 0; k<l_phbList.size(); ++k)
         {
             const fapi2::Target<fapi2::TARGET_TYPE_PHB>
@@ -622,6 +625,7 @@ void setup_pcie_iovalid_enable(const TARGETING::Target * i_procTarget)
                       (l_phbList[k])->getAttr<TARGETING::ATTR_CHIP_UNIT>());
             }
         }
+*/
 
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                  "PROC %.8X PEC%d -> ATTR_PROC_PCIE_IOVALID_ENABLE: 0x%02X",

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -28,14 +28,15 @@ ROOTPATH = ../../../..
 
 MODULE = secureboot_rt
 
-include ../common/common.mk
+# FIXME RTC: 210975
+#include ../common/common.mk
 CFLAGS += -iquote${ROOTPATH}/src/usr/secureboot
 
 SUBDIRS += test.d
 
-OBJS += ${SECUREBOOT_COMMON_OBJS}
-OBJS += rt_secureboot.o
+#OBJS += ${SECUREBOOT_COMMON_OBJS}
+#OBJS += rt_secureboot.o
 
-VPATH += ../common
+#VPATH += ../common
 
 include $(ROOTPATH)/config.mk

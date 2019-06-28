@@ -213,6 +213,7 @@ void* host_gard( void *io_pArgs )
             }
             else
             {
+/* FIXME RTC: 210975 updateProcessorSbeSeeproms has many FAPI dependencies
                 // The masterCore may have a GARD record, update SBE
                 // and let it reboot to another core
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK"host_gard: "
@@ -223,6 +224,7 @@ void* host_gard( void *io_pArgs )
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                         "host_gard: Error calling updateProcessorSbeSeeproms");
                 }
+*/
             }
             break;
         }

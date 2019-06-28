@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -186,6 +186,7 @@ errlHndl_t checkForCSAttentions()
 
     do
     {
+/* FIXME RTC: 210975 PRDF is not enabled yet
         // Read register data from PNOR into memory.
         PnorFirDataReader & firData = PnorFirDataReader::getPnorFirDataReader();
         bool validData;
@@ -241,6 +242,7 @@ errlHndl_t checkForCSAttentions()
             break;
         }
 
+*/
     } while (0);
 
     ATTN_SLOW("checkForCSAttentions complete");

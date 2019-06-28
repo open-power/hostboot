@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,8 +51,10 @@
 #include <initservice/isteps_trace.H>  // g_trac_isteps_trace
 #include <initservice/initserviceif.H>  // isSMPWrapConfig
 
+/* FIXME RTC: 210975
 //  HWP call support
 #include <nest/nestHwpHelperFuncs.H>   // fapiHWPCallWrapperForChip
+*/
 
 namespace ISTEP_10
 {
@@ -67,6 +69,7 @@ using   namespace   TARGETING;
 void* call_proc_obus_scominit( void *io_pArgs )
 {
     IStepError l_stepError;
+/* FIXME RTC: 210975
 
     TRACFCOMP(g_trac_isteps_trace, ENTER_MRK"call_proc_obus_scominit entry");
 
@@ -77,6 +80,7 @@ void* call_proc_obus_scominit( void *io_pArgs )
                                   HWPF_COMP_ID, TYPE_OBUS);
     }
     TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_proc_obus_scominit exit");
+*/
 
     return l_stepError.getErrorHandle();
 }

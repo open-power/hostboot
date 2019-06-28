@@ -33,11 +33,13 @@
 #include <targeting/common/utilFilter.H>
 #include <sys/time.h>
 #include <usr/devicefw/userif.H>
+/* FIXME RTC: 210975
 #include <fapi2.H>
 #include <fapi2/plat_hwp_invoker.H>
 #include <lib/shared/nimbus_defaults.H>
 #include <lib/dimm/ddr4/nvdimm_utils.H>
 #include <lib/mc/port.H>
+*/
 #include <isteps/nvdimm/nvdimmreasoncodes.H>
 #include <isteps/nvdimm/nvdimm.H>
 #include <vpd/spdenums.H>
@@ -844,12 +846,15 @@ errlHndl_t nvdimmRestore(TargetHandleList i_nvdimmList, uint8_t &i_mpipl)
             getParentAffinityTargets(l_mcaList, *it, TARGETING::CLASS_UNIT, TARGETING::TYPE_MCA);
             assert(l_mcaList.size(), "nvdimmRestore() failed to find parent MCA.");
 
+/* FIXME RTC: 210975
             fapi2::Target<fapi2::TARGET_TYPE_MCA> l_fapi_mca(l_mcaList[0]);
+*/
 
             // Before we do anything, check if we are in mpipl. If we are, make sure ddr_resetn
             // is de-asserted before kicking off the restore
             if (i_mpipl)
             {
+/* FIXME RTC: 210975
                 FAPI_INVOKE_HWP(l_err, mss::ddr_resetn, l_fapi_mca, HIGH);
 
                 if (l_err)
@@ -865,8 +870,10 @@ errlHndl_t nvdimmRestore(TargetHandleList i_nvdimmList, uint8_t &i_mpipl)
                     // Leaving this comment here as a reminder, will remove later
                     break;
                 }
+*/
             }
 
+/* FIXME RTC: 210975
             // Self-refresh is done at the port level
             FAPI_INVOKE_HWP(l_err, mss::nvdimm::self_refresh_entry, l_fapi_mca);
 
@@ -882,6 +889,7 @@ errlHndl_t nvdimmRestore(TargetHandleList i_nvdimmList, uint8_t &i_mpipl)
                 // Leaving this comment here as a reminder, will remove later
                 break;
             }
+*/
             it++;
         }
 
@@ -988,10 +996,10 @@ errlHndl_t nvdimmRestore(TargetHandleList i_nvdimmList, uint8_t &i_mpipl)
             break;
         }
 
+/* FIXME RTC: 210975
         // Exit self-refresh
         for (const auto & l_nvdimm : i_nvdimmList)
         {
-
             TARGETING::TargetHandleList l_mcaList;
             getParentAffinityTargets(l_mcaList, l_nvdimm, TARGETING::CLASS_UNIT, TARGETING::TYPE_MCA);
             assert(l_mcaList.size(), "nvdimmRestore() failed to find parent MCA.");
@@ -1017,6 +1025,7 @@ errlHndl_t nvdimmRestore(TargetHandleList i_nvdimmList, uint8_t &i_mpipl)
                 nvdimmSetStatusFlag(l_nvdimm, NSTD_VAL_PRSV);
             }
         }
+*/
 
     }while(0);
 
@@ -1321,6 +1330,7 @@ errlHndl_t nvdimmEpowSetup(TargetHandleList &i_nvdimmList)
     TRACUCOMP(g_trac_nvdimm, ENTER_MRK"nvdimmEpowSetup()");
 
     errlHndl_t l_err = nullptr;
+/* FIXME RTC: 210975
     do
     {
         // Loop through each target
@@ -1349,7 +1359,7 @@ errlHndl_t nvdimmEpowSetup(TargetHandleList &i_nvdimmList)
         }
 
     }while(0);
-
+*/
     TRACUCOMP(g_trac_nvdimm, EXIT_MRK"nvdimmEpowSetup()");
     return l_err;
 }

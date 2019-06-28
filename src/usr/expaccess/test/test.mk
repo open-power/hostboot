@@ -22,14 +22,15 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
-EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/shared
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include
-EXTRAINCDIR += ${ROOTPATH}/src/import
+# FIXME RTC: 210975
+#EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
+#EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/shared
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include
+#EXTRAINCDIR += ${ROOTPATH}/src/import
 
 
 include ${ROOTPATH}/config.mk

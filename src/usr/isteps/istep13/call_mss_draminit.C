@@ -30,13 +30,17 @@
 #include <isteps/hwpisteperror.H>
 #include <initservice/isteps_trace.H>
 #include <initservice/initserviceif.H>
+/* FIXME RTC: 210975
 #include <plat_trace.H>
+*/
 
 // Generated files
 #include  <config.h>
 
 // Istep 13 framework
+/* FIXME RTC: 210975
 #include <istepHelperFuncs.H>
+*/
 #include "istep13consts.H"
 #include "platform_vddr.H"
 
@@ -45,6 +49,7 @@
 #include <targeting/common/util.H>
 #include <targeting/common/utilFilter.H>
 
+/* FIXME RTC: 210975
 // fapi2 HWP invoker
 #include  <fapi2/plat_hwp_invoker.H>
 
@@ -52,12 +57,12 @@
 #include  <fapi2.H>
 #ifndef CONFIG_AXONE
     #include  <p9_mss_draminit.H>
-    #include  <p9c_mss_draminit.H>
 #else
 #include <chipids.H>
     #include  <exp_draminit.H>
     #include  <gem_draminit.H>
 #endif
+*/
 
 // NVDIMM support
 #ifdef CONFIG_NVDIMM
@@ -116,6 +121,7 @@ void* call_mss_draminit (void *io_pArgs)
 
 void mss_post_draminit( IStepError & io_stepError )
 {
+/* FIXME RTC: 210975
     errlHndl_t l_err = NULL;
     bool rerun_vddr = false;
 
@@ -193,11 +199,13 @@ void mss_post_draminit( IStepError & io_stepError )
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "mss_post_draminit exit" );
     return;
+*/
 }
 
 #ifndef CONFIG_AXONE
 void nimbus_mss_draminit(IStepError & io_istepError)
 {
+/* FIXME RTC: 210975
     errlHndl_t l_err = NULL;
 
     // Get all MCBIST targets
@@ -254,59 +262,12 @@ void nimbus_mss_draminit(IStepError & io_istepError)
         }
 
     }   // endfor   mcbist's
+*/
 }
 
 void cumulus_mss_draminit(IStepError & io_istepError)
 {
-    errlHndl_t l_err = NULL;
 
-    // Get all Centaur targets
-    TARGETING::TargetHandleList l_membufTargetList;
-    getAllChips(l_membufTargetList, TYPE_MEMBUF);
-
-    for (const auto & l_membufTarget : l_membufTargetList )
-    {
-        TARGETING::TargetHandleList l_mbaTargetList;
-        getChildChiplets(l_mbaTargetList, l_membufTarget, TYPE_MBA);
-
-        for (const auto & l_mbaTarget : l_mbaTargetList )
-        {
-            // Dump current run on target
-             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "Running p9c_mss_draminit HWP on "
-                "target HUID %.8X", TARGETING::get_huid(l_mbaTarget));
-
-            //  call the HWP with each target
-            fapi2::Target <fapi2::TARGET_TYPE_MBA_CHIPLET> l_fapi_mba_target(l_mbaTarget);
-
-            FAPI_INVOKE_HWP(l_err, p9c_mss_draminit, l_fapi_mba_target);
-
-            //  process return code.
-            if ( l_err )
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR 0x%.8X : p9c_mss_draminit HWP returns error",
-                    l_err->reasonCode());
-
-                // capture the target data in the elog
-                ErrlUserDetailsTarget(l_mbaTarget).addToLog(l_err);
-
-                // Create IStep error log and cross reference to error that occurred
-                io_istepError.addErrorDetails( l_err );
-
-                // Commit Error
-                errlCommit( l_err, HWPF_COMP_ID );
-
-                break;
-            }
-            else
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "SUCCESS running p9c_mss_draminit HWP on "
-                       "target HUID %.8X", TARGETING::get_huid(l_mbaTarget));
-            }
-         } // end MBA loop
-    } // end MEMBUF loop
 }
 
 #else
@@ -328,6 +289,7 @@ void cumulus_mss_draminit(IStepError & io_istepError)
 #ifdef CONFIG_AXONE
 void axone_mss_draminit(IStepError & io_istepError)
 {
+/* FIXME RTC: 210975
     errlHndl_t l_err = NULL;
 
     // Get all OCMB targets
@@ -383,6 +345,7 @@ void axone_mss_draminit(IStepError & io_istepError)
                 isGeminiChip?"gem":"exp", TARGETING::get_huid(l_ocmb) );
         }
     } // end of OCMB loop
+*/
 }
 
 #else

@@ -31,8 +31,10 @@
 #include    <util/misc.H>
 #include    <diag/prdf/prdfMain.H>
 
+/* FIXME RTC: 210975
 #include <plat_hwp_invoker.H>     // for FAPI_INVOKE_HWP
 #include <lib/fir/memdiags_fir.H> // for mss::unmask::after_background_scrub
+*/
 
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
@@ -127,7 +129,9 @@ void* call_mss_scrub (void *io_pArgs)
             if ( !start ) continue;
 
             // Start the command on this target.
+/* FIXME RTC: 210975 Linker errors
             errl = PRDF::startScrub( maintTrgt );
+*/
             if ( nullptr != errl )
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ISTEP_FUNC
@@ -136,6 +140,7 @@ void* call_mss_scrub (void *io_pArgs)
                 break;
             }
 
+/* FIXME RTC: 210975
             // Nimbus chips require us to unmask some additional FIR bits. Note
             // that this is not needed on Cumulus based systems because this is
             // already contained within the other Centaur HWPs.
@@ -152,6 +157,7 @@ void* call_mss_scrub (void *io_pArgs)
                     break;
                 }
             }
+*/
         }
         if ( nullptr != errl ) break;
 

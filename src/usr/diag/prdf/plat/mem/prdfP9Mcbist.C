@@ -187,7 +187,7 @@ int32_t CmdCompleteDd1Workaround( ExtensibleChip * i_mcbChip,
     // This workaround should only be seen during super fast MCBIST commands,
     // which are only run during Memory Diagnostics. Also, the workaround only
     // applies to P9 Nimbus DD1.0.
-    PRDF_ASSERT( isInMdiaMode() );
+    PRDF_ASSERT( /* FIXME RTC: 210975 isInMdiaMode() */ 1);
     PRDF_ASSERT( (MODEL_NIMBUS == getChipModel(mcbTrgt)) &&
                  (0x10         == getChipLevel(mcbTrgt)) );
 
@@ -244,8 +244,10 @@ int32_t CmdCompleteDd1Workaround( ExtensibleChip * i_mcbChip,
         //if the values are different the command has not completed yet
         else
         {
+/* FIXME RTC: 210975
             //sleep for a bit - hopefully will be enough for the cmd to complete
             PlatServices::milliSleep(0, 20);
+*/
 
             //do not commit the errl - it won't have useful data
             io_sc.service_data->setDontCommitErrl();
@@ -269,8 +271,10 @@ int32_t CmdCompleteDd1Workaround( ExtensibleChip * i_mcbChip,
         io_sc.service_data->SetCallout( LEVEL2_SUPPORT, MRU_HIGH );
         io_sc.service_data->setServiceCall();
 
+/* FIXME RTC: 210975
         // Tell MDIA to skip further analysis on this target.
         l_rc = mdiaSendEventMsg( mcbTrgt, MDIA::STOP_TESTING );
+*/
         if ( SUCCESS != l_rc )
             PRDF_ERR( PRDF_FUNC "mdiaSendEventMsg(STOP_TESTING) failed" );
     }

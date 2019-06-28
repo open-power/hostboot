@@ -29,7 +29,9 @@
  *  @brief Provides the interfaces to perform I2Cscom
  */
 #include <stdint.h>
-
+#include <devicefw/driverif.H>
+#include <targeting/common/target.H>
+#include <errl/errlentry.H>
 
 namespace I2CSCOMDD
 {

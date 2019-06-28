@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2016
+# Contributors Listed Below - COPYRIGHT 2015,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -36,8 +36,10 @@ SUBDIRS += runtime.d
 
 include fapi2.mk
 
-OBJS += plat_attr_task.o
+# FIXME RTC: 210975
+
+#OBJS += plat_attr_task.o
 
 include ${ROOTPATH}/config.mk
 
-vpath %.C ${GENDIR}
+#vpath %.C ${GENDIR}

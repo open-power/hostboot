@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014
+# Contributors Listed Below - COPYRIGHT 2014,2019
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -26,7 +26,9 @@
 ROOTPATH = ../../..
 MODULE = gpio
 
-OBJS += $(if $(CONFIG_GPIODD),gpiodd.o,)
+# FIXME RTC: 210975
+
+#OBJS += $(if $(CONFIG_GPIODD),gpiodd.o,)
 
 # no way to test this at the moment TODO RTC 111415
 #SUBDIRS = test.d

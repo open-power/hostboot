@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2016
+# Contributors Listed Below - COPYRIGHT 2013,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -29,6 +29,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 
 MODULE = testscom_rt
 
-TESTS = *.H
+# FIXME RTC: 210975
+#TESTS = *.H
 
 include ${ROOTPATH}/config.mk

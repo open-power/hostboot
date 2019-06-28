@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,8 +78,10 @@ class TpsEvent : public TdEntry
 
         do
         {
+/* FIXME RTC: 210975
             // First, do analysis.
             o_rc = analyzePhase( io_sc, o_done );
+*/
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "analyzePhase() failed on 0x%08x, 0x%2x",
@@ -89,8 +91,10 @@ class TpsEvent : public TdEntry
 
             if ( o_done ) break; // Nothing more to do.
 
+/* FIXME RTC: 210975
             // Then, start the next phase of the procedure.
             o_rc = startNextPhase( io_sc );
+*/
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "startNextPhase() failed on 0x%08x, 0x%2x",

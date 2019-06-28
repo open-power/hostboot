@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2018
+# Contributors Listed Below - COPYRIGHT 2012,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -39,7 +39,8 @@ OBJS += utilmbox_scratch.o
 OBJS += utiltcemgr.o
 OBJS += utilsemipersist.o
 OBJS += utilrsvdmem.o
-OBJS += utilxipimage.o
+# FIXME RTC: 210975
+#OBJS += utilxipimage.o
 OBJS += utilmclmgr.o
 OBJS += utilcommonattr.o
 
@@ -47,7 +48,8 @@ SUBDIRS += test.d
 SUBDIRS += runtime.d
 
 #Add all the extra include paths
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include
 
 include ${ROOTPATH}/config.mk

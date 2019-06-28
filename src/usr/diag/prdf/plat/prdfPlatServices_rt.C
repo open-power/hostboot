@@ -344,6 +344,7 @@ int32_t extractL3Err( TargetHandle_t i_exTgt,
 int32_t l3LineDelete(TargetHandle_t i_exTgt,
                      const p9_l3err_extract_err_data& i_l3_err_data)
 {
+/* FIXME RTC: 210975
     using namespace stopImageSection;
     errlHndl_t err = NULL;
     const uint64_t retryCount = 100;
@@ -382,13 +383,14 @@ int32_t l3LineDelete(TargetHandle_t i_exTgt,
         PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
         return FAIL;
     }
-
+*/
     return SUCCESS;
 }
 
 int32_t extractL2Err( TargetHandle_t i_exTgt, bool i_ce,
                       p9_l2err_extract_err_data &o_errorAddr)
 {
+/* FIXME RTC: 210975
     errlHndl_t err = nullptr;
     bool errFound = false;
     fapi2::variable_buffer ta_data( P9_TRACEARRAY_NUM_ROWS *
@@ -439,13 +441,14 @@ int32_t extractL2Err( TargetHandle_t i_exTgt, bool i_ce,
                   getHuid(i_exTgt));
         return FAIL;
     }
-
+*/
     return SUCCESS;
 }
 
 int32_t l2LineDelete(TargetHandle_t i_exTgt,
                      const p9_l2err_extract_err_data& i_l2_err_data)
 {
+/* FIXME RTC: 210975
     using namespace stopImageSection;
     errlHndl_t err = nullptr;
     const uint64_t retryCount = 100;
@@ -486,7 +489,7 @@ int32_t l2LineDelete(TargetHandle_t i_exTgt,
         PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
         return FAIL;
     }
-
+*/
     return SUCCESS;
 }
 
@@ -496,6 +499,7 @@ int32_t pmCallout( TargetHandle_t i_tgt,
                    uint32_t &o_deadCores,
                    std::vector < StopErrLogSectn >& o_ffdcList )
 {
+/* FIXME RTC: 210975
     errlHndl_t err = nullptr;
     fapi2::buffer <uint32_t> deadCores;
 
@@ -523,6 +527,7 @@ int32_t pmCallout( TargetHandle_t i_tgt,
     }
 
     o_deadCores = (uint32_t) deadCores;
+*/
     return SUCCESS;
 }
 
@@ -532,6 +537,7 @@ void requestNewTODTopology( uint32_t i_oscPos,
                             bool i_informPhyp)
 {
     #define PRDF_FUNC "[PlatServices::requestNewTODTopology] "
+/* FIXME RTC: 210975
     if ( i_badChipList.size() > 0 || i_procOscTgt != NULL )
     {
         errlHndl_t err = TOD::resetBackupTopology( i_oscPos, i_procOscTgt,
@@ -549,6 +555,7 @@ void requestNewTODTopology( uint32_t i_oscPos,
     {
         PRDF_ERR( PRDF_FUNC "No chips in black list");
     }
+*/
     #undef PRDF_FUNC
 }
 
@@ -556,8 +563,10 @@ int32_t getTodPortControlReg ( const TARGETING::TargetHandle_t& i_procTgt,
                                bool i_slvPath0,  uint32_t &o_regValue )
 {
     #define PRDF_FUNC "[PlatServices::getTodPortControlReg] "
-    errlHndl_t err = nullptr;
     int32_t l_rc = SUCCESS;
+/* FIXME RTC: 210975
+    int32_t l_rc = SUCCESS;
+    errlHndl_t err = nullptr
     TOD::TodChipDataContainer todRegData;
     bool foundChip = false;
     uint32_t ordId = i_procTgt->getAttr<ATTR_ORDINAL_ID>();
@@ -592,6 +601,7 @@ int32_t getTodPortControlReg ( const TARGETING::TargetHandle_t& i_procTgt,
         }
     } while (0);
 
+*/
     return l_rc;
     #undef PRDF_FUNC
 }

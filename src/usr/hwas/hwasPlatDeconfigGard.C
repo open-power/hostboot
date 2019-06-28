@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -54,11 +54,13 @@
 #include <util/runtime/rt_fwreq_helper.H>  // firmware_request_helper
 #include <errl/errludtarget.H>
 
+/* FIXME RTC: 210975 the P10 version of this HWP DNE yet
 // includes to support the fapi2 hwp call in
 // platDeconfigureTargetAtRuntime()
 #include <fapi2/target.H>
 #include <p9_update_ec_eq_state.H>
 #include <fapi2/plat_hwp_invoker.H>
+*/
 #endif
 
 #ifdef CONFIG_TPMDD
@@ -906,6 +908,8 @@ errlHndl_t DeconfigGard::platDeconfigureTargetAtRuntime(
             HWAS_INF("platDeconfigureTargetAtRuntime() - skippign call to resetPMComplex - ATTR_HB_INITIATED_PM_RESET=%d", l_pmResetInProgress );
         }
 
+// FIXME RTC: 210975
+#if 0
         // get the parent proc and call the hwp to alert
         // pm not to attempt to manage this core anymore
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
@@ -915,6 +919,7 @@ errlHndl_t DeconfigGard::platDeconfigureTargetAtRuntime(
                 "calling p9_update_ec_eq_state");
         FAPI_INVOKE_HWP( l_errl,p9_update_ec_eq_state,
                          l_proc,true/*skip qssr*/);
+#endif
 
         if(l_errl)
         {

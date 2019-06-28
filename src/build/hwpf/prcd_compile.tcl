@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2019
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -311,7 +313,7 @@ foreach arg $argv {
                        puts {With the -D parameter, all files in all sub-directories are built.}
                        puts {Without the -n, any files that do not exist in the hostboot sandbox are ignored.}
                        puts {example }
-                       puts {> prcd_compile.tcl -D centaur/working/procedues/ -D p8/working/procedures}
+                       puts {> prcd_compile.tcl -D p8/working/procedures}
                        puts {}
                        puts {The -d and -o parameters are optional.  Default for -d is the master level of code }
                        puts {and default for -o is the current working directory }

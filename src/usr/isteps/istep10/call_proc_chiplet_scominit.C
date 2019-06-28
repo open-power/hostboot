@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,14 +45,17 @@
 
 //  Error handling support
 #include <isteps/hwpisteperror.H>      // ISTEP_ERROR::IStepError
-#include <istepHelperFuncs.H>          // captureError
+// FIXME RTC: 210975
+//#include <istepHelperFuncs.H>          // captureError
 
 //  Tracing support
 #include <trace/interface.H>           // TRACFCOMP
 #include <initservice/isteps_trace.H>  // g_trac_isteps_trace
 #include <initservice/initserviceif.H>  // isSMPWrapConfig
+/* FIXME RTC: 210975
 //  HWP call support
 #include <nest/nestHwpHelperFuncs.H>   // fapiHWPCallWrapperForChip
+*/
 
 // Util TCE Support
 #include <util/utiltce.H>              // TCE::utilUseTcesForDmas
@@ -76,6 +79,7 @@ void* call_proc_chiplet_scominit( void *io_pArgs )
 
     if (!INITSERVICE::isSMPWrapConfig())
     {
+/* FIXME RTC: 210975
         // Make the FAPI call to p9_chiplet_scominit
         // Make the FAPI call to p9_io_obus_firmask_save_restore, if previous call succeeded
         // Make the FAPI call to p9_psi_scominit, if previous call succeeded
@@ -85,6 +89,7 @@ void* call_proc_chiplet_scominit( void *io_pArgs )
                                   HWPF_COMP_ID, TYPE_PROC)                &&
         fapiHWPCallWrapperHandler(P9_PSI_SCOMINIT, l_stepError,
                                   HWPF_COMP_ID, TYPE_PROC);
+*/
     }
 
     // Enable TCEs with an empty TCE Table, if necessary
@@ -101,10 +106,12 @@ void* call_proc_chiplet_scominit( void *io_pArgs )
                       "utilEnableTcesWithoutTceTable, returned ERROR 0x%.4X",
                       l_err->reasonCode());
 
+/* FIXME RTC: 210975
             // Capture error
             captureError(l_err,
                          l_stepError,
                          HWPF_COMP_ID);
+*/
         }
     }
 

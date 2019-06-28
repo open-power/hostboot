@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017
+# Contributors Listed Below - COPYRIGHT 2017,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -24,19 +24,23 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
 MODULE = p9_phbPerst
-PROCEDURES_PATH    = ${ROOTPATH}/src/import/chips/p9/procedures
 
-EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/nest/
-EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
+# FIXME RTC: 210975
+
+#PROCEDURES_PATH    = ${ROOTPATH}/src/import/chips/p9/procedures
+
+#EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/nest/
+#EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
+#EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
 
-include ${ROOTPATH}/procedure.rules.mk
-include $(PROCEDURES_PATH)/hwp/nest/p9_perst_phb.mk
+#include ${ROOTPATH}/procedure.rules.mk
+#include $(PROCEDURES_PATH)/hwp/nest/p9_perst_phb.mk
 include ${ROOTPATH}/config.mk
 
-VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest/
+#VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest/
 

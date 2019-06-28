@@ -132,7 +132,7 @@ errlHndl_t cfamIDEC(DeviceFW::OperationType i_opType,
     size_t op_size = sizeof(id_ec);
     errlHndl_t errl = NULL;
 
-    // At the time when we read IDEC, the tp chiplet of Centaur & slave
+    // At the time when we read IDEC, the tp chiplet of slave
     // processors are not yet enabled; therefore, we can not read IDEC
     // using SCOM path.  We must use FSI path to read the IDEC values.
     // For master proc, use scom
@@ -421,12 +421,14 @@ errlHndl_t ocmbTranslateSpdToIdec(const uint16_t  i_value,
 
     errlHndl_t error = nullptr;
 
+/* FIXME RTC: 210975 The constants are unused
     const uint16_t OCMB_ID = i_isID ? i_value : i_id;
 
     const uint32_t GEMINI_EC        = 0x0000;
     const uint32_t GEMINI_SPD_EC    = 0x0000;
     const uint32_t EXPLORER_EC      = 0x0010;
     const uint32_t EXPLORER_SPD_EC  = 0x0000;
+*/
     // This map will hold the associated values between what is read from
     // the OCMB's IDEC register and the SPD since they use different
     // standards and thus cannot be directly compared.
@@ -434,6 +436,7 @@ errlHndl_t ocmbTranslateSpdToIdec(const uint16_t  i_value,
 
     if (i_isID)
     {
+/* FIXME RTC: 210975 DDIMM_DMB_ID constants DNE anymore
         if (DDIMM_DMB_ID::EXPLORER == OCMB_ID)
         {
             OCMB_ASSOCIATION_MAP[DDIMM_DMB_ID::EXPLORER] =
@@ -444,9 +447,11 @@ errlHndl_t ocmbTranslateSpdToIdec(const uint16_t  i_value,
             OCMB_ASSOCIATION_MAP[DDIMM_DMB_ID::GEMINI] =
                 POWER_CHIPID::GEMINI_16;
         }
+*/
     }
     else
     {
+/* FIXME RTC: 210975 DDIMM_DMB_ID constants DNE anymore
         if (DDIMM_DMB_ID::EXPLORER == OCMB_ID)
         {
             OCMB_ASSOCIATION_MAP[EXPLORER_SPD_EC] = EXPLORER_EC;
@@ -455,6 +460,7 @@ errlHndl_t ocmbTranslateSpdToIdec(const uint16_t  i_value,
         {
             OCMB_ASSOCIATION_MAP[GEMINI_SPD_EC] = GEMINI_EC;
         }
+*/
     }
 
     auto map_it = OCMB_ASSOCIATION_MAP.find(i_value);
@@ -616,12 +622,12 @@ errlHndl_t ocmbIdecPhase1(const TARGETING::TargetHandle_t& i_target)
 
         uint8_t spdEc = *(spdBuffer + SPD_EC_OFFSET);
 
-        if (DDIMM_DMB_ID::EXPLORER == spdId)
+        if (/* FIXME RTC: 210975 DDIMM_DMB_ID constants DNE anymore DDIMM_DMB_ID::EXPLORER == spdId*/ 0)
         {
             HWAS_INF("ocmbIdecPhase1> OCMB 0x%.8X chip type is EXPLORER",
                      TARGETING::get_huid(i_target));
         }
-        else if (DDIMM_DMB_ID::GEMINI == spdId)
+        else if (/* FIXME RTC: 210975 DDIMM_DMB_ID constants DNE anymore DDIMM_DMB_ID::GEMINI == spdId*/ 0)
         {
             HWAS_INF("ocmbIdecPhase1> OCMB 0x%.8X chip type is GEMINI",
                      TARGETING::get_huid(i_target));
@@ -1088,15 +1094,6 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
 #endif
 #ifdef CONFIG_MVPD_WRITE_TO_PNOR
         errl = PNOR::clearSection( PNOR::MODULE_VPD );
-        if( errl )
-        {
-            // commit the error but keep going
-            errlCommit(errl, HWAS_COMP_ID);
-        }
-#endif
-#if    defined(CONFIG_MEMVPD_WRITE_TO_PNOR) || \
-       defined(CONFIG_PVPD_WRITE_TO_PNOR)
-        errl = PNOR::clearSection( PNOR::CENTAUR_VPD );
         if( errl )
         {
             // commit the error but keep going

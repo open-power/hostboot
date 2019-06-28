@@ -46,7 +46,6 @@
 #include <config.h>
 #include <initservice/initserviceif.H>
 #include <sys/time.h>
-#include <p9c_mss_maint_cmds.H>
 #include <dimmBadDqBitmapFuncs.H>
 #include <sys/misc.h>
 
@@ -610,27 +609,9 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
 
                 // If maint cmd complete bit is not on, time out
                 MDIA_FAST("sm: stopping command HUID:0x%08X", get_huid(target));
-                // target type is MBA
-                if ( TYPE_MBA == trgtType )
-                {
-                    FAPI_INVOKE_HWP( err,
-                        static_cast<mss_MaintCmd *>((*wit)->data)->stopCmd );
-                    if( nullptr != err )
-                    {
-                        MDIA_ERR("sm: mss_MaintCmd::stopCmd failed");
-                        errlCommit(err, MDIA_COMP_ID);
-                    }
 
-                    FAPI_INVOKE_HWP( err,
-                        static_cast<mss_MaintCmd *>((*wit)->data)->cleanupCmd );
-                    if( nullptr != err )
-                    {
-                        MDIA_ERR("sm: mss_MaintCmd::cleanupCmd failed");
-                        errlCommit(err, MDIA_COMP_ID);
-                    }
-                }
                 // target type is MCBIST
-                else if ( TYPE_MCBIST == trgtType )
+                if ( TYPE_MCBIST == trgtType )
                 {
                     fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiMcbist(target);
                     FAPI_INVOKE_HWP( err, mss::memdiags::stop, fapiMcbist );
@@ -973,6 +954,7 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
                 TargetHandle_t target = getTarget( *i_wfp );
                 TYPE trgtType = target->getAttr<ATTR_TYPE>();
 
+                // MCBIST target
                 if ( TYPE_MCBIST == trgtType )
                 {
                     // Get the connected MCAs.
@@ -1087,7 +1069,7 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
 errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
 {
     errlHndl_t err = nullptr;
-    uint64_t workItem;
+    //uint64_t workItem;
 
     TargetHandle_t target;
 
@@ -1098,7 +1080,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
 
     uint64_t monitorId = CommandMonitor::INVALID_MONITOR_ID;
     i_wfp.timeoutCnt = 0; // reset for new work item
-    workItem = *i_wfp.workItem;
+    //workItem = *i_wfp.workItem;
 
     target = getTarget(i_wfp);
 
@@ -1109,133 +1091,10 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
     do
     {
         // new command...use the full range
-        //target type is MBA
-        if (TYPE_MBA == trgtType)
+         //target type is MCBIST
+        if (TYPE_MCBIST == trgtType)
         {
-            uint32_t stopCondition =
-                mss_MaintCmd::STOP_END_OF_RANK                  |
-                mss_MaintCmd::STOP_ON_MPE                       |
-                mss_MaintCmd::STOP_ON_UE                        |
-                mss_MaintCmd::STOP_ON_END_ADDRESS               |
-                mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION;
-
-            if( TARGETING::MNFG_FLAG_IPL_MEMORY_CE_CHECKING
-                & iv_globals.mfgPolicy )
-            {
-                // For MNFG mode, check CE also
-                stopCondition |= mss_MaintCmd::STOP_ON_HARD_NCE_ETE;
-            }
-
-            fapi2::buffer<uint64_t> startAddr, endAddr;
-            mss_MaintCmd * cmd = nullptr;
-            cmd = static_cast<mss_MaintCmd *>(i_wfp.data);
-            fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiMba(target);
-
-            // We will always do ce setup though CE calculation
-            // is only done during MNFG. This will give use better ffdc.
-            err = ceErrorSetup<TYPE_MBA>( target );
-            if( nullptr != err)
-            {
-                MDIA_FAST("sm: ceErrorSetup failed for mba. HUID:0x%08X",
-                        get_huid(target));
-                break;
-            }
-
-            FAPI_INVOKE_HWP( err, mss_get_address_range, fapiMba, MSS_ALL_RANKS,
-                             startAddr, endAddr );
-            if(err)
-            {
-                MDIA_FAST("sm: get_address_range failed");
-                break;
-            }
-
-            // new command...use the full range
-
-            switch(workItem)
-            {
-                case START_RANDOM_PATTERN:
-
-                    cmd = new mss_SuperFastRandomInit(
-                            fapiMba,
-                            startAddr,
-                            endAddr,
-                            mss_MaintCmd::PATTERN_RANDOM,
-                            stopCondition,
-                            false);
-
-                    MDIA_FAST("sm: random init %p on: %x", cmd,
-                            get_huid(target));
-                    break;
-
-                case START_SCRUB:
-
-                    cmd = new mss_SuperFastRead(
-                            fapiMba,
-                            startAddr,
-                            endAddr,
-                            stopCondition,
-                            false);
-
-                    MDIA_FAST("sm: scrub %p on: %x", cmd,
-                            get_huid(target));
-                    break;
-
-                case START_PATTERN_0:
-                case START_PATTERN_1:
-                case START_PATTERN_2:
-                case START_PATTERN_3:
-                case START_PATTERN_4:
-                case START_PATTERN_5:
-                case START_PATTERN_6:
-                case START_PATTERN_7:
-
-                    cmd = new mss_SuperFastInit(
-                            fapiMba,
-                            startAddr,
-                            endAddr,
-                            static_cast<mss_MaintCmd::PatternIndex>(workItem),
-                            stopCondition,
-                            false);
-
-                    MDIA_FAST("sm: init %p on: %x", cmd,
-                            get_huid(target));
-                    break;
-
-                default:
-                    break;
-            }
-
-            if(!cmd)
-            {
-                MDIA_ERR("unrecognized maint command type %d on: %x",
-                        workItem,
-                        get_huid(target));
-                break;
-            }
-
-            mutex_lock(&iv_mutex);
-
-            i_wfp.data = cmd;
-
-            mutex_unlock(&iv_mutex);
-
-            // Command and address configured.
-            // Invoke the command.
-            FAPI_INVOKE_HWP( err, cmd->setupAndExecuteCmd );
-            if( nullptr != err )
-            {
-                MDIA_FAST("sm: setupAndExecuteCmd %p failed", target);
-                i_wfp.data = nullptr;
-                if (cmd)
-                {
-                    delete cmd;
-                }
-            }
-
-        }
-        //target type is MCBIST
-        else if (TYPE_MCBIST == trgtType)
-        {
+/* FIXME RTC: 210975
             fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiMcbist(target);
             mss::mcbist::stop_conditions<> stopCond;
 
@@ -1295,6 +1154,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
                 MDIA_FAST("sm: Running Maint Cmd failed");
                 i_wfp.data = nullptr;
             }
+*/
         }
         // target type is OCMB_CHIP
         else if ( TYPE_OCMB_CHIP == trgtType )
@@ -1515,55 +1375,8 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
                 break;
         }
 
-        //target type is MBA
-        if ( TYPE_MBA == trgtType )
-        {
-            mss_MaintCmd * cmd = static_cast<mss_MaintCmd *>(wfp.data);
-
-            // It's possible PRD sent RESET_TIMER and started a command on this
-            // target so we need to use a dummy command here since cmd might be
-            // null. It is safe to create a dummy command object because the
-            // stopCmd() function is generic for all command types. Also, since
-            // we are only stopping the command, all of the parameters for the
-            // command object are junk except for the target.
-            if( flags & STOP_CMD )
-            {
-                MDIA_FAST("sm: stopping command: %p", target);
-
-                fapi2::buffer<uint64_t> i_startAddr, i_endAddr;
-                fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiMba(target);
-                mss_SuperFastRead dummyCmd{ fapiMba, i_startAddr, i_endAddr, 0,
-                                            false };
-
-                FAPI_INVOKE_HWP( err, dummyCmd.stopCmd );
-                if (nullptr != err)
-                {
-                    MDIA_ERR("sm: mss_MaintCmd::stopCmd failed");
-                    errlCommit(err, MDIA_COMP_ID);
-                }
-            }
-
-            if(cmd && (flags & CLEANUP_CMD))
-            {
-                // restore any init settings that
-                // may have been changed by the command
-
-                FAPI_INVOKE_HWP( err, cmd->cleanupCmd );
-                if(nullptr != err)
-                {
-                    MDIA_ERR("sm: mss_MaintCmd::cleanupCmd failed");
-                    errlCommit(err, MDIA_COMP_ID);
-                }
-            }
-
-            if(cmd && (flags & DELETE_CMD))
-            {
-                delete cmd;
-                wfp.data = NULL;
-            }
-        }
         //target type is MCBIST
-        else if ( TYPE_MCBIST == trgtType )
+        if ( TYPE_MCBIST == trgtType )
         {
             if(flags & STOP_CMD)
             {

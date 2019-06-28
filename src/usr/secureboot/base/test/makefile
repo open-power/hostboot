@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2017
+# Contributors Listed Below - COPYRIGHT 2013,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -25,7 +25,8 @@
 ROOTPATH = ../../../../..
 
 MODULE = testsecureboot
-TESTS = *.H
+# FIXME RTC: 210975
+#TESTS = *.H
 
 BINARY_FILES = $(IMGDIR)/secureboot_signed_container:7cff7a85f0db014016a61eac856c3775cd266240
 BINARY_FILES += $(IMGDIR)/secureboot_hash_page_table_container:16ccaff1e3c94cf17c2858e3a917dd9d64528848

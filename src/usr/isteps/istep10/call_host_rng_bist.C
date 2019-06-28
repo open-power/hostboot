@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,8 +56,10 @@
 #include <vpd/mvpdenums.H>
 
 #include <config.h>
+/* FIXME RTC: 210975
 #include <fapi2/plat_hwp_invoker.H>
 #include <p9_rng_init_phase1.H>
+*/
 
 namespace   ISTEP_10
 {
@@ -72,9 +74,9 @@ using   namespace   TARGETING;
 //******************************************************************************
 void* call_host_rng_bist( void *io_pArgs )
 {
-
-    errlHndl_t l_err = NULL;
     IStepError l_StepError;
+/* FIXME RTC: 210975
+    errlHndl_t l_err = NULL;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_rng_bist entry" );
@@ -135,6 +137,7 @@ void* call_host_rng_bist( void *io_pArgs )
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_rng_bist exit");
 
+*/
     return l_StepError.getErrorHandle();
 }
 
