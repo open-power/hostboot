@@ -31,8 +31,6 @@
  *   an error log.
  */
 
-#if !defined(PARSER) && !defined(LOGPARSER)
-
 #include <errl/errluserdetails.H>
 
 namespace TARGETING // Forward reference
@@ -85,13 +83,5 @@ class ErrlUserDetailsAttribute : public ErrlUserDetails {
     uint32_t iv_dataSize;
 };
 }
-#else // if LOGPARSER defined
-
-#include "errluserdetails.H"
-
-// Pull in the auto-generated portion for the parser
-#include <errl/errludattribute_gen.H>
-
-#endif
 
 #endif //ERRL_UDATTRIBUTE_H
