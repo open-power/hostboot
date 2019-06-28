@@ -255,6 +255,130 @@ void longSleep(uint8_t const i_sleepInSeconds)
     } while (iterations > 0);
 }
 
+void runBpmUpdates(bpmList_t           * const i_16gb_BPMs,
+                   bpmList_t           * const i_32gb_BPMs,
+                   BpmFirmwareLidImage * const i_16gb_fwImage,
+                   BpmFirmwareLidImage * const i_32gb_fwImage,
+                   BpmConfigLidImage   * const i_16gb_configImage,
+                   BpmConfigLidImage   * const i_32gb_configImage)
+{
+
+    assert(   (i_16gb_BPMs == nullptr)
+           ||  i_16gb_BPMs->empty()
+           || ((i_16gb_fwImage != nullptr) && (i_16gb_configImage != nullptr)),
+           "BPM::runBpmUpdates(): Update images for 16gb BPMs was nullptr and "
+           "there are 16gb BPMs in the system to may require updates.");
+    assert(   (i_32gb_BPMs == nullptr)
+           ||  i_32gb_BPMs->empty()
+           || ((i_32gb_fwImage != nullptr) && (i_32gb_configImage != nullptr)),
+           "BPM::runBpmUpdates(): Update images for 32gb BPMs was nullptr and "
+           "there are 32gb BPMs in the system to may require updates.");
+
+    errlHndl_t errl = nullptr;
+
+    do {
+        // @TODO RTC 212448 Enable updates once everything works
+        break;
+
+        if (   (i_16gb_BPMs != nullptr)
+            && (i_16gb_fwImage != nullptr)
+            && (i_16gb_configImage != nullptr))
+        {
+            TRACFCOMP(g_trac_bpm,
+                     "Check/update %d BPMs on 16GB_TYPE NVDIMMs",
+                     i_16gb_BPMs->size());
+
+            for(auto& bpm : *i_16gb_BPMs)
+            {
+                errl = bpm.runUpdate(*i_16gb_fwImage, *i_16gb_configImage);
+                if (errl != nullptr)
+                {
+                    uint32_t nvdimmHuid = TARGETING::get_huid(bpm.getNvdimm());
+                    if (bpm.attemptAnotherUpdate())
+                    {
+                        TRACFCOMP(g_trac_bpm, ERR_MRK
+                                 "An error occurred during a 16GB_TYPE BPM "
+                                 "update for NVDIMM 0x%.8X. "
+                                 "Commit and try again.",
+                                 nvdimmHuid);
+                        ERRORLOG::errlCommit(errl, BPM_COMP_ID);
+
+                        errl = bpm.runUpdate(*i_16gb_fwImage,
+                                             *i_16gb_configImage);
+                        if (errl != nullptr)
+                        {
+                            TRACFCOMP(g_trac_bpm, ERR_MRK
+                                     "Another error occurred while attempting "
+                                     "to update the same 16GB_TYPE BPM for "
+                                     "NVDIMM 0x%.8X. Commit and move onto the "
+                                     "next BPM",
+                                     nvdimmHuid);
+                        }
+                    }
+                    else
+                    {
+                        TRACFCOMP(g_trac_bpm, ERR_MRK
+                                 "An error occurred during a 16GB_TYPE BPM "
+                                 "update for NVDIMM 0x%.8X. "
+                                 "Commit and move onto the next BPM",
+                                 nvdimmHuid);
+                    }
+                    ERRORLOG::errlCommit(errl, BPM_COMP_ID);
+                }
+            }
+        }
+
+        if (  (i_32gb_BPMs != nullptr)
+           && (i_32gb_fwImage != nullptr)
+           && (i_32gb_configImage != nullptr))
+        {
+            TRACFCOMP(g_trac_bpm,
+                     "Check/update %d BPMs on 32GB_TYPE NVDIMMs",
+                     i_32gb_BPMs->size());
+
+            for(auto& bpm : *i_32gb_BPMs)
+            {
+                errl = bpm.runUpdate(*i_32gb_fwImage, *i_32gb_configImage);
+                if (errl != nullptr)
+                {
+                    uint32_t nvdimmHuid = TARGETING::get_huid(bpm.getNvdimm());
+                    if (bpm.attemptAnotherUpdate())
+                    {
+                        TRACFCOMP(g_trac_bpm, ERR_MRK
+                                 "An error occurred during a 32GB_TYPE BPM "
+                                 "update for NVDIMM 0x%.8X. "
+                                 "Commit and try again.",
+                                 nvdimmHuid);
+                        ERRORLOG::errlCommit(errl, BPM_COMP_ID);
+
+                        errl = bpm.runUpdate(*i_32gb_fwImage,
+                                             *i_32gb_configImage);
+                        if (errl != nullptr)
+                        {
+                            TRACFCOMP(g_trac_bpm, ERR_MRK
+                                     "Another error occurred while attempting "
+                                     "to update the same 32GB_TYPE BPM for "
+                                     "NVDIMM 0x%.8X. Commit and move onto the "
+                                     "next BPM",
+                                     nvdimmHuid);
+                        }
+                    }
+                    else
+                    {
+                        TRACFCOMP(g_trac_bpm, ERR_MRK
+                                 "An error occurred during a 32GB_TYPE BPM "
+                                 "update for NVDIMM 0x%.8X. "
+                                 "Commit and move onto the next BPM",
+                                 nvdimmHuid);
+                    }
+                    ERRORLOG::errlCommit(errl, BPM_COMP_ID);
+                }
+            }
+        }
+    } while(0);
+}
+
+
 // =============================================================================
 //                      BpmFirmwareLidImage Class Functions
 // =============================================================================
@@ -263,6 +387,8 @@ BpmFirmwareLidImage::BpmFirmwareLidImage(void * const i_lidImageAddr,
                                          size_t i_size)
     : iv_lidImage(i_lidImageAddr), iv_lidImageSize(i_size)
 {
+    assert(i_lidImageAddr != nullptr,
+          "BPM::BpmFirmwareLidImage(): Provided LID image must not be nullptr");
 }
 
 uint16_t BpmFirmwareLidImage::getVersion() const
@@ -701,8 +827,7 @@ errlHndl_t Bpm::runUpdate(BpmFirmwareLidImage i_fwImage,
                      "Firmware version on the BPM matches the version in the "
                      "image. Skipping update.");
 
-            // @TODO RTC 212448: disable forced updates.
-            //break;
+            break;
         }
 
         // Depending on the BSL version a CRC check may be necessary
@@ -790,7 +915,6 @@ errlHndl_t Bpm::runUpdate(BpmFirmwareLidImage i_fwImage,
         errl = checkFirmwareCrc();
         if (errl != nullptr)
         {
-            // @TODO RTC 212448: Add support for multiple update attempts.
             TRACFCOMP(g_trac_bpm, "Bpm:: runUpdate(): "
                      "Final CRC check failed. Attempting update again...");
             iv_attemptAnotherUpdate = !iv_attemptAnotherUpdate;

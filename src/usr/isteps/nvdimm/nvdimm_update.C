@@ -26,6 +26,7 @@
 #include "nvdimm.H"
 #include <isteps/nvdimm/nvdimm.H>
 #include <isteps/nvdimm/nvdimmreasoncodes.H>
+#include "bpm_update.H"
 
 #include <initservice/istepdispatcherif.H> // sendProgressCode
 #include <util/utilmclmgr.H> // secure LID manager
@@ -33,6 +34,7 @@
 #include <devicefw/userif.H>
 #include <vpd/spdenums.H>
 #include <sys/time.h>
+#include <vector>
 
 // Unique tracing for nvdimm update process
 const char NVDIMM_UPD[] = "NVDIMM_UPD";
@@ -1894,12 +1896,15 @@ bool NvdimmsUpdate::runUpdate(void)
     // List of each installed NVDIMM type
     std::vector<NvdimmInstalledImage*> v_NVDIMM_16GB_list;
     std::vector<NvdimmInstalledImage*> v_NVDIMM_32GB_list;
+    BPM::bpmList_t NVDIMM_BPM_16GB_list;
+    BPM::bpmList_t NVDIMM_BPM_32GB_list;
 
     // Build up installed NVDIMM image lists
     for (auto l_nvdimm : iv_nvdimmList)
     {
         NvdimmInstalledImage * l_installed_image =
             new NvdimmInstalledImage(l_nvdimm);
+
         l_err = l_installed_image->getType(l_installed_type);
         if (l_err)
         {
@@ -1924,6 +1929,10 @@ bool NvdimmsUpdate::runUpdate(void)
                 "0x%.8X NVDIMM is SMART_NVDIMM_16GB_TYPE",
                 get_huid(l_nvdimm));
             v_NVDIMM_16GB_list.push_back(l_installed_image);
+
+            BPM::Bpm l_16gbBpm(l_nvdimm);
+            NVDIMM_BPM_16GB_list.push_back(l_16gbBpm);
+
         }
         else if (l_installed_type == SMART_NVDIMM_32GB_TYPE)
         {
@@ -1931,6 +1940,9 @@ bool NvdimmsUpdate::runUpdate(void)
                 "0x%.8X NVDIMM is SMART_NVDIMM_32GB_TYPE",
                 get_huid(l_nvdimm));
             v_NVDIMM_32GB_list.push_back(l_installed_image);
+
+            BPM::Bpm l_32gbBpm(l_nvdimm);
+            NVDIMM_BPM_32GB_list.push_back(l_32gbBpm);
         }
         else
         {
@@ -1976,12 +1988,14 @@ bool NvdimmsUpdate::runUpdate(void)
     }
 
     do {
-        // First check that updatable NVDIMMs exist on the system
-        if ((v_NVDIMM_16GB_list.size() == 0) &&
-            (v_NVDIMM_32GB_list.size() == 0))
+        // First check that updatable NVDIMMs or BPMs exist on the system
+        if (   (v_NVDIMM_16GB_list.size() == 0)
+            && (v_NVDIMM_32GB_list.size() == 0)
+            && (NVDIMM_BPM_16GB_list.size() == 0)
+            && (NVDIMM_BPM_32GB_list.size() == 0))
         {
             TRACFCOMP(g_trac_nvdimm_upd, "NvdimmsUpdate::runUpdate() - "
-                "No updatable NVDIMMs present on the system");
+                "No updatable NVDIMMs or BPMs present on the system");
             break;
         }
 
@@ -2000,8 +2014,17 @@ bool NvdimmsUpdate::runUpdate(void)
                 break;
             }
 
-            for(const auto& lid : info.lidIds)
+            // Both the config and firmware images are needed to perform an
+            // update on a BPM. So, get pointers to each in the CompInfo
+            // struct's vector of LID IDs.
+            MCL::LidInfo * bpm_16gb_fw = nullptr;
+            MCL::LidInfo * bpm_16gb_config = nullptr;
+            MCL::LidInfo * bpm_32gb_fw = nullptr;
+            MCL::LidInfo * bpm_32gb_config = nullptr;
+
+            for(auto& lid : info.lidIds)
             {
+
                 TRACFCOMP(g_trac_nvdimm,"LID ID=0x%08X, size=%d, vAddr=%p",
                     lid.id, lid.size, lid.vAddr);
 
@@ -2031,21 +2054,21 @@ bool NvdimmsUpdate::runUpdate(void)
                                                             v_NVDIMM_32GB_list);
                     }
                 }
-                else if ((  lid.id == NVDIMM_32GB_BPM_FW_LIDID)
-                        || (lid.id == NVDIMM_32GB_BPM_CONFIG_LIDID))
+                else if (lid.id == NVDIMM_32GB_BPM_FW_LIDID)
                 {
-                    TRACFCOMP(g_trac_nvdimm,
-                              "Check/Update %d 32GB_TYPE NVDIMMs' BPM",
-                              v_NVDIMM_32GB_list.size());
-                    //@TODO RTC 212448 Add calls into bpm_update.C code.
+                    bpm_32gb_fw = &lid;
                 }
-                else if ((  lid.id == NVDIMM_16GB_BPM_FW_LIDID)
-                        || (lid.id == NVDIMM_16GB_BPM_CONFIG_LIDID))
+                else if (lid.id == NVDIMM_32GB_BPM_CONFIG_LIDID)
                 {
-                    TRACFCOMP(g_trac_nvdimm,
-                              "Check/Update %d 16GB_TYPE NVDIMMs' BPM",
-                              v_NVDIMM_16GB_list.size());
-                    //@TODO RTC 212448 Add calls into bpm_update.C code.
+                    bpm_32gb_config = &lid;
+                }
+                else if (lid.id == NVDIMM_16GB_BPM_FW_LIDID)
+                {
+                    bpm_16gb_fw = &lid;
+                }
+                else if (lid.id == NVDIMM_16GB_BPM_CONFIG_LIDID)
+                {
+                    bpm_16gb_config = &lid;
                 }
                 else if (lid.id != NVDIMM_SIGNATURE_LIDID)
                 {
@@ -2056,7 +2079,26 @@ bool NvdimmsUpdate::runUpdate(void)
                 }
             }
 
-            // @TODO RTC 212448 Add call to perform BPM updates
+            // Run BPM updates on NVDIMMs
+            BPM::BpmFirmwareLidImage fwImage_16gb(bpm_16gb_fw->vAddr,
+                                                  bpm_16gb_fw->size);
+
+            BPM::BpmFirmwareLidImage fwImage_32gb(bpm_32gb_fw->vAddr,
+                                                  bpm_32gb_fw->size);
+
+            BPM::BpmConfigLidImage configImage_16gb(bpm_16gb_config->vAddr,
+                                                    bpm_16gb_config->size);
+
+            BPM::BpmConfigLidImage configImage_32gb(bpm_32gb_config->vAddr,
+                                                    bpm_32gb_config->size);
+
+            BPM::runBpmUpdates(&NVDIMM_BPM_16GB_list,
+                               &NVDIMM_BPM_32GB_list,
+                               &fwImage_16gb,
+                               &fwImage_32gb,
+                               &configImage_16gb,
+                               &configImage_32gb);
+
             // Destructor automatically unloads the NVDIMM flash binary
         }
         else
