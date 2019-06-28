@@ -54,9 +54,19 @@ int ringid_get_raw_ring_file_path( uint32_t        i_magic,
             strcat(io_ringPath, l_ringDir);
             strcat(io_ringPath, "/");
         }
-        else if ( i_magic == TOR_MAGIC_OVRD ||
-                  i_magic == TOR_MAGIC_OVLY ||
-                  i_magic == TOR_MAGIC_DYN )
+        else if ( i_magic == TOR_MAGIC_OVLY )
+        {
+            l_ringDir = getenv("OVLY_FOLDER");
+            strcat(io_ringPath, l_ringDir);
+            strcat(io_ringPath, "/");
+        }
+        else if ( i_magic == TOR_MAGIC_DYN )
+        {
+            l_ringDir = getenv("DYN_FOLDERS");
+            strcat(io_ringPath, l_ringDir);
+            strcat(io_ringPath, "/");
+        }
+        else if ( i_magic == TOR_MAGIC_OVRD )
         {
             // Path already fully qualified. Return io_ringPath as is.
         }

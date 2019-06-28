@@ -85,7 +85,7 @@ typedef struct
     ChipId_t  chipId;      // Value from ChipId enum
     uint8_t   ddLevel;     // Actual DD level of ringSection
     uint8_t   undefined;
-    uint32_t  size;        // Size of ringSection.
+    uint32_t  size;        // Size of ringSection (incl this header).
 } TorHeader_t;
 
 typedef struct

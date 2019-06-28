@@ -49,7 +49,7 @@
 /// now. Users of CompressedScanData which use the magic value to detect
 /// a ring data structure won't be able to distingish old and new
 /// CompressedScanData for iv_version being 0x34. In the very unlikely case
-/// that we would have that many versions of ComprossedScanData, it is
+/// that we would have that many versions of CompressedScanData, it is
 /// strongly suggested to simply skip 0x34 as version number.
 ///
 /// Bytes - Content
@@ -57,15 +57,10 @@
 /// 0:1   - A 16-bit "magic number" that identifies and validates the
 /// compression algorithm used to compress the data ("RS").
 ///
-/// 2     - An 8-bit version number (3 for the time being).
+/// 2     - An 8-bit version number.
 ///
-/// 3     - An 8-bit type field distinguishing different scan data types
-///         0bxxxxxxnn: Non-CMSK or CMSK type of ring
-///         nn=00: Undefined, nn=01: Non-CMSK, nn=10: CMSK, nn=11: Context
-///         0bxxxxnnxx: Flush or override type of ring
-///         nn=00: Undefined, nn=01: Flush, nn=10: Override, nn=11: Context
-///         0bnnnnxxxx: Unused
-///         nnnn=0000: Undefined
+/// 3     - An 8-bit type field distinguishing different ring types.
+/// See detailed explanation elsewhere in this file.
 ///
 /// 4:5   - The 16-bit size of the compressed scan data with
 /// this header in \e bytes. This is not the exact length of actual scan data
@@ -74,7 +69,11 @@
 ///
 /// 6:7   - The 16-bit ring ID uniquely identifying the ring.
 ///
-/// 8:11  - scan scom register value
+/// 8:9   - Dynamic init, or PLL, selector value [0:63].
+///
+/// 10:13 - scan scom register value
+///
+/// 14:15 - Undefined (to purposely pad to 4B boundary)
 typedef struct
 {
     uint16_t iv_magic;
@@ -83,7 +82,11 @@ typedef struct
     uint16_t iv_size;
     RingId_t iv_ringId;
     uint32_t iv_scanAddr;
+    uint16_t iv_selector;  // Must be second last (temp assumption in Mvpd accessor)
+    uint16_t iv_undefined; // Must be last (temp assumption in Mvpd accessor)
 } CompressedScanData;
+
+#define RS4_V3TOV4_SIZE_INC 4 // Header increase from V3 to V4 (needed by Mvpd accessor)
 
 /// Endian-translate a CompressedScanData structure
 ///
@@ -127,7 +130,12 @@ compressed_scan_data_translate( CompressedScanData* o_data,
 /// \param[in] i_ringId The ring ID that uniquely identifies the ring. (See
 /// <ChipType> ring ID header files for more info.)
 ///
-/// \param[in] i_bOverride A flag specifying: true: override, false: flush, 0xff: context
+/// \param[in] i_selector The dynamic, or PLL, 8-bit selector value identifying
+/// the Dynamic init feature, or the PLL sub type, to be overlaid onto the
+/// base ring found in either the .sbe.rings or .qme.rings section.
+///
+/// \param[in] i_type A vector specifying ring type: CMSK, override, selector
+/// type (see details for iv_type elsewhere in this header file)
 ///
 /// This API is required for integration with PHYP which does not support
 /// local memory allocation, like malloc() and new().  Applications in
@@ -149,7 +157,8 @@ _rs4_compress( CompressedScanData* io_rs4,
                const uint32_t i_length,
                const uint32_t i_scanAddr,
                const RingId_t i_ringId,
-               const MyBool_t i_bOverride );
+               const uint16_t i_selector,
+               const uint8_t  i_type );
 
 
 /// Compress a scan string using the RS4 compression algorithm
@@ -176,7 +185,13 @@ _rs4_compress( CompressedScanData* io_rs4,
 /// \param[in] i_ringId The ring ID that uniquely identifies the ring. (See
 /// <ChipType> ring ID header files for more info.)
 ///
-/// \param[in] i_bOverride A flag specifying: true: override, false: flush, 0xff: context
+/// \param[in] i_selector The dynamic, or PLL, 8-bit selector value identifying
+/// the Dynamic init feature, or the PLL sub type, to be overlaid onto the
+/// base ring found in either the .sbe.rings or .qme.rings section.
+///
+/// \param[in] i_type A vector specifying ring type: CMSK, override, selector
+/// type (see details for iv_type elsewhere in this header file)
+///
 /// \returns See \ref scan_compression_codes
 int
 rs4_compress( CompressedScanData** o_rs4,
@@ -185,7 +200,8 @@ rs4_compress( CompressedScanData** o_rs4,
               const uint32_t i_length,
               const uint32_t i_scanAddr,
               const RingId_t i_ringId,
-              const MyBool_t i_bOverride );
+              const uint16_t i_selector,
+              const uint8_t  i_type );
 
 
 /// Decompress a scan string compressed using the RS4 compression algorithm
@@ -259,19 +275,23 @@ rs4_decompress( uint8_t** o_data_str,
 int
 rs4_redundant( const CompressedScanData* i_data, int* o_redundant );
 
+
 /// Check for CMSK ring in RS4
 ///
 /// \param[in] i_rs4 A pointer to the RS4 CompressedScanData [header + data]
 ///
 /// \returns   true if CMSK ring, false if non-CMSK ring and UNDEFINED_BOOLEAN if any other type
-int rs4_is_cmsk( const CompressedScanData* i_rs4, uint8_t* o_ivType );
+MyBool_t
+rs4_is_cmsk( const CompressedScanData* i_rs4, uint8_t* o_ivType );
+
 
 /// Check for Override or Flush ring in RS4
 ///
 /// \param[in] i_rs4 A pointer to the RS4 CompressedScanData [header + data]
 ///
 /// \returns  true if Ovrd ring, false if flush ring and UNDEFINED_BOOLEAN if any other type
-MyBool_t rs4_is_ovrd(const CompressedScanData* i_rs4, uint8_t* o_ivType);
+MyBool_t
+rs4_is_ovrd(const CompressedScanData* i_rs4, uint8_t* o_ivType);
 
 
 /// Embed CMSK ring into an RS4 ring
@@ -284,8 +304,7 @@ MyBool_t rs4_is_ovrd(const CompressedScanData* i_rs4, uint8_t* o_ivType);
 ///
 /// \returns See \ref scan_compression_codes
 int rs4_embed_cmsk( CompressedScanData** io_rs4,
-                    CompressedScanData* i_rs4_cmsk,
-                    MyBool_t i_bOverride );
+                    CompressedScanData* i_rs4_cmsk );
 
 
 /// Extract Stump & CMSK rings from an RS4 ring (assumes pre-allocated ring buffers)
@@ -360,17 +379,28 @@ void print_raw_ring( uint8_t*  data, uint32_t  bits);
 // #define RS4_VERSION 3  // Reduced header size to 12 bytes
 #define RS4_VERSION 4  // Updated definition of RS4 header's iv_type field
 
+/// @}
+
 /// Scan data types (used for coding bit fields within iv_type in RS4 header)
+///
+/// Non-CMSK or CMSK
 #define RS4_IV_TYPE_CMSK_MASK       (uint8_t)0b00000011
 #define RS4_IV_TYPE_CMSK_NON_CMSK   (uint8_t)0b00000001
 #define RS4_IV_TYPE_CMSK_CMSK       (uint8_t)0b00000010
 #define RS4_IV_TYPE_CMSK_CTX        (uint8_t)0b00000011
+/// Flush or override marking
 #define RS4_IV_TYPE_OVRD_MASK       (uint8_t)0b00001100
 #define RS4_IV_TYPE_OVRD_FLUSH      (uint8_t)0b00000100
 #define RS4_IV_TYPE_OVRD_OVRD       (uint8_t)0b00001000
 #define RS4_IV_TYPE_OVRD_CTX        (uint8_t)0b00001100
+/// Base, dynamic or PLL type of ring
+#define RS4_IV_TYPE_SEL_MASK        (uint8_t)0b01110000
+#define RS4_IV_TYPE_SEL_BASE        (uint8_t)0b00010000 // Ordinary ring
+#define RS4_IV_TYPE_SEL_DYN         (uint8_t)0b00100000 // Dynamic init
+#define RS4_IV_TYPE_SEL_PLL         (uint8_t)0b01000000 // PLL
 
-/// @}
+#define UNDEFINED_RS4_TYPE     (uint8_t)0xff
+#define UNDEFINED_RS4_SELECTOR (uint16_t)0xffff
 
 /// \defgroup scan_compression_codes Scan Compression Return Codes
 ///
@@ -407,16 +437,16 @@ void print_raw_ring( uint8_t*  data, uint32_t  bits);
 /// Inconsistent input data
 ///
 /// 1 in data is masked by 0 in care mask
-#define SCAN_COMPRESSION_INPUT_ERROR 5
+#define SCAN_COMPRESSION_INPUT_ERROR (uint8_t)5
 
 /// Invalid transition in state machine
-#define SCAN_COMPRESSION_STATE_ERROR 6
+#define SCAN_COMPRESSION_STATE_ERROR (uint8_t)6
 
 /// wrong compression version
-#define SCAN_COMPRESSION_VERSION_ERROR 7
+#define SCAN_COMPRESSION_VERSION_ERROR (uint8_t)7
 
 /// Invalid iv_type value
-#define SCAN_COMPRESSION_IV_TYPE_ERROR 8
+#define SCAN_COMPRESSION_IV_TYPE_ERROR (uint8_t)8
 
 /// @}
 

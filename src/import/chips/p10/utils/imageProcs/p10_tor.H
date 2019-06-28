@@ -37,9 +37,6 @@
 /// ppe type, ring type, RS4 ring container and ring address
 ///
 /// \param[in]  i_ringSection A pointer to a Ring section binary image.
-/// It contains details of p9 Ring, which is used for scanning operation.
-/// TOR API supports two type of binary image. 1) HW image format and 2)
-/// SEEPROM image format binary
 ///
 /// \param[in]  i_ringId A enum to indicate unique ID for the ring
 ///
@@ -66,7 +63,7 @@
 ///
 /// \param[out] o_ringName A string. Returns name of ring ID in characters
 ///
-/// \param[in] - i_debug is debug statment params. Supports 0 to 3.
+/// \param[in] i_debug Debug level [0:3].
 ///
 /// \retval 0 Success
 ///
@@ -85,8 +82,6 @@ int tor_access_ring( void*           i_ringSection,    // Ring section ptr
 /// Traverse on TOR structure and copies RS4 ring container data
 ///
 /// \param[in]  i_ringSection A pointer to a Ring section binary image.
-/// It contain details of p9 Ring which is used for scanning operation.
-/// TOR API supports HW image format  only
 ///
 /// \param[in]  i_ringId A enum to indicate unique ID for the ring
 ///
@@ -102,7 +97,7 @@ int tor_access_ring( void*           i_ringSection,    // Ring section ptr
 /// \param[in/out] io_ringBlockSize A variable. Returns size of data copied
 ///  into io_ringBlockPtr
 ///
-/// \param[in] - i_debug is debug statment params. Supports 0 to 3.
+/// \param[in] i_debug Debug level [0:3].
 ///
 /// \retval 0 Success
 ///
@@ -118,47 +113,59 @@ int tor_get_single_ring ( void*          i_ringSection,
 /// Traverse on TOR structure and copies absolute memory address of Ringtype
 /// offset addres and TOR offset slot address
 ///
-/// \param[in]  i_ringSection A pointer to a Ring section binary image.
-/// It contains details of p9 Ring which is used for scanning operation.
-///  TOR API supports SEEPROM image format.
+/// \param[in] i_ringSection A pointer to a Ring section binary image.
 ///
-/// \param[in/out]  io_ringSectionSize   In: Exact size of i_ringSection.
+/// \param[in/out] io_ringSectionSize   In: Exact size of i_ringSection.
 /// Out: Updated size of i_ringSection.
 /// Note: Caller manages this buffer and must make sure the RS4 ring fits
 /// before making this call
 ///
-/// \param[in]  i_ringBuffer A pointer to a ring work buffer, which is used
-/// for scanning operation purpose
-///
-/// \param[in]  i_ringBufferSize A constant value to indicate size of
-/// ringBuffer data passed in
-///
-/// \param[in]  i_ringId A enum to indicate unique ID for the ring
+/// \param[in] i_ringId A enum to indicate unique ID for the ring
 ///
 /// \param[in] i_instanceId A variable to indicate chiplet instance ID
 ///
 /// \param[in] i_rs4_container A void pointer. Contains RS4 compressed ring
-/// data which eventually attached into void image pointer i_ringSection
+/// data to be appended at the end of binary i_ringSection
 ///
-/// \param[in] - i_debug is debug statment params. Supports 0 to 3.
-///
-/// \a io_ringBlockSize contains absolute memory address of ringTorslot. Then
-/// appends new rs4 ring container at the end of ring section and updates new
-/// ring offset address on ring offset location. The slot must be empty. If there
-/// is non-zero content in the slot, the API will fail. Note that this API does not
-/// "insert" or "replace" rings. It only appends at the end of the ring section.
+/// \param[in] i_debug Debug level [0:3].
 ///
 /// \retval 0 Success
 ///
 /// \retval non-0 See \ref TOR API RETURN errors
-int tor_append_ring(  void*           i_ringSection,
-                      uint32_t&       io_ringSectionSize,
-                      void*           i_ringBuffer,
-                      const uint32_t  i_ringBufferSize,
-                      RingId_t        i_ringId,
-                      uint8_t         i_instanceId,
-                      void*           i_rs4Container,
-                      uint32_t        i_dbgl = 0 );
+///
+int tor_append_ring( void*           i_ringSection,
+                     uint32_t&       io_ringSectionSize,
+                     RingId_t        i_ringId,
+                     uint8_t         i_instanceId,
+                     void*           i_rs4Container,
+                     uint32_t        i_dbgl = 0 );
+
+
+/// Create a complete TOR ring section but with empty offset ring slots.
+///
+/// \param[in/out] io_ringSection A pointer to a ring section binary image.
+/// This ring section should initially be empty. If not, it'll be overwritten.
+///
+/// \param[in] i_torMagic TOR magic number.
+///
+/// \param[in] i_torVersion TOR version.
+///
+/// \param[in] i_ddLevel The ddLevel.
+///
+/// \param[in] i_chipId The chip ID.
+///
+/// \param[in] i_debug Debug level [0:3].
+///
+/// \retval 0 Success
+///
+/// \retval non-0 See \ref TOR API RETURN errors
+///
+int tor_skeleton_generation( void*         io_ringSection,
+                             uint32_t      i_torMagic,
+                             uint8_t       i_torVersion,
+                             uint8_t       i_ddLevel,
+                             ChipId_t      i_chipId,
+                             uint32_t      dbgl = 0 );
 
 
 /// Inform caller of TOR version
