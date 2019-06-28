@@ -1234,7 +1234,7 @@ extern "C"
                         }
                     }
 
-                    if (P9A_MC_OMIC0_PPE_RING_ID <= l_ring && l_ring < P9A_MC_OMIC2_PPE_RING_ID  && l_port == UNIT_PORT_ID)
+                    if (P9A_MC_OMIC0_PPE_RING_ID <= l_ring && l_ring <= P9A_MC_OMIC2_PPE_RING_ID  && l_port == UNIT_PORT_ID)
                     {
                         o_chipUnitRelated = true;
                         o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_OMIC_CHIPUNIT,
