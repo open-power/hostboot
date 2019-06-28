@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,7 +34,7 @@
 #include "errludstring.H"
 #include "errludtarget.H"
 #include "errludbacktrace.H"
-#include "errludattribute.H"
+#include "errludattributeP.H"
 #include "errludlogregister.H"
 #include "errludcallout.H"
 #include "errludsensor.H"

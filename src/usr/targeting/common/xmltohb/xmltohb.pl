@@ -26,10 +26,7 @@
 
 #
 # Purpose:
-# Author: Nick Bofferding
-# Last Updated: 09/09/2011
-#
-# Version: 1.0
+#   Process the attribute xml files, generate code, create binaries, etc
 #
 # Change Log **********************************************************
 #
@@ -371,9 +368,9 @@ if( !($cfgSrcOutputDir =~ "none") )
     close $attrErrlCFile;
 
     mkdir("$cfgSrcOutputDir/errl");
-    open(ATTR_ATTRERRL_H_FILE,">$cfgSrcOutputDir"."errl/errludattribute_gen.H")
+    open(ATTR_ATTRERRL_H_FILE,">$cfgSrcOutputDir"."errl/errludattributeP_gen.H")
       or croak ("Attribute errlog H file: \"$cfgSrcOutputDir"
-        . "errl/errludattribute_gen.H\" could not be opened.");
+        . "errl/errludattributeP_gen.H\" could not be opened.");
     my $attrErrlHFile = *ATTR_ATTRERRL_H_FILE;
     writeAttrErrlHFile($attributes,$attrErrlHFile);
     close $attrErrlHFile;
@@ -2952,7 +2949,7 @@ sub writeAttrErrlCFile {
 sub writeAttrErrlHFile {
     my($attributes,$outFile) = @_;
 
-    # Inserts inside LOGPARSER leg in errludattribute.H
+    # Included by errludattributeP.H
     print $outFile "\n";
     print $outFile "namespace ERRORLOG\n";
     print $outFile "{\n";
