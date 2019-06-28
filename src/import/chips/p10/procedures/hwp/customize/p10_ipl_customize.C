@@ -46,7 +46,7 @@
 #include <p10_ipl_image.H>
 #include <p10_ring_identification.H>
 #include <p10_tor.H>
-#include <p9_scan_compression.H>
+#include <p10_scan_compression.H>
 #include <p10_infrastruct_help.H>
 
 using namespace fapi2;
@@ -276,18 +276,14 @@ fapi2::ReturnCode get_overlays_ring(
                      fapi2::XIPC_RS4_DECOMPRESS_ERROR().
                      set_CHIP_TARGET(i_procTarget).
                      set_RING_ID(i_ringId).
-                     set_CHIPLET_ID(0xff).
                      set_MAX_RING_BYTE_SIZE(l_maxRingByteSize).
                      set_LOCAL_RC(l_rc).
                      set_OCCURRENCE(1),
                      "rs4_decompress() failed w/rc=%i for "
-                     "ringId=0x%x, chipletId=0xff, maxRingByteSize=%d, occurrence=1",
+                     "ringId=0x%x, maxRingByteSize=%d, occurrence=1",
                      l_rc, i_ringId, l_maxRingByteSize );
 
-        // For debug and testing
         FAPI_DBG("Overlay raw ring size=%d bits", l_ovlyUncmpSize);
-        //print_raw_ring( (uint8_t*)(*io_ringBuf3), l_ovlyUncmpSize);
-        //print_raw_ring( (uint8_t*)(*io_ringBuf3) + l_maxRingByteSize / 2, l_ovlyUncmpSize);
 
         // Copy the overlay ring's raw size
         *o_ovlyUncmpSize = l_ovlyUncmpSize;
@@ -369,19 +365,15 @@ fapi2::ReturnCode apply_overlays_ring(
     FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS,
                  fapi2::XIPC_RS4_DECOMPRESS_ERROR().
                  set_CHIP_TARGET(i_procTarget).
-                 set_RING_ID(0xff).
-                 set_CHIPLET_ID(0xff).
+                 set_RING_ID(be16toh(((CompressedScanData*)io_vpdRing)->iv_ringId)).
                  set_MAX_RING_BYTE_SIZE(maxRingByteSize).
                  set_LOCAL_RC(l_rc).
                  set_OCCURRENCE(2),
-                 "rs4_decompress() for gptr: Failed w/rc=%i for "
-                 "ringId=0xff, chipletId=0xff, maxRingByteSize=%d, occurrence=2",
-                 l_rc, maxRingByteSize );
+                 "rs4_decompress() for gptr: Failed w/rc=%i for ringId=0x%x,"
+                 "maxRingByteSize=%d, occurrence=2",
+                 l_rc, be16toh(((CompressedScanData*)io_vpdRing)->iv_ringId), maxRingByteSize );
 
-    // For debug and testing
     FAPI_DBG("Mvpd raw ring size=%d bits)", vpdUncmpSize);
-    //print_raw_ring( dataVpd, vpdUncmpSize);
-    //print_raw_ring( careVpd, vpdUncmpSize);
 
     // Compare uncompressed Mvpd ring and overlay ring sizes
     FAPI_ASSERT( i_ovlyUncmpSize == vpdUncmpSize,
@@ -456,10 +448,6 @@ fapi2::ReturnCode apply_overlays_ring(
         }
     }
 
-    //FAPI_DBG("Mvpd ring(modified): data care (size:%d bits)", vpdUncmpSize);
-    //print_raw_ring( dataVpd, vpdUncmpSize);
-    //print_raw_ring( careVpd, vpdUncmpSize);
-
     // Recompress vpd ring
     l_rc = _rs4_compress(
                (CompressedScanData*)io_vpdRing,
@@ -468,7 +456,11 @@ fapi2::ReturnCode apply_overlays_ring(
                careVpd,
                vpdUncmpSize,
                be32toh(((CompressedScanData*)io_vpdRing)->iv_scanAddr),
-               be16toh(((CompressedScanData*)io_vpdRing)->iv_ringId));
+               be16toh(((CompressedScanData*)io_vpdRing)->iv_ringId),
+               UNDEFINED_RS4_SELECTOR,
+               RS4_IV_TYPE_CMSK_NON_CMSK |
+               RS4_IV_TYPE_OVRD_FLUSH |
+               RS4_IV_TYPE_SEL_BASE );
 
     FAPI_ASSERT( l_rc == 0,
                  fapi2::XIPC_RS4_COMPRESS_ERROR().
@@ -825,8 +817,6 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
         l_rc = tor_append_ring(
                    i_ringSection,
                    io_ringSectionSize, // In: Exact size. Out: Updated size.
-                   i_ringBuf2,
-                   i_ringBufSize2,  // Max size.
                    i_ring.ringId,
                    l_chipletTorId,  // Chiplet instance TOR Index
                    i_vpdRing );     // The VPD RS4 ring container

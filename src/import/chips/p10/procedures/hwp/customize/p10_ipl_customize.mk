@@ -25,14 +25,13 @@
 PROCEDURE=p10_ipl_customize
 lib$(PROCEDURE)_DEPLIBS+=p10_ipl_image
 lib$(PROCEDURE)_DEPLIBS+=p10_ring_identification
-lib$(PROCEDURE)_DEPLIBS+=p9_scan_compression
+lib$(PROCEDURE)_DEPLIBS+=p10_scan_compression
 lib$(PROCEDURE)_DEPLIBS+=p10_get_mvpd_ring
 lib$(PROCEDURE)_DEPLIBS+=p10_mvpd_ring_funcs
 lib$(PROCEDURE)_DEPLIBS+=p10_tor
 lib$(PROCEDURE)_DEPLIBS+=common_ringId
 lib$(PROCEDURE)_DEPLIBS+=p10_ringId
 lib$(PROCEDURE)_DEPLIBS+=p10_ddco
-$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/utils/imageProcs)
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/utils/imageProcs)
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/common/utils/imageProcs)
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/procedures/hwp/accessors)
