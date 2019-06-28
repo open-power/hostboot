@@ -158,7 +158,6 @@
     <description>DMB manufacturer ID is not the expected ID and
                  therefore not supported.</description>
     <ffdc>DMB_MFG_ID</ffdc>
-    <ffdc>EXPECTED</ffdc>
     <ffdc>OCMB_CHIP_TARGET</ffdc>
     <ffdc>VPD_TYPE</ffdc>
     <ffdc>DDR_TYPE</ffdc>
