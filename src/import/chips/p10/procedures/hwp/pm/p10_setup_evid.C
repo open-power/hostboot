@@ -99,6 +99,11 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     //Instantiate PPB object
     PlatPmPPB l_pmPPB(i_target);
 
+    FAPI_ASSERT(l_pmPPB.iv_init_error == false,
+                fapi2::PSTATE_PB_ATTRIBUTE_ACCESS_ERROR()
+                .set_CHIP_TARGET(i_target),
+                "Pstate Parameter Block attribute access error");
+
     // Compute the boot/safe values
     FAPI_TRY(l_pmPPB.compute_boot_safe(i_action));
 
