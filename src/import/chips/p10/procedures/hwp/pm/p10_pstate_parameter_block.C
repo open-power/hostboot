@@ -117,13 +117,15 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
 {
     FAPI_DBG("> p10_pstate_parameter_block");
 
-    do
-    {
-        //Instantiate pstate object
-        PlatPmPPB l_pmPPB(i_target);
-    }
-    while(0);
+    //Instantiate pstate object
+    PlatPmPPB l_pmPPB(i_target);
 
+    FAPI_ASSERT(l_pmPPB.iv_init_error == false,
+                fapi2::PSTATE_PB_ATTRIBUTE_ACCESS_ERROR()
+                .set_CHIP_TARGET(i_target),
+                "Pstate Parameter Block attribute access error");
+
+fapi_try_exit:
     FAPI_DBG("< p10_pstate_parameter_block");
     return fapi2::current_err;
 }
@@ -382,10 +384,7 @@ FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.a
 fapi_try_exit:
     if (fapi2::current_err)
     {
-        FAPI_ASSERT(false,
-                fapi2::PSTATE_PB_ATTRIBUTE_ACCESS_ERROR()
-                .set_CHIP_TARGET(iv_procChip),
-                "Pstate Parameter Block attribute access error");
+        iv_init_error = true;
     }
 }
 
