@@ -178,7 +178,7 @@ class PlatPmPPB
     public:
         //Constructor with Proc target as input
         PlatPmPPB ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> i_target ) :
-            iv_procChip (i_target), iv_pstates_enabled(0), iv_resclk_enabled(0),
+            iv_init_error(false), iv_procChip (i_target), iv_pstates_enabled(0), iv_resclk_enabled(0),
             iv_dds_enabled(0), iv_ivrm_enabled(0), iv_wof_enabled(0), iv_safe_voltage (0),
             iv_safe_frequency(0), iv_reference_frequency_mhz(0), iv_reference_frequency_khz(0),
             iv_frequency_step_khz(0), iv_proc_dpll_divider(0), iv_nest_freq_mhz(0),
@@ -440,6 +440,10 @@ class PlatPmPPB
                      l_result);
             return (l_result);
         }
+
+    public:
+        bool                      iv_init_error;
+
     private:
         fapi2::Target< fapi2::TARGET_TYPE_PROC_CHIP > iv_procChip;  // processor chip target
         AttributeList             iv_attrs;
