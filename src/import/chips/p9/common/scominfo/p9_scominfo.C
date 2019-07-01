@@ -656,7 +656,9 @@ extern "C"
                     // NPU0: 05011000 to 050113FF
                     // NPU1: 05011400 to 050117FF
                     // NPU2: 03011C00 to 03011FFF
-                    if ( N3_NPU_0_RING_ID == l_ring )
+                    if ( N3_NPU_0_RING_ID  == l_ring ||
+                         N3_NPU_1_RING_ID  == l_ring ||
+                         P9A_NPU_2_RING_ID == l_ring )
                     {
                         // NPU0/NPU1
                         if ( N3_CHIPLET_ID == l_chiplet_id )
@@ -677,17 +679,20 @@ extern "C"
                     // NPU0: 05013C00 to 05013C8F
                     // NPU1: 05013CC0 to 05013D4F
                     // NPU2: 03012000 to 0301208F
-                    else if ( P9A_NPU_0_FIR_RING_ID == l_ring )
+                    else if ( P9A_NPU_0_FIR_RING_ID == l_ring ||
+                              P9A_NPU_2_FIR_RING_ID == l_ring )
                     {
                         // NPU0/NPU1
                         if ( N3_CHIPLET_ID == l_chiplet_id )
                         {
-                            l_scom.set_sat_id( l_sat_id + (3 * i_chipUnitNum) );
+                            l_scom.set_ring( P9A_NPU_0_FIR_RING_ID );
+                            l_scom.set_sat_id( (l_sat_id % 3) + (3 * i_chipUnitNum) );
                         }
                         // NPU2
                         else if ( N1_CHIPLET_ID == l_chiplet_id )
                         {
                             l_scom.set_ring( P9A_NPU_2_FIR_RING_ID );
+                            l_scom.set_sat_id( l_sat_id % 3 );
                         }
                         else
                         {
