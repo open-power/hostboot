@@ -1580,6 +1580,7 @@ void nvdimm_restore(TargetHandleList &i_nvdimmList)
  *        - Checks for ready state
  *        - Gathers timeout values
  *        - Waits for the ongoing backup to complete
+ *        - Unlocks encryption
  *        - Disarms the trigger for draminit
  *
  * @param[in] i_nvdimm - nvdimm target
@@ -1628,6 +1629,11 @@ void nvdimm_init(Target *i_nvdimm)
             errlCommit(l_err, NVDIMM_COMP_ID);
             break;
         }
+
+        // Unlock encryption if enabled
+        TargetHandleList l_nvdimmTargetList;
+        l_nvdimmTargetList.push_back(i_nvdimm);
+        NVDIMM::nvdimm_encrypt_unlock(l_nvdimmTargetList);
 
         // Disarm the ddr_resetn here in case it came in armed. When the nvdimm is
         // armed the reset_n is masked off from the host, meaning the drams won't

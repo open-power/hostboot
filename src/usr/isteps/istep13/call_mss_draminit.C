@@ -219,6 +219,10 @@ void nimbus_mss_draminit(IStepError & io_istepError)
         TARGETING::TargetHandleList l_dimmTargetList;
         getChildAffinityTargets(l_dimmTargetList, l_mcbist_target, CLASS_NA, TYPE_DIMM);
 
+        // Generate valid encryption keys
+        NVDIMM::nvdimm_gen_keys();
+
+        // Walk the dimm list and init nvdimms
         for (const auto & l_dimm : l_dimmTargetList)
         {
             if (isNVDIMM(l_dimm))
@@ -226,7 +230,12 @@ void nimbus_mss_draminit(IStepError & io_istepError)
                 NVDIMM::nvdimm_init(l_dimm);
             }
         }
+        // After nvdimm init
+        //   - nvdimm controller initialized
+        //   - nvdimm encryption unlocked
+        //   - nvdimms disarmed
 #endif
+
         FAPI_INVOKE_HWP(l_err, p9_mss_draminit, l_fapi_mcbist_target);
 
         if (l_err)
