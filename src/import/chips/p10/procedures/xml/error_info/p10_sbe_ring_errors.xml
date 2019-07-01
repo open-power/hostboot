@@ -81,7 +81,6 @@
     <rc>RC_P10_PUTRING_CHECKWORD_DATA_MISMATCH</rc>
     <description>putring failed due to checkword mismatch</description>
     <ffdc>TARGET</ffdc>
-    <ffdc>CHIPLET_ID</ffdc>
     <ffdc>SCOM_ADDRESS</ffdc>
     <ffdc>SCOM_DATA</ffdc>
     <ffdc>BITS_DECODED</ffdc>
@@ -104,8 +103,6 @@
     <sbeError/>
     <rc>RC_P10_PUTRING_OPCG_DONE_TIMEOUT</rc>
     <description>putring failed due to opcg done timeout</description>
-    <ffdc>TARGET</ffdc>
-    <ffdc>CHIPLET_ID</ffdc>
     <ffdc>SCOM_ADDRESS</ffdc>
     <ffdc>SCOM_DATA</ffdc>
     <ffdc>ROTATE_COUNT</ffdc>
@@ -128,7 +125,6 @@
     <rc>RC_P10_PARALLEL_SCAN_COMPARE_ERR</rc>
     <description>Putring failed to complete parallel scanning</description>
     <ffdc>TARGET</ffdc>
-    <ffdc>CHIPLET_ID</ffdc>
     <ffdc>RING_ID</ffdc>
     <ffdc>CPLT_STAT0</ffdc>
   </hwpError>
