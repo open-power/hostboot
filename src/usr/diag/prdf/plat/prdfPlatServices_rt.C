@@ -111,6 +111,7 @@ uint32_t nvdimmNotifyPhypProtChange( TARGETING::TargetHandle_t i_target,
 
     uint32_t o_rc = SUCCESS;
 
+#ifdef CONFIG_NVDIMM
     errlHndl_t errl = NVDIMM::notifyNvdimmProtectionChange( i_target, i_state );
     if ( nullptr != errl )
     {
@@ -119,6 +120,7 @@ uint32_t nvdimmNotifyPhypProtChange( TARGETING::TargetHandle_t i_target,
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         o_rc = FAIL;
     }
+#endif
 
     return o_rc;
 

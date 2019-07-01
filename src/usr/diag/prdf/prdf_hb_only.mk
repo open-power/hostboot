@@ -137,8 +137,6 @@ prd_obj += prdfPlatServices_rt.o
 # nvdimm
 prd_vpath += ${ROOTPATH}/src/usr/isteps/nvdimm/
 prd_vpath += ${ROOTPATH}/src/usr/isteps/nvdimm/runtime
-prd_obj_no_sim += nvdimm.o
-prd_obj_no_sim += nvdimm_rt.o
 
 endif
 
