@@ -577,7 +577,7 @@ errlHndl_t nvdimmPollStatus ( Target *i_nvdimm,
 
         o_poll += OPS_POLL_TIME_MS;
 
-    } while (o_poll < l_timeout);
+    } while (o_poll <= l_timeout);
 
     if (!l_done && !l_err)
     {
