@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -70,6 +72,7 @@ struct format_options
         TYPE_CHAR,
         TYPE_STRING,
         TYPE_PTR,
+        TYPE_DOUBLE,
     };
 
     types type;
@@ -253,6 +256,10 @@ void parse_format_options(format_options& opt, const char*& fmt)
             opt.type = opt.TYPE_PTR;
             break;
 
+        case 'f':
+            opt.type = opt.TYPE_DOUBLE;
+            break;
+
         default:
             opt.type = opt.TYPE_PERCENT;
     }
@@ -308,6 +315,16 @@ size_t display_string(ConsoleBufferInterface& func,
         ++count;
     }
     count += display_post_header(func, f, len);
+
+    return count;
+}
+
+size_t display_double(ConsoleBufferInterface& func,
+                      const format_options& f, double number)
+{
+    // TODO: CQ SW464805 Put in an implementation for double
+
+    size_t count(0);
 
     return count;
 }
@@ -490,6 +507,10 @@ size_t vasprintf(ConsoleBufferInterface& func, const char* fmt, va_list& args)
 
                 case format_options::TYPE_STRING:
                     count += display_string(func, f, va_arg(args,const char*));
+                    break;
+
+                case format_options::TYPE_DOUBLE:
+                    count += display_double(func, f, va_arg(args,double));
                     break;
 
                 // All the number cases.
