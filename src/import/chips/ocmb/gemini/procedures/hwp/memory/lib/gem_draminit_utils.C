@@ -112,7 +112,9 @@ fapi2::ReturnCode init_memory(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
         FAPI_TRY(fapi2::putScom(i_target, GEMINI_ICECFG1, l_reg_contents));
     }
 
-    l_reg_contents.clearBit<FLD_ICECFG1_INIT_ZERO>();
+    l_reg_contents.setBit<FLD_ICECFG1_INIT_ZERO>();
+    FAPI_TRY(fapi2::putScom(i_target, GEMINI_ICECFG1, l_reg_contents));
+
     l_reg_contents.setBit<FLD_ICECFG1_MEMORY_INIT_START>();
     FAPI_TRY(fapi2::putScom(i_target, GEMINI_ICECFG1, l_reg_contents));
 
