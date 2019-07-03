@@ -58,6 +58,8 @@ enum eepromModuleId
     EEPROM_CLEAR_EECACHE                    = 0x08,
     EEPROM_CACHE_PERFORM_OP                 = 0x09,
     EEPROM_INVALIDATE_CACHE                 = 0x0A,
+    EEPROM_RESOLVE_SOURCE                   = 0x0B,
+    EEPROM_CACHE_INIT_RT                    = 0x0C,
 };
 
 /**
@@ -92,6 +94,10 @@ enum eepromReasonCode
                                                                        // what eeproms have been cached was not found
     EEPROM_CACHE_NOT_FOUND_IN_PNOR          = EEPROM_COMP_ID | 0x10,   // An entry we thought would be in the the EECACHE section of PNOR seems
                                                                        // to be missing
+    EEPROM_CACHE_NO_VPD_IN_RSV_MEM          = EEPROM_COMP_ID | 0x11,   // When looking up the VPD section in reserved memory no entry was found.
+    EEPROM_DUPLICATE_CACHE_ENTRY            = EEPROM_COMP_ID | 0x12    // While parsing eecache found in reserved memory we found at least two
+                                                                       // cache entries that had identical "unique" identifiers
+                                                                       // (see structs defined in eeprom_const.H)
 };
 
 enum UserDetailsTypes

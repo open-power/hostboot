@@ -1314,13 +1314,11 @@ errlHndl_t fetchDataFromEepromType(uint64_t i_byteAddr,
     }
     else if (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_DDIMM)
     {
-#ifndef __HOSTBOOT_RUNTIME
         errl = ocmbFetchData(i_target,
                              i_byteAddr,
                              i_numBytes,
                              o_data,
                              EEPROM::AUTOSELECT);
-#endif
     }
 
     return errl;

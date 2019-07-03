@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/vpd/runtime/makefile $
+# $Source: src/usr/i2c/runtime/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2015
+# Contributors Listed Below - COPYRIGHT 2013,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -32,7 +32,7 @@ include ../i2c.mk
 
 #add unique object modules
 OBJS += rt_i2c.o
-
+OBJS += $(if $(CONFIG_SUPPORT_EEPROM_CACHING),rt_eepromCache.o)
 VPATH += ..
 
 include $(ROOTPATH)/config.mk

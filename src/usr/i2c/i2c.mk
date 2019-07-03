@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015
+# Contributors Listed Below - COPYRIGHT 2015,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -27,4 +27,4 @@ OBJS += eepromdd.o
 OBJS += eepromdd_hardware.o
 OBJS += eeprom_utils.o
 OBJS += errlud_i2c.o
-OBJS += $(if $(CONFIG_SUPPORT_EEPROM_CACHING),eepromCache.o)
+OBJS += $(if $(CONFIG_SUPPORT_EEPROM_CACHING),eepromCache_common.o)
