@@ -80,7 +80,7 @@ p10_hcd_cache_stopclocks(
 {
     fapi2::Target < fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > eq_target =
         i_target.getParent < fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST > ();
-    uint32_t                l_regions  = i_target.getCoreSelect();
+    uint32_t                l_regions  = i_target.getCoreSelect() << SHIFT32(12);
     fapi2::buffer<uint64_t> l_scomData = 0;
     fapi2::buffer<buffer_t> l_mmioData = 0;
 #ifndef EQ_SKEW_ADJUST_DISABLE

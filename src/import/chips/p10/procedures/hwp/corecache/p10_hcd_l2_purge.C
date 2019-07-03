@@ -173,12 +173,16 @@ p10_hcd_l2_purge(
     }
     while( (--l_timeout) != 0 );
 
+#ifndef PMSR_SHIFT_ACTIVE_DISABLE
+
     FAPI_ASSERT((l_timeout != 0),
                 fapi2::PMSR_SHIFT_ACTIVE_TIMEOUT()
                 .set_PMSR_SHIFT_ACTIVE_POLL_TIMEOUT_HW_NS(HCD_PMSR_SHIFT_ACTIVE_POLL_TIMEOUT_HW_NS)
                 .set_QME_SCSR(l_mmioData)
                 .set_CORE_TARGET(i_target),
                 "PMSR_SHIFT_ACTIVE Timeout");
+
+#endif
 
     FAPI_DBG("Drop L2_PURGE_REQ/ABORT via PCR_SCSR[5, 6]");
     FAPI_TRY( HCD_PUTMMIO_C( i_target, QME_SCSR_WO_CLEAR, MMIO_LOAD32H( BITS32(5, 2) ) ) );
