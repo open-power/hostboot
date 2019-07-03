@@ -41,9 +41,7 @@ then
         runsim -m $MACHINE \
         hb_script_to_run=$SANDBOXBASE/obj/ppc/simu/scripts/hbfw/startup.simics \
         pnor_img=$SANDBOXBASE/obj/ppc/hbfw/img/p10.pnor \
-        sbe_seeprom_img=$SANDBOXBASE/images/ppc/lab/flash/sbe_seeprom_p9a_10.bin.ecc \
-        num_procs=1 \
-        vpd_proc=vpd/images/11a4199cd205aaad34566b1832e3ef6a"
+        num_procs=1 enable_lpc_console=TRUE"
 fi
 
 #   Front end to autocitest - script to execute unit tests under simics.
