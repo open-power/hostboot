@@ -93,6 +93,7 @@ enum PM_GPE_OCCFLG3_DEFS
 {
     XGPE_IODLR_ENABLE                       = 0,
     AUX_THREAD_ACTIVATE                     = 1,
+    XGPE_PM_COMPLEX_SUSPEND                 = 3,
     XGPE_DEBUG_TRAP_ENABLE                  = 4,
     XGPE_DEBUG_HALT_ENABLE                  = 5,
     XGPE_HCODE_ERROR_INJECT                 = 6,
@@ -100,12 +101,17 @@ enum PM_GPE_OCCFLG3_DEFS
     XGPE_OP_TRACE_DISABLE                   = 8,
     XGPE_OP_TRACE_MEM_MODE                  = 9,
     XGPE_OP_TRACE_MEM_MODE_LEN          = 2,
-    CORE_THROT_CONTIN_CHANGE_ENABLE         = 13,
-    CORE_THROT_SINGLE_EVENT_INJECT          = 14,
-    CORE_THROT_TYPE_SEL                     = 15,
+    XGPE_IGNORE_STOP_CONTROL                = 10,
+    XGPE_IGNORE_STOP_ACTION                 = 11,
+    XGPE_IGNORE_STOP_EXITS                  = 12,
+    XGPE_IGNORE_STOP_ENTRIES                = 13,
     XGPE_ACTIVE                             = 16,
     XGPE_IODLR_ACTIVE                       = 17,
-    AUX_THREAD_ACTIVE                       = 18
+    AUX_THREAD_ACTIVE                       = 18,
+    XGPE_PM_COMPLEX_SUSPENDED               = 19,
+    CORE_THROT_CONTIN_CHANGE_ENABLE         = 29,
+    CORE_THROT_SINGLE_EVENT_INJECT          = 30,
+    CORE_THROT_TYPE_SEL                     = 31,
 };
 
 //Enum form of OCC FLAG2.
@@ -166,6 +172,11 @@ enum PM_QME_SCRB_DEFS
     QME_SCRB_MMA_POWEROFF_DISABLE          = 20
 };
 
+enum PM_XGPE_FLAGS
+{
+    XGPE_IODLR_ENABLE_FLAG        = 0x8000,
+    XGPE_OCC_PM_SUSPEND_IMMEDIATE_MODE   = 0x4000,
+};
 //
 //Enum form of per core QME_PCSCR
 //
