@@ -31,10 +31,12 @@
 #define __p10_scom_c_e_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace c
 {
+#endif
 
 
 static const uint64_t ATOMIC_LOCK_MASK_LATCH_REG = 0x20010007ull;
@@ -254,9 +256,9 @@ static const uint32_t QME_CISR_REG_WKUP_PRESENT = 62;
 static const uint32_t QME_CISR_REG_WKUP_REQUESTED = 63;
 // c/reg00014.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "c/reg00014.H"
+}
+}
+#include "c/reg00014.H"
 #endif
 #endif

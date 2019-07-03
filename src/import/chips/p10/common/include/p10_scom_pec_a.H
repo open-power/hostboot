@@ -31,10 +31,12 @@
 #define __p10_scom_pec_a_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace pec
 {
+#endif
 
 
 static const uint64_t CC_PROTECT_MODE_REG = 0x080303feull;
@@ -155,7 +157,7 @@ static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_SPATTN_ERR = 2;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_LXSTOP_ERR = 3;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_HOSTATTN_ERR = 4;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_SYS_XSTOP_ERR = 5;
-static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_OOB1_ERR = 6;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_SYS_XSTOP_STAGED_ERR = 6;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_DBG_TRIG_ERR = 7;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP01 = 12;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP02 = 13;
@@ -220,9 +222,9 @@ static const uint32_t PB_PBCQ_PEPBREGS_NRDSTKOVR_REG_STK1_LEN = 16;
 static const uint32_t PB_PBCQ_PEPBREGS_NRDSTKOVR_REG_ENABLE = 48;
 // pec/reg00010.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "pec/reg00010.H"
+}
+}
+#include "pec/reg00010.H"
 #endif
 #endif

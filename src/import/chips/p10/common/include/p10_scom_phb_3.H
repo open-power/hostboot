@@ -31,10 +31,12 @@
 #define __p10_scom_phb_3_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace phb
 {
+#endif
 
 
 static const uint64_t REGS_NFIRACTION0_REG = 0x03011846ull;
@@ -65,9 +67,9 @@ static const uint32_t RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PASR_DL_PCI_SIZE_LEN = 2
 static const uint32_t RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PASR_FREEZE_INFO = 11;
 // phb/reg00003.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "phb/reg00003.H"
+}
+}
+#include "phb/reg00003.H"
 #endif
 #endif

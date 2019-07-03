@@ -31,10 +31,12 @@
 #define __p10_scom_omi_9_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace omi
 {
+#endif
 
 
 static const uint64_t EDPL_MAX_COUNT = 0x0c011755ull;
@@ -648,10 +650,10 @@ static const uint32_t TXPACKS_1_DD_3_TX_BIT_REGS_CNTL26_PL_TX_NSEG_MAIN_16_18_SA
 static const uint32_t TXPACKS_1_DD_3_TX_BIT_REGS_CNTL26_PL_TX_NSEG_MAIN_16_18_SAFE_EN_LEN = 3;
 // omi/reg00019.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "omi/reg00018.H"
-    #include "omi/reg00019.H"
+}
+}
+#include "omi/reg00018.H"
+#include "omi/reg00019.H"
 #endif
 #endif

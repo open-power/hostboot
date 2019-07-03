@@ -31,10 +31,12 @@
 #define __p10_scom_pau_3_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace pau
 {
+#endif
 
 
 static const uint64_t AME_ATL_MISC_ECC_CONFIG = 0x10010bf2ull;
@@ -953,9 +955,9 @@ static const uint32_t XTS_REG_ATRMISSCLR_TRIGGERED = 62;
 static const uint32_t XTS_REG_ATRMISSCLR_ENA = 63;
 // pau/reg00004.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "pau/reg00004.H"
+}
+}
+#include "pau/reg00004.H"
 #endif
 #endif

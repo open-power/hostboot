@@ -31,10 +31,12 @@
 #define __p10_scom_phb_f_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace phb
 {
+#endif
 
 
 static const uint64_t REGS_BARE_REG = 0x03011854ull;
@@ -65,9 +67,9 @@ static const uint32_t REGS_PBAIBTXDCR_REG_R = 44;
 static const uint32_t REGS_PBAIBTXDCR_REG_R_LEN = 4;
 // phb/reg00015.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "phb/reg00015.H"
+}
+}
+#include "phb/reg00015.H"
 #endif
 #endif

@@ -31,10 +31,12 @@
 #define __p10_scom_phb_9_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace phb
 {
+#endif
 
 
 static const uint64_t REGS_MMIOBAR0_MASK_REG = 0x0301184full;
@@ -62,9 +64,9 @@ static const uint32_t REGS_PFIRACTION1_REG_PFIRACTION1 = 0;
 static const uint32_t REGS_PFIRACTION1_REG_PFIRACTION1_LEN = 6;
 // phb/reg00009.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "phb/reg00009.H"
+}
+}
+#include "phb/reg00009.H"
 #endif
 #endif

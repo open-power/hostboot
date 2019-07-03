@@ -31,10 +31,12 @@
 #define __p10_scom_omic_4_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace omic
 {
+#endif
 
 
 static const uint64_t CTL_REGS_RX_MODE13_PG = 0x8008684010012c3full;
@@ -100,9 +102,9 @@ static const uint32_t TX_CTL_SM_REGS_CTLSM_CNTL10_PG_3 = 54;
 static const uint32_t TX_CTL_SM_REGS_CTLSM_CNTL10_PG_3_LEN = 6;
 // omic/reg00004.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "omic/reg00004.H"
+}
+}
+#include "omic/reg00004.H"
 #endif
 #endif

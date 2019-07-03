@@ -31,15 +31,17 @@
 #define __p10_scom_phb_0_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace phb
 {
+#endif
 
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "phb/reg00000.H"
+}
+}
+#include "phb/reg00000.H"
 #endif
 #endif

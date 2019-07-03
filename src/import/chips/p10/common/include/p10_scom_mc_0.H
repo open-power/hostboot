@@ -31,10 +31,12 @@
 #define __p10_scom_mc_0_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace mc
 {
+#endif
 
 
 static const uint64_t CLK_REGION = 0x0c030006ull;
@@ -129,6 +131,7 @@ static const uint32_t CPLT_CTRL0_TC_UNIT_SYNCCLK_MUXSEL_DC = 1;
 static const uint32_t CPLT_CTRL0_CTRL_CC_FLUSHMODE_INH = 2;
 static const uint32_t CPLT_CTRL0_CTRL_CC_FORCE_ALIGN = 3;
 static const uint32_t CPLT_CTRL0_TC_UNIT_ARY_WRT_THRU_DC = 4;
+static const uint32_t CPLT_CTRL0_TC_VITL_PROTECTION = 6;
 static const uint32_t CPLT_CTRL0_CTRL_CC_ABIST_RECOV_DISABLE_DC = 8;
 static const uint32_t CPLT_CTRL0_RESERVED_11A = 11;
 static const uint32_t CPLT_CTRL0_TC_SKIT_MODE_BIST_DC = 12;
@@ -557,9 +560,9 @@ static const uint32_t XSTOP_MASK_52 = 52;
 static const uint32_t XSTOP_MASK_53 = 53;
 // mc/reg00000.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "mc/reg00000.H"
+}
+}
+#include "mc/reg00000.H"
 #endif
 #endif

@@ -31,10 +31,12 @@
 #define __p10_scom_pau_f_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace pau
 {
+#endif
 
 
 static const uint64_t AME_AME0_MISC_AMM_CONFIG1 = 0x10010bc1ull;
@@ -1083,9 +1085,9 @@ static const uint32_t XSL_MAIN_WRAP_CFG_XSLO_OTL_REQ_LIMIT = 4;
 static const uint32_t XSL_MAIN_WRAP_CFG_XSLO_OTL_REQ_LIMIT_LEN = 4;
 // pau/reg00021.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "pau/reg00021.H"
+}
+}
+#include "pau/reg00021.H"
 #endif
 #endif

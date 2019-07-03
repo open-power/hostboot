@@ -31,10 +31,12 @@
 #define __p10_scom_eq_4_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace eq
 {
+#endif
 
 
 static const uint64_t CLOCK_STAT_ARY = 0x2003000aull;
@@ -249,6 +251,12 @@ static const uint32_t QME_RS4DBGD_QME_RS4DBGD_SCAN_DATA_IN = 0;
 static const uint32_t QME_RS4DBGD_QME_RS4DBGD_SCAN_DATA_IN_LEN = 64;
 // eq/reg00004.H
 
+static const uint64_t REGION_CCFLUSH_STATUS = 0x20030016ull;
+
+static const uint32_t REGION_CCFLUSH_STATUS_REGION_CCFLUSH = 4;
+static const uint32_t REGION_CCFLUSH_STATUS_REGION_CCFLUSH_LEN = 15;
+// eq/reg00004.H
+
 static const uint64_t XSTOP1 = 0x2003000cull;
 
 static const uint32_t XSTOP1_XSTOP1_MASK_B = 0;
@@ -274,9 +282,9 @@ static const uint32_t XSTOP1_XSTOP1_WAIT_CYCLES = 48;
 static const uint32_t XSTOP1_XSTOP1_WAIT_CYCLES_LEN = 12;
 // eq/reg00004.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "eq/reg00004.H"
+}
+}
+#include "eq/reg00004.H"
 #endif
 #endif

@@ -31,10 +31,12 @@
 #define __p10_scom_mcc_5_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace mcc
 {
+#endif
 
 
 static const uint64_t CRYPTO_DECRYPT_CRYPTONONCEA = 0x0c010f5eull;
@@ -66,9 +68,9 @@ static const uint32_t USTL_USTLOCAPIERROR_OCAPIERROR_ERROR_INFORMATION = 9;
 static const uint32_t USTL_USTLOCAPIERROR_OCAPIERROR_ERROR_INFORMATION_LEN = 31;
 // mcc/reg00005.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "mcc/reg00005.H"
+}
+}
+#include "mcc/reg00005.H"
 #endif
 #endif

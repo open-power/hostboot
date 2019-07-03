@@ -31,10 +31,12 @@
 #define __p10_scom_mcc_9_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace mcc
 {
+#endif
 
 
 static const uint64_t ATCL_CL_CLSCOM_MCAMOC = 0x0c010c25ull;
@@ -86,7 +88,7 @@ static const uint64_t DSTL_DSTLFIRMASK_WO_AND = 0x0c010d04ull;
 static const uint64_t DSTL_DSTLFIRMASK_WO_OR = 0x0c010d05ull;
 
 static const uint32_t DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK = 0;
-static const uint32_t DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK_LEN = 37;
+static const uint32_t DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK_LEN = 39;
 // mcc/reg00009.H
 
 static const uint64_t DSTL_DSTLSTATUS = 0x0c010d10ull;
@@ -172,9 +174,9 @@ static const uint32_t WRITE_WRT_WDF_ECC_3_SYNDROME = 56;
 static const uint32_t WRITE_WRT_WDF_ECC_3_SYNDROME_LEN = 8;
 // mcc/reg00009.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "mcc/reg00009.H"
+}
+}
+#include "mcc/reg00009.H"
 #endif
 #endif

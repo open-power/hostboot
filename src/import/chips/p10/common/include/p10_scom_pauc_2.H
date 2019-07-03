@@ -31,10 +31,12 @@
 #define __p10_scom_pauc_2_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace pauc
 {
+#endif
 
 
 static const uint64_t CPLT_STAT0 = 0x10000100ull;
@@ -256,9 +258,9 @@ static const uint32_t TRA1_TR0_CONFIG_3_D = 24;
 static const uint32_t TRA1_TR0_CONFIG_3_D_LEN = 24;
 // pauc/reg00002.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "pauc/reg00002.H"
+}
+}
+#include "pauc/reg00002.H"
 #endif
 #endif

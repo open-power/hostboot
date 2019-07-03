@@ -31,10 +31,12 @@
 #define __p10_scom_phb_7_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace phb
 {
+#endif
 
 
 static const uint64_t REGS_MMIOBAR1_MASK_REG = 0x03011851ull;
@@ -64,9 +66,9 @@ static const uint32_t REGS_PE_CACHE_INJECT_CNTL_REG_STALL_FULL_CACHE_INJECTION_O
 static const uint64_t RSB_REGS_PHB5_PMON_COUNTERS = 0x08010919ull;
 // phb/reg00007.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "phb/reg00007.H"
+}
+}
+#include "phb/reg00007.H"
 #endif
 #endif

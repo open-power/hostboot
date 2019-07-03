@@ -27,10 +27,12 @@
 #ifndef __IOHS_REG00004_H_
 #define __IOHS_REG00004_H_
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace iohs
 {
+#endif
 
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
@@ -16011,7 +16013,9 @@ fapi_try_exit:
 }
 
 
+#ifndef __PPE_HCODE__
 }
 }
 
+#endif
 #endif

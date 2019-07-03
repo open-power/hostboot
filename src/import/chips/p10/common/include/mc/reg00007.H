@@ -27,10 +27,12 @@
 #ifndef __MC_REG00007_H_
 #define __MC_REG00007_H_
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace mc
 {
+#endif
 
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
@@ -4391,7 +4393,9 @@ fapi_try_exit:
 }
 
 
+#ifndef __PPE_HCODE__
 }
 }
 
+#endif
 #endif

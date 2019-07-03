@@ -31,10 +31,12 @@
 #define __p10_scom_iohs_e_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace iohs
 {
+#endif
 
 
 static const uint64_t AXON_CLK_REGION = 0x18030006ull;
@@ -128,6 +130,7 @@ static const uint32_t AXON_CPLT_CTRL0_TC_UNIT_SYNCCLK_MUXSEL_DC = 1;
 static const uint32_t AXON_CPLT_CTRL0_CTRL_CC_FLUSHMODE_INH = 2;
 static const uint32_t AXON_CPLT_CTRL0_CTRL_CC_FORCE_ALIGN = 3;
 static const uint32_t AXON_CPLT_CTRL0_TC_UNIT_ARY_WRT_THRU_DC = 4;
+static const uint32_t AXON_CPLT_CTRL0_TC_VITL_PROTECTION = 6;
 static const uint32_t AXON_CPLT_CTRL0_CTRL_CC_ABIST_RECOV_DISABLE_DC = 8;
 static const uint32_t AXON_CPLT_CTRL0_RESERVED_11A = 11;
 static const uint32_t AXON_CPLT_CTRL0_TC_SKIT_MODE_BIST_DC = 12;
@@ -367,6 +370,7 @@ static const uint64_t DLP_CONFIG = 0x1801100aull;
 
 static const uint32_t DLP_CONFIG_LINK_PAIR = 0;
 static const uint32_t DLP_CONFIG_DISABLE_SL_ECC = 1;
+static const uint32_t DLP_CONFIG_SYN_CAPTURE_SL_ECC = 3;
 static const uint32_t DLP_CONFIG_SL_UE_CRC_ERR = 4;
 static const uint32_t DLP_CONFIG_REPORT_SL_CHKBIT_ERR = 5;
 static const uint32_t DLP_CONFIG_BW_SAMPLE_SIZE = 6;
@@ -1822,13 +1826,13 @@ static const uint32_t SLAVE_CONFIG_REG_QME_PAR_DIS = 20;
 static const uint32_t SLAVE_CONFIG_REG_FORCE_0_QME = 21;
 // iohs/reg00065.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "iohs/reg00061.H"
-    #include "iohs/reg00062.H"
-    #include "iohs/reg00063.H"
-    #include "iohs/reg00064.H"
-    #include "iohs/reg00065.H"
+}
+}
+#include "iohs/reg00061.H"
+#include "iohs/reg00062.H"
+#include "iohs/reg00063.H"
+#include "iohs/reg00064.H"
+#include "iohs/reg00065.H"
 #endif
 #endif

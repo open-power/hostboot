@@ -31,10 +31,12 @@
 #define __p10_scom_c_4_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace c
 {
+#endif
 
 
 static const uint64_t CPMS_CCCR = 0x200e0e70ull;
@@ -56,8 +58,8 @@ static const uint32_t CPMS_CCCR_SPARE_LEN = 2;
 // c/reg00004.H
 
 static const uint64_t CPMS_RVCSR = 0x200e0e04ull;
-static const uint64_t CPMS_RVCSR_WO_CLEAR = 0x200e0e06ull;
-static const uint64_t CPMS_RVCSR_WO_OR = 0x200e0e07ull;
+static const uint64_t CPMS_RVCSR_WO_CLEAR = 0x200e0e07ull;
+static const uint64_t CPMS_RVCSR_WO_OR = 0x200e0e06ull;
 
 static const uint32_t CPMS_RVCSR_RVID_ENABLE = 0;
 static const uint32_t CPMS_RVCSR_RVID_OVERRIDE = 1;
@@ -365,9 +367,9 @@ static const uint32_t WRITE_PROTECT_ENABLE_REG_ENABLE_RING_LOCKING = 0;
 static const uint32_t WRITE_PROTECT_ENABLE_REG_RESERVED_RING_LOCKING = 1;
 // c/reg00004.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "c/reg00004.H"
+}
+}
+#include "c/reg00004.H"
 #endif
 #endif

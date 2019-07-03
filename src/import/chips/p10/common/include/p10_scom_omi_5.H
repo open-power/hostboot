@@ -31,10 +31,12 @@
 #define __p10_scom_omi_5_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace omi
 {
+#endif
 
 
 static const uint64_t RXCTL_DATASM_12_PLREGS_RX_CNTL1_PL = 0x8003c04310012c3full;
@@ -570,10 +572,10 @@ static const uint32_t TXPACKS_1_DD_3_TX_BIT_REGS_CNTL6_PL_SEL = 56;
 static const uint32_t TXPACKS_1_DD_3_TX_BIT_REGS_CNTL6_PL_SEL_LEN = 5;
 // omi/reg00011.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "omi/reg00010.H"
-    #include "omi/reg00011.H"
+}
+}
+#include "omi/reg00010.H"
+#include "omi/reg00011.H"
 #endif
 #endif

@@ -27,10 +27,12 @@
 #ifndef __IOHS_REG00061_H_
 #define __IOHS_REG00061_H_
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace iohs
 {
+#endif
 
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
@@ -6216,6 +6218,90 @@ static inline bool GET_AXON_CPLT_CTRL0_TC_UNIT_ARY_WRT_THRU_DC(fapi2::buffer<uin
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     FAPI_ERR("Invalid dial access AXON_CPLT_CTRL0_TC_UNIT_ARY_WRT_THRU_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_CPLT_CTRL0_TC_VITL_PROTECTION(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_CPLT_CTRL0_RW, AXON_CPLT_CTRL0_WO_CLEAR, AXON_CPLT_CTRL0_WO_OR));
+#endif
+    return o_data.insertFromRight<AXON_CPLT_CTRL0_TC_VITL_PROTECTION,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_CPLT_CTRL0_TC_VITL_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_CPLT_CTRL0_TC_VITL_PROTECTION(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_CPLT_CTRL0_RW, AXON_CPLT_CTRL0_WO_CLEAR, AXON_CPLT_CTRL0_WO_OR));
+#endif
+    return o_data.insertFromRight<AXON_CPLT_CTRL0_TC_VITL_PROTECTION,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_CPLT_CTRL0_TC_VITL_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_CPLT_CTRL0_TC_VITL_PROTECTION(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_CPLT_CTRL0_RW, AXON_CPLT_CTRL0_WO_CLEAR, AXON_CPLT_CTRL0_WO_OR));
+#endif
+    return o_data.setBit<AXON_CPLT_CTRL0_TC_VITL_PROTECTION>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_CPLT_CTRL0_TC_VITL_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_AXON_CPLT_CTRL0_TC_VITL_PROTECTION(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_CPLT_CTRL0_RW, AXON_CPLT_CTRL0_WO_CLEAR, AXON_CPLT_CTRL0_WO_OR));
+#endif
+    return o_data.clearBit<AXON_CPLT_CTRL0_TC_VITL_PROTECTION>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_CPLT_CTRL0_TC_VITL_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_AXON_CPLT_CTRL0_TC_VITL_PROTECTION(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_CPLT_CTRL0_RW, AXON_CPLT_CTRL0_WO_CLEAR, AXON_CPLT_CTRL0_WO_OR));
+#endif
+    return i_data.extractToRight<AXON_CPLT_CTRL0_TC_VITL_PROTECTION,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_CPLT_CTRL0_TC_VITL_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_AXON_CPLT_CTRL0_TC_VITL_PROTECTION(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_CPLT_CTRL0_RW, AXON_CPLT_CTRL0_WO_CLEAR, AXON_CPLT_CTRL0_WO_OR));
+#endif
+    return i_data.getBit<AXON_CPLT_CTRL0_TC_VITL_PROTECTION>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_CPLT_CTRL0_TC_VITL_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -21190,6 +21276,90 @@ fapi_try_exit:
 #endif
 }
 
+static inline fapi2::buffer<uint64_t>& SET_DLP_CONFIG_SYN_CAPTURE_SL_ECC(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_CONFIG_SYN_CAPTURE_SL_ECC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_CONFIG_SYN_CAPTURE_SL_ECC chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_CONFIG_SYN_CAPTURE_SL_ECC(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_CONFIG));
+#endif
+    return o_data.insertFromRight<DLP_CONFIG_SYN_CAPTURE_SL_ECC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_CONFIG_SYN_CAPTURE_SL_ECC chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DLP_CONFIG_SYN_CAPTURE_SL_ECC(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_CONFIG));
+#endif
+    return o_data.setBit<DLP_CONFIG_SYN_CAPTURE_SL_ECC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_CONFIG_SYN_CAPTURE_SL_ECC chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_DLP_CONFIG_SYN_CAPTURE_SL_ECC(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_CONFIG));
+#endif
+    return o_data.clearBit<DLP_CONFIG_SYN_CAPTURE_SL_ECC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_CONFIG_SYN_CAPTURE_SL_ECC chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DLP_CONFIG_SYN_CAPTURE_SL_ECC(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_CONFIG));
+#endif
+    return i_data.extractToRight<DLP_CONFIG_SYN_CAPTURE_SL_ECC,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_CONFIG_SYN_CAPTURE_SL_ECC chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_DLP_CONFIG_SYN_CAPTURE_SL_ECC(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLP_CONFIG));
+#endif
+    return i_data.getBit<DLP_CONFIG_SYN_CAPTURE_SL_ECC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DLP_CONFIG_SYN_CAPTURE_SL_ECC chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
 static inline fapi2::buffer<uint64_t>& SET_DLP_CONFIG_SL_UE_CRC_ERR(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -30338,7 +30508,9 @@ fapi_try_exit:
 }
 
 
+#ifndef __PPE_HCODE__
 }
 }
 
+#endif
 #endif

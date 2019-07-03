@@ -31,10 +31,12 @@
 #define __p10_scom_perv_6_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace perv
 {
+#endif
 
 
 static const uint64_t COMP_INTR_HOST_MASK_REG = 0x000f0033ull;
@@ -108,8 +110,8 @@ static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_9H = 9;
 static const uint32_t CPLT_CONF1_IOVALID_DC_9H = 9;
 static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_10H = 10;
 static const uint32_t CPLT_CONF1_IOVALID_DC_10H = 10;
-static const uint32_t CPLT_CONF1_LP_RESET = 11;
 static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_11H = 11;
+static const uint32_t CPLT_CONF1_LP_RESET = 12;
 static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_VMEAS_DC = 12;
 static const uint32_t CPLT_CONF1_APP0_RATIO_DC_12H = 12;
 static const uint32_t CPLT_CONF1__ANEQ_VMEAS_CALIBRATE_DC = 13;
@@ -819,10 +821,10 @@ static const uint32_t TRA7_TR0_CONFIG_4_B = 24;
 static const uint32_t TRA7_TR0_CONFIG_4_B_LEN = 24;
 // perv/reg00010.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "perv/reg00009.H"
-    #include "perv/reg00010.H"
+}
+}
+#include "perv/reg00009.H"
+#include "perv/reg00010.H"
 #endif
 #endif

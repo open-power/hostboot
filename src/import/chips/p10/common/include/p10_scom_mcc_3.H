@@ -31,10 +31,12 @@
 #define __p10_scom_mcc_3_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace mcc
 {
+#endif
 
 
 static const uint64_t USTL_USTLMCHWFM = 0x0c010e0full;
@@ -53,9 +55,9 @@ static const uint32_t USTL_USTLMCHWFM_HWFM_STATUS = 19;
 static const uint32_t USTL_USTLMCHWFM_HWFM_STATUS_LEN = 4;
 // mcc/reg00003.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "mcc/reg00003.H"
+}
+}
+#include "mcc/reg00003.H"
 #endif
 #endif

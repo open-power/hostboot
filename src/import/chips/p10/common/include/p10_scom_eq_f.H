@@ -31,10 +31,12 @@
 #define __p10_scom_eq_f_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace eq
 {
+#endif
 
 
 static const uint64_t BIST = 0x2003000bull;
@@ -64,26 +66,22 @@ static const uint64_t CPLT_CTRL5_RW = 0x20000005ull;
 static const uint64_t CPLT_CTRL5_WO_CLEAR = 0x20000025ull;
 static const uint64_t CPLT_CTRL5_WO_OR = 0x20000015ull;
 
-static const uint32_t CPLT_CTRL5_0 = 0;
-static const uint32_t CPLT_CTRL5_1 = 1;
-static const uint32_t CPLT_CTRL5_2 = 2;
-static const uint32_t CPLT_CTRL5_3 = 3;
-static const uint32_t CPLT_CTRL5_4 = 4;
-static const uint32_t CPLT_CTRL5_5 = 5;
-static const uint32_t CPLT_CTRL5_6 = 6;
-static const uint32_t CPLT_CTRL5_7 = 7;
-static const uint32_t CPLT_CTRL5_8 = 8;
-static const uint32_t CPLT_CTRL5_9 = 9;
-static const uint32_t CPLT_CTRL5_10 = 10;
-static const uint32_t CPLT_CTRL5_11 = 11;
-static const uint32_t CPLT_CTRL5_12 = 12;
-static const uint32_t CPLT_CTRL5_13 = 13;
-static const uint32_t CPLT_CTRL5_14 = 14;
-static const uint32_t CPLT_CTRL5_15 = 15;
-static const uint32_t CPLT_CTRL5_16 = 16;
-static const uint32_t CPLT_CTRL5_17 = 17;
-static const uint32_t CPLT_CTRL5_18 = 18;
-static const uint32_t CPLT_CTRL5_19 = 19;
+static const uint32_t CPLT_CTRL5_VITL_DFT_FENCE_DC = 3;
+static const uint32_t CPLT_CTRL5_REGION0_DFT_FENCE_DC = 4;
+static const uint32_t CPLT_CTRL5_REGION1_DFT_FENCE_DC = 5;
+static const uint32_t CPLT_CTRL5_REGION2_DFT_FENCE_DC = 6;
+static const uint32_t CPLT_CTRL5_REGION3_DFT_FENCE_DC = 7;
+static const uint32_t CPLT_CTRL5_REGION4_DFT_FENCE_DC = 8;
+static const uint32_t CPLT_CTRL5_REGION5_DFT_FENCE_DC = 9;
+static const uint32_t CPLT_CTRL5_REGION6_DFT_FENCE_DC = 10;
+static const uint32_t CPLT_CTRL5_REGION7_DFT_FENCE_DC = 11;
+static const uint32_t CPLT_CTRL5_REGION8_DFT_FENCE_DC = 12;
+static const uint32_t CPLT_CTRL5_REGION9_DFT_FENCE_DC = 13;
+static const uint32_t CPLT_CTRL5_REGION10_DFT_FENCE_DC = 14;
+static const uint32_t CPLT_CTRL5_REGION11_DFT_FENCE_DC = 15;
+static const uint32_t CPLT_CTRL5_REGION12_DFT_FENCE_DC = 16;
+static const uint32_t CPLT_CTRL5_REGION13_DFT_FENCE_DC = 17;
+static const uint32_t CPLT_CTRL5_REGION14_DFT_FENCE_DC = 18;
 // eq/reg00015.H
 
 static const uint64_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2 = 0x20040082ull;
@@ -94,7 +92,7 @@ static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_SPATTN_ERR = 2;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_LXSTOP_ERR = 3;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_HOSTATTN_ERR = 4;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_SYS_XSTOP_ERR = 5;
-static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_OOB1_ERR = 6;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_SYS_XSTOP_STAGED_ERR = 6;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_DBG_TRIG_ERR = 7;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP01 = 12;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP02 = 13;
@@ -233,9 +231,9 @@ static const uint32_t XSTOP_UNMASKED_XSTOP_UNMASKED_IN = 1;
 static const uint32_t XSTOP_UNMASKED_XSTOP_UNMASKED_IN_LEN = 53;
 // eq/reg00015.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "eq/reg00015.H"
+}
+}
+#include "eq/reg00015.H"
 #endif
 #endif

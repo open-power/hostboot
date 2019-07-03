@@ -31,10 +31,12 @@
 #define __p10_scom_pau_b_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace pau
 {
+#endif
 
 
 static const uint64_t AME_AME2_MISC_CERR_RPT_MASK = 0x10010be9ull;
@@ -1038,9 +1040,9 @@ static const uint32_t XTS_REG_TEST_CERR_TEST_CERR_BITSEL = 58;
 static const uint32_t XTS_REG_TEST_CERR_TEST_CERR_BITSEL_LEN = 6;
 // pau/reg00015.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "pau/reg00015.H"
+}
+}
+#include "pau/reg00015.H"
 #endif
 #endif

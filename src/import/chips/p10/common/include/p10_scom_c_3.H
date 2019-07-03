@@ -31,18 +31,20 @@
 #define __p10_scom_c_3_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace c
 {
+#endif
 
 
 static const uint64_t CPMS_CCDR = 0x200e0e74ull;
 // c/reg00003.H
 
 static const uint64_t CPMS_CL2_PFETCNTL = 0x200e0e28ull;
-static const uint64_t CPMS_CL2_PFETCNTL_WO_CLEAR = 0x200e0e2aull;
-static const uint64_t CPMS_CL2_PFETCNTL_WO_OR = 0x200e0e2bull;
+static const uint64_t CPMS_CL2_PFETCNTL_WO_CLEAR = 0x200e0e2bull;
+static const uint64_t CPMS_CL2_PFETCNTL_WO_OR = 0x200e0e2aull;
 
 static const uint32_t CPMS_CL2_PFETCNTL_VDD_PFET_SEQ_STATE = 0;
 static const uint32_t CPMS_CL2_PFETCNTL_VDD_PFET_SEQ_STATE_LEN = 2;
@@ -76,8 +78,8 @@ static const uint32_t CPMS_CL2_PFETCNTL_SRAM_ENABLE = 63;
 // c/reg00003.H
 
 static const uint64_t CPMS_FDCR = 0x200e0e40ull;
-static const uint64_t CPMS_FDCR_SCOM1 = 0x200e0e42ull;
-static const uint64_t CPMS_FDCR_SCOM2 = 0x200e0e43ull;
+static const uint64_t CPMS_FDCR_SCOM1 = 0x200e0e43ull;
+static const uint64_t CPMS_FDCR_SCOM2 = 0x200e0e42ull;
 
 static const uint32_t CPMS_FDCR_DISABLE = 0;
 static const uint32_t CPMS_FDCR_FORCE_SAMPLE = 1;
@@ -409,9 +411,9 @@ static const uint32_t QME_CSIR_QME_CSIR_PMSR_INSTR_DATA = 36;
 static const uint32_t QME_CSIR_QME_CSIR_PMSR_INSTR_DATA_LEN = 23;
 // c/reg00003.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "c/reg00003.H"
+}
+}
+#include "c/reg00003.H"
 #endif
 #endif

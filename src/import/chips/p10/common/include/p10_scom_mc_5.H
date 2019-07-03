@@ -31,10 +31,12 @@
 #define __p10_scom_mc_5_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace mc
 {
+#endif
 
 
 static const uint64_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1 = 0x0c040081ull;
@@ -45,7 +47,7 @@ static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_SPATTN_ERR = 2;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_LXSTOP_ERR = 3;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_HOSTATTN_ERR = 4;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_SYS_XSTOP_ERR = 5;
-static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_OOB1_ERR = 6;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_SYS_XSTOP_STAGED_ERR = 6;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_DBG_TRIG_ERR = 7;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP01 = 12;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP02 = 13;
@@ -205,9 +207,9 @@ static const uint32_t TRA1_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
 static const uint32_t TRA1_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
 // mc/reg00005.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "mc/reg00005.H"
+}
+}
+#include "mc/reg00005.H"
 #endif
 #endif

@@ -31,10 +31,12 @@
 #define __p10_scom_pau_0_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace pau
 {
+#endif
 
 
 static const uint64_t AME_AME0_MISC_CERR_RPT_HOLD = 0x10010bc8ull;
@@ -1255,9 +1257,9 @@ static const uint32_t XTS_REG_CONFIG_PREF_THRSH3 = 60;
 static const uint32_t XTS_REG_CONFIG_PREF_THRSH3_LEN = 4;
 // pau/reg00000.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "pau/reg00000.H"
+}
+}
+#include "pau/reg00000.H"
 #endif
 #endif

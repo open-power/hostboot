@@ -31,10 +31,12 @@
 #define __p10_scom_mc_6_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace mc
 {
+#endif
 
 
 static const uint64_t CPLT_CONF1_RW = 0x0c000009ull;
@@ -219,9 +221,9 @@ static const uint32_t TRA1_TR0_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT = 22;
 static const uint32_t TRA1_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT = 23;
 // mc/reg00006.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "mc/reg00006.H"
+}
+}
+#include "mc/reg00006.H"
 #endif
 #endif

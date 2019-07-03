@@ -31,10 +31,12 @@
 #define __p10_scom_iohs_3_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace iohs
 {
+#endif
 
 
 static const uint64_t AXON_BIST = 0x1803000bull;
@@ -1644,6 +1646,7 @@ static const uint32_t NET_CTRL0_CPLT_RCTRL2 = 21;
 static const uint32_t NET_CTRL0_ADJ_FUNC_CLKSEL = 22;
 static const uint32_t NET_CTRL0_FUNC_LCB_EDIS = 24;
 static const uint32_t NET_CTRL0_TP_FENCE_PCB = 25;
+static const uint32_t NET_CTRL0_LVLTRANS_FENCE = 26;
 static const uint32_t NET_CTRL0_ARRAY_WRITE_ASSIST_EN = 27;
 static const uint32_t NET_CTRL0_HTB_INTEST = 28;
 static const uint32_t NET_CTRL0_HTB_EXTEST = 29;
@@ -1656,13 +1659,13 @@ static const uint64_t PLL_LOCK_REG = 0x180f0019ull;
 static const uint64_t REGS_PRX0_DLR_APSR = 0x18011039ull;
 // iohs/reg00017.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "iohs/reg00013.H"
-    #include "iohs/reg00014.H"
-    #include "iohs/reg00015.H"
-    #include "iohs/reg00016.H"
-    #include "iohs/reg00017.H"
+}
+}
+#include "iohs/reg00013.H"
+#include "iohs/reg00014.H"
+#include "iohs/reg00015.H"
+#include "iohs/reg00016.H"
+#include "iohs/reg00017.H"
 #endif
 #endif

@@ -31,10 +31,12 @@
 #define __p10_scom_pau_9_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace pau
 {
+#endif
 
 
 static const uint64_t AME_AME0_MISC_TEST_CERR_RPT = 0x10010bcbull;
@@ -787,9 +789,9 @@ static const uint32_t XSL_MAIN_ARY_RD_FUNC_XSL_ARY_DATA = 0;
 static const uint32_t XSL_MAIN_ARY_RD_FUNC_XSL_ARY_DATA_LEN = 64;
 // pau/reg00012.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "pau/reg00012.H"
+}
+}
+#include "pau/reg00012.H"
 #endif
 #endif

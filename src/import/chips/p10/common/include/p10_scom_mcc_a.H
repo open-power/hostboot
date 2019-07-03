@@ -31,10 +31,12 @@
 #define __p10_scom_mcc_a_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace mcc
 {
+#endif
 
 
 static const uint64_t ATCL_CL_CLSCOM_MCERRINJ = 0x0c010c28ull;
@@ -101,13 +103,13 @@ static const uint32_t DSTL_DSTLERRRPT_SUBCHANNEL_B_FAIL_STATE = 63;
 static const uint64_t DSTL_DSTLFIRACT1 = 0x0c010d07ull;
 
 static const uint32_t DSTL_DSTLFIRACT1_DSTLFIRACT1_ACTION_1 = 0;
-static const uint32_t DSTL_DSTLFIRACT1_DSTLFIRACT1_ACTION_1_LEN = 37;
+static const uint32_t DSTL_DSTLFIRACT1_DSTLFIRACT1_ACTION_1_LEN = 39;
 // mcc/reg00010.H
 
 static const uint64_t DSTL_DSTLFIRWOF = 0x0c010d08ull;
 
 static const uint32_t DSTL_DSTLFIRWOF_DSTLFIRWOF_WOF = 0;
-static const uint32_t DSTL_DSTLFIRWOF_DSTLFIRWOF_WOF_LEN = 37;
+static const uint32_t DSTL_DSTLFIRWOF_DSTLFIRWOF_WOF_LEN = 39;
 // mcc/reg00010.H
 
 static const uint64_t DSTL_DSTLPSAVE0 = 0x0c010d12ull;
@@ -139,9 +141,9 @@ static const uint32_t DSTL_DSTLPSAVE0_RESERVED_43_47 = 43;
 static const uint32_t DSTL_DSTLPSAVE0_RESERVED_43_47_LEN = 5;
 // mcc/reg00010.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "mcc/reg00010.H"
+}
+}
+#include "mcc/reg00010.H"
 #endif
 #endif

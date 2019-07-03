@@ -31,10 +31,12 @@
 #define __p10_scom_pau_8_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace pau
 {
+#endif
 
 
 static const uint64_t AME_AME2_MISC_DEBUG_CONFIG0 = 0x10010be4ull;
@@ -1210,10 +1212,10 @@ static const uint32_t XTS_REG_PMU_CNT_3 = 48;
 static const uint32_t XTS_REG_PMU_CNT_3_LEN = 16;
 // pau/reg00011.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "pau/reg00010.H"
-    #include "pau/reg00011.H"
+}
+}
+#include "pau/reg00010.H"
+#include "pau/reg00011.H"
 #endif
 #endif

@@ -31,10 +31,12 @@
 #define __p10_scom_c_8_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace c
 {
+#endif
 
 
 static const uint64_t CPMS_ACDR = 0x200e0e7cull;
@@ -249,9 +251,9 @@ static const uint32_t PSCOM_STATUS_ERROR_REG_TRAPPED_SATELLITE_ACKNOWLEDGE_ACCES
 static const uint32_t PSCOM_STATUS_ERROR_REG_TRAPPED_SATELLITE_ACKNOWLEDGE_INVALID_REGISTER = 35;
 // c/reg00008.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "c/reg00008.H"
+}
+}
+#include "c/reg00008.H"
 #endif
 #endif

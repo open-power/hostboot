@@ -31,10 +31,12 @@
 #define __p10_scom_iohs_d_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace iohs
 {
+#endif
 
 
 static const uint64_t AXON_EPS_DBG_DEBUG_TRACE_CONTROL = 0x180107d0ull;
@@ -1356,12 +1358,12 @@ static const uint64_t PRIMARY_ADDRESS_REG = 0x180f0000ull;
 static const uint64_t REGS_PRX1_DLR_APSR = 0x1801103dull;
 // iohs/reg00060.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "iohs/reg00057.H"
-    #include "iohs/reg00058.H"
-    #include "iohs/reg00059.H"
-    #include "iohs/reg00060.H"
+}
+}
+#include "iohs/reg00057.H"
+#include "iohs/reg00058.H"
+#include "iohs/reg00059.H"
+#include "iohs/reg00060.H"
 #endif
 #endif

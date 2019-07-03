@@ -31,10 +31,12 @@
 #define __p10_scom_iohs_8_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace iohs
 {
+#endif
 
 
 static const uint64_t ASSIST_INTERRUPT_REG = 0x180f0011ull;
@@ -1495,12 +1497,12 @@ static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_CNTL6_PL_SEL_LEN = 5;
 static const uint64_t REGS_PRX1_DLR_APST = 0x1801103full;
 // iohs/reg00039.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "iohs/reg00036.H"
-    #include "iohs/reg00037.H"
-    #include "iohs/reg00038.H"
-    #include "iohs/reg00039.H"
+}
+}
+#include "iohs/reg00036.H"
+#include "iohs/reg00037.H"
+#include "iohs/reg00038.H"
+#include "iohs/reg00039.H"
 #endif
 #endif

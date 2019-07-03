@@ -31,10 +31,12 @@
 #define __p10_scom_iohs_5_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace iohs
 {
+#endif
 
 
 static const uint64_t AXON_EPS_PSC_ADDR_TRAP_REG = 0x18010003ull;
@@ -1502,12 +1504,12 @@ static const uint32_t NET_CTRL1_ORE2_CLK_DCADJUST_RESET_DC = 22;
 static const uint32_t NET_CTRL1_ORE3_CLK_DCADJUST_RESET_DC = 23;
 // iohs/reg00025.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "iohs/reg00022.H"
-    #include "iohs/reg00023.H"
-    #include "iohs/reg00024.H"
-    #include "iohs/reg00025.H"
+}
+}
+#include "iohs/reg00022.H"
+#include "iohs/reg00023.H"
+#include "iohs/reg00024.H"
+#include "iohs/reg00025.H"
 #endif
 #endif

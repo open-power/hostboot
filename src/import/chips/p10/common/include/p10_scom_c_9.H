@@ -31,10 +31,12 @@
 #define __p10_scom_c_9_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace c
 {
+#endif
 
 
 static const uint64_t CPMS_DDSR = 0x200e0e50ull;
@@ -58,8 +60,8 @@ static const uint32_t CPMS_DDSR_SAMPLE_DISABLE_OCCURRED = 63;
 // c/reg00009.H
 
 static const uint64_t CPMS_FDIR = 0x200e0e44ull;
-static const uint64_t CPMS_FDIR_WO_CLEAR = 0x200e0e46ull;
-static const uint64_t CPMS_FDIR_WO_OR = 0x200e0e47ull;
+static const uint64_t CPMS_FDIR_WO_CLEAR = 0x200e0e47ull;
+static const uint64_t CPMS_FDIR_WO_OR = 0x200e0e46ull;
 
 static const uint32_t CPMS_FDIR_INJECT_ENABLE = 0;
 static const uint32_t CPMS_FDIR_HALT_INJECT = 1;
@@ -197,9 +199,9 @@ static const uint32_t QME_CDBB_QME_CDBB_MESSAGE_NUMBER = 0;
 static const uint32_t QME_CDBB_QME_CDBB_MESSAGE_NUMBER_LEN = 8;
 // c/reg00009.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "c/reg00009.H"
+}
+}
+#include "c/reg00009.H"
 #endif
 #endif

@@ -31,10 +31,12 @@
 #define __p10_scom_iohs_a_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace iohs
 {
+#endif
 
 
 static const uint64_t AXON_CC_ATOMIC_LOCK_REG = 0x180303ffull;
@@ -68,7 +70,7 @@ static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3_SPATTN_ERR = 2;
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3_LXSTOP_ERR = 3;
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3_HOSTATTN_ERR = 4;
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3_SYS_XSTOP_ERR = 5;
-static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3_OOB1_ERR = 6;
+static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3_SYS_XSTOP_STAGED_ERR = 6;
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3_DBG_TRIG_ERR = 7;
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3_UNIT_TC_FIR_LOCAL_XSTOP01 = 12;
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3_UNIT_TC_FIR_LOCAL_XSTOP02 = 13;
@@ -153,6 +155,12 @@ static const uint32_t AXON_EPS_FIR_LOCAL_ACTION1_60 = 60;
 static const uint32_t AXON_EPS_FIR_LOCAL_ACTION1_61 = 61;
 static const uint32_t AXON_EPS_FIR_LOCAL_ACTION1_62 = 62;
 static const uint32_t AXON_EPS_FIR_LOCAL_ACTION1_63 = 63;
+// iohs/reg00044.H
+
+static const uint64_t AXON_REGION_CCFLUSH_STATUS = 0x18030016ull;
+
+static const uint32_t AXON_REGION_CCFLUSH_STATUS_REGION_CCFLUSH = 4;
+static const uint32_t AXON_REGION_CCFLUSH_STATUS_REGION_CCFLUSH_LEN = 15;
 // iohs/reg00044.H
 
 static const uint64_t AXON_SCAN_UPDATEDR_LONG = 0x1803b000ull;
@@ -514,7 +522,7 @@ static const uint64_t IOO_RX0_0_RD_4_RX_DAC_REGS_LOFF_B_CNTLX59_PL = 0x8001d8041
 
 static const uint32_t IOO_RX0_0_RD_4_RX_DAC_REGS_LOFF_B_CNTLX59_PL_RX_BD_LATCH_DAC_N000 = 55;
 static const uint32_t IOO_RX0_0_RD_4_RX_DAC_REGS_LOFF_B_CNTLX59_PL_RX_BD_LATCH_DAC_N000_LEN = 9;
-// iohs/reg00044.H
+// iohs/reg00045.H
 
 static const uint64_t IOO_RX0_0_RD_4_RX_DAC_REGS_LOFF_B_CNTLX69_PL = 0x8002280410012c3full;
 
@@ -860,7 +868,7 @@ static const uint64_t IOO_RX0_1_RD_5_RX_DAC_REGS_LOFF_A_CNTLX52_PL = 0x8001a00f1
 
 static const uint32_t IOO_RX0_1_RD_5_RX_DAC_REGS_LOFF_A_CNTLX52_PL_RX_AD_LATCH_DAC_W001 = 55;
 static const uint32_t IOO_RX0_1_RD_5_RX_DAC_REGS_LOFF_A_CNTLX52_PL_RX_AD_LATCH_DAC_W001_LEN = 9;
-// iohs/reg00045.H
+// iohs/reg00046.H
 
 static const uint64_t IOO_RX0_1_RD_5_RX_DAC_REGS_LOFF_B_CNTLX85_PL = 0x8002a80f10012c3full;
 
@@ -1211,7 +1219,7 @@ static const uint64_t IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL25_PL = 0x8004f40110012c3fu
 
 static const uint32_t IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL25_PL_TX_NSEG_MAIN_0_15_SAFE_EN = 48;
 static const uint32_t IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL25_PL_TX_NSEG_MAIN_0_15_SAFE_EN_LEN = 16;
-// iohs/reg00046.H
+// iohs/reg00047.H
 
 static const uint64_t IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL6_PL = 0x80045c0110012c3full;
 
@@ -1490,12 +1498,12 @@ static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_FIR_MASK_PL_TX_PL_FIR_ERRS_MASK
 static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_FIR_MASK_PL_TX_PL_FIR_ERRS_MASK_LEN = 2;
 // iohs/reg00047.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "iohs/reg00044.H"
-    #include "iohs/reg00045.H"
-    #include "iohs/reg00046.H"
-    #include "iohs/reg00047.H"
+}
+}
+#include "iohs/reg00044.H"
+#include "iohs/reg00045.H"
+#include "iohs/reg00046.H"
+#include "iohs/reg00047.H"
 #endif
 #endif

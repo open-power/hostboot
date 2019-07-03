@@ -31,10 +31,12 @@
 #define __p10_scom_mc_e_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace mc
 {
+#endif
 
 
 static const uint64_t EPS_DBG_TRACE_REG_1 = 0x0c0107ceull;
@@ -310,9 +312,9 @@ static const uint32_t XSTOP2_XSTOP2_WAIT_CYCLES = 48;
 static const uint32_t XSTOP2_XSTOP2_WAIT_CYCLES_LEN = 12;
 // mc/reg00014.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "mc/reg00014.H"
+}
+}
+#include "mc/reg00014.H"
 #endif
 #endif

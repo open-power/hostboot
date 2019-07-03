@@ -31,10 +31,12 @@
 #define __p10_scom_nmmu_9_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace nmmu
 {
+#endif
 
 
 static const uint64_t FBC_CQ_WRAP_NXCQ_SCOM_NX_PB_ERR_RPT_0 = 0x02010c22ull;
@@ -42,9 +44,9 @@ static const uint64_t FBC_CQ_WRAP_NXCQ_SCOM_NX_PB_ERR_RPT_0 = 0x02010c22ull;
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_PB_ERR_RPT_0_NX_PBI_WRITE_IDLE = 52;
 // nmmu/reg00009.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "nmmu/reg00009.H"
+}
+}
+#include "nmmu/reg00009.H"
 #endif
 #endif

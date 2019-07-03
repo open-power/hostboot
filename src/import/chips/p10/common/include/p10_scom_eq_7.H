@@ -31,10 +31,12 @@
 #define __p10_scom_eq_7_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace eq
 {
+#endif
 
 
 static const uint64_t EPS_THERM_WSUB_CONTROL_REG = 0x20050012ull;
@@ -316,9 +318,9 @@ static const uint32_t SYNC_CONFIG_PHASE_COUNTER_ON_CLKCHANGE = 16;
 static const uint32_t SYNC_CONFIG_PHASE_COUNTER_ON_CLKCHANGE_LEN = 8;
 // eq/reg00007.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "eq/reg00007.H"
+}
+}
+#include "eq/reg00007.H"
 #endif
 #endif

@@ -31,10 +31,12 @@
 #define __p10_scom_perv_8_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace perv
 {
+#endif
 
 
 static const uint64_t ASSIST_INTERRUPT_REG = 0x000f0011ull;
@@ -882,9 +884,9 @@ static const uint32_t XSTOP3_XSTOP3_WAIT_CYCLES = 48;
 static const uint32_t XSTOP3_XSTOP3_WAIT_CYCLES_LEN = 12;
 // perv/reg00013.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "perv/reg00013.H"
+}
+}
+#include "perv/reg00013.H"
 #endif
 #endif

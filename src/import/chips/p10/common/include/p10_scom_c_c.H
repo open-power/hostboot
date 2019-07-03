@@ -31,15 +31,17 @@
 #define __p10_scom_c_c_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace c
 {
+#endif
 
 
 static const uint64_t CPMS_CGCSR = 0x200e0e00ull;
-static const uint64_t CPMS_CGCSR_WO_CLEAR = 0x200e0e02ull;
-static const uint64_t CPMS_CGCSR_WO_OR = 0x200e0e03ull;
+static const uint64_t CPMS_CGCSR_WO_CLEAR = 0x200e0e03ull;
+static const uint64_t CPMS_CGCSR_WO_OR = 0x200e0e02ull;
 
 static const uint32_t CPMS_CGCSR_L3_CLK_SYNC_ENABLE = 0;
 static const uint32_t CPMS_CGCSR_CL2_CLK_SYNC_ENABLE = 1;
@@ -138,9 +140,9 @@ static const uint32_t NC_NCMISC_NCSCOMS_NCU_DARN_BAR_REG_ADDR = 12;
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_DARN_BAR_REG_ADDR_LEN = 40;
 // c/reg00012.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "c/reg00012.H"
+}
+}
+#include "c/reg00012.H"
 #endif
 #endif

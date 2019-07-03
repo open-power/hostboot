@@ -31,10 +31,12 @@
 #define __p10_scom_mc_7_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace mc
 {
+#endif
 
 
 static const uint64_t EPS_THERM_WSUB_CONTROL_REG = 0x0c050012ull;
@@ -208,9 +210,9 @@ static const uint32_t TRA1_TR0_CONFIG_5_D = 24;
 static const uint32_t TRA1_TR0_CONFIG_5_D_LEN = 24;
 // mc/reg00007.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "mc/reg00007.H"
+}
+}
+#include "mc/reg00007.H"
 #endif
 #endif

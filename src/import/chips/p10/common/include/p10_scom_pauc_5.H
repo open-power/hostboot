@@ -31,10 +31,12 @@
 #define __p10_scom_pauc_5_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace pauc
 {
+#endif
 
 
 static const uint64_t DL_PPE_WRAP_XIDBGPRO = 0x10012c55ull;
@@ -59,7 +61,7 @@ static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_SPATTN_ERR = 2;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_LXSTOP_ERR = 3;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_HOSTATTN_ERR = 4;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_SYS_XSTOP_ERR = 5;
-static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_OOB1_ERR = 6;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_SYS_XSTOP_STAGED_ERR = 6;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_DBG_TRIG_ERR = 7;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP01 = 12;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP02 = 13;
@@ -284,9 +286,9 @@ static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO8_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XP_
 static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO8_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XP_32_39_LEN = 8;
 // pauc/reg00005.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "pauc/reg00005.H"
+}
+}
+#include "pauc/reg00005.H"
 #endif
 #endif

@@ -31,10 +31,12 @@
 #define __p10_scom_eq_1_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace eq
 {
+#endif
 
 
 static const uint64_t DBG_CBS_CC = 0x20030013ull;
@@ -272,9 +274,9 @@ static const uint64_t SCAN32 = 0x20038000ull;
 static const uint64_t SCAN64 = 0x2003e000ull;
 // eq/reg00001.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "eq/reg00001.H"
+}
+}
+#include "eq/reg00001.H"
 #endif
 #endif

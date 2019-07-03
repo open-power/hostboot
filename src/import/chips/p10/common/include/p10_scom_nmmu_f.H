@@ -31,10 +31,12 @@
 #define __p10_scom_nmmu_f_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace nmmu
 {
+#endif
 
 
 static const uint64_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_MASK_REG_RW = 0x02010c03ull;
@@ -45,9 +47,9 @@ static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_MASK_REG_NX_CQ_FIR_MASK = 0;
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_MASK_REG_NX_CQ_FIR_MASK_LEN = 20;
 // nmmu/reg00015.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "nmmu/reg00015.H"
+}
+}
+#include "nmmu/reg00015.H"
 #endif
 #endif

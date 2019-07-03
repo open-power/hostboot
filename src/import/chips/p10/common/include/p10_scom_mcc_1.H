@@ -31,10 +31,12 @@
 #define __p10_scom_mcc_1_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace mcc
 {
+#endif
 
 
 static const uint64_t ATCL_CL_CLSCOM_MCPERF2 = 0x0c010c24ull;
@@ -127,9 +129,9 @@ static const uint32_t WDF_ECC_3_SYNDROME = 56;
 static const uint32_t WDF_ECC_3_SYNDROME_LEN = 8;
 // mcc/reg00001.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "mcc/reg00001.H"
+}
+}
+#include "mcc/reg00001.H"
 #endif
 #endif

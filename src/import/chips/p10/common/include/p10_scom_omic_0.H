@@ -31,10 +31,12 @@
 #define __p10_scom_omic_0_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace omic
 {
+#endif
 
 
 static const uint64_t CTL_REGS_RX_MODE19_PG = 0x8008984010012c3full;
@@ -68,9 +70,9 @@ static const uint32_t MC_OMI_FIR_WOF_REG_MC_OMI_FIR_WOF = 0;
 static const uint32_t MC_OMI_FIR_WOF_REG_MC_OMI_FIR_WOF_LEN = 62;
 // omic/reg00000.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "omic/reg00000.H"
+}
+}
+#include "omic/reg00000.H"
 #endif
 #endif

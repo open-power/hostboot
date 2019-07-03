@@ -31,10 +31,12 @@
 #define __p10_scom_iohs_0_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace iohs
 {
+#endif
 
 
 static const uint64_t AXON_EPS_FIR_LOCAL_ACTION2 = 0x18040109ull;
@@ -1454,12 +1456,12 @@ static const uint32_t REGS_PRX1_DLR_APOR_BASE_ACCUM = 32;
 static const uint32_t REGS_PRX1_DLR_APOR_BASE_ACCUM_LEN = 32;
 // iohs/reg00003.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "iohs/reg00000.H"
-    #include "iohs/reg00001.H"
-    #include "iohs/reg00002.H"
-    #include "iohs/reg00003.H"
+}
+}
+#include "iohs/reg00000.H"
+#include "iohs/reg00001.H"
+#include "iohs/reg00002.H"
+#include "iohs/reg00003.H"
 #endif
 #endif

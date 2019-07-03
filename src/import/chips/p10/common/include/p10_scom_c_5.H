@@ -31,10 +31,12 @@
 #define __p10_scom_c_5_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace c
 {
+#endif
 
 
 static const uint64_t ADDR_TRAP_REG = 0x20010003ull;
@@ -233,9 +235,9 @@ static const uint32_t QME_SCR_QME_SCR_DATA = 0;
 static const uint32_t QME_SCR_QME_SCR_DATA_LEN = 64;
 // c/reg00005.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "c/reg00005.H"
+}
+}
+#include "c/reg00005.H"
 #endif
 #endif

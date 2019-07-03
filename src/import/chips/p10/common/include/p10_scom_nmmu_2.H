@@ -31,10 +31,12 @@
 #define __p10_scom_nmmu_2_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace nmmu
 {
+#endif
 
 
 static const uint64_t CFG_NMMU_CTL_TLB = 0x02010c55ull;
@@ -85,9 +87,9 @@ static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_PB_DEBUG_REG_NXCQ_TRACE_CNTL = 0;
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_PB_DEBUG_REG_NXCQ_TRACE_CNTL_LEN = 8;
 // nmmu/reg00002.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "nmmu/reg00002.H"
+}
+}
+#include "nmmu/reg00002.H"
 #endif
 #endif

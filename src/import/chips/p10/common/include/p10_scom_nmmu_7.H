@@ -31,10 +31,12 @@
 #define __p10_scom_nmmu_7_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace nmmu
 {
+#endif
 
 
 static const uint64_t CFG_NMMU_CTL_SLB = 0x02010c54ull;
@@ -84,9 +86,9 @@ static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_ACTION1_REG_NX_CQ_FIR_ACTION1
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_ACTION1_REG_NX_CQ_FIR_ACTION1_LEN = 20;
 // nmmu/reg00007.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "nmmu/reg00007.H"
+}
+}
+#include "nmmu/reg00007.H"
 #endif
 #endif

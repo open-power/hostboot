@@ -27,10 +27,12 @@
 #ifndef __PROC_REG00016_H_
 #define __PROC_REG00016_H_
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace proc
 {
+#endif
 
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
@@ -7953,6 +7955,97 @@ fapi_try_exit:
 #endif
 }
 
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_NET_PCBSLPERV_CTRL0_LVLTRANS_FENCE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_NET_PCBSLPERV_CTRL0_RW, TP_TPCHIP_NET_PCBSLPERV_CTRL0_RW_WAND,
+                           TP_TPCHIP_NET_PCBSLPERV_CTRL0_RW_WOR));
+#endif
+    return o_data.insertFromRight<TP_TPCHIP_NET_PCBSLPERV_CTRL0_LVLTRANS_FENCE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_NET_PCBSLPERV_CTRL0_LVLTRANS_FENCE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_NET_PCBSLPERV_CTRL0_LVLTRANS_FENCE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_NET_PCBSLPERV_CTRL0_RW, TP_TPCHIP_NET_PCBSLPERV_CTRL0_RW_WAND,
+                           TP_TPCHIP_NET_PCBSLPERV_CTRL0_RW_WOR));
+#endif
+    return o_data.insertFromRight<TP_TPCHIP_NET_PCBSLPERV_CTRL0_LVLTRANS_FENCE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_NET_PCBSLPERV_CTRL0_LVLTRANS_FENCE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_NET_PCBSLPERV_CTRL0_LVLTRANS_FENCE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_NET_PCBSLPERV_CTRL0_RW, TP_TPCHIP_NET_PCBSLPERV_CTRL0_RW_WAND,
+                           TP_TPCHIP_NET_PCBSLPERV_CTRL0_RW_WOR));
+#endif
+    return o_data.setBit<TP_TPCHIP_NET_PCBSLPERV_CTRL0_LVLTRANS_FENCE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_NET_PCBSLPERV_CTRL0_LVLTRANS_FENCE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPCHIP_NET_PCBSLPERV_CTRL0_LVLTRANS_FENCE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_NET_PCBSLPERV_CTRL0_RW, TP_TPCHIP_NET_PCBSLPERV_CTRL0_RW_WAND,
+                           TP_TPCHIP_NET_PCBSLPERV_CTRL0_RW_WOR));
+#endif
+    return o_data.clearBit<TP_TPCHIP_NET_PCBSLPERV_CTRL0_LVLTRANS_FENCE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_NET_PCBSLPERV_CTRL0_LVLTRANS_FENCE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TP_TPCHIP_NET_PCBSLPERV_CTRL0_LVLTRANS_FENCE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_NET_PCBSLPERV_CTRL0_RW, TP_TPCHIP_NET_PCBSLPERV_CTRL0_RW_WAND,
+                           TP_TPCHIP_NET_PCBSLPERV_CTRL0_RW_WOR));
+#endif
+    return i_data.extractToRight<TP_TPCHIP_NET_PCBSLPERV_CTRL0_LVLTRANS_FENCE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_NET_PCBSLPERV_CTRL0_LVLTRANS_FENCE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TP_TPCHIP_NET_PCBSLPERV_CTRL0_LVLTRANS_FENCE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_NET_PCBSLPERV_CTRL0_RW, TP_TPCHIP_NET_PCBSLPERV_CTRL0_RW_WAND,
+                           TP_TPCHIP_NET_PCBSLPERV_CTRL0_RW_WOR));
+#endif
+    return i_data.getBit<TP_TPCHIP_NET_PCBSLPERV_CTRL0_LVLTRANS_FENCE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPCHIP_NET_PCBSLPERV_CTRL0_LVLTRANS_FENCE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
 static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_NET_PCBSLPERV_CTRL0_ARRAY_WRITE_ASSIST_EN(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -14469,7 +14562,9 @@ fapi_try_exit:
 }
 
 
+#ifndef __PPE_HCODE__
 }
 }
 
+#endif
 #endif

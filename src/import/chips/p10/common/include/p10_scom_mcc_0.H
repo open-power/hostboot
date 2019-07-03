@@ -31,21 +31,23 @@
 #define __p10_scom_mcc_0_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace mcc
 {
+#endif
 
 
 static const uint64_t DSTL_DSTLFIRACT2 = 0x0c010d09ull;
 
 static const uint32_t DSTL_DSTLFIRACT2_DSTLFIRACT2_ACTION_2 = 0;
-static const uint32_t DSTL_DSTLFIRACT2_DSTLFIRACT2_ACTION_2_LEN = 37;
+static const uint32_t DSTL_DSTLFIRACT2_DSTLFIRACT2_ACTION_2_LEN = 39;
 // mcc/reg00000.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "mcc/reg00000.H"
+}
+}
+#include "mcc/reg00000.H"
 #endif
 #endif

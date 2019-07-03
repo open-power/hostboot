@@ -31,15 +31,17 @@
 #define __p10_scom_c_0_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace c
 {
+#endif
 
 
 static const uint64_t CPMS_L3_PFETCNTL = 0x200e0e20ull;
-static const uint64_t CPMS_L3_PFETCNTL_WO_CLEAR = 0x200e0e22ull;
-static const uint64_t CPMS_L3_PFETCNTL_WO_OR = 0x200e0e23ull;
+static const uint64_t CPMS_L3_PFETCNTL_WO_CLEAR = 0x200e0e23ull;
+static const uint64_t CPMS_L3_PFETCNTL_WO_OR = 0x200e0e22ull;
 
 static const uint32_t CPMS_L3_PFETCNTL_VDD_PFET_SEQ_STATE = 0;
 static const uint32_t CPMS_L3_PFETCNTL_VDD_PFET_SEQ_STATE_LEN = 2;
@@ -66,6 +68,9 @@ static const uint32_t CPMS_L3_PFETCNTL_VCS_PG_STATE_LEN = 4;
 static const uint32_t CPMS_L3_PFETCNTL_VCS_PG_SEL = 54;
 static const uint32_t CPMS_L3_PFETCNTL_VCS_PG_SEL_LEN = 4;
 static const uint32_t CPMS_L3_PFETCNTL_SRAM_ENABLE = 63;
+// c/reg00000.H
+
+static const uint64_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT2 = 0x20020602ull;
 // c/reg00000.H
 
 static const uint64_t EC_PC_COMMON_SPR_HMEER = 0x20020496ull;
@@ -173,9 +178,9 @@ static const uint32_t QME_SSH_SRC_SPC_WKUP_RECENT_DRP = 62;
 static const uint32_t QME_SSH_SRC_SPC_WKUP_RECENT_DRP_LEN = 2;
 // c/reg00000.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "c/reg00000.H"
+}
+}
+#include "c/reg00000.H"
 #endif
 #endif

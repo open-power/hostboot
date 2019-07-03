@@ -31,10 +31,12 @@
 #define __p10_scom_iohs_6_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace iohs
 {
+#endif
 
 
 static const uint64_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1 = 0x18040081ull;
@@ -45,7 +47,7 @@ static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_SPATTN_ERR = 2;
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_LXSTOP_ERR = 3;
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_HOSTATTN_ERR = 4;
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_SYS_XSTOP_ERR = 5;
-static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_OOB1_ERR = 6;
+static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_SYS_XSTOP_STAGED_ERR = 6;
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_DBG_TRIG_ERR = 7;
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP01 = 12;
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP02 = 13;
@@ -1600,13 +1602,13 @@ static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_MODE3_PL_SEG_TEST_LEAKAGE_CTRL 
 static const uint64_t REGS_PRX0_DLR_APST = 0x1801103bull;
 // iohs/reg00030.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "iohs/reg00026.H"
-    #include "iohs/reg00027.H"
-    #include "iohs/reg00028.H"
-    #include "iohs/reg00029.H"
-    #include "iohs/reg00030.H"
+}
+}
+#include "iohs/reg00026.H"
+#include "iohs/reg00027.H"
+#include "iohs/reg00028.H"
+#include "iohs/reg00029.H"
+#include "iohs/reg00030.H"
 #endif
 #endif

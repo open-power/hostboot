@@ -27,10 +27,12 @@
 #ifndef __PROC_REG00067_H_
 #define __PROC_REG00067_H_
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace proc
 {
+#endif
 
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
@@ -28511,96 +28513,97 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_OOB1_ERR(
+static inline fapi2::buffer<uint64_t>& SET_TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_SYS_XSTOP_STAGED_ERR(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2));
 #endif
-    return o_data.insertFromRight<TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_OOB1_ERR,
+    return o_data.insertFromRight<TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_SYS_XSTOP_STAGED_ERR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_OOB1_ERR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_SYS_XSTOP_STAGED_ERR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_OOB1_ERR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2));
-#endif
-    return o_data.insertFromRight<TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_OOB1_ERR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_OOB1_ERR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_OOB1_ERR(
+static inline fapi2::buffer<uint64_t>& SET_TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_SYS_XSTOP_STAGED_ERR(
+    const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2));
 #endif
-    return o_data.setBit<TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_OOB1_ERR>();
+    return o_data.insertFromRight<TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_SYS_XSTOP_STAGED_ERR,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_OOB1_ERR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_SYS_XSTOP_STAGED_ERR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_OOB1_ERR(
+static inline fapi2::buffer<uint64_t>& SET_TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_SYS_XSTOP_STAGED_ERR(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2));
 #endif
-    return o_data.clearBit<TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_OOB1_ERR>();
+    return o_data.setBit<TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_SYS_XSTOP_STAGED_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_OOB1_ERR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_SYS_XSTOP_STAGED_ERR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_OOB1_ERR(
+static inline fapi2::buffer<uint64_t>& CLEAR_TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_SYS_XSTOP_STAGED_ERR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2));
+#endif
+    return o_data.clearBit<TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_SYS_XSTOP_STAGED_ERR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_SYS_XSTOP_STAGED_ERR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_SYS_XSTOP_STAGED_ERR(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2));
 #endif
-    return i_data.extractToRight<TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_OOB1_ERR,
+    return i_data.extractToRight<TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_SYS_XSTOP_STAGED_ERR,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_OOB1_ERR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_SYS_XSTOP_STAGED_ERR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_OOB1_ERR(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_SYS_XSTOP_STAGED_ERR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2));
 #endif
-    return i_data.getBit<TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_OOB1_ERR>();
+    return i_data.getBit<TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_SYS_XSTOP_STAGED_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_OOB1_ERR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_SYS_XSTOP_STAGED_ERR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -39682,7 +39685,9 @@ fapi_try_exit:
 }
 
 
+#ifndef __PPE_HCODE__
 }
 }
 
+#endif
 #endif

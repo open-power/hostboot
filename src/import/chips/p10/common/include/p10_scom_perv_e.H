@@ -31,10 +31,12 @@
 #define __p10_scom_perv_e_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace perv
 {
+#endif
 
 
 static const uint64_t COMP_P_0_RSIS = 0x0003000aull;
@@ -936,9 +938,9 @@ static const uint32_t XSTOP2_XSTOP2_WAIT_CYCLES = 48;
 static const uint32_t XSTOP2_XSTOP2_WAIT_CYCLES_LEN = 12;
 // perv/reg00021.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "perv/reg00021.H"
+}
+}
+#include "perv/reg00021.H"
 #endif
 #endif

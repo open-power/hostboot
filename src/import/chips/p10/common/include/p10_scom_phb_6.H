@@ -31,10 +31,12 @@
 #define __p10_scom_phb_6_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace phb
 {
+#endif
 
 
 static const uint64_t RSB_REGS_FIR_REG_RW = 0x08010908ull;
@@ -123,9 +125,9 @@ static const uint32_t RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PAST_DL_PCI_SIZE_HIST = 
 static const uint32_t RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PAST_DL_PCI_SIZE_HIST_LEN = 4;
 // phb/reg00006.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "phb/reg00006.H"
+}
+}
+#include "phb/reg00006.H"
 #endif
 #endif

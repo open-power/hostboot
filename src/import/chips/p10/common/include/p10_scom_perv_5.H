@@ -31,10 +31,12 @@
 #define __p10_scom_perv_5_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace perv
 {
+#endif
 
 
 static const uint64_t COMP_INTR_INTERRUPT1_REG_RW = 0x000f0020ull;
@@ -95,7 +97,7 @@ static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_SPATTN_ERR = 2;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_LXSTOP_ERR = 3;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_HOSTATTN_ERR = 4;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_SYS_XSTOP_ERR = 5;
-static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_OOB1_ERR = 6;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_SYS_XSTOP_STAGED_ERR = 6;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_DBG_TRIG_ERR = 7;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP01 = 12;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP02 = 13;
@@ -657,10 +659,10 @@ static const uint32_t TRA7_TR0_CONFIG_3_D = 24;
 static const uint32_t TRA7_TR0_CONFIG_3_D_LEN = 24;
 // perv/reg00008.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "perv/reg00007.H"
-    #include "perv/reg00008.H"
+}
+}
+#include "perv/reg00007.H"
+#include "perv/reg00008.H"
 #endif
 #endif

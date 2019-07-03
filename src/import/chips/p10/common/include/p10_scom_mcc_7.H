@@ -31,10 +31,12 @@
 #define __p10_scom_mcc_7_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace mcc
 {
+#endif
 
 
 static const uint64_t ATCL_CL_CLSCOM_MCBUSYQ = 0x0c010c27ull;
@@ -86,7 +88,7 @@ static const uint32_t ATCL_CL_CLSCOM_MCPERF3_ENABLE_RMW_BUF_DEALLOC_STALL = 40;
 static const uint32_t ATCL_CL_CLSCOM_MCPERF3_ENABLE_PROMOTE_RESET_DROP = 41;
 static const uint32_t ATCL_CL_CLSCOM_MCPERF3_DISABLE_READ_HIT_AMO_WINDOW = 42;
 static const uint32_t ATCL_CL_CLSCOM_MCPERF3_ENABLE_CP_M_MDI0_LOCAL_ONLY = 43;
-static const uint32_t ATCL_CL_CLSCOM_MCPERF3_WRAP_MODE = 44;
+static const uint32_t ATCL_CL_CLSCOM_MCPERF3_RESERVED44 = 44;
 static const uint32_t ATCL_CL_CLSCOM_MCPERF3_AMO_LIMIT_SEL = 45;
 static const uint32_t ATCL_CL_CLSCOM_MCPERF3_HP_WR_EQ_LP_RD = 46;
 static const uint32_t ATCL_CL_CLSCOM_MCPERF3_HP_WR_EQ_RD = 47;
@@ -97,8 +99,9 @@ static const uint32_t ATCL_CL_CLSCOM_MCPERF3_SQ_LOC0_CNT_SEL_LEN = 3;
 static const uint32_t ATCL_CL_CLSCOM_MCPERF3_TIMEOUT_FORCE_RETRY = 54;
 static const uint32_t ATCL_CL_CLSCOM_MCPERF3_TIMEOUT_FORCE_CH_FAIL = 55;
 static const uint32_t ATCL_CL_CLSCOM_MCPERF3_DISABLE_RETRY_AMO_HPC_WR_BAD_CR = 56;
-static const uint32_t ATCL_CL_CLSCOM_MCPERF3_RESERVED_57_63 = 57;
-static const uint32_t ATCL_CL_CLSCOM_MCPERF3_RESERVED_57_63_LEN = 7;
+static const uint32_t ATCL_CL_CLSCOM_MCPERF3_EN_INBAND_NO_DISP_WIN = 57;
+static const uint32_t ATCL_CL_CLSCOM_MCPERF3_INBAND_NO_DISP_THRESH = 58;
+static const uint32_t ATCL_CL_CLSCOM_MCPERF3_INBAND_NO_DISP_THRESH_LEN = 6;
 // mcc/reg00007.H
 
 static const uint64_t CRYPTO_ENCRYPT_CRYPTOKEY1A = 0x0c010f52ull;
@@ -123,7 +126,7 @@ static const uint32_t WRITE_READCFG_CFG_RD_EINJ_TARGET = 0;
 static const uint32_t WRITE_READCFG_CFG_RD_EINJ_TARGET_LEN = 3;
 static const uint32_t WRITE_READCFG_CFG_RD_EINJ_RATE = 3;
 static const uint32_t WRITE_READCFG_CFG_RD_EINJ_RATE_LEN = 3;
-static const uint32_t WRITE_READCFG_READCFG_RESERVED_6 = 6;
+static const uint32_t WRITE_READCFG_CFG_DISABLE_EARLY_TRIGGER = 6;
 static const uint32_t WRITE_READCFG_CFG_RD_FAIL_ACTION = 7;
 static const uint32_t WRITE_READCFG_CFG_RD_FAIL_ACTION_LEN = 2;
 static const uint32_t WRITE_READCFG_READCFG_RESERVED_9_11 = 9;
@@ -132,11 +135,16 @@ static const uint32_t WRITE_READCFG_CFG_MMIO_SUE_BAD_DATA = 12;
 static const uint32_t WRITE_READCFG_CFG_RTYFAIL_NO_BD = 13;
 static const uint32_t WRITE_READCFG_READCFG_CAPTURE_1ST_SYNDROME = 14;
 static const uint32_t WRITE_READCFG_READCFG_SYNDROME_FIR_ENABLE = 15;
-static const uint32_t WRITE_READCFG_READCFG_RESERVED_16 = 16;
+static const uint32_t WRITE_READCFG_CFG_BYPASS_SUPPORT_64B_FAILS = 16;
 static const uint32_t WRITE_READCFG_CFG_BOGUS_NO_BD = 17;
 static const uint32_t WRITE_READCFG_CFG_DO_DUAL_PACKET_ANALYSIS = 18;
-static const uint32_t WRITE_READCFG_READCFG_RESERVED_19_31 = 19;
-static const uint32_t WRITE_READCFG_READCFG_RESERVED_19_31_LEN = 13;
+static const uint32_t WRITE_READCFG_CFG_P1PF_DROP_THRESHOLD = 19;
+static const uint32_t WRITE_READCFG_CFG_P1PF_DROP_THRESHOLD_LEN = 7;
+static const uint32_t WRITE_READCFG_CFG_P1PF_EN_PEND_ADJ = 26;
+static const uint32_t WRITE_READCFG_CFG_P1PF_STOP_THRESHOLD = 27;
+static const uint32_t WRITE_READCFG_CFG_P1PF_STOP_THRESHOLD_LEN = 7;
+static const uint32_t WRITE_READCFG_READCFG_RESERVED_34_39 = 34;
+static const uint32_t WRITE_READCFG_READCFG_RESERVED_34_39_LEN = 6;
 // mcc/reg00007.H
 
 static const uint64_t WRITE_WRT_DSTL_ECC = 0x0c010f4cull;
@@ -159,9 +167,9 @@ static const uint32_t WRITE_WRT_DSTL_ECC_3_SYNDROME = 56;
 static const uint32_t WRITE_WRT_DSTL_ECC_3_SYNDROME_LEN = 8;
 // mcc/reg00007.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "mcc/reg00007.H"
+}
+}
+#include "mcc/reg00007.H"
 #endif
 #endif

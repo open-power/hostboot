@@ -31,10 +31,12 @@
 #define __p10_scom_nmmu_e_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace nmmu
 {
+#endif
 
 
 static const uint64_t FBC_CQ_WRAP_NXCQ_SCOM_MM_EPSILON_COUNTER_VALUE = 0x02010c1dull;
@@ -154,9 +156,9 @@ static const uint32_t NMMU_PMU1_CTL_REG_MM_PMU1_CTL = 0;
 static const uint32_t NMMU_PMU1_CTL_REG_MM_PMU1_CTL_LEN = 64;
 // nmmu/reg00014.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "nmmu/reg00014.H"
+}
+}
+#include "nmmu/reg00014.H"
 #endif
 #endif

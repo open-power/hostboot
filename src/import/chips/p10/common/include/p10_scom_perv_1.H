@@ -31,10 +31,12 @@
 #define __p10_scom_perv_1_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace perv
 {
+#endif
 
 
 static const uint64_t COMP_P_0_LSTAT = 0x00030002ull;
@@ -481,9 +483,9 @@ static const uint32_t TRA6_TR0_CONFIG_5_D = 24;
 static const uint32_t TRA6_TR0_CONFIG_5_D_LEN = 24;
 // perv/reg00002.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "perv/reg00002.H"
+}
+}
+#include "perv/reg00002.H"
 #endif
 #endif

@@ -31,10 +31,12 @@
 #define __p10_scom_mc_1_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace mc
 {
+#endif
 
 
 static const uint64_t DBG_CBS_CC = 0x0c030013ull;
@@ -223,9 +225,9 @@ static const uint32_t TRA1_TR0_CONFIG_4_B = 24;
 static const uint32_t TRA1_TR0_CONFIG_4_B_LEN = 24;
 // mc/reg00001.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "mc/reg00001.H"
+}
+}
+#include "mc/reg00001.H"
 #endif
 #endif

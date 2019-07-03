@@ -31,10 +31,12 @@
 #define __p10_scom_iohs_4_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace iohs
 {
+#endif
 
 
 static const uint64_t AXON_CLOCK_STAT_NSL = 0x18030009ull;
@@ -1307,12 +1309,12 @@ static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_CNTL24_PL_TX_PSEG_MAIN_16_18_SA
 static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_CNTL24_PL_TX_PSEG_MAIN_16_18_SAFE_EN_LEN = 3;
 // iohs/reg00021.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "iohs/reg00018.H"
-    #include "iohs/reg00019.H"
-    #include "iohs/reg00020.H"
-    #include "iohs/reg00021.H"
+}
+}
+#include "iohs/reg00018.H"
+#include "iohs/reg00019.H"
+#include "iohs/reg00020.H"
+#include "iohs/reg00021.H"
 #endif
 #endif

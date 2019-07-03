@@ -31,10 +31,12 @@
 #define __p10_scom_pauc_6_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace pauc
 {
+#endif
 
 
 static const uint64_t CPLT_CONF1_RW = 0x10000009ull;
@@ -222,9 +224,9 @@ static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO6_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XP_
 static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO6_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XP_0_15_LEN = 16;
 // pauc/reg00006.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "pauc/reg00006.H"
+}
+}
+#include "pauc/reg00006.H"
 #endif
 #endif

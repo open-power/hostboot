@@ -31,10 +31,12 @@
 #define __p10_scom_pau_d_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace pau
 {
+#endif
 
 
 static const uint64_t AME_AME0_MISC_PMU_CONFIG1 = 0x10010bc6ull;
@@ -1282,9 +1284,9 @@ static const uint32_t XTS_REG_ATRMISS2_PASID = 44;
 static const uint32_t XTS_REG_ATRMISS2_PASID_LEN = 20;
 // pau/reg00018.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "pau/reg00018.H"
+}
+}
+#include "pau/reg00018.H"
 #endif
 #endif

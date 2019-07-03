@@ -31,10 +31,12 @@
 #define __p10_scom_iohs_9_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace iohs
 {
+#endif
 
 
 static const uint64_t AXON_CTRL_ATOMIC_LOCK_REG = 0x180003ffull;
@@ -54,7 +56,7 @@ static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_SPATTN_ERR = 2;
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_LXSTOP_ERR = 3;
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_HOSTATTN_ERR = 4;
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_SYS_XSTOP_ERR = 5;
-static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_OOB1_ERR = 6;
+static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_SYS_XSTOP_STAGED_ERR = 6;
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_DBG_TRIG_ERR = 7;
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP01 = 12;
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP02 = 13;
@@ -1661,12 +1663,12 @@ static const uint32_t MULTICAST_GROUP_2_MULTICAST2_GROUP = 3;
 static const uint32_t MULTICAST_GROUP_2_MULTICAST2_GROUP_LEN = 3;
 // iohs/reg00043.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "iohs/reg00040.H"
-    #include "iohs/reg00041.H"
-    #include "iohs/reg00042.H"
-    #include "iohs/reg00043.H"
+}
+}
+#include "iohs/reg00040.H"
+#include "iohs/reg00041.H"
+#include "iohs/reg00042.H"
+#include "iohs/reg00043.H"
 #endif
 #endif

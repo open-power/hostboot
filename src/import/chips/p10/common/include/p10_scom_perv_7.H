@@ -31,10 +31,12 @@
 #define __p10_scom_perv_7_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace perv
 {
+#endif
 
 
 static const uint64_t EPS_THERM_WSUB_CONTROL_REG = 0x00050012ull;
@@ -169,9 +171,9 @@ static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL1_SET_PERV_CTRL1_21_RESERVED = 21;
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL1_SET_PERV_CTRL1_22_RESERVED = 22;
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL1_SET_PERV_CTRL1_23_RESERVED = 23;
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL1_SET_PERV_CTRL1_24_RESERVED = 24;
-static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL1_SET_TP_CLK_PULSE_ENABLE_DC = 25;
-static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL1_SET_TP_CLK_PULSE_MODE_DC = 26;
-static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL1_SET_TP_CLK_PULSE_MODE_DC_LEN = 2;
+static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL1_SET_PERV_CTRL1_25_RESERVED = 25;
+static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL1_SET_PERV_CTRL1_26_27_RESERVED = 26;
+static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL1_SET_PERV_CTRL1_26_27_RESERVED_LEN = 2;
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL1_SET_PERV_CTRL1_28_RESERVED = 28;
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL1_SET_PERV_CTRL1_29_RESERVED = 29;
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL1_SET_PERV_CTRL1_30_RESERVED = 30;
@@ -795,10 +797,10 @@ static const uint32_t TRA6_TR0_CONFIG_4_B = 24;
 static const uint32_t TRA6_TR0_CONFIG_4_B_LEN = 24;
 // perv/reg00012.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "perv/reg00011.H"
-    #include "perv/reg00012.H"
+}
+}
+#include "perv/reg00011.H"
+#include "perv/reg00012.H"
 #endif
 #endif

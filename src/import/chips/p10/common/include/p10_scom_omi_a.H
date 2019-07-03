@@ -31,10 +31,12 @@
 #define __p10_scom_omi_a_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace omi
 {
+#endif
 
 
 static const uint64_t ERROR_CAPTURE = 0x0c011754ull;
@@ -639,10 +641,10 @@ static const uint32_t TXPACKS_1_DD_3_TX_BIT_REGS_CNTL28_PL_SEL = 56;
 static const uint32_t TXPACKS_1_DD_3_TX_BIT_REGS_CNTL28_PL_SEL_LEN = 7;
 // omi/reg00021.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "omi/reg00020.H"
-    #include "omi/reg00021.H"
+}
+}
+#include "omi/reg00020.H"
+#include "omi/reg00021.H"
 #endif
 #endif

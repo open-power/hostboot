@@ -27,10 +27,12 @@
 #ifndef __PROC_REG00010_H_
 #define __PROC_REG00010_H_
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace proc
 {
+#endif
 
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
@@ -10966,6 +10968,90 @@ static inline bool GET_TP_TCN0_N0_CPLT_CTRL0_TC_UNIT_ARY_WRT_THRU_DC(fapi2::buff
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     FAPI_ERR("Invalid dial access TP_TCN0_N0_CPLT_CTRL0_TC_UNIT_ARY_WRT_THRU_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TCN0_N0_CPLT_CTRL0_TC_VITL_PROTECTION(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TCN0_N0_CPLT_CTRL0_RW, TP_TCN0_N0_CPLT_CTRL0_WO_CLEAR, TP_TCN0_N0_CPLT_CTRL0_WO_OR));
+#endif
+    return o_data.insertFromRight<TP_TCN0_N0_CPLT_CTRL0_TC_VITL_PROTECTION,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TCN0_N0_CPLT_CTRL0_TC_VITL_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TCN0_N0_CPLT_CTRL0_TC_VITL_PROTECTION(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TCN0_N0_CPLT_CTRL0_RW, TP_TCN0_N0_CPLT_CTRL0_WO_CLEAR, TP_TCN0_N0_CPLT_CTRL0_WO_OR));
+#endif
+    return o_data.insertFromRight<TP_TCN0_N0_CPLT_CTRL0_TC_VITL_PROTECTION,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TCN0_N0_CPLT_CTRL0_TC_VITL_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TCN0_N0_CPLT_CTRL0_TC_VITL_PROTECTION(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TCN0_N0_CPLT_CTRL0_RW, TP_TCN0_N0_CPLT_CTRL0_WO_CLEAR, TP_TCN0_N0_CPLT_CTRL0_WO_OR));
+#endif
+    return o_data.setBit<TP_TCN0_N0_CPLT_CTRL0_TC_VITL_PROTECTION>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TCN0_N0_CPLT_CTRL0_TC_VITL_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TP_TCN0_N0_CPLT_CTRL0_TC_VITL_PROTECTION(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TCN0_N0_CPLT_CTRL0_RW, TP_TCN0_N0_CPLT_CTRL0_WO_CLEAR, TP_TCN0_N0_CPLT_CTRL0_WO_OR));
+#endif
+    return o_data.clearBit<TP_TCN0_N0_CPLT_CTRL0_TC_VITL_PROTECTION>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TCN0_N0_CPLT_CTRL0_TC_VITL_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TP_TCN0_N0_CPLT_CTRL0_TC_VITL_PROTECTION(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TCN0_N0_CPLT_CTRL0_RW, TP_TCN0_N0_CPLT_CTRL0_WO_CLEAR, TP_TCN0_N0_CPLT_CTRL0_WO_OR));
+#endif
+    return i_data.extractToRight<TP_TCN0_N0_CPLT_CTRL0_TC_VITL_PROTECTION,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TCN0_N0_CPLT_CTRL0_TC_VITL_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TP_TCN0_N0_CPLT_CTRL0_TC_VITL_PROTECTION(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TCN0_N0_CPLT_CTRL0_RW, TP_TCN0_N0_CPLT_CTRL0_WO_CLEAR, TP_TCN0_N0_CPLT_CTRL0_WO_OR));
+#endif
+    return i_data.getBit<TP_TCN0_N0_CPLT_CTRL0_TC_VITL_PROTECTION>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TCN0_N0_CPLT_CTRL0_TC_VITL_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -53738,7 +53824,9 @@ fapi_try_exit:
 }
 
 
+#ifndef __PPE_HCODE__
 }
 }
 
+#endif
 #endif

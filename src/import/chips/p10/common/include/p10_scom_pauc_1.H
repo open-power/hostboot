@@ -31,10 +31,12 @@
 #define __p10_scom_pauc_1_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace pauc
 {
+#endif
 
 
 static const uint64_t DBG_CBS_CC = 0x10030013ull;
@@ -202,9 +204,9 @@ static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO2_PB_AX_VAL = 55;
 static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO2_PB_AX_VAL_LEN = 7;
 // pauc/reg00001.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "pauc/reg00001.H"
+}
+}
+#include "pauc/reg00001.H"
 #endif
 #endif

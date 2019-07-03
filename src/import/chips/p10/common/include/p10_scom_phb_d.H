@@ -31,10 +31,12 @@
 #define __p10_scom_phb_d_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace phb
 {
+#endif
 
 
 static const uint64_t REGS_PE_DFREEZE_REG = 0x03011855ull;
@@ -60,9 +62,9 @@ static const uint32_t RSB_SCOM_SSR_PHB5_HVIAR_REQ_ADDR_VALUE = 51;
 static const uint32_t RSB_SCOM_SSR_PHB5_HVIAR_REQ_ADDR_VALUE_LEN = 11;
 // phb/reg00013.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "phb/reg00013.H"
+}
+}
+#include "phb/reg00013.H"
 #endif
 #endif

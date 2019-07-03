@@ -31,10 +31,12 @@
 #define __p10_scom_nmmu_3_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace nmmu
 {
+#endif
 
 
 static const uint64_t NMMU_PMU0_CNT_REG = 0x02010c4full;
@@ -43,9 +45,9 @@ static const uint32_t NMMU_PMU0_CNT_REG_MM_PMU0_CNT = 0;
 static const uint32_t NMMU_PMU0_CNT_REG_MM_PMU0_CNT_LEN = 64;
 // nmmu/reg00003.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "nmmu/reg00003.H"
+}
+}
+#include "nmmu/reg00003.H"
 #endif
 #endif

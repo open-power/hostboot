@@ -31,10 +31,12 @@
 #define __p10_scom_pau_a_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace pau
 {
+#endif
 
 
 static const uint64_t AME_AME1_MISC_INHIBIT_CONFIG = 0x10010bd3ull;
@@ -1134,10 +1136,10 @@ static const uint32_t XTS_REG_ERR_FIRST_ERR_FIRST_BITS = 0;
 static const uint32_t XTS_REG_ERR_FIRST_ERR_FIRST_BITS_LEN = 64;
 // pau/reg00014.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "pau/reg00013.H"
-    #include "pau/reg00014.H"
+}
+}
+#include "pau/reg00013.H"
+#include "pau/reg00014.H"
 #endif
 #endif

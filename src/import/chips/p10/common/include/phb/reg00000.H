@@ -27,14 +27,18 @@
 #ifndef __PHB_REG00000_H_
 #define __PHB_REG00000_H_
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace phb
 {
+#endif
 
 
 
+#ifndef __PPE_HCODE__
 }
 }
 
+#endif
 #endif

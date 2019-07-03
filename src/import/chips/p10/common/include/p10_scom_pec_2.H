@@ -31,10 +31,12 @@
 #define __p10_scom_pec_2_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace pec
 {
+#endif
 
 
 static const uint64_t CPLT_STAT0 = 0x08000100ull;
@@ -135,9 +137,9 @@ static const uint32_t TRA0_TR1_CONFIG_5_D = 24;
 static const uint32_t TRA0_TR1_CONFIG_5_D_LEN = 24;
 // pec/reg00002.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "pec/reg00002.H"
+}
+}
+#include "pec/reg00002.H"
 #endif
 #endif

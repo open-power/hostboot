@@ -31,10 +31,12 @@
 #define __p10_scom_nmmu_a_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace nmmu
 {
+#endif
 
 
 static const uint64_t FIR1_REG_RW = 0x02010c40ull;
@@ -98,9 +100,9 @@ static const uint32_t NMMU_ERR_LOG_MULT_SEL = 5;
 static const uint32_t NMMU_ERR_LOG_MULT_SEL_LEN = 3;
 // nmmu/reg00010.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "nmmu/reg00010.H"
+}
+}
+#include "nmmu/reg00010.H"
 #endif
 #endif

@@ -31,10 +31,12 @@
 #define __p10_scom_mcc_8_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace mcc
 {
+#endif
 
 
 static const uint64_t ATCL_CL_CLSCOM_MCEPSQ = 0x0c010c26ull;
@@ -186,9 +188,9 @@ static const uint32_t WDF_WDFDBG_WAT1_EVENT_SELECT = 40;
 static const uint32_t WDF_WDFDBG_WAT1_EVENT_SELECT_LEN = 4;
 // mcc/reg00008.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "mcc/reg00008.H"
+}
+}
+#include "mcc/reg00008.H"
 #endif
 #endif

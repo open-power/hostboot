@@ -31,10 +31,12 @@
 #define __p10_scom_proc_c_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace proc
 {
+#endif
 
 
 static const uint64_t INT_CQ_CFG_LDQ1 = 0x0201081aull;
@@ -904,7 +906,7 @@ static const uint32_t TP_TCN0_N0_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_SPATTN_ERR = 2;
 static const uint32_t TP_TCN0_N0_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_LXSTOP_ERR = 3;
 static const uint32_t TP_TCN0_N0_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_HOSTATTN_ERR = 4;
 static const uint32_t TP_TCN0_N0_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_SYS_XSTOP_ERR = 5;
-static const uint32_t TP_TCN0_N0_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_OOB1_ERR = 6;
+static const uint32_t TP_TCN0_N0_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_SYS_XSTOP_STAGED_ERR = 6;
 static const uint32_t TP_TCN0_N0_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_DBG_TRIG_ERR = 7;
 static const uint32_t TP_TCN0_N0_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP01 = 12;
 static const uint32_t TP_TCN0_N0_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP02 = 13;
@@ -1405,8 +1407,9 @@ static const uint32_t TP_TPBR_PBA_PBAO_PBAOCFG_CHSW_DIS_WRITE_MATCH_REARB = 4;
 static const uint32_t TP_TPBR_PBA_PBAO_PBAOCFG_CHSW_DIS_OCIDATAPAR_GEN = 5;
 static const uint32_t TP_TPBR_PBA_PBAO_PBAOCFG_CHSW_DIS_OCIDATAPAR_CHECK = 6;
 static const uint32_t TP_TPBR_PBA_PBAO_PBAOCFG_CHSW_USE_TOPOLOGY_ID_SCOPE = 7;
-static const uint32_t TP_TPBR_PBA_PBAO_PBAOCFG_RESERVED_8_15 = 8;
-static const uint32_t TP_TPBR_PBA_PBAO_PBAOCFG_RESERVED_8_15_LEN = 8;
+static const uint32_t TP_TPBR_PBA_PBAO_PBAOCFG_HTM_ENABLE = 8;
+static const uint32_t TP_TPBR_PBA_PBAO_PBAOCFG_RESERVED_9_15 = 9;
+static const uint32_t TP_TPBR_PBA_PBAO_PBAOCFG_RESERVED_9_15_LEN = 7;
 // proc/reg00057.H
 
 static const uint64_t TP_TPBR_PBA_PBAO_PBAOCR3 = 0x0006801dull;
@@ -2576,13 +2579,13 @@ static const uint64_t VAS_VA_RG_SCF_WRMON4WID = 0x0201141cull;
 static const uint64_t VAS_VA_RG_SCF_WRMON5CMP = 0x02011425ull;
 // proc/reg00060.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "proc/reg00056.H"
-    #include "proc/reg00057.H"
-    #include "proc/reg00058.H"
-    #include "proc/reg00059.H"
-    #include "proc/reg00060.H"
+}
+}
+#include "proc/reg00056.H"
+#include "proc/reg00057.H"
+#include "proc/reg00058.H"
+#include "proc/reg00059.H"
+#include "proc/reg00060.H"
 #endif
 #endif

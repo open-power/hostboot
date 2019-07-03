@@ -31,10 +31,12 @@
 #define __p10_scom_pauc_e_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace pauc
 {
+#endif
 
 
 static const uint64_t DL_PPE_WRAP_SCOM_FUNC = 0x10012c67ull;
@@ -317,9 +319,9 @@ static const uint32_t XSTOP2_XSTOP2_WAIT_CYCLES = 48;
 static const uint32_t XSTOP2_XSTOP2_WAIT_CYCLES_LEN = 12;
 // pauc/reg00014.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "pauc/reg00014.H"
+}
+}
+#include "pauc/reg00014.H"
 #endif
 #endif

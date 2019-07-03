@@ -31,10 +31,12 @@
 #define __p10_scom_mc_8_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace mc
 {
+#endif
 
 
 static const uint64_t ASSIST_INTERRUPT_REG = 0x0c0f0011ull;
@@ -385,9 +387,9 @@ static const uint32_t XSTOP3_XSTOP3_WAIT_CYCLES = 48;
 static const uint32_t XSTOP3_XSTOP3_WAIT_CYCLES_LEN = 12;
 // mc/reg00008.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "mc/reg00008.H"
+}
+}
+#include "mc/reg00008.H"
 #endif
 #endif

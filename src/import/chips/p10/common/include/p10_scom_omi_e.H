@@ -31,10 +31,12 @@
 #define __p10_scom_omi_e_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace omi
 {
+#endif
 
 
 static const uint64_t PRBS_STATUS = 0x0c01175eull;
@@ -673,10 +675,10 @@ static const uint32_t TXPACKS_1_DD_3_TX_BIT_REGS_MODE2_PL_UNLOAD_SEL_LEN = 3;
 static const uint32_t TXPACKS_1_DD_3_TX_BIT_REGS_MODE2_PL_FIFO_HOLD = 61;
 // omi/reg00029.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "omi/reg00028.H"
-    #include "omi/reg00029.H"
+}
+}
+#include "omi/reg00028.H"
+#include "omi/reg00029.H"
 #endif
 #endif

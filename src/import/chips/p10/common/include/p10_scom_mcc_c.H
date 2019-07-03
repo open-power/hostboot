@@ -31,16 +31,18 @@
 #define __p10_scom_mcc_c_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace mcc
 {
+#endif
 
 
 static const uint64_t DSTL_DSTLFIRACT0 = 0x0c010d06ull;
 
 static const uint32_t DSTL_DSTLFIRACT0_DSTLFIRACT0_ACTION_0 = 0;
-static const uint32_t DSTL_DSTLFIRACT0_DSTLFIRACT0_ACTION_0_LEN = 37;
+static const uint32_t DSTL_DSTLFIRACT0_DSTLFIRACT0_ACTION_0_LEN = 39;
 // mcc/reg00012.H
 
 static const uint64_t DSTL_DSTLPSAVE1 = 0x0c010d13ull;
@@ -105,9 +107,9 @@ static const uint32_t USTL_USTLDBG_3 = 22;
 static const uint32_t USTL_USTLDBG_3_LEN = 2;
 // mcc/reg00012.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "mcc/reg00012.H"
+}
+}
+#include "mcc/reg00012.H"
 #endif
 #endif

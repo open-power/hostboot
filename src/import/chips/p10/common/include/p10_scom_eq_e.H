@@ -31,10 +31,12 @@
 #define __p10_scom_eq_e_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace eq
 {
+#endif
 
 
 static const uint64_t EPS_DBG_TRACE_REG_1 = 0x200183eeull;
@@ -367,9 +369,9 @@ static const uint32_t XSTOP2_XSTOP2_WAIT_CYCLES = 48;
 static const uint32_t XSTOP2_XSTOP2_WAIT_CYCLES_LEN = 12;
 // eq/reg00014.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "eq/reg00014.H"
+}
+}
+#include "eq/reg00014.H"
 #endif
 #endif

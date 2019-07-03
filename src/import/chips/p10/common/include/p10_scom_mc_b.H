@@ -31,10 +31,12 @@
 #define __p10_scom_mc_b_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace mc
 {
+#endif
 
 
 static const uint64_t ATOMIC_LOCK_REG = 0x0c0f03ffull;
@@ -326,9 +328,9 @@ static const uint32_t XSTOP4_XSTOP4_WAIT_CYCLES = 48;
 static const uint32_t XSTOP4_XSTOP4_WAIT_CYCLES_LEN = 12;
 // mc/reg00011.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "mc/reg00011.H"
+}
+}
+#include "mc/reg00011.H"
 #endif
 #endif

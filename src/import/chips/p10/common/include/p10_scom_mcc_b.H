@@ -31,10 +31,12 @@
 #define __p10_scom_mcc_b_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace mcc
 {
+#endif
 
 
 static const uint64_t CRYPTO_DECRYPT_CRYPTOKEY1B = 0x0c010f5bull;
@@ -152,9 +154,9 @@ static const uint32_t USTL_USTLFIRWOF_USTLFIRWOF_WOF = 0;
 static const uint32_t USTL_USTLFIRWOF_USTLFIRWOF_WOF_LEN = 62;
 // mcc/reg00011.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "mcc/reg00011.H"
+}
+}
+#include "mcc/reg00011.H"
 #endif
 #endif

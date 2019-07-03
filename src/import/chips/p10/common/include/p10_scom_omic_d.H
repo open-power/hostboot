@@ -31,10 +31,12 @@
 #define __p10_scom_omic_d_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace omic
 {
+#endif
 
 
 static const uint64_t CMN_CONFIG = 0x0c01174eull;
@@ -130,9 +132,9 @@ static const uint32_t TX_CTL_SM_REGS_CTLSM_CNTL7_PG_TX_PSAVE_FORCE_STS_0_15 = 48
 static const uint32_t TX_CTL_SM_REGS_CTLSM_CNTL7_PG_TX_PSAVE_FORCE_STS_0_15_LEN = 16;
 // omic/reg00013.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "omic/reg00013.H"
+}
+}
+#include "omic/reg00013.H"
 #endif
 #endif

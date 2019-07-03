@@ -31,10 +31,12 @@
 #define __p10_scom_c_1_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace c
 {
+#endif
 
 
 static const uint64_t EC_LS_LSU_HOLD_OUT_REG1 = 0x200206c1ull;
@@ -251,9 +253,9 @@ static const uint32_t QME_PSCRS2_PLS = 24;
 static const uint32_t QME_PSCRS2_PLS_LEN = 4;
 // c/reg00001.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "c/reg00001.H"
+}
+}
+#include "c/reg00001.H"
 #endif
 #endif

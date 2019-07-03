@@ -31,10 +31,12 @@
 #define __p10_scom_proc_2_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace proc
 {
+#endif
 
 
 static const uint64_t INT_CQ_PMC_0 = 0x02010828ull;
@@ -1146,6 +1148,7 @@ static const uint32_t TP_TCN0_N0_CPLT_CTRL0_TC_UNIT_SYNCCLK_MUXSEL_DC = 1;
 static const uint32_t TP_TCN0_N0_CPLT_CTRL0_CTRL_CC_FLUSHMODE_INH = 2;
 static const uint32_t TP_TCN0_N0_CPLT_CTRL0_CTRL_CC_FORCE_ALIGN = 3;
 static const uint32_t TP_TCN0_N0_CPLT_CTRL0_TC_UNIT_ARY_WRT_THRU_DC = 4;
+static const uint32_t TP_TCN0_N0_CPLT_CTRL0_TC_VITL_PROTECTION = 6;
 static const uint32_t TP_TCN0_N0_CPLT_CTRL0_CTRL_CC_ABIST_RECOV_DISABLE_DC = 8;
 static const uint32_t TP_TCN0_N0_CPLT_CTRL0_RESERVED_11A = 11;
 static const uint32_t TP_TCN0_N0_CPLT_CTRL0_TC_SKIT_MODE_BIST_DC = 12;
@@ -2841,7 +2844,6 @@ static const uint32_t TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST3_PORT_CONTROL_INVERT_P
 static const uint32_t TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST3_PORT_CONTROL_SPI_SLAVE_RESET = 24;
 static const uint32_t TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST3_PORT_CONTROL_SPI_SLAVE_RESET_LEN = 4;
 static const uint32_t TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST3_PORT_CONTROL_LOOPBACK = 28;
-static const uint32_t TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST3_PORT_CONTROL_MMSPISM_ENABLE = 29;
 // proc/reg00013.H
 
 static const uint64_t VAS_VA_EG_SCF_ERRINJSO = 0x0201144bull;
@@ -2890,13 +2892,13 @@ static const uint64_t VAS_VA_RG_SCF_WRMON6CMP = 0x02011426ull;
 static const uint64_t VAS_VA_RG_SCF_WRMON7WID = 0x0201141full;
 // proc/reg00013.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "proc/reg00009.H"
-    #include "proc/reg00010.H"
-    #include "proc/reg00011.H"
-    #include "proc/reg00012.H"
-    #include "proc/reg00013.H"
+}
+}
+#include "proc/reg00009.H"
+#include "proc/reg00010.H"
+#include "proc/reg00011.H"
+#include "proc/reg00012.H"
+#include "proc/reg00013.H"
 #endif
 #endif

@@ -31,10 +31,12 @@
 #define __p10_scom_iohs_7_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace iohs
 {
+#endif
 
 
 static const uint64_t AXON_CC_PROTECT_MODE_REG = 0x180303feull;
@@ -1576,13 +1578,13 @@ static const uint32_t IOO_TX0_2_DD_4_TX_BIT_REGS_CNTL3_PL_RXDET_ENABLE = 52;
 static const uint32_t IOO_TX0_2_DD_4_TX_BIT_REGS_CNTL3_PL_RXDET_PULSE = 53;
 // iohs/reg00035.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "iohs/reg00031.H"
-    #include "iohs/reg00032.H"
-    #include "iohs/reg00033.H"
-    #include "iohs/reg00034.H"
-    #include "iohs/reg00035.H"
+}
+}
+#include "iohs/reg00031.H"
+#include "iohs/reg00032.H"
+#include "iohs/reg00033.H"
+#include "iohs/reg00034.H"
+#include "iohs/reg00035.H"
 #endif
 #endif

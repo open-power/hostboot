@@ -31,10 +31,12 @@
 #define __p10_scom_mcc_6_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace mcc
 {
+#endif
 
 
 static const uint64_t CRYPTO_DECRYPT_CRYPTOCFG = 0x0c010f58ull;
@@ -92,9 +94,9 @@ static const uint32_t DSTL_DSTLPSAVE2_RESERVED_59_63 = 59;
 static const uint32_t DSTL_DSTLPSAVE2_RESERVED_59_63_LEN = 5;
 // mcc/reg00006.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "mcc/reg00006.H"
+}
+}
+#include "mcc/reg00006.H"
 #endif
 #endif

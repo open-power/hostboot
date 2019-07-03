@@ -31,10 +31,12 @@
 #define __p10_scom_eq_2_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace eq
 {
+#endif
 
 
 static const uint64_t CPLT_STAT0 = 0x20000100ull;
@@ -260,9 +262,9 @@ static const uint32_t SPATTN_SPATTN_IN34 = 34;
 static const uint32_t SPATTN_SPATTN_IN35 = 35;
 // eq/reg00002.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "eq/reg00002.H"
+}
+}
+#include "eq/reg00002.H"
 #endif
 #endif

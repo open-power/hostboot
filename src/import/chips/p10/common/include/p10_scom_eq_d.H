@@ -31,10 +31,12 @@
 #define __p10_scom_eq_d_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace eq
 {
+#endif
 
 
 static const uint64_t CC_ATOMIC_LOCK_REG = 0x200303ffull;
@@ -320,9 +322,9 @@ static const uint32_t XSTOP5_XSTOP5_WAIT_CYCLES = 48;
 static const uint32_t XSTOP5_XSTOP5_WAIT_CYCLES_LEN = 12;
 // eq/reg00013.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "eq/reg00013.H"
+}
+}
+#include "eq/reg00013.H"
 #endif
 #endif

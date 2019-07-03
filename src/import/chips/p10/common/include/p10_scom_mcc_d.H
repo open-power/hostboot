@@ -31,10 +31,12 @@
 #define __p10_scom_mcc_d_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace mcc
 {
+#endif
 
 
 static const uint64_t ATCL_CL_CLSCOM_MCPERF0 = 0x0c010c23ull;
@@ -137,9 +139,8 @@ static const uint32_t USTL_USTLCFG_TMPL1_FORCE_MDI_ZERO = 7;
 static const uint32_t USTL_USTLCFG_DATE_ERROR_RETRY_ENABLE = 8;
 static const uint32_t USTL_USTLCFG_LOWLAT_MISS_015_DELAY = 9;
 static const uint32_t USTL_USTLCFG_LOWLAT_MISS_015_DELAY_LEN = 3;
-static const uint32_t USTL_USTLCFG_RESERVED_12_15 = 12;
-static const uint32_t USTL_USTLCFG_RESERVED_12_15_LEN = 4;
-static const uint32_t USTL_USTLCFG_ET_DISABLE = 16;
+static const uint32_t USTL_USTLCFG_RESERVED_12_16 = 12;
+static const uint32_t USTL_USTLCFG_RESERVED_12_16_LEN = 5;
 static const uint32_t USTL_USTLCFG_RETRY_LOL_HOLDOFF_ENABLE = 17;
 static const uint32_t USTL_USTLCFG_MMIOCNFG_READ_LOL_BLOCK_DISABLE = 18;
 static const uint32_t USTL_USTLCFG_TEMPLATE1_ENABLE = 19;
@@ -208,14 +209,14 @@ static const uint32_t USTL_USTLFIRMASK_USTLFIRMASK_FIR_MASK_LEN = 62;
 static const uint64_t USTL_USTLLOLMASK = 0x0c010e12ull;
 
 static const uint32_t USTL_USTLLOLMASK_RECOVER_ENABLE_MASK = 0;
-static const uint32_t USTL_USTLLOLMASK_RECOVER_ENABLE_MASK_LEN = 16;
+static const uint32_t USTL_USTLLOLMASK_RECOVER_ENABLE_MASK_LEN = 19;
 static const uint32_t USTL_USTLLOLMASK_CHECKSTOP_ENABLE_MASK = 32;
-static const uint32_t USTL_USTLLOLMASK_CHECKSTOP_ENABLE_MASK_LEN = 16;
+static const uint32_t USTL_USTLLOLMASK_CHECKSTOP_ENABLE_MASK_LEN = 19;
 // mcc/reg00013.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "mcc/reg00013.H"
+}
+}
+#include "mcc/reg00013.H"
 #endif
 #endif

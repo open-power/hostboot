@@ -31,10 +31,12 @@
 #define __p10_scom_phb_8_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace phb
 {
+#endif
 
 
 static const uint64_t REGS_PFIRMASK_REG_RW = 0x08010843ull;
@@ -58,9 +60,9 @@ static const uint32_t RSB_REGS_UVI_PHB5_SCOM_UV_SEC_INCL_CMP_VALUE = 12;
 static const uint32_t RSB_REGS_UVI_PHB5_SCOM_UV_SEC_INCL_CMP_VALUE_LEN = 40;
 // phb/reg00008.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "phb/reg00008.H"
+}
+}
+#include "phb/reg00008.H"
 #endif
 #endif

@@ -31,10 +31,12 @@
 #define __p10_scom_pec_3_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace pec
 {
+#endif
 
 
 static const uint64_t CLOCK_STAT_NSL = 0x08030009ull;
@@ -155,6 +157,7 @@ static const uint32_t NET_CTRL0_CPLT_RCTRL2 = 21;
 static const uint32_t NET_CTRL0_ADJ_FUNC_CLKSEL = 22;
 static const uint32_t NET_CTRL0_FUNC_LCB_EDIS = 24;
 static const uint32_t NET_CTRL0_TP_FENCE_PCB = 25;
+static const uint32_t NET_CTRL0_LVLTRANS_FENCE = 26;
 static const uint32_t NET_CTRL0_ARRAY_WRITE_ASSIST_EN = 27;
 static const uint32_t NET_CTRL0_HTB_INTEST = 28;
 static const uint32_t NET_CTRL0_HTB_EXTEST = 29;
@@ -247,9 +250,9 @@ static const uint32_t TRA0_TR0_CONFIG_3_D = 24;
 static const uint32_t TRA0_TR0_CONFIG_3_D_LEN = 24;
 // pec/reg00003.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "pec/reg00003.H"
+}
+}
+#include "pec/reg00003.H"
 #endif
 #endif

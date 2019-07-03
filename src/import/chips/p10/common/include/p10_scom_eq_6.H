@@ -31,10 +31,12 @@
 #define __p10_scom_eq_6_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace eq
 {
+#endif
 
 
 static const uint64_t CPLT_CONF1_RW = 0x20000009ull;
@@ -227,9 +229,9 @@ static const uint32_t QME_SCOM_XIVDR2_3 = 32;
 static const uint32_t QME_SCOM_XIVDR2_3_LEN = 32;
 // eq/reg00006.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "eq/reg00006.H"
+}
+}
+#include "eq/reg00006.H"
 #endif
 #endif

@@ -31,10 +31,12 @@
 #define __p10_scom_proc_7_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace proc
 {
+#endif
 
 
 static const uint64_t INT_CQ_PBI_CTL = 0x02010815ull;
@@ -2303,6 +2305,12 @@ static const uint32_t TP_TPCHIP_TPC_OPCG_REG2_SM_LBIST_CNTRL = 48;
 static const uint32_t TP_TPCHIP_TPC_OPCG_REG2_SM_LBIST_CNTRL_LEN = 16;
 // proc/reg00036.H
 
+static const uint64_t TP_TPCHIP_TPC_REGION_CCFLUSH_STATUS = 0x01030016ull;
+
+static const uint32_t TP_TPCHIP_TPC_REGION_CCFLUSH_STATUS_REGION_CCFLUSH = 4;
+static const uint32_t TP_TPCHIP_TPC_REGION_CCFLUSH_STATUS_REGION_CCFLUSH_LEN = 15;
+// proc/reg00036.H
+
 static const uint64_t TP_TPCHIP_TPC_SPATTN_MASK_RW = 0x01040042ull;
 static const uint64_t TP_TPCHIP_TPC_SPATTN_MASK_WO_CLEAR = 0x01040062ull;
 static const uint64_t TP_TPCHIP_TPC_SPATTN_MASK_WO_OR = 0x01040052ull;
@@ -2588,7 +2596,7 @@ static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_MST_1_MVER_SCOMFSI0 = 0x00000d1dull
 // proc/reg00036.H
 
 static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_SCMBL = 0x00000840ull;
-// proc/reg00036.H
+// proc/reg00037.H
 
 static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_SCMDT = 0x0000082cull;
 // proc/reg00037.H
@@ -2646,13 +2654,13 @@ static const uint64_t VAS_VA_RG_SCF_WRMON6WID = 0x0201141eull;
 static const uint64_t VAS_VA_RG_SCF_WRMON7CMP = 0x02011427ull;
 // proc/reg00037.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "proc/reg00033.H"
-    #include "proc/reg00034.H"
-    #include "proc/reg00035.H"
-    #include "proc/reg00036.H"
-    #include "proc/reg00037.H"
+}
+}
+#include "proc/reg00033.H"
+#include "proc/reg00034.H"
+#include "proc/reg00035.H"
+#include "proc/reg00036.H"
+#include "proc/reg00037.H"
 #endif
 #endif

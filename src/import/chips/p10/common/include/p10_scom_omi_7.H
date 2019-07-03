@@ -31,10 +31,12 @@
 #define __p10_scom_omi_7_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace omi
 {
+#endif
 
 
 static const uint64_t CYA_BITS = 0x0c01175full;
@@ -765,10 +767,10 @@ static const uint32_t TXPACKS_1_DD_3_TX_BIT_REGS_CNTL3_PL_RXDET_ENABLE = 52;
 static const uint32_t TXPACKS_1_DD_3_TX_BIT_REGS_CNTL3_PL_RXDET_PULSE = 53;
 // omi/reg00015.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "omi/reg00014.H"
-    #include "omi/reg00015.H"
+}
+}
+#include "omi/reg00014.H"
+#include "omi/reg00015.H"
 #endif
 #endif

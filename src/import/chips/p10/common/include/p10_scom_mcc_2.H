@@ -31,10 +31,12 @@
 #define __p10_scom_mcc_2_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace mcc
 {
+#endif
 
 
 static const uint64_t CRYPTO_DECRYPT_CRYPTOKEY2A = 0x0c010f5cull;
@@ -150,9 +152,9 @@ static const uint32_t WDF_WBMGR_TAG_INFO_SLICE3_BUFFER_OVERRUN = 3;
 static const uint32_t WDF_WBMGR_TAG_INFO_TAG_OVERRUN = 4;
 // mcc/reg00002.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "mcc/reg00002.H"
+}
+}
+#include "mcc/reg00002.H"
 #endif
 #endif

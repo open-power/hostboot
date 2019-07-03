@@ -31,10 +31,12 @@
 #define __p10_scom_pau_2_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace pau
 {
+#endif
 
 
 static const uint64_t AME_AME0_MISC_DEBUG_CONFIG1 = 0x10010bc5ull;
@@ -1125,10 +1127,10 @@ static const uint32_t XTS_REG_CONFIG3_TLBIE_OVERLAP_OP2_EN = 6;
 static const uint32_t XTS_REG_CONFIG3_NVLINK_16CHIP_MODE = 7;
 // pau/reg00003.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "pau/reg00002.H"
-    #include "pau/reg00003.H"
+}
+}
+#include "pau/reg00002.H"
+#include "pau/reg00003.H"
 #endif
 #endif

@@ -31,10 +31,12 @@
 #define __p10_scom_c_2_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace c
 {
+#endif
 
 
 static const uint64_t CPMS_DTIR = 0x200e0e80ull;
@@ -87,6 +89,9 @@ static const uint32_t CPMS_FMMR_SMALL_RESPONSE_DISABLE = 59;
 static const uint32_t CPMS_FMMR_SLOPE_REPORT_SEL = 60;
 static const uint32_t CPMS_FMMR_OVERRIDE_VECTOR_LIMIT = 61;
 static const uint32_t CPMS_FMMR_OVERRIDE_VECTOR_LIMIT_LEN = 3;
+// c/reg00002.H
+
+static const uint64_t EC_LS_LSU_HOLD_OUT_REG10 = 0x200206caull;
 // c/reg00002.H
 
 static const uint64_t EC_LS_LSU_HOLD_OUT_REG6 = 0x200206c6ull;
@@ -291,9 +296,9 @@ static const uint32_t NC_NCMISC_NCSCOMS_NCU_SPEC_BAR_REG_ADDR = 12;
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_SPEC_BAR_REG_ADDR_LEN = 38;
 // c/reg00002.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "c/reg00002.H"
+}
+}
+#include "c/reg00002.H"
 #endif
 #endif

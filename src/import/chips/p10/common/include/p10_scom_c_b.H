@@ -31,10 +31,12 @@
 #define __p10_scom_c_b_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace c
 {
+#endif
 
 
 static const uint64_t CPMS_DHDR = 0x200e0e58ull;
@@ -217,9 +219,9 @@ static const uint32_t RING_FENCE_MASK_LATCH_REG_RING_FENCE_ENABLE_MASK = 1;
 static const uint32_t RING_FENCE_MASK_LATCH_REG_RING_FENCE_ENABLE_MASK_LEN = 31;
 // c/reg00011.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "c/reg00011.H"
+}
+}
+#include "c/reg00011.H"
 #endif
 #endif

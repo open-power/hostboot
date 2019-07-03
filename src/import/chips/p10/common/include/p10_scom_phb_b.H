@@ -31,10 +31,12 @@
 #define __p10_scom_phb_b_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace phb
 {
+#endif
 
 
 static const uint64_t REGS_PE_SPARSE_PAGE_CNTL_REG = 0x03011856ull;
@@ -52,9 +54,9 @@ static const uint64_t RSB_REGS_MASK_REG_WO_AND = 0x0801090cull;
 static const uint64_t RSB_REGS_MASK_REG_WO_OR = 0x0801090dull;
 // phb/reg00011.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "phb/reg00011.H"
+}
+}
+#include "phb/reg00011.H"
 #endif
 #endif

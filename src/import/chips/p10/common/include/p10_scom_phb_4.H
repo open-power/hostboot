@@ -31,10 +31,12 @@
 #define __p10_scom_phb_4_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace phb
 {
+#endif
 
 
 static const uint64_t REGS_NFIR_REG_RW = 0x03011840ull;
@@ -48,9 +50,9 @@ static const uint32_t REGS_NFIR_REG_NFIRNFIR_LEN = 28;
 static const uint64_t RSB_REGS_PHB5_PMON_EVENT_SEL = 0x08010918ull;
 // phb/reg00004.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "phb/reg00004.H"
+}
+}
+#include "phb/reg00004.H"
 #endif
 #endif

@@ -31,10 +31,12 @@
 #define __p10_scom_phb_a_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace phb
 {
+#endif
 
 
 static const uint64_t REGS_CQSTAT_REG = 0x0301184cull;
@@ -57,9 +59,9 @@ static const uint32_t REGS_PHBBAR_REG_PE_PHB_BAR = 0;
 static const uint32_t REGS_PHBBAR_REG_PE_PHB_BAR_LEN = 42;
 // phb/reg00010.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "phb/reg00010.H"
+}
+}
+#include "phb/reg00010.H"
 #endif
 #endif

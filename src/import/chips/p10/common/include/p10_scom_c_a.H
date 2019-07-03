@@ -31,11 +31,16 @@
 #define __p10_scom_c_a_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace c
 {
+#endif
 
+
+static const uint64_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT1 = 0x20020601ull;
+// c/reg00010.H
 
 static const uint64_t EC_PC_FIR_CORE_SYS = 0x2002044aull;
 // c/reg00010.H
@@ -127,9 +132,9 @@ static const uint32_t L3_MISC_L3CERRS_LRU_VIC_ALLOC_REG_ALLOC_MD_CFG = 16;
 static const uint32_t L3_MISC_L3CERRS_LRU_VIC_ALLOC_REG_ALLOC_MD_CFG_LEN = 2;
 // c/reg00010.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "c/reg00010.H"
+}
+}
+#include "c/reg00010.H"
 #endif
 #endif

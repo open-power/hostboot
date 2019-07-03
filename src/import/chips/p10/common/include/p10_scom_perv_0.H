@@ -31,10 +31,12 @@
 #define __p10_scom_perv_0_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace perv
 {
+#endif
 
 
 static const uint64_t CLK_REGION = 0x00030006ull;
@@ -142,7 +144,7 @@ static const uint32_t CPLT_CTRL0_CTRL_CC_FLUSHMODE_INH = 2;
 static const uint32_t CPLT_CTRL0_CTRL_CC_FORCE_ALIGN = 3;
 static const uint32_t CPLT_CTRL0_TC_UNIT_ARY_WRT_THRU_DC = 4;
 static const uint32_t CPLT_CTRL0_TC_UNIT_AVP_MODE = 5;
-static const uint32_t CPLT_CTRL0_TC_CTRL0_BIT6_CHIPLET_ID_DC = 6;
+static const uint32_t CPLT_CTRL0_TC_VITL_PROTECTION = 6;
 static const uint32_t CPLT_CTRL0_CTRL_CC_ABIST_RECOV_DISABLE_DC = 8;
 static const uint32_t CPLT_CTRL0_RESERVED_11A = 11;
 static const uint32_t CPLT_CTRL0_TC_SKIT_MODE_BIST_DC = 12;
@@ -1138,10 +1140,10 @@ static const uint32_t XSTOP_MASK_52 = 52;
 static const uint32_t XSTOP_MASK_53 = 53;
 // perv/reg00001.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "perv/reg00000.H"
-    #include "perv/reg00001.H"
+}
+}
+#include "perv/reg00000.H"
+#include "perv/reg00001.H"
 #endif
 #endif

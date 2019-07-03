@@ -31,10 +31,12 @@
 #define __p10_scom_eq_0_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace eq
 {
+#endif
 
 
 static const uint64_t CLK_REGION = 0x20030006ull;
@@ -129,7 +131,7 @@ static const uint32_t CPLT_CTRL0_CTRL_CC_FLUSHMODE_INH = 2;
 static const uint32_t CPLT_CTRL0_CTRL_CC_FORCE_ALIGN = 3;
 static const uint32_t CPLT_CTRL0_TC_UNIT_ARY_WRT_THRU_DC = 4;
 static const uint32_t CPLT_CTRL0_TC_UNIT_AVP_MODE = 5;
-static const uint32_t CPLT_CTRL0_TC_CTRL0_BIT6_CHIPLET_ID_DC = 6;
+static const uint32_t CPLT_CTRL0_TC_VITL_PROTECTION = 6;
 static const uint32_t CPLT_CTRL0_CTRL_CC_ABIST_RECOV_DISABLE_DC = 8;
 static const uint32_t CPLT_CTRL0_RESERVED_11A = 11;
 static const uint32_t CPLT_CTRL0_TC_UNIT_DETERMINISTIC_TEST_ENA_DC = 13;
@@ -454,6 +456,8 @@ static const uint64_t QME_BCECSR = 0x200e0068ull;
 
 static const uint32_t QME_BCECSR_BUSY = 0;
 static const uint32_t QME_BCECSR_ERROR = 1;
+static const uint32_t QME_BCECSR_START = 2;
+static const uint32_t QME_BCECSR_STOP = 3;
 static const uint32_t QME_BCECSR_RNW = 4;
 static const uint32_t QME_BCECSR_BARSEL = 5;
 static const uint32_t QME_BCECSR_PRIORITY = 6;
@@ -609,9 +613,9 @@ static const uint32_t XSTOP_MASK_52 = 52;
 static const uint32_t XSTOP_MASK_53 = 53;
 // eq/reg00000.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "eq/reg00000.H"
+}
+}
+#include "eq/reg00000.H"
 #endif
 #endif

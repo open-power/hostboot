@@ -31,10 +31,12 @@
 #define __p10_scom_mcc_4_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace mcc
 {
+#endif
 
 
 static const uint64_t ATCL_CL_CLSCOM_MCPERF4 = 0x0c010c22ull;
@@ -106,9 +108,9 @@ static const uint32_t USTL_USTLFIRACT2_USTLFIRACT2_ACTION_2 = 0;
 static const uint32_t USTL_USTLFIRACT2_USTLFIRACT2_ACTION_2_LEN = 62;
 // mcc/reg00004.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "mcc/reg00004.H"
+}
+}
+#include "mcc/reg00004.H"
 #endif
 #endif

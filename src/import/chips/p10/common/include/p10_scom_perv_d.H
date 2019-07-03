@@ -31,10 +31,12 @@
 #define __p10_scom_perv_d_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace perv
 {
+#endif
 
 
 static const uint64_t CC_ATOMIC_LOCK_REG = 0x000303ffull;
@@ -690,9 +692,9 @@ static const uint32_t XSTOP5_XSTOP5_WAIT_CYCLES = 48;
 static const uint32_t XSTOP5_XSTOP5_WAIT_CYCLES_LEN = 12;
 // perv/reg00020.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "perv/reg00020.H"
+}
+}
+#include "perv/reg00020.H"
 #endif
 #endif

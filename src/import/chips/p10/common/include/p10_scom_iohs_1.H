@@ -31,10 +31,12 @@
 #define __p10_scom_iohs_1_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace iohs
 {
+#endif
 
 
 static const uint64_t AXON_CPLT_CTRL5_RW = 0x18000005ull;
@@ -1392,12 +1394,12 @@ static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_STAT1_PL_TX_SEG_TEST_STATUS_LEN
 static const uint64_t RECOV_INTERRUPT_REG = 0x180f001bull;
 // iohs/reg00007.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "iohs/reg00004.H"
-    #include "iohs/reg00005.H"
-    #include "iohs/reg00006.H"
-    #include "iohs/reg00007.H"
+}
+}
+#include "iohs/reg00004.H"
+#include "iohs/reg00005.H"
+#include "iohs/reg00006.H"
+#include "iohs/reg00007.H"
 #endif
 #endif

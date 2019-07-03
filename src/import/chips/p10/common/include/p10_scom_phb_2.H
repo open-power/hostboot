@@ -31,10 +31,12 @@
 #define __p10_scom_phb_2_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace phb
 {
+#endif
 
 
 static const uint64_t REGS_CERR_RPT0_REG = 0x0301184aull;
@@ -62,9 +64,9 @@ static const uint32_t RSB_REGS_UVI_PHB5_SCOM_UV_OFFSET_CNTL_INT_NOTIFY_BASE_ADDR
 static const uint32_t RSB_REGS_UVI_PHB5_SCOM_UV_OFFSET_CNTL_INT_NOTIFY_BASE_INDEX_ENABLE = 8;
 // phb/reg00002.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "phb/reg00002.H"
+}
+}
+#include "phb/reg00002.H"
 #endif
 #endif

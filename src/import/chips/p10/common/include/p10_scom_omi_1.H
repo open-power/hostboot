@@ -31,10 +31,12 @@
 #define __p10_scom_omi_1_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace omi
 {
+#endif
 
 
 static const uint64_t PM_REGS_DLR_APOR = 0x0c011772ull;
@@ -560,10 +562,10 @@ static const uint32_t TXPACKS_1_DD_2_TX_BIT_REGS_STAT1_PL_TX_SEG_TEST_STATUS = 5
 static const uint32_t TXPACKS_1_DD_2_TX_BIT_REGS_STAT1_PL_TX_SEG_TEST_STATUS_LEN = 2;
 // omi/reg00003.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "omi/reg00002.H"
-    #include "omi/reg00003.H"
+}
+}
+#include "omi/reg00002.H"
+#include "omi/reg00003.H"
 #endif
 #endif

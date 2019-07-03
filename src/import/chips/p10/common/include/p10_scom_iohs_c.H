@@ -31,10 +31,12 @@
 #define __p10_scom_iohs_c_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace iohs
 {
+#endif
 
 
 static const uint64_t AXON_CPLT_STAT0 = 0x18000100ull;
@@ -79,7 +81,7 @@ static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_SPATTN_ERR = 2;
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_LXSTOP_ERR = 3;
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_HOSTATTN_ERR = 4;
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_SYS_XSTOP_ERR = 5;
-static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_OOB1_ERR = 6;
+static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_SYS_XSTOP_STAGED_ERR = 6;
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_DBG_TRIG_ERR = 7;
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP01 = 12;
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP02 = 13;
@@ -1607,12 +1609,12 @@ static const uint64_t REGS_PRX1_DLR_APCR = 0x1801103cull;
 static const uint64_t XSTOP_INTERRUPT_REG = 0x180f001cull;
 // iohs/reg00056.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "iohs/reg00053.H"
-    #include "iohs/reg00054.H"
-    #include "iohs/reg00055.H"
-    #include "iohs/reg00056.H"
+}
+}
+#include "iohs/reg00053.H"
+#include "iohs/reg00054.H"
+#include "iohs/reg00055.H"
+#include "iohs/reg00056.H"
 #endif
 #endif

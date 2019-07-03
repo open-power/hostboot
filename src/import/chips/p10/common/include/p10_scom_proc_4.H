@@ -31,10 +31,12 @@
 #define __p10_scom_proc_4_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace proc
 {
+#endif
 
 
 static const uint64_t INT_CQ_END_BAR = 0x0201080bull;
@@ -1317,7 +1319,7 @@ static const uint32_t TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_SPATTN_ERR = 2;
 static const uint32_t TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_LXSTOP_ERR = 3;
 static const uint32_t TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_HOSTATTN_ERR = 4;
 static const uint32_t TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_SYS_XSTOP_ERR = 5;
-static const uint32_t TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_OOB1_ERR = 6;
+static const uint32_t TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_SYS_XSTOP_STAGED_ERR = 6;
 static const uint32_t TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_DBG_TRIG_ERR = 7;
 static const uint32_t TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP01 = 12;
 static const uint32_t TP_TCN1_N1_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP02 = 13;
@@ -2337,7 +2339,6 @@ static const uint32_t TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_PORT_CONTROL_INVERT_P
 static const uint32_t TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_PORT_CONTROL_SPI_SLAVE_RESET = 24;
 static const uint32_t TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_PORT_CONTROL_SPI_SLAVE_RESET_LEN = 4;
 static const uint32_t TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_PORT_CONTROL_LOOPBACK = 28;
-static const uint32_t TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_PORT_CONTROL_MMSPISM_ENABLE = 29;
 // proc/reg00022.H
 
 static const uint64_t TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST3_ERROR_INJECT_ = 0x00070060ull;
@@ -2346,12 +2347,12 @@ static const uint32_t TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST3_ERROR_INJECT__ERROR_R
 static const uint32_t TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST3_ERROR_INJECT__ERROR_REG_Q_LEN = 64;
 // proc/reg00022.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "proc/reg00019.H"
-    #include "proc/reg00020.H"
-    #include "proc/reg00021.H"
-    #include "proc/reg00022.H"
+}
+}
+#include "proc/reg00019.H"
+#include "proc/reg00020.H"
+#include "proc/reg00021.H"
+#include "proc/reg00022.H"
 #endif
 #endif

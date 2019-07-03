@@ -31,10 +31,12 @@
 #define __p10_scom_nmmu_8_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace nmmu
 {
+#endif
 
 
 static const uint64_t FIR1_MASK_REG_RW = 0x02010c43ull;
@@ -45,9 +47,9 @@ static const uint32_t FIR1_MASK_REG_MM_FIR1_MASK = 0;
 static const uint32_t FIR1_MASK_REG_MM_FIR1_MASK_LEN = 46;
 // nmmu/reg00008.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "nmmu/reg00008.H"
+}
+}
+#include "nmmu/reg00008.H"
 #endif
 #endif

@@ -31,10 +31,12 @@
 #define __p10_scom_pec_d_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace pec
 {
+#endif
 
 
 static const uint64_t CC_ATOMIC_LOCK_REG = 0x080303ffull;
@@ -229,9 +231,9 @@ static const uint32_t XSTOP5_XSTOP5_WAIT_CYCLES = 48;
 static const uint32_t XSTOP5_XSTOP5_WAIT_CYCLES_LEN = 12;
 // pec/reg00013.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "pec/reg00013.H"
+}
+}
+#include "pec/reg00013.H"
 #endif
 #endif

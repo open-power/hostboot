@@ -31,10 +31,12 @@
 #define __p10_scom_perv_3_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace perv
 {
+#endif
 
 
 static const uint64_t CLOCK_STAT_NSL = 0x00030009ull;
@@ -228,7 +230,7 @@ static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_CLEAR_ROOT_CTRL1_23_SPARE_TEST =
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_CLEAR_TP_TEST_BURNIN_MODE_DC = 24;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_CLEAR_TPFSI_ARRAY_SET_VBL_TO_VDD_DC = 25;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_CLEAR_ROOT_CTRL1_26_SPARE = 26;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_CLEAR_TP_GLBCK_MEM_TESTCLK_SEL_DC = 27;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_CLEAR_ROOT_CTRL1_27_SPARE = 27;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_CLEAR_ROOT_CTRL1_28_SPARE_TEST_CONTROL = 28;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_CLEAR_ROOT_CTRL1_29_SPARE_TEST_CONTROL = 29;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_CLEAR_ROOT_CTRL1_30_SPARE_TEST_CONTROL = 30;
@@ -403,6 +405,7 @@ static const uint32_t NET_CTRL0_CPLT_RCTRL2 = 21;
 static const uint32_t NET_CTRL0_ADJ_FUNC_CLKSEL = 22;
 static const uint32_t NET_CTRL0_FUNC_LCB_EDIS = 24;
 static const uint32_t NET_CTRL0_TP_FENCE_PCB = 25;
+static const uint32_t NET_CTRL0_LVLTRANS_FENCE = 26;
 static const uint32_t NET_CTRL0_ARRAY_WRITE_ASSIST_EN = 27;
 static const uint32_t NET_CTRL0_HTB_INTEST = 28;
 static const uint32_t NET_CTRL0_HTB_EXTEST = 29;
@@ -805,10 +808,10 @@ static const uint32_t TRA7_TR0_CONFIG_2_B = 24;
 static const uint32_t TRA7_TR0_CONFIG_2_B_LEN = 24;
 // perv/reg00005.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "perv/reg00004.H"
-    #include "perv/reg00005.H"
+}
+}
+#include "perv/reg00004.H"
+#include "perv/reg00005.H"
 #endif
 #endif

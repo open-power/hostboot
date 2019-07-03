@@ -31,10 +31,12 @@
 #define __p10_scom_mc_4_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace mc
 {
+#endif
 
 
 static const uint64_t CLKMON_MONM_CLKRATIO = 0x0c010ff0ull;
@@ -180,6 +182,12 @@ static const uint64_t PCB_OPCG_GO = 0x0c030020ull;
 static const uint32_t PCB_OPCG_GO_PCB_OPCGGO = 0;
 // mc/reg00004.H
 
+static const uint64_t REGION_CCFLUSH_STATUS = 0x0c030016ull;
+
+static const uint32_t REGION_CCFLUSH_STATUS_REGION_CCFLUSH = 4;
+static const uint32_t REGION_CCFLUSH_STATUS_REGION_CCFLUSH_LEN = 15;
+// mc/reg00004.H
+
 static const uint64_t TRA0_TR0_TRACE_LO_DATA_REG = 0x0c010401ull;
 
 static const uint32_t TRA0_TR0_TRACE_LO_DATA_REG_LO_DATA = 0;
@@ -228,9 +236,9 @@ static const uint32_t XSTOP1_XSTOP1_WAIT_CYCLES = 48;
 static const uint32_t XSTOP1_XSTOP1_WAIT_CYCLES_LEN = 12;
 // mc/reg00004.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "mc/reg00004.H"
+}
+}
+#include "mc/reg00004.H"
 #endif
 #endif

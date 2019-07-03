@@ -31,10 +31,12 @@
 #define __p10_scom_pauc_7_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace pauc
 {
+#endif
 
 
 static const uint64_t DL_PPE_WRAP_SCOM_CNTL = 0x10012c60ull;
@@ -207,9 +209,9 @@ static const uint32_t TXIRLM_REGS_ZCAL_FIR_MASK_PB_ZCAL_FIR_ERRS_MASK = 48;
 static const uint32_t TXIRLM_REGS_ZCAL_FIR_MASK_PB_ZCAL_FIR_ERRS_MASK_LEN = 2;
 // pauc/reg00007.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "pauc/reg00007.H"
+}
+}
+#include "pauc/reg00007.H"
 #endif
 #endif

@@ -31,10 +31,12 @@
 #define __p10_scom_pauc_4_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace pauc
 {
+#endif
 
 
 static const uint64_t CLOCK_STAT_ARY = 0x1003000aull;
@@ -208,6 +210,12 @@ static const uint32_t PHY_PPE_WRAP_XIRAMGA_RA_SPRG0 = 32;
 static const uint32_t PHY_PPE_WRAP_XIRAMGA_RA_SPRG0_LEN = 32;
 // pauc/reg00004.H
 
+static const uint64_t REGION_CCFLUSH_STATUS = 0x10030016ull;
+
+static const uint32_t REGION_CCFLUSH_STATUS_REGION_CCFLUSH = 4;
+static const uint32_t REGION_CCFLUSH_STATUS_REGION_CCFLUSH_LEN = 15;
+// pauc/reg00004.H
+
 static const uint64_t TRA0_TR0_TRACE_LO_DATA_REG = 0x10010401ull;
 
 static const uint32_t TRA0_TR0_TRACE_LO_DATA_REG_LO_DATA = 0;
@@ -282,9 +290,9 @@ static const uint32_t XSTOP1_XSTOP1_WAIT_CYCLES = 48;
 static const uint32_t XSTOP1_XSTOP1_WAIT_CYCLES_LEN = 12;
 // pauc/reg00004.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "pauc/reg00004.H"
+}
+}
+#include "pauc/reg00004.H"
 #endif
 #endif

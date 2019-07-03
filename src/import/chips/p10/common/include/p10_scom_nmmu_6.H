@@ -31,10 +31,12 @@
 #define __p10_scom_nmmu_6_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace nmmu
 {
+#endif
 
 
 static const uint64_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW = 0x02010c00ull;
@@ -63,9 +65,9 @@ static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_STORE_LINK_ERR_FIR =
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_LINK_ABORT_FIR = 19;
 // nmmu/reg00006.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "nmmu/reg00006.H"
+}
+}
+#include "nmmu/reg00006.H"
 #endif
 #endif

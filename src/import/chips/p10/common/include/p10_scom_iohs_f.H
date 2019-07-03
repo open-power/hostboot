@@ -31,10 +31,12 @@
 #define __p10_scom_iohs_f_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace iohs
 {
+#endif
 
 
 static const uint64_t AXON_DBG_CBS_CC = 0x18030013ull;
@@ -79,7 +81,7 @@ static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_SPATTN_ERR = 2;
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_LXSTOP_ERR = 3;
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_HOSTATTN_ERR = 4;
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_SYS_XSTOP_ERR = 5;
-static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_OOB1_ERR = 6;
+static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_SYS_XSTOP_STAGED_ERR = 6;
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_DBG_TRIG_ERR = 7;
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP01 = 12;
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP02 = 13;
@@ -1522,12 +1524,12 @@ static const uint64_t TIMEOUT_REG = 0x180f0010ull;
 static const uint64_t VITAL_SCAN_OUT = 0x180f0017ull;
 // iohs/reg00069.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "iohs/reg00066.H"
-    #include "iohs/reg00067.H"
-    #include "iohs/reg00068.H"
-    #include "iohs/reg00069.H"
+}
+}
+#include "iohs/reg00066.H"
+#include "iohs/reg00067.H"
+#include "iohs/reg00068.H"
+#include "iohs/reg00069.H"
 #endif
 #endif

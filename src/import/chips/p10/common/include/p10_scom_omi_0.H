@@ -31,10 +31,12 @@
 #define __p10_scom_omi_0_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace omi
 {
+#endif
 
 
 static const uint64_t ERROR_HOLD = 0x0c011753ull;
@@ -639,10 +641,10 @@ static const uint32_t TXPACKS_1_DD_3_TX_BIT_REGS_MODE1_PL_PL_SPARE_MODE_2 = 62;
 static const uint32_t TXPACKS_1_DD_3_TX_BIT_REGS_MODE1_PL_PL_SPARE_MODE_3 = 63;
 // omi/reg00001.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "omi/reg00000.H"
-    #include "omi/reg00001.H"
+}
+}
+#include "omi/reg00000.H"
+#include "omi/reg00001.H"
 #endif
 #endif

@@ -31,10 +31,12 @@
 #define __p10_scom_nmmu_c_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace nmmu
 {
+#endif
 
 
 static const uint64_t CFG_NMMU_CTL_MISC = 0x02010c53ull;
@@ -68,9 +70,9 @@ static const uint32_t CFG_NMMU_CTL_MISC_NCU_SNP_TLBIE_DEC_RATE = 56;
 static const uint32_t CFG_NMMU_CTL_MISC_NCU_SNP_TLBIE_DEC_RATE_LEN = 8;
 // nmmu/reg00012.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "nmmu/reg00012.H"
+}
+}
+#include "nmmu/reg00012.H"
 #endif
 #endif

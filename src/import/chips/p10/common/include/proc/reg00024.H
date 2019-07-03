@@ -27,10 +27,12 @@
 #ifndef __PROC_REG00024_H_
 #define __PROC_REG00024_H_
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace proc
 {
+#endif
 
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
@@ -15790,6 +15792,90 @@ fapi_try_exit:
 #endif
 }
 
+static inline fapi2::buffer<uint64_t>& SET_TP_TCN1_N1_CPLT_CTRL0_TC_VITL_PROTECTION(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TCN1_N1_CPLT_CTRL0_RW, TP_TCN1_N1_CPLT_CTRL0_WO_CLEAR, TP_TCN1_N1_CPLT_CTRL0_WO_OR));
+#endif
+    return o_data.insertFromRight<TP_TCN1_N1_CPLT_CTRL0_TC_VITL_PROTECTION,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TCN1_N1_CPLT_CTRL0_TC_VITL_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TCN1_N1_CPLT_CTRL0_TC_VITL_PROTECTION(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TCN1_N1_CPLT_CTRL0_RW, TP_TCN1_N1_CPLT_CTRL0_WO_CLEAR, TP_TCN1_N1_CPLT_CTRL0_WO_OR));
+#endif
+    return o_data.insertFromRight<TP_TCN1_N1_CPLT_CTRL0_TC_VITL_PROTECTION,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TCN1_N1_CPLT_CTRL0_TC_VITL_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TCN1_N1_CPLT_CTRL0_TC_VITL_PROTECTION(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TCN1_N1_CPLT_CTRL0_RW, TP_TCN1_N1_CPLT_CTRL0_WO_CLEAR, TP_TCN1_N1_CPLT_CTRL0_WO_OR));
+#endif
+    return o_data.setBit<TP_TCN1_N1_CPLT_CTRL0_TC_VITL_PROTECTION>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TCN1_N1_CPLT_CTRL0_TC_VITL_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TP_TCN1_N1_CPLT_CTRL0_TC_VITL_PROTECTION(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TCN1_N1_CPLT_CTRL0_RW, TP_TCN1_N1_CPLT_CTRL0_WO_CLEAR, TP_TCN1_N1_CPLT_CTRL0_WO_OR));
+#endif
+    return o_data.clearBit<TP_TCN1_N1_CPLT_CTRL0_TC_VITL_PROTECTION>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TCN1_N1_CPLT_CTRL0_TC_VITL_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TP_TCN1_N1_CPLT_CTRL0_TC_VITL_PROTECTION(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TCN1_N1_CPLT_CTRL0_RW, TP_TCN1_N1_CPLT_CTRL0_WO_CLEAR, TP_TCN1_N1_CPLT_CTRL0_WO_OR));
+#endif
+    return i_data.extractToRight<TP_TCN1_N1_CPLT_CTRL0_TC_VITL_PROTECTION,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TCN1_N1_CPLT_CTRL0_TC_VITL_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TP_TCN1_N1_CPLT_CTRL0_TC_VITL_PROTECTION(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TCN1_N1_CPLT_CTRL0_RW, TP_TCN1_N1_CPLT_CTRL0_WO_CLEAR, TP_TCN1_N1_CPLT_CTRL0_WO_OR));
+#endif
+    return i_data.getBit<TP_TCN1_N1_CPLT_CTRL0_TC_VITL_PROTECTION>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TCN1_N1_CPLT_CTRL0_TC_VITL_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
 static inline fapi2::buffer<uint64_t>& SET_TP_TCN1_N1_CPLT_CTRL0_CTRL_CC_ABIST_RECOV_DISABLE_DC(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -20941,6 +21027,101 @@ static inline bool GET_TP_TCN1_N1_PHASE_COUNTER_RESET_PHASECOUNTER_RESET(fapi2::
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     FAPI_ERR("Invalid dial access TP_TCN1_N1_PHASE_COUNTER_RESET_PHASECOUNTER_RESET chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_TP_TCN1_N1_REGION_CCFLUSH_STATUS(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = TP_TCN1_N1_REGION_CCFLUSH_STATUS;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_TP_TCN1_N1_REGION_CCFLUSH_STATUS(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = TP_TCN1_N1_REGION_CCFLUSH_STATUS;
+#endif
+    return fapi2::getScom(i_target, TP_TCN1_N1_REGION_CCFLUSH_STATUS, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_TP_TCN1_N1_REGION_CCFLUSH_STATUS(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(TP_TCN1_N1_REGION_CCFLUSH_STATUS));
+#endif
+    return fapi2::putScom(i_target, TP_TCN1_N1_REGION_CCFLUSH_STATUS, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TCN1_N1_REGION_CCFLUSH_STATUS_REGION_CCFLUSH(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TCN1_N1_REGION_CCFLUSH_STATUS));
+#endif
+    return o_data.insertFromRight<TP_TCN1_N1_REGION_CCFLUSH_STATUS_REGION_CCFLUSH,
+           TP_TCN1_N1_REGION_CCFLUSH_STATUS_REGION_CCFLUSH_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TCN1_N1_REGION_CCFLUSH_STATUS_REGION_CCFLUSH chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TCN1_N1_REGION_CCFLUSH_STATUS_REGION_CCFLUSH(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TCN1_N1_REGION_CCFLUSH_STATUS));
+#endif
+    return o_data.insertFromRight<TP_TCN1_N1_REGION_CCFLUSH_STATUS_REGION_CCFLUSH,
+           TP_TCN1_N1_REGION_CCFLUSH_STATUS_REGION_CCFLUSH_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TCN1_N1_REGION_CCFLUSH_STATUS_REGION_CCFLUSH chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TP_TCN1_N1_REGION_CCFLUSH_STATUS_REGION_CCFLUSH(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TCN1_N1_REGION_CCFLUSH_STATUS));
+#endif
+    return i_data.extractToRight<TP_TCN1_N1_REGION_CCFLUSH_STATUS_REGION_CCFLUSH,
+           TP_TCN1_N1_REGION_CCFLUSH_STATUS_REGION_CCFLUSH_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TCN1_N1_REGION_CCFLUSH_STATUS_REGION_CCFLUSH chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
@@ -30956,53 +31137,10 @@ fapi_try_exit:
 #endif
 }
 
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_TP_TPCHIP_NET_PCBSLN0_RECOV_INTERRUPT_REG(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = TP_TPCHIP_NET_PCBSLN0_RECOV_INTERRUPT_REG;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
 
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_TP_TPCHIP_NET_PCBSLN0_RECOV_INTERRUPT_REG(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = TP_TPCHIP_NET_PCBSLN0_RECOV_INTERRUPT_REG;
-#endif
-    return fapi2::getScom(i_target, TP_TPCHIP_NET_PCBSLN0_RECOV_INTERRUPT_REG, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_TP_TPCHIP_NET_PCBSLN0_RECOV_INTERRUPT_REG(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(TP_TPCHIP_NET_PCBSLN0_RECOV_INTERRUPT_REG));
-#endif
-    return fapi2::putScom(i_target, TP_TPCHIP_NET_PCBSLN0_RECOV_INTERRUPT_REG, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-
-
+#ifndef __PPE_HCODE__
 }
 }
 
+#endif
 #endif

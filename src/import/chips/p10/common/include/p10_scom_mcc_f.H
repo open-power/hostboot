@@ -31,10 +31,12 @@
 #define __p10_scom_mcc_f_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace mcc
 {
+#endif
 
 
 static const uint64_t ATCL_CL_CLSCOM_MCEBUSCL = 0x0c010c29ull;
@@ -64,14 +66,14 @@ static const uint32_t CRYPTO_ENCRYPT_CRYPTONONCEA_NONCEA_LEN = 64;
 static const uint64_t USTL_USTLLOLDROP = 0x0c010e11ull;
 
 static const uint32_t USTL_USTLLOLDROP_A_DROP_REASON = 0;
-static const uint32_t USTL_USTLLOLDROP_A_DROP_REASON_LEN = 18;
+static const uint32_t USTL_USTLLOLDROP_A_DROP_REASON_LEN = 19;
 static const uint32_t USTL_USTLLOLDROP_B_DROP_REASON = 32;
-static const uint32_t USTL_USTLLOLDROP_B_DROP_REASON_LEN = 18;
+static const uint32_t USTL_USTLLOLDROP_B_DROP_REASON_LEN = 19;
 // mcc/reg00015.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "mcc/reg00015.H"
+}
+}
+#include "mcc/reg00015.H"
 #endif
 #endif

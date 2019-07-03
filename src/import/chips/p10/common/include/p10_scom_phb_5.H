@@ -31,10 +31,12 @@
 #define __p10_scom_phb_5_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace phb
 {
+#endif
 
 
 static const uint64_t REGS_NFIRWOF_REG = 0x03011848ull;
@@ -43,9 +45,9 @@ static const uint64_t REGS_NFIRWOF_REG = 0x03011848ull;
 static const uint64_t RSB_REGS_PHB5_PMON_CONFIG = 0x08010917ull;
 // phb/reg00005.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "phb/reg00005.H"
+}
+}
+#include "phb/reg00005.H"
 #endif
 #endif

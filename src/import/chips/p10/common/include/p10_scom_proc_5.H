@@ -31,10 +31,12 @@
 #define __p10_scom_proc_5_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace proc
 {
+#endif
 
 
 static const uint64_t INT_CQ_CFG_STQ1 = 0x02010818ull;
@@ -1060,6 +1062,7 @@ static const uint32_t TP_TCN1_N1_CPLT_CTRL0_TC_UNIT_SYNCCLK_MUXSEL_DC = 1;
 static const uint32_t TP_TCN1_N1_CPLT_CTRL0_CTRL_CC_FLUSHMODE_INH = 2;
 static const uint32_t TP_TCN1_N1_CPLT_CTRL0_CTRL_CC_FORCE_ALIGN = 3;
 static const uint32_t TP_TCN1_N1_CPLT_CTRL0_TC_UNIT_ARY_WRT_THRU_DC = 4;
+static const uint32_t TP_TCN1_N1_CPLT_CTRL0_TC_VITL_PROTECTION = 6;
 static const uint32_t TP_TCN1_N1_CPLT_CTRL0_CTRL_CC_ABIST_RECOV_DISABLE_DC = 8;
 static const uint32_t TP_TCN1_N1_CPLT_CTRL0_RESERVED_11A = 11;
 static const uint32_t TP_TCN1_N1_CPLT_CTRL0_TC_UNIT_DETERMINISTIC_TEST_ENA_DC = 13;
@@ -1147,6 +1150,12 @@ static const uint32_t TP_TCN1_N1_OPCG_ALIGN_OPCG_WAIT_CYCLES_LEN = 12;
 static const uint64_t TP_TCN1_N1_PHASE_COUNTER_RESET = 0x03030028ull;
 
 static const uint32_t TP_TCN1_N1_PHASE_COUNTER_RESET_PHASECOUNTER_RESET = 0;
+// proc/reg00024.H
+
+static const uint64_t TP_TCN1_N1_REGION_CCFLUSH_STATUS = 0x03030016ull;
+
+static const uint32_t TP_TCN1_N1_REGION_CCFLUSH_STATUS_REGION_CCFLUSH = 4;
+static const uint32_t TP_TCN1_N1_REGION_CCFLUSH_STATUS_REGION_CCFLUSH_LEN = 15;
 // proc/reg00024.H
 
 static const uint64_t TP_TCN1_N1_SCAN64CONTSCAN = 0x0303f000ull;
@@ -1437,7 +1446,7 @@ static const uint32_t TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_2_MULTICAST2_GROUP_L
 // proc/reg00024.H
 
 static const uint64_t TP_TPCHIP_NET_PCBSLN0_RECOV_INTERRUPT_REG = 0x020f001bull;
-// proc/reg00024.H
+// proc/reg00025.H
 
 static const uint64_t TP_TPCHIP_NET_PCBSLN1_PLL_LOCK_REG = 0x030f0019ull;
 // proc/reg00025.H
@@ -1804,7 +1813,7 @@ static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C7RR_SOURCE_CORE = 13;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C7RR_SOURCE_CORE_LEN = 2;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C7RR_PAYLOAD = 15;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C7RR_PAYLOAD_LEN = 17;
-// proc/reg00025.H
+// proc/reg00026.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OPITASV3RR = 0x0006c583ull;
 
@@ -2306,7 +2315,7 @@ static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL1_SET_ROOT_
 static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL1_SET_TP_TEST_BURNIN_MODE_DC = 24;
 static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL1_SET_TPFSI_ARRAY_SET_VBL_TO_VDD_DC = 25;
 static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL1_SET_ROOT_CTRL1_26_SPARE = 26;
-static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL1_SET_TP_GLBCK_MEM_TESTCLK_SEL_DC = 27;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL1_SET_ROOT_CTRL1_27_SPARE = 27;
 static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL1_SET_ROOT_CTRL1_28_SPARE_TEST_CONTROL = 28;
 static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL1_SET_ROOT_CTRL1_29_SPARE_TEST_CONTROL = 29;
 static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL1_SET_ROOT_CTRL1_30_SPARE_TEST_CONTROL = 30;
@@ -2539,7 +2548,7 @@ static const uint32_t TP_TPVSB_FSI_W_SBE_FIFO_FSB_UPFIFO_STATUS_FIFO_EOT_FLAGS_L
 
 static const uint32_t TP_TPVSB_FSI_W_SHIFT_CHIP_ID_FSI = 0x00000c09ull;
 static const uint32_t TP_TPVSB_FSI_W_SHIFT_CHIP_ID_FSI_BYTE = 0x00000c24ull;
-// proc/reg00026.H
+// proc/reg00027.H
 
 static const uint32_t TP_TPVSB_FSI_W_SHIFT_STATUS_FSI = 0x00000c07ull;
 static const uint32_t TP_TPVSB_FSI_W_SHIFT_STATUS_FSI_BYTE = 0x00000c1cull;
@@ -2771,13 +2780,13 @@ static const uint64_t VAS_VA_RG_SCF_WRMON3WID = 0x0201141bull;
 static const uint64_t VAS_VA_RG_SCF_WRMON6BAR = 0x02011416ull;
 // proc/reg00027.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "proc/reg00023.H"
-    #include "proc/reg00024.H"
-    #include "proc/reg00025.H"
-    #include "proc/reg00026.H"
-    #include "proc/reg00027.H"
+}
+}
+#include "proc/reg00023.H"
+#include "proc/reg00024.H"
+#include "proc/reg00025.H"
+#include "proc/reg00026.H"
+#include "proc/reg00027.H"
 #endif
 #endif

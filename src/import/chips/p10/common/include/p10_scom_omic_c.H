@@ -31,10 +31,12 @@
 #define __p10_scom_omic_c_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace omic
 {
+#endif
 
 
 static const uint64_t DATASM_REGS_RX_STAT10_PG = 0x800ad84010012c3full;
@@ -43,9 +45,9 @@ static const uint64_t DATASM_REGS_RX_STAT10_PG = 0x800ad84010012c3full;
 static const uint64_t DATASM_REGS_RX_STAT20_PG = 0x800b284010012c3full;
 // omic/reg00012.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "omic/reg00012.H"
+}
+}
+#include "omic/reg00012.H"
 #endif
 #endif

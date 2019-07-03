@@ -31,10 +31,12 @@
 #define __p10_scom_iohs_b_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace iohs
 {
+#endif
 
 
 static const uint64_t ATOMIC_LOCK_REG = 0x180f03ffull;
@@ -1597,13 +1599,13 @@ static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_CNTL8_PL_TX_PSEG_MAIN_0_15_HS_E
 static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_CNTL8_PL_TX_PSEG_MAIN_0_15_HS_EN_LEN = 16;
 // iohs/reg00052.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "iohs/reg00048.H"
-    #include "iohs/reg00049.H"
-    #include "iohs/reg00050.H"
-    #include "iohs/reg00051.H"
-    #include "iohs/reg00052.H"
+}
+}
+#include "iohs/reg00048.H"
+#include "iohs/reg00049.H"
+#include "iohs/reg00050.H"
+#include "iohs/reg00051.H"
+#include "iohs/reg00052.H"
 #endif
 #endif

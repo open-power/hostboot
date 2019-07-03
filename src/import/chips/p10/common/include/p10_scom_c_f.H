@@ -31,10 +31,12 @@
 #define __p10_scom_c_f_H_
 
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace c
 {
+#endif
 
 
 static const uint64_t CPMS_ACCR = 0x200e0e78ull;
@@ -56,8 +58,8 @@ static const uint32_t CPMS_ACCR_SPARE_LEN = 2;
 // c/reg00015.H
 
 static const uint64_t CPMS_MMAR_RW = 0x200e0e38ull;
-static const uint64_t CPMS_MMAR_WO_CLEAR = 0x200e0e3aull;
-static const uint64_t CPMS_MMAR_WO_OR = 0x200e0e3bull;
+static const uint64_t CPMS_MMAR_WO_CLEAR = 0x200e0e3bull;
+static const uint64_t CPMS_MMAR_WO_OR = 0x200e0e3aull;
 
 static const uint32_t CPMS_MMAR_AVAILABLE = 0;
 static const uint32_t CPMS_MMAR_FUNC_RESET = 1;
@@ -204,9 +206,9 @@ static const uint32_t NC_NCMISC_NCSCOMS_NCU_MODE_REG_TLB_CHK_WAIT_DEC_LEN = 8;
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_MODE_REG_SKIP_GRP_SCOPE_EN = 48;
 // c/reg00015.H
 
-}
-}
 #ifndef __PPE_HCODE__
-    #include "c/reg00015.H"
+}
+}
+#include "c/reg00015.H"
 #endif
 #endif
