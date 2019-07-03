@@ -813,12 +813,12 @@ extern "C"
 
             // If the 'is implemented flag' is true for the EFD, AND if the EFD
             // frequency mask contains the frequency mask we are looking for AND
-            // the EFD master rank matches the master rank we are looking for
+            // the EFD master rank bitmap includes the master rank we are looking for
             // then copy the EFD block for the caller.
             if ( (l_efdMetaDataNptr[SPD_EFD_META_DATA_EFD_BYTE_3_OFFSET] &
                   SPD_EFD_META_DATA_EFD_IS_IMPLEMENTED_MASK) &&
                  (l_efdFreqMask & l_freqMask)                               &&
-                 (l_efdDataNptr[EFD_DDR4_MASTER_RANK_ADDR] == l_rankMask) )
+                 (l_efdDataNptr[EFD_DDR4_MASTER_RANK_ADDR] & l_rankMask) )
             {
                 // io_vpdInfo.iv_size and EFD block size compatibility
                 // have been verified above
