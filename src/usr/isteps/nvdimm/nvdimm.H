@@ -122,11 +122,11 @@ enum i2cReg : uint16_t
     SET_ES_POLICY_STATUS = 0x070,
     FIRMWARE_OPS_STATUS = 0x071,
     OPERATIONAL_UNIT_OPS_STATUS = 0x072,
-    RESTORE_FAIL_INFO = 0x088,
-    OPERATIONAL_UNIT_FAIL_INFO = 0x08F,
     CSAVE_INFO = 0x080,
     CSAVE_FAIL_INFO0 = 0x084,
     CSAVE_FAIL_INFO1 = 0x085,
+    RESTORE_FAIL_INFO = 0x088,
+    OPERATIONAL_UNIT_FAIL_INFO = 0x08F,
     NVM_LIFETIME_ERROR_THRESHOLD = 0x090,
     ES_LIFETIME_ERROR_THRESHOLD = 0x091,
     ES_TEMP_ERROR_HIGH_THRESHOLD0 = 0x094,
@@ -320,6 +320,7 @@ enum i2c_in_values : uint8_t
     RESET_CTRLR                                 = 0x01,
     VALID_IMAGE                                 = 0x01,
     RESET_CONTROLLER                            = 0x01,
+    FACTORY_DEFAULT                             = 0x01,
 };
 
 enum i2c_out_values : uint8_t
@@ -336,6 +337,7 @@ enum i2c_out_values : uint8_t
     ES_SUCCESS                  = 0x05,
     CHARGE_SUCCESS              = 0x00,
     NV_READY                    = 0xA5,
+    FACTORY_RESET_IN_PROGRESS   = 0x03,
 };
 
 // Timeout-related enum

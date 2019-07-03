@@ -1734,6 +1734,21 @@
   </attribute>
 
   <attribute>
+    <description>
+      Lab-only trigger to force a factory reset of the NVDIMMs.
+      NOTE: This will erase any saved image and encryption keys.
+    </description>
+    <id>FORCE_NVDIMM_RESET</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+  </attribute>
+
+  <attribute>
     <id>FREQ_CORE_CEILING_MHZ</id>
     <description>
     The maximum core frequency in MHz.

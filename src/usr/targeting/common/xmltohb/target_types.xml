@@ -1848,6 +1848,9 @@
       <id>FIELD_TH_P8EX_L3_LINE_DELETES</id>
     </attribute>
     <attribute>
+      <id>FORCE_NVDIMM_RESET</id>
+    </attribute>
+    <attribute>
       <id>FREQ_CORE_CEILING_MHZ</id>
     </attribute>
     <attribute>

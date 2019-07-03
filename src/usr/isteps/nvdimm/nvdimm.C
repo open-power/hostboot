@@ -47,6 +47,8 @@
 #ifdef __HOSTBOOT_RUNTIME
 #include <runtime/hbrt_utilities.H>
 #include <usr/runtime/rt_targeting.H>
+#else
+#include <initservice/istepdispatcherif.H>
 #endif
 
 using namespace TARGETING;
@@ -1581,6 +1583,93 @@ void nvdimm_restore(TargetHandleList &i_nvdimmList)
 }
 
 /**
+ * @brief Force a factory reset of the NV logic and flash
+ *
+ * @param[in] i_nvdimm - NVDIMM Target
+ */
+errlHndl_t nvdimm_factory_reset(Target *i_nvdimm)
+{
+    TRACFCOMP(g_trac_nvdimm, ENTER_MRK"nvdimm_factory_reset() nvdimm[%X]",
+              get_huid(i_nvdimm));
+    errlHndl_t l_err = nullptr;
+
+    do
+    {
+        // Send the reset command
+        l_err = nvdimmWriteReg(i_nvdimm, NVDIMM_FUNC_CMD, FACTORY_DEFAULT);
+        if( l_err )
+        {
+            break;
+        }
+
+        // Poll 2 minutes for completion
+        //   We could get the timeout value from the dimm but since we're
+        //   doing a hard reset anyway I just want to use a big number that
+        //   can handle any lies that the controller might tell us.
+        uint8_t l_data = 0;
+        constexpr uint64_t MAX_POLL_SECONDS = 120;
+        uint64_t poll = 0;
+        for( poll = 0; poll < MAX_POLL_SECONDS; poll++ )
+        {
+            l_err = nvdimmReadReg(i_nvdimm, NVDIMM_CMD_STATUS0, l_data);
+            if( l_err )
+            {
+                break;
+            }
+
+            if( l_data != FACTORY_RESET_IN_PROGRESS )
+            {
+                break;
+            }
+
+#ifndef __HOSTBOOT_RUNTIME
+            // kick the watchdog since this can take awhile
+            INITSERVICE::sendProgressCode();
+#endif
+
+            // sleep 1 second
+            nanosleep(1, 0);
+        }
+        if( l_err ) { break; }
+
+        // Make an error if it never finished
+        if( poll >= MAX_POLL_SECONDS )
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_factory_reset() nvdimm[%X] - factory reset never completed[%d]",
+                      get_huid(i_nvdimm), l_data);
+            /*@
+             *@errortype
+             *@reasoncode       NVDIMM_NOT_READY
+             *@severity         ERRORLOG_SEV_UNRECOVERABLE
+             *@moduleid         NVDIMM_FACTORY_RESET
+             *@userdata1[0:31]  Ret value from ready register
+             *@userdata1[32:63] Target Huid
+             *@userdata2        Number of seconds waited
+             *@devdesc          NVDIMM factory reset never completed
+             *@custdesc         NVDIMM still in reset
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                        NVDIMM_FACTORY_RESET,
+                        NVDIMM_NOT_READY,
+                        NVDIMM_SET_USER_DATA_1(l_data, get_huid(i_nvdimm)),
+                        MAX_POLL_SECONDS,
+                        ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
+
+            l_err->collectTrace(NVDIMM_COMP_NAME);
+
+            // If nvdimm is not ready for access by now, this is
+            // a failing indication on the NV controller
+            l_err->addPartCallout( i_nvdimm,
+                                   HWAS::NV_CONTROLLER_PART_TYPE,
+                                   HWAS::SRCI_PRIORITY_HIGH);
+        }
+    } while(0);
+
+    return l_err;
+}
+
+/**
  * @brief NVDIMM initialization
  *        - Checks for ready state
  *        - Gathers timeout values
@@ -1600,12 +1689,29 @@ void nvdimm_init(Target *i_nvdimm)
 
     do
     {
+        // Force a factory reset if told to via attribute override
+        //  This will allow us to recover from bad images, lost keys, etc
+        Target* l_sys = nullptr;
+        targetService().getTopLevelTarget( l_sys );
+        assert(l_sys, "nvdimm_init: no TopLevelTarget");
+        if( l_sys->getAttr<ATTR_FORCE_NVDIMM_RESET>() )
+        {
+            l_err = nvdimm_factory_reset(i_nvdimm);
+            if (l_err)
+            {
+                nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR);
+                TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_init() nvdimm[%X], factory reset failed",
+                          get_huid(i_nvdimm));
+                errlCommit(l_err, NVDIMM_COMP_ID);
+            }
+        }
+
         l_err = nvdimmReady(i_nvdimm);
 
         if (l_err)
         {
             nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR);
-            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_int() nvdimm[%X], controller not ready",
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_init() nvdimm[%X], controller not ready",
                       get_huid(i_nvdimm));
             errlCommit(l_err, NVDIMM_COMP_ID);
             break;
@@ -1616,7 +1722,7 @@ void nvdimm_init(Target *i_nvdimm)
         if (l_err)
         {
             nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR);
-            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_int() nvdimm[%X], error retrieving timeout values",
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_init() nvdimm[%X], error retrieving timeout values",
                       get_huid(i_nvdimm));
             errlCommit(l_err, NVDIMM_COMP_ID);
             break;
@@ -1629,7 +1735,7 @@ void nvdimm_init(Target *i_nvdimm)
         if (l_err)
         {
             nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_NOPRSV);
-            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_int() nvdimm[%X], error backing up the DRAM!",
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_init() nvdimm[%X], error backing up the DRAM!",
                       get_huid(i_nvdimm));
             errlCommit(l_err, NVDIMM_COMP_ID);
             break;
