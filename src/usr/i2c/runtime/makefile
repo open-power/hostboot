@@ -34,7 +34,7 @@ MODULE = i2c_rt
 
 #add unique object modules
 #OBJS += rt_i2c.o
-
+#OBJS += $(if $(CONFIG_SUPPORT_EEPROM_CACHING),rt_eepromCache.o)
 #VPATH += ..
 
 include $(ROOTPATH)/config.mk

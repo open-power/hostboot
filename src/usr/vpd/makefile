@@ -31,7 +31,6 @@ include vpd.mk
 #include unique objects
 OBJS += vpd.o
 OBJS += dimmPres.o
-OBJS += ocmb_spd.o
 OBJS += rtvpd_load.o
 
 SUBDIRS += test.d

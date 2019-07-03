@@ -97,20 +97,24 @@ errlHndl_t buildEepromRecordHeader(TARGETING::Target * i_target,
                                     eeprom_addr_t & io_eepromInfo,
                                     eepromRecordHeader & o_eepromRecordHeader);
 
+
+#ifndef __HOSTBOOT_RUNTIME
+
 /**
 *
-* @brief Perform a lookup on the global map g_cachedEeproms to get a
-*        virtual address for a given EEPROM cache entry
+* @brief Check if entry already exists in g_cachedEeproms, if a match is
+*        found then return true. If there is no match, add it to the list
+*        and return false;
 *
-* @param[in] i_eepromRecordHeader
+* @param[in] i_eepromRecordHeader Header for record we want to add to map
 *
-* @pre  It is expected that i_eepromRecordHeader has valid information for
-*       the uniqueID (i2cm_huid, port, engine, devAddr, mux_select)
+* @param[in] i_recordHeaderVaddr Virtual address to PNOR copy of header information
 *
-* @return uint64_t virtual address pointing to the cached eeprom data in pnor
+* @return TRUE if entry is already in map FALSE if this is a new entry
 *
 */
-uint64_t lookupEepromCacheAddr(const eepromRecordHeader& i_eepromRecordHeader);
+bool addEepromToCachedList(const eepromRecordHeader & i_eepromRecordHeader,
+                           const uint64_t i_recordHeaderVaddr);
 
 /**
 *
@@ -127,7 +131,32 @@ uint64_t lookupEepromCacheAddr(const eepromRecordHeader& i_eepromRecordHeader);
 */
 uint64_t lookupEepromHeaderAddr(const eepromRecordHeader& i_eepromRecordHeader);
 
-#ifndef __HOSTBOOT_RUNTIME
+/**
+*
+* @brief Perform a lookup on the global map g_cachedEeproms to get a
+*        virtual address for a given EEPROM cache entry
+*
+* @param[in] i_eepromRecordHeader
+*
+* @pre  It is expected that i_eepromRecordHeader has valid information for
+*       the uniqueID (i2cm_huid, port, engine, devAddr, mux_select)
+*
+* @return uint64_t virtual address pointing to the cached eeprom data in pnor
+*
+*/
+uint64_t lookupEepromCacheAddr(const eepromRecordHeader& i_eepromRecordHeader);
+
+
+/**
+*
+* @brief Print the info found in the Table of Contents of the EECACHE
+*        section of pnor to trace buffer
+*
+* @return void
+*
+*/
+void printTableOfContents(void);
+
 
 /**
 *
@@ -164,16 +193,77 @@ errlHndl_t setIsValidCacheEntry(const TARGETING::Target * i_target,
 *
 */
 errlHndl_t setIsValidCacheEntry(const eepromRecordHeader& i_eepromRecordHeader, bool i_isValid);
+
 /**
 *
-* @brief Print the info found in the Table of Contents of the EECACHE
-*        section of pnor to trace buffer
+* @brief Lookup a given i_eepromRecordHeader in the global map of eeprom
+*        caches and check if the eeprom has changed this IPL or not
+*
+* @param[in] i_eepromRecordHeader we want to look up
+*
+* @return bool Return TRUE if eeprom is found in map AND mark_target_changed
+               was set to true for the eeprom entry. Return FALSE otherwise.
+*
+*/
+bool hasEeepromChanged(const eepromRecordHeader & i_eepromRecordHeader);
+
+/**
+*
+* @brief Lookup a given i_eepromRecordHeader in the global map of eeprom
+*        caches and mark that it has changed this IPL
+*
+* @param[in] i_eepromRecordHeader we want to mark as changed
+*
+* @return void
+*/
+void setEeepromChanged(const eepromRecordHeader & i_eepromRecordHeader);
+#else
+/**
+*
+* @brief Check if entry already exists in g_cachedEeproms, if a match is
+*        found then return true. If there is no match, add it to the list
+*        and return false;
+*
+* @param[in] i_eepromRecordHeader Header for record we want to add to map
+*
+* @param[in] i_recordHeaderVaddr Virtual address to PNOR copy of header information
+*
+* @param[in] i_instance          Node ID that this eeprom is on
+*
+* @return TRUE if entry is already in map FALSE if this is a new entry
+*
+*/
+bool addEepromToCachedList(const eepromRecordHeader & i_eepromRecordHeader,
+                           const uint64_t i_recordHeaderVaddr,
+                           const uint8_t i_instance);
+
+/**
+*
+* @brief Perform a lookup on the global map g_cachedEeproms to get a
+*        virtual address for a given EEPROM cache entry
+*
+* @param[in] i_eepromRecordHeader Header for record we want to add to lookup address for
+*
+* @param[in] i_isntance  Node ID that this eeprom is on
+*
+* @pre  It is expected that i_eepromRecordHeader has valid information for
+*       the uniqueID (i2cm_huid, port, engine, devAddr, mux_select)
+*
+* @return uint64_t virtual address pointing to the cached eeprom data in pnor
+*
+*/
+uint64_t lookupEepromCacheAddr(const eepromRecordHeader& i_eepromRecordHeader,
+                               const uint8_t i_instance);
+
+/**
+*
+* @brief Walk through g_cachedEeproms map and print information about
+*        the cached eeproms found
 *
 * @return void
 *
 */
-void printTableOfContents(void);
-
+void printCurrentCachedEepromMap(void);
 #endif  // __HOSTBOOT_RUNTIME
 }
 

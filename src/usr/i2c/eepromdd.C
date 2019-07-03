@@ -41,6 +41,11 @@
                                 // va_list
 #include "eepromCache.H"
 #include "eepromdd_hardware.H"
+#include <i2c/eepromddreasoncodes.H>
+#ifdef __HOSTBOOT_RUNTIME
+// Need to be able to convert HB target id's to runtime target ids
+#include <targeting/attrrp.H>
+#endif
 
 extern trace_desc_t* g_trac_eeprom;
 
@@ -87,6 +92,7 @@ errlHndl_t resolveSource(TARGETING::Target * i_target,
     err = buildEepromRecordHeader(i_target,
                                   io_i2cInfo,
                                   l_eepromRecordHeader);
+#ifndef __HOSTBOOT_RUNTIME
     // if lookupEepromAddr returns non-zero address
     // then we know it exists in cache somewhere
     if(lookupEepromCacheAddr(l_eepromRecordHeader))
@@ -99,7 +105,46 @@ errlHndl_t resolveSource(TARGETING::Target * i_target,
         TRACDCOMP(g_trac_eeprom,"Eeprom not found in cache, looking at hardware");
         o_source = EEPROM::HARDWARE;
     }
-
+#else
+    uint8_t l_instance = TARGETING::AttrRP::getNodeId(i_target);
+    // if lookupEepromAddr returns non-zero address
+    // then we know it exists in cache somewhere
+    if(lookupEepromCacheAddr(l_eepromRecordHeader, l_instance))
+    {
+        TRACDCOMP(g_trac_eeprom,"Eeprom found in cache, looking at eecache");
+        o_source = EEPROM::CACHE;
+    }
+    else
+    {
+        /*@
+        * @errortype
+        * @moduleid     EEPROM_RESOLVE_SOURCE
+        * @reasoncode   EEPROM_CACHE_NOT_FOUND_IN_MAP
+        * @userdata1[0:7]   i2c_master_huid
+        * @userdata1[8:9]   port on i2c master eeprom slave is on
+        * @userdata1[10:11] engine on i2c master eeprom slave is on
+        * @userdata1[12:13] devAddr of eeprom slave
+        * @userdata1[14:15] muxSelect of eeprom slave (0xFF is not valid)
+        * @userdata2[0:7]   size of eeprom
+        * @devdesc      resolveSource failed to find cache in map during runtime
+        */
+        err = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                        EEPROM_RESOLVE_SOURCE,
+                        EEPROM_CACHE_NOT_FOUND_IN_MAP,
+                        TWO_UINT32_TO_UINT64(
+                            l_eepromRecordHeader.completeRecord.i2c_master_huid,
+                            TWO_UINT16_TO_UINT32(
+                                TWO_UINT8_TO_UINT16(
+                                    l_eepromRecordHeader.completeRecord.port,
+                                    l_eepromRecordHeader.completeRecord.engine),
+                                TWO_UINT8_TO_UINT16(
+                                    l_eepromRecordHeader.completeRecord.devAddr,
+                                    l_eepromRecordHeader.completeRecord.mux_select))),
+                        l_eepromRecordHeader.completeRecord.cache_copy_size,
+                        ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+    }
+#endif
     return err;
 }
 
@@ -185,14 +230,16 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
             {
                 break;
             }
-
-            // If the operation is a write we also need to
-            // "write through" to HW after we write cache
+            // TODO RTC:212469 Complete Work needed for Axone i2c runtime support
+            #ifndef __HOSTBOOT_RUNTIME
             if(i_opType == DeviceFW::WRITE)
             {
+                // If the operation is a write we also need to
+                // "write through" to HW after we write cache
                 err = eepromPerformOpHW(i_opType, i_target,
                                         io_buffer, io_buflen, i2cInfo);
             }
+            #endif
         }
         else if(l_source == EEPROM::HARDWARE)
         {

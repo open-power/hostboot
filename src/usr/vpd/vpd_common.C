@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -155,6 +155,8 @@ bool resolveVpdSource( TARGETING::Target * i_target,
             TRACFCOMP(g_trac_vpd,"resolveVpdSource: READ/WRITE PNOR CONFIG and READ/WRITE HW CONFIG disabled");
         }
     }
+
+    TRACDCOMP(g_trac_vpd,"resolveVpdSource: o_vpdSource = %s" ,o_vpdSource == VPD::PNOR ? "PNOR" : "SEEPROM" );
 
     return badConfig;
 }

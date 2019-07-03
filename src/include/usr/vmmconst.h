@@ -196,8 +196,12 @@ enum BlockPriority
 #define VMM_MODULE_VPD_SIZE (512*KILOBYTE)          /* must be 64KB aligned */
 #define VMM_CENTAUR_VPD_SIZE (256*KILOBYTE)         /* must be 64KB aligned */
 #define VMM_DIMM_JEDEC_VPD_SIZE (256*KILOBYTE)      /* must be 64KB aligned */
+#ifndef CONFIG_SUPPORT_EEPROM_CACHING
 #define VMM_RT_VPD_SIZE ( VMM_MODULE_VPD_SIZE + \
                           VMM_DIMM_JEDEC_VPD_SIZE )
+#else
+#define VMM_RT_VPD_SIZE (512*KILOBYTE) /* 64KB aligned (size EECACHE section size - ecc) */
+#endif
 
 
 /** Internode communication area outside of the HB image.

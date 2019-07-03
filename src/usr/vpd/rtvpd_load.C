@@ -108,6 +108,7 @@ errlHndl_t VPD::vpd_load_rt_image(uint64_t & i_vpd_addr)
 
     do
     {
+#ifndef CONFIG_SUPPORT_EEPROM_CACHING
         void* vptr = reinterpret_cast<void*>(i_vpd_addr);
         uint8_t* vpd_ptr = reinterpret_cast<uint8_t*>(vptr);
 
@@ -137,6 +138,21 @@ errlHndl_t VPD::vpd_load_rt_image(uint64_t & i_vpd_addr)
         {
             break;
         }
+#else
+        // In Axone we store all contents of EEPROMs in EECACHE
+        // so copy the EECACHE pnor section to the space in reserved
+        // memory allocated for VPD.
+        void* vptr = reinterpret_cast<void*>(i_vpd_addr);
+        uint8_t* vpd_ptr = reinterpret_cast<uint8_t*>(vptr);
+
+        err = bld_vpd_image(PNOR::EECACHE,
+                                 vpd_ptr,
+                                 VMM_RT_VPD_SIZE);
+        if(err)
+        {
+            break;
+        }
+#endif
 
     } while( 0 );
 

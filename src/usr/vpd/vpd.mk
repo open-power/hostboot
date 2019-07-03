@@ -34,4 +34,5 @@ OBJS += cvpd.o
 OBJS += pvpd.o
 OBJS += dvpd.o
 OBJS += spd.o
+OBJS += ocmb_spd.o
 OBJS += errlud_vpd.o
