@@ -76,14 +76,14 @@
 /// 14:15 - Undefined (to purposely pad to 4B boundary)
 typedef struct
 {
-    uint16_t iv_magic;
-    uint8_t  iv_version;
-    uint8_t  iv_type;
-    uint16_t iv_size;
-    RingId_t iv_ringId;
-    uint32_t iv_scanAddr;
-    uint16_t iv_selector;  // Must be second last (temp assumption in Mvpd accessor)
-    uint16_t iv_undefined; // Must be last (temp assumption in Mvpd accessor)
+    uint16_t      iv_magic;
+    uint8_t       iv_version;
+    uint8_t       iv_type;
+    uint16_t      iv_size;
+    RingId_t      iv_ringId;
+    uint32_t      iv_scanAddr;
+    Rs4Selector_t iv_selector;  // Must be second last (temp assumption in Mvpd accessor)
+    uint16_t      iv_undefined; // Must be last (temp assumption in Mvpd accessor)
 } CompressedScanData;
 
 #define RS4_V3TOV4_SIZE_INC 4 // Header increase from V3 to V4 (needed by Mvpd accessor)
@@ -123,7 +123,7 @@ compressed_scan_data_translate( CompressedScanData* o_data,
 /// i_data_str that need to be scanned (written). String is left-justified.
 ///
 /// \param[in] i_length The length of the input string in \e bits.  It is
-/// assumed the \a i_string contains at least (\a i_length + 7) / 8 bytes.
+/// assumed the \a i_string contains at most (\a i_length + 7) / 8 bytes.
 ///
 /// \param[in] i_scanAddr The 32-bit scan address.
 ///
@@ -151,14 +151,14 @@ compressed_scan_data_translate( CompressedScanData* o_data,
 /// \returns See \ref scan_compression_codes
 int
 _rs4_compress( CompressedScanData* io_rs4,
-               const uint32_t i_size,
-               const uint8_t* i_data_str,
-               const uint8_t* i_care_str,
-               const uint32_t i_length,
-               const uint32_t i_scanAddr,
-               const RingId_t i_ringId,
-               const uint16_t i_selector,
-               const uint8_t  i_type );
+               const uint32_t      i_size,
+               const uint8_t*      i_data_str,
+               const uint8_t*      i_care_str,
+               const uint32_t      i_length,
+               const uint32_t      i_scanAddr,
+               const RingId_t      i_ringId,
+               const Rs4Selector_t i_selector,
+               const uint8_t       i_type );
 
 
 /// Compress a scan string using the RS4 compression algorithm
@@ -178,7 +178,7 @@ _rs4_compress( CompressedScanData* io_rs4,
 /// i_data_str that need to be scanned (written). String is left-justified.
 ///
 /// \param[in] i_length The length of the input string in \e bits.  It is
-/// assumed the \a i_string contains at least (\a i_length + 7) / 8 bytes.
+/// assumed the \a i_string contains at most (\a i_length + 7) / 8 bytes.
 ///
 /// \param[in] i_scanAddr The 32-bit scan address.
 ///
@@ -195,29 +195,29 @@ _rs4_compress( CompressedScanData* io_rs4,
 /// \returns See \ref scan_compression_codes
 int
 rs4_compress( CompressedScanData** o_rs4,
-              const uint8_t* i_data_str,
-              const uint8_t* i_care_str,
-              const uint32_t i_length,
-              const uint32_t i_scanAddr,
-              const RingId_t i_ringId,
-              const uint16_t i_selector,
-              const uint8_t  i_type );
+              const uint8_t*       i_data_str,
+              const uint8_t*       i_care_str,
+              const uint32_t       i_length,
+              const uint32_t       i_scanAddr,
+              const RingId_t       i_ringId,
+              const Rs4Selector_t  i_selector,
+              const uint8_t        i_type );
 
 
 /// Decompress a scan string compressed using the RS4 compression algorithm
 ///
 /// \param[in,out] io_data_str A caller-supplied data area to contain the
-/// decompressed string. The \a i_stringSize must be large enough to contain
+/// decompressed string. The \a i_size must be large enough to contain
 /// the decompressed string, which is the size of the original string in bits
 /// rounded up to the nearest byte.
 ///
 /// \param[in,out] io_care_str A caller-supplied data area to contain the
-/// decompressed care mask. The \a i_stringSize must be large enough to contain
+/// decompressed care mask. The \a i_size must be large enough to contain
 /// the decompressed care mask, which is the size of the original string in
-/// bits rounded up to the nearest byte.
+/// bits / 8 rounded up to the nearest byte.
 ///
 /// \param[in] i_size The size in \e bytes of \a o_data_str and \a o_care_str
-/// buffers and which represents the max number of raw ring bits x 8 that may
+/// buffers and which represents the max number of raw ring bits / 8 that may
 /// fit into the two raw ring buffers.
 ///
 /// \param[out] o_length The length of the decompressed string in \e bits.
@@ -251,7 +251,7 @@ _rs4_decompress( uint8_t* o_data_str,
 ///
 /// \param[out] o_length The length of the decompressed string and care mask
 /// in \e bits. The caller may assume that \a o_data_str and o_care_str each
-/// contain at least (\a o_length + 7) / 8 \e bytes.
+/// contain at most (\a o_length + 7) / 8 \e bytes.
 ///
 /// \param[in] i_rs4 A pointer to the CompressedScanData header and data to be
 /// decompressed.
@@ -282,7 +282,7 @@ rs4_redundant( const CompressedScanData* i_data, int* o_redundant );
 ///
 /// \returns   true if CMSK ring, false if non-CMSK ring and UNDEFINED_BOOLEAN if any other type
 MyBool_t
-rs4_is_cmsk( const CompressedScanData* i_rs4, uint8_t* o_ivType );
+rs4_is_cmsk( const CompressedScanData* i_rs4, uint8_t& o_ivType );
 
 
 /// Check for Override or Flush ring in RS4
@@ -291,7 +291,7 @@ rs4_is_cmsk( const CompressedScanData* i_rs4, uint8_t* o_ivType );
 ///
 /// \returns  true if Ovrd ring, false if flush ring and UNDEFINED_BOOLEAN if any other type
 MyBool_t
-rs4_is_ovrd(const CompressedScanData* i_rs4, uint8_t* o_ivType);
+rs4_is_ovrd(const CompressedScanData* i_rs4, uint8_t& o_ivType);
 
 
 /// Embed CMSK ring into an RS4 ring
@@ -394,13 +394,15 @@ void print_raw_ring( uint8_t*  data, uint32_t  bits);
 #define RS4_IV_TYPE_OVRD_OVRD       (uint8_t)0b00001000
 #define RS4_IV_TYPE_OVRD_CTX        (uint8_t)0b00001100
 /// Base, dynamic or PLL type of ring
-#define RS4_IV_TYPE_SEL_MASK        (uint8_t)0b01110000
+#define RS4_IV_TYPE_SEL_MASK        (uint8_t)0b11110000
 #define RS4_IV_TYPE_SEL_BASE        (uint8_t)0b00010000 // Ordinary ring
 #define RS4_IV_TYPE_SEL_DYN         (uint8_t)0b00100000 // Dynamic init
 #define RS4_IV_TYPE_SEL_PLL         (uint8_t)0b01000000 // PLL
+#define RS4_IV_TYPE_SEL_FINAL       (uint8_t)0b10000000 // Final overlaid ring
 
 #define UNDEFINED_RS4_TYPE     (uint8_t)0xff
-#define UNDEFINED_RS4_SELECTOR (uint16_t)0xffff
+#define UNDEFINED_RS4_SELECTOR (Rs4Selector_t)0xffff
+#define MAX_RS4_SELECTOR       (Rs4Selector_t)0xff // Practical upper limit of 255
 
 /// \defgroup scan_compression_codes Scan Compression Return Codes
 ///

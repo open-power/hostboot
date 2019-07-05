@@ -31,60 +31,6 @@ namespace P10_RID
 #include <p10_infrastruct_help.H>
 
 
-#ifndef __HOSTBOOT_MODULE  // This is only used by ring_apply in EKB
-
-int ringid_get_raw_ring_file_path( uint32_t        i_magic,
-                                   char*           io_ringPath )
-{
-    int   rc = INFRASTRUCT_RC_SUCCESS;
-    char* l_ringDir = NULL;
-
-    do
-    {
-
-        if ( i_magic == TOR_MAGIC_SBE )
-        {
-            l_ringDir = getenv("IPL_BASE");
-            strcat(io_ringPath, l_ringDir);
-            strcat(io_ringPath, "/");
-        }
-        else if ( i_magic == TOR_MAGIC_QME )
-        {
-            l_ringDir = getenv("RUNTIME_BASE");
-            strcat(io_ringPath, l_ringDir);
-            strcat(io_ringPath, "/");
-        }
-        else if ( i_magic == TOR_MAGIC_OVLY )
-        {
-            l_ringDir = getenv("OVLY_FOLDER");
-            strcat(io_ringPath, l_ringDir);
-            strcat(io_ringPath, "/");
-        }
-        else if ( i_magic == TOR_MAGIC_DYN )
-        {
-            l_ringDir = getenv("DYN_FOLDERS");
-            strcat(io_ringPath, l_ringDir);
-            strcat(io_ringPath, "/");
-        }
-        else if ( i_magic == TOR_MAGIC_OVRD )
-        {
-            // Path already fully qualified. Return io_ringPath as is.
-        }
-        else
-        {
-            MY_ERR("Unsupported value of TOR magic(=0x%08x)\n", i_magic);
-            rc = TOR_INVALID_MAGIC_NUMBER;
-        }
-
-    }
-    while(0);
-
-    return rc;
-}
-
-#endif // End of  ifndef __HOSTBOOT_MODULE
-
-
 int ringid_get_num_ring_ids( ChipId_t   i_chipId,
                              RingId_t*  o_numRingIds )
 {

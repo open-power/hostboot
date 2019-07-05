@@ -42,6 +42,7 @@
 //     INFRASTRUCT TEAM. (These defs affect packing assumptions
 //     of ring structures that go into the image ringSections.)
 typedef uint16_t  RingId_t;         // Type for RingID enum
+typedef uint16_t  Rs4Selector_t;    // Type for dynamic inits and PLL selectors
 typedef uint16_t  RingClass_t;      // Type for RingClass enum vectors used in non-SBE
 typedef uint8_t   ChipletType_t;    // Type for Chiplets enum
 typedef uint8_t   ChipId_t;         // Type for ChipId enum
@@ -61,10 +62,12 @@ typedef uint8_t   MyBool_t;         // false:0, true:1, undefined:UNDEFINED_BOOL
 
 #define  MAX_TOR_RING_OFFSET    (uint16_t)(256*256-1) // Max val of uint16
 
-#define  MAX_RING_PATH_LENGTH   (uint8_t)500
 #define  MAX_RING_NAME_LENGTH   (uint8_t)50
 
 #define  UNDEFINED_BOOLEAN      (MyBool_t)0xff
+
+#define  MIN_INSTANCE_ID       (uint8_t)0x01
+#define  MAX_INSTANCE_ID       (uint8_t)0x3F
 
 //                                                                           //
 //                     Declare assumptions - End                             //
@@ -243,32 +246,27 @@ typedef struct
 #define TOR_FAILURE                           INFRASTRUCT_RC_FAILURE
 #define TOR_CODE_BUG                          INFRASTRUCT_RC_CODE_BUG
 #define TOR_USER_ERROR                        INFRASTRUCT_RC_USER_ERROR
-#define TOR_INVALID_MAGIC_NUMBER              INFRASTRUCT_NOOF_RCS + 1
+#define TOR_HEADER_CHECK_FAILURE              INFRASTRUCT_NOOF_RCS + 1
+#define TOR_INVALID_MAGIC_NUMBER              INFRASTRUCT_NOOF_RCS + 2
 #define TOR_INVALID_CHIP_ID                   INFRASTRUCT_NOOF_RCS + 3
 #define TOR_INVALID_CHIPLET_TYPE              INFRASTRUCT_NOOF_RCS + 4
-#define TOR_INVALID_VARIANT                   INFRASTRUCT_NOOF_RCS + 5
-#define TOR_INVALID_RING_ID                   INFRASTRUCT_NOOF_RCS + 6
-#define TOR_INVALID_INSTANCE_ID               INFRASTRUCT_NOOF_RCS + 7
-#define TOR_INVALID_RING_REQUEST              INFRASTRUCT_NOOF_RCS + 8
-#define TOR_UNSUPPORTED_RING_SECTION          INFRASTRUCT_NOOF_RCS + 9
-#define TOR_RING_NOT_FOUND                    INFRASTRUCT_NOOF_RCS + 10 // to be phased out
-#define TOR_RING_IS_EMPTY                     INFRASTRUCT_NOOF_RCS + 10 // non-fatal replace
+#define TOR_INVALID_RING_ID                   INFRASTRUCT_NOOF_RCS + 5
+#define TOR_INVALID_INSTANCE_ID               INFRASTRUCT_NOOF_RCS + 6
+#define TOR_INVALID_RING_REQUEST              INFRASTRUCT_NOOF_RCS + 7
+#define TOR_UNSUPPORTED_RING_SECTION          INFRASTRUCT_NOOF_RCS + 8
+#define TOR_RING_FILE_NOT_FOUND               INFRASTRUCT_NOOF_RCS + 9
+#define TOR_RING_IS_EMPTY                     INFRASTRUCT_NOOF_RCS + 10
 #define TOR_RING_IS_POPULATED                 INFRASTRUCT_NOOF_RCS + 11
-#define TOR_RING_HAS_NO_TOR_SLOT              INFRASTRUCT_NOOF_RCS + 12 // fatal replace
+#define TOR_RING_HAS_NO_TOR_SLOT              INFRASTRUCT_NOOF_RCS + 12
 #define TOR_AMBIGUOUS_API_PARMS               INFRASTRUCT_NOOF_RCS + 13
 #define TOR_SECTION_NOT_FOUND                 INFRASTRUCT_NOOF_RCS + 14
 #define TOR_DD_LEVEL_NOT_FOUND                INFRASTRUCT_NOOF_RCS + 15
 #define TOR_BUFFER_TOO_SMALL                  INFRASTRUCT_NOOF_RCS + 16
 #define TOR_OFFSET_TOO_BIG                    INFRASTRUCT_NOOF_RCS + 17
-#define TOR_NO_RINGS_FOR_VARIANT              INFRASTRUCT_NOOF_RCS + 18
 #define TOR_SCOM_ADDR_NOT_FOUND               INFRASTRUCT_NOOF_RCS + 19
 #define TOR_RING_NAME_NOT_FOUND               INFRASTRUCT_NOOF_RCS + 20
 #define TOR_NO_RINGS_FOR_CHIP                 INFRASTRUCT_NOOF_RCS + 21
-
-#ifndef __HOSTBOOT_MODULE // Only needed by ring_apply in EKB
-int ringid_get_raw_ring_file_path( uint32_t       i_magic,
-                                   char*          io_directory );
-#endif
+#define TOR_DYN_RING_NOT_FOUND                INFRASTRUCT_NOOF_RCS + 22
 
 // This function returns the main ring properties list associated w/the chip ID.
 int ringid_get_ringProps( ChipId_t           i_chipId,
