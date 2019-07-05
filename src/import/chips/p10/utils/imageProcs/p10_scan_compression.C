@@ -944,11 +944,11 @@ rs4_redundant(const CompressedScanData* i_data, int* o_redundant)
 // Check if RS4 container contains an CMSK or non-CMSK ring and also return masked off
 // iv_type field.
 MyBool_t
-rs4_is_cmsk(const CompressedScanData* i_rs4, uint8_t* o_ivType)
+rs4_is_cmsk(const CompressedScanData* i_rs4, uint8_t& o_ivType)
 {
-    *o_ivType = i_rs4->iv_type;
+    o_ivType = i_rs4->iv_type;
 
-    switch (*o_ivType & RS4_IV_TYPE_CMSK_MASK)
+    switch (o_ivType & RS4_IV_TYPE_CMSK_MASK)
     {
         case RS4_IV_TYPE_CMSK_CMSK:
             return true;
@@ -966,11 +966,11 @@ rs4_is_cmsk(const CompressedScanData* i_rs4, uint8_t* o_ivType)
 // Check if RS4 container contains an Override or Flush ring and also return masked off
 // iv_type field
 MyBool_t
-rs4_is_ovrd(const CompressedScanData* i_rs4, uint8_t* o_ivType)
+rs4_is_ovrd(const CompressedScanData* i_rs4, uint8_t& o_ivType)
 {
-    *o_ivType = i_rs4->iv_type;
+    o_ivType = i_rs4->iv_type;
 
-    switch (*o_ivType & RS4_IV_TYPE_OVRD_MASK)
+    switch (o_ivType & RS4_IV_TYPE_OVRD_MASK)
     {
         case RS4_IV_TYPE_OVRD_OVRD:
             return true;

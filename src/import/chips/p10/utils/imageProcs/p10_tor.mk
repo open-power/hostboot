@@ -25,6 +25,5 @@
 PROCEDURE=p10_tor
 lib$(PROCEDURE)_DEPLIBS += common_ringId
 lib$(PROCEDURE)_DEPLIBS += p10_ringId
-$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/utils/imageProcs)
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/common/utils/imageProcs)
 $(call BUILD_PROCEDURE)

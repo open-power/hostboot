@@ -42,18 +42,16 @@ const uint32_t  MAX_SBE_SEEPROM_SIZE    = 4 * 64 * 1024; // Max SBE Seeprom size
 const uint32_t  MAX_SEEPROM_IMAGE_SIZE  = 4 * ((64 * 1024) / 9 * 8) -
         256; // Max Seeprom image size, excl ECC bits (4 banks).
 const uint32_t  MAX_RT_IMAGE_SIZE       = 1024 * 1024;   // Max Runtime size.
-const uint32_t  MAX_RING_BUF_SIZE       = 60000;         // Max ring buffer size.
+const uint32_t  MAX_RING_BUF_SIZE       = 60000;         // Max ring buffer size (agreed w/HB).
 const uint32_t  MAX_RING_BUF_SIZE_TOOL  = 200000;        // Max ring buf size for tools.
 // (i.e., n3_fure.bin.srd is some
 // 346,000B x 4b/B = 1,384,000b =
 // 173,000B binary w 8b/B)
-const uint32_t  MAX_OVERRIDES_SIZE      = 2 * 1024;      // Max overrides section size.
-const uint32_t  MAX_HBBL_SIZE           = 20 * 1024;     // Max hbbl section size.
+const uint32_t  MAX_DYN_RING_SECTION_SIZE = 1024 * 1024; // Max dynamic ring section size.
+const uint32_t  MAX_OVERRIDES_SIZE      = 2 * 1024;      // Max overrides ring section size.
+const uint32_t  MAX_HBBL_SIZE           = 20 * 1024;     // Max hbbl bin section size.
 
 const uint32_t  MAX_NOOF_DD_LEVELS_IN_IMAGE = 20;
-
-#define INSTANCE_ID_MIN        (uint8_t)0x01
-#define INSTANCE_ID_MAX        (uint8_t)0x3F
 
 #if defined(__FAPI)
     #include <fapi2.H>
