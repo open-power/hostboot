@@ -39,6 +39,7 @@ my $TRAC_ERR = 0;
 my $g_trace = 1;
 
 use XML::Simple;
+
 ################################################################################
 # Set PREFERRED_PARSER to XML::Parser. Otherwise it uses XML::SAX which contains
 # bugs that result in XML parse errors that can be fixed by adjusting white-
@@ -89,6 +90,10 @@ sub loadPnorLayout
 
         my $numOfSides  = scalar (@{$metadataEl->{side}});
         my $sideSize = ($imageSize)/($numOfSides);
+
+        my $currOffset = 0;
+        my $sectionNum = 0;
+        my $isStartingPartition = 1;
 
         trace(2, " $this_func: metadata: imageSize = $imageSize, blockSize=$blockSize, arrangement = $arrangement, numOfSides: $numOfSides, sideSize: $sideSize, tocSize: $tocSize");
 
@@ -170,6 +175,41 @@ sub loadPnorLayout
             $physicalOffset = getNumber($physicalOffset);
             $physicalRegionSize = getNumber($physicalRegionSize);
 
+            # if at first section, set starting offset
+            if ($isStartingPartition == 1)
+            {
+                $currOffset = $physicalOffset;
+                $isStartingPartition = 0;
+            }
+
+            # if physical offset does not exist, calculate it and create new element
+            my $hexOffset;
+            if ($physicalOffset == 0)
+            {
+                $physicalOffset = $currOffset;
+                $hexOffset = sprintf("0x%X", $physicalOffset);
+                trace(3, "$this_func: Calculated physicalOffset = $physicalOffset, for eyeCatch = $eyeCatch");
+                push @{$xml->{section}->[$sectionNum]->{physicalOffset}}, $hexOffset;
+                $currOffset = $currOffset + $physicalRegionSize;
+            }
+            else
+            {
+                # if sections overlap, throw error
+                if ($physicalOffset < $currOffset)
+                {
+                    $hexOffset = sprintf("0x%X", $physicalOffset);
+                    die "ERROR: Collision between sections detected at offset ".$hexOffset."";
+                }
+                $currOffset = $physicalOffset + $physicalRegionSize;
+            }
+            $sectionNum = $sectionNum + 1;
+
+            # align partition by minimum boundary
+            if ($currOffset % PAGE_SIZE != 0)
+            {
+                $currOffset = $currOffset + (PAGE_SIZE - $currOffset % PAGE_SIZE);
+            }
+
             if($physicalRegionSize  + $physicalOffset > $imageSize)
             {
                 die "ERROR: $this_func: Image size ($imageSize) smaller than ".$eyeCatch."'s offset + ".$eyeCatch."'s size (".($physicalOffset + $physicalRegionSize)."). Aborting! ";
@@ -214,6 +254,22 @@ sub loadPnorLayout
         # After all sections have been processed, check for overlaps among them
         checkForOverlap($i_pnorLayoutRef);
     }
+
+    # write xml with offsets to new file
+    my $filename = basename($i_pnorFile, ".xml");
+    $filename = "${filename}WithOffsets.xml";
+
+    # writing to new file with error handling
+    eval
+    {
+        print XMLout($xml, RootName => "pnor", OutputFile => $filename);
+        1;
+    }
+    or do
+    {
+        my $err = $@;
+        die "ERROR: $this_func: Failed to create new XML file with corrected offsets, error = $err";
+    };
 
     return 0;
 }
@@ -377,8 +433,7 @@ sub checkSpaceConstraints
             if ($eyeCatch eq "HBI")
             {
                 print "Adjusting HBI size - ran out of space for test cases\n";
-                my $stopKey = findLayoutKeyByEyeCatch("TEST", \%$i_pnorLayoutRef);
-                adjustSecPhysSize(\%sectionHash, $layoutKey, $filesize, $stopKey);
+                adjustSecPhysSize(\%sectionHash, $layoutKey, $filesize);
             }
             else
             {
@@ -389,37 +444,48 @@ sub checkSpaceConstraints
     trace(1, "Done checkSpaceConstraints");
 }
 
-
-###############################################################################
-# adjustSecPhysSize - Adjust section physical size when running test cases
-#                     and fix up physical offsets between partitions
-#                     (for example HBI and TEST)
-################################################################################
+# sub adjustSecPhysSize
+#
+# Adjust section physical size when running test cases and fix up physical
+# offsets between partitions (for example HBI and all partitions that follow)
+#
+# @param [in] i_sectionHashRef - PNOR layout as a hash table reference
+# @param [in] i_initPartKey - key of initial partition whose physical size will
+#   be adjusted
+# @param [in] i_filesize - final file size of partition (note: actual final size
+#   may be larger than this as the size is adjusted by increments of PAGE_SIZE)
+# @return - N/A
+#
 sub adjustSecPhysSize
 {
-    my ($i_sectionHashRef, $i_secKey, $i_filesize, $i_stopKey) = @_;
+    my ($i_sectionHashRef, $i_initPartKey, $i_filesize) = @_;
+    my $this_func = (caller(0))[3];
 
     my %sectionHash = %$i_sectionHashRef;
 
-    # Increment HBI physical size by PAGE_SIZE until the HBI file can fit
-    my $sec_old = $sectionHash{$i_secKey}{physicalRegionSize};
-    while ($i_filesize > $sectionHash{$i_secKey}{physicalRegionSize})
+    # Increment initial partition physical size by PAGE_SIZE until the initial
+    # partition file can fit
+    my $initPart_old = $sectionHash{$i_initPartKey}{physicalRegionSize};
+    while ($i_filesize > $sectionHash{$i_initPartKey}{physicalRegionSize})
     {
-        $sectionHash{$i_secKey}{physicalRegionSize} += PAGE_SIZE;
+        $sectionHash{$i_initPartKey}{physicalRegionSize} += PAGE_SIZE;
     }
-    my $sec_move = $sectionHash{$i_secKey}{physicalRegionSize} - $sec_old;
-    my $sec_end = $sectionHash{$i_secKey}{physicalRegionSize} + $sec_move;
+    my $initPart_move = $sectionHash{$i_initPartKey}{physicalRegionSize} - $initPart_old;
 
-    # Fix up physical offset affected by HBI size change
+    # Fix up physical offsets affected by initial partition size change
     foreach my $section (keys %sectionHash)
     {
-        # Only fix partitions after HBI and before $i_stopKey
-        if ($sectionHash{$section}{physicalOffset} > $sectionHash{$i_secKey}{physicalOffset}
-            && $sectionHash{$section}{physicalOffset} < $sectionHash{$i_stopKey}{physicalOffset})
+        # Only fix partitions after initial partition
+        if ( $sectionHash{$section}{physicalOffset} >
+             $sectionHash{$i_initPartKey}{physicalOffset} )
         {
-            my $new_location = $sectionHash{$section}{physicalOffset} + $sec_move;
-            print "Moving section $sectionHash{$section}{eyeCatch} forward by $sec_move bytes to $new_location\n";
-            $sectionHash{$section}{physicalOffset} = $new_location;
+            my $origoffset = $sectionHash{$section}{physicalOffset};
+            $sectionHash{$section}{physicalOffset} += $initPart_move;
+            trace(3, "$this_func: Section $sectionHash{$section}{eyeCatch} : " . sprintf("%X",$origoffset) . " --> " . sprintf("%X",$sectionHash{$section}{physicalOffset}));
+        }
+        else
+        {
+            printf "$this_func: Section $sectionHash{$section}{eyeCatch} : unchanged";
         }
     }
 }
@@ -558,7 +624,6 @@ sub checkForOverlap
         $prevEyeCatch=$$i_pnorLayoutRef{sections}{$section}{eyeCatch};
     }
 }
-
 
 ###############################################################################
 # Display Pnor Layout -   Display XML pnor layout more simply
