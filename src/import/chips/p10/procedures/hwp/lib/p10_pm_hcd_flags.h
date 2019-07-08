@@ -105,6 +105,7 @@ enum PM_GPE_OCCFLG3_DEFS
     XGPE_IGNORE_STOP_ACTION                 = 11,
     XGPE_IGNORE_STOP_EXITS                  = 12,
     XGPE_IGNORE_STOP_ENTRIES                = 13,
+    XGPE_IGNORE_STOP_LEN                    = 4,
     XGPE_ACTIVE                             = 16,
     XGPE_IODLR_ACTIVE                       = 17,
     AUX_THREAD_ACTIVE                       = 18,
@@ -179,8 +180,9 @@ enum PM_QME_SCRB_DEFS
 
 enum PM_XGPE_FLAGS
 {
-    XGPE_IODLR_ENABLE_FLAG        = 0x8000,
+    XGPE_IODLR_ENABLE_FLAG               = 0x8000,
     XGPE_OCC_PM_SUSPEND_IMMEDIATE_MODE   = 0x4000,
+    XGPE_PM_SUSPEND_MODE                 = 0x2000,
 };
 //
 //Enum form of per core QME_PCSCR
@@ -189,7 +191,7 @@ enum PM_QME_PCSCR_DEFS
 {
 
     QME_PCSCR_MMA_POFF_DLY_POF2            = 59,
-    QME_PCSCR_MMA_POFF_DLY_POF2_LEN     = 5
+    QME_PCSCR_MMA_POFF_DLY_POF2_LEN        = 5
 };
 
 #ifndef __PPE_PLAT

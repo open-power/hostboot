@@ -157,8 +157,8 @@ p10_block_wakeup_intr(
 
     PUT_TP_TPCHIP_OCC_OCI_OCB_OCCFLG3_WO_OR(l_proc, l_occflg3_data);
 
-    //OISR0 - set IPI3 (that signals xgpe)
-    SET_TP_TPCHIP_OCC_OCI_OCB_OISR0_IPI3(l_data64);
+    //OISR0 - set GPE3_FUNC_TRIGGER (that signals xgpe)
+    l_data64.flush<0>().setBit<11>();
     PUT_TP_TPCHIP_OCC_OCI_OCB_OISR0_WO_OR(l_proc, l_data64);
 
     for (uint32_t i = 0; i < TRIES_BEFORE_TIMEOUT; i++)
