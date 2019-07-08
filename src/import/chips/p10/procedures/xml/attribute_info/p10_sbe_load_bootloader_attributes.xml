@@ -35,6 +35,15 @@
   <initToZero/>
 </attribute>
 <attribute>
+  <id>ATTR_SBE_MASTER_HRMOR_ADDRESS</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>Defines value of HRMOR register for master core.
+  </description>
+  <valueType>uint64</valueType>
+  <writeable/>
+  <initToZero/>
+</attribute>
+<attribute>
   <id>ATTR_HOSTBOOT_HRMOR_OFFSET</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>Defines offset to be applied to SBE bootloader installation
