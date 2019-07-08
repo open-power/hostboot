@@ -730,73 +730,26 @@ uint32_t getChipLevel (TARGETING::Target* i_target)
     TARGETING::ATTR_EC_type l_ec =
       l_chip->getAttr<TARGETING::ATTR_EC>();
 
+    // @TODO RTC 213022: remove this when the EKB constant is available
+    const uint32_t P10_DD1_SI_MODE = 0x0;
+
     // convert to scominfo types
     uint32_t l_chipLevel = 0;
     switch( l_model )
     {
-        case(TARGETING::MODEL_NIMBUS):
+        case(TARGETING::MODEL_POWER10):
             switch(l_ec)
             {
-                case(0x10):
-                    l_chipLevel = P9N_DD1_SI_MODE;
-                    break;
-                case(0x20):
-                case(0x21):
-                case(0x22):
-                case(0x23):
-                    l_chipLevel = P9N_DD2_SI_MODE;
-                    break;
-
-                case(0x00):
-                    // before ATTR_EC is set, default to newest level
-                    l_chipLevel = P9N_DD2_SI_MODE;
-                    break;
+                // @TODO RTC 213022: fix this case and make default the error
+                // case when ATTR_EC actually gets set for P10
                 default:
-                    TRACFCOMP( g_trac_scom,
-                               "Unsupported Nimbus EC 0x%X", l_ec );
-                    assert(false,"Unsupported Nimbus EC");
-            }
-            break;
-        case(TARGETING::MODEL_CUMULUS):
-            switch(l_ec)
-            {
                 case(0x10):
-                case(0x11):
-                case(0x12):
-                case(0x13):
-                    l_chipLevel = P9C_DD1_SI_MODE;
+                    l_chipLevel = P10_DD1_SI_MODE;
                     break;
-                case(0x20):
-                    l_chipLevel = P9C_DD2_SI_MODE;
-                    break;
-
-                case(0x00):
-                    // before ATTR_EC is set, default to newest level
-                    l_chipLevel = P9C_DD2_SI_MODE;
-                    break;
-                default:
+                //default:
                     TRACFCOMP( g_trac_scom,
-                               "Unsupported Cumulus EC 0x%X", l_ec );
-                    assert(false,"Unsupported Cumulus EC");
-            }
-            break;
-        case(TARGETING::MODEL_AXONE):
-            switch(l_ec)
-            {
-                case(0x10):
-                    l_chipLevel = P9A_DD1_SI_MODE;
-                    break;
-                case(0x20):
-                    l_chipLevel = P9A_DD2_SI_MODE;
-                    break;
-                case(0x00):
-                    // before ATTR_EC is set, default to newest level that exists
-                    l_chipLevel = P9A_DD1_SI_MODE;
-                    break;
-                default:
-                    TRACFCOMP( g_trac_scom,
-                               "Unsupported Axone EC 0x%X", l_ec );
-                    assert(false,"Unsupported Axone EC");
+                               "Unsupported P10 EC 0x%X", l_ec );
+                    assert(false,"Unsupported P10 EC");
             }
             break;
         default:

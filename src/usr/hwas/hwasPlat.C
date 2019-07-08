@@ -1145,8 +1145,13 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
         // call deviceRead() to see if they are present
         bool present = false;
         size_t presentSize = sizeof(present);
+
+        /* @TODO RTC 212820: Add this back in when we have vpd/eeprom */
+        (void)presentSize;
+        /*
         errl = deviceRead(pTarget, &present, presentSize,
                                 DEVICE_PRESENT_ADDRESS());
+        */
 
         if (unlikely(errl != NULL))
         {   // errl was set - this is an error condition.
@@ -1160,6 +1165,9 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
             // target is not present - fall thru
             present = false;
         }
+
+        present = true; // @TODO RTC 212820: Remove this line when we can call
+                        // deviceRead
 
         // if TYPE_MCS
         // Need to handle "special" -- DVPD cache relies on this

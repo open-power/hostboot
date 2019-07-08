@@ -38,7 +38,7 @@ include fapi2.mk
 
 # FIXME RTC: 210975
 
-#OBJS += plat_attr_task.o
+OBJS += plat_attr_task.o
 
 include ${ROOTPATH}/config.mk
 

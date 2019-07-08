@@ -213,11 +213,19 @@ const   TaskInfo    g_istep06[]  =   {
                 NULL,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
+        {// @TODO RTC 213026: Remove this fake entry and restore the real 6.11
+         // when we implement the OCC in simics
+                ISTEPNAME(06,11,""),
+                NULL,
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
+        },
+        /*
         {
                 ISTEPNAME(06,11,"host_start_occ_xstop_handler"),
                 ISTEP_06::host_start_occ_xstop_handler,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
+        */
         {
                 ISTEPNAME(06,12,"host_voltage_config"),
                 ISTEP_06::call_host_voltage_config,

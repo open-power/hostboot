@@ -35,6 +35,7 @@
 /******************************************************************************/
 // Includes
 /******************************************************************************/
+
 #include <stdint.h>
 #include <algorithm>
 #include <map>
@@ -735,7 +736,10 @@ errlHndl_t discoverTargets()
                && (l_targetType != TYPE_I2C_MUX))
             {
                 // read Chip ID/EC data from these physical chips
-                errl = platReadIDEC(pTarget);
+
+                // @TODO RTC 212820: Remove this when we have VPD
+                //errl = platReadIDEC(pTarget);
+                errl = NULL;
 
                 if (errl)
                 {
@@ -757,7 +761,10 @@ errlHndl_t discoverTargets()
                 else if (l_targetType == TYPE_PROC)
                 {
                     // read partialGood vector from these as well.
-                    errl = platReadPartialGood(pTarget, pgData);
+
+                    // @TODO RTC 212820: Remove this when we have VPD
+                    //errl = platReadPartialGood(pTarget, pgData);
+                    errl = NULL;
 
                     if (errl)
                     {   // read of PG failed even tho we were present..
@@ -775,9 +782,14 @@ errlHndl_t discoverTargets()
                     {
                         // look at the 'nest' logic to override the
                         //  functionality of this proc
+
+                        // @TODO RTC 212820: Remove this when we have VPD
+                        chipFunctional = true;
+                        /*
                         chipFunctional =
                             isChipFunctional(pTarget,
                                              pgData);
+                        */
 
                         if(!chipFunctional)
                         {
@@ -817,6 +829,9 @@ errlHndl_t discoverTargets()
                                            errlEid,
                                            infoErrl,
                                            createInfoLog);
+
+            // @TODO RTC 212820: Remove this when we have VPD
+            chipPresent = chipFunctional = true;
 
             // set HWAS state to show CHIP is present, functional per above
             enableHwasState(pTarget, chipPresent, chipFunctional, errlEid);
@@ -895,6 +910,7 @@ errlHndl_t discoverTargets()
         //by this function as this function could detect multiple procs w/
         //bad ECs and will make a log for each
         errl = validateProcessorEcLevels();
+
         if (errl)
         {
             HWAS_ERR("discoverTargets: validateProcessorEcLevels failed");

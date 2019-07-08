@@ -248,73 +248,18 @@
   </targetTypeExtension>
 
   <targetTypeExtension>
-    <id>sys-sys-power9</id>
+    <id>sys-sys-power10</id>
     <attribute>
       <id>ALLOW_ATTR_OVERRIDES_IN_SECURE_MODE</id>
     </attribute>
     <attribute>
-      <id>ATTN_CHK_ALL_PROCS</id>
-    </attribute>
-    <attribute>
-      <id>CHKSTOP_ANALYSIS_ON_STARTUP</id>
-    </attribute>
-    <attribute>
-      <id>CLEAR_DIMM_SPD_ENABLE</id>
-    </attribute>
-    <attribute>
-      <id>EARLY_TESTCASES_ISTEP</id>
-    </attribute>
-    <!-- Need to add this explicitly to handle the Axone case -->
-    <attribute>
-      <id>FREQ_MCA_MHZ</id>
-    </attribute>
-    <attribute>
-      <id>HB_EXISTING_IMAGE</id>
-    </attribute>
-    <attribute>
-      <id>HB_MUTEX_TEST_LOCK</id>
-    </attribute>
-    <attribute>
-      <id>HB_RECURSIVE_MUTEX_TEST_LOCK</id>
-    </attribute>
-    <attribute>
-      <id>HB_RSV_MEM_NEXT_SECTION</id>
-    </attribute>
-    <attribute>
       <id>HIDDEN_ERRLOGS_ENABLE</id>
-    </attribute>
-    <attribute>
-      <id>IBSCOM_ENABLE_OVERRIDE</id>
-    </attribute>
-    <attribute>
-      <id>IPC_NODE_BUFFER_GLOBAL_ADDRESS</id>
     </attribute>
     <attribute>
       <id>IS_MPIPL_HB</id>
     </attribute>
     <attribute>
       <id>MASTER_MBOX_SCRATCH</id>
-    </attribute>
-    <attribute>
-      <id>MPIPL_HB_MDRT_COUNT</id>
-    </attribute>
-    <attribute>
-      <id>OCC_COMMON_AREA_PHYS_ADDR</id>
-    </attribute>
-    <attribute>
-      <id>OVERRIDES_ATTEMPTED_FLAG</id>
-    </attribute>
-    <attribute>
-      <id>PDA_CAPTURED_THREAD_REG_ARRAY_ADDR</id>
-    </attribute>
-    <attribute>
-      <id>PDA_CAPTURED_THREAD_REG_ARRAY_SIZE</id>
-    </attribute>
-    <attribute>
-      <id>PDA_THREAD_REG_ENTRY_SIZE</id>
-    </attribute>
-    <attribute>
-      <id>PDA_THREAD_REG_STATE_ENTRY_FORMAT</id>
     </attribute>
   </targetTypeExtension>
 

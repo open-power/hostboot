@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -202,6 +202,9 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
     }
 
     bool present = fsi_present && mvpd_present;
+
+    present = true; // @TODO RTC 212820: Fix this when we have VPD
+
     if( present )
     {
         //Fsp sets PN/SN so if there is none, do it here

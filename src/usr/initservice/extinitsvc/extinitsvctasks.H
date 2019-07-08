@@ -132,7 +132,9 @@ const TaskInfo g_exttaskinfolist[]   =   {
             "libintr.so",                               // taskname
             NULL,                                       // no ptr to fnct
             {
-                START_TASK,                             // task type
+                // @TODO RTC 210643: Change this back to START_TASK when we
+                // are fixing interrupts
+                INIT_TASK,                              // task type
                 EXT_IMAGE,                              // Extended Module
             }
         },
@@ -257,17 +259,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
             }
         },
 
-        /**
-         * @brief inband scom code library
-         */
-        {
-            "libibscom.so" ,                      // taskname
-            NULL,                                 // no pointer to fn
-            {
-               INIT_TASK,                         // task type
-               EXT_IMAGE,                         // Extended Module
-            }
-        },
         /**
          * @brief   fapi2 task, handles attribute override and fapi2 plat intf.
          */

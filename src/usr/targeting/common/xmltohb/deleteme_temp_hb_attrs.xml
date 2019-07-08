@@ -67,6 +67,19 @@
   <enum>IN_SYNC = 1, NOT_IN_SYNC = 0</enum>
 </attribute>
 
+<!-- TODO: This should come from the ekb -->
+<attribute>
+  <id>ATTR_FREQ_CORE_NOMINAL_MHZ</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    The nominal core frequency in MHz.
+    This is the same for all cores in the system.
+    Provided by the #V bucket of module VPD.
+  </description>
+  <valueType>uint32</valueType>
+  <platInit/>
+</attribute>
+
 <attribute>
   <id>ATTR_BOOT_FREQ_MHZ</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>

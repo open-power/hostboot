@@ -430,7 +430,8 @@ void* call_host_voltage_config( void *io_pArgs )
 
                 continue;
             }
-// FIXME RTC: 210975
+// @TODO RTC 213024: Re-enable this when we have the hardware procedures to read
+// voltage data etc.
 #if 0
             //  for each child EQ target
             for( const auto & l_eq : l_eqList )
@@ -616,6 +617,9 @@ void* call_host_voltage_config( void *io_pArgs )
             l_floorFreq = std::max( l_floorFreq, l_dpoFreq );
         }
 
+        // @TODO RTC 213024: Re-enable this loop when we have the
+        // hardware procedures to read voltage data etc.
+        /*
         l_sys->setAttr<ATTR_MIN_FREQ_MHZ>( l_floorFreq );
 
         l_sys->setAttr<ATTR_FREQ_CORE_CEILING_MHZ>( l_ceilingFreq );
@@ -623,6 +627,7 @@ void* call_host_voltage_config( void *io_pArgs )
         l_sys->setAttr<ATTR_FREQ_CORE_MAX>( l_turboFreq );
 
         l_sys->setAttr<ATTR_ULTRA_TURBO_FREQ_MHZ>(l_ultraTurboFreq);
+        */
 
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                 "Setting System Frequency Attributes: "
@@ -638,7 +643,10 @@ void* call_host_voltage_config( void *io_pArgs )
         l_sys->setAttr<ATTR_SOCKET_POWER_NOMINAL>(l_powerModeNom);
         l_sys->setAttr<ATTR_SOCKET_POWER_TURBO>(l_powerModeTurbo);
 
-/* FIXME RTC: 210975
+// @TODO RTC 213024: Re-enable loop when we have the hardware procedures to set
+// up evid etc.
+#if 0
+
         // for each proc target
         for( const auto & l_proc : l_procList )
         {
@@ -660,7 +668,8 @@ void* call_host_voltage_config( void *io_pArgs )
             }
 
         } // PROC for-loop
-*/
+#endif
+
         // If we hit an error from p9_setup_evid, quit
         if( l_err )
         {

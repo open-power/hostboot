@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -30,22 +30,6 @@
 <attributes>
   <targetTypeExtension>
     <id>chip-processor</id>
-    <attribute>
-      <id>CFM_TEST_NV_RO</id>
-    </attribute>
-    <attribute>
-      <id>CFM_TEST_NV_WR</id>
-    </attribute>
-    <attribute>
-      <id>CFM_TEST_VZ</id>
-    </attribute>
-    <attribute>
-      <id>CFM_TEST_V_WR</id>
-    </attribute>
-  </targetTypeExtension>
-
-  <targetTypeExtension>
-    <id>sys-sys-power9</id>
     <attribute>
       <id>CFM_TEST_NV_RO</id>
     </attribute>

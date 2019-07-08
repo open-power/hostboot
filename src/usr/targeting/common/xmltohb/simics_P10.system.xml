@@ -32,6 +32,11 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0</default>
     </attribute>
+    <!-- @TODO RTC 213022: Adjust ASYNC_NEST_FREQ_MHZ to the correct P10 value -->
+    <attribute>
+        <id>ASYNC_NEST_FREQ_MHZ</id>
+        <default>0x7D0</default>
+    </attribute>
     <attribute>
         <id>FAPI_NAME</id>
         <default>k0</default>
@@ -87,6 +92,10 @@
         <default>pu:k0:n0:s0:p00</default>
     </attribute>
     <attribute>
+        <id>PROC_MASTER_TYPE</id>
+        <default>ACTING_MASTER</default>
+    </attribute>
+    <attribute>
         <id>FAPI_POS</id>
         <default>0</default>
     </attribute>
@@ -125,6 +134,7 @@
     <attribute><id>XIVE_THREAD_MGMT1_BAR_ADDR</id>
         <default>0x0006030203180000</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
 </targetInstance>
 
 

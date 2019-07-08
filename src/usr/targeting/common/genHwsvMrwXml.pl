@@ -2999,7 +2999,7 @@ sub generate_sys
 
 <targetInstance>
     <id>sys$sys</id>
-    <type>sys-sys-power9</type>
+    <type>sys-sys-power10</type>
     <attribute>
         <id>FAPI_NAME</id>
         <default>k0</default>

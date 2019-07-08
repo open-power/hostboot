@@ -398,15 +398,12 @@ static void checkProcessorTargeting(TargetService& i_targetService)
                     l_haveOneCorrectProcessor = true;
                 }
                 break;
-/* TODO RTC 208792 - this needs P10 targeting changes first
             case MODEL_POWER10:
                 if(l_coreType == CORE_POWER10)
                 {
                     l_haveOneCorrectProcessor = true;
                 }
                 break;
-*/
-
             default:
                 break;
         };
@@ -490,8 +487,13 @@ static void initializeAttributes(TargetService& i_targetService,
             //otherwise use default level defined by system MRW
             // Risk Level is a 4 bit value that is treated as an integer, but
             //  there is a legacy mode that we need to maintain support for
-            ATTR_RISK_LEVEL_type l_riskLevel =
-              l_pTopLevel->getAttr<ATTR_MRW_DEFAULT_RISK_LEVEL>();
+
+            // @TODO RTC 213021: evaluate whether to add this back b/c of dynamic
+            // inits
+            //ATTR_RISK_LEVEL_type l_riskLevel =
+            //  l_pTopLevel->getAttr<ATTR_MRW_DEFAULT_RISK_LEVEL>();
+
+            ATTR_RISK_LEVEL_type l_riskLevel = 0;
 
             INITSERVICE::SPLESS::MboxScratch8_t l_scratch8;
             l_scratch8.data32 =
@@ -855,6 +857,7 @@ static void adjustMemoryMap( TargetService& i_targetService )
     i_targetService.getTopLevelTarget(l_pTopLevel);
     ATTR_XSCOM_BASE_ADDRESS_type l_xscomBase =
       l_pTopLevel->getAttr<ATTR_XSCOM_BASE_ADDRESS>();
+
     ATTR_LPC_BUS_ADDR_type l_lpcBase =
       l_pTopLevel->getAttr<ATTR_LPC_BUS_ADDR>();
 
@@ -1002,7 +1005,6 @@ static void adjustMemoryMap( TargetService& i_targetService )
         // Handle the rest of the BARs...
     }
 
-
     // Cross-check that what we ended up setting in the attributes
     //  matches the non-TARGETING values that the XSCOM and LPC
     //  drivers computed
@@ -1014,6 +1016,7 @@ static void adjustMemoryMap( TargetService& i_targetService )
            LPC::get_lpc_bar() );
         TARG_ASSERT( false, "LPC BARs are inconsistent" );
     }
+
     if( l_pMasterProcChip->getAttr<ATTR_XSCOM_BASE_ADDRESS>()
         != XSCOM::get_master_bar() )
     {

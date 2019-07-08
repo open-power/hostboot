@@ -514,20 +514,24 @@ void* host_discover_targets( void *io_pArgs )
                 break;
             }
 
-/* FIXME RTC: 210975
             // Mask off the OBUS FIRs (normally part of proc_chiplet_scominit
             // Make the FAPI call to p9_io_obus_firmask_save_restore
+
+            // @TODO RTC 213022: Fix this when we implement the HWP
+            bool l_success = true;
+            /*
             bool l_success = ISTEP::fapiHWPCallWrapperHandler(
                                  ISTEP::P9_OBUS_FIRMASK_SAVE_RESTORE,
                                  l_stepError,
                                  ISTEP_COMP_ID,
                                  TARGETING::TYPE_PROC);
+            */
+
             if( !l_success )
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                           ERR_MRK"Error calling p9_io_obus_firmask_save_restore");
             }
-*/
         }while(0);
 
     }
@@ -574,6 +578,7 @@ void* host_discover_targets( void *io_pArgs )
             l_presData[l_type] |= (0x8000000000000000 >> l_pos);
         }
     }
+
     TARGETING::EntityPath l_epath; //use EntityPath's translation functions
     for( std::map<TARGETING::TYPE,uint64_t>::iterator itr = l_presData.begin();
          itr != l_presData.end();
@@ -617,7 +622,9 @@ void* host_discover_targets( void *io_pArgs )
     if (l_pMasterProcChip)
     {
         // Make the PSU call to get and apply the SBE Capabilities
-        l_err = SBEIO::getPsuSbeCapabilities(l_pMasterProcChip);
+
+        // @TODO RTC 213023: Restore this when SBE is implemented
+        //l_err = SBEIO::getPsuSbeCapabilities(l_pMasterProcChip);
         if (l_err)
         {
             // Commit Error

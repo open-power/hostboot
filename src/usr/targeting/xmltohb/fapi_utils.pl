@@ -253,7 +253,7 @@ sub createTargetExtensionFromFapi(\%,\%)
 
     # Conversions from FAPI2 to TARGETING types
     my $fapi2targ = {
-    TARGET_TYPE_SYSTEM        => "sys-sys-power9",
+    TARGET_TYPE_SYSTEM        => "sys-sys-power10",
     TARGET_TYPE_DIMM          => "lcard-dimm",
     TARGET_TYPE_PROC_CHIP     => "chip-processor",
     TARGET_TYPE_MEMBUF_CHIP   => "chip-membuf-centaur",

@@ -29,8 +29,8 @@ MODULE = errldisplay
 
 # FIXME RTC: 210975
 
-#OBJS += errldisplay.o
-#OBJS += errldisplaydata.o
+OBJS += errldisplay.o
+OBJS += errldisplaydata.o
 
 #PRDF Error Sigs
 #include ${ROOTPATH}/src/usr/diag/prdf/common/rule/prdf_rule.mk
@@ -41,8 +41,8 @@ include ${ROOTPATH}/config.mk
 
 # To find errldisplaydata.C - it is generated
 # by ../errl/parser/genErrlParsers.pl
-#vpath %.C ${GENDIR} ${GENDIR}/plugins/prdf/
-#vpath %.C ${GENDIR} ${GENDIR}/plugins/prdf/rule
+vpath %.C ${GENDIR} ${GENDIR}/plugins/prdf/
+vpath %.C ${GENDIR} ${GENDIR}/plugins/prdf/rule
 
 #To find hbfwErrDisplayPlatHwpErr add extra include paths
 EXTRAINCDIR += ${GENDIR}/plugins
