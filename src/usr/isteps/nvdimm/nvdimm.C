@@ -3035,7 +3035,7 @@ void send_ATTR_NVDIMM_ARMED( Target* i_nvdimm,
 
     // Send attr to HWSV if at runtime
     AttributeTank::Attribute l_attr = {};
-    if( !makeAttribute<ATTR_NVDIMM_ENCRYPTION_ENABLE>
+    if( !makeAttribute<ATTR_NVDIMM_ARMED>
         (i_nvdimm, l_attr) )
     {
         TRACFCOMP(g_trac_nvdimm, ERR_MRK"send_ATTR_NVDIMM_ARMED() Could not create Attribute");
