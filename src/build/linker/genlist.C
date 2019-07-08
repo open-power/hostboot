@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -95,12 +95,35 @@ string g_imageName;
      *  call binutils tools. */
 char* g_crossPrefix = NULL;
 
+    /** Whether we should use cached objdump files (true) or redump the
+        ELF objects (false). */
+bool use_cached_objdump = false;
+
+    /** Print status messages */
+bool verbose = false;
+
+#define VFPRINTF(...)                           \
+    do {                                        \
+        if (verbose)                             \
+            fprintf(__VA_ARGS__);               \
+    } while (0)
+
 int main(int argc, char** argv)
 {
     // Only parameter allowed is the name of the base image.
     if (argc != 2)
     {
         print_usage();
+    }
+
+    verbose = getenv("BUILD_VERBOSE") != NULL;
+
+    use_cached_objdump = getenv("BUILD_FAST") != NULL;
+
+    if (use_cached_objdump) {
+        VFPRINTF(stderr, "Using cached OBJDUMP output\n");
+    } else {
+        VFPRINTF(stderr, "Using fresh OBJDUMP output\n");
     }
 
     // Get base image name from parameters.
@@ -310,18 +333,42 @@ void* read_module_content(void* input)
     // Assumes they are in the same subdirectory.
     string module_path = g_imageName.substr(0, g_imageName.rfind('/') + 1) +
                          module;
+    const string objdump_path =
+        g_imageName.substr(0, g_imageName.rfind('/') + 1) + "/objdump/" + module;
 
-    // Create the 'objdump' command for finding all the symbols and start as
-    // a sub-process.
-    //    -d - Disassemble sections containing code.
-    //    -C - Intersparse C code.
-    //    -S - Demangle symbol names.
-    //    -j .text, .data, .rodata - Only dump those 3 sections.
-    string command = string(g_crossPrefix) +
-                     string("objdump -dCS -j .text -j .data -j .rodata ") +
-                     module_path;
-    FILE* pipe = popen(command.c_str(), "r");
-    if (NULL == pipe) return NULL;
+    FILE* pipe = NULL;
+
+    VFPRINTF(stderr, "GENLIST: Processing %s\n", module_path.c_str());
+
+    if (use_cached_objdump) {
+        string bzcat_command = "bzcat " + objdump_path + ".objdump";
+        pipe = popen(bzcat_command.c_str(), "r");
+
+        if (NULL == pipe) {
+            VFPRINTF(stderr, "GENLIST: Failed to run %s, falling back to live dump\n",
+                     bzcat_command.c_str());
+        }
+    }
+
+    if (pipe == NULL) {
+        // Create the 'objdump' command for finding all the symbols and start as
+        // a sub-process.
+        //    -d - Disassemble sections containing code.
+        //    -C - Intersparse C code.
+        //    -S - Demangle symbol names.
+        //    -j .text, .data, .rodata - Only dump those 3 sections.
+        string objdump_command = string(g_crossPrefix) +
+            string("objdump -dCS -j .text -j .data -j .rodata ") +
+            module_path;
+
+        pipe = popen(objdump_command.c_str(), "r");
+
+        if (NULL == pipe) {
+            fprintf(stderr, "GENLIST: Failed to open pipe for objdump: %s\n",
+                    objdump_command.c_str());
+            return NULL;
+        }
+    }
 
     // Start result string and add module start header.
     string result;

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2017
+# Contributors Listed Below - COPYRIGHT 2013,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -27,13 +27,48 @@
 # Description:
 #     Rules for linking the Hostboot binary images using the custom linker.
 
+# Folder to store *.objdump files in
+OBJDUMP_FOLDER := $(IMGDIR)/objdump
+
+# Clean up after ourselves
+clean: clean-objdump
+
+.PHONY: clean-objdump
+clean-objdump:
+	$(C2) "    MAKE       objdump CLEAN"
+	$(C1)rm -rf $(OBJDUMP_FOLDER)
+
 ifdef IMGS
 _IMGS = $(addprefix $(IMGDIR)/, $(IMGS))
 IMAGES += $(addsuffix .bin, $(_IMGS)) $(addsuffix .elf, $(_IMGS))
 
+ifdef BUILD_FAST
+OBJDUMP_MODULES := $(sort $(foreach img, $(IMGS), $($(img)_MODULES) $($(img)_EXTENDED_MODULES)))
+
+OBJDUMP_BIN_TARGETS := $(addsuffix .elf.objdump, $(IMGS))
+OBJDUMP_LIB_TARGETS := $(addsuffix .so.objdump, $(OBJDUMP_MODULES))
+
+OBJDUMP_TARGETS := $(addprefix $(OBJDUMP_FOLDER)/lib, $(OBJDUMP_LIB_TARGETS))
+OBJDUMP_TARGETS += $(addprefix $(OBJDUMP_FOLDER)/, $(OBJDUMP_BIN_TARGETS))
+
+# Tell make not to delete our objdumps
+.SECONDARY: $(OBJDUMP_TARGETS)
+endif
+
 IMAGE_PASS_POST += $(addsuffix .list.bz2, $(_IMGS)) $(addsuffix .syms, $(_IMGS))
 CLEAN_TARGETS += $(addsuffix .list.bz2, $(_IMGS)) $(addsuffix .syms, $(_IMGS))
 CLEAN_TARGETS += $(addsuffix .lnkout.bz2, $(addprefix $(IMGDIR)/., $(IMGS)))
+
+$(OBJDUMP_FOLDER):
+	mkdir -p $@
+
+$(OBJDUMP_FOLDER)/%.so.objdump: $(IMGDIR)/%.so $(OBJDUMP_FOLDER)
+	$(C2) "    OBJDUMP    $(notdir $*)"
+	$(C1)$(OBJDUMP) -dCS -j .text -j .data -j .rodata $< | bzip2 >$@
+
+$(OBJDUMP_FOLDER)/%.elf.objdump: $(IMGDIR)/%.elf $(OBJDUMP_FOLDER)
+	$(C2) "    OBJDUMP    $(notdir $*)"
+	$(C1)$(OBJDUMP) -dCS -j .text -j .data -j .rodata $< | bzip2 >$@
 
 define ELF_template
 $$(IMGDIR)/$(1).elf: $$(addprefix $$(OBJDIR)/, $$($(1)_OBJECTS)) \
@@ -63,7 +98,7 @@ $(IMGDIR)/%.bin: $(IMGDIR)/%.elf \
         | bzip2 -zc > $(IMGDIR)/.$*.lnkout.bz2'
 	$(C1)$(ROOTPATH)/src/build/tools/addimgid $@ $<
 
-$(IMGDIR)/%.list.bz2 $(IMGDIR)/%.syms: $(IMGDIR)/%.bin
+$(IMGDIR)/%.list.bz2 $(IMGDIR)/%.syms: $(IMGDIR)/%.bin $(OBJDUMP_TARGETS)
 	$(C2) "    GENLIST    $(notdir $*)"
 	$(C1)(cd $(ROOTPATH)&& \
               src/build/linker/gensyms $*.bin \
