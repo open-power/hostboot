@@ -184,9 +184,9 @@ uint32_t mssRestoreDramRepairs<TYPE_MCA>( TargetHandle_t i_target,
 //------------------------------------------------------------------------------
 
 template<>
-uint32_t mssRestoreDramRepairs<TYPE_MEM_PORT>( TargetHandle_t i_target,
-                                               uint8_t & o_repairedRankMask,
-                                               uint8_t & o_badDimmMask )
+uint32_t mssRestoreDramRepairs<TYPE_OCMB_CHIP>( TargetHandle_t i_target,
+                                                uint8_t & o_repairedRankMask,
+                                                uint8_t & o_badDimmMask )
 {
     uint32_t o_rc = SUCCESS;
 
@@ -196,7 +196,7 @@ uint32_t mssRestoreDramRepairs<TYPE_MEM_PORT>( TargetHandle_t i_target,
 
     fapi2::buffer<uint8_t> tmpRepairedRankMask, tmpBadDimmMask;
     FAPI_INVOKE_HWP( errl, mss::restore_repairs,
-                     fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>( i_target ),
+                     fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>( i_target ),
                      tmpRepairedRankMask, tmpBadDimmMask );
 
     if ( NULL != errl )

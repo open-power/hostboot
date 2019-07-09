@@ -171,11 +171,7 @@ void commitSoftError( uint32_t i_reasonCode, TargetHandle_t i_trgt,
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>
-bool processRepairedRanks( TargetHandle_t i_trgt, uint8_t i_repairedRankMask );
-
-template<>
-bool processRepairedRanks<TYPE_MCA>( TargetHandle_t i_trgt,
-                                     uint8_t i_repairedRankMask )
+bool processRepairedRanks( TargetHandle_t i_trgt, uint8_t i_repairedRankMask )
 {
     #define PRDF_FUNC "[processRepairedRanks] "
 
@@ -194,7 +190,7 @@ bool processRepairedRanks<TYPE_MCA>( TargetHandle_t i_trgt,
         // map value has no significance.
         std::map<TargetHandle_t, uint32_t> calloutList;
 
-        ExtensibleChip * mcaChip = (ExtensibleChip *)systemPtr->GetChip(i_trgt);
+        ExtensibleChip * chip = (ExtensibleChip *)systemPtr->GetChip(i_trgt);
 
         for ( uint8_t r = 0; r < MASTER_RANKS_PER_PORT; ++r )
         {
@@ -206,20 +202,18 @@ bool processRepairedRanks<TYPE_MCA>( TargetHandle_t i_trgt,
             MemRank rank ( r );
 
             MemMark cm;
-            if ( SUCCESS != MarkStore::readChipMark<TYPE_MCA>( mcaChip, rank,
-                                                               cm ) )
+            if ( SUCCESS != MarkStore::readChipMark<T>( chip, rank, cm ) )
             {
-                PRDF_ERR( PRDF_FUNC "readChipMark<TYPE_MCA>(0x%08x,0x%02x) "
-                          "failed", mcaChip->getHuid(), rank.getKey() );
+                PRDF_ERR( PRDF_FUNC "readChipMark<T>(0x%08x,0x%02x) "
+                          "failed", chip->getHuid(), rank.getKey() );
                 continue; // skip this rank
             }
 
             MemMark sm;
-            if ( SUCCESS != MarkStore::readSymbolMark<TYPE_MCA>( mcaChip, rank,
-                                                                 sm ) )
+            if ( SUCCESS != MarkStore::readSymbolMark<T>( chip, rank, sm ) )
             {
-                PRDF_ERR( PRDF_FUNC "readSymbolMark<TYPE_MCA>(0x%08x,0x%02x) "
-                          "failed", mcaChip->getHuid(), rank.getKey() );
+                PRDF_ERR( PRDF_FUNC "readSymbolMark<T>(0x%08x,0x%02x) "
+                          "failed", chip->getHuid(), rank.getKey() );
                 continue; // skip this rank
             }
 
@@ -229,9 +223,8 @@ bool processRepairedRanks<TYPE_MCA>( TargetHandle_t i_trgt,
 
                 if ( NULL == errl )
                 {
-                    errl = createErrl<TYPE_MCA>( PRDF_DETECTED_FAIL_HARDWARE,
-                                                 i_trgt,
-                                                 PRDFSIG_RdrRepairsUsed );
+                    errl = createErrl<T>( PRDF_DETECTED_FAIL_HARDWARE,
+                                          i_trgt, PRDFSIG_RdrRepairsUsed );
                 }
 
                 std::vector<MemSymbol> symList;
@@ -261,16 +254,16 @@ bool processRepairedRanks<TYPE_MCA>( TargetHandle_t i_trgt,
         // Callout all DIMMs in the map.
         for ( auto const & dimm : calloutList )
         {
-            __calloutDimm<TYPE_MCA>( errl, i_trgt, dimm.first );
+            __calloutDimm<T>( errl, i_trgt, dimm.first );
         }
 
         // Commit the error log, if needed.
-        commitErrl<TYPE_MCA>( errl, i_trgt );
+        commitErrl<T>( errl, i_trgt );
 
         // Commit an additional error log indicating something failed in the
         // analysis, if needed.
-        commitSoftError<TYPE_MCA>( PRDF_DETECTED_FAIL_SOFTWARE, i_trgt,
-            PRDFSIG_RdrInternalFail, analysisErrors );
+        commitSoftError<T>( PRDF_DETECTED_FAIL_SOFTWARE, i_trgt,
+                            PRDFSIG_RdrInternalFail, analysisErrors );
     }while(0);
 
     return o_calloutMade;
@@ -278,13 +271,18 @@ bool processRepairedRanks<TYPE_MCA>( TargetHandle_t i_trgt,
     #undef PRDF_FUNC
 }
 
+
+template
+bool processRepairedRanks<TYPE_MCA>( TargetHandle_t i_trgt,
+                                     uint8_t i_repairedRankMask );
+template
+bool processRepairedRanks<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
+                                           uint8_t i_repairedRankMask );
+
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>
-bool processBadDimms( TargetHandle_t i_trgt, uint8_t i_badDimmMask );
-
-template<>
-bool processBadDimms<TYPE_MCA>( TargetHandle_t i_trgt, uint8_t i_badDimmMask )
+bool processBadDimms( TargetHandle_t i_trgt, uint8_t i_badDimmMask )
 {
     #define PRDF_FUNC "[processBadDimms] "
 
@@ -310,28 +308,34 @@ bool processBadDimms<TYPE_MCA>( TargetHandle_t i_trgt, uint8_t i_badDimmMask )
         {
             if ( NULL == errl )
             {
-                errl = createErrl<TYPE_MCA>( PRDF_DETECTED_FAIL_HARDWARE,
-                                             i_trgt, PRDFSIG_RdrRepairUnavail );
+                errl = createErrl<T>( PRDF_DETECTED_FAIL_HARDWARE,
+                                      i_trgt, PRDFSIG_RdrRepairUnavail );
             }
 
-            __calloutDimm<TYPE_MCA>( errl, i_trgt, dimm );
+            __calloutDimm<T>( errl, i_trgt, dimm );
 
             o_calloutMade = true;
         }
     }
 
     // Commit the error log, if needed.
-    commitErrl<TYPE_MCA>( errl, i_trgt );
+    commitErrl<T>( errl, i_trgt );
 
     // Commit an additional error log indicating something failed in the
     // analysis, if needed.
-    commitSoftError<TYPE_MCA>( PRDF_DETECTED_FAIL_SOFTWARE, i_trgt,
-                               PRDFSIG_RdrInternalFail, analysisErrors );
+    commitSoftError<T>( PRDF_DETECTED_FAIL_SOFTWARE, i_trgt,
+                        PRDFSIG_RdrInternalFail, analysisErrors );
 
     return o_calloutMade;
 
     #undef PRDF_FUNC
 }
+
+template
+bool processBadDimms<TYPE_MCA>( TargetHandle_t i_trgt, uint8_t i_badDimmMask );
+template
+bool processBadDimms<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
+                                      uint8_t i_badDimmMask );
 
 //------------------------------------------------------------------------------
 
@@ -380,6 +384,25 @@ void deployDramSpares( TargetHandle_t i_trgt,
 template<>
 void deployDramSpares<TYPE_MCA>( TargetHandle_t i_trgt,
                                  const std::vector<MemRank> & i_ranks ){}
+
+template<>
+void deployDramSpares<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
+                                       const std::vector<MemRank> & i_ranks )
+{
+    for ( auto & rank : i_ranks )
+    {
+        MemSymbol sym = MemSymbol::fromSymbol( i_trgt, rank, 71 );
+
+        int32_t l_rc = mssSetSteerMux<TYPE_OCMB_CHIP>(i_trgt, rank, sym, false);
+        if ( SUCCESS != l_rc )
+        {
+            // mssSetSteerMux() will print a trace and commit the error log,
+            // however, we need to handle the return code or we get a compile
+            // warning in Hostboot.
+            continue;
+        }
+    }
+}
 
 } // end namespace RDR
 
@@ -479,6 +502,8 @@ uint32_t restoreDramRepairs( TargetHandle_t i_trgt )
 
 template
 uint32_t restoreDramRepairs<TYPE_MCA>( TargetHandle_t i_trgt );
+template
+uint32_t restoreDramRepairs<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt );
 
 //------------------------------------------------------------------------------
 
