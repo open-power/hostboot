@@ -305,6 +305,8 @@ fsp.tar_CONTENTS = \
     src/build/buildpnor/genPnorImages.pl \
     src/build/buildpnor/buildUcdFlashImages.pl \
     src/build/buildpnor/buildBpmFlashImages.pl \
+    src/build/buildpnor/bpm-utils/insertBpmFwCrc.py \
+    src/build/buildpnor/bpm-utils/imageCrc.c \
     src/build/buildpnor/PnorUtils.pm \
     src/build/buildpnor/imprintHwKeyHash \
     src/build/buildpnor/pkgOcmbFw.pl \

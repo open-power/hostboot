@@ -32,12 +32,16 @@ use Pod::Usage;
 
 my $progName = File::Basename::basename $0;
 my $outputDir=".";
+my $bpmUtilScript="./bpm-utils/insertBpmFwCrc.py";
+my $bpmCrcProgram="./bpm-utils/imageCrc";
 my @files;
 my $cfgHelp=0;
 my $cfgMan=0;
 my $verbose=0;
 
 GetOptions("output-dir=s" => \$outputDir,
+           "bpm-util-script=s" => \$bpmUtilScript,
+           "bpm-crc-program=s" => \$bpmCrcProgram,
            "image=s" => \@files,
            "help" => \$cfgHelp,
            "verbose" => \$verbose,
@@ -82,6 +86,7 @@ for my $file (@files)
         print "    $file\n";
     }
 
+    generateConfigImage($file,$outputDir);
     generateFirmwareImage($file,$outputDir);
 }
 
@@ -105,22 +110,26 @@ for my $file (@files)
 #           MM mm NN NN XX AD DR DD DD DD DD
 #
 # @param[in] i_fileName    Name of file
-# @param[in] i_outputDir   Dir to emit intermediate file to
+# @param[in] i_outputDir   Dir to emit binary to
 #
 # @return N/A
 ################################################################################
-
 sub generateFirmwareImage
 {
     my ($i_fileName, $i_outputDir) = @_;
     my $this_func = (caller(0))[3];
+
+#    my $intermediateFileName = generateIntermediateImage($i_fileName);
+#
+#    open my $inputFileHandle, '<:encoding(UTF-8)', $intermediateFileName
+#        or die "Failed to open $intermediateFileName";
 
     open my $inputFileHandle, '<:encoding(UTF-8)', $i_fileName
         or die "Failed to open $i_fileName";
 
     my ($name, @version) = generateOutputNameAndVersion($i_fileName);
 
-    my $imageFile = $i_outputDir . "/" . $name . ".bin";
+    my $imageFile = $i_outputDir . "/" . $name . "FW.bin";
 
     open my $outputFileHandle, '>:raw', $imageFile
         or die "Failed to open $imageFile";
@@ -245,6 +254,7 @@ sub generateFirmwareImage
     if (!defined($blocks))
     {
         die "Unable to process image file: $i_fileName";
+        #die "Unable to process image file: $intermediateFileName";
     }
 
     # Write the version information to the file.
@@ -260,11 +270,401 @@ sub generateFirmwareImage
     print $outputFileHandle $blocks
         or die "Failed to write to output file: $imageFile";
 
-    close $inputFileHandle or die "Failed to close input file: $i_fileName";
+    close $inputFileHandle
+        or die "Failed to close input file: $i_fileName";
+#    unlink $intermediateFileName
+#        or die "Failed to remove temporary file $intermediateFileName";
     close $outputFileHandle
         or die "Failed to close output file: $imageFile";
 }
 
+################################################################################
+# @brief Processes an input file to pull information from its name and content
+#        to be used when preparing the output file's binary image. This function
+#        will only emit the binaries for the configuration data portion of the
+#        BPM update.
+#        The final binary will be organized in the following way:
+#        Byte 1:     Major version number (MM)
+#        Byte 2:     Minor version number (mm)
+#        Byte 3:     N number of fragments in the file (NN)
+#        Byte 4-EOF: Fragments of the form:
+#                  FRAGMENT_SIZE   Byte 1:   X number of bytes in fragment data
+#                                            section. (XX)
+#                  INDEX_OFFSET    Byte 2-3: Each BPM's config section is unique
+#                                            to itself. So, during update the
+#                                            contents of a BPM's config data
+#                                            will be dumped into a buffer.
+#                                            These bytes will be used as an
+#                                            offset into that buffer from which
+#                                            overwritting will take place.
+#                                            (IN DX)
+#                  DATA_BYTES      Byte 4-X: Configuration data bytes (DD)
+#
+#        Example file output:
+#           01 05 01 04 01 28 6a 14 31 80
+#           MM mm NN XX IN DX DD DD DD DD
+#
+# @algorithm    Each BPM has a config data section unique to itself so the data
+#               on each BPM must be dumped into a buffer and then "merged" with
+#               the config data from the update. The config data section is
+#               divided into 4 segments. A, B, C, and D. These segments appear
+#               in reverse order. Since it is known which "fragments" of each
+#               segment has to be updated this function will extract those
+#               fragments from the update file and organize them as described
+#               above so that hostboot can handle the rest.
+#
+# SegmentDataFromBPM:     Copy of the segment data taken from the BPM (dump)
+#
+# SegmentDataFromFWImage: Copy of the segment data from the firmware image file.
+#                         This could be the firmware image to be upgraded to or
+#                         to be downgraded to. These are what will become
+#                         fragments.
+#
+# Segment  Address         Data Source
+# =====================================
+# D        1800 - 187F     <---- [SegmentDataFromFWImage: 1800 - 187F]
+#
+# C        1880 - 18FF     <---- [SegmentDataFromBPM: 1880 - 18FF]
+#
+# B        1900 - 197F     <---- [SegmentDataFromBPM:     1900 - 1927]
+#                                [SegmentDataFromFWImage: 1928 - 1979]
+#                                [SegmentDataFromBPM:     197A - 197D]
+#                                [SegmentDataFromFWImage: 197E - 197F]
+#
+# A        1980 - 19FF     <---- [SegmentDataFromBPM: 1980 - 19FF]
+#
+# @param[in] i_fileName    Name of file
+# @param[in] i_outputDir   Dir to emit binary to
+#
+# @return N/A
+################################################################################
+sub generateConfigImage
+{
+    my ($i_fileName, $i_outputDir) = @_;
+    my $this_func = (caller(0))[3];
+
+    open my $inputFileHandle, '<:encoding(UTF-8)', $i_fileName
+        or die "Failed to open $i_fileName";
+
+    my ($name, @version) = generateOutputNameAndVersion($i_fileName);
+
+    my $imageFile = $i_outputDir . "/" . $name . "CONFIG.bin";
+
+    open my $outputFileHandle, '>:raw', $imageFile
+        or die "Failed to open $imageFile";
+
+    # Indicates whether or not we're in the config section of the image file.
+    my $inConfigSection = undef;
+
+    # Keep track of the number of fragments we'll be writing to the output file.
+    my $numberOfFragments = 0;
+
+    # Used to keep track of which byte is the current byte being looked at in
+    # the file.
+    my $currentAddress = 0;
+
+    # The address offsets in the file are prefixed with the @ symbol.
+    use constant ADDRESS_LINE => "\@";
+    use constant CONFIG_START_ADDRESS_MARKER => "\@1800";
+    use constant CONFIG_START_ADDRESS => 0x1800;
+
+    # Segment data start addresses relative to config data start address.
+    use constant SEGMENT_D_START_ADDRESS => 0x000;
+    use constant SEGMENT_C_START_ADDRESS => 0x080;
+    use constant SEGMENT_B_START_ADDRESS => 0x100;
+    use constant SEGMENT_A_START_ADDRESS => 0x180;
+
+    # Each line is plain text where each byte is separated by spaces.
+    # To determine how many bytes are on the line, divide by characters per byte
+    # and number of spaces between bytes. 2 characters per byte + 1 space = 3
+    use constant BYTES_PER_LINE_EXCLUDING_SPACES => 3;
+
+    # Spec for BPM updates says that the maximum size for the data portion of
+    # the payload is 16 bytes
+    use constant MAXIMUM_DATA_BYTES_FOR_PAYLOAD => 16;
+
+    my $fragments = undef;
+    my $fragmentData = undef;
+    my $fragmentSize = 0;
+
+    # The offset into the segment data where the fragment data will be written.
+    # In hostboot code, this will be a 512 byte buffer that holds a dump of the
+    # BPM's unique segment data.
+    my $fragmentOffset = SEGMENT_D_START_ADDRESS;
+
+    # Ensure that the diamond operator ( <> ) is searching for \n to determine
+    # where the end of a line is in the image file.
+    local $/ = "\n";
+
+    while (my $line = <$inputFileHandle>)
+    {
+        # Strip off the end-of-line character \n and optionally \r if it exists.
+        # Since the image files were created on a windows OS and this script
+        # runs on linux this will not be handled properly by chomp.
+        $line =~ s/\r?\n$//;
+
+        # Look for @1800 starting address marker.
+        #
+        # If found, start reading the data from the file until the next "@"
+        # marker or "q" starting markers are found.
+        #
+        # It is possible that the input file might not have the distinct @1800
+        # marker. In that case, the [currentAddress] variable is used to track
+        # the 0x1800 address in the input file.
+        if (substr($line, 0, 1) eq "q")
+        {
+            last;
+        }
+
+        if (substr($line, 0, 1) eq ADDRESS_LINE)
+        {
+            $currentAddress = hex substr($line, 1);
+            if ($verbose)
+            {
+                printf("Found address offset: 0x%04x\n", $currentAddress);
+            }
+
+            if ($line eq CONFIG_START_ADDRESS_MARKER)
+            {
+                $inConfigSection = 1;
+            }
+            next;
+        }
+
+        # Process the line into fragments of the form: size, address offset,
+        # and bytes.
+        #
+        # Size: The size of the fragment data.
+        #       Note: The size only corresponds to the size of the fragment data
+        #       itself. In hostboot code, this size will indicate how much of
+        #       the BPM's segment data will be overwritten for the given
+        #       fragment.
+        # Address offset: The address offset of the start byte of segment data.
+        #                 This will be used to determine where to start
+        #                 overwritting segment data from the BPM config dump.
+        # Bytes: The bytes to write to the BPM config data dump buffer.
+
+        # The length of the line. The maximum size of any line is 16 bytes.
+        my $dataLength = length($line) / BYTES_PER_LINE_EXCLUDING_SPACES;
+
+        if ($dataLength > MAXIMUM_DATA_BYTES_FOR_PAYLOAD)
+        {
+            die "$dataLength exceeds the maximum size for the data portion of" .
+                "the payload (". MAXIMUM_DATA_BYTES_FOR_PAYLOAD .")";
+        }
+
+        # If the CONFIG_START_ADDRESS_MARKER is missing from the file then this
+        # will serve as the backup method to locating the config data within the
+        # image file. Otherwise, this will always evaluate to false.
+        if (($currentAddress + $dataLength) == CONFIG_START_ADDRESS)
+        {
+            # The next line is the start of the config data section of the
+            # image. So, skip the current line and move into the config section.
+            $inConfigSection = 1;
+            $currentAddress += $dataLength;
+            next;
+        }
+
+        # Don't process lines that aren't config data.
+        if (not $inConfigSection)
+        {
+            next;
+        }
+
+        # Create Segment D fragment. For Segment D, the entire segment is
+        # required to be updated during the firmware update. So, create a
+        # fragment that encompasses the whole segment.
+        if ($currentAddress < CONFIG_START_ADDRESS + SEGMENT_C_START_ADDRESS)
+        {
+            # Increase the fragmentSize by the amount being appended to the
+            # fragment.
+            $fragmentSize += $dataLength;
+
+            # Pack the fragment data.
+            # Since the line is a string where each byte is an ASCII
+            # representation of the hex data separated by spaces, we
+            # must split the line by the space character and then write
+            # each byte string one at a time. Hence, the template
+            # "(H2)*". Each element is processed with the H2 part and
+            # the * just says to do this for all elements in the array
+            # emitted by split.
+            $fragmentData .= pack("(H2)*", split(/ /, $line));
+
+            if($currentAddress ==
+                (CONFIG_START_ADDRESS + SEGMENT_C_START_ADDRESS - 0x10))
+            {
+                $fragments .= createFragment($fragmentSize,
+                                             $fragmentOffset,
+                                             $fragmentData,
+                                             $numberOfFragments);
+            }
+        }
+        # Segment C is skipped over implicitly since there is no segment data in
+        # segment C that needs to be applied to the BPM.
+        elsif (   ($currentAddress >=
+                  (CONFIG_START_ADDRESS + SEGMENT_B_START_ADDRESS))
+               && ($currentAddress <
+                  (CONFIG_START_ADDRESS + SEGMENT_A_START_ADDRESS)))
+        {
+            # Work on Segment B data. There will be two fragments created for
+            # this segment.
+            # Fragment 1: [0x1928 - 0x1979]
+            # Fragment 2: [0x197E - 0x197F]
+            my $createFragment = 0;
+
+            # According to SMART's documentation, each segment must be 8 lines
+            # of 16 byte rows. Since we are searching for a specific region in
+            # segment B to create a fragment from we bound the fragment packing
+            # code by the borders of that region.
+            if (   ($currentAddress >=
+                    (CONFIG_START_ADDRESS + SEGMENT_B_START_ADDRESS + 0x20))
+                && ($currentAddress <
+                    (CONFIG_START_ADDRESS + SEGMENT_B_START_ADDRESS + 0x80)))
+            {
+                # Only need bytes from [0x1928 to 0x1979] to form Fragment 1.
+                # If we are not on the bounds of the fragment then we can simply
+                # pack the data and update the size.
+                # Otherwise, we must do some extra trimming.
+                if ($currentAddress ==
+                    (CONFIG_START_ADDRESS + SEGMENT_B_START_ADDRESS + 0x20))
+                {
+                    # This is the begining of Fragment 1's range. Trim off the
+                    # bytes with offsets less than 0x1928.
+
+                    # Set the fragmentOffset to the start of the range
+                    $fragmentOffset = SEGMENT_B_START_ADDRESS
+                                    + 0x28;
+
+                    # Split the line into individual bytes and only pack
+                    # required bytes.
+                    my @bytes = split(/ /, $line);
+
+                    # Drop the first eight bytes since they aren't in the range.
+                    splice @bytes, 0, 8;
+
+                    $fragmentSize += scalar @bytes;
+
+                    $fragmentData .= pack("(H2)*", @bytes);
+
+                    # Since this is the begining of Fragment 1, there is still
+                    # data left to be appended to this fragment. So don't call
+                    # createFragment().
+                }
+                elsif ($currentAddress ==
+                        (CONFIG_START_ADDRESS + SEGMENT_B_START_ADDRESS + 0x70))
+                {
+                    # This is the last line in the range of Fragment 1 and the
+                    # only line where Fragment 2 data is. So, trimming is
+                    # required to finalize Fragment 1 and create Fragment 2.
+
+                    # Start by finishing off Fragment 1.
+                    # Split the line into individual bytes and only pack
+                    # required bytes.
+                    my @bytes = split(/ /, $line);
+
+                    # Drop the last six bytes since they aren't
+                    # in range [0x1928-0x1979]
+                    splice @bytes, 10, 6;
+
+                    $fragmentSize += scalar @bytes;
+
+                    $fragmentData .= pack("(H2)*", @bytes);
+
+                    # Now that Fragment 1 is completed, create the fragment and
+                    # append it to the list of fragments.
+                    $fragments .= createFragment($fragmentSize,
+                                                 $fragmentOffset,
+                                                 $fragmentData,
+                                                 $numberOfFragments);
+
+                    # Now work on Fragment 2.
+                    # Only need bytes from [0x197E to 0x197F] to form Fragment 2
+
+                    # Set the fragmentOffset
+                    $fragmentOffset = SEGMENT_B_START_ADDRESS
+                                    + 0x7E;
+
+                    # Split the line into individual bytes and only pack
+                    # required bytes.
+                    @bytes = split(/ /, $line);
+
+                    # Drop the first 14 bytes since they aren't in
+                    # range [0x197E to 0x197F]
+                    splice @bytes, 0, 14;
+
+                    $fragmentSize += scalar @bytes;
+
+                    $fragmentData .= pack("(H2)*", @bytes);
+
+                    # Fragment 2 is complete. Create the fragment and append to
+                    # list of fragments.
+                    $fragments .= createFragment($fragmentSize,
+                                                 $fragmentOffset,
+                                                 $fragmentData,
+                                                 $numberOfFragments);
+
+                }
+                else
+                {
+                    # We are not on a fragment boundary, so append the full line
+                    # of data to Fragment 1.
+
+                    # Increase the fragmentSize by the amount being appended to
+                    # the fragment.
+                    $fragmentSize += $dataLength;
+
+                    # Pack the fragment data.
+                    # Since the line is a string where each byte is an ASCII
+                    # representation of the hex data separated by spaces, we
+                    # must split the line by the space character and then write
+                    # each byte string one at a time. Hence, the template
+                    # "(H2)*". Each element is processed with the H2 part and
+                    # the * just says to do this for all elements in the array
+                    # emitted by split.
+                    $fragmentData .= pack("(H2)*", split(/ /, $line));
+                }
+            }
+        }
+        elsif ($currentAddress >=
+                  (CONFIG_START_ADDRESS + SEGMENT_A_START_ADDRESS))
+        {
+            # Don't need to create fragments in Segment A.
+            last;
+        }
+
+        # Increment the address offset by the number of firmware data
+        # bytes processed.
+        $currentAddress += $dataLength;
+    }
+
+    if ($verbose)
+    {
+        print "number of fragments: $numberOfFragments\n";
+    }
+
+    if (!defined($fragments))
+    {
+        die "Unable to process image file: $i_fileName";
+    }
+
+    # Write the version information to the file.
+    print $outputFileHandle pack("(H2)*", @version)
+        or die "Failed to write to output file: $imageFile";
+
+    # Write the number of fragments in the file.
+    # uint16_t
+    print $outputFileHandle pack("n", $numberOfFragments)
+        or die "Failed to write to output file: $imageFile";
+
+    # Write the fragments to the file
+    print $outputFileHandle $fragments
+        or die "Failed to write to output file: $imageFile";
+
+    close $inputFileHandle
+        or die "Failed to close input file: $i_fileName";
+    close $outputFileHandle
+        or die "Failed to close output file: $imageFile";
+}
 
 ################################################################################
 # @brief Transforms the input file name into the output file name and extracts
@@ -312,9 +712,14 @@ sub generateOutputNameAndVersion
         die "NVDIMM Interface Type $nvdimmInterfaceNumber Unsupported";
     }
 
-    # Extract the version from the filename and convert it to a hex string.
-    my @version = map { sprintf("%.2X", $_) }
-        $fileNameComponents[3] =~ /([0-9]+)/g;
+    # Extract the version from the filename and convert it to a two one byte hex
+    # strings.
+    my @versionComponents = split(/\./, $name);
+    my @version =
+        sprintf("%.2X", substr($versionComponents[0], -2, 2) =~ /([0-9]+)/g);
+    push(@version,
+        sprintf("%.2X", substr($versionComponents[1], 0, 2) =~ /([0-9]+)/g));
+
 
     if ($verbose)
     {
@@ -323,8 +728,90 @@ sub generateOutputNameAndVersion
                                " Minor: " . $version[1] . "\n";
     }
 
-    return ($nvdimmType."-NVDIMM-BPM-FW", @version);
+    return ($nvdimmType."-NVDIMM-BPM-", @version);
 
+}
+
+################################################################################
+# @brief Processes input image file to generate CRC signature, firmware start
+#        address, and calculated CRC bytes at address marker @FF7A. This
+#        function simply calls SMART's supplied python script to perform the
+#        operations. This intermediate file is only used during the firmware
+#        binary generation.
+#
+# @param[in] i_fileName    Name of file
+#
+# @return    txt file name The temporary file that has the calculated CRC
+################################################################################
+sub generateIntermediateImage
+{
+    my $i_fileName = shift;
+
+    # Parse the file name into its filename, path, and suffix.
+    my ($name, $path, $suffix) = fileparse($i_fileName, ".txt");
+
+    # Parse the file name into its filename, path, and suffix.
+    my ($utilName, $utilPath, $utilSuffix) = fileparse($bpmUtilScript, ".txt");
+
+    my $intermediateFileName = $utilPath . $name . ".crc";
+
+    # Call the python script which will insert the CRC
+    my $pythonReturn = system($bpmUtilScript,
+                              $i_fileName,
+                              $intermediateFileName,
+                              $bpmCrcProgram);
+
+    return $intermediateFileName;
+
+}
+
+################################################################################
+# @brief Creates a new fragment by packing the fragment size, offset, and data;
+#        then it cleans up the fragment parameters so that the caller doesn't
+#        have to.
+#
+# @param[in] io_fragmentSize        The size of the fragment data section.
+# @param[in] i_fragmentOffset       The offset into the BPM config dump buffer
+#                                   that this fragment should begin overwritting
+#                                   at.
+# @param[in] io_fragmentData        The partial config segment data from the
+#                                   flash image to be written to the BPM during
+#                                   the update procedure.
+# @param[in] io_numberOfFragments   This parameter incremented by this function
+#                                   so the caller can keep track of how many
+#                                   fragments have been created so far. However,
+#                                   due to the messiness of perl syntax this
+#                                   parameter is created as a visual reference
+#                                   only and not used directly.
+#
+# @return                           The created fragment
+################################################################################
+sub createFragment
+{
+    my ($io_fragmentSize,
+        $i_fragmentOffset,
+        $io_fragmentData,
+        $io_numberOfFragments) = @_;
+
+    # Pack the fragment size
+    # uint8_t
+    my $fragment .= pack("C", $io_fragmentSize);
+
+    # Pack the BPM dump offset.
+    # uint16_t
+    $fragment .= pack("n", $i_fragmentOffset);
+
+    # Pack the fragment data
+    $fragment .= $io_fragmentData;
+
+    # Keep track of number of fragments in output
+    $_[3]++;       # $io_numberOfFragments
+
+    # Reset variables
+    $_[2] = undef; # $io_fragmentData
+    $_[0] = 0;     # $io_fragmentSize
+
+    return $fragment;
 }
 
 __END__

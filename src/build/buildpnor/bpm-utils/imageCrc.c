@@ -29,15 +29,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <sys/ioctl.h>
-#include "./i2c-dev.h" // Copied from i2c-tools package.
-#include <getopt.h>
-#include <termios.h>
-#include <stdarg.h>
-#include <time.h>
 
 //#define DEBUG
 
@@ -65,47 +56,43 @@
 #define ADDRESS_RESET_VECTOR  (0xFFFE)  // @FFFE, FFFF
 #define LENGTH_IMAGE_CRC      (0x2)
 
-typedef unsigned char  u8;
-typedef unsigned short u16;
-typedef unsigned long  u32;
-typedef unsigned int   bool;
-
-bool true = 1;
-bool false = 0;
+typedef unsigned char  uint8_t;
+typedef unsigned short uint16_t;
+typedef unsigned long  uint32_t;
 
 typedef struct _CRC_CONTEXT {
-    u16 mainImageStartAddress;
-    u16 mainImageTotalLength;
+    uint16_t mainImageStartAddress;
+    uint16_t mainImageTotalLength;
 } CRC_CONTEXT;
 
 typedef struct _OFFSET_LIST {
-    u32 count;
-    u32 offset[4];
+    uint32_t count;
+    uint32_t offset[4];
 } OFFSET_LIST;
 
-char* readNextHex(const char* pLine, u32 *value);
+char* readNextHex(const char* pLine, uint32_t *value);
 
-u16 resetCrc(void);
+uint16_t resetCrc(void);
 
-u16 updateCrc(u8 byte);
+uint16_t updateCrc(uint8_t byte);
 
-u16 calculateCrc(u8* pData, int length);
+uint16_t calculateCrc(uint8_t* pData, int length);
 
 bool
 parseLine(const char* pLine,
-          u32  *mMemoryAddress,
+          uint32_t  *mMemoryAddress,
           CRC_CONTEXT *context,
-          u8   *mainImageData);
+          uint8_t   *mainImageData);
 
-u16 mCrc = 0;
+uint16_t mCrc = 0;
 
 void
-dumpImageData(u8 *data, u32 dataLength, OFFSET_LIST *offsetToSkipList)
+dumpImageData(uint8_t *data, uint32_t dataLength, OFFSET_LIST *offsetToSkipList)
 {
     bool dontPrint = false;
 
-    u32 i, c;
-    u32 offsetToSkipCount = 0;
+    uint32_t i, c;
+    uint32_t offsetToSkipCount = 0;
 
     if (offsetToSkipList != NULL) {
         offsetToSkipCount = offsetToSkipList->count;
@@ -140,15 +127,15 @@ dumpImageData(u8 *data, u32 dataLength, OFFSET_LIST *offsetToSkipList)
     printf("\n");
 }
 
-u16
+uint16_t
 resetCrc(void)
 {
     mCrc = 0xFFFF;
     return mCrc;
 }
 
-u16
-updateCrc(u8 byte)
+uint16_t
+updateCrc(uint8_t byte)
 {
     bool x;
     int i;
@@ -163,8 +150,8 @@ updateCrc(u8 byte)
     return mCrc;
 }
 
-u16
-calculateCrc(u8* pData, int length)
+uint16_t
+calculateCrc(uint8_t* pData, int length)
 {
     //resetCrc();
     for (; length; --length, ++pData) {
@@ -174,9 +161,9 @@ calculateCrc(u8* pData, int length)
 }
 
 char*
-readNextHex(const char* pLine, u32 *pValue)
+readNextHex(const char* pLine, uint32_t *pValue)
 {
-    u32 value = 0;
+    uint32_t value = 0;
 
     // Skip leading white space
     while (*pLine != '\0' && *pLine <= ' ') {
@@ -208,18 +195,15 @@ readNextHex(const char* pLine, u32 *pValue)
 
 bool
 parseLine(const char* pLine,
-          u32  *mMemoryAddress,
+          uint32_t  *mMemoryAddress,
           CRC_CONTEXT *context,
-          u8   *mainImageData)
+          uint8_t   *mainImageData)
 {
-    u8 data[0x100];
+    uint8_t data[0x100];
     int dataLength = 0;
-    u32 value;
-    int length = strlen(pLine);
-    u16 data16[2];
-    u8 value8;
+    uint32_t value;
 
-    u32 offsetToCopy = 0;
+    uint32_t offsetToCopy = 0;
 #ifdef DEBUG
     int i;
 #endif
@@ -227,7 +211,7 @@ parseLine(const char* pLine,
     if (*pLine == '@') {
         // This is a memory address
         if (readNextHex(pLine + 1, &value) != NULL) {
-            *mMemoryAddress = (u16) value;
+            *mMemoryAddress = (uint16_t) value;
 #ifdef DEBUG
             printf("@Memory Address: 0x%x\n", *mMemoryAddress);
 #endif // DEBUG
@@ -280,18 +264,21 @@ parseLine(const char* pLine,
         //
         // added by rananth to calculate the CRC of the main image data.
         //
-        if ((*mMemoryAddress >= context->mainImageStartAddress) && 
-            (*mMemoryAddress < (context->mainImageStartAddress + context->mainImageTotalLength))) {
+        if ((*mMemoryAddress >= context->mainImageStartAddress) &&
+            (*mMemoryAddress <
+             (context->mainImageStartAddress + context->mainImageTotalLength)))
+        {
 
-            if ((context->mainImageStartAddress != 0) && (context->mainImageTotalLength != 0) &&
+            if (   (context->mainImageStartAddress != 0)
+                && (context->mainImageTotalLength != 0) &&
                 (mainImageData != NULL)) {
-               
+
                 //
                 // Copy the main image data bytes (Range: @8000, 0x8000) to the
                 // passed in data buffer.
                 //
                 offsetToCopy = *mMemoryAddress - context->mainImageStartAddress;
-                memcpy(mainImageData + offsetToCopy, data, dataLength); 
+                memcpy(mainImageData + offsetToCopy, data, dataLength);
 
 #ifdef DEBUG
                 printf("Copy  data (%04x) dataLength (0x%x):",
@@ -312,21 +299,18 @@ parseLine(const char* pLine,
 int
 ProcessFile(char *pFilename, bool verbose)
 {
-    bool error = false;
     char buffer[0x100];
     int length;
-    int retry;
     int line;
-    int offset = 0;
 
-    u8 *mainImageData = 0;
+    uint8_t *mainImageData = 0;
 
-    u32 mMemoryAddress = 0;
-    u32 crc = 0;
-    u32 offsetToSkip;
-    u32 offsetToInsert;
-    u32 firstPortion = 0;
-    u32 secondPortion = 0;
+    uint32_t mMemoryAddress = 0;
+    uint32_t crc = 0;
+    uint32_t offsetToSkip;
+    uint32_t offsetToInsert;
+    uint32_t firstPortion = 0;
+    uint32_t secondPortion = 0;
 
     CRC_CONTEXT  context;
     OFFSET_LIST  offsetList;
@@ -343,20 +327,18 @@ ProcessFile(char *pFilename, bool verbose)
         }
     }
 
-    int lineCount = line;
 
     // Rewind to the beginning of the file
     fseek(pFile, 0, SEEK_SET);
 
     //
-    // allocate memory for the main image data 
+    // allocate memory for the main image data
     //
-    mainImageData = (u8 *) malloc(FW_MAINIMAGE_MAX_LENGTH);
+    mainImageData = (uint8_t *) malloc(FW_MAINIMAGE_MAX_LENGTH);
     memset(mainImageData, 0xFF, FW_MAINIMAGE_MAX_LENGTH);
 
     memset(&context, 0, sizeof(CRC_CONTEXT));
 
-    bool validSection = true;
     // Process the lines
     for (line = 0; !feof(pFile); ++line) {
         if (fgets(buffer, sizeof(buffer), pFile) == NULL) {
@@ -418,7 +400,7 @@ ProcessFile(char *pFilename, bool verbose)
     offsetToSkip = ADDRESS_IMAGE_CRC - context.mainImageStartAddress;
     mainImageData[offsetToSkip] = 0xFF;
     mainImageData[offsetToSkip + 1] = 0xFF;
- 
+
     offsetToSkip = ADDRESS_RESET_VECTOR - context.mainImageStartAddress;
     mainImageData[offsetToSkip] = 0xFF;
     mainImageData[offsetToSkip + 1] = 0xFF;

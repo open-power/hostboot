@@ -27,6 +27,7 @@
 #
 #
 # IBM_PROLOG_END_TAG
+
 import os, sys, time, datetime, glob
 from subprocess import Popen, PIPE
 import shlex
@@ -36,7 +37,7 @@ import shlex
 # firmware image file, inFile, and to generate the
 # signature file, outFile.
 #
-def InsertCrcSignature(inFile, outFile):
+def InsertCrcSignature(inFile, outFile, crcProgram):
 
     #
     # Open the outFile
@@ -74,9 +75,7 @@ def InsertCrcSignature(inFile, outFile):
     # ....
 
     # Call imageCrc here
-    cmd = './imageCrc ' + inFile 
-    cmdArgs = shlex.split(cmd)
-    proc = Popen(cmdArgs, stdout=PIPE, stderr=PIPE)
+    proc = Popen([crcProgram, inFile], stdout=PIPE, stderr=PIPE)
     out,err = proc.communicate()
     exitCode = proc.returncode
 
@@ -86,7 +85,7 @@ def InsertCrcSignature(inFile, outFile):
         print "Command stderr - \n{0}".format(err)
         sys.exit(999)
     else:
-        print "\nCRC generation using imageCrc utility successful" 
+        print "\nCRC generation using imageCrc utility successful"
         print "Command output - \n{0}".format(out)
 
     # Parse through output of imageCrc and get addr and signature
@@ -94,7 +93,7 @@ def InsertCrcSignature(inFile, outFile):
     for counter in range(0, len(splitLines_crc)):
 
         if splitLines_crc[counter].startswith("@"):
-            crcAddressLine = splitLines_crc[counter].strip()
+            crcAddressLine = splitLines_crc[counter]
             crcSignature = splitLines_crc[counter+1].strip().upper()
 
     # Open infile here
@@ -116,20 +115,22 @@ def InsertCrcSignature(inFile, outFile):
                     # If crc already in input file, check if it is equal to calculate value
                     # If equal, write only once, if not equal, write calculated value
                     if crcWritten == 0 and inputFileAddr == crcAddressLine:
-                        outFileObj.write(line.strip()+'\n')
-                        if ins.next().strip().upper() == crcSignature:
+                        outFileObj.write(line.strip()+' \n')
+                        if ins.next().upper() == crcSignature:
                             print "Correct crc already present at {0} in input file, will skip writing calculated crc again to output file".format(inputFileAddr)
                         else:
                             print "Incorrect crc present at {0} in input file, will write calculated crc {1} to output file".format(inputFileAddr, crcSignature)
-                        outFileObj.write(crcSignature+'\n')
+                        outFileObj.write(crcSignature+' \n')
                         crcWritten = 1
                         continue
                     # If crc not present, then write calculated value
                     elif crcWritten == 0 and inputFileAddr > crcAddressLine:
                         outFileObj.write(crcAddressLine+'\n')
-                        outFileObj.write(crcSignature+'\n')
+                        outFileObj.write(crcSignature+' \n')
                         crcWritten = 1
-                outFileObj.write(line.strip()+'\n')
+                    outFileObj.write(inputFileAddr.strip()+'\n')
+                else:
+                    outFileObj.write(line.strip()+' \n')
 
     except Exception as e:
         print "\nException {0} occured, args: {1!r}".format(type(e).__name__, e.args)
@@ -138,7 +139,7 @@ def InsertCrcSignature(inFile, outFile):
     print("\nClosing Files\n")
     outFileObj.close()
 
-## End of insertCrcSignature ######### 
+## End of insertCrcSignature #########
 
 
 #
@@ -148,9 +149,10 @@ if __name__ == '__main__':
 
     inFile=""
     outFile=""
+    crcProgram=""
 
-    if (len(sys.argv) < 3):
-        print "\nUsage: %s <IN FILE> <OUT FILE>\n" % sys.argv[0]
+    if (len(sys.argv) < 4):
+        print "\nUsage: %s <IN FILE> <OUT FILE> <CRC PROGRAM>\n" % sys.argv[0]
         sys.exit(1)
     else:
         #
@@ -164,18 +166,26 @@ if __name__ == '__main__':
             print "\nInput File {0} does not exist or is zero in size".format(inFile)
         #
         # Name of the firmware image file to be generated with the signature
-        # Please check with Mike on the name for this.
         #
         outFile = sys.argv[2]
         if '/' not in outFile:
-            outFile = os.getcwd() + '/' + outFile 
+            outFile = os.getcwd() + '/' + outFile
 
         if os.path.exists(outFile):
-            print "\nOutput File {0} already exists, will be wiped out if test successful, press CTRL-C in 5s to stop test if needed".format(outFile)
-            time.sleep(5)
+            print "\nOutput File {0} already exists, will be overwritten".format(outFile)
 
-    
+        #
+        # Name of the CRC calculation program to be used to calculate the
+        # firmware image CRC
+        #
+        crcProgram = sys.argv[3]
+        if '/' not in crcProgram:
+            crcProgram = os.getcwd() + '/' + crcProgram
+
+        if not os.path.exists(crcProgram) or os.path.getsize(crcProgram) == 0:
+            print "\nCRC Program {0} does not exist or is zero in size".format(crcProgram)
+
     #
     # Call the function to insert the CRC signature
     #
-    InsertCrcSignature(inFile, outFile)
+    InsertCrcSignature(inFile, outFile, crcProgram)
