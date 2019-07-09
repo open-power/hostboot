@@ -1879,8 +1879,12 @@ bool nvdimm_encrypt_unlock(TargetHandleList &i_nvdimmList)
 
                 l_err->collectTrace(NVDIMM_COMP_NAME);
                 l_err->addPartCallout( l_nvdimm,
-                                    HWAS::NV_CONTROLLER_PART_TYPE,
-                                    HWAS::SRCI_PRIORITY_HIGH);
+                                       HWAS::NV_CONTROLLER_PART_TYPE,
+                                       HWAS::SRCI_PRIORITY_HIGH);
+                l_err->addHwCallout( l_nvdimm,
+                                     HWAS::SRCI_PRIORITY_MED,
+                                     HWAS::DECONFIG,
+                                     HWAS::GARD_NULL );
 
                 errlCommit( l_err, NVDIMM_COMP_ID );
                 nvdimmSetEncryptionError(l_nvdimm);
