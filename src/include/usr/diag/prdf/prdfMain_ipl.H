@@ -48,7 +48,7 @@ extern errlHndl_t noLock_initialize();
 
 /**
  * @brief  Restores hardware DRAM repairs to reflect what is stored in VPD.
- * @param  i_trgt An MBA or MCA target.
+ * @param  i_trgt An MBA, MCA, or OCMB target.
  * @return Non-SUCCESS if conditions are such that a callout had to be made,
  *         SUCCESS otherwise.
  */

@@ -321,8 +321,8 @@ TARGETING::TargetHandleList getConnectedDimms( TARGETING::TargetHandle_t i_trgt,
 /**
  * @param  i_trgt The target MBA, MCA, OCMB_CHIP, or MEM_PORT.
  * @param  i_rank The target rank.
- * @param  i_port Port select, only needed for MBA. MCA and MEM_PORT are
- *                targets equivalent to the port already.
+ * @param  i_port Port select, only needed for MBA and OCMB_CHIP. MCA and
+ *                MEM_PORT are targets equivalent to the port already.
  * @return The DIMM connected to the target and rank on a port.
  */
 TARGETING::TargetHandle_t getConnectedDimm( TARGETING::TargetHandle_t i_trgt,
