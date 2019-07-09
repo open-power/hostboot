@@ -251,6 +251,14 @@ fapi2::ReturnCode p9a_omic_io_scom(const fapi2::Target<fapi2::TARGET_TYPE_OMIC>&
             FAPI_TRY(fapi2::putScom(TGT0, 0x800970000701103full, l_scom_buffer));
         }
         {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x800978000701103full, l_scom_buffer ));
+
+            constexpr auto l_MCP_OMI0_IOO_CPLT_RX0_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DC_ENABLE_CM_COARSE_CAL_OFF = 0x0;
+            l_scom_buffer.insert<48, 1, 63, uint64_t>
+            (l_MCP_OMI0_IOO_CPLT_RX0_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DC_ENABLE_CM_COARSE_CAL_OFF );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x800978000701103full, l_scom_buffer));
+        }
+        {
             FAPI_TRY(fapi2::getScom( TGT0, 0x800988000701103full, l_scom_buffer ));
 
             l_scom_buffer.insert<48, 3, 61, uint64_t>(literal_0b110 );

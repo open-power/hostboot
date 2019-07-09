@@ -722,6 +722,46 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+/**
+ * @brief Init PHY Tx FIFO Logic
+ * @param[in] i_tgt         FAPI2 Target
+ * @param[in] i_lave_vector Lanve Vector
+ * @retval ReturnCode
+ */
+fapi2::ReturnCode p9_omi_tx_fifo_init(const OMIC_TGT i_tgt, const uint32_t i_lane_vector)
+{
+    FAPI_IMP("p9_omi_tx_fifo_init: I/O OMI Entering");
+    const uint8_t GRP0  = 0;
+    const uint8_t LANES = 24;
+    fapi2::buffer<uint64_t> l_data = 0;
+
+    // Power up Per-Lane Registers
+    for(uint8_t l_lane = 0; l_lane < LANES; ++l_lane)
+    {
+        if(((0x1 << l_lane) & i_lane_vector) != 0)
+        {
+            // - Clear TX_UNLOAD_CLK_DISABLE
+            FAPI_TRY(io::read(OPT_TX_MODE2_PL, i_tgt, GRP0, l_lane, l_data));
+            io::set(OPT_TX_UNLOAD_CLK_DISABLE, 0, l_data);
+            FAPI_TRY(io::write(OPT_TX_MODE2_PL, i_tgt, GRP0, l_lane, l_data));
+
+            // - Set TX_FIFO_INIT
+            l_data.flush<0>();
+            io::set(OPT_TX_FIFO_INIT, 1, l_data);
+            FAPI_TRY(io::write(OPT_TX_CNTL1G_PL, i_tgt, GRP0, l_lane, l_data));
+
+            // - Set TX_UNLOAD_CLK_DISABLE
+            FAPI_TRY(io::read(OPT_TX_MODE2_PL, i_tgt, GRP0, l_lane, l_data));
+            io::set(OPT_TX_UNLOAD_CLK_DISABLE, 1, l_data );
+            FAPI_TRY(io::write(OPT_TX_MODE2_PL, i_tgt, GRP0, l_lane, l_data));
+        }
+    }
+
+fapi_try_exit:
+    FAPI_IMP("p9_omi_tx_fifo_init: I/O OMI Exiting");
+    return fapi2::current_err;
+}
+
 } // end namespace P9A_IO_OMI_DCCAL
 
 using namespace P9A_IO_OMI_DCCAL;
@@ -783,6 +823,9 @@ fapi2::ReturnCode p9a_io_omi_dccal(const OMIC_TGT i_tgt, const uint32_t i_lane_v
     // Turn Phase Rotator Fly Wheel On
     FAPI_TRY(set_omi_flywheel_off(i_tgt, i_lane_vector, 0));
     FAPI_TRY(set_omi_pr_edge_track_cntl(i_tgt, i_lane_vector, 0));
+
+    // Run Tx FIFO Init
+    FAPI_TRY(p9_omi_tx_fifo_init(i_tgt, i_lane_vector));
 
 fapi_try_exit:
     FAPI_IMP("p9_io_omi_dccal: I/O OMI Exiting");
