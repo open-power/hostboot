@@ -45,7 +45,7 @@ namespace mss
 ///
 /// @brief enum list of preliminary data fields needed before eff_config
 ///
-enum pre_data_init_fields
+enum class pre_data_init_fields
 {
     // Template recursive base case
     ATTR_PRE_DATA_ENGINE_CASE = 0,
@@ -60,7 +60,7 @@ enum pre_data_init_fields
     DIMM_RANKS_CNFG = 7,
 
     // Dispatcher set to last enum value
-    ATTR_PRE_DATA_ENG_DISPATCHER = DIMM_RANKS_CNFG,
+    DISPATCHER = DIMM_RANKS_CNFG,
 };
 
 ///
@@ -70,7 +70,7 @@ enum pre_data_init_fields
 /// (e.g. Nimbus vs Axone)
 /// @warning these depend on pre_data_init_fields fields being set
 ///
-enum generic_metadata_fields
+enum class generic_metadata_fields
 {
     // Template recursive base case
     ATTR_METADATA_BASE_CASE = 0,
@@ -81,13 +81,13 @@ enum generic_metadata_fields
     DIMM_POS_METADATA = 3,
 
     // Dispatcher set to last enum value
-    ATTR_METADATA_DISPATCHER = DIMM_POS_METADATA,
+    DISPATCHER = DIMM_POS_METADATA,
 };
 
 ///
 /// @brief enum list of SPD based attr fields to set
 ///
-enum attr_eff_engine_fields
+enum class attr_eff_engine_fields
 {
     // Template recursive base case
     ATTR_EFF_BASE_CASE = 0,
@@ -117,13 +117,13 @@ enum attr_eff_engine_fields
     ROW_ADDR_BITS = 22,
 
     // Dispatcher set to last enum value
-    ATTR_EFF_DISPATCHER = ROW_ADDR_BITS,
+    DISPATCHER = ROW_ADDR_BITS,
 };
 
 ///
 /// @brief enum list of SI attr fields to set from EFD
 ///
-enum attr_si_engine_fields
+enum class attr_si_engine_fields
 {
     // Template recursive base case
     ATTR_SI_BASE_CASE = 0,
@@ -149,7 +149,7 @@ enum attr_si_engine_fields
     SI_GEARDOWN_MODE = 18,
 
     // Dispatcher set to last enum value
-    ATTR_SI_DISPATCHER = SI_GEARDOWN_MODE,
+    DISPATCHER = SI_GEARDOWN_MODE,
 };
 
 ///
@@ -157,7 +157,7 @@ enum attr_si_engine_fields
 /// @note these are attributes that are derived from other
 /// attributes or other APIs.
 ///
-enum attr_engine_derived_fields
+enum class attr_engine_derived_fields
 {
     // Attributes are set recursively from the bottom up.
     // When adding attrs that depend on other attrs
@@ -173,22 +173,22 @@ enum attr_engine_derived_fields
     LOGICAL_RANKS = 3,
 
     // Dispatcher set to last enum value
-    ATTR_DERIVED_DISPATCHER = LOGICAL_RANKS,
+    DISPATCHER = LOGICAL_RANKS,
 };
 
 ///
 /// @brief Forward declartion of traits for pre_data_engine
 /// @class preDataInitTraits
-/// @tparam T proc_type (e.g. Nimbus, Axone, etc.)
+/// @tparam P processor type (e.g. Nimbus, Axone, etc.)
 /// @tparam TT pre_data_init_fields (e.g. DIMM_TYPE, MRANK, etc.)
 ///
-template< proc_type T, pre_data_init_fields TT >
+template< proc_type P, pre_data_init_fields TT >
 class preDataInitTraits;
 
 ///
 /// @brief Traits associated with DIMM positioning
 /// @class dimmPosTraits
-/// @tparam MC the MC type
+/// @tparam MC the memory controller type
 ///
 template< mss::mc_type MC >
 class dimmPosTraits;
@@ -196,10 +196,11 @@ class dimmPosTraits;
 ///
 /// @brief Forward declartion of traits for attrEngineTraits
 /// @class attrEngineTraits
+/// @tparam P processor type (e.g. Nimbus, Axone, etc.)
 /// @tparam ET enum type
 /// @tparam T enum value
 ///
-template < typename ET, ET T>
+template < proc_type P, typename ET, ET T = ET::DISPATCHER>
 struct attrEngineTraits;
 
 ///
@@ -211,14 +212,25 @@ struct attrEngineTraits;
 template < typename ET, ET T >
 struct setTimingTraits;
 
+namespace gen
+{
 ///
-/// @brief Forward declartion of traits for attrEnumTraits
-/// @class attrEnumTraits
-/// @tparam ET enum type
+/// @brief Template recursive algorithm for setting attrs
+/// @class attr_engine
+/// @tparam P processor type (e.g. Nimbus, Axone, etc.)
+/// @tparam ET enum type - conceptually a list of attrs to set
+/// @tparam F enum value - the specific attr value from ET to set
+/// @tparam TT associated traits for attr_engine
+/// @tparam B dispatch tag - defaulted to false
 ///
-template < typename ET >
-struct attrEnumTraits;
+template < proc_type P,
+           typename ET,
+           ET F = ET::DISPATCHER,
+           typename TT = attrEngineTraits<P, ET, F>,
+           bool B = false>
+struct attr_engine;
 
+}// gen
 }// mss
 
 #endif

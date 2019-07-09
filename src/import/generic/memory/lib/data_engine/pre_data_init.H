@@ -232,7 +232,7 @@ class pre_data_engine
 
             FAPI_TRY(iv_spd_data.base_module(l_base_module_type));
             FAPI_TRY(lookup_table_check(iv_dimm, BASE_MODULE_TYPE_MAP, SET_ATTR_DIMM_TYPE, l_base_module_type, l_dimm_type));
-            FAPI_TRY( (set_field<P, DIMM_TYPE>(iv_dimm, l_dimm_type)) );
+            FAPI_TRY( (set_field<P, pre_data_init_fields::DIMM_TYPE>(iv_dimm, l_dimm_type)) );
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -250,7 +250,7 @@ class pre_data_engine
             FAPI_TRY(iv_spd_data.device_type(l_device_type));
             FAPI_TRY(lookup_table_check(iv_dimm, DRAM_GEN_MAP, SET_ATTR_DRAM_GEN, l_device_type, l_dram_gen));
 
-            FAPI_TRY( (set_field<P, DRAM_GEN>(iv_dimm, l_dram_gen)) );
+            FAPI_TRY( (set_field<P, pre_data_init_fields::DRAM_GEN>(iv_dimm, l_dram_gen)) );
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -268,7 +268,7 @@ class pre_data_engine
             FAPI_TRY(iv_spd_data.hybrid(l_spd_hybrid_type));
             FAPI_TRY(lookup_table_check(iv_dimm, HYBRID_MAP, SET_ATTR_HYBRID, l_spd_hybrid_type, l_hybrid));
 
-            FAPI_TRY( (set_field<P, HYBRID>(iv_dimm, l_hybrid)) );
+            FAPI_TRY( (set_field<P, pre_data_init_fields::HYBRID>(iv_dimm, l_hybrid)) );
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -286,7 +286,7 @@ class pre_data_engine
             FAPI_TRY(iv_spd_data.hybrid_media(l_spd_hybrid_media));
             FAPI_TRY(lookup_table_check(iv_dimm, HYBRID_MAP, SET_ATTR_HYBRID, l_spd_hybrid_media, l_hybrid_media));
 
-            FAPI_TRY( (set_field<P, HYBRID_MEDIA>(iv_dimm, l_hybrid_media)) );
+            FAPI_TRY( (set_field<P, pre_data_init_fields::HYBRID_MEDIA>(iv_dimm, l_hybrid_media)) );
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -301,7 +301,7 @@ class pre_data_engine
             uint8_t l_master_ranks = 0;
             FAPI_TRY( get_master_ranks(l_master_ranks) );
 
-            FAPI_TRY( (set_field<P, MRANKS>(iv_dimm, l_master_ranks)) );
+            FAPI_TRY( (set_field<P, pre_data_init_fields::MRANKS>(iv_dimm, l_master_ranks)) );
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -324,7 +324,7 @@ class pre_data_engine
             FAPI_TRY( l_ranks_configed.setBit(0, l_master_ranks),
                       "%s. Failed to setBit", spd::c_str(iv_dimm) );
 
-            FAPI_TRY( (set_field<P, DIMM_RANKS_CNFG>(iv_dimm, uint8_t(l_ranks_configed))) );
+            FAPI_TRY( (set_field<P, pre_data_init_fields::DIMM_RANKS_CNFG>(iv_dimm, uint8_t(l_ranks_configed))) );
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -395,7 +395,8 @@ inline fapi2::ReturnCode set_pre_init_attrs<mss::proc_type::NIMBUS>( const fapi2
              mss::spd::c_str(i_target) );
 
     // Adding metadata c-str fields derived from attrs set above
-    FAPI_TRY( mss::attr_derived_engine<mss::generic_metadata_fields>::set(i_target) );
+    FAPI_TRY( (mss::gen::attr_engine<proc_type::NIMBUS, mss::generic_metadata_fields>::set(i_target)),
+              "Failed attr_engine<proc_type::NIMBUS, mss::generic_metadata_fields>::set for %s", mss::spd::c_str(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;

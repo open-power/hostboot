@@ -213,7 +213,7 @@ inline fapi2::ReturnCode calc_trfc_dlr(const fapi2::Target<fapi2::TARGET_TYPE_DI
     // Item No. 1727.58A
     // pg. 69 - 71
     // Table 42 - Refresh parameters by logical rank density
-    static const std::vector<std::pair<uint8_t, uint64_t> > TRFC_DLR1 =
+    const std::vector<std::pair<uint8_t, uint64_t> > TRFC_DLR1 =
     {
         // { density in GBs, tRFC4(min) in picoseconds }
         {4, 90000},
@@ -225,7 +225,7 @@ inline fapi2::ReturnCode calc_trfc_dlr(const fapi2::Target<fapi2::TARGET_TYPE_DI
     // Item No. 1727.58A
     // pg. 69 - 71
     // Table 42 - Refresh parameters by logical rank density
-    static const std::vector<std::pair<uint8_t, uint64_t> > TRFC_DLR2 =
+    const std::vector<std::pair<uint8_t, uint64_t> > TRFC_DLR2 =
     {
         // { density in GBs, tRFC4(min) in picoseconds }
         {4, 55000},
@@ -237,7 +237,7 @@ inline fapi2::ReturnCode calc_trfc_dlr(const fapi2::Target<fapi2::TARGET_TYPE_DI
     // Item No. 1727.58A
     // pg. 69 - 71
     // Table 42 - Refresh parameters by logical rank density
-    static const std::vector<std::pair<uint8_t, uint64_t> > TRFC_DLR4 =
+    const std::vector<std::pair<uint8_t, uint64_t> > TRFC_DLR4 =
     {
         // { density in GBs, tRFC4(min) in picoseconds }
         {4, 40000},

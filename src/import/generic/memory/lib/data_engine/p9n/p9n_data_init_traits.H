@@ -50,7 +50,7 @@ namespace mss
 /// @note NIMBUS, DIMM_TYPE specialization
 ///
 template<>
-class preDataInitTraits<mss::proc_type::NIMBUS, DIMM_TYPE>
+class preDataInitTraits<mss::proc_type::NIMBUS, pre_data_init_fields::DIMM_TYPE>
 {
     public:
         using attr_type = fapi2::ATTR_EFF_DIMM_TYPE_Type;
@@ -91,7 +91,7 @@ class preDataInitTraits<mss::proc_type::NIMBUS, DIMM_TYPE>
 /// @note NIMBUS, DRAM_GEN specialization
 ///
 template<>
-class preDataInitTraits<mss::proc_type::NIMBUS, DRAM_GEN>
+class preDataInitTraits<mss::proc_type::NIMBUS, pre_data_init_fields::DRAM_GEN>
 {
     public:
         using attr_type = fapi2::ATTR_EFF_DRAM_GEN_Type;
@@ -132,7 +132,7 @@ class preDataInitTraits<mss::proc_type::NIMBUS, DRAM_GEN>
 /// @note NIMBUS, HYBRID specialization
 ///
 template<>
-class preDataInitTraits<mss::proc_type::NIMBUS, HYBRID>
+class preDataInitTraits<mss::proc_type::NIMBUS, pre_data_init_fields::HYBRID>
 {
     public:
         using attr_type = fapi2::ATTR_EFF_HYBRID_Type;
@@ -173,7 +173,7 @@ class preDataInitTraits<mss::proc_type::NIMBUS, HYBRID>
 /// @note NIMBUS, HYBRID_MEDIA specialization
 ///
 template<>
-class preDataInitTraits<mss::proc_type::NIMBUS, HYBRID_MEDIA>
+class preDataInitTraits<mss::proc_type::NIMBUS, pre_data_init_fields::HYBRID_MEDIA>
 {
     public:
         using attr_type = fapi2::ATTR_EFF_HYBRID_MEMORY_TYPE_Type;
@@ -214,7 +214,7 @@ class preDataInitTraits<mss::proc_type::NIMBUS, HYBRID_MEDIA>
 /// @note NIMBUS, MRANKS specialization
 ///
 template<>
-class preDataInitTraits<mss::proc_type::NIMBUS, MRANKS>
+class preDataInitTraits<mss::proc_type::NIMBUS, pre_data_init_fields::MRANKS>
 {
     public:
         using attr_type = fapi2::ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_Type;
@@ -255,7 +255,7 @@ class preDataInitTraits<mss::proc_type::NIMBUS, MRANKS>
 /// @note NIMBUS, DIMM_RANKS_CNFG specialization
 ///
 template<>
-struct preDataInitTraits<mss::proc_type::NIMBUS, DIMM_RANKS_CNFG>
+struct preDataInitTraits<mss::proc_type::NIMBUS, pre_data_init_fields::DIMM_RANKS_CNFG>
 {
     using attr_type = fapi2::ATTR_EFF_DIMM_RANKS_CONFIGED_Type;
     static const fapi2::TargetType TARGET_TYPE = fapi2::ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_TargetType;
@@ -292,7 +292,7 @@ struct preDataInitTraits<mss::proc_type::NIMBUS, DIMM_RANKS_CNFG>
 /// @note AXONE, DIMM_TYPE_METADATA specialization
 ///
 template<>
-struct attrEngineTraits<generic_metadata_fields, DIMM_TYPE_METADATA>
+struct attrEngineTraits<proc_type::NIMBUS, generic_metadata_fields, generic_metadata_fields::DIMM_TYPE_METADATA>
 {
     using attr_type = fapi2::ATTR_MEM_DIMM_TYPE_METADATA_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -373,7 +373,7 @@ class dimmPosTraits<mss::mc_type::NIMBUS>
 /// @note generic_metadata_fields, DRAM_GEN_METADATA specialization
 ///
 template<>
-struct attrEngineTraits<generic_metadata_fields, DRAM_GEN_METADATA>
+struct attrEngineTraits<proc_type::NIMBUS, generic_metadata_fields, generic_metadata_fields::DRAM_GEN_METADATA>
 {
     using attr_type = fapi2::ATTR_MEM_DRAM_GEN_METADATA_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -423,7 +423,7 @@ struct attrEngineTraits<generic_metadata_fields, DRAM_GEN_METADATA>
 /// @note generic_metadata_fields, DIMM_POS_METADATA specialization
 ///
 template<>
-struct attrEngineTraits<generic_metadata_fields, DIMM_POS_METADATA>
+struct attrEngineTraits<proc_type::NIMBUS, generic_metadata_fields, generic_metadata_fields::DIMM_POS_METADATA>
 {
     using attr_type = fapi2::ATTR_MEM_DIMM_POS_METADATA_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -466,17 +466,6 @@ struct attrEngineTraits<generic_metadata_fields, DIMM_POS_METADATA>
         using TT = mss::dimmPosTraits<mss::mc_type::NIMBUS>;
         return gen::dimm_pos<TT>(i_target, o_setting);
     }
-};
-
-///
-/// @brief Value traits for attr_eff_engine_fields
-/// @class attrEngineTraits
-/// @note attr_eff_engine_fields
-///
-template < >
-struct attrEnumTraits<generic_metadata_fields>
-{
-    static constexpr size_t DISPATCHER = ATTR_METADATA_DISPATCHER;
 };
 
 }// mss

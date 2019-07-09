@@ -52,19 +52,21 @@ namespace mss
 ///
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, ATTR_EFF_BASE_CASE specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, ATTR_EFF_BASE_CASE partial specialization
 /// NOP for base case needed to trigger partial specialization of attr_engine
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::ATTR_EFF_BASE_CASE> {};
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::ATTR_EFF_BASE_CASE> {};
 
 ///
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, DRAM_MODULE_HEIGHT specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, DRAM_MODULE_HEIGHT partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::DRAM_MODULE_HEIGHT>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::DRAM_MODULE_HEIGHT>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -115,10 +117,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::DRAM_MODULE_HEIGHT>
 ///
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC0_MFG_ID specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC0_MFG_ID partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_MFG_ID>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC0_MFG_ID>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_MFG_ID_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -165,10 +168,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_MFG_ID>
 ///
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC0_SWA_VOLTAGE_SETTING specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC0_SWA_VOLTAGE_SETTING partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWA_VOLTAGE_SETTING>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC0_SWA_VOLTAGE_SETTING>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWA_VOLTAGE_SETTING_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -215,10 +219,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWA_VOLTAGE_SE
 //
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC0_SWA_VOLTAGE_RANGE_SELECT specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC0_SWA_VOLTAGE_RANGE_SELECT partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWA_VOLTAGE_RANGE_SELECT>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC0_SWA_VOLTAGE_RANGE_SELECT>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWA_VOLTAGE_RANGE_SELECT_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -265,10 +270,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWA_VOLTAGE_RA
 //
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC0_SWA_VOLTAGE_OFFSET specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC0_SWA_VOLTAGE_OFFSET partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWA_VOLTAGE_OFFSET>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC0_SWA_VOLTAGE_OFFSET>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWA_VOLTAGE_OFFSET_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -323,10 +329,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWA_VOLTAGE_OF
 //
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC0_SWA_SEQUENCE_DELAY specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC0_SWA_SEQUENCE_DELAY partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWA_SEQUENCE_DELAY>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC0_SWA_SEQUENCE_DELAY>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWA_SEQUENCE_DELAY_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -373,10 +380,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWA_SEQUENCE_D
 //
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC0_SWA_SEQUENCE_ORDER specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC0_SWA_SEQUENCE_ORDER partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWA_SEQUENCE_ORDER>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC0_SWA_SEQUENCE_ORDER>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWA_SEQUENCE_ORDER_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -423,10 +431,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWA_SEQUENCE_O
 ///
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC0_SWB_VOLTAGE_SETTING specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC0_SWB_VOLTAGE_SETTING partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWB_VOLTAGE_SETTING>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC0_SWB_VOLTAGE_SETTING>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWB_VOLTAGE_SETTING_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -473,10 +482,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWB_VOLTAGE_SE
 //
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC0_SWB_VOLTAGE_RANGE_SELECT specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC0_SWB_VOLTAGE_RANGE_SELECT partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWB_VOLTAGE_RANGE_SELECT>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC0_SWB_VOLTAGE_RANGE_SELECT>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWB_VOLTAGE_RANGE_SELECT_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -523,10 +533,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWB_VOLTAGE_RA
 //
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC0_SWB_VOLTAGE_OFFSET specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC0_SWB_VOLTAGE_OFFSET partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWB_VOLTAGE_OFFSET>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC0_SWB_VOLTAGE_OFFSET>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWB_VOLTAGE_OFFSET_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -581,10 +592,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWB_VOLTAGE_OF
 //
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC0_SWB_SEQUENCE_DELAY specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC0_SWB_SEQUENCE_DELAY partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWB_SEQUENCE_DELAY>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC0_SWB_SEQUENCE_DELAY>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWB_SEQUENCE_DELAY_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -631,10 +643,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWB_SEQUENCE_D
 //
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC0_SWB_SEQUENCE_ORDER specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC0_SWB_SEQUENCE_ORDER partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWB_SEQUENCE_ORDER>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC0_SWB_SEQUENCE_ORDER>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWB_SEQUENCE_ORDER_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -682,10 +695,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWB_SEQUENCE_O
 ///
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC0_SWC_VOLTAGE_SETTING specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC0_SWC_VOLTAGE_SETTING partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWC_VOLTAGE_SETTING>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC0_SWC_VOLTAGE_SETTING>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWC_VOLTAGE_SETTING_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -732,10 +746,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWC_VOLTAGE_SE
 //
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC0_SWC_VOLTAGE_RANGE_SELECT specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC0_SWC_VOLTAGE_RANGE_SELECT partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWC_VOLTAGE_RANGE_SELECT>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC0_SWC_VOLTAGE_RANGE_SELECT>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWC_VOLTAGE_RANGE_SELECT_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -782,10 +797,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWC_VOLTAGE_RA
 //
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC0_SWC_VOLTAGE_OFFSET specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC0_SWC_VOLTAGE_OFFSET partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWC_VOLTAGE_OFFSET>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC0_SWC_VOLTAGE_OFFSET>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWC_VOLTAGE_OFFSET_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -840,10 +856,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWC_VOLTAGE_OF
 //
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC0_SWC_SEQUENCE_DELAY specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC0_SWC_SEQUENCE_DELAY partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWC_SEQUENCE_DELAY>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC0_SWC_SEQUENCE_DELAY>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWC_SEQUENCE_DELAY_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -890,10 +907,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWC_SEQUENCE_D
 //
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC0_SWC_SEQUENCE_ORDER specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC0_SWC_SEQUENCE_ORDER partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWC_SEQUENCE_ORDER>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC0_SWC_SEQUENCE_ORDER>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWC_SEQUENCE_ORDER_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -941,10 +959,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWC_SEQUENCE_O
 ///
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC0_SWD_VOLTAGE_SETTING specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC0_SWD_VOLTAGE_SETTING partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWD_VOLTAGE_SETTING>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC0_SWD_VOLTAGE_SETTING>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWD_VOLTAGE_SETTING_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -991,10 +1010,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWD_VOLTAGE_SE
 //
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC0_SWD_VOLTAGE_RANGE_SELECT specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC0_SWD_VOLTAGE_RANGE_SELECT partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWD_VOLTAGE_RANGE_SELECT>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC0_SWD_VOLTAGE_RANGE_SELECT>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWD_VOLTAGE_RANGE_SELECT_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -1041,10 +1061,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWD_VOLTAGE_RA
 //
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC0_SWD_VOLTAGE_OFFSET specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC0_SWD_VOLTAGE_OFFSET partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWD_VOLTAGE_OFFSET>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC0_SWD_VOLTAGE_OFFSET>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWD_VOLTAGE_OFFSET_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -1099,10 +1120,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWD_VOLTAGE_OF
 //
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC0_SWD_SEQUENCE_DELAY specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC0_SWD_SEQUENCE_DELAY partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWD_SEQUENCE_DELAY>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC0_SWD_SEQUENCE_DELAY>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWD_SEQUENCE_DELAY_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -1149,10 +1171,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWD_SEQUENCE_D
 //
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC0_SWD_SEQUENCE_ORDER specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC0_SWD_SEQUENCE_ORDER partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWD_SEQUENCE_ORDER>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC0_SWD_SEQUENCE_ORDER>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWD_SEQUENCE_ORDER_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -1199,10 +1222,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_SWD_SEQUENCE_O
 //
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC0_PHASE_COMB specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC0_PHASE_COMB partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_PHASE_COMB>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC0_PHASE_COMB>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_PHASE_COMB_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -1254,10 +1278,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC0_PHASE_COMB>
 ///
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC1_MFG_ID specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC1_MFG_ID partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_MFG_ID>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC1_MFG_ID>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_MFG_ID_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -1304,10 +1329,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_MFG_ID>
 ///
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC1_SWA_VOLTAGE_SETTING specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC1_SWA_VOLTAGE_SETTING partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWA_VOLTAGE_SETTING>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC1_SWA_VOLTAGE_SETTING>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWA_VOLTAGE_SETTING_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -1354,10 +1380,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWA_VOLTAGE_SE
 //
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC1_SWA_VOLTAGE_RANGE_SELECT specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC1_SWA_VOLTAGE_RANGE_SELECT partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWA_VOLTAGE_RANGE_SELECT>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC1_SWA_VOLTAGE_RANGE_SELECT>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWA_VOLTAGE_RANGE_SELECT_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -1404,10 +1431,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWA_VOLTAGE_RA
 //
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC1_SWA_VOLTAGE_OFFSET specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC1_SWA_VOLTAGE_OFFSET partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWA_VOLTAGE_OFFSET>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC1_SWA_VOLTAGE_OFFSET>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWA_VOLTAGE_OFFSET_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -1462,10 +1490,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWA_VOLTAGE_OF
 //
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC1_SWA_SEQUENCE_DELAY specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC1_SWA_SEQUENCE_DELAY partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWA_SEQUENCE_DELAY>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC1_SWA_SEQUENCE_DELAY>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWA_SEQUENCE_DELAY_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -1512,10 +1541,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWA_SEQUENCE_D
 //
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC1_SWA_SEQUENCE_ORDER specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC1_SWA_SEQUENCE_ORDER partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWA_SEQUENCE_ORDER>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC1_SWA_SEQUENCE_ORDER>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWA_SEQUENCE_ORDER_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -1562,10 +1592,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWA_SEQUENCE_O
 ///
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC1_SWB_VOLTAGE_SETTING specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC1_SWB_VOLTAGE_SETTING partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWB_VOLTAGE_SETTING>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC1_SWB_VOLTAGE_SETTING>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWB_VOLTAGE_SETTING_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -1612,10 +1643,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWB_VOLTAGE_SE
 //
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC1_SWB_VOLTAGE_RANGE_SELECT specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC1_SWB_VOLTAGE_RANGE_SELECT partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWB_VOLTAGE_RANGE_SELECT>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC1_SWB_VOLTAGE_RANGE_SELECT>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWB_VOLTAGE_RANGE_SELECT_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -1662,10 +1694,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWB_VOLTAGE_RA
 //
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC1_SWB_VOLTAGE_OFFSET specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC1_SWB_VOLTAGE_OFFSET partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWB_VOLTAGE_OFFSET>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC1_SWB_VOLTAGE_OFFSET>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWB_VOLTAGE_OFFSET_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -1720,10 +1753,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWB_VOLTAGE_OF
 //
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC1_SWB_SEQUENCE_DELAY specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC1_SWB_SEQUENCE_DELAY partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWB_SEQUENCE_DELAY>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC1_SWB_SEQUENCE_DELAY>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWB_SEQUENCE_DELAY_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -1770,10 +1804,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWB_SEQUENCE_D
 //
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC1_SWB_SEQUENCE_ORDER specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC1_SWB_SEQUENCE_ORDER partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWB_SEQUENCE_ORDER>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC1_SWB_SEQUENCE_ORDER>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWB_SEQUENCE_ORDER_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -1820,10 +1855,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWB_SEQUENCE_O
 ///
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC1_SWC_VOLTAGE_SETTING specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC1_SWC_VOLTAGE_SETTING partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWC_VOLTAGE_SETTING>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC1_SWC_VOLTAGE_SETTING>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWC_VOLTAGE_SETTING_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -1870,10 +1906,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWC_VOLTAGE_SE
 //
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC1_SWC_VOLTAGE_RANGE_SELECT specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC1_SWC_VOLTAGE_RANGE_SELECT partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWC_VOLTAGE_RANGE_SELECT>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC1_SWC_VOLTAGE_RANGE_SELECT>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWC_VOLTAGE_RANGE_SELECT_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -1920,10 +1957,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWC_VOLTAGE_RA
 //
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC1_SWC_VOLTAGE_OFFSET specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC1_SWC_VOLTAGE_OFFSET partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWC_VOLTAGE_OFFSET>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC1_SWC_VOLTAGE_OFFSET>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWC_VOLTAGE_OFFSET_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -1978,10 +2016,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWC_VOLTAGE_OF
 //
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC1_SWC_SEQUENCE_DELAY specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC1_SWC_SEQUENCE_DELAY partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWC_SEQUENCE_DELAY>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC1_SWC_SEQUENCE_DELAY>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWC_SEQUENCE_DELAY_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -2028,10 +2067,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWC_SEQUENCE_D
 //
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC1_SWC_SEQUENCE_ORDER specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC1_SWC_SEQUENCE_ORDER partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWC_SEQUENCE_ORDER>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC1_SWC_SEQUENCE_ORDER>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWC_SEQUENCE_ORDER_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -2078,10 +2118,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWC_SEQUENCE_O
 ///
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC1_SWD_VOLTAGE_SETTING specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC1_SWD_VOLTAGE_SETTING partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWD_VOLTAGE_SETTING>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC1_SWD_VOLTAGE_SETTING>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWD_VOLTAGE_SETTING_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -2128,10 +2169,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWD_VOLTAGE_SE
 //
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC1_SWD_VOLTAGE_RANGE_SELECT specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC1_SWD_VOLTAGE_RANGE_SELECT partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWD_VOLTAGE_RANGE_SELECT>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC1_SWD_VOLTAGE_RANGE_SELECT>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWD_VOLTAGE_RANGE_SELECT_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -2178,10 +2220,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWD_VOLTAGE_RA
 //
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC1_SWD_VOLTAGE_OFFSET specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC1_SWD_VOLTAGE_OFFSET partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWD_VOLTAGE_OFFSET>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC1_SWD_VOLTAGE_OFFSET>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWD_VOLTAGE_OFFSET_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -2236,10 +2279,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWD_VOLTAGE_OF
 //
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC1_SWD_SEQUENCE_DELAY specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC1_SWD_SEQUENCE_DELAY partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWD_SEQUENCE_DELAY>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC1_SWD_SEQUENCE_DELAY>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWD_SEQUENCE_DELAY_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -2286,10 +2330,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWD_SEQUENCE_D
 //
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC1_SWD_SEQUENCE_ORDER specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC1_SWD_SEQUENCE_ORDER partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWD_SEQUENCE_ORDER>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC1_SWD_SEQUENCE_ORDER>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWD_SEQUENCE_ORDER_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -2336,10 +2381,11 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_SWD_SEQUENCE_O
 //
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, PMIC1_PHASE_COMB specialization
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC1_PHASE_COMB partial specialization
 ///
-template<>
-struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_PHASE_COMB>
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC1_PHASE_COMB>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_PHASE_COMB_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -2381,17 +2427,6 @@ struct attrEngineTraits<pmic::attr_eff_engine_fields, pmic::PMIC1_PHASE_COMB>
     {
         return i_spd_data.phase_combination_pmic1(o_setting);
     }
-};
-
-///
-/// @brief Value traits for attr_eff_engine_fields
-/// @class attrEngineTraits
-/// @note attr_eff_engine_fields
-///
-template < >
-struct attrEnumTraits<pmic::attr_eff_engine_fields>
-{
-    static constexpr size_t DISPATCHER = pmic::ATTR_EFF_DISPATCHER;
 };
 
 }//mss

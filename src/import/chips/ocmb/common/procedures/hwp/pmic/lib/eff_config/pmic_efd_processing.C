@@ -34,9 +34,6 @@
 // *HWP Consumed by: HB:CI
 
 #include <fapi2.H>
-#include <generic/memory/lib/data_engine/data_engine_traits_def.H>
-#include <generic/memory/lib/data_engine/data_engine.H>
-#include <generic/memory/lib/spd/spd_facade.H>
 #include <lib/mss_pmic_attribute_setters.H>
 #include <lib/eff_config/pmic_efd_processing.H>
 #include <lib/utils/pmic_consts.H>

@@ -53,11 +53,12 @@ namespace mss
 
 ///
 /// @brief Traits for attr_engine
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attr_eff_engine_fields, PRIM_STACK_TYPE specialization
 ///
-template<>
-struct attrEngineTraits<attr_eff_engine_fields, PRIM_STACK_TYPE>
+template< proc_type P >
+struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::PRIM_STACK_TYPE>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PRIM_STACK_TYPE_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -103,11 +104,12 @@ struct attrEngineTraits<attr_eff_engine_fields, PRIM_STACK_TYPE>
 
 ///
 /// @brief Traits for attr_engine
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attr_eff_engine_fields, PRIM_DIE_COUNT specialization
 ///
-template<>
-struct attrEngineTraits<attr_eff_engine_fields, PRIMARY_DIE_COUNT>
+template< proc_type P >
+struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::PRIMARY_DIE_COUNT>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PRIM_DIE_COUNT_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -182,11 +184,12 @@ struct attrEngineTraits<attr_eff_engine_fields, PRIMARY_DIE_COUNT>
 
 ///
 /// @brief Traits for pre_data_engine
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attr_eff_engine_fields, DRAM_DENSITY specialization
 ///
-template<>
-struct attrEngineTraits<attr_eff_engine_fields, DRAM_DENSITY>
+template< proc_type P >
+struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_DENSITY>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_DENSITY_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -254,11 +257,12 @@ struct attrEngineTraits<attr_eff_engine_fields, DRAM_DENSITY>
 
 ///
 /// @brief Traits for attr_engine
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attr_engine_derived_fields, BUS_WIDTH specialization
 ///
-template<>
-struct attrEngineTraits<attr_eff_engine_fields, PRIM_BUS_WIDTH>
+template< proc_type P >
+struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::PRIM_BUS_WIDTH>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PRIM_BUS_WIDTH_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -330,11 +334,12 @@ struct attrEngineTraits<attr_eff_engine_fields, PRIM_BUS_WIDTH>
 
 ///
 /// @brief Traits for attr_engine
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attr_eff_engine_fields, DRAM_WIDTH specialization
 ///
-template<>
-struct attrEngineTraits<attr_eff_engine_fields, DRAM_WIDTH>
+template< proc_type P >
+struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_WIDTH>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_WIDTH_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -407,11 +412,12 @@ struct attrEngineTraits<attr_eff_engine_fields, DRAM_WIDTH>
 
 ///
 /// @brief Traits for attr_engine
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attr_si_engine_fields, COLUMN_ADDR_BITS specialization
 ///
-template<>
-struct attrEngineTraits<attr_eff_engine_fields, COLUMN_ADDR_BITS>
+template< proc_type P >
+struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::COLUMN_ADDR_BITS>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_COLUMN_BITS_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -471,11 +477,12 @@ struct attrEngineTraits<attr_eff_engine_fields, COLUMN_ADDR_BITS>
 
 ///
 /// @brief Traits for attr_engine
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attr_si_engine_fields, ROW_ADDR_BITS specialization
 ///
-template<>
-struct attrEngineTraits<attr_eff_engine_fields, ROW_ADDR_BITS>
+template< proc_type P >
+struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::ROW_ADDR_BITS>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_ROW_BITS_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -543,19 +550,21 @@ struct attrEngineTraits<attr_eff_engine_fields, ROW_ADDR_BITS>
 
 ///
 /// @brief Traits for attr_engine
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attr_si_engine_fields, ATTR_SI_BASE_CASE specialization
 ///
-template<>
-struct attrEngineTraits<attr_si_engine_fields, ATTR_SI_BASE_CASE> {};
+template< proc_type P >
+struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::ATTR_SI_BASE_CASE> {};
 
 ///
 /// @brief Traits for attr_engine
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attr_si_engine_fields, SI_MC_RCV_IMP_DQ_DQS specialization
 ///
-template<>
-struct attrEngineTraits<attr_si_engine_fields, SI_MC_RCV_IMP_DQ_DQS>
+template< proc_type P >
+struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_MC_RCV_IMP_DQ_DQS>
 {
     using attr_type = fapi2::ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -622,11 +631,12 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_RCV_IMP_DQ_DQS>
 
 ///
 /// @brief Traits for attr_engine
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attr_si_engine_fields, SI_MC_DRV_IMP_DQ_DQS_PULL_UP specialization
 ///
-template<>
-struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_IMP_DQ_DQS_PULL_UP>
+template< proc_type P >
+struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_MC_DRV_IMP_DQ_DQS_PULL_UP>
 {
     using attr_type = fapi2::ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -706,11 +716,12 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_IMP_DQ_DQS_PULL_UP>
 
 ///
 /// @brief Traits for attr_engine
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attr_si_engine_fields, SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN specialization
 ///
-template<>
-struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN>
+template< proc_type P >
+struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN>
 {
     using attr_type = fapi2::ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -791,11 +802,12 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN>
 
 ///
 /// @brief Traits for attr_engine
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attr_si_engine_fields, SI_MC_DRV_SLEW_RATE_DQ_DQS specialization
 ///
-template<>
-struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_SLEW_RATE_DQ_DQS>
+template< proc_type P >
+struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_MC_DRV_SLEW_RATE_DQ_DQS>
 {
     using attr_type = fapi2::ATTR_MEM_SI_MC_DRV_SLEW_RATE_DQ_DQS_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -841,11 +853,12 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_SLEW_RATE_DQ_DQS>
 
 ///
 /// @brief Traits for attr_engine
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attr_si_engine_fields, SI_MC_DRV_IMP_CMD_ADDR specialization
 ///
-template<>
-struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_IMP_CMD_ADDR>
+template< proc_type P >
+struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_MC_DRV_IMP_CMD_ADDR>
 {
     using attr_type = fapi2::ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -913,11 +926,12 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_IMP_CMD_ADDR>
 
 ///
 /// @brief Traits for attr_engine
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attr_si_engine_fields, SI_MC_DRV_SLEW_RATE_CMD_ADDR specialization
 ///
-template<>
-struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_SLEW_RATE_CMD_ADDR>
+template< proc_type P >
+struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_MC_DRV_SLEW_RATE_CMD_ADDR>
 {
     using attr_type = fapi2::ATTR_MEM_SI_MC_DRV_SLEW_RATE_CMD_ADDR_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -963,11 +977,12 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_SLEW_RATE_CMD_ADDR>
 
 ///
 /// @brief Traits for attr_engine
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attr_si_engine_fields, SI_MC_DRV_IMP_CLK specialization
 ///
-template<>
-struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_IMP_CLK>
+template< proc_type P >
+struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_MC_DRV_IMP_CLK>
 {
     using attr_type = fapi2::ATTR_MEM_SI_MC_DRV_IMP_CLK_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -1035,11 +1050,12 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_IMP_CLK>
 
 ///
 /// @brief Traits for attr_engine
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attr_si_engine_fields, SI_MC_DRV_SLEW_RATE_CLK specialization
 ///
-template<>
-struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_SLEW_RATE_CLK>
+template< proc_type P >
+struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_MC_DRV_SLEW_RATE_CLK>
 {
     using attr_type = fapi2::ATTR_MEM_SI_MC_DRV_SLEW_RATE_CLK_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -1085,11 +1101,12 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_SLEW_RATE_CLK>
 
 ///
 /// @brief Traits for attr_engine
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attr_si_engine_fields, SI_MC_RCV_IMP_ALERT_N specialization
 ///
-template<>
-struct attrEngineTraits<attr_si_engine_fields, SI_MC_RCV_IMP_ALERT_N>
+template< proc_type P >
+struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_MC_RCV_IMP_ALERT_N>
 {
     using attr_type = fapi2::ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -1157,11 +1174,12 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_RCV_IMP_ALERT_N>
 
 ///
 /// @brief Traits for attr_engine
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attr_si_engine_fields, SI_DRAM_RTT_NOM specialization
 ///
-template<>
-struct attrEngineTraits<attr_si_engine_fields, SI_DRAM_RTT_NOM>
+template< proc_type P >
+struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_DRAM_RTT_NOM>
 {
     using attr_type = fapi2::ATTR_MEM_SI_DRAM_RTT_NOM_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -1227,11 +1245,12 @@ struct attrEngineTraits<attr_si_engine_fields, SI_DRAM_RTT_NOM>
 
 ///
 /// @brief Traits for attr_engine
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attr_si_engine_fields, SI_DRAM_RTT_WR specialization
 ///
-template<>
-struct attrEngineTraits<attr_si_engine_fields, SI_DRAM_RTT_WR>
+template< proc_type P >
+struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_DRAM_RTT_WR>
 {
     using attr_type = fapi2::ATTR_MEM_SI_DRAM_RTT_WR_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -1294,11 +1313,12 @@ struct attrEngineTraits<attr_si_engine_fields, SI_DRAM_RTT_WR>
 
 ///
 /// @brief Traits for attr_engine
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attr_si_engine_fields, SI_DRAM_RTT_PARK specialization
 ///
-template<>
-struct attrEngineTraits<attr_si_engine_fields, SI_DRAM_RTT_PARK>
+template< proc_type P >
+struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_DRAM_RTT_PARK>
 {
     using attr_type = fapi2::ATTR_MEM_SI_DRAM_RTT_PARK_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -1366,11 +1386,12 @@ struct attrEngineTraits<attr_si_engine_fields, SI_DRAM_RTT_PARK>
 
 ///
 /// @brief Traits for attr_engine
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attr_si_engine_fields, SI_DRAM_PREAMBLE specialization
 ///
-template<>
-struct attrEngineTraits<attr_si_engine_fields, SI_DRAM_PREAMBLE>
+template< proc_type P >
+struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_DRAM_PREAMBLE>
 {
     using attr_type = fapi2::ATTR_MEM_SI_DRAM_PREAMBLE_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -1417,11 +1438,12 @@ struct attrEngineTraits<attr_si_engine_fields, SI_DRAM_PREAMBLE>
 
 ///
 /// @brief Traits for attr_engine
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attr_si_engine_fields, SI_MC_DRV_EQ_DQ_DQS specialization
 ///
-template<>
-struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_EQ_DQ_DQS>
+template< proc_type P >
+struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_MC_DRV_EQ_DQ_DQS>
 {
     using attr_type = fapi2::ATTR_MEM_SI_MC_DRV_EQ_DQ_DQS_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -1467,11 +1489,12 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_EQ_DQ_DQS>
 
 ///
 /// @brief Traits for attr_engine
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attr_si_engine_fields, SI_DRAM_DRV_IMP_DQ_DQS specialization
 ///
-template<>
-struct attrEngineTraits<attr_si_engine_fields, SI_DRAM_DRV_IMP_DQ_DQS>
+template< proc_type P >
+struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_DRAM_DRV_IMP_DQ_DQS>
 {
     using attr_type = fapi2::ATTR_MEM_SI_DRAM_DRV_IMP_DQ_DQS_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -1534,11 +1557,12 @@ struct attrEngineTraits<attr_si_engine_fields, SI_DRAM_DRV_IMP_DQ_DQS>
 
 ///
 /// @brief Traits for attr_engine
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attr_si_engine_fields, SI_ODT_WR specialization
 ///
-template<>
-struct attrEngineTraits<attr_si_engine_fields, SI_ODT_WR>
+template< proc_type P >
+struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_ODT_WR>
 {
     using attr_type = fapi2::ATTR_MEM_SI_ODT_WR_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -1618,11 +1642,12 @@ struct attrEngineTraits<attr_si_engine_fields, SI_ODT_WR>
 
 ///
 /// @brief Traits for attr_engine
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attr_si_engine_fields, SI_ODT_RD specialization
 ///
-template<>
-struct attrEngineTraits<attr_si_engine_fields, SI_ODT_RD>
+template< proc_type P >
+struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_ODT_RD>
 {
     using attr_type = fapi2::ATTR_MEM_SI_ODT_RD_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -1702,11 +1727,12 @@ struct attrEngineTraits<attr_si_engine_fields, SI_ODT_RD>
 
 ///
 /// @brief Traits for attr_engine
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attr_si_engine_fields, SI_GEARDOWN_MODE specialization
 ///
-template<>
-struct attrEngineTraits<attr_si_engine_fields, SI_GEARDOWN_MODE>
+template< proc_type P >
+struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_GEARDOWN_MODE>
 {
     using attr_type = fapi2::ATTR_MEM_SI_GEARDOWN_MODE_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -1756,11 +1782,12 @@ struct attrEngineTraits<attr_si_engine_fields, SI_GEARDOWN_MODE>
 ///
 
 /// @brief Traits for attrEngineTraits
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attrEngineTraits, MRANKS specialization
 ///
-template<>
-struct attrEngineTraits<attr_engine_derived_fields, LOGICAL_RANKS>
+template< proc_type P >
+struct attrEngineTraits<P, attr_engine_derived_fields, attr_engine_derived_fields::LOGICAL_RANKS>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -1825,11 +1852,12 @@ struct attrEngineTraits<attr_engine_derived_fields, LOGICAL_RANKS>
 
 ///
 /// @brief Traits for attr_engine
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attr_engine_derived_fields, MEM_DIMM_SIZE specialization
 ///
-template<>
-struct attrEngineTraits<attr_engine_derived_fields, MEM_DIMM_SIZE>
+template< proc_type P >
+struct attrEngineTraits<P, attr_engine_derived_fields, attr_engine_derived_fields::MEM_DIMM_SIZE>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DIMM_SIZE_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -1894,11 +1922,12 @@ struct attrEngineTraits<attr_engine_derived_fields, MEM_DIMM_SIZE>
 
 ///
 /// @brief Traits for attr_engine
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attr_engine_derived_fields, HEIGHT_3DS specialization
 ///
-template<>
-struct attrEngineTraits<attr_engine_derived_fields, HEIGHT_3DS>
+template< proc_type P >
+struct attrEngineTraits<P, attr_engine_derived_fields, attr_engine_derived_fields::HEIGHT_3DS>
 {
     using attr_type = fapi2::ATTR_MEM_3DS_HEIGHT_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -1966,11 +1995,12 @@ struct attrEngineTraits<attr_engine_derived_fields, HEIGHT_3DS>
 
 ///
 /// @brief Traits for attrEngineTraits
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attrEngineTraits, DRAM_CWL specialization
 ///
-template<>
-struct attrEngineTraits<attr_eff_engine_fields, DRAM_CWL>
+template<proc_type P>
+struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_CWL>
 {
     using attr_type = fapi2::ATTR_MEM_DRAM_CWL_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -2063,11 +2093,12 @@ struct attrEngineTraits<attr_eff_engine_fields, DRAM_CWL>
 
 ///
 /// @brief Traits for attrEngineTraits
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attrEngineTraits, DRAM_TREFI specialization
 ///
-template<>
-struct attrEngineTraits<attr_eff_engine_fields, DRAM_TREFI>
+template<proc_type P>
+struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_TREFI>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_TREFI_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -2199,11 +2230,12 @@ struct attrEngineTraits<attr_eff_engine_fields, DRAM_TREFI>
 
 ///
 /// @brief Traits for attrEngineTraits
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attrEngineTraits, DRAM_TCCD_L specialization
 ///
-template<>
-struct attrEngineTraits<attr_eff_engine_fields, DRAM_TCCD_L>
+template<proc_type P>
+struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_TCCD_L>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_TCCD_L_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -2299,11 +2331,12 @@ struct attrEngineTraits<attr_eff_engine_fields, DRAM_TCCD_L>
 
 ///
 /// @brief Traits for attrEngineTraits
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attrEngineTraits, DRAM_TWTR_L specialization
 ///
-template<>
-struct attrEngineTraits<attr_eff_engine_fields, DRAM_TWTR_L>
+template<proc_type P>
+struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_TWTR_L>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_TWTR_L_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -2390,11 +2423,12 @@ struct attrEngineTraits<attr_eff_engine_fields, DRAM_TWTR_L>
 
 ///
 /// @brief Traits for attrEngineTraits
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attrEngineTraits, DRAM_TWTR_S specialization
 ///
-template<>
-struct attrEngineTraits<attr_eff_engine_fields, DRAM_TWTR_S>
+template<proc_type P>
+struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_TWTR_S>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_TWTR_S_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -2481,11 +2515,12 @@ struct attrEngineTraits<attr_eff_engine_fields, DRAM_TWTR_S>
 
 ///
 /// @brief Traits for attrEngineTraits
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attrEngineTraits, DRAM_TFAW specialization
 ///
-template<>
-struct attrEngineTraits<attr_eff_engine_fields, DRAM_TFAW>
+template<proc_type P>
+struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_TFAW>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_TFAW_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -2598,11 +2633,12 @@ struct attrEngineTraits<attr_eff_engine_fields, DRAM_TFAW>
 
 ///
 /// @brief Traits for attrEngineTraits
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attrEngineTraits, DRAM_TRCD specialization
 ///
-template<>
-struct attrEngineTraits<attr_eff_engine_fields, DRAM_TRCD>
+template<proc_type P>
+struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_TRCD>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_TRCD_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -2697,11 +2733,12 @@ struct attrEngineTraits<attr_eff_engine_fields, DRAM_TRCD>
 
 ///
 /// @brief Traits for attrEngineTraits
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attrEngineTraits, DRAM_TRP specialization
 ///
-template<>
-struct attrEngineTraits<attr_eff_engine_fields, DRAM_TRP>
+template<proc_type P>
+struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_TRP>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_TRP_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -2799,11 +2836,12 @@ struct attrEngineTraits<attr_eff_engine_fields, DRAM_TRP>
 
 ///
 /// @brief Traits for attrEngineTraits
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attrEngineTraits, DRAM_TRAS specialization
 ///
-template<>
-struct attrEngineTraits<attr_eff_engine_fields, DRAM_TRAS>
+template<proc_type P>
+struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_TRAS>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_TRAS_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -2883,11 +2921,12 @@ struct attrEngineTraits<attr_eff_engine_fields, DRAM_TRAS>
 
 ///
 /// @brief Traits for attrEngineTraits
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attrEngineTraits, DRAM_TWR specialization
 ///
-template<>
-struct attrEngineTraits<attr_eff_engine_fields, DRAM_TWR>
+template<proc_type P>
+struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_TWR>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_TWR_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -2980,11 +3019,12 @@ struct attrEngineTraits<attr_eff_engine_fields, DRAM_TWR>
 
 ///
 /// @brief Traits for attrEngineTraits
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attrEngineTraits, DRAM_TRTP specialization
 ///
-template<>
-struct attrEngineTraits<attr_eff_engine_fields, DRAM_TRTP>
+template<proc_type P>
+struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_TRTP>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_TRTP_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -3056,11 +3096,12 @@ struct attrEngineTraits<attr_eff_engine_fields, DRAM_TRTP>
 
 ///
 /// @brief Traits for attrEngineTraits
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attrEngineTraits, DRAM_TRRD_S specialization
 ///
-template<>
-struct attrEngineTraits<attr_eff_engine_fields, DRAM_TRRD_S>
+template<proc_type P>
+struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_TRRD_S>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_TRRD_S_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -3178,11 +3219,12 @@ struct attrEngineTraits<attr_eff_engine_fields, DRAM_TRRD_S>
 
 ///
 /// @brief Traits for attrEngineTraits
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attrEngineTraits, DRAM_TRRD_L specialization
 ///
-template<>
-struct attrEngineTraits<attr_eff_engine_fields, DRAM_TRRD_L>
+template<proc_type P>
+struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_TRRD_L>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_TRRD_L_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -3300,11 +3342,12 @@ struct attrEngineTraits<attr_eff_engine_fields, DRAM_TRRD_L>
 
 ///
 /// @brief Traits for attrEngineTraits
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attrEngineTraits, DRAM_TRFC specialization
 ///
-template<>
-struct attrEngineTraits<attr_eff_engine_fields, DRAM_TRFC>
+template<proc_type P>
+struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_TRFC>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_TRFC_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -3427,11 +3470,12 @@ struct attrEngineTraits<attr_eff_engine_fields, DRAM_TRFC>
 
 ///
 /// @brief Traits for attrEngineTraits
-/// @class attrEngineTraits
+/// @class attrEngineTraits - partial specialization
+/// @tparam P processor type
 /// @note attrEngineTraits, DRAM_TRFC_DLR specialization
 ///
-template<>
-struct attrEngineTraits<attr_eff_engine_fields, DRAM_TRFC_DLR>
+template<proc_type P>
+struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_TRFC_DLR>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_TRFC_DLR_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;

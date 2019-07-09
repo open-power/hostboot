@@ -94,7 +94,7 @@ fapi2::ReturnCode p9a_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
             FAPI_TRY( mss::efd::factory(l_ocmb, l_vpd_raw, l_vpd_info.iv_rank, l_efd_data) );
 
             // Set up SI ATTRS
-            FAPI_TRY( mss::attr_si_engine<mss::attr_si_engine_fields>::set(l_efd_data) );
+            FAPI_TRY( (mss::gen::attr_engine<mss::proc_type::AXONE, mss::attr_si_engine_fields>::set(l_efd_data)) );
 
             // Explorer EFD
             FAPI_TRY( mss::exp::efd::process(dimm, l_efd_data));
@@ -115,18 +115,18 @@ fapi2::ReturnCode p9a_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
                 FAPI_TRY( l_rc, "Failed to initialize SPD facade for %s", mss::spd::c_str(dimm) );
 
                 // Set up generic SPD ATTRS
-                FAPI_TRY( mss::attr_eff_engine<mss::attr_eff_engine_fields>::set(l_spd_decoder) );
+                FAPI_TRY( (mss::gen::attr_engine<mss::proc_type::AXONE, mss::attr_eff_engine_fields>::set(l_spd_decoder)) );
 
                 // Set up explorer SPD ATTRS
-                FAPI_TRY( mss::attr_eff_engine<mss::exp::attr_eff_engine_fields>::set(l_spd_decoder) );
+                FAPI_TRY( (mss::gen::attr_engine<mss::proc_type::AXONE, mss::exp::attr_eff_engine_fields>::set(l_spd_decoder)) );
 
                 // Set up pmic SPD ATTRS
-                FAPI_TRY( mss::attr_eff_engine<mss::pmic::attr_eff_engine_fields>::set(l_spd_decoder) );
+                FAPI_TRY( (mss::gen::attr_engine<mss::proc_type::AXONE, mss::pmic::attr_eff_engine_fields>::set(l_spd_decoder)) );
             }
         }
 
         // Set up derived ATTRS
-        FAPI_TRY( mss::attr_derived_engine<mss::attr_engine_derived_fields>::set(dimm) );
+        FAPI_TRY( (mss::gen::attr_engine<mss::proc_type::AXONE, mss::attr_engine_derived_fields>::set(dimm)) );
 
     }// dimm
 

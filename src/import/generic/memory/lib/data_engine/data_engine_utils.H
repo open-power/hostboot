@@ -310,10 +310,15 @@ inline fapi2::ReturnCode set_field(const fapi2::Target<T>& i_target,
 {
     const auto l_attr_target = mss::find_target<TT::TARGET_TYPE>(i_target);
     typename TT::attr_type l_attr_list = {};
-    FAPI_TRY( TT::get_attr(l_attr_target, l_attr_list) );
 
-    FAPI_TRY( update_data(i_target, i_setting, TT::FFDC_CODE, l_attr_list) );
-    FAPI_TRY( TT::set_attr(l_attr_target, l_attr_list) );
+    FAPI_TRY( TT::get_attr(l_attr_target, l_attr_list),
+              "Failed get_attr() for %s", spd::c_str(i_target) );
+
+    FAPI_TRY( update_data(i_target, i_setting, TT::FFDC_CODE, l_attr_list),
+              "Failed update_data for %s", spd::c_str(i_target) );
+
+    FAPI_TRY( TT::set_attr(l_attr_target, l_attr_list),
+              "Failed set_attr() for %s", spd::c_str(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -342,13 +347,16 @@ inline fapi2::ReturnCode set_field(const DT& i_data,
 
     // Get the attribute data in its entirety
     typename TT::attr_type l_attr_list = {};
-    FAPI_TRY( TT::get_attr(l_attr_target, l_attr_list) );
+    FAPI_TRY( TT::get_attr(l_attr_target, l_attr_list),
+              "Failed get_attr()");
 
     // Update the portion of interest (can vary per dimm and/or rank)
-    FAPI_TRY( update_data(i_data, i_setting, TT::FFDC_CODE, l_attr_list) );
+    FAPI_TRY( update_data(i_data, i_setting, TT::FFDC_CODE, l_attr_list),
+              "Failed update_data()");
 
     // Set the contents back to the attribute
-    FAPI_TRY( TT::set_attr(l_attr_target, l_attr_list) );
+    FAPI_TRY( TT::set_attr(l_attr_target, l_attr_list),
+              "Failed set_attr()");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -356,17 +364,14 @@ fapi_try_exit:
 
 ///
 /// @brief Template recursive algorithm for setting attrs
-/// @class attr_engine
+/// @class attr_engine - partial specialization when F != 0
+/// @tparam P processor type
 /// @tparam ET enum type - conceptually a list of attrs to set
 /// @tparam F enum value - the specific attr value from ET to set
-/// @tparam TT defaulted to attrEngineTraits<ET, F>
-/// @tparam V defaulted to void (dispatch tag)
+/// @tparam TT associated traits for attr_engine
 ///
-template < typename ET,
-           ET F,
-           typename TT = mss::attrEngineTraits<ET, F>,
-           typename V = void >
-struct attr_engine
+template < proc_type P, typename ET, ET F, typename TT >
+struct attr_engine<P, ET, F, TT, false>
 {
     ///
     /// @brief Sets attributes fields F in ET
@@ -378,9 +383,12 @@ struct attr_engine
     static fapi2::ReturnCode single_set(const IT& i_input)
     {
         typename TT::attr_integral_type l_value = 0;
-        FAPI_TRY( TT::get_value_to_set(i_input, l_value) );
 
-        FAPI_TRY( set_field<TT>(i_input, l_value) );
+        FAPI_TRY( TT::get_value_to_set(i_input, l_value),
+                  "Failed get_value_to_set() for proc_type: %d and enum val: %d", P, F);
+
+        FAPI_TRY( set_field<TT>(i_input, l_value),
+                  "Failed set_field() for proc_type: %d and enum val: %d", P, F);
 
     fapi_try_exit:
         return fapi2::current_err;
@@ -395,12 +403,20 @@ struct attr_engine
     template < typename IT >
     static fapi2::ReturnCode set(const IT& i_input)
     {
-        FAPI_TRY( (attr_engine<ET, F>::single_set(i_input)) );
+        FAPI_TRY( (attr_engine<P, ET, F, TT, static_cast<size_t>(F) == 0u>::single_set(i_input)),
+                  "Failed attr_engine<P, ET, F>::single_set() for proc_type: %d and enum val: %d", P, F);
 
         // Compiler isn't smart enough to deduce F - 1u (decrementing the enum values by 1)
         // Cast needed to help the compiler deduce this value is an ET type
         // This does the recursive call to unroll a compile-time looping of a enum list of attrs to set
-        FAPI_TRY( (attr_engine < ET, static_cast<ET>(F - 1u) >::set(i_input)) );
+        // The recursion stops at the base case where NEXT_FLD == 0u
+        {
+            constexpr ET NEXT_FLD = static_cast<ET>( static_cast<size_t>(F) - 1u );
+            using T =  mss::attrEngineTraits<P, ET, NEXT_FLD>;
+
+            FAPI_TRY( (attr_engine <P, ET, NEXT_FLD, T, 0u == static_cast<size_t>(NEXT_FLD)>::set(i_input)),
+                      "Failed (attr_engine <P, ET, NEXT_FLD>::set() for proc_type: %d and enum val: %d", P, F);
+        }
 
     fapi_try_exit:
         return fapi2::current_err;
@@ -408,17 +424,15 @@ struct attr_engine
 };
 
 ///
-/// @brief Algorithm for setting SI attrs
-/// @class attr_engine
-/// @tparam ET enum type
-/// @tparam F enum value
-/// @note partial specialization when F == 0 (base case). Which is a NOP.
+/// @brief Template recursive algorithm for setting attrs
+/// @class attr_engine - partial specialization where F == 0u
+/// @tparam P processor type
+/// @tparam ET attr fields enum type (conceptually a list of attrs to set)
+/// @tparam F enum value - the specific attr value from ET to set
+/// @tparam TT associated traits for attr_engine
 ///
-template < typename ET, ET F>
-struct attr_engine< ET,
-           F,
-           mss::attrEngineTraits<ET, F>,
-           typename std::enable_if<0u == F>::type >
+template < proc_type P, typename ET, ET F, typename TT >
+struct attr_engine< P, ET, F, TT, true >
 {
     ///
     /// @brief Sets attributes fields F in ET
@@ -429,6 +443,7 @@ struct attr_engine< ET,
     template < typename IT >
     static fapi2::ReturnCode set(const IT& i_input)
     {
+        FAPI_DBG("NO-OP: Reached base case (0) of recursive template for proc_type: %d and enum value: %d", P, F);
         return fapi2::FAPI2_RC_SUCCESS;
     }
 };
