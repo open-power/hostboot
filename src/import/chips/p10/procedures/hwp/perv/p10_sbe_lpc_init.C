@@ -57,17 +57,15 @@ static fapi2::ReturnCode reset_lpc_master(
     //Do the functional reset that resets the internal registers
     //Setting registers to do an LPC functional reset
     PREP_TP_TCN1_N1_CPLT_CONF1_WO_OR(i_target_chip);
-//  FIXME RTC:209732 use proper SCOM header constant for bit 12
-//    SET_TP_TCN1_N1_CPLT_CONF1_LP_RESET(l_data64);
-    l_data64.setBit<12>();
+
+    SET_TP_TCN1_N1_CPLT_CONF1_LP_RESET(l_data64);
     FAPI_TRY(PUT_TP_TCN1_N1_CPLT_CONF1_WO_OR(i_target_chip, l_data64));
 
     //Turn off the LPC functional reset
     l_data64 = 0;
     PREP_TP_TCN1_N1_CPLT_CONF1_WO_CLEAR(i_target_chip);
-//  FIXME RTC:209732 use proper SCOM header constant for bit 12
-//    SET_TP_TCN1_N1_CPLT_CONF1_LP_RESET(l_data64);
-    l_data64.setBit<12>();
+
+    SET_TP_TCN1_N1_CPLT_CONF1_LP_RESET(l_data64);
     FAPI_TRY(PUT_TP_TCN1_N1_CPLT_CONF1_WO_CLEAR(i_target_chip, l_data64));
 
 fapi_try_exit:
