@@ -103,6 +103,27 @@ inline bool get_enterprise_config( const fapi2::buffer<uint64_t>& i_data )
     return i_data.getBit<EXPLR_MMIO_MENTERP_CFG_ENTERPRISE_MODE>();
 }
 
+
+///
+/// @brief Get edpl enable bit
+/// @param[in] i_data the register data
+/// @return The register's EDPL_ENA bit
+///
+inline bool get_edpl_enable_bit( const fapi2::buffer<uint64_t>& i_data )
+{
+    return i_data.getBit<EXPLR_DLX_DL0_CONFIG1_CFG_EDPL_ENA>();
+}
+
+///
+/// @brief Set edpl enable bit
+/// @param[in,out] io_data the register data
+/// @param[in] i_enable The register's EDPL_ENA bit
+///
+inline void set_edpl_enable_bit( fapi2::buffer<uint64_t>& io_data, const bool i_enable )
+{
+    io_data.writeBit<EXPLR_DLX_DL0_CONFIG1_CFG_EDPL_ENA>(i_enable);
+}
+
 ///
 /// @brief Checks if the enterprise config bit is in the correct mode
 /// @param[in] i_target target on which we are operating - for logging
@@ -157,6 +178,44 @@ inline fapi2::ReturnCode write_enterprise_config( const fapi2::Target<fapi2::TAR
     return fapi2::putScom(i_target, EXPLR_MMIO_MENTERP, i_data);
 }
 
+///
+/// @brief Reads the EXPLR_DLX_DL0_CONFIG1 register using I2C
+/// @param[in] i_target the OCMB target on which to operate
+/// @param[out] o_data the register contents
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
+///
+inline fapi2::ReturnCode read_dlx_config1( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        fapi2::buffer<uint64_t>& o_data )
+{
+    return fapi2::getScom(i_target, EXPLR_DLX_DL0_CONFIG1, o_data);
+}
+
+///
+/// @brief Writes the EXPLR_DLX_DL0_CONFIG1 register using I2C
+/// @param[in] i_target the OCMB target on which to operate
+/// @param[in] i_data the register contents
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
+///
+inline fapi2::ReturnCode write_dlx_config1( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const  fapi2::buffer<uint64_t>& i_data )
+{
+    return fapi2::putScom(i_target, EXPLR_DLX_DL0_CONFIG1, i_data);
+}
+
+///
+/// @brief Set the OMI_DL0 configuration register for a given mode
+///
+/// @param[in] i_target OCMB target
+/// @param[in] i_train_mode mode to use
+/// @param[in] i_dl_x4_backoff_en backoff enable bit
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+/// @note Algorithm from p9a_omi_train.C
+///
+fapi2::ReturnCode setup_omi_dl0_config0(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const uint8_t i_train_mode,
+    const uint8_t i_dl_x4_backoff_en);
+
 namespace train
 {
 
@@ -168,7 +227,6 @@ namespace train
 ///
 fapi2::ReturnCode setup_fw_boot_config( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                         std::vector<uint8_t>& o_data );
-
 } // ns train
 
 } // ns omi
