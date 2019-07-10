@@ -26,7 +26,6 @@
 /** @file prdfMemDsd_ipl.C */
 
 // Platform includes
-#include <prdfCenMbaExtraSig.H>
 #include <prdfMemDqBitmap.H>
 #include <prdfMemDsd.H>
 
@@ -189,49 +188,6 @@ uint32_t DsdEvent<T>::verifySpare( const uint32_t & i_eccAttns,
 //------------------------------------------------------------------------------
 
 template<>
-uint32_t DsdEvent<TYPE_MBA>::startCmd()
-{
-    #define PRDF_FUNC "[DsdEvent<TYPE_MBA>::startCmd] "
-
-    uint32_t o_rc = SUCCESS;
-
-    uint32_t stopCond = mss_MaintCmd::NO_STOP_CONDITIONS;
-
-    switch ( iv_phase )
-    {
-        case TD_PHASE_1:
-            // Start the steer cleanup procedure on this master rank.
-            o_rc = startTdSteerCleanup<TYPE_MBA>( iv_chip, iv_rank, MASTER_RANK,
-                                                  stopCond );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "startTdSteerCleanup(0x%08x,0x%2x) failed",
-                          iv_chip->getHuid(), getKey() );
-            }
-            break;
-
-        case TD_PHASE_2:
-            // Start the superfast read procedure on this master rank.
-            o_rc = startTdSfRead<TYPE_MBA>( iv_chip, iv_rank, MASTER_RANK,
-                                            stopCond );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "startTdSfRead(0x%08x,0x%2x) failed",
-                          iv_chip->getHuid(), getKey() );
-            }
-            break;
-
-        default: PRDF_ASSERT( false ); // invalid phase
-    }
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-template<>
 uint32_t DsdEvent<TYPE_OCMB_CHIP>::startCmd()
 {
     #define PRDF_FUNC "[DsdEvent<TYPE_OCMB_CHIP>::startCmd] "
@@ -305,7 +261,6 @@ uint32_t DsdEvent<T>::startNextPhase( STEP_CODE_DATA_STRUCT & io_sc )
 //------------------------------------------------------------------------------
 
 // Avoid linker errors with the template.
-template class DsdEvent<TYPE_MBA>;
 template class DsdEvent<TYPE_OCMB_CHIP>;
 
 } // end namespace PRDF

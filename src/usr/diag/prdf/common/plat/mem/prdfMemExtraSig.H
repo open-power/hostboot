@@ -28,6 +28,9 @@
 
 #include <prdrSignatures.H>
 
+PRDR_ERROR_SIGNATURE(CmdComplete_ERROR, 0xeeee0000, "",
+                     "ERROR: command complete analysis failed" );
+
 PRDR_ERROR_SIGNATURE(StartVcmPhase1, 0xffff0000, "", "VCM: Starting phase 1");
 PRDR_ERROR_SIGNATURE(StartVcmPhase2, 0xffff0001, "", "VCM: Starting phase 2");
 PRDR_ERROR_SIGNATURE(StartDsdPhase1, 0xffff0002, "", "DSD: Starting phase 1");
@@ -100,6 +103,13 @@ PRDR_ERROR_SIGNATURE(EsHlthAssess,  0xffff008F, "", "NVDIMM Energy Source Health
 
 PRDR_ERROR_SIGNATURE(EsLifeErr,     0xffff0090, "", "NVDIMM Energy Source Lifetime Error");
 PRDR_ERROR_SIGNATURE(EsTmpErr,      0xffff0091, "", "NVDIMM Energy Source Temp Error");
+
+PRDR_ERROR_SIGNATURE(DsdResume, 0xbbbb0003, "", "DSD: Resuming procedure");
+
+PRDR_ERROR_SIGNATURE(VcmBadSpare,     0xbbbb0022, "", "VCM: bad DRAM spare");
+
+PRDR_ERROR_SIGNATURE(DsdDramSpared,   0xbbbb0030, "", "DSD: DRAM spared");
+PRDR_ERROR_SIGNATURE(DsdBadSpare,     0xbbbb0031, "", "DSD: DRAM spare is bad");
 
 #endif // __prdfMemExtraSig_H
 

@@ -34,8 +34,6 @@
 #include <UtilHash.H>
 
 // Platform includes
-#include <prdfCenMbaDataBundle.H>
-#include <prdfCenMbaExtraSig.H>
 #include <prdfMemCaptureData.H>
 #include <prdfMemEccAnalysis.H>
 #include <prdfMemScrubUtils.H>
@@ -132,64 +130,6 @@ void __recaptureRegs<TYPE_OCMB_CHIP>( STEP_CODE_DATA_STRUCT & io_sc,
     }
 
     i_chip->CaptureErrorData( cd, Util::hashString("MaintCmdRegs_ocmb") );
-
-    #undef PRDF_FUNC
-}
-
-template<>
-void __recaptureRegs<TYPE_MBA>( STEP_CODE_DATA_STRUCT & io_sc,
-                                ExtensibleChip * i_chip )
-{
-    #define PRDF_FUNC "[__recaptureRegs<TYPE_MBA>] "
-
-    RegDataCache & cache = RegDataCache::getCachedRegisters();
-    ExtensibleChip * membChip = getConnectedParent( i_chip, TYPE_MEMBUF );
-    TargetHandle_t mbaTrgt = i_chip->GetChipHandle();
-    uint32_t mbaPos = getTargetPosition( mbaTrgt );
-
-    const char * membRegs[2][15] =
-    {
-        { "MBSECCFIR_0", "MBA0_MBSECCERRPT_0","MBA0_MBSECCERRPT_1",
-          "MBA0_MBSEC0", "MBA0_MBSEC1", "MBSTR_0",
-          "MBA0_MBSSYMEC0", "MBA0_MBSSYMEC1", "MBA0_MBSSYMEC2",
-          "MBA0_MBSSYMEC3", "MBA0_MBSSYMEC4", "MBA0_MBSSYMEC5",
-          "MBA0_MBSSYMEC6", "MBA0_MBSSYMEC7", "MBA0_MBSSYMEC8", },
-        { "MBSECCFIR_1", "MBA1_MBSECCERRPT_0","MBA1_MBSECCERRPT_1",
-          "MBA1_MBSEC0", "MBA1_MBSEC1", "MBSTR_1",
-          "MBA1_MBSSYMEC0", "MBA1_MBSSYMEC1", "MBA1_MBSSYMEC2",
-          "MBA1_MBSSYMEC3", "MBA1_MBSSYMEC4", "MBA1_MBSSYMEC5",
-          "MBA1_MBSSYMEC6", "MBA1_MBSSYMEC7", "MBA1_MBSSYMEC8", },
-    };
-    for ( uint32_t i = 0; i < 15; i++ )
-    {
-        SCAN_COMM_REGISTER_CLASS * reg
-            = membChip->getRegister( membRegs[mbaPos][i] );
-        cache.flush( membChip, reg );
-    }
-
-    const char * mbaRegs[] =
-    {
-        "MBASPA", "MBMCT", "MBMSR", "MBMACA", "MBMEA", "MBASCTL", "MBAECTL",
-    };
-    for ( uint32_t i = 0; i < sizeof(mbaRegs)/sizeof(char*); i++ )
-    {
-        SCAN_COMM_REGISTER_CLASS * reg = i_chip->getRegister( mbaRegs[i] );
-        cache.flush( i_chip, reg );
-    }
-
-    // Now recapture those registers.
-
-    CaptureData & cd = io_sc.service_data->GetCaptureData();
-
-    if ( 0 == mbaPos )
-    {
-        membChip->CaptureErrorData(cd, Util::hashString("MaintCmdRegs_mba0") );
-    }
-    else
-    {
-        membChip->CaptureErrorData(cd, Util::hashString("MaintCmdRegs_mba1") );
-    }
-    i_chip->CaptureErrorData(cd, Util::hashString("MaintCmdRegs"));
 
     #undef PRDF_FUNC
 }
@@ -446,26 +386,6 @@ uint32_t __handleSoftInterCeEte<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     return __handleNceEte<TYPE_OCMB_CHIP>( i_chip, i_addr, io_sc );
 }
 
-template<>
-uint32_t __handleSoftInterCeEte<TYPE_MBA>( ExtensibleChip * i_chip,
-                                           const MemAddr & i_addr,
-                                           STEP_CODE_DATA_STRUCT & io_sc )
-{
-    // Due to workarounds on the Centaur we are unable to stop on each
-    // occurrence of the soft or intermittent CEs like we do for Nimbus.
-    // Instead, the threshold is set much higher. If the threshold is hit we
-    // simply want to add the rank to the callout list and trigger TPS.
-
-    MemoryMru mm { i_chip->getTrgt(), i_addr.getRank(),
-                   MemoryMruData::CALLOUT_RANK };
-    io_sc.service_data->SetCallout( mm );
-
-    TdEntry * e = new TpsEvent<TYPE_MBA>{ i_chip, i_addr.getRank() };
-    MemDbUtils::pushToQueue<TYPE_MBA>( i_chip, e );
-
-    return SUCCESS;
-}
-
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>
@@ -555,70 +475,6 @@ uint32_t __handleRceEte<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
             PRDF_ERR( PRDF_FUNC "analyzeMaintIue(0x%08x) failed",
                       i_chip->getHuid() );
             break;
-        }
-
-    } while (0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-template<>
-uint32_t __handleRceEte<TYPE_MBA>( ExtensibleChip * i_chip,
-                                   const MemRank & i_rank, bool & o_errorsFound,
-                                   STEP_CODE_DATA_STRUCT & io_sc )
-{
-    #define PRDF_FUNC "[__handleRceEte] "
-
-    uint32_t o_rc = SUCCESS;
-
-    TargetHandle_t trgt = i_chip->getTrgt();
-
-    o_errorsFound = true;
-    io_sc.service_data->AddSignatureList( trgt, PRDFSIG_MaintRETRY_CTE );
-
-    // Add the rank to the callout list.
-    MemoryMru mm { trgt, i_rank, MemoryMruData::CALLOUT_RANK };
-    io_sc.service_data->SetCallout( mm );
-
-    do
-    {
-        bool doTps = true;
-
-        if ( mfgMode() )
-        {
-            ExtensibleChip * membChip = getConnectedParent(i_chip, TYPE_MEMBUF);
-
-            // Get the current RCE count from hardware.
-            const char * reg_str = (0 == i_chip->getPos()) ? "MBA0_MBSEC1"
-                                                           : "MBA1_MBSEC1";
-            SCAN_COMM_REGISTER_CLASS * reg = membChip->getRegister( reg_str );
-            o_rc = reg->Read();
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "Read() failed on %s", reg_str );
-                break;
-            }
-            uint16_t count = reg->GetBitFieldJustified( 0, 12 );
-
-            // Add the count to RCE table.
-            doTps = getMbaDataBundle(i_chip)->iv_rceTable.addEntry( i_rank,
-                                                                    io_sc,
-                                                                    count );
-        }
-        else
-        {
-            // The RCE threshold was set to the maximum. If we hit this then
-            // there is definitely a problem.
-            io_sc.service_data->setServiceCall();
-        }
-
-        // Add a TPS procedure to the queue, if needed.
-        if ( doTps )
-        {
-            TdEntry * e = new TpsEvent<TYPE_MBA>{ i_chip, i_rank };
-            MemDbUtils::pushToQueue<TYPE_MBA>( i_chip, e );
         }
 
     } while (0);
@@ -777,10 +633,6 @@ uint32_t __checkEcc( ExtensibleChip * i_chip,
 
 template
 uint32_t __checkEcc<TYPE_MCA>( ExtensibleChip * i_chip,
-                               const MemAddr & i_addr, bool & o_errorsFound,
-                               STEP_CODE_DATA_STRUCT & io_sc );
-template
-uint32_t __checkEcc<TYPE_MBA>( ExtensibleChip * i_chip,
                                const MemAddr & i_addr, bool & o_errorsFound,
                                STEP_CODE_DATA_STRUCT & io_sc );
 template
@@ -945,98 +797,6 @@ uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::unmaskEccAttns()
 
 //------------------------------------------------------------------------------
 
-template<>
-uint32_t MemTdCtlr<TYPE_MBA>::maskEccAttns()
-{
-    #define PRDF_FUNC "[MemTdCtlr<TYPE_MBA>::maskEccAttns] "
-
-    uint32_t o_rc = SUCCESS;
-
-    do
-    {
-        // Don't want to handle memory CEs during any TD procedures, so
-        // mask them.
-
-        const char * reg_str = (0 == iv_chip->getPos())
-            ? "MBSECCFIR_0_MASK_OR" : "MBSECCFIR_1_MASK_OR";
-
-        ExtensibleChip * membChip = getConnectedParent( iv_chip, TYPE_MEMBUF );
-
-        SCAN_COMM_REGISTER_CLASS * reg = membChip->getRegister(reg_str);
-
-        reg->clearAllBits();
-        reg->SetBit(16); // fetch NCE
-        reg->SetBit(17); // fetch RCE
-        reg->SetBit(43); // prefetch UE
-
-        o_rc = reg->Write();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "Write() failed on %s", reg_str );
-            break;
-        }
-
-    } while (0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-uint32_t MemTdCtlr<TYPE_MBA>::unmaskEccAttns()
-{
-    #define PRDF_FUNC "[MemTdCtlr<TYPE_MBA>::unmaskEccAttns] "
-
-    uint32_t o_rc = SUCCESS;
-
-    do
-    {
-        // Memory CEs where masked at the beginning of the TD procedure, so
-        // clear and unmask them. Also, it is possible that memory UEs have
-        // thresholded so clear and unmask them as well.
-
-        const char * fir_str = (0 == iv_chip->getPos())
-            ? "MBSECCFIR_0_AND" : "MBSECCFIR_1_AND";
-        const char * msk_str = (0 == iv_chip->getPos())
-            ? "MBSECCFIR_0_MASK_AND" : "MBSECCFIR_1_MASK_AND";
-
-        ExtensibleChip * membChip = getConnectedParent( iv_chip, TYPE_MEMBUF );
-
-        SCAN_COMM_REGISTER_CLASS * fir = membChip->getRegister( fir_str );
-        SCAN_COMM_REGISTER_CLASS * msk = membChip->getRegister( msk_str );
-
-        fir->setAllBits(); msk->setAllBits();
-        fir->ClearBit(16); msk->ClearBit(16); // fetch NCE
-        fir->ClearBit(17); msk->ClearBit(17); // fetch RCE
-        fir->ClearBit(19); msk->ClearBit(19); // fetch UE
-        fir->ClearBit(43); msk->ClearBit(43); // prefetch UE
-
-        o_rc = fir->Write();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "Write() failed on %s", fir_str );
-            break;
-        }
-
-        o_rc = msk->Write();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "Write() failed on %s", msk_str );
-            break;
-        }
-
-    } while (0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
 template<TARGETING::TYPE T>
 SCAN_COMM_REGISTER_CLASS * __getEccFirAnd( ExtensibleChip * i_chip );
 
@@ -1059,14 +819,6 @@ SCAN_COMM_REGISTER_CLASS * __getEccFirAnd<TYPE_MEM_PORT>(
 {
     ExtensibleChip * ocmbChip = getConnectedParent( i_chip, TYPE_OCMB_CHIP );
     return ocmbChip->getRegister( "RDFFIR_AND" );
-}
-
-template<>
-SCAN_COMM_REGISTER_CLASS * __getEccFirAnd<TYPE_MBA>( ExtensibleChip * i_chip )
-{
-    ExtensibleChip * membChip = getConnectedParent( i_chip, TYPE_MEMBUF );
-    return membChip->getRegister( (0 == i_chip->getPos()) ? "MBSECCFIR_0_AND"
-                                                          : "MBSECCFIR_1_AND" );
 }
 
 template <TARGETING::TYPE TP, TARGETING::TYPE TC>
@@ -1284,45 +1036,6 @@ uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::initialize()
 
         // Find all unverified chip marks.
         o_rc = __findChipMarks<TYPE_MEM_PORT>( iv_rankList );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "__findChipMarks() failed on 0x%08x",
-                      iv_chip->getHuid() );
-            break;
-        }
-
-        // At this point, the TD controller is initialized.
-        iv_initialized = true;
-
-    } while (0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-template<>
-uint32_t MemTdCtlr<TYPE_MBA>::initialize()
-{
-    #define PRDF_FUNC "[MemTdCtlr<TYPE_MBA>::initialize] "
-
-    uint32_t o_rc = SUCCESS;
-
-    do
-    {
-        if ( iv_initialized ) break; // nothing to do
-
-        // Unmask the fetch attentions just in case there were masked during a
-        // TD procedure prior to a reset/reload.
-        o_rc = unmaskEccAttns();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "unmaskEccAttns() failed" );
-            break;
-        }
-
-        // Find all unverified chip marks.
-        o_rc = __findChipMarks<TYPE_MBA>( iv_rankList );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "__findChipMarks() failed on 0x%08x",
@@ -1568,133 +1281,6 @@ uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::handleRrFo()
 //------------------------------------------------------------------------------
 
 template<>
-uint32_t MemTdCtlr<TYPE_MBA>::handleRrFo()
-{
-    #define PRDF_FUNC "[MemTdCtlr<TYPE_MBA>::handleRrFo] "
-
-     uint32_t o_rc = SUCCESS;
-
-    do
-    {
-        // Check if maintenance command complete attention is set.
-        SCAN_COMM_REGISTER_CLASS * mbaspa =
-                                iv_chip->getRegister("MBASPA");
-        o_rc = mbaspa->Read();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "Read() failed on MBASPA");
-            break;
-        }
-
-        // If there is a command complete attention, nothing to do, break out.
-        if ( mbaspa->IsBitSet(0) ||  mbaspa->IsBitSet(8) )
-            break;
-
-        // Check if a maintenance command is running currently.
-        SCAN_COMM_REGISTER_CLASS * mbmsr =
-                                iv_chip->getRegister("MBMSR");
-
-        o_rc = mbmsr->Read();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "Read() failed on MBMSR");
-            break;
-        }
-
-        // If a command is not running, set command complete attn, break.
-        if ( !mbmsr->IsBitSet(0) )
-        {
-            SCAN_COMM_REGISTER_CLASS * mbaspa_or =
-                iv_chip->getRegister("MBASPA_OR");
-            mbaspa_or->SetBit( 0 );
-
-            mbaspa_or->Write();
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "Write() failed on MBASPA_OR" );
-            }
-            break;
-        }
-
-        // Check if there are unverified chip marks.
-        std::vector<TdRankListEntry> vectorList = iv_rankList.getList();
-
-        for ( auto & entry : vectorList )
-        {
-            ExtensibleChip * mbaChip = entry.getChip();
-            MemRank rank = entry.getRank();
-
-            // Get the chip mark
-            MemMark chipMark;
-            o_rc = MarkStore::readChipMark<TYPE_MBA>( mbaChip, rank, chipMark );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "readChipMark<TYPE_MBA>(0x%08x,%d) "
-                        "failed", mbaChip->getHuid(), rank.getMaster() );
-                break;
-            }
-
-            if ( !chipMark.isValid() ) continue; // no chip mark present
-
-            // Get the DQ Bitmap data.
-            TargetHandle_t mbaTrgt = mbaChip->GetChipHandle();
-            MemDqBitmap dqBitmap;
-
-            o_rc = getBadDqBitmap( mbaTrgt, rank, dqBitmap );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "getBadDqBitmap(0x%08x, %d)",
-                          getHuid(mbaTrgt), rank.getMaster() );
-                break;
-            }
-
-            // Check if the chip mark is verified or not.
-            bool cmVerified = false;
-            o_rc = dqBitmap.isChipMark( chipMark.getSymbol(), cmVerified );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "dqBitmap.isChipMark failed." );
-                break;
-            }
-
-            // If there are any unverified chip marks, stop the command, break.
-            if ( !cmVerified )
-            {
-                o_rc = stopBgScrub<TYPE_MBA>( iv_chip );
-                if ( SUCCESS != o_rc )
-                {
-                    PRDF_ERR( PRDF_FUNC "stopBgScrub<TYPE_MBA>(0x%08x) failed",
-                            iv_chip->getHuid() );
-                }
-
-                // The HWP that stops the command apparently clears the command
-                // complete attention, which we were not expecting. Therefore,
-                // we must manually set the attention.
-                SCAN_COMM_REGISTER_CLASS * mbaspa_or =
-                                            iv_chip->getRegister("MBASPA_OR");
-                mbaspa_or->SetBit( 0 );
-
-                mbaspa_or->Write();
-                if ( SUCCESS != o_rc )
-                {
-                    PRDF_ERR( PRDF_FUNC "Write() failed on MBASPA_OR" );
-                }
-
-                // There is now a command complete attention for this MBA. So
-                // break out of the for-loop.
-                break;
-            }
-        }
-
-    } while (0);
-
-    return o_rc;
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-template<>
 uint32_t MemTdCtlr<TYPE_MCBIST>::canResumeBgScrub( bool & o_canResume )
 {
     #define PRDF_FUNC "[MemTdCtlr<TYPE_MCBIST>::canResumeBgScrub] "
@@ -1770,45 +1356,10 @@ uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::canResumeBgScrub( bool & o_canResume )
     #undef PRDF_FUNC
 }
 
-template<>
-uint32_t MemTdCtlr<TYPE_MBA>::canResumeBgScrub( bool & o_canResume )
-{
-    #define PRDF_FUNC "[MemTdCtlr<TYPE_MBA>::canResumeBgScrub] "
-
-    uint32_t o_rc = SUCCESS;
-
-    o_canResume = false;
-
-    // It is possible that we were running a TD procedure and the PRD service
-    // was reset. Assuming the command did not stop on the last address of the
-    // current slave rank, we will simply "resume" the command from the next
-    // address to the end of the rank. The MBA resume actually starts a new
-    // command, unlike MCBIST. Therefore, we can get away with blindly starting
-    // the command without trying to assess what type of command was actually
-    // running.
-
-    bool lastAddr = false;
-    o_rc = didCmdStopOnLastAddr<TYPE_MBA>( iv_chip, SLAVE_RANK, lastAddr );
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "didCmdStopOnLastAddr(0x%08x) failed",
-                  iv_chip->getHuid() );
-    }
-    else
-    {
-        o_canResume = !lastAddr;
-    }
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
 //------------------------------------------------------------------------------
 
 // Avoid linker errors with the template.
 template class MemTdCtlr<TYPE_MCBIST>;
-template class MemTdCtlr<TYPE_MBA>;
 template class MemTdCtlr<TYPE_OCMB_CHIP>;
 
 //------------------------------------------------------------------------------

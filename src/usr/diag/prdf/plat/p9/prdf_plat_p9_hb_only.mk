@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2018
+# Contributors Listed Below - COPYRIGHT 2016,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -40,7 +40,6 @@ prd_incpath += ${PRD_SRC_PATH}/plat/p9
 # plat/p9/ (non-rule plugin related)
 
 # plat/p9/ (rule plugin related)
-prd_rule_plugin += prdfPlatCenPll.o
 
 ################################################################################
 # Hostboot only object files (IPL only)

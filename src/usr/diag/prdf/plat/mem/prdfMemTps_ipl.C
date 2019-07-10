@@ -130,13 +130,6 @@ bool __iueCheck<TYPE_OCMB_CHIP>( uint32_t i_eccAttns )
     return ( 0 != (i_eccAttns & MAINT_IUE) );
 }
 
-template<> inline
-bool __iueCheck<TYPE_MBA>( uint32_t i_eccAttns )
-{
-    // IUES are reported via RCE ETE on Centaur
-    return ( 0 != (i_eccAttns & MAINT_RCE_ETE) );
-}
-
 template<TARGETING::TYPE T>
 uint32_t TpsEvent<T>::analyzeEccErrors( const uint32_t & i_eccAttns,
                                         STEP_CODE_DATA_STRUCT & io_sc,
@@ -342,84 +335,10 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::startCmd()
     #undef PRDF_FUNC
 }
 
-//##############################################################################
-//
-//                          Specializations for MBA
-//
-//##############################################################################
-
-template<>
-uint32_t TpsEvent<TYPE_MBA>::startCmd()
-{
-    #define PRDF_FUNC "[TpsEvent::startCmd] "
-
-    uint32_t o_rc = SUCCESS;
-
-    uint32_t stopCond = mss_MaintCmd::NO_STOP_CONDITIONS;
-
-    // We don't need to set any stop-on-error conditions or thresholds for
-    // soft/inter/hard CEs during Memory Diagnostics. The design is to let the
-    // command continue to the end of the rank and we do diagnostics on the
-    // CE counts found in the per-symbol counters. Therefore, all we need to do
-    // is tell the hardware which CE types to count.
-
-    do
-    {
-        ExtensibleChip * membChip = getConnectedParent( iv_chip, TYPE_MEMBUF );
-        const char * reg_str = (0 == iv_chip->getPos()) ? "MBSTR_0" : "MBSTR_1";
-        SCAN_COMM_REGISTER_CLASS * mbstr = membChip->getRegister( reg_str );
-        o_rc = mbstr->Read();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "Read() failed on %s: 0x%08x", reg_str,
-                      membChip->getHuid() );
-            break;
-        }
-
-        switch ( iv_phase )
-        {
-            case TD_PHASE_1:
-                // Set the per symbol counters to count only soft/inter CEs.
-                mbstr->SetBitFieldJustified( 55, 3, 0x6 );
-                break;
-
-            case TD_PHASE_2:
-                // Set the per symbol counters to count only hard CEs.
-                mbstr->SetBitFieldJustified( 55, 3, 0x1 );
-                break;
-
-            default: PRDF_ASSERT( false ); // invalid phase
-        }
-
-        o_rc = mbstr->Write();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "Write() failed on %s: 0x%08x", reg_str,
-                      membChip->getHuid() );
-            break;
-        }
-
-        // Start the time based scrub procedure on this slave rank.
-        o_rc = startTdScrub<TYPE_MBA>( iv_chip, iv_rank, SLAVE_RANK, stopCond );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x) failed",
-                      iv_chip->getHuid(), getKey() );
-            break;
-        }
-
-    } while(0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
 //------------------------------------------------------------------------------
 
 // Avoid linker errors with the template.
 template class TpsEvent<TYPE_MCA>;
-template class TpsEvent<TYPE_MBA>;
 template class TpsEvent<TYPE_OCMB_CHIP>;
 
 //------------------------------------------------------------------------------

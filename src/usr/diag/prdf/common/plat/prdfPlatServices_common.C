@@ -687,10 +687,6 @@ uint32_t getBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
             o_rc = __getBadDqBitmap<fapi2::TARGET_TYPE_MCA>( i_trgt, i_rank,
                                                              o_bitmap );
             break;
-        case TYPE_MBA:
-            o_rc = __getBadDqBitmap<fapi2::TARGET_TYPE_MBA>( i_trgt, i_rank,
-                                                             o_bitmap );
-            break;
         case TYPE_MEM_PORT:
             o_rc = __getBadDqBitmap<fapi2::TARGET_TYPE_MEM_PORT>( i_trgt,
                 i_rank, o_bitmap );
@@ -767,10 +763,6 @@ uint32_t setBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
     {
         case TYPE_MCA:
             o_rc = __setBadDqBitmap<fapi2::TARGET_TYPE_MCA>( i_trgt, i_rank,
-                                                             i_bitmap );
-            break;
-        case TYPE_MBA:
-            o_rc = __setBadDqBitmap<fapi2::TARGET_TYPE_MBA>( i_trgt, i_rank,
                                                              i_bitmap );
             break;
         case TYPE_MEM_PORT:
@@ -912,41 +904,6 @@ int32_t mssGetSteerMux<TYPE_MCA>( TargetHandle_t i_mca,
 }
 
 template<>
-int32_t mssGetSteerMux<TYPE_MBA>( TargetHandle_t i_mba, const MemRank & i_rank,
-                            MemSymbol & o_port0Spare, MemSymbol & o_port1Spare,
-                            MemSymbol & o_eccSpare )
-{
-    int32_t o_rc = SUCCESS;
-
-    // called by FSP code so can't just move to hostboot side
-#ifdef __HOSTBOOT_MODULE
-    errlHndl_t errl = NULL;
-
-    uint8_t port0Spare, port1Spare, eccSpare;
-
-    fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiMba(i_mba);
-    FAPI_INVOKE_HWP( errl, mss_check_steering, fapiMba,
-            i_rank.getMaster(), port0Spare, port1Spare, eccSpare );
-
-    if ( NULL != errl )
-    {
-        PRDF_ERR( "[PlatServices::mssGetSteerMux] mss_check_steering() "
-                  "failed. HUID: 0x%08x rank: %d",
-                  getHuid(i_mba), i_rank.getMaster() );
-        PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-        o_rc = FAIL;
-    }
-    else
-    {
-        o_port0Spare = MemSymbol::fromSymbol( i_mba, i_rank, port0Spare );
-        o_port1Spare = MemSymbol::fromSymbol( i_mba, i_rank, port1Spare );
-        o_eccSpare   = MemSymbol::fromSymbol( i_mba, i_rank, eccSpare   );
-    }
-#endif
-    return o_rc;
-}
-
-template<>
 int32_t mssGetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
                                         const MemRank & i_rank,
                                         MemSymbol & o_port0Spare,
@@ -988,36 +945,6 @@ int32_t mssGetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
 }
 
 //------------------------------------------------------------------------------
-
-template<>
-int32_t mssSetSteerMux<TYPE_MBA>( TargetHandle_t i_mba, const MemRank & i_rank,
-                                const MemSymbol & i_symbol, bool i_x4EccSpare )
-{
-    int32_t o_rc = SUCCESS;
-#ifdef __HOSTBOOT_MODULE
-    errlHndl_t errl = NULL;
-    fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiMba(i_mba);
-
-    uint8_t l_dramSymbol = PARSERUTILS::dram2Symbol<TYPE_MBA>(
-                                                     i_symbol.getDram(),
-                                                     isDramWidthX4(i_mba) );
-
-    FAPI_INVOKE_HWP( errl, mss_do_steering, fapiMba,
-                     i_rank.getMaster(), l_dramSymbol,
-                     i_x4EccSpare );
-
-    if ( NULL != errl )
-    {
-        PRDF_ERR( "[PlatServices::mssSetSteerMux] mss_do_steering "
-                  "failed. HUID: 0x%08x rank: %d symbol: %d eccSpare: %c",
-                  getHuid(i_mba), i_rank.getMaster(), l_dramSymbol,
-                  i_x4EccSpare ? 'T' : 'F' );
-        PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-        o_rc = FAIL;
-    }
-#endif
-    return o_rc;
-}
 
 template<>
 int32_t mssSetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_memPort,
@@ -1134,68 +1061,6 @@ int32_t getDimmSpareConfig<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
                                               o_spareConfig );
 }
 
-template<>
-int32_t getDimmSpareConfig<TYPE_MBA>( TargetHandle_t i_mba, MemRank i_rank,
-                                      uint8_t i_ps, uint8_t & o_spareConfig )
-{
-    #define PRDF_FUNC "[PlatServices::getDimmSpareConfig] "
-    int32_t o_rc = SUCCESS;
-
-#ifdef __HOSTBOOT_MODULE
-    using namespace fapi2;
-
-    ATTR_CEN_VPD_DIMM_SPARE_Type attr;
-    o_spareConfig = ENUM_ATTR_CEN_VPD_DIMM_SPARE_NO_SPARE;
-    do
-    {
-        if( TYPE_MBA != getTargetType( i_mba ) )
-        {
-            PRDF_ERR( PRDF_FUNC "Invalid Target:0x%08X", getHuid( i_mba ) );
-            o_rc = FAIL; break;
-        }
-
-        if ( MAX_PORT_PER_MBA <= i_ps )
-        {
-            PRDF_ERR( PRDF_FUNC "Invalid parameters i_ps:%u", i_ps );
-            o_rc = FAIL; break;
-        }
-
-        fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiMba(i_mba);
-        ReturnCode l_rc = FAPI_ATTR_GET(ATTR_CEN_VPD_DIMM_SPARE, fapiMba, attr);
-        errlHndl_t errl = fapi2::rcToErrl(l_rc);
-        if ( NULL != errl )
-        {
-            PRDF_ERR( PRDF_FUNC "Failed to get ATTR_VPD_DIMM_SPARE for Target:"
-                      "0x%08X", getHuid( i_mba ) );
-            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-            o_rc = FAIL; break;
-        }
-        o_spareConfig = attr[i_ps][i_rank.getDimmSlct()][i_rank.getRankSlct()];
-
-        // Check for valid values
-        // For X4 DRAM, we can not have full byte as spare config. Also for X8
-        // DRAM we can not have nibble as spare.
-
-        if( ENUM_ATTR_CEN_VPD_DIMM_SPARE_NO_SPARE == o_spareConfig) break;
-
-        bool isFullByte = ( ENUM_ATTR_CEN_VPD_DIMM_SPARE_FULL_BYTE ==
-                                                            o_spareConfig );
-        bool isX4Dram = isDramWidthX4(i_mba);
-
-        if ( ( isX4Dram && isFullByte ) || ( !isX4Dram && !isFullByte ) )
-        {
-            PRDF_ERR( PRDF_FUNC "Invalid Configuration: o_spareConfig:%u",
-                      o_spareConfig );
-            o_rc = FAIL; break;
-        }
-
-    }while(0);
-#endif
-
-    return o_rc;
-    #undef PRDF_FUNC
-}
-
 //------------------------------------------------------------------------------
 
 template<>
@@ -1239,44 +1104,6 @@ uint32_t isDramSparingEnabled<TYPE_MEM_PORT>( TARGETING::TargetHandle_t i_trgt,
             break;
         }
         o_spareEnable = (TARGETING::MEM_EFF_DIMM_SPARE_NO_SPARE != cnfg);
-
-    }while(0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-template<>
-uint32_t isDramSparingEnabled<TYPE_MBA>( TARGETING::TargetHandle_t i_trgt,
-                                         MemRank i_rank, uint8_t i_ps,
-                                         bool & o_spareEnable )
-{
-    #define PRDF_FUNC "[PlatServices::isDramSparingEnabled<TYPE_MBA>] "
-
-    uint32_t o_rc = SUCCESS;
-    o_spareEnable = false;
-
-    do
-    {
-        const bool isX4 = isDramWidthX4( i_trgt );
-        if ( isX4 )
-        {
-            // Always an ECC spare in x4 mode.
-            o_spareEnable = true;
-            break;
-        }
-
-        // Check for any DRAM spares.
-        uint8_t cnfg = TARGETING::CEN_VPD_DIMM_SPARE_NO_SPARE;
-        o_rc = getDimmSpareConfig<TYPE_MBA>( i_trgt, i_rank, i_ps, cnfg );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getDimmSpareConfig(0x%08x,0x%02x,%d) "
-                      "failed", getHuid(i_trgt), i_rank.getKey(), i_ps );
-            break;
-        }
-        o_spareEnable = (TARGETING::CEN_VPD_DIMM_SPARE_NO_SPARE != cnfg);
 
     }while(0);
 
@@ -1368,10 +1195,6 @@ uint32_t isSpareAvailable( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
     #undef PRDF_FUNC
 
 }
-
-template
-uint32_t isSpareAvailable<TYPE_MBA>( TARGETING::TargetHandle_t i_trgt,
-    MemRank i_rank, uint8_t i_ps, bool & o_spAvail, bool & o_eccAvail );
 
 template
 uint32_t isSpareAvailable<TYPE_MEM_PORT>( TARGETING::TargetHandle_t i_trgt,
@@ -1512,106 +1335,6 @@ int32_t  getSpdModspecComRefRawCard(
 
     return rc;
 #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-CEN_SYMBOL::WiringType getMemBufRawCardType<TYPE_MBA>( TargetHandle_t i_trgt )
-{
-    #define PRDF_FUNC "[PlatServices::getMemBufRawCardType] "
-
-    PRDF_ASSERT( nullptr != i_trgt );
-    PRDF_ASSERT( TYPE_MBA == getTargetType(i_trgt) );
-
-    // Ensure invalid card type if something fails.
-    CEN_SYMBOL::WiringType o_cardType = CEN_SYMBOL::WIRING_INVALID;
-
-    do
-    {
-        // Must be a custom DIMM with Centaur chip.
-        if ( !isMembufOnDimm<TYPE_MBA>(i_trgt) ) break;
-
-        TargetHandleList l_dimmList = getConnected( i_trgt, TYPE_DIMM );
-        PRDF_ASSERT( 0 != l_dimmList.size() ); // MBA configured with no DIMMs
-
-        // All logical DIMMs connected to this MBA are on the same card as the
-        // MBA so we can use any connected DIMM to query for the raw card type.
-        uint8_t l_cardType;
-        if ( SUCCESS != getSpdModspecComRefRawCard(l_dimmList[0], l_cardType) )
-        {
-            PRDF_ERR( PRDF_FUNC "getSpdModspecComRefRawCard(0x%08x) failed",
-                      getHuid(l_dimmList[0]) );
-            break;
-        }
-
-        uint8_t l_version = getDramGen<TYPE_MBA>( i_trgt );
-
-        // Centaur raw card types are only used for DRAM site locations. If an
-        // invalid wiring type is passed to the error log parser, the parser
-        // will simply print out the symbol and other data instead of
-        // translating it into a DRAM site location. Therefore, do not fail out
-        // if the raw card is currently not supported. Otherwise, there may be
-        // some downstream effects to the functional (non-parsing) code for
-        // data that is only needed for parsing.
-
-        switch ( l_cardType )
-        {
-            case SPD_MODSPEC_COM_REF_RAW_CARD_A:
-                if (CEN_EFF_DRAM_GEN_DDR3 == l_version)
-                {
-                    o_cardType = CEN_SYMBOL::CEN_TYPE_A;
-                }
-                else if (CEN_EFF_DRAM_GEN_DDR4 == l_version)
-                {
-                    o_cardType = CEN_SYMBOL::CEN_TYPE_A4;
-                }
-                break;
-
-            case SPD_MODSPEC_COM_REF_RAW_CARD_B:
-                if (CEN_EFF_DRAM_GEN_DDR3 == l_version)
-                {
-                    o_cardType = CEN_SYMBOL::CEN_TYPE_B;
-                }
-                else if (CEN_EFF_DRAM_GEN_DDR4 == l_version)
-                {
-                    o_cardType = CEN_SYMBOL::CEN_TYPE_B4;
-                }
-                break;
-
-            case SPD_MODSPEC_COM_REF_RAW_CARD_C:
-                if (CEN_EFF_DRAM_GEN_DDR3 == l_version)
-                {
-                    o_cardType = CEN_SYMBOL::CEN_TYPE_C;
-                }
-                else if (CEN_EFF_DRAM_GEN_DDR4 == l_version)
-                {
-                    o_cardType = CEN_SYMBOL::CEN_TYPE_C4;
-                }
-                break;
-
-            case SPD_MODSPEC_COM_REF_RAW_CARD_D:
-                if (CEN_EFF_DRAM_GEN_DDR3 == l_version)
-                {
-                    o_cardType = CEN_SYMBOL::CEN_TYPE_D;
-                }
-                else if (CEN_EFF_DRAM_GEN_DDR4 == l_version)
-                {
-                    o_cardType = CEN_SYMBOL::CEN_TYPE_D4;
-                }
-                break;
-
-            default:
-                PRDF_INF( PRDF_FUNC "Unsupported card type 0x%02x or DRAM "
-                          "version 0x%02x on DIMM 0x%08x", l_cardType,
-                          l_version, getHuid(l_dimmList[0]) );
-        }
-
-    } while(0);
-
-    return o_cardType;
-
-    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------

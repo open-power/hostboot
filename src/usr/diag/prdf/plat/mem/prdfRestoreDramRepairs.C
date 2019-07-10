@@ -265,132 +265,6 @@ bool processRepairedRanks<TYPE_MCA>( TargetHandle_t i_trgt,
 
 //------------------------------------------------------------------------------
 
-template<>
-bool processRepairedRanks<TYPE_MBA>( TargetHandle_t i_trgt,
-                                     uint8_t i_repairedRankMask )
-{
-    #define PRDF_FUNC "[processRepairedRanks] "
-
-    // The bits in i_repairedRankMask represent ranks that have repairs. Query
-    // hardware and compare against RAS policies.
-
-    bool o_calloutMade  = false;
-
-    bool analysisErrors = false;
-
-    errlHndl_t errl = NULL; // Initially NULL, will create if needed.
-
-    bool isCen = isMembufOnDimm<TYPE_MBA>( i_trgt );
-    bool isX4 = isDramWidthX4( i_trgt );
-
-    for ( uint8_t r = 0; r < MASTER_RANKS_PER_PORT; ++r )
-    {
-        if ( 0 == (i_repairedRankMask & (0x80 >> r)) )
-        {
-            continue; // this rank didn't have any repairs
-        }
-
-        MemRank rank ( r );
-        MemMark chipMark, symMark;
-
-        ExtensibleChip * chip = (ExtensibleChip *)systemPtr->GetChip( i_trgt );
-
-        if (SUCCESS != MarkStore::readChipMark<TYPE_MBA>(chip, rank, chipMark))
-        {
-            PRDF_ERR( PRDF_FUNC "readChipMark() failed: MBA=0x%08x "
-                    "rank=0x%02x", getHuid(i_trgt), rank.getKey() );
-            analysisErrors = true;
-            continue; // skip this rank
-        }
-
-        if (SUCCESS != MarkStore::readSymbolMark<TYPE_MBA>(chip, rank, symMark))
-        {
-            PRDF_ERR( PRDF_FUNC "readSymbolMark() failed: MBA=0x%08x "
-                    "rank=0x%02x", getHuid(i_trgt), rank.getKey() );
-            analysisErrors = true;
-            continue; // skip this rank
-        }
-
-
-        MemSymbol sp0, sp1, ecc;
-        if ( SUCCESS != mssGetSteerMux<TYPE_MBA>(i_trgt, rank, sp0, sp1, ecc) )
-        {
-            PRDF_ERR( PRDF_FUNC "mssGetSteerMux() failed: MBA=0x%08x "
-                      "rank=%d", getHuid(i_trgt), rank.getMaster() );
-            analysisErrors = true;
-            continue; // skip this rank
-        }
-
-        bool isCm  = chipMark.isValid();                // chip mark
-        bool isSm  = symMark.isValid();                 // symbol mark
-        bool isSp  = (sp0.isValid() || sp1.isValid());  // either DRAM spare
-        bool isEcc = ecc.isValid();                     // ECC spare
-
-        if ( isCm &&                                    // CM used
-             ( ( isCen && isSp && (!isX4 || isEcc)) ||  // all spares used
-               (!isCen &&         ( isSm || isEcc)) ) ) // SM or ECC used
-        {
-            // All repairs on the rank have been used. Callout all repairs.
-
-            if ( NULL == errl )
-            {
-                errl = createErrl<TYPE_MBA>( PRDF_DETECTED_FAIL_HARDWARE,
-                                             i_trgt, PRDFSIG_RdrRepairsUsed );
-            }
-
-            // Keep a list of DIMMs to callout. Note that we are using a map
-            // with the DIMM target as the key so that we can maintain a
-            // unique list. The map value has no significance.
-            std::map<TargetHandle_t, uint32_t> calloutList;
-            std::vector<MemSymbol> symList;
-            symList.push_back( chipMark.getSymbol() );
-            symList.push_back( symMark.getSymbol() );
-            symList.push_back( sp0          );
-            symList.push_back( sp1          );
-            symList.push_back( ecc          );
-
-            for ( auto & sym : symList )
-            {
-                if ( !sym.isValid() ) continue;
-
-                MemoryMru mm( i_trgt, rank, sym );
-
-                // Add all parts to the error log.
-                for ( auto & dimm : mm.getCalloutList() )
-                {
-                    calloutList[dimm] = 1;
-                }
-
-                // Add the MemoryMru to the capture data.
-                MemCaptureData::addExtMemMruData( mm, errl );
-            }
-
-            // Callout all DIMMs in the map.
-            for ( auto const & dimm : calloutList )
-            {
-                __calloutDimm<TYPE_MBA>( errl, i_trgt, dimm.first );
-            }
-
-            o_calloutMade = true;
-        }
-    }
-
-    // Commit the error log, if needed.
-    commitErrl<TYPE_MBA>( errl, i_trgt );
-
-    // Commit an additional error log indicating something failed in the
-    // analysis, if needed.
-    commitSoftError<TYPE_MBA>( PRDF_DETECTED_FAIL_SOFTWARE, i_trgt,
-                               PRDFSIG_RdrInternalFail, analysisErrors );
-
-    return o_calloutMade;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-
 template<TARGETING::TYPE T>
 bool processBadDimms( TargetHandle_t i_trgt, uint8_t i_badDimmMask );
 
@@ -446,58 +320,6 @@ bool processBadDimms<TYPE_MCA>( TargetHandle_t i_trgt, uint8_t i_badDimmMask )
 
 //------------------------------------------------------------------------------
 
-template<>
-bool processBadDimms<TYPE_MBA>( TargetHandle_t i_trgt, uint8_t i_badDimmMask )
-{
-    #define PRDF_FUNC "[processBadDimms] "
-
-    // The bits in i_badDimmMask represent DIMMs that have exceeded the
-    // available repairs. Callout these DIMMs.
-
-    bool o_calloutMade  = false;
-    bool analysisErrors = false;
-
-    errlHndl_t errl = nullptr; // Initially NULL, will create if needed.
-
-    // Iterate the list of all DIMMs be
-    TargetHandleList dimms = getConnected( i_trgt, TYPE_DIMM );
-    for ( auto & dimm : dimms )
-    {
-        uint8_t portSlct = getDimmPort( dimm );
-        uint8_t dimmSlct = getDimmSlct( dimm );
-
-        // The 4 bits of i_badDimmMask is defined as p0d0, p0d1, p1d0, and p1d1.
-        uint8_t mask = 0x8 >> (portSlct * MAX_PORT_PER_MBA + dimmSlct);
-
-        if ( 0 != (i_badDimmMask & mask) )
-        {
-            if ( NULL == errl )
-            {
-                errl = createErrl<TYPE_MBA>( PRDF_DETECTED_FAIL_HARDWARE,
-                                             i_trgt, PRDFSIG_RdrRepairUnavail );
-            }
-
-            __calloutDimm<TYPE_MBA>( errl, i_trgt, dimm );
-
-            o_calloutMade = true;
-        }
-    }
-
-    // Commit the error log, if needed.
-    commitErrl<TYPE_MBA>( errl, i_trgt );
-
-    // Commit an additional error log indicating something failed in the
-    // analysis, if needed.
-    commitSoftError<TYPE_MBA>( PRDF_DETECTED_FAIL_SOFTWARE, i_trgt,
-                               PRDFSIG_RdrInternalFail, analysisErrors );
-
-    return o_calloutMade;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
 template<TARGETING::TYPE T>
 bool screenBadDqs( TargetHandle_t i_trgt, const std::vector<MemRank> & i_ranks )
 {
@@ -543,42 +365,6 @@ void deployDramSpares( TargetHandle_t i_trgt,
 template<>
 void deployDramSpares<TYPE_MCA>( TargetHandle_t i_trgt,
                                  const std::vector<MemRank> & i_ranks ){}
-template<>
-void deployDramSpares<TYPE_MBA>( TargetHandle_t i_trgt,
-                                 const std::vector<MemRank> & i_ranks )
-{
-    bool x4 = isDramWidthX4( i_trgt );
-    bool cenDimm = isMembufOnDimm<TYPE_MBA>( i_trgt );
-
-    for ( auto & rank : i_ranks )
-    {
-        // Doesn't matter which DRAM is spared as long as they are all spared.
-        // Also, make sure the ECC spare is on a different DRAM than the spare
-        // DRAM.
-        MemSymbol symPort0 = MemSymbol::fromSymbol( i_trgt, rank, 71 );
-        MemSymbol symPort1 = MemSymbol::fromSymbol( i_trgt, rank, 39 );
-        MemSymbol symEccSp = MemSymbol::fromSymbol( i_trgt, rank, 67 );
-
-        int32_t l_rc = SUCCESS;
-
-        if ( cenDimm )
-        {
-            l_rc |= mssSetSteerMux<TYPE_MBA>( i_trgt, rank, symPort0, false );
-            l_rc |= mssSetSteerMux<TYPE_MBA>( i_trgt, rank, symPort1, false );
-        }
-
-        if ( x4 )
-            l_rc |= mssSetSteerMux<TYPE_MBA>( i_trgt, rank, symEccSp, true );
-
-        if ( SUCCESS != l_rc )
-        {
-            // mssSetSteerMux() will print a trace and commit the error log,
-            // however, we need to handle the return code or we get a compile
-            // warning in Hostboot.
-            continue;
-        }
-    }
-}
 
 } // end namespace RDR
 
@@ -678,8 +464,6 @@ uint32_t restoreDramRepairs( TargetHandle_t i_trgt )
 
 template
 uint32_t restoreDramRepairs<TYPE_MCA>( TargetHandle_t i_trgt );
-template
-uint32_t restoreDramRepairs<TYPE_MBA>( TargetHandle_t i_trgt );
 
 //------------------------------------------------------------------------------
 

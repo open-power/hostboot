@@ -490,16 +490,6 @@ uint32_t __getSpareInfo( TargetHandle_t i_trgt, MemRank i_rank,
         {
             o_spareSupported = false;
         }
-        // Centaur/MBA case
-        else if ( TYPE_MBA == trgtType )
-        {
-            o_noSpare     = CEN_VPD_DIMM_SPARE_NO_SPARE;
-            o_lowNibble   = CEN_VPD_DIMM_SPARE_LOW_NIBBLE;
-            o_highNibble  = CEN_VPD_DIMM_SPARE_HIGH_NIBBLE;
-            o_spareConfig = CEN_VPD_DIMM_SPARE_NO_SPARE;
-            o_rc = getDimmSpareConfig<TYPE_MBA>( i_trgt, i_rank, i_portSlct,
-                                                 o_spareConfig );
-        }
         // Generic/MEM_PORT case
         else
         {

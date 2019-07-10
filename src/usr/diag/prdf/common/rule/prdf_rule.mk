@@ -67,10 +67,6 @@ PRDR_RULE_TABLES += axone_mi.prf
 PRDR_RULE_TABLES += axone_mcc.prf
 PRDR_RULE_TABLES += axone_omic.prf
 
-# Centaur Chip
-PRDR_RULE_TABLES += centaur_membuf.prf
-PRDR_RULE_TABLES += centaur_mba.prf
-
 # Explorer Chip
 PRDR_RULE_TABLES += explorer_ocmb.prf
 

@@ -26,7 +26,6 @@
 #ifndef prdfMemDbUtils_H
 #define prdfMemDbUtils_H
 
-#include <prdfCenMbaDataBundle.H>
 #include <prdfP9McaDataBundle.H>
 #include <prdfOcmbDataBundle.H>
 #include <prdfTargetServices.H>
@@ -73,16 +72,6 @@ uint32_t addCeTableEntry<TARGETING::TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                                            i_isHard );
 }
 
-template<> inline
-uint32_t addCeTableEntry<TARGETING::TYPE_MBA>( ExtensibleChip * i_chip,
-                                               const MemAddr & i_addr,
-                                               const MemSymbol & i_symbol,
-                                               bool i_isHard )
-{
-    return getMbaDataBundle(i_chip)->iv_ceTable.addEntry( i_addr, i_symbol,
-                                                          i_isHard );
-}
-
 /**
  * @brief  Generic wrapper to add an entry to the UE table.
  * @param  i_chip MCA or MBA.
@@ -108,14 +97,6 @@ void addUeTableEntry<TARGETING::TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                                  const MemAddr & i_addr )
 {
     getOcmbDataBundle(i_chip)->iv_ueTable.addEntry( i_type, i_addr );
-}
-
-template<> inline
-void addUeTableEntry<TARGETING::TYPE_MBA>( ExtensibleChip * i_chip,
-                                           UE_TABLE::Type i_type,
-                                           const MemAddr & i_addr )
-{
-    getMbaDataBundle(i_chip)->iv_ueTable.addEntry( i_type, i_addr );
 }
 
 /**
@@ -145,15 +126,6 @@ void resetEccFfdc<TARGETING::TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     getOcmbDataBundle(i_chip)->iv_ceTable.deactivateRank( i_rank, i_type );
 }
 
-template<> inline
-void resetEccFfdc<TARGETING::TYPE_MBA>( ExtensibleChip * i_chip,
-                                        const MemRank & i_rank,
-                                        AddrRangeType i_type )
-{
-    getMbaDataBundle(i_chip)->iv_ceTable.deactivateRank( i_rank, i_type );
-    getMbaDataBundle(i_chip)->iv_rceTable.flushEntry( i_rank, i_type );
-}
-
 //##############################################################################
 //                         Hostboot IPL/Runtime wrappers
 //##############################################################################
@@ -174,13 +146,6 @@ void pushToQueue<TARGETING::TYPE_MCA>( ExtensibleChip * i_chip,
                                        TdEntry * i_entry )
 {
     getMcaDataBundle(i_chip)->getTdCtlr()->pushToQueue( i_entry );
-}
-
-template<> inline
-void pushToQueue<TARGETING::TYPE_MBA>( ExtensibleChip * i_chip,
-                                       TdEntry * i_entry )
-{
-    getMbaDataBundle(i_chip)->getTdCtlr()->pushToQueue( i_entry );
 }
 
 template<> inline
@@ -220,12 +185,6 @@ MemIplCeStats<TARGETING::TYPE_OCMB_CHIP> * getIplCeStats(
     return getOcmbDataBundle(i_chip)->getIplCeStats();
 }
 
-template<> inline
-MemIplCeStats<TARGETING::TYPE_MBA> * getIplCeStats( ExtensibleChip * i_chip )
-{
-    return getMbaDataBundle(i_chip)->getIplCeStats();
-}
-
 #endif // Hostboot IPL only
 
 //##############################################################################
@@ -259,13 +218,6 @@ uint32_t handleTdEvent<TARGETING::TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
     return getOcmbDataBundle(i_chip)->getTdCtlr()->handleTdEvent( io_sc );
 }
 
-template<> inline
-uint32_t handleTdEvent<TARGETING::TYPE_MBA>( ExtensibleChip * i_chip,
-                                             STEP_CODE_DATA_STRUCT & io_sc )
-{
-    return getMbaDataBundle(i_chip)->getTdCtlr()->handleTdEvent( io_sc );
-}
-
 /**
  * @brief Generic wrapper to tell the TD controller to ban TPS on a rank.
  * @param i_chip  MCA or MBA.
@@ -282,13 +234,6 @@ void banTps<TARGETING::TYPE_MCA>( ExtensibleChip * i_chip,
     getMcaDataBundle(i_chip)->getTdCtlr()->banTps( i_chip, i_rank );
     // Permanently mask mainline NCEs and TCEs because of the TPS ban.
     getMcaDataBundle(i_chip)->iv_maskMainlineNceTce = true;
-}
-
-template<> inline
-void banTps<TARGETING::TYPE_MBA>( ExtensibleChip * i_chip,
-                                  const MemRank & i_rank )
-{
-    getMbaDataBundle(i_chip)->getTdCtlr()->banTps( i_chip, i_rank );
 }
 
 template<> inline

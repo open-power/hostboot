@@ -48,7 +48,6 @@
 #ifdef __HOSTBOOT_RUNTIME
 #include <prdfP9McbistDomain.H>
 #include <prdfP9OcmbChipDomain.H>
-#include <prdfCenMbaDomain.H>
 #endif
 
 #if !defined(__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
@@ -168,10 +167,6 @@ errlHndl_t noLock_initialize()
     if ( MODEL_NIMBUS == procModel )
     {
         ((McbistDomain *)systemPtr->GetDomain(MCBIST_DOMAIN))->handleRrFo();
-    }
-    else if ( MODEL_CUMULUS == procModel )
-    {
-        ((MbaDomain *)systemPtr->GetDomain(MBA_DOMAIN))->handleRrFo();
     }
     else if ( MODEL_AXONE == procModel )
     {

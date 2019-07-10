@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -68,25 +68,6 @@ int32_t PreAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE( cumulus_dmi, PreAnalysis );
-
-/**
- * @brief  Plugin function called after analysis is complete but before PRD
- *         exits.
- * @param  i_chip A DMI chip.
- * @param  io_sc  The step code data struct.
- * @note   This is especially useful for any analysis that still needs to be
- *         done after the framework clears the FIR bits that were at attention.
- * @return SUCCESS.
- */
-int32_t PostAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
-{
-    // If there was a channel failure some cleanup is required to ensure
-    // there are no more attentions from this channel.
-    MemUtils::cleanupChnlFail<TYPE_DMI>( i_chip, io_sc );
-
-    return SUCCESS;
-}
-PRDF_PLUGIN_DEFINE( cumulus_dmi, PostAnalysis );
 
 //------------------------------------------------------------------------------
 

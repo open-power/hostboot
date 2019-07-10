@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2018
+# Contributors Listed Below - COPYRIGHT 2016,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -44,7 +44,6 @@ prd_obj += prdfMemVcm.o
 prd_obj += prdfP9McbistDomain.o
 
 # plat/mem/ (rule plugin related)
-prd_rule_plugin += prdfCenMba.o
 prd_rule_plugin += prdfP9Mca.o
 prd_rule_plugin += prdfP9Mcbist.o
 

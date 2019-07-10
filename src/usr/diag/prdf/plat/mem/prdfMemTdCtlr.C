@@ -26,12 +26,11 @@
 #include <prdfMemTdCtlr.H>
 
 // Platform includes
-#include <prdfCenMbaDataBundle.H>
 #include <prdfMemAddress.H>
 #include <prdfMemCaptureData.H>
 #include <prdfMemScrubUtils.H>
 #include <prdfP9McaDataBundle.H>
-#include <prdfP9McbistExtraSig.H>
+#include <prdfMemExtraSig.H>
 #include <prdfParserEnums.H>
 #include <UtilHash.H> // for Util::hashString
 
@@ -344,20 +343,6 @@ uint32_t __analyzeCmdComplete<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 
-template<>
-uint32_t __analyzeCmdComplete<TYPE_MBA>( ExtensibleChip * i_chip,
-                                         TdRankListEntry & o_stoppedRank,
-                                         const MemAddr & i_addr,
-                                         bool & o_errorsFound,
-                                         STEP_CODE_DATA_STRUCT & io_sc )
-{
-    // Update iv_stoppedRank.
-    o_stoppedRank = __getStopRank<TYPE_MBA>( i_chip, i_addr );
-
-    // Check the MBA for ECC errors.
-    return __checkEcc<TYPE_MBA>(i_chip, i_addr, o_errorsFound, io_sc);
-}
-
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>
@@ -571,7 +556,6 @@ void MemTdCtlr<T>::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
 
 // Avoid linker errors with the template.
 template class MemTdCtlr<TYPE_MCBIST>;
-template class MemTdCtlr<TYPE_MBA>;
 template class MemTdCtlr<TYPE_OCMB_CHIP>;
 
 //------------------------------------------------------------------------------

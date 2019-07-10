@@ -30,7 +30,6 @@
 #include <prdfMemTdCtlr.H>
 
 // Platform includes
-#include <prdfCenMbaDataBundle.H>
 #include <prdfMemEccAnalysis.H>
 #include <prdfMemMark.H>
 #include <prdfMemoryMru.H>
@@ -167,12 +166,6 @@ bool __mnfgCeCheck<TYPE_OCMB_CHIP>( uint32_t i_eccAttns )
                (0 != (i_eccAttns & MAINT_TCE))         ) );
 }
 
-template<> inline
-bool __mnfgCeCheck<TYPE_MBA>( uint32_t i_eccAttns )
-{
-    return ( 0 != (i_eccAttns & MAINT_HARD_NCE_ETE) );
-}
-
 template <TARGETING::TYPE T>
 uint32_t __checkEcc( ExtensibleChip * i_chip,
                      const MemAddr & i_addr, bool & o_errorsFound,
@@ -256,10 +249,6 @@ uint32_t __checkEcc<TYPE_MCA>( ExtensibleChip * i_chip,
                                const MemAddr & i_addr, bool & o_errorsFound,
                                STEP_CODE_DATA_STRUCT & io_sc );
 template
-uint32_t __checkEcc<TYPE_MBA>( ExtensibleChip * i_chip,
-                               const MemAddr & i_addr, bool & o_errorsFound,
-                               STEP_CODE_DATA_STRUCT & io_sc );
-template
 uint32_t __checkEcc<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                      const MemAddr & i_addr,
                                      bool & o_errorsFound,
@@ -269,7 +258,6 @@ uint32_t __checkEcc<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
 // Avoid linker errors with the template.
 template class MemTdCtlr<TYPE_MCBIST>;
-template class MemTdCtlr<TYPE_MBA>;
 template class MemTdCtlr<TYPE_OCMB_CHIP>;
 
 //------------------------------------------------------------------------------

@@ -59,9 +59,6 @@
 #include <prdfP9ProcDomain.H>
 #include <prdfP9XbusDomain.H>
 
-#include <prdfCenMbaDomain.H>
-#include <prdfCenMembufDomain.H>
-
 using namespace TARGETING;
 
 namespace PRDF
@@ -87,7 +84,6 @@ errlHndl_t PlatConfigurator::build()
 
     // Create domains.
     ProcDomain     * procDomain     = new ProcDomain(   PROC_DOMAIN   );
-    MembufDomain   * membufDomain   = nullptr;
     OcmbChipDomain * ocmbChipDomain = nullptr;
 
     std::map<TARGETING::TYPE, RuleChipDomain *> unitMap;
@@ -113,9 +109,6 @@ errlHndl_t PlatConfigurator::build()
             unitMap[TYPE_MC ] = new McDomain(     MC_DOMAIN     );
             unitMap[TYPE_MI ] = new MiDomain(     MI_DOMAIN     );
             unitMap[TYPE_DMI] = new DmiDomain(    DMI_DOMAIN    );
-
-            membufDomain      = new MembufDomain( MEMBUF_DOMAIN );
-            unitMap[TYPE_MBA] = new MbaDomain(    MBA_DOMAIN    );
 
             break;
 
@@ -148,12 +141,6 @@ errlHndl_t PlatConfigurator::build()
         errl = addDomainChips( TYPE_PROC, procDomain, pllDmnMapLst );
         if ( nullptr != errl ) break;
 
-        if ( nullptr != membufDomain )
-        {
-            errl = addDomainChips( TYPE_MEMBUF, membufDomain, pllDmnMapLst );
-            if ( nullptr != errl ) break;
-        }
-
         if ( nullptr != ocmbChipDomain )
         {
             errl = addDomainChips( TYPE_OCMB_CHIP, ocmbChipDomain,
@@ -183,7 +170,6 @@ errlHndl_t PlatConfigurator::build()
     addPllDomainsToSystem( pllDmnMapLst );
 
     // Memory chip domains are always second.
-    if ( nullptr != membufDomain ) sysDmnLst.push_back( membufDomain );
     if ( nullptr != ocmbChipDomain ) sysDmnLst.push_back( ocmbChipDomain );
 
     // Processor chip domains are always third.
@@ -269,8 +255,6 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
                             { TYPE_MC,     cumulus_mc     },
                             { TYPE_MI,     cumulus_mi     },
                             { TYPE_DMI,    cumulus_dmi    }, } },
-        { MODEL_CENTAUR,  { { TYPE_MEMBUF, centaur_membuf },
-                            { TYPE_MBA,    centaur_mba    }, } },
         { MODEL_AXONE,    { { TYPE_PROC,   axone_proc     },
                             { TYPE_EQ,     axone_eq       },
                             { TYPE_EX,     axone_ex       },
@@ -355,12 +339,6 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
                                     scanFac, resFac );
                 addChipToPllDomain( CLOCK_DOMAIN_IO, mfRefPllDmnMap,
                                     chip, trgt, TYPE_PEC,
-                                    scanFac, resFac );
-                break;
-
-            case TYPE_MEMBUF:
-                addChipToPllDomain( CLOCK_DOMAIN_MEMBUF, sysRefPllDmnMap,
-                                    chip, trgt, TYPE_MEMBUF,
                                     scanFac, resFac );
                 break;
 

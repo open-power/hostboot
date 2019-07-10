@@ -88,8 +88,6 @@ PRDF_PLUGIN_DEFINE_NS( cumulus_pec,    CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( cumulus_phb,    CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( cumulus_proc,   CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( cumulus_xbus,   CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( centaur_membuf, CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( centaur_mba,    CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( axone_capp,     CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( axone_ec,       CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( axone_eq,       CommonPlugins, ClearServiceCallFlag );

@@ -191,132 +191,6 @@ uint32_t handleMemUe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 
-template<>
-uint32_t handleMemUe<TYPE_MBA>( ExtensibleChip * i_chip, const MemAddr & i_addr,
-                                UE_TABLE::Type i_type,
-                                STEP_CODE_DATA_STRUCT & io_sc )
-{
-    #define PRDF_FUNC "[MemEcc::handleMemUe<TYPE_MBA>] "
-
-    PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
-
-    uint32_t o_rc = SUCCESS;
-
-    do
-    {
-        #if !defined(__HOSTBOOT_RUNTIME) && defined(__HOSTBOOT_MODULE)
-
-        MemRank rank = i_addr.getRank();
-
-        if ( isInMdiaMode() )
-        {
-            // During MemDiags, we want to try avoiding calling out both DIMMs
-            // on a rank, if possible. So we use mssIplUeIsolation() to callout
-            // only the DIMMs with bad bits instead of calling out the entire
-            // rank. We cannot call this procedure once mainline traffic is
-            // running because it will modify contents of memory.
-
-            MbaDataBundle * mbadb = getMbaDataBundle( i_chip );
-
-            MemDqBitmap l_dqBitmap;
-            o_rc = mssIplUeIsolation( i_chip->getTrgt(), rank, l_dqBitmap );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "mssIplUeIsolation(0x%08x, 0x%02x) failed",
-                          i_chip->getHuid(), rank.getKey() );
-                break;
-            }
-
-            // Add UE data to capture data
-            l_dqBitmap.getCaptureData( io_sc.service_data->GetCaptureData() );
-
-            // Add all DIMMs with bad bits to the callout list.
-            TargetHandleList callouts;
-            for ( uint8_t ps = 0; ps < MAX_PORT_PER_MBA; ps++ )
-            {
-                bool badDqs = false;
-                o_rc = l_dqBitmap.badDqs( badDqs, ps );
-                if ( SUCCESS != o_rc )
-                {
-                    PRDF_ERR( PRDF_FUNC "badDqs(%d) failed", ps );
-                    break;
-                }
-
-                if ( !badDqs ) continue;
-
-                TargetHandle_t l_dimm = getConnectedDimm( i_chip->getTrgt(),
-                                                          rank, ps );
-                if ( l_dimm == nullptr ) continue;
-
-                callouts.push_back( l_dimm );
-
-                if ( isMfgCeCheckingEnabled() )
-                {
-                    // Because this is a UE, no need to do further MNFG CE
-                    // analysis on this rank.
-                    mbadb->getIplCeStats()->banAnalysis(rank.getDimmSlct(), ps);
-                }
-            }
-
-            if ( 0 == callouts.size() )
-            {
-                // It is possible the scrub counters have rolled over to zero
-                // due to a known DD1.0 hardware bug. In this case, the best
-                // we can do is callout both DIMMs, because at minimum we know
-                // there was a UE, we just don't know where.
-                // NOTE: If this condition happens because of a DD2.0+ bug, the
-                //       mssIplUeIsolation procedure will callout the Centaur.
-                callouts = getConnectedDimms( i_chip->getTrgt(), rank );
-                if ( 0 == callouts.size() )
-                {
-                    PRDF_ERR( PRDF_FUNC "getConnectedDimms() failed" );
-                    o_rc = FAIL; break;
-                }
-            }
-
-            // Callout all DIMMs in the list.
-            for ( auto & dimm : callouts )
-            {
-                io_sc.service_data->SetCallout( dimm, MRU_HIGH );
-            }
-
-            // Make the error log predictive.
-            io_sc.service_data->setServiceCall();
-
-            // Add entry to UE table.
-            MemDbUtils::addUeTableEntry<TYPE_MBA>( i_chip, i_type, i_addr );
-        }
-        else
-        {
-            o_rc = __handleMemUe<TYPE_MBA>( i_chip, i_addr, i_type, io_sc );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "__handleMemUe(0x%08x,%d) failed",
-                          i_chip->getHuid(), i_type );
-                break;
-            }
-        }
-
-        #else
-
-        o_rc = __handleMemUe<TYPE_MBA>( i_chip, i_addr, i_type, io_sc );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "__handleMemUe(0x%08x,%d) failed",
-                      i_chip->getHuid(), i_type );
-            break;
-        }
-
-        #endif
-
-    }while(0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
 //------------------------------------------------------------------------------
 
 #ifdef __HOSTBOOT_MODULE
@@ -545,10 +419,6 @@ uint32_t handleMpe<TYPE_MCA>( ExtensibleChip * i_chip, const MemAddr & i_addr,
                               UE_TABLE::Type i_type,
                               STEP_CODE_DATA_STRUCT & io_sc );
 template
-uint32_t handleMpe<TYPE_MBA>( ExtensibleChip * i_chip, const MemAddr & i_addr,
-                              UE_TABLE::Type i_type,
-                              STEP_CODE_DATA_STRUCT & io_sc );
-template
 uint32_t handleMpe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                     const MemAddr & i_addr,
                                     UE_TABLE::Type i_type,
@@ -635,10 +505,6 @@ uint32_t analyzeFetchMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
 // To resolve template linker errors.
 template
 uint32_t analyzeFetchMpe<TYPE_MCA>( ExtensibleChip * i_chip,
-                                    const MemRank & i_rank,
-                                    STEP_CODE_DATA_STRUCT & io_sc );
-template
-uint32_t analyzeFetchMpe<TYPE_MBA>( ExtensibleChip * i_chip,
                                     const MemRank & i_rank,
                                     STEP_CODE_DATA_STRUCT & io_sc );
 template
@@ -856,9 +722,6 @@ template
 uint32_t analyzeFetchNceTce<TYPE_MCA>( ExtensibleChip * i_chip,
                                        STEP_CODE_DATA_STRUCT & io_sc );
 template
-uint32_t analyzeFetchNceTce<TYPE_MBA>( ExtensibleChip * i_chip,
-                                       STEP_CODE_DATA_STRUCT & io_sc );
-template
 uint32_t analyzeFetchNceTce<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                              STEP_CODE_DATA_STRUCT & io_sc );
 
@@ -934,9 +797,6 @@ uint32_t analyzeFetchUe( ExtensibleChip * i_chip,
 // To resolve template linker errors.
 template
 uint32_t analyzeFetchUe<TYPE_MCA>( ExtensibleChip * i_chip,
-                                   STEP_CODE_DATA_STRUCT & io_sc );
-template
-uint32_t analyzeFetchUe<TYPE_MBA>( ExtensibleChip * i_chip,
                                    STEP_CODE_DATA_STRUCT & io_sc );
 
 //------------------------------------------------------------------------------
@@ -1301,68 +1161,6 @@ uint32_t analyzeImpe<TYPE_MCA>( ExtensibleChip * i_chip,
 
     } while (0);
 
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-uint32_t analyzeFetchRcePue<TYPE_MBA>( ExtensibleChip * i_chip,
-                                       STEP_CODE_DATA_STRUCT & io_sc )
-{
-    #define PRDF_FUNC "[MemEcc::analyzeFetchRcePue] "
-
-    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
-
-    uint32_t o_rc = SUCCESS;
-
-    do
-    {
-        // WORKAROUND: An RCE starts as a UE and its address is trapped in the
-        //             MBUER (note: UE fir bit not set at this point). Since
-        //             multiple addresses are retried (not just the failing
-        //             address), the MBRCER will contain the last address
-        //             retried, and not necessarily the address that started out
-        //             with the UE. Therefore, we will use the MBUER instead.
-
-        MemAddr addr;
-        o_rc = getMemReadAddr<TYPE_MBA>( i_chip, MemAddr::READ_UE_ADDR, addr );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getMemReadAddr(0x%08x, READ_UE_ADDR) failed",
-                      i_chip->getHuid() );
-            break;
-        }
-        MemRank rank = addr.getRank();
-
-        // Callout the rank.
-        MemoryMru mm { i_chip->getTrgt(), rank, MemoryMruData::CALLOUT_RANK };
-        io_sc.service_data->SetCallout( mm );
-
-        #ifdef __HOSTBOOT_RUNTIME
-
-        // Add an entry to the RCE table.
-        if ( getMbaDataBundle(i_chip)->iv_rceTable.addEntry(rank, io_sc) )
-        {
-            TdEntry * entry = new TpsEvent<TYPE_MBA>{ i_chip, rank };
-            MemDbUtils::pushToQueue<TYPE_MBA>( i_chip, entry );
-            o_rc = MemDbUtils::handleTdEvent<TYPE_MBA>( i_chip, io_sc );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "handleTdEvent(0x%08x) failed on rank "
-                          "0x%02x", i_chip->getHuid(), rank.getKey() );
-                break;
-            }
-        }
-
-        #endif // __HOSTBOOT_RUNTIME
-
-    } while (0);
-
-    MemCaptureData::addEccData<TYPE_MBA>( i_chip, io_sc );
 
     return o_rc;
 

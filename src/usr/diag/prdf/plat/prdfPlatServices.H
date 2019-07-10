@@ -36,7 +36,6 @@
 
 #include <lib/shared/nimbus_defaults.H> // Memory HWP constant defs
 #include <lib/mcbist/memdiags.H> // MCBIST command interfaces
-#include <p9c_mss_maint_cmds.H>  // MBA command interfaces
 
 // This must be included after all Hostboot specific includes. This will take
 // care of cases where a file must be included in the common code, but the

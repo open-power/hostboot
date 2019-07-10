@@ -358,14 +358,6 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
         rc = __handleLaneRepairEvent<TYPE_XBUS,TYPE_XBUS>( i_chip, i_sc,
                                                            i_spareDeployed );
         break;
-      case TYPE_DMI:
-        rc = __handleLaneRepairEvent<TYPE_DMI,TYPE_MEMBUF>( i_chip, i_sc,
-                                                            i_spareDeployed );
-        break;
-      case TYPE_MEMBUF:
-        rc = __handleLaneRepairEvent<TYPE_MEMBUF,TYPE_DMI>( i_chip, i_sc,
-                                                            i_spareDeployed );
-        break;
 
       default:
         PRDF_ASSERT( false );  // Unsupported type for handleLaneRepairEvent
@@ -1029,7 +1021,6 @@ PRDF_PLUGIN_DEFINE_NS( axone_xbus,     LaneRepair, spareDeployed );
 PRDF_PLUGIN_DEFINE_NS( nimbus_obus,    LaneRepair, spareDeployed );
 PRDF_PLUGIN_DEFINE_NS( cumulus_obus,   LaneRepair, spareDeployed );
 PRDF_PLUGIN_DEFINE_NS( axone_obus,     LaneRepair, spareDeployed );
-PRDF_PLUGIN_DEFINE_NS( centaur_membuf, LaneRepair, spareDeployed );
 
 /**
  * @brief  Handles Max Spares Exceeded Event
@@ -1051,7 +1042,6 @@ PRDF_PLUGIN_DEFINE_NS( axone_xbus,     LaneRepair, maxSparesExceeded );
 PRDF_PLUGIN_DEFINE_NS( nimbus_obus,    LaneRepair, maxSparesExceeded );
 PRDF_PLUGIN_DEFINE_NS( cumulus_obus,   LaneRepair, maxSparesExceeded );
 PRDF_PLUGIN_DEFINE_NS( axone_obus,     LaneRepair, maxSparesExceeded );
-PRDF_PLUGIN_DEFINE_NS( centaur_membuf, LaneRepair, maxSparesExceeded );
 
 /**
  * @brief  Handles Too Many Bus Errors Event
@@ -1073,7 +1063,6 @@ PRDF_PLUGIN_DEFINE_NS( axone_xbus,     LaneRepair, tooManyBusErrors );
 PRDF_PLUGIN_DEFINE_NS( nimbus_obus,    LaneRepair, tooManyBusErrors );
 PRDF_PLUGIN_DEFINE_NS( cumulus_obus,   LaneRepair, tooManyBusErrors );
 PRDF_PLUGIN_DEFINE_NS( axone_obus,     LaneRepair, tooManyBusErrors );
-PRDF_PLUGIN_DEFINE_NS( centaur_membuf, LaneRepair, tooManyBusErrors );
 
 /**
  * @brief Add callouts for a BUS interface
@@ -1095,7 +1084,6 @@ PRDF_PLUGIN_DEFINE_NS( cumulus_obus,   LaneRepair, calloutBusInterfacePlugin );
 PRDF_PLUGIN_DEFINE_NS( axone_obus,     LaneRepair, calloutBusInterfacePlugin );
 PRDF_PLUGIN_DEFINE_NS( explorer_ocmb,  LaneRepair, calloutBusInterfacePlugin );
 PRDF_PLUGIN_DEFINE_NS( cumulus_dmi,    LaneRepair, calloutBusInterfacePlugin );
-PRDF_PLUGIN_DEFINE_NS( centaur_membuf, LaneRepair, calloutBusInterfacePlugin );
 
 /**
  * @brief Add callouts for a BUS interface inputting an OMIC or MCC target

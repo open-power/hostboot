@@ -81,10 +81,6 @@ namespace PRDF
     // P9 Explorer Chip
     extern const char * explorer_ocmb;
 
-    // Centaur Chip
-    extern const char * centaur_membuf;
-    extern const char * centaur_mba;
-
 } // end namespace PRDF
 
 #endif

@@ -209,21 +209,8 @@ void MemCeTable<T>::addCapData( CaptureData & io_cd )
 
     size_t sz_actData = 0;
 
-    // Centaur specific info.
-    uint8_t isMba  = 0;
-    uint8_t mbaPos = 0;
-    CEN_SYMBOL::WiringType rcType = CEN_SYMBOL::WIRING_INVALID;
-    if ( TYPE_MBA == iv_chip->getType() )
-    {
-        isMba  = 1;
-        mbaPos = getTargetPosition( iv_chip->getTrgt() );
-        rcType = getMemBufRawCardType<TYPE_MBA>( iv_chip->getTrgt() );
-    }
-
     // Fill in the header info.
-    data[0] = (isMba << 7) | (mbaPos << 6); // 6 spare bits
-    data[1] = rcType;
-    // Bytes 2-7 are currently unused.
+    // Bytes 0-7 are currently unused.
 
     sz_actData += METADATA_SIZE;
 
@@ -250,7 +237,7 @@ void MemCeTable<T>::addCapData( CaptureData & io_cd )
 
         data[sz_actData  ] = entry.count;
         data[sz_actData+1] = // 5 bits spare here.
-                             (isSp << 2) | (isEcc << 1) | entry.portSlct;
+                             (isSp << 2) | (isEcc << 1); // 1 bit spare at end.
         data[sz_actData+2] = (isHard << 7) | (active << 6) |
                              (entry.dram & 0x3f);
         data[sz_actData+3] = entry.dramPins;
@@ -280,7 +267,6 @@ void MemCeTable<T>::addCapData( CaptureData & io_cd )
 
 // Avoid linker errors with the template.
 template class MemCeTable<TYPE_MCA>;
-template class MemCeTable<TYPE_MBA>;
 template class MemCeTable<TYPE_OCMB_CHIP>;
 
 //------------------------------------------------------------------------------

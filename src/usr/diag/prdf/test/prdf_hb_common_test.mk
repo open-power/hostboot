@@ -43,7 +43,6 @@ EXTRAINCDIR += ${PRD_USR_PATH}/common/framework/resolution
 EXTRAINCDIR += ${PRD_USR_PATH}/common/framework/config
 EXTRAINCDIR += ${PRD_USR_PATH}/common/rule
 EXTRAINCDIR += ${PRD_USR_PATH}/common/plat
-EXTRAINCDIR += ${PRD_USR_PATH}/common/plat/cen
 EXTRAINCDIR += ${PRD_USR_PATH}/common/plat/mem
 EXTRAINCDIR += ${PRD_USR_PATH}/common/plat/p9
 EXTRAINCDIR += ${PRD_USR_PATH}/common/mnfgtools
@@ -51,7 +50,6 @@ EXTRAINCDIR += ${PRD_USR_PATH}/mnfgtools
 EXTRAINCDIR += ${PRD_USR_PATH}/framework
 EXTRAINCDIR += ${PRD_USR_PATH}/occ_firdata
 EXTRAINCDIR += ${PRD_USR_PATH}/plat
-EXTRAINCDIR += ${PRD_USR_PATH}/plat/cen
 EXTRAINCDIR += ${PRD_USR_PATH}/plat/mem
 EXTRAINCDIR += ${PRD_USR_PATH}/plat/p9
 EXTRAINCDIR += ${PRD_USR_PATH}/test
@@ -60,9 +58,6 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/errl
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/util
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/centaur/common/include
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/centaur/procedures/hwp/memory
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/centaur/procedures/hwp/memory/lib/shared
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory
@@ -104,9 +99,7 @@ TESTS += $(if $(CONFIG_AXONE_BRING_UP),,${PRD_USR_TEST_PATH}/prdfTest_NimbusTpLF
 #TODO RTC 167288 - Once Cumulus/Centaur are ready we update these
 # Need Centaurs for this (CUMULUS processor chip)
 #TESTS += ${PRD_USR_TEST_PATH}/prdfTest_CentCs.H
-#TESTS += ${PRD_USR_TEST_PATH}/prdfTest_Mba.H
 #TESTS += ${PRD_USR_TEST_PATH}/prdfTest_ProcMbsFir.H
-#TESTS += ${PRD_USR_TEST_PATH}/prdfTest_CenTpLFir.H
 #TESTS += ${PRD_USR_TEST_PATH}/prdfTest_McsMciFir.H
 
 

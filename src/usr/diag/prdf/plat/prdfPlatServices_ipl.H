@@ -84,18 +84,6 @@ uint32_t mssRestoreDramRepairs( TARGETING::TargetHandle_t i_target,
                                 uint8_t & o_repairedRankMask,
                                 uint8_t & o_badDimmMask );
 
-/**
- * @brief  Invokes the mss_IPL_UE_isolation hardware procedure.
- *         This function will identify the bits that caused the UE.
- * @param  i_mba    Target MBA.
- * @param  i_rank   Target rank.
- * @param  o_bitmap DQ bitmap container.
- * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
- */
-uint32_t mssIplUeIsolation( TARGETING::TargetHandle_t i_mba,
-                           const MemRank & i_rank,
-                           MemDqBitmap & o_bitmap );
-
 //##############################################################################
 //##                  Nimbus/Centaur Maintenance Command wrappers
 //##############################################################################

@@ -26,7 +26,6 @@
 /** @file prdfMemDsd_rt.C */
 
 // Platform includes
-#include <prdfCenMbaExtraSig.H>
 #include <prdfMemDsd.H>
 
 using namespace TARGETING;
@@ -171,53 +170,6 @@ uint32_t DsdEvent<T>::verifySpare( const uint32_t & i_eccAttns,
 //------------------------------------------------------------------------------
 
 template<>
-uint32_t DsdEvent<TYPE_MBA>::startCmd()
-{
-    #define PRDF_FUNC "[DsdEvent<TYPE_MBA>::startCmd] "
-
-    uint32_t o_rc = SUCCESS;
-
-    uint32_t stopCond = mss_MaintCmd::NO_STOP_CONDITIONS;
-
-    // Due to a hardware bug in the Centaur, we must execute runtime maintenance
-    // commands at a very slow rate. Because of this, we decided that we should
-    // stop the command immediately on error if there is a UE so that we can
-    // respond quicker and send a DMD message to the hypervisor as soon as
-    // possible.
-
-    stopCond |= mss_MaintCmd::STOP_ON_UE;
-    stopCond |= mss_MaintCmd::STOP_IMMEDIATE;
-
-    if ( iv_canResumeScrub )
-    {
-        // Resume the command from the next address to the end of this master
-        // rank.
-        o_rc = resumeTdScrub<TYPE_MBA>( iv_chip, MASTER_RANK, stopCond );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "resumeTdScrub(0x%08x) failed",
-                      iv_chip->getHuid() );
-        }
-    }
-    else
-    {
-        // Start the time based scrub procedure on this master rank.
-        o_rc = startTdScrub<TYPE_MBA>( iv_chip, iv_rank, MASTER_RANK, stopCond);
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x) failed",
-                      iv_chip->getHuid(), getKey() );
-        }
-    }
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-template<>
 uint32_t DsdEvent<TYPE_OCMB_CHIP>::startCmd()
 {
     #define PRDF_FUNC "[DsdEvent<TYPE_OCMB_CHIP>::startCmd] "
@@ -280,7 +232,6 @@ uint32_t DsdEvent<T>::startNextPhase( STEP_CODE_DATA_STRUCT & io_sc )
 //------------------------------------------------------------------------------
 
 // Avoid linker errors with the template.
-template class DsdEvent<TYPE_MBA>;
 template class DsdEvent<TYPE_OCMB_CHIP>;
 
 } // end namespace PRDF

@@ -29,8 +29,6 @@
 #include <prdfMemDqBitmap.H>
 #include <prdfMemVcm.H>
 #include <prdfP9McaDataBundle.H>
-#include <prdfCenMbaDataBundle.H>
-#include <prdfCenMbaExtraSig.H>
 
 using namespace TARGETING;
 
@@ -58,12 +56,6 @@ template<>
 VcmFalseAlarm * __getFalseAlarmCounter<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip)
 {
     return getOcmbDataBundle(i_chip)->getVcmFalseAlarmCounter();
-}
-
-template<>
-VcmFalseAlarm * __getFalseAlarmCounter<TYPE_MBA>( ExtensibleChip * i_chip )
-{
-    return getMbaDataBundle(i_chip)->getVcmFalseAlarmCounter();
 }
 
 //##############################################################################
@@ -306,140 +298,6 @@ uint32_t VcmEvent<TYPE_OCMB_CHIP>::cleanup( STEP_CODE_DATA_STRUCT & io_sc )
 
 //##############################################################################
 //
-//                          Specializations for MBA
-//
-//##############################################################################
-
-template<>
-uint32_t VcmEvent<TYPE_MBA>::startCmd()
-{
-    #define PRDF_FUNC "[VcmEvent::startCmd] "
-
-    uint32_t o_rc = SUCCESS;
-
-    uint32_t stopCond = mss_MaintCmd::NO_STOP_CONDITIONS;
-
-    // Due to a hardware bug in the Centaur, we must execute runtime maintenance
-    // commands at a very slow rate. Because of this, we decided that we should
-    // stop the command immediately on error if there is a UE so that we can
-    // respond quicker and send a DMD message to the hypervisor as soon as
-    // possible.
-
-    stopCond |= mss_MaintCmd::STOP_ON_UE;
-    stopCond |= mss_MaintCmd::STOP_IMMEDIATE;
-
-    // Again, due to the hardware bug in the Centaur, we want to stop
-    // immediately if there is an MCE found during phase 2 because that
-    // indicates an error was detected on the bad DRAM and fixed by the chip
-    // mark.
-
-    if ( TD_PHASE_2 == iv_phase ) stopCond |= mss_MaintCmd::STOP_ON_MCE;
-
-    // If Row Repair is enabled, we should stop immediately on error if there is
-    // an MCE during phase 2. This is already done because of the Centaur
-    // workarounds. This comment is just pointing out what should be done if for
-    // some reason the hardware is fixed.
-
-    if ( iv_canResumeScrub )
-    {
-        // Resume the command from the next address to the end of this master
-        // rank.
-        o_rc = resumeTdScrub<TYPE_MBA>( iv_chip, MASTER_RANK, stopCond,
-                                        iv_resumeNextRow );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "resumeTdScrub(0x%08x) failed",
-                      iv_chip->getHuid() );
-        }
-    }
-    else
-    {
-        // Start the time based scrub procedure on this master rank.
-        o_rc = startTdScrub<TYPE_MBA>( iv_chip, iv_rank, MASTER_RANK, stopCond);
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x) failed",
-                      iv_chip->getHuid(), getKey() );
-        }
-    }
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-uint32_t VcmEvent<TYPE_MBA>::checkEcc( const uint32_t & i_eccAttns,
-                                       STEP_CODE_DATA_STRUCT & io_sc,
-                                       bool & o_done )
-{
-    #define PRDF_FUNC "[VcmEvent<TYPE_MBA>::checkEcc] "
-
-    uint32_t o_rc = SUCCESS;
-
-    do
-    {
-        if ( i_eccAttns & MAINT_UE )
-        {
-            PRDF_TRAC( PRDF_FUNC "UE Detected: 0x%08x,0x%02x",
-                       iv_chip->getHuid(), getKey() );
-
-            io_sc.service_data->setSignature( iv_chip->getHuid(),
-                                              PRDFSIG_MaintUE );
-
-            // At this point we don't actually have an address for the UE. The
-            // best we can do is get the address in which the command stopped.
-            MemAddr addr;
-            o_rc = getMemMaintAddr<TYPE_MBA>( iv_chip, addr );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "getMemMaintAddr(0x%08x) failed",
-                          iv_chip->getHuid() );
-                break;
-            }
-
-            o_rc = MemEcc::handleMemUe<TYPE_MBA>( iv_chip, addr,
-                                                  UE_TABLE::SCRUB_UE, io_sc );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "handleMemUe(0x%08x,0x%02x) failed",
-                          iv_chip->getHuid(), getKey() );
-                break;
-            }
-
-            // Because of the UE, any further TPS requests will likely have no
-            // effect. So ban all subsequent requests.
-            MemDbUtils::banTps<TYPE_MBA>( iv_chip, addr.getRank() );
-
-            // Leave the mark in place and abort this procedure.
-            o_done = true; break;
-        }
-
-        if ( i_eccAttns & MAINT_RCE_ETE )
-        {
-            io_sc.service_data->setSignature( iv_chip->getHuid(),
-                                              PRDFSIG_MaintRETRY_CTE );
-
-            // Add the rank to the callout list.
-            MemoryMru mm { iv_chip->getTrgt(), iv_rank,
-                           MemoryMruData::CALLOUT_RANK };
-            io_sc.service_data->SetCallout( mm );
-
-            // Make the error log predictive.
-            io_sc.service_data->setServiceCall();
-        }
-
-    } while (0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//##############################################################################
-//
 //                          Generic template functions
 //
 //##############################################################################
@@ -509,7 +367,6 @@ uint32_t VcmEvent<T>::falseAlarm( STEP_CODE_DATA_STRUCT & io_sc )
 
 // Avoid linker errors with the template.
 template class VcmEvent<TYPE_MCA>;
-template class VcmEvent<TYPE_MBA>;
 template class VcmEvent<TYPE_OCMB_CHIP>;
 
 //------------------------------------------------------------------------------

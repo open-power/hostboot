@@ -292,15 +292,6 @@ uint32_t isSpareAvailable( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
                            uint8_t i_ps, bool & o_spAvail, bool & o_eccAvail );
 
 /**
- * @brief  Returns the raw card type of a buffered DIMM.
- * @param  i_trgt An MBA target.
- * @return WIRING_INVALID if an internal function fails. Otherwise, the DIMM's
- *         raw card type.
- */
-template<TARGETING::TYPE>
-CEN_SYMBOL::WiringType getMemBufRawCardType( TARGETING::TargetHandle_t i_trgt );
-
-/**
  * @brief   get DIMM DQ map from FAPI routines
  * @param   i_target      DIMM target
  * @param   io_dqMapPtr   Pointer to area to receive DIMM DQ map (80 bytes)

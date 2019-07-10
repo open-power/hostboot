@@ -973,13 +973,7 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
                 TargetHandle_t target = getTarget( *i_wfp );
                 TYPE trgtType = target->getAttr<ATTR_TYPE>();
 
-                // MBA target
-                if ( TYPE_MBA == trgtType )
-                {
-                    rc = PRDF::restoreDramRepairs<TYPE_MBA>( target );
-                }
-                // MCBIST target
-                else if ( TYPE_MCBIST == trgtType )
+                if ( TYPE_MCBIST == trgtType )
                 {
                     // Get the connected MCAs.
                     TargetHandleList mcaList;

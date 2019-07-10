@@ -39,7 +39,6 @@
 #include <prdfExtensibleChip.H>
 
 // Platform includes
-#include <prdfCenMbaDataBundle.H>
 #include <prdfPlatServices.H>
 #include <prdfP9McaDataBundle.H>
 #include <prdfMemBgScrub.H>
@@ -91,12 +90,6 @@ int32_t analyzeIplCEStats( TargetHandle_t i_trgt, bool &o_calloutMade )
             McaDataBundle * db = getMcaDataBundle( mcaChip );
             if ( db->getIplCeStats()->analyzeStats() ) o_calloutMade = true;
         }
-    }
-    else if ( TYPE_MBA == type )
-    {
-        // Analyze the CE stats for the MBA.
-        MbaDataBundle * db = getMbaDataBundle( chip );
-        o_calloutMade = db->getIplCeStats()->analyzeStats();
     }
     else
     {
@@ -153,7 +146,6 @@ errlHndl_t startScrub( const TargetHandle_t i_trgt )
         // Start background scrubbing on this target.
         switch ( chip->getType() )
         {
-            case TYPE_MBA:    startInitialBgScrub<TYPE_MBA>(   chip); break;
             case TYPE_MCBIST: startInitialBgScrub<TYPE_MCBIST>(chip); break;
             default:
                 PRDF_ERR( PRDF_FUNC "Unsupported maintenance target type "

@@ -97,13 +97,6 @@ bool __iueCheck<TYPE_OCMB_CHIP>( uint32_t i_eccAttns )
     return ( 0 != (i_eccAttns & MAINT_IUE) );
 }
 
-template<> inline
-bool __iueCheck<TYPE_MBA>( uint32_t i_eccAttns )
-{
-    // IUES are reported via RCE ETE on Centaur
-    return ( 0 != (i_eccAttns & MAINT_RCE_ETE) );
-}
-
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>
@@ -161,69 +154,10 @@ uint32_t VcmEvent<T>::checkEcc( const uint32_t & i_eccAttns,
     #undef PRDF_FUNC
 }
 
-//##############################################################################
-//
-//                          Specializations for MBA
-//
-//##############################################################################
-
-template<>
-uint32_t VcmEvent<TYPE_MBA>::startCmd()
-{
-    #define PRDF_FUNC "[VcmEvent::startCmd] "
-
-    uint32_t o_rc = SUCCESS;
-
-    uint32_t stopCond = mss_MaintCmd::NO_STOP_CONDITIONS;
-
-    // Ensure we stop on each MCE if Row Repair is enabled.
-    if ( iv_rowRepairEnabled && (TD_PHASE_2 == iv_phase) )
-    {
-        stopCond |= mss_MaintCmd::STOP_ON_MCE;
-        stopCond |= mss_MaintCmd::STOP_IMMEDIATE;
-    }
-
-    switch ( iv_phase )
-    {
-        case TD_PHASE_1:
-            o_rc = ( iv_canResumeScrub )
-                     ? resumeTdSteerCleanup<TYPE_MBA>( iv_chip, MASTER_RANK,
-                                                       stopCond )
-                     : startTdSteerCleanup<TYPE_MBA>( iv_chip, iv_rank,
-                                                      MASTER_RANK, stopCond );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "steer cleanup command failed on 0x%08x",
-                          iv_chip->getHuid() );
-            }
-            break;
-
-        case TD_PHASE_2:
-            o_rc = ( iv_canResumeScrub )
-                     ? resumeTdSfRead<TYPE_MBA>( iv_chip, MASTER_RANK,
-                                                 stopCond, iv_resumeNextRow )
-                     : startTdSfRead<TYPE_MBA>( iv_chip, iv_rank, MASTER_RANK,
-                                                stopCond );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "sf read command failed on 0x%08x",
-                          iv_chip->getHuid() );
-            }
-            break;
-
-        default: PRDF_ASSERT( false ); // invalid phase
-    }
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
 //------------------------------------------------------------------------------
 
 // Avoid linker errors with the template.
 template class VcmEvent<TYPE_MCA>;
-template class VcmEvent<TYPE_MBA>;
 template class VcmEvent<TYPE_OCMB_CHIP>;
 
 } // end namespace PRDF

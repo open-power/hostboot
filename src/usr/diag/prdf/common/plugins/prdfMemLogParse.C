@@ -3113,11 +3113,7 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
     i_parser.PrintString( hh, hd );
 
     // Get the metadata info.
-    uint8_t isMba  = (i_buffer[0] >> 7) & 0x1;                          // 1-bit
-    uint8_t mbaPos = (i_buffer[0] >> 6) & 0x1;                          // 1-bit
-    // 6 spare bits                                                     // 6-bit
-    uint8_t rcType =  i_buffer[1];                                      // 8-bit
-    // Bytes 2-7 are currently unused.
+    // Bytes 0-7 are currently unused.
 
     // Get the entry info.
     for ( uint32_t idx = METADATA_SIZE, entry = 0;
@@ -3128,7 +3124,7 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
         // 5 spare bits                                                 // 5-bit
         uint32_t isSp     = (i_buffer[idx+1] >> 2) & 0x1;               // 1-bit
         uint32_t isEcc    = (i_buffer[idx+1] >> 1) & 0x1;               // 1-bit
-        uint32_t ps       =  i_buffer[idx+1]       & 0x1;               // 1-bit
+        // 1 spare bit                                                  // 1-bit
         uint32_t isHard   = (i_buffer[idx+2] >> 7) & 0x1;               // 1-bit
         uint32_t active   = (i_buffer[idx+2] >> 6) & 0x1;               // 1-bit
         uint32_t dram     =  i_buffer[idx+2]       & 0x3f;              // 6-bit
@@ -3154,40 +3150,6 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
         const char * cardName_str = "";
         const char * portSlct_str = " "; // intentionally an empty space.
         const char * dramSite_str = "";
-
-        if ( 1 == isMba )
-        {
-            // Get the DRAM site location information.
-            const char ** dqMap;
-            const char ** dramMap;
-            int32_t l_rc = getDramSiteInfo( rcType, mbaPos, ps, mrnk,
-                                            cardName_str, dqMap, dramMap );
-
-            // Check if DIMM has x4 DRAMs.
-            bool x4Dram;
-            l_rc |= isX4Dram( rcType, x4Dram );
-
-            // Get the DRAM site string.
-            if ( (SUCCESS == l_rc) &&
-                 (dram < (x4Dram ? MBA_NIBBLES_PER_RANK : MBA_BYTES_PER_RANK)) )
-            {
-                uint8_t tmp = x4Dram ? nibble2Symbol<TYPE_MBA>(dram)
-                                     : byte2Symbol  <TYPE_MBA>(dram);
-
-                // Get the DRAM index for site location table.
-                uint8_t symbol  = transEccSpare( tmp, (1 == isEcc) );
-                uint8_t dqIdx   = transDramSpare( symbol2Dq<TYPE_MBA>(symbol),
-                                                  (1 == isSp) );
-                uint8_t dramIdx = dqSiteIdx2DramSiteIdx( dqIdx, x4Dram );
-
-                dramSite_str = dramMap[dramIdx];
-            }
-
-            // Get the port select string.
-            char tmp[DATA_SIZE] = { '\0' };
-            snprintf( tmp, DATA_SIZE, "%1d", ps );
-            portSlct_str = tmp;
-        }
 
         // Build the header string.
         char header[HEADER_SIZE] = { '\0' };

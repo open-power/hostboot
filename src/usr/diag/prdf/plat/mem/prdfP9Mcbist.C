@@ -37,7 +37,7 @@
 #include <prdfMemEccAnalysis.H>
 #include <prdfPlatServices.H>
 #include <prdfP9McbistDataBundle.H>
-#include <prdfP9McbistExtraSig.H>
+#include <prdfMemExtraSig.H>
 #include <prdfMemScrubUtils.H>
 
 using namespace TARGETING;

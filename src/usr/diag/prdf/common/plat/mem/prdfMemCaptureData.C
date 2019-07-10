@@ -36,7 +36,6 @@
 #include <utilmem.H>
 
 // Platform includes
-#include <prdfCenMbaDataBundle.H>
 #include <prdfPlatServices.H>
 #include <prdfP9McaDataBundle.H>
 #include <prdfOcmbDataBundle.H>
@@ -75,13 +74,6 @@ void addExtMemMruData( const MemoryMru & i_memMru, errlHndl_t io_errl )
         {
             // Get the DRAM width.
             extMemMru.isX4Dram = isDramWidthX4( trgt ) ? 1 : 0;
-        }
-
-        // Get the DIMM type.
-        if ( TYPE_MBA == getTargetType(trgt) )
-        {
-            extMemMru.isBufDimm = isMembufOnDimm<TYPE_MBA>( trgt ) ? 1 : 0;
-            extMemMru.cardType  = getMemBufRawCardType<TYPE_MBA>( trgt );
         }
 
         if ( 0 == extMemMru.isBufDimm )
@@ -573,35 +565,6 @@ void addEccData<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     for ( auto & port : list ) { addEccData<TYPE_MEM_PORT>(port, io_sc); }
 }
 
-template<>
-void addEccData<TYPE_MBA>( ExtensibleChip * i_chip,
-                           STEP_CODE_DATA_STRUCT & io_sc )
-{
-    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
-
-    CaptureData & cd = io_sc.service_data->GetCaptureData();
-    MbaDataBundle * db = getMbaDataBundle( i_chip );
-
-    // Add UE table to capture data.
-    db->iv_ueTable.addCapData( cd );
-
-    // Add CE table to capture data.
-    db->iv_ceTable.addCapData( cd );
-
-    // Add RCE table to capture data.
-    db->iv_rceTable.addCapData( cd );
-
-    // Add DRAM repairs data from hardware.
-    captureDramRepairsData<TYPE_MBA>( i_chip->getTrgt(), cd );
-
-    // Add DRAM repairs data from VPD.
-    captureDramRepairsVpd<TYPE_MBA>(i_chip->getTrgt(), cd);
-
-    // Add Row Repair data from VPD
-    captureRowRepairVpd<TYPE_MBA>(i_chip->getTrgt(), cd);
-
-}
-
 //------------------------------------------------------------------------------
 
 template<>
@@ -617,24 +580,6 @@ void addEccData<TYPE_MCA>( TargetHandle_t i_trgt, errlHndl_t io_errl )
 
     ErrDataService::AddCapData( cd, io_errl );
 }
-
-template<>
-void addEccData<TYPE_MBA>( TargetHandle_t i_trgt, errlHndl_t io_errl )
-{
-    CaptureData cd;
-
-    // Add DRAM repairs data from hardware.
-    captureDramRepairsData<TYPE_MBA>( i_trgt, cd );
-
-    // Add DRAM repairs data from VPD.
-    captureDramRepairsVpd<TYPE_MBA>( i_trgt, cd );
-
-    // Add Row Repair data from VPD.
-    captureRowRepairVpd<TYPE_MBA>( i_trgt, cd );
-
-    ErrDataService::AddCapData( cd, io_errl );
-}
-
 
 //------------------------------------------------------------------------------
 

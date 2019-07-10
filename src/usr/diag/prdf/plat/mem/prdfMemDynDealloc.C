@@ -1139,7 +1139,6 @@ int32_t rank( ExtensibleChip * i_chip, MemRank i_rank )
     #undef PRDF_FUNC
 }
 template int32_t rank<TYPE_MCA>( ExtensibleChip * i_chip, MemRank i_rank );
-template int32_t rank<TYPE_MBA>( ExtensibleChip * i_chip, MemRank i_rank );
 
 //------------------------------------------------------------------------------
 
@@ -1188,7 +1187,6 @@ int32_t port( ExtensibleChip * i_chip )
     #undef PRDF_FUNC
 }
 template int32_t port<TYPE_MCA>( ExtensibleChip * i_chip );
-template int32_t port<TYPE_MBA>( ExtensibleChip * i_chip );
 
 //------------------------------------------------------------------------------
 
@@ -1382,14 +1380,6 @@ int32_t dimmList( TargetHandleList  & i_dimmList )
         if ( !list.empty() )
         {
             o_rc = dimmList<TYPE_MCA>( i_dimmList );
-            break;
-        }
-
-        // Second, check for MBAs.
-        list = getConnected( dimmTrgt, TYPE_MBA );
-        if ( !list.empty() )
-        {
-            o_rc = dimmList<TYPE_MBA>( i_dimmList );
             break;
         }
 

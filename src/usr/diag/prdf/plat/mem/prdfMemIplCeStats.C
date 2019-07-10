@@ -57,19 +57,6 @@ using namespace PARSERUTILS;
 //------------------------------------------------------------------------------
 
 template<>
-void MemIplCeStats<TYPE_MBA>::banAnalysis( uint8_t i_dimmSlct,
-                                           uint8_t i_portSlct )
-{
-    PRDF_ASSERT( i_dimmSlct < MAX_DIMM_PER_PORT );
-    PRDF_ASSERT( i_portSlct < MAX_PORT_PER_MBA );
-
-    DimmKey banKey = { i_dimmSlct, i_portSlct };
-    iv_bannedAnalysis[banKey] = true;
-}
-
-//------------------------------------------------------------------------------
-
-template<>
 void MemIplCeStats<TYPE_MCA>::banAnalysis( uint8_t i_dimmSlct,
                                            uint8_t i_portSlct )
 {
@@ -91,18 +78,6 @@ void MemIplCeStats<TYPE_OCMB_CHIP>::banAnalysis( uint8_t i_dimmSlct,
 
     DimmKey banKey = { i_dimmSlct, i_portSlct };
     iv_bannedAnalysis[banKey] = true;
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-void MemIplCeStats<TYPE_MBA>::banAnalysis( uint8_t i_dimmSlct )
-{
-    // Two DIMMs per DIMM select on MBA.
-    for ( uint8_t ps = 0; ps < MAX_PORT_PER_MBA; ps++ )
-    {
-        banAnalysis( i_dimmSlct, ps );
-    }
 }
 
 //------------------------------------------------------------------------------
@@ -480,7 +455,6 @@ void MemIplCeStats<T>::addMruAndCommitErrl( const MemoryMru & i_memmru,
 
 // need these templates to avoid linker errors
 template class MemIplCeStats<TYPE_MCA>;
-template class MemIplCeStats<TYPE_MBA>;
 template class MemIplCeStats<TYPE_OCMB_CHIP>;
 
 } // end namespace PRDF
