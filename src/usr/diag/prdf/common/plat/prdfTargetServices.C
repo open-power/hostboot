@@ -1437,7 +1437,9 @@ bool isDramWidthX4( TargetHandle_t i_trgt )
    bool o_dramWidthX4 = false;
 
    PRDF_ASSERT( nullptr != i_trgt );
-   //uint8_t dramWidths[MAX_DIMM_PER_PORT];
+   uint8_t dramWidths[MAX_DIMM_PER_PORT];
+   uint8_t dimmSlct = 0;
+   TargetHandle_t memPort = nullptr;
 
    switch ( getTargetType(i_trgt) )
    {
@@ -1446,12 +1448,17 @@ bool isDramWidthX4( TargetHandle_t i_trgt )
             break;
 
         case TYPE_DIMM:
-            // TODO RTC 207273 - attribute not in TARGETING code yet
-            //TargetHandle_t memPort = getConnectedParent(i_trgt, TYPE_MEM_PORT);
-            //dramWidths = memPort->getAttr<ATTR_MEM_EFF_DRAM_WIDTH>();
-            //uint8_t dimmSlct = getDimmSlct( i_trgt );
-            //o_dramWidthX4 =
-            //  (TARGETING::MEM_EFF_DRAM_WIDTH_X4 == dramWidths[dimmSlct]);
+            memPort = getConnectedParent(i_trgt, TYPE_MEM_PORT);
+            if ( !memPort->tryGetAttr<ATTR_MEM_EFF_DRAM_WIDTH>(dramWidths) )
+            {
+                PRDF_ERR( "isDramWidthX4: Unable to access "
+                          "ATTR_MEM_EFF_DRAM_WIDTH i_trgt=0x%08x.",
+                          getHuid(memPort) );
+                PRDF_ASSERT( false );
+            }
+            dimmSlct = getDimmSlct( i_trgt );
+            o_dramWidthX4 =
+                (TARGETING::MEM_EFF_DRAM_WIDTH_X4 == dramWidths[dimmSlct]);
             break;
 
         default:
@@ -1490,15 +1497,12 @@ void __getMasterRanks( TargetHandle_t i_trgt, std::vector<MemRank> & o_ranks,
     }
     else if ( MODEL_AXONE == l_procModel )
     {
-        PRDF_ERR( PRDF_FUNC "Axone attribute not supported yet" );
-        /* TODO RTC 207273 - no targeting support for attr yet
         if ( !i_trgt->tryGetAttr<ATTR_MEM_EFF_DIMM_RANKS_CONFIGED>(info[0]) )
         {
             PRDF_ERR( PRDF_FUNC "tryGetAttr<ATTR_MEM_EFF_DIMM_RANKS_CONFIGED> "
                       "failed: i_trgt=0x%08x", getHuid(i_trgt) );
             PRDF_ASSERT( false ); // attribute does not exist for target
         }
-        */
     }
     else
     {
