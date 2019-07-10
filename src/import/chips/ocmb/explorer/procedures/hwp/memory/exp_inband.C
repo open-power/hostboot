@@ -541,9 +541,9 @@ fapi2::ReturnCode poll_for_response_ready(const fapi2::Target<fapi2::TARGET_TYPE
     // NUM_LOOPS is based on EXP_FW_DDR_PHY_INIT command, which completes in ~10ms in HW.
     // We initially delay 8ms, so we should only need to poll for ~2ms here.
     // We're waiting 100us between polls, so we should only need about 20 loops here,
-    // but we make it 50 to be safe
+    // but we make it 200 to be safe
+    constexpr uint64_t NUM_LOOPS = 200;
 
-    constexpr uint64_t NUM_LOOPS = 50;
     // So, why aren't we using the memory team's polling API?
     // This is a base function that will be utilized by the platform code
     // As such, we don't want to pull in more libraries than we need to: it would cause extra dependencies
