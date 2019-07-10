@@ -104,11 +104,7 @@ fapi2::ReturnCode p10_perv_sbe_cmn_array_init_module(const
 
     i_regions.extractToRight<1, 15>(l_regions);
 
-    FAPI_DBG("Drop vital fence");
-    //Setting CPLT_CTRL1 register value
-    l_data64.flush<0>()
-    .setBit<C_CPLT_CTRL1_TC_VITL_REGION_FENCE>();
-    FAPI_TRY(fapi2::putScom(i_mcast_target, PERV_CPLT_CTRL1_CLEAR, l_data64));
+    // no need to drop Vital fence
 
     FAPI_DBG("Setup ABISTMUX_SEL");
     //Setting CPLT_CTRL0 register value
@@ -230,7 +226,6 @@ fapi_try_exit:
 }
 
 /// @brief Seeprom scan0 module
-/// --Raise VITAL clock region fence
 /// --Write Clock Region Register
 /// --Write Scan Select Register
 /// --set OPCG_REG0 register bit 0='0'
@@ -238,7 +233,6 @@ fapi_try_exit:
 /// --Poll OPCG done bit to check for scan0 completeness
 /// --clear clock region register
 /// --clear scan select register
-/// --Drop VITAL fence
 ///
 ///
 /// @param[in]     i_target_chiplets   Reference to TARGET_TYPE_PERV target Targets for all chiplets
@@ -260,10 +254,7 @@ fapi2::ReturnCode p10_perv_sbe_cmn_scan0_module(const
     i_regions.extractToRight<1, 15>(l_regions);
     i_scan_types.extractToRight<4, 12>(l_scan_types);
 
-    FAPI_DBG("raise Vital clock region fence");
-    //Setting CPLT_CTRL1 register value
-    l_data64.flush<0>()
-    .setBit<C_CPLT_CTRL1_TC_VITL_REGION_FENCE>();
+    // no need to raise Vital fence
 
     FAPI_DBG("Raise region fences for all regions");
     //Setting CPLT_CTRL1 register value
