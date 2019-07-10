@@ -30,6 +30,13 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include
 EXTRAINCDIR += ${ROOTPATH}/src/import
+EXTRAINCDIR += ${ROOTPATH}/src/usr/expaccess/
+EXTRAINCDIR += ${ROOTPATH}/src/usr/expaccess/test/
+
+VPATH += ${ROOTPATH}/src/usr/expaccess/test/
+VPATH += ${ROOTPATH}/src/usr/expaccess/
+
+OBJS += exptest_utils.o
 
 
 include ${ROOTPATH}/config.mk

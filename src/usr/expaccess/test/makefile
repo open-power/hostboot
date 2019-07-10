@@ -28,8 +28,6 @@ MODULE = testexpaccess
 
 include test.mk
 
-OBJS += exptest_utils.o
-
 TESTS = *.H
 
 include ${ROOTPATH}/config.mk

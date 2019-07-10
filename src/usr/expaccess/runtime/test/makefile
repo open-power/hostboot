@@ -30,9 +30,6 @@ MODULE = testexpaccess_rt
 
 include ../../test/test.mk
 
-#TODO RTC:196806 re-enable mmio communication tests when mmio works
 TESTS = ../../test/expscomtest.H
 
 include ${ROOTPATH}/config.mk
-
-

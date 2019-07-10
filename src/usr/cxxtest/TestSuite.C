@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -115,10 +115,11 @@ void doFailTest( )
 
 void doFailTest( const char *filename, uint32_t linenum )
 {
-    TRACDCOMP( g_trac_test,
+    TRACFCOMP( g_trac_test,
             "!!!       > Test %s Failed at line %d ",
             filename,
             linenum );
+
     if(g_FailedTests < CXXTEST_FAIL_LIST_SIZE)
     {
         memcpy(g_FailedTestList[g_FailedTests].failTestFile,

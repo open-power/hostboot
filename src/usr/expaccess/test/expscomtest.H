@@ -42,8 +42,8 @@
 #include <fapi2/hw_access.H>
 #include <lib/shared/exp_consts.H>
 #include "exptest_utils.H"
+#include "../expscom_trace.H"
 
-extern trace_desc_t* g_trac_expscom;
 
 using namespace TARGETING;
 using namespace ERRORLOG;
@@ -120,6 +120,8 @@ public:
     */
     void testExpscomI2c(void)
     {
+// Only MMIO supported at runtime
+#ifndef __HOSTBOOT_RUNTIME
         TRACFCOMP( g_trac_expscom, ">> Enter  testExpscomI2c");
         // Keep trace of pass/fails
         uint32_t l_tests = 0;
@@ -272,8 +274,8 @@ public:
             // << atomic section
             mutex_unlock(iv_serializeTestMutex);
         }while(0);
-
         TRACFCOMP( g_trac_expscom, "<< Exit  testExpscomI2c");
+#endif
         return;
     }
 
@@ -282,6 +284,8 @@ public:
      */
     void testExpscomI2cPlatform(void)
     {
+// Only mmio supported at runtime
+#ifndef __HOSTBOOT_RUNTIME
         TRACFCOMP( g_trac_expscom, ">> Enter  testExpscomI2cPlatform");
         // Keep trace of pass/fails
         uint32_t l_tests = 0;
@@ -434,6 +438,7 @@ public:
         }while(0);
 
         TRACFCOMP( g_trac_expscom, "<< Exit  testExpscomI2cPlatform");
+#endif
         return;
     }
 
@@ -620,6 +625,8 @@ public:
      */
     void testExpscomCombined(void)
     {
+// Only MMIO scoms supported at runtime, i2c not supported
+#ifndef __HOSTBOOT_RUNTIME
         TargetHandleList l_explorerList;
         uint32_t l_tests = 0;
         uint32_t l_fails = 0;
@@ -796,7 +803,7 @@ public:
         }while(0);
 
         TRACFCOMP(g_trac_expscom, "<< Exit  testExpscomCombined");
-
+#endif
         return;
     }
 
