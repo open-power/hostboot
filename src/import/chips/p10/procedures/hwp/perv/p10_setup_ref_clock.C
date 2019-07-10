@@ -39,7 +39,7 @@
 
 enum P10_SETUP_REF_CLOCK_Private_Constants
 {
-    RCS_CONTRL_DC_CFAM_RESET_VAL = 0x0200000,
+    RCS_CONTRL_DC_CFAM_RESET_VAL = 0x0200004,
     TP_MUX0A_CLKIN_SEL = 0,
     TP_MUX0B_CLKIN_SEL = 1,
     TP_MUX0C_CLKIN_SEL = 2,
@@ -97,6 +97,10 @@ fapi2::ReturnCode p10_setup_ref_clock(const
 
     FAPI_DBG("Disable Write Protection for Root/Perv Control registers");
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_GPWRP_FSI, p10SetupRefClock::DISABLE_WRITE_PROTECTION));
+
+    FAPI_DBG("Assert PERST#");
+    l_read_reg.flush<0>().setBit<26>();
+    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_ROOT_CTRL1_CLEAR_FSI, l_read_reg));
 
     // -----------------------------------------------------------------------------------
     // ROOT CONTROL 5 and its COPY
