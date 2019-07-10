@@ -914,10 +914,15 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
                     l_elog->collectTrace(RUNTIME_COMP_NAME);
                     break;
             }
+            // break out of for-loop if
+            if(l_elog)
+            {
+                break;
+            }
             i++;
         }
 
-        // exit if we hit an error
+        // break out of do-while if we hit an error
         if(l_elog)
         {
             break;
