@@ -279,6 +279,7 @@ TESTCASE_MODULES += testmmio
 endif
 
 
+
 #******************************************************************
 #KNOWN ISSUES (I might let these run but there is something wrong)
 #All of these are tracked by a RTC story
@@ -363,7 +364,7 @@ RUNTIME_TESTCASE_MODULES += testxscom_rt  # ~/src/usr/xscom/runtime/test/
 RUNTIME_TESTCASE_MODULES += testsbeio_rt  # ~/src/usr/sbeio/runtime/test/
 RUNTIME_TESTCASE_MODULES += testpm_rt     # ~/src/usr/isteps/pm/runtime/test/
 RUNTIME_TESTCASE_MODULES += testsyslib_rt # ~/src/usr/testcore/lib/runtime/
-#RUNTIME_TESTCASE_MODULES += testexpaccess_rt # ~/src/usr/expaccess/runtime/test/
+RUNTIME_TESTCASE_MODULES += testexpaccess_rt # ~/src/usr/expaccess/runtime/test/
 #RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_HBRT_PRD),testprdf_rt)
 #RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_HBRT_PRD),testattn_rt)
 #RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_BMC_IPMI),testipmi_rt)

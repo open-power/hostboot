@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -154,10 +154,11 @@ void sortTests(std::vector<const char *> & i_list,
 
 void doFailTest( const char *filename, uint32_t linenum )
 {
-    TRACDCOMP( g_trac_test,
+    TRACFCOMP( g_trac_test,
             "!!!       > Test %s Failed at line %d ",
             filename,
             linenum );
+
     if(g_FailedTests < CXXTEST_FAIL_LIST_SIZE)
     {
         memcpy(g_FailedTestList[g_FailedTests].failTestFile,

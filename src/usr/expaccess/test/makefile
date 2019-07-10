@@ -28,8 +28,6 @@ MODULE = testexpaccess
 
 include test.mk
 
-OBJS += exptest_utils.o
-
 #TODO RTC:249013 re-enable mmio communication tests when mmio works
 #TESTS = *.H
 TESTS = expscomtest.H

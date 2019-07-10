@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019
+# Contributors Listed Below - COPYRIGHT 2019,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -28,14 +28,14 @@
 #EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 #EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/inband/
 #EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 #EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
 #EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 #EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
 
 VPATH += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/inband/
 
-# Need to build exp_indband to use EKB's getMMIO/putMMIO/getCMD/getRSP
+# Need to build exp_inband to use EKB's getMMIO/putMMIO/getCMD/getRSP
 #OBJS += exp_inband.o
 OBJS += expscom_trace.o
 OBJS += expscom_utils.o

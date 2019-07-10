@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019
+# Contributors Listed Below - COPYRIGHT 2019,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -35,11 +35,11 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/expaccess/test
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 
 # FIXME RTC: 210975
-#VPATH += ${ROOTPATH}/src/usr/expaccess/test/
-#VPATH += ${ROOTPATH}/src/usr/expaccess/
+VPATH += ${ROOTPATH}/src/usr/expaccess/test/
+VPATH += ${ROOTPATH}/src/usr/expaccess/
 #VPATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
 
-#OBJS += exptest_utils.o
+OBJS += exptest_utils.o
 #OBJS += exp_collect_explorer_log.o
 #OBJS += rcExpLog.o
 
