@@ -1411,9 +1411,14 @@ errlHndl_t nvdimmGetTimeoutVal(Target* i_nvdimm)
 
         //Converting to msec depending on bit 15. 1 = sec, 0 = msec
         //except for charge. Charge is only in seconds so convert anyway
+        //Double the timeout values for margins
         if (timeout_map[i] >= 0x8000 || i == CHARGE){
             timeout_map[i] = timeout_map[i] & 0x7FFF;
-            timeout_map[i] = timeout_map[i] * MS_PER_SEC;
+            timeout_map[i] = timeout_map[i] * MS_PER_SEC * 2;
+        }
+        else
+        {
+            timeout_map[i] = timeout_map[i] * 2;
         }
 
         TRACUCOMP(g_trac_nvdimm, "nvdimmGetTimeoutVal() HUID[%X], timeout_idx[%d], timeout_ms[%d]"
