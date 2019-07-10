@@ -679,7 +679,7 @@
     <platinit/>
     <enum>
         BUCKETA = 1,
-        BUCKETB = 2,
+        BUCKETB = 2
     </enum>
     <initToZero/>
     <overrideOnly/>
