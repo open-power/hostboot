@@ -37,7 +37,9 @@
 #include <lib/omi/exp_omi_utils.H>
 #include <lib/shared/exp_consts.H>
 #include <lib/i2c/exp_i2c_fields.H>
+#include <generic/memory/lib/mss_generic_attribute_getters.H>
 #include <mss_explorer_attribute_getters.H>
+#include <generic/memory/lib/mss_generic_system_attribute_getters.H>
 
 namespace mss
 {
@@ -45,6 +47,42 @@ namespace exp
 {
 namespace omi
 {
+
+///
+/// @brief Set the OMI_DL0 configuration register for a given mode
+///
+/// @param[in] i_target OCMB target
+/// @param[in] i_train_mode mode to use
+/// @param[in] i_dl_x4_backoff_en backoff enable bit
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+/// @note Algorithm from p9a_omi_train.C
+///
+fapi2::ReturnCode setup_omi_dl0_config0(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const uint8_t i_train_mode,
+    const uint8_t i_dl_x4_backoff_en)
+{
+    fapi2::buffer<uint64_t> l_config0;
+
+    // Get the "reset" values so we can just overwrite with the changes
+    FAPI_TRY(fapi2::getScom(i_target, EXPLR_DLX_DL0_CONFIG0, l_config0),
+             "Error reading EXPLR_DLX_DL0_CONFIG0 on %s", mss::c_str(i_target));
+
+    // CFG_DL0_HALF_WIDTH_BACKOFF_ENABLE: dl0 x4 backoff enabled
+    l_config0.writeBit<EXPLR_DLX_DL0_CONFIG0_CFG_X4_BACKOFF_ENABLE>(i_dl_x4_backoff_en);
+
+    // CFG_DL0_TRAIN_MODE: dl0 train mode
+    l_config0.insertFromRight<EXPLR_DLX_DL0_CONFIG0_CFG_TRAIN_MODE,
+                              EXPLR_DLX_DL0_CONFIG0_CFG_TRAIN_MODE_LEN>(i_train_mode);
+
+    // All other bits will be left at their default values
+    FAPI_TRY( fapi2::putScom(i_target, EXPLR_DLX_DL0_CONFIG0, l_config0),
+              "Error writing EXPLR_DLX_DL0_CONFIG0 on %s", mss::c_str(i_target));
+
+fapi_try_exit:
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
 namespace train
 {
 

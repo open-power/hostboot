@@ -9007,4 +9007,22 @@
       </chip>
     </chipEcFeature>
   </attribute>
+
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_OMI_DL_X4_BACKOFF_ENABLE</id>
+    <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    <description>
+      The DL half width backoff enable bit in DL_CONFIG0_CFG (bit 47)
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_EXPLORER</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
 </attributes>

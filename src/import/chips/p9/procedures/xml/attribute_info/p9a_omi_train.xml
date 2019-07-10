@@ -35,6 +35,7 @@
 <!-- -->
 
 <attributes>
+
      <attribute>
         <id>ATTR_OMI_DL_LN_REV_ENABLE</id>
         <targetType>TARGET_TYPE_OMI</targetType>
@@ -49,34 +50,6 @@
         <default>0x01</default>
         <platInit/>
         <mssAccessorName>omi_dl_ln_rev_enable</mssAccessorName>
-    </attribute>
-
-     <attribute>
-        <id>ATTR_OMI_DL_X4_BACKOFF_ENABLE</id>
-        <targetType>TARGET_TYPE_OMI</targetType>
-        <description>
-            The DL half width backoff enable bit in DL_CONFIG0_CFG (bit 47)
-        </description>
-        <valueType>uint8</valueType>
-        <enum>
-           ENABLED  = 0x01,
-           DISABLED = 0x00
-        </enum>
-        <default>0x01</default>
-        <platInit/>
-        <mssAccessorName>omi_dl_x4_backoff_enable</mssAccessorName>
-    </attribute>
-
-     <attribute>
-        <id>ATTR_OMI_DL_PREIPL_PRBS_TIME</id>
-        <targetType>TARGET_TYPE_OMI</targetType>
-        <description>
-            The time to send pre-ipl PRBS in ms.
-        </description>
-        <valueType>uint32</valueType>
-        <default>0x100</default>
-        <platInit/>
-        <mssAccessorName>omi_dl_preipl_prbs_time</mssAccessorName>
     </attribute>
 
 </attributes>

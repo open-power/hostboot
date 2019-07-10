@@ -202,6 +202,20 @@ inline fapi2::ReturnCode write_dlx_config1( const fapi2::Target<fapi2::TARGET_TY
     return fapi2::putScom(i_target, EXPLR_DLX_DL0_CONFIG1, i_data);
 }
 
+///
+/// @brief Set the OMI_DL0 configuration register for a given mode
+///
+/// @param[in] i_target OCMB target
+/// @param[in] i_train_mode mode to use
+/// @param[in] i_dl_x4_backoff_en backoff enable bit
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+/// @note Algorithm from p9a_omi_train.C
+///
+fapi2::ReturnCode setup_omi_dl0_config0(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const uint8_t i_train_mode,
+    const uint8_t i_dl_x4_backoff_en);
+
 namespace train
 {
 
@@ -213,7 +227,6 @@ namespace train
 ///
 fapi2::ReturnCode setup_fw_boot_config( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                         std::vector<uint8_t>& o_data );
-
 } // ns train
 
 } // ns omi

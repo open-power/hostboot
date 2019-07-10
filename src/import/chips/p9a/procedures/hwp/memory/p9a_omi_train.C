@@ -47,6 +47,7 @@
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <lib/mc/omi.H>
+#include <lib/workarounds/p9a_omi_workarounds.H>
 #include <generic/memory/mss_git_data_helper.H>
 
 
@@ -61,35 +62,45 @@ fapi2::ReturnCode p9a_omi_train( const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_
 
     FAPI_INF("%s Start p9a_omi_train", mss::c_str(i_target));
 
-    const auto l_mc = mss::find_target<fapi2::TARGET_TYPE_MC>(i_target);
-    uint32_t l_prbs_time;
-    uint64_t PRBS_TIME;
-    uint8_t l_sim = 0;
+    const auto& l_mc = mss::find_target<fapi2::TARGET_TYPE_MC>(i_target);
+    const auto& l_ocmbs = mss::find_targets<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
 
-    FAPI_TRY( mss::attr::get_is_simulation( l_sim) );
+    FAPI_TRY(mss::mc::setup_mc_mcn_config(l_mc));
+    FAPI_TRY(mss::mc::setup_mc_config1(i_target));
+    FAPI_TRY(mss::mc::setup_mc_cya_bits(i_target));
+    FAPI_TRY(mss::mc::setup_mc_error_action(i_target));
+    FAPI_TRY(mss::mc::setup_mc_rmt_config(i_target));
 
-    FAPI_TRY(mss::attr::get_omi_dl_preipl_prbs_time(i_target, l_prbs_time),
-             "Error from FAPI_ATTR_GET (ATTR_OMI_DL_PREIPL_PRBS_TIME)");
-    PRBS_TIME = l_prbs_time * mss::common_timings::DELAY_1MS;
+    if(l_ocmbs.empty())
+    {
+        // No ocmbs, no training needed
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
 
-    FAPI_TRY(mss::mc::setup_mc_mcn_config_helper(l_mc));
-    FAPI_TRY(mss::mc::setup_mc_config1_helper(i_target));
-    FAPI_TRY(mss::mc::setup_mc_cya_bits_helper(i_target));
-    FAPI_TRY(mss::mc::setup_mc_error_action_helper(i_target));
-    FAPI_TRY(mss::mc::setup_mc_rmt_config_helper(i_target));
+    {
+        // Only one OCMB per OMI for axone
+        const auto& l_ocmb = l_ocmbs[0];
+        const auto& l_proc = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(l_ocmb);
+        uint8_t l_dl_x4_backoff_en = 0;
+        bool l_workaround_required = false;
 
-    // *_CONFIG0 should be the last one written, since it starts the training.
-    // We are not using the pre-ipl PRBS auto training mode because it doesn't function properly in Axone
-    // Enable training state 6 to send TS3
-    FAPI_TRY(mss::mc::setup_mc_config0_helper(i_target, mss::mc::train_mode::TX_TRAINING_STATE3));
-    // Set configurable delay based on the PRBS ATTR and SIM mode
-    FAPI_TRY(fapi2::delay(PRBS_TIME, mss::common_timings::DELAY_1US));
-    FAPI_DBG("OMI Training Pre-ipl PRBS Time = %dns",
-             (l_sim ? mss::common_timings::DELAY_1US : PRBS_TIME));
-    // Enable training state 1 to send Pattern A
-    FAPI_TRY(mss::mc::setup_mc_config0_helper(i_target, mss::mc::train_mode::TX_PATTERN_A));
-    // Enable training state 8 for auto training
-    FAPI_TRY(mss::mc::setup_mc_config0_helper(i_target, mss::mc::train_mode::ENABLE_AUTO_TRAINING));
+        // Get BACKOFF_ENABLE CHIP_EC attribute
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_OMI_DL_X4_BACKOFF_ENABLE, l_ocmb, l_dl_x4_backoff_en),
+                 "Error getting ATTR_CHIP_EC_FEATURE_OMI_DL_X4_BACKOFF_ENABLE");
+
+        // Determine if workaround will be performed, if so, perform it
+        FAPI_TRY(mss::workarounds::mc::is_prbs_omi_required(l_ocmb, l_proc, l_workaround_required));
+
+        if (l_workaround_required)
+        {
+            FAPI_TRY(mss::workarounds::mc::prbs_omi(i_target, l_dl_x4_backoff_en));
+        }
+
+        // Enable auto training
+        FAPI_TRY(mss::mc::setup_mc_config0(i_target, mss::omi::train_mode::ENABLE_AUTO_TRAINING, l_dl_x4_backoff_en));
+
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
