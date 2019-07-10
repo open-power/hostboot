@@ -22,3 +22,56 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file exp_omi_workarounds.H
+/// @brief Workarounds for exp_omi_* procedures
+///
+// *HWP HWP Owner: Mark Pizzutillo <Mark.Pizzutillo@ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: Memory
+
+#ifndef EXP_OMI_WORKAROUNDS_H_
+#define EXP_OMI_WORKAROUNDS_H_
+
+#include <fapi2.H>
+
+namespace mss
+{
+namespace exp
+{
+namespace workarounds
+{
+namespace omi
+{
+
+///
+/// @brief Determine if OCMB PRBS workaround needs to be performed
+///
+/// @param[in] i_ocmb_chip OCMB target
+/// @param[out] o_required workaround needs to be performed
+/// @return FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode is_prbs_ocmb_required(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> i_ocmb_chip,
+    bool& o_required);
+
+///
+/// @brief Performs OCMB PRBS workaround
+///
+/// @param[in] i_ocmb_chip OCMB chip
+/// @param[in] i_dl_x4_backoff_en backoff enable
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode prbs_ocmb(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> i_ocmb_chip,
+    const uint8_t i_dl_x4_backoff_en);
+
+} // omi
+} // workarounds
+} // exp
+} // mss
+
+#endif
