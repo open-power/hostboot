@@ -26,6 +26,7 @@ ROOTPATH = ../../../..
 MODULE = istep14
 
 PROCEDURE_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
+AXONE_PROCEDURE_PATH = ${ROOTPATH}/src/import/chips/p9a/procedures
 CEN_PROC_PATH = ${ROOTPATH}/src/import/chips/centaur/procedures
 EXP_COMMON_PATH = ${ROOTPATH}/src/import/chips/ocmb/explorer/common
 
@@ -51,6 +52,7 @@ EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/lib/dimm/ddr4/
 EXTRAINCDIR += ${EXP_COMMON_PATH}/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils
+EXTRAINCDIR += ${AXONE_PROCEDURE_PATH}/hwp/memory/
 
 OBJS += call_mss_memdiag.o
 OBJS += call_mss_thermal_init.o
@@ -93,14 +95,19 @@ OBJS += p9_revert_sbe_mcs_setup.o
 # include ${PROCEDURE_PATH}/hwp/memory/p9_mss_thermal_init.mk
 # include ${CEN_PROC_PATH}/hwp/memory/p9c_mss_thermal_init.mk
 # include ${CEN_PROC_PATH}/hwp/memory/p9c_mss_unmask_errors.mk
-include ${PROCEDURE_PATH}/hwp/nest/p9_throttle_sync.mk
-include ${PROCEDURE_PATH}/hwp/memory/p9_mss_power_cleanup.mk
-include ${ROOTPATH}/config.mk
 
-VPATH    += ${PROCEDURE_PATH}/hwp/nest/ ${PROCEDURE_PATH}/hwp/memory/
+include ${PROCEDURE_PATH}/hwp/memory/p9_mss_power_cleanup.mk
+
+VPATH    += ${PROCEDURE_PATH}/hwp/nest/
+VPATH    += ${PROCEDURE_PATH}/hwp/memory/
 VPATH    += ${PROCEDURE_PATH}/hwp/memory/lib/eff_config/
 VPATH    += ${PROCEDURE_PATH}/hwp/memory/lib/utils/
 VPATH    += ${PROCEDURE_PATH}/hwp/memory/lib/mcbist/
 VPATH    += ${PROCEDURE_PATH}/hwp/memory/lib/dimm/
 VPATH    += ${CEN_PROC_PATH}/hwp/memory/
 VPATH    += ${PROCEDURE_PATH}/hwp/memory/lib/dimm/ddr4/
+
+# Axone vs non-Axone specific HWP
+OBJS += $(if $(CONFIG_AXONE),p9a_throttle_sync.o,p9_throttle_sync.o)
+
+include ${ROOTPATH}/config.mk

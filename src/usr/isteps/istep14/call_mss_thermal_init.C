@@ -37,13 +37,15 @@
 #include    <config.h>
 #include    <fapi2.H>
 #include    <fapi2/plat_hwp_invoker.H>
-#include    <p9c_mss_thermal_init.H>
-#include    <p9_mss_thermal_init.H>
-#include    <p9_throttle_sync.H>
 
 #ifdef CONFIG_AXONE
     //@TODO RTC:195557 #include    <exp_thermal_init.H>
     #include    <chipids.H> // for EXPLORER ID
+    #include    <p9a_throttle_sync.H>
+#else
+    #include    <p9c_mss_thermal_init.H>
+    #include    <p9_mss_thermal_init.H>
+    #include    <p9_throttle_sync.H>
 #endif
 
 using   namespace   ISTEP;
@@ -81,6 +83,7 @@ void* call_mss_thermal_init (void *io_pArgs)
             break;
     }
 
+    // This should run whether or not mss_thermal_init worked
     run_proc_throttle_sync(l_StepError);
 
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_thermal_init exit");
@@ -276,6 +279,7 @@ void axone_call_mss_thermal_init(IStepError & io_istepError)
 }
 #endif
 
+
 void run_proc_throttle_sync(IStepError & io_istepError)
 {
     errlHndl_t  l_errl  =   nullptr;
@@ -293,12 +297,18 @@ void run_proc_throttle_sync(IStepError & io_istepError)
         fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                                            l_fapi2CpuTarget((l_procChip));
 
+        // Call p9_throttle_sync
+#ifndef CONFIG_AXONE
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "Running p9_throttle_sync HWP on target HUID %.8X",
                    TARGETING::get_huid(l_procChip) );
-
-        // Call p9_throttle_sync
         FAPI_INVOKE_HWP( l_errl, p9_throttle_sync, l_fapi2CpuTarget );
+#else
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "Running p9a_throttle_sync HWP on target HUID %.8X",
+                   TARGETING::get_huid(l_procChip) );
+        FAPI_INVOKE_HWP( l_errl, p9a_throttle_sync, l_fapi2CpuTarget );
+#endif
 
         if (l_errl)
         {
@@ -321,7 +331,7 @@ void run_proc_throttle_sync(IStepError & io_istepError)
         else
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "SUCCESS :  p9_throttle_sync HWP( ) on 0x%.8X processor",
+                       "SUCCESS : p9_throttle_sync HWP on 0x%.8X processor",
                        TARGETING::get_huid(l_procChip) );
         }
     }
