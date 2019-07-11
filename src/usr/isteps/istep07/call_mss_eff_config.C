@@ -180,13 +180,13 @@ void*    call_mss_eff_config( void *io_pArgs )
 {
     IStepError l_StepError;
     errlHndl_t l_err = nullptr;
-#ifdef CONFIG_SECUREBOOT
+#if (defined CONFIG_SECUREBOOT && ! defined CONFIG_AXONE)
     auto memdLoaded = false;
 #endif
 
     do {
 
-    #ifdef CONFIG_SECUREBOOT
+    #if (defined CONFIG_SECUREBOOT && ! defined CONFIG_AXONE)
     // MEMD used by p9_mss_eff_config HWP
     l_err = loadSecureSection(PNOR::MEMD);
     if (l_err)
@@ -577,7 +577,7 @@ void*    call_mss_eff_config( void *io_pArgs )
 
     } while (0);
 
-    #ifdef CONFIG_SECUREBOOT
+    #if (defined CONFIG_SECUREBOOT && ! defined CONFIG_AXONE)
     if(memdLoaded)
     {
         l_err = unloadSecureSection(PNOR::MEMD);

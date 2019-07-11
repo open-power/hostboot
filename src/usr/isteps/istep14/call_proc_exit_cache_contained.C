@@ -81,7 +81,7 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
                "call_proc_exit_cache_contained entry" );
     errlHndl_t  l_errl = nullptr;
 
-#ifdef CONFIG_SECUREBOOT
+#if (defined CONFIG_SECUREBOOT && ! defined CONFIG_AXONE)
     if(SECUREBOOT::enabled())
     {
         SECUREBOOT::CENTAUR_SECURITY::ScomCache& centaurCache =
@@ -537,7 +537,7 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
         errlCommit( l_errl, HWPF_COMP_ID );
     }
 
-#ifdef CONFIG_SECUREBOOT
+#if (defined CONFIG_SECUREBOOT && ! defined CONFIG_AXONE)
     // Unload the MEMD section that was loaded at the beginning of step11
     l_errl = unloadSecureSection(PNOR::MEMD);
     if (l_errl)

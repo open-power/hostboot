@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -732,7 +732,7 @@ class DVPDTest: public CxxTest::TestSuite
         DVPDTest() : CxxTest::TestSuite()
         {
             TRACFCOMP( g_trac_vpd, "Starting DVPDTest" );
-#ifdef CONFIG_SECUREBOOT
+#if (defined CONFIG_SECUREBOOT && ! defined CONFIG_AXONE)
 #ifndef __HOSTBOOT_RUNTIME
             errlHndl_t l_err = loadSecureSection(PNOR::MEMD);
             if(l_err)
@@ -746,7 +746,7 @@ class DVPDTest: public CxxTest::TestSuite
 
         ~DVPDTest()
         {
-#ifdef CONFIG_SECUREBOOT
+#if (defined CONFIG_SECUREBOOT && ! defined CONFIG_AXONE)
 #ifndef __HOSTBOOT_RUNTIME
             errlHndl_t l_err = unloadSecureSection(PNOR::MEMD);
             TRACFCOMP( g_trac_vpd, "Ending DVPDTest" );
