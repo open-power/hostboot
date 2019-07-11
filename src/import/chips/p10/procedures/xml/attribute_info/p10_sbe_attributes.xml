@@ -369,6 +369,14 @@
       <value>0x0</value>
  </entry>
  <entry>
+      <name>ATTR_PROC_SBE_MCS_SETUP_REG_STATES</name>
+      <value>0x0</value>
+ </entry>
+ <entry>
+      <name>ATTR_PROC_SBE_MCS_SETUP_SELECTED_MC</name>
+      <value>0x0</value>
+ </entry>
+ <entry>
       <name>ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE</name>
       <!-- Initialize all 32 entries to 0xff (INVALID) -->
       <value>0xff</value> <!-- 00 -->
