@@ -127,4 +127,10 @@ fapi2::ReturnCode p10_perv_sbe_cmn_eqs_with_good_cores(
 fapi2::ReturnCode p10_perv_sbe_cmn_align_chiplets(const
         fapi2::Target < fapi2::TARGET_TYPE_PERV | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_COMPARE > & i_mcast_target);
 
+/// @brief Enable Drivers/Recievers for a pervasive target
+///
+/// @param[in]     i_target  Reference to TARGET_TYPE_PERV target
+/// @return  FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p10_enable_ridi(const fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target);
+
 #endif
