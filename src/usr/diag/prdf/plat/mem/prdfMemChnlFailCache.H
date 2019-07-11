@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/plat/cen/prdfCenChnlFailCache.H $           */
+/* $Source: src/usr/diag/prdf/plat/mem/prdfMemChnlFailCache.H $           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,8 +25,8 @@
 #include <map>
 #include <targeting/common/targetservice.H>
 
-#ifndef __prdfCenChnlFailCache_H
-#define __prdfCenChnlFailCache_H
+#ifndef __prdfMemChnlFailCache_H
+#define __prdfMemChnlFailCache_H
 
 namespace PRDF
 {
@@ -142,4 +142,4 @@ TargetScoms_t chnlFailScomList =
 
 } // namespace PRDF
 
-#endif // __prdfCenChnlFailCache_H
+#endif // __prdfMemChnlFailCache_H

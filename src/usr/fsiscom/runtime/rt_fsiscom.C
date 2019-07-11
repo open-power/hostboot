@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,7 +34,7 @@
 
 #include <runtime/hbrt_utilities.H>        // createGenericFspMsg
 #include <util/runtime/rt_fwreq_helper.H>  // firmware_request_helper
-#include <plat/cen/prdfCenChnlFailCache.H> // chnlFailScomList
+#include <plat/mem/prdfMemChnlFailCache.H> // chnlFailScomList
 
 #include <map>
 
@@ -441,7 +441,7 @@ void switchToFspScomAccess(TARGETING::TargetHandle_t i_target)
         // Cache SCOMs that PRD will request.  chnlFailScomList is a map of
         // target types (MEMBUF, MBA, etc) and the associated SCOMs for them.
         // chnlFailScomList is maintained by PRD and defined in
-        // prdfCenChnlFailCache.H.
+        // prdfMemChnlFailCache.H.
         for (auto& l_typeScoms: PRDF::chnlFailScomList)
         {
             // For each target type in chnlFailScomList, find the associated
