@@ -286,7 +286,6 @@
   <enum> CORE_UNFUSED = 0x0, CORE_FUSED = 0x1 </enum>
   <platInit/>
   <default>CORE_UNFUSED</default>
-  <writeable/>   <!-- temp -->
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
