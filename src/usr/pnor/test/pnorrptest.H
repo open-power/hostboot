@@ -89,11 +89,13 @@ class PnorRpTest : public CxxTest::TestSuite
                 continue;
             }
 
-            if(( testSections[idx] == PNOR::DIMM_JEDEC_VPD ) &&
+            if(( testSections[idx] == PNOR::DIMM_JEDEC_VPD ||
+                 testSections[idx] == PNOR::MODULE_VPD) &&
                ( TARGETING::MODEL_AXONE ==
                  TARGETING::targetService().getProcessorModel() ))
             {
-                TRACFCOMP(g_trac_pnor, "PnorRpTest::test_sectionInfo> Skipping non-existent DIMM_JEDEC_VPD section for Axone");
+                TRACFCOMP(g_trac_pnor, "PnorRpTest::test_sectionInfo> "
+                          "Skipping non-existent MODULE_VPD and DIMM_JEDEC_VPD section for Axone");
                 continue;
             }
 

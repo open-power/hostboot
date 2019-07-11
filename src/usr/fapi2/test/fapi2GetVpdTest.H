@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,7 +46,7 @@ public:
 
 void testGetVPD(void)
 {
-#ifdef CONFIG_SECUREBOOT
+#if (defined CONFIG_SECUREBOOT && ! defined CONFIG_AXONE)
     errlHndl_t pError=NULL;
     do
     {
@@ -71,7 +71,7 @@ void testGetVPD(void)
         testGetVPD_DQ();
 
         testGetVPD_CK();
-#ifdef CONFIG_SECUREBOOT
+#if (defined CONFIG_SECUREBOOT && ! defined CONFIG_AXONE)
         pError = PNOR::unloadSecureSection(PNOR::MEMD);
         if(pError)
         {

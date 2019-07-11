@@ -82,7 +82,7 @@ void*    call_mss_freq( void *io_pArgs )
     IStepError l_StepError;
     errlHndl_t l_err = NULL;
 
-    #ifdef CONFIG_SECUREBOOT
+    #if (defined CONFIG_SECUREBOOT && ! defined CONFIG_AXONE)
     bool l_isMemdLoaded = false;
     #endif
 
@@ -90,7 +90,7 @@ void*    call_mss_freq( void *io_pArgs )
 
     do
     {
-        #ifdef CONFIG_SECUREBOOT
+        #if (defined CONFIG_SECUREBOOT && ! defined CONFIG_AXONE)
         // Load MEMD so that vpd_supported_freqs can use it.
         l_err = loadSecureSection(PNOR::MEMD);
         if (l_err)
@@ -365,7 +365,7 @@ void*    call_mss_freq( void *io_pArgs )
 
     } while(0);
 
-    #ifdef CONFIG_SECUREBOOT
+    #if (defined CONFIG_SECUREBOOT && ! defined CONFIG_AXONE)
     if(l_isMemdLoaded)
     {
         // Should not have any uncommitted errors at this point.

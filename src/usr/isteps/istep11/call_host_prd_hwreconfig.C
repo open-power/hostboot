@@ -40,7 +40,7 @@ void* call_host_prd_hwreconfig (void *io_pArgs)
     ISTEP_ERROR::IStepError l_StepError;
     //@TODO-RTC:158411 call p9_enable_reconfig.C
 
-#ifdef CONFIG_SECUREBOOT
+#if (defined CONFIG_SECUREBOOT && ! defined CONFIG_AXONE)
     errlHndl_t l_err = NULL;
     // Load the MEMD section here as the first part of step11, it
     //  will stay loaded until the end of step14

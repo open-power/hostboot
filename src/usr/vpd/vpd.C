@@ -1251,14 +1251,16 @@ void getListOfOverrideSections( OverrideRsvMemMap_t& o_overrides )
         delete l_elog;
         return;
     }
+    else
+    {
+        // Add MEMD section
+        OverrideSpecifier_t l_memd = {
+            PNOR::MEMD,
+            l_memd_info.size
+        };
 
-    // Add MEMD section
-    OverrideSpecifier_t l_memd = {
-        PNOR::MEMD,
-        l_memd_info.size
-    };
-
-    o_overrides[0x4D454D44/*MEMD*/] = l_memd;
+        o_overrides[0x4D454D44/*MEMD*/] = l_memd;
+    }
 }
 
 }; //end VPD namespace
