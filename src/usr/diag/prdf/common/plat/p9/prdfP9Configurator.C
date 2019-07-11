@@ -272,6 +272,11 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
         #ifdef __HOSTBOOT_MODULE
         { POWER_CHIPID::EXPLORER_16, { { TYPE_OCMB_CHIP, explorer_ocmb }, } },
         #endif
+        // OCMB is not supported on FSP, however we need support here for the
+        // MODEL_OCMB model for our simulator to work.
+        #ifdef ESW_SIM_COMPILE
+        { MODEL_OCMB, { { TYPE_OCMB_CHIP, explorer_ocmb }, } },
+        #endif
     };
 
     // Get references to factory objects.
