@@ -117,10 +117,9 @@ uint32_t mssRestoreDramRepairs<TYPE_OCMB_CHIP>( TargetHandle_t i_target,
                                                 uint8_t & o_badDimmMask )
 {
     uint32_t o_rc = SUCCESS;
+    /* TODO RTC 247259
 
-    /* TODO RTC 199032 - no HWP support yet
     errlHndl_t errl = NULL;
-
 
     fapi2::buffer<uint8_t> tmpRepairedRankMask, tmpBadDimmMask;
     FAPI_INVOKE_HWP( errl, mss::restore_repairs,
@@ -139,7 +138,6 @@ uint32_t mssRestoreDramRepairs<TYPE_OCMB_CHIP>( TargetHandle_t i_target,
     o_repairedRankMask = (uint8_t)tmpRepairedRankMask;
     o_badDimmMask = (uint8_t)tmpBadDimmMask;
     */
-
     return o_rc;
 }
 
