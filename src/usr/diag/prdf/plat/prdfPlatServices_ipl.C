@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -218,7 +218,6 @@ uint32_t mssRestoreDramRepairs<TYPE_OCMB_CHIP>( TargetHandle_t i_target,
 {
     uint32_t o_rc = SUCCESS;
 
-    /* TODO RTC 199032 - no HWP support yet
     errlHndl_t errl = NULL;
 
 
@@ -238,7 +237,6 @@ uint32_t mssRestoreDramRepairs<TYPE_OCMB_CHIP>( TargetHandle_t i_target,
 
     o_repairedRankMask = (uint8_t)tmpRepairedRankMask;
     o_badDimmMask = (uint8_t)tmpBadDimmMask;
-    */
 
     return o_rc;
 }

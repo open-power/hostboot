@@ -1017,9 +1017,7 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
                 // OCMB target
                 else if ( TYPE_OCMB_CHIP == trgtType )
                 {
-                    /* TODO RTC 199034 - uncomment for restoreDramRepairs
                     rc = PRDF::restoreDramRepairs<TYPE_OCMB_CHIP>( target );
-                    */
                 }
                 else
                 {
