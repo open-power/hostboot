@@ -580,6 +580,7 @@ TargetService::ASSOCIATION_TYPE getAssociationType( TargetHandle_t i_target,
         { TYPE_MC,     TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
         { TYPE_MC,     TYPE_MI,         TargetService::CHILD_BY_AFFINITY  },
         { TYPE_MC,     TYPE_OMIC,       TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_MC,     TYPE_MCC,        TargetService::CHILD_BY_AFFINITY  },
         { TYPE_MC,     TYPE_DMI,        TargetService::CHILD_BY_AFFINITY  },
         { TYPE_MC,     TYPE_DIMM,       TargetService::CHILD_BY_AFFINITY  },
 
@@ -593,6 +594,7 @@ TargetService::ASSOCIATION_TYPE getAssociationType( TargetHandle_t i_target,
         { TYPE_OMIC,   TYPE_OMI,        TargetService::CHILD_BY_AFFINITY  },
 
         { TYPE_MCC,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
+        { TYPE_MCC,    TYPE_MC,         TargetService::PARENT_BY_AFFINITY },
         { TYPE_MCC,    TYPE_MI,         TargetService::PARENT_BY_AFFINITY },
         { TYPE_MCC,    TYPE_OMI,        TargetService::CHILD_BY_AFFINITY  },
         { TYPE_MCC,    TYPE_OCMB_CHIP,  TargetService::CHILD_BY_AFFINITY  },
@@ -880,6 +882,17 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
                         uint32_t miPos = getTargetPosition(t);
                         return (trgtPos   == (miPos / MAX_MI_PER_MC)) &&
                                (i_connPos == (miPos % MAX_MI_PER_MC));
+                    } );
+        }
+        else if ( TYPE_MC == trgtType && TYPE_MCC == i_connType )
+        {
+            // i_connPos is position relative to MC (0-3)
+            itr = std::find_if( list.begin(), list.end(),
+                    [&](const TargetHandle_t & t)
+                    {
+                        uint32_t mccPos = getTargetPosition(t);
+                        return (trgtPos   == (mccPos / MAX_MCC_PER_MC)) &&
+                               (i_connPos == (mccPos % MAX_MCC_PER_MC));
                     } );
         }
         else if ( TYPE_MC == trgtType && TYPE_DMI == i_connType )
