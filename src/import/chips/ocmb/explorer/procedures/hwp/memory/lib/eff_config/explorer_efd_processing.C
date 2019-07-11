@@ -43,6 +43,7 @@
 #include <mss_explorer_attribute_getters.H>
 #include <mss_explorer_attribute_setters.H>
 #include <lib/eff_config/explorer_efd_processing.H>
+#include <generic/memory/lib/mss_generic_attribute_setters.H>
 
 namespace mss
 {

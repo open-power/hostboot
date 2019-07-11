@@ -327,9 +327,10 @@ inline fapi2::ReturnCode get_field( const fapi2::Target<T>& i_target,
                                            typename TT::template COMPARISON_OP<IT>() ),
                                    F.get_byte(i_data),
                                    l_temp,
-                                   i_ffdc_codes),
-              "Failed fail_for_invalid_value() for " TARGIDFORMAT, TARGTID );
-
+                                   i_ffdc_codes,
+                                   TT::FIELD_STR),
+              "%s failed check::invalid_value() for %s",
+              TT::FIELD_STR, spd::c_str(i_target) );
 
     // Output should only change if data check passes
     o_value = static_cast<OT>(l_temp);

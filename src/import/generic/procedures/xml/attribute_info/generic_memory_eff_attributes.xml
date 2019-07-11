@@ -625,7 +625,8 @@
     <description>
       ARRAY[DIMM]
       DRAM Manufacturer ID Code
-      Decodes SPD Byte 350 and 351
+      Decodes SPD Byte 350 and 351 for ISDIMMs
+      Decodes SPD Byte 552 and 553 for DDIMMs
     </description>
     <enum>MICRON = 0x802C, SAMSUNG = 0x80CE, HYNIX = 0x80AD </enum>
     <initToZero></initToZero>

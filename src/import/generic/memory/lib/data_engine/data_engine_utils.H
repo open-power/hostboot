@@ -37,14 +37,106 @@
 #define _MSS_DATA_ENGINE_UTILS_H_
 
 #include <fapi2.H>
+#include <generic/memory/lib/data_engine/data_engine_traits_def.H>
 #include <generic/memory/lib/utils/index.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/pos.H>
 #include <generic/memory/lib/spd/ddimm/efd_decoder.H>
+#include <generic/memory/lib/spd/spd_utils.H>
 #include <generic/memory/lib/spd/spd_facade.H>
+#include <generic/memory/lib/mss_generic_attribute_getters.H>
+#include <generic/memory/lib/utils/conversions.H>
 
 namespace mss
 {
+
+///
+/// @brief Alias for function pointer to spd_facade timing methods
+///
+using spd_facade_fptr = fapi2::ReturnCode (spd::facade::*)(int64_t& o_timing_in_mtb) const;
+
+///
+/// @brief Algorithm to calculate SPD timings in nCK
+/// @tparam ET SPD fields enumeration (e.g. attr_eff_engine_fields)
+/// @tparam F SPD field
+/// @tparam OT output type
+/// @tparam TT defaulted to setTimingTraits<ET, F>
+/// @param[in] i_spd the SPD data
+/// @param[out] o_timing_in_ps SPD timing value in picoseconds
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template < typename ET,
+           ET F,
+           typename OT,
+           typename TT = setTimingTraits<ET, F> >
+inline fapi2::ReturnCode calc_spd_time_in_ps(const spd::facade& i_spd,
+        OT& o_timing_in_ps)
+{
+    const auto l_dimm = i_spd.get_dimm_target();
+    int64_t l_timing_mtb = 0;
+    int64_t l_timing_ftb = 0;
+    int64_t l_mtb = 0;
+    int64_t l_ftb = 0;
+
+    FAPI_TRY( spd::get_timebases(i_spd, l_mtb, l_ftb) );
+
+    FAPI_TRY( (i_spd.*TT::get_timing_in_mtb)(l_timing_mtb),
+              "Failed to get % (in MTB) for %s", TT::TIMING_NAME,  spd::c_str(l_dimm) );
+    FAPI_TRY( (i_spd.*TT::get_timing_in_ftb)(l_timing_ftb),
+              "Failed to get %s (in FTB) for %s", TT::TIMING_NAME, spd::c_str(l_dimm) );
+
+    FAPI_DBG("%s medium timebase (ps): %ld, fine timebase (ps): %ld, %s (MTB): %ld, (FTB): %ld",
+             spd::c_str(l_dimm), l_mtb, l_ftb, TT::TIMING_NAME, l_timing_mtb, l_timing_ftb );
+
+    o_timing_in_ps = spd::calc_timing_from_timebase(l_timing_mtb, l_mtb, l_timing_ftb, l_ftb);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Algorithm to calculate SPD timings in nCK
+/// @tparam ET SPD fields enumeration (e.g. attr_eff_engine_fields)
+/// @tparam F SPD field
+/// @tparam OT output type
+/// @tparam TT defaulted to setTimingTraits<ET, F>
+/// @param[in] i_spd the SPD data
+/// @param[out] o_timing_in_ps SPD timing value in number of clocks (nCK)
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template < typename ET,
+           ET F,
+           typename OT,
+           typename TT = setTimingTraits<ET, F> >
+inline fapi2::ReturnCode calc_spd_time_in_nck(const spd::facade& i_spd,
+        OT& o_timing_in_nck)
+{
+    const auto l_dimm = i_spd.get_dimm_target();
+
+    // Calculate the DIMM speed in picoseconds (a.k.a tCK == clock period)
+    int64_t l_tck_in_ps = 0;
+    uint64_t l_freq = 0;
+    FAPI_TRY( attr::get_freq(mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(l_dimm), l_freq) );
+    FAPI_TRY( freq_to_ps(l_freq, l_tck_in_ps),
+              "Failed to calculate clock period (tCK) for %s", spd::c_str(l_dimm) );
+
+    {
+        // Calculate the desired timing in ps
+        int64_t l_timing_in_ps = 0;
+        FAPI_TRY( (calc_spd_time_in_ps<ET, F>(i_spd, l_timing_in_ps)) );
+
+        // Calculate nck
+        FAPI_TRY( spd::calc_nck(l_timing_in_ps, l_tck_in_ps, spd::INVERSE_DDR4_CORRECTION_FACTOR, o_timing_in_nck),
+                  "Error in calculating %s (nCK) for target %s, with value of %d",
+                  TT::TIMING_NAME, spd::c_str(l_dimm), l_timing_in_ps );
+
+        FAPI_INF("tCK (ps): %d, %s (ps): %d, %s (nck): %d",
+                 l_tck_in_ps, TT::TIMING_NAME, l_timing_in_ps, TT::TIMING_NAME, o_timing_in_nck);
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 // Controller agnostic functions
 
@@ -361,92 +453,6 @@ inline fapi2::ReturnCode set_field(const DT& i_data,
 fapi_try_exit:
     return fapi2::current_err;
 }
-
-///
-/// @brief Template recursive algorithm for setting attrs
-/// @class attr_engine - partial specialization when F != 0
-/// @tparam P processor type
-/// @tparam ET enum type - conceptually a list of attrs to set
-/// @tparam F enum value - the specific attr value from ET to set
-/// @tparam TT associated traits for attr_engine
-///
-template < proc_type P, typename ET, ET F, typename TT >
-struct attr_engine<P, ET, F, TT, false>
-{
-    ///
-    /// @brief Sets attributes fields F in ET
-    /// @tparam IT the input type
-    /// @param[in] i_input input (efd_decoder, spd_facade, fapi2 target)
-    /// @return FAPI2_RC_SUCCESS iff ok
-    ///
-    template < typename IT >
-    static fapi2::ReturnCode single_set(const IT& i_input)
-    {
-        typename TT::attr_integral_type l_value = 0;
-
-        FAPI_TRY( TT::get_value_to_set(i_input, l_value),
-                  "Failed get_value_to_set() for proc_type: %d and enum val: %d", P, F);
-
-        FAPI_TRY( set_field<TT>(i_input, l_value),
-                  "Failed set_field() for proc_type: %d and enum val: %d", P, F);
-
-    fapi_try_exit:
-        return fapi2::current_err;
-    }
-
-    ///
-    /// @brief Sets attributes fields F in ET
-    /// @tparam IT the input type
-    /// @param[in] i_input input (efd_decoder, spd_facade, fapi2 target)
-    /// @return FAPI2_RC_SUCCESS iff ok
-    ///
-    template < typename IT >
-    static fapi2::ReturnCode set(const IT& i_input)
-    {
-        FAPI_TRY( (attr_engine<P, ET, F, TT, static_cast<size_t>(F) == 0u>::single_set(i_input)),
-                  "Failed attr_engine<P, ET, F>::single_set() for proc_type: %d and enum val: %d", P, F);
-
-        // Compiler isn't smart enough to deduce F - 1u (decrementing the enum values by 1)
-        // Cast needed to help the compiler deduce this value is an ET type
-        // This does the recursive call to unroll a compile-time looping of a enum list of attrs to set
-        // The recursion stops at the base case where NEXT_FLD == 0u
-        {
-            constexpr ET NEXT_FLD = static_cast<ET>( static_cast<size_t>(F) - 1u );
-            using T =  mss::attrEngineTraits<P, ET, NEXT_FLD>;
-
-            FAPI_TRY( (attr_engine <P, ET, NEXT_FLD, T, 0u == static_cast<size_t>(NEXT_FLD)>::set(i_input)),
-                      "Failed (attr_engine <P, ET, NEXT_FLD>::set() for proc_type: %d and enum val: %d", P, F);
-        }
-
-    fapi_try_exit:
-        return fapi2::current_err;
-    }
-};
-
-///
-/// @brief Template recursive algorithm for setting attrs
-/// @class attr_engine - partial specialization where F == 0u
-/// @tparam P processor type
-/// @tparam ET attr fields enum type (conceptually a list of attrs to set)
-/// @tparam F enum value - the specific attr value from ET to set
-/// @tparam TT associated traits for attr_engine
-///
-template < proc_type P, typename ET, ET F, typename TT >
-struct attr_engine< P, ET, F, TT, true >
-{
-    ///
-    /// @brief Sets attributes fields F in ET
-    /// @tparam IT the input type
-    /// @param[in] i_input input (efd_decoder, spd_facade, fapi2 target)
-    /// @return FAPI2_RC_SUCCESS iff ok
-    ///
-    template < typename IT >
-    static fapi2::ReturnCode set(const IT& i_input)
-    {
-        FAPI_DBG("NO-OP: Reached base case (0) of recursive template for proc_type: %d and enum value: %d", P, F);
-        return fapi2::FAPI2_RC_SUCCESS;
-    }
-};
 
 ///
 /// @brief Return a DIMM's position from a fapi2 target

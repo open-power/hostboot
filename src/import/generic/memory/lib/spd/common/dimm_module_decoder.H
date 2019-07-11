@@ -1490,6 +1490,17 @@ class dimm_module_decoder
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
         }
+
+        ///
+        /// @brief Decodes DRAM Manufacturer ID code
+        /// @param[out] o_value dram manufacturing id code
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode dram_manufacturer_id_code( uint16_t& o_value ) const
+        {
+            o_value = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
 };
 
 }// spd

@@ -44,6 +44,8 @@
 #include <generic/memory/lib/spd/spd_facade.H>
 #include <mss_explorer_attribute_getters.H>
 #include <mss_explorer_attribute_setters.H>
+#include <mss_generic_attribute_setters.H>
+#include <mss_generic_attribute_getters.H>
 
 namespace mss
 {

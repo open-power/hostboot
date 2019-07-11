@@ -37,19 +37,159 @@
 #define _MSS_ATTR_ENGINE_TRAITS_H_
 
 #include <fapi2.H>
+#include <generic/memory/lib/spd/spd_facade.H>
 #include <generic/memory/lib/data_engine/data_engine_traits_def.H>
-#include <generic/memory/lib/data_engine/data_engine_utils.H>
+#include <generic/memory/lib/data_engine/data_engine.H>
 #include <generic/memory/lib/mss_generic_attribute_getters.H>
 #include <generic/memory/lib/mss_generic_attribute_setters.H>
 #include <generic/memory/lib/mss_generic_system_attribute_getters.H>
 #include <generic/memory/lib/spd/ddimm/efd_decoder.H>
-#include <generic/memory/lib/spd/spd_facade.H>
 #include <generic/memory/lib/utils/buffer_ops.H>
 #include <generic/memory/lib/utils/dimm/mss_timing.H>
 #include <generic/memory/lib/spd/spd_utils.H>
 
 namespace mss
 {
+
+///
+/// @brief Forward declartion of traits for setTimingTraits
+/// @class setTimingTraits
+/// @note attr_eff_engine_fields, DRAM_TCCD_L
+///
+template< >
+struct setTimingTraits< attr_eff_engine_fields, attr_eff_engine_fields::DRAM_TCCD_L >
+{
+    static constexpr const char* TIMING_NAME = "TCCD_L";
+
+    static constexpr spd_facade_fptr get_timing_in_mtb = &spd::facade::min_tccd_l;
+    static constexpr spd_facade_fptr get_timing_in_ftb = &spd::facade::fine_offset_min_tccd_l;
+};
+
+///
+/// @brief Forward declartion of traits for setTimingTraits
+/// @class setTimingTraits
+/// @note attr_eff_engine_fields, DRAM_TWTR_L
+///
+template< >
+struct setTimingTraits< attr_eff_engine_fields, attr_eff_engine_fields::DRAM_TWTR_L >
+{
+    static constexpr const char* TIMING_NAME = "tWTR_L";
+
+    static constexpr spd_facade_fptr get_timing_in_mtb = &spd::facade::min_twtr_l;
+    static constexpr spd_facade_fptr get_timing_in_ftb = &spd::facade::fine_offset_min_twtr_l;
+};
+
+///
+/// @brief Forward declartion of traits for setTimingTraits
+/// @class setTimingTraits
+/// @note attr_eff_engine_fields, DRAM_TWTR_S
+///
+template< >
+struct setTimingTraits< attr_eff_engine_fields, attr_eff_engine_fields::DRAM_TWTR_S >
+{
+    static constexpr const char* TIMING_NAME = "tWTR_S";
+
+    static constexpr spd_facade_fptr get_timing_in_mtb = &spd::facade::min_twtr_s;
+    static constexpr spd_facade_fptr get_timing_in_ftb = &spd::facade::fine_offset_min_twtr_s;
+};
+
+///
+/// @brief Forward declartion of traits for setTimingTraits
+/// @class setTimingTraits
+/// @note attr_eff_engine_fields, DRAM_TFAW
+///
+template< >
+struct setTimingTraits< attr_eff_engine_fields, attr_eff_engine_fields::DRAM_TFAW >
+{
+    static constexpr const char* TIMING_NAME = "tFAW";
+
+    static constexpr spd_facade_fptr get_timing_in_mtb = &spd::facade::min_tfaw;
+    static constexpr spd_facade_fptr get_timing_in_ftb = &spd::facade::fine_offset_min_tfaw;
+};
+
+///
+/// @brief Forward declartion of traits for setTimingTraits
+/// @class setTimingTraits
+/// @note attr_eff_engine_fields, DRAM_TRCD
+///
+template< >
+struct setTimingTraits< attr_eff_engine_fields, attr_eff_engine_fields::DRAM_TRCD >
+{
+    static constexpr const char* TIMING_NAME = "trcd";
+
+    static constexpr spd_facade_fptr get_timing_in_mtb = &spd::facade::min_trcd;
+    static constexpr spd_facade_fptr get_timing_in_ftb = &spd::facade::fine_offset_min_trcd;
+};
+
+///
+/// @brief Forward declartion of traits for setTimingTraits
+/// @class setTimingTraits
+/// @note attr_eff_engine_fields, DRAM_TRP
+///
+template< >
+struct setTimingTraits< attr_eff_engine_fields, attr_eff_engine_fields::DRAM_TRP >
+{
+    static constexpr const char* TIMING_NAME = "tRP";
+
+    static constexpr spd_facade_fptr get_timing_in_mtb = &spd::facade::min_trp;
+    static constexpr spd_facade_fptr get_timing_in_ftb = &spd::facade::fine_offset_min_trp;
+};
+
+///
+/// @brief Forward declartion of traits for setTimingTraits
+/// @class setTimingTraits
+/// @note attr_eff_engine_fields, DRAM_TRAS
+///
+template< >
+struct setTimingTraits< attr_eff_engine_fields, attr_eff_engine_fields::DRAM_TRAS >
+{
+    static constexpr const char* TIMING_NAME = "tRAS";
+
+    static constexpr spd_facade_fptr get_timing_in_mtb = &spd::facade::min_tras;
+    static constexpr spd_facade_fptr get_timing_in_ftb = &spd::facade::fine_offset_min_tras;
+};
+
+///
+/// @brief Forward declartion of traits for setTimingTraits
+/// @class setTimingTraits
+/// @note attr_eff_engine_fields, DRAM_TWR
+///
+template< >
+struct setTimingTraits< attr_eff_engine_fields, attr_eff_engine_fields::DRAM_TWR >
+{
+    static constexpr const char* TIMING_NAME = "tWR";
+
+    static constexpr spd_facade_fptr get_timing_in_mtb = &spd::facade::min_twr;
+    static constexpr spd_facade_fptr get_timing_in_ftb = &spd::facade::fine_offset_min_twr;
+};
+
+///
+/// @brief Forward declartion of traits for setTimingTraits
+/// @class setTimingTraits
+/// @note attr_eff_engine_fields, DRAM_TRRD_S
+///
+template< >
+struct setTimingTraits< attr_eff_engine_fields, attr_eff_engine_fields::DRAM_TRRD_S >
+{
+    static constexpr const char* TIMING_NAME = "tRRD_S";
+
+    static constexpr spd_facade_fptr get_timing_in_mtb = &spd::facade::min_trrd_s;
+    static constexpr spd_facade_fptr get_timing_in_ftb = &spd::facade::fine_offset_min_trrd_s;
+};
+
+///
+/// @brief Forward declartion of traits for setTimingTraits
+/// @class setTimingTraits
+/// @note attr_eff_engine_fields, DRAM_TRRD_L
+///
+template< >
+struct setTimingTraits< attr_eff_engine_fields, attr_eff_engine_fields::DRAM_TRRD_L >
+{
+    static constexpr const char* TIMING_NAME = "tRRD_L";
+
+    static constexpr spd_facade_fptr get_timing_in_mtb = &spd::facade::min_trrd_l;
+    static constexpr spd_facade_fptr get_timing_in_ftb = &spd::facade::fine_offset_min_trrd_l;
+};
 
 ///
 /// @brief Traits for attr_engine
@@ -2009,7 +2149,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
 
     ///
     /// @brief attribute getter
-    /// @param[in] i_target the attr target
+    /// @param[in] i_target the fapi2 target
     /// @param[out] o_setting array to populate
     /// @return FAPI2_RC_SUCCESS iff okay
     ///
@@ -2021,7 +2161,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
 
     ///
     /// @brief attribute setter
-    /// @param[in] i_target the attr target
+    /// @param[in] i_target the fapi2 target
     /// @param[in] i_setting array to set
     /// @return FAPI2_RC_SUCCESS iff okay
     ///
@@ -2085,6 +2225,62 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
         }
 
         FAPI_DBG("%s DRAM CWL %d", spd::c_str(l_dimm), o_setting);
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+};
+
+///
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @note attr_engine_derived_fields, DRAM_MFG_ID specialization
+///
+template < proc_type P >
+struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_MFG_ID>
+{
+    using attr_type = fapi2::ATTR_MEM_EFF_DRAM_MFG_ID_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_DRAM_MFG_ID_TargetType;
+    static constexpr generic_ffdc_codes FFDC_CODE = SET_DRAM_MFG_ID;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_dram_mfg_id(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the attr target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_dram_mfg_id(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_efd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static inline fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
+            attr_integral_type& o_setting)
+    {
+        fapi2::buffer<attr_integral_type> l_temp;
+        FAPI_TRY(i_spd_data.dram_manufacturer_id_code(l_temp));
+        fapi2::endian_swap(l_temp);
+        o_setting = l_temp;
 
     fapi_try_exit:
         return fapi2::current_err;
@@ -2275,57 +2471,8 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        const auto& l_dimm = i_spd_data.get_dimm_target();
-        int64_t l_tccd_in_ps = 0;
-        int64_t l_tck_in_ps = 0;
-        uint64_t l_freq = 0;
-
-        FAPI_TRY( attr::get_freq(mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(l_dimm), l_freq) );
-        FAPI_TRY( freq_to_ps(l_freq, l_tck_in_ps),
-                  "%s Failed to calculate clock period (tCK)", spd::c_str(l_dimm) );
-
-        // Get the tCCD_L timing values
-        // tCCD_L is speed bin independent and is
-        // the same for all bins at a DRAM frequency.
-        // It is safe to read this from SPD because the correct nck
-        // value will be calulated based on our dimm speed.
-
-        {
-            int64_t l_ftb = 0;
-            int64_t l_mtb = 0;
-            int64_t l_tccd_mtb = 0;
-            int64_t l_tccd_ftb = 0;
-
-            FAPI_TRY( spd::get_timebases(i_spd_data, l_mtb, l_ftb) );
-            FAPI_TRY( i_spd_data.min_tccd_l(l_tccd_mtb),
-                      "%s Failed min_tccd_l()", spd::c_str(l_dimm) );
-            FAPI_TRY( i_spd_data.fine_offset_min_tccd_l(l_tccd_ftb),
-                      "%s Failed fine_offset_min_tccd_l()", spd::c_str(l_dimm) );
-
-            FAPI_INF("%s medium timebase (ps): %ld, fine timebase (ps): %ld, tCCD_L (MTB): %ld, tCCD_L(FTB): %ld",
-                     spd::c_str(l_dimm), l_mtb, l_ftb, l_tccd_mtb, l_tccd_ftb );
-
-            l_tccd_in_ps = spd::calc_timing_from_timebase(l_tccd_mtb, l_mtb, l_tccd_ftb, l_ftb);
-        }
-
-        {
-            // Calculate refresh cycle time in nCK & set attribute
-            uint8_t l_tccd_in_nck = 0;
-
-            // Calculate nck
-            FAPI_TRY(  spd::calc_nck(l_tccd_in_ps, l_tck_in_ps, spd::INVERSE_DDR4_CORRECTION_FACTOR, l_tccd_in_nck),
-                       "%s Error in calculating tccd, with value of l_tccd_in_ps: %d",
-                       spd::c_str(l_dimm), l_tccd_in_ps);
-
-            FAPI_INF("%s tCK (ps): %d, tCCD_L (ps): %d, tCCD_L (nck): %d",
-                     spd::c_str(l_dimm), l_tck_in_ps, l_tccd_in_ps, l_tccd_in_nck);
-
-            o_setting = l_tccd_in_nck;
-            FAPI_DBG("%s DRAM TCCD_L %d", spd::c_str(l_dimm), o_setting);
-        }
-
-    fapi_try_exit:
-        return fapi2::current_err;
+        return  mss::calc_spd_time_in_nck<attr_eff_engine_fields,
+                attr_eff_engine_fields::DRAM_TCCD_L>(i_spd_data, o_setting);
     }
 };
 
@@ -2376,48 +2523,8 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        const auto& l_dimm = i_spd_data.get_dimm_target();
-        int64_t l_twtr_l_in_ps = 0;
-        int64_t l_tck_in_ps = 0;
-        uint64_t l_freq = 0;
-
-        FAPI_TRY( attr::get_freq(mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(l_dimm), l_freq) );
-        FAPI_TRY( freq_to_ps(l_freq, l_tck_in_ps),
-                  "%s Failed to calculate clock period (tCK)", spd::c_str(l_dimm) );
-
-        // Calculate twtr_l (in ps)
-        {
-            int64_t l_ftb = 0;
-            int64_t l_mtb = 0;
-            constexpr int64_t l_twtr_l_ftb = 0;
-            int64_t l_twtr_l_mtb = 0;
-
-            FAPI_TRY( spd::get_timebases(i_spd_data, l_mtb, l_ftb) );
-            FAPI_TRY( i_spd_data.min_twtr_l(l_twtr_l_mtb) );
-
-            FAPI_INF("%s medium timebase (ps): %ld, fine timebase (ps): %ld, tWTR_L (MTB): %ld, tWTR_L (FTB): %ld",
-                     spd::c_str(l_dimm), l_mtb, l_ftb, l_twtr_l_mtb, l_twtr_l_ftb );
-
-            l_twtr_l_in_ps = spd::calc_timing_from_timebase(l_twtr_l_mtb, l_mtb, l_twtr_l_ftb, l_ftb);
-        }
-
-        {
-            uint8_t l_twtr_l_in_nck = 0;
-
-            // Calculate nck
-            FAPI_TRY( spd::calc_nck(l_twtr_l_in_ps, l_tck_in_ps, spd::INVERSE_DDR4_CORRECTION_FACTOR, l_twtr_l_in_nck),
-                      "%s Error in calculating tWTR_L, with value of l_twtr_in_ps: %d",
-                      spd::c_str(l_dimm), l_twtr_l_in_ps );
-
-            FAPI_INF( "%s tCK (ps): %d,  tWTR_L (ps): %d, tWTR_L (nck): %d",
-                      spd::c_str(l_dimm), l_tck_in_ps, l_twtr_l_in_ps, l_twtr_l_in_nck );
-
-            o_setting = l_twtr_l_in_nck;
-            FAPI_DBG("%s DRAM TWTR_L %d", spd::c_str(l_dimm), o_setting);
-        }
-
-    fapi_try_exit:
-        return fapi2::current_err;
+        return  mss::calc_spd_time_in_nck<attr_eff_engine_fields,
+                attr_eff_engine_fields::DRAM_TWTR_L>(i_spd_data, o_setting);
     }
 };
 
@@ -2468,48 +2575,8 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        const auto& l_dimm = i_spd_data.get_dimm_target();
-        int64_t l_twtr_s_in_ps = 0;
-        int64_t l_tck_in_ps = 0;
-        uint64_t l_freq = 0;
-
-        FAPI_TRY( attr::get_freq(mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(l_dimm), l_freq) );
-        FAPI_TRY( freq_to_ps(l_freq, l_tck_in_ps),
-                  "%s Failed to calculate clock period (tCK)", spd::c_str(l_dimm) );
-
-        // Calculate twtr_s (in ps)
-        {
-            int64_t l_ftb = 0;
-            int64_t l_mtb = 0;
-            constexpr int64_t l_twtr_s_ftb = 0;
-            int64_t l_twtr_s_mtb = 0;
-
-            FAPI_TRY( spd::get_timebases(i_spd_data, l_mtb, l_ftb) );
-            FAPI_TRY( i_spd_data.min_twtr_s(l_twtr_s_mtb) );
-
-            FAPI_INF("%s medium timebase (ps): %ld, fine timebase (ps): %ld, tWTR_S (MTB): %ld, tWTR_S (FTB): %ld",
-                     spd::c_str(l_dimm), l_mtb, l_ftb, l_twtr_s_mtb, l_twtr_s_ftb );
-
-            l_twtr_s_in_ps = spd::calc_timing_from_timebase(l_twtr_s_mtb, l_mtb, l_twtr_s_ftb, l_ftb);
-        }
-
-        {
-            int8_t l_twtr_s_in_nck = 0;
-
-            // Calculate nck
-            FAPI_TRY( spd::calc_nck(l_twtr_s_in_ps, l_tck_in_ps, spd::INVERSE_DDR4_CORRECTION_FACTOR, l_twtr_s_in_nck),
-                      "%s Error in calculating tWTR_S, with value of l_twtr_in_ps: %d",
-                      spd::c_str(l_dimm), l_twtr_s_in_ps );
-
-            FAPI_INF( "%s tCK (ps): %d,  tWTR_S (ps): %d, tWTR_S (nck): %d",
-                      spd::c_str(l_dimm), l_tck_in_ps, l_twtr_s_in_ps, l_twtr_s_in_nck );
-
-            o_setting = l_twtr_s_in_nck;
-            FAPI_DBG("%s DRAM TWTR_S %d", spd::c_str(l_dimm), o_setting);
-        }
-
-    fapi_try_exit:
-        return fapi2::current_err;
+        return  mss::calc_spd_time_in_nck<attr_eff_engine_fields,
+                attr_eff_engine_fields::DRAM_TWTR_S>(i_spd_data, o_setting);
     }
 };
 
@@ -2560,74 +2627,8 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        const auto& l_dimm = i_spd_data.get_dimm_target();
-        uint64_t l_tfaw_in_nck = 0;
-        uint64_t l_jedec_tfaw_in_nck = 0;
-        int64_t l_tfaw_in_ps = 0;
-        int64_t l_tfaw_ftb = 0;
-        int64_t l_tck_in_ps = 0;
-        uint64_t l_freq = 0;
-        uint8_t l_dram_width = 0;
-
-        FAPI_TRY( attr::get_freq(mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(l_dimm), l_freq) );
-        FAPI_TRY( freq_to_ps(l_freq, l_tck_in_ps),
-                  "%s Failed to calculate clock period (tCK)", spd::c_str(l_dimm) );
-
-        // Calculate tFAW
-        {
-            int64_t l_ftb = 0;
-            int64_t l_mtb = 0;
-            int64_t l_tfaw_mtb = 0;
-
-            FAPI_TRY( spd::get_timebases(i_spd_data, l_mtb, l_ftb) );
-            FAPI_TRY( i_spd_data.min_tfaw(l_tfaw_mtb),
-                      "%s Failed min_tfaw()", spd::c_str(l_dimm) );
-
-            FAPI_INF("%s medium timebase (ps): %ld, fine timebase (ps): %ld, tfaw (MTB): %ld",
-                     spd::c_str(l_dimm), l_mtb, l_ftb, l_tfaw_mtb);
-
-            l_tfaw_in_ps = spd::calc_timing_from_timebase(l_tfaw_mtb, l_mtb, l_tfaw_ftb, l_ftb);
-
-            FAPI_ASSERT( l_tfaw_in_ps >= 0,
-                         fapi2::MSS_INVALID_TIMING_VALUE()
-                         .set_VALUE(l_tfaw_in_ps)
-                         .set_DIMM_TARGET(l_dimm)
-                         .set_FUNCTION(TFAW),
-                         "%s Error calculating tFAW (%d). Less than or equal to 0",
-                         spd::c_str(l_dimm),
-                         l_tfaw_in_ps);
-
-            FAPI_DBG("%s TFAW in ps is %d", spd::c_str(l_dimm), l_tfaw_in_ps);
-
-            FAPI_TRY( spd::calc_nck(l_tfaw_in_ps, l_tck_in_ps, spd::INVERSE_DDR4_CORRECTION_FACTOR, l_tfaw_in_nck),
-                      "%s Error in calculating l_tFAW, with value of l_tfaw_in_ps: %d",
-                      spd::c_str(l_dimm),
-                      l_tfaw_in_nck);
-        }
-
-        FAPI_TRY( attr::get_dram_width(l_dimm, l_dram_width) );
-        FAPI_TRY( mss::tfaw(l_dimm, l_dram_width, l_freq, l_jedec_tfaw_in_nck), "Failed tfaw()" );
-
-        // Taking the worst case between the required minimum JEDEC value and the proposed value from SPD
-        if (l_jedec_tfaw_in_nck != l_tfaw_in_nck)
-        {
-            FAPI_INF("%s TFAW from JEDEC (%d) and from SPD (%d) don't match. Choosing worst case. dram width %d, freq %d",
-                     spd::c_str(l_dimm),
-                     l_jedec_tfaw_in_nck,
-                     l_tfaw_in_nck,
-                     l_dram_width,
-                     l_freq);
-
-            l_tfaw_in_nck = std::max(l_jedec_tfaw_in_nck, l_tfaw_in_nck);
-        }
-
-        FAPI_INF("%s SDRAM width: %d, tFAW (nck): %d",
-                 spd::c_str(l_dimm), l_dram_width, l_tfaw_in_nck);
-        o_setting = l_tfaw_in_nck;
-        FAPI_DBG("%s DRAM TFAW %d", spd::c_str(l_dimm), o_setting);
-
-    fapi_try_exit:
-        return fapi2::current_err;
+        return  mss::calc_spd_time_in_nck<attr_eff_engine_fields,
+                attr_eff_engine_fields::DRAM_TFAW>(i_spd_data, o_setting);
     }
 };
 
@@ -2678,56 +2679,8 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        const auto& l_dimm = i_spd_data.get_dimm_target();
-        int64_t l_tck_in_ps = 0;
-        uint64_t l_freq = 0;
-        int64_t l_trcd_in_ps = 0;
-
-        FAPI_TRY( attr::get_freq(mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(l_dimm), l_freq) );
-        FAPI_TRY( freq_to_ps(l_freq, l_tck_in_ps),
-                  "%s Failed to calculate clock period (tCK)", spd::c_str(l_dimm) );
-
-        // Calculate tRCD (in ps)
-        // Get the tRCD timing values
-        // tRCD is speed bin dependent and has a unique
-        // value for each speed bin so it is safe to
-        // read from SPD because the correct nck
-        // value will be calulated based on our dimm speed.
-        {
-            int64_t l_ftb = 0;
-            int64_t l_mtb = 0;
-            int64_t l_trcd_mtb = 0;
-            int64_t l_trcd_ftb = 0;
-
-            FAPI_TRY( spd::get_timebases(i_spd_data, l_mtb, l_ftb) );
-            FAPI_TRY( i_spd_data.min_trcd(l_trcd_mtb),
-                      "%s Failed min_trcd()", spd::c_str(l_dimm) );
-            FAPI_TRY( i_spd_data.fine_offset_min_trcd(l_trcd_ftb),
-                      "%s Failed fine_offset_min_trcd()", spd::c_str(l_dimm) );
-
-            FAPI_INF("%s medium timebase MTB (ps): %ld, fine timebase FTB (ps): %ld, tRCD (MTB): %ld, tRCD (FTB): %ld",
-                     spd::c_str(l_dimm), l_mtb, l_ftb, l_trcd_mtb, l_trcd_ftb);
-
-            l_trcd_in_ps = spd::calc_timing_from_timebase(l_trcd_mtb, l_mtb, l_trcd_ftb, l_ftb);
-        }
-
-        {
-            uint8_t l_trcd_in_nck = 0;
-
-            // Calculate nck
-            FAPI_TRY( spd::calc_nck(l_trcd_in_ps, l_tck_in_ps, spd::INVERSE_DDR4_CORRECTION_FACTOR, l_trcd_in_nck),
-                      "%s Error in calculating trcd, with value of l_trcd_in_ps: %d",
-                      spd::c_str(l_dimm), l_trcd_in_ps);
-
-            FAPI_INF("%s tCK (ps): %d, tRCD (ps): %d, tRCD (nck): %d",
-                     spd::c_str(l_dimm), l_tck_in_ps, l_trcd_in_ps, l_trcd_in_nck);
-
-            o_setting = l_trcd_in_nck;
-            FAPI_DBG("%s DRAM TRCD %d", spd::c_str(l_dimm), o_setting);
-        }
-
-    fapi_try_exit:
-        return fapi2::current_err;
+        return  mss::calc_spd_time_in_nck<attr_eff_engine_fields,
+                attr_eff_engine_fields::DRAM_TRCD>(i_spd_data, o_setting);
     }
 };
 
@@ -2778,59 +2731,8 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        const auto& l_dimm = i_spd_data.get_dimm_target();
-        int64_t l_tck_in_ps = 0;
-        uint64_t l_freq = 0;
-        int64_t l_trp_in_ps = 0;
-
-        FAPI_TRY( attr::get_freq(mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(l_dimm), l_freq) );
-        FAPI_TRY( freq_to_ps(l_freq, l_tck_in_ps),
-                  "%s Failed to calculate clock period (tCK)", spd::c_str(l_dimm) );
-
-        // Calculate tRP (in ps)
-        {
-            int64_t l_ftb = 0;
-            int64_t l_mtb = 0;
-            int64_t l_trp_mtb = 0;
-            int64_t l_trp_ftb = 0;
-
-            FAPI_TRY( spd::get_timebases(i_spd_data, l_mtb, l_ftb) );
-            FAPI_TRY( i_spd_data.min_trp(l_trp_mtb),
-                      "%s Failed min_trp()", spd::c_str(l_dimm) );
-
-            FAPI_TRY( i_spd_data.fine_offset_min_trp(l_trp_ftb),
-                      "%s Failed fine_offset_min_trp()", spd::c_str(l_dimm) );
-
-            FAPI_INF("%s medium timebase (ps): %ld, fine timebase (ps): %ld, tRP (MTB): %ld, tRP(FTB): %ld",
-                     spd::c_str(l_dimm), l_mtb, l_ftb, l_trp_mtb, l_trp_ftb);
-
-            l_trp_in_ps = spd::calc_timing_from_timebase(l_trp_mtb, l_mtb, l_trp_ftb, l_ftb);
-        }
-
-        // SPD spec gives us the minimum... compute our worstcase (maximum) from JEDEC
-        {
-            // Declaring as int64_t to fix std::max compile
-            const int64_t l_trp = mss::ps_to_cycles(l_tck_in_ps, mss::trtp());
-            l_trp_in_ps = std::max(l_trp_in_ps, l_trp);
-        }
-
-        {
-            uint8_t l_trp_in_nck = 0;
-
-            // Calculate nck
-            FAPI_TRY( spd::calc_nck(l_trp_in_ps, l_tck_in_ps, spd::INVERSE_DDR4_CORRECTION_FACTOR, l_trp_in_nck),
-                      "%s Error in calculating dram_tRP nck, with value of l_trp_in_ps: %d",
-                      spd::c_str(l_dimm), l_trp_in_ps);
-
-            FAPI_INF( "%s tCK (ps): %d, tRP (ps): %d, tRP (nck): %d",
-                      spd::c_str(l_dimm), l_tck_in_ps, l_trp_in_ps, l_trp_in_nck );
-
-            o_setting = l_trp_in_nck;
-            FAPI_DBG("%s DRAM TRP %d", spd::c_str(l_dimm), o_setting);
-        }
-
-    fapi_try_exit:
-        return fapi2::current_err;
+        return  mss::calc_spd_time_in_nck<attr_eff_engine_fields,
+                attr_eff_engine_fields::DRAM_TRP>(i_spd_data, o_setting);
     }
 };
 
@@ -2881,41 +2783,8 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        const auto& l_dimm = i_spd_data.get_dimm_target();
-        int64_t l_tck_in_ps = 0;
-        uint64_t l_freq = 0;
-        uint64_t l_tras_in_ps = 0;
-        uint8_t l_tras_in_nck = 0;
-
-        // tRAS is bin independent so we don't read this from SPD
-        // which will give the best timing value for the dimm
-        // (like 2400 MT/s) which may be different than the system
-        // speed (if we were being limited by VPD or MRW restrictions)
-        FAPI_TRY( attr::get_freq(mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(l_dimm), l_freq) );
-        l_tras_in_ps = mss::tras(l_dimm, l_freq);
-
-        FAPI_TRY( freq_to_ps(l_freq, l_tck_in_ps),
-                  "%s Failed to calculate clock period (tCK)", spd::c_str(l_dimm) );
-
-        // Cast needed for calculations to be done on the same integral type
-        // as required by template deduction. We have l_tck_in_ps as a signed
-        // integer because we have other timing values that calculations do
-        // addition with negative integers.
-        FAPI_TRY( spd::calc_nck(l_tras_in_ps,
-                                static_cast<uint64_t>(l_tck_in_ps),
-                                spd::INVERSE_DDR4_CORRECTION_FACTOR,
-                                l_tras_in_nck),
-                  "%s Error in calculating tras_l, with value of l_twtr_in_ps: %d",
-                  spd::c_str(l_dimm), l_tras_in_ps);
-
-        FAPI_INF("%s tCK (ps): %d, tRAS (ps): %d, tRAS (nck): %d",
-                 spd::c_str(l_dimm), l_tck_in_ps, l_tras_in_ps, l_tras_in_nck);
-
-        o_setting = l_tras_in_nck;
-        FAPI_DBG("%s DRAM TRAS %d", spd::c_str(l_dimm), o_setting);
-
-    fapi_try_exit:
-        return fapi2::current_err;
+        return  mss::calc_spd_time_in_nck<attr_eff_engine_fields,
+                attr_eff_engine_fields::DRAM_TRAS>(i_spd_data, o_setting);
     }
 };
 
@@ -2966,54 +2835,8 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        const auto& l_dimm = i_spd_data.get_dimm_target();
-        int64_t l_tck_in_ps = 0;
-        uint64_t l_freq = 0;
-        int64_t l_twr_in_ps = 0;
-
-        FAPI_TRY( attr::get_freq(mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(l_dimm), l_freq) );
-        FAPI_TRY( freq_to_ps(l_freq, l_tck_in_ps),
-                  "%s Failed to calculate clock period (tCK)", spd::c_str(l_dimm) );
-
-        // Get the tWR timing values
-        // tWR is speed bin independent and is
-        // the same for all bins within a speed grade.
-        // It is safe to read this from SPD because the correct nck
-        // value will be calulated based on our dimm speed.
-        {
-            constexpr int64_t l_twr_ftb = 0;
-            int64_t l_twr_mtb = 0;
-            int64_t l_ftb = 0;
-            int64_t l_mtb = 0;
-
-            FAPI_TRY( spd::get_timebases(i_spd_data, l_mtb, l_ftb) );
-
-            FAPI_TRY( i_spd_data.min_twr(l_twr_mtb),
-                      "%s Failed min_twr()", spd::c_str(l_dimm) );
-
-            FAPI_INF("%s medium timebase (ps): %ld, fine timebase (ps): %ld, tWR (MTB): %ld, tWR(FTB): %ld",
-                     spd::c_str(l_dimm), l_mtb, l_ftb, l_twr_mtb, l_twr_ftb);
-
-            // Calculate twr (in ps)
-            l_twr_in_ps = spd::calc_timing_from_timebase(l_twr_mtb, l_mtb, l_twr_ftb, l_ftb);
-        }
-
-        {
-            uint8_t l_twr_in_nck = 0;
-
-            // Calculate tNCK
-            FAPI_TRY( spd::calc_nck(l_twr_in_ps, l_tck_in_ps, spd::INVERSE_DDR4_CORRECTION_FACTOR,  l_twr_in_nck),
-                      "%s Error in calculating l_twr_in_nck, with value of l_twr_in_ps: %d", spd::c_str(l_dimm), l_twr_in_ps);
-
-            FAPI_INF( "%s tCK (ps): %d, tWR (ps): %d, tWR (nck): %d",
-                      spd::c_str(l_dimm), l_tck_in_ps, l_twr_in_ps, l_twr_in_nck );
-
-            o_setting = l_twr_in_nck;
-            FAPI_DBG("%s DRAM TWR %d", spd::c_str(l_dimm), o_setting);
-        }
-
-    fapi_try_exit:
-        return fapi2::current_err;
+        return  mss::calc_spd_time_in_nck<attr_eff_engine_fields,
+                attr_eff_engine_fields::DRAM_TWR>(i_spd_data, o_setting);
     }
 };
 
@@ -3142,69 +2965,16 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
             attr_integral_type& o_setting)
     {
         const auto& l_dimm = i_spd_data.get_dimm_target();
-        int64_t l_tck_in_ps = 0;
-        uint64_t l_freq = 0;
+
+        // Taking the worst case required minimum JEDEC value
+        // instead of calculating proposed value from SPD -- which selects optimistic values
+        // leading to errors in expected timing values
         uint64_t l_trrd_s_in_nck = 0;
-        int64_t l_trrd_s_in_ps = 0;
-        uint64_t l_jedec_trrd = 0;
+        uint64_t l_freq = 0;
         uint8_t l_dram_width = 0;
-
-        FAPI_TRY( attr::get_freq(mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(l_dimm), l_freq) );
-        FAPI_TRY( freq_to_ps(l_freq, l_tck_in_ps),
-                  "%s Failed to calculate clock period (tCK)", spd::c_str(l_dimm) );
-
-        // Calculate tRRD_S
-        {
-            int64_t l_trrd_s_mtb = 0;
-            int64_t l_trrd_s_ftb = 0;
-            int64_t l_ftb = 0;
-            int64_t l_mtb = 0;
-
-            FAPI_TRY( spd::get_timebases(i_spd_data, l_mtb, l_ftb) );
-
-            FAPI_TRY( i_spd_data.min_trrd_s(l_trrd_s_mtb),
-                      "%s Failed min_trrd_s()", spd::c_str(l_dimm) );
-
-            FAPI_TRY( i_spd_data.fine_offset_min_trrd_s(l_trrd_s_ftb),
-                      "%s Failed fine_offset_min_trrd_s()", spd::c_str(l_dimm) );
-
-            FAPI_INF("%s medium timebase (ps): %ld, fine timebase (ps): %ld, trrd_s (MTB): %ld",
-                     spd::c_str(l_dimm), l_mtb, l_ftb, l_trrd_s_mtb);
-
-            l_trrd_s_in_ps = spd::calc_timing_from_timebase(l_trrd_s_mtb, l_mtb, l_trrd_s_ftb, l_ftb);
-
-            FAPI_ASSERT( l_trrd_s_in_ps >= 0,
-                         fapi2::MSS_INVALID_TIMING_VALUE()
-                         .set_VALUE(l_trrd_s_in_ps)
-                         .set_DIMM_TARGET(l_dimm)
-                         .set_FUNCTION(TRRD_S),
-                         "%s Error calculating tRRD_S (%d). Less than or equal to 0",
-                         spd::c_str(l_dimm),
-                         l_trrd_s_in_ps);
-
-            FAPI_DBG("%s TRRD_S in ps is %d", spd::c_str(l_dimm), l_trrd_s_in_ps);
-
-            FAPI_TRY( spd::calc_nck(l_trrd_s_in_ps, l_tck_in_ps, spd::INVERSE_DDR4_CORRECTION_FACTOR, l_trrd_s_in_nck),
-                      "%s Error in calculating l_tRRD_S, with value of l_trrd_s_in_ps: %d",
-                      spd::c_str(l_dimm),
-                      l_trrd_s_in_nck);
-        }
-
         FAPI_TRY( attr::get_dram_width(l_dimm, l_dram_width) );
-        FAPI_TRY( trrd_s( l_dimm, l_dram_width, l_freq, l_jedec_trrd) );
-
-        // Taking the worst case between the required minimum JEDEC value and the proposed value from SPD
-        if (l_jedec_trrd != l_trrd_s_in_nck)
-        {
-            FAPI_INF("%s TRRD_S from JEDEC (%d) and from SPD (%d) don't match. Choosing worst case. dram width %d, freq %d",
-                     spd::c_str(l_dimm),
-                     l_jedec_trrd,
-                     l_trrd_s_in_nck,
-                     l_dram_width,
-                     l_freq);
-
-            l_trrd_s_in_nck = std::max( l_jedec_trrd, l_trrd_s_in_nck);
-        }
+        FAPI_TRY( attr::get_freq(mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(l_dimm), l_freq) );
+        FAPI_TRY( trrd_s( l_dimm, l_dram_width, l_freq, l_trrd_s_in_nck) );
 
         FAPI_INF("%s SDRAM width: %d, tRRD_S (nck): %d",
                  spd::c_str(l_dimm), l_dram_width, l_trrd_s_in_nck);
@@ -3265,69 +3035,17 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
             attr_integral_type& o_setting)
     {
         const auto& l_dimm = i_spd_data.get_dimm_target();
-        int64_t l_tck_in_ps = 0;
-        uint64_t l_freq = 0;
-        uint64_t l_trrd_l_in_nck = 0;
-        int64_t l_trrd_l_in_ps = 0;
-        uint64_t l_jedec_trrd = 0;
+
+        // Taking the worst case required minimum JEDEC value
+        // instead of calculating proposed value from SPD -- which selects optimistic values
+        // leading to errors in expected timing values
         uint8_t l_dram_width = 0;
+        uint64_t l_trrd_l_in_nck = 0;
+        uint64_t l_freq = 0;
 
         FAPI_TRY( attr::get_freq(mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(l_dimm), l_freq) );
-        FAPI_TRY( freq_to_ps(l_freq, l_tck_in_ps),
-                  "%s Failed to calculate clock period (tCK)", spd::c_str(l_dimm) );
-
-        // Calculate tRRD_L
-        {
-            int64_t l_trrd_l_mtb = 0;
-            int64_t l_trrd_l_ftb = 0;
-            int64_t l_ftb = 0;
-            int64_t l_mtb = 0;
-
-            FAPI_TRY( spd::get_timebases(i_spd_data, l_mtb, l_ftb) );
-
-            FAPI_TRY( i_spd_data.min_trrd_l(l_trrd_l_mtb),
-                      "%s Failed min_trrd_l()", spd::c_str(l_dimm) );
-
-            FAPI_TRY( i_spd_data.fine_offset_min_trrd_l(l_trrd_l_ftb),
-                      "%s Failed fine_offset_min_trrd_l()", spd::c_str(l_dimm) );
-
-            FAPI_INF("%s medium timebase (ps): %ld, fine timebase (ps): %ld, trrd_l (MTB): %ld",
-                     spd::c_str(l_dimm), l_mtb, l_ftb, l_trrd_l_mtb);
-
-            l_trrd_l_in_ps = spd::calc_timing_from_timebase(l_trrd_l_mtb, l_mtb, l_trrd_l_ftb, l_ftb);
-
-            FAPI_ASSERT( l_trrd_l_in_ps >= 0,
-                         fapi2::MSS_INVALID_TIMING_VALUE()
-                         .set_VALUE(l_trrd_l_in_ps)
-                         .set_DIMM_TARGET(l_dimm)
-                         .set_FUNCTION(TRRD_L),
-                         "%s Error calculating tRRD_L (%d). Less than or equal to 0",
-                         spd::c_str(l_dimm),
-                         l_trrd_l_in_ps);
-
-            FAPI_DBG("%s TRRD_L in ps is %d", spd::c_str(l_dimm), l_trrd_l_in_ps);
-
-            FAPI_TRY( spd::calc_nck(l_trrd_l_in_ps, l_tck_in_ps, spd::INVERSE_DDR4_CORRECTION_FACTOR, l_trrd_l_in_nck),
-                      "%s Error in calculating l_tRRD_L, with value of l_trrd_l_in_ps: %d",
-                      spd::c_str(l_dimm),
-                      l_trrd_l_in_nck);
-        }
-
         FAPI_TRY( attr::get_dram_width(l_dimm, l_dram_width) );
-        FAPI_TRY( trrd_l( l_dimm, l_dram_width, l_freq, l_jedec_trrd) );
-
-        // Taking the worst case between the required minimum JEDEC value and the proposed value from SPD
-        if (l_jedec_trrd != l_trrd_l_in_nck)
-        {
-            FAPI_INF("%s TRRD_L from JEDEC (%d) and from SPD (%d) don't match. Choosing worst case. dram width %d, freq %d",
-                     spd::c_str(l_dimm),
-                     l_jedec_trrd,
-                     l_trrd_l_in_nck,
-                     l_dram_width,
-                     l_freq);
-
-            l_trrd_l_in_nck = std::max( l_jedec_trrd, l_trrd_l_in_nck);
-        }
+        FAPI_TRY( trrd_l( l_dimm, l_dram_width, l_freq, l_trrd_l_in_nck) );
 
         FAPI_INF("%s SDRAM width: %d, tRRD_L (nck): %d",
                  spd::c_str(l_dimm), l_dram_width, l_trrd_l_in_nck);
@@ -3546,6 +3264,106 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
 
     fapi_try_exit:
         return fapi2::current_err;
+    }
+};
+
+///
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @note attr_engine_derived_fields, RCD_MFG_ID specialization
+///
+template < proc_type P >
+struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::RCD_MFG_ID>
+{
+    using attr_type = fapi2::ATTR_MEM_EFF_RCD_MFG_ID_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_RCD_MFG_ID_TargetType;
+    static constexpr generic_ffdc_codes FFDC_CODE = SET_RCD_MFG_ID;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_rcd_mfg_id(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the attr target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_rcd_mfg_id(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_efd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static inline fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
+            attr_integral_type& o_setting)
+    {
+        return i_spd_data.reg_manufacturer_id_code(o_setting);
+    }
+};
+
+///
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @note attr_engine_derived_fields, DRAM_MODULE_HEIGHT specialization
+///
+template < proc_type P >
+struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_MODULE_HEIGHT>
+{
+    using attr_type = fapi2::ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_TargetType;
+    static constexpr generic_ffdc_codes FFDC_CODE = SET_DRAM_MODULE_HEIGHT;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_dram_module_height(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the attr target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_dram_module_height(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_efd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static inline fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
+            attr_integral_type& o_setting)
+    {
+        return i_spd_data.module_base_height(o_setting);
     }
 };
 
