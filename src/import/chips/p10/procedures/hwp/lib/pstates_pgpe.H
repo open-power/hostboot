@@ -69,6 +69,15 @@ enum POUNDW_DDS_FIELDS
     SLOPEB_CYCLES           = 11,
     NUM_POUNDW_DDS_FIELDS   = 12
 };
+/// These define the Run-time rails that are controlled by the PGPE during
+/// Pstate operations.
+#define RUNTIME_RAILS       2
+#define RUNTIME_RAIL_VDD    0
+#define RUNTIME_RAIL_VCS    1
+
+/// These defines resonant clock data structures constants
+#define RESCLK_FREQ_REGIONS 4
+#define RESCLK_STEPS        32
 
 /// Control Attributes
 typedef union
@@ -87,51 +96,41 @@ typedef union
     } fields;
 } Attributes_t;
 
+///
+///Resonant Clock Frequency Index
+///
+typedef struct
+{
+    uint16_t freq;
+    uint8_t idx;
+} ResClkFreqIdx_t;
+
+///
 /// Resonant Clock Stepping Entry
 ///
-/// @todo needs refinement for P10 yet.
 typedef union
 {
-    uint16_t value;
+    uint8_t value;
     struct
     {
 #ifdef _BIG_ENDIAN
         uint16_t    sector_buffer   : 4;
-        uint16_t    spare1          : 1;
-        uint16_t    pulse_enable    : 1;
-        uint16_t    pulse_mode      : 2;
         uint16_t    resonant_switch : 4;
-        uint16_t    spare4          : 4;
 #else
-        uint16_t    spare4          : 4;
         uint16_t    resonant_switch : 4;
-        uint16_t    pulse_mode      : 2;
-        uint16_t    pulse_enable    : 1;
-        uint16_t    spare1          : 1;
         uint16_t    sector_buffer   : 4;
 #endif // _BIG_ENDIAN
     } fields;
 } ResClkStepEntry_t;
 
-/// @todo needs refinement for P10 yet.
-#define RESCLK_FREQ_REGIONS 8
-#define RESCLK_STEPS        64
-#define RESCLK_L3_STEPS     4
-/// These define the Run-time rails that are controlled by the PGPE during
-/// Pstate operations.
-#define RUNTIME_RAILS       2
-#define RUNTIME_RAIL_VDD    0
-#define RUNTIME_RAIL_VCS    1
-
+///
 /// Resonant Clock Setup
+///
 typedef struct
 {
-    uint8_t             freq_mhz[RESCLK_FREQ_REGIONS];
+    uint8_t             ps[RESCLK_FREQ_REGIONS];
     uint8_t             index[RESCLK_FREQ_REGIONS];
     ResClkStepEntry_t   steparray[RESCLK_STEPS];
-    uint16_t            step_delay_ns;                   // Max delay: 65.536us
-    uint8_t             l3_steparray[RESCLK_L3_STEPS];
-    uint16_t            l3_threshold_mv;
 
 } ResClkSetup_t;
 
