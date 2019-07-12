@@ -23,6 +23,7 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
 ################################################################################
 ##  Simics automation using autosim
 ##  2011-05-23  mww modified to run hostboot in simics
@@ -33,6 +34,7 @@
 ##  Usage:
 ##       autocitest [--quiet] <backing_build> <sandbox_name> <hbi_image>
 ################################################################################
+
 function    waitkb()
 {
 
@@ -181,8 +183,7 @@ then
     NRE=""
 else
     # Trick autosim into thinking we're running on a vexec system.
-    echo "echo \"Running on server $HOSTNAME ---\"" >> \
-            ${SANDBOXBASE}/obj/ppc/simu/scripts/hbfw/startup.simics
+    echo "echo \"Running on server $HOSTNAME ---\"" >> ${STARTUPSIMICS}
     NRE="--sim_parms -nre"
 fi
 
@@ -244,7 +245,10 @@ while true; do
 
     if [ "$loopcount" -ge 36 ];   then
         echo "ERROR: timed out after 3 minutes waiting for SBE and Hostboot bootloader completion"
-        autosim $NOWIN --simcmd "sbe-trace 0"
+
+        # TODO RTC 215556
+        # autosim $NOWIN --simcmd "sbe-trace 0"
+
         autosim $NOWIN --simcmd "hb-bltrace"
         stopsim
         stopserver
@@ -320,7 +324,7 @@ shutdown_status=`echo "obase=16; $temp" | bc`
 temp=$((HRMOR + 0x$imageId_addr))
 imageId_addr=`echo "obase=16; $temp" | bc`
 
-##  note, don't use $VERBOSE here or you get all sorts of extra junk in the output file.
+#  note, don't use $VERBOSE here or you get all sorts of extra junk in the output file.
 echo "Wait for unit test completion."
 echo
 echo "==================================="

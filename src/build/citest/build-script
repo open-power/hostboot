@@ -29,14 +29,6 @@ if [ -z $PROJECT_ROOT ]; then
 fi
 
 source "$PROJECT_ROOT/src/build/citest/setup-env"
-echo "#--------------------------------"
-echo "SANDBOXROOT=$SANDBOXROOT"
-echo "SANDBOXNAME=$SANDBOXNAME"
-echo "CHIP=$CHIP"
-echo "PNOR=$PNOR"
-echo "CONFIG_FILE=$CONFIG_FILE"
-echo "#--------------------------------"
-#export HOSTBOOT_DEBUG=1    #-- Ensure printkd / tracd is compiled in.
 
 # Force simics into Secure Mode
 export SECURITY_HW_POLICY="1"
@@ -52,11 +44,30 @@ else
     exit -1
 fi
 
+# Create holding environment, build HB, and populate holding environment
+
+echo "#--------------------------------"
+if [ "$CHIP" == "P10" ];then
+    echo "As things stand, when doing a P10 Standalone build, a Sandbox is "
+    echo "still created because Simics' autosim depends on it."
+    export SETUP_FOR_STANDALONE="1"
+    export STANDALONE=${PROJECT_ROOT}/standalone
+    export STANDALONE_SIMICS=${STANDALONE}/simics
+fi
+echo "SANDBOXROOT=$SANDBOXROOT"
+echo "SANDBOXNAME=$SANDBOXNAME"
+echo "CHIP=$CHIP"
+echo "PNOR=$PNOR"
+echo "CONFIG_FILE=$CONFIG_FILE"
+echo "#--------------------------------"
+
+#export HOSTBOOT_DEBUG=1    #-- Ensure printkd / tracd is compiled in.
 
 # Create simics sandbox.
-create-sandbox > create-sandbox.log 2>&1 &
+create-environment > create-sandbox.log 2>&1 &
 CREATESANDBOX_PID=$!
 
+# Build Hostboot
 my_date=$(date)
 # Build Hostboot.
 if [[ -z "${HOSTBOOT_PROFILE}" ]]; then
@@ -89,14 +100,16 @@ else
     exit -1
 fi
 
-# Add Hostboot files to simics sandbox.
+# Add Hostboot files to simics sandbox
+# If SETUP_FOR_STANDALONE = 1, Hostboot files will be added under
+# ${PROJECT_ROOT}/standalone
 my_date=$(date)
 echo "#--------------------------------"
-printf "\n\n$(date): STARTED running populate-sandbox....\n\n"
+printf "\n\n$(date): STARTED running \"populate-environment\"....\n\n"
 echo "#--------------------------------"
-populate-sandbox || exit -1
+populate-environment || exit -1
 echo "#--------------------------------"
-printf "\n\nrc=$?: $(date): FINISHED running (\"populate-sandbox\" was started at $my_date)\n\n"
+printf "\n\nrc=$?: $(date): FINISHED running (\"populate-environment\" was started at $my_date)\n\n"
 echo "#--------------------------------"
 
 if [ "$CHIP" == "FSPBUILD" ];
@@ -123,13 +136,12 @@ else
         # Start CxxTest Simics execution.
         my_date=$(date)
         echo "#--------------------------------"
-        printf "\n\n$(date): STARTED running cxxtest-start.sh....\n\n"
+        printf "\n\n$(date): STARTED running \"cxxtest-start.sh\"....\n\n"
         echo "#--------------------------------"
         cxxtest-start.sh || exit -1
         echo "#--------------------------------"
         printf "\n\nrc=$?: $(date): FINISHED running (\"cxxtest-start.sh\" was started at  $my_date)\n\n"
         echo "#--------------------------------"
-
 fi
 
 if [[ ! -z "${HOSTBOOT_PROFILE}" ]]; then
