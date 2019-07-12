@@ -286,18 +286,6 @@ void getTargetInfo( HUID i_chipId, TARGETING::TYPE & o_targetType,
                       l_node, l_chip, l_chiplet );
             break;
 
-        case TYPE_MEMBUF:
-            snprintf( o_chipName, i_sz_chipName, "mb(n%dp%d)",
-                      l_node, l_chip );
-            break;
-
-        case TYPE_MBA:
-            l_chip    = l_chip / MAX_MBA_PER_MEMBUF;
-            l_chiplet = l_chiplet % MAX_MBA_PER_MEMBUF;
-            snprintf( o_chipName, i_sz_chipName, "mba(n%dp%dc%d)",
-                      l_node, l_chip, l_chiplet );
-            break;
-
         default:
             snprintf( o_chipName, i_sz_chipName, "????" );
     }
@@ -824,7 +812,6 @@ bool parseExtMemMru( void * i_buffer, uint32_t i_buflen,
         // TODO RTC 179854
         extMemMru.mmMeld.u  = ntohl( bs.getFieldJustify( curPos, 32 ) );
                               curPos+=32;
-        extMemMru.cardType  = bs.getFieldJustify( curPos,  8 ); curPos+= 8;
         extMemMru.isBufDimm = bs.getFieldJustify( curPos,  1 ); curPos+= 1;
         extMemMru.isX4Dram  = bs.getFieldJustify( curPos,  1 ); curPos+= 1;
         extMemMru.isValid   = bs.getFieldJustify( curPos,  1 ); curPos+= 1;

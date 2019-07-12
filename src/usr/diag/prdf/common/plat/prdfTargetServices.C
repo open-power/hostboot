@@ -398,7 +398,6 @@ void setHWStateChanged(TARGETING::TargetHandle_t i_target)
     {
         TYPE type = getTargetType(i_target);
         if( (TYPE_DIMM   == type) ||
-            (TYPE_MEMBUF == type) ||
             (TYPE_MCS    == type) )
         {
             update_hwas_changed_mask(i_target, HWAS_CHANGED_BIT_MEMDIAG);
@@ -469,9 +468,6 @@ struct conn_t
             case TYPE_OCMB_CHIP:    order = 23; break;
             case TYPE_MEM_PORT:     order = 24; break;
             case TYPE_DMI:          order = 25; break;
-            case TYPE_MEMBUF:       order = 26; break;
-            case TYPE_L4:           order = 27; break;
-            case TYPE_MBA:          order = 28; break;
             case TYPE_DIMM:         order = 29; break;
             default: ;
         }
@@ -506,7 +502,6 @@ TargetService::ASSOCIATION_TYPE getAssociationType( TargetHandle_t i_target,
 
         { TYPE_NODE,   TYPE_SYS,        TargetService::PARENT_BY_AFFINITY },
         { TYPE_NODE,   TYPE_PROC,       TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_NODE,   TYPE_MEMBUF,     TargetService::CHILD_BY_AFFINITY },
 
         { TYPE_PROC,   TYPE_NODE,       TargetService::PARENT_BY_AFFINITY },
         { TYPE_PROC,   TYPE_EQ,         TargetService::CHILD_BY_AFFINITY  },
@@ -529,7 +524,6 @@ TargetService::ASSOCIATION_TYPE getAssociationType( TargetHandle_t i_target,
         { TYPE_PROC,   TYPE_OMIC,       TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_MCC,        TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_DMI,        TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC,   TYPE_MEMBUF,     TargetService::CHILD_BY_AFFINITY  },
 
         { TYPE_EQ,     TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
         { TYPE_EQ,     TYPE_EX,         TargetService::CHILD_BY_AFFINITY  },
@@ -612,26 +606,11 @@ TargetService::ASSOCIATION_TYPE getAssociationType( TargetHandle_t i_target,
         { TYPE_DMI,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
         { TYPE_DMI,    TYPE_MC,         TargetService::PARENT_BY_AFFINITY },
         { TYPE_DMI,    TYPE_MI,         TargetService::PARENT_BY_AFFINITY },
-        { TYPE_DMI,    TYPE_MEMBUF,     TargetService::CHILD_BY_AFFINITY  },
         { TYPE_DMI,    TYPE_DIMM,       TargetService::CHILD_BY_AFFINITY  },
-
-        { TYPE_MEMBUF, TYPE_NODE,       TargetService::PARENT_BY_AFFINITY },
-        { TYPE_MEMBUF, TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
-        { TYPE_MEMBUF, TYPE_DMI,        TargetService::PARENT_BY_AFFINITY },
-        { TYPE_MEMBUF, TYPE_L4,         TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_MEMBUF, TYPE_MBA,        TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_MEMBUF, TYPE_DIMM,       TargetService::CHILD_BY_AFFINITY  },
-
-        { TYPE_L4,     TYPE_MEMBUF,     TargetService::PARENT_BY_AFFINITY },
-
-        { TYPE_MBA,    TYPE_MI,         TargetService::PARENT_BY_AFFINITY },
-        { TYPE_MBA,    TYPE_MEMBUF,     TargetService::PARENT_BY_AFFINITY },
-        { TYPE_MBA,    TYPE_DIMM,       TargetService::CHILD_BY_AFFINITY  },
 
         { TYPE_DIMM,   TYPE_MCA,        TargetService::PARENT_BY_AFFINITY },
         { TYPE_DIMM,   TYPE_OCMB_CHIP,  TargetService::PARENT_BY_AFFINITY },
         { TYPE_DIMM,   TYPE_MEM_PORT,   TargetService::PARENT_BY_AFFINITY },
-        { TYPE_DIMM,   TYPE_MBA,        TargetService::PARENT_BY_AFFINITY },
 
     };
 
@@ -904,19 +883,7 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
                                (i_connPos == (dmiPos % MAX_DMI_PER_MI));
                     } );
         }
-        else if ( TYPE_PROC == trgtType && TYPE_MEMBUF == i_connType )
-        {
-            // i_connPos is position relative to PROC (0-7)
-            itr = std::find_if( list.begin(), list.end(),
-                    [&](const TargetHandle_t & t)
-                    {
-                        uint32_t mbPos = getTargetPosition(t);
-                        return (trgtPos   == (mbPos / MAX_MEMBUF_PER_PROC)) &&
-                               (i_connPos == (mbPos % MAX_MEMBUF_PER_PROC));
-                    } );
-        }
-        else if ( (TYPE_DMI == trgtType && TYPE_MEMBUF == i_connType) ||
-                  (TYPE_OMI == trgtType && TYPE_OCMB_CHIP == i_connType) ||
+        else if ( (TYPE_OMI == trgtType && TYPE_OCMB_CHIP == i_connType) ||
                   (TYPE_OCMB_CHIP == trgtType && TYPE_MEM_PORT == i_connType) )
         {
             // There should only be one in the list.
@@ -1370,7 +1337,6 @@ uint32_t getTargetPosition( TargetHandle_t i_trgt )
                 case TYPE_OSC:
                 case TYPE_OSCPCICLK:
                 case TYPE_OSCREFCLK:
-                case TYPE_MEMBUF:
                 case TYPE_OCMB_CHIP:
                     o_pos = i_trgt->getAttr<ATTR_POSITION>();
                     break;
@@ -1452,50 +1418,6 @@ uint32_t getMemChnl( TargetHandle_t i_trgt )
 
 //------------------------------------------------------------------------------
 
-template<>
-bool isMembufOnDimm<TYPE_MBA>( TargetHandle_t i_trgt )
-{
-    PRDF_ASSERT( nullptr != i_trgt );
-    PRDF_ASSERT( TYPE_MBA == getTargetType(i_trgt) );
-
-    return i_trgt->getAttr<ATTR_CEN_EFF_CUSTOM_DIMM>();
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-uint8_t getDramGen<TYPE_MBA>( TargetHandle_t i_trgt )
-{
-    PRDF_ASSERT( nullptr != i_trgt );
-    PRDF_ASSERT( TYPE_MBA == getTargetType(i_trgt) );
-
-    return i_trgt->getAttr<ATTR_CEN_EFF_DRAM_GEN>();
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-uint8_t getRowNumConfig<TYPE_MBA>( TARGETING::TargetHandle_t i_trgt )
-{
-    PRDF_ASSERT( nullptr != i_trgt );
-    PRDF_ASSERT( TYPE_MBA == getTargetType(i_trgt) );
-
-    return i_trgt->getAttr<ATTR_CEN_EFF_DRAM_ROWS>();
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-uint8_t getColNumConfig<TYPE_MBA>( TARGETING::TargetHandle_t i_trgt )
-{
-    PRDF_ASSERT( nullptr != i_trgt );
-    PRDF_ASSERT( TYPE_MBA == getTargetType(i_trgt) );
-
-    return i_trgt->getAttr<ATTR_CEN_EFF_DRAM_COLS>();
-}
-
-//------------------------------------------------------------------------------
-
 bool isDramWidthX4( TargetHandle_t i_trgt )
 {
    bool o_dramWidthX4 = false;
@@ -1507,11 +1429,6 @@ bool isDramWidthX4( TargetHandle_t i_trgt )
    {
         case TYPE_MCA:
             o_dramWidthX4 = true; // Nimbus only supports x4 DRAMs
-            break;
-
-        case TYPE_MBA:
-            o_dramWidthX4 = ( fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X4 ==
-                              i_trgt->getAttr<ATTR_CEN_EFF_DRAM_WIDTH>() );
             break;
 
         case TYPE_DIMM:
@@ -1624,17 +1541,6 @@ void getMasterRanks<TYPE_MCA>( TargetHandle_t i_trgt,
 }
 
 template<>
-void getMasterRanks<TYPE_MBA>( TargetHandle_t i_trgt,
-                               std::vector<MemRank> & o_ranks,
-                               uint8_t i_ds )
-{
-    // NOTE: DIMMs must be plugged into pairs. So the values for each port
-    //       select will be the same for each DIMM select. There is no need to
-    //       iterate on both port selects.
-    __getMasterRanks<TYPE_MBA>( i_trgt, o_ranks, 0, i_ds );
-}
-
-template<>
 void getMasterRanks<TYPE_MEM_PORT>( TargetHandle_t i_trgt,
                                     std::vector<MemRank> & o_ranks,
                                     uint8_t i_ds )
@@ -1704,14 +1610,6 @@ void getSlaveRanks<TYPE_MCA>( TargetHandle_t i_trgt,
                               uint8_t i_ds )
 {
     __getSlaveRanks<TYPE_MCA>( i_trgt, o_ranks, i_ds );
-}
-
-template<>
-void getSlaveRanks<TYPE_MBA>( TargetHandle_t i_trgt,
-                              std::vector<MemRank> & o_ranks,
-                              uint8_t i_ds )
-{
-    __getSlaveRanks<TYPE_MBA>( i_trgt, o_ranks, i_ds );
 }
 
 template<>
@@ -1803,16 +1701,6 @@ uint8_t getNumMasterRanksPerDimm<TYPE_MCA>( TargetHandle_t i_trgt,
     uint8_t relPos = getTargetPosition(i_trgt) % MAX_MCA_PER_MCS;
 
     return __getNumMasterRanksPerDimm<TYPE_MCS>( mcsTrgt, relPos, i_ds );
-}
-
-template<>
-uint8_t getNumMasterRanksPerDimm<TYPE_MBA>( TargetHandle_t i_trgt,
-                                            uint8_t i_ds )
-{
-    // NOTE: DIMMs must be plugged into pairs. So the values for each port
-    //       select will be the same for each DIMM select. There is no need to
-    //       iterate on both port selects.
-    return __getNumMasterRanksPerDimm<TYPE_MBA>( i_trgt, 0, i_ds );
 }
 
 template<>
@@ -1912,15 +1800,6 @@ uint8_t getNumRanksPerDimm<TYPE_MCA>( TargetHandle_t i_trgt, uint8_t i_ds )
 }
 
 template<>
-uint8_t getNumRanksPerDimm<TYPE_MBA>( TargetHandle_t i_trgt, uint8_t i_ds )
-{
-    // NOTE: DIMMs must be plugged into pairs. So the values for each port
-    //       select will be the same for each DIMM select. There is no need to
-    //       iterate on both port selects.
-    return __getNumRanksPerDimm<TYPE_MBA>( i_trgt, 0, i_ds );
-}
-
-template<>
 uint8_t getNumRanksPerDimm<TYPE_MEM_PORT>( TargetHandle_t i_trgt, uint8_t i_ds )
 {
     return __getNumRanksPerDimm<TYPE_MEM_PORT>( i_trgt, 0, i_ds );
@@ -1955,12 +1834,6 @@ TARGETING::TargetHandle_t getClockId(TARGETING::TargetHandle_t
 
     do
     {
-        // If membuf target, use the connected proc target
-        if(TYPE_MEMBUF == getTargetType(i_pGivenTarget))
-        {
-            l_target = getConnectedParent(i_pGivenTarget, TYPE_PROC);
-        }
-
         PredicateIsFunctional l_funcFilter;
         PredicateCTM l_oscFilter(CLASS_CHIP, i_connType);
         PredicateCTM l_peerFilter(CLASS_UNIT,

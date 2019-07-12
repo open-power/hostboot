@@ -123,36 +123,6 @@ int32_t readErepair<TYPE_XBUS>(TargetHandle_t i_rxBusTgt,
 }
 
 template<>
-int32_t readErepair<TYPE_MEMBUF>(TargetHandle_t i_rxBusTgt,
-                                 std::vector<uint8_t> &o_rxFailLanes,
-                                 uint8_t i_clkGrp)
-{
-    int32_t o_rc = SUCCESS;
-
-    #ifdef __HOSTBOOT_MODULE
-    PRDF_ASSERT( nullptr != i_rxBusTgt);
-    PRDF_ASSERT( TYPE_MEMBUF == getTargetType(i_rxBusTgt) );
-    errlHndl_t err = nullptr;
-
-    fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> fapiTrgt (i_rxBusTgt);
-    FAPI_INVOKE_HWP(err,
-                    p9_io_cen_read_erepair,
-                    fapiTrgt,
-                    o_rxFailLanes);
-
-    if (nullptr != err)
-    {
-        PRDF_ERR( "[PlatServices::readErepairMembuf] HUID: 0x%08x "
-          "p9_io_cen_restore_erepair failed", getHuid(i_rxBusTgt) );
-        PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
-        o_rc = FAIL;
-    }
-
-    #endif
-    return o_rc;
-}
-
-template<>
 int32_t readErepair<TYPE_DMI>(TargetHandle_t i_rxBusTgt,
                               std::vector<uint8_t> &o_rxFailLanes,
                               uint8_t i_clkGrp)
@@ -210,35 +180,6 @@ int32_t clearIOFirs<TYPE_XBUS>(TargetHandle_t i_rxBusTgt)
 
     #endif
 
-    return o_rc;
-}
-
-template<>
-int32_t clearIOFirs<TYPE_MEMBUF>(TargetHandle_t  i_rxBusTgt)
-{
-    int32_t o_rc = SUCCESS;
-
-    #ifdef __HOSTBOOT_MODULE
-    PRDF_ASSERT( nullptr != i_rxBusTgt);
-    PRDF_ASSERT( TYPE_MEMBUF == getTargetType(i_rxBusTgt) );
-
-    errlHndl_t err = nullptr;
-
-    fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> fapiCenTrgt (i_rxBusTgt);
-    // Clear Centaur side
-    FAPI_INVOKE_HWP(err,
-                    p9_io_dmi_cn_clear_firs,
-                    fapiCenTrgt);
-
-    if (nullptr != err)
-    {
-        PRDF_ERR( "[PlatServices::clearIOFirs<TYPE_MEMBUF>] HUID: 0x%08x "
-                  "p9_io_dmi_cn_clear_firs failed", getHuid(i_rxBusTgt) );
-        PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
-        o_rc = FAIL;
-    }
-
-    #endif
     return o_rc;
 }
 
@@ -306,40 +247,6 @@ int32_t powerDownLanes<TYPE_XBUS>( TargetHandle_t i_rxBusTgt,
 }
 
 template<>
-int32_t powerDownLanes<TYPE_MEMBUF>(TargetHandle_t i_rxBusTgt,
-                                    const std::vector<uint8_t> &i_rxFailLanes,
-                                    const std::vector<uint8_t> &i_txFailLanes,
-                                    uint8_t i_clkGrp )
-{
-
-    int32_t o_rc = SUCCESS;
-
-    #ifdef __HOSTBOOT_MODULE
-    PRDF_ASSERT( nullptr != i_rxBusTgt);
-    PRDF_ASSERT( TYPE_MEMBUF == getTargetType(i_rxBusTgt) );
-
-    errlHndl_t err = nullptr;
-
-    fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> fapiTrgt (i_rxBusTgt);
-    FAPI_INVOKE_HWP(err,
-                    p9_io_cen_pdwn_lanes,
-                    fapiTrgt,
-                    i_rxFailLanes,
-                    i_txFailLanes);
-
-    if(nullptr != err)
-    {
-        PRDF_ERR( "[PlatServices::powerDownLanesMembuf] HUID: 0x%08x "
-                  "p9_io_cen_pdwn_lanes failed", getHuid(i_rxBusTgt) );
-        PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
-        o_rc = FAIL;
-    }
-
-    #endif
-    return o_rc;
-}
-
-template<>
 int32_t powerDownLanes<TYPE_DMI>(TargetHandle_t i_rxBusTgt,
                                  const std::vector<uint8_t> &i_rxFailLanes,
                                  const std::vector<uint8_t> &i_txFailLanes,
@@ -398,42 +305,6 @@ int32_t getVpdFailedLanes<TYPE_XBUS>(TargetHandle_t i_rxBusTgt,
     if(nullptr != err)
     {
         PRDF_ERR( "[PlatServices::getVpdFailedLanes] HUID: 0x%08x "
-                  "erepairGetFailedLanes failed",
-                  getHuid(i_rxBusTgt));
-        PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
-        o_rc = FAIL;
-    }
-
-    #endif
-    return o_rc;
-}
-
-template<>
-int32_t getVpdFailedLanes<TYPE_MEMBUF>(TargetHandle_t i_rxBusTgt,
-                              std::vector<uint8_t> &o_rxFailLanes,
-                              std::vector<uint8_t> &o_txFailLanes,
-                              uint8_t i_clkGrp)
-{
-    int32_t o_rc = SUCCESS;
-
-    #ifdef __HOSTBOOT_MODULE
-    PRDF_ASSERT( nullptr != i_rxBusTgt);
-    PRDF_ASSERT( TYPE_MEMBUF == getTargetType(i_rxBusTgt) );
-
-    errlHndl_t err = nullptr;
-
-    fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> fapiTrgt (i_rxBusTgt);
-
-    FAPI_INVOKE_HWP(err,
-                    erepairGetFailedLanes,
-                    fapiTrgt,
-                    i_clkGrp,
-                    o_txFailLanes,
-                    o_rxFailLanes);
-
-    if(nullptr != err)
-    {
-        PRDF_ERR( "[PlatServices::getVpdFailedLanesMembuf] HUID: 0x%08x "
                   "erepairGetFailedLanes failed",
                   getHuid(i_rxBusTgt));
         PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
@@ -515,96 +386,6 @@ int32_t setVpdFailedLanes<TYPE_XBUS,TYPE_XBUS>(
     if(nullptr != err)
     {
         PRDF_ERR( "[PlatServices::setVpdFailedLanes] rxHUID: 0x%08x "
-                  "txHUID: 0x%08x erepairSetFailedLanes failed",
-                  getHuid(i_rxBusTgt), getHuid(i_txBusTgt));
-        PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
-        o_rc = FAIL;
-    }
-
-    #endif
-    return o_rc;
-}
-
-
-template<>
-int32_t setVpdFailedLanes<TYPE_MEMBUF, TYPE_DMI>(
-                                            TargetHandle_t i_rxBusTgt,
-                                            TargetHandle_t i_txBusTgt,
-                                            std::vector<uint8_t> &i_rxFailLanes,
-                                            bool & o_thrExceeded,
-                                            uint8_t i_clkGrp )
-{
-    int32_t o_rc = SUCCESS;
-    o_thrExceeded = false;
-
-    #ifdef __HOSTBOOT_MODULE
-    PRDF_ASSERT( nullptr != i_rxBusTgt);
-    PRDF_ASSERT( nullptr != i_txBusTgt);
-    PRDF_ASSERT( TYPE_MEMBUF == getTargetType(i_rxBusTgt) );
-    PRDF_ASSERT( TYPE_DMI == getTargetType(i_txBusTgt) );
-
-
-    errlHndl_t err = nullptr;
-
-    fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> fapiRxTrgt (i_rxBusTgt);
-    fapi2::Target<fapi2::TARGET_TYPE_DMI> fapiTxTrgt (i_txBusTgt);
-
-    FAPI_INVOKE_HWP(err,
-                    erepairSetFailedLanes,
-                    fapiTxTrgt,
-                    fapiRxTrgt,
-                    i_clkGrp,
-                    i_rxFailLanes,
-                    o_thrExceeded);
-
-    if(nullptr != err)
-    {
-        PRDF_ERR( "[PlatServices::setVpdFailedLanesMembuf] rxHUID: 0x%08x "
-                  "txHUID: 0x%08x erepairSetFailedLanes failed",
-                  getHuid(i_rxBusTgt), getHuid(i_txBusTgt));
-        PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
-        o_rc = FAIL;
-    }
-
-    #endif
-    return o_rc;
-}
-
-
-template<>
-int32_t setVpdFailedLanes<TYPE_DMI,TYPE_MEMBUF>(
-                                            TargetHandle_t i_rxBusTgt,
-                                            TargetHandle_t i_txBusTgt,
-                                            std::vector<uint8_t> &i_rxFailLanes,
-                                            bool & o_thrExceeded,
-                                            uint8_t i_clkGrp )
-{
-    int32_t o_rc = SUCCESS;
-    o_thrExceeded = false;
-
-    #ifdef __HOSTBOOT_MODULE
-    PRDF_ASSERT( nullptr != i_rxBusTgt);
-    PRDF_ASSERT( nullptr != i_txBusTgt);
-    PRDF_ASSERT( TYPE_DMI == getTargetType(i_rxBusTgt) );
-    PRDF_ASSERT( TYPE_MEMBUF == getTargetType(i_txBusTgt) );
-
-
-    errlHndl_t err = nullptr;
-
-    fapi2::Target<fapi2::TARGET_TYPE_DMI> fapiRxTrgt (i_rxBusTgt);
-    fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> fapiTxTrgt (i_txBusTgt);
-
-    FAPI_INVOKE_HWP(err,
-                    erepairSetFailedLanes,
-                    fapiTxTrgt,
-                    fapiRxTrgt,
-                    i_clkGrp,
-                    i_rxFailLanes,
-                    o_thrExceeded);
-
-    if(nullptr != err)
-    {
-        PRDF_ERR( "[PlatServices::setVpdFailedLanesDmi] rxHUID: 0x%08x "
                   "txHUID: 0x%08x erepairSetFailedLanes failed",
                   getHuid(i_rxBusTgt), getHuid(i_txBusTgt));
         PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
@@ -960,7 +741,7 @@ int32_t mssSetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_memPort,
 
     TargetHandle_t dimm = getConnectedDimm( i_memPort, i_rank,
                                             i_symbol.getPortSlct() );
-    uint8_t l_dramSymbol = PARSERUTILS::dram2Symbol<TYPE_MBA>(
+    uint8_t l_dramSymbol = PARSERUTILS::dram2Symbol<TYPE_OCMB_CHIP>(
                                                      i_symbol.getDram(),
                                                      isDramWidthX4(dimm) );
 

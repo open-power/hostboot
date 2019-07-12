@@ -205,26 +205,6 @@ inline TdRankList<TARGETING::TYPE_OCMB_CHIP>::TdRankList(
     }
 }
 
-//------------------------------------------------------------------------------
-
-template<>
-inline TdRankList<TARGETING::TYPE_MBA>::TdRankList( ExtensibleChip * i_chip )
-{
-    using namespace TARGETING;
-    using namespace PlatServices;
-
-    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
-
-    std::vector<MemRank> rankList;
-    getSlaveRanks<TYPE_MBA>( i_chip->getTrgt(), rankList );
-    PRDF_ASSERT( !rankList.empty() ); // target configured with no ranks
-
-    for ( auto & rank : rankList )
-    {
-        iv_list.push_back( TdRankListEntry(i_chip, rank) );
-    }
-}
-
 } // end namespace PRDF
 
 #endif // __prdfTdRankList_H

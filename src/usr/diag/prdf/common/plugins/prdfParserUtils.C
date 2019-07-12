@@ -40,22 +40,6 @@ namespace FSP
 namespace PARSERUTILS
 {
 
-template<>
-uint8_t symbol2Dq<TARGETING::TYPE_MBA>( uint8_t i_symbol )
-{
-    uint8_t dq = DQS_PER_DIMM;
-
-    if ( SYMBOLS_PER_RANK > i_symbol )
-    {
-        if ( 8 > i_symbol )
-            dq = ( ((3 - (i_symbol % 4)) * 2) + 64 );
-        else
-            dq = ( (31 - (((i_symbol - 8) % 32))) * 2 );
-    }
-
-    return dq;
-}
-
 //------------------------------------------------------------------------------
 
 template<>
@@ -96,22 +80,6 @@ uint8_t symbol2Dq<TARGETING::TYPE_OCMB_CHIP>( uint8_t i_symbol )
 //------------------------------------------------------------------------------
 
 template<>
-uint8_t symbol2PortSlct<TARGETING::TYPE_MBA>( uint8_t i_symbol )
-{
-    uint8_t portSlct = MAX_PORT_PER_MBA;
-
-    if ( SYMBOLS_PER_RANK > i_symbol )
-    {
-        portSlct = ( ((i_symbol <= 3) || ((8 <= i_symbol) && (i_symbol <= 39)))
-                     ? 1 : 0 );
-    }
-
-    return portSlct;
-}
-
-//------------------------------------------------------------------------------
-
-template<>
 uint8_t symbol2PortSlct<TARGETING::TYPE_MCA>( uint8_t i_symbol )
 {
     // Port select does not exist on MCA. Always return 0 so that code will
@@ -129,24 +97,6 @@ uint8_t symbol2PortSlct<TARGETING::TYPE_OCMB_CHIP>( uint8_t i_symbol )
     // We'll need to figure out how to convert the symbol to a port select for
     // OCMB at that time.
     return 0;
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-uint8_t dq2Symbol<TARGETING::TYPE_MBA>( uint8_t i_dq, uint8_t i_ps )
-{
-    uint8_t sym = SYMBOLS_PER_RANK;
-
-    if ( DQS_PER_DIMM > i_dq && MAX_PORT_PER_MBA > i_ps )
-    {
-        if ( i_dq >= 64 )
-            sym = ( (3 - ((i_dq - 64) / 2)) + ((0 == i_ps) ? 4 : 0) );
-        else
-            sym = ( ((63 - i_dq) / 2) + ((0 == i_ps) ? 32 : 0) + 8 );
-    }
-
-    return sym;
 }
 
 //------------------------------------------------------------------------------
@@ -189,15 +139,6 @@ uint8_t dq2Symbol<TARGETING::TYPE_MEM_PORT>( uint8_t i_dq, uint8_t i_ps )
 //------------------------------------------------------------------------------
 
 template<>
-uint8_t nibble2Symbol<TARGETING::TYPE_MBA>( uint8_t i_x4Dram )
-{
-    return (MBA_NIBBLES_PER_RANK >i_x4Dram) ? (i_x4Dram *MBA_SYMBOLS_PER_NIBBLE)
-                                            : SYMBOLS_PER_RANK;
-}
-
-//------------------------------------------------------------------------------
-
-template<>
 uint8_t nibble2Symbol<TARGETING::TYPE_MCA>( uint8_t i_x4Dram )
 {
     uint8_t symbol = SYMBOLS_PER_RANK;
@@ -224,15 +165,6 @@ uint8_t nibble2Symbol<TARGETING::TYPE_OCMB_CHIP>( uint8_t i_x4Dram )
 {
     // OCMB_CHIP case is identical to MCA
     return nibble2Symbol<TARGETING::TYPE_MCA>(i_x4Dram);
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-uint8_t byte2Symbol<TARGETING::TYPE_MBA>( uint8_t i_x8Dram )
-{
-    return (MBA_BYTES_PER_RANK > i_x8Dram) ? (i_x8Dram * MBA_SYMBOLS_PER_BYTE)
-                                           : SYMBOLS_PER_RANK;
 }
 
 //------------------------------------------------------------------------------
@@ -269,15 +201,6 @@ uint8_t byte2Symbol<TARGETING::TYPE_OCMB_CHIP>( uint8_t i_x8Dram )
 //------------------------------------------------------------------------------
 
 template<>
-uint8_t symbol2Nibble<TARGETING::TYPE_MBA>( uint8_t i_symbol )
-{
-    return (SYMBOLS_PER_RANK > i_symbol) ? (i_symbol / MBA_SYMBOLS_PER_NIBBLE)
-                                         : MBA_NIBBLES_PER_RANK;
-}
-
-//------------------------------------------------------------------------------
-
-template<>
 uint8_t symbol2Nibble<TARGETING::TYPE_MCA>( uint8_t i_symbol )
 {
     return (SYMBOLS_PER_RANK > i_symbol)
@@ -292,15 +215,6 @@ uint8_t symbol2Nibble<TARGETING::TYPE_OCMB_CHIP>( uint8_t i_symbol )
 {
     // OCMB_CHIP case is identical to MCA
     return symbol2Nibble<TARGETING::TYPE_MCA>(i_symbol);
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-uint8_t symbol2Byte<TARGETING::TYPE_MBA>( uint8_t i_symbol )
-{
-    return (SYMBOLS_PER_RANK > i_symbol) ? (i_symbol / MBA_SYMBOLS_PER_BYTE)
-                                         : MBA_BYTES_PER_RANK;
 }
 
 //------------------------------------------------------------------------------
@@ -321,29 +235,6 @@ uint8_t symbol2Byte<TARGETING::TYPE_OCMB_CHIP>( uint8_t i_symbol )
     // OCMB_CHIP case is identical to MCA
     return symbol2Byte<TARGETING::TYPE_MCA>(i_symbol);
 }
-
-//------------------------------------------------------------------------------
-
-/**
- * @brief Find the first symbol of the given DRAM index
- * @param i_dram     The Dram
- * @param i_isX4Dram TRUE if DRAM is x4
- * @return The Symbol
- */
-template<>
-uint8_t dram2Symbol<TARGETING::TYPE_MBA>( uint8_t i_dram, bool i_isX4Dram )
-{
-    const uint8_t dramsPerRank   = i_isX4Dram ? MBA_NIBBLES_PER_RANK
-                                              : MBA_BYTES_PER_RANK;
-
-    const uint8_t symbolsPerDram = i_isX4Dram ? MBA_SYMBOLS_PER_NIBBLE
-                                              : MBA_SYMBOLS_PER_BYTE;
-
-    return (dramsPerRank > i_dram) ? (i_dram * symbolsPerDram)
-                                   : SYMBOLS_PER_RANK;
-}
-
-
 
 } // namespace PARSERUTILS
 

@@ -73,7 +73,7 @@ class MemSymbol
     /** @brief Constructor from components. Used only by the static initializer
      *         functions below. Guarantees the symbol is valid or asserts. */
     MemSymbol( TARGETING::TargetHandle_t i_trgt, const MemRank & i_rank,
-               uint8_t i_symbol, uint8_t i_pins );
+               uint8_t i_symbol );
 
   public: // functions
 
@@ -82,15 +82,13 @@ class MemSymbol
      * @param  i_trgt   MBA, MCA, or MEM_PORT target.
      * @param  i_rank   The rank this symbol is on.
      * @param  i_symbol The input symbol.
-     * @param  i_pins   See enum DqMask.
      * @return A MemSymbol. Must call isValid() to determine if the function was
      *         successful in creating a valid object.
      */
     static MemSymbol fromSymbol( TARGETING::TargetHandle_t i_trgt,
-                                 const MemRank & i_rank, uint8_t i_symbol,
-                                 uint8_t i_pins = CEN_SYMBOL::NO_SYMBOL_DQS )
+                                 const MemRank & i_rank, uint8_t i_symbol )
     {
-        return MemSymbol ( i_trgt, i_rank, i_symbol, i_pins );
+        return MemSymbol ( i_trgt, i_rank, i_symbol );
     }
 
     /**
@@ -206,7 +204,7 @@ class MemSymbol
      * this object is initially invalid. */
     uint8_t iv_symbol = SYMBOLS_PER_RANK;
 
-    uint8_t iv_pins = CEN_SYMBOL::NO_SYMBOL_DQS; ///< See enum DqMask.
+    uint8_t iv_pins = 0; ///< See enum DqMask.
 
     bool iv_isDramSpared = false; ///< TRUE if symbol resides on DRAM spare.
     bool iv_isEccSpared  = false; ///< TRUE if symbol resides on ECC spare.

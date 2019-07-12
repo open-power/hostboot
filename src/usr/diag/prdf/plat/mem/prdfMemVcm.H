@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -343,11 +343,6 @@ class VcmEvent : public TdEntry
 template<>
 uint32_t VcmEvent<TARGETING::TYPE_MCA>::cleanup(STEP_CODE_DATA_STRUCT & io_sc);
 #endif
-
-template<>
-uint32_t VcmEvent<TARGETING::TYPE_MBA>::startNextPhase(
-                                                STEP_CODE_DATA_STRUCT & io_sc );
-
 
 } // end namespace PRDF
 

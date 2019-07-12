@@ -329,7 +329,6 @@ uint32_t __handleNceEte( ExtensibleChip * i_chip,
         switch ( T )
         {
             case TYPE_MCA:       PRDF_ASSERT( 1 <= count && count <= 2 ); break;
-            case TYPE_MBA:       PRDF_ASSERT( 1 == count               ); break;
             case TYPE_OCMB_CHIP: PRDF_ASSERT( 1 <= count && count <= 2 ); break;
             default: PRDF_ASSERT( false );
         }

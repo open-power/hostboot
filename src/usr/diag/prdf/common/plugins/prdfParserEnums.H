@@ -199,41 +199,6 @@ namespace ROW_REPAIR
     };
 } // namespace ROW_REPAIR
 
-namespace CEN_SYMBOL
-{
-
-    /** Used as a 2-bit mask to display which of the DQs on this symbol are
-     *  failing. */
-    enum DqMask
-    {
-        NO_SYMBOL_DQS   = 0x0,
-        ODD_SYMBOL_DQ   = 0x1,
-        EVEN_SYMBOL_DQ  = 0x2,
-        BOTH_SYMBOL_DQS = EVEN_SYMBOL_DQ | ODD_SYMBOL_DQ,
-    };
-
-    /** This enum describes the raw card type for buffered DIMMs or the
-     *  DIMM plug card type for IS DIMMs. PRD will store the 80 byte translation
-     *  map in a separate section of the error log which can be used by the
-     *  parser to do the Centaur DQ to DIMM DQ translation. These types are used
-     *  for error log parsing which must be supported independent of the
-     *  drivers (i.e. eblis tool) so enums can be added, but the values of the
-     *  enums cannot be changed */
-    enum WiringType
-    {
-        CEN_TYPE_A          = 0,
-        CEN_TYPE_B          = 1,
-        CEN_TYPE_D          = 2,
-        CEN_TYPE_C          = 3,
-        CEN_TYPE_B4         = 4,
-        CEN_TYPE_A4         = 5,
-        CEN_TYPE_D4         = 6,
-        WIRING_INVALID      = 7, // An invalid card type
-        CEN_TYPE_C4         = 8,
-    };
-
-}//namespace CEN_SYMBOL ends
-
 namespace SLW_FFDC_DATA
 {
     static const char * const title = "SLW_FFDC_DATA";

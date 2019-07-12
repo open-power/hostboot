@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -134,7 +134,6 @@ union MemMruMeld
 struct ExtendedData
 {
     MemMruMeld mmMeld;             ///< See MemMruMeld union
-    uint32_t   cardType       : 8; ///< Raw card type (Centaur DIMMs only)
     uint32_t   isBufDimm      : 1; ///< 1=Centaur DIMM, 0=IS DIMM
     uint32_t   isX4Dram       : 1; ///< 1=x4 DRAM DIMM, 0=x8 DRAM DIMM
     uint32_t   isValid        : 1; ///< 1=struct contains valid data,
@@ -147,7 +146,7 @@ struct ExtendedData
 
     /** Default contructor */
     ExtendedData() :
-        cardType(CEN_SYMBOL::WIRING_INVALID), isBufDimm(0), isX4Dram(0),
+        isBufDimm(0), isX4Dram(0),
         isValid(0), reserved(0)
     {
         mmMeld.u = 0;
@@ -156,7 +155,7 @@ struct ExtendedData
 
     /** Contructor from flattened MemoryMru */
     explicit ExtendedData( uint32_t i_memMru ) :
-        cardType(CEN_SYMBOL::WIRING_INVALID), isBufDimm(0), isX4Dram(0),
+        isBufDimm(0), isX4Dram(0),
         isValid(0), reserved(0)
     {
         mmMeld.u = i_memMru;

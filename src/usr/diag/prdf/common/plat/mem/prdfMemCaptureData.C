@@ -94,10 +94,6 @@ void addExtMemMruData( const MemoryMru & i_memMru, errlHndl_t io_errl )
                 {
                     getDimmDqAttr<TYPE_MCA>( trgt, extMemMru.dqMapping );
                 }
-                else if ( TYPE_MBA == getTargetType(trgt) )
-                {
-                    getDimmDqAttr<TYPE_DIMM>(partList[0], extMemMru.dqMapping);
-                }
                 else if ( TYPE_MEM_PORT == getTargetType(trgt) )
                 {
                     getDimmDqAttr<TYPE_MEM_PORT>( trgt, extMemMru.dqMapping );
@@ -121,7 +117,6 @@ void addExtMemMruData( const MemoryMru & i_memMru, errlHndl_t io_errl )
 
     // TODO RTC 179854
     bsb.setFieldJustify( curPos, 32, htonl(extMemMru.mmMeld.u)  ); curPos+=32;
-    bsb.setFieldJustify( curPos,  8, extMemMru.cardType  ); curPos+= 8;
     bsb.setFieldJustify( curPos,  1, extMemMru.isBufDimm ); curPos+= 1;
     bsb.setFieldJustify( curPos,  1, extMemMru.isX4Dram  ); curPos+= 1;
     bsb.setFieldJustify( curPos,  1, extMemMru.isValid   ); curPos+= 1;
@@ -162,7 +157,6 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_trgt,
 
         uint8_t spareConfig = CEN_VPD_DIMM_SPARE_NO_SPARE;
         // check for spare DRAM. Port does not matter.
-        // Also this configuration is same for all ranks on MBA. (MCA no-op)
         rc = getDimmSpareConfig<T>( i_trgt, masterRanks[0], 0, spareConfig );
         if( SUCCESS != rc )
         {
@@ -221,10 +215,7 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_trgt,
         {
             data.header.rankCount = data.rankDataList.size();
             data.header.isEccSp   = false;
-            if ( TYPE_MBA == getTargetType(i_trgt) )
-            {
-                data.header.isEccSp = isDramWidthX4( i_trgt );
-            }
+
             UtilMem dramStream;
             dramStream << data;
 

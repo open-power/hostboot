@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,8 +51,7 @@ int32_t ClockResolution::Resolve(STEP_CODE_DATA_STRUCT & serviceData)
 
     uint32_t l_rc = SUCCESS;
     // callout clock osc
-    if ( (iv_targetType == TYPE_PROC) ||
-         (iv_targetType == TYPE_MEMBUF) )
+    if ( iv_targetType == TYPE_PROC )
     {
         TargetHandle_t l_ptargetClock =
             getActiveRefClk(iv_ptargetClock, TYPE_OSCREFCLK);

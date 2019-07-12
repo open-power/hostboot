@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,7 +35,6 @@ namespace PRDF
 
 using namespace MemoryMruData;
 using namespace PlatServices;
-using namespace CEN_SYMBOL;
 
 //------------------------------------------------------------------------------
 
@@ -71,29 +70,7 @@ MemoryMru::MemoryMru( uint32_t i_memMru ) :
     }
 
     // If our target is MBA, get the chnlPos from the membuf
-    if ( 0 == iv_memMruMeld.s.isMca )
-    {
-        TargetHandle_t membuf = getConnectedChild( proc, TYPE_MEMBUF,
-                iv_memMruMeld.s.chnlPos );
-        if ( NULL == membuf )
-        {
-            PRDF_ERR( PRDF_FUNC "Could not find functional membuf "
-                    "attached to proc 0x%08X at pos: %u", getHuid( proc ),
-                    iv_memMruMeld.s.chnlPos );
-            PRDF_ASSERT( false );
-        }
-
-        iv_target = getConnectedChild( membuf, TYPE_MBA,
-                iv_memMruMeld.s.mbaPos );
-        if ( NULL == iv_target )
-        {
-            PRDF_ERR( PRDF_FUNC "Could not find functional mba attached "
-                    "to 0x%08X at pos: %u", getHuid( membuf ),
-                    iv_memMruMeld.s.mbaPos );
-            PRDF_ASSERT( false );
-        }
-    }
-    else
+    if ( 1 == iv_memMruMeld.s.isMca )
     {
         iv_target = getConnectedChild( proc, TYPE_MCA,
                 iv_memMruMeld.s.chnlPos );
@@ -126,8 +103,7 @@ MemoryMru::MemoryMru( uint32_t i_memMru ) :
         }
 
         iv_symbol = MemSymbol::fromSymbol( iv_target, iv_rank,
-                iv_memMruMeld.s.symbol,
-                iv_memMruMeld.s.pins );
+                iv_memMruMeld.s.symbol );
         if ( !iv_symbol.isValid() )
         {
             PRDF_ERR( PRDF_FUNC "fromSymbol() failed" );
@@ -209,45 +185,7 @@ TargetHandleList MemoryMru::getCalloutList() const
     }
     else
     {
-        if ( TARGETING::TYPE_MBA == getTargetType(iv_target) )
-        {
-            if ( NO_SPECIAL_CALLOUT != iv_special )
-            {
-                switch ( iv_special )
-                {
-                    case CALLOUT_RANK:
-                        o_list = PlatServices::getConnectedDimms( iv_target,
-                                                                  iv_rank );
-                        break;
-                    case CALLOUT_ALL_MEM:
-                        o_list = getConnected( iv_target, TYPE_DIMM );
-                        break;
-                    default:
-                        PRDF_ERR( PRDF_FUNC "MemoryMruData::Callout 0x%02x not "
-                                "supported", iv_special );
-                }
-            }
-            else
-            {
-                uint8_t ps = iv_symbol.getPortSlct();
-
-                // Add DIMM represented by symbol
-                if ( iv_memMruMeld.s.eccSpared ) ps = 1; // Adjust for ECC spare
-                TARGETING::TargetHandle_t l_dimm = getConnectedDimm( iv_target,
-                                                                 iv_rank, ps );
-                if (l_dimm != nullptr)
-                {
-                  o_list.push_back(l_dimm);
-                }
-                else
-                {
-                  PRDF_ERR( PRDF_FUNC "getConnectedDimm(0x%08x, 0x%02X, %d) "
-                      "returned nullptr", getHuid(iv_target),
-                      iv_rank.getDimmSlct(), ps );
-                }
-            }
-        }
-        else if ( TARGETING::TYPE_MCA == getTargetType(iv_target) )
+        if ( TARGETING::TYPE_MCA == getTargetType(iv_target) )
         {
             if ( CALLOUT_ALL_MEM == iv_special )
             {
@@ -295,12 +233,7 @@ void MemoryMru::getCommonVars()
     TARGETING::TYPE trgtType = getTargetType( iv_target );
 
     TargetHandle_t proc = nullptr;
-    if ( TYPE_MBA == trgtType )
-    {
-        TargetHandle_t membuf = getConnectedParent( iv_target, TYPE_MEMBUF );
-        proc = getConnectedParent( membuf, TYPE_PROC );
-    }
-    else if ( TYPE_MCA == trgtType )
+    if ( TYPE_MCA == trgtType )
     {
         proc = getConnectedParent( iv_target, TYPE_PROC );
     }
@@ -311,19 +244,9 @@ void MemoryMru::getCommonVars()
     }
     TargetHandle_t node = getConnectedParent( proc, TYPE_NODE );
 
-    // If our target is an MBA, get the chnlPos from the membuf and the
-    // mbaPos from the target
-    if ( TYPE_MBA == getTargetType(iv_target) )
-    {
-        TargetHandle_t membuf = getConnectedParent( iv_target, TYPE_MEMBUF );
-
-        iv_memMruMeld.s.isMca   = 0;
-        iv_memMruMeld.s.chnlPos = getMemChnl( membuf );
-        iv_memMruMeld.s.mbaPos  = getTargetPosition( iv_target );
-    }
     // If our target is an MCA, then chnlPos will specify the MCA position
     // and mbaPos will be an unused field
-    else
+    if ( TYPE_MCA == getTargetType(iv_target) )
     {
         iv_memMruMeld.s.isMca   = 1;
         iv_memMruMeld.s.chnlPos = getTargetPosition( iv_target );

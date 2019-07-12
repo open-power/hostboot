@@ -571,96 +571,6 @@ int32_t __getPortAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip, MemAddr i_addr,
     return o_rc;
 }
 
-template <>
-int32_t __getPortAddr<TYPE_MBA>( ExtensibleChip * i_chip, MemAddr i_addr,
-                                 uint64_t & o_addr )
-{
-    #define PRDF_FUNC "[DEALLOC::__getPortAddr<TYPE_MBA>] "
-
-    int32_t o_rc = SUCCESS;
-
-    o_addr = 0;
-
-    TargetHandle_t mba  = i_chip->GetChipHandle();
-
-    ExtensibleChip * mbChip = getConnectedParent(i_chip, TYPE_MEMBUF);
-    uint64_t mbaPos = i_chip->getPos();
-
-    uint64_t ds   = i_addr.getRank().getDimmSlct(); // D
-    uint64_t mrnk = i_addr.getRank().getRankSlct(); // M0-M2
-    uint64_t srnk = i_addr.getRank().getSlave();    // S0-S2
-
-    uint64_t row  = i_addr.getRow();    // R18-R0
-    uint64_t col  = i_addr.getCol();    // C13,C11,C9-C3
-    uint64_t bnk  = i_addr.getBank();   // DDR3: B2-B0, DDR4: BG1-BG0,B1-B0
-
-    // Get the number of configured address bits for the master and slave ranks.
-    uint64_t num_mrnk = getNumMasterRanksPerDimm<TYPE_MBA>( mba, ds );
-    uint64_t num_srnk = getNumRanksPerDimm<TYPE_MBA>( mba, ds ) / num_mrnk;
-
-    uint64_t mrnkBits = ranks2bits( num_mrnk );
-    uint64_t srnkBits = ranks2bits( num_srnk );
-
-    // Get the number of configured address bits for the row and column.
-    uint8_t rowBits = getRowNumConfig<TYPE_MBA>( mba );
-    uint8_t colBits = getColNumConfig<TYPE_MBA>( mba );
-
-    do
-    {
-        // The attribute used in getDimmRowCol() returns a value for colBits
-        // which includes c2-c0. Those bits are tied to zero and are not
-        // included in col. Therefore, we need to subtract 3 to get the real
-        // value.
-        colBits = colBits - 3;
-
-        // Get the DDR verion of the DIMM (DDR3, DDR4, etc...)
-        uint8_t ddrVer = getDramGen<TYPE_MBA>( mba );
-
-        // Get the Centaur interleave mode (MBSXCR[0:4]).
-        SCAN_COMM_REGISTER_CLASS * mbsxcr = mbChip->getRegister("MBSXCR");
-        o_rc = mbsxcr->Read();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "Read() failed on MBSXCR. HUID:0x%08X",
-                      mbChip->GetId() ) ;
-            break;
-        }
-
-        uint64_t cenIlMode = mbsxcr->GetBitFieldJustified( 0, 5 );
-
-        // Get the rank config (MBAXCR[8]), rank hash (MBAXCR[10:11]), and
-        // MBA interleave mode (MBAXCR[12]).
-        const char * reg_str = ( 0 == mbaPos ) ? "MBA0_MBAXCR" : "MBA1_MBAXCR";
-        SCAN_COMM_REGISTER_CLASS * mbaxcr = mbChip->getRegister( reg_str );
-        o_rc = mbaxcr->Read();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "Read() failed on %s. HUID:0X%08X",
-                      reg_str, mbChip->GetId() );
-            break;
-        }
-
-        uint8_t cfg       = mbaxcr->GetBitFieldJustified(  8, 1 );
-        uint8_t hash      = mbaxcr->GetBitFieldJustified( 10, 2 );
-        uint8_t mbaIlMode = mbaxcr->GetBitFieldJustified( 12, 1 );
-
-        // Form the address from info gathered above
-        o_addr = transPhysToCenAddr( ds, mrnk, srnk,
-                                     mrnkBits, srnkBits,
-                                     row, rowBits, col, colBits,
-                                     bnk, mbaPos,
-                                     ddrVer,
-                                     cenIlMode, mbaIlMode,
-                                     hash, cfg );
-
-
-    } while(0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-
-}
 //------------------------------------------------------------------------------
 
 template<TYPE T>
@@ -697,21 +607,6 @@ void __getGrpPrms<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip, uint8_t o_portPos,
     o_mcfgpm = mcs_chip->getRegister("MCFGPM");
     */
 }
-
-template<>
-void __getGrpPrms<TYPE_MBA>( ExtensibleChip * i_chip, uint8_t o_portPos,
-                             SCAN_COMM_REGISTER_CLASS * &o_mcfgp,
-                             SCAN_COMM_REGISTER_CLASS * &o_mcfgpm )
-{
-    // Get the connected MI chip and MBA target position.
-    ExtensibleChip * mi_chip = getConnectedParent( i_chip, TYPE_MI );
-    o_portPos = i_chip->getPos();
-
-    o_mcfgp  = mi_chip->getRegister("MCFGP");
-    o_mcfgpm = mi_chip->getRegister("MCFGPM");
-}
-
-
 
 template<TYPE T>
 uint32_t __getGrpInfo( ExtensibleChip * i_chip, uint64_t & o_grpChnls,
@@ -1088,7 +983,6 @@ int32_t page( ExtensibleChip * i_chip, MemAddr i_addr )
     #undef PRDF_FUNC
 }
 template int32_t page<TYPE_MCA>( ExtensibleChip * i_chip, MemAddr i_addr );
-template int32_t page<TYPE_MBA>( ExtensibleChip * i_chip, MemAddr i_addr );
 template int32_t page<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip, MemAddr i_addr);
 
 //------------------------------------------------------------------------------

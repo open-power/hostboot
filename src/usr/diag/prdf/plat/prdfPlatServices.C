@@ -113,17 +113,6 @@ uint32_t getScom(TARGETING::TargetHandle_t i_target, BitString& io_bs,
 
         #ifdef __HOSTBOOT_RUNTIME
 
-        // We don't have a good mechanism at this time to determine if the SCOM
-        // failed because of a channel failure. So we will just assume any SCOM
-        // error on the Centaur means there is a channel failure and that we
-        // will need to retry.
-        if ( SCOM::SCOM_RUNTIME_HYP_ERR == errl->reasonCode() &&
-             ( (TYPE_MEMBUF == getTargetType(i_target)) ||
-               (TYPE_MBA    == getTargetType(i_target)) ) )
-        {
-            doRetry = true;
-        }
-
         #else
 
         // An inband SCOM failure likely means the memory channel has failed.

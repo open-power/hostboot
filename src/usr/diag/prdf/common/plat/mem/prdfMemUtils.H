@@ -110,16 +110,6 @@ template<TARGETING::TYPE T>
 uint8_t getDramSize( ExtensibleChip * i_chip, uint8_t i_dimmSlct = 0 );
 
 /**
- * @brief  determines the type of Centaur based raw card  associated with MBA.
- * @param  i_mba    mba target
- * @param  o_type   raw card type.
- * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
- * @note   Function is not intended for IS DIMM.
- */
-int32_t getRawCardType( TARGETING::TargetHandle_t i_mba,
-                        CEN_SYMBOL::WiringType & o_type );
-
-/**
  * @brief  When handling attentions on a memory buffer, there will be FIR bits
  *         on the processor side of the bus that must be manually cleared in
  *         order to completely clear the attention.

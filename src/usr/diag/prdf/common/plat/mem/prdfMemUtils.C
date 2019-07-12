@@ -53,7 +53,6 @@ namespace MemUtils
 
 using namespace PlatServices;
 using namespace PARSERUTILS;
-using namespace CEN_SYMBOL;
 
 const uint8_t CE_REGS_PER_PORT = 9;
 const uint8_t SYMBOLS_PER_CE_REG = 8;
@@ -146,7 +145,7 @@ int32_t collectCeStats<TYPE_MCA>( ExtensibleChip * i_chip,
 
                     SymbolData symData;
                     symData.symbol = MemSymbol::fromSymbol( mcaTrgt, i_rank,
-                                               sym, CEN_SYMBOL::ODD_SYMBOL_DQ );
+                                               sym );
                     if ( !symData.symbol.isValid() )
                     {
                         PRDF_ERR( PRDF_FUNC "MemSymbol() failed: symbol=%d",
@@ -277,7 +276,7 @@ int32_t collectCeStats<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
                     SymbolData symData;
                     symData.symbol = MemSymbol::fromSymbol( ocmbTrgt, i_rank,
-                        sym, CEN_SYMBOL::ODD_SYMBOL_DQ );
+                        sym );
                     if ( !symData.symbol.isValid() )
                     {
                         PRDF_ERR( PRDF_FUNC "MemSymbol() failed: symbol=%d",

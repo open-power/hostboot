@@ -444,9 +444,6 @@ std::vector<MemSymbol> MemDqBitmap::getSymbolList( uint8_t i_portSlct )
                         case TYPE_MCA:
                             symbol = dq2Symbol<TYPE_MCA>( dq, i_portSlct );
                             break;
-                        case TYPE_MBA:
-                            symbol = dq2Symbol<TYPE_MBA>( dq, i_portSlct );
-                            break;
                         case TYPE_MEM_PORT:
                             symbol = dq2Symbol<TYPE_MEM_PORT>( dq, i_portSlct );
                             break;

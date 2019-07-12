@@ -40,7 +40,7 @@ uint32_t DsdEvent<T>::checkEcc( const uint32_t & i_eccAttns,
                                 STEP_CODE_DATA_STRUCT & io_sc,
                                 bool & o_done )
 {
-    #define PRDF_FUNC "[DsdEvent<TYPE_MBA>::checkEcc] "
+    #define PRDF_FUNC "[DsdEvent<T>::checkEcc] "
 
     uint32_t o_rc = SUCCESS;
 

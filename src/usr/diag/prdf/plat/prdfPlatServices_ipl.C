@@ -78,10 +78,9 @@ int32_t mdiaSendEventMsg( TargetHandle_t i_trgt,
 
     PRDF_ASSERT( nullptr != i_trgt );
 
-    // Only MCBIST, MBA, and OCMB_CHIP supported.
+    // Only MCBIST and OCMB_CHIP supported.
     TYPE trgtType = getTargetType( i_trgt );
     PRDF_ASSERT( TYPE_MCBIST == trgtType ||
-                 TYPE_MBA == trgtType    ||
                  TYPE_OCMB_CHIP == trgtType );
 
     // MDIA must be running.
@@ -481,23 +480,7 @@ uint32_t startTdSteerCleanup<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
             break;
         }
 
-        /* TODO RTC 207273 - sparing support
-        // Get the MBA fapi target.
-        fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiTrgt ( i_chip->getTrgt() );
-
-        // Start the steer cleanup command.
-        mss_TimeBaseSteerCleanup cmd { fapiTrgt, saddr, eaddr, cmdSpeed,
-                                       i_stopCond, false };
-        errlHndl_t errl = nullptr;
-        FAPI_INVOKE_HWP( errl, cmd.setupAndExecuteCmd );
-        if ( nullptr != errl )
-        {
-            PRDF_ERR( PRDF_FUNC "setupAndExecuteCmd() on 0x%08x,0x%02x failed",
-                      i_chip->getHuid(), i_rank.getKey() );
-            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-            o_rc = FAIL; break;
-        }
-        */
+        // TODO RTC 207273 - sparing support
 
     } while (0);
 
@@ -549,29 +532,7 @@ uint32_t startTdSfRead<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
             break;
         }
 
-        /* TODO RTC 207273 - HWP support
-        // Get the MBA fapi target.
-        fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiTrgt ( i_chip->getTrgt() );
-
-        // Create the new command. Store a pointer to the command in the MBA
-        // data bundle so that we can call the cleanup function after the
-        // command has completed.
-        MbaDataBundle * db = getMbaDataBundle( i_chip );
-        PRDF_ASSERT( nullptr == db->iv_sfCmd ); // Code bug.
-        db->iv_sfCmd = new mss_SuperFastRead { fapiTrgt, saddr, eaddr,
-                                               i_stopCond, false };
-
-        // Start the super fast read command.
-        errlHndl_t errl = nullptr;
-        FAPI_INVOKE_HWP( errl, db->iv_sfCmd->setupAndExecuteCmd );
-        if ( nullptr != errl )
-        {
-            PRDF_ERR( PRDF_FUNC "setupAndExecuteCmd() on 0x%08x,0x%02x failed",
-                      i_chip->getHuid(), i_rank.getKey() );
-            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-            o_rc = FAIL; break;
-        }
-        */
+        // TODO RTC 207273 - HWP support
 
     } while (0);
 

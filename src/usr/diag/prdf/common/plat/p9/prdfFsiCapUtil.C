@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -80,20 +80,6 @@ void captureFsiStatusReg<TYPE_PROC>( ExtensibleChip * i_chip,
     // FSP has full FSI access.
     __captureFsiReg( i_chip, io_sc, 0x1007, "CFAM_FSI_STATUS" );
     __captureFsiReg( i_chip, io_sc, 0x2816, "CFAM_FSI_GP7"    );
-
-    #endif
-}
-
-template<>
-void captureFsiStatusReg<TYPE_MEMBUF>( ExtensibleChip * i_chip,
-                                       STEP_CODE_DATA_STRUCT & io_sc )
-{
-    PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MEMBUF == i_chip->getType() );
-
-    #ifndef __HOSTBOOT_RUNTIME
-
-    __captureFsiReg( i_chip, io_sc, 0x1007, "CFAM_FSI_STATUS" );
 
     #endif
 }

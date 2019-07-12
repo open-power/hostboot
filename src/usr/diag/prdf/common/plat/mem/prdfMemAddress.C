@@ -70,22 +70,6 @@ MemAddr MemAddr::fromReadAddr<TYPE_OCMB_CHIP>( uint64_t i_addr )
     return MemAddr( MemRank(mrnk, srnk), bnk, row, col );
 }
 
-
-template<>
-MemAddr MemAddr::fromReadAddr<TYPE_MEMBUF>( uint64_t i_addr )
-{
-    uint64_t mrnk   = (i_addr >> 60) &     0x7; //  1: 3
-    uint64_t srnk   = (i_addr >> 57) &     0x7; //  4: 6
-    uint64_t bnk    = (i_addr >> 53) &     0xf; //  7:10
-    uint64_t r16_r0 = (i_addr >> 36) & 0x1ffff; // 11:27
-    uint64_t col    = (i_addr >> 27) &   0x1ff; // 28:36
-    uint64_t r17    = (i_addr >> 22) &     0x1; // 41
-
-    uint64_t row    = (r17 << 17) | r16_r0;
-
-    return MemAddr( MemRank(mrnk, srnk), bnk, row, col );
-}
-
 template<>
 MemAddr MemAddr::fromMaintAddr<TYPE_MCBIST>( uint64_t i_addr )
 {
@@ -114,34 +98,6 @@ MemAddr MemAddr::fromMaintAddr<TYPE_OCMB_CHIP>( uint64_t i_addr )
     uint64_t mrnk  = (dslct << 2) | rslct;
 
     return MemAddr( MemRank(mrnk, srnk), bnk, row, col );
-}
-
-template<>
-MemAddr MemAddr::fromMaintAddr<TYPE_MBA>( uint64_t i_addr )
-{
-    uint64_t mrnk   = (i_addr >> 60) &     0x7; //  1: 3
-    uint64_t srnk   = (i_addr >> 57) &     0x7; //  4: 6
-    uint64_t bnk    = (i_addr >> 53) &     0xf; //  7:10
-    uint64_t r16_r0 = (i_addr >> 36) & 0x1ffff; // 11:27
-    uint64_t col    = (i_addr >> 27) &   0x1ff; // 28:36 (37:39 tied to 0)
-    uint64_t r17    = (i_addr >>  4) &     0x1; // 59
-
-    uint64_t row    = (r17 << 17) | r16_r0;
-
-    return MemAddr( MemRank(mrnk, srnk), bnk, row, col );
-}
-
-template<>
-uint64_t MemAddr::toMaintAddr<TYPE_MBA>() const
-{
-    return (
-        ((uint64_t)(iv_rnk.getMaster() &     0x7)<< 60) |  //  1: 3
-        ((uint64_t)(iv_rnk.getSlave()  &     0x7)<< 57) |  //  4: 6
-        ((uint64_t)(iv_bnk             &     0xf)<< 53) |  //  7:10
-        ((uint64_t)(iv_row             & 0x1ffff)<< 36) |  // 11:27
-        ((uint64_t)(iv_col             &   0x1ff)<< 27) |  // 28:36
-                                                           // 37:39 tied to 0
-        ((uint64_t)(iv_row             & 0x20000)>> 13) ); // 59
 }
 
 //------------------------------------------------------------------------------
@@ -251,53 +207,6 @@ uint32_t getMemReadAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 //------------------------------------------------------------------------------
 
 template<>
-uint32_t getMemReadAddr<TYPE_MEMBUF>( ExtensibleChip * i_chip, uint32_t i_pos,
-                                      MemAddr::ReadReg i_reg, MemAddr & o_addr )
-{
-    #define PRDF_FUNC "[getMemReadAddr<TYPE_MEMBUF>] "
-
-    // Check parameters
-    PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MEMBUF == i_chip->getType() );
-    PRDF_ASSERT( i_pos < MAX_MBA_PER_MEMBUF );
-
-    // Get the register string.
-    const char * tmp = "";
-    switch ( i_reg )
-    {
-        case MemAddr::READ_NCE_ADDR: tmp = "MBNCER"; break;
-        case MemAddr::READ_RCE_ADDR: tmp = "MBRCER"; break;
-        case MemAddr::READ_MPE_ADDR: tmp = "MBMPER"; break;
-        case MemAddr::READ_UE_ADDR : tmp = "MBUER" ; break;
-        default: PRDF_ASSERT( false );
-    }
-
-    char reg_str[64];
-    sprintf( reg_str, "MBA%d_%s", i_pos, tmp );
-
-    // Read the address register
-    SCAN_COMM_REGISTER_CLASS * reg = i_chip->getRegister( reg_str );
-    uint32_t o_rc = reg->Read();
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "Read() failed on %s: i_chip=0x%08x",
-                  reg_str, i_chip->getHuid() );
-    }
-    else
-    {
-        // Get the address object.
-        uint64_t addr = reg->GetBitFieldJustified( 0, 64 );
-        o_addr = MemAddr::fromReadAddr<TYPE_MEMBUF>( addr );
-    }
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-template<>
 uint32_t getMemReadAddr<TYPE_MCA>( ExtensibleChip * i_chip,
                                    MemAddr::ReadReg i_reg, MemAddr & o_addr )
 {
@@ -309,22 +218,6 @@ uint32_t getMemReadAddr<TYPE_MCA>( ExtensibleChip * i_chip,
     uint8_t port = i_chip->getPos() % MAX_MCA_PER_MCBIST;
 
     return getMemReadAddr<TYPE_MCBIST>( mcbChip, port, i_reg, o_addr );
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-uint32_t getMemReadAddr<TYPE_MBA>( ExtensibleChip * i_chip,
-                                   MemAddr::ReadReg i_reg, MemAddr & o_addr )
-{
-    PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
-
-    ExtensibleChip * membChip = getConnectedParent( i_chip, TYPE_MEMBUF );
-
-    uint8_t mbaPos = i_chip->getPos();
-
-    return getMemReadAddr<TYPE_MEMBUF>( membChip, mbaPos, i_reg, o_addr );
 }
 
 //------------------------------------------------------------------------------
@@ -424,96 +317,6 @@ uint32_t getMemMaintAddr<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
     ExtensibleChip * ocmbChip = getConnectedParent( i_chip, TYPE_OCMB_CHIP );
 
     return getMemMaintAddr<TYPE_OCMB_CHIP>( ocmbChip, o_addr );
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-uint32_t getMemMaintAddr<TYPE_MBA>( ExtensibleChip * i_chip, MemAddr & o_addr )
-{
-    #define PRDF_FUNC "[getMemMaintAddr<TYPE_MBA>] "
-
-    // Check parameters
-    PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
-
-    // Read the address register
-    SCAN_COMM_REGISTER_CLASS * reg = i_chip->getRegister( "MBMACA" );
-    uint32_t o_rc = reg->Read();
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "Read() failed on MBMACA: i_chip=0x%08x",
-                  i_chip->getHuid() );
-    }
-    else
-    {
-        // Get the address object.
-        uint64_t addr = reg->GetBitFieldJustified( 0, 64 );
-        o_addr = MemAddr::fromMaintAddr<TYPE_MBA>( addr );
-    }
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-uint32_t setMemMaintAddr<TYPE_MBA>( ExtensibleChip * i_chip,
-                                    const MemAddr & i_addr )
-{
-    #define PRDF_FUNC "[setMemMaintAddr<TYPE_MBA>] "
-
-    // Check parameters
-    PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
-
-    // Write the address register
-    SCAN_COMM_REGISTER_CLASS * reg = i_chip->getRegister( "MBMACA" );
-    reg->SetBitFieldJustified( 0, 64, i_addr.toMaintAddr<TYPE_MBA>() );
-    uint32_t o_rc = reg->Write();
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "Write() failed on MBMACA: i_chip=0x%08x",
-                  i_chip->getHuid() );
-    }
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-uint32_t getMemMaintEndAddr<TYPE_MBA>( ExtensibleChip * i_chip,
-                                       MemAddr & o_addr )
-{
-    #define PRDF_FUNC "[getMemMaintEndAddr<TYPE_MBA>] "
-
-    // Check parameters
-    PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
-
-    // Read the address register
-    SCAN_COMM_REGISTER_CLASS * reg = i_chip->getRegister( "MBMEA" );
-    uint32_t o_rc = reg->Read();
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "Read() failed on MBMEA: i_chip=0x%08x",
-                  i_chip->getHuid() );
-    }
-    else
-    {
-        // Get the address object.
-        uint64_t addr = reg->GetBitFieldJustified( 0, 64 );
-        o_addr = MemAddr::fromMaintAddr<TYPE_MBA>( addr );
-    }
-
-    return o_rc;
 
     #undef PRDF_FUNC
 }

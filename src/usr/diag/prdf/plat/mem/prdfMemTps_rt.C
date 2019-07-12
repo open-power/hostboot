@@ -1756,7 +1756,7 @@ uint32_t TpsEvent<TYPE_MCA>::getSymbolCeCounts( CeCount & io_badDqCount,
 
                     MemUtils::SymbolData symData;
                     symData.symbol = MemSymbol::fromSymbol( mcaTrgt, iv_rank,
-                        sym, CEN_SYMBOL::ODD_SYMBOL_DQ );
+                        sym );
                     if ( !symData.symbol.isValid() )
                     {
                         PRDF_ERR( PRDF_FUNC "MemSymbol() failed: symbol=%d",
@@ -1858,7 +1858,7 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::getSymbolCeCounts( CeCount & io_badDqCount,
 
                     MemUtils::SymbolData symData;
                     symData.symbol = MemSymbol::fromSymbol( mcaTrgt, iv_rank,
-                        sym, CEN_SYMBOL::ODD_SYMBOL_DQ );
+                        sym );
                     if ( !symData.symbol.isValid() )
                     {
                         PRDF_ERR( PRDF_FUNC "MemSymbol() failed: symbol=%d",

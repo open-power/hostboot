@@ -38,7 +38,6 @@ namespace PRDF
 {
 
 using namespace PlatServices;
-using namespace CEN_SYMBOL;
 using namespace PARSERUTILS;
 
 //##############################################################################
@@ -46,16 +45,13 @@ using namespace PARSERUTILS;
 //##############################################################################
 
 MemSymbol::MemSymbol( TARGETING::TargetHandle_t i_trgt, const MemRank & i_rank,
-                      uint8_t i_symbol, uint8_t i_pins ) :
+                      uint8_t i_symbol ) :
     iv_trgt(i_trgt), iv_rank(i_rank), iv_symbol(i_symbol),
-    iv_pins(i_pins), iv_isDramSpared(false), iv_isEccSpared(false)
+    iv_pins(0), iv_isDramSpared(false), iv_isEccSpared(false)
 {
     PRDF_ASSERT( nullptr != i_trgt );
-    PRDF_ASSERT( TYPE_MBA == getTargetType(i_trgt) ||
-                 TYPE_MCA == getTargetType(i_trgt) ||
+    PRDF_ASSERT( TYPE_MCA == getTargetType(i_trgt) ||
                  TYPE_OCMB_CHIP == getTargetType(i_trgt) );
-    // Allowing an invalid symbol. Use isValid() to check validity.
-    PRDF_ASSERT( i_pins <= CEN_SYMBOL::BOTH_SYMBOL_DQS );
 }
 
 //------------------------------------------------------------------------------
@@ -74,21 +70,7 @@ MemSymbol MemSymbol::fromGalois( TargetHandle_t i_trgt, const MemRank & i_rank,
         }
     }
 
-    // Get pins from mask.
-    uint8_t pins = NO_SYMBOL_DQS;
-    TYPE trgtType = getTargetType( i_trgt );
-    if ( TYPE_MCA == trgtType || TYPE_OCMB_CHIP == trgtType )
-    {
-        // 1 pin for MCA/TYPE_OCMB_CHIP.
-        if ( 0 != (i_mask & 0xff) ) pins |= ODD_SYMBOL_DQ;
-    }
-    else
-    {
-        PRDF_ERR( "MemSymbol::fromGalois: Invalid target type" );
-        PRDF_ASSERT(false);
-    }
-
-    return MemSymbol( i_trgt, i_rank, symbol, pins );
+    return MemSymbol( i_trgt, i_rank, symbol );
 }
 
 //------------------------------------------------------------------------------

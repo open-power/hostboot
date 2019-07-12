@@ -111,14 +111,6 @@ uint32_t __getRowRepairData( TargetHandle_t i_dimm, const MemRank & i_rank,
 }
 
 template<>
-uint32_t getRowRepairData<TYPE_MBA>( TargetHandle_t i_dimm,
-    const MemRank & i_rank, MemRowRepair & o_rowRepair )
-{
-    return __getRowRepairData<TYPE_MBA, fapi2::TARGET_TYPE_MBA>( i_dimm, i_rank,
-                                                                 o_rowRepair );
-}
-
-template<>
 uint32_t getRowRepairData<TYPE_MCA>( TargetHandle_t i_dimm,
     const MemRank & i_rank, MemRowRepair & o_rowRepair )
 {
@@ -181,15 +173,6 @@ uint32_t __setRowRepairData( TargetHandle_t i_dimm, const MemRank & i_rank,
 }
 
 template<>
-uint32_t setRowRepairData<TYPE_MBA>( TargetHandle_t i_dimm,
-                                     const MemRank & i_rank,
-                                     const MemRowRepair & i_rowRepair )
-{
-    return __setRowRepairData<TYPE_MBA, fapi2::TARGET_TYPE_MBA>( i_dimm, i_rank,
-                                                                 i_rowRepair );
-}
-
-template<>
 uint32_t setRowRepairData<TYPE_MCA>( TargetHandle_t i_dimm,
                                      const MemRank & i_rank,
                                      const MemRowRepair & i_rowRepair )
@@ -202,26 +185,6 @@ uint32_t setRowRepairData<TYPE_MCA>( TargetHandle_t i_dimm,
 
 template<TARGETING::TYPE T>
 void __setRowRepairDataHelper( const MemAddr & i_addr, uint32_t & io_tmp );
-
-template<>
-void __setRowRepairDataHelper<TYPE_MBA>( const MemAddr & i_addr,
-                                         uint32_t & io_tmp )
-{
-    #ifdef __HOSTBOOT_MODULE
-
-    // Bank is stored as MBA "(DDR4): bg1-bg0,b1-b0 (4-bit)" in a MemAddr.
-    // bank group - 2 bits (bg1-bg0)
-    io_tmp = ( io_tmp << 2 ) | ( (i_addr.getBank() >> 2) & 0x03 );
-
-    // bank - 3 bits (b2-b0)
-    io_tmp = ( io_tmp << 3 ) | ( i_addr.getBank() & 0x03 );
-
-    // Row is stored as "MBA: r17-r0 (18-bit)" in a MemAddr.
-    // row - 18 bits (r17-r0)
-    io_tmp = ( io_tmp << 18 ) | ( i_addr.getRow() & 0x0003ffff );
-
-    #endif // __HOSTBOOT_MODULE
-}
 
 template<>
 void __setRowRepairDataHelper<TYPE_MCA>( const MemAddr & i_addr,
@@ -289,23 +252,13 @@ uint32_t setRowRepairData( TargetHandle_t i_dimm,
         // validity - 1 bit
         l_tmp = ( l_tmp << 1 ) | 0x1;
 
-        // Adjust for mba port 1 address inversion if necessary
-        if ( (1 == getDimmPort(i_dimm) % 2) && (T == TYPE_MBA) )
-        {
-            // Bits flipped in port 1 inversion: (10:12, 16:22, 24, 26:28)
-            // mask:
-            // 0000 0000 0011 1000 1111 1110 1011 1000
-            uint32_t mask = 0x0038FEB8;
-            l_tmp ^= mask;
-        }
-
         // ROW_REPAIR_SIZE = 4
         uint8_t l_data[ROW_REPAIR::ROW_REPAIR_SIZE] = {0};
         memcpy( l_data, &l_tmp, sizeof(l_data) );
 
         MemRowRepair l_rowRepair( i_dimm, i_rank, l_data );
 
-        o_rc = setRowRepairData<TYPE_MBA>( i_dimm, i_rank, l_rowRepair );
+        o_rc = setRowRepairData<T>( i_dimm, i_rank, l_rowRepair );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "setRowRepairData() failed" );
@@ -321,11 +274,6 @@ uint32_t setRowRepairData( TargetHandle_t i_dimm,
 
 }
 
-template
-uint32_t setRowRepairData<TYPE_MBA>( TargetHandle_t i_dimm,
-                                     const MemRank & i_rank,
-                                     const MemAddr & i_addr,
-                                     uint8_t i_dram );
 template
 uint32_t setRowRepairData<TYPE_MCA>( TargetHandle_t i_dimm,
                                      const MemRank & i_rank,
@@ -364,9 +312,6 @@ uint32_t clearRowRepairData( TargetHandle_t i_dimm, const MemRank & i_rank )
     #undef PRDF_FUNC
 }
 
-template
-uint32_t clearRowRepairData<TYPE_MBA>( TargetHandle_t i_dimm,
-                                       const MemRank & i_rank );
 template
 uint32_t clearRowRepairData<TYPE_MCA>( TargetHandle_t i_dimm,
                                        const MemRank & i_rank );

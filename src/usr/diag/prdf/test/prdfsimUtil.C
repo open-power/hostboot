@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -115,17 +115,6 @@ const epath_array EPATH_ARRAY_MAP[] =
     {"MCS{2}", {TYPE_MCS, 2}},
     {"MCS{3}", {TYPE_MCS, 3}},
 
-    {"MEMBUF{0}", {TYPE_MEMBUF, 0}},
-    {"MEMBUF{1}", {TYPE_MEMBUF, 1}},
-    {"MEMBUF{2}", {TYPE_MEMBUF, 2}},
-    {"MEMBUF{3}", {TYPE_MEMBUF, 3}},
-    {"MEMBUF{4}", {TYPE_MEMBUF, 4}},
-    {"MEMBUF{5}", {TYPE_MEMBUF, 5}},
-    {"MEMBUF{6}", {TYPE_MEMBUF, 6}},
-    {"MEMBUF{7}", {TYPE_MEMBUF, 7}},
-
-    {"MBA{0}", {TYPE_MBA, 0}},
-    {"MBA{1}", {TYPE_MBA, 1}}
 };
 
 const uint64_t NUM_EPATH_ARRAY = sizeof(EPATH_ARRAY_MAP)/sizeof(EPATH_ARRAY_MAP[0]);

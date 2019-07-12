@@ -65,16 +65,6 @@ TargetHandle_t getTxBusEndPt( TargetHandle_t i_rxTrgt)
     {
         o_txTrgt = getConnectedPeerTarget( i_rxTrgt );
     }
-    else if (TYPE_DMI == busType)
-    {
-        // Get connected memory buffer
-        o_txTrgt = getConnectedChild( i_rxTrgt, TYPE_MEMBUF, 0 );
-    }
-    else if (TYPE_MEMBUF == busType)
-    {
-        // grab connected DMI parent
-        o_txTrgt = getConnectedParent( i_rxTrgt, TYPE_DMI );
-    }
 
     PRDF_ASSERT(nullptr != o_txTrgt);
     return o_txTrgt;
@@ -99,12 +89,6 @@ bool isLaneRepairDisabled<TYPE_DMI>()
 {
     return isMemeRepairDisabled();
 }
-template<>
-bool isLaneRepairDisabled<TYPE_MEMBUF>()
-{
-    return isMemeRepairDisabled();
-}
-
 
 template< TYPE T_RX, TYPE T_TX >
 int32_t __handleLaneRepairEvent( ExtensibleChip * i_chip,
@@ -961,11 +945,6 @@ int32_t calloutBusInterface( ExtensibleChip * i_chip,
         else if ( TYPE_OBUS == rxType && TYPE_OBUS == txType )
         {
             hwasType = HWAS::O_BUS_TYPE;
-        }
-        else if ( (TYPE_DMI == rxType && TYPE_MEMBUF == txType) ||
-                  (TYPE_MEMBUF == rxType && TYPE_DMI == txType) )
-        {
-            hwasType = HWAS::DMI_BUS_TYPE;
         }
         else if ( (TYPE_OMI == rxType && TYPE_OCMB_CHIP == txType) ||
                   (TYPE_OCMB_CHIP == rxType && TYPE_OMI == txType) )

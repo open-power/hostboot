@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -897,17 +897,10 @@ void ErrDataService::deallocateDimms( const SDC_MRU_LIST & i_mruList )
                 TargetHandle_t calloutTgt = thiscallout.getTarget();
                 TYPE tgtType = getTargetType( calloutTgt );
 
-                if ( TYPE_L4 == tgtType )
-                {
-                    calloutTgt = getConnectedParent( calloutTgt, TYPE_MEMBUF );
-                    tgtType    = TYPE_MEMBUF;
-                }
-
                 switch ( tgtType )
                 {
                     case TYPE_MCBIST: case TYPE_MCS: case TYPE_MCA: // Nimbus
                     case TYPE_MC:     case TYPE_MI:  case TYPE_DMI: // Cumulus
-                    case TYPE_MEMBUF: case TYPE_MBA:                // Centaur
                     {
                         TargetHandleList dimms = getConnected( calloutTgt,
                                                                TYPE_DIMM );
