@@ -305,7 +305,7 @@ uint32_t setRowRepairData( TargetHandle_t i_dimm,
 
         MemRowRepair l_rowRepair( i_dimm, i_rank, l_data );
 
-        o_rc = setRowRepairData<TYPE_MBA>( i_dimm, i_rank, l_rowRepair );
+        o_rc = setRowRepairData<T>( i_dimm, i_rank, l_rowRepair );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "setRowRepairData() failed" );
