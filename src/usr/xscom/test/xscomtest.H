@@ -71,9 +71,10 @@ const testXscomAddrData g_xscomMultiWriteTable[] =
         {0x21010A89, 0x0200000000000000},
         {0x22010A89, 0x0030000000000000},
         {0x23010A89, 0x0004000000000000},
-        // Local checkstop regs
-        {0x10040018, 0x1000000000000000},  // ChipletID 0x10
-        {0x20040018, 0x1000000000000000},  // ChipletID 0x20
+        // Group0 Xstop mask regs, TPEQPCC.EPS.FIR.GXSTOP0_MASK_REG
+        // Use register without actions attached to it
+        {0x10040014, 0x8000000000000000},  // ChipletID 0x10, set bit0
+        {0x20040014, 0x8000000000000000},  // ChipletID 0x20, set bit0
 };
 const uint32_t g_xscomMultiWriteTableSz =
                 sizeof(g_xscomMultiWriteTable)/sizeof(testXscomAddrData);
@@ -85,10 +86,10 @@ const testXscomAddrData g_xscomMultiReadTable[] =
         // Scratch reg 3
         //   Multicast OR op
         {0x41010a89, 0x1234000000000000},
-        // Local checkstop regs
+        // Group0 Xstop Mask regs, TPEQPCC.EPS.FIR.GXSTOP0_MASK_REG
         //   ChipletID 0x10 0x20
         //   Multicast BITWISE op
-        {0x50040018, 0x0000800080000000},
+        {0x50040014, 0x0000800080000000},
 };
 const uint32_t g_xscomMultiReadTableSz =
                 sizeof(g_xscomMultiReadTable)/sizeof(testXscomAddrData);
@@ -404,8 +405,8 @@ public:
         uint32_t l_num;
 
         do {
-#if defined(CONFIG_EARLY_TESTCASES) || defined(CONFIG_AXONE_BRING_UP)
-            TS_TRACE("testXscom4: Skipping test, multicast groups not setup yet");
+#if defined(CONFIG_EARLY_TESTCASES)
+            TS_INFO("testXscom4: Skipping test, multicast groups not setup yet");
             break;
 #endif
 
