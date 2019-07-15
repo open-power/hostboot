@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/runtime/customize_attrs_for_payload.H $       */
+/* $Source: src/include/usr/targeting/common/hbrt_target.H $              */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,41 +22,24 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
-#ifndef __RUNTIME_CUST_ATTRS_FOR_PAYLOAD_H
-#define __RUNTIME_CUST_ATTRS_FOR_PAYLOAD_H
-
-/**
- *  @file customize_attrs_for_payload.H
- *  @brief Provides the definition for the payload specific attribute
- *      customization functions
- */
+#ifndef __HBRT_TARGET_H
+#define __HBRT_TARGET_H
 
 #include <errl/errlentry.H>
-#include <targeting/runtime/rt_targeting.H>
-#include <targeting/common/attributes.H>
 
-namespace RUNTIME
+namespace TARGETING
 {
+    typedef uint64_t rtChipId_t;
+     /**
+     * @brief Convert a TARGETING::Target to an unit ID that can be used
+     * in calls to the runtime host
+     * @param[in] The HB TARGETING::Target
+     * @param[out] Sapphire target id
+     * @return an error handle on error
+     */
+    errlHndl_t getRtTarget(const TARGETING::Target* i_target,
+                           rtChipId_t &o_targetId);
 
-static const TARGETING::ATTR_HBRT_HYP_ID_type HBRT_HYP_ID_UNKNOWN
-    = 0xFFFFFFFFFFFFFFFFULL;
-
-static const TARGETING::rtChipId_t RT_TYPE_UNKNOWN
-    = 0xFFFFFFFFFFFFFFFFULL;
-
-/**
- *  @brief Populate ATTR_HBRT_HYP_ID attributes for the current payload type,
- *      allowing runtime/host interfaces to reference equivalent targets
- *  @param[in] i_configForPhyp Whether to configure the IDs for PHyp (true), or
- *      all other payload kinds (false)
- *  @return Error log handle
- *  @retval NULL Populated all ATTR_HBRT_HYP_ID attributes successfully
- *  @retval !NULL Failed to populate one or more ATTR_HBRT_HYP_ID attributes
- */
-errlHndl_t configureHbrtHypIds(bool i_configForPhyp);
-
-
-}; // End namespace RUNTIME
+}
 
 #endif

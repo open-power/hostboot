@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,7 +27,6 @@
 
 #include <cxxtest/TestSuite.H>
 #include <runtime/interface.h>
-#include <runtime/rt_targeting.H>
 #include <sbeio/runtime/sbe_msg_passing.H>
 #include <sbeio/sbeioreasoncodes.H>
 #include <secureboot/service.H>
@@ -35,6 +34,7 @@
 #include <targeting/common/target.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
+#include <targeting/runtime/rt_targeting.H>
 #include <errl/errlmanager.H>
 #include <devicefw/userif.H>
 #include <initservice/mboxRegs.H>
@@ -172,8 +172,8 @@ public:
             }
 
             l_proc = procList[0];
-            RT_TARG::rtChipId_t l_chipId = 0;
-            errlHndl_t l_err = RT_TARG::getRtTarget(l_proc, l_chipId);
+            TARGETING::rtChipId_t l_chipId = 0;
+            errlHndl_t l_err = TARGETING::getRtTarget(l_proc, l_chipId);
 
             if(nullptr != l_err)
             {

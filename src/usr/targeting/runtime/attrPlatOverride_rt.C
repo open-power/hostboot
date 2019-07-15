@@ -24,7 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 #include <runtime/interface.h>
-#include <runtime/rt_targeting.H>
+#include <targeting/runtime/rt_targeting.H>
 #include <targeting/common/commontargeting.H>
 #include <targeting/attrPlatOverride.H>
 #include <fapi2/plat_attr_override_sync.H>

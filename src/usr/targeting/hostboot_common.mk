@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2016
+# Contributors Listed Below - COPYRIGHT 2013,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -29,6 +29,9 @@ COMMON_TARGETING_REL_PATH = ${TARGETING_REL_PATH}/common
 COMMON_TARGETING_MAKEFILE = ${COMMON_TARGETING_REL_PATH}/common.mk
 
 include ${COMMON_TARGETING_MAKEFILE}
+
+# TODO: 248022 move this to common.mk when CMVC files are updated for fips
+TARGET_OBJS += hbrt_target.o
 
 VPATH += ${TARGETING_REL_PATH}/adapters
 VPATH += ${COMMON_TARGETING_REL_PATH}

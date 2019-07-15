@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,7 +29,7 @@
 #include <initservice/taskargs.H>
 #include <initservice/initserviceif.H>
 
-#include <runtime/rt_targeting.H>
+#include <targeting/runtime/rt_targeting.H>
 #include <runtime/interface.h>   // g_hostInterfaces, postInitCalls_t
 
 #include <pnor/pnorif.H>
@@ -923,7 +923,7 @@ errlHndl_t RtPnor::getMasterProcId()
         TRACFCOMP(g_trac_pnor, "RtPnor::getMasterProcId: queryMasterProcChipTargetHandle failed");
         break;
     }
-    l_err = RT_TARG::getRtTarget(l_masterProc, iv_masterProcId);
+    l_err = TARGETING::getRtTarget(l_masterProc, iv_masterProcId);
     if (l_err)
     {
         TRACFCOMP(g_trac_pnor, "RtPnor::getMasterProcId: getRtTarget failed for master proc");

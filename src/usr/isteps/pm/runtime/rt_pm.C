@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,7 +37,6 @@
 
 #include <runtime/interface.h>        // g_hostInterfaces
 #include <runtime/rt_fwreq_helper.H>  // firmware_request_helper
-#include <runtime/rt_targeting.H>
 #include <runtime/runtime_reasoncodes.H>
 
 #include <initservice/isteps_trace.H>
@@ -46,6 +45,7 @@
 #include    <targeting/common/util.H>
 #include    <targeting/common/utilFilter.H>
 #include    <targeting/common/targetservice.H>
+#include    <targeting/runtime/rt_targeting.H>
 
 #include <scom/scomif.H>
 #include <scom/wakeup.H>
@@ -400,9 +400,9 @@ namespace RTPM
             }
 
             // Get the Proc Chip Id
-            RT_TARG::rtChipId_t l_chipId = 0;
+            TARGETING::rtChipId_t l_chipId = 0;
 
-            l_err = RT_TARG::getRtTarget(l_pChipTarget, l_chipId);
+            l_err = TARGETING::getRtTarget(l_pChipTarget, l_chipId);
             if(l_err)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,

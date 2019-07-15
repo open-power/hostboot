@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,7 +40,7 @@
 #include    <targeting/common/target.H>
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
-#include    <runtime/rt_targeting.H>
+#include    <targeting/runtime/rt_targeting.H>
 
 //  mailbox register definitions
 #include <initservice/mboxRegs.H>

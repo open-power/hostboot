@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/runtime/rt_targeting.H $                      */
+/* $Source: src/include/usr/targeting/runtime/rt_targeting.H $            */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -26,6 +26,7 @@
 #define __RT_TARGETING_H
 
 #include <errl/errlentry.H>
+#include <targeting/common/hbrt_target.H>
 
 namespace TARGETING
 {
@@ -34,7 +35,6 @@ namespace TARGETING
 
 namespace RT_TARG
 {
-    typedef uint64_t rtChipId_t;
 
     enum
     {
@@ -50,22 +50,12 @@ namespace RT_TARG
     };
 
     /**
-     * @brief Convert a TARGETING::Target to an unit ID that can be used
-     * in calls to the runtime host
-     * @param[in] The HB TARGETING::Target
-     * @param[out] Sapphire target id
-     * @return an error handle on error
-     */
-    errlHndl_t getRtTarget(const TARGETING::Target* i_target,
-                           rtChipId_t &o_targetId);
-
-    /**
      * @brief Convert a runtime chip_id (target) into a TARGETING::Target
      * @param[in] The rt chipId
      * @param[out] The TARGETING::Target pointer
      * @return error log handle on error else NULL
      */
-    errlHndl_t getHbTarget(rtChipId_t i_rt_chip_id,
+    errlHndl_t getHbTarget(TARGETING::rtChipId_t i_rt_chip_id,
                            TARGETING::Target *& o_target);
 
     /**
