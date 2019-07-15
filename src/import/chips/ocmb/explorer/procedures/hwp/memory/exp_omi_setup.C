@@ -37,6 +37,7 @@
 #include <generic/memory/lib/utils/c_str.H>
 #include <lib/exp_attribute_accessors_manual.H>
 #include <lib/omi/exp_omi_utils.H>
+#include <lib/i2c/exp_i2c.H>
 #include <generic/memory/mss_git_data_helper.H>
 
 extern "C"
@@ -55,6 +56,18 @@ extern "C"
         fapi2::buffer<uint64_t> l_data;
         bool l_is_enterprise = false;
         bool l_is_half_dimm = false;
+        std::vector<uint8_t> l_boot_config_data;
+        uint8_t l_dl_layer_boot_mode = fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_DL_LAYER_BOOT_MODE_NON_DL_TRAINING;
+
+        // Gets the data setup
+        FAPI_TRY(mss::exp::omi::train::setup_fw_boot_config(i_target, l_boot_config_data));
+
+        // Sanity check: set dl_layer_boot_mode to NON DL TRAINING (0b00 == default)
+        FAPI_TRY(mss::exp::i2c::boot_cfg::set_dl_layer_boot_mode( i_target, l_boot_config_data, l_dl_layer_boot_mode ));
+
+        // Issues the command and checks for completion
+        // Note: This does not kick off OMI training
+        FAPI_TRY(mss::exp::i2c::boot_config(i_target, l_boot_config_data));
 
         // Gets the configuration information from attributes
         FAPI_TRY(mss::enterprise_mode(i_target, l_is_enterprise));

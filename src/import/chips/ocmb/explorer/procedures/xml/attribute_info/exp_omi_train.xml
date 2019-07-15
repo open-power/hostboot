@@ -97,8 +97,8 @@
         </description>
         <valueType>uint8</valueType>
         <enum>
-           BOOT_RIGHT_AFTER_CONFIG = 0,
-           WAIT_FOR_HOST_CMD = 1
+           NON_DL_TRAINING = 0,
+           ONLY_DL_TRAINING = 1
         </enum>
         <platInit/>
         <initToZero/>
