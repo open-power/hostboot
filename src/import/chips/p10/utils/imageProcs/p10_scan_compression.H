@@ -400,7 +400,6 @@ void print_raw_ring( uint8_t*  data, uint32_t  bits);
 #define RS4_IV_TYPE_SEL_PLL         (uint8_t)0b01000000 // PLL
 #define RS4_IV_TYPE_SEL_FINAL       (uint8_t)0b10000000 // Final overlaid ring
 
-#define UNDEFINED_RS4_TYPE     (uint8_t)0xff
 #define UNDEFINED_RS4_SELECTOR (Rs4Selector_t)0xffff
 #define MAX_RS4_SELECTOR       (Rs4Selector_t)0xff // Practical upper limit of 255
 
