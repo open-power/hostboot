@@ -541,9 +541,9 @@ uint32_t __applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
             __addCallout( i_chip, i_rank, ecc, io_sc );
 
             // Add the row repairs to the callout list if they exist
-            o_rc = __addRowRepairCallout<TARGETING::TYPE_MEM_PORT>( memPort,
-                                                                    i_rank,
-                                                                    io_sc );
+            o_rc = __addRowRepairCallout<TARGETING::TYPE_OCMB_CHIP>( memPort,
+                                                                     i_rank,
+                                                                     io_sc );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "__addRowRepairCallout(0x%08x,0x%02x) "

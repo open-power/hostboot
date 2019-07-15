@@ -347,8 +347,6 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
                                     scanFac, resFac );
                 break;
 
-            // TODO RTC 199020 - add the pll domains for axone
-
             default: ;
         }
     }
