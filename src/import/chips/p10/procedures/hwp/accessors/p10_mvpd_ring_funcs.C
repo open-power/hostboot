@@ -806,7 +806,7 @@ extern "C"
                 ((CompressedScanData*)i_pCallerRingBuf)->iv_type  = RS4_IV_TYPE_CMSK_NON_CMSK;
                 ((CompressedScanData*)i_pCallerRingBuf)->iv_type |= RS4_IV_TYPE_OVRD_FLUSH;
                 ((CompressedScanData*)i_pCallerRingBuf)->iv_type |= RS4_IV_TYPE_SEL_BASE;
-                ((CompressedScanData*)i_pCallerRingBuf)->iv_size += RS4_V3TOV4_SIZE_INC;
+                ((CompressedScanData*)i_pCallerRingBuf)->iv_size += htobe16(RS4_V3TOV4_SIZE_INC);
                 ((CompressedScanData*)i_pCallerRingBuf)->iv_selector = UNDEFINED_RS4_SELECTOR;
                 ((CompressedScanData*)i_pCallerRingBuf)->iv_undefined = 0;
             }

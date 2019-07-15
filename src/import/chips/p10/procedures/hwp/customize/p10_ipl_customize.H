@@ -32,8 +32,16 @@
 #define NUM_OF_QMES      (uint8_t)8
 #define CORES_PER_QME    (NUM_OF_CORES/NUM_OF_QMES)
 
-#define EQ_QUADRANT_MASK      (uint32_t)0x00003C00
-#define EQ_QUADRANT0_SEL      (uint32_t)0x00002000
+// The following two defines are needed for selecting the three ec repair
+// rings depending on which quadrant they belong to and which is governed
+// by the "region core select" nibbles, however, are different for the
+// three rings.  Fortunately, these bits for the three rings do
+// not overlap on the same bit positions in the scanScomAddr. For more
+// info, see the specific scanScomAddr for ec{,1,2,3}_{cl2,mma,l3}_repr
+// in p10_ring_properties.H
+#define EQ_QUADRANT0_SEL (uint32_t)0x00802200  // "leftmost" quadrant0 selector bits for the 3 rings
+#define EQ_QUADRANT_MASK (uint32_t)0x00F03FC0  // 3 rings x 4bits/ring = 12 region select bits
+
 #define QUAD0_CORES_MASK (uint32_t)0xF0000000
 #define CORE0_MASK       (uint32_t)0x80000000
 
