@@ -23,4 +23,8 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p10_qme_customize
+lib$(PROCEDURE)_DEPLIBS+=p10_tor
+lib$(PROCEDURE)_DEPLIBS+=common_ringId
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/utils/imageProcs)
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/common/utils/imageProcs)
 $(call BUILD_PROCEDURE)
