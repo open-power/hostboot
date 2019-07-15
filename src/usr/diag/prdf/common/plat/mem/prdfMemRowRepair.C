@@ -134,6 +134,14 @@ uint32_t getRowRepairData<TYPE_MEM_PORT>( TargetHandle_t i_dimm,
         i_dimm, i_rank, o_rowRepair );
 }
 
+template<>
+uint32_t getRowRepairData<TYPE_OCMB_CHIP>( TargetHandle_t i_dimm,
+    const MemRank & i_rank, MemRowRepair & o_rowRepair )
+{
+    return __getRowRepairData<TYPE_OCMB_CHIP, fapi2::TARGET_TYPE_OCMB_CHIP>(
+        i_dimm, i_rank, o_rowRepair );
+}
+
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T, fapi2::TargetType F>
@@ -198,34 +206,19 @@ uint32_t setRowRepairData<TYPE_MCA>( TargetHandle_t i_dimm,
                                                                  i_rowRepair );
 }
 
+template<>
+uint32_t setRowRepairData<TYPE_OCMB_CHIP>( TargetHandle_t i_dimm,
+                                           const MemRank & i_rank,
+                                           const MemRowRepair & i_rowRepair )
+{
+    return __setRowRepairData<TYPE_OCMB_CHIP, fapi2::TARGET_TYPE_OCMB_CHIP>(
+        i_dimm, i_rank, i_rowRepair );
+}
+
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>
-void __setRowRepairDataHelper( const MemAddr & i_addr, uint32_t & io_tmp );
-
-template<>
-void __setRowRepairDataHelper<TYPE_MBA>( const MemAddr & i_addr,
-                                         uint32_t & io_tmp )
-{
-    #ifdef __HOSTBOOT_MODULE
-
-    // Bank is stored as MBA "(DDR4): bg1-bg0,b1-b0 (4-bit)" in a MemAddr.
-    // bank group - 2 bits (bg1-bg0)
-    io_tmp = ( io_tmp << 2 ) | ( (i_addr.getBank() >> 2) & 0x03 );
-
-    // bank - 3 bits (b2-b0)
-    io_tmp = ( io_tmp << 3 ) | ( i_addr.getBank() & 0x03 );
-
-    // Row is stored as "MBA: r17-r0 (18-bit)" in a MemAddr.
-    // row - 18 bits (r17-r0)
-    io_tmp = ( io_tmp << 18 ) | ( i_addr.getRow() & 0x0003ffff );
-
-    #endif // __HOSTBOOT_MODULE
-}
-
-template<>
-void __setRowRepairDataHelper<TYPE_MCA>( const MemAddr & i_addr,
-                                         uint32_t & io_tmp )
+void __setRowRepairDataHelper( const MemAddr & i_addr, uint32_t & io_tmp )
 {
     #ifdef __HOSTBOOT_MODULE
 
@@ -247,6 +240,32 @@ void __setRowRepairDataHelper<TYPE_MCA>( const MemAddr & i_addr,
 
     // row - 18 bits (r17-r0)
     io_tmp = ( io_tmp << 18 ) | ( l_row & 0x0003ffff );
+
+    #endif // __HOSTBOOT_MODULE
+}
+template
+void __setRowRepairDataHelper<TYPE_MCA>( const MemAddr & i_addr,
+                                         uint32_t & io_tmp );
+template
+void __setRowRepairDataHelper<TYPE_OCMB_CHIP>( const MemAddr & i_addr,
+                                               uint32_t & io_tmp );
+
+template<>
+void __setRowRepairDataHelper<TYPE_MBA>( const MemAddr & i_addr,
+                                         uint32_t & io_tmp )
+{
+    #ifdef __HOSTBOOT_MODULE
+
+    // Bank is stored as MBA "(DDR4): bg1-bg0,b1-b0 (4-bit)" in a MemAddr.
+    // bank group - 2 bits (bg1-bg0)
+    io_tmp = ( io_tmp << 2 ) | ( (i_addr.getBank() >> 2) & 0x03 );
+
+    // bank - 3 bits (b2-b0)
+    io_tmp = ( io_tmp << 3 ) | ( i_addr.getBank() & 0x03 );
+
+    // Row is stored as "MBA: r17-r0 (18-bit)" in a MemAddr.
+    // row - 18 bits (r17-r0)
+    io_tmp = ( io_tmp << 18 ) | ( i_addr.getRow() & 0x0003ffff );
 
     #endif // __HOSTBOOT_MODULE
 }
@@ -331,6 +350,11 @@ uint32_t setRowRepairData<TYPE_MCA>( TargetHandle_t i_dimm,
                                      const MemRank & i_rank,
                                      const MemAddr & i_addr,
                                      uint8_t i_dram );
+template
+uint32_t setRowRepairData<TYPE_OCMB_CHIP>( TargetHandle_t i_dimm,
+                                           const MemRank & i_rank,
+                                           const MemAddr & i_addr,
+                                           uint8_t i_dram );
 
 //------------------------------------------------------------------------------
 
@@ -370,6 +394,9 @@ uint32_t clearRowRepairData<TYPE_MBA>( TargetHandle_t i_dimm,
 template
 uint32_t clearRowRepairData<TYPE_MCA>( TargetHandle_t i_dimm,
                                        const MemRank & i_rank );
+template
+uint32_t clearRowRepairData<TYPE_OCMB_CHIP>( TargetHandle_t i_dimm,
+                                             const MemRank & i_rank );
 
 //------------------------------------------------------------------------------
 
