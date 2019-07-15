@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,7 +71,6 @@ fapi2::ReturnCode p9_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
     fapi2::buffer<uint8_t> l_read_attr;
     fapi2::buffer<uint8_t> l_fifo_reset_skip;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-    fapi2::buffer<uint8_t>  l_is_axone;
 
     FAPI_INF("p9_start_cbs: Entering ...");
 
@@ -80,8 +79,6 @@ fapi2::ReturnCode p9_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_START_CBS_FIFO_RESET_SKIP,
                            FAPI_SYSTEM, l_fifo_reset_skip));
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_P9A_SBE_REGION, i_target_chip, l_is_axone));
 
     FAPI_DBG("Clearing  Selfboot message register before every boot ");
     // buffer is init value is 0
@@ -203,68 +200,7 @@ fapi2::ReturnCode p9_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                 .set_FSI2PIB_STATUS_READ(l_data32),
                 "ERROR:VDD OFF, FSI2PIB  BIT 16 NOT SET");
 
-    if (l_is_axone)
-    {
-        FAPI_DBG("Switching to PIB2PCB mux sel to 1 [till pcbnet clocks are started]");
-        FAPI_TRY(p9_start_cbs_switch_to_pib2pcb_path_cfam(i_target_chip));
-    }
-
     FAPI_INF("p9_start_cbs: Exiting ...");
-
-fapi_try_exit:
-    return fapi2::current_err;
-
-}
-
-/// @brief Switching to PIB2PCB Path via cfam
-///
-/// @param[in]     i_target_chip     Reference to TARGET_TYPE_PROC_CHIP
-/// @return  FAPI2_RC_SUCCESS if success, else error code.
-fapi2::ReturnCode p9_start_cbs_switch_to_pib2pcb_path_cfam(const
-        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip)
-{
-    fapi2::buffer<uint32_t> l_read_reg;
-    FAPI_INF("p9_start_cbs_switch_to_pib2pcb_path_cfam: Entering ...");
-
-    FAPI_DBG("Reading ROOT_CTRL0_REG");
-    FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_ROOT_CTRL0_FSI, l_read_reg));
-
-    if (!l_read_reg.getBit<PERV_ROOT_CTRL0_SET_PCB_RESET_DC>())
-    {
-        FAPI_DBG("Setting PCB RESET bit in  ROOT_CTRL0_REG");
-        l_read_reg.setBit<PERV_ROOT_CTRL0_SET_PCB_RESET_DC>();
-        FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_ROOT_CTRL0_FSI, l_read_reg));
-    }
-
-    if (!l_read_reg.getBit<PERV_ROOT_CTRL0_18_SPARE_MUX_CONTROL>())
-    {
-        FAPI_DBG("Setting PIB2PCB bit in  ROOT_CTRL0_REG");
-        l_read_reg.setBit<PERV_ROOT_CTRL0_18_SPARE_MUX_CONTROL>();
-        FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_ROOT_CTRL0_FSI, l_read_reg));
-    }
-
-    if (l_read_reg.getBit<PERV_ROOT_CTRL0_PIB2PCB_DC>())
-    {
-        FAPI_DBG("Clearing FSI2PCB bit in  ROOT_CTRL0_REG");
-        l_read_reg.clearBit<PERV_ROOT_CTRL0_PIB2PCB_DC>();
-        FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_ROOT_CTRL0_FSI, l_read_reg));
-    }
-
-    if (l_read_reg.getBit<PERV_ROOT_CTRL0_19_SPARE_MUX_CONTROL>())
-    {
-        FAPI_DBG("Clearing PCB2PCB bit in  ROOT_CTRL0_REG");
-        l_read_reg.clearBit<PERV_ROOT_CTRL0_19_SPARE_MUX_CONTROL>();
-        FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_ROOT_CTRL0_FSI, l_read_reg));
-    }
-
-    if (l_read_reg.getBit<PERV_ROOT_CTRL0_SET_PCB_RESET_DC>())
-    {
-        FAPI_DBG("Clearing PCB RESET bit in  ROOT_CTRL0_REG");
-        l_read_reg.clearBit<PERV_ROOT_CTRL0_SET_PCB_RESET_DC>();
-        FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_ROOT_CTRL0_FSI, l_read_reg));
-    }
-
-    FAPI_INF("p9_start_cbs_switch_to_pib2pcb_path_cfam: Exiting ...");
 
 fapi_try_exit:
     return fapi2::current_err;
