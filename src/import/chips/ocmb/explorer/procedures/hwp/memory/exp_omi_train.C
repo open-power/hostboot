@@ -53,9 +53,13 @@ extern "C"
         mss::display_git_commit_info("exp_omi_train");
 
         std::vector<uint8_t> l_data;
+        uint8_t l_dl_layer_boot_mode = fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_DL_LAYER_BOOT_MODE_ONLY_DL_TRAINING;
 
         // Gets the data setup
         FAPI_TRY(mss::exp::omi::train::setup_fw_boot_config(i_target, l_data));
+
+        // Sets DL_TRAIN field
+        FAPI_TRY(mss::exp::i2c::boot_cfg::set_dl_layer_boot_mode( i_target, l_data, l_dl_layer_boot_mode ));
 
         // Issues the command and checks for completion
         // Note: the status check also checks for the OMI training completion, so after we run this command, we're good to go
