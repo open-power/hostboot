@@ -653,7 +653,22 @@ _rs4_compress(CompressedScanData* io_rs4,
         io_rs4->iv_scanAddr = htobe32(i_scanAddr);
         io_rs4->iv_undefined = 0;
 
-        // Check for valid iv_type and flush/override settings
+        // Check for valid iv_type and iv_selector settings
+
+        // iv_type check:  CMSK
+        if ( (i_type & RS4_IV_TYPE_CMSK_MASK) == RS4_IV_TYPE_CMSK_NON_CMSK ||
+             (i_type & RS4_IV_TYPE_CMSK_MASK) == RS4_IV_TYPE_CMSK_CMSK )
+        {
+            // Valid CMSK settings.
+        }
+        else
+        {
+            return BUGX(SCAN_COMPRESSION_IV_TYPE_ERROR,
+                        "_rs4_compress: Invalid iv_type(=0x%02x) value for CMSK settings\n",
+                        i_type);
+        }
+
+        // iv_type check:  flush/override
         if ( (i_type & RS4_IV_TYPE_OVRD_MASK) == RS4_IV_TYPE_OVRD_FLUSH ||
              (i_type & RS4_IV_TYPE_OVRD_MASK) == RS4_IV_TYPE_OVRD_OVRD )
         {
@@ -666,9 +681,8 @@ _rs4_compress(CompressedScanData* io_rs4,
                         i_type);
         }
 
-        // Check for valid iv_type and iv_selector settings
-        if ( ( i_selector == UNDEFINED_RS4_SELECTOR &&
-               (i_type & RS4_IV_TYPE_SEL_MASK) == RS4_IV_TYPE_SEL_BASE ) ||
+        // iv_type check: selector
+        if ( ( i_selector == UNDEFINED_RS4_SELECTOR && (i_type & RS4_IV_TYPE_SEL_MASK) ) ||
              ( i_selector != UNDEFINED_RS4_SELECTOR &&
                ( (i_type & RS4_IV_TYPE_SEL_MASK) == RS4_IV_TYPE_SEL_DYN ||
                  (i_type & RS4_IV_TYPE_SEL_MASK) == RS4_IV_TYPE_SEL_PLL ) ) )
@@ -683,9 +697,7 @@ _rs4_compress(CompressedScanData* io_rs4,
                         i_type, i_selector);
         }
 
-        // For now this assumes non-CMSK scan data and relies on caller
-        // to set type later.
-        io_rs4->iv_type     = i_type | RS4_IV_TYPE_CMSK_NON_CMSK;
+        io_rs4->iv_type     = i_type;
         io_rs4->iv_selector = htobe16(i_selector);
     }
 

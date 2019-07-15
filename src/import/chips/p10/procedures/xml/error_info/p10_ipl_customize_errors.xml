@@ -383,7 +383,7 @@
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_XIPC_RS4_DECOMPRESS_ERROR</rc>
-    <description>rs4_decompress() failed</description>
+    <description>_rs4_decompress() failed</description>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>RING_ID</ffdc>
     <ffdc>MAX_RING_BYTE_SIZE</ffdc>
@@ -396,10 +396,10 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
-    <rc>RC_XIPC_MVPD_OVLY_RAW_RING_SIZE_MISMATCH_ERROR</rc>
+    <rc>RC_XIPC_BASE_OVLY_RAW_RING_SIZE_MISMATCH_ERROR</rc>
     <description>Mvpd and Ovly raw ring size mismatch</description>
     <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>MVPD_SIZE</ffdc>
+    <ffdc>BASE_SIZE</ffdc>
     <ffdc>OVLY_SIZE</ffdc>
     <callout>
       <procedure>CODE</procedure>
@@ -423,11 +423,25 @@
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_XIPC_RS4_COMPRESS_ERROR</rc>
-    <description>rs4_compress() failed</description>
+    <description>_rs4_compress() failed</description>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>RING_ID</ffdc>
-    <ffdc>CHIPLET_ID</ffdc>
+    <ffdc>SCAN_ADDR</ffdc>
     <ffdc>LOCAL_RC</ffdc>
+    <ffdc>OCCURRENCE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_RS4_TYPE_FIELD_ERROR</rc>
+    <description>RS4 header iv_type field error</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>RING_ID</ffdc>
+    <ffdc>SCAN_ADDR</ffdc>
+    <ffdc>TYPE_FIELD</ffdc>
     <ffdc>OCCURRENCE</ffdc>
     <callout>
       <procedure>CODE</procedure>
@@ -496,6 +510,78 @@
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>MVPD_DD_KWD_VERSION</ffdc>
     <ffdc>MVPD_DDSIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_SKELETON_GEN_FAILED</rc>
+    <description>TOR sekeleton api failed</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_DYNAMIC_INIT_FAILED</rc>
+    <description>Failed to fetch the rings in process_base_and_dynamic_rings</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>RING_ID</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_NO_RING_FOUND</rc>
+    <description>No dynamic and no base rings found</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_BASE_GET_SINGLE_RING_ERROR</rc>
+    <description>Failed to fetch base ring</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>RING_ID</ffdc>
+    <ffdc>DD_LEVEL</ffdc>
+    <ffdc>LOCAL_RC</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_DYNAMIC_RING_ERROR</rc>
+    <description>Failed to fetch dynamic ring</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>RING_ID</ffdc>
+    <ffdc>MAX_RING_BYTE_SIZE</ffdc>
+    <ffdc>LOCAL_RC</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_BITS_MISMATCH_DYNAMIC_RING</rc>
+    <description>Bit conflict found while processing dynamic rings</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>RING_ID</ffdc>
+    <ffdc>BIT</ffdc>
+    <ffdc>DATA_DYNACC</ffdc>
+    <ffdc>DATA_DYN</ffdc>
+    <ffdc>OCCURRENCE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>

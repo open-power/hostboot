@@ -48,6 +48,8 @@
 #include <p10_tor.H>
 #include <p10_scan_compression.H>
 #include <p10_infrastruct_help.H>
+#include <map>
+#include <p10_ring_id.H>
 
 using namespace fapi2;
 
@@ -239,7 +241,7 @@ fapi2::ReturnCode get_overlays_ring(
     ReturnCode l_fapiRc = fapi2::FAPI2_RC_SUCCESS;
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     int l_rc = INFRASTRUCT_RC_SUCCESS;
-    uint32_t l_maxRingByteSize = MAX_RING_BUF_SIZE;
+    uint32_t maxRingBufSize = MAX_RING_BUF_SIZE;
     uint32_t l_ovlyUncmpSize = 0;
 
     // As we'll be using tor_get_single_ring() with P9_XIP_MAGIC_SEEPROM
@@ -267,8 +269,8 @@ fapi2::ReturnCode get_overlays_ring(
         // Decompress Gptr overlay ring
         l_rc = _rs4_decompress(
                    (uint8_t*)(*io_ringBuf3),
-                   (uint8_t*)(*io_ringBuf3) + l_maxRingByteSize / 2,
-                   l_maxRingByteSize / 2, // Max allowable raw ring size (in bytes)
+                   (uint8_t*)(*io_ringBuf3) + maxRingBufSize / 2,
+                   maxRingBufSize / 2, // Max allowable raw ring size (in bytes)
                    &l_ovlyUncmpSize,      // Actual raw ring size (in bits) on return.
                    (CompressedScanData*)(*io_ringBuf2) );
 
@@ -276,12 +278,12 @@ fapi2::ReturnCode get_overlays_ring(
                      fapi2::XIPC_RS4_DECOMPRESS_ERROR().
                      set_CHIP_TARGET(i_procTarget).
                      set_RING_ID(i_ringId).
-                     set_MAX_RING_BYTE_SIZE(l_maxRingByteSize).
+                     set_MAX_RING_BYTE_SIZE(maxRingBufSize).
                      set_LOCAL_RC(l_rc).
-                     set_OCCURRENCE(1),
-                     "rs4_decompress() failed w/rc=%i for "
-                     "ringId=0x%x, maxRingByteSize=%d, occurrence=1",
-                     l_rc, i_ringId, l_maxRingByteSize );
+                     set_OCCURRENCE(2),
+                     "_rs4_decompress() failed w/rc=%i for "
+                     "ringId=0x%x, maxRingBufSize=%d, occurrence=2",
+                     l_rc, i_ringId, maxRingBufSize );
 
         FAPI_DBG("Overlay raw ring size=%d bits", l_ovlyUncmpSize);
 
@@ -317,163 +319,209 @@ fapi_try_exit:
 }
 
 
-// Function: apply_overlays_ring()
-// @brief: This function applies the Gptr overlay ring from the overlays section to the Gptr
-//         ring from the Mvpd.
+// Function: apply_overlay_ring()
+// @brief: This function overlays a raw ring from either the .dynamic or the .overlays ring
+//         section onto an RS4 ring obtained from either the .{sbe,qme}.rings ring section
+//         or the Mvpd #G record (Gptr rings specifically).
 //
 // Parameter list:
 // const fapi2::Target &i_target:    Processor chip target.
-// void*    io_vpdRing:      Contains Mvpd RS4 ring on input and final Vpd RS4 ring on output
-// void*    io_ringBuf2:     Work buffer (has raw Mvpd ring on output)
+// void*    io_rs4Ring:      Contains Base RS4 ring on input and final overlaid RS4 ring on output
+// void*    io_workBuf:      Work buffer (has final overlaid raw ring on output)
 // void*    i_ovlyRawRing:   Raw data+care overlay ring
-// uint32_t i_ovlyUncmpSize: Overlay/gptr uncompressed ring size
+// uint32_t i_ovlyRawSize:   Overlay raw ring size
+// CompressedScanData* i_rs4RefRing:  Reference ring to get header data from (assumed volatile)
+// uint8_t  i_rs4TypeField:  iv_type to be used for final RS4 ring
+// _
+// Assumption:
+// - RS4 header's iv_selector will be set to UNDEFINED_RS4_SELECTOR
+//
 #ifdef WIN32
-int apply_overlays_ring(
+int apply_overlay_ring(
     int i_procTarget,
 #else
-fapi2::ReturnCode apply_overlays_ring(
+fapi2::ReturnCode apply_overlay_ring(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_procTarget,
 #endif
-    void*    io_vpdRing,
-    void*    io_ringBuf2,
+    void*    io_rs4Ring,
+    void*    io_workBuf,
     void*    i_ovlyRawRing,
-    uint32_t i_ovlyUncmpSize)
+    uint32_t i_ovlyRawSize,
+    CompressedScanData*  i_rs4RefHeader,
+    uint8_t  i_rs4TypeField)
 {
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     int l_rc = INFRASTRUCT_RC_SUCCESS;
-    uint32_t maxRingByteSize = MAX_RING_BUF_SIZE;
-    uint8_t* dataVpd = (uint8_t*)io_ringBuf2;
-    uint8_t* careVpd = (uint8_t*)io_ringBuf2 + maxRingByteSize / 2;
-    uint8_t* dataOvly = NULL;
-    uint8_t* careOvly = NULL;
-    uint32_t vpdUncmpSize = 0;
+    uint32_t maxRingBufSize = MAX_RING_BUF_SIZE;
+    // Pt to our overlay raw buffers
+    uint8_t* dataOvly = (uint8_t*)i_ovlyRawRing;
+    uint8_t* careOvly = (uint8_t*)i_ovlyRawRing + maxRingBufSize / 2;
+    // Pt to our Base/Final raw work buffers
+    uint8_t* dataBase = (uint8_t*)io_workBuf;
+    uint8_t* careBase = (uint8_t*)io_workBuf + maxRingBufSize / 2;
+    uint32_t baseRawSize = 0;
+    MyBool_t bOvrd = UNDEFINED_BOOLEAN;
+    uint8_t  ivTypeTmp = 0;
 
-    FAPI_DBG("Entering apply_overlays_ring");
+    FAPI_DBG("Entering apply_overlay_ring");
 
-    // Get the data+care raw Gptr overlay ring
-    dataOvly = (uint8_t*)i_ovlyRawRing;
-    careOvly = (uint8_t*)i_ovlyRawRing + maxRingByteSize / 2;
+    // Copy the key RS4 ref header settings into local struct before we, possibly,
+    // contaminate i_rs4RefHeader as this may be pointing to one of our work
+    // buffers.
+    CompressedScanData l_rs4RefHeader;
+    l_rs4RefHeader.iv_ringId = be16toh(i_rs4RefHeader->iv_ringId);
+    l_rs4RefHeader.iv_scanAddr = be32toh(i_rs4RefHeader->iv_scanAddr);
+    l_rs4RefHeader.iv_type = i_rs4RefHeader->iv_type;
 
-    // Decompress Gptr Mvpd ring
+    // Decompress the ring to apply overlay onto, io_rs4Ring.
     l_rc = _rs4_decompress(
-               dataVpd,
-               careVpd,
-               maxRingByteSize / 2, // Max allowable raw ring size (in bytes)
-               &vpdUncmpSize,         // Actual raw ring size (in bits) on return.
-               (CompressedScanData*)io_vpdRing );
+               dataBase,
+               careBase,
+               maxRingBufSize / 2, // Max allowable raw ring size (in bytes)
+               &baseRawSize,         // Actual raw ring size (in bits) on return.
+               (CompressedScanData*)io_rs4Ring );
 
     FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS,
                  fapi2::XIPC_RS4_DECOMPRESS_ERROR().
                  set_CHIP_TARGET(i_procTarget).
-                 set_RING_ID(be16toh(((CompressedScanData*)io_vpdRing)->iv_ringId)).
-                 set_MAX_RING_BYTE_SIZE(maxRingByteSize).
+                 set_RING_ID(l_rs4RefHeader.iv_ringId).
+                 set_MAX_RING_BYTE_SIZE(maxRingBufSize).
                  set_LOCAL_RC(l_rc).
-                 set_OCCURRENCE(2),
-                 "rs4_decompress() for gptr: Failed w/rc=%i for ringId=0x%x,"
-                 "maxRingByteSize=%d, occurrence=2",
-                 l_rc, be16toh(((CompressedScanData*)io_vpdRing)->iv_ringId), maxRingByteSize );
+                 set_OCCURRENCE(3),
+                 "_rs4_decompress() of Base ring failed w/rc=%i for ringId=0x%x,"
+                 "maxRingBufSize=%d, occurrence=3",
+                 l_rc, l_rs4RefHeader.iv_ringId, maxRingBufSize );
 
-    FAPI_DBG("Mvpd raw ring size=%d bits)", vpdUncmpSize);
-
-    // Compare uncompressed Mvpd ring and overlay ring sizes
-    FAPI_ASSERT( i_ovlyUncmpSize == vpdUncmpSize,
-                 fapi2::XIPC_MVPD_OVLY_RAW_RING_SIZE_MISMATCH_ERROR().
+    // Compare raw Base and Overlay ring sizes
+    FAPI_ASSERT( i_ovlyRawSize == baseRawSize,
+                 fapi2::XIPC_BASE_OVLY_RAW_RING_SIZE_MISMATCH_ERROR().
                  set_CHIP_TARGET(i_procTarget).
-                 set_MVPD_SIZE(vpdUncmpSize).
-                 set_OVLY_SIZE(i_ovlyUncmpSize),
-                 "MVPD raw size (=%d) and overlay raw size (=%d) don't match.",
-                 vpdUncmpSize, i_ovlyUncmpSize);
+                 set_BASE_SIZE(baseRawSize).
+                 set_OVLY_SIZE(i_ovlyRawSize),
+                 "Base raw size (=%d) and overlay raw size (=%d) don't match.",
+                 baseRawSize, i_ovlyRawSize);
 
-    // Perform Overlay operation:
-    // if overlay data is '1' and care is '1', set vpd data to '1' and care to '1'
-    // if overlay data is '0' and care is '1', set vpd data to '0' and care to '0'
-    // Note that the latter can be done bcoz GPTR rings are scanned on flushed latches.
-    // And since writing a 0 data to a flushed latch result in no change, hence we can
-    // save RS4 ring space in image as well as improve scan time by clearing the
-    // associated care bit so we instead rotate through the bit.
-    int i;
+    FAPI_DBG("Base raw ring size=%d bits)", baseRawSize);
 
-    for (i = 0; i < (int)vpdUncmpSize / 8; i++)
+    //
+    // Check ring override/flush type and then perform Overlay operation:
+    // If overlay data is '1' and care is '1', set base data to '1' and care to '1'.
+    // If overlay data is '0' and care is '1', set base data to '0' and:
+    //     set care to '1' if ring is an override ring
+    //     set care to '0' if ring is an flush ring (to save RS4 data string space)
+    //
+    bOvrd = rs4_is_ovrd(&l_rs4RefHeader, ivTypeTmp);
+
+    FAPI_DBG("Pos0");
+    FAPI_ASSERT( bOvrd != UNDEFINED_BOOLEAN,
+                 fapi2::XIPC_RS4_TYPE_FIELD_ERROR().
+                 set_CHIP_TARGET(i_procTarget).
+                 set_RING_ID(l_rs4RefHeader.iv_ringId).
+                 set_SCAN_ADDR(l_rs4RefHeader.iv_scanAddr).
+                 set_TYPE_FIELD(ivTypeTmp).
+                 set_OCCURRENCE(1),
+                 "RS4 header iv_type field error: OVRD setting must be either true or "
+                 "false but iv_type=0x%2x for ringId=0x%x, scanAddr=0x%8x, occurrence=1",
+                 ivTypeTmp, l_rs4RefHeader.iv_ringId, l_rs4RefHeader.iv_scanAddr );
+
+    FAPI_DBG("Pos1");
+    uint32_t i, j;
+
+    for (i = 0; i < baseRawSize / 8; i++)
     {
         if (careOvly[i] > 0)
         {
-            for (int j = 0; j < 8; j++)
+            for (j = 0; j < 8; j++)
             {
                 if (careOvly[i] & (0x80 >> j))
                 {
-                    uint8_t temp = (dataOvly[i] & (0x80 >> j));
-
-                    if (temp)
+                    if ( dataOvly[i] & (0x80 >> j) )
                     {
-                        dataVpd[i] |= (0x80 >> j);
-                        careVpd[i] |= (0x80 >> j);
+                        dataBase[i] |= (0x80 >> j);
+                        careBase[i] |= (0x80 >> j);
                     }
                     else
                     {
-                        dataVpd[i] &= ~(0x80 >> j);
-                        careVpd[i] &= ~(0x80 >> j);
+                        dataBase[i] &= ~(0x80 >> j);
+
+                        if (bOvrd)
+                        {
+                            careBase[i] |= (0x80 >> j);
+                        }
+                        else
+                        {
+                            careBase[i] &= ~(0x80 >> j);
+                        }
                     }
                 }
             }
         }
     }
+
+    FAPI_DBG("Pos2");
 
     // Processing remainder of data & care bits (mod 8)
-    if (vpdUncmpSize % 8)
+    if (baseRawSize % 8)
     {
-        i = (int)vpdUncmpSize / 8;
+        i = baseRawSize / 8;
 
-        careOvly[i] &= ~(0xFF << (8 - (vpdUncmpSize % 8)));
+        careOvly[i] &= ~(0xFF << (8 - (baseRawSize % 8)));
 
         if (careOvly[i] > 0)
         {
-            for (int j = 0; j < (int)vpdUncmpSize % 8; j++)
+            for (j = 0; j < baseRawSize % 8; j++)
             {
                 if (careOvly[i] & (0x80 >> j))
                 {
-                    uint8_t temp = (dataOvly[i] & (0x80 >> j));
-
-                    if (temp)
+                    if ( dataOvly[i] & (0x80 >> j) )
                     {
-                        dataVpd[i] |= (0x80 >> j);
-                        careVpd[i] |= (0x80 >> j);
+                        dataBase[i] |= (0x80 >> j);
+                        careBase[i] |= (0x80 >> j);
                     }
                     else
                     {
-                        dataVpd[i] &= ~(0x80 >> j);
-                        careVpd[i] &= ~(0x80 >> j);
+                        dataBase[i] &= ~(0x80 >> j);
+
+                        if (bOvrd)
+                        {
+                            careBase[i] |= (0x80 >> j);
+                        }
+                        else
+                        {
+                            careBase[i] &= ~(0x80 >> j);
+                        }
                     }
                 }
             }
         }
     }
 
-    // Recompress vpd ring
+    FAPI_DBG("Pos3");
+    // Recompress overlay ring
     l_rc = _rs4_compress(
-               (CompressedScanData*)io_vpdRing,
-               maxRingByteSize,
-               dataVpd,
-               careVpd,
-               vpdUncmpSize,
-               be32toh(((CompressedScanData*)io_vpdRing)->iv_scanAddr),
-               be16toh(((CompressedScanData*)io_vpdRing)->iv_ringId),
+               (CompressedScanData*)io_rs4Ring,
+               maxRingBufSize,
+               dataBase,
+               careBase,
+               baseRawSize,
+               l_rs4RefHeader.iv_scanAddr,
+               l_rs4RefHeader.iv_ringId,
                UNDEFINED_RS4_SELECTOR,
-               RS4_IV_TYPE_CMSK_NON_CMSK |
-               RS4_IV_TYPE_OVRD_FLUSH |
-               RS4_IV_TYPE_SEL_BASE );
+               i_rs4TypeField);
 
     FAPI_ASSERT( l_rc == 0,
                  fapi2::XIPC_RS4_COMPRESS_ERROR().
                  set_CHIP_TARGET(i_procTarget).
-                 set_RING_ID(0xff).
-                 set_CHIPLET_ID(0xff).
+                 set_RING_ID(l_rs4RefHeader.iv_ringId).
+                 set_SCAN_ADDR(l_rs4RefHeader.iv_scanAddr).
                  set_LOCAL_RC(l_rc).
                  set_OCCURRENCE(2),
-                 "rs4_compress() for gptr: Failed w/rc=%i for "
-                 "ringId=0xff, chipletId=0xff, occurrence=2 ", l_rc );
+                 "_rs4_compress() : Failed w/rc=%i for "
+                 "ringId=0x%x, scanAddr=0x%8x, occurrence=2",
+                 l_rc, l_rs4RefHeader.iv_ringId, l_rs4RefHeader.iv_scanAddr );
 
 fapi_try_exit:
-    FAPI_DBG("Exiting apply_overlays_ring");
+    FAPI_DBG("Exiting apply_overlay_ring");
     return fapi2::current_err;
 }
 
@@ -549,15 +597,17 @@ fapi2::ReturnCode process_gptr_rings(
                      l_vpdScanAddr,
                      be32toh(((CompressedScanData*)l_ovlyRs4Ring)->iv_scanAddr) );
 
-        // Apply overlays operations
-        FAPI_TRY( apply_overlays_ring(
+        // Do overlay operation
+        FAPI_TRY( apply_overlay_ring(
                       i_procTarget,
                       io_vpdRing,
                       io_ringBuf2, //We can now destroy ovlyRs4Ring
                       l_ovlyRawRing,
-                      l_ovlyUncmpSize),
-                  "apply_overlays_ring() failed w/rc=0x%08x for ringId=0x%x",
-                  (uint32_t)current_err, l_vpdRingId);
+                      l_ovlyUncmpSize,
+                      (CompressedScanData*)l_ovlyRs4Ring, //Ovly ring is more trustworthy for ref
+                      ((CompressedScanData*)l_ovlyRs4Ring)->iv_type ),
+                  "apply_overlay_ring() failed w/rc=0x%08x for ringId=0x%x",
+                  (uint32_t)current_err, be16toh(((CompressedScanData*)l_ovlyRs4Ring)->iv_ringId));
     }
     else
     {
@@ -595,7 +645,7 @@ fapi_try_exit:
 //  uint32_t   i_maxRingSectionSize: Max ring section size
 //  void*      i_overlaysSection:    DD specific overlays ring section
 //  uint8_t    i_ddLevel:            DD level (to be used for TOR API level verif)
-//  uint8_t    i_sysPhase:           ={HB_SBE, RT_QME, RT_XGPE}
+//  uint8_t    i_sysPhase:           ={HB_SBE, RT_QME}
 //  void*      i_vpdRing:            VPD ring buffer.
 //  uint32_t   i_vpdRingSize:        Size of VPD ring buffer.
 //  void*      i_ringBuf2:           Ring work buffer.
@@ -923,8 +973,8 @@ fapi2::ReturnCode resolve_gptr_overlays(
                  set_XIP_RC(l_rc).
                  set_SECTION_ID(P9_XIP_SECTION_HW_OVERLAYS).
                  set_DDLEVEL(o_ddLevel).
-                 set_OCCURRENCE(2),
-                 "p9_xip_get_section() failed (2) w/rc=0x%08X getting .overlays"
+                 set_OCCURRENCE(5),
+                 "p9_xip_get_section() failed (5) w/rc=0x%08X getting .overlays"
                  " section for ddLevel=0x%x",
                  (uint32_t)l_rc, o_ddLevel );
 
@@ -1420,6 +1470,355 @@ fapi_try_exit:
 
 
 
+//  Function: process_base_and_dynamic_rings()
+//
+//  Parameter list:
+//  const fapi::Target &i_target:    Processor chip target.
+//  void*           i_baseRingSection
+//  void*           i_dynamicRingSection
+//  void*           io_ringBuf1
+//  void*           i_ringBuf2
+//  void*           i_ringBuf3
+//  std::map<Rs4Selector_t, Rs4Selector_t> i_idxFeatureMap
+//  std::map<Rs4Selector_t, Rs4Selector_t> i_featureAppMap
+//  Rs4Selector_t   i_numberOfFeatures
+//  RingId_t&       i_ringId
+//  uint32_t        i_ddlevel
+//
+#ifdef WIN32
+int process_base_and_dynamic_rings(
+    int i_procTarget,
+#else
+fapi2::ReturnCode process_base_and_dynamic_rings(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_procTarget,
+#endif
+    void*           i_baseRingSection,
+    void*           i_dynamicRingSection,
+    void*           io_ringBuf1,
+    void*           i_ringBuf2,
+    void*           i_ringBuf3,
+    std::map<Rs4Selector_t, Rs4Selector_t> i_idxFeatureMap,
+    std::map<Rs4Selector_t, Rs4Selector_t>& io_featureAppMap,
+    Rs4Selector_t   i_numberOfFeatures,
+    RingId_t        i_ringId,
+    uint32_t        i_ddlevel )
+{
+    int         l_rc = 0;
+    uint32_t    ringBlockSize = 0xFFFFFFFF;
+    uint32_t    dynUncmpSize = 0;
+    uint32_t    maxRingBufSize = MAX_RING_BUF_SIZE;
+    bool        bDynRingFound = false;
+    bool        bBaseRingFound = false;
+    uint32_t    nextFeature = 0;
+    uint64_t    featureVecAcc = 0;
+    uint8_t     mask = 0;
+    bool        bUpdateAcc = false;
+    uint8_t     baseTypeField = 0;
+    uint8_t     dynTypeField = 0;
+    uint8_t     finalTypeField = 0;
+
+    // io_ringBuf1 is used for multiple purposes:-
+    // 1-> In dynRs4, it contains the individual Dynamic RS4 rings from the
+    //     .dynamic ring section.
+    // 2-> In baseRs4, it contains the Base ring from the .<ppe>.rings
+    //     ring section.
+    // 3-> In finalRs4, it contains the final [overlaid] RS4 ring that gets
+    //     appended to the customized .rings section.
+    void* dynRs4 = io_ringBuf1;
+    void* baseRs4 = io_ringBuf1;
+    void* finalRs4 = io_ringBuf1;
+
+    uint8_t* dataDyn = (uint8_t*)i_ringBuf2;
+    uint8_t* careDyn = (uint8_t*)i_ringBuf2 + maxRingBufSize / 2;
+
+    uint8_t* dataDynAcc = (uint8_t*)i_ringBuf3;
+    uint8_t* careDynAcc = (uint8_t*)i_ringBuf3 + maxRingBufSize / 2;
+
+    memset(dataDyn, 0, maxRingBufSize);
+    memset(dataDynAcc, 0, maxRingBufSize);
+
+    //TODO need to change this trace
+    FAPI_DBG("Entering process_base_and_dynamic_rings i_numberOfFeatures is %d and i_ringId is 0x%x", i_numberOfFeatures,
+             i_ringId);
+
+    //
+    // 1st: Get/accumulate the Dynamic ring(s)
+    //
+    for (uint64_t idxFeat = 0; idxFeat < i_numberOfFeatures; idxFeat++)
+    {
+        nextFeature = i_idxFeatureMap[idxFeat];
+        l_rc = dyn_get_ring( i_dynamicRingSection,
+                             i_ringId,
+                             nextFeature,
+                             i_ddlevel,
+                             dynRs4,
+                             maxRingBufSize,
+                             0 );
+
+        if(l_rc == TOR_SUCCESS)
+        {
+            bDynRingFound = true;
+
+            featureVecAcc |= 0x8000000000000000 >> nextFeature;
+
+            dynTypeField = ((CompressedScanData*)dynRs4)->iv_type;
+
+            l_rc = _rs4_decompress(
+                       dataDyn,
+                       careDyn,
+                       maxRingBufSize / 2,
+                       &dynUncmpSize,
+                       (CompressedScanData*)(dynRs4) );
+
+            FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS,
+                         fapi2::XIPC_RS4_DECOMPRESS_ERROR().
+                         set_CHIP_TARGET(i_procTarget).
+                         set_RING_ID(i_ringId).
+                         set_MAX_RING_BYTE_SIZE(maxRingBufSize).
+                         set_LOCAL_RC(l_rc).
+                         set_OCCURRENCE(1),
+                         "_rs4_decompress() failed w/rc=%i for "
+                         "ringId=0x%x, maxRingBufSize=%d, occurrence=1",
+                         l_rc, i_ringId, maxRingBufSize );
+
+            int i ;
+
+            for (i = 0; i < (int)dynUncmpSize / 8; i++)
+            {
+                if (careDyn[i] > 0)
+                {
+                    for (int j = 0; j < 8; j++)
+                    {
+                        mask = 0x80 >> j;
+
+                        if (careDyn[i] & mask)
+                        {
+                            //Conflict checking
+                            if ( ((careDynAcc[i] & mask) == mask) &&
+                                 ((careDyn[i] & mask) == mask) )
+                            {
+                                if ( (dataDynAcc[i] & mask) != (dataDyn[i] & mask) )
+                                {
+                                    FAPI_ASSERT( false,
+                                                 fapi2::XIPC_BITS_MISMATCH_DYNAMIC_RING().
+                                                 set_CHIP_TARGET(i_procTarget).
+                                                 set_RING_ID(i_ringId).
+                                                 set_BIT(i).
+                                                 set_DATA_DYNACC(dataDynAcc[i]).
+                                                 set_DATA_DYN(dataDyn[i]).
+                                                 set_OCCURRENCE(1),
+                                                 "Bit conflict at bit=0x%d found while processing "
+                                                 "dynamic rings for ringId=0x%0x at feature=%d and "
+                                                 "featureVecAcc=0x%0llx)",
+                                                 8 * i + j, i_ringId, nextFeature, featureVecAcc);
+                                }
+                                else
+                                {
+                                    continue;
+                                }
+                            }
+                            else
+                            {
+                                bUpdateAcc = true;
+                            }
+
+                            if(bUpdateAcc)
+                            {
+                                dataDynAcc[i] |= dataDyn[i] & mask;
+                                careDynAcc[i] |= mask;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (dynUncmpSize % 8)
+            {
+                i = (int)dynUncmpSize / 8;
+
+                careDyn[i] &= ~(0xFF << (8 - (dynUncmpSize % 8)));
+
+                if (careDyn[i] > 0)
+                {
+                    for (int j = 0; j < (int)dynUncmpSize % 8; j++)
+                    {
+                        mask = 0x80 >> j;
+
+                        if (careDyn[i] & mask)
+                        {
+                            //Conflict checking
+                            if((careDynAcc[i] == 1) && (careDyn[i] == 1))
+                            {
+                                if(!(dataDynAcc[i] == dataDyn[i]))
+                                {
+                                    FAPI_ASSERT( false,
+                                                 fapi2::XIPC_BITS_MISMATCH_DYNAMIC_RING().
+                                                 set_CHIP_TARGET(i_procTarget).
+                                                 set_RING_ID(i_ringId).
+                                                 set_BIT(i).
+                                                 set_DATA_DYNACC(dataDynAcc[i]).
+                                                 set_DATA_DYN(dataDyn[i]).
+                                                 set_OCCURRENCE(2),
+                                                 "Bit conflict at bit=0x%d found while processing "
+                                                 "dynamic rings for ringId=0x%0x at feature=%d and "
+                                                 "featureVecAcc=0x%0llx)",
+                                                 8 * i + j, i_ringId, nextFeature, featureVecAcc);
+                                }
+                                else
+                                {
+                                    continue;
+                                }
+                            }
+                            else
+                            {
+                                bUpdateAcc = true;
+                            }
+
+                            if(bUpdateAcc)
+                            {
+                                dataDynAcc[i] |= dataDyn[i] & mask;
+                                careDynAcc[i] |= mask;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        else if(l_rc != TOR_DYN_RING_NOT_FOUND)
+        {
+            FAPI_ASSERT( false,
+                         fapi2::XIPC_DYNAMIC_RING_ERROR().
+                         set_CHIP_TARGET(i_procTarget).
+                         set_RING_ID(i_ringId).
+                         set_MAX_RING_BYTE_SIZE(maxRingBufSize).
+                         set_LOCAL_RC(l_rc),
+                         "Failed to fetch dynamic ring for ringID 0x%0x w/rc = %i",
+                         i_ringId, l_rc);
+        }
+    }
+
+    //
+    // 2nd: Get the Base ring
+    //
+    l_rc = tor_get_single_ring(
+               i_baseRingSection,
+               i_ddlevel,
+               i_ringId,
+               0xff,
+               baseRs4,
+               ringBlockSize, 1);//Last parameter is for debug will remove it later
+
+    FAPI_ASSERT( l_rc == TOR_SUCCESS ||
+                 l_rc == TOR_RING_IS_EMPTY ||
+                 l_rc == TOR_INVALID_CHIPLET_TYPE,  // We will hit this in RT_QME phase
+                 fapi2::XIPC_BASE_GET_SINGLE_RING_ERROR().
+                 set_CHIP_TARGET(i_procTarget).
+                 set_RING_ID(i_ringId).
+                 set_DD_LEVEL(i_ddlevel).
+                 set_LOCAL_RC(l_rc),
+                 "tor_get_single_ring() for Base ring: Failed w/rc=%i for "
+                 "ringId=0x%x, chipletId=0xff and ddLevel=0x%x",
+                 l_rc, i_ringId, i_ddlevel );
+
+    if(l_rc == TOR_SUCCESS)
+    {
+        FAPI_DBG("Successfully found Base ringId=0x%x of iv_size=%d bytes", i_ringId,
+                 be16toh(((CompressedScanData*)(i_baseRingSection))->iv_size));
+
+        bBaseRingFound = true;
+
+        baseTypeField = ((CompressedScanData*)baseRs4)->iv_type;
+    }
+
+//CMO-20190902: At this point we could probably sanity check that baseTypeField ==
+//              dynTypeField. However, it's a hit-and-miss check since we can only
+//              make this check if both a Base AND a Dynamic ring is found. It's
+//              better than nothing, but we postpone for now.
+
+    if(bBaseRingFound && bDynRingFound)
+    {
+        FAPI_DBG("Base and Dynamic rings found.");// Will delete later
+
+        // Use baseTypeField as ref input value for iv_type, but dynTypeField would be just as good
+        finalTypeField = (baseTypeField & ~RS4_IV_TYPE_SEL_MASK) |
+                         RS4_IV_TYPE_SEL_BASE | RS4_IV_TYPE_SEL_DYN | RS4_IV_TYPE_SEL_FINAL;
+
+        // Note that apply_overlay_ring() will set iv_selector = UNDEFINED_RS4_SELECTOR.
+        FAPI_TRY( apply_overlay_ring( i_procTarget,
+                                      finalRs4, //finalRs4 = baseRs4 = io_ringBuf1 will have final ring
+                                      i_ringBuf2,
+                                      dataDynAcc, //dataDynAcc = i_ringBuf3 has raw Dynamic ring
+                                      dynUncmpSize,
+                                      (CompressedScanData*)finalRs4, //Base is a good ref
+                                      finalTypeField ),
+                  "apply_overlay_ring() for Dynamic overlay: Failed "
+                  "w/rc=0x%08x for ringId=0x%x",
+                  (uint32_t)current_err, i_ringId);
+
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    }
+    else if(!bBaseRingFound && bDynRingFound)
+    {
+        FAPI_DBG("No Base ring found. Dynamic ring found.");//Will delete later
+
+        // We'll need these temp vars below
+        RingId_t ringIdTmp = be16toh(((CompressedScanData*)finalRs4)->iv_ringId);
+        uint32_t scanAddrTmp = be32toh(((CompressedScanData*)finalRs4)->iv_scanAddr);
+
+        finalTypeField = (dynTypeField & ~RS4_IV_TYPE_SEL_MASK) |
+                         RS4_IV_TYPE_SEL_DYN | RS4_IV_TYPE_SEL_FINAL;
+
+        l_rc = _rs4_compress(
+                   (CompressedScanData*)finalRs4,//finalRs4 = io_ringBuf1 will have final ring
+                   maxRingBufSize,
+                   dataDynAcc,
+                   careDynAcc,
+                   dynUncmpSize,
+                   scanAddrTmp,
+                   ringIdTmp,
+                   UNDEFINED_RS4_SELECTOR,
+                   finalTypeField );
+
+        FAPI_ASSERT( l_rc == 0,
+                     fapi2::XIPC_RS4_COMPRESS_ERROR().
+                     set_CHIP_TARGET(i_procTarget).
+                     set_RING_ID(ringIdTmp).
+                     set_SCAN_ADDR(scanAddrTmp).
+                     set_LOCAL_RC(l_rc).
+                     set_OCCURRENCE(1),
+                     "_rs4_compress() for dynamic ring: Failed w/rc=%i for "
+                     "ringId=0x%x, scanAddr=0x%8x, occurrence=1 ",
+                     l_rc, ringIdTmp, scanAddrTmp );
+
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    }
+    else if(bBaseRingFound && !bDynRingFound)
+    {
+        //In this case finalRs4 = baseRs4 = io_ringBuf1 already has the final ring
+        FAPI_DBG("Base ring found. No Dynamic ring found.");//Will delete this later
+
+        finalTypeField = (baseTypeField & ~RS4_IV_TYPE_SEL_MASK) |
+                         RS4_IV_TYPE_SEL_BASE | RS4_IV_TYPE_SEL_FINAL;
+        ((CompressedScanData*)finalRs4)->iv_type = finalTypeField;
+
+        ((CompressedScanData*)finalRs4)->iv_selector = UNDEFINED_RS4_SELECTOR;
+
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    }
+    else
+    {
+        FAPI_DBG("No Base or Dynamic rings found."); // Delete later
+        fapi2::current_err = RC_XIPC_NO_RING_FOUND;
+    }
+
+    //io_ringBuf1 has the final ring at this point.
+
+fapi_try_exit:
+    FAPI_DBG("Exiting process_base_and_dynamic_rings");
+    return fapi2::current_err;
+}
+//End of process_base_and_dynamic_rings
+
 #ifndef WIN32
 fapi2::ReturnCode p10_ipl_customize (
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_procTarget,
@@ -1464,7 +1863,7 @@ ReturnCode p10_ipl_customize (
     uint32_t        l_sectionOffset = 1;
     uint32_t        attrMaxSbeSeepromSize = 0;
     uint32_t        l_requestedBootCoreMask = (i_sysPhase == SYSPHASE_HB_SBE) ? io_bootCoreMask : 0xFFFFFFFF;
-    uint8_t         attrDdLevel = UNDEFINED_DD_LEVEL; // Used for host services
+    uint8_t         attrDdLevel = UNDEFINED_DD_LEVEL; // Used for platform services
     uint32_t        l_sizeMvpdDDField = 0;
     uint8_t*        l_decimalDDData = nullptr;
     uint8_t*        l_fullDDData = nullptr;
@@ -1472,6 +1871,17 @@ ReturnCode p10_ipl_customize (
     uint8_t         l_chipName = 0;
     uint32_t        l_sizeMvpdCIField = 0;
     uint8_t*        l_fullCIData = nullptr;
+
+    uint64_t        dynamicVector = 0;
+    RingId_t        ringId = UNDEFINED_RING_ID;
+    std::map< Rs4Selector_t,  Rs4Selector_t> idxFeatureMap;
+    std::map< Rs4Selector_t,  Rs4Selector_t> featureAppMap;
+    Rs4Selector_t   numberOfFeatures = 0;
+    void*           baseRingSection = NULL;
+    void*           dynamicRingSection = NULL;
+    TorHeader_t*    torHeader;
+    bool            bFeature = false;
+    uint32_t        customRingSectionSize = 0;
 
     FAPI_IMP ("Entering p10_ipl_customize w/sysPhase=%d...", i_sysPhase);
 
@@ -2087,10 +2497,10 @@ ReturnCode p10_ipl_customize (
                          fapi2::XIPC_XIP_GET_SECTION_ERROR().
                          set_CHIP_TARGET(i_procTarget).
                          set_XIP_RC(l_rc).
-                         set_SECTION_ID(P9_XIP_SECTION_SBE_RINGS).
+                         set_SECTION_ID(subSectionID).
                          set_DDLEVEL(attrDdLevel).
-                         set_OCCURRENCE(1),
-                         "p9_xip_get_sub_section() failed (1) w/rc=0x%08X retrieving .sbe.rings"
+                         set_OCCURRENCE(2),
+                         "p9_xip_get_sub_section() failed (2) w/rc=0x%08X retrieving .sbe.rings"
                          " section and ddLevel=0x%x",
                          (uint32_t)l_rc, attrDdLevel );
 
@@ -2102,7 +2512,7 @@ ReturnCode p10_ipl_customize (
             mainSectionID = P9_XIP_SECTION_HW_QME;
             subSectionID = P9_XIP_SECTION_QME_RINGS;
 
-            l_rc = p9_xip_get_sub_section( io_image,
+            l_rc = p9_xip_get_sub_section( i_hwImage,
                                            mainSectionID,
                                            subSectionID,
                                            &iplImgSection,
@@ -2114,11 +2524,10 @@ ReturnCode p10_ipl_customize (
                          set_XIP_RC(l_rc).
                          set_SECTION_ID(subSectionID).
                          set_DDLEVEL(attrDdLevel).
-                         set_OCCURRENCE(4),
-                         "p9_xip_get_sub_section() failed (4) w/rc=0x%08x in sysPhase=%d",
-                         " getting nested PPE image's .rings subSectionID=%d for"
-                         " ddLevel=0x%x",
-                         (uint32_t)l_rc, i_sysPhase, subSectionID, attrDdLevel );
+                         set_OCCURRENCE(3),
+                         "p9_xip_get_sub_section() failed (3) w/rc=0x%08x retrieving .qme.rings"
+                         " section and ddLevel=0x%x",
+                         (uint32_t)l_rc, attrDdLevel );
 
             break;
 
@@ -2147,6 +2556,7 @@ ReturnCode p10_ipl_customize (
                  " There's no TOR.",
                  i_sysPhase, attrDdLevel, mainSectionID, subSectionID );
 
+    baseRingSection = (void*)((uint8_t*)i_hwImage + iplImgSection.iv_offset);
 
 
 
@@ -2155,27 +2565,142 @@ ReturnCode p10_ipl_customize (
     // System phase:       All phases
     //////////////////////////////////////////////////////////////////////////
 
-    // 1. tor_skeleton_generation()
+    torHeader  = (TorHeader_t*)baseRingSection;
 
+    l_rc = tor_skeleton_generation( io_ringSectionBuf,
+                                    be32toh(torHeader->magic),
+                                    torHeader->version,
+                                    attrDdLevel,
+                                    torHeader->chipId,
+                                    0 );
 
+    FAPI_ASSERT( l_rc == 0,
+                 fapi2::XIPC_SKELETON_GEN_FAILED().
+                 set_CHIP_TARGET(i_procTarget),
+                 "tor_skeleton_generation failed w/rc=0x%08X", (uint32_t)l_rc );
 
+    customRingSectionSize = be32toh(((TorHeader_t*)io_ringSectionBuf)->size);
 
     //////////////////////////////////////////////////////////////////////////
     // CUSTOMIZE item:     Append Dynamic-on-Base rings to io_ringSectionBuf
     // System phase:       All phases
+    //------------------------------------------------------------------------
+    // Notes:
+    // Here we copy, overlay or produce Base rings and append them to the
+    // customized .rings section as follows:
+    // - copy:    Is performed when a ring is only found in the .{sbe,qme}.rings
+    //            ring section (ie, no Dynamic ring is found).
+    // - overlay: Is performed when rings are found in both the .{sbe,qme}.rings
+    //            and .dynamic ring sections.
+    // - produce: Is performed when a ring is only found in the .dynamic ring
+    //            ring section (ie, no Base ring is found) and in which case the Dynamic
+    //            ring becomes the de facto Base ring.
     //////////////////////////////////////////////////////////////////////////
 
-    // 2. Get the dynamic ring section here, but no nneed for any additional
-    //    local foo() for this.;
-    //
-    // for (ringId) loop
-    // {
-    //     3. process_dynamic_ring();
-    //     4. tor_append_ring()
-    // }
+#if 0
+    l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_DYN_OVLY, FAPI_SYSTEM, l_dynamicVector);
 
+    FAPI_ASSERT( l_fapiRc2 == fapi2::FAPI2_RC_SUCCESS,
+                 fapi2::XIPC_XIP_API_MISC_ERROR.
+                 set_CHIP_TARGET(i_procTarget).
+                 set_OCCURRENCE(2),
+                 "Failed to get dynamic section");
+#endif
+    //l_dynamicVector is hardcoded as the FAPI attribute is not ready
+    dynamicVector = 0b01101000;
+    dynamicVector = dynamicVector << 56;
 
+    l_rc = p9_xip_get_section(i_hwImage, P9_XIP_SECTION_HW_DYNAMIC, &iplImgSection, attrDdLevel);
 
+    FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS,
+                 fapi2::XIPC_XIP_GET_SECTION_ERROR().
+                 set_CHIP_TARGET(i_procTarget).
+                 set_XIP_RC(l_rc).
+                 set_SECTION_ID(P9_XIP_SECTION_HW_DYNAMIC).
+                 set_DDLEVEL(attrDdLevel).
+                 set_OCCURRENCE(4),
+                 "p9_xip_get_section() failed (4) w/rc=0x%08X getting .dynamic"
+                 " section for ddLevel=0x%x",
+                 (uint32_t)l_rc, attrDdLevel );
+
+    dynamicRingSection = (void*)((uint8_t*)i_hwImage + iplImgSection.iv_offset);
+
+    for(uint64_t feature = 0; feature < 64; feature++)
+    {
+        bFeature = dynamicVector & (0x8000000000000000 >> feature);
+
+        if(bFeature)
+        {
+            idxFeatureMap.insert({numberOfFeatures, feature});
+            featureAppMap.insert({feature, 0});
+            numberOfFeatures++;
+            bFeature = false;
+        }
+    }
+
+//CMO-20190825: Is it reasonable to mindlessly run through all ringId when we know
+//              which ringId to consider for the given sysPhase?  It's ok for the
+//              HB_SBE phase, but not for the RT_QME phase because we will get
+//              TOR_INVALID_CHIPLET_TYPE a lot and thus have to mask that error
+//              but this comes at expense of the protection it gives us.  For now,
+//              we will be mindless, but this should probably be changed.
+    for(ringId = 0; ringId < NUM_RING_IDS; ringId++)
+    {
+        // Only process non-Mvpd rings (which are all assumed to be Common rings)
+        if ( ringid_is_mvpd_ring(torHeader->chipId, ringId) == true )
+        {
+            continue;
+        }
+
+        l_fapiRc = process_base_and_dynamic_rings( i_procTarget,
+                   baseRingSection,
+                   dynamicRingSection,
+                   i_ringBuf1,
+                   i_ringBuf2,
+                   i_ringBuf3,
+                   idxFeatureMap,
+                   featureAppMap,
+                   numberOfFeatures,
+                   ringId,
+                   attrDdLevel );
+
+        FAPI_ASSERT( ((l_fapiRc == FAPI2_RC_SUCCESS) ||
+                      ((uint32_t) l_fapiRc == RC_XIPC_NO_RING_FOUND)),
+                     fapi2::XIPC_DYNAMIC_INIT_FAILED().
+                     set_CHIP_TARGET(i_procTarget).
+                     set_RING_ID(ringId),
+                     "process_base_and_dynamic_rings failed for "
+                     "ringId=0x%0x w/rc=0x%08x",
+                     ringId, (uint32_t)l_fapiRc);
+
+        if(l_fapiRc == FAPI2_RC_SUCCESS)
+        {
+            l_rc = tor_append_ring(
+                       io_ringSectionBuf,
+                       customRingSectionSize,
+                       ringId,
+                       0xff,
+                       i_ringBuf1, 1);//Last parameter is for debug, will remove it later
+
+            FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS,
+                         fapi2::XIPC_TOR_APPEND_RING_FAILED().
+                         set_CHIP_TARGET(i_procTarget).
+                         set_TOR_RC(l_rc).
+                         set_RING_ID(ringId).
+                         set_OCCURRENCE(1),
+                         "tor_append_ring() failed in "
+                         "process_base_and_dynamic_rings w/rc=%d "
+                         "for ringId=0x%x", l_rc, ringId );
+
+        }
+        else
+        {
+            FAPI_DBG("No Rings found");//Will remove later
+            continue;
+        }
+    }
+
+    io_ringSectionBufSize = customRingSectionSize;
 
     //////////////////////////////////////////////////////////////////////////
     // CUSTOMIZE item:     Append VPD rings to io_ringSectionBuf
@@ -2197,18 +2722,10 @@ ReturnCode p10_ipl_customize (
 
             FAPI_DBG("Max allowable size of .rings section: %d", l_maxRingSectionSize);
 
-//CMO: This memcpy() needs to be removed asap we are able to generate the brand new ring
-//     section from tor_skeleton_generation()
-            // Move .rings to the top of ringSectionBuf (which currently holds a copy of the
-            //   io_image but which can now be destroyed.)
-            memcpy( io_ringSectionBuf,
-                    (void*)((uint8_t*)i_hwImage + iplImgSection.iv_offset),
-                    io_ringSectionBufSize );
-
             //----------------------------------------
             // Append VPD Rings to the .rings section
             //----------------------------------------
-#if 0
+
             l_fapiRc = fetch_and_insert_vpd_rings( i_procTarget,
                                                    io_ringSectionBuf,
                                                    io_ringSectionBufSize, // Running section size
@@ -2222,7 +2739,7 @@ ReturnCode p10_ipl_customize (
                                                    i_ringBuf3,
                                                    i_ringBufSize3,
                                                    io_bootCoreMask );
-#endif
+
             FAPI_DBG("-----------------------------------------------------------------------");
             FAPI_DBG("bootCoreMask:  Requested=0x%08X  Final=0x%08X",
                      l_requestedBootCoreMask, io_bootCoreMask);
@@ -2300,6 +2817,7 @@ ReturnCode p10_ipl_customize (
             FAPI_DBG( "Image details: io_ringSectionBufSize=%d, l_imageSizeWithoutRings=%d,"
                       "  l_maxImageSize=%d",
                       io_ringSectionBufSize, l_imageSizeWithoutRings, l_maxImageSize );
+
 
             //--------------------------------------------------------
             // Append the updated .rings section to the Seeprom image
