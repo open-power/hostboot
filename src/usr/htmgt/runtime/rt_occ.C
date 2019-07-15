@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,7 +27,7 @@
 #include    <htmgt/htmgt.H>
 #include    "../htmgt_utility.H"
 #include    <targeting/common/commontargeting.H>
-#include    <runtime/rt_targeting.H>
+#include    <targeting/runtime/rt_targeting.H>
 
 
 using namespace TARGETING;

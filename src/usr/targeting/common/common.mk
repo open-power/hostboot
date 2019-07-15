@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2018
+# Contributors Listed Below - COPYRIGHT 2011,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -64,4 +64,3 @@ COMMON_TARGETING_OBJS += ${TARGET_OBJS}
 COMMON_TARGETING_OBJS += ${PREDICATES_OBJS}
 COMMON_TARGETING_OBJS += ${ITERATORS_OBJS}
 COMMON_TARGETING_OBJS += ${OTHER_OBJS}
-

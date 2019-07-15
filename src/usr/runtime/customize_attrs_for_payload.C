@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,10 +36,10 @@
 #include <targeting/common/target.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
+#include <targeting/runtime/rt_targeting.H>
 #include <runtime/runtime_reasoncodes.H>
 #include <runtime/runtime.H>
 #include <errl/errlmanager.H>
-#include <runtime/rt_targeting.H>
 #include <arch/pirformat.H>
 #include <targeting/common/util.H>
 #include <errl/errludtarget.H>
@@ -110,7 +110,7 @@ errlHndl_t createProcNotFoundError(
  */
 errlHndl_t computeNonPhypRtTarget(
     const TARGETING::Target*   i_pTarget,
-          RT_TARG::rtChipId_t& o_rtTargetId)
+          TARGETING::rtChipId_t& o_rtTargetId)
 {
     assert(i_pTarget != NULL);
 
@@ -354,7 +354,7 @@ errlHndl_t computeNonPhypRtTarget(
  */
 errlHndl_t getRtTypeForTarget(
     const TARGETING::Target*   i_pTarget,
-          RT_TARG::rtChipId_t& o_rtType)
+          TARGETING::rtChipId_t& o_rtType)
 {
     assert(i_pTarget != NULL);
 

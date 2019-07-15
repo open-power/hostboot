@@ -41,7 +41,7 @@
 #include    <targeting/common/target.H>
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
-#include    <runtime/rt_targeting.H>
+#include    <targeting/runtime/rt_targeting.H>
 
 
 using namespace TARGETING;

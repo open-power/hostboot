@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,7 +35,7 @@
 #include <runtime/interface.h>
 #include <sbeio/runtime/sbe_msg_passing.H>
 #include <sbeio/sbeioreasoncodes.H>
-#include <runtime/rt_targeting.H>
+#include <targeting/runtime/rt_targeting.H>
 #include <targeting/common/attributes.H>
 #include <targeting/common/utilFilter.H>
 #include <errl/errlmanager.H>
@@ -88,7 +88,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
          */
         int initSbeMessagePassing(sbeMessage_t& o_request,
                                   sbeMessage_t& o_expected_response,
-                                  RT_TARG::rtChipId_t& o_chipId,
+                                  TARGETING::rtChipId_t& o_chipId,
                                   uint64_t& o_sbeCommAddr,
                                   runtimeInterfaces_t **o_rt_intf)
         {
@@ -142,8 +142,8 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                 TargetHandle_t proc = procList[0];
 
                 // Get the chip ID for the proc
-                RT_TARG::rtChipId_t o_chipId = 0;
-                errlHndl_t err = RT_TARG::getRtTarget(proc, o_chipId);
+                TARGETING::rtChipId_t o_chipId = 0;
+                errlHndl_t err = TARGETING::getRtTarget(proc, o_chipId);
                 if(nullptr != err)
                 {
                     rc = -1;
@@ -311,7 +311,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
          *
          * @return Return Code    O if Successful, otherwise not 0.
          */
-        int checkResetSbeMessagePassingCFAM(RT_TARG::rtChipId_t i_procChipId,
+        int checkResetSbeMessagePassingCFAM(TARGETING::rtChipId_t i_procChipId,
                                             uint32_t i_checkMask = SBE_MSG_MASK)
         {
             // Test check / reset CFAM entry
@@ -402,7 +402,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                                     "testSbeMessagePassingVersions");
             sbeMessage_t l_request;
             sbeMessage_t l_expected_response;
-            RT_TARG::rtChipId_t chipId = 0;
+            TARGETING::rtChipId_t chipId = 0;
             uint64_t l_sbeCommAddr = 0;
             runtimeInterfaces_t *rt_intf = nullptr;
 
@@ -501,7 +501,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
 
             sbeMessage_t l_request;
             sbeMessage_t l_expected_response;
-            RT_TARG::rtChipId_t chipId = 0;
+            TARGETING::rtChipId_t chipId = 0;
             uint64_t l_sbeCommAddr = 0;
             runtimeInterfaces_t *rt_intf = nullptr;
 
@@ -567,7 +567,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
 
             sbeMessage_t l_request;
             sbeMessage_t l_expected_response;
-            RT_TARG::rtChipId_t chipId = 0;
+            TARGETING::rtChipId_t chipId = 0;
             uint64_t l_sbeCommAddr = 0;
             runtimeInterfaces_t *rt_intf = nullptr;
 
@@ -741,7 +741,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
 
             sbeMessage_t l_request;
             sbeMessage_t l_expected_response;
-            RT_TARG::rtChipId_t chipId = 0;
+            TARGETING::rtChipId_t chipId = 0;
             uint64_t l_sbeCommAddr = 0;
             runtimeInterfaces_t *rt_intf = nullptr;
 
@@ -832,7 +832,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
 
             sbeMessage_t l_request;
             sbeMessage_t l_expected_response;
-            RT_TARG::rtChipId_t chipId = 0;
+            TARGETING::rtChipId_t chipId = 0;
             uint64_t l_sbeCommAddr = 0;
             runtimeInterfaces_t *rt_intf = nullptr;
 
@@ -984,7 +984,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
 
             sbeMessage_t l_request;
             sbeMessage_t l_expected_response;
-            RT_TARG::rtChipId_t chipId = 0;
+            TARGETING::rtChipId_t chipId = 0;
             uint64_t l_sbeCommAddr = 0;
             runtimeInterfaces_t *rt_intf = nullptr;
 
@@ -1142,7 +1142,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
             sbeMessage_t l_request;
             sbeMessage_t l_expected_response;
             uint32_t l_hdrsSize = sizeof(sbeHeader_t) + sizeof(cmdHeader_t);
-            RT_TARG::rtChipId_t chipId = 0;
+            TARGETING::rtChipId_t chipId = 0;
             uint64_t l_sbeCommAddr = 0;
             runtimeInterfaces_t *rt_intf = nullptr;
 

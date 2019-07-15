@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,7 +37,7 @@
 #include <initservice/initserviceif.H>
 
 #ifdef __HOSTBOOT_RUNTIME
-#include <runtime/rt_targeting.H>
+#include <targeting/runtime/rt_targeting.H>
 #include <runtime/interface.h>
 #endif // __HOSTBOOT_RUNTIME
 
@@ -156,8 +156,8 @@ errlHndl_t callWakeupHyp(TARGETING::Target* i_target,
           ++pCore_it )
     {
         // Runtime target id
-        RT_TARG::rtChipId_t rtTargetId = 0;
-        l_errl = RT_TARG::getRtTarget(*pCore_it, rtTargetId);
+        TARGETING::rtChipId_t rtTargetId = 0;
+        l_errl = TARGETING::getRtTarget(*pCore_it, rtTargetId);
         if(l_errl)
         {
             break;

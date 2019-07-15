@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,7 +41,7 @@
 #include <devicefw/driverif.H>
 #include <i2c/i2creasoncodes.H>
 #include <runtime/interface.h>
-#include <runtime/rt_targeting.H>
+#include <targeting/runtime/rt_targeting.H>
 #include "../errlud_i2c.H"
 
 // ----------------------------------------------
@@ -146,10 +146,10 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
 
     int rc = 0;
     bool l_host_if_enabled = true;
-    RT_TARG::rtChipId_t proc_id = 0;
+    TARGETING::rtChipId_t proc_id = 0;
 
     // Convert target to proc id
-    err = RT_TARG::getRtTarget( i_target,
+    err = TARGETING::getRtTarget( i_target,
                                 proc_id);
     if(err)
     {

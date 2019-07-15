@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,7 +30,7 @@
 #include <scom/scomif.H>
 #include <scom/runtime/rt_scomif.H>
 #include <runtime/interface.h>
-#include <runtime/rt_targeting.H>
+#include <targeting/runtime/rt_targeting.H>
 #include <xscom/piberror.H>
 #include <runtime/hbrt_utilities.H>
 
@@ -169,8 +169,8 @@ errlHndl_t sendScomToHyp(DeviceFW::OperationType i_opType,
     do
     {
         // Convert target to something Sapphire understands
-        RT_TARG::rtChipId_t target_id = 0;
-        l_err = RT_TARG::getRtTarget(i_target,
+        TARGETING::rtChipId_t target_id = 0;
+        l_err = TARGETING::getRtTarget(i_target,
                                     target_id);
         if(l_err)
         {

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,7 +33,7 @@
 
 #include <cxxtest/TestSuite.H>
 #include <runtime/interface.h>
-#include <runtime/rt_targeting.H>
+#include <targeting/runtime/rt_targeting.H>
 #include <targeting/common/utilFilter.H>
 #include <errl/errlmanager.H>
 #include <devicefw/userif.H>

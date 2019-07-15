@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,7 +39,7 @@
 #include <targeting/attrrp.H>
 #include <arch/pirformat.H>
 #include <runtime/customize_attrs_for_payload.H>
-#include <runtime/rt_targeting.H>
+#include <targeting/runtime/rt_targeting.H>
 #include <runtime/interface.h>
 #include <map>
 #include <util/memoize.H>
@@ -54,61 +54,6 @@ using namespace TARGETING;
 namespace RT_TARG
 {
 
-errlHndl_t getRtTarget(
-    const TARGETING::Target* i_pTarget,
-          rtChipId_t&        o_rtTargetId)
-{
-    errlHndl_t pError = NULL;
-
-    do
-    {
-        if(i_pTarget == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
-        {
-            TARGETING::Target* masterProcChip = NULL;
-            TARGETING::targetService().
-                masterProcChipTargetHandle(masterProcChip);
-            i_pTarget = masterProcChip;
-        }
-
-        auto hbrtHypId = RUNTIME::HBRT_HYP_ID_UNKNOWN;
-        if(   (!i_pTarget->tryGetAttr<TARGETING::ATTR_HBRT_HYP_ID>(hbrtHypId))
-           || (hbrtHypId == RUNTIME::HBRT_HYP_ID_UNKNOWN))
-        {
-            auto huid = get_huid(i_pTarget);
-            auto targetingTargetType =
-                i_pTarget->getAttr<TARGETING::ATTR_TYPE>();
-            TRACFCOMP(g_trac_targeting, ERR_MRK
-                "Targeting target type of 0x%08X not supported. "
-                "HUID: 0x%08X",
-                targetingTargetType,
-                huid);
-            /*@
-             * @errortype
-             * @moduleid    TARG_RT_GET_RT_TARGET
-             * @reasoncode  TARG_RT_TARGET_TYPE_NOT_SUPPORTED
-             * @userdata1   Target's HUID
-             * @userdata2   target's targeting type
-             * @devdesc     Targeting target's type not supported by runtime
-             *              code
-             */
-            pError = new ERRORLOG::ErrlEntry(
-                ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                TARGETING::TARG_RT_GET_RT_TARGET,
-                TARGETING::TARG_RT_TARGET_TYPE_NOT_SUPPORTED,
-                huid,
-                targetingTargetType,
-                true);
-
-            ERRORLOG::ErrlUserDetailsTarget(i_pTarget,"Targeting Target").
-                addToLog(pError);
-        }
-
-        o_rtTargetId = hbrtHypId;
-
-    } while(0);
-
-    return pError;
-}
 
 /**
  *  @brief API documentation same as for getHbTarget; this just implements the

@@ -31,7 +31,7 @@
 #include <errl/errlmanager.H>              // errlCommit
 #include <errl/hberrltypes.H>              // TWO_UINT32_TO_UINT64
 #include <targeting/common/target.H>       // TargetHandle_t, getTargetFromHuid
-#include <runtime/rt_targeting.H>          // RT_TARG::getHbTarget
+#include <targeting/runtime/rt_targeting.H>          // RT_TARG::getHbTarget
 #include <attributeenums.H>                // ATTRIBUTE_ID
 
 #ifdef CONFIG_NVDIMM

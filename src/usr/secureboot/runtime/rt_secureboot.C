@@ -35,7 +35,7 @@
 #include <secureboot/secure_reasoncodes.H>
 
 #include <errl/errlmanager.H>
-#include <runtime/rt_targeting.H>
+#include <targeting/runtime/rt_targeting.H>
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/targetservice.H>
 #include <devicefw/userif.H>

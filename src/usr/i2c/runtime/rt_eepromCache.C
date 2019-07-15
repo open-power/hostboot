@@ -37,7 +37,7 @@
 #include <devicefw/driverif.H>
 #include <i2c/eepromddreasoncodes.H>
 #include <runtime/interface.h>
-#include <runtime/rt_targeting.H>
+#include <targeting/runtime/rt_targeting.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/attrrp.H>
 #include <trace/interface.H>

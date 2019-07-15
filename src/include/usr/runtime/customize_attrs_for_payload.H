@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,7 +33,7 @@
  */
 
 #include <errl/errlentry.H>
-#include <runtime/rt_targeting.H>
+#include <targeting/runtime/rt_targeting.H>
 #include <targeting/common/attributes.H>
 
 namespace RUNTIME
@@ -42,7 +42,7 @@ namespace RUNTIME
 static const TARGETING::ATTR_HBRT_HYP_ID_type HBRT_HYP_ID_UNKNOWN
     = 0xFFFFFFFFFFFFFFFFULL;
 
-static const RT_TARG::rtChipId_t RT_TYPE_UNKNOWN
+static const TARGETING::rtChipId_t RT_TYPE_UNKNOWN
     = 0xFFFFFFFFFFFFFFFFULL;
 
 /**

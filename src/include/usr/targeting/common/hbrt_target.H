@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/runtime/rt_targeting.H $                      */
+/* $Source: src/include/usr/targeting/common/hbrt_target.H $              */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,28 +22,15 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __RT_TARGETING_H
-#define __RT_TARGETING_H
+#ifndef __HBRT_TARGET_H
+#define __HBRT_TARGET_H
 
 #include <errl/errlentry.H>
 
 namespace TARGETING
 {
-    class Target;
-}
-
-namespace RT_TARG
-{
     typedef uint64_t rtChipId_t;
-
-    enum
-    {
-        MEMBUF_ID_SHIFT = 4,    //!< CHIPID for MEMBUF is '<procid>MMMM'b
-        MEMBUF_ID_MASK  = 0x0000000F, //!< valid position bits for MEMBUF
-    };
-
-
-    /**
+     /**
      * @brief Convert a TARGETING::Target to an unit ID that can be used
      * in calls to the runtime host
      * @param[in] The HB TARGETING::Target
@@ -53,46 +40,6 @@ namespace RT_TARG
     errlHndl_t getRtTarget(const TARGETING::Target* i_target,
                            rtChipId_t &o_targetId);
 
-    /**
-     * @brief Convert a runtime chip_id (target) into a TARGETING::Target
-     * @param[in] The rt chipId
-     * @param[out] The TARGETING::Target pointer
-     * @return error log handle on error else NULL
-     */
-    errlHndl_t getHbTarget(rtChipId_t i_rt_chip_id,
-                           TARGETING::Target *& o_target);
-
-    /**
-     * @brief Save/Restore attribute values from current Reserved Memory data
-     * into new LID Structure data
-     * @param[in] Pointer to current Reserved Memory targeting binary data
-     * @param[in/out] Pointer to new LID Structure targeting binary data
-     * @param[in] Instance, ie, Node ID
-     * @return nullptr on success, else error log
-     */
-    errlHndl_t saveRestoreAttrs(void *i_rsvdMemPtr,
-                                void *io_lidStructPtr,
-                                uint8_t i_instance);
-
-    /**
-     * @brief Validate LID Structure against Reserved Memory.  Check that the
-     * TargetingHeader eyecatchers are valid, that the TargetingHeader number of
-     * sections match, and that the types and sizes of each TargetingSection
-     * match.
-     * @param[in] Pointer to new LID Structure targeting binary data
-     * @param[in] Pointer to current Reserved Memory targeting binary data
-     * @param[out] Total size of all sections in the new lid
-     * @return nullptr on success, else error log
-     */
-    errlHndl_t validateData(void *i_lidStructPtr,
-                            void *i_rsvdMemPtr,
-                            size_t& o_lidTotalSize);
-
-    /**
-     * @brief Apply ATTR_TMP overrides to be available for run time
-     */
-    void applyTempOverrides( );
-
-};
+}
 
 #endif

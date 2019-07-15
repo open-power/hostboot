@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,7 +38,7 @@
 #include "../../common/attntrace.H"
 #include "../../common/attntarget.H"
 #include <runtime/interface.h>
-#include <runtime/rt_targeting.H>
+#include <targeting/runtime/rt_targeting.H>
 #include <targeting/common/targetservice.H>
 
 using namespace ATTN;
@@ -79,8 +79,8 @@ class AttnCheckForRtAttentionsTest : public CxxTest::TestSuite
                 }
                 proc = procList[0];
 
-                RT_TARG::rtChipId_t chipId = 0;
-                errlHndl_t err = RT_TARG::getRtTarget( proc, chipId );
+                TARGETING::rtChipId_t chipId = 0;
+                errlHndl_t err = TARGETING::getRtTarget( proc, chipId );
                 if( NULL != err )
                 {
                     TS_FAIL("getRtTarget() failed for 0x%08X",
@@ -153,7 +153,7 @@ class AttnCheckForRtAttentionsTest : public CxxTest::TestSuite
                     break;
                 }
 
-                RT_TARG::rtChipId_t chipId = 0;
+                TARGETING::rtChipId_t chipId = 0;
                 errlHndl_t err = RT_TARG::getRtTarget( proc, chipId );
                 if( NULL != err )
                 {

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,7 +25,7 @@
 #include <cxxtest/TestSuite.H>
 #include <targeting/common/commontargeting.H>
 #include <runtime/interface.h>
-#include <runtime/rt_targeting.H>
+#include <targeting/runtime/rt_targeting.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <targeting/common/trace.H>
@@ -62,7 +62,7 @@ class TargetingTestSuite : public CxxTest::TestSuite
         {
             using namespace TARGETING;
             errlHndl_t err = NULL;
-            RT_TARG::rtChipId_t rt_chipid;
+            TARGETING::rtChipId_t rt_chipid;
 
             TARGETING::TargetHandleList allTargets;
             TARGETING::TargetHandleList targetList;
@@ -91,7 +91,7 @@ class TargetingTestSuite : public CxxTest::TestSuite
             for(TargetHandleList::iterator pTarg = allTargets.begin();
                 pTarg != allTargets.end(); ++pTarg)
             {
-                err = RT_TARG::getRtTarget(*pTarg, rt_chipid);
+                err = TARGETING::getRtTarget(*pTarg, rt_chipid);
                 if( err )
                 {
                     TS_FAIL("getRtTarget returned error log");

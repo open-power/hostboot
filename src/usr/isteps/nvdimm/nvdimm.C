@@ -50,7 +50,7 @@
 #include <targeting/common/targetUtil.H>
 #ifdef __HOSTBOOT_RUNTIME
 #include <runtime/hbrt_utilities.H>
-#include <usr/runtime/rt_targeting.H>
+#include <targeting/runtime/rt_targeting.H>
 #else
 #include <initservice/istepdispatcherif.H>
 #endif
@@ -3802,9 +3802,9 @@ errlHndl_t notifyNvdimmProtectionChange(Target* i_target,
 
         // Send combined status notification
         // Get the Proc Chip Id
-        RT_TARG::rtChipId_t l_chipId = 0;
+        TARGETING::rtChipId_t l_chipId = 0;
 
-        l_err = RT_TARG::getRtTarget(l_proc, l_chipId);
+        l_err = TARGETING::getRtTarget(l_proc, l_chipId);
         if(l_err)
         {
             TRACFCOMP( g_trac_nvdimm,

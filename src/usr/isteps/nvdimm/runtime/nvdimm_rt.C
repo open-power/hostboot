@@ -43,7 +43,7 @@
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/util.H>
 #include <targeting/common/utilFilter.H>
-#include <usr/runtime/rt_targeting.H>
+#include <targeting/runtime/rt_targeting.H>
 #include <runtime/interface.h>
 #include <arch/ppc.H>
 #include <isteps/nvdimm/nvdimmreasoncodes.H>
