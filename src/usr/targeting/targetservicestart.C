@@ -74,6 +74,7 @@
 #include <sbeio/sbeioif.H>
 #include <sys/mm.h>
 #include "../runtime/hdatstructs.H"
+#include <console/consoleif.H>
 
 #ifdef CONFIG_BMC_IPMI
 #include <ipmi/ipmiif.H>
@@ -968,11 +969,65 @@ static void adjustMemoryMap( TargetService& i_targetService )
         // Set the rest of the BARs...
     }
 
-    // We must have found a match somewhere
-    TARG_ASSERT( l_swapVictim != nullptr, "No swap match found" );
+    // We should have found a match, but if a processor was swapped
+    //  between different systems we could end up with a non-match
+    if( l_swapVictim == nullptr )
+    {
+        TARG_INF( "No swap victim was found, forcing master proc to use calculated proc0 values" );
 
+        // figure out what fabric id we actually booted with
+        uint8_t l_bootGroup = 0;
+        uint8_t l_bootChip = 0;
+        getFabricIdFromAddr( l_curXscomBAR, l_bootGroup, l_bootChip );
+        CONSOLE::displayf( NULL, "Module swap detected - handling memory remap from g%d:c%d\n", l_bootGroup, l_bootChip );
+
+        // now adjust the attributes that our early code is going to consume
+        //  to match the fabric id we're currently using
+        ATTR_XSCOM_BASE_ADDRESS_type l_xscomBAR =
+          computeMemoryMapOffset( l_xscomBase, l_bootGroup, l_bootChip );
+        l_pMasterProcChip->setAttr<ATTR_XSCOM_BASE_ADDRESS>(l_xscomBAR);
+
+        ATTR_LPC_BUS_ADDR_type l_lpcBAR =
+          computeMemoryMapOffset( l_lpcBase, l_bootGroup, l_bootChip );
+        l_pMasterProcChip->setAttr<ATTR_LPC_BUS_ADDR>(l_lpcBAR);
+
+        ATTR_PSI_BRIDGE_BASE_ADDR_type l_psiBridgeBAR =
+            computeMemoryMapOffset(MMIO_GROUP0_CHIP0_PSI_BRIDGE_BASE_ADDR,
+                                  l_bootGroup,
+                                  l_bootChip);
+        l_pMasterProcChip->setAttr<ATTR_PSI_BRIDGE_BASE_ADDR>(l_psiBridgeBAR);
+
+        ATTR_XIVE_CONTROLLER_BAR_ADDR_type l_xiveCtrlBAR =
+            computeMemoryMapOffset(MMIO_GROUP0_CHIP0_XIVE_CONTROLLER_BASE_ADDR,
+                                   l_bootGroup,
+                                   l_bootChip);
+        l_pMasterProcChip->setAttr<ATTR_XIVE_CONTROLLER_BAR_ADDR>(l_xiveCtrlBAR);
+
+        ATTR_XIVE_THREAD_MGMT1_BAR_ADDR_type l_xiveThreadMgmtBAR =
+            computeMemoryMapOffset(MMIO_GROUP0_CHIP0_XIVE_THREAD_MGMT1_BASE_ADDR,
+                                   l_bootGroup,
+                                   l_bootChip);
+        TARG_INF( " XIVE_THREAD_MGMT1_BAR =%.16llX", l_xiveThreadMgmtBAR );
+        l_pMasterProcChip->setAttr<ATTR_XIVE_THREAD_MGMT1_BAR_ADDR>(l_xiveThreadMgmtBAR);
+
+        ATTR_PSI_HB_ESB_ADDR_type l_psiHbEsbBAR =
+            computeMemoryMapOffset(MMIO_GROUP0_CHIP0_PSI_HB_ESB_BASE_ADDR,
+                                   l_bootGroup,
+                                   l_bootChip);
+        l_pMasterProcChip->setAttr<ATTR_PSI_HB_ESB_ADDR>(l_psiHbEsbBAR);
+
+        ATTR_INTP_BASE_ADDR_type l_intpBAR =
+            computeMemoryMapOffset(MMIO_GROUP0_CHIP0_INTP_BASE_ADDR,
+                                   l_bootGroup,
+                                   l_bootChip);
+        l_pMasterProcChip->setAttr<ATTR_INTP_BASE_ADDR>(l_intpBAR);
+
+        // Set the attribute to force a SBE update later
+        l_pTopLevel->setAttr<TARGETING::ATTR_FORCE_SBE_UPDATE>
+          (TARGETING::FORCE_SBE_UPDATE_BAR_MISMATCH);
+    }
     // Now swap the BARs between the master and the victim if needed
-    if( l_swapVictim != l_pMasterProcChip )
+    else if( l_swapVictim != l_pMasterProcChip )
     {
         // Walk through all of the attributes we cached above
         SWAP_ATTRIBUTE( ATTR_PROC_EFF_FABRIC_GROUP_ID, l_pMasterProcChip,
@@ -999,17 +1054,19 @@ static void adjustMemoryMap( TargetService& i_targetService )
 
     // Cross-check that what we ended up setting in the attributes
     //  matches the non-TARGETING values that the XSCOM and LPC
-    //  drivers computed
-    if( l_pMasterProcChip->getAttr<ATTR_LPC_BUS_ADDR>()
-        != LPC::get_lpc_bar() )
+    //  drivers computed (only if we found a swap victim)
+    if( l_swapVictim &&
+        (l_pMasterProcChip->getAttr<ATTR_LPC_BUS_ADDR>()
+         != LPC::get_lpc_bar()) )
     {
         TARG_ERR( "LPC attribute=%.16llX, live=%.16llX",
            l_pMasterProcChip->getAttr<ATTR_LPC_BUS_ADDR>(),
            LPC::get_lpc_bar() );
         TARG_ASSERT( false, "LPC BARs are inconsistent" );
     }
-    if( l_pMasterProcChip->getAttr<ATTR_XSCOM_BASE_ADDRESS>()
-        != XSCOM::get_master_bar() )
+    if( l_swapVictim &&
+        (l_pMasterProcChip->getAttr<ATTR_XSCOM_BASE_ADDRESS>()
+         != XSCOM::get_master_bar()) )
     {
         TARG_ERR( "XSCOM attribute=%.16llX, live=%.16llX",
            l_pMasterProcChip->getAttr<ATTR_XSCOM_BASE_ADDRESS>(),

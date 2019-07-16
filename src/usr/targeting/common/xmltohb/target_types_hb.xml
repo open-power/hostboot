@@ -276,6 +276,9 @@
     <attribute>
       <id>FORCE_PRE_PAYLOAD_DRTM</id>
     </attribute>
+    <attribute>
+      <id>FORCE_SBE_UPDATE</id>
+    </attribute>
     <!-- Need to add this explicitly to handle the Axone case -->
     <attribute>
       <id>FREQ_MCA_MHZ</id>

@@ -230,6 +230,39 @@
     <readable/>
   </attribute>
 
+  <enumerationType>
+    <description>
+        Enumeration specifying a target's CEC degraded mode domain
+    </description>
+    <default>NO</default>
+    <enumerator>
+      <name>NO</name>
+      <value>0</value>
+    </enumerator>
+    <enumerator>
+      <name>BAR_MISMATCH</name>
+      <value>1</value>
+    </enumerator>
+    <id>FORCE_SBE_UPDATE</id>
+  </enumerationType>
+
+  <attribute>
+    <id>FORCE_SBE_UPDATE</id>
+    <description>
+        Set to non-zero to force a SBE update at various places in the IPL.
+    </description>
+    <simpleType>
+      <enumeration>
+        <id>FORCE_SBE_UPDATE</id>
+        <default>NO</default>
+      </enumeration>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
   <attribute>
     <!-- Need to add this explicitly to handle the Axone case -->
     <id>FREQ_MCA_MHZ</id>

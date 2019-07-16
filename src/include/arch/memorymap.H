@@ -39,8 +39,13 @@ constexpr uint64_t  MMIO_OFFSET_PER_CHIP  = (4*TERABYTE);  //0x40000000000
 constexpr uint64_t  MMIO_OFFSET_PER_GROUP = (32*TERABYTE); //0x200000000000
 
 constexpr uint64_t  MMIO_BASE = 0x6000000000000;
+
 /**
  * @brief Compute MMIO value for a given chip and base value
+ * @param[in] i_baseAddr  group0-chip0 address
+ * @param[in] i_group  Fabric Group ID to compute address for
+ * @param[in] i_chip  Fabric Chip  ID to compute address for
+ * @return Fully qualified memory address
  */
 inline uint64_t computeMemoryMapOffset( uint64_t i_baseAddr,
                                         uint8_t i_group,
@@ -49,6 +54,26 @@ inline uint64_t computeMemoryMapOffset( uint64_t i_baseAddr,
     return (i_baseAddr +
       (MMIO_OFFSET_PER_GROUP * i_group) +
       (MMIO_OFFSET_PER_CHIP * i_chip));
+};
+
+/**
+ * @brief Determine fabric id from a MMIO address
+ * @param[in] i_addr  position-specific memory address
+ * @param[out] i_group  Fabric Group ID to compute address for
+ * @param[out] i_chip  Fabric Chip  ID to compute address for
+ */
+inline void getFabricIdFromAddr( uint64_t i_addr,
+                                 uint8_t& o_group,
+                                 uint8_t& o_chip )
+{
+    // chop off any high-order offset
+    uint64_t l_addr = i_addr % MMIO_BASE;
+    // use integer math to get the group id
+    o_group = l_addr / MMIO_OFFSET_PER_GROUP;
+    // chop off the group
+    l_addr = l_addr % MMIO_OFFSET_PER_GROUP;
+    // use integer math to get the chip id
+    o_chip = l_addr % MMIO_OFFSET_PER_CHIP;
 };
 
 /**
