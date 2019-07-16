@@ -88,6 +88,25 @@ typedef union
 }topologyIndexBits_t;
 
 /**
+ * @brief bit definition for a complete memory address
+ */
+typedef union
+{
+    struct
+    {
+        uint64_t rsvd1:12;    //0:11
+        uint64_t smf:1;       //12
+        uint64_t memType:2;   //13:14
+                              // b00 = non-mirrored
+                              // b10 = mirrored
+                              // b11 = mmio
+        uint64_t topoIndex:5; //15:19
+        uint64_t chipAddr:44; //20:63
+    } bits;
+    uint64_t address;
+} memoryAddress_t;
+
+/**
  * Collection of constants and utility functions related to the
  * static memory map defined for the POWER9 family of processors.
  */
@@ -141,6 +160,24 @@ inline uint64_t computeMemoryMapOffset( const uint64_t i_baseAddr,
     }
 
     return (i_baseAddr + (MMIO_OFFSET_PER_TOPO_INDEX * l_indexBits.topoIndex));
+};
+
+/**
+ * @brief Compute MMIO address for a 5-bit topology index
+ *
+ * @param[in] i_baseAddr The base MMIO address for topology index 0
+ * @param[in] i_topologyIndex The topology Index (or effective topology Index)
+ *
+ * @return The base address adjusted for the chip associated with the given
+ *         topology Index.
+ */
+inline uint64_t computeMemoryMapOffset( const uint64_t i_baseAddr,
+                                        const uint8_t i_topologyIndex)
+{
+    memoryAddress_t l_addr;
+    l_addr.bits.chipAddr = i_baseAddr;
+    l_addr.bits.topoIndex = i_topologyIndex;
+    return l_addr.address;
 };
 
 
@@ -204,6 +241,18 @@ inline topoId_t makeTopoId(const topoMode_t i_topologyMode,
     }
 
     return l_idBits.topoId;
+};
+
+/**
+ * @brief Determine topology index from a MMIO address
+ * @param[in] i_addr  position-specific memory address
+ * @return i_chip  Fabric Topology ID that address represents
+ */
+inline uint8_t getTopoIndexFromAddr( uint64_t i_addr )
+{
+    memoryAddress_t l_memAddr;
+    l_memAddr.address = i_addr;
+    return l_memAddr.bits.topoIndex;
 };
 
 #endif // if !(defined(BOOTLOADER) || defined(HOSTBOOT_KERNEL))
