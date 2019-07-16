@@ -328,49 +328,6 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Disable powerdown mode in rc09
-/// @param[in] i_target, a fapi2::Target<TARGET_TYPE_DIMM>
-/// @param[in,out] io_inst a vector of CCS instructions we should add to
-/// @return FAPI2_RC_SUCCESS if and only if ok
-///
-fapi2::ReturnCode rc09_disable_powerdown( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t >& io_inst)
-{
-    FAPI_INF("rc09_disable_powerdown %s", mss::c_str(i_target));
-
-    constexpr uint8_t POWER_DOWN_BIT = 4;
-    constexpr bool l_sim = false;
-    constexpr uint8_t FS0 = 0; // Function space 0
-    constexpr uint64_t CKE_HIGH = mss::ON;
-    fapi2::buffer<uint8_t> l_rc09_cw = 0;
-    std::vector<uint64_t> l_ranks;
-
-    FAPI_TRY(mss::eff_dimm_ddr4_rc09(i_target, l_rc09_cw));
-
-    // Clear power down enable bit.
-    l_rc09_cw.clearBit<POWER_DOWN_BIT>();
-
-    FAPI_TRY( mss::rank::ranks(i_target, l_ranks) );
-
-    // DES to ensure we exit powerdown properly
-    FAPI_DBG("deselect for %s", mss::c_str(i_target));
-    io_inst.push_back( ccs::des_command() );
-
-    static const cw_data l_rc09_4bit_data( FS0, 9, l_rc09_cw, mss::tmrd() );
-
-    // Load RC09
-    FAPI_TRY( control_word_engine<RCW_4BIT>(i_target, l_rc09_4bit_data, l_sim, io_inst, CKE_HIGH),
-              "Failed to load 4-bit RC09 control word for %s",
-              mss::c_str(i_target));
-
-    // Hold the CKE high
-    mss::ccs::workarounds::hold_cke_high(io_inst);
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
 /// @brief Load the rcd control words
 /// @param[in] i_target, a fapi2::Target<TARGET_TYPE_DIMM>
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
@@ -383,7 +340,7 @@ fapi2::ReturnCode rcd_load_nvdimm( const fapi2::Target<TARGET_TYPE_DIMM>& i_targ
 {
     FAPI_INF("rcd_load_nvdimm %s", mss::c_str(i_target));
 
-    constexpr uint64_t CKE_LOW = mss::OFF;
+    constexpr uint64_t CKE_HIGH = mss::ON;
     constexpr bool l_sim = false;
 
     // Per DDR4RCD02, tSTAB is us. We want this in cycles for the CCS.
@@ -431,17 +388,19 @@ fapi2::ReturnCode rcd_load_nvdimm( const fapi2::Target<TARGET_TYPE_DIMM>& i_targ
     };
 
     // Load 4-bit data
-    FAPI_TRY( control_word_engine<RCW_4BIT>(i_target, l_rcd_4bit_data, l_sim, io_inst, CKE_LOW),
+    // Keeping the CKE high as this will be done not in powerdown/STR mode. Not affected for
+    // the RCD supplier on nvdimm
+    FAPI_TRY( control_word_engine<RCW_4BIT>(i_target, l_rcd_4bit_data, l_sim, io_inst, CKE_HIGH),
               "Failed to load 4-bit control words for %s",
               mss::c_str(i_target));
 
     // Load 8-bit data
-    FAPI_TRY( control_word_engine<RCW_8BIT>(i_target, l_rcd_8bit_data, l_sim, io_inst, CKE_LOW),
+    FAPI_TRY( control_word_engine<RCW_8BIT>(i_target, l_rcd_8bit_data, l_sim, io_inst, CKE_HIGH),
               "Failed to load 8-bit control words for %s",
               mss::c_str(i_target));
 
     // Load RC09 with CKE_LOW
-    FAPI_TRY( control_word_engine<RCW_4BIT>(i_target, l_rc09_4bit_data, l_sim, io_inst, CKE_LOW),
+    FAPI_TRY( control_word_engine<RCW_4BIT>(i_target, l_rc09_4bit_data, l_sim, io_inst, CKE_HIGH),
               "Failed to load 4-bit RC09 control word for %s",
               mss::c_str(i_target));
 
@@ -468,27 +427,6 @@ fapi2::ReturnCode rcd_restore( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
     // instructions in the CCS instruction vector
     l_program.iv_poll.iv_initial_delay = 0;
     l_program.iv_poll.iv_initial_sim_delay = 0;
-
-    // We expect to come in with the port in STR. Before proceeding with
-    // restoring the RCD, power down needs to be disabled first on the RCD so
-    // the rest of the CWs can be restored with CKE low
-    for ( const auto& d : mss::find_targets<TARGET_TYPE_DIMM>(i_target) )
-    {
-        FAPI_DBG("rc09_disable_powerdown for %s", mss::c_str(d));
-        FAPI_TRY( rc09_disable_powerdown(d, l_program.iv_instructions),
-                  "Failed rc09_disable_powerdown() for %s", mss::c_str(d) );
-    }// dimms
-
-    // Exit STR first so CKE is back to high and rcd isn't ignoring us
-    FAPI_TRY( self_refresh_exit( i_target ) );
-
-    FAPI_TRY( mss::ccs::workarounds::nvdimm::execute(l_mcbist, l_program, i_target),
-              "Failed to execute ccs for %s", mss::c_str(i_target) );
-
-    // Now, drive CKE back to low via STR entry instead of pde (we have data in the drams!)
-    FAPI_TRY( self_refresh_entry( i_target ) );
-
-    l_program = ccs::program(); //Reset the program
 
     // Now, fill the program with instructions to program the RCD
     for ( const auto& d : mss::find_targets<TARGET_TYPE_DIMM>(i_target) )
@@ -614,11 +552,11 @@ fapi2::ReturnCode post_restore_transition( const fapi2::Target<fapi2::TARGET_TYP
     FAPI_TRY(get_refresh_overrun_mask(i_target, l_refresh_overrun_mask));
     FAPI_TRY(change_refresh_overrun_mask(i_target, mss::states::ON));
 
-    // Restore the rcd
-    FAPI_TRY( rcd_restore( i_target ) );
-
     // Exit STR
     FAPI_TRY( self_refresh_exit( i_target ) );
+
+    // Restore the rcd
+    FAPI_TRY( rcd_restore( i_target ) );
 
     // Load the MRS
     FAPI_TRY( mss::mrs_load( i_target, NVDIMM_WORKAROUND ) );
@@ -635,6 +573,26 @@ fapi2::ReturnCode post_restore_transition( const fapi2::Target<fapi2::TARGET_TYP
     // Restore the refresh overrun mask to previous and clear the fir
     FAPI_TRY(clear_refresh_overrun_fir(i_target));
     FAPI_TRY(change_refresh_overrun_mask(i_target, l_refresh_overrun_mask));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Helper to change the BAR valid state. Consumed by hostboot
+/// @param[in] i_target the target associated with this subroutine
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+fapi2::ReturnCode change_bar_valid_state( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint8_t i_state)
+{
+    const auto& l_mcs = mss::find_target<fapi2::TARGET_TYPE_MCS>(i_target);
+    fapi2::buffer<uint64_t> l_data;
+
+    FAPI_TRY( mss::getScom(l_mcs, MCS_MCFGP, l_data) );
+    l_data.writeBit<MCS_MCFGP_VALID>(i_state);
+    FAPI_INF("Changing MCS_MCFGP_VALID to %d on %s", i_state, mss::c_str(l_mcs));
+    FAPI_TRY( mss::putScom(l_mcs, MCS_MCFGP, l_data) );
 
 fapi_try_exit:
     return fapi2::current_err;

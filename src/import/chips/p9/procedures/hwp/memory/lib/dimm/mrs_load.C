@@ -72,7 +72,17 @@ fapi2::ReturnCode mrs_load<TARGET_TYPE_MCA>( const fapi2::Target<TARGET_TYPE_MCA
     for ( const auto& d : find_targets<TARGET_TYPE_DIMM>(i_target) )
     {
         FAPI_DBG("mrs load for %s", mss::c_str(d));
-        FAPI_TRY( perform_mrs_load(d, l_program.iv_instructions) );
+
+        // TK - break out the nvdimm stuff into function
+        if (i_nvdimm_workaround)
+        {
+            FAPI_DBG("nvdimm workaround detected. loading mrs for restore sequence");
+            FAPI_TRY( ddr4::mrs_load_nvdimm(d, l_program.iv_instructions) );
+        }
+        else
+        {
+            FAPI_TRY( perform_mrs_load(d, l_program.iv_instructions) );
+        }
     }
 
     // We have to configure the CCS engine to let it know which port these instructions are

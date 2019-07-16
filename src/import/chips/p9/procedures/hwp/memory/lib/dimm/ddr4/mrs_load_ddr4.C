@@ -146,28 +146,82 @@ fapi2::ReturnCode mrs_load( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
     const size_t DOUBLE_TMRD = 2 * mss::tmrd();
     const size_t DOUBLE_TMOD = 2 * mss::tmod(i_target);
 
-    static const std::vector< mrs_data<TARGET_TYPE_MCBIST> > MRS_DATA =
-    {
-        // JEDEC ordering of MRS per DDR4 power on sequence
-        {  3, mrs03, mrs03_decode, DOUBLE_TMRD  },
-        {  6, mrs06, mrs06_decode, DOUBLE_TMRD  },
-        {  5, mrs05, mrs05_decode, DOUBLE_TMRD  },
-        {  4, mrs04, mrs04_decode, DOUBLE_TMRD  },
-        {  2, mrs02, mrs02_decode, DOUBLE_TMRD  },
-        {  1, mrs01, mrs01_decode, DOUBLE_TMRD  },
-        // We need to wait tmod before zqcl, a non-mrs command
-        {  0, mrs00, mrs00_decode, DOUBLE_TMOD },
-    };
+    // tDLLK to wait for DLL Reset
+    uint64_t tDLLK = 0;
+    FAPI_TRY( mss::tdllk(i_target, tDLLK) );
 
-    std::vector< uint64_t > l_ranks;
-    FAPI_TRY( mss::rank::ranks(i_target, l_ranks) );
-
-    // Load MRS
-    for (const auto& d : MRS_DATA)
     {
-        for (const auto& r : l_ranks)
+        const std::vector< mrs_data<TARGET_TYPE_MCBIST> > MRS_DATA =
         {
-            FAPI_TRY( mrs_engine(i_target, d, r, io_inst) );
+            // JEDEC ordering of MRS per DDR4 power on sequence
+            {  3, mrs03, mrs03_decode, DOUBLE_TMRD  },
+            {  6, mrs06, mrs06_decode, DOUBLE_TMRD  },
+            {  5, mrs05, mrs05_decode, DOUBLE_TMRD  },
+            {  4, mrs04, mrs04_decode, DOUBLE_TMRD  },
+            {  2, mrs02, mrs02_decode, DOUBLE_TMRD  },
+            {  1, mrs01, mrs01_decode, DOUBLE_TMRD  },
+            // We need to wait tmod before zqcl, a non-mrs command
+            // Adding Per Glancy's request, to ensure DLL locking time
+            {  0, mrs00, mrs00_decode, DOUBLE_TMOD + tDLLK },
+        };
+
+        std::vector< uint64_t > l_ranks;
+        FAPI_TRY( mss::rank::ranks(i_target, l_ranks) );
+
+        // Load MRS
+        for (const auto& d : MRS_DATA)
+        {
+            for (const auto& r : l_ranks)
+            {
+                FAPI_TRY( mrs_engine(i_target, d, r, io_inst) );
+            }
+        }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform the mrs_load DDR4 operations for nvdimm restore - TARGET_TYPE_DIMM specialization
+/// @param[in] i_target a fapi2::Target<fapi2::TARGET_TYPE_DIMM>
+/// @param[in] io_inst a vector of CCS instructions we should add to
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+fapi2::ReturnCode mrs_load_nvdimm( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
+                                   std::vector< ccs::instruction_t >& io_inst)
+{
+    FAPI_INF("ddr4::mrs_load_nvdimm %s", mss::c_str(i_target));
+
+    // tDLLK to wait for DLL Reset
+    uint64_t tDLLK = 0;
+    FAPI_TRY( mss::tdllk(i_target, tDLLK) );
+
+    {
+        const std::vector< mrs_data<TARGET_TYPE_MCBIST> > MRS_DATA =
+        {
+            // JEDEC ordering of MRS per DDR4 NVDIMM restore sequence
+            // Need to perform DLL off to on procedure (mrs01&mrs00)
+            // before all the other MRS's
+            {  1, mrs01, mrs01_decode, mss::tmrd()  },
+            {  0, mrs00, mrs00_decode, mss::tmod(i_target) + tDLLK },
+            {  3, mrs03, mrs03_decode, mss::tmrd()  },
+            {  6, mrs06, mrs06_decode, mss::tmrd()  },
+            {  5, mrs05, mrs05_decode, mss::tmrd()  },
+            {  4, mrs04, mrs04_decode, mss::tmrd()  },
+            {  2, mrs02, mrs02_decode, mss::tmrd()  },
+        };
+
+        std::vector< uint64_t > l_ranks;
+        FAPI_TRY( mss::rank::ranks(i_target, l_ranks) );
+
+        // Load MRS
+        for (const auto& d : MRS_DATA)
+        {
+            for (const auto& r : l_ranks)
+            {
+                FAPI_TRY( mrs_engine(i_target, d, r, io_inst) );
+            }
         }
     }
 

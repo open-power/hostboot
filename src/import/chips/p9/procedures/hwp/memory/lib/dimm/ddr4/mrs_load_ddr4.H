@@ -1511,6 +1511,15 @@ fapi2::ReturnCode mrs_load( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_targ
                             std::vector< ccs::instruction_t >& io_inst);
 
 ///
+/// @brief Perform the mrs_load DDR4 operations for nvdimm restore - TARGET_TYPE_DIMM specialization
+/// @param[in] i_target a fapi2::Target<fapi2::TARGET_TYPE_DIMM>
+/// @param[in] io_inst a vector of CCS instructions we should add to
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+fapi2::ReturnCode mrs_load_nvdimm( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                   std::vector< ccs::instruction_t >& io_inst);
+
+///
 /// @brief Sets WR LVL mode
 /// @param[in] i_target a DIMM target
 /// @param[in] i_mode setting for WR LVL mode

@@ -182,15 +182,6 @@ template< fapi2::TargetType T >
 fapi2::ReturnCode self_refresh_exit( const fapi2::Target<T>& i_target );
 
 ///
-/// @brief Disable powerdown mode in rc09
-/// @param[in] i_target, a fapi2::Target<TARGET_TYPE_DIMM>
-/// @param[in,out] io_inst a vector of CCS instructions we should add to
-/// @return FAPI2_RC_SUCCESS if and only if ok
-///
-fapi2::ReturnCode rc09_disable_powerdown( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t >& io_inst);
-
-///
 /// @brief Load the rcd control words
 /// @param[in] i_target, a fapi2::Target<TARGET_TYPE_DIMM>
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
@@ -235,6 +226,14 @@ fapi2::ReturnCode wr_vref_latch( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_
 ///
 template< fapi2::TargetType T >
 fapi2::ReturnCode post_restore_transition( const fapi2::Target<T>& i_target );
+
+///
+/// @brief Helper to change the BAR valid state. Consumed by hostboot
+/// @param[in] i_target the target associated with this subroutine
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+fapi2::ReturnCode change_bar_valid_state( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint8_t i_state);
 
 ///
 /// @brief Preload the CCS with the EPOW sequence
