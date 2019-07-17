@@ -972,6 +972,7 @@ errlHndl_t nvdimmRestore(TargetHandleList i_nvdimmList, uint8_t &i_mpipl)
             // is de-asserted before kicking off the restore
             if (i_mpipl)
             {
+                TRACFCOMP(g_trac_nvdimm, "nvdimmRestore(): in MPIPL");
                 FAPI_INVOKE_HWP(l_err, mss::ddr_resetn, l_fapi_mca, HIGH);
 
                 if (l_err)
@@ -987,6 +988,23 @@ errlHndl_t nvdimmRestore(TargetHandleList i_nvdimmList, uint8_t &i_mpipl)
                     // Leaving this comment here as a reminder, will remove later
                     break;
                 }
+
+                // In MPIPL, invalidate the BAR to prevent any traffic from stepping on
+                // the restore
+                FAPI_INVOKE_HWP(l_err, mss::nvdimm::change_bar_valid_state, l_fapi_mca, LOW);
+
+                // This should not fail at all (scom read/write). If it does, post an informational log
+                // to leave some breadcrumbs
+                if (l_err)
+                {
+                    TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmRestore() HUID[%X] i_mpipl[%u] failed to invalidate BAR!",
+                              get_huid(*it), i_mpipl);
+
+                    l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                    l_err->collectTrace(NVDIMM_COMP_NAME, 256);
+                    ERRORLOG::errlCommit(l_err, NVDIMM_COMP_ID);
+                }
+
             }
 
             // Self-refresh is done at the port level
@@ -1138,6 +1156,33 @@ errlHndl_t nvdimmRestore(TargetHandleList i_nvdimmList, uint8_t &i_mpipl)
             {
                 // Restore success!
                 nvdimmSetStatusFlag(l_nvdimm, NSTD_VAL_PRSV);
+            }
+        }
+
+        if (i_mpipl)
+        {
+            for (const auto & l_nvdimm : i_nvdimmList)
+            {
+                TargetHandleList l_mcaList;
+                errlHndl_t err = nullptr;
+                getParentAffinityTargets(l_mcaList, l_nvdimm, CLASS_UNIT, TYPE_MCA);
+                assert(l_mcaList.size(), "nvdimmRestore() failed to find parent MCA.");
+
+                // Re-validate the BAR after restore
+                fapi2::Target<fapi2::TARGET_TYPE_MCA> l_fapi_mca(l_mcaList[0]);
+                FAPI_INVOKE_HWP(err, mss::nvdimm::change_bar_valid_state, l_fapi_mca, HIGH);
+
+                // This should not fail at all (scom read/write). If it does, post an informational log
+                // to leave some breadcrumbs
+                if (err)
+                {
+                    TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmRestore() HUID[%X] i_mpipl[%u] failed to invalidate BAR!",
+                              get_huid(l_nvdimm), i_mpipl);
+
+                    err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                    err->collectTrace(NVDIMM_COMP_NAME, 256);
+                    ERRORLOG::errlCommit(err, NVDIMM_COMP_ID);
+                }
             }
         }
 
