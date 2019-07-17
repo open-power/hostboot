@@ -711,6 +711,7 @@ errlHndl_t ensureEepromCacheIsInSync(TARGETING::Target           * i_target,
     vpdRecord  l_record    = 0;
     vpdKeyword l_keywordPN = 0;
     vpdKeyword l_keywordSN = 0;
+    TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
 
     do
     {
@@ -764,12 +765,80 @@ errlHndl_t ensureEepromCacheIsInSync(TARGETING::Target           * i_target,
         // Check the serial number and part number of the system if the previous
         // record/key pair matched. Note that this time the record/key pairs are
         // OSYS/SS and OSYS/MM for serial number and part number, respectively
-        // @TODO RTC 210350 Handle this case.
-//        if (l_type == TARGETING::TYPE_NODE &&
-//           (l_matchSN && l_matchPN))
-//        {
-//
-//        }
+       if (l_type == TARGETING::TYPE_NODE &&
+          (l_matchSN && l_matchPN))
+       {
+            // If we have a NODE, use pvpd api
+            IpVpdFacade* l_ipvpd = &(Singleton<PvpdFacade>::instance());
+            bool l_zeroPN = false;
+            bool l_zeroSN = false;
+            l_err = l_ipvpd->cmpSeepromToZero(i_target,
+                                              PVPD::OSYS,
+                                              PVPD::MM,
+                                              l_zeroPN);
+            if(l_err)
+            {
+                TRACDCOMP(g_trac_vpd,ERR_MRK"VPD::ensureEepromCacheIsInSync: "
+                "cmpSeepromToZero returned an error. Assuming this error is "
+                "related to OSYS/MM not being present in SEEPROM. Skipping "
+                "this error. HUID: 0x%.8X",
+                TARGETING::get_huid(i_target));
+                delete l_err;
+                l_err = nullptr;
+                l_zeroPN = true;
+
+            }
+
+            l_err = l_ipvpd->cmpSeepromToZero(i_target,
+                                              PVPD::OSYS,
+                                              PVPD::SS,
+                                              l_zeroSN);
+            if(l_err)
+            {
+                TRACDCOMP(g_trac_vpd,ERR_MRK"VPD::ensureEepromCacheIsInSync: "
+                "cmpSeepromToZero returned an error. Assuming this error is "
+                "related to OSYS/SS not being present in SEEPROM. Skipping "
+                "this error. HUID: 0x%.8X",
+                TARGETING::get_huid(i_target));
+                delete l_err;
+                l_err = nullptr;
+                l_zeroSN = true;
+            }
+
+            //Only compare the SN/PN between SEEPROM and EECACHE if they are
+            //nonzero.
+            if(!l_zeroPN)
+            {
+                l_err = cmpEecacheToEeprom(i_target,
+                                          i_eepromType,
+                                          PVPD::MM,
+                                          PVPD::OSYS,
+                                          l_matchPN);
+                if(l_err)
+                {
+                    TRACFCOMP(g_trac_vpd,ERR_MRK"VPD::ensureEepromCacheIsInSync: Error"
+                    " checking for EECACHE/SEEPROM PN match for NODE target 0x%.8X",
+                    TARGETING::get_huid(i_target));
+                    break;
+                }
+            }
+
+            if(!l_zeroSN)
+            {
+                l_err = cmpEecacheToEeprom(i_target,
+                                          i_eepromType,
+                                          PVPD::SS,
+                                          PVPD::OSYS,
+                                          l_matchSN);
+                if(l_err)
+                {
+                    TRACFCOMP(g_trac_vpd,ERR_MRK"VPD::ensureEepromCacheIsInSync: Error"
+                    " checking for EECACHE/SEEPROM SN match for NODE target 0x%.8X",
+                    TARGETING::get_huid(i_target));
+                    break;
+                }
+            }
+       }
 
         o_isInSync = (l_matchPN && l_matchSN);
 
