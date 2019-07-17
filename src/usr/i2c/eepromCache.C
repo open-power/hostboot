@@ -639,6 +639,11 @@ DEVICE_REGISTER_ROUTE( DeviceFW::READ,
                        TARGETING::TYPE_DIMM,
                        genericI2CEepromCache );
 
+DEVICE_REGISTER_ROUTE( DeviceFW::READ,
+                       DeviceFW::EEPROM_CACHE,
+                       TARGETING::TYPE_NODE,
+                       genericI2CEepromCache );
+
 errlHndl_t setIsValidCacheEntry(const TARGETING::Target * i_target,
                                 const EEPROM_ROLE &i_eepromRole,
                                 bool i_isValid)
