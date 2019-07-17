@@ -1830,6 +1830,9 @@
       <id>AFFINITY_PATH</id>
     </attribute>
     <attribute>
+      <id>BOOT_FREQ_MHZ</id>
+    </attribute>
+    <attribute>
       <default>SYS</default>
       <id>CLASS</id>
     </attribute>
@@ -2376,6 +2379,15 @@
     </attribute>
     <attribute>
       <id>UCD_MFR_REVISION_OVERRIDE</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
+    <id>ucd90320</id>
+    <parent>i2c-power-sequencer</parent>
+    <attribute>
+      <id>MODEL</id>
+      <default>UCD90320</default>
     </attribute>
   </targetType>
 
