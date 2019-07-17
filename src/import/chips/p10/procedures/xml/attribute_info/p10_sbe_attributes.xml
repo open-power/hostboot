@@ -412,4 +412,8 @@
       <name>ATTR_NUM_KEY_ADDR_PAIR</name>
       <value>0x0</value>
  </entry>
+ <entry>
+      <name>ATTR_SBE_MASTER_HRMOR_ADDRESS</name>
+      <value>0x0</value>
+ </entry>
 </entries>
