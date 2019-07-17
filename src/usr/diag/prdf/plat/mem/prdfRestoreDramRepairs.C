@@ -112,17 +112,24 @@ void __calloutDimm( errlHndl_t & io_errl, TargetHandle_t i_portTrgt,
     HWAS::DeconfigEnum deconfigPolicy = HWAS::DELAYED_DECONFIG;
     HWAS::GARD_ErrorType gardPolicy   = HWAS::GARD_Predictive;
 
+    #ifdef CONFIG_NVDIMM
     // If the DIMM is an NVDIMM, change the gard and deconfig options to no
-    // gard/deconfig and set the appropriate attribute to indicate a
+    // gard/deconfig and call nvdimmNotifyProtChange to indicate a
     // save/restore may work
     if ( isNVDIMM(i_dimmTrgt) )
     {
         deconfigPolicy = HWAS::NO_DECONFIG;
         gardPolicy     = HWAS::GARD_NULL;
 
-        i_dimmTrgt->setAttr<ATTR_NV_STATUS_FLAG>(0x40);
+        uint32_t l_rc = PlatServices::nvdimmNotifyProtChange( i_dimmTrgt,
+            NVDIMM::NVDIMM_RISKY_HW_ERROR );
+        if ( SUCCESS != l_rc )
+        {
+            PRDF_TRAC( PRDF_FUNC "nvdimmNotifyProtChange(0x%08x) "
+                       "failed.", PlatServices::getHuid(i_dimmTrgt) );
+        }
     }
-
+    #endif
 
     io_errl->addHwCallout( i_dimmTrgt, HWAS::SRCI_PRIORITY_HIGH,
                            deconfigPolicy, gardPolicy );

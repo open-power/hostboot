@@ -181,6 +181,8 @@ void ServiceDataCollector::clearNvdimmMruListGard()
 {
     #define PRDF_FUNC "[ServiceDataCollector::clearNvdimmMruListGard] "
 
+    #ifdef CONFIG_NVDIMM
+    #ifdef __HOSTBOOT_MODULE
     // Loop through the MRU list.
     for ( auto & mru : xMruList )
     {
@@ -188,33 +190,29 @@ void ServiceDataCollector::clearNvdimmMruListGard()
         TargetHandle_t trgt = callout.getTarget();
         if ( TYPE_DIMM == PlatServices::getTargetType(trgt) )
         {
-            // If the callout target is an NVDIMM, do not gard it and send a
-            // message to PHYP/Hostboot that a save/restore may work.
+            // If the callout target is an NVDIMM send a message to
+            // PHYP/Hostboot that a save/restore may work, and if we are at
+            // IPL, clear Gard on the NVDIMM.
             if ( isNVDIMM(trgt) )
             {
-                mru.gardState = NO_GARD;
-
-                #ifdef __HOSTBOOT_MODULE
-
-                #ifdef __HOSTBOOT_RUNTIME
-                // Hostboot runtime, send the message to PHYP
-                uint32_t l_rc = PlatServices::nvdimmNotifyPhypProtChange( trgt,
+                // Send the message to PHYP/Hostboot
+                uint32_t l_rc = PlatServices::nvdimmNotifyProtChange( trgt,
                     NVDIMM::NVDIMM_RISKY_HW_ERROR );
                 if ( SUCCESS != l_rc )
                 {
-                    PRDF_TRAC( PRDF_FUNC "nvdimmNotifyPhypProtChange(0x%08x) "
+                    PRDF_TRAC( PRDF_FUNC "nvdimmNotifyProtChange(0x%08x) "
                                "failed.", PlatServices::getHuid(trgt) );
                     continue;
                 }
-                #else
-                // IPL, set the appropriate internal attribute in Hostboot
-                trgt->setAttr<ATTR_NV_STATUS_FLAG>(0x40);
+                #ifndef __HOSTBOOT_RUNTIME
+                // IPL, clear Gard
+                mru.gardState = NO_GARD;
                 #endif
-
-                #endif // __HOSTBOOT_MODULE
             }
         }
     }
+    #endif // __HOSTBOOT_MODULE
+    #endif // CONFIG_NVDIMM
 
     #undef PRDF_FUNC
 }

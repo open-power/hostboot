@@ -594,6 +594,32 @@ bool isRowRepairEnabled<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 
+//------------------------------------------------------------------------------
+
+#ifdef CONFIG_NVDIMM
+uint32_t nvdimmNotifyProtChange( TARGETING::TargetHandle_t i_target,
+                                 const NVDIMM::nvdimm_protection_t i_state )
+{
+    #define PRDF_FUNC "[PlatServices::nvdimmNotifyProtChange] "
+
+    uint32_t o_rc = SUCCESS;
+
+    errlHndl_t errl = NVDIMM::notifyNvdimmProtectionChange( i_target, i_state );
+    if ( nullptr != errl )
+    {
+        PRDF_ERR( PRDF_FUNC "NVDIMM::notifyNvdimmProtectionChange(0x%08x) "
+                  "failed.", getHuid(i_target) );
+        PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+        o_rc = FAIL;
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+
+}
+#endif
+
 //##############################################################################
 //##                    Nimbus Maintenance Command wrappers
 //##############################################################################
