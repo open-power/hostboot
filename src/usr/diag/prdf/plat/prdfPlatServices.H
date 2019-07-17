@@ -53,6 +53,10 @@
 #include <prdfBitString.H>
 #include <mem/prdfMemRank.H>
 
+#ifdef CONFIG_NVDIMM
+#include <isteps/nvdimm/nvdimm.H>
+#endif
+
 //------------------------------------------------------------------------------
 
 namespace PRDF
@@ -168,6 +172,17 @@ uint32_t getMemAddrRange( ExtensibleChip * i_chip,
  */
 template<TARGETING::TYPE T>
 bool isRowRepairEnabled( ExtensibleChip * i_chip, const MemRank & i_rank );
+
+#ifdef CONFIG_NVDIMM
+/**
+ * @brief Notify PHYP/Hostboot of NVDIMM protection status
+ *
+ * @param i_target     Processor with NVDIMM
+ * @param i_state      Protection state of NVDIMM
+ */
+uint32_t nvdimmNotifyProtChange( TARGETING::Target * i_target,
+    const NVDIMM::nvdimm_protection_t i_state );
+#endif
 
 //##############################################################################
 //##                  Nimbus/Centaur Maintenance Command wrappers

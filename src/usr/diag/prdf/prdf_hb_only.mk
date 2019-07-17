@@ -131,10 +131,6 @@ ifeq (${HOSTBOOT_RUNTIME},1)
 # plat/
 prd_obj += prdfPlatServices_rt.o
 
-# nvdimm
-prd_vpath += ${ROOTPATH}/src/usr/isteps/nvdimm/
-prd_vpath += ${ROOTPATH}/src/usr/isteps/nvdimm/runtime
-
 endif
 
 ################################################################################

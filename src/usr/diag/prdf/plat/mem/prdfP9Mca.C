@@ -27,7 +27,6 @@
 #include <iipServiceDataCollector.h>
 #include <prdfExtensibleChip.H>
 #include <prdfPluginMap.H>
-#include <isteps/nvdimm/nvdimm.H>
 
 // Platform includes
 #include <prdfMemDbUtils.H>
@@ -747,6 +746,7 @@ int32_t AnalyzeNvdimmHealthStatRegs( ExtensibleChip * i_chip,
 {
     #define PRDF_FUNC "[nimbus_mca::AnalyzeNvdimmHealthStatRegs] "
 
+    #ifdef CONFIG_NVDIMM
     #ifdef __HOSTBOOT_RUNTIME
 
     uint32_t l_rc = SUCCESS;
@@ -786,7 +786,7 @@ int32_t AnalyzeNvdimmHealthStatRegs( ExtensibleChip * i_chip,
             io_sc.service_data->SetThresholdMaskId(0);
 
             // Send message to PHYP that save/restore may work
-            l_rc = PlatServices::nvdimmNotifyPhypProtChange( dimm,
+            l_rc = PlatServices::nvdimmNotifyProtChange( dimm,
                     NVDIMM::NVDIMM_RISKY_HW_ERROR );
             if ( SUCCESS != l_rc ) continue;
 
@@ -829,7 +829,14 @@ int32_t AnalyzeNvdimmHealthStatRegs( ExtensibleChip * i_chip,
     PRDF_ERR( PRDF_FUNC "Unexpected call to analyze NVDIMMs at IPL." );
     io_sc.service_data->SetCallout( LEVEL2_SUPPORT, MRU_HIGH, NO_GARD );
 
-    #endif
+    #endif // end runtime vs IPL check
+
+    #else // CONFIG_NVDIMM not defined
+
+    PRDF_ERR( PRDF_FUNC "CONFIG_NVDIMM not defined." );
+    io_sc.service_data->SetCallout( LEVEL2_SUPPORT, MRU_HIGH, NO_GARD );
+
+    #endif // end CONFIG_NVDIMM check
 
     return SUCCESS; // nothing to return to rule code
 

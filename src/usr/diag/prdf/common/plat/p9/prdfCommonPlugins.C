@@ -146,40 +146,62 @@ int32_t ClearNvdimmGardState( ExtensibleChip * i_chip,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS(nimbus_mcs,    CommonPlugins, ClearNvdimmGardState);
 PRDF_PLUGIN_DEFINE_NS(nimbus_mca,    CommonPlugins, ClearNvdimmGardState);
-PRDF_PLUGIN_DEFINE_NS(nimbus_mcbist, CommonPlugins, ClearNvdimmGardState);
 
 /**
  * @brief   Will check if any of the DIMMs connected to this chip are NVDIMMs
- *          and callout self, no gard if there are.
+ *          and send a message to PHYP/Hostboot that save/restore may work. If
+ *          we are at IPL, we will callout self no gard instead of garding.
  * @param   i_chip The chip of the DIMM parent.
  * @param   io_sc  The step code data struct.
- * @returns SUCCESS if NVDIMMs found, PRD_SCAN_COMM_REGISTER_ZERO if not.
+ * @returns SUCCESS if NVDIMMs found at IPL, PRD_SCAN_COMM_REGISTER_ZERO if not.
  */
 int32_t CheckForNvdimms( ExtensibleChip * i_chip,
                          STEP_CODE_DATA_STRUCT & io_sc )
 {
     int32_t rc = PRD_SCAN_COMM_REGISTER_ZERO;
 
+    #ifdef CONFIG_NVDIMM
     #ifdef __HOSTBOOT_MODULE
 
     TargetHandleList dimmList = getConnected( i_chip->getTrgt(), TYPE_DIMM );
 
+    // Always loop through all the dimms so we send the
+    // nvdimmNotifyProtChange message for all the NVDIMMs on the target.
     for ( auto & dimm : dimmList )
     {
+        // If the callout target is an NVDIMM send a message to
+        // PHYP/Hostboot that a save/restore may work, and if we are at
+        // IPL, do not gard the target.
         if ( isNVDIMM(dimm) )
         {
-            // Callout self, no gard
-            io_sc.service_data->SetCallout(i_chip->getTrgt(), MRU_MED, NO_GARD);
+            // Send the message to PHYP/Hostboot
+            uint32_t l_rc = PlatServices::nvdimmNotifyProtChange( dimm,
+                NVDIMM::NVDIMM_RISKY_HW_ERROR );
+            if ( SUCCESS != l_rc )
+            {
+                PRDF_TRAC( "CheckForNvdimms: nvdimmNotifyProtChange(0x%08x)"
+                           " failed.", PlatServices::getHuid(dimm) );
+                continue;
+            }
 
-            // No need for other actions, so return SUCCESS
+            #ifndef __HOSTBOOT_RUNTIME
+            // IPL
+            // We will callout self, no gard. No need for another self callout
+            // from the rule code, so return SUCCESS.
             rc = SUCCESS;
-            break;
+            #endif
         }
     }
 
-    #endif
+    if ( SUCCESS == rc )
+    {
+        // Callout self, no gard
+        io_sc.service_data->SetCallout( i_chip->getTrgt(), MRU_MED, NO_GARD );
+    }
+
+    #endif // __HOSTBOOT_MODULE
+    #endif // CONFIG_NVDIMM
 
     return rc;
 }

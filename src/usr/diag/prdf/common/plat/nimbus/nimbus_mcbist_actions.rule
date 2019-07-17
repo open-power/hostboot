@@ -40,7 +40,7 @@ actionclass command_addr_timeout
 #                               NVDIMM callouts                                #
 ################################################################################
 
-# Simple callouts that will avoid gard for NVDIMMs
+# Simple callouts that will avoid gard for NVDIMMs at IPL
 actionclass nvdimm_self_th_1
 {
     try( funccall("CheckForNvdimms"), calloutSelfMed );
