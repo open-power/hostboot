@@ -773,11 +773,7 @@ errlHndl_t discoverTargets()
                && (l_targetType != TYPE_I2C_MUX))
             {
                 // read Chip ID/EC data from these physical chips
-
-                // @TODO RTC 212820: Remove this when we have VPD
-                //errl = platReadIDEC(pTarget);
-                errl = NULL;
-
+                errl = platReadIDEC(pTarget);
                 if (errl)
                 {
                     // read of ID/EC failed even tho we THOUGHT we were present.
@@ -798,10 +794,7 @@ errlHndl_t discoverTargets()
                 else if (l_targetType == TYPE_PROC)
                 {
                     // read partialGood vector from these as well.
-                    // @TODO RTC 212820: Remove this when we have VPD
-                    //errl = platReadPartialGood(pTarget, pgData);
-                    errl = NULL;
-
+                    errl = platReadPartialGood(pTarget, &pgData[0]);
                     if (errl)
                     {   // read of PG failed even tho we were present..
                         HWAS_INF("pTarget 0x%.8X - read PG failed "
@@ -820,14 +813,8 @@ errlHndl_t discoverTargets()
 
                         // look at the 'nest' logic to override the
                         //  functionality of this proc
-
-                        // @TODO RTC 212820: Remove this when we have VPD
-                        chipFunctional = true;
-                        /*
                         chipFunctional =
-                            isChipFunctional(pTarget,
-                                             pgData);
-                        */
+                            isChipFunctional(pTarget, pgData_expanded);
 
                         if(!chipFunctional)
                         {
@@ -867,9 +854,6 @@ errlHndl_t discoverTargets()
                                            errlEid,
                                            infoErrl,
                                            createInfoLog);
-
-            // @TODO RTC 212820: Remove this when we have VPD
-            chipPresent = chipFunctional = true;
 
             // set HWAS state to show CHIP is present, functional per above
             enableHwasState(pTarget, chipPresent, chipFunctional, errlEid);

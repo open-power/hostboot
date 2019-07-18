@@ -204,7 +204,10 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
         }
 #endif
 
-        present = spdPresent( i_target );
+        // TODO RTC 213602
+        // enable this once dimm presence detection works
+        //present = spdPresent( i_target );
+        present = true;
 
         if( present == false )
         {

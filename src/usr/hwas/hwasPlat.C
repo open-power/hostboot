@@ -424,14 +424,12 @@ errlHndl_t ocmbTranslateSpdToIdec(const uint16_t  i_value,
 
     errlHndl_t error = nullptr;
 
-/* FIXME RTC: 210975 The constants are unused
     const uint16_t OCMB_ID = i_isID ? i_value : i_id;
-
     const uint32_t GEMINI_EC        = 0x0000;
     const uint32_t GEMINI_SPD_EC    = 0x0000;
     const uint32_t EXPLORER_EC      = 0x0010;
     const uint32_t EXPLORER_SPD_EC  = 0x0000;
-*/
+
     // This map will hold the associated values between what is read from
     // the OCMB's IDEC register and the SPD since they use different
     // standards and thus cannot be directly compared.
@@ -439,7 +437,6 @@ errlHndl_t ocmbTranslateSpdToIdec(const uint16_t  i_value,
 
     if (i_isID)
     {
-/* FIXME RTC: 210975 DDIMM_DMB_ID constants DNE anymore
         if (DDIMM_DMB_ID::EXPLORER == OCMB_ID)
         {
             OCMB_ASSOCIATION_MAP[DDIMM_DMB_ID::EXPLORER] =
@@ -450,11 +447,9 @@ errlHndl_t ocmbTranslateSpdToIdec(const uint16_t  i_value,
             OCMB_ASSOCIATION_MAP[DDIMM_DMB_ID::GEMINI] =
                 POWER_CHIPID::GEMINI_16;
         }
-*/
     }
     else
     {
-/* FIXME RTC: 210975 DDIMM_DMB_ID constants DNE anymore
         if (DDIMM_DMB_ID::EXPLORER == OCMB_ID)
         {
             OCMB_ASSOCIATION_MAP[EXPLORER_SPD_EC] = EXPLORER_EC;
@@ -463,7 +458,6 @@ errlHndl_t ocmbTranslateSpdToIdec(const uint16_t  i_value,
         {
             OCMB_ASSOCIATION_MAP[GEMINI_SPD_EC] = GEMINI_EC;
         }
-*/
     }
 
     auto map_it = OCMB_ASSOCIATION_MAP.find(i_value);
@@ -625,12 +619,12 @@ errlHndl_t ocmbIdecPhase1(const TARGETING::TargetHandle_t& i_target)
 
         uint8_t spdEc = *(spdBuffer + SPD_EC_OFFSET);
 
-        if (/* FIXME RTC: 210975 DDIMM_DMB_ID constants DNE anymore DDIMM_DMB_ID::EXPLORER == spdId*/ 0)
+        if (DDIMM_DMB_ID::EXPLORER == spdId)
         {
             HWAS_INF("ocmbIdecPhase1> OCMB 0x%.8X chip type is EXPLORER",
                      TARGETING::get_huid(i_target));
         }
-        else if (/* FIXME RTC: 210975 DDIMM_DMB_ID constants DNE anymore DDIMM_DMB_ID::GEMINI == spdId*/ 0)
+        else if (DDIMM_DMB_ID::GEMINI == spdId)
         {
             HWAS_INF("ocmbIdecPhase1> OCMB 0x%.8X chip type is GEMINI",
                      TARGETING::get_huid(i_target));
@@ -1148,13 +1142,8 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
         // call deviceRead() to see if they are present
         bool present = false;
         size_t presentSize = sizeof(present);
-
-        /* @TODO RTC 212820: Add this back in when we have vpd/eeprom */
-        (void)presentSize;
-        /*
         errl = deviceRead(pTarget, &present, presentSize,
                                 DEVICE_PRESENT_ADDRESS());
-        */
 
         if (unlikely(errl != NULL))
         {   // errl was set - this is an error condition.
@@ -1168,9 +1157,6 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
             // target is not present - fall thru
             present = false;
         }
-
-        present = true; // @TODO RTC 212820: Remove this line when we can call
-                        // deviceRead
 
         // if TYPE_MCS
         // Need to handle "special" -- DVPD cache relies on this

@@ -222,7 +222,10 @@ errlHndl_t ocmbI2CPresencePerformOp(DeviceFW::OperationType i_opType,
 {
     errlHndl_t l_invalidateErrl = nullptr;
 
-    bool l_ocmbPresent = EEPROM::eepromPresence(i_target);
+    // TODO RTC 213602
+    // Enable once presence detection is supported
+    //bool l_ocmbPresent = EEPROM::eepromPresence(i_target);
+    bool l_ocmbPresent = true;
 
     memcpy(io_buffer, &l_ocmbPresent, sizeof(l_ocmbPresent));
     io_buflen = sizeof(l_ocmbPresent);
@@ -258,9 +261,12 @@ errlHndl_t basicI2CPresencePerformOp(DeviceFW::OperationType i_opType,
     bool l_muxPresent = 0;
     errlHndl_t l_returnedError = nullptr;
 
-    l_returnedError = genericI2CTargetPresenceDetect(i_target,
-                                                     io_buflen,
-                                                     l_muxPresent);
+    // TODO RTC 213602
+    // Enable once presence detection is supported
+    //l_returnedError = genericI2CTargetPresenceDetect(i_target,
+    //                                                 io_buflen,
+    //                                                 l_muxPresent);
+    l_muxPresent = true;
 
     if (l_returnedError)
     {

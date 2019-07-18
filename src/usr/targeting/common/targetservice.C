@@ -331,11 +331,14 @@ void TargetService::_getMasterProcChipTargetHandle(
     TARGETING::Target* l_masterChip = nullptr;
     for (auto & l_chip: l_procTargetList)
     {
-        TARGETING::ATTR_FABRIC_CHIP_ID_type l_chipId =
-            (l_chip)->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
-        TARGETING::ATTR_FABRIC_GROUP_ID_type l_groupId =
-            (l_chip)->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
-        if( l_chipId == l_masterChipID && l_groupId == l_masterGroupID )
+        //TODO RTC 212966
+        //TARGETING::ATTR_FABRIC_CHIP_ID_type l_chipId =
+        //    (l_chip)->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
+        //TARGETING::ATTR_FABRIC_GROUP_ID_type l_groupId =
+        //    (l_chip)->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
+        //if( l_chipId == l_masterChipID && l_groupId == l_masterGroupID )
+        (void)l_masterGroupID;
+        (void)l_masterChipID;
         {
             l_masterChip = (l_chip);
             break;

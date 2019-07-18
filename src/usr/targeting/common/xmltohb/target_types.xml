@@ -805,6 +805,14 @@
   <targetType>
     <id>chip-processor-power10</id>
     <parent>chip-processor</parent>
+    <!-- TODO RTC 213604: Remove i2c based module vpd once SPI support is added -->
+    <attribute>
+      <id>EEPROM_VPD_BACKUP_INFO</id>
+    </attribute>
+    <!-- TODO RTC 213604: Remove i2c based module vpd once SPI support is added -->
+    <attribute>
+      <id>EEPROM_VPD_PRIMARY_INFO</id>
+    </attribute>
     <attribute>
       <id>FSP_BASE_ADDR</id>
     </attribute>
@@ -1937,6 +1945,9 @@
     <attribute>
       <default>SYS</default>
       <id>CLASS</id>
+    </attribute>
+    <attribute>
+      <id>CLEAR_DIMM_SPD_ENABLE</id>
     </attribute>
     <attribute>
       <id>DPO_MIN_FREQ_PERCENT</id>

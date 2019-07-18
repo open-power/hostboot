@@ -208,10 +208,13 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
     do{
 
         #ifdef CONFIG_SUPPORT_EEPROM_CACHING
-        if(l_source == EEPROM::AUTOSELECT)
-        {
-            err = resolveSource(i_target, i2cInfo, l_source);
-        }
+        // TODO RTC 213602
+        // Force using cached data until simics supports access to EEPROMs
+        //if(l_source == EEPROM::AUTOSELECT)
+        //{
+        //    err = resolveSource(i_target, i2cInfo, l_source);
+        //}
+        l_source = EEPROM::CACHE;
 
         if(err)
         {

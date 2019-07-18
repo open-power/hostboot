@@ -290,6 +290,7 @@ Layout Description
         <ecc/>
     </section>
     <section>
+        <!-- NOTE must update standalone.simics if EECACHE offset changes-->
         <description>Eeprom Cache(512K)</description>
         <eyeCatch>EECACHE</eyeCatch>
         <physicalOffset>0x3C5C000</physicalOffset>

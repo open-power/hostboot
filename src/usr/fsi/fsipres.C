@@ -121,7 +121,10 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
 
     if ( check_for_mvpd )
     {
-       mvpd_present = VPD::mvpdPresent( i_target );
+        // TODO RTC 213602
+        // Re-enable once presence detection is supported in simics
+        // mvpd_present = VPD::mvpdPresent( i_target );
+        mvpd_present = true;
     }
 
 #if defined(CONFIG_MVPD_READ_FROM_HW) && defined(CONFIG_MVPD_READ_FROM_PNOR)
@@ -202,8 +205,6 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
     }
 
     bool present = fsi_present && mvpd_present;
-
-    present = true; // @TODO RTC 212820: Fix this when we have VPD
 
     memcpy(io_buffer, &present, sizeof(present));
     io_buflen = sizeof(present);

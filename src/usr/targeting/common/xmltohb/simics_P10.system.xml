@@ -134,6 +134,40 @@
     <attribute><id>XIVE_THREAD_MGMT1_BAR_ADDR</id>
         <default>0x0006030203180000</default>
     </attribute>
+    <!-- TODO RTC 213604: Remove i2c based module vpd once SPI support is added -->
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <!-- Note: that there are actually two 64KB chips associated with the MVPD SEEPROM
+                 but Hostboot should never access the second chip -->
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>1</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+            <field><id>port</id><value>2</value></field>
+            <field><id>writeCycleTime</id><value>0x0A</value></field>
+            <field><id>writePageSize</id><value>0x80</value></field>
+        </default>
+    </attribute>
+    <!-- TODO RTC 213604: Remove i2c based module vpd once SPI support is added -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <!-- Note: that there are actually two 64KB chips associated with the MVPD SEEPROM
+                 but Hostboot should never access the second chip -->
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>1</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>writeCycleTime</id><value>0x0A</value></field>
+            <field><id>writePageSize</id><value>0x80</value></field>
+        </default>
+    </attribute>
     <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
 </targetInstance>
 
@@ -5920,6 +5954,29 @@
         <id>POSITION</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>0</default>
+    </attribute>
+    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
+         that we preload in standalone simics. No cache updates should be needed -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <!-- TODO RTC 213602 Use correct values once available in simics-->
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0x08</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5948,6 +6005,29 @@
     <attribute>
         <id>POSITION</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>1</default>
+    </attribute>
+    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
+         that we preload in standalone simics. No cache updates should be needed -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <!-- TODO RTC 213602 Use correct values once available in simics-->
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0x09</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
+        </default>
     </attribute>
 </targetInstance>
 
@@ -5978,6 +6058,29 @@
         <id>POSITION</id>
         <default>2</default>
     </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>2</default>
+    </attribute>
+    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
+         that we preload in standalone simics. No cache updates should be needed -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <!-- TODO RTC 213602 Use correct values once available in simics-->
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0x0A</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6006,6 +6109,29 @@
     <attribute>
         <id>POSITION</id>
         <default>3</default>
+    </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>3</default>
+    </attribute>
+    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
+         that we preload in standalone simics. No cache updates should be needed -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <!-- TODO RTC 213602 Use correct values once available in simics-->
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0x0B</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
+        </default>
     </attribute>
 </targetInstance>
 
@@ -6036,6 +6162,29 @@
         <id>POSITION</id>
         <default>4</default>
     </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>4</default>
+    </attribute>
+    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
+         that we preload in standalone simics. No cache updates should be needed -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <!-- TODO RTC 213602 Use correct values once available in simics-->
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0x0C</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6064,6 +6213,29 @@
     <attribute>
         <id>POSITION</id>
         <default>5</default>
+    </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>5</default>
+    </attribute>
+    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
+         that we preload in standalone simics. No cache updates should be needed -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <!-- TODO RTC 213602 Use correct values once available in simics-->
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0x0D</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
+        </default>
     </attribute>
 </targetInstance>
 
@@ -6094,6 +6266,29 @@
         <id>POSITION</id>
         <default>6</default>
     </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>6</default>
+    </attribute>
+    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
+         that we preload in standalone simics. No cache updates should be needed -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <!-- TODO RTC 213602 Use correct values once available in simics-->
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0x0E</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6122,6 +6317,29 @@
     <attribute>
         <id>POSITION</id>
         <default>7</default>
+    </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>7</default>
+    </attribute>
+    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
+         that we preload in standalone simics. No cache updates should be needed -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <!-- TODO RTC 213602 Use correct values once available in simics-->
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0x0F</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
+        </default>
     </attribute>
 </targetInstance>
 
@@ -6152,8 +6370,32 @@
         <id>POSITION</id>
         <default>8</default>
     </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>8</default>
+    </attribute>
+    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
+         that we preload in standalone simics. No cache updates should be needed -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <!-- TODO RTC 213602 Use correct values once available in simics-->
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>20</value></field>
+            <field><id>writePageSize</id><value>32</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
+<!-- TODO RTC 213602: Uncomment this once presence detection works
 <targetInstance>
     <id>sys0node0ocmb9</id>
     <type>chip-ocmb</type>
@@ -6180,6 +6422,26 @@
     <attribute>
         <id>POSITION</id>
         <default>9</default>
+    </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>9</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>20</value></field>
+            <field><id>writePageSize</id><value>32</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
+        </default>
     </attribute>
 </targetInstance>
 
@@ -6210,6 +6472,26 @@
         <id>POSITION</id>
         <default>10</default>
     </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>10</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA4</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>20</value></field>
+            <field><id>writePageSize</id><value>32</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6238,6 +6520,26 @@
     <attribute>
         <id>POSITION</id>
         <default>11</default>
+    </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>11</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA6</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>20</value></field>
+            <field><id>writePageSize</id><value>32</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
+        </default>
     </attribute>
 </targetInstance>
 
@@ -6268,6 +6570,26 @@
         <id>POSITION</id>
         <default>12</default>
     </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>12</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>2</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>20</value></field>
+            <field><id>writePageSize</id><value>32</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6296,6 +6618,26 @@
     <attribute>
         <id>POSITION</id>
         <default>13</default>
+    </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>13</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA4</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>2</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>20</value></field>
+            <field><id>writePageSize</id><value>32</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
+        </default>
     </attribute>
 </targetInstance>
 
@@ -6326,6 +6668,26 @@
         <id>POSITION</id>
         <default>14</default>
     </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>14</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA6</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>2</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>20</value></field>
+            <field><id>writePageSize</id><value>32</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6355,7 +6717,28 @@
         <id>POSITION</id>
         <default>15</default>
     </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>15</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA8</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>2</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>20</value></field>
+            <field><id>writePageSize</id><value>32</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
+        </default>
+    </attribute>
 </targetInstance>
+-->
 
 <!-- ===================================================================== -->
 <!-- MEMPORT Units -->
@@ -6657,6 +7040,7 @@
     </attribute>
 </targetInstance>
 
+<!-- TODO RTC 213602: Uncomment this once presence detection works
 <targetInstance>
     <id>sys0node0ocmb9memport0</id>
     <type>unit-mem_port</type>
@@ -6887,13 +7271,14 @@
         <default>0</default>
     </attribute>
 </targetInstance>
+-->
 
 <!-- ===================================================================== -->
 <!-- DIMM Units -->
 <!-- ===================================================================== -->
 <targetInstance>
     <id>sys0node0dimm0</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
         <default>0x00030000</default>
@@ -6926,11 +7311,34 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>0</default>
+    </attribute>
+    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
+         that we preload in standalone simics. No cache updates should be needed -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <!-- TODO RTC 213602 Use correct values once available in simics-->
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0x08</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
     <id>sys0node0dimm1</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
         <default>0x00030001</default>
@@ -6963,11 +7371,34 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>1</default>
+    </attribute>
+    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
+         that we preload in standalone simics. No cache updates should be needed -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <!-- TODO RTC 213602 Use correct values once available in simics-->
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0x09</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
     <id>sys0node0dimm2</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
         <default>0x00030002</default>
@@ -7000,11 +7431,34 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>2</default>
+    </attribute>
+    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
+         that we preload in standalone simics. No cache updates should be needed -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <!-- TODO RTC 213602 Use correct values once available in simics-->
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0x0A</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
     <id>sys0node0dimm3</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
         <default>0x00030003</default>
@@ -7037,11 +7491,34 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>3</default>
+    </attribute>
+    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
+         that we preload in standalone simics. No cache updates should be needed -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <!-- TODO RTC 213602 Use correct values once available in simics-->
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0x0B</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
     <id>sys0node0dimm4</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
         <default>0x00030004</default>
@@ -7074,11 +7551,34 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>4</default>
+    </attribute>
+    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
+         that we preload in standalone simics. No cache updates should be needed -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <!-- TODO RTC 213602 Use correct values once available in simics-->
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0x0C</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
     <id>sys0node0dimm5</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
         <default>0x00030005</default>
@@ -7111,11 +7611,34 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>5</default>
+    </attribute>
+    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
+         that we preload in standalone simics. No cache updates should be needed -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <!-- TODO RTC 213602 Use correct values once available in simics-->
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0x0D</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
     <id>sys0node0dimm6</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
         <default>0x00030006</default>
@@ -7148,11 +7671,34 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>6</default>
+    </attribute>
+    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
+         that we preload in standalone simics. No cache updates should be needed -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <!-- TODO RTC 213602 Use correct values once available in simics-->
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0x0E</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
     <id>sys0node0dimm7</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
         <default>0x00030007</default>
@@ -7185,11 +7731,34 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>7</default>
+    </attribute>
+    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
+         that we preload in standalone simics. No cache updates should be needed -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <!-- TODO RTC 213602 Use correct values once available in simics-->
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0x0F</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
     <id>sys0node0dimm8</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
         <default>0x00030008</default>
@@ -7222,11 +7791,35 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>8</default>
+    </attribute>
+    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
+         that we preload in standalone simics. No cache updates should be needed -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <!-- TODO RTC 213602 Use correct values once available in simics-->
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>20</value></field>
+            <field><id>writePageSize</id><value>32</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
+<!-- TODO RTC 213602: Uncomment once presence detection works
 <targetInstance>
     <id>sys0node0dimm9</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
         <default>0x00030009</default>
@@ -7259,11 +7852,29 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>9</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>2</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
     <id>sys0node0dimm10</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
         <default>0x0003000A</default>
@@ -7296,11 +7907,29 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>10</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>3</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
     <id>sys0node0dimm11</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
         <default>0x0003000B</default>
@@ -7333,11 +7962,29 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>11</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>4</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
     <id>sys0node0dimm12</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
         <default>0x0003000C</default>
@@ -7370,11 +8017,29 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>12</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>5</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
     <id>sys0node0dimm13</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
         <default>0x0003000D</default>
@@ -7407,11 +8072,29 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>13</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>6</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
     <id>sys0node0dimm14</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
         <default>0x0003000E</default>
@@ -7444,11 +8127,29 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>14</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>7</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
     <id>sys0node0dimm15</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
         <default>0x0003000F</default>
@@ -7481,7 +8182,26 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>15</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>8</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
 </targetInstance>
+-->
 
 
 <!-- ===================================================================== -->
@@ -7536,7 +8256,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/nx-0</default>
+        <default>affinity:sys-0/node-0/proc-0/nx-0</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -8712,6 +9432,44 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-39</default>
+    </attribute>
+</targetInstance>
+
+<!-- ===================================================================== -->
+<!-- I2C_MUX -->
+<!-- ===================================================================== -->
+<!-- TODO RTC 213602 Remove this once correct model is available in simics-->
+<targetInstance>
+    <id>sys0node0i2cmux0</id>
+    <type>i2c_mux_pca9847</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x004D0000</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/i2c_mux-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/i2c_mux-0</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>NA</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>devAddr</id><value>0xE0</value></field>
+            <field><id>engine</id><value>3</value></field>
+        </default>
     </attribute>
 </targetInstance>
 
