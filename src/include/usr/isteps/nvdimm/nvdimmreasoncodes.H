@@ -98,6 +98,7 @@ enum nvdimmModuleId
     SET_ATTR_NVDIMM_ENCRYPTION_KEYS_FW      = 0x30,
     SEND_ATTR_NVDIMM_ARMED                  = 0x31,
     NVDIMM_FACTORY_RESET                    = 0x32,
+    NVDIMM_HEALTH_CHECK                     = 0x33,
 };
 
 /**
@@ -161,6 +162,10 @@ enum nvdimmReasonCode
     NVDIMM_ENCRYPTION_MAX_DARN_ERRORS       = NVDIMM_COMP_ID | 0x37,   // Darn random key gen reached max errors
     NVDIMM_ENCRYPTION_BAD_RANDOM_DATA       = NVDIMM_COMP_ID | 0x38,   // Generated key data not valid
     NVDIMM_CANNOT_MAKE_ATTRIBUTE            = NVDIMM_COMP_ID | 0x39,   // Cannot make Attribute
+    NVDIMM_HEALTH_CHECK_IN_PROGRESS_FAILURE = NVDIMM_COMP_ID | 0x3A,   // !< pertains to ES_CMD_STATUS0[0]; the health check in progress flag
+    NVDIMM_HEALTH_CHECK_REPORTED_FAILURE    = NVDIMM_COMP_ID | 0x3B,   // !< pertains to ES_CMD_STATUS0[2]; the health check reported a failure flag
+    NVDIMM_LIFETIME_MIN_REQ_NOT_MET         = NVDIMM_COMP_ID | 0x3C,   // !< pertains to ES_LIFETIME; BPM does not meet minimum requirement for a new BPM
+    NVDIMM_HEALTH_CHECK_NEVER_INITIATED     = NVDIMM_COMP_ID | 0x3D,   // !< A health check was never initiated at start of IPL
 };
 
 enum UserDetailsTypes

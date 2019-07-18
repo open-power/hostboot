@@ -193,6 +193,39 @@ bool nvdimmArm(TARGETING::TargetHandleList &i_nvdimmTargetList);
  */
 bool nvdimmDisarm(TARGETING::TargetHandleList &i_nvdimmTargetList);
 
+/**
+ * @brief Check the health status of the individual NVDIMMs supplied in list
+ *
+ * @details The BPM will trigger the health check when power is applied at the
+ *          beginning of the IPL, with results ready to check about 20 mins
+ *          later. It is the caller's responsibility to ensure enough time has
+ *          passed to make this call.
+ *          Excerpt from the Jedec Standard, Byte Addressable Energy Backed
+ *          Interface of the interested flags (bits 0 .. 2).
+ *          ES_CMD_STATUS0
+ *              Bit 0 : Health Check in Progress
+ *              Bit 1 : Health Check Succeeded
+ *              Bit 2 : Health Check Failed
+ *
+ * @param[in] i_nvdimmTargetList - list of NVDIMMs to check the health of
+ *
+ * @return false if one or more NVDIMMs fail health check, else true
+ */
+bool nvDimmCheckHealthStatus(TARGETING::TargetHandleList &i_nvdimmTargetList);
+
+/**
+ * @brief A wrapper around the call to nvDimmCheckHealthStatus
+ *
+ * @details This will aggregate all the NVDIMMs of the system and pass
+ *          them to the call nvDimmCheckHealthStatus
+ *
+ * @see nvDimmCheckHealthStatus for more details
+ *
+ * @return false if one or more NVDIMMs fail health check, else true
+ */
+bool nvDimmCheckHealthStatusOnSystem();
+
+
 #endif
 
 /**
@@ -241,7 +274,6 @@ errlHndl_t notifyNvdimmProtectionChange(TARGETING::Target* i_target,
  * @param i_target     nvdimm target
  */
 void nvdimm_init(TARGETING::Target *i_nvdimm);
-
 }
 
 #endif  // NVDIMM_EXT_H__

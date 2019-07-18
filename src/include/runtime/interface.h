@@ -579,6 +579,8 @@ typedef struct hostInterfaces
     //       error out.
     enum NVDIMM_Op_t: uint16_t
     {
+        /// The following operations pertain to arming/disarming
+        /// the NVDIMM
         // Disarm the NV logic such that the next save attempt is a NOOP
         HBRT_FW_NVDIMM_DISARM             = 0x0001,
         // Disable encryption on the NVDIMM and clear saved values from FW
@@ -589,6 +591,12 @@ typedef struct hostInterfaces
         HBRT_FW_NVDIMM_ENABLE_ENCRYPTION  = 0x0008,
         // Arm the NV logic
         HBRT_FW_NVDIMM_ARM                = 0x0010,
+
+        /// The following operation pertains to the Health of the NVDIMM
+        /// This operation can be performed with the arming/disarming
+        /// operation, these operation types are orthogonal to each other
+        // Manufacturing energy source(ES) health check request
+        HBRT_FW_MNFG_ES_HEALTH_CHECK      = 0x0020,
     };
 
     // NVDIMM (PHYP -> HBRT) message to request NVDIMM operation(s)

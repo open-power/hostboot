@@ -27,6 +27,9 @@
  *
  *  @brief NVDIMM functions only needed for runtime
  */
+
+/// BPM - Backup Power Module
+
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
@@ -46,6 +49,7 @@
 #define TRACUCOMP(args...)
 
 using namespace TARGETING;
+using namespace ERRORLOG;
 
 namespace NVDIMM
 {
@@ -470,5 +474,322 @@ errlHndl_t nvdimm_getRandom(uint8_t* o_genData)
     return l_err;
 }
 
+/*
+ * @brief Check the health status of the individual NVDIMMs supplied in list
+ *
+ * @param[in] i_nvdimmTargetList - list of NVDIMMs to check the health of
+ *
+ * @return false if one or more NVDIMMs fail health check, else true
+ */
+bool nvDimmCheckHealthStatus(TargetHandleList &i_nvdimmTargetList)
+{
+    TRACFCOMP(g_trac_nvdimm, ENTER_MRK"nvDimmCheckHealthStatus(): "
+              "Target list size(%d)", i_nvdimmTargetList.size());
+
+    // The minimum lifetime value
+    const uint8_t LIFETIME_MINIMUM_REQUIREMENT = 0x62;   // > 97%
+
+    // The health check status flags for the different states of a health check
+    const uint8_t HEALTH_CHECK_IN_PROGRESS_FLAG = 0x01;  // bit 0
+    const uint8_t HEALTH_CHECK_SUCCEEDED_FLAG   = 0x02;  // bit 1
+    const uint8_t HEALTH_CHECK_FAILED_FLAG      = 0x04;  // bit 2
+
+    // Handle to catch any errors
+    errlHndl_t l_err(nullptr);
+
+    // The health check status from a health check call
+    uint8_t l_healthCheck(0);
+
+    // Status of the accumulation of all calls related to the health check.
+    // If any one call is bad/fails, then this will be false, else it stays true
+    bool l_didHealthCheckPass(true);
+
+    // Iterate thru the NVDIMMs checking the health status of each one.
+    // Going with the assumption that the caller waited the allotted time,
+    // roughly 20 to 30 minutes, after the start of an IPL.
+    // Success case:
+    //   * Health check initiated at start of the IPL, caller waited the
+    //     allotted time (20 to 30 mins) before doing a health check, health
+    //     check returned success and the lifetime meets the minimum threshold
+    //     for a new BPM.
+    // Error cases are:
+    //   * Health check is in progress, will assume BPM is hung
+    //   * Health check failed
+    //   * Health check succeeded but lifetime does not meet a certain threshold
+    //   * If none of the above apply (success case and other error cases),
+    //     then assume the health check was never initiated at the start of the
+    //     IPL
+    //   For each of these error cases do a predictive callout
+    for (auto const l_nvdimm : i_nvdimmTargetList)
+    {
+        // Retrieve the Health Check status from the BPM
+        TRACFCOMP(g_trac_nvdimm, INFO_MRK"nvDimmCheckHealthStatus(): "
+                  "Reading NVDIMM(0x%.8X) health check data, "
+                  "register ES_CMD_STATUS0(0x%.2X)",
+                   get_huid(l_nvdimm), ES_CMD_STATUS0);
+
+        l_err = nvdimmReadReg(l_nvdimm, ES_CMD_STATUS0, l_healthCheck);
+
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvDimmCheckHealthStatus(): "
+                      "NVDIMM(0x%X) failed to read the health check "
+                      "data, register ES_CMD_STATUS0(0x%.2X)",
+                      get_huid(l_nvdimm), ES_CMD_STATUS0);
+
+            l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+            l_err->collectTrace(NVDIMM_COMP_NAME);
+            errlCommit(l_err, NVDIMM_COMP_ID);
+
+            // Let the caller know something went amiss
+            l_didHealthCheckPass = false;
+
+            // Proceed to next NVDIMM, better luck next time
+            continue;
+        }
+
+        // Trace out the returned data for inspection
+        TRACFCOMP(g_trac_nvdimm, INFO_MRK"nvDimmCheckHealthStatus(): "
+                  "NVDIMM(0x%X) returned value(0x%.2X) from health check "
+                  "data, register ES_CMD_STATUS0(0x%.2X)",
+                  get_huid(l_nvdimm), l_healthCheck, ES_CMD_STATUS0)
+
+        if (l_healthCheck & HEALTH_CHECK_IN_PROGRESS_FLAG)
+        {
+            TRACFCOMP( g_trac_nvdimm, ERR_MRK"nvDimmCheckHealthStatus(): "
+                       "Assuming caller waited the allotted time before "
+                       "doing a health check on NVDIMM(0x%.8X), the BPM "
+                       "is hung doing the health check.",
+                       get_huid(l_nvdimm) );
+
+            /*@
+             * @errortype
+             * @severity    ERRL_SEV_PREDICTIVE
+             * @moduleid    NVDIMM_HEALTH_CHECK
+             * @reasoncode  NVDIMM_HEALTH_CHECK_IN_PROGRESS_FAILURE
+             * @userdata1   HUID of NVDIMM target
+             * @userdata2   Health check status
+             * @devdesc     Assuming caller waited the allotted time before
+             *              doing a health check, then the BPM is hung doing
+             *              the health check.
+             * @custdesc    NVDIMM Health Check failed.
+             */
+            l_err = new ErrlEntry( ERRL_SEV_PREDICTIVE,
+                                   NVDIMM_HEALTH_CHECK,
+                                   NVDIMM_HEALTH_CHECK_IN_PROGRESS_FAILURE,
+                                   get_huid(l_nvdimm),
+                                   l_healthCheck,
+                                   ErrlEntry::ADD_SW_CALLOUT );
+            l_err->collectTrace(NVDIMM_COMP_NAME);
+
+            // Add a BPM callout
+            l_err->addPartCallout( l_nvdimm,
+                                   HWAS::BPM_PART_TYPE,
+                                   HWAS::SRCI_PRIORITY_HIGH);
+            // Collect the error
+            errlCommit(l_err, NVDIMM_COMP_ID);
+
+            // Let the caller know something went amiss
+            l_didHealthCheckPass = false;
+        }
+        else if (l_healthCheck & HEALTH_CHECK_FAILED_FLAG)
+        {
+            TRACFCOMP( g_trac_nvdimm, ERR_MRK"nvDimmCheckHealthStatus(): "
+                       "Assuming caller waited the allotted time before "
+                       "doing a health check on NVDIMM(0x%.8X), the BPM "
+                       "reported a failure.",
+                       get_huid(l_nvdimm) );
+
+            /*@
+             * @errortype
+             * @severity    ERRL_SEV_PREDICTIVE
+             * @moduleid    NVDIMM_HEALTH_CHECK
+             * @reasoncode  NVDIMM_HEALTH_CHECK_REPORTED_FAILURE
+             * @userdata1   HUID of NVDIMM target
+             * @userdata2   Health check status
+             * @devdesc     NVDIMM Health Check failed
+             * @devdesc     Assuming caller waited the allotted time before
+             *              doing a health check, the BPM reported a failure
+             *              while doing a health check.
+             * @custdesc    NVDIMM Health Check failed.
+             */
+            l_err = new ErrlEntry( ERRL_SEV_PREDICTIVE,
+                                   NVDIMM_HEALTH_CHECK,
+                                   NVDIMM_HEALTH_CHECK_REPORTED_FAILURE,
+                                   get_huid(l_nvdimm),
+                                   l_healthCheck,
+                                   ErrlEntry::ADD_SW_CALLOUT );
+            l_err->collectTrace(NVDIMM_COMP_NAME);
+
+            // Add a BPM callout
+            l_err->addPartCallout( l_nvdimm,
+                                   HWAS::BPM_PART_TYPE,
+                                   HWAS::SRCI_PRIORITY_HIGH);
+            // Collect the error
+            errlCommit(l_err, NVDIMM_COMP_ID);
+
+            // Let the caller know something went amiss
+            l_didHealthCheckPass = false;
+        }
+        else if (l_healthCheck & HEALTH_CHECK_SUCCEEDED_FLAG)
+        {
+            TRACFCOMP(g_trac_nvdimm, INFO_MRK"nvDimmCheckHealthStatus(): "
+                      "Reading NVDIMM(0x%.8X) es lifetime data, "
+                      "register ES_LIFETIME(0x%.2X)",
+                       get_huid(l_nvdimm), ES_LIFETIME);
+
+            // The lifetime percentage
+            uint8_t l_lifetimePercentage(0);
+
+            // Retrieve the Lifetime Percentage from the BPM
+            l_err = nvdimmReadReg(l_nvdimm, ES_LIFETIME, l_lifetimePercentage);
+
+            if (l_err)
+            {
+                TRACFCOMP( g_trac_nvdimm, ERR_MRK"nvDimmCheckHealthStatus(): "
+                           "NVDIMM(0x%.8X) failed to read the "
+                           "ES_LIFETIME(0x%.2X) data",
+                           get_huid(l_nvdimm),
+                           ES_LIFETIME );
+
+                l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+                l_err->collectTrace(NVDIMM_COMP_NAME);
+                errlCommit(l_err, NVDIMM_COMP_ID);
+
+                // Let the caller know something went amiss
+                l_didHealthCheckPass = false;
+            }
+            else if (l_lifetimePercentage < LIFETIME_MINIMUM_REQUIREMENT)
+            {
+                TRACFCOMP( g_trac_nvdimm, ERR_MRK"nvDimmCheckHealthStatus(): "
+                           "Health check on NVDIMM(0x%.8X) succeeded but the "
+                           "BPM's lifetime(%d) does not meet the minimum "
+                           "requirement(%d) needed to qualify as a new BPM.",
+                            get_huid(l_nvdimm),
+                            l_lifetimePercentage,
+                            LIFETIME_MINIMUM_REQUIREMENT );
+
+                /*@
+                 * @errortype
+                 * @severity         ERRL_SEV_PREDICTIVE
+                 * @moduleid         NVDIMM_HEALTH_CHECK
+                 * @reasoncode       NVDIMM_LIFETIME_MIN_REQ_NOT_MET
+                 * @userdata1[00:31] HUID of NVDIMM target
+                 * @userdata1[32:63] Health check status
+                 * @userdata2[00:31] Retrieved lifetime percentage
+                 * @userdata2[32:63] lifetime minimum requirement
+                 * @devdesc          Health check succeeded but the BPM's
+                 *                   lifetime does not meet the minimum
+                 *                   requirement needed to qualify as a
+                 *                   new BPM.
+                 * @custdesc    NVDIMM Health Check failed
+                 */
+                l_err = new ErrlEntry( ERRL_SEV_PREDICTIVE,
+                                       NVDIMM_HEALTH_CHECK,
+                                       NVDIMM_LIFETIME_MIN_REQ_NOT_MET,
+                                       TWO_UINT32_TO_UINT64(
+                                           get_huid(l_nvdimm),
+                                           l_healthCheck),
+                                       TWO_UINT32_TO_UINT64(
+                                           l_lifetimePercentage,
+                                           LIFETIME_MINIMUM_REQUIREMENT),
+                                       ErrlEntry::ADD_SW_CALLOUT );
+                l_err->collectTrace(NVDIMM_COMP_NAME);
+
+                // Add a BPM callout
+                l_err->addPartCallout( l_nvdimm,
+                                       HWAS::BPM_PART_TYPE,
+                                       HWAS::SRCI_PRIORITY_HIGH);
+                // Collect the error
+                errlCommit(l_err, NVDIMM_COMP_ID);
+
+                // Let the caller know something went amiss
+                l_didHealthCheckPass = false;
+            } // end else if (l_lifetimePercentage ...
+            else
+            {
+                TRACFCOMP( g_trac_nvdimm, ERR_MRK"nvdimmCheckHealthStatus(): "
+                           "Success: Health check on NVDIMM(0x%.8X) succeeded "
+                           "and the BPM's lifetime(%d) meet's the minimum "
+                           "requirement(%d) needed to qualify as a new BPM.",
+                            get_huid(l_nvdimm),
+                            l_lifetimePercentage,
+                            LIFETIME_MINIMUM_REQUIREMENT );
+            }
+        }  // end else if (l_healthCheck & HEALTH_CHECK_SUCCEEDED_FLAG)
+        else  // Assume the health check was never initiated at
+              // the start of the IPL.
+        {
+            TRACFCOMP( g_trac_nvdimm, ERR_MRK"nvDimmCheckHealthStatus(): "
+                       "The health check on NVDIMM(0x%.8X) shows no status (in "
+                       "progress, fail or succeed) so assuming it was never "
+                       "initiated at the start of the IPL.",
+                       get_huid(l_nvdimm) );
+
+            /*@
+             * @errortype
+             * @severity    ERRL_SEV_PREDICTIVE
+             * @moduleid    NVDIMM_HEALTH_CHECK
+             * @reasoncode  NVDIMM_HEALTH_CHECK_NEVER_INITIATED
+             * @userdata1   HUID of NVDIMM target
+             * @userdata2   Health check status
+             * @devdesc     The health check shows no status (in progress, fail
+             *              or succeed) so assuming it was never initiated
+             *              at the start of the IPL.
+             * @custdesc    NVDIMM Health Check failed.
+             */
+            l_err = new ErrlEntry( ERRL_SEV_PREDICTIVE,
+                                   NVDIMM_HEALTH_CHECK,
+                                   NVDIMM_HEALTH_CHECK_NEVER_INITIATED,
+                                   get_huid(l_nvdimm),
+                                   l_healthCheck,
+                                   ErrlEntry::ADD_SW_CALLOUT );
+            l_err->collectTrace(NVDIMM_COMP_NAME);
+
+            // Add a BPM callout
+            l_err->addPartCallout( l_nvdimm,
+                                   HWAS::BPM_PART_TYPE,
+                                   HWAS::SRCI_PRIORITY_HIGH);
+            // Collect the error
+            errlCommit(l_err, NVDIMM_COMP_ID);
+
+            // Let the caller know something went amiss
+            l_didHealthCheckPass = false;
+        }
+    }  // end for (auto const l_nvdimm : i_nvdimmTargetList)
+
+    // Should not have any uncommitted errors
+    assert(l_err == NULL, "nvDimmCheckHealthStatus() - unexpected uncommitted"
+                          "error found" );
+
+    TRACFCOMP(g_trac_nvdimm, EXIT_MRK"nvDimmCheckHealthStatus(): "
+              "Returning %s", l_didHealthCheckPass == true ? "true" : "false" );
+
+    return l_didHealthCheckPass;
+}  // end nvDimmCheckHealthStatus
+
+/**
+ * @brief A wrapper around the call to nvDimmCheckHealthStatus
+ *
+ * @see nvDimmCheckHealthStatus for more details
+ *
+ * @return false if one or more NVDIMMs fail health check, else true
+ */
+bool nvDimmCheckHealthStatusOnSystem()
+{
+    TRACFCOMP(g_trac_nvdimm, ENTER_MRK"nvDimmCheckHealthStatusOnSystem()");
+
+    // Get the list of NVDIMM Targets from the system
+    TargetHandleList l_nvDimmTargetList;
+    nvdimm_getNvdimmList(l_nvDimmTargetList);
+
+    // Return status of doing a check health status
+    bool l_didHealthCheckPass = nvDimmCheckHealthStatus(l_nvDimmTargetList);
+
+    TRACFCOMP(g_trac_nvdimm, EXIT_MRK"nvDimmCheckHealthStatusOnSystem(): "
+              "Returning %s", l_didHealthCheckPass == true ? "true" : "false" );
+
+    return l_didHealthCheckPass;
+}  // end nvDimmCheckHealthStatusOnSystem
 
 } // end NVDIMM namespace

@@ -1178,6 +1178,27 @@ void cmd_nvdimm_protection_msg( char* &o_output, uint32_t i_huid,
         errlCommit(l_err, UTIL_COMP_ID);
     }
 }
+
+void cmd_nvdimmCheckHealthStatus( char* &o_output)
+{
+    o_output = new char[500];
+    if (NVDIMM::nvDimmCheckHealthStatusOnSystem())
+    {
+        sprintf( o_output, "cmd_doNvDimmCheckHealthStatus: "
+                           "health status check passed.");
+
+    }
+    else
+    {
+        sprintf( o_output, "cmd_doNvDimmCheckHealthStatus: "
+                           "health status check failed. Inspect HBRT traces "
+                           "for further details.");
+
+    }
+
+    return;
+}  // end cmd_nvdimmCheckHealthStatus
+
 #endif
 
 /**
@@ -1514,6 +1535,18 @@ int hbrtCommand( int argc,
             sprintf(*l_output, "ERROR: nvdimm_protection <huid> <0 or 1>");
         }
     }
+    else if( !strcmp( argv[0], "nvdimm_check_status" ) )
+    {
+        if (argc == 1)
+        {
+            cmd_nvdimmCheckHealthStatus( *l_output );
+        }
+        else
+        {
+            *l_output = new char[100];
+            sprintf(*l_output, "Usage: nvdimm_check_status");
+        }
+    }
 #endif
     else
     {
@@ -1553,6 +1586,8 @@ int hbrtCommand( int argc,
         strcat( *l_output, l_tmpstr );
 #ifdef CONFIG_NVDIMM
         sprintf( l_tmpstr, "nvdimm_protection <huid> <0 or 1>\n");
+        strcat( *l_output, l_tmpstr );
+        sprintf( l_tmpstr, "nvdimm_check_status\n");
         strcat( *l_output, l_tmpstr );
 #endif
 

@@ -396,7 +396,7 @@ void set_ATTR_NVDIMM_ENCRYPTION_ENABLE(
          *@errortype
          *@reasoncode       RC_CANNOT_MAKE_ATTRIBUTE
          *@severity         ERRORLOG_SEV_PREDICTIVE
-         *@moduleid         SET_ATTR_NVDIMM_ENCRYPTION_ENABLE 
+         *@moduleid         SET_ATTR_NVDIMM_ENCRYPTION_ENABLE
          *@devdesc          Couldn't create an Attribute to send the data
          *                  to the FSP
          *@custdesc         NVDIMM encryption error
@@ -427,16 +427,18 @@ void set_ATTR_NVDIMM_ENCRYPTION_ENABLE(
 
 /**
  *  @brief Perform an NVDIMM operation
- *  @param[in] nvDimmOp - A struct that contains the operation(s) to perform
- *                        and a flag indicating whether to perform operation
- *                        on all processors or a given single processor.
- *  @Note The operations below are in the order of which they should be
- *        performed.  If a new operation is added, make sure it inserted in the
+ *  @param[in] i_nvDimmOp - A struct that contains the operation(s) to perform
+ *                          and a flag indicating whether to perform operation
+ *                          on all processors or a given single processor.
+ *
+ *  @Note The arming/disarming operations below are in the order of which they
+ *        should be performed.  If a new sequence is added to the
+ *        arming/disarming sequence, make sure it is inserted in the
  *        correct order.
  *        The current order is: disarm -> disable encryption -> remove keys ->
  *                              enable encryption -> arm
  **/
-void doNvDimmOperation(const hostInterfaces::nvdimm_operation_t& nvDimmOp)
+void doNvDimmOperation(const hostInterfaces::nvdimm_operation_t& i_nvDimmOp)
 {
 #ifndef CONFIG_NVDIMM
     TRACFCOMP(g_trac_runtime, ENTER_MRK"doNvDimmOperation: not an "
@@ -445,20 +447,21 @@ void doNvDimmOperation(const hostInterfaces::nvdimm_operation_t& nvDimmOp)
 #else
     TRACFCOMP(g_trac_runtime, ENTER_MRK"doNvDimmOperation: Operation(s) "
               "0x%0X, processor ID  0x%0X",
-              nvDimmOp.opType,
-              nvDimmOp.procId);
+              i_nvDimmOp.opType,
+              i_nvDimmOp.procId);
 
     // Error log handle for capturing any errors
     errlHndl_t       l_err{nullptr};
     // List of NVDIMM Targets to execute NVDIMM operation on
     TargetHandleList l_nvDimmTargetList;
 
+    // Perform the operations requested
     do
     {
         /// Populate the NVDIMM target list
         // If requesting to perform operation on all NVDIMMs, then
         // retrieve all NVDIMMs from system
-        if (HBRT_NVDIMM_OPERATION_APPLY_TO_ALL_NVDIMMS == nvDimmOp.procId)
+        if (HBRT_NVDIMM_OPERATION_APPLY_TO_ALL_NVDIMMS == i_nvDimmOp.procId)
         {
             nvdimm_getNvdimmList(l_nvDimmTargetList);
         }
@@ -468,13 +471,13 @@ void doNvDimmOperation(const hostInterfaces::nvdimm_operation_t& nvDimmOp)
             /// Get the NVDIMMs associated with procId
             // Convert the procId to a real boy, uh, I mean target
             TARGETING::TargetHandle_t l_procTarget;
-            l_err = RT_TARG::getHbTarget(nvDimmOp.procId, l_procTarget);
+            l_err = RT_TARG::getHbTarget(i_nvDimmOp.procId, l_procTarget);
             if (l_err)
             {
                 TRACFCOMP(g_trac_runtime, "doNvDimmOperation: Error getting "
                                           "HB Target from processor ID 0x%0X, "
                                           "exiting ...",
-                                          nvDimmOp.procId);
+                                          i_nvDimmOp.procId);
 
                 break;
             }
@@ -491,113 +494,142 @@ void doNvDimmOperation(const hostInterfaces::nvdimm_operation_t& nvDimmOp)
             break;
         }
 
-        /// Perform the operation(s) requested
-        // Disarm the NV logic
-        if (nvDimmOp.opType & hostInterfaces::HBRT_FW_NVDIMM_DISARM)
+        // Perform the arming/disarming operations.  If anyone fails in the
+        // sequence, no point in calling the next, if there is a next operation.
+        do
         {
-            // Make call to disarm
-            if (!nvdimmDisarm(l_nvDimmTargetList))
+            // Disarm the NV logic
+            if (i_nvDimmOp.opType & hostInterfaces::HBRT_FW_NVDIMM_DISARM)
             {
-                TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
-                                          "Call to disarm failed, exiting ...");
-                break;
-            }
-            else
-            {
-                TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
-                                          "Call to disarm succeeded");
-            }
-        }
-
-        // Disable encryption on the NVDIMM and clear saved values from FW
-        if (nvDimmOp.opType & hostInterfaces::HBRT_FW_NVDIMM_DISABLE_ENCRYPTION)
-        {
-            // Make call to disable encryption
-            if (!nvdimm_crypto_erase(l_nvDimmTargetList))
-            {
-                TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
-                              "Call to disable encryption failed, exiting ...");
-
-                // Clear the encryption enable attribute
-                set_ATTR_NVDIMM_ENCRYPTION_ENABLE(0);
-
-                break;
-            }
-            else
-            {
-                TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
-                                       "Call to disable encryption succeeded.");
-            }
-
-            // Clear the encryption enable attribute
-            set_ATTR_NVDIMM_ENCRYPTION_ENABLE(0);
-        }
-
-        // Remove keys
-        if (nvDimmOp.opType & hostInterfaces::HBRT_FW_NVDIMM_REMOVE_KEYS)
-        {
-            // Make call to remove keys
-            if (!nvdimm_remove_keys())
-            {
-                TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
-                                     "Call to remove keys failed, exiting ...");
-                break;
-            }
-            else
-            {
-                TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
-                                          "Call to remove keys succeeded.");
-            }
-        }
-
-        // Enable encryption on the NVDIMM
-        if (nvDimmOp.opType & hostInterfaces::HBRT_FW_NVDIMM_ENABLE_ENCRYPTION)
-        {
-            // Set the encryption enable attribute
-            set_ATTR_NVDIMM_ENCRYPTION_ENABLE(1);
-
-            // Make call to generate keys before enabling encryption
-            if(!nvdimm_gen_keys())
-            {
-                TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
-                                          "Call to generate keys failed, unable"
-                                          " to enable encryption, exiting ...");
-                break;
-            }
-            else
-            {
-                // Make call to enable encryption
-                if (!nvdimm_encrypt_enable(l_nvDimmTargetList))
+                // Make call to disarm
+                if (!nvdimmDisarm(l_nvDimmTargetList))
                 {
                     TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
-                               "Call to enable encryption failed, exiting ...");
+                              "Call to disarm failed. Will not perform any "
+                              "more arming/disarming calls, if they exist");
                     break;
                 }
                 else
                 {
                     TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
-                                        "Call to enable encryption succeeded.");
+                                              "Call to disarm succeeded");
                 }
-            } // end if(!nvdimm_gen_keys()) ... else ...
-        }
+            }
 
-        // Arm the NV logic
-        if (nvDimmOp.opType & hostInterfaces::HBRT_FW_NVDIMM_ARM)
+            // Disable encryption on the NVDIMM and clear saved values from FW
+            if (i_nvDimmOp.opType &
+                              hostInterfaces::HBRT_FW_NVDIMM_DISABLE_ENCRYPTION)
+            {
+                // Make call to disable encryption
+                if (!nvdimm_crypto_erase(l_nvDimmTargetList))
+                {
+                    TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
+                              "Call to disable encryption failed.  Will not "
+                              "perform any more arming/disarming calls, if "
+                              "they exist");
+
+                    // Clear the encryption enable attribute
+                    set_ATTR_NVDIMM_ENCRYPTION_ENABLE(0);
+
+                    break;
+                }
+                else
+                {
+                    TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
+                                       "Call to disable encryption succeeded.");
+                }
+
+                // Clear the encryption enable attribute
+                set_ATTR_NVDIMM_ENCRYPTION_ENABLE(0);
+            }
+
+            // Remove keys
+            if (i_nvDimmOp.opType & hostInterfaces::HBRT_FW_NVDIMM_REMOVE_KEYS)
+            {
+                // Make call to remove keys
+                if (!nvdimm_remove_keys())
+                {
+                    TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
+                              "Call to remove keys failed.  Will not perform "
+                              "any more arming/disarming calls, if they exist");
+                    break;
+                }
+                else
+                {
+                    TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
+                                              "Call to remove keys succeeded.");
+                }
+            }
+
+            // Enable encryption on the NVDIMM
+            if (i_nvDimmOp.opType &
+                               hostInterfaces::HBRT_FW_NVDIMM_ENABLE_ENCRYPTION)
+            {
+                // Set the encryption enable attribute
+                set_ATTR_NVDIMM_ENCRYPTION_ENABLE(1);
+
+                // Make call to generate keys before enabling encryption
+                if(!nvdimm_gen_keys())
+                {
+                    TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
+                              "Call to generate keys failed, unable to enable "
+                              "encryption. Will not perform any more "
+                              "arming/disarming calls, if they exist");
+                    break;
+                }
+                else
+                {
+                    // Make call to enable encryption
+                    if (!nvdimm_encrypt_enable(l_nvDimmTargetList))
+                    {
+                        TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
+                                  "Call to enable encryption failed. "
+                                  "Will not perform any more arming/disarming "
+                                  "calls, if they exist");
+                        break;
+                    }
+                    else
+                    {
+                        TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
+                                        "Call to enable encryption succeeded.");
+                    }
+                } // end if(!nvdimm_gen_keys()) ... else ...
+            }
+
+            // Arm the NV logic
+            if (i_nvDimmOp.opType & hostInterfaces::HBRT_FW_NVDIMM_ARM)
+            {
+                // Make call to arm
+                if (!nvdimmArm(l_nvDimmTargetList))
+                {
+                    TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
+                                              "Call to arm failed.");
+                    break;
+                }
+                else
+                {
+                    TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
+                                              "Call to arm succeeded.");
+                }
+            }  // end if (nvDimmOp.opType & hostInterfaces::HBRT_FW_NVDIMM_ARM)
+        }  while (0); // end Perform the arming/disarming operations.
+
+        // Perform the health check operation
+        if (i_nvDimmOp.opType & hostInterfaces::HBRT_FW_MNFG_ES_HEALTH_CHECK)
         {
-            // Make call to arm
-            if (!nvdimmArm(l_nvDimmTargetList))
+            if (!nvDimmCheckHealthStatus(l_nvDimmTargetList))
             {
                 TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
-                                          "Call to arm failed, exiting ...");
+                                          "Call to do a health check failed.");
                 break;
             }
             else
             {
                 TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
-                                          "Call to arm succeeded.");
+                                        "Call to do a health check succeeded.");
             }
-        }  // end if (nvDimmOp.opType & hostInterfaces::HBRT_FW_NVDIMM_ARM)
-    } while(0);
+        }
+    } while(0); // end Perform the operations requested
 
     if (l_err)
     {
