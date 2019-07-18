@@ -46,7 +46,7 @@
 #include <generic/memory/lib/spd/common/ddr4/spd_decoder_ddr4.H>
 #include <generic/memory/lib/utils/pos.H>
 #include <lib/utils/checker.H>
-#include <generic/memory/lib/utils/find.H>
+#include <lib/utils/nimbus_find.H>
 #include <lib/shared/mss_kind.H>
 #include <lib/dimm/eff_dimm.H>
 #include <lib/eff_config/plug_rules.H>

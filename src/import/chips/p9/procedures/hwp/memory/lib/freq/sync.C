@@ -46,7 +46,7 @@
 
 // Generic libraries
 #include <generic/memory/lib/utils/assert_noexit.H>
-#include <generic/memory/lib/utils/find.H>
+#include <lib/utils/nimbus_find.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/spd/spd_facade.H>
 #include <generic/memory/lib/spd/spd_utils.H>

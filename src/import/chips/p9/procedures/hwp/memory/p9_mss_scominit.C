@@ -40,7 +40,7 @@
 #include <p9n_mcbist_scom.H>
 #include <p9n_ddrphy_scom.H>
 #include <generic/memory/lib/utils/count_dimm.H>
-#include <generic/memory/lib/utils/find.H>
+#include <lib/utils/nimbus_find.H>
 #include <lib/phy/ddr_phy.H>
 #include <lib/mc/mc.H>
 #include <lib/fir/unmask.H>

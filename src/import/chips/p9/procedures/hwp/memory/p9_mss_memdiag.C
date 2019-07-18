@@ -39,7 +39,7 @@
 
 #include <lib/dimm/rank.H>
 #include <generic/memory/lib/utils/poll.H>
-#include <generic/memory/lib/utils/find.H>
+#include <lib/utils/nimbus_find.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <lib/mcbist/address.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_patterns.H>

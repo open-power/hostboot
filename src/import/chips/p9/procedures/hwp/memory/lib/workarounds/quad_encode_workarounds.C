@@ -38,7 +38,7 @@
 #include <p9n2_mc_scom_addresses.H>
 
 #include <generic/memory/lib/utils/c_str.H>
-#include <generic/memory/lib/utils/find.H>
+#include <lib/utils/nimbus_find.H>
 #include <lib/ccs/ccs_traits_nimbus.H>
 #include <generic/memory/lib/ccs/ccs.H>
 #include <lib/mss_attribute_accessors.H>

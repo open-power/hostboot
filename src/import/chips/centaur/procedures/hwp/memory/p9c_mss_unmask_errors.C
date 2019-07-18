@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,7 +42,7 @@
 #include <p9c_mss_unmask_errors.H>
 #include <cen_gen_scom_addresses.H>
 #include <fapi2.H>
-#include <generic/memory/lib/utils/find.H>
+#include <lib/utils/cumulus_find.H>
 
 ///
 /// @brief Sets action regs and mask settings for pervasive errors to their runtime settings.

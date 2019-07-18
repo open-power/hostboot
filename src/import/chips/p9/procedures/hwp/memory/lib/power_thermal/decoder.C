@@ -42,7 +42,7 @@
 #include <mss.H>
 #include <lib/power_thermal/throttle.H>
 #include <lib/power_thermal/decoder.H>
-#include <generic/memory/lib/utils/find.H>
+#include <lib/utils/nimbus_find.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/utils/power_thermal/gen_decoder.H>

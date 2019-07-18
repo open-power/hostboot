@@ -34,7 +34,7 @@
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
-#include <generic/memory/lib/utils/find.H>
+#include <lib/utils/nimbus_find.H>
 #include <lib/shared/mss_const.H>
 #include <lib/phy/dp16.H>
 #include <lib/mc/port.H>

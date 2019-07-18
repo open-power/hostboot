@@ -38,7 +38,7 @@
 #include <cstdint>
 #include <fapi2.H>
 #include <lib/mss_attribute_accessors.H>
-#include <generic/memory/lib/utils/find.H>
+#include <lib/utils/nimbus_find.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/dimm/mss_timing.H>
 #include <lib/utils/mss_nimbus_conversions.H>

@@ -36,7 +36,7 @@
 #include <fapi2.H>
 #include <lib/shared/nimbus_defaults.H>
 #include <lib/mc/mc.H>
-#include <generic/memory/lib/utils/find.H>
+#include <lib/utils/nimbus_find.H>
 #include <p9_mss_thermal_init.H>
 
 using fapi2::TARGET_TYPE_MCS;

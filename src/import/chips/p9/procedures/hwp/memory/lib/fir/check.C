@@ -43,7 +43,7 @@
 #include <lib/fir/fir.H>
 #include <lib/fir/check.H>
 #include <generic/memory/lib/utils/assert_noexit.H>
-#include <generic/memory/lib/utils/find.H>
+#include <lib/utils/nimbus_find.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;

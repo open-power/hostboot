@@ -39,7 +39,7 @@
 #include <fapi2.H>
 
 #include <generic/memory/lib/utils/c_str.H>
-#include <generic/memory/lib/utils/find.H>
+#include <lib/utils/nimbus_find.H>
 #include <lib/ccs/ccs_traits_nimbus.H>
 #include <generic/memory/lib/ccs/ccs.H>
 #include <lib/dimm/ddr4/data_buffer_ddr4.H>

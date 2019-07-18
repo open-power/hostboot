@@ -40,7 +40,7 @@
 #include <p9_mc_scom_addresses_fld.H>
 #include <p9_mss_draminit_mc.H>
 #include <lib/fir/unmask.H>
-#include <generic/memory/lib/utils/find.H>
+#include <lib/utils/nimbus_find.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <lib/workarounds/mca_workarounds.H>
 

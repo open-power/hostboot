@@ -53,7 +53,7 @@
 #include <generic/memory/lib/spd/spd_checker.H>
 #include <generic/memory/lib/spd/spd_utils.H>
 #include <lib/utils/mss_nimbus_conversions.H>
-#include <generic/memory/lib/utils/find.H>
+#include <lib/utils/nimbus_find.H>
 #include <lib/eff_config/timing.H>
 #include <lib/shared/mss_const.H>
 

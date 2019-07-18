@@ -44,7 +44,7 @@
 #include <lib/mc/mc.H>
 #include <lib/mc/xlate.H>
 #include <generic/memory/lib/utils/scom.H>
-#include <generic/memory/lib/utils/find.H>
+#include <lib/utils/nimbus_find.H>
 #include <lib/dimm/nimbus_kind.H>
 
 using fapi2::TARGET_TYPE_MCA;

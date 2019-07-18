@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,7 +32,7 @@
 /// *HWP Consumed by: HB
 
 #include <mss_dynamic_vid_utils.H>
-#include <generic/memory/lib/utils/find.H>
+#include <lib/utils/cumulus_find.H>
 #include <generic/memory/lib/utils/c_str.H>
 
 ///

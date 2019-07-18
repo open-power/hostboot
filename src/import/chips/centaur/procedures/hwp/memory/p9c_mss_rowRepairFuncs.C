@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,7 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 #include <p9c_mss_rowRepairFuncs.H>
-#include <generic/memory/lib/utils/find.H>
+#include <lib/utils/cumulus_find.H>
 #include <generic/memory/lib/utils/c_str.H>
 
 using namespace fapi2;

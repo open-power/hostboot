@@ -38,7 +38,7 @@
 #include <lib/mss_attribute_accessors.H>
 #include <lib/shared/mss_const.H>
 #include <generic/memory/lib/utils/memory_size.H>
-#include <generic/memory/lib/utils/find.H>
+#include <lib/utils/nimbus_find.H>
 
 namespace mss
 {

@@ -39,7 +39,7 @@
 #include <p9_mc_scom_addresses_fld.H>
 #include <lib/utils/find_magic.H>
 #include <generic/memory/lib/utils/scom.H>
-#include <generic/memory/lib/utils/find.H>
+#include <lib/utils/nimbus_find.H>
 #include <lib/fir/fir.H>
 #include <lib/mc/port.H>
 #include <lib/fir/unmask.H>

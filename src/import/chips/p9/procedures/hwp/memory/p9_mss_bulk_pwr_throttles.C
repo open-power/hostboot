@@ -38,7 +38,7 @@
 
 #include <fapi2.H>
 #include <p9_mss_bulk_pwr_throttles.H>
-#include <generic/memory/lib/utils/find.H>
+#include <lib/utils/nimbus_find.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <lib/power_thermal/throttle.H>
 

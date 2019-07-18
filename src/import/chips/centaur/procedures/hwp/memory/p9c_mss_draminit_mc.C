@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,7 +53,7 @@
 #include <p9c_mss_draminit_mc.H>
 #include <p9c_mss_row_repair.H>
 #include <generic/memory/lib/utils/c_str.H>
-#include <generic/memory/lib/utils/find.H>
+#include <lib/utils/cumulus_find.H>
 #include <dimmConsts.H>
 //----------------------------------------------------------------------
 //  Address Includes

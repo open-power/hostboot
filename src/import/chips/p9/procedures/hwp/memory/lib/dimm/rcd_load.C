@@ -38,7 +38,7 @@
 #include <mss.H>
 #include <lib/dimm/rcd_load.H>
 #include <lib/dimm/rcd_load_ddr4.H>
-#include <generic/memory/lib/utils/find.H>
+#include <lib/utils/nimbus_find.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;

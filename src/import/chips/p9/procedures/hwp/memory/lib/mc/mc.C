@@ -38,7 +38,7 @@
 #include <lib/shared/nimbus_defaults.H>
 #include <generic/memory/lib/utils/dump_regs.H>
 #include <lib/mc/mc.H>
-#include <generic/memory/lib/utils/find.H>
+#include <lib/utils/nimbus_find.H>
 
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_MCS;

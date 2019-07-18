@@ -48,7 +48,7 @@
 #include <lib/workarounds/adr32s_workarounds.H>
 #include <lib/phy/ddr_phy.H>
 #include <lib/phy/dcd.H>
-#include <generic/memory/lib/utils/find.H>
+#include <lib/utils/nimbus_find.H>
 
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_SYSTEM;

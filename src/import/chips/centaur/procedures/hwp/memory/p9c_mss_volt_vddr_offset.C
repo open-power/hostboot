@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,7 +43,7 @@
 #include <fapi2.H>
 #include <p9c_mss_volt_vddr_offset.H>
 #include <mss_dynamic_vid_utils.H>
-#include <generic/memory/lib/utils/find.H>
+#include <lib/utils/cumulus_find.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 
 extern "C"

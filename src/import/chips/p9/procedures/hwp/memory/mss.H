@@ -58,7 +58,7 @@
 #include <generic/memory/lib/utils/pos.H>
 #include <generic/memory/lib/utils/buffer_ops.H>
 #include <lib/utils/mss_nimbus_conversions.H>
-#include <generic/memory/lib/utils/find.H>
+#include <lib/utils/nimbus_find.H>
 #include <generic/memory/lib/utils/poll.H>
 #include <lib/utils/checker.H>
 #include <generic/memory/lib/utils/dump_regs.H>

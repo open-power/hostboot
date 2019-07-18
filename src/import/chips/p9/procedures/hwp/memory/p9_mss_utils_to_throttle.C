@@ -46,7 +46,7 @@
 // mss lib
 #include <lib/power_thermal/throttle.H>
 #include <generic/memory/lib/utils/index.H>
-#include <generic/memory/lib/utils/find.H>
+#include <lib/utils/nimbus_find.H>
 #include <lib/utils/mss_nimbus_conversions.H>
 #include <lib/power_thermal/throttle.H>
 #include <lib/mss_attribute_accessors.H>

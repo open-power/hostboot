@@ -58,7 +58,7 @@
 #include <lib/phy/mss_training.H>
 #include <lib/utils/find_magic.H>
 #include <generic/memory/lib/utils/bit_count.H>
-#include <generic/memory/lib/utils/find.H>
+#include <lib/utils/nimbus_find.H>
 #include <generic/memory/lib/utils/dump_regs.H>
 #include <generic/memory/lib/utils/scom.H>
 #include <generic/memory/lib/utils/count_dimm.H>

@@ -43,7 +43,7 @@
 #include <lib/shared/mss_const.H>
 #include <lib/mc/mc.H>
 #include <generic/memory/lib/utils/scom.H>
-#include <generic/memory/lib/utils/find.H>
+#include <lib/utils/nimbus_find.H>
 #include <generic/memory/lib/utils/pos.H>
 
 using fapi2::TARGET_TYPE_MCA;

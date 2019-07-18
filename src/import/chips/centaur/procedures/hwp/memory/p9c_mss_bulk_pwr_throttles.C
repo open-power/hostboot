@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -67,7 +67,7 @@
 #include <p9c_mss_bulk_pwr_throttles.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <dimmConsts.H>
-#include <generic/memory/lib/utils/find.H>
+#include <lib/utils/cumulus_find.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 //------------------------------------------------------------------------------
 //  Includes

@@ -43,7 +43,7 @@
 //------------------------------------------------------------------------------
 #include <p9_throttle_sync.H>
 #include <fapi2.H>
-#include <generic/memory/lib/utils/find.H>
+#include <lib/utils/nimbus_find.H>
 #include <p9_perv_scom_addresses.H>
 
 ///----------------------------------------------------------------------------
