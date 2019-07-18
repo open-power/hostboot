@@ -75,6 +75,18 @@ const HdatKeywordInfo l_pvpdKeywords[] =
     { PVPD::PF,  "PF" },
 };
 
+vpdData pvpdDataAxone[] =
+{
+    { PVPD::OPFR, PVPD::VP },
+    { PVPD::OPFR, PVPD::VS },
+};
+
+const HdatKeywordInfo l_pvpdKeywordsAxone[] =
+{
+    { PVPD::VP,  "VP" },
+    { PVPD::VS,  "VS" },
+};
+
 extern trace_desc_t *g_trac_hdat;
 
 const uint32_t HDAT_MULTIPLE = 16;
@@ -651,13 +663,28 @@ errlHndl_t HdatIoHubFru::addDaughterCard(uint32_t i_resourceId,
     // told to allow for on the constructor
     if (iv_actDaughterCnt < iv_maxDaughters)
     {
+        //Get the processor model
+        auto l_model = TARGETING::targetService().getProcessorModel();
+
         if ( l_vpdType == FRU_BP )
         {
-
-            uint32_t i_num = sizeof(mvpdData)/sizeof(mvpdData[0]);
-            l_vpdObj = new HdatVpd(l_errlHndl, i_resourceId,i_target,
-                                   HDAT_KID_STRUCT_NAME,i_index,BP,
-                                   mvpdData,i_num,l_pvpdKeywords);
+            //@TODO:RTC 213229(Remove HDAT hack or Axone)
+            //Check whether the code can be more fault tolerant by avoiding
+            //model check
+            if(l_model == TARGETING::MODEL_NIMBUS)
+            {
+                uint32_t i_num = sizeof(mvpdData)/sizeof(mvpdData[0]);
+                l_vpdObj = new HdatVpd(l_errlHndl, i_resourceId,i_target,
+                                       HDAT_KID_STRUCT_NAME,i_index,BP,
+                                       mvpdData,i_num,l_pvpdKeywords);
+            }
+            else if(l_model == TARGETING::MODEL_AXONE)
+            {
+                uint32_t i_num = sizeof(pvpdDataAxone)/sizeof(pvpdDataAxone[0]);
+                l_vpdObj = new HdatVpd(l_errlHndl, i_resourceId,i_target,
+                                       HDAT_KID_STRUCT_NAME,i_index,BP,
+                                       pvpdDataAxone,i_num,l_pvpdKeywordsAxone);
+            }
         }
         //@TODO: RTC 148660 pci slots and cards
 
@@ -897,6 +924,10 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
             if(l_model == TARGETING::MODEL_NIMBUS)
             {
                 l_hub->hdatModuleId = HDAT_MODULE_TYPE_ID_NIMBUS_LAGRANGE;
+            }
+            else if(l_model == TARGETING::MODEL_AXONE)
+            {
+                l_hub->hdatModuleId = HDAT_MODULE_TYPE_ID_AXONE_HOPPER;
             }
             else if(l_model == TARGETING::MODEL_CUMULUS)
             {

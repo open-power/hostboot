@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -446,8 +446,10 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
 
                 // Need to get i2c Master data correctly
                 std::vector<hdatI2cData_t> l_i2cDevEntries;
+                TARGETING::ATTR_MODEL_type  l_model = TARGETING::MODEL_NIMBUS;
+                l_model = l_pProcTarget->getAttr<TARGETING::ATTR_MODEL>();
 
-                hdatGetI2cDeviceInfo(l_pProcTarget, l_i2cDevEntries);
+                hdatGetI2cDeviceInfo(l_pProcTarget, l_model, l_i2cDevEntries);
 
                 l_pcrdHI2cTotalSize = sizeof(*l_hostI2cFullPcrdHdrPtr) +
                     (sizeof(hdatI2cData_t) * l_i2cDevEntries.size());

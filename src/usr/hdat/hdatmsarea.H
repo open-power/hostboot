@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,7 +51,7 @@ namespace HDAT
 /* Constants                                                                  */
 /*----------------------------------------------------------------------------*/
 
-const uint16_t HDAT_MS_AREA_VERSION = 0x30;
+const uint16_t HDAT_MS_AREA_VERSION = 0x50;
 const char HDAT_MSAREA_STRUCT_NAME[] = "MSAREA";
 
 /** @brief Since the size of each MS Area must the same as all others, the

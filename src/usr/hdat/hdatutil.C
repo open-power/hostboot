@@ -772,7 +772,10 @@ errlHndl_t hdatGetPvpdFullRecord(TARGETING::Target * i_target,
                     theRecord,0,0,0,
                     ERRORLOG::ERRL_SEV_INFORMATIONAL,
                     HDAT_VERSION1,
-                    true);
+                    false);
+                    //@TODO:RTC 213229(Remove HDAT hack or Axone)
+                    //There are known differences where not all records will be
+                    //present. So changing now from true to false.
 
                 continue;
             }
@@ -1738,6 +1741,7 @@ bool byNodeProcAffinity(
  *
  * @param[in] i_pTarget
  *       The i2c master target handle, or nullptr for all i2c masters
+ * @param[in] i_model Target model
  * @param[out] o_i2cDevEntries
  *       The host i2c dev entries
  *
@@ -1746,6 +1750,7 @@ bool byNodeProcAffinity(
 *******************************************************************************/
 void hdatGetI2cDeviceInfo(
     TARGETING::Target*          i_pTarget,
+    TARGETING::ATTR_MODEL_type  i_model,
     std::vector<hdatI2cData_t>& o_i2cDevEntries)
 {
     HDAT_ENTER();
@@ -1825,8 +1830,18 @@ void hdatGetI2cDeviceInfo(
                 "detected");
             ++linkId.instance;
 
-            if(   (i_pTarget == nullptr)
-               || (i_pTarget == i2cDevice.masterChip))
+            //@TODO:RTC 213230(HDAT Axone additional support)
+            //Hacking this now as OCMB is not an i2c master
+            if (i_model == TARGETING::MODEL_NIMBUS)
+            {
+                if( (i_pTarget == nullptr) ||
+                    (i_pTarget == i2cDevice.masterChip)
+                  )
+                {
+                    o_i2cDevEntries.push_back(l_hostI2cObj);
+                }
+            }
+            else
             {
                 o_i2cDevEntries.push_back(l_hostI2cObj);
             }
@@ -2144,60 +2159,77 @@ errlHndl_t hdatUpdateSMPLinkInfoData(hdatHDIFDataArray_t * i_SMPInfoFullPcrdHdrP
 
 uint32_t getMemBusFreq(const TARGETING::Target* i_pTarget)
 {
-
     HDAT_ENTER();
-    TARGETING::ATTR_MSS_FREQ_type l_MemBusFreqInMHz = 0;
 
+    TARGETING::ATTR_MSS_FREQ_type l_MemBusFreqInMHz = 0;
     TARGETING::ATTR_CLASS_type l_class = GETCLASS(i_pTarget);
     TARGETING::ATTR_TYPE_type l_type = GETTYPE(i_pTarget);
-    if((l_class == TARGETING::CLASS_CHIP) && (l_type == TARGETING::TYPE_PROC))
+    if((l_class == TARGETING::CLASS_CHIP) &&
+       (l_type == TARGETING::TYPE_PROC))
     {
         TARGETING::PredicateCTM l_mcbistPredicate(TARGETING::CLASS_UNIT,
                                                 TARGETING::TYPE_MCBIST);
         TARGETING::PredicateHwas l_predHwasFunc;
         TARGETING::PredicatePostfixExpr l_presentMcbist;
         l_presentMcbist.push(&l_mcbistPredicate).
-                            push(&l_predHwasFunc).And();
+                             push(&l_predHwasFunc).And();
         TARGETING::TargetHandleList l_mcbistList;
 
         // Find Associated MCBIST list
         TARGETING::targetService().getAssociated(l_mcbistList,
-                                            i_pTarget,
-                                            TARGETING::TargetService::CHILD_BY_AFFINITY,
-                                            TARGETING::TargetService::ALL,
-                                            &l_presentMcbist);
+                                    i_pTarget,
+                                    TARGETING::TargetService::CHILD_BY_AFFINITY,
+                                    TARGETING::TargetService::ALL,
+                                    &l_presentMcbist);
         if(l_mcbistList.size() == 0)
         {
             HDAT_ERR("Didn't find any mcbist for a proc with huid [0x%08X]",
-                        i_pTarget->getAttr<TARGETING::ATTR_HUID>());
+                    i_pTarget->getAttr<TARGETING::ATTR_HUID>());
         }
         else
         {
             TARGETING::Target *l_pMcbistTarget = l_mcbistList[0];
             if( l_pMcbistTarget->tryGetAttr<TARGETING::ATTR_MSS_FREQ>
-             (l_MemBusFreqInMHz) == false )
+              (l_MemBusFreqInMHz) == false )
             {
-                HDAT_ERR(" MSS_FREQ not present for MCBIST with huid [0x%08X]",
-                        l_pMcbistTarget->getAttr<TARGETING::ATTR_HUID>());
+                HDAT_ERR("MSS_FREQ not present for MCBIST with "
+                "huid [0x%08X]",
+                l_pMcbistTarget->getAttr<TARGETING::ATTR_HUID>());
             }
         }
-     }
-    else if((l_class == TARGETING::CLASS_UNIT) && (l_type == TARGETING::TYPE_MCBIST))
+    }
+    else if((l_class == TARGETING::CLASS_UNIT) &&
+            (l_type == TARGETING::TYPE_MCBIST))
     {
-        if(i_pTarget->tryGetAttr<TARGETING::ATTR_MSS_FREQ>
-             (l_MemBusFreqInMHz) == false )
-            {
-                HDAT_ERR(" MSS_FREQ not present for MCBIST with huid [0x%08X]",
-                        i_pTarget->getAttr<TARGETING::ATTR_HUID>());
-            }
+         if(i_pTarget->tryGetAttr<TARGETING::ATTR_MSS_FREQ>
+           (l_MemBusFreqInMHz) == false )
+         {
+             HDAT_ERR(" MSS_FREQ not present for MCBIST with huid [0x%08X]",
+                    i_pTarget->getAttr<TARGETING::ATTR_HUID>());
+         }
     }
     else
     {
 
-        HDAT_ERR(" Input target with HUID [0x%08X] is not of proc/mcbist target type",
-                        i_pTarget->getAttr<TARGETING::ATTR_HUID>());
+        HDAT_ERR(" Input target with HUID [0x%08X] is not of "
+                 "proc/mcbist target type",
+                 i_pTarget->getAttr<TARGETING::ATTR_HUID>());
     }
- 
+    HDAT_EXIT();
+    return l_MemBusFreqInMHz;
+}
+
+uint32_t getMemBusFreqAxone(const TARGETING::Target* i_pTarget)
+{
+    HDAT_ENTER();
+    TARGETING::ATTR_MEM_EFF_FREQ_type l_MemBusFreqInMHz = {0};
+    if( i_pTarget->tryGetAttr<TARGETING::ATTR_MEM_EFF_FREQ>
+          (l_MemBusFreqInMHz) == false )
+    {
+        HDAT_ERR("MSS_EFF_FREQ not present for MEM PORT with "
+                 "huid [0x%08X]",
+                 i_pTarget->getAttr<TARGETING::ATTR_HUID>());
+    }
     HDAT_EXIT();
     return l_MemBusFreqInMHz;
 }
