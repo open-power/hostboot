@@ -44,7 +44,7 @@
 #include <lib/phy/ddr_phy.H>
 #include <lib/mc/mc.H>
 #include <lib/fir/unmask.H>
-#include <generic/memory/lib/utils/find_magic.H>
+#include <lib/utils/find_magic.H>
 
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_MCBIST;

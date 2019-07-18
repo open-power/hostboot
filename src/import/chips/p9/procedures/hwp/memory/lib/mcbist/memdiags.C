@@ -38,7 +38,6 @@
 
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
-#include <generic/memory/lib/utils/find_magic.H>
 #include <lib/mcbist/memdiags.H>
 #include <lib/mcbist/mcbist.H>
 #include <generic/memory/lib/utils/count_dimm.H>
@@ -305,7 +304,7 @@ fapi2::ReturnCode operation<DEFAULT_MC_TYPE>::multi_port_init_internal()
                  "Start address %d larger than end address %d for %s",
                  l_portdimm_start_address, l_portdimm_end_address, mss::c_str(iv_target));
 
-    // Determine which ports are functional and whether we can broadcast to them
+// Determine which ports are functional and whether we can broadcast to them
     // If we're in broadcast mode, PRD sends DIMM 0/1 of the first functional and configured port,
     // and we then run all ports in parallel (ports set in subtest config)
     if( mss::mcbist::is_broadcast_capable(iv_target) == mss::YES )

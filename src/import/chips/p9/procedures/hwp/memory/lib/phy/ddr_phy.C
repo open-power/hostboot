@@ -56,7 +56,7 @@
 #include <lib/workarounds/dll_workarounds.H>
 #include <lib/workarounds/dqs_align_workarounds.H>
 #include <lib/phy/mss_training.H>
-#include <generic/memory/lib/utils/find_magic.H>
+#include <lib/utils/find_magic.H>
 #include <generic/memory/lib/utils/bit_count.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/dump_regs.H>

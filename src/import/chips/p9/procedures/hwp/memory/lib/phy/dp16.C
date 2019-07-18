@@ -51,7 +51,7 @@
 #include <generic/memory/lib/utils/scom.H>
 #include <generic/memory/lib/utils/pos.H>
 #include <generic/memory/lib/utils/c_str.H>
-#include <generic/memory/lib/utils/find_magic.H>
+#include <lib/utils/find_magic.H>
 #include <lib/workarounds/dp16_workarounds.H>
 #include <lib/fir/check.H>
 #include <generic/memory/lib/utils/mss_math.H>

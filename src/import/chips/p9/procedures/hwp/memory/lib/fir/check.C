@@ -38,7 +38,7 @@
 #include <p9_mc_scom_addresses_fld.H>
 #include <p9_perv_scom_addresses.H>
 #include <p9_perv_scom_addresses_fld.H>
-#include <generic/memory/lib/utils/find_magic.H>
+#include <lib/utils/find_magic.H>
 #include <generic/memory/lib/utils/scom.H>
 #include <lib/fir/fir.H>
 #include <lib/fir/check.H>

@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/generic/memory/lib/utils/find_magic.H $            */
+/* $Source: src/import/chips/p9/procedures/hwp/memory/lib/utils/find_magic.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -133,30 +133,6 @@ find_targets_with_magic( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_targe
     // In either case, l_ports is the proper thing to return. Either the magic port was in
     // l_ports or it is now because we inserted it.
     return l_ports;
-}
-
-///
-/// @brief Determine if a thing is functional
-/// @tparam I, the type of the item we want to check for
-/// @tparam P, the type of the parent which holds the things of interest
-/// @param[in] i_target the parent containing the thing we're looking for
-/// @param[in] i_rel_pos the relative position of the item of interest.
-/// @return bool true iff the thing at i_rel_pos is noted as functional
-///
-template< fapi2::TargetType I, fapi2::TargetType P >
-bool is_functional( const fapi2::Target<P>& i_target, const uint64_t i_rel_pos )
-{
-    // Not sure of a good way to do this ... we get all the functional
-    // children of the parent and look for our relative position ...
-    for (const auto& i : i_target.template getChildren<I>(fapi2::TARGET_STATE_FUNCTIONAL))
-    {
-        if (mss::template relative_pos<P>(i) == i_rel_pos)
-        {
-            return true;
-        }
-    }
-
-    return false;
 }
 
 }// mss
