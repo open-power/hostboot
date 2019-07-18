@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -273,6 +273,7 @@ enum hdatHubStatus
 //@TODO:RTC 166789: Need to access the module type from HB targeting model
 #define HDAT_MODULE_TYPE_ID_NIMBUS_LAGRANGE 0x0022
 #define HDAT_MODULE_TYPE_ID_CUMULUS_DUOMO 0x0030
+#define HDAT_MODULE_TYPE_ID_P10_HOPPER  0x0040
 
 
 

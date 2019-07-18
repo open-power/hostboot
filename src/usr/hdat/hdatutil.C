@@ -772,7 +772,10 @@ errlHndl_t hdatGetPvpdFullRecord(TARGETING::Target * i_target,
                     theRecord,0,0,0,
                     ERRORLOG::ERRL_SEV_INFORMATIONAL,
                     HDAT_VERSION1,
-                    true);
+                    false);
+                    //@TODO:RTC 213229 Remove HDAT hack
+                    //There are known differences where not all records will be
+                    //present. So changing now from true to false.
 
                 continue;
             }
@@ -1601,6 +1604,7 @@ bool byNodeProcAffinity(
  *
  * @param[in] i_pTarget
  *       The i2c master target handle, or nullptr for all i2c masters
+ * @param[in] i_model Target model
  * @param[out] o_i2cDevEntries
  *       The host i2c dev entries
  *
@@ -1609,6 +1613,7 @@ bool byNodeProcAffinity(
 *******************************************************************************/
 void hdatGetI2cDeviceInfo(
     TARGETING::Target*          i_pTarget,
+    TARGETING::ATTR_MODEL_type  i_model,
     std::vector<hdatI2cData_t>& o_i2cDevEntries)
 {
     HDAT_ENTER();
@@ -1688,11 +1693,21 @@ void hdatGetI2cDeviceInfo(
                 "detected");
             ++linkId.instance;
 
-            if(   (i_pTarget == nullptr)
-               || (i_pTarget == i2cDevice.masterChip))
+            //@TODO:RTC 213230(HDAT Axone additional support)
+            //Hacking this now as OCMB is not an i2c master
+            //TODO : RTC Story 246361 HDAT Nimbus/Cumulus model code removal
+            /*
+            if (i_model == TARGETING::MODEL_NIMBUS)
             {
-                o_i2cDevEntries.push_back(l_hostI2cObj);
+                if( (i_pTarget == nullptr) ||
+                    (i_pTarget == i2cDevice.masterChip)
+                  )
+                {
+                    o_i2cDevEntries.push_back(l_hostI2cObj);
+                }
             }
+             */
+            o_i2cDevEntries.push_back(l_hostI2cObj);
         }
     }
 
@@ -2067,6 +2082,21 @@ uint32_t getMemBusFreq(const TARGETING::Target* i_pTarget)
     **/
     HDAT_EXIT();
     return 24;
+}
+
+uint32_t getMemBusFreqP10(const TARGETING::Target* i_pTarget)
+{
+    HDAT_ENTER();
+    TARGETING::ATTR_MEM_EFF_FREQ_type l_MemBusFreqInMHz = {0};
+    if( i_pTarget->tryGetAttr<TARGETING::ATTR_MEM_EFF_FREQ>
+          (l_MemBusFreqInMHz) == false )
+    {
+        HDAT_ERR("MSS_EFF_FREQ not present for MEM PORT with "
+                 "huid [0x%08X]",
+                 i_pTarget->getAttr<TARGETING::ATTR_HUID>());
+    }
+    HDAT_EXIT();
+    return l_MemBusFreqInMHz;
 }
 
 } //namespace HDAT

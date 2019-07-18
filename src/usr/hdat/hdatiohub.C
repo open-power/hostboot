@@ -75,6 +75,18 @@ const HdatKeywordInfo l_pvpdKeywords[] =
     { PVPD::PF,  "PF" },
 };
 
+vpdData pvpdDataP10[] =
+{
+    { PVPD::OPFR, PVPD::VP },
+    { PVPD::OPFR, PVPD::VS },
+};
+
+const HdatKeywordInfo l_pvpdKeywordsP10[] =
+{
+    { PVPD::VP,  "VP" },
+    { PVPD::VS,  "VS" },
+};
+
 extern trace_desc_t *g_trac_hdat;
 
 const uint32_t HDAT_MULTIPLE = 16;
@@ -651,13 +663,35 @@ errlHndl_t HdatIoHubFru::addDaughterCard(uint32_t i_resourceId,
     // told to allow for on the constructor
     if (iv_actDaughterCnt < iv_maxDaughters)
     {
+        //Get the processor model
+        auto l_model = TARGETING::targetService().getProcessorModel();
+
         if ( l_vpdType == FRU_BP )
         {
-
-            uint32_t i_num = sizeof(mvpdData)/sizeof(mvpdData[0]);
-            l_vpdObj = new HdatVpd(l_errlHndl, i_resourceId,i_target,
-                                   HDAT_KID_STRUCT_NAME,i_index,BP,
-                                   mvpdData,i_num,l_pvpdKeywords);
+            //@TODO:RTC 213229(Remove HDAT hack or Axone)
+            //Check whether the code can be more fault tolerant by avoiding
+            //model check
+            //@TODO:RTC Story 246361 HDAT Nimbus/Cumulus model code removal
+            /*
+            if(l_model == TARGETING::MODEL_NIMBUS)
+            {
+                uint32_t i_num = sizeof(mvpdData)/sizeof(mvpdData[0]);
+                l_vpdObj = new HdatVpd(l_errlHndl, i_resourceId,i_target,
+                                       HDAT_KID_STRUCT_NAME,i_index,BP,
+                                       mvpdData,i_num,l_pvpdKeywords);
+            }
+             */
+            if(l_model == TARGETING::MODEL_POWER10)
+            {
+                uint32_t i_num = sizeof(pvpdDataP10)/sizeof(pvpdDataP10[0]);
+                l_vpdObj = new HdatVpd(l_errlHndl, i_resourceId,i_target,
+                                       HDAT_KID_STRUCT_NAME,i_index,BP,
+                                       pvpdDataP10,i_num,l_pvpdKeywordsP10);
+            }
+            else
+            {
+                HDAT_ERR("Chip is not POWER10");
+            }
         }
         //@TODO: RTC 148660 pci slots and cards
 
@@ -894,17 +928,14 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
             TARGETING::ATTR_MODEL_type  l_model =
                             (l_pProcTarget->getAttr<TARGETING::ATTR_MODEL>());
 
-            if(l_model == TARGETING::MODEL_NIMBUS)
+            //@TODO:RTC Story 246361 HDAT Nimbus/Cumulus model code removal
+            if(l_model == TARGETING::MODEL_POWER10)
             {
-                l_hub->hdatModuleId = HDAT_MODULE_TYPE_ID_NIMBUS_LAGRANGE;
-            }
-            else if(l_model == TARGETING::MODEL_CUMULUS)
-            {
-                l_hub->hdatModuleId = HDAT_MODULE_TYPE_ID_CUMULUS_DUOMO;
+                l_hub->hdatModuleId = HDAT_MODULE_TYPE_ID_P10_HOPPER;
             }
             else
             {
-                HDAT_ERR("Chip is not in Nimbus,Cumulus");
+                HDAT_ERR("Chip is not POWER10");
             }
 
             TARGETING::Target *l_pSysTarget = NULL;

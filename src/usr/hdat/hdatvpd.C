@@ -207,7 +207,10 @@ iv_kwdSize(0), iv_kwd(NULL)
         TARGETING::TargetHandleList l_targList;
         PredicateCTM predNode(TARGETING::CLASS_ENC, TARGETING::TYPE_NODE);
         PredicateHwas predFunctional;
-        predFunctional.functional(true);
+        //@TODO:RTC 213229(Remove HDAT hack or Axone)
+        //crashes below at l_target because the node got deconfigured
+        //changed from functional to present
+        predFunctional.present(true);
         PredicatePostfixExpr nodeCheckExpr;
         nodeCheckExpr.push(&predNode).push(&predFunctional).And();
 

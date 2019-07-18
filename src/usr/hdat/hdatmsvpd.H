@@ -63,6 +63,10 @@ const uint32_t HDAT_START_INSTANCE = 0;
 const uint32_t HDAT_RHB_MAX_RANGE_ENTRIES = 20;
 const uint32_t MAX_DIMMS_PER_MCBIST = 8;
 
+//@TODO:RTC 213230(HDAT Axone additional support)
+//Need to revisit the number if needed
+const uint32_t HDAT_MAX_MSAREA_P10 = 32;
+
 /** @brief Structure version number
  */
 const uint16_t HDAT_MS_VPD_VERSION = 0x24;
@@ -811,10 +815,12 @@ class HdatMsVpd : public HdatHdif
         /**
          * @brief Gets maximum configured memory address
          *
+         * @param[in] i_model Target model
          *
          * @return value of  ms address
          */
-        uint64_t hdatGetMaxMemConfiguredAddress();
+        uint64_t hdatGetMaxMemConfiguredAddress(
+            TARGETING::ATTR_MODEL_type i_model);
 
         /**
          * @brief Fetches the group of MC
@@ -828,6 +834,19 @@ class HdatMsVpd : public HdatHdif
         bool hdatFindGroupForMc(const TARGETING::Target *i_pProcTarget,
                             const TARGETING::Target *i_pMcsTarget,
                             uint32_t& o_groupOfMc);
+
+        /**
+         * @brief Fetches the group of MCC
+         *
+         * @param[in] i_pTarget Proc target
+         * @param[in] i_pMccTarget MCC target
+         * @param[out] o_groupOfMcc MCC group value
+         *
+         * @return Success or failure
+         */
+        bool hdatFindGroupForMcc(const TARGETING::Target *i_pProcTarget,
+                            const TARGETING::Target *i_pMccTarget,
+                            uint32_t& o_groupOfMcc);
 
         /**
          * @brief Get the DIMMS list present on the system
@@ -849,6 +868,28 @@ class HdatMsVpd : public HdatHdif
         errlHndl_t hdatScanDimms(const TARGETING::Target *i_pTarget,
                          const TARGETING::Target *i_pMcsTarget,
                          uint32_t i_membufFruid,
+                         std::list<hdatRamArea>& o_areas,
+                         uint32_t& o_areaSize,
+                         uint32_t& o_dimmNum,
+                         bool& o_areaFunctional,
+                         hdatMemParentType& i_parentType);
+
+        /**
+         * @brief Get the DIMMS list present on the P10 system
+         *
+         * @param[in] i_pTarget OCMB Chip target
+         * @param[out] o_areas list of ram area structure based on the DIMM
+         * present.
+         * @param[out] o_areaSize - Total DIMM size
+         * @param[out] o_dimmNum - Total DIMM number
+         * @param[out] o_areaFunctional - DIMM functional status
+         * @param[out] o_parentType - memory parent type based on whether
+         *              the dimms are pluggable or soldered
+         *
+         * @return A null error log handle if successful, else the return the
+         * error handle
+         */
+        errlHndl_t hdatScanDimmsP10(const TARGETING::Target *i_pOcmbTarget,
                          std::list<hdatRamArea>& o_areas,
                          uint32_t& o_areaSize,
                          uint32_t& o_dimmNum,

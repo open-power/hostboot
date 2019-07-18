@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -572,6 +572,7 @@ errlHndl_t hdatGetFullEepromVpd ( TARGETING::Target * i_target,
  *
  * @param[in] i_pTarget
  *       The i2c master target handle
+ * @param[in] i_model Target model
  * @param[out] o_i2cDevEntries
  *       The host i2c dev entries
  *
@@ -579,6 +580,7 @@ errlHndl_t hdatGetFullEepromVpd ( TARGETING::Target * i_target,
  *
 *******************************************************************************/
 void hdatGetI2cDeviceInfo(TARGETING::Target* i_pTarget,
+    TARGETING::ATTR_MODEL_type  i_model,
     std::vector<hdatI2cData_t>&o_i2cDevEntries);
 
 /*******************************************************************************
@@ -620,6 +622,13 @@ errlHndl_t hdatUpdateSMPLinkInfoData(hdatHDIFDataArray_t * i_SMPInfoFullPcrdHdrP
  * @return        Memory bus frequency. upon any error conditions it returns 0.
 *******************************************************************************/
 uint32_t getMemBusFreq(const TARGETING::Target* i_pTarget);
+
+/******************************************************************************
+ * @brief         get Memory bus frequency of given target.
+ * @param[in]     i_pTarget     : input target handle
+ * @return        Memory bus frequency. upon any error conditions it returns 0.
+*******************************************************************************/
+uint32_t getMemBusFreqP10(const TARGETING::Target* i_pTarget);
 };// end namespace
 
 #endif // HDATUTILITY_H
