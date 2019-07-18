@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/generic/memory/lib/data_engine/p9n/p9n_data_init_traits.H $ */
+/* $Source: src/import/chips/p9/procedures/hwp/memory/lib/eff_config/p9n_data_init_traits.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */

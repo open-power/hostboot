@@ -48,7 +48,7 @@
 #include <lib/freq/nimbus_freq_traits.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/utils/freq/gen_mss_freq.H>
-#include <generic/memory/lib/data_engine/pre_data_init.H>
+#include <lib/eff_config/pre_data_init.H>
 
 using fapi2::TARGET_TYPE_MCS;
 using fapi2::TARGET_TYPE_MCA;

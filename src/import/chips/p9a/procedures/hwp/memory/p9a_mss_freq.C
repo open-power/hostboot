@@ -40,7 +40,7 @@
 #include <p9a_mss_freq.H>
 
 #include <lib/freq/axone_freq_traits.H>
-#include <generic/memory/lib/data_engine/p9a/p9a_data_init_traits.H>
+#include <lib/eff_config/p9a_data_init_traits.H>
 #include <lib/eff_config/explorer_attr_engine_traits.H>
 #include <generic/memory/lib/data_engine/data_engine.H>
 #include <generic/memory/lib/utils/find.H>

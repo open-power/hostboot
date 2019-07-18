@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/generic/memory/lib/data_engine/pre_data_init.H $   */
+/* $Source: src/import/chips/p9/procedures/hwp/memory/lib/eff_config/pre_data_init.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -41,7 +41,7 @@
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/spd/spd_facade.H>
 #include <generic/memory/lib/utils/find.H>
-#include <generic/memory/lib/data_engine/p9n/p9n_data_init_traits.H>
+#include <lib/eff_config/p9n_data_init_traits.H>
 #include <generic/memory/lib/data_engine/data_engine_utils.H>
 
 namespace mss

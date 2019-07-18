@@ -38,7 +38,7 @@
 #include <generic/memory/lib/spd/common/rcw_settings.H>
 #include <lib/spd/spd_factory.H>
 #include <lib/eff_config/timing.H>
-#include <generic/memory/lib/data_engine/pre_data_init.H>
+#include <lib/eff_config/pre_data_init.H>
 #include <generic/memory/lib/spd/spd_utils.H>
 
 namespace mss

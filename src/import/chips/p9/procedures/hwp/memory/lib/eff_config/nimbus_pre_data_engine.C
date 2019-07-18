@@ -34,7 +34,7 @@
 // *HWP Level: 3
 // *HWP Consumed by: CI
 
-#include <generic/memory/lib/data_engine/pre_data_init.H>
+#include <lib/eff_config/pre_data_init.H>
 
 namespace mss
 {
