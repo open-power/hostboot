@@ -266,9 +266,13 @@ template<>
 fapi2::ReturnCode self_refresh_entry( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
 {
     fapi2::buffer<uint64_t> l_mbarpc0_data, l_mbastr0_data;
+    const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
 
     // Entry time to 0 for immediate entry
     constexpr uint64_t l_str_entry_time = 0;
+
+    // Stop mcbist (scrub) in case of MPIPL. It will get restarted in the later istep
+    FAPI_TRY(mss::mcbist::start_stop(l_mcbist, mss::states::STOP));
 
     // Step 1 - In MBARPC0Q, disable power domain control, set domain to MAXALL_MIN0,
     //          and disable minimum domain reduction (allow immediate entry of STR)
