@@ -410,17 +410,9 @@ typedef struct
 // -----------------------------------------------------------------------------
 // Start Error Log Table
 
-/// Maximum number of error log entries available
-#define MAX_HCODE_ELOG_ENTRIES 4
-
-/// Index into the array of error log entries
-enum elog_entry_index
-{
-    ELOG_PGPE_CRITICAL      = 0,
-    ELOG_PGPE_INFO          = 1,
-    ELOG_SGPE_CRITICAL      = 2,
-    ELOG_SGPE_INFO          = 3,
-};
+/// Maximum number of error log entries available, 1 UE per SPGE & PGPE
+#define MAX_HCODE_ELOG_ENTRIES 2
+#define HCODE_ELOG_TABLE_MAGIC_WORD 0x454C5443   // "ELTC"
 
 /// Structure of an individual error log entry
 typedef struct
@@ -462,7 +454,7 @@ typedef struct hcode_error_table
         } fields;
     } dw0;
 
-    /// Array of error log entries (index with enum elog_entry_index)
+    /// Array of error log entries
     hcode_elog_entry_t  elog[MAX_HCODE_ELOG_ENTRIES];
 } hcode_error_table_t;
 
@@ -491,9 +483,6 @@ typedef struct
 
     //PGPE WOF Values
     pgpe_wof_values_t    pgpe_wof_values;
-
-    //Reserved
-    uint64_t            reserved1;
 
     /// Hcode Error Log Index
     hcode_error_table_t  errlog_idx;
