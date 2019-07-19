@@ -795,8 +795,9 @@ fapi2::ReturnCode p10_perv_sbe_cmn_eqs_with_good_cores(
     {
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PG, targ, l_read_attr_pg));
 
-        if ( l_read_attr_pg.getBit<13>() || l_read_attr_pg.getBit<14>() || l_read_attr_pg.getBit<15>()
-             || l_read_attr_pg.getBit<16>() )
+        // ATTR_PG indicates a "good" core with 0b0
+        if (!l_read_attr_pg.getBit<13>() || !l_read_attr_pg.getBit<14>()
+            || !l_read_attr_pg.getBit<15>() || !l_read_attr_pg.getBit<16>())
         {
             l_data64.setBit(targ.getChipletNumber());
         }
