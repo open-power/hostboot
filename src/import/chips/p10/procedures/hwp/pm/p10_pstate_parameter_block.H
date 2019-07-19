@@ -40,6 +40,7 @@
 #include "p10_pm_get_poundv_bucket.H"
 #include "p10_pm_get_poundw_bucket.H"
 
+#define INVALID_BUS_NUM   0xFF
 
 //VDD Voltage config actions
 typedef enum
