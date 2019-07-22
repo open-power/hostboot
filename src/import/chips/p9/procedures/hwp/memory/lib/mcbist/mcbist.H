@@ -126,6 +126,28 @@ fapi2::ReturnCode setup_broadcast_port_select(const fapi2::Target<T>& i_target, 
 template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
 fapi2::ReturnCode enable_broadcast_mode(const fapi2::Target<T>& i_target, mcbist::program<>& io_program);
 
+///
+/// @brief Load MCBIST ECC (and?) spare data pattern given a pattern - explorer specialization
+/// @param[in] i_target the target to effect
+/// @param[in] i_pattern an mcbist::patterns
+/// @param[in] i_invert whether to invert the pattern or not
+/// @note this overload disappears when we have real patterns.
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< >
+inline fapi2::ReturnCode load_eccspare_pattern<mss::mc_type::NIMBUS>(
+    const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+    const pattern& i_pattern,
+    const bool i_invert )
+{
+    // First up assemble the pattern
+    const auto l_pattern = generate_eccspare_pattern(i_pattern, i_invert);
+
+    FAPI_TRY(fapi2::putScom(i_target, MCBIST_MCBFDQ, l_pattern));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 } // namespace MCBIST
 
 } // namespace mss
