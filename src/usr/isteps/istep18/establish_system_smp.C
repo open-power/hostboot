@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -674,6 +674,8 @@ void *host_sys_fab_iovalid_processing(void* io_ptr )
                 "returned err: plid=0x%X. Deleting err and continuing",
                 err->plid());
             err->collectTrace("ISTEPS_TRACE");
+            // Let the caller know that an error occurred
+            io_pMsg->data[0] = err->plid();
             errlCommit(err, SECURE_COMP_ID);
        }
 
