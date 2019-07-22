@@ -46,5 +46,7 @@ static const uint8_t EXPLR_MCBIST_MBSSYMEC9Q_MODAL_SYMBOL_COUNTER_78           =
 static const uint8_t EXPLR_MCBIST_MBSSYMEC9Q_MODAL_SYMBOL_COUNTER_78_LEN       = 8   ;
 static const uint8_t EXPLR_MCBIST_MBSSYMEC9Q_MODAL_SYMBOL_COUNTER_79           = 56  ;
 static const uint8_t EXPLR_MCBIST_MBSSYMEC9Q_MODAL_SYMBOL_COUNTER_79_LEN       = 8   ;
+static const uint8_t EXPLR_RDF_MCBCM2_MCBIST_HALF_COMPARE_MASK                 = 0   ;
+static const uint8_t EXPLR_RDF_MCBCM2_MCBIST_HALF_COMPARE_MASK_LEN             = 40  ;
 
 #endif
