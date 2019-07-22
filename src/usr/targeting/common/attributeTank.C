@@ -443,15 +443,12 @@ void AttributeTank::deserializeAttributes(
     // Iterate thru the Attributes
     while (l_index < i_attributes.iv_size)
     {
-        // Progress the offset to the serialized data
-        l_serializedData += l_index;
-
         // Create a new Attribute
         Attribute * l_pAttribute = new Attribute();
 
         // Deserialize the data, if possible
         uint32_t l_deserializedDataSize = l_pAttribute->deserialize(
-                                l_serializedData,
+                                l_serializedData + l_index,
                                 i_attributes.iv_size - l_index);
 
         if (!l_deserializedDataSize)
