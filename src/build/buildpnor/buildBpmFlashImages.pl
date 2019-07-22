@@ -119,13 +119,10 @@ sub generateFirmwareImage
     my ($i_fileName, $i_outputDir) = @_;
     my $this_func = (caller(0))[3];
 
-#    my $intermediateFileName = generateIntermediateImage($i_fileName);
-#
-#    open my $inputFileHandle, '<:encoding(UTF-8)', $intermediateFileName
-#        or die "Failed to open $intermediateFileName";
+    my $intermediateFileName = generateIntermediateImage($i_fileName);
 
-    open my $inputFileHandle, '<:encoding(UTF-8)', $i_fileName
-        or die "Failed to open $i_fileName";
+    open my $inputFileHandle, '<:encoding(UTF-8)', $intermediateFileName
+        or die "Failed to open $intermediateFileName";
 
     my ($name, @version) = generateOutputNameAndVersion($i_fileName);
 
@@ -257,8 +254,7 @@ sub generateFirmwareImage
 
     if (!defined($blocks))
     {
-        die "Unable to process image file: $i_fileName";
-        #die "Unable to process image file: $intermediateFileName";
+        die "Unable to process image file: $intermediateFileName";
     }
 
     # Write the version information to the file.
@@ -275,9 +271,9 @@ sub generateFirmwareImage
         or die "Failed to write to output file: $imageFile";
 
     close $inputFileHandle
-        or die "Failed to close input file: $i_fileName";
-#    unlink $intermediateFileName
-#        or die "Failed to remove temporary file $intermediateFileName";
+        or die "Failed to close input file: $intermediateFileName";
+    unlink $intermediateFileName
+        or die "Failed to remove temporary file $intermediateFileName";
     close $outputFileHandle
         or die "Failed to close output file: $imageFile";
 }
