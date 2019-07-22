@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -133,6 +133,7 @@ errlHndl_t nodeCommAbusGetRandom(uint64_t & o_nonce)
 {
     errlHndl_t err = nullptr;
     o_nonce = NODE_COMM_DEFAULT_NONCE;
+#ifdef CONFIG_TPMDD
     Target* tpm_tgt = nullptr;
 
     TRACUCOMP(g_trac_nc,ENTER_MRK"nodeCommAbusGetRandom:");
@@ -144,9 +145,7 @@ errlHndl_t nodeCommAbusGetRandom(uint64_t & o_nonce)
     // This function call requires the CONFIG check for compilation purposes,
     // but no extra error handling is needed as it should not have gotten this
     // far if CONFIG_TPMDD wasn't set
-#ifdef CONFIG_TPMDD
     TRUSTEDBOOT::getPrimaryTpm(tpm_tgt);
-#endif
     HwasState hwasState{};
     if(tpm_tgt)
     {
@@ -192,11 +191,9 @@ errlHndl_t nodeCommAbusGetRandom(uint64_t & o_nonce)
     // This function call requires the CONFIG check for compilation purposes,
     // but no extra error handling is needed as it should not have gotten this
     // far if CONFIG_TPMDD wasn't set
-#ifdef CONFIG_TPMDD
     err = TRUSTEDBOOT::GetRandom(tpm_tgt,
                                  sizeof(o_nonce),
                                  reinterpret_cast<uint8_t*>(&o_nonce));
-#endif
     if (err)
     {
         // Reset just to make sure above call didn't change it
@@ -208,18 +205,30 @@ errlHndl_t nodeCommAbusGetRandom(uint64_t & o_nonce)
                   get_huid(tpm_tgt),
                   TRACE_ERR_ARGS(err),
                   o_nonce);
-        // err commited outside of do-while loop below
-
         // break to be safe in case code gets added later
         break;
     }
 
     } while( 0 );
 
-    if (err)
+    if(err)
     {
-        err->collectTrace(TRBOOT_COMP_NAME);
-        err->collectTrace(NODECOMM_TRACE_NAME);
+        if(!TRUSTEDBOOT::isTpmRequired())
+        {
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusGetRandom: Error occurred; "
+                      "RC: 0x%.04X; PLID: 0x%.08X. TPM Required policy is off; "
+                      "deleting the error and trying to continue.",
+                      err->reasonCode(),
+                      err->plid());
+            // TPM is not required - do not return the error
+            delete err;
+            err = nullptr;
+        }
+        else
+        {
+            err->collectTrace(TRBOOT_COMP_NAME);
+            err->collectTrace(NODECOMM_TRACE_NAME);
+        }
     }
 
     TRACFCOMP(g_trac_nc,EXIT_MRK"nodeCommAbusGetRandom: "
@@ -228,6 +237,7 @@ errlHndl_t nodeCommAbusGetRandom(uint64_t & o_nonce)
               o_nonce, get_huid(tpm_tgt),
               TRACE_ERR_ARGS(err));
 
+#endif
     return err;
 
 } // end of nodeCommAbusGetRandom
@@ -618,17 +628,19 @@ errlHndl_t nodeCommGenSlaveQuoteResponse(const MasterQuoteRequestBlob* const i_r
             {
                 l_poisonTpmErr->plid(l_errl->plid());
             }
-            errlCommit(l_poisonTpmErr, SECURE_COMP_ID);
-        }
-    }
-
-    if(l_errl)
-    {
-        if(!l_tpmRequired)
-        {
-            // TPM is not required, so no need to propagate the error up and
-            // fail the boot.
-            errlCommit(l_errl, SECURE_COMP_ID);
+            if(l_tpmRequired)
+            {
+                errlCommit(l_poisonTpmErr, SECURE_COMP_ID);
+            }
+            else
+            {
+                TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenSlaveQuoteResponse: "
+                          "Could not poison TPMs. Errl PLID: 0x%.08X "
+                          "Deleting the error log and continuing anyway.",
+                          l_poisonTpmErr->plid());
+                delete l_poisonTpmErr;
+                l_poisonTpmErr = nullptr;
+            }
         }
     }
 
@@ -721,14 +733,19 @@ errlHndl_t nodeCommGenMasterQuoteRequest(MasterQuoteRequestBlob* const o_request
             {
                 l_poisonTpmErr->plid(l_errl->plid());
             }
-            errlCommit(l_poisonTpmErr, SECURE_COMP_ID);
-        }
-
-        if(!l_tpmRequired)
-        {
-            // TPM is not required, so no need to propagate the error up and
-            // fail the boot.
-            errlCommit(l_errl, SECURE_COMP_ID);
+            if(l_tpmRequired)
+            {
+                errlCommit(l_poisonTpmErr, SECURE_COMP_ID);
+            }
+            else
+            {
+                TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenMasterQuoteRequest: "
+                          "Could not poison TPMs. Errl PLID: 0x%.08X. "
+                          "Deleting the error log and continuing anyway.",
+                          l_poisonTpmErr->plid());
+                delete l_poisonTpmErr;
+                l_poisonTpmErr = nullptr;
+            }
         }
     }
 
@@ -814,13 +831,19 @@ errlHndl_t nodeCommProcessSlaveQuote(uint8_t* const i_slaveQuote,
             {
                 l_poisonTpmErr->plid(l_errl->plid());
             }
-            errlCommit(l_poisonTpmErr, SECURE_COMP_ID);
-        }
-
-        if(!TRUSTEDBOOT::isTpmRequired())
-        {
-            // TPM is not required - do not propagate the error
-            errlCommit(l_errl, SECURE_COMP_ID);
+            if(TRUSTEDBOOT::isTpmRequired())
+            {
+                errlCommit(l_poisonTpmErr, SECURE_COMP_ID);
+            }
+            else
+            {
+                TRACFCOMP(g_trac_nc, ERR_MRK"nodeCommProcessSlaveQuote: "
+                          "Could not poison TPMs. Errl PLID: 0x%.08X. "
+                          "Deleting the error log and continuing.",
+                          l_poisonTpmErr->plid());
+                delete l_poisonTpmErr;
+                l_poisonTpmErr = nullptr;
+            }
         }
     }
 
@@ -1738,9 +1761,24 @@ errlHndl_t nodeCommAbusExchange(void)
 
     if (err)
     {
-        err->collectTrace(SECURE_COMP_NAME);
-        err->collectTrace(NODECOMM_TRACE_NAME);
-        err->collectTrace(TRBOOT_COMP_NAME);
+        if(!TRUSTEDBOOT::isTpmRequired())
+        {
+            TRACFCOMP(g_trac_nc,EXIT_MRK"nodeCommAbusExchange:An error occurred"
+                     " during secure node communication, but the TPM required "
+                     "policy is not set, so the error will not be propagated."
+                     " Original error RC: 0x%.04X; PLID: 0x%.08X."
+                     " Deleting the error log and continuing.",
+                     err->reasonCode(),
+                     err->plid());
+            delete err;
+            err = nullptr;
+        }
+        else
+        {
+            err->collectTrace(SECURE_COMP_NAME);
+            err->collectTrace(NODECOMM_TRACE_NAME);
+            err->collectTrace(TRBOOT_COMP_NAME);
+        }
     }
 
     if (l_phys_path_str != nullptr)
