@@ -592,7 +592,7 @@ fapi2::ReturnCode p10_setup_sbe_config(
                      "Error from p10_sbe_scratch_calc_iohs_region_gard_vectors");
             l_scratch7_reg.insert<NDL_GARD_STARTBIT, NDL_GARD_LENGTH, GARD_VECTOR_STARTBIT>(l_ndl_gard_vector);
         }
-        else
+        else if (l_attr_contained_ipl_type == fapi2::ENUM_ATTR_CONTAINED_IPL_TYPE_CHIP)
         {
             fapi2::ATTR_CHIP_CONTAINED_ACTIVE_CORES_VEC_Type l_attr_chip_contained_active_cores_vec;
 
@@ -693,7 +693,7 @@ fapi2::ReturnCode p10_setup_sbe_config(
                          ATTR_IOHS_PLL_BUCKET_LENGTH));
             }
         }
-        else
+        else if (l_attr_contained_ipl_type == fapi2::ENUM_ATTR_CONTAINED_IPL_TYPE_CHIP)
         {
             fapi2::ATTR_CHIP_CONTAINED_BACKING_CACHES_VEC_Type l_attr_chip_contained_backing_caches_vec;
 
