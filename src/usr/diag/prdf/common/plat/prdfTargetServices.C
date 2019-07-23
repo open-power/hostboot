@@ -666,14 +666,30 @@ TargetHandleList getConnAssoc( TargetHandle_t i_target, TYPE i_connType,
 
     TargetHandleList o_list; // Default empty list
 
-    // Match any class, specified type, and functional.
-    PredicateCTM predType( CLASS_NA, i_connType );
-    PredicateIsFunctional predFunc;
-    PredicatePostfixExpr predAnd;
-    predAnd.push(&predType).push(&predFunc).And();
+    TYPE trgtType = getTargetType( i_target );
 
-    targetService().getAssociated( o_list, i_target, i_assocType,
-                                   TargetService::ALL, &predAnd );
+    // OMIC -> OMI and vice versa require special handling.
+    if ( TYPE_OMIC == trgtType && TYPE_OMI == i_connType )
+    {
+        getChildOmiTargetsByState( o_list, i_target, CLASS_NA, TYPE_OMI,
+                                   UTIL_FILTER_FUNCTIONAL );
+    }
+    else if ( TYPE_OMI == trgtType && TYPE_OMIC == i_connType )
+    {
+        getParentOmicTargetsByState( o_list, i_target, CLASS_NA, TYPE_OMIC,
+                                     UTIL_FILTER_FUNCTIONAL );
+    }
+    else
+    {
+        // Match any class, specified type, and functional.
+        PredicateCTM predType( CLASS_NA, i_connType );
+        PredicateIsFunctional predFunc;
+        PredicatePostfixExpr predAnd;
+        predAnd.push(&predType).push(&predFunc).And();
+
+        targetService().getAssociated( o_list, i_target, i_assocType,
+                                       TargetService::ALL, &predAnd );
+    }
 
     // Sort by target position.
     std::sort( o_list.begin(), o_list.end(),
@@ -983,13 +999,14 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
         else if ( TYPE_OMIC == trgtType && TYPE_OMI == i_connType )
         {
             // i_connPos is position relative to OMIC (0-2)
-            for ( auto & trgt : list )
+            for ( TargetHandleList::iterator trgtIt = list.begin();
+                  trgtIt != list.end(); trgtIt++ )
             {
                 uint8_t omiPos = 0;
-                if ( trgt->tryGetAttr<ATTR_OMI_DL_GROUP_POS>(omiPos) &&
+                if ( (*trgtIt)->tryGetAttr<ATTR_OMI_DL_GROUP_POS>(omiPos) &&
                      (i_connPos == omiPos) )
                 {
-                    *itr = trgt;
+                    itr = trgtIt;
                     break;
                 }
             }
