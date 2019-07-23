@@ -305,6 +305,9 @@ int ringid_get_chipletIndex( ChipId_t        i_chipId,
                              ChipletType_t   i_chipletType,
                              ChipletType_t*  o_chipletIndex );
 
+// Check if ring is an Mvpd ring
+MyBool_t ringid_is_mvpd_ring( ChipId_t  i_chipId,
+                              RingId_t  i_ringId );
 
 #if !defined(__PPE__) && !defined(NO_STD_LIB_IN_PPE) && !defined(__HOSTBOOT_MODULE) && !defined(FIPSODE)
 

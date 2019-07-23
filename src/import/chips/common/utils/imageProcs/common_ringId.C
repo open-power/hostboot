@@ -305,6 +305,33 @@ int ringid_get_chipletIndex( ChipId_t        i_chipId,
 }
 
 
+MyBool_t ringid_is_mvpd_ring( ChipId_t  i_chipId,
+                              RingId_t  i_ringId )
+{
+    switch (i_chipId)
+    {
+        case CID_P10:
+            if ( (P10_RID::RING_PROPERTIES[i_ringId].ringClass & RCLS_MVPD_PDG_RING) ==
+                 RCLS_MVPD_PDG_RING ||
+                 (P10_RID::RING_PROPERTIES[i_ringId].ringClass & RCLS_MVPD_PDR_RING) ==
+                 RCLS_MVPD_PDR_RING )
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
+        default:
+            MY_ERR("ringid_is_mvpd_ring(): Unsupported chipId (=%d) supplied\n", i_chipId);
+            return UNDEFINED_BOOLEAN;
+    }
+
+    return UNDEFINED_BOOLEAN;
+}
+
+
 #if !defined(__PPE__) && !defined(NO_STD_LIB_IN_PPE) && !defined(__HOSTBOOT_MODULE) && !defined(FIPSODE)
 
 // Mapping from the shared [initCompiler] chipId to the chipType name
