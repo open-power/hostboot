@@ -46,6 +46,19 @@ enum
 };
 
 /**
+* @brief Enumerations for common SPD values
+*/
+enum
+{
+    MEM_DDR3 = 0xB,
+    MEM_DDR4 = 0xC,
+    DDR3_SPD_SIZE = 256,
+    DDR4_SPD_SIZE = 512,
+    DDIMM_DDR4_SPD_SIZE = 640,
+    MEM_DDIMM = 0xA
+};
+
+/**
 * @brief Enumerations for fields that can be accessed in the SPD
 */
 enum
