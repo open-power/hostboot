@@ -729,6 +729,8 @@ void  obus_clearMaskFail( errlHndl_t &io_errl, TargetHandle_t &i_rxTrgt,
     PRDF_ASSERT( NULL != i_txTrgt );
     PRDF_ASSERT( NULL != io_errl );
 
+#ifdef __HOSTBOOT_MODULE // register writes not allowed on FSP
+
     uint32_t         l_rc = SUCCESS;
     ExtensibleChip  *l_rxChip =
                             (ExtensibleChip *)systemPtr->GetChip( i_rxTrgt );
@@ -789,6 +791,8 @@ void  obus_clearMaskFail( errlHndl_t &io_errl, TargetHandle_t &i_rxTrgt,
         }
 
     } while (0);
+
+#endif // __HOSTBOOT_MODULE
 
 } // end obus_clearMaskFail
 
