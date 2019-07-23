@@ -81,6 +81,7 @@ my %maxInstance = (
     "MCC"           => 8,
     "OMI"           => 16,
     "OCMB_CHIP"     => 16,
+    "MEM_PORT"      => 16,
     "DDIMM"         => 16,
     "DMI"           => 8,
     "OCC"           => 1,
@@ -658,6 +659,7 @@ sub buildAffinity
     my $mcc             = -1;
     my $omi             = -1;
     my $ocmb            = -1;
+    my $mem_port        = -1;
     my $i2c_mux         = -1;
     my $dimm            = -1;
     my $pmic            = -1;
@@ -1005,6 +1007,19 @@ sub buildAffinity
                     }
                 }
             }
+        }
+        elsif ($type eq "MEM_PORT")
+        {
+            my $parent = $self->getTargetParent($target);
+            my $ocmb_num = $self->getAttribute($parent, "POSITION");
+            my $ocmb_affinity = $self->getAttribute($parent, "AFFINITY_PATH");
+            $self->setAttribute($target, "AFFINITY_PATH", "$ocmb_affinity/mem_port-0");
+            my $ocmb_phys = $self->getAttribute($parent, "PHYS_PATH");
+            $self->setAttribute($target, "PHYS_PATH", "$ocmb_phys/mem_port-0");
+            $self->setHuid($target, $sys_pos, $node);
+            $self->deleteAttribute($target, "EXP_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT");
+
+            $self->{targeting}{SYS}[0]{NODES}[$node]{OCMB_CHIPS}[$ocmb_num]{MEM_PORTS}[0]{KEY} = $target;
         }
         # Witherspoon has its own DIMM parsing mechanism so don't want to
         # interfere with it
@@ -1805,6 +1820,7 @@ sub getPervasiveForUnit
 
     return $pervasive
 }
+
 sub processMcaDimms
 {
     my $self        = shift;
