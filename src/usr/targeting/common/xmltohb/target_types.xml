@@ -159,6 +159,13 @@
     <parent>chip-tpm-cectpm</parent>
   </targetType>
 
+  <!-- This special I2C_MUX target adapts the MRW to Hostboot's specific I2C_MUX
+    target. All attributes should be declared against the parent target -->
+  <targetType>
+    <id>chip-PCA9847</id>
+    <parent>i2c_mux_pca9847</parent>
+  </targetType>
+
   <!-- This special UCD target adapts the MRW to Hostboot's specific UCD
       target.  All attributes should be declared against the parent
       target. -->
@@ -1360,8 +1367,7 @@
     </attribute>
   </targetType>
 
-  <!-- This special I2C_MUX target adapts the MRW to Hostboot's specific I2C_MUX
-    target. All attributes should be declared against the parent target -->
+  <!-- Represents a I2C Mux device that is compatible with the PCA9847 spec -->
   <targetType>
     <id>i2c_mux_pca9847</id>
     <parent>chip</parent>
