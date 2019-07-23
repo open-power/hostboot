@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -90,6 +90,7 @@ namespace SBE_MSG
         PASSTHRU_HBRT_GET_PSTATE    = 0x00E10001, // HBRT Get PState Table
         PASSTHRU_HBRT_OVERRIDE_ATTR = 0x00E10002, // HBRT Apply Override
                                                   // attributes
+        PASSTHRU_HBRT_NVDIMM_OP     = 0x00E10003, // HBRT NVDIMM operation
     };
 
 

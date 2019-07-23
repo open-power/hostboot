@@ -438,8 +438,9 @@ void set_ATTR_NVDIMM_ENCRYPTION_ENABLE(
  *        The current order is: disarm -> disable encryption -> remove keys ->
  *                              enable encryption -> arm
  **/
-void doNvDimmOperation(const hostInterfaces::nvdimm_operation_t& i_nvDimmOp)
+int doNvDimmOperation(const hostInterfaces::nvdimm_operation_t& i_nvDimmOp)
 {
+    int rc = 0;
 #ifndef CONFIG_NVDIMM
     TRACFCOMP(g_trac_runtime, ENTER_MRK"doNvDimmOperation: not an "
               "NVDIMM configuration, this call becomes a noop.");
@@ -478,7 +479,7 @@ void doNvDimmOperation(const hostInterfaces::nvdimm_operation_t& i_nvDimmOp)
                                           "HB Target from processor ID 0x%0X, "
                                           "exiting ...",
                                           i_nvDimmOp.procId);
-
+                rc = -1;
                 break;
             }
 
@@ -491,6 +492,7 @@ void doNvDimmOperation(const hostInterfaces::nvdimm_operation_t& i_nvDimmOp)
         {
             TRACFCOMP(g_trac_runtime, "doNvDimmOperation: No NVDIMMs found, "
                                       "exiting ...");
+            rc = -1;
             break;
         }
 
@@ -507,6 +509,7 @@ void doNvDimmOperation(const hostInterfaces::nvdimm_operation_t& i_nvDimmOp)
                     TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
                               "Call to disarm failed. Will not perform any "
                               "more arming/disarming calls, if they exist");
+                    rc = -1;
                     break;
                 }
                 else
@@ -531,6 +534,7 @@ void doNvDimmOperation(const hostInterfaces::nvdimm_operation_t& i_nvDimmOp)
                     // Clear the encryption enable attribute
                     set_ATTR_NVDIMM_ENCRYPTION_ENABLE(0);
 
+                    rc = -1;
                     break;
                 }
                 else
@@ -552,6 +556,7 @@ void doNvDimmOperation(const hostInterfaces::nvdimm_operation_t& i_nvDimmOp)
                     TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
                               "Call to remove keys failed.  Will not perform "
                               "any more arming/disarming calls, if they exist");
+                    rc = -1;
                     break;
                 }
                 else
@@ -575,6 +580,7 @@ void doNvDimmOperation(const hostInterfaces::nvdimm_operation_t& i_nvDimmOp)
                               "Call to generate keys failed, unable to enable "
                               "encryption. Will not perform any more "
                               "arming/disarming calls, if they exist");
+                    rc = -1;
                     break;
                 }
                 else
@@ -586,6 +592,7 @@ void doNvDimmOperation(const hostInterfaces::nvdimm_operation_t& i_nvDimmOp)
                                   "Call to enable encryption failed. "
                                   "Will not perform any more arming/disarming "
                                   "calls, if they exist");
+                        rc = -1;
                         break;
                     }
                     else
@@ -604,6 +611,7 @@ void doNvDimmOperation(const hostInterfaces::nvdimm_operation_t& i_nvDimmOp)
                 {
                     TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
                                               "Call to arm failed.");
+                    rc = -1;
                     break;
                 }
                 else
@@ -621,6 +629,7 @@ void doNvDimmOperation(const hostInterfaces::nvdimm_operation_t& i_nvDimmOp)
             {
                 TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
                                           "Call to do a health check failed.");
+                rc = -1;
                 break;
             }
             else
@@ -640,6 +649,7 @@ void doNvDimmOperation(const hostInterfaces::nvdimm_operation_t& i_nvDimmOp)
 #endif
 
     TRACFCOMP(g_trac_runtime, EXIT_MRK"doNvDimmOperation")
+    return rc;
 }
 
 /**

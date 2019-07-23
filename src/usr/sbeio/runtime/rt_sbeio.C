@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,6 +29,7 @@
 #include <sys/misc.h>
 #include <sbeio/runtime/sbe_msg_passing.H>
 #include <sbeio/runtime/sbeio_attr_override.H>
+#include <sbeio/runtime/sbeio_nvdimm_operation.H>
 #include <sbeio/sbeioreasoncodes.H>
 #include <errno.h>
 #include <errl/errlentry.H>
@@ -782,6 +783,10 @@ namespace RT_SBEIO
 #endif
            SBE_MSG::setProcessCmdFunction(PASSTHRU_HBRT_OVERRIDE_ATTR,
                                           sbeApplyAttrOverrides);
+#ifdef CONFIG_NVDIMM
+           SBE_MSG::setProcessCmdFunction(PASSTHRU_HBRT_NVDIMM_OP,
+                                          sbeNvdimmOperation);
+#endif
         }
     };
 

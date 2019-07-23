@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017,2018
+# Contributors Listed Below - COPYRIGHT 2017,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -37,6 +37,7 @@ include ../common/common.mk
 ## Objects unique to HBRT
 OBJS += rt_sbeio.o
 OBJS += sbeio_attr_override.o
+OBJS += sbeio_nvdimm_operation.o
 OBJS += sbeio_vital_attn.o
 
 ## sbeio_rt's sub directories
