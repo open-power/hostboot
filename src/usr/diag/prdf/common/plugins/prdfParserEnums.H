@@ -109,9 +109,14 @@ enum PositionBounds
 
     MAX_OMI_PER_MCC     = 2,
     MAX_OMI_PER_OMIC    = 3,
+    MAX_OMI_PER_MC      = 8,
+    MAX_OMI_PER_PROC    = MAX_OMI_PER_MC * MAX_MC_PER_PROC,
 
     MAX_OCMB_PER_OMI    = 1,
     MAX_OCMB_PER_MCC    = MAX_OCMB_PER_OMI * MAX_OMI_PER_MCC,
+
+    // TODO RTC 210072 - Support multiple ports
+    MAX_PORT_PER_OCMB   = 1,
 
     MAX_SUB_PORT        = 2,
 
