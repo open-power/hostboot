@@ -555,10 +555,11 @@ namespace Bootloader{
                 writeScratchReg(MMIO_SCRATCH_HOSTBOOT_ACTIVE,
                                 hostboot_string);
 
-                //Determine if P9N or P9C and apply URMOR hack
+                //All variants of P9 need to apply URMOR hack
                 uint64_t l_urmor_hack_required = 0x0;
                 PVR_t l_pvr(getPVR());
-                if((l_pvr.chipFamily == PVR_t::P9_ALL))
+                if((l_pvr.chipFamily == PVR_t::P9_ALL)
+                   ||((l_pvr.chipFamily == PVR_t::P9_AXONE)))
                 {
                     l_urmor_hack_required = 1;
                 }
