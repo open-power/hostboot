@@ -213,7 +213,7 @@ namespace PARTIAL_GOOD
         return it->model_mask;
     }
 
-    const PartialGoodRule::specialRuleFuncPtr_t NO_SPECIAL_RULE = nullptr;
+    constexpr PartialGoodRule::specialRuleFuncPtr_t NO_SPECIAL_RULE = nullptr;
 
     constexpr PartialGoodRule::PartialGoodRule(const TARGETING::TYPE i_type)
         : iv_type(i_type),

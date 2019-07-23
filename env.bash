@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2017
+# Contributors Listed Below - COPYRIGHT 2010,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -22,6 +22,7 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
 ROOTDIR=.
 
 if [ -e ./customrc ]; then
@@ -32,8 +33,8 @@ if [ -n "${OPENPOWER_BUILD}" ]; then
     export SKIP_BINARY_FILES=1
     export JAILCMD=""
 else
+    export CROSS_PREFIX=${CROSS_PREFIX:-/opt/mcp/shared/powerpc64-gcc-20190822/bin/powerpc64le-buildroot-linux-gnu-}
     export FAKEROOT=${FAKEROOT:-/opt/mcp/shared/powerpc64-gcc-20150516}
-    export CROSS_PREFIX=${CROSS_PREFIX:-${FAKEROOT}/wrappers/powerpc64-unknown-linux-gnu-}
     export HOST_PREFIX=${HOST_PREFIX:-${FAKEROOT}/wrappers/x86_64-pc-linux-gnu-}
     export PATH=${FAKEROOT}/wrappers:${PATH}
 fi
