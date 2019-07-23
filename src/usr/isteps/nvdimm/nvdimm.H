@@ -277,6 +277,9 @@ enum i2cReg : uint16_t
     TYPED_BLOCK_DATA_OFFSET = 0x3E0,
     BPM_MAGIC_REG1          = 0x430,
     BPM_MAGIC_REG2          = 0x431,
+    SCAP_STATUS             = 0x432,
+    SCAP_REG                = 0x434,
+    SCAP_DATA               = 0x435,
     I2C_REG_PROTECT         = 0x43D,
     BPM_REG_CMD             = 0x440,
     BPM_CMD_STATUS          = 0x441,
@@ -388,6 +391,36 @@ struct nvdimmKeyData_t
     uint8_t ek[ENC_KEY_SIZE];   // Erase Key (EK)
     uint8_t ak[ENC_KEY_SIZE];   // Access Key (AK)
 };
+
+struct scap_status_bits
+{
+    uint8_t Reserved1       : 1; // Bit 7
+    uint8_t Bpm_Bsl_Mode    : 1; // Bit 6
+    uint8_t Reserved2       : 1; // Bit 5
+    uint8_t Present         : 1; // Bit 4
+    uint8_t Delay           : 1; // Bit 3
+    uint8_t Error           : 1; // Bit 2
+    uint8_t Busy            : 1; // Bit 1
+    uint8_t Enable          : 1; // Bit 0
+} PACKED;
+
+/**
+ * @brief Union simplifying manipulation of SCAP_STATUS bits
+ */
+union scap_status_union
+{
+    uint8_t full;
+    scap_status_bits bit;
+
+    /**
+     *  @brief Constructor
+     */
+    scap_status_union()
+    : full(0)
+    {}
+} PACKED;
+
+typedef scap_status_union scap_status_register_t;
 
 /**
  * @brief Wrapper to call deviceOp to read the NV controller via I2C

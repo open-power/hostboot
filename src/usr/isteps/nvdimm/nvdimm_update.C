@@ -2037,7 +2037,7 @@ bool NvdimmsUpdate::runUpdate(void)
                     TRACFCOMP(g_trac_nvdimm,
                               "Check/Update %d 32GB_TYPE NVDIMMs' BPM",
                               v_NVDIMM_32GB_list.size());
-                    //@TODO RTC 210367 Add calls into bpm_update.C code.
+                    //@TODO RTC 212448 Add calls into bpm_update.C code.
                 }
                 else if ((  lid.id == NVDIMM_16GB_BPM_FW_LIDID)
                         || (lid.id == NVDIMM_16GB_BPM_CONFIG_LIDID))
@@ -2045,7 +2045,7 @@ bool NvdimmsUpdate::runUpdate(void)
                     TRACFCOMP(g_trac_nvdimm,
                               "Check/Update %d 16GB_TYPE NVDIMMs' BPM",
                               v_NVDIMM_16GB_list.size());
-                    //@TODO RTC 210367 Add calls into bpm_update.C code.
+                    //@TODO RTC 212448 Add calls into bpm_update.C code.
                 }
                 else if (lid.id != NVDIMM_SIGNATURE_LIDID)
                 {
@@ -2056,6 +2056,7 @@ bool NvdimmsUpdate::runUpdate(void)
                 }
             }
 
+            // @TODO RTC 212448 Add call to perform BPM updates
             // Destructor automatically unloads the NVDIMM flash binary
         }
         else
