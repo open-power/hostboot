@@ -37,8 +37,7 @@ enum SYSPHASE
 {
     SYSPHASE_HB_SBE = 0,
     SYSPHASE_RT_QME = 1,
-    SYSPHASE_RT_XGPE = 2,
-    NOOF_SYSPHASES = 3,
+    NOOF_SYSPHASES  = 2,
 };
 
 enum MvpdRingStatus
@@ -85,7 +84,6 @@ typedef fapi2::ReturnCode (*p10_ipl_customize_FP_t) (
     void*     io_ringSectionBuf,
     uint32_t& io_ringSectionBufSize,
     uint8_t   i_sysPhase,
-    uint8_t   i_modeBuild,
     void*     i_ringBuf1,
     uint32_t  i_ringBufSize1,
     void*     i_ringBuf2,
@@ -101,54 +99,53 @@ extern "C"
 ///
 /// @param[in] i_proc_target             => Processor chip target
 /// @param[in] i_hwImage                 => HW image
-/// @param[in/out] io_image              => Pointer to an in-memory image
+/// @param[in/out] io_image              => Pointer to SBE image
 ///                                         HB_SBE:
-///                                             In:  SBE image
-///                                             Out: Seeprom image
-///                                         RT_{CME,SGPE}:
-///                                             In:  HW image
-///                                             Out: HW image
-/// @param[in/out] io_imageSize          => Size of image
+///                                             In:  SBE [ringless] DD specific image
+///                                             Out: Customized SBE image
+///                                         RT_QME:
+///                                             In:  Undefined
+///                                             Out: Undefined
+/// @param[in/out] io_imageSize          => Size of SBE image
 ///                                         HB_SBE:
 ///                                             In:  >=MAX_SBE_SEEPROM_SIZE
 ///                                             Out: Final size
-///                                         RT_{CME,SGPE}:
-///                                             In:  Size of HW image
-///                                             Out: Unchanged
+///                                         RT_QME:
+///                                             In:  Undefined
+///                                             Out: Undefined
 /// @param[in/out] io_ringSectionBuf     => Pointer to an in-memory ring section
 ///                                         buffer
 ///                                         HB_SBE:
 ///                                             Used as temporary image work buffer
-///                                             In:  Undefined
+///                                             In:  Caller supplied buffer
 ///                                             Out: Undefined
-///                                         RT_{CME,SGPE}:
-///                                             In:  Undefined
-///                                             Out: Updated .rings section
+///                                         RT_QME:
+///                                             In:  Caller supplied buffer
+///                                             Out: Customized QME .rings section
 /// @param[in/out] io_ringSectionBufSize => In: Size of ring section buffer
 ///                                         HB_SBE:
-///                                             In:  Input value of io_imageSize
-///                                             Out: Final size
-///                                         RT_{CME,SGPE}:
 ///                                             In:  >=MAX_SBE_SEEPROM_SIZE
 ///                                             Out: Final size
-/// @param[in] i_sysPhase                => ={HB_SBE, RT_QME, RT_XGPE}
-/// @param[in] i_modeBuild               => ={IPL, REBUILD} - Not used in P9
+///                                         RT_QME:
+///                                             In:  >=MAX_SBE_SEEPROM_SIZE
+///                                             Out: Final size
+/// @param[in] i_sysPhase                => ={HB_SBE, RT_QME}
 /// @param[in] i_ringBuf1                => Caller supplied in-memory buffer
 ///                                         for VPD rings
-/// @param[in] i_ringBufSize1            => Max size of VPD ring buffer
+/// @param[in] i_ringBufSize1            => Max size of ring buffer
 ///                                         (Should equal MAX_RING_BUF_SIZE)
 /// @param[in] i_ringBuf2                => Caller supplied in-memory buffer
-///                                         for overlay rings
-/// @param[in] i_ringBufSize2            => Max size of overlay ring buffer
+///                                         for dynamic and overlays rings
+/// @param[in] i_ringBufSize2            => Max size of ring buffer
 ///                                         (Should equal MAX_RING_BUF_SIZE)
 /// @param[in] i_ringBuf3                => Caller supplied in-memory buffer
 ///                                         to hold scratchpad rings
-/// @param[in] i_ringBufSize3            => Max size of overlay ring buffer
+/// @param[in] i_ringBufSize3            => Max size of ring buffer
 ///                                         (Should equal MAX_RING_BUF_SIZE)
 /// @param[in/out] io_bootCoreMask       => In: Mask of the desired boot cores
-///                                         Out: Actual boot cores
+///                                         Out: Actual boot cores filled
 ///                                         (Only used in HB_SBE sysPhase)
-///                                         (Bits(8:31) = EC00:EC23)
+///                                         (Bits(0:31) = EC00:EC31)
 ///
 /// @return FAPI_RC_SUCCESS if the customization was successful
 ///
@@ -160,7 +157,6 @@ extern "C"
         void*     io_ringSectionBuf,
         uint32_t& io_ringSectionBufSize,
         uint8_t   i_sysPhase,
-        uint8_t   i_modeBuild,
         void*     i_ringBuf1,
         uint32_t  i_ringBufSize1,
         void*     i_ringBuf2,
@@ -179,7 +175,6 @@ extern "C" {
         void*     io_ringSectionBuf,
         uint32_t& io_ringSectionBufSize,
         uint8_t   i_sysPhase,
-        uint8_t   i_modeBuild,
         void*     i_ringBuf1,
         uint32_t  i_ringBufSize1,
         void*     i_ringBuf2,

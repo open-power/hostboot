@@ -842,7 +842,6 @@ fapi2::ReturnCode buildQmeRing( CONST_FAPI2_PROC& i_procTgt, void * const i_pIma
                                  i_ringData.iv_pRingBuffer,
                                  i_ringData.iv_ringBufSize,
                                  SYSPHASE_RT_QME,
-                                 0, //Unused parameter
                                  i_ringData.iv_pWorkBuf1,
                                  i_ringData.iv_sizeWorkBuf1,
                                  i_ringData.iv_pWorkBuf2,

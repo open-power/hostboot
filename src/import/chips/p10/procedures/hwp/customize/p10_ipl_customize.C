@@ -1432,15 +1432,14 @@ ReturnCode p10_ipl_customize (
     uint32_t& io_imageSize,             // In: Max, Out: Actual
     void*     io_ringSectionBuf,
     uint32_t& io_ringSectionBufSize,    // In: Max, Out: Actual
-    uint8_t   i_sysPhase,
-    uint8_t   i_modeBuild,
+    uint8_t   i_sysPhase,               // {HB_SBE,RT_QME}
     void*     i_ringBuf1,
     uint32_t  i_ringBufSize1,
     void*     i_ringBuf2,
     uint32_t  i_ringBufSize2,
     void*     i_ringBuf3,
     uint32_t  i_ringBufSize3,
-    uint32_t& io_bootCoreMask )         // Bits(8:31) = EC00:EC23
+    uint32_t& io_bootCoreMask )         // Bits(0:31) = EC00:EC31
 {
 #ifndef WIN32
     fapi2::ReturnCode   l_fapiRc = fapi2::FAPI2_RC_SUCCESS;
@@ -1464,7 +1463,7 @@ ReturnCode p10_ipl_customize (
     uint32_t        l_maxRingSectionSize;
     uint32_t        l_sectionOffset = 1;
     uint32_t        attrMaxSbeSeepromSize = 0;
-    uint32_t        l_requestedBootCoreMask = (i_sysPhase == SYSPHASE_HB_SBE) ? io_bootCoreMask : 0x00FFFFFF;
+    uint32_t        l_requestedBootCoreMask = (i_sysPhase == SYSPHASE_HB_SBE) ? io_bootCoreMask : 0xFFFFFFFF;
     uint8_t         attrDdLevel = UNDEFINED_DD_LEVEL; // Used for host services
     uint32_t        l_sizeMvpdDDField = 0;
     uint8_t*        l_decimalDDData = nullptr;
@@ -1489,7 +1488,7 @@ ReturnCode p10_ipl_customize (
     //-------------------------------------------
 
     FAPI_ASSERT( i_hwImage != NULL &&
-                 io_image != NULL &&
+                 (io_image != NULL || i_sysPhase == SYSPHASE_RT_QME) && // RT_QME ignores io_image
                  io_ringSectionBuf != NULL &&
                  i_ringBuf1 != NULL &&
                  i_ringBuf2 != NULL &&
@@ -1516,20 +1515,30 @@ ReturnCode p10_ipl_customize (
                  (uintptr_t)i_ringBuf2,
                  (uintptr_t)i_ringBuf3 );
 
-    l_rc = p9_xip_image_size(io_image, &l_inputImageSize);
+    if (i_sysPhase == SYSPHASE_HB_SBE)
+    {
+        l_rc = p9_xip_image_size(io_image, &l_inputImageSize);
 
-    FAPI_ASSERT( l_rc == 0,
-                 fapi2::XIPC_XIP_API_MISC_ERROR().
-                 set_CHIP_TARGET(i_procTarget).
-                 set_XIP_RC(l_rc).
-                 set_OCCURRENCE(1),
-                 "p9_xip_image_size() failed (1) w/rc=0x%08X",
-                 (uint32_t)l_rc );
+        FAPI_ASSERT( l_rc == 0,
+                     fapi2::XIPC_XIP_API_MISC_ERROR().
+                     set_CHIP_TARGET(i_procTarget).
+                     set_XIP_RC(l_rc).
+                     set_OCCURRENCE(1),
+                     "p9_xip_image_size() failed (1) w/rc=0x%08X",
+                     (uint32_t)l_rc );
+
+        FAPI_DBG("Input image size: %d", l_inputImageSize);
+    }
+    else
+    {
+        l_inputImageSize = 0;    // For RT_QME there is no separate input PPE image
+    }
 
     // Check that buffer sizes are > or == to some minimum sizes. More precise size checks
     //   later for each sysPhase. Neither io_imageSize nor io_ringSectionBufSize are
     //   subject to attrMaxSbeSeepromSize adjust yet, since this is sysPhase dependent.
-    FAPI_ASSERT( (io_imageSize >= l_inputImageSize || io_imageSize >= MAX_SEEPROM_IMAGE_SIZE) &&
+    FAPI_ASSERT( ( io_imageSize >= MAX_SEEPROM_IMAGE_SIZE ||
+                   i_sysPhase == SYSPHASE_RT_QME ) && // RT_QME ignores io_image
                  io_ringSectionBufSize >= MAX_SEEPROM_IMAGE_SIZE &&
                  i_ringBufSize1 == MAX_RING_BUF_SIZE &&
                  i_ringBufSize2 == MAX_RING_BUF_SIZE &&
@@ -1557,9 +1566,14 @@ ReturnCode p10_ipl_customize (
                  (uintptr_t)i_ringBufSize2,
                  (uintptr_t)i_ringBufSize3 );
 
-    FAPI_DBG("Input image size: %d", l_inputImageSize);
 
-    // First, determine the DD level
+    //-------------------------------------------
+    // Verify that platform and Mvpd agree on:
+    // - DD level
+    // - Chip name (e.g., p9 or p10)
+    //-------------------------------------------
+
+    // Get platform DD level
     l_fapiRc = FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, i_procTarget, attrDdLevel);
 
     FAPI_ASSERT( l_fapiRc == fapi2::FAPI2_RC_SUCCESS,
@@ -1568,9 +1582,9 @@ ReturnCode p10_ipl_customize (
                  set_OCCURRENCE(1),
                  "FAPI_ATTR_GET(ATTR_EC) failed." );
 
-    FAPI_DBG("attrDdLevel (for DD level .rings) = 0x%x", attrDdLevel);
+    FAPI_DBG("Platform DD level = 0x%x", attrDdLevel);
 
-    //Fetching the chip name
+    // Get platform chip name
     l_fapiRc = FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, i_procTarget, l_chipName);
 
     FAPI_ASSERT( l_fapiRc == fapi2::FAPI2_RC_SUCCESS,
@@ -1579,9 +1593,9 @@ ReturnCode p10_ipl_customize (
                  set_OCCURRENCE(1),
                  "FAPI_ATTR_GET(ATTR_NAME) failed." );
 
-    FAPI_DBG("chipName (from HW image .rings) = 0x%x", l_chipName);
+    FAPI_DBG("Platform chip name = 0x%x", l_chipName);
 
-    //Fetching DD version from MVPD file
+    // Get Mvpd DD level
     FAPI_TRY(getMvpdField(fapi2::MVPD_RECORD_CRP0,
                           fapi2::MVPD_KEYWORD_DD,
                           i_procTarget,
@@ -1631,7 +1645,8 @@ ReturnCode p10_ipl_customize (
     //ORed and shifted by 4 bits.
     l_mvpdDD = (((*(l_decimalDDData + 1) * 10 + * (l_decimalDDData + 2)) << 4) |
                 (*(l_decimalDDData + 3) * 10 + * (l_decimalDDData + 4)));
-    FAPI_DBG("l_mvpdDD (DD level fetched from MVPD) is 0x%02x", l_mvpdDD);
+
+    FAPI_DBG("Mvpd DD level = 0x%x", l_mvpdDD);
 
     FAPI_ASSERT((l_mvpdDD == attrDdLevel),
                 fapi2::XIPC_DD_LEVEL_MISMATCH_ERROR().
@@ -1650,7 +1665,7 @@ ReturnCode p10_ipl_customize (
                 attrDdLevel, l_mvpdDD, *(l_fullDDData + 1), *(l_fullDDData + 2),
                 *(l_fullDDData + 3), *(l_fullDDData + 4), l_sizeMvpdDDField);
 
-    //Fetching chip name from MVPD
+    // Get Mvpd chip name
     FAPI_TRY( getMvpdField(fapi2::MVPD_RECORD_CRP0,
                            fapi2::MVPD_KEYWORD_CI,
                            i_procTarget,
@@ -1669,7 +1684,8 @@ ReturnCode p10_ipl_customize (
               "getMvpdField failed for CRP0/CI (2) w/rc=0x%08x and"
               "chipname data size is of %u bytes",
               (uint64_t)fapi2::current_err, l_sizeMvpdCIField);
-    FAPI_DBG("Chip name fetched from MVPD is 0x%0x", *l_fullCIData);
+
+    FAPI_DBG("Mvpd chip name = 0x%x", *l_fullCIData);
 
     FAPI_ASSERT((*(l_fullCIData) == P10_MVPD_CHIP_NAME) && (l_chipName == CID_P10),
                 fapi2::XIPC_CHIPNAME_MISMATCH_ERROR().
@@ -1869,7 +1885,8 @@ ReturnCode p10_ipl_customize (
 
 
     ///////////////////////////////////////////////////////////////////////////
-    // CUSTOMIZE item:  Removal of .toc, .fixed_toc and .strings
+    // CUSTOMIZE item:  Removal of .toc, .fixed_toc and .strings and adjustment
+    //                  of max Seeprom image size.
     // System phase:    HB_SBE
     ///////////////////////////////////////////////////////////////////////////
 
@@ -1955,96 +1972,106 @@ ReturnCode p10_ipl_customize (
                      "p9_xip_image_size() failed (7) w/rc=0x%08X",
                      (uint32_t)l_rc );
 
-        FAPI_DBG("Image size after XIP section removals: %d", l_currentImageSize);
+        FAPI_IMP("SBE image size after IPL image section removals and empty .rings section: %d",
+                 l_currentImageSize);
+
+        l_imageSizeWithoutRings = l_currentImageSize;
+
+        // Adjust the local size of MAX_SEEPROM_IMAGE_SIZE to accommodate enlarged image for Cronus
+        l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_MAX_SBE_SEEPROM_SIZE, FAPI_SYSTEM, attrMaxSbeSeepromSize);
+
+        FAPI_ASSERT( l_fapiRc2 == fapi2::FAPI2_RC_SUCCESS,
+                     fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
+                     set_CHIP_TARGET(i_procTarget).
+                     set_OCCURRENCE(2),
+                     "FAPI_ATTR_GET(ATTR_MAX_SBE_SEEPROM_SIZE) failed."
+                     " Unable to determine ATTR_MAX_SBE_SEEPROM_SIZE,"
+                     " so don't know what what max image size." );
+
+        if (attrMaxSbeSeepromSize == MAX_SBE_SEEPROM_SIZE)
+        {
+            l_maxImageSize = MAX_SEEPROM_IMAGE_SIZE;
+        }
+        else if (attrMaxSbeSeepromSize > MAX_SBE_SEEPROM_SIZE)
+        {
+            l_maxImageSize = attrMaxSbeSeepromSize;
+        }
+        else
+        {
+            FAPI_ASSERT( false,
+                         fapi2::XIPC_ATTR_MAX_SBE_SEEPROM_SIZE_TOO_SMALL().
+                         set_CHIP_TARGET(i_procTarget).
+                         set_ATTR_MAX_SBE_SEEPROM_SIZE(attrMaxSbeSeepromSize).
+                         set_MAX_SBE_SEEPROM_SIZE(MAX_SBE_SEEPROM_SIZE),
+                         "SBE Seeprom size reported in attribute (=0x%x) is smaller than"
+                         " MAX_SBE_SEEPROM_SIZE (=0x%x)",
+                         attrMaxSbeSeepromSize,
+                         MAX_SBE_SEEPROM_SIZE );
+        }
+
+        FAPI_DBG("Platform adjusted MAX_SEEPROM_IMAGE_SIZE: %d", l_maxImageSize);
+
+        // Make sure current image size isn't already too big for Seeprom
+        FAPI_ASSERT( l_currentImageSize <= l_maxImageSize,
+                     fapi2::XIPC_IMAGE_TOO_LARGE().
+                     set_CHIP_TARGET(i_procTarget).
+                     set_IMAGE_SIZE(l_currentImageSize).
+                     set_MAX_IMAGE_SIZE(l_maxImageSize).
+                     set_OCCURRENCE(1),
+                     "Image size before VPD updates (=%d) already exceeds max image size (=%d)",
+                     l_currentImageSize, l_maxImageSize );
+
+        // Test that supplied buffer spaces are big enough to hold max image size
+        FAPI_ASSERT( io_imageSize >= l_maxImageSize,
+                     fapi2::XIPC_INVALID_INPUT_BUFFER_SIZE_PARM().
+                     set_CHIP_TARGET(i_procTarget).
+                     set_INPUT_IMAGE_SIZE(l_inputImageSize).
+                     set_IMAGE_BUF_SIZE(io_imageSize).
+                     set_RING_SECTION_BUF_SIZE(io_ringSectionBufSize).
+                     set_RING_BUF_SIZE1(i_ringBufSize1).
+                     set_RING_BUF_SIZE2(i_ringBufSize2).
+                     set_OCCURRENCE(2),
+                     "One or more invalid input buffer sizes for HB_SBE phase:\n"
+                     "  l_maxImageSize=0x%016llx\n"
+                     "  io_imageSize=0x%016llx\n"
+                     "  io_ringSectionBufSize=0x%016llx\n",
+                     (uintptr_t)l_maxImageSize,
+                     (uintptr_t)io_imageSize,
+                     (uintptr_t)io_ringSectionBufSize );
 
     }
 
 
 
+
     //////////////////////////////////////////////////////////////////////////
-    // CUSTOMIZE item:     Append VPD rings to ring section
+    // CUSTOMIZE item:     Common for all subsequent customization steps
     // System phase:       All phases
-    //------------------------------------------------------------------------
-    // Notes:
-    // Do some sysPhase specific initial operations:
-    // - Set max image size
-    // - Copy image's sysPhase specific [sub-]section into separate ring
-    //   section buffer
-    // - Delete (IPL sysPhase only) .rings, since we need to append later
-    // - Determine if there GPTR support, and overlays support, through Mvpd
     //////////////////////////////////////////////////////////////////////////
 
+    l_fapiRc = FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, i_procTarget, attrDdLevel);
+
+    FAPI_ASSERT( l_fapiRc == fapi2::FAPI2_RC_SUCCESS,
+                 fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
+                 set_CHIP_TARGET(i_procTarget).
+                 set_OCCURRENCE(1),
+                 "FAPI_ATTR_GET(ATTR_EC) failed." );
+
+    FAPI_DBG("attrDdLevel = 0x%x", attrDdLevel);
+
+
+
+
+    //////////////////////////////////////////////////////////////////////////
+    // CUSTOMIZE item:     Extract the DD-specific .rings section from either
+    //                     the SBE or QME embedded image in the HW image.
+    // System phase:       All phases
+    //////////////////////////////////////////////////////////////////////////
 
     switch (i_sysPhase)
     {
 
         case SYSPHASE_HB_SBE:
-
-            FAPI_DBG("Image size w/empty .rings section before any VPD updates: %d", l_currentImageSize);
-
-            l_imageSizeWithoutRings = l_currentImageSize;
-
-            // Adjust the local size of MAX_SEEPROM_IMAGE_SIZE to accommodate enlarged image for Cronus
-            l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_MAX_SBE_SEEPROM_SIZE, FAPI_SYSTEM, attrMaxSbeSeepromSize);
-
-            FAPI_ASSERT( l_fapiRc2 == fapi2::FAPI2_RC_SUCCESS,
-                         fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
-                         set_CHIP_TARGET(i_procTarget).
-                         set_OCCURRENCE(2),
-                         "FAPI_ATTR_GET(ATTR_MAX_SBE_SEEPROM_SIZE) failed."
-                         " Unable to determine ATTR_MAX_SBE_SEEPROM_SIZE,"
-                         " so don't know what what max image size." );
-
-            if (attrMaxSbeSeepromSize == MAX_SBE_SEEPROM_SIZE)
-            {
-                l_maxImageSize = MAX_SEEPROM_IMAGE_SIZE;
-            }
-            else if (attrMaxSbeSeepromSize > MAX_SBE_SEEPROM_SIZE)
-            {
-                l_maxImageSize = attrMaxSbeSeepromSize;
-            }
-            else
-            {
-                FAPI_ASSERT( false,
-                             fapi2::XIPC_ATTR_MAX_SBE_SEEPROM_SIZE_TOO_SMALL().
-                             set_CHIP_TARGET(i_procTarget).
-                             set_ATTR_MAX_SBE_SEEPROM_SIZE(attrMaxSbeSeepromSize).
-                             set_MAX_SBE_SEEPROM_SIZE(MAX_SBE_SEEPROM_SIZE),
-                             "SBE Seeprom size reported in attribute (=0x%x) is smaller than"
-                             " MAX_SBE_SEEPROM_SIZE (=0x%x)",
-                             attrMaxSbeSeepromSize,
-                             MAX_SBE_SEEPROM_SIZE );
-            }
-
-            FAPI_DBG("Platform adjusted MAX_SEEPROM_IMAGE_SIZE: %d", l_maxImageSize);
-
-            // Make sure current image size isn't already too big for Seeprom
-            FAPI_ASSERT( l_currentImageSize <= l_maxImageSize,
-                         fapi2::XIPC_IMAGE_TOO_LARGE().
-                         set_CHIP_TARGET(i_procTarget).
-                         set_IMAGE_SIZE(l_currentImageSize).
-                         set_MAX_IMAGE_SIZE(l_maxImageSize).
-                         set_OCCURRENCE(1),
-                         "Image size before VPD updates (=%d) already exceeds max image size (=%d)",
-                         l_currentImageSize, l_maxImageSize );
-
-            // Test supplied buffer spaces are big enough to hold max image size
-            FAPI_ASSERT( io_imageSize >= l_maxImageSize,
-                         fapi2::XIPC_INVALID_INPUT_BUFFER_SIZE_PARM().
-                         set_CHIP_TARGET(i_procTarget).
-                         set_INPUT_IMAGE_SIZE(l_inputImageSize).
-                         set_IMAGE_BUF_SIZE(io_imageSize).
-                         set_RING_SECTION_BUF_SIZE(io_ringSectionBufSize).
-                         set_RING_BUF_SIZE1(i_ringBufSize1).
-                         set_RING_BUF_SIZE2(i_ringBufSize2).
-                         set_OCCURRENCE(2),
-                         "One or more invalid input buffer sizes for HB_SBE phase:\n"
-                         "  l_maxImageSize=0x%016llx\n"
-                         "  io_imageSize=0x%016llx\n"
-                         "  io_ringSectionBufSize=0x%016llx\n",
-                         (uintptr_t)l_maxImageSize,
-                         (uintptr_t)io_imageSize,
-                         (uintptr_t)io_ringSectionBufSize );
 
             // Setup up nested section ID combination for SBE PPE image
             mainSectionID = P9_XIP_SECTION_HW_SBE;
@@ -2067,23 +2094,111 @@ ReturnCode p10_ipl_customize (
                          " section and ddLevel=0x%x",
                          (uint32_t)l_rc, attrDdLevel );
 
-            io_ringSectionBufSize = iplImgSection.iv_size;
+            break;
 
-            FAPI_ASSERT( io_ringSectionBufSize > 0,
-                         fapi2::XIPC_EMPTY_IMAGE_SECTION().
+        case SYSPHASE_RT_QME:
+
+            // Setup up nested section ID combination for QME PPE image
+            mainSectionID = P9_XIP_SECTION_HW_QME;
+            subSectionID = P9_XIP_SECTION_QME_RINGS;
+
+            l_rc = p9_xip_get_sub_section( io_image,
+                                           mainSectionID,
+                                           subSectionID,
+                                           &iplImgSection,
+                                           attrDdLevel );
+
+            FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS,
+                         fapi2::XIPC_XIP_GET_SECTION_ERROR().
                          set_CHIP_TARGET(i_procTarget).
-                         set_SECTION_ID(P9_XIP_SECTION_SBE_RINGS).
-                         set_DDLEVEL(UNDEFINED_DD_LEVEL).
-                         set_OCCURRENCE(1),
-                         "p9_xip_get_sub_section() returned .sbe.rings size of size zero."
-                         "No TOR. Can't append rings.");
+                         set_XIP_RC(l_rc).
+                         set_SECTION_ID(subSectionID).
+                         set_DDLEVEL(attrDdLevel).
+                         set_OCCURRENCE(4),
+                         "p9_xip_get_sub_section() failed (4) w/rc=0x%08x in sysPhase=%d",
+                         " getting nested PPE image's .rings subSectionID=%d for"
+                         " ddLevel=0x%x",
+                         (uint32_t)l_rc, i_sysPhase, subSectionID, attrDdLevel );
 
-            FAPI_DBG("Size of .rings section before VPD update: %d", io_ringSectionBufSize);
+            break;
+
+        default:
+
+            FAPI_ASSERT( false,
+                         fapi2::XIPC_INVALID_SYSPHASE_PARM().
+                         set_CHIP_TARGET(i_procTarget).
+                         set_SYSPHASE(i_sysPhase).
+                         set_OCCURRENCE(1),
+                         "Caller bug: Caller supplied unsupported value of sysPhase (=%d)",
+                         i_sysPhase );
+
+            break;
+    }
+
+    // Sanity check that the .rings section exists
+    FAPI_ASSERT( iplImgSection.iv_size > 0,
+                 fapi2::XIPC_EMPTY_IMAGE_SECTION().
+                 set_CHIP_TARGET(i_procTarget).
+                 set_SECTION_ID(subSectionID).
+                 set_DDLEVEL(attrDdLevel).
+                 set_OCCURRENCE(3),
+                 "p9_xip_get_sub_section() returned a .rings section of zero size for"
+                 " sysPhase=%d, ddLevel=0x%x, mainSectionID=%d and subSectionID=%d."
+                 " There's no TOR.",
+                 i_sysPhase, attrDdLevel, mainSectionID, subSectionID );
+
+
+
+
+    //////////////////////////////////////////////////////////////////////////
+    // CUSTOMIZE item:     Build up a new ring section in io_ringSectionBuf
+    // System phase:       All phases
+    //////////////////////////////////////////////////////////////////////////
+
+    // 1. tor_skeleton_generation()
+
+
+
+
+    //////////////////////////////////////////////////////////////////////////
+    // CUSTOMIZE item:     Append Dynamic-on-Base rings to io_ringSectionBuf
+    // System phase:       All phases
+    //////////////////////////////////////////////////////////////////////////
+
+    // 2. Get the dynamic ring section here, but no nneed for any additional
+    //    local foo() for this.;
+    //
+    // for (ringId) loop
+    // {
+    //     3. process_dynamic_ring();
+    //     4. tor_append_ring()
+    // }
+
+
+
+
+    //////////////////////////////////////////////////////////////////////////
+    // CUSTOMIZE item:     Append VPD rings to io_ringSectionBuf
+    // System phase:       All phases
+    //------------------------------------------------------------------------
+    // Notes:
+    // Do some sysPhase specific initial operations:
+    // - Determine if there GPTR support, and overlays support, through Mvpd
+    //////////////////////////////////////////////////////////////////////////
+
+    switch (i_sysPhase)
+    {
+
+        case SYSPHASE_HB_SBE:
+
+            FAPI_DBG("Size of SBE .rings section before VPD update: %d", io_ringSectionBufSize);
 
             l_maxRingSectionSize = l_maxImageSize - l_imageSizeWithoutRings;
 
             FAPI_DBG("Max allowable size of .rings section: %d", l_maxRingSectionSize);
 
+//CMO: This memcpy() needs to be removed asap we are able to generate the brand new ring
+//     section from tor_skeleton_generation()
             // Move .rings to the top of ringSectionBuf (which currently holds a copy of the
             //   io_image but which can now be destroyed.)
             memcpy( io_ringSectionBuf,
@@ -2233,66 +2348,12 @@ ReturnCode p10_ipl_customize (
 
         case SYSPHASE_RT_QME:
 
-            FAPI_ASSERT( io_imageSize == l_inputImageSize &&
-                         io_ringSectionBufSize >= MAX_SEEPROM_IMAGE_SIZE, //Not subject to attrMaxSbeSeepromSize adjust
-                         fapi2::XIPC_INVALID_INPUT_BUFFER_SIZE_PARM().
-                         set_CHIP_TARGET(i_procTarget).
-                         set_INPUT_IMAGE_SIZE(l_inputImageSize).
-                         set_IMAGE_BUF_SIZE(io_imageSize).
-                         set_RING_SECTION_BUF_SIZE(io_ringSectionBufSize).
-                         set_RING_BUF_SIZE1(i_ringBufSize1).
-                         set_RING_BUF_SIZE2(i_ringBufSize2).
-                         set_OCCURRENCE(3),
-                         "One or more invalid input buffer sizes for RT_QME phase:\n"
-                         "  l_inputImageSize=0x%016llx\n"
-                         "  io_imageSize=0x%016llx\n"
-                         "  io_ringSectionBufSize=0x%016llx\n",
-                         (uintptr_t)l_inputImageSize,
-                         (uintptr_t)io_imageSize,
-                         (uintptr_t)io_ringSectionBufSize );
+            FAPI_DBG("Size of QME .rings section before VPD update: %d", io_ringSectionBufSize);
 
             l_maxRingSectionSize = io_ringSectionBufSize;
 
-
-            //
-            // Next, get the DD level specific set of QME rings from the HW image.
-            //
-
-            // Setup up nested section ID combination for current PPE image
-            mainSectionID = P9_XIP_SECTION_HW_QME;
-            subSectionID = P9_XIP_SECTION_QME_RINGS;
-
-            l_rc = p9_xip_get_sub_section( io_image,
-                                           mainSectionID,
-                                           subSectionID,
-                                           &iplImgSection,
-                                           attrDdLevel );
-
-            FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS,
-                         fapi2::XIPC_XIP_GET_SECTION_ERROR().
-                         set_CHIP_TARGET(i_procTarget).
-                         set_XIP_RC(l_rc).
-                         set_SECTION_ID(subSectionID).
-                         set_DDLEVEL(attrDdLevel).
-                         set_OCCURRENCE(4),
-                         "p9_xip_get_sub_section() failed (4) w/rc=0x%08x in sysPhase=%d",
-                         " getting nested PPE image's .rings subSectionID=%d for"
-                         " ddLevel=0x%x",
-                         (uint32_t)l_rc, i_sysPhase, subSectionID, attrDdLevel );
-
-            FAPI_ASSERT( iplImgSection.iv_size > 0,
-                         fapi2::XIPC_EMPTY_IMAGE_SECTION().
-                         set_CHIP_TARGET(i_procTarget).
-                         set_SECTION_ID(subSectionID).
-                         set_DDLEVEL(attrDdLevel).
-                         set_OCCURRENCE(3),
-                         "p9_xip_get_sub_section() returned a ring section of zero size for"
-                         " sysPhase=%d, ddLevel=0x%x, mainSectionID=%d and subSectionID=%d."
-                         " There's no TOR. We cannot append rings.",
-                         i_sysPhase, attrDdLevel, mainSectionID, subSectionID );
-
-            io_ringSectionBufSize = iplImgSection.iv_size;
-
+//CMO: This memcpy() needs to be removed asap we are able to generate the brand new ring
+//     section from tor_skeleton_generation()
             memcpy( io_ringSectionBuf,
                     (void*)((uint8_t*)io_image + iplImgSection.iv_offset),
                     io_ringSectionBufSize );
@@ -2354,7 +2415,7 @@ ReturnCode p10_ipl_customize (
                          fapi2::XIPC_INVALID_SYSPHASE_PARM().
                          set_CHIP_TARGET(i_procTarget).
                          set_SYSPHASE(i_sysPhase).
-                         set_OCCURRENCE(1),
+                         set_OCCURRENCE(2),
                          "Caller bug: Caller supplied unsupported value of sysPhase (=%d)",
                          i_sysPhase );
 

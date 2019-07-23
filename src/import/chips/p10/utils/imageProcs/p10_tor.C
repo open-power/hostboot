@@ -111,8 +111,10 @@ int get_ring_from_ring_section( void*           i_ringSection,  // Ring section 
         if ( rc == TOR_INVALID_CHIPLET_TYPE )
         {
             // This is not necessarily a fatal or unacceptable error. For example,
-            // xip_tool will hit this one a lot, so we can't trace out here.
-            // For now, we're just returning TOR_INVALID_CHIPLET_TYPE.
+            // xip_tool and ipl_customize's dynamic customization for QME will hit
+            // this one a lot.  So we can't trace out here in confidence.  For
+            // now, we're just returning TOR_INVALID_CHIPLET_TYPE and leaving it
+            // up to the caller to investigate the rc.
             return rc;
         }
         else
@@ -433,7 +435,17 @@ int tor_get_single_ring ( void*         i_ringSection,  // Ring section ptr
                           io_ringBufSize,
                           i_dbgl );
 
-    if (rc)
+    // Explanation to the "list" of RCs that we exclude from tracing out:
+    // TOR_RING_IS_EMPTY:  Normal scenario (will occur frequently)
+    // TOR_INVALID_CHIPLET_TYPE:  Also somewhat normal scenario since the caller should,
+    //                     in princple, be able to mindlessly request a ringId without
+    //                     having to figure out first if that ringId belongs to a chiplet
+    //                     that is valid for the context. But really this is a gray area.
+    //                     For now, we omit to trace out as we will hit this rc condition
+    //                     in both ipl_image_tool and ipl_customize (RT_QME phase).
+    if ( rc &&
+         rc != TOR_RING_IS_EMPTY &&
+         rc != TOR_INVALID_CHIPLET_TYPE )
     {
         MY_ERR("ERROR: tor_get_single_ring(): tor_access_ring() failed w/rc="
                "0x%08x\n", rc);
