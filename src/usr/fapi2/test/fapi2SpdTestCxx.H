@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,7 @@
 #include <errl/errlentry.H>
 #include <devicefw/driverif.H>
 #include <fapi2_spd_access.H>
+#include <vpd/spdenums.H>
 
 using namespace TARGETING;
 
@@ -105,6 +106,105 @@ class SPDTest: public CxxTest::TestSuite
                     TS_FAIL( "testGetSPD- Failed to read data from DIMM with HUID= 0x%x",
                               TARGETING::get_huid(i_pTarget));
                     break;
+                }
+
+                uint8_t l_memModule = 0x0;
+                size_t l_memSize = sizeof(uint8_t);
+
+                auto l_errl = deviceRead(i_pTarget,
+                                         (void *)&l_memModule,
+                                         l_memSize,
+                                         DEVICE_SPD_ADDRESS(SPD::MODULE_TYPE));
+
+                if ( l_errl )
+                {
+                    TS_FAIL( "testGetSPD- Failed to deviceRead with HUID= 0x%x",
+                              TARGETING::get_huid(i_pTarget));
+                    break;
+                }
+
+                uint8_t l_memGen = 0x0;
+                l_errl = deviceRead(i_pTarget,
+                                         (void *)&l_memGen,
+                                         l_memSize,
+                                         DEVICE_SPD_ADDRESS(SPD::BASIC_MEMORY_TYPE));
+
+                if ( l_errl )
+                {
+                    TS_FAIL( "testGetSPD- Failed to deviceRead with HUID= 0x%x",
+                              TARGETING::get_huid(i_pTarget));
+                    break;
+                }
+
+                auto l_chipModel = i_pTarget->getAttr<TARGETING::ATTR_MODEL>();
+
+                if( l_chipModel == TARGETING::MODEL_AXONE )
+                {
+                    // Assumes Axone is strictly DDR4, so not taking into
+                    // account DDR3 or any other DRAM generation
+                    if( l_memModule == SPD::MEM_DDIMM )
+                    {
+                        if ( l_size != SPD::DDIMM_DDR4_SPD_SIZE )
+                        {
+                            TS_FAIL( "testGetSPD- expected size %d != actual size %d with HUID= 0x%x",
+                                     SPD::DDIMM_DDR4_SPD_SIZE,
+                                     l_size,
+                                     TARGETING::get_huid(i_pTarget));
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        if ( l_size != SPD::DDR4_SPD_SIZE )
+                        {
+                            TS_FAIL( "testGetSPD- expected size %d != actual size %d with HUID= 0x%x",
+                                     SPD::DDR4_SPD_SIZE,
+                                     l_size,
+                                     TARGETING::get_huid(i_pTarget));
+                            break;
+                        }
+                    }
+                }
+                else if ( l_chipModel == TARGETING::MODEL_NIMBUS )
+                {
+                    // Nimbus only suppported DDR4 and SPD size was
+                    // DIMM BASE_MODULE_TYPE agnostic.
+                    if ( l_size != SPD::DDR4_SPD_SIZE )
+                    {
+                            TS_FAIL( "testGetSPD- expected size %d != actual size %d with HUID= 0x%x",
+                                     SPD::DDR4_SPD_SIZE,
+                                     l_size,
+                                     TARGETING::get_huid(i_pTarget));
+                            break;
+                    }
+                }
+                else if( l_chipModel == TARGETING::MODEL_CUMULUS )
+                {
+                    // BASE_MODULE_TYPE (RDIMM, LRDIMM, etc) isn't being
+                    // taken into account because the SPD size isn't dependent
+                    // on it for Cumulus.
+                    if( l_memGen == SPD::MEM_DDR4 )
+                    {
+                        if ( l_size != SPD::DDR4_SPD_SIZE )
+                        {
+                                TS_FAIL( "testGetSPD- expected size %d != actual size %d with HUID= 0x%x",
+                                         SPD::DDR4_SPD_SIZE,
+                                         l_size,
+                                         TARGETING::get_huid(i_pTarget));
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        if ( l_size != SPD::DDR3_SPD_SIZE )
+                        {
+                                TS_FAIL( "testGetSPD- expected size %d != actual size %d with HUID= 0x%x",
+                                         SPD::DDR3_SPD_SIZE,
+                                         l_size,
+                                         TARGETING::get_huid(i_pTarget));
+                                break;
+                        }
+                    }
                 }
 
                 FAPI_DBG("getSPD: SPD data for DIMM with HUID=0x%.8X Size %d Blob %d",

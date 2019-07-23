@@ -72,6 +72,7 @@ namespace fapi2
         MOD_FAPI2_PLAT_GET_MC_PLL_BUCKET            = 0x1D,
         MOD_FAPI2_PLAT_GET_FREQ_MCA_MHZ             = 0x1E,
         MOD_GET_OMI_FREQ_AND_VCO                    = 0x1F,
+        MOD_FAPI2_SPD_ACCESS                        = 0x20,
     };
 
     /**
@@ -143,6 +144,8 @@ namespace fapi2
         RC_NO_MATCHING_FREQ            = HWPF_COMP_ID | 0x31,
         RC_FREQ_LIST_NOT_FOUND         = HWPF_COMP_ID | 0x32,
         RC_PROC_FREQ_MISMATCH          = HWPF_COMP_ID | 0x33,
+
+        RC_INVALID_SPD_DRAM_GEN        = FAPI2_COMP_ID | 0x34,
     };
 
     /**

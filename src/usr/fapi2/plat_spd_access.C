@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,8 @@
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <fapi2_spd_access.H>
+#include <vpd/spdenums.H>
+#include <hwas/common/hwasCallout.H>
 
 namespace fapi2
 {
@@ -49,14 +51,9 @@ fapi2::ReturnCode getSPD(
 {
     FAPI_DBG(ENTER_MRK "getSPD");
 
-    const uint8_t   MEM_DDR3 = 0xB;
-    const uint8_t   MEM_DDR4 = 0xC;
-    const uint32_t  DDR3_KEYWORD_SIZE = 256;
-    const uint32_t  DDR4_KEYWORD_SIZE = 512;
-
-    errlHndl_t l_errl  = NULL;
+    errlHndl_t l_errl  = nullptr;
     fapi2::ReturnCode  l_rc;
-    TARGETING::Target* l_pTarget = NULL;
+    TARGETING::Target* l_pTarget = nullptr;
 
     do
     {
@@ -65,49 +62,101 @@ fapi2::ReturnCode getSPD(
                                                         TARGETING::TYPE_DIMM);
         if (l_errl)
         {
-            FAPI_ERR("getSPD: Error from getTargetingTarget");
+            FAPI_ERR("getSPD: Error from getTargetingTarget for TYPE_DIMM");
             break;
         }
 
         // If the caller passed a nullptr for blob then
         // return size of the SPD
-        if ( o_blob == NULL )
+        if ( o_blob == nullptr )
         {
-            // Get the DDR device type from SPD
-            uint8_t l_memType = 0x0;
-            size_t  l_memSize = sizeof(l_memType);
+            // Get the DRAM generation from SPD
+            uint8_t l_memGen = 0x0;
+            size_t l_memSize = sizeof(l_memGen);
 
             l_errl = deviceRead(l_pTarget,
-                    (void *)&l_memType,
-                    l_memSize,
-                    DEVICE_SPD_ADDRESS(SPD::BASIC_MEMORY_TYPE));
+                                static_cast<void *>(&l_memGen),
+                                l_memSize,
+                                DEVICE_SPD_ADDRESS(SPD::BASIC_MEMORY_TYPE));
 
-            if ( !l_errl )
+            if ( l_errl )
             {
-                if ( l_memType == MEM_DDR3 )
-                {
-                    o_size = DDR3_KEYWORD_SIZE;
-                }
-                else if ( l_memType == MEM_DDR4 )
-                {
-                    o_size = DDR4_KEYWORD_SIZE;
-                }
-                else
-                {
-                    FAPI_ERR("getSPD: Invalid DIMM DDR Type");
-                    break;
-                }
-
-                FAPI_DBG("getSPD: Returning the size of the SPD :%d ", o_size);
+                FAPI_ERR("getSPD: Error from deviceRead for BASIC_MEMORY_TYPE")
+                break;
             }
-        }
+
+            switch(l_memGen)
+            {
+                case SPD::MEM_DDR3:
+                    o_size = SPD::DDR3_SPD_SIZE;
+                    break;
+
+                case SPD::MEM_DDR4:
+                {
+                    uint8_t l_memModule = 0x0;
+
+                    l_errl = deviceRead(l_pTarget,
+                                        static_cast<void *>(&l_memModule),
+                                        l_memSize,
+                                        DEVICE_SPD_ADDRESS(SPD::MODULE_TYPE));
+
+                    if( l_errl )
+                    {
+                        FAPI_ERR("getSPD: Error on deviceRead for MODULE_TYPE");
+                        break;
+                    }
+
+                    if( l_memModule == SPD::MEM_DDIMM )
+                    {
+                        o_size = SPD::DDIMM_DDR4_SPD_SIZE;
+                    }
+                    else
+                    {
+                        o_size = SPD::DDR4_SPD_SIZE;
+                    }
+                }// case MEM_DDR4
+                break;
+
+                default:
+                {
+                    FAPI_ERR("getSPD: Unsupported DIMM DDR Generation");
+
+                    /*@
+                     * @errortype
+                     * @moduleid     MOD_FAPI2_SPD_ACCESS
+                     * @reasoncode   RC_INVALID_SPD_DRAM_GEN
+                     * @userdata1    DDR generation
+                     * @userdata2    HUID of input target
+                     * @devdesc      Bad SPD or unsupported DIMM
+                     * @custdesc     Unsupported DIMM generation
+                     */
+                    l_errl = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            MOD_FAPI2_SPD_ACCESS,
+                            RC_INVALID_SPD_DRAM_GEN,
+                            TARGETING::get_huid(l_pTarget),
+                            l_memGen );
+
+                    l_errl->addHwCallout( l_pTarget,
+                                          HWAS::SRCI_PRIORITY_HIGH,
+                                          HWAS::DELAYED_DECONFIG,
+                                          HWAS::GARD_NULL );
+                }
+                break;
+
+            }// switch
+
+            FAPI_DBG("getSPD: Returning the size of the SPD :%d ", o_size);
+
+        }// endif
         else
         {
+            // Return the entire SPD blob
             l_errl = deviceRead(l_pTarget,
-                    o_blob,
-                    o_size,
-                    DEVICE_SPD_ADDRESS(SPD::ENTIRE_SPD));
-        }
+                                o_blob,
+                                o_size,
+                                DEVICE_SPD_ADDRESS(SPD::ENTIRE_SPD));
+        }// end else
 
         break;
 
@@ -118,7 +167,7 @@ fapi2::ReturnCode getSPD(
         FAPI_ERR("getSPD: Error getting SPD data for HUID=0x%.8X Size %d",
                 TARGETING::get_huid(l_pTarget),o_size);
 
-        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+        l_rc.setPlatDataPtr(reinterpret_cast<void *>(l_errl));
     }
 
     FAPI_DBG("getSPD: SPD data for HUID=0x%.8X Size %d Blob %d",
