@@ -87,4 +87,7 @@ if ($hb_mode == 1) {
     ($hb_masterproc_cecchip).invoke parallel_store SCOM 0x5003B "00000005_00000000" 64
     ($hb_masterproc_cecchip).invoke parallel_store FSIMBOX 0x01 "80000000" 32
     ($hb_masterproc_cecchip).invoke parallel_store FSIMBOX 0x08 "00080000" 32
+
+    # Set the isMaster (24th) bit in Mbox Scratch Reg 6
+    ($hb_masterproc_cecchip).invoke parallel_store SCOM 0x5003D "00000080_00000000" 64
 }

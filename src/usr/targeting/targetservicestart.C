@@ -501,7 +501,7 @@ static void initializeAttributes(TargetService& i_targetService,
             l_scratch5.data32 =
               i_masterScratch[INITSERVICE::SPLESS::MboxScratch5_t::REG_IDX];
 
-            // @TODO RTC: 210612
+            // @TODO RTC: 212818
             // risk level is going away in P10, we need to figure out
             // what to do with this
             if( l_scratch5.deprecated.oldRiskLevel && l_scratch8.scratchRegValid.validHwpCtlFlags)
@@ -515,7 +515,7 @@ static void initializeAttributes(TargetService& i_targetService,
                 l_scratch3.data32 =
                     i_masterScratch[INITSERVICE::SPLESS::MboxScratch3_t::REG_IDX];
 
-                // @TODO RTC: 210612
+                // @TODO RTC: 212818
                 // risk level is going away in P10, need to find a
                 // replacement here
                 l_riskLevel = l_scratch3.fwModeCtlFlags.riskLevel;

@@ -117,11 +117,6 @@ void* call_host_slave_sbe_config(void *io_pArgs)
             "non-master processors even if secure mode.");
     }
 
-    // grab the boot flags from the master proc
-    INITSERVICE::SPLESS::MboxScratch5_t l_scratch5;
-    l_scratch5.data32 = l_scratchRegs[INITSERVICE::SPLESS::MboxScratch5_t::REG_IDX];
-
-
     // execute p9_setup_sbe_config.C for non-primary processor targets
     TARGETING::TargetHandleList l_cpuTargetList;
     getAllChips(l_cpuTargetList, TYPE_PROC);
@@ -137,14 +132,7 @@ void* call_host_slave_sbe_config(void *io_pArgs)
 /* FIXME RTC: 210975
             const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                 l_fapi2_proc_target (l_cpu_target);
-*/
 
-            // @TODO RTC: 210612
-            // mcSyncMode is removed in P10, need to find a
-            // replacement here
-            l_cpu_target->setAttr<ATTR_MC_SYNC_MODE>(l_scratch5.deprecated.mcSyncMode);
-
-/* FIXME RTC: 210975
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                      "Running p9_setup_sbe_config HWP on processor target %.8X",
                      TARGETING::get_huid(l_cpu_target) );

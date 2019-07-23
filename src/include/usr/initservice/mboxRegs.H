@@ -240,7 +240,7 @@ namespace SPLESS
                 DONOTUSE()
                 uint32_t reserved3                   :13;  //15:27 -- Available
 
-                // @TODO RTC: 210612
+                // @TODO RTC: 212818
                 // The riskLevel field is being deprecated in P10 but
                 // is used in targetservicestart.C
                 uint32_t riskLevel                   :4;   //28:31
@@ -275,8 +275,8 @@ namespace SPLESS
                     };
                 } refSpiBusDivider;                  //0:15
 
-                // Maps to ATTR_BOOT_FREQ_MULT
-                uint16_t bootFreqMult           :16; //16:31
+                // Maps to ATTR_CORE_BOOT_FREQ_MHZ
+                uint16_t coreBootFreqMhz        :16; //16:31
             } nestBootFreq;
 
             // This is the structure of this register as used by debug
@@ -319,6 +319,15 @@ namespace SPLESS
             CHIP_CONTAINED  = 2
         };
 
+        enum sbeExPolicy_t
+        {
+            HB_DEFAULT                   = 0,
+            CRONUS_MAX_ACTIVE            = 1,
+            HB_MAX_FOOTPRINT             = 2,
+            HB_MAX_THREADS               = 4,
+            HB_MAX_FOOTPRINT_MAX_THREADS = HB_MAX_FOOTPRINT | HB_MAX_THREADS
+        };
+
         union
         {
             uint32_t data32;
@@ -329,20 +338,35 @@ namespace SPLESS
             {
                 // This is a tri-state variable; the value of 3 has no
                 // meaning.
-                systemIplPhase_t systemIplPhase :2;    //0:1
-
-                // Maps to ATTR_SYS_FORCE_ALL_CORES
-                uint32_t forceSbeToInitAllCores :1;    //2
-
-                // Maps to ATTR_DISABLE_HBBL_VECTORS
-                // @TODO RTC: 210612
-                // Is this needed?
-                uint32_t disableHbblVectors     :1;    //3
+                systemIplPhase_t systemIplPhase :2; //0:1
 
                 DONOTUSE()
-                uint32_t reserved               :4;    //4:7
+                uint32_t reserved1              :1; //2
 
-                uint32_t chipletPllMuxDebugCtl  :24;   //8:31
+                // Maps to ATTR_DISABLE_HBBL_VECTORS
+                uint32_t disableHbblVectors     :1; //3
+
+                // Maps to ATTR_SBE_SELECT_EX_POLICY
+                sbeExPolicy_t sbeSelectExPolicy :3; //4:6
+
+                DONOTUSE()
+                uint32_t reserved2              :5; //7:11
+
+                /* NOTE: bits 12:29 are don't-cares if the chiplet is knocked
+                 * out. Chip-level mux selects are controlled in separate root
+                 * control register */
+
+                uint32_t iohs0Lcpll             :2; //12:13
+                uint32_t iohs1Lcpll             :2; //14:15
+
+                DONOTUSE()
+                uint32_t reserved3              :10;//16:25
+
+                uint32_t pci0Lcpll              :2; //26:27
+                uint32_t pci1Lcpll              :2; //28:29
+
+                DONOTUSE()
+                uint32_t reserved4              :2; //30:31
             } hwpCtlFlags;
 
             // used by istepdispatcher.C to hold debug info during ipl
@@ -360,17 +384,16 @@ namespace SPLESS
                 uint32_t minorStep           :8;    //24:31
             } debug;
 
-            // @TODO RTC: 210612
-            // The following struct is slated to be removed but the
-            // oldRiskLevel and mcSyncMode members are still used
-            // because there are no replacements yet.
+            // @TODO RTC: 212818 The following struct is slated to be removed
+            // but the oldRiskLevel member is still used because there are no
+            // replacements yet.
             struct
             {
                 uint32_t              :1;    //0
                 uint32_t              :1;    //1
                 uint32_t oldRiskLevel :1;    //2
                 uint32_t              :1;    //3
-                uint32_t mcSyncMode   :1;    //4
+                uint32_t              :1;    //4
                 uint32_t              :1;    //5
                 uint32_t              :6;    //6:11
                 uint32_t              :20;   //12:31
@@ -407,37 +430,41 @@ namespace SPLESS
             struct
             {
                 DONOTUSE()                            //       Tracks:
-                uint32_t reserved1               : 8; // 0:7
+                uint32_t reserved1                :8; // 0:7
 
-                uint32_t cpSpreadFilterPllBypass : 1; // 8     ATTR_FILTER_1_BYPASS
-                uint32_t cpFilterPllBypass       : 1; // 9     ATTR_FILTER_2_BYPASS
-                uint32_t ioSpreadPllBypass       : 1; // 10    ATTR_FILTER_3_BYPASS
-                uint32_t ioPllBypass             : 1; // 11    ATTR_FILTER_4_BYPASS
-                uint32_t nestDpllBypass          : 1; // 12    ATTR_NEST_DPLL_BYPASS
-                uint32_t pauDpllBypass           : 1; // 13    ATTR_PAU_DPLL_BYPASS
-                uint32_t allIohsOmiPcieBypass    : 1; // 14    ATTR_IO_TANK_PLL_BYPASS
+                uint32_t forceTodFilterPllBypass  :1; // 8     ATTR_CP_PLLTODFLT_BYPASS
+                uint32_t forceNestFilterPllBypass :1; // 9     ATTR_CP_PLLNESTFLT_BYPASS
+                uint32_t forceIoFilterPllBypass   :1; // 10    ATTR_CP_PLLIOFLT_BYPASS
+                uint32_t
+                   forceIoSpreadSpectrumPllBypass :1; // 11    ATTR_CP_PLLIOSSFLT_BYPASS
+                uint32_t forceNestDpllBypass      :1; // 12    ATTR_NEST_DPLL_BYPASS
+                uint32_t forcePauDpllBypass       :1; // 13    ATTR_PAU_DPLL_BYPASS
+                uint32_t
+                   forceAllIohsOmiPcieBypass      :1; // 14    ATTR_IO_TANK_PLL_BYPASS
 
                 DONOTUSE()
-                uint32_t reserved2               : 1; // 15
+                uint32_t reserved2                :1; // 15
 
-                uint32_t fabricEffTopologyId     : 4; // 16:19 ATTR_FABRIC_EFF_TOPOLOGY_ID
+                uint32_t fabricEffTopologyId      :4; // 16:19 ATTR_FABRIC_EFF_TOPOLOGY_ID
 
                 fabricTopologyMode_t
-                    fabricTopologyMode           : 1; // 20    ATTR_FABRIC_TOPOLOGY_MODE
+                    fabricTopologyMode            :1; // 20    ATTR_FABRIC_TOPOLOGY_MODE
 
                 DONOTUSE()
-                uint32_t reserved3               : 1; // 21
+                uint32_t reserved3                :1; // 21
 
                 fabricBroadcastMode_t
-                    fabricBroadcastMode          : 2; // 22:23 ATTR_FABRIC_BROADCAST_MODE
+                    fabricBroadcastMode           :2; // 22:23 ATTR_FABRIC_BROADCAST_MODE
 
-                uint32_t isSlave                 : 1; // 24    ATTR_PROC_SBE_MASTER_CHIP
-                                                      //       but with inverse polarity
+                // If this is set to 0 then this overrides the external C4 pin
+                // indicating master/slave; if this is set to 1 then use the
+                // external C4 pin to determine whether master or slave
+                uint32_t isMaster                 :1; // 24    ATTR_PROC_SBE_MASTER_CHIP
 
                 DONOTUSE()
-                uint32_t reserved4               : 3; // 25:27
+                uint32_t reserved4                :3; // 25:27
 
-                uint32_t fabricTopologyId        : 4; // 28:31 ATTR_FABRIC_TOPOLOGY_ID
+                uint32_t fabricTopologyId         :4; // 28:31 ATTR_FABRIC_TOPOLOGY_ID
             } masterSlaveNodeChipSel;
         };
     };
@@ -454,19 +481,29 @@ namespace SPLESS
         {
             uint32_t data32;
 
-            // This is the structure of this register according to the
-            // P10 IPL flow doc
+            // This is the structure of this register according to the P10 IPL
+            // flow doc if the chip IS NOT configured in chip-contained mode
             struct
             {
-                // A bit set to 1 means that the part is clock-gated
+                DONOTUSE()
+                uint32_t reserved1           :8; // 0:7
 
-                uint32_t pdlLayer            :8; // 0:7
-                uint32_t ndlLayer            :8; // 8:15
-                uint32_t odlLayer            :8; // 16:23
+                // A bit set to 1 means that the part is power-gated
+                uint32_t ndlLayerMask        :8; // 8:15
 
                 DONOTUSE()
-                uint32_t reserved            :8; // 24:31
+                uint32_t reserved2           :16;// 16:31
             } clockGatedDls;
+
+            // This is the structure of this register according to the P10 IPL
+            // flow doc if the chip IS configured in chip-contained mode
+            struct
+            {
+                // A bitvector of active cores, where bit X indicates whether
+                // core X is active
+                // Maps to ATTR_CHIP_CONTAINED_ACTIVE_CORES_VEC
+                uint32_t activeCoresMask     :32;//0:31
+            } activeCores;
 
             // used by ipc mbox code
             struct
@@ -494,9 +531,6 @@ namespace SPLESS
             // P10 IPL flow doc
             struct
             {
-                // @TODO RTC: 210612
-                // Update these bits to reflect the correct names, and
-                // also add bits for registers 9 and 10 if they go here.
                 uint32_t validFwFunctionalEqEc    :1;  //0
                 uint32_t validSbeI2cBusSpeed      :1;  //1
                 uint32_t validFwMode              :1;  //2
@@ -505,9 +539,19 @@ namespace SPLESS
                 uint32_t validMasterSlaveChipNode :1;  //5
                 uint32_t validDrtmPayloadAddr     :1;  //6
                 uint32_t validBytes               :1;  //7
+                uint32_t validPauMcFreq           :1;  //8
+                uint32_t validIohsPll             :1;  //9
+
+                // TODO: Update these members when registers are named
+                uint32_t validReg11               :1;  //10
+                uint32_t validReg12               :1;  //11
+                uint32_t validReg13               :1;  //12
+                uint32_t validReg14               :1;  //13
+                uint32_t validReg15               :1;  //14
+                uint32_t validReg16               :1;  //15
 
                 DONOTUSE()
-                uint32_t reserved                 :24; //8:31
+                uint32_t reserved                 :16; //16:31
             } scratchRegValid;
 
             // used by ipc mbox code
@@ -535,13 +579,16 @@ namespace SPLESS
             struct
             {
                                                   //       Maps to:
-                uint32_t pauPllFreqMult      :16; //0:15   ATTR_PAU_FREQ_MULT
-                uint32_t mc0PllBucket        :3;  //16:18  ATTR_MC0_PLL_BUCKET
-                uint32_t mc1PllBucket        :3;  //19:21  ATTR_MC1_PLL_BUCKET
-                uint32_t mc2PllBucket        :3;  //22:24  ATTR_MC2_PLL_BUCKET
-                uint32_t mc3PllBucket        :3;  //25:27  ATTR_MC3_PLL_BUCKET
+                uint32_t pauPllFreqMhz       :16; //0:15   ATTR_PAU_FREQ_MHZ
 
-                // @TODO RTC: 210612
+                // These bitfields are the least-significant bits of the array
+                // entries in the attribute that they reflect
+                uint32_t mc0PllBucket        :3;  //16:18  ATTR_MC_PLL_BUCKET[0]
+                uint32_t mc1PllBucket        :3;  //19:21  ATTR_MC_PLL_BUCKET[1]
+                uint32_t mc2PllBucket        :3;  //22:24  ATTR_MC_PLL_BUCKET[2]
+                uint32_t mc3PllBucket        :3;  //25:27  ATTR_MC_PLL_BUCKET[3]
+
+                // @TODO RTC: 212818
                 // Is this needed?
                 uint32_t ndlMeshCtlSetup     :4;  //28:31  ATTR_NDL_MESHCTRL_SETUP
             } pauMcFreq;
@@ -560,21 +607,32 @@ namespace SPLESS
         {
             uint32_t data32;
 
+            // This is the structure of this register if the chip IS NOT
+            // configured in chip-contained mode
             struct
             {
+                // These bitfields are the least-significant bits of the array
+                // entries in the attribute that they reflect
                                                  //       Maps to:
-                uint32_t iohs0PllBucket      :3; //0:2    ATTR_IOHS0_PLL_BUCKET
-                uint32_t iohs1PllBucket      :3; //3:5    ATTR_IOHS1_PLL_BUCKET
-                uint32_t iohs2PllBucket      :3; //6:8    ATTR_IOHS2_PLL_BUCKET
-                uint32_t iohs3PllBucket      :3; //9:11   ATTR_IOHS3_PLL_BUCKET
-                uint32_t iohs4PllBucket      :3; //12:14  ATTR_IOHS4_PLL_BUCKET
-                uint32_t iohs5PllBucket      :3; //15:17  ATTR_IOHS5_PLL_BUCKET
-                uint32_t iohs6PllBucket      :3; //18:20  ATTR_IOHS6_PLL_BUCKET
-                uint32_t iohs7PllBucket      :3; //21:23  ATTR_IOHS7_PLL_BUCKET
-
-                DONOTUSE()
-                uint32_t reserved            :8; //24:31
+                uint32_t iohs0PllBucket      :4; //0:3    ATTR_IOHS_PLL_BUCKET[0]
+                uint32_t iohs1PllBucket      :4; //4:7    ATTR_IOHS_PLL_BUCKET[1]
+                uint32_t iohs2PllBucket      :4; //8:11   ATTR_IOHS_PLL_BUCKET[2]
+                uint32_t iohs3PllBucket      :4; //12:15  ATTR_IOHS_PLL_BUCKET[3]
+                uint32_t iohs4PllBucket      :4; //16:19  ATTR_IOHS_PLL_BUCKET[4]
+                uint32_t iohs5PllBucket      :4; //20:23  ATTR_IOHS_PLL_BUCKET[5]
+                uint32_t iohs6PllBucket      :4; //24:27  ATTR_IOHS_PLL_BUCKET[6]
+                uint32_t iohs7PllBucket      :4; //28:31  ATTR_IOHS_PLL_BUCKET[7]
             } iohsPll;
+
+            // This is the structure of this register if the chip IS configured
+            // in chip-contained mode
+            struct
+            {
+                // A bitvector of chip contained backing caches, where bit X
+                // indicates whether cache X is active
+                // Maps to ATTR_CHIP_CONTAINED_BACKING_CACHES_VEC
+                uint32_t backingCachesMask   :32; //0:31
+            } chipCaches;
         };
     };
 

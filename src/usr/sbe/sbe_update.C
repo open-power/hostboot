@@ -5564,42 +5564,6 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
     }
 
 /////////////////////////////////////////////////////////////////////
-    errlHndl_t getBootMcSyncMode( uint8_t& o_mcSyncMode )
-    {
-        errlHndl_t l_err = nullptr;
-
-        INITSERVICE::SPLESS::MboxScratch5_t l_scratch5;
-
-        TRACFCOMP( g_trac_sbe, ENTER_MRK"Enter getBootMcSyncMode()");
-        do
-        {
-            TARGETING::Target * l_sys = nullptr;
-            (void) TARGETING::targetService().getTopLevelTarget( l_sys );
-            assert( l_sys, "getBootMcSyncMode() system target is NULL");
-
-            TARGETING::ATTR_MASTER_MBOX_SCRATCH_type l_scratchRegs;
-            assert(l_sys->tryGetAttr
-                      <TARGETING::ATTR_MASTER_MBOX_SCRATCH>(l_scratchRegs),
-                   "getBootMcSyncMode() failed to get MASTER_MBOX_SCRATCH");
-            l_scratch5.data32 = l_scratchRegs[INITSERVICE::SPLESS::MboxScratch5_t::REG_IDX];
-
-            // @TODO RTC: 210612
-            // mcSyncMode is removed in P10, need to find a
-            // replacement here
-
-            TRACFCOMP(g_trac_sbe,
-                      "The MC Sync Bit is %d",
-                      l_scratch5.deprecated.mcSyncMode );
-
-            o_mcSyncMode = l_scratch5.deprecated.mcSyncMode;
-
-        } while( 0 );
-        TRACUCOMP(g_trac_sbe,EXIT_MRK "Exit getBootMcSyncMode()");
-
-        return l_err;
-    }
-
-/////////////////////////////////////////////////////////////////////
 errlHndl_t sbeDoReboot( void )
 {
     errlHndl_t err = NULL;

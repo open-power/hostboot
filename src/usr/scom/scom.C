@@ -1199,8 +1199,6 @@ errlHndl_t doMulticastWorkaround( DeviceFW::OperationType i_opType,
 
 #ifndef __HOSTBOOT_RUNTIME
     // Some P9-specific chiplet values to make things more efficient
-    constexpr uint64_t P9_FIRST_MC   = 0x07;
-    constexpr uint64_t P9_LAST_MC    = 0x08;
     constexpr uint64_t P9_FIRST_EQ   = 0x10;
     constexpr uint64_t P9_LAST_EQ    = 0x1F;
     constexpr uint64_t P9_FIRST_EC   = 0x20;
@@ -1323,18 +1321,6 @@ errlHndl_t doMulticastWorkaround( DeviceFW::OperationType i_opType,
                 }
                 auto l_eqNum = 0x10 + l_ecNum/4;
                 if( l_unit == l_eqNum )
-                {
-                    continue;
-                }
-            }
-            if( !g_useMemChiplets
-                && ((l_unit >= P9_FIRST_MC) && (l_unit <= P9_LAST_MC)) )
-            {
-                // Only access the mem chiplets if we're not in async mode
-                //  because we don't start clocks until later on in that case
-                auto l_syncMode =
-                i_target->getAttr<TARGETING::ATTR_MC_SYNC_MODE>();
-                if( l_syncMode == TARGETING::MC_SYNC_MODE_NOT_IN_SYNC )
                 {
                     continue;
                 }

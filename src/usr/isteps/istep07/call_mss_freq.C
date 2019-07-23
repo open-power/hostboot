@@ -215,28 +215,11 @@ void*    call_mss_freq( void *io_pArgs )
         uint32_t l_originalNest = Util::getBootNestFreq();
         #endif
 
-        // Read MC_SYNC_MODE from SBE itself and set the attribute
-        uint8_t l_bootSyncMode = 0;
-        l_err = SBE::getBootMcSyncMode( l_bootSyncMode );
-        if( l_err )
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "Failed getting the boot mc sync mode from the SBE");
-
-            // Create IStep error log and cross reference to error that occurred
-            l_StepError.addErrorDetails( l_err );
-
-            // Commit Error
-            errlCommit( l_err, ISTEP_COMP_ID );
-            break;
-        }
-
 /* FIXME RTC: 210975
 
         TARGETING::Target * l_masterProc = nullptr;
         TARGETING::targetService()
             .masterProcChipTargetHandle( l_masterProc );
-        l_masterProc->setAttr<TARGETING::ATTR_MC_SYNC_MODE>(l_bootSyncMode);
 
         if (l_procModel == TARGETING::MODEL_NIMBUS)
         {
@@ -325,23 +308,16 @@ void*    call_mss_freq( void *io_pArgs )
 
         // TODO RTC: 207596 Get nest boot freq for OMIs
         #ifndef CONFIG_AXONE_BRING_UP
-        // Get latest MC_SYNC_MODE and FREQ_PB_MHZ
-        // FIXME RTC: 210975 This master proc fetch needs to be removed, and
-        // uncommented above
-        TARGETING::Target * l_masterProc = nullptr;
-        TARGETING::targetService()
-            .masterProcChipTargetHandle( l_masterProc );
-        uint8_t l_mcSyncMode = l_masterProc->getAttr<TARGETING::ATTR_MC_SYNC_MODE>();
+        // Get latest FREQ_PB_MHZ
         uint32_t l_newNest = l_sys->getAttr<TARGETING::ATTR_FREQ_PB_MHZ>();
 
         //Trigger sbe update if the nest frequency changed.
-        if( (l_newNest != l_originalNest) || (l_mcSyncMode != l_bootSyncMode) )
+        if( l_newNest != l_originalNest )
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "The nest frequency or sync mode changed!"
-                  " Original Nest: %d New Nest: %d"
-                  " Original syncMode: %d New syncMode: %d",
-                  l_originalNest, l_newNest, l_bootSyncMode, l_mcSyncMode );
+                  "The nest frequency changed!"
+                  " Original Nest: %d New Nest: %d",
+                  l_originalNest, l_newNest );
             if(l_sys->getAttr<TARGETING::ATTR_IS_MPIPL_HB>() == true)
             {
 
@@ -352,19 +328,14 @@ void*    call_mss_freq( void *io_pArgs )
                 * @errortype
                 * @moduleid          MOD_SBE_PERFORM_UPDATE_CHECK
                 * @reasoncode        RC_SBE_UPDATE_IN_MPIPL
-                * @userdata1[0:31]   original mc sync mode
-                * @userdata1[32:63]  new mc sync mode
-                * @userdata2[0:31]   original nest frequency
-                * @userdata2[32:63]  new nest frequency
+                * @userdata1[0:31]   original nest frequency
+                * @userdata1[32:63]  new nest frequency
                 * @devdesc           SBE cannot be reset during MPIPL
                 * @custdesc          Illegal action during boot
                 */
                 l_err = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
                               MOD_SBE_PERFORM_UPDATE_CHECK,
                               RC_SBE_UPDATE_IN_MPIPL,
-                              TWO_UINT32_TO_UINT64(
-                                  TO_UINT32(l_bootSyncMode),
-                                  TO_UINT32(l_mcSyncMode)),
                               TWO_UINT32_TO_UINT64(
                                   l_originalNest, l_newNest));
 

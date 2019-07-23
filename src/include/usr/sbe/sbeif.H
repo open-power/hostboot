@@ -93,15 +93,6 @@ namespace SBE
      */
     errlHndl_t isGoldenSide( bool & o_isGolden );
 
-   /**
-    * @brief Determines if we booted in synchronous memory mode or not
-    *
-    * @param[out] o_mcSyncMode - The MC sync mode the system last booted with.
-    *
-    * @return errlHndl_t Error log handle on error.
-    */
-    errlHndl_t getBootMcSyncMode( uint8_t& o_mcSyncMode );
-
     /**
      * @brief Sets the target processor to boot SBE from the side that is
      *        indicated by the SBE MVPD
