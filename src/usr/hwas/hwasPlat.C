@@ -58,6 +58,9 @@
 #include <i2c/eepromif.H>
 #endif
 
+#include <vpd/vpd_if.H>
+#include <initservice/initserviceif.H>
+
 namespace HWAS
 {
 
@@ -1207,10 +1210,30 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
                       DEVICE_CACHE_EEPROM_ADDRESS(present, EEPROM::VPD_PRIMARY));
             errl = deviceRead(pTarget, &present, presentSize,
                             DEVICE_CACHE_EEPROM_ADDRESS(present, EEPROM::VPD_PRIMARY));
+
             errlCommit(errl, HWAS_COMP_ID);
             // errl is now null, move on to next target
         }
 #endif
+        // FSP normally sets PN/SN so if FSP isn't present, do it here
+        //(after VPD has been cached if caching is enabled)
+        if ((present == true) &&
+            (!INITSERVICE::spBaseServicesEnabled()))
+        {
+            // set part and serial number attributes for current target
+            // (error handling is done internally)
+            if (l_attrType == TYPE_PROC)
+            {
+                VPD::setPartAndSerialNumberAttributes(pTarget);
+            }
+            else if (l_attrType == TYPE_DIMM)
+            {
+                SPD::setPartAndSerialNumberAttributes(pTarget);
+            }
+
+            //otherwise, do nothing.
+        }
+
     } // for pTarget_it
 
     return errl;

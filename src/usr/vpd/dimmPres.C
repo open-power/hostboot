@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -244,13 +244,6 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
 
         if( present && !err )
         {
-            //Fsp sets PN/SN so if there is none, do it here
-            if(!INITSERVICE::spBaseServicesEnabled())
-            {
-                //populate serial and part number attributes
-                SPD::setPartAndSerialNumberAttributes( i_target );
-            }
-
             // Read ATTR_CLEAR_DIMM_SPD_ENABLE attribute
             TARGETING::Target* l_sys = NULL;
             TARGETING::targetService().getTopLevelTarget(l_sys);

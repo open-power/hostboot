@@ -84,8 +84,8 @@ namespace VPD
 
     /**
      * @brief This function sets the part and serial number attributes for
-     *        a given target
-     * @param[in] i_target - the target to set the attributes for
+     *        a given processor target
+     * @param[in] i_target - the processor target to set the attributes for
      *
      */
     void setPartAndSerialNumberAttributes( TARGETING::Target * i_target );
@@ -188,4 +188,14 @@ namespace VPD
 
 }; //end vpd namespace
 
+namespace SPD
+{
+    /**
+     * @brief This function sets the part and serial number attributes for
+     *        a given DIMM target
+     * @param[in] i_target - the DIMM target to set the attributes for
+     *
+     */
+    void setPartAndSerialNumberAttributes( TARGETING::Target * i_target );
+}
 #endif

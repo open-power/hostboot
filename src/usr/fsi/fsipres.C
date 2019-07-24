@@ -205,17 +205,6 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
 
     present = true; // @TODO RTC 212820: Fix this when we have VPD
 
-    if( present )
-    {
-        //Fsp sets PN/SN so if there is none, do it here
-        if(!INITSERVICE::spBaseServicesEnabled())
-        {
-            // set part and serial number attributes for current target
-            VPD::setPartAndSerialNumberAttributes( i_target );
-
-        }
-    }
-
     memcpy(io_buffer, &present, sizeof(present));
     io_buflen = sizeof(present);
 
