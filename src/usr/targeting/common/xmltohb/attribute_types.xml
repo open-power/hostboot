@@ -188,20 +188,6 @@
   </attribute>
 
   <attribute>
-    <id>BRAZOS_RX_FIFO_OVERRIDE</id>
-    <description>
-      Defines where to apply Brazos rx_fifo_final_l2u_dly override settings for SW299500.
-    </description>
-    <simpleType>
-      <uint8_t>
-        <default>0</default>
-      </uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-  </attribute>
-
-  <attribute>
     <description>
         Specifies a target's CEC degraded mode domain.  For example, all
         DIMMs are part of the DIMM CEC degraded mode domain.
@@ -215,6 +201,7 @@
         <id>CDM_DOMAIN</id>
       </enumeration>
     </simpleType>
+    <no_export/>
   </attribute>
 
   <enumerationType>
@@ -669,6 +656,7 @@
     <simpleType>
       <uint32_t/>
     </simpleType>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -709,6 +697,7 @@
     <simpleType>
       <uint32_t/>
     </simpleType>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -719,6 +708,7 @@
     <simpleType>
       <uint32_t/>
     </simpleType>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -729,6 +719,7 @@
     <simpleType>
       <uint32_t/>
     </simpleType>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -739,6 +730,7 @@
     <simpleType>
       <uint32_t/>
     </simpleType>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -2725,6 +2717,7 @@
     <simpleType>
       <uint32_t/>
     </simpleType>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -2735,6 +2728,7 @@
     <simpleType>
       <uint32_t/>
     </simpleType>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -2745,6 +2739,7 @@
     <simpleType>
       <uint32_t/>
     </simpleType>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -2755,34 +2750,7 @@
     <simpleType>
       <uint32_t/>
     </simpleType>
-  </attribute>
-
-  <attribute>
-    <description>Size of IMT IO Region
-        Set by FSP-based tooling
-    </description>
-    <id>IMT_BAR_SIZE</id>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <simpleType>
-      <uint64_t>
-        <default>0x0000000000000000</default>
-      </uint64_t>
-    </simpleType>
-  </attribute>
-
-  <attribute>
-    <description>Base Address of In-Memory Trace Region
-        Set by FSP-based tooling
-    </description>
-    <id>IMT_BASE_ADDR</id>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <simpleType>
-      <uint64_t>
-        <default>0xFFFFFFFFFFFFFFFF</default>
-      </uint64_t>
-    </simpleType>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -2936,6 +2904,7 @@
     <simpleType>
       <uint32_t/>
     </simpleType>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -2946,6 +2915,7 @@
     <simpleType>
       <uint32_t/>
     </simpleType>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -2956,6 +2926,7 @@
     <simpleType>
       <uint32_t/>
     </simpleType>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -2966,6 +2937,7 @@
     <simpleType>
       <uint32_t/>
     </simpleType>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -2976,6 +2948,7 @@
     <simpleType>
       <uint32_t/>
     </simpleType>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -3013,6 +2986,7 @@
     <simpleType>
       <uint8_t/>
     </simpleType>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -7108,6 +7082,7 @@
     <persistency>volatile</persistency>
     <readable/>
     <writeable/>
+    <no_export/>
   </attribute>
 
   <attribute>
