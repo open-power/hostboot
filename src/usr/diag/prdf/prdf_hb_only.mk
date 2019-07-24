@@ -80,6 +80,7 @@ prd_incpath += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 prd_incpath += ${ROOTPATH}/src/import/hwpf/fapi2/include
 prd_incpath += ${ROOTPATH}/src/import/
 prd_incpath += ${ROOTPATH}/src/import/chips/centaur/procedures/hwp/io/
+prd_incpath += ${ROOTPATH}/src/usr/isteps/nvdimm
 
 ################################################################################
 # Hostboot only object files common to both IPL and runtime
