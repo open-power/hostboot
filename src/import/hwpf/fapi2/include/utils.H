@@ -33,6 +33,7 @@
 #include <stdint.h>
 #include <return_code.H>
 #include <target_types.H>
+#include <plat_types.H>
 #include <plat_utils.H>
 
 
@@ -63,6 +64,18 @@ void endian_swap(T& io_input)
         l_varArray[BYTE_SWAP_INDEX] = l_varArray[i];
         l_varArray[i] = l_temp;
     }
+}
+
+///
+/// @brief Macro to check for a given platform.
+/// Platforms are expected to define a constant PLATFORM value in plat_utils.H
+///
+template <PlatformType i_type>
+static inline constexpr bool is_platform()
+{
+    // This assertion makes sure that PLATFORM is a compile time constant
+    static_assert(static_cast<int>(fapi2::PLATFORM) != 0xDEADBEEF, "");
+    return fapi2::PLATFORM == i_type;
 }
 
 #ifndef __PPE__
