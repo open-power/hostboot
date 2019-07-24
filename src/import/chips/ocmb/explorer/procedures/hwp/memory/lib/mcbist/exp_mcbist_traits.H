@@ -205,6 +205,9 @@ class mcbistTraits< mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>
         // LARGEST_ADDRESS. port select (bit0~1) are always 0 so shift 2 more bits.
         static constexpr uint64_t LARGEST_ADDRESS = ~0 >> (mss::mcbist::address::MAGIC_PAD + 2);
 
+        // Length of expected patterns
+        static constexpr uint64_t EXPECTED_PATTERN_SIZE = 4;
+
         // Size
         static constexpr size_t PORTS_PER_MCBIST = mss::exp::MAX_PORT_PER_OCMB;
         static constexpr size_t MAX_DIMM_PER_PORT = mss::exp::MAX_DIMM_PER_PORT;

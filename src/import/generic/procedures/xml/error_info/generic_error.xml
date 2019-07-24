@@ -585,6 +585,18 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_MCBIST_INCORRECT_PATTERN_LENGTH</rc>
+    <description>MCBIST pattern has an incorrect length</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>ACTUAL</ffdc>
+    <ffdc>EXPECTED</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_VOLT_WRONG_NUMBER_OF_VOLTAGES</rc>
     <description>Incorrect number of voltages supplied to set_voltage_attributes function</description>
     <ffdc>VOLT_TARGET</ffdc>

@@ -205,6 +205,9 @@ class mcbistTraits<mss::mc_type::NIMBUS, fapi2::TARGET_TYPE_MCBIST>
         // LARGEST_ADDRESS
         static constexpr uint64_t LARGEST_ADDRESS = ~0 >> mss::mcbist::address::MAGIC_PAD;
 
+        // Length of expected patterns
+        static constexpr uint64_t EXPECTED_PATTERN_SIZE = 4;
+
         // Size
         static constexpr size_t PORTS_PER_MCBIST = mss::PORTS_PER_MCBIST;
         static constexpr size_t MAX_DIMM_PER_PORT = mss::MAX_DIMM_PER_PORT;

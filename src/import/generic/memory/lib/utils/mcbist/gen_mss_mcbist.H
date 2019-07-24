@@ -2867,7 +2867,17 @@ inline fapi2::ReturnCode load_pattern( const fapi2::Target<T>& i_target, const p
 {
     uint64_t l_address = TT::PATTERN0_REG;
 
-    // TODO RTC:155561 Add random pattern support.
+    // Checks that the pattern is of the expected length, if not, error out
+    // Creates helpers for FAPI_ASSERT
+    const auto EXPECTED_SIZE = TT::EXPECTED_PATTERN_SIZE;
+    const auto ACTUAL_SIZE = i_pattern.size();
+    FAPI_ASSERT(EXPECTED_SIZE == ACTUAL_SIZE,
+                fapi2::MSS_MCBIST_INCORRECT_PATTERN_LENGTH()
+                .set_TARGET(i_target)
+                .set_EXPECTED(EXPECTED_SIZE)
+                .set_ACTUAL(ACTUAL_SIZE),
+                "%s pattern expected size %u != actual size %u",
+                mss::c_str(i_target), EXPECTED_SIZE, ACTUAL_SIZE);
 
     // TK: algorithm for patterns which include ECC bits in them
     // Loop over the cache lines in the pattern. We write one half of the cache line
@@ -3296,9 +3306,6 @@ fapi_try_exit:
 template<  mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode load_data_config( const fapi2::Target<T>& i_target, const mcbist::program<MC>& i_program )
 {
-    uint64_t l_data_rotate_cnfg_addr = TT::DATA_ROTATE_CNFG_REG;
-    uint64_t l_data_rotate_seed_addr = TT::DATA_ROTATE_SEED_REG;
-
     // First load the data pattern registers
     FAPI_INF("Loading the data pattern seeds for %s!", mss::c_str(i_target));
     FAPI_TRY( mss::mcbist::load_pattern(i_target, i_program.iv_pattern) );
@@ -3316,8 +3323,8 @@ inline fapi2::ReturnCode load_data_config( const fapi2::Target<T>& i_target, con
     FAPI_TRY( mss::mcbist::load_maint_pattern(i_target, i_program.iv_pattern) );
 
     FAPI_INF("Loading the data rotate config and seeds for %s!", mss::c_str(i_target));
-    FAPI_TRY( fapi2::putScom(i_target, l_data_rotate_cnfg_addr, i_program.iv_data_rotate_cnfg) );
-    FAPI_TRY( fapi2::putScom(i_target, l_data_rotate_seed_addr, i_program.iv_data_rotate_seed) );
+    FAPI_TRY( fapi2::putScom(i_target, TT::DATA_ROTATE_CNFG_REG, i_program.iv_data_rotate_cnfg) );
+    FAPI_TRY( fapi2::putScom(i_target, TT::DATA_ROTATE_SEED_REG, i_program.iv_data_rotate_seed) );
 
 fapi_try_exit:
     return fapi2::current_err;
