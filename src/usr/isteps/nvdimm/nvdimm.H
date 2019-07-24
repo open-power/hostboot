@@ -378,19 +378,10 @@ enum misc
     HIGH = 1,
 };
 
-const size_t NUM_KEYS_IN_ATTR = 3;
-const size_t ENC_KEY_SIZE = 32;
-const size_t MAX_TPM_SIZE = 34;
-const uint8_t KEY_TERMINATE_BYTE = 0x00;
-const uint8_t KEY_ABORT_BYTE = 0xFF;
-const uint64_t DARN_ERROR_CODE = 0xFFFFFFFFFFFFFFFFull;
-const uint32_t MAX_DARN_ERRORS = 10;
-const uint32_t MAX_RANDOM_ATTEMPTS = 100;
-
-
 /**
  * @brief Encryption key data
  */
+static constexpr size_t ENC_KEY_SIZE = 32;
 struct nvdimmKeyData_t
 {
     uint8_t rs[ENC_KEY_SIZE];   // Random String (RS)

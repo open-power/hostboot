@@ -1162,63 +1162,20 @@ void cmd_nvdimm_protection_msg( char* &o_output, uint32_t i_huid,
 {
     errlHndl_t l_err = nullptr;
     o_output = new char[500];
-    uint8_t l_notifyType = 0;
 
     TARGETING::Target* l_targ{};
     l_targ = getTargetFromHUID(i_huid);
-    if (l_targ != NULL)
+
+    // protection should match enum from nvdimm_protection_t
+    // No match will just return, no error generated
+    l_err = notifyNvdimmProtectionChange( l_targ,
+                                (NVDIMM::nvdimm_protection_t)protection);
+    if (l_err)
     {
-      if (protection == NVDIMM::NVDIMM_ARMED)
-      {
-          l_notifyType = NVDIMM::NVDIMM_ARMED;
-          l_err = notifyNvdimmProtectionChange(l_targ, NVDIMM::NVDIMM_ARMED);
-      }
-      else if (protection == NVDIMM::NVDIMM_DISARMED)
-      {
-          l_notifyType = NVDIMM::NVDIMM_DISARMED;
-          l_err = notifyNvdimmProtectionChange(l_targ, NVDIMM::NVDIMM_DISARMED);
-      }
-      else if (protection == NVDIMM::OCC_ACTIVE)
-      {
-          l_notifyType = NVDIMM::OCC_ACTIVE;
-          l_err = notifyNvdimmProtectionChange(l_targ, NVDIMM::OCC_ACTIVE);
-      }
-      else if (protection == NVDIMM::OCC_INACTIVE)
-      {
-          l_notifyType = NVDIMM::OCC_INACTIVE;
-          l_err = notifyNvdimmProtectionChange(l_targ, NVDIMM::OCC_INACTIVE);
-      }
-      else if (protection == NVDIMM::NVDIMM_FATAL_HW_ERROR)
-      {
-          l_notifyType = NVDIMM::NVDIMM_FATAL_HW_ERROR;
-          l_err = notifyNvdimmProtectionChange(l_targ, NVDIMM::NVDIMM_FATAL_HW_ERROR);
-      }
-      else if (protection == NVDIMM::NVDIMM_RISKY_HW_ERROR)
-      {
-          l_notifyType = NVDIMM::NVDIMM_RISKY_HW_ERROR;
-          l_err = notifyNvdimmProtectionChange(l_targ, NVDIMM::NVDIMM_RISKY_HW_ERROR);
-      }
-      else
-      {
-            sprintf( o_output,
-                "cmd_nvdimm_protection_msg: HUID 0x%.8X "
-                "unknown protection type 0x%.2X",
-                i_huid, protection );
-      }
-      if (l_err)
-      {
-          sprintf( o_output, "Error on call to notifyNvdimmProtectionChange"
-                  "(0x%.8X, %d), rc=0x%.8X, plid=0x%.8X",
-                  i_huid, l_notifyType, ERRL_GETRC_SAFE(l_err), l_err->plid() );
-          errlCommit(l_err, UTIL_COMP_ID);
-          return;
-      }
-    }
-    else
-    {
-        sprintf( o_output, "cmd_nvdimm_protection_msg: HUID 0x%.8X not found",
-            i_huid );
-        return;
+        sprintf( o_output, "Error on call to notifyNvdimmProtectionChange"
+                "(0x%.8X, %d), rc=0x%.8X, plid=0x%.8X",
+                i_huid, protection, ERRL_GETRC_SAFE(l_err), l_err->plid() );
+        errlCommit(l_err, UTIL_COMP_ID);
     }
 }
 #endif
@@ -1543,7 +1500,7 @@ int hbrtCommand( int argc,
         }
     }
 #ifdef CONFIG_NVDIMM
-    else if( !strcmp( argv[0], "nvdimm_protection" ) )
+     else if( !strcmp( argv[0], "nvdimm_protection" ) )
     {
         if (argc >= 3)
         {

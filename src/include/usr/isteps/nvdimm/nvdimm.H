@@ -204,6 +204,7 @@ bool nvdimmDisarm(TARGETING::TargetHandleList &i_nvdimmTargetList);
  *        OCC_INACTIVE - set inactive state
  *        NVDIMM_FATAL_HW_ERROR - set fatal hw state
  *        NVDIMM_RISKY_HW_ERROR - set risky hw state
+ *        NVDIMM_ENCRYPTION_ERROR - set encryption state
  *          Note: fatal error will stay with target preventing
  *                PROTECTED status until power is cycled again
  */
@@ -215,6 +216,7 @@ enum nvdimm_protection_t
     OCC_INACTIVE              = 3,
     NVDIMM_FATAL_HW_ERROR     = 4,
     NVDIMM_RISKY_HW_ERROR     = 5,
+    NVDIMM_ENCRYPTION_ERROR   = 6,
     /* deprecated, still used by PRD */
     UNPROTECTED_BECAUSE_ERROR = 4,
 };

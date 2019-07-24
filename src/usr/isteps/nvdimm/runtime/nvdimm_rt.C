@@ -50,6 +50,9 @@ using namespace TARGETING;
 namespace NVDIMM
 {
 
+static constexpr uint64_t DARN_ERROR_CODE = 0xFFFFFFFFFFFFFFFFull;
+static constexpr uint32_t MAX_DARN_ERRORS = 10;
+
 /**
  * @brief This function polls the command status register for arm completion
  *        (does not indicate success or fail)

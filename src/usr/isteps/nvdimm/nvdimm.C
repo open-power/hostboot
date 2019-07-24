@@ -110,6 +110,8 @@ typedef union {
 
 // Valid bits to check against (skips reserved and unsupported)
 static constexpr uint8_t ENCRYPTION_STATUS_CHECK_MASK = 0x3F;
+static constexpr uint8_t ENCRYPTION_STATUS_DISABLED = 0x01;
+static constexpr uint8_t ENCRYPTION_STATUS_ENABLED = 0x1F;
 
 // NV_STATUS masks
 static constexpr uint8_t NV_STATUS_OR_MASK = 0xFB;
@@ -118,6 +120,12 @@ static constexpr uint8_t NV_STATUS_UNPROTECTED_SET   = 0x01;
 static constexpr uint8_t NV_STATUS_UNPROTECTED_CLEAR = 0xFE;
 static constexpr uint8_t NV_STATUS_POSSIBLY_UNPROTECTED_SET   = 0x40;
 static constexpr uint8_t NV_STATUS_POSSIBLY_UNPROTECTED_CLEAR = 0xBF;
+
+// NVDIMM key consts
+static constexpr size_t NUM_KEYS_IN_ATTR = 3;
+static constexpr size_t MAX_TPM_SIZE = 34;
+static constexpr uint8_t KEY_TERMINATE_BYTE = 0x00;
+static constexpr uint8_t KEY_ABORT_BYTE = 0xFF;
 
 // Definition of ENCRYPTION_KEY_VALIDATION -- page 5 offset 0x2A
 typedef union {
@@ -2639,7 +2647,7 @@ bool nvdimm_encrypt_enable(TargetHandleList &i_nvdimmList)
 
             // Need to handle these cases?
             if (!((l_encStatus.whole & ENCRYPTION_STATUS_CHECK_MASK)
-                  == 0x01))
+                  == ENCRYPTION_STATUS_DISABLED))
             {
                 TRACFCOMP(g_trac_nvdimm, "nvdimm_encrypt_enable() nvdimm[%X] unsupported state 0x%.02X",get_huid(l_nvdimm),l_encStatus.whole);
                 continue;
@@ -2702,7 +2710,7 @@ bool nvdimm_encrypt_enable(TargetHandleList &i_nvdimmList)
                 continue;
             }
             if (!((l_encStatus.whole & ENCRYPTION_STATUS_CHECK_MASK)
-                  == 0x1F))
+                  == ENCRYPTION_STATUS_ENABLED))
             {
                 TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_encrypt_enable() nvdimm[%X] encryption enable failed, ENCRYPTION_CONFIG_STATUS=0x%.02X, expected=0x1F ",get_huid(l_nvdimm),l_encStatus.whole);
                 /*@
@@ -3038,6 +3046,9 @@ errlHndl_t notifyNvdimmProtectionChange(Target* i_target,
                     break;
                 case NVDIMM_RISKY_HW_ERROR:
                     l_armed_state.risky_error_detected = 1;
+                    break;
+                case NVDIMM_ENCRYPTION_ERROR:
+                    l_armed_state.encryption_error_detected = 1;
                     break;
             }
 
