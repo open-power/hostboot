@@ -37,6 +37,10 @@
   #include <prdfMemTps.H>
 #endif
 
+#ifdef CONFIG_NVDIMM
+    #include <nvdimm.H>
+#endif
+
 using namespace TARGETING;
 
 namespace PRDF
@@ -295,17 +299,8 @@ PRDF_PLUGIN_DEFINE( nimbus_mca, MemPortFailure );
 //
 //##############################################################################
 
+#ifdef CONFIG_NVDIMM
 #ifdef __HOSTBOOT_RUNTIME
-
-enum nvdimmRegOffset
-{
-    NVDIMM_MGT_CMD1          = 0x041,
-    MODULE_HEALTH            = 0x0A0,
-    MODULE_HEALTH_STATUS0    = 0x0A1,
-    MODULE_HEALTH_STATUS1    = 0x0A2,
-    ERROR_THRESHOLD_STATUS   = 0x0A5,
-    WARNING_THRESHOLD_STATUS = 0x0A7,
-};
 
 /**
  * @brief  Gets a map list of which bits are set from a uint8_t bit list (7:0)
@@ -348,6 +343,7 @@ uint32_t __addBpmCallout( TargetHandle_t i_dimm,
             break;
         }
 
+        // addPartCallout will default to GARD_NULL, NO_DECONFIG
         mainErrl->addPartCallout( i_dimm, HWAS::BPM_PART_TYPE,
                                   i_priority );
 
@@ -383,6 +379,7 @@ uint32_t __addNvdimmCableCallout( TargetHandle_t i_dimm,
             break;
         }
 
+        // addPartCallout will default to GARD_NULL, NO_DECONFIG
         mainErrl->addPartCallout( i_dimm, HWAS::BPM_CABLE_PART_TYPE,
                                   i_priority );
 
@@ -393,15 +390,36 @@ uint32_t __addNvdimmCableCallout( TargetHandle_t i_dimm,
     #undef PRDF_FUNC
 }
 
+/**
+ * @brief  If a previous error has been found, add a signature to the
+ *         multi-signature list, else set the primary signature.
+ * @param  io_sc      The step code data struct.
+ * @param  i_trgt     The target.
+ * @param  i_errFound Whether an error has already been found or not.
+ * @param  i_sig      The signature to be set.
+ */
+void __addSignature( STEP_CODE_DATA_STRUCT & io_sc, TargetHandle_t i_trgt,
+                     bool i_errFound, uint32_t i_sig )
+{
+    if ( i_errFound )
+    {
+        io_sc.service_data->AddSignatureList( i_trgt, i_sig );
+    }
+    else
+    {
+        io_sc.service_data->setSignature( getHuid(i_trgt), i_sig );
+    }
+}
 
 /**
  * @brief  Analyze NVDIMM Health Status0 Register for errors
- * @param  io_sc  The step code data struct.
- * @param  i_dimm The target dimm.
+ * @param  io_sc       The step code data struct.
+ * @param  i_dimm      The target dimm.
+ * @param  io_errFound Whether an error has already been found or not.
  * @return FAIL if unable to read register, else SUCCESS
  */
-uint32_t __analyzeHealthStatus0Reg( STEP_CODE_DATA_STRUCT & io_sc,
-                                    TargetHandle_t i_dimm )
+uint32_t __analyzeHealthStatus0Reg(STEP_CODE_DATA_STRUCT & io_sc,
+                                   TargetHandle_t i_dimm, bool & io_errFound)
 {
     #define PRDF_FUNC "[__analyzeHealthStatus0Reg] "
 
@@ -415,7 +433,7 @@ uint32_t __analyzeHealthStatus0Reg( STEP_CODE_DATA_STRUCT & io_sc,
 
         // Read the Health Status0 Register (0xA1) 7:0
         errlHndl_t errl = deviceRead( i_dimm, &data, NVDIMM_SIZE,
-            DEVICE_NVDIMM_ADDRESS(MODULE_HEALTH_STATUS0) );
+            DEVICE_NVDIMM_ADDRESS(NVDIMM::i2cReg::MODULE_HEALTH_STATUS0) );
         if ( errl )
         {
             PRDF_ERR( PRDF_FUNC "Failed to read Health Status0 Register. "
@@ -429,58 +447,66 @@ uint32_t __analyzeHealthStatus0Reg( STEP_CODE_DATA_STRUCT & io_sc,
         // BIT 0: Voltage Regulator Fail
         if ( bitList.count(0) )
         {
-            io_sc.service_data->AddSignatureList( i_dimm, PRDFSIG_VoltRegFail );
+            __addSignature( io_sc, i_dimm, io_errFound, PRDFSIG_VoltRegFail );
             // Callout NVDIMM on 1st, no gard
-            io_sc.service_data->SetCallout( i_dimm, MRU_HIGH, NO_GARD );
+            io_sc.service_data->SetCallout( i_dimm, MRU_MED, NO_GARD );
+            io_errFound = true;
         }
         // BIT 1: VDD Lost
         if ( bitList.count(1) )
         {
-            io_sc.service_data->AddSignatureList( i_dimm, PRDFSIG_VddLost );
+            __addSignature( io_sc, i_dimm, io_errFound, PRDFSIG_VddLost );
             // Callout NVDIMM on 1st, no gard
-            io_sc.service_data->SetCallout( i_dimm, MRU_HIGH, NO_GARD );
+            io_sc.service_data->SetCallout( i_dimm, MRU_MED, NO_GARD );
+            io_errFound = true;
         }
         // BIT 2: VPP Lost
         if ( bitList.count(2) )
         {
-            io_sc.service_data->AddSignatureList( i_dimm, PRDFSIG_VppLost );
+            __addSignature( io_sc, i_dimm, io_errFound, PRDFSIG_VppLost );
             // Callout NVDIMM on 1st, no gard
-            io_sc.service_data->SetCallout( i_dimm, MRU_HIGH, NO_GARD );
+            io_sc.service_data->SetCallout( i_dimm, MRU_MED, NO_GARD );
+            io_errFound = true;
         }
         // BIT 3: VTT Lost
         if ( bitList.count(3) )
         {
-            io_sc.service_data->AddSignatureList( i_dimm, PRDFSIG_VttLost );
+            __addSignature( io_sc, i_dimm, io_errFound, PRDFSIG_VttLost );
             // Callout NVDIMM on 1st, no gard
-            io_sc.service_data->SetCallout( i_dimm, MRU_HIGH, NO_GARD );
+            io_sc.service_data->SetCallout( i_dimm, MRU_MED, NO_GARD );
+            io_errFound = true;
         }
         // BIT 4: DRAM not Self Refresh
         if ( bitList.count(4) )
         {
-            io_sc.service_data->AddSignatureList( i_dimm, PRDFSIG_NotSelfRefr );
+            __addSignature( io_sc, i_dimm, io_errFound, PRDFSIG_NotSelfRefr );
             // Callout NVDIMM on 1st, no gard
-            io_sc.service_data->SetCallout( i_dimm, MRU_HIGH, NO_GARD );
+            io_sc.service_data->SetCallout( i_dimm, MRU_MED, NO_GARD );
+            io_errFound = true;
         }
         // BIT 5: Controller HW Error
         if ( bitList.count(5) )
         {
-            io_sc.service_data->AddSignatureList( i_dimm, PRDFSIG_CtrlHwErr );
+            __addSignature( io_sc, i_dimm, io_errFound, PRDFSIG_CtrlHwErr );
             // Callout NVDIMM on 1st, no gard
-            io_sc.service_data->SetCallout( i_dimm, MRU_HIGH, NO_GARD );
+            io_sc.service_data->SetCallout( i_dimm, MRU_MED, NO_GARD );
+            io_errFound = true;
         }
         // BIT 6: NVM Controller Error
         if ( bitList.count(6) )
         {
-            io_sc.service_data->AddSignatureList( i_dimm, PRDFSIG_NvmCtrlErr );
+            __addSignature( io_sc, i_dimm, io_errFound, PRDFSIG_NvmCtrlErr );
             // Callout NVDIMM on 1st, no gard
-            io_sc.service_data->SetCallout( i_dimm, MRU_HIGH, NO_GARD );
+            io_sc.service_data->SetCallout( i_dimm, MRU_MED, NO_GARD );
+            io_errFound = true;
         }
         // BIT 7: NVM Lifetime Error
         if ( bitList.count(7) )
         {
-            io_sc.service_data->AddSignatureList( i_dimm, PRDFSIG_NvmLifeErr );
+            __addSignature( io_sc, i_dimm, io_errFound, PRDFSIG_NvmLifeErr );
             // Callout NVDIMM on 1st, no gard
-            io_sc.service_data->SetCallout( i_dimm, MRU_HIGH, NO_GARD );
+            io_sc.service_data->SetCallout( i_dimm, MRU_MED, NO_GARD );
+            io_errFound = true;
         }
 
     }while(0);
@@ -493,12 +519,13 @@ uint32_t __analyzeHealthStatus0Reg( STEP_CODE_DATA_STRUCT & io_sc,
 
 /**
  * @brief  Analyze NVDIMM Health Status1 Register for errors
- * @param  io_sc  The step code data struct.
- * @param  i_dimm The target dimm.
+ * @param  io_sc       The step code data struct.
+ * @param  i_dimm      The target dimm.
+ * @param  io_errFound Whether an error has already been found or not.
  * @return FAIL if unable to read register, else SUCCESS
  */
 uint32_t __analyzeHealthStatus1Reg( STEP_CODE_DATA_STRUCT & io_sc,
-                                    TargetHandle_t i_dimm )
+                                    TargetHandle_t i_dimm, bool & io_errFound )
 {
     #define PRDF_FUNC "[__analyzeHealthStatus1Reg] "
 
@@ -512,7 +539,7 @@ uint32_t __analyzeHealthStatus1Reg( STEP_CODE_DATA_STRUCT & io_sc,
 
         // Read the Health Status1 Register (0xA2) 7:0
         errlHndl_t errl = deviceRead( i_dimm, &data, NVDIMM_SIZE,
-            DEVICE_NVDIMM_ADDRESS(MODULE_HEALTH_STATUS1) );
+            DEVICE_NVDIMM_ADDRESS(NVDIMM::i2cReg::MODULE_HEALTH_STATUS1) );
         if ( errl )
         {
             PRDF_ERR( PRDF_FUNC "Failed to read Health Status1 Register. "
@@ -526,7 +553,7 @@ uint32_t __analyzeHealthStatus1Reg( STEP_CODE_DATA_STRUCT & io_sc,
         // BIT 0: Insufficient Energy
         if ( bitList.count(0) )
         {
-            io_sc.service_data->AddSignatureList(i_dimm, PRDFSIG_InsuffEnergy);
+            __addSignature( io_sc, i_dimm, io_errFound, PRDFSIG_InsuffEnergy );
 
             // Callout BPM (backup power module) high, cable high
             o_rc = __addBpmCallout( i_dimm, HWAS::SRCI_PRIORITY_HIGH );
@@ -536,25 +563,28 @@ uint32_t __analyzeHealthStatus1Reg( STEP_CODE_DATA_STRUCT & io_sc,
 
             // Callout NVDIMM low, no gard
             io_sc.service_data->SetCallout( i_dimm, MRU_LOW, NO_GARD );
+            io_errFound = true;
         }
         // BIT 1: Invalid Firmware
         if ( bitList.count(1) )
         {
-            io_sc.service_data->AddSignatureList( i_dimm, PRDFSIG_InvFwErr );
+            __addSignature( io_sc, i_dimm, io_errFound, PRDFSIG_InvFwErr );
             // Callout NVDIMM on 1st, no gard
-            io_sc.service_data->SetCallout( i_dimm, MRU_HIGH, NO_GARD );
+            io_sc.service_data->SetCallout( i_dimm, MRU_MED, NO_GARD );
+            io_errFound = true;
         }
         // BIT 2: Configuration Data Error
         if ( bitList.count(2) )
         {
-            io_sc.service_data->AddSignatureList( i_dimm, PRDFSIG_CnfgDataErr );
+            __addSignature( io_sc, i_dimm, io_errFound, PRDFSIG_CnfgDataErr );
             // Callout NVDIMM on 1st, no gard
-            io_sc.service_data->SetCallout( i_dimm, MRU_HIGH, NO_GARD );
+            io_sc.service_data->SetCallout( i_dimm, MRU_MED, NO_GARD );
+            io_errFound = true;
         }
         // BIT 3: No Energy Source
         if ( bitList.count(3) )
         {
-            io_sc.service_data->AddSignatureList(i_dimm, PRDFSIG_NoEsPres);
+            __addSignature( io_sc, i_dimm, io_errFound, PRDFSIG_NoEsPres );
 
             // Callout BPM (backup power module) high, cable high
             o_rc = __addBpmCallout( i_dimm, HWAS::SRCI_PRIORITY_HIGH );
@@ -564,22 +594,24 @@ uint32_t __analyzeHealthStatus1Reg( STEP_CODE_DATA_STRUCT & io_sc,
 
             // Callout NVDIMM low, no gard
             io_sc.service_data->SetCallout( i_dimm, MRU_LOW, NO_GARD );
+            io_errFound = true;
         }
         // BIT 4: Energy Policy Not Set
         if ( bitList.count(4) )
         {
-            io_sc.service_data->AddSignatureList( i_dimm, PRDFSIG_EsPolNotSet );
+            __addSignature( io_sc, i_dimm, io_errFound, PRDFSIG_EsPolNotSet );
 
             // Callout FW (Level2 Support) High
             io_sc.service_data->SetCallout( LEVEL2_SUPPORT, MRU_HIGH, NO_GARD );
 
             // Callout NVDIMM low on 1st, no gard
             io_sc.service_data->SetCallout( i_dimm, MRU_LOW, NO_GARD );
+            io_errFound = true;
         }
         // BIT 5: Energy Source HW Error
         if ( bitList.count(5) )
         {
-            io_sc.service_data->AddSignatureList ( i_dimm, PRDFSIG_EsHwFail );
+            __addSignature( io_sc, i_dimm, io_errFound, PRDFSIG_EsHwFail );
 
             // Callout BPM (backup power module) high, cable high
             o_rc = __addBpmCallout( i_dimm, HWAS::SRCI_PRIORITY_HIGH );
@@ -589,11 +621,12 @@ uint32_t __analyzeHealthStatus1Reg( STEP_CODE_DATA_STRUCT & io_sc,
 
             // Callout NVDIMM low, no gard
             io_sc.service_data->SetCallout( i_dimm, MRU_LOW, NO_GARD );
+            io_errFound = true;
         }
         // BIT 6: Energy Source Health Assessment Error
         if ( bitList.count(6) )
         {
-            io_sc.service_data->AddSignatureList(i_dimm, PRDFSIG_EsHlthAssess);
+            __addSignature( io_sc, i_dimm, io_errFound, PRDFSIG_EsHlthAssess);
 
             // Callout BPM (backup power module) high, cable high
             o_rc = __addBpmCallout( i_dimm, HWAS::SRCI_PRIORITY_HIGH );
@@ -603,6 +636,7 @@ uint32_t __analyzeHealthStatus1Reg( STEP_CODE_DATA_STRUCT & io_sc,
 
             // Callout NVDIMM low, no gard
             io_sc.service_data->SetCallout( i_dimm, MRU_LOW, NO_GARD );
+            io_errFound = true;
         }
         // BIT 7: Reserved
 
@@ -615,13 +649,94 @@ uint32_t __analyzeHealthStatus1Reg( STEP_CODE_DATA_STRUCT & io_sc,
 }
 
 /**
+ * @brief  Reads and merges the data from two ES_TEMP registers to get the
+ *         correct temperature format.
+ * @param  i_dimm       The target nvdimm.
+ * @param  i_tempMsbReg The address of the register that contains the most
+ *                      significant byte of the temperature data.
+ * @param  i_tempLsbReg The address of the register that contains the least
+ *                      significant byte of the temperature data.
+ * @param  o_tempData   The 16 bit temperature data.
+ * @return FAIL if unable to read register, else SUCCESS
+ */
+uint32_t __readTemp( TargetHandle_t i_dimm, uint16_t i_tempMsbReg,
+                     uint16_t i_tempLsbReg, uint16_t o_tempData )
+{
+    #define PRDF_FUNC "[__readTemp] "
+
+    /*
+     * -NOTE: Example showing how to read the temperature format:
+     * ES_TEMP1  = 0x03 (MSB: bits 15-8)
+     * ES_TEMP0  = 0x48 (LSB: bits 7-0)
+     *
+     * 0x0348 = 0000 0011 0100 1000 = 52.5 C
+     *
+     * -NOTE: bit definition:
+     * [15:13]Reserved
+     * [12]Sign 0 = positive, 1 = negative; 0°C should be expressed as positive
+     * [11]  128°C
+     * [10]   64°C
+     * [9]    32°C
+     * [8]    16°C
+     * [7]     8°C
+     * [6]     4°C
+     * [5]     2°C
+     * [4]     1°C
+     * [3]   0.5°C
+     * [2]  0.25°C
+     * [1] 0.125°C Optional for temp fields; not used for temp th fields
+     * [0]0.0625°C Optional for temp fields; not used for temp th fields
+     */
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        // NVDIMM health status registers size = 1 byte
+        size_t NVDIMM_SIZE = 1;
+        uint8_t msbData = 0;
+        uint8_t lsbData = 0;
+
+        // Read the two inputted temperature registers.
+        errlHndl_t errl = deviceRead( i_dimm, &msbData, NVDIMM_SIZE,
+                                      DEVICE_NVDIMM_ADDRESS(i_tempMsbReg) );
+        if ( errl )
+        {
+            PRDF_ERR( PRDF_FUNC "Failed to read ES Temperature MSB Register. "
+                      "HUID: 0x%08x", getHuid(i_dimm) );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL;
+            break;
+        }
+
+        errl = deviceRead( i_dimm, &lsbData, NVDIMM_SIZE,
+                           DEVICE_NVDIMM_ADDRESS(i_tempLsbReg) );
+        if ( errl )
+        {
+            PRDF_ERR( PRDF_FUNC "Failed to read ES Temperature LSB Register. "
+                      "HUID: 0x%08x", getHuid(i_dimm) );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL;
+            break;
+        }
+
+        o_tempData = (msbData << 8) | lsbData;
+
+    }while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+/**
  * @brief  Analyze NVDIMM Error Threshold Status Register for errors
- * @param  io_sc  The step code data struct.
- * @param  i_dimm The target dimm.
+ * @param  io_sc       The step code data struct.
+ * @param  i_dimm      The target dimm.
+ * @param  io_errFound Whether an error has already been found or not.
  * @return FAIL if unable to read register, else SUCCESS
  */
 uint32_t __analyzeErrorThrStatusReg( STEP_CODE_DATA_STRUCT & io_sc,
-                                     TargetHandle_t i_dimm )
+                                     TargetHandle_t i_dimm, bool & io_errFound )
 {
     #define PRDF_FUNC "[__analyzeErrorThrStatusReg] "
 
@@ -635,7 +750,7 @@ uint32_t __analyzeErrorThrStatusReg( STEP_CODE_DATA_STRUCT & io_sc,
 
         // Read the Error Threshold Status Register (0xA5) 7:0
         errlHndl_t errl = deviceRead( i_dimm, &data, NVDIMM_SIZE,
-            DEVICE_NVDIMM_ADDRESS(ERROR_THRESHOLD_STATUS) );
+            DEVICE_NVDIMM_ADDRESS(NVDIMM::i2cReg::ERROR_THRESHOLD_STATUS) );
         if ( errl )
         {
             PRDF_ERR( PRDF_FUNC "Failed to read Error Threshold Status Reg. "
@@ -650,7 +765,7 @@ uint32_t __analyzeErrorThrStatusReg( STEP_CODE_DATA_STRUCT & io_sc,
         // BIT 1: ES Lifetime Error
         if ( bitList.count(1) )
         {
-            io_sc.service_data->AddSignatureList ( i_dimm, PRDFSIG_EsLifeErr );
+            __addSignature( io_sc, i_dimm, io_errFound, PRDFSIG_EsLifeErr );
 
             // Callout BPM (backup power module) high
             o_rc = __addBpmCallout( i_dimm, HWAS::SRCI_PRIORITY_HIGH );
@@ -658,11 +773,44 @@ uint32_t __analyzeErrorThrStatusReg( STEP_CODE_DATA_STRUCT & io_sc,
 
             // Callout NVDIMM low, no gard
             io_sc.service_data->SetCallout( i_dimm, MRU_LOW, NO_GARD );
+            io_errFound = true;
         }
         // BIT 2: ES Temperature Error
         if ( bitList.count(2) )
         {
-            io_sc.service_data->AddSignatureList( i_dimm, PRDFSIG_EsTmpErr );
+            // Read the ES_TEMP and ES_TEMP_ERROR_HIGH_THRESHOLD values
+            uint16_t msbEsTempReg = NVDIMM::i2cReg::ES_TEMP1;
+            uint16_t lsbEsTempReg = NVDIMM::i2cReg::ES_TEMP0;
+
+            uint16_t esTemp = 0;
+            o_rc = __readTemp( i_dimm, msbEsTempReg, lsbEsTempReg, esTemp );
+            if ( SUCCESS != o_rc ) break;
+
+            uint16_t msbThReg = NVDIMM::i2cReg::ES_TEMP_ERROR_HIGH_THRESHOLD1;
+            uint16_t lsbThReg = NVDIMM::i2cReg::ES_TEMP_ERROR_HIGH_THRESHOLD0;
+
+            uint16_t esTempHighTh = 0;
+            o_rc = __readTemp( i_dimm, msbThReg, lsbThReg, esTempHighTh );
+            if ( SUCCESS != o_rc ) break;
+
+            // Check to see if the ES_TEMP is negative (bit 12)
+            bool esTempNeg = false;
+            if ( esTemp | 0x1000 ) esTempNeg = true;
+
+            // If ES_TEMP is equal or above ES_TEMP_ERROR_HIGH_THRESHOLD
+            // Just in case ES_TEMP has moved before we read it out, we'll add
+            // a 2°C margin when comparing to the threshold.
+            if ( (esTemp >= (esTempHighTh - 0x0020)) && !esTempNeg )
+            {
+                __addSignature( io_sc, i_dimm, io_errFound,
+                                PRDFSIG_EsTmpErrHigh );
+            }
+            // Else assume the warning is because of a low threshold.
+            else
+            {
+                __addSignature( io_sc, i_dimm, io_errFound,
+                                PRDFSIG_EsTmpErrLow );
+            }
 
             // Callout BPM (backup power module) high
             o_rc = __addBpmCallout( i_dimm, HWAS::SRCI_PRIORITY_HIGH );
@@ -670,6 +818,7 @@ uint32_t __analyzeErrorThrStatusReg( STEP_CODE_DATA_STRUCT & io_sc,
 
             // Callout NVDIMM low, no gard
             io_sc.service_data->SetCallout( i_dimm, MRU_LOW, NO_GARD );
+            io_errFound = true;
         }
         // BIT 3:7: Reserved
 
@@ -679,6 +828,288 @@ uint32_t __analyzeErrorThrStatusReg( STEP_CODE_DATA_STRUCT & io_sc,
 
     #undef PRDF_FUNC
 
+}
+
+/**
+ * @brief  Adjusts the warning threshold so that future warnings are allowed
+ *         to report.
+ * @param  i_dimm      The target nvdimm.
+ * @param  i_warnThReg The address of the relevant warning threshold register.
+ * @param  i_errThReg  The address of the relevant error threshold register.
+ * @param  o_firstWarn Flag if this is the first warning of this type.
+ * @return FAIL if unable to read register, else SUCCESS
+ */
+uint32_t __adjustThreshold( TargetHandle_t i_dimm, uint16_t i_warnThReg,
+                            uint16_t i_errThReg, bool & o_firstWarn )
+{
+    #define PRDF_FUNC "[__adjustThreshold] "
+
+    uint32_t o_rc = SUCCESS;
+    uint16_t notifReg = NVDIMM::i2cReg::SET_EVENT_NOTIFICATION_CMD;
+    o_firstWarn = false;
+
+    do
+    {
+        // NVDIMM health status registers size = 1 byte
+        size_t NVDIMM_SIZE = 1;
+
+        // Read the corresponding warning threshold
+        uint8_t warnTh = 0;
+        errlHndl_t errl = deviceRead( i_dimm, &warnTh, NVDIMM_SIZE,
+                                      DEVICE_NVDIMM_ADDRESS(i_warnThReg) );
+        if ( errl )
+        {
+            PRDF_ERR( PRDF_FUNC "Failed to read Warning Threshold Reg. HUID: "
+                      "0x%08x", getHuid(i_dimm) );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL;
+            break;
+        }
+
+        // Read the corresponding error threshold
+        uint8_t errTh = 0;
+        errl = deviceRead( i_dimm, &errTh, NVDIMM_SIZE,
+                           DEVICE_NVDIMM_ADDRESS(i_errThReg) );
+        if ( errl )
+        {
+            PRDF_ERR( PRDF_FUNC "Failed to read Error Threshold Reg. HUID: "
+                      "0x%08x", getHuid(i_dimm) );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL;
+            break;
+        }
+
+        // If the warning threshold is not set to the error threshold+1,
+        // move the threshold.
+        if ( warnTh != (errTh+1) )
+        {
+            o_firstWarn = true;
+
+            // Set SET_EVENT_NOTIFICATION_CMD[1]: Warning Threshold
+            //                                    Notification = 0
+            // First read the register.
+            uint8_t warnThNotif = 0;
+            errl = deviceRead( i_dimm, &warnThNotif, NVDIMM_SIZE,
+                               DEVICE_NVDIMM_ADDRESS(notifReg) );
+            if ( errl )
+            {
+                PRDF_ERR( PRDF_FUNC "Failed to read Set Event Notification "
+                          "Cmd Reg. HUID: 0x%08x", getHuid(i_dimm) );
+                PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+                o_rc = FAIL;
+                break;
+            }
+
+            // Clear bit 1
+            warnThNotif &= 0xfd;
+            errl = deviceWrite( i_dimm, &warnThNotif, NVDIMM_SIZE,
+                                DEVICE_NVDIMM_ADDRESS(notifReg) );
+            if ( errl )
+            {
+                PRDF_ERR( PRDF_FUNC "Failed to clear Set Event Notification "
+                          "Cmd Reg. HUID: 0x%08x", getHuid(i_dimm) );
+                PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+                o_rc = FAIL;
+                break;
+            }
+
+            // Set the warning threshold to error threshold + 1
+            warnTh = errTh+1;
+            errl = deviceWrite( i_dimm, &warnTh, NVDIMM_SIZE,
+                                DEVICE_NVDIMM_ADDRESS(i_warnThReg) );
+            if ( errl )
+            {
+                PRDF_ERR( PRDF_FUNC "Failed to write Warning Threshold Reg. "
+                          "HUID: 0x%08x", getHuid(i_dimm) );
+                PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+                o_rc = FAIL;
+                break;
+            }
+
+            // Set SET_EVENT_NOTIFICATION_CMD[1]: Warning Threshold
+            //                                    Notification = 1
+            // Set bit 1
+            warnThNotif |= 0x02;
+            errl = deviceWrite( i_dimm, &warnThNotif, NVDIMM_SIZE,
+                                DEVICE_NVDIMM_ADDRESS(notifReg) );
+            if ( errl )
+            {
+                PRDF_ERR( PRDF_FUNC "Failed to write Set Event Notification "
+                          "Cmd Reg. HUID: 0x%08x", getHuid(i_dimm) );
+                PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+                o_rc = FAIL;
+                break;
+            }
+
+        }
+        // Note: moving the threshold should clear the warning from
+        // WARNING_THRESHOLD_STATUS, which allows future warnings to report.
+
+    }while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+/**
+ * @brief  Analyze NVDIMM Warning Threshold Status Register for errors
+ * @param  io_sc       The step code data struct.
+ * @param  i_dimm      The target dimm.
+ * @param  io_errFound Whether an error has already been found or not.
+ * @return FAIL if unable to read register, else SUCCESS
+ */
+uint32_t __analyzeWarningThrStatusReg(STEP_CODE_DATA_STRUCT & io_sc,
+                                      TargetHandle_t i_dimm, bool & io_errFound)
+{
+    #define PRDF_FUNC "[__analyzeWarningThrStatusReg] "
+
+    uint32_t o_rc = SUCCESS;
+    uint8_t data = 0;
+
+    do
+    {
+        // NVDIMM health status registers size = 1 byte
+        size_t NVDIMM_SIZE = 1;
+
+        // Read the Warning Threshold Status Register (0xA7) 7:0
+        errlHndl_t errl = deviceRead( i_dimm, &data, NVDIMM_SIZE,
+            DEVICE_NVDIMM_ADDRESS(NVDIMM::i2cReg::WARNING_THRESHOLD_STATUS) );
+        if ( errl )
+        {
+            PRDF_ERR( PRDF_FUNC "Failed to read Warning Threshold Status Reg. "
+                      "HUID: 0x%08x", getHuid(i_dimm) );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL;
+            break;
+        }
+        std::map<uint8_t,bool> bitList = __nvdimmGetActiveBits( data );
+
+        // Analyze Bit 2 First
+        // BIT 2: ES_TEMP_WARNING
+        if ( bitList.count(2) )
+        {
+            // Make the log predictive and mask the FIR.
+            io_sc.service_data->SetThresholdMaskId(0);
+
+            // Read the ES_TEMP and ES_TEMP_WARNING_HIGH_THRESHOLD values
+            uint16_t msbEsTempReg = NVDIMM::i2cReg::ES_TEMP1;
+            uint16_t lsbEsTempReg = NVDIMM::i2cReg::ES_TEMP0;
+
+            uint16_t esTemp = 0;
+            o_rc = __readTemp( i_dimm, msbEsTempReg, lsbEsTempReg, esTemp );
+            if ( SUCCESS != o_rc ) break;
+
+            uint16_t msbThReg = NVDIMM::i2cReg::ES_TEMP_WARNING_HIGH_THRESHOLD1;
+            uint16_t lsbThReg = NVDIMM::i2cReg::ES_TEMP_WARNING_HIGH_THRESHOLD0;
+
+            uint16_t esTempHighTh = 0;
+            o_rc = __readTemp( i_dimm, msbThReg, lsbThReg, esTempHighTh );
+            if ( SUCCESS != o_rc ) break;
+
+            // Check to see if the ES_TEMP is negative (bit 12)
+            bool esTempNeg = false;
+            if ( esTemp | 0x1000 ) esTempNeg = true;
+
+            // If ES_TEMP is equal or above ES_TEMP_WARNING_HIGH_THRESHOLD
+            // Just in case ES_TEMP has moved before we read it out, we'll add
+            // a 2°C margin when comparing to the threshold.
+            if ( (esTemp >= (esTempHighTh - 0x0020)) && !esTempNeg )
+            {
+                __addSignature( io_sc, i_dimm, io_errFound,
+                                PRDFSIG_EsTmpWarnHigh );
+            }
+            // Else assume the warning is because of a low threshold.
+            else
+            {
+                __addSignature( io_sc, i_dimm, io_errFound,
+                                PRDFSIG_EsTmpWarnLow );
+            }
+
+            // Callout BPM (backup power module) high
+            o_rc = __addBpmCallout( i_dimm, HWAS::SRCI_PRIORITY_HIGH );
+            if ( SUCCESS != o_rc ) break;
+
+            // Callout NVDIMM low, no gard
+            io_sc.service_data->SetCallout( i_dimm, MRU_LOW, NO_GARD );
+
+            // Send message to PHYP that save/restore may work
+            o_rc = PlatServices::nvdimmNotifyProtChange( i_dimm,
+                NVDIMM::NVDIMM_RISKY_HW_ERROR );
+            if ( SUCCESS != o_rc ) break;
+
+            io_errFound = true;
+        }
+        // BIT 0: NVM_LIFETIME_WARNING
+        if ( bitList.count(0) )
+        {
+            // Make the log predictive, but do not mask the FIR
+            io_sc.service_data->setServiceCall();
+
+            // Callout NVDIMM on 1st, no gard
+            io_sc.service_data->SetCallout( i_dimm, MRU_MED, NO_GARD );
+
+            // Adjust warning threshold.
+            uint16_t warnThReg = NVDIMM::i2cReg::NVM_LIFETIME_WARNING_THRESHOLD;
+            uint16_t errThReg  = NVDIMM::i2cReg::NVM_LIFETIME_ERROR_THRESHOLD;
+            bool firstWarn = false;
+            o_rc = __adjustThreshold( i_dimm, warnThReg, errThReg, firstWarn );
+            if ( SUCCESS != o_rc ) break;
+
+            // Update signature depending on whether this is the first or second
+            // warning of this type.
+            if ( firstWarn )
+            {
+                __addSignature( io_sc, i_dimm, io_errFound,
+                                PRDFSIG_NvmLifeWarn1 );
+            }
+            else
+            {
+                __addSignature( io_sc, i_dimm, io_errFound,
+                                PRDFSIG_NvmLifeWarn2 );
+            }
+
+            io_errFound = true;
+        }
+        // BIT 1: ES_LIFETIME_WARNING
+        if ( bitList.count(1) )
+        {
+            // Make the log predictive, but do not mask the FIR
+            io_sc.service_data->setServiceCall();
+
+            // Callout BPM (backup power module) high
+            o_rc = __addBpmCallout( i_dimm, HWAS::SRCI_PRIORITY_HIGH );
+            if ( SUCCESS != o_rc ) break;
+
+            // Callout NVDIMM low, no gard
+            io_sc.service_data->SetCallout( i_dimm, MRU_LOW, NO_GARD );
+
+            // Adjust warning threshold.
+            uint16_t warnThReg = NVDIMM::i2cReg::ES_LIFETIME_WARNING_THRESHOLD;
+            uint16_t errThReg  = NVDIMM::i2cReg::ES_LIFETIME_ERROR_THRESHOLD;
+            bool firstWarn = false;
+            o_rc = __adjustThreshold( i_dimm, warnThReg, errThReg, firstWarn );
+            if ( SUCCESS != o_rc ) break;
+
+            // Update signature depending on whether this is the first or second
+            // warning of this type.
+            if ( firstWarn )
+            {
+                __addSignature(io_sc, i_dimm, io_errFound, PRDFSIG_EsLifeWarn1);
+            }
+            else
+            {
+                __addSignature(io_sc, i_dimm, io_errFound, PRDFSIG_EsLifeWarn2);
+            }
+
+            io_errFound = true;
+        }
+
+    }while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
 }
 
 /**
@@ -700,7 +1131,7 @@ uint32_t __deassertEventN( TargetHandle_t i_dimm )
 
         // Read the NVDIMM_MGT_CMD1 register (0x41) 7:0
         errlHndl_t errl = deviceRead( i_dimm, &data, NVDIMM_SIZE,
-            DEVICE_NVDIMM_ADDRESS(NVDIMM_MGT_CMD1) );
+            DEVICE_NVDIMM_ADDRESS(NVDIMM::i2cReg::NVDIMM_MGT_CMD1) );
         if ( errl )
         {
             PRDF_ERR( PRDF_FUNC "Failed to read NVDIMM_MGT_CMD1. "
@@ -715,7 +1146,7 @@ uint32_t __deassertEventN( TargetHandle_t i_dimm )
 
         // Write the updated data back to NVDIMM_MGT_CMD1
         errl = deviceWrite( i_dimm, &data, NVDIMM_SIZE,
-            DEVICE_NVDIMM_ADDRESS(NVDIMM_MGT_CMD1) );
+            DEVICE_NVDIMM_ADDRESS(NVDIMM::i2cReg::NVDIMM_MGT_CMD1) );
         if ( errl )
         {
             PRDF_ERR( PRDF_FUNC "Failed to write NVDIMM_MGT_CMD1. "
@@ -734,6 +1165,7 @@ uint32_t __deassertEventN( TargetHandle_t i_dimm )
 }
 
 #endif // HOSTBOOT_RUNTIME
+#endif // CONFIG_NVDIMM
 
 /**
  * @brief  MCACALFIR[8] - Error from NVDIMM health status registers
@@ -750,10 +1182,14 @@ int32_t AnalyzeNvdimmHealthStatRegs( ExtensibleChip * i_chip,
     #ifdef __HOSTBOOT_RUNTIME
 
     uint32_t l_rc = SUCCESS;
+    bool errFound = false;
 
     // We need to check both dimms for errors
     for ( auto & dimm : getConnected(i_chip->getTrgt(), TYPE_DIMM) )
     {
+        // Skip any non-NVDIMMs
+        if ( !isNVDIMM(dimm) ) continue;
+
         // De-assert the EVENT_N pin by setting bit 2 in NVDIMM_MGT_CMD1
         l_rc = __deassertEventN( dimm );
         if ( SUCCESS != l_rc ) continue;
@@ -765,7 +1201,7 @@ int32_t AnalyzeNvdimmHealthStatRegs( ExtensibleChip * i_chip,
 
         // Read the Module Health Register (0xA0) 7:0
         errlHndl_t errl = deviceRead( dimm, &data, NVDIMM_SIZE,
-            DEVICE_NVDIMM_ADDRESS(MODULE_HEALTH) );
+            DEVICE_NVDIMM_ADDRESS(NVDIMM::i2cReg::MODULE_HEALTH) );
         if ( errl )
         {
             PRDF_ERR( PRDF_FUNC "Failed to read Module Health Register. "
@@ -792,23 +1228,54 @@ int32_t AnalyzeNvdimmHealthStatRegs( ExtensibleChip * i_chip,
 
             // Analyze Health Status0 Reg, Health Status1 Reg,
             // and Error Theshold Status Reg
-            l_rc = __analyzeHealthStatus0Reg( io_sc, dimm );
+            l_rc = __analyzeHealthStatus0Reg( io_sc, dimm, errFound );
             if ( SUCCESS != l_rc ) continue;
-            l_rc = __analyzeHealthStatus1Reg( io_sc, dimm );
+            l_rc = __analyzeHealthStatus1Reg( io_sc, dimm, errFound );
             if ( SUCCESS != l_rc ) continue;
-            l_rc = __analyzeErrorThrStatusReg( io_sc, dimm );
+            l_rc = __analyzeErrorThrStatusReg( io_sc, dimm, errFound );
             if ( SUCCESS != l_rc ) continue;
         }
-        // BIT 1: Warning Threshold Exceeded -- ignore
+        // BIT 1: Warning Threshold Exceeded
+        else if ( bitList.count(1) )
+        {
+            l_rc = __analyzeWarningThrStatusReg( io_sc, dimm, errFound );
+            if ( SUCCESS != l_rc ) continue;
+        }
         // BIT 2: Persistency Restored
-        if ( bitList.count(2) )
+        else if ( bitList.count(2) )
         {
             // It would be rare to have an intermittent error that comes and
             // goes so fast we only see PERSISTENCY_RESTORED and not
             // PERSISTENCY_LOST_ERROR. Set predictive on threshold of 32
             // per day (rule code handles the thresholding), else just keep
             // as a hidden log.
-            io_sc.service_data->AddSignatureList( dimm, PRDFSIG_NvdimmPersRes );
+            __addSignature( io_sc, dimm, errFound, PRDFSIG_NvdimmPersRes );
+
+            // Callout NVDIMM
+            io_sc.service_data->SetCallout( dimm, MRU_MED, NO_GARD );
+        }
+        // BIT 3: Below Warning Threshold
+        else if ( bitList.count(3) )
+        {
+            // Much like the persistency restored bit above, we don't expect
+            // to see this, so just make a hidden log.
+            __addSignature( io_sc, dimm, errFound, PRDFSIG_BelowWarnTh );
+
+            // Callout NVDIMM
+            io_sc.service_data->SetCallout( dimm, MRU_MED, NO_GARD );
+        }
+        // BIT 4: Hardware Failure -- ignore - no logic feeding this
+        // BIT 5: EVENT_N_LOW -- ignore
+        // BIT 6:7: Unused
+
+        // If we reach a threshold on MCACALFIR[8] of 32 per day, we assume
+        // some intermittent error must be triggering the FIR that isn't a
+        // persistency lost error which would cause us to mask. The rule code
+        // handles the actual thresholding here.
+        if ( io_sc.service_data->IsAtThreshold() )
+        {
+            io_sc.service_data->setSignature( getHuid(dimm),
+                                              PRDFSIG_IntNvdimmErr );
 
             // callout NVDIMM high, cable high, BPM high, no gard
             io_sc.service_data->SetCallout( dimm, MRU_HIGH, NO_GARD );
@@ -816,12 +1283,12 @@ int32_t AnalyzeNvdimmHealthStatRegs( ExtensibleChip * i_chip,
             if ( SUCCESS != l_rc ) continue;
             l_rc = __addNvdimmCableCallout( dimm, HWAS::SRCI_PRIORITY_HIGH );
             if ( SUCCESS != l_rc ) continue;
-        }
-        // BIT 3: Below Warning Threshold -- ignore
-        // BIT 4: Hardware Failure -- ignore
-        // BIT 5: EVENT_N_LOW -- ignore
-        // BIT 6:7: Unused
 
+            // Send message to PHYP that save/restore may work
+            l_rc = PlatServices::nvdimmNotifyProtChange( dimm,
+                    NVDIMM::NVDIMM_RISKY_HW_ERROR );
+            if ( SUCCESS != l_rc ) continue;
+        }
     }
     #else // IPL only
 

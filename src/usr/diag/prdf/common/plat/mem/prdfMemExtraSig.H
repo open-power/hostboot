@@ -91,7 +91,7 @@ PRDR_ERROR_SIGNATURE(VttLost,       0xffff0084, "", "NVDIMM VTT Lost");
 PRDR_ERROR_SIGNATURE(NotSelfRefr,   0xffff0085, "", "NVDIMM Dram Not Self Refresh");
 PRDR_ERROR_SIGNATURE(CtrlHwErr,     0xffff0086, "", "NVDIMM Controller Hardware Error");
 PRDR_ERROR_SIGNATURE(NvmCtrlErr,    0xffff0087, "", "NVDIMM NVM Controller Error");
-PRDR_ERROR_SIGNATURE(NvmLifeErr,    0xffff0088, "", "NVDIMM NVM Lifetime Error");
+PRDR_ERROR_SIGNATURE(NvmLifeErr,    0xffff0088, "", "NVDIMM Final NVM Lifetime Error");
 
 PRDR_ERROR_SIGNATURE(InsuffEnergy,  0xffff0089, "", "NVDIMM Not enough energy for CSAVE");
 PRDR_ERROR_SIGNATURE(InvFwErr,      0xffff008A, "", "NVDIMM Invalid Firmware Error");
@@ -101,8 +101,18 @@ PRDR_ERROR_SIGNATURE(EsPolNotSet,   0xffff008D, "", "NVDIMM Energy Source Policy
 PRDR_ERROR_SIGNATURE(EsHwFail,      0xffff008E, "", "NVDIMM Energy Source Hardware Fail");
 PRDR_ERROR_SIGNATURE(EsHlthAssess,  0xffff008F, "", "NVDIMM Energy Source Health Assessment Error");
 
-PRDR_ERROR_SIGNATURE(EsLifeErr,     0xffff0090, "", "NVDIMM Energy Source Lifetime Error");
-PRDR_ERROR_SIGNATURE(EsTmpErr,      0xffff0091, "", "NVDIMM Energy Source Temp Error");
+PRDR_ERROR_SIGNATURE(EsLifeErr,     0xffff0090, "", "NVDIMM Final Energy Source Lifetime Error");
+PRDR_ERROR_SIGNATURE(EsTmpErrHigh,  0xffff0091, "", "NVDIMM Energy Source Temperature Error - High Temp Threshold");
+PRDR_ERROR_SIGNATURE(EsTmpErrLow,   0xffff0092, "", "NVDIMM Energy Source Temperature Error - Low Temp Threshold");
+
+PRDR_ERROR_SIGNATURE(NvmLifeWarn1,  0xffff0093, "", "NVDIMM First NVM Lifetime Warning");
+PRDR_ERROR_SIGNATURE(NvmLifeWarn2,  0xffff0094, "", "NVDIMM Second NVM Lifetime Warning");
+PRDR_ERROR_SIGNATURE(EsLifeWarn1,   0xffff0095, "", "NVDIMM First Energy Source Lifetime Warning");
+PRDR_ERROR_SIGNATURE(EsLifeWarn2,   0xffff0096, "", "NVDIMM Second Energy Source Lifetime Warning");
+PRDR_ERROR_SIGNATURE(EsTmpWarnHigh, 0xffff0097, "", "NVDIMM Energy Source Temperature Warning - High Temp Threshold");
+PRDR_ERROR_SIGNATURE(EsTmpWarnLow,  0xffff0098, "", "NVDIMM Energy Source Temperature Warning - Low Temp Threshold");
+PRDR_ERROR_SIGNATURE(BelowWarnTh,   0xffff0099, "", "NVDIMM Below Warning Threshold");
+PRDR_ERROR_SIGNATURE(IntNvdimmErr,  0xffff009A, "", "NVDIMM Intermittent error");
 
 PRDR_ERROR_SIGNATURE(DsdResume, 0xbbbb0003, "", "DSD: Resuming procedure");
 
