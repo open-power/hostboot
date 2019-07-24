@@ -75,7 +75,7 @@ enum PM_GPE_OCCFLG2_DEFS
     PGPE_HCODE_FIT_ERROR_INJECT             = 7,
     PGPE_OP_TRACE_DISABLE                   = 8,
     PGPE_OP_TRACE_MEM_MODE                  = 9,
-    PGPE_OP_TRACE_MEM_MODE_LEN          = 2,
+    PGPE_OP_TRACE_MEM_MODE_LEN              = 2,
     PGPE_ACTIVE                             = 16,
     PGPE_PSTATE_PROTOCOL_ACTIVE             = 17,
     PGPE_SAFE_MODE_ACTIVE                   = 18,
