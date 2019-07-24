@@ -208,6 +208,86 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_SKEWADJ_BYPASS</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Keep skew adjust logic between nest, cores and caches bypassed
+  </description>
+  <valueType>uint8</valueType>
+  <enum>BYPASS = 0x1, NO_BYPASS = 0x0</enum>
+  <platInit/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_SKEWADJ_CORE_PDLY_OVERRIDE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Skew Adjust: Set fixed value for core-cache delay
+    bit 0: override enabled
+    bits 12:15: override value
+    Taken from CP00 MK keyword in VPD
+  </description>
+  <valueType>uint16</valueType>
+  <platInit/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_SKEWADJ_CACHE_PDLY_OVERRIDE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Skew Adjust: Set fixed value for cache-nest delay
+    bit 0: override enabled
+    bits 12:15: override value
+    Taken from CP00 MK keyword in VPD
+  </description>
+  <valueType>uint16</valueType>
+  <platInit/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_DCADJ_BYPASS</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Keep core duty cycle adjust logic bypassed
+  </description>
+  <valueType>uint8</valueType>
+  <enum>BYPASS = 0x1, NO_BYPASS = 0x0</enum>
+  <platInit/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_DCADJ_DCC_OVERRIDE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Duty Cycle Adjust: Set fixed value for duty cycle control
+    bit 0: override enabled
+    bits 8:15: override value
+    Taken from CP00 MK keyword in VPD
+  </description>
+  <valueType>uint16</valueType>
+  <platInit/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_DCADJ_TARGET_OVERRIDE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Duty Cycle Adjust: Set duty cycle target different from 50%
+    bit 0: override enabled
+    bits 8:15: override value (signed integer, delta from 50%)
+    Taken from CP00 MK keyword in VPD
+  </description>
+  <valueType>uint16</valueType>
+  <platInit/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_ECID</id>
   <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_MEMBUF_CHIP, TARGET_TYPE_OCMB_CHIP</targetType>
   <description>Populated by HWP called during IPL.
