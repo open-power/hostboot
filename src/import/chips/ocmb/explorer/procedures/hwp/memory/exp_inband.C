@@ -232,6 +232,7 @@ fapi2::ReturnCode user_input_msdg_to_little_endian(const user_input_msdg& i_inpu
 
     padCommData(o_data);
     FAPI_TRY(correctMMIOEndianForStruct(o_data));
+    FAPI_TRY(correctMMIOword_order(o_data));
 
 fapi_try_exit:
     FAPI_DBG("Exiting with return code : 0x%08X...", (uint64_t) fapi2::current_err);
@@ -283,6 +284,7 @@ fapi2::ReturnCode host_fw_command_struct_to_little_endian(const host_fw_command_
     FAPI_TRY(forceCrctEndian(l_cmd_header_crc, o_data));
     padCommData(o_data);
     FAPI_TRY(correctMMIOEndianForStruct(o_data));
+    FAPI_TRY(correctMMIOword_order(o_data));
 
 fapi_try_exit:
     FAPI_DBG("Exiting with return code : 0x%08X...", (uint64_t) fapi2::current_err);
@@ -467,6 +469,7 @@ fapi2::ReturnCode host_fw_response_struct_from_little_endian(std::vector<uint8_t
     uint32_t l_response_header_crc = 0;
 
     FAPI_TRY(correctMMIOEndianForStruct(i_data));
+    FAPI_TRY(correctMMIOword_order(i_data));
     FAPI_TRY(readCrctEndian(i_data, l_idx, l_response_id));
     FAPI_TRY(readCrctEndian(i_data, l_idx, l_response_flags));
     FAPI_TRY(readCrctEndian(i_data, l_idx, l_request_identifier));
@@ -630,6 +633,7 @@ fapi2::ReturnCode getRSP(
 
         FAPI_TRY( fapi2::getMMIO(i_target, EXPLR_IB_DATA_ADDR, BUFFER_TRANSACTION_SIZE, o_data) );
         FAPI_TRY( correctMMIOEndianForStruct(o_data) );
+        FAPI_TRY( correctMMIOword_order(o_data) );
     }
     else
     {
@@ -677,6 +681,7 @@ fapi2::ReturnCode sensor_cache_struct_from_little_endian(std::vector<uint8_t>& i
     uint8_t l_initial_packet1 = 0;
 
     FAPI_TRY(correctMMIOEndianForStruct(i_data));
+    FAPI_TRY(correctMMIOword_order(i_data));
     FAPI_TRY(readCrctEndian(i_data, l_idx, l_status));
     FAPI_TRY(readCrctEndian(i_data, l_idx, l_ocmb_dts));
     FAPI_TRY(readCrctEndian(i_data, l_idx, l_mem_dts0));
@@ -760,57 +765,96 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief UT helper for correctMMIOEndianForStruct
+///
+/// @param[in] i_endian_ctrl value of ATTR_MSS_OCMB_EXP_STRUCT_MMIO_ENDIAN_CTRL
+/// @param[in,out] io_data value to swizzle
+///
+void correctMMIOEndianForStruct_helper(fapi2::ATTR_MSS_OCMB_EXP_STRUCT_MMIO_ENDIAN_CTRL_Type i_endian_ctrl,
+                                       std::vector<uint8_t>& io_data)
+{
+    size_t l_loops = 0;
 
+    if (i_endian_ctrl == fapi2::ENUM_ATTR_MSS_OCMB_EXP_STRUCT_MMIO_ENDIAN_CTRL_SWAP)
+    {
+        l_loops = io_data.size() / BUFFER_TRANSACTION_SIZE;
 
+        for (size_t l_idx = 0; l_idx < l_loops; l_idx++)
+        {
+            for (int l_bidx = BUFFER_TRANSACTION_SIZE - 1; l_bidx >= 0; l_bidx--)
+            {
+                io_data.push_back(io_data.at(l_bidx));
+            }
 
+            io_data.erase(io_data.begin(), io_data.begin() + BUFFER_TRANSACTION_SIZE);
+        }
+    }
+}
 
+///
 /// @brief We will use 4 or 8 byte reads via fapi2::put/getMMIO for buffer
 /// data structures.  The byte order of the 4 or 8 byte reads should be little
 /// endian.  In order to represent the data structure in its proper layout
 /// the endianness of each 4 or 8 byte read must be corrected.
-///
 /// @param[in,out] io_data   Either data structure in proper byte order that we
 ///      want to swizzle prior to writing to the buffer, or the data returned
 ///      from reading the buffer that we want to unsizzle.
-///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+///
 fapi2::ReturnCode correctMMIOEndianForStruct(std::vector<uint8_t>& io_data)
 {
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     fapi2::ATTR_MSS_OCMB_EXP_STRUCT_MMIO_ENDIAN_CTRL_Type l_endian_ctrl;
-    size_t l_loops = 0;
 
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_STRUCT_MMIO_ENDIAN_CTRL,
-                            FAPI_SYSTEM, l_endian_ctrl));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_STRUCT_MMIO_ENDIAN_CTRL,
+                           FAPI_SYSTEM, l_endian_ctrl));
+    correctMMIOEndianForStruct_helper(l_endian_ctrl, io_data);
 
-    if (l_endian_ctrl == fapi2::ENUM_ATTR_MSS_OCMB_EXP_STRUCT_MMIO_ENDIAN_CTRL_NO_SWAP)
+fapi_try_exit:
+    FAPI_DBG("Exiting with return code : 0x%08X...", (uint64_t) fapi2::current_err);
+    return fapi2::current_err;
+}
+
+///
+/// @brief UT helper for correctMMIOword_order
+/// @param[in] i_word_swap value of ATTR_MSS_OCMB_EXP_STRUCT_MMIO_WORD_SWAP
+/// @param[in,out] io_data value to swizzle
+///
+void correctMMIOword_order_helper(fapi2::ATTR_MSS_OCMB_EXP_STRUCT_MMIO_WORD_SWAP_Type i_word_swap,
+                                  std::vector<uint8_t>& io_data)
+{
+    if (i_word_swap == fapi2::ENUM_ATTR_MSS_OCMB_EXP_STRUCT_MMIO_WORD_SWAP_SWAP)
     {
-        goto fapi_try_exit;
-    }
-
-    l_loops = io_data.size() / BUFFER_TRANSACTION_SIZE;
-
-    for (size_t l_idx = 0; l_idx < l_loops; l_idx++)
-    {
-        for (int l_bidx = BUFFER_TRANSACTION_SIZE - 1; l_bidx >= 0; l_bidx--)
+        for (size_t l_idx = 0; l_idx < io_data.size(); l_idx += BUFFER_TRANSACTION_SIZE)
         {
-            io_data.push_back(io_data.at(l_bidx));
-        }
-
-        io_data.erase(io_data.begin(), io_data.begin() + BUFFER_TRANSACTION_SIZE);
-    }
-
-    // Because of how the AXI bridge in Explorer breaks up the transaction, we also need to swap 32-bit word order
-    for (size_t l_idx = 0; l_idx < io_data.size(); l_idx += BUFFER_TRANSACTION_SIZE)
-    {
-        for (size_t l_bidx = l_idx; l_bidx < l_idx + BUFFER_TRANSACTION_SIZE / 2; l_bidx++)
-        {
-            uint8_t l_temp_first_word = io_data.at(l_bidx);
-            uint8_t l_temp_second_word = io_data.at(l_bidx + BUFFER_TRANSACTION_SIZE / 2);
-            io_data[l_bidx] = l_temp_second_word;
-            io_data[l_bidx + BUFFER_TRANSACTION_SIZE / 2] = l_temp_first_word;
+            for (size_t l_bidx = l_idx; l_bidx < l_idx + BUFFER_TRANSACTION_SIZE / 2; l_bidx++)
+            {
+                uint8_t l_temp_first_word = io_data.at(l_bidx);
+                uint8_t l_temp_second_word = io_data.at(l_bidx + BUFFER_TRANSACTION_SIZE / 2);
+                io_data[l_bidx] = l_temp_second_word;
+                io_data[l_bidx + BUFFER_TRANSACTION_SIZE / 2] = l_temp_first_word;
+            }
         }
     }
+}
+
+///
+/// @brief Because of how the AXI bridge in Explorer breaks up the transaction,
+///      we might need to swap 32-bit word order
+/// @param[in,out] io_data   Either data structure in proper byte order that we
+///      want to swizzle prior to writing to the buffer, or the data returned
+///      from reading the buffer that we want to unsizzle.
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode correctMMIOword_order(std::vector<uint8_t>& io_data)
+{
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_MSS_OCMB_EXP_STRUCT_MMIO_WORD_SWAP_Type l_word_swap;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_STRUCT_MMIO_WORD_SWAP,
+                           FAPI_SYSTEM, l_word_swap));
+    correctMMIOword_order_helper(l_word_swap, io_data);
 
 fapi_try_exit:
     FAPI_DBG("Exiting with return code : 0x%08X...", (uint64_t) fapi2::current_err);

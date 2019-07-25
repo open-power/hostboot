@@ -311,6 +311,23 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MSS_OCMB_EXP_STRUCT_MMIO_WORD_SWAP</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+          Controls whether or not the first and second half of MMIO
+          transactions are swapped before and after mmio accesses to
+          the buffer.
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            SWAP = 0,
+            NO_SWAP = 1
+        </enum>
+        <platInit/>
+        <default>NO_SWAP</default>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MSS_OCMB_EXP_OMI_CFG_ENDIAN_CTRL</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
         <description>

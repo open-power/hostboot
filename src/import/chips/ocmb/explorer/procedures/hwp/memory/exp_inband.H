@@ -396,6 +396,45 @@ fapi2::ReturnCode getSensorCache(
 // Command/Response/Data structure Endian handling
 //--------------------------------------------------------------------------------
 
+///
+/// @brief UT helper for correctMMIOEndianForStruct
+///
+/// @param[in] i_endian_ctrl value of ATTR_MSS_OCMB_EXP_STRUCT_MMIO_ENDIAN_CTRL
+/// @param[in,out] io_data value to swizzle
+///
+void correctMMIOEndianForStruct_helper(fapi2::ATTR_MSS_OCMB_EXP_STRUCT_MMIO_ENDIAN_CTRL_Type i_endian_ctrl,
+                                       std::vector<uint8_t>& io_data);
+
+///
+/// @brief We will use 4 or 8 byte reads via fapi2::put/getMMIO for buffer
+/// data structures.  The byte order of the 4 or 8 byte reads should be little
+/// endian.  In order to represent the data structure in its proper layout
+/// the endianness of each 4 or 8 byte read must be corrected.
+/// @param[in,out] io_data   Either data structure in proper byte order that we
+///      want to swizzle prior to writing to the buffer, or the data returned
+///      from reading the buffer that we want to unsizzle.
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode correctMMIOEndianForStruct(std::vector<uint8_t>& io_data);
+
+///
+/// @brief UT helper for correctMMIOword_order
+/// @param[in] i_word_swap value of ATTR_MSS_OCMB_EXP_STRUCT_MMIO_WORD_SWAP
+/// @param[in,out] io_data value to swizzle
+///
+void correctMMIOword_order_helper(fapi2::ATTR_MSS_OCMB_EXP_STRUCT_MMIO_WORD_SWAP_Type i_word_swap,
+                                  std::vector<uint8_t>& io_data);
+
+///
+/// @brief Because of how the AXI bridge in Explorer breaks up the transaction,
+///      we might need to swap 32-bit word order
+/// @param[in,out] io_data   Either data structure in proper byte order that we
+///      want to swizzle prior to writing to the buffer, or the data returned
+///      from reading the buffer that we want to unsizzle.
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode correctMMIOword_order(std::vector<uint8_t>& io_data);
+
 /// @brief We will use 4 or 8 byte reads via fapi2::put/getMMIO for buffer
 /// data structures.  The byte order of the 4 or 8 byte reads should be little
 /// endian.  In order to represent the data structure in its proper layout
@@ -407,6 +446,15 @@ fapi2::ReturnCode getSensorCache(
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 fapi2::ReturnCode correctMMIOEndianForStruct(std::vector<uint8_t>& io_data);
+
+/// @brief Because of how the AXI bridge in Explorer breaks up the transaction,
+///      we might need to swap 32-bit word order
+/// @param[in,out] io_data   Either data structure in proper byte order that we
+///      want to swizzle prior to writing to the buffer, or the data returned
+///      from reading the buffer that we want to unsizzle.
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode correctMMIOword_order(std::vector<uint8_t>& io_data);
 
 /// @brief Ensure data is an even multiple of 8 (BUFFER_TRANSACTION_SIZE).
 ///        If (sizeof(buffer) % BUFFER_TRANSACTION_SIZE != 0) ; then pad
