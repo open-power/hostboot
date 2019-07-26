@@ -734,7 +734,9 @@ errlHndl_t ocmbIdecPhase2(const TARGETING::TargetHandle_t& i_target)
         const uint16_t translatedId =
             i_target->getAttr<TARGETING::ATTR_CHIP_ID>();
 
-        if (id != translatedId)
+        //@TODO RTC-209353: Read IDEC for Gemini.
+        if ( translatedId != POWER_CHIPID::GEMINI_16 &&
+             id != translatedId)
         {
             HWAS_ERR("ocmbIdecPhase2> OCMB Chip Id and associated SPD Chip Id "
                      "don't match: OCMB ID=0x%.4X; Translated SPD ID=0x%.4X;",
@@ -776,7 +778,9 @@ errlHndl_t ocmbIdecPhase2(const TARGETING::TargetHandle_t& i_target)
 
         const uint8_t translatedEc = i_target->getAttr<TARGETING::ATTR_EC>();
 
-        if (ec != translatedEc)
+        //@TODO RTC-209353: Read IDEC for Gemini.
+        if (translatedId != POWER_CHIPID::GEMINI_16 &&
+            ec != translatedEc)
         {
             HWAS_ERR("ocmbIdecPhase2> OCMB Revision and associated SPD "
                      "Revision don't match: OCMB EC=0x%.2X; "
