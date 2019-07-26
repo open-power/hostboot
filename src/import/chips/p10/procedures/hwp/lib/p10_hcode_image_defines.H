@@ -73,7 +73,7 @@ typedef struct
 {
 #endif
 HCD_HDR_ATTN  ( iv_attnOpcodes,         2);
-HCD_HDR_UINT64( iv_magicNum,            CPMR_MAGIC_NUMBER);
+HCD_HDR_UINT64( iv_magicWord,           CPMR_MAGIC_NUMBER);
 HCD_HDR_UINT32( iv_buildDate,           0);
 HCD_HDR_UINT32( iv_version,             0);
 HCD_HDR_UINT8_VEC (iv_reserveFlags, 4,  0);
@@ -206,6 +206,36 @@ enum ImgBldRetCode_t
     BUILD_FAIL_XIP_CUST_ERR     =   36,
     BUILD_ERR_INTERNAL          =   0xffff,
 };
+
+/**
+ * @brief   models SCOM restore header region.
+ */
+typedef struct
+{
+    uint16_t     iv_magicMark;
+    uint8_t      iv_version;
+    uint8_t      iv_reserved1;
+    uint8_t      iv_reserved2[4];
+    uint16_t     iv_coreOffset;
+    uint16_t     iv_coreLength;
+    uint16_t     iv_eqOffset;
+    uint16_t     iv_eqLength;
+    uint16_t     iv_l2Offset;
+    uint16_t     iv_l2Length;
+    uint16_t     iv_l3Offset;
+    uint16_t     iv_l3Length;
+} ScomRestoreHeader_t;
+
+/**
+ * @brief models a CPU register restoration area in STOP section of homer image.
+ */
+typedef struct
+{
+    uint8_t iv_threadRestoreArea[MAX_THREADS_PER_CORE][SMF_CORE_RESTORE_THREAD_AREA_SIZE];
+    uint8_t iv_threadSaveArea[MAX_THREADS_PER_CORE][SMF_SELF_SAVE_THREAD_AREA_SIZE];
+    uint8_t iv_coreRestoreArea[SMF_CORE_RESTORE_CORE_AREA_SIZE];
+    uint8_t iv_coreSaveArea[SMF_CORE_SAVE_CORE_AREA_SIZE];
+} SmfSprRestoreRegion_t;
 
 /**
  * @brief   models image section of XGPE in HOMER.

@@ -29,8 +29,11 @@ HCODE_UTIL+=$(ROOTPATH)/chips/p10/procedures/hwp/lib/
 HCODE_UTIL+=$(ROOTPATH)/chips/p10/common/include/
 HCODE_UTIL+=$(ROOTPATH)/chips/p10/procedures/hwp/customize/
 HCODE_UTIL+=$(ROOTPATH)/chips/p10/procedures/hwp/accessors/
+HCODE_UTIL+=$(ROOTPATH)/chips/p10/procedures/utils/stopreg/
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(HCODE_UTIL))
 lib$(PROCEDURE)_DEPLIBS += p10_ddco
+lib$(PROCEDURE)_DEPLIBS += p10_stop_util
+lib$(PROCEDURE)_DEPLIBS += p10_stop_api
 lib$(PROCEDURE)_DEPLIBS += p10_ipl_image
 lib$(PROCEDURE)_DEPLIBS += p10_scan_ring_util
 lib$(PROCEDURE)_DEPLIBS += p10_ipl_customize

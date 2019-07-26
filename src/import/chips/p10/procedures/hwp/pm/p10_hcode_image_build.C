@@ -47,6 +47,7 @@
 #include <p10_hcd_memmap_base.H>
 #include <p10_ipl_image.H>
 #include <p10_ipl_customize.H>
+#include <p10_stop_api.H>
 
 extern "C"
 {
@@ -62,6 +63,8 @@ enum
     TEMP_ARRAY_SIZE     =   50,
     PLAT_NAME_SIZE      =   20,
     ENABLE_ALL_CORE     =   0xFFFFFFFF,
+    BCE_RD_BLOCK_SIZE   =   0x20,
+    SHIFT_RD_BLOCK_SIZE =   5,
 };
 
 /**
@@ -89,17 +92,6 @@ struct ImgSectnSumm
         iv_sectnLength( 0 )
     { }
 };
-
-/**
- * @brief models a CPU register restoration area in STOP section of homer image.
- */
-typedef struct
-{
-    uint8_t iv_threadRestoreArea[MAX_THREADS_PER_CORE][SMF_CORE_RESTORE_THREAD_AREA_SIZE];
-    uint8_t iv_threadSaveArea[MAX_THREADS_PER_CORE][SMF_SELF_SAVE_THREAD_AREA_SIZE];
-    uint8_t iv_coreRestoreArea[SMF_CORE_RESTORE_CORE_AREA_SIZE];
-    uint8_t iv_coreSaveArea[SMF_CORE_SAVE_CORE_AREA_SIZE];
-} SmfSprRestoreRegion_t;
 
 /**
  * @brief   struct used to manipulate scan ring in HOMER.
@@ -344,7 +336,7 @@ uint32_t ImageBuildRecord::verifyBuild( )
 
 /**
  * @brief   validates arguments passed for hcode image build
- * @param[in]   refer to p9_hcode_image_build arguments
+ * @param[in]   refer to p10_hcode_image_build arguments
  * @return  fapi2 return code
 */
 fapi2::ReturnCode validateInputArguments( void* const i_pImageIn, void* i_pImageOut,
@@ -497,10 +489,8 @@ fapi2::ReturnCode   initSelfSaveRestoreEntries( Homerlayout_t* i_pChipHomer,
 {
     FAPI_DBG(">> initSelfSaveRestoreEntries" );
 
-#if 0
-
-    StopReturnCode_t    l_retCode;
-    uint32_t            l_corePos   =   0;
+    stopImageSection::StopReturnCode_t    l_retCode;
+    uint32_t  l_corePos   =   0;
 
     for( l_corePos = 0; l_corePos < MAX_CORES_PER_CHIP; l_corePos++ )
     {
@@ -510,31 +500,28 @@ fapi2::ReturnCode   initSelfSaveRestoreEntries( Homerlayout_t* i_pChipHomer,
         }
 
         FAPI_INF( "Core Pos 0x%02d", l_corePos );
-        l_retCode   =  p9_stop_init_cpureg( (void *)i_pChipHomer, l_corePos );
+        l_retCode   =  stopImageSection::proc_stop_init_cpureg( (void *)i_pChipHomer, l_corePos );
 
-        FAPI_ASSERT( ( STOP_SAVE_SUCCESS == l_retCode ),
+        FAPI_ASSERT( ( stopImageSection::STOP_SAVE_SUCCESS == l_retCode ),
                      fapi2::SELF_RESTORE_INIT_FAILED()
                      .set_HOMER_PTR( i_pChipHomer )
                      .set_CORE_POS( l_corePos )
                      .set_FAILURE_CODE( l_retCode )
-                     .set_EC_LEVEL( i_procFuncModel.getChipLevel() )
-                     .set_CHIP_TYPE( i_procFuncModel.getChipName() ),
+                     .set_EC_LEVEL( i_procFuncModel.getChipLevel() ),
                      "Failed To Initialize The Self-Restore Region 0x%08x", l_retCode );
 
-        l_retCode   =  p9_stop_init_self_save( (void *)i_pChipHomer, l_corePos );
+        l_retCode   =  stopImageSection::proc_stop_init_self_save( (void *)i_pChipHomer, l_corePos );
 
-        FAPI_ASSERT( ( STOP_SAVE_SUCCESS == l_retCode ),
+        FAPI_ASSERT( ( stopImageSection::STOP_SAVE_SUCCESS == l_retCode ),
                      fapi2::SELF_SAVE_INIT_FAILED()
                      .set_HOMER_PTR( i_pChipHomer )
                      .set_CORE_POS( l_corePos )
                      .set_FAILURE_CODE( l_retCode )
-                     .set_EC_LEVEL( i_procFuncModel.getChipLevel() )
-                     .set_CHIP_TYPE( i_procFuncModel.getChipName() ),
+                     .set_EC_LEVEL( i_procFuncModel.getChipLevel() ),
                      "Failed To Initialize The Self-Save Region 0x%08x", (uint32_t)l_retCode );
     }
 
     fapi_try_exit:
-#endif
     FAPI_DBG("<< initSelfSaveRestoreEntries" );
     return fapi2::current_err;
 }
@@ -925,18 +912,98 @@ fapi2::ReturnCode buildQmeHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   *
 //----------------------------------------------------------------------------------------------
 
 /**
+ * @brief populates SCOM restore headers at the base of each EQ region
+ * @param[in]   i_procTgt       fapi2 target for P10.
+ * @param[in]   i_pChipHomer    points to base of P10  HOMER
+ * @return fapi2 return code.
+ */
+fapi2::ReturnCode   buildScomHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t *i_pChipHomer )
+{
+    FAPI_INF( ">> buildScomHeader" );
+
+    uint8_t l_eqPos = 0;
+    CpmrHeader_t* pCpmrHdr      =
+        (CpmrHeader_t*) & ( i_pChipHomer->iv_cpmrRegion.iv_selfRestoreRegion.iv_CPMR_SR.elements.iv_CPMRHeader);
+    ScomRestoreHeader_t * l_pScomHdr    =   NULL;
+    uint32_t l_eqScomRegionSize =   htobe32(pCpmrHdr->iv_maxCoreL2ScomEntry) +
+                                    htobe32(pCpmrHdr->iv_maxEqL3ScomEntry);
+    uint32_t l_offset   =   0;
+    auto eqList         =
+        i_procTgt.getChildren<fapi2::TARGET_TYPE_EQ>(fapi2::TARGET_STATE_FUNCTIONAL);
+
+    for( auto eq : eqList )
+    {
+        FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS, eq, l_eqPos ));
+        l_offset    =   (l_eqPos * l_eqScomRegionSize * SCOM_RESTORE_ENTRY_SIZE) ;   //Header at the start of an EQ SCOM region
+        l_pScomHdr  =   (ScomRestoreHeader_t *)&i_pChipHomer->iv_cpmrRegion.
+                                                iv_selfRestoreRegion.iv_coreScom[l_offset];
+
+        //FIXME Need to clarify modulus 32B mentioned in spec
+        l_pScomHdr->iv_magicMark    =   htobe16(SCOM_REST_MAGIC_WORD);
+        l_pScomHdr->iv_version      =   SCOM_RESTORE_VER;
+        l_pScomHdr->iv_coreOffset   =   sizeof(ScomRestoreHeader_t);
+        l_pScomHdr->iv_l2Offset     =   l_pScomHdr->iv_coreOffset;
+
+        l_pScomHdr->iv_coreLength   =   (SCOM_RESTORE_L2_CORE * SCOM_RESTORE_ENTRY_SIZE * MAX_CORES_PER_QUAD);
+        l_pScomHdr->iv_coreLength   =   ( l_pScomHdr->iv_coreLength + BCE_RD_BLOCK_SIZE - 1 );
+        l_pScomHdr->iv_coreLength   =   ( l_pScomHdr->iv_coreLength >> SHIFT_RD_BLOCK_SIZE );
+        l_pScomHdr->iv_coreLength   =   ( l_pScomHdr->iv_coreLength << SHIFT_RD_BLOCK_SIZE );
+
+        l_pScomHdr->iv_l3Offset     =   l_pScomHdr->iv_coreOffset + l_pScomHdr->iv_coreLength;
+
+        l_pScomHdr->iv_l3Length     =   ((SCOM_RESTORE_L3_CACHE * SCOM_RESTORE_ENTRY_SIZE) * MAX_L3_PER_QUAD);
+        l_pScomHdr->iv_l3Length     =   ( l_pScomHdr->iv_l3Length + BCE_RD_BLOCK_SIZE - 1 );
+        l_pScomHdr->iv_l3Length     =   ( l_pScomHdr->iv_l3Length >> SHIFT_RD_BLOCK_SIZE );
+        l_pScomHdr->iv_l3Length     =   ( l_pScomHdr->iv_l3Length << SHIFT_RD_BLOCK_SIZE );
+
+        l_pScomHdr->iv_eqOffset     =   l_pScomHdr->iv_l3Offset;
+        l_pScomHdr->iv_eqLength     =   l_pScomHdr->iv_l3Length;
+
+#ifndef __HOSTBOOT_MODULE
+        l_pScomHdr->iv_coreOffset   =   htobe16(l_pScomHdr->iv_coreOffset);
+        l_pScomHdr->iv_l2Offset     =   htobe16(l_pScomHdr->iv_l2Offset);
+        l_pScomHdr->iv_eqOffset     =   htobe16(l_pScomHdr->iv_eqOffset);
+        l_pScomHdr->iv_l3Offset     =   htobe16(l_pScomHdr->iv_l3Offset);
+
+        l_pScomHdr->iv_coreLength   =   htobe16( l_pScomHdr->iv_coreLength );
+        l_pScomHdr->iv_l2Length     =   htobe16( l_pScomHdr->iv_l2Length );
+        l_pScomHdr->iv_eqLength     =   htobe16( l_pScomHdr->iv_eqLength );
+        l_pScomHdr->iv_l3Length     =   htobe16( l_pScomHdr->iv_l3Length );
+#endif
+
+        FAPI_DBG( "=================== SCOM Restore Entry Header ====================" );
+        FAPI_DBG( "SCOM Magic Word          0x%04x",  htobe16(l_pScomHdr->iv_magicMark) );
+        FAPI_DBG( "SCOM Restore Ver         0x%02x",  l_pScomHdr->iv_version );
+        FAPI_DBG( "Core SCOM Offset         0x%04x",  htobe16(l_pScomHdr->iv_coreOffset) );
+        FAPI_DBG( "Core SCOM Length         0x%04x",  htobe16( l_pScomHdr->iv_coreLength ) );
+        FAPI_DBG( "L3 SCOM Offset           0x%04x",  htobe16( l_pScomHdr->iv_l3Offset) );
+        FAPI_DBG( "L3 SCOM Length           0x%04x",  htobe16( l_pScomHdr->iv_l3Length) );
+        FAPI_DBG( "===================================================================" );
+
+    }
+
+   fapi_try_exit:
+    FAPI_INF( "<< buildScomHeader" );
+    return fapi2::current_err;
+}
+
+//----------------------------------------------------------------------------------------------
+
+/**
  * @brief       builds CPMR header in HOMER
  * @param[in]   i_procTgt           fapi2 target for P10 proc chip
  * @param[in]   i_pChipHomer        models HOMER region in memory
  * @param[in]   i_qmeBuildRecord    contains QME image build details.
  * @return      fapi2 return code.
  */
-fapi2::ReturnCode buildCpmrHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   *i_pChipHomer, ImageBuildRecord & i_qmeBuildRecord )
+fapi2::ReturnCode buildCpmrHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   *i_pChipHomer, uint8_t i_fusedState, ImageBuildRecord & i_qmeBuildRecord )
 {
     CpmrHeader_t* pCpmrHdr =
         (CpmrHeader_t*) & ( i_pChipHomer->iv_cpmrRegion.iv_selfRestoreRegion.iv_CPMR_SR.elements.iv_CPMRHeader);
     uint32_t l_qmeHcodeOffset           =    QME_IMAGE_CPMR_OFFSET;
     ImgSectnSumm    l_imgSectn;
+
+    pCpmrHdr->iv_fusedMode   =   i_fusedState ? (uint8_t)(FUSED_CORE_MODE) :(uint8_t)(NONFUSED_CORE_MODE);
 
     if( !i_qmeBuildRecord.getSection( "QME Hcode", l_imgSectn ) )
     {
@@ -959,9 +1026,17 @@ fapi2::ReturnCode buildCpmrHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   
         pCpmrHdr->iv_commonRingLength   =   htobe32( l_imgSectn.iv_sectnLength );
     }
 
+    pCpmrHdr->iv_maxCoreL2ScomEntry   =     htobe32(MAX_CORE_SCOM_ENTRIES + MAX_L2_SCOM_ENTRIES);
+    pCpmrHdr->iv_maxEqL3ScomEntry     =     htobe32(MAX_EQ_SCOM_ENTRIES + MAX_L3_SCOM_ENTRIES);
+
     i_qmeBuildRecord.dumpBuildRecord();
 
- //fapi_try_exit:
+    FAPI_TRY( buildScomHeader( i_procTgt, i_pChipHomer ) );
+
+    FAPI_INF( "Max Core L2 SCOM Entry       0x%08x", htobe32( pCpmrHdr->iv_maxCoreL2ScomEntry) );
+    FAPI_INF( "Max Cache L3 SCOM Entry      0x%08x",  htobe32( pCpmrHdr->iv_maxEqL3ScomEntry) );
+
+ fapi_try_exit:
     FAPI_INF( "<< buildQmeHeader" )
     return fapi2::current_err;
 }
@@ -992,6 +1067,30 @@ fapi2::ReturnCode initCpmrAttribute( Homerlayout_t   *i_pChipHomer,
     fapi_try_exit:
     return fapi2::current_err;
 }
+
+//----------------------------------------------------------------------------------------------
+
+/**
+ * @brief populates Magic Word in various headers
+ * @param[in]   i_pChipHomer        models HOMER region in memory
+ * @return      fapi2 return code.
+ */
+fapi2::ReturnCode populateMagicWord( Homerlayout_t   *i_pChipHomer )
+{
+    FAPI_INF( ">> populateMagicWord" );
+    //Populate CPMR Header's Magic Word
+    CpmrHeader_t* pCpmrHdr      =
+        (CpmrHeader_t*) & ( i_pChipHomer->iv_cpmrRegion.iv_selfRestoreRegion.iv_CPMR_SR.elements.iv_CPMRHeader);
+    QmeHeader_t* pQmeImgHdr     =
+            (QmeHeader_t*) & i_pChipHomer->iv_cpmrRegion.iv_qmeSramRegion[QME_INT_VECTOR_SIZE];
+
+    pCpmrHdr->iv_magicWord          =   htobe64(CPMR_MAGIC_NUMBER);
+    pQmeImgHdr->g_qme_magic_number  =   htobe64(QME_MAGIC_NUMBER);
+
+    FAPI_INF( "<< populateMagicWord" );
+    return fapi2::current_err;
+}
+
 //----------------------------------------------------------------------------------------------
 
 fapi2::ReturnCode buildCpmrImage( CONST_FAPI2_PROC& i_procTgt,
@@ -1029,13 +1128,13 @@ fapi2::ReturnCode buildCpmrImage( CONST_FAPI2_PROC& i_procTgt,
     FAPI_TRY( buildQmeImage( i_pImageIn, i_pChipHomer, i_imgType, i_chipFuncModel, l_qmeBuildRecord ),
               "Failed To Copy QME Section In HOMER" );
 
-    FAPI_TRY( buildQmeRing( i_procTgt, i_pImageIn, i_pChipHomer, i_chipFuncModel, i_ringData, l_qmeBuildRecord ),
-              "Failed To Build QME Ring Region" );
+    //FAPI_TRY( buildQmeRing( i_procTgt, i_pImageIn, i_pChipHomer, i_chipFuncModel, i_ringData, l_qmeBuildRecord ),
+    //          "Failed To Build QME Ring Region" );
 
     FAPI_TRY( buildQmeHeader( i_procTgt, i_pChipHomer, l_qmeBuildRecord ),
               "Failed To Build CME Image Header" );
 
-    FAPI_TRY( buildCpmrHeader( i_procTgt, i_pChipHomer, l_qmeBuildRecord ),
+    FAPI_TRY( buildCpmrHeader( i_procTgt, i_pChipHomer, l_fuseModeState, l_qmeBuildRecord ),
               "Failed To Build CPMR Header" );
 
     FAPI_TRY( initCpmrAttribute( i_pChipHomer, l_qmeBuildRecord ),
@@ -1108,6 +1207,9 @@ fapi2::ReturnCode p10_hcode_image_build(    CONST_FAPI2_PROC& i_procTgt,
 
     FAPI_TRY( buildCpmrImage( i_procTgt, i_pImageIn, pChipHomer, i_phase, i_imgType, l_chipFuncModel, l_ringData ),
               "Failed To Build CPMR Region of HOMER " );
+
+    FAPI_TRY( populateMagicWord( pChipHomer ),
+              "Failed To Copy Magic Words" );
 
 fapi_try_exit:
     FAPI_IMP("<< p10_hcode_image_build" );
