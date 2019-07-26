@@ -102,6 +102,9 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
     bool l_updateHeader = true;
     bool l_updateContents = true;
 
+    // Initially assume this is a new eeprom cache entry
+    bool l_newEntryDetected = true;
+
     do{
         // eepromReadAttributes keys off the eepromRole value
         // to determine what attribute to lookup to get eeprom info
@@ -222,6 +225,9 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
             if( memcmp(l_recordHeaderToUpdate, &l_eepromRecordHeader, NUM_BYTE_UNIQUE_ID ) == 0 )
             {
                 l_recordHeaderToUpdateIndex = i;
+                // We have matched with existing eeprom in the PNOR's EECACHE
+                // section. So we know this is not a new entry.
+                l_newEntryDetected = false;
 
                 if( l_recordHeaderToUpdate->completeRecord.cache_copy_size != l_eepromRecordHeader.completeRecord.cache_copy_size)
                 {
@@ -414,16 +420,15 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
         else if(!i_present)
         {
             // If the target is not present, then do not update contents
-            // or header
             l_updateContents = false;
-            l_updateHeader = false;
+            // Only update header if this is a new entry
+            l_updateHeader = l_newEntryDetected;
         }
-        // The check below makes sure that is isnt a new entry, because
-        // new entries do not have internal_offset set in header.
+        // The check below makes sure that is isnt a new entry
         // If there is a matching header entry in PNOR marked 'invalid'
         // but we now see the target as present, this indicates a replacement
         // part has been added where a part was removed
-        else if(l_recordHeaderToUpdate->completeRecord.internal_offset != UNSET_INTERNAL_OFFSET_VALUE)
+        else if(!l_newEntryDetected)
         {
             TRACFCOMP(g_trac_eeprom, "cacheEeprom() Detected replacement of a part"
                       " Master 0x%.08X Engine 0x%.02X"
