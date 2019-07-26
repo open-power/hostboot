@@ -292,7 +292,7 @@ class Target
 
         ///
         /// @brief Get this target's children
-        /// @tparam T The type of the parent
+        /// @tparam T The type of the children
         /// @param[in] i_state The desired TargetState of the children
         /// @return std::vector<Target<T,V>> a vector of present/functional
         /// children
@@ -305,7 +305,7 @@ class Target
 
         ///
         /// @brief Get this target's children, filtered
-        /// @tparam T The type of the parent
+        /// @tparam T The type of the children
         /// @param[in] i_filter The desired chiplet filter
         /// @param[in] i_state The desired TargetState of the children
         /// @return std::vector<Target<T,V>> a vector of present/functional
@@ -427,6 +427,60 @@ class Target
 
         /// @brief Internal implementation of getCoreSelect, filtered for CORE targets
         inline MulticastCoreSelect _getCoreSelect(void) const;
+
+        ///
+        /// @brief Static checks for getParent.
+        ///        Platform implementations are expected to call this.
+        /// @tparam T The type of the parent
+        ///
+        template< TargetType T >
+        inline void check_getParent(void) const
+        {
+            // It's forbidden to strip multicast from a target below PROC_CHIP level:
+            // Since a multicast might end up expanding to more than one unicast target,
+            // users are required to use getChildren if they want to map back to unicast.
+            static_assert(!(((K ^ T) & TARGET_TYPE_MULTICAST) && ((T & TARGET_TYPE_CHIPLETS) != TARGET_TYPE_NONE)),
+                          "Parent target for a multicast target must also be multicast or PROC_CHIP");
+        }
+
+        ///
+        /// @brief Static compile time checks for getChildren.
+        ///        Platform implementations are expected to call this.
+        /// @tparam T The type of the children
+        ///
+        template< TargetType T>
+        inline void check_getChildren() const
+        {
+            // valid children for multicast targets are the same with multicast stripped
+            static_assert(!((K & TARGET_TYPE_MULTICAST) &&
+                            (K != (T | TARGET_TYPE_MULTICAST))),
+                          "improper child of fapi2::TARGET_TYPE_MULTICAST");
+        }
+
+        ///
+        /// @brief Static checks for getMulticast(). Platforms are expected to call this.
+        /// @tparam T The type of target to return; TARGET_TYPE_MULTICAST is added automatically
+        /// @tparam O The type of multicast read operation for the target; defaults to OR
+        ///
+        template< TargetType T, MulticastType O >
+        inline void check_getMulticast() const
+        {
+            // C++ does not allow partial specialization of class member functions (please prove me wrong!),
+            // so we need to use this static assertion instead. On the upside, the error message is much clearer ;)
+            static_assert((K == TARGET_TYPE_PROC_CHIP), "Parent target must be the proc chip");
+            static_assert((T & TARGET_TYPE_MULTICASTABLE) != 0,
+                          "Requested target type must be part of TARGET_TYPE_MULTICASTABLE");
+            static_assert(bitCount<T>::count == 1,
+                          "Requested target type must be a single type, TARGET_TYPE_MULTICAST will be added automatically");
+        }
+
+        ///
+        /// @brief Static checks for getChipletNumber. Platforms are expected to call this.
+        ///
+        inline void check_getChipletNumber(void) const
+        {
+            static_assert((K & TARGET_TYPE_MULTICAST) == 0, "getChipletNumber is not supported for multicast targets");
+        }
 };
 
 // EX threads map to CORE threads:
