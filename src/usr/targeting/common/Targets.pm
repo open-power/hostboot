@@ -1070,6 +1070,7 @@ sub buildAffinity
 
             $self->{targeting}{SYS}[0]{NODES}[$node]{DIMMS}[$dimm]{KEY} = $target;
             $self->setAttribute($target, "PHYS_PATH", $node_phys . "/dimm-$dimm");
+            $self->setHuid($target, $sys_pos, $node);
 
             # The standard fapi_pos calculation uses the relative position to
             # the proc instead of omi_chip_unit. However, in this case, there is
