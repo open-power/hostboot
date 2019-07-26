@@ -180,17 +180,15 @@ p10_hcd_corecache_power_control(
 
         do
         {
-            if (!l_attr_runn_mode)
+            FAPI_TRY( HCD_GETMMIO_C( i_target, HCD_CPMS_PFETSTAT[l_isL3], l_mmioData ) );
+
+            MMIO_GET32H(l_pfet_senses);
+
+            //use multicastAND to check 1
+            if( ( !l_attr_runn_mode ) &&
+                ( l_pfet_senses & HCD_PFET_SENSE_BITS[l_isON][l_isVCS] ) )
             {
-                FAPI_TRY( HCD_GETMMIO_C( i_target, HCD_CPMS_PFETSTAT[l_isL3], l_mmioData ) );
-
-                MMIO_GET32H(l_pfet_senses);
-
-                //use multicastAND to check 1
-                if( l_pfet_senses & HCD_PFET_SENSE_BITS[l_isON][l_isVCS] )
-                {
-                    break;
-                }
+                break;
             }
 
             // Debug read
@@ -201,15 +199,16 @@ p10_hcd_corecache_power_control(
         }
         while( (--l_timeout) != 0 );
 
-        FAPI_ASSERT((l_timeout != 0),
-                    fapi2::CORECACHE_POW_CTRL_TIMEOUT()
-                    .set_POW_CTRL_POLL_TIMEOUT_HW_NS(HCD_CORECACHE_POW_CTRL_POLL_TIMEOUT_HW_NS)
-                    .set_PFET_SENSES(l_pfet_senses)
-                    .set_POW_COMMAND(l_isON)
-                    .set_POW_HEADERS(l_isVCS)
-                    .set_POW_DOMAINS(l_isL3)
-                    .set_CORE_TARGET(i_target),
-                    "Core/Cache PFET Control Timeout");
+        FAPI_ASSERT( ( l_attr_runn_mode ?
+                       ( l_pfet_senses & HCD_PFET_SENSE_BITS[l_isON][l_isVCS] ) : (l_timeout != 0) ),
+                     fapi2::CORECACHE_POW_CTRL_TIMEOUT()
+                     .set_POW_CTRL_POLL_TIMEOUT_HW_NS(HCD_CORECACHE_POW_CTRL_POLL_TIMEOUT_HW_NS)
+                     .set_PFET_SENSES(l_pfet_senses)
+                     .set_POW_COMMAND(l_isON)
+                     .set_POW_HEADERS(l_isVCS)
+                     .set_POW_DOMAINS(l_isL3)
+                     .set_CORE_TARGET(i_target),
+                     "Core/Cache PFET Control Timeout");
 
 #endif
 

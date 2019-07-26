@@ -225,6 +225,17 @@
 #define SCOM_LOAD64(hword, lword)         BUF_LOAD2(BUF_SCOM,0,0,32,hword,32,32,lword)
 
 //-------------------------
+// Structs
+//-------------------------
+
+typedef struct
+{
+    uint16_t scomEntryTag;
+    uint16_t scomEntryAddress;
+    uint64_t scomEntryData;
+} ScomEntry_t;
+
+//-------------------------
 // Constants
 //-------------------------
 
@@ -233,6 +244,10 @@
 // Instead of namespace protection, here will always use unique HCD prefix
 // in ALL namings that shouldnt be used outside of Hcode team.
 
+enum P10_QME_SCOM_RESTORE_CONST
+{
+    SCOM_REST_SKIP_CODE = 0x60000000,
+};
 
 // Constants to calculate hcd poll timeout intervals
 enum P10_HCD_TIMEOUT_CONSTANTS

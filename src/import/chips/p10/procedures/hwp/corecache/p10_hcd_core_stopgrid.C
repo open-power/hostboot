@@ -94,15 +94,13 @@ p10_hcd_core_stopgrid(
 
     do
     {
-        if (!l_attr_runn_mode)
-        {
-            FAPI_TRY( HCD_GETMMIO_C( i_target, MMIO_LOWADDR(CPMS_CGCSR), l_mmioData ) );
+        FAPI_TRY( HCD_GETMMIO_C( i_target, MMIO_LOWADDR(CPMS_CGCSR), l_mmioData ) );
 
-            // use multicastOR to check 0
-            if( MMIO_GET(MMIO_LOWBIT(33)) == 0 )
-            {
-                break;
-            }
+        // use multicastOR to check 0
+        if( ( !l_attr_runn_mode ) &&
+            ( MMIO_GET(MMIO_LOWBIT(33)) == 0 ) )
+        {
+            break;
         }
 
         fapi2::delay(HCD_ECL2_CLK_SYNC_DROP_POLL_DELAY_HW_NS,
@@ -110,12 +108,12 @@ p10_hcd_core_stopgrid(
     }
     while( (--l_timeout) != 0 );
 
-    FAPI_ASSERT((l_timeout != 0),
-                fapi2::ECL2_CLK_SYNC_DROP_TIMEOUT()
-                .set_ECL2_CLK_SYNC_DROP_POLL_TIMEOUT_HW_NS(HCD_ECL2_CLK_SYNC_DROP_POLL_TIMEOUT_HW_NS)
-                .set_CPMS_CGCSR(l_mmioData)
-                .set_CORE_TARGET(i_target),
-                "ECL2 Clock Sync Drop Timeout");
+    FAPI_ASSERT( ( l_attr_runn_mode ? ( MMIO_GET(MMIO_LOWBIT(33)) == 0 ) : (l_timeout != 0) ),
+                 fapi2::ECL2_CLK_SYNC_DROP_TIMEOUT()
+                 .set_ECL2_CLK_SYNC_DROP_POLL_TIMEOUT_HW_NS(HCD_ECL2_CLK_SYNC_DROP_POLL_TIMEOUT_HW_NS)
+                 .set_CPMS_CGCSR(l_mmioData)
+                 .set_CORE_TARGET(i_target),
+                 "ECL2 Clock Sync Drop Timeout");
 
 #endif
 
