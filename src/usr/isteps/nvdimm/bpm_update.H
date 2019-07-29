@@ -162,21 +162,29 @@ typedef config_image_fragment config_image_fragment_t;
  *    16 bytes: data
  *    2 bytes: CRC
  */
-extern const size_t MAX_PAYLOAD_SIZE;
+constexpr size_t MAX_PAYLOAD_SIZE = 26;
 
 // Max number of bytes data section of payload can be.
-extern const size_t MAX_PAYLOAD_DATA_SIZE;
+constexpr size_t MAX_PAYLOAD_DATA_SIZE = 16;
 
 // Number of bytes for header, address, extra, and CRC
-extern const size_t MAX_PAYLOAD_OTHER_DATA_SIZE;
+constexpr size_t MAX_PAYLOAD_OTHER_DATA_SIZE = 10;
 
 // Number of bytes for the header.
-extern const uint8_t PAYLOAD_HEADER_SIZE;
+constexpr uint8_t PAYLOAD_HEADER_SIZE = 4;
+
+// Indices of where to find certain data within a constructed payload.
+// These indices have been subtracted by 1 from the given payload format because
+// after a payload is constructed the sync byte is removed from the front.
+constexpr uint8_t PAYLOAD_COMMAND_INDEX = 0;
+constexpr uint8_t PAYLOAD_DATA_START_INDEX = 7;
+constexpr uint8_t PAYLOAD_HEADER_DATA_LENGTH_INDEX = 1;
 
 // The sync byte that must always be at the front of a BPM payload. This is used
 // calculate the CRC of the payload and then removed because the nvdimm
 // automatically sends the sync byte ahead of the payload.
-extern const uint8_t SYNC_BYTE;
+constexpr uint8_t SYNC_BYTE = 0x80;
+constexpr uint8_t SYNC_BYTE_SIZE = sizeof(uint8_t);
 
 // Maximum size of any segment in the config data section
 constexpr size_t SEGMENT_SIZE = 128;
@@ -411,6 +419,9 @@ private:
 
     // The Bootstrap Loader version of the BPM
     uint8_t iv_bslVersion;
+
+    // The firmware address for the BPM image can be either 0x8000 or 0xA000.
+    // This member will keep track of which one it is.
     uint16_t iv_firmwareStartAddress;
 
     // Keeps track of if the update should be attempted again.
@@ -426,7 +437,6 @@ private:
     // yet.
     bool iv_segmentDMerged;
     bool iv_segmentBMerged;
-
     /**
      * @brief Gets the BSL version from the BPM and sets the iv_bslVersion
      *        member. Only needs to be called once.
@@ -715,6 +725,37 @@ private:
     errlHndl_t preprocessSegments(BpmConfigLidImage i_configImage);
 
     /**
+     *  @brief  Verifies that the data written into the flash on the BPM is what
+     *          was sent by hostboot in a payload.
+     *
+     *  @param[in]  i_payload       The payload that was just sent to the BPM to
+     *                              be verified.
+     *
+     *  @param[in]  i_dataLength    The length of the data section of the
+     *                              payload.
+     *
+     *  @param[in]  o_status        The status code returned from the BPM.
+     *                              A status of 0 indicates success, all other
+     *                              values are a failure.
+     *
+     *  @return     errlHndl_t      nullptr if no errors. Otherwise, an error.
+     */
+    errlHndl_t verifyBlockWrite(payload_t i_payload,
+                                uint8_t   i_dataLength,
+                                uint8_t & o_status);
+
+    /**
+     *  @brief Attempts a BSL_RX_DATA_BLOCK command up to three times.
+     *
+     *  @param[in]  i_payload       The payload containing the BSL_RX_DATA_BLOCK
+     *                              command and the data to be attempted to be
+     *                              written.
+     *
+     *  @return     errlHndl_t      nullptr on success. Otherwise, an error.
+     */
+    errlHndl_t blockWrite(payload_t i_payload);
+
+    /**
      * @brief A helper function used to wait for the command status bit to reset
      *        after a command is executed.
      *
@@ -750,14 +791,17 @@ private:
     /**
      *  @brief After a command is sent to the BPM to request info from it this
      *         function processes the response and returns it to the caller.
-     *         Must be in BSL mode.
+     *         A response packet can only be received once per command sent to
+     *         the BPM. Which means that the caller must resend the command
+     *         again to get another response packet. Simply calling the function
+     *         repeatedly will not work. BPM must be in BSL mode.
      *
      *  @param[in]  o_responseData      The buffer to be filled with the
      *                                  response data from the BPM.
      *
      *  @param[in]  i_responseSize      The size of the buffer to be filled.
      *
-     *  @return     errlHndl_t      nullptr on success. Otherwise, an error.
+     *  @return     errlHndl_t          nullptr on success. Otherwise, an error.
      */
     errlHndl_t getResponse(uint8_t * o_responseData,
                            uint8_t   i_responseSize);

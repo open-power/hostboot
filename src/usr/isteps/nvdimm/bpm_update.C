@@ -47,13 +47,6 @@ TRAC_INIT(&g_trac_bpm, BPM_COMP_NAME, 4*KILOBYTE);
 #define TRACUCOMP(args...)
 //#define TRACUCOMP(args...) TRACFCOMP(args)
 
-// See bpm_update.H for more info on these constants.
-const size_t MAX_PAYLOAD_SIZE            = 26;
-const size_t MAX_PAYLOAD_DATA_SIZE       = 16;
-const size_t MAX_PAYLOAD_OTHER_DATA_SIZE = 10;
-const uint8_t PAYLOAD_HEADER_SIZE        = 4;
-const uint8_t SYNC_BYTE                  = 0x80;
-
 // These constants are kept out of the header file since they aren't relevant
 // outside of this file.
 const uint16_t BPM_ADDRESS_ZERO = 0;
@@ -92,6 +85,8 @@ const std::map<uint16_t, size_t> segmentMap
     {SEGMENT_C_CODE, SEGMENT_C_START_ADDR},
     {SEGMENT_D_CODE, SEGMENT_D_START_ADDR},
 };
+
+const size_t MAX_RETRY = 3;
 
 /**
  * @brief A helper function used in assert statements to verify the correct
@@ -219,7 +214,6 @@ void longSleep(uint8_t const i_sleepInSeconds)
         --iterations;
     } while (iterations > 0);
 }
-
 
 // =============================================================================
 //                      BpmFirmwareLidImage Class Functions
@@ -519,12 +513,16 @@ errlHndl_t Bpm::issueCommand(const uint8_t i_command,
 
     do {
 
-        if (i_payload.size() > MAX_PAYLOAD_SIZE)
+        // Check the full payload size to make sure it's not too large. Add the
+        // size of the SYNC_BYTE that was dropped during payload creation to
+        // verify that the full payload sent by the NVDIMM won't exceed the max
+        // size the BPM is able to receive.
+        if ((i_payload.size() + SYNC_BYTE_SIZE) > MAX_PAYLOAD_SIZE)
         {
             //@TODO RTC 212447: Error
             TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::issueCommand(): "
                      "payload size %d exceeds max payload size of %d",
-                     i_payload.size(), MAX_PAYLOAD_SIZE);
+                     (i_payload.size() + SYNC_BYTE_SIZE), MAX_PAYLOAD_SIZE);
             break;
         }
 
@@ -560,7 +558,9 @@ errlHndl_t Bpm::issueCommand(const uint8_t i_command,
             break;
         }
 
-        // Set the payload length
+        // Set the payload length. This is the actual length of the payload
+        // excluding the size of the SYNC_BYTE that was dropped during payload
+        // creation which is already missing from size().
         uint8_t data = i_payload.size();
         errl = nvdimmWriteReg(iv_nvdimm,
                               BPM_PAYLOAD_LENGTH,
@@ -902,8 +902,12 @@ errlHndl_t Bpm::updateFirmware(BpmFirmwareLidImage i_image)
 
     // There are two potential start addresses for the firmware section.
     // They are:
-    const uint16_t MAIN_PROGRAM_ADDRESS = 0x8000;
+    const uint16_t MAIN_PROGRAM_ADDRESS     = 0x8000;
     const uint16_t MAIN_PROGRAM_ADDRESS_ALT = 0xA000;
+
+    // The reset vector address is near the end of the firmware section.
+    // We must do a special operation on it when it shows up during the update.
+    const uint16_t RESET_VECTOR_ADDRESS     = 0xFFFE;
 
     bool mainAddressEncountered = false;
 
@@ -959,15 +963,85 @@ errlHndl_t Bpm::updateFirmware(BpmFirmwareLidImage i_image)
             break;
         }
 
-        // Send the payload data over as a pass-through command
-        errl = issueCommand(BPM_PASSTHROUGH, payload, WRITE);
-        if (errl != nullptr)
+        if (block->iv_addressOffset == RESET_VECTOR_ADDRESS)
         {
-            break;
+            // Attempting to BSL_VERIFY_BLOCK on the reset vector data will
+            // fail. To verify that this data is written correctly we will check
+            // the response packet sent by the BPM.
+            const uint8_t RESET_VECTOR_RECEIVE_SUCCESS = 0x80;
+            uint8_t retry = 1;
+            do
+            {
+                // Issue the write command to the BPM.
+                errl = issueCommand(BPM_PASSTHROUGH, payload, WRITE);
+                if (errl != nullptr)
+                {
+                    break;
+                }
+
+                // Get the response packet and verify that the status is
+                // RESET_VECTOR_RECEIVE_SUCCESS.
+                //
+                // Any status besides RESET_VECTOR_RECEIVE_SUCCESS is considered
+                // a fail. So, assume a failure and check.
+                uint8_t status = 0xFF;
+                errl = getResponse(&status,
+                                   sizeof(uint8_t));
+                if (errl != nullptr)
+                {
+                    break;
+                }
+
+                if (status != RESET_VECTOR_RECEIVE_SUCCESS)
+                {
+                    TRACFCOMP(g_trac_bpm, "Bpm::updateFirmware(): "
+                             "status %d from BPM was not "
+                             "RESET_VECTOR_RECEIVE_SUCCESS value of %d. "
+                             "Retrying...",
+                             status,
+                             RESET_VECTOR_RECEIVE_SUCCESS);
+                    if (++retry > MAX_RETRY)
+                    {
+                        TRACFCOMP(g_trac_bpm, "Bpm::updateFirmware(): "
+                                  "Never received RESET_VECTOR_RECEIVE_SUCCESS "
+                                  "status from BPM in three attempts. "
+                                  "Aborting Update");
+                        //TODO RTC 212447 Error
+
+                        // Flip the status of iv_attemptAnotherUpdate to signal
+                        // if another update attempt should occur.
+                        iv_attemptAnotherUpdate = !iv_attemptAnotherUpdate;
+
+                        break;
+                    }
+                }
+                else
+                {
+                    // RESET_VECTOR was written and received successfully.
+                    // Exit retry loop.
+                    break;
+                }
+
+                // Sleep for 0.001 second before attempting again.
+                nanosleep(0, 1 * NS_PER_MSEC);
+
+            } while(retry <= MAX_RETRY);
+            if (errl != nullptr)
+            {
+                break;
+            }
+        }
+        else
+        {
+            // Attempt to write the data using a retry loop. This will also
+            // verify that the data was correctly written to the BPM.
+            errl = blockWrite(payload);
+            if (errl != nullptr)
+            {
+                break;
+            }
         }
 
-        // Sleep for 0.001 second
-        nanosleep(0, 1 * NS_PER_MSEC);
 
         // Move to the next block
         // iv_blocksize doesn't include the sizeof itself. So, add another byte
@@ -1921,21 +1995,21 @@ errlHndl_t Bpm::writeSegment(uint8_t const (&i_buffer)[SEGMENT_SIZE],
                                 addressOffset,
                                 &i_buffer[offset],
                                 MAX_PAYLOAD_DATA_SIZE);
-
             if (errl != nullptr)
             {
                 break;
             }
 
-            // Send the payload data over as a pass-through command
-            errl = issueCommand(BPM_PASSTHROUGH, payload, WRITE);
+            // Attempt to write the payload using a retry loop.
+            errl = blockWrite(payload);
             if (errl != nullptr)
             {
                 break;
             }
-
-            // Sleep for 0.001 second.
-            nanosleep(0, 1 * NS_PER_MSEC);
+        }
+        if (errl != nullptr)
+        {
+            break;
         }
 
     } while(0);
@@ -2132,6 +2206,130 @@ errlHndl_t Bpm::getResponse(uint8_t * const o_responseData,
     } while(0);
 
     return errl;
+}
+
+errlHndl_t Bpm::verifyBlockWrite(payload_t  i_payload,
+                            uint8_t    i_dataLength,
+                            uint8_t  & o_status)
+{
+    errlHndl_t errl = nullptr;
+    // Assume a bad status.
+    o_status = 0xFF;
+
+    do {
+
+        // Pull the address to verify out of the payload. It was inserted in
+        // little endian form so it needs to be converted back to big endian.
+        uint16_t address = (i_payload[PAYLOAD_HEADER_SIZE])
+                         & (i_payload[PAYLOAD_HEADER_SIZE + 1] << 8);
+
+        // The data section of the payload is organized in the following way:
+        // 2 bytes: uint16_t size of data to verify in little endian format
+        // 2 bytes: CRC of the data to be verified on the BPM.
+        const size_t VERIFY_BLOCK_PAYLOAD_DATA_SIZE = 4;
+        uint8_t data[VERIFY_BLOCK_PAYLOAD_DATA_SIZE] = {0};
+
+        // Since the data length is stored as uint16_t but the length we deal
+        // with is uint8_t we can easily convert this to little endian by
+        // storing our uint8_t data length in the first index of the array and
+        // leaving the next index 0.
+        data[0] = i_dataLength;
+
+        // Calculate the uint16_t CRC for the data that was written to the BPM.
+        // The BPM will compare its calculated CRC with this one to verify if
+        // the block was written correctly.
+        uint16_t crc = crc16_calc(&i_payload[PAYLOAD_DATA_START_INDEX],
+                                  i_dataLength);
+
+        memcpy(&data[2], &crc, sizeof(uint16_t));
+
+        payload_t verifyPayload;
+        errl = setupPayload(verifyPayload,
+                            BSL_VERIFY_BLOCK,
+                            address,
+                            data,
+                            VERIFY_BLOCK_PAYLOAD_DATA_SIZE);
+        if (errl != nullptr)
+        {
+            break;
+        }
+
+        // Issue the command to the BPM.
+        errl = issueCommand(BPM_PASSTHROUGH, verifyPayload, WRITE);
+        if (errl != nullptr)
+        {
+            break;
+        }
+
+        errl = getResponse(&o_status, sizeof(uint8_t));
+        if (errl != nullptr)
+        {
+            break;
+        }
+
+    } while(0);
+
+    return errl;
+}
+
+errlHndl_t Bpm::blockWrite(payload_t i_payload)
+{
+    assert(i_payload[PAYLOAD_COMMAND_INDEX] == BSL_RX_DATA_BLOCK,
+          "Bpm::blockWrite(): "
+          "Can only retry for BSL_RX_DATA_BLOCK commands");
+
+    errlHndl_t errl = nullptr;
+    uint8_t retry = 1;
+
+    do {
+
+        // Send the payload data over as a pass-through command
+        errl = issueCommand(BPM_PASSTHROUGH, i_payload, WRITE);
+        if (errl != nullptr)
+        {
+            break;
+        }
+
+        // Sleep for 0.001 second
+        nanosleep(0, 1 * NS_PER_MSEC);
+
+        // Any status from verifyBlockWrite that is non-zero is considered a
+        // fail. So, assume a fail and check.
+        uint8_t wasVerified = 0xFF;
+        uint8_t dataLength = i_payload[PAYLOAD_HEADER_DATA_LENGTH_INDEX]
+                           - PAYLOAD_HEADER_SIZE;
+        errl = verifyBlockWrite(i_payload,
+                                dataLength,
+                                wasVerified);
+        if (errl != nullptr)
+        {
+            break;
+        }
+
+        if (!wasVerified)
+        {
+            TRACFCOMP(g_trac_bpm, "Bpm::blockWrite(): "
+                     "BSL_VERIFY_BLOCK failed. Retry %d/%d",
+                     retry,
+                     MAX_RETRY);
+        }
+        else
+        {
+            break;
+        }
+
+    } while (++retry <= MAX_RETRY);
+    if (retry > MAX_RETRY)
+    {
+        // @TODO RTC 212447 error, flag for retry update
+
+        // Flip the state of iv_attemptAnotherUpdate. This will signal
+        // another update attempt or cease further attempts.
+        iv_attemptAnotherUpdate = !iv_attemptAnotherUpdate;
+    }
+
+    return errl;
+
 }
 
 errlHndl_t Bpm::waitForCommandStatusBitReset(
