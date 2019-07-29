@@ -657,99 +657,24 @@ void ErrlEntry::addVersionInfo()
     if (   !INITSERVICE::spBaseServicesEnabled()
         && PNOR::isSectionAvailable(PNOR::VERSION))
     {
-
-// Setting variables only used in config secureboot
-#ifdef CONFIG_SECUREBOOT
-        bool l_secureSectionLoaded = false;
-        errlHndl_t l_errl_loadSecureSection = nullptr;
-#endif
-
-        errlHndl_t l_errl = nullptr;
-
         do
         {
-
-#ifdef CONFIG_SECUREBOOT
-            l_errl_loadSecureSection = PNOR::loadSecureSection(PNOR::VERSION);
-            if (l_errl_loadSecureSection)
-            {
-                TRACFCOMP( g_trac_errl,
-                          "addVersionInfo: Failed to load secure VERSION");
-                // Since an error occurred while attempting to add version info
-                // to another error log there is nothing that can be done with
-                // this error since attempting to commit it will lead to an
-                // infinite loop of committing the error and then recalling this
-                // function. If this error occurred then the VERSION partition
-                // is not added and the error log commit continues.
-                delete l_errl_loadSecureSection;
-                l_errl_loadSecureSection = nullptr;
-                break;
-            }
-            else
-            {
-                l_secureSectionLoaded = true;
-            }
-#endif
-
-            // Get PNOR Version
-            PNOR::SectionInfo_t l_pnorVersionInfo;
-            l_errl = getSectionInfo(PNOR::VERSION, l_pnorVersionInfo);
-
-            if (l_errl)
-            {
-                TRACFCOMP( g_trac_errl,
-                          "addVersionInfo: Failed to getSectionInfo");
-                // Since an error occurred while attempting to add version info
-                // to another error log there is nothing that can be done with
-                // this error since attempting to commit it will lead to an
-                // infinite loop of committing the error and then recalling this
-                // function. If this error occurred then the VERSION partition
-                // is not added and the error log commit continues.
-                delete l_errl;
-                l_errl = nullptr;
-                break;
-            }
-
             const uint8_t* l_versionData =
-                reinterpret_cast<uint8_t*>(l_pnorVersionInfo.vaddr);
+                ERRORLOG::getCachedVersionPartition();
+            size_t l_versionSize =
+                ERRORLOG::getCachedVersionPartitionSize();
 
-            size_t l_numberOfBytes = 0;
-
-            // Determine the size of the version data. The max size is the given
-            // size in the SectionInfo but can be less.
-            while ((static_cast<char>(l_versionData[l_numberOfBytes]) != '\0')
-                  && l_numberOfBytes < l_pnorVersionInfo.size)
+            if(!l_versionData || !l_versionSize)
             {
-                ++l_numberOfBytes;
+                break;
             }
 
-            char l_pVersionString[l_numberOfBytes + 1]={0};
+            char l_pVersionString[l_versionSize + 1]={0};
 
-            memcpy(l_pVersionString, l_versionData, l_numberOfBytes);
+            memcpy(l_pVersionString, l_versionData, l_versionSize);
 
             ErrlUserDetailsString(l_pVersionString).addToLog(this);
         } while(0);
-
-#ifdef CONFIG_SECUREBOOT
-        if (l_secureSectionLoaded)
-        {
-            l_errl_loadSecureSection = PNOR::unloadSecureSection(PNOR::VERSION);
-            if(l_errl_loadSecureSection)
-            {
-                TRACFCOMP( g_trac_errl,
-                          "addVersionInfo: Failed to unload secure VERSION");
-                // Since an error occurred while attempting to add version info
-                // to another error log there is nothing that can be done with
-                // this error since attempting to commit it will lead to an
-                // infinite loop of committing the error and then recalling this
-                // function. If this error occurred then the VERSION partition
-                // is not added and the error log commit continues.
-                delete l_errl_loadSecureSection;
-                l_errl_loadSecureSection = nullptr;
-            }
-        }
-#endif
-
     }
 
 // End of IPL only block
