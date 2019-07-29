@@ -1956,6 +1956,12 @@ sub processMc
 
                 foreach my $dmi (@{ $self->getTargetChildren($mi) })
                 {
+                    my $child_type = $self->getType($dmi);
+                    if ($child_type ne "DMI")
+                    {
+                        next;
+                    }
+
                     my $dmi_num = $self->getAttribute($dmi, "CHIP_UNIT");
 
                     my $membufnum = $proc * $self->{MAX_DMI} + $dmi_num;
@@ -1982,7 +1988,7 @@ sub processMc
                         my $parent_physical = $self->getAttribute($membuf, "PHYS_PATH");
 
                         $self->setAttribute($membuf,"FAPI_NAME",
-                                     $self->getFapiName($membuf_type, $node, $membufnum));
+                                     $self->getFapiName($membuf_type, $node, $membufnum, $memCardOffset));
 
                         my $fapi_pos = (($node * $maxInstance{"PROC"}) + $proc ) * $self->{MAX_DMI} + $dmi_num;
 
