@@ -33,12 +33,15 @@
 // *HWP Level: 2
 // *HWP Consumed by: Memory
 
+#include <fapi2.H>
 #include <generic/memory/lib/utils/find.H>
 #include <lib/workarounds/exp_omi_workarounds.H>
 #include <lib/shared/exp_consts.H>
 #include <lib/omi/exp_omi_utils.H>
 #include <generic/memory/lib/mss_generic_attribute_getters.H>
 #include <generic/memory/lib/mss_generic_system_attribute_getters.H>
+#include <lib/inband/exp_inband.H>
+#include <exp_oc_regs.H>
 
 namespace mss
 {
@@ -132,6 +135,40 @@ fapi2::ReturnCode gem_menterp(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> 
     o_workaround = 0;
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_GEMINI_MENTERP_WORKAROUND, i_target, o_workaround),
              "Error getting ATTR_CHIP_EC_FEATURE_GEMINI_MENTERP_WORKAROUND");
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+/// @brief Determine if / perform the gemini workaround to setup the OMI config registers
+///
+/// @param[in] i_target OCMB (gemini)
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error
+/// @note Gemini workaround to setup METADATA and TEMPLATE bits before doing reads
+///
+fapi2::ReturnCode gem_setup_config(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+{
+    uint8_t l_gemini_config_workaround = 0;
+
+    // Check if gemini workaround should be performed
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_GEMINI_OMI_SETUP_CONFIG_WORKAROUND, i_target,
+                           l_gemini_config_workaround),
+             "Error getting ATTR_CHIP_EC_FEATURE_GEMINI_OMI_SETUP_CONFIG_WORKAROUND");
+
+    if (l_gemini_config_workaround)
+    {
+        // Set metadata bits
+        fapi2::buffer<uint32_t> l_value;
+        l_value.setBit<EXPLR_OC_OCTRLPID_MSB_METADATA_SUPPORTED>();
+        l_value.setBit<EXPLR_OC_OCTRLPID_MSB_METADATA_ENABLED>();
+        FAPI_TRY(mss::exp::ib::putOCCfg(i_target, EXPLR_OC_OCTRLPID_MSB, l_value));
+
+        // Set template bits
+        l_value.flush<0>();
+        l_value.setBit<EXPLR_OC_OTTCFG_MSB_TEMPLATE_0>();
+        l_value.setBit<EXPLR_OC_OTTCFG_MSB_TEMPLATE_5>();
+        FAPI_TRY(mss::exp::ib::putOCCfg(i_target, EXPLR_OC_OTTCFG_MSB, l_value));
+    }
 
 fapi_try_exit:
     return fapi2::current_err;

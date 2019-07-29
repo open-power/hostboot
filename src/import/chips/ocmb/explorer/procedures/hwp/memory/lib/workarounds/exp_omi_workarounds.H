@@ -33,8 +33,8 @@
 // *HWP Level: 2
 // *HWP Consumed by: Memory
 
-#ifndef EXP_OMI_WORKAROUNDS_H_
-#define EXP_OMI_WORKAROUNDS_H_
+#ifndef _EXP_OMI_WORKAROUNDS_H_
+#define _EXP_OMI_WORKAROUNDS_H_
 
 #include <fapi2.H>
 
@@ -78,6 +78,13 @@ fapi2::ReturnCode prbs_ocmb(
 ///
 fapi2::ReturnCode gem_menterp(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> i_target,
                               uint8_t& o_workaround);
+
+/// @brief Determine if / perform the gemini workaround to setup the OMI config registers
+///
+/// @param[in] i_target OCMB (gemini)
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error
+///
+fapi2::ReturnCode gem_setup_config(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
 
 } // omi
 } // workarounds

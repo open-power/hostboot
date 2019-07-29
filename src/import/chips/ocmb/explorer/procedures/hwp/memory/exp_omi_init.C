@@ -39,6 +39,7 @@
 #include <mss_explorer_attribute_getters.H>
 #include <mss_p9a_attribute_getters.H>
 #include <generic/memory/mss_git_data_helper.H>
+#include <lib/workarounds/exp_omi_workarounds.H>
 
 ///
 /// @brief Verify we know how to talk to the connected device
@@ -607,6 +608,7 @@ fapi2::ReturnCode exp_omi_init(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
     mss::display_git_commit_info("exp_omi_init");
 
     FAPI_DBG("Start");
+    FAPI_TRY(mss::exp::workarounds::omi::gem_setup_config(i_target));
     FAPI_TRY(omiDeviceVerify(i_target));
     FAPI_TRY(omiSetUpstreamTemplates(i_target));
     FAPI_TRY(omiValidateDownstream(i_target));
