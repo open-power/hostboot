@@ -128,11 +128,23 @@ namespace HTMGT
                 const occErrlEntry_t * l_occElog =
                     reinterpret_cast<occErrlEntry_t*> (l_buffer.pointer());
 
-                TMGT_BIN("OCC ELOG", l_occElog, 256);
+                TMGT_BIN("OCC ELOG", l_occElog, 320);
 
-                // Get user details section
+                unsigned int l_elog_header_len = OCC_ELOG_HEADER_LENGTH;
+                unsigned int l_max_callout = l_occElog->occ_data.maxCallouts;
+                unsigned int l_callout_size = sizeof(occErrlCallout_t);
+                if (i_source != OCC_ERRSRC_405)
+                {
+                    // PGPE logs require different memory alignment/structures
+                    l_elog_header_len = PGPE_ELOG_HEADER_LENGTH;
+                    l_max_callout = l_occElog->pgpe_data.maxCallouts;
+                    l_callout_size = sizeof(pgpeErrlCallout_t);
+                }
+
+                // Get user details section (after callouts)
                 const occErrlUsrDtls_t *l_usrDtls_ptr = (occErrlUsrDtls_t *)
-                    ((uint8_t*)l_occElog + sizeof(occErrlEntry_t));
+                    ( (uint8_t*)l_occElog +
+                      l_elog_header_len + (l_max_callout * l_callout_size) );
 
                 const uint32_t l_occSrc = l_comp_id | l_occElog->reasonCode;
                 ERRORLOG::errlSeverity_t severity =
@@ -166,6 +178,16 @@ namespace HTMGT
                                    severity,
                                    l_call_home_event);
 
+                uint16_t l_extendedRC = l_usrDtls_ptr->modId << 16;
+                if (i_source == OCC_ERRSRC_405)
+                {
+                    l_extendedRC |= l_occElog->occ_data.extendedRC;
+                }
+                else
+                {
+                    l_extendedRC |= l_occElog->pgpe_data.extendedRC;
+                }
+
                 // Create OCC error log
                 // NOTE: word 4 (used by extended reason code) to save off OCC
                 //       sub component value which is needed to correctly parse
@@ -178,8 +200,7 @@ namespace HTMGT
                           l_usrDtls_ptr->userData1,
                           l_usrDtls_ptr->userData2,
                           l_usrDtls_ptr->userData3,
-                          (l_usrDtls_ptr->modId << 16 ) |
-                          l_occElog->extendedRC, // extended reason code
+                          l_extendedRC,
                           severity);
 
                 if (l_call_home_event)
@@ -190,26 +211,36 @@ namespace HTMGT
                 }
 
                 // Add callout information
-                const uint8_t l_max_callouts = l_occElog->maxCallouts;
                 bool l_bad_fru_data = false;
                 uint8_t numCallouts = 0;
                 uint8_t calloutIndex = 0;
-                while (calloutIndex < l_max_callouts)
+                while (calloutIndex < l_max_callout)
                 {
-                    const occErrlCallout_t callout =
-                        l_occElog->callout[calloutIndex];
-                    if (callout.type != 0)
+                    const occErrlCallout_t *callout = (occErrlCallout_t*)
+                        ( (uint8_t*)l_occElog + l_elog_header_len +
+                          (calloutIndex*l_callout_size) );
+                    if (callout->type != 0)
                     {
                         HWAS::callOutPriority priority;
                         bool l_success = true;
-                        l_success = elogXlateSrciPriority(callout.priority,
+                        l_success = elogXlateSrciPriority(callout->priority,
                                                           priority);
                         if (l_success == true)
                         {
-                            l_success = elogAddCallout(l_errlHndl,
-                                                       priority,
-                                                       callout,
-                                                       numCallouts);
+                            if (i_source == OCC_ERRSRC_405)
+                            {
+                                l_success = elogAddCallout(l_errlHndl,
+                                                           priority,
+                                                          *callout,
+                                                           numCallouts);
+                            }
+                            else
+                            {
+                                l_success = elogAddPgpeCallout(l_errlHndl,
+                                                               priority,
+                                         *((pgpeErrlCallout_t*)callout),
+                                                               numCallouts);
+                            }
                             if (l_success == false)
                             {
                                 l_bad_fru_data = true;
@@ -220,24 +251,26 @@ namespace HTMGT
                             l_bad_fru_data = true;
                             TMGT_ERR("occProcessElog: Priority translate"
                                      " failure (priority = 0x%02X)",
-                                     callout.priority);
+                                     callout->priority);
                         }
                     }
                     else
                     {   // make sure all the remaining callout data are zeros,
                         // otherwise mark bad fru data
-                        const occErrlCallout_t zeros = { 0 };
-                        while (calloutIndex < l_max_callouts)
+                        uint8_t *l_ptr = (uint8_t*)callout;
+                        unsigned int l_len =
+                            (l_max_callout-calloutIndex) * l_callout_size;
+                        while (l_len != 0)
                         {
-                            if (memcmp(&l_occElog->callout[calloutIndex],
-                                       &zeros, sizeof(occErrlCallout_t)))
+                            if (*l_ptr != 0x00)
                             {
                                 TMGT_ERR("occProcessElog: The remaining"
                                          " callout data should be all zeros");
                                 l_bad_fru_data = true;
                                 break;
                             }
-                            ++calloutIndex;
+                            l_len--;
+                            l_ptr++;
                         }
                         break;
                     }
@@ -248,8 +281,10 @@ namespace HTMGT
                 errlHndl_t err2 = nullptr;
                 if (l_bad_fru_data == true)
                 {
-                    TMGT_BIN("Callout Data", &l_occElog->callout[0],
-                             sizeof(occErrlCallout)*ERRL_MAX_CALLOUTS);
+                    const uint8_t *callout_ptr = (uint8_t*)l_occElog
+                        + l_elog_header_len;
+                    TMGT_BIN("Callout Data", callout_ptr,
+                             l_callout_size * ERRL_MAX_CALLOUTS);
                     /*@
                      * @errortype
                      * @refcode LIC_REFCODE
@@ -514,6 +549,65 @@ namespace HTMGT
         return l_success;;
 
     } // end Occ::elogAddCallout()
+
+
+    // Add callout to specified elog
+    bool Occ::elogAddPgpeCallout(errlHndl_t &               io_errlHndl,
+                                 HWAS::callOutPriority    & i_priority,
+                                 const pgpeErrlCallout_t    i_callout,
+                                 uint8_t &                  io_callout_num)
+    {
+        bool l_success = true;
+
+        TMGT_INF("elogAddPgpeCallout: Add callout type:0x%02X, value:0x%016llX,"
+                 " priority:0x%02X",
+                 i_callout.type,i_callout.calloutValue, i_priority);
+
+        if (i_callout.type == OCC_CALLOUT_TYPE_COMPONENT_ID)
+        {
+            tmgtCompxlateType l_compDataType;
+            uint32_t l_compData = 0;
+            const uint8_t l_compId = (i_callout.calloutValue & 0xFF);
+
+            if (elogGetTranslationData(l_compId, l_compDataType, l_compData))
+            {
+                switch(l_compDataType)
+                {
+                    case TMGT_COMP_DATA_SYMBOLIC_FRU:
+                        TMGT_INF("elogAddPgpeCallout: symbolic callout: 0x%08X",
+                                 l_compData);
+                        break;
+                    case TMGT_COMP_DATA_PROCEDURE:
+                        io_errlHndl->addProcedureCallout(
+                                      (HWAS::epubProcedureID)l_compData,
+                                       i_priority);
+                        io_callout_num++;
+                        break;
+                    case TMGT_COMP_DATA_END_OF_TABLE:
+                        break;
+                    default:
+                        TMGT_ERR("elogAddPgpeCallout: Invalid component id"
+                                 " 0x%02X", l_compId);
+                        l_success = false;
+                }
+            }
+            else
+            {
+                TMGT_ERR("elogAddPgpeCallout: Component id translate failure"
+                         " (id=0x%02X)", l_compId);
+                l_success = false;
+            }
+        }
+        else
+        {
+            TMGT_ERR("elogAddPgpeCallout: Invalid callout type (type=%d)",
+                     i_callout.type);
+            l_success = false;
+        }
+
+        return l_success;;
+
+    } // end Occ::elogAddPgpeCallout()
 
 
     void Occ::elogProcessActions(const uint8_t  i_actions,

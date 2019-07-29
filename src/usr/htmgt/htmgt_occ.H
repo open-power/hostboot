@@ -99,6 +99,16 @@ namespace HTMGT
     } __attribute__ ((__packed__));
     typedef struct occErrlCallout occErrlCallout_t;
 
+    // PGPE Callout Structure
+    struct pgpeErrlCallout
+    {
+        uint64_t    calloutValue;
+        uint8_t     type;
+        uint8_t     priority;
+        uint8_t     reserved[6];
+    } __attribute__ ((__packed__));
+    typedef struct pgpeErrlCallout pgpeErrlCallout_t;
+
 
     /**
      *  @class Occ
@@ -379,6 +389,21 @@ namespace HTMGT
                                 HWAS::callOutPriority    & i_priority,
                                 const occErrlCallout_t     i_callout,
                                 uint8_t &                  io_callout_num);
+
+
+            /**
+             * @brief Add specified PGEP callout to the error log
+             *
+             * @param[in,out] io_errlHndl     elog to add callout
+             * @param[in]     i_priority      priority for callout
+             * @param[in]     i_callout       callout from PGPE
+             * @param[in,out] io_numCallouts  number of callouts in elog,
+             *                                incremented if new callout added
+             * */
+            bool elogAddPgpeCallout(errlHndl_t &               io_errlHndl,
+                                    HWAS::callOutPriority    & i_priority,
+                                    const pgpeErrlCallout_t    i_callout,
+                                    uint8_t &                  io_callout_num);
 
 
             /**

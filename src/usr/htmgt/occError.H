@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -130,6 +130,8 @@ namespace HTMGT
 #define ERRL_MAX_CALLOUTS 6
 
     // OCC Error Log Structure
+    const unsigned int OCC_ELOG_HEADER_LENGTH = 12;
+    const unsigned int PGPE_ELOG_HEADER_LENGTH = 16;
     struct occErrlEntry
     {
         // Log CheckSum
@@ -144,14 +146,30 @@ namespace HTMGT
         uint8_t             severity;
         // Actions to process the errors
         uint8_t             actions;
-        // Reserved
-        uint16_t            reserved;
-        // Extended Reason Code
-        uint16_t            extendedRC;
-        // Log Callout Number
-        uint8_t             maxCallouts;
-        // Callouts
-        occErrlCallout      callout[ERRL_MAX_CALLOUTS];
+
+        union // PGPE has different alignment requirements, so structure differs
+        {
+            struct {
+                // Max Elog Size
+                uint16_t            maxSize;
+                // Extended Reason Code
+                uint16_t            extendedRC;
+                // Log Callout Number
+                uint8_t             maxCallouts;
+            } occ_data __attribute__((packed));
+            struct {
+                // Log Callout Number
+                uint8_t             maxCallouts;
+                // Extended Reason Code
+                uint16_t            extendedRC;
+                // Max Elog Size
+                uint16_t            maxSize;
+                // Reserved
+                uint16_t            reserved[2];
+            } pgpe_data __attribute__ ((__packed__));
+        };
+
+        // Callouts start
     } __attribute__ ((__packed__));
     typedef struct occErrlEntry occErrlEntry_t;
 
@@ -192,10 +210,13 @@ namespace HTMGT
 
     const tmgtCompXlate_t tmgt_compXlateTable[TMGT_MAX_COMP_IDS] =
     {
-        { 0x01, TMGT_COMP_DATA_PROCEDURE,    HWAS::EPUB_PRC_HB_CODE}, // FW
-        { 0x04, TMGT_COMP_DATA_SYMBOLIC_FRU, OVERTMP}, // over temperature
-        { 0x05, TMGT_COMP_DATA_SYMBOLIC_FRU, TPMD_OV}, // oversub throttling
-        { 0xFF, TMGT_COMP_DATA_END_OF_TABLE, 0},       // none
+        { OCC_COMPONENT_ID_FIRMWARE,
+            TMGT_COMP_DATA_PROCEDURE,HWAS::EPUB_PRC_HB_CODE},
+        { OCC_COMPONENT_ID_OVER_TEMPERATURE, TMGT_COMP_DATA_SYMBOLIC_FRU,
+            OVERTMP},
+        { OCC_COMPONENT_ID_OVERSUBSCRIPTION, TMGT_COMP_DATA_SYMBOLIC_FRU,
+            TPMD_OV},
+        { OCC_COMPONENT_ID_NONE, TMGT_COMP_DATA_END_OF_TABLE, 0} // END
     };
 
 
