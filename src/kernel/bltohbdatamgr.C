@@ -51,15 +51,11 @@ void BlToHbDataManager::print() const
     if(iv_dataValid)
     {
         printkd("\nBlToHbData (all addr HRMOR relative):\n");
-        if(iv_data.version >= Bootloader::BLTOHB_SAB)
-        {
-            printkd("-- secureSettings: SAB=%d, SecOvrd=%d, AllowAttrOvrd=%d\n",
-                    iv_data.secureAccessBit, iv_data.securityOverride,
-                    iv_data.allowAttrOverrides);
-        }
-
+        printkd("-- secureSettings: SAB=%d, SecOvrd=%d, AllowAttrOvrd=%d\n",
+                iv_data.secureAccessBit, iv_data.securityOverride,
+                iv_data.allowAttrOverrides);
         printkd("-- eyeCatch = 0x%lX (%s)\n", iv_data.eyeCatch,
-                                    reinterpret_cast<char*>(&iv_data.eyeCatch));
+                reinterpret_cast<char*>(&iv_data.eyeCatch));
         printkd("-- version = 0x%lX\n", iv_data.version);
         printkd("-- branchtableOffset = 0x%lX\n", iv_data.branchtableOffset);
         printkd("-- SecureRom Addr = 0x%lX Size = 0x%lX\n", getSecureRomAddr(),
@@ -70,10 +66,8 @@ void BlToHbDataManager::print() const
         printkd("-- HBB header Addr = 0x%lX Size = 0x%lX\n", getHbbHeaderAddr(),
                iv_data.hbbHeaderSize);
         printkd("-- Reserved Size = 0x%lX\n", iv_preservedSize);
-        if(iv_data.version >= Bootloader::BLTOHB_SIZE)
-        {
-            printkd("-- Size of structure = 0x%lX\n", iv_data.sizeOfStructure);
-        }
+        printkd("-- HB Cache Size = %d MB\n", iv_cacheSizeMb);
+        printkd("-- Size of structure = 0x%lX\n", iv_data.sizeOfStructure);
         printkd("\n");
     }
 }
@@ -124,68 +118,26 @@ void BlToHbDataManager::initValid (const Bootloader::BlToHbData& i_data)
     iv_data.hbbHeader = i_data.hbbHeader;
     iv_data.hbbHeaderSize = i_data.hbbHeaderSize;
 
-printk("Version=%lX\n",i_data.version);
-    // Ensure Bootloader to HB structure has the Secure Settings
-    if(iv_data.version >= Bootloader::BLTOHB_SAB)
-    {
-        iv_data.secureAccessBit = i_data.secureAccessBit;
-    }
+    printk("Version=%lX\n",i_data.version);
+    // Apply the Secure Settings
+    iv_data.secureAccessBit = i_data.secureAccessBit;
+    iv_data.securityOverride   = i_data.securityOverride;
+    iv_data.allowAttrOverrides = i_data.allowAttrOverrides;
+    iv_data.secBackdoorBit = i_data.secBackdoorBit;
 
-    if(iv_data.version >= Bootloader::BLTOHB_SECURE_OVERRIDES)
-    {
-        iv_data.securityOverride   = i_data.securityOverride;
-        iv_data.allowAttrOverrides = i_data.allowAttrOverrides;
-    }
-    else
-    {
-        iv_data.securityOverride   = 0;
-        iv_data.allowAttrOverrides = 0;
-    }
+    // Populate the MMIO members
+    kassert(i_data.lpcBAR>0);
+    kassert(i_data.xscomBAR>0);
+    iv_data.lpcBAR = i_data.lpcBAR;
+    iv_data.xscomBAR = i_data.xscomBAR;
 
-    // Ensure Bootloader to HB structure has the MMIO members
-    // NOTE: BLTOHB_MMIOBARS version may not be sufficient to ensure that BARs
-    //       were set correctly, instead use BLTOHB_SECURE_OVERRIDES version.
-    if( iv_data.version >= Bootloader::BLTOHB_SECURE_OVERRIDES )
-    {
-        kassert(i_data.lpcBAR>0);
-        kassert(i_data.xscomBAR>0);
-        iv_data.lpcBAR = i_data.lpcBAR;
-        iv_data.xscomBAR = i_data.xscomBAR;
-    }
-    else
-    {
-        //default to group0-proc0 values for down-level SBE
-        iv_data.lpcBAR = MMIO_GROUP0_CHIP0_LPC_BASE_ADDR;
-        iv_data.xscomBAR = MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR;
-
-    }
     printk("lpc=%lX, xscom=%lX\n", i_data.lpcBAR, i_data.xscomBAR );
-
     printk("iv_lpc=%lX, iv_xscom=%lX, iv_data=%p\n",
             iv_data.lpcBAR, iv_data.xscomBAR, static_cast<void *>(&iv_data) );
 
-    // Check if bootloader advertised the size of the structure it saw;
-    // otherwise use the default padded size
-    if(iv_data.version >= Bootloader::BLTOHB_SIZE)
-    {
-        iv_data.sizeOfStructure = i_data.sizeOfStructure;
-    }
-    else
-    {
-        iv_data.sizeOfStructure = Bootloader::INITIAL_BLTOHB_PADDED_SIZE;
-    }
-
-    if(iv_data.version >= Bootloader::BLTOHB_KEYADDR)
-    {
-        memcpy(&iv_data.keyAddrStashData,
-               &i_data.keyAddrStashData,
-               sizeof(Bootloader::keyAddrPair_t));
-    }
-
-    if(iv_data.version >= Bootloader::BLTOHB_BACKDOOR)
-    {
-        iv_data.secBackdoorBit = i_data.secBackdoorBit;
-    }
+    iv_data.sizeOfStructure = i_data.sizeOfStructure;
+    memcpy(&iv_data.keyAddrStashData, &i_data.keyAddrStashData,
+           sizeof(Bootloader::keyAddrPair_t));
 
     iv_data.cacheSizeMb = i_data.cacheSizeMb;
     printk("Hostboot cache size=%d MB\n", iv_data.cacheSizeMb);

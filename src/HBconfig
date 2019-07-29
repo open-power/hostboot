@@ -48,12 +48,6 @@ config FSP_BUILD
     help
         Indicates that this is an FSP build
 
-config SUPPORT_PARTIAL_CACHE
-    default n
-    help
-        Support chips that do not have full cache --
-        intended for early bringup of hardware
-
 config AXONE
     default n
     help

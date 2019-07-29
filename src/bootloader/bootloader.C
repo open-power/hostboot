@@ -48,7 +48,7 @@
 #include <securerom/ROM.H>
 #include <config.h>
 #include <secureboot/secure_reasoncodes.H>
-#include <p9_sbe_hb_structures.H>
+#include <p10_sbe_hb_structures.H>
 
 #include <pnor/pnorif.H>
 #include <kernel/memstate.H>
@@ -80,21 +80,14 @@ namespace Bootloader{
         // Set Secure Settings
         // Ensure SBE to Bootloader structure has the SAB member
         //   and other Secure Settings
-        if (l_blConfigData->version >= SAB_ADDED)
-        {
-            g_blData->blToHbData.secureAccessBit =
-                l_blConfigData->secureSettings.secureAccessBit;
-            g_blData->blToHbData.securityOverride =
-                l_blConfigData->secureSettings.securityOverride;
-            g_blData->blToHbData.allowAttrOverrides =
-                l_blConfigData->secureSettings.allowAttrOverrides;
-        }
-
-        if(l_blConfigData->version >= SBE_BACKDOOR_BIT_ADDED)
-        {
-            g_blData->blToHbData.secBackdoorBit =
-                                 l_blConfigData->secureSettings.secBackdoorBit;
-        }
+        g_blData->blToHbData.secureAccessBit =
+            l_blConfigData->secureSettings.secureAccessBit;
+        g_blData->blToHbData.securityOverride =
+            l_blConfigData->secureSettings.securityOverride;
+        g_blData->blToHbData.allowAttrOverrides =
+            l_blConfigData->secureSettings.allowAttrOverrides;
+        g_blData->blToHbData.secBackdoorBit =
+            l_blConfigData->secureSettings.secBackdoorBit;
 
         // Find secure ROM addr
         // Get starting address of ROM size and code which is the next 8 byte
@@ -121,23 +114,18 @@ namespace Bootloader{
         switch(l_blConfigData->version)
         {
             // Add cases as additional versions are created
-            case ADDR_STASH_SUPPORT_ADDED:
-                g_blData->blToHbData.version = BLTOHB_KEYADDR;
-                break;
-            case SBE_BACKDOOR_BIT_ADDED:
-                g_blData->blToHbData.version = BLTOHB_BACKDOOR;
-                break;
+            case INIT:
             default:
-                g_blData->blToHbData.version = BLTOHB_SIZE;
+                g_blData->blToHbData.version = BLTOHB_INIT;
                 break;
         }
 
         // Copy values for MMIO BARs
-        g_blData->blToHbData.xscomBAR
-            = ((l_blConfigData->version >= MMIO_BARS_ADDED) &&
-               ((l_blConfigData->xscomBAR & XSCOM_BAR_MASK) == 0))
-            ? l_blConfigData->xscomBAR
-            : MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR;
+        g_blData->blToHbData.xscomBAR =
+            ((l_blConfigData->xscomBAR & XSCOM_BAR_MASK) == 0) ?
+                l_blConfigData->xscomBAR :
+                MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR;
+
         /* lpcBAR already copied in main() */
 
         // Only set rest of BlToHbData if SecureROM is valid
@@ -174,12 +162,9 @@ namespace Bootloader{
 
         // Set copy keyaddr stash data
         // Ensure SBE to Bootloader structure has key addr stash info
-        if (l_blConfigData->version >= ADDR_STASH_SUPPORT_ADDED)
-        {
-            memcpy(&g_blData->blToHbData.keyAddrStashData,
-                   &l_blConfigData->pair,
-                   sizeof(keyAddrPair_t));
-        }
+        memcpy(&g_blData->blToHbData.keyAddrStashData,
+               &l_blConfigData->pair,
+               sizeof(keyAddrPair_t));
     }
 
     void copyBlToHbtoHbLocation()
@@ -424,15 +409,13 @@ namespace Bootloader{
         const auto l_blConfigData = reinterpret_cast<BootloaderConfigData_t *>(
                                                               SBE_HB_COMM_ADDR);
         g_blData->blToHbData.lpcBAR
-            = ((l_blConfigData->version >= MMIO_BARS_ADDED) &&
-               ((l_blConfigData->lpcBAR & LPC_BAR_MASK) == 0))
+            = ((l_blConfigData->lpcBAR & LPC_BAR_MASK) == 0)
             ? l_blConfigData->lpcBAR
             : MMIO_GROUP0_CHIP0_LPC_BASE_ADDR;
 
-        g_blData->blToHbData.cacheSizeMb = 8; //l_blConfigData->cacheSize;
+        g_blData->blToHbData.cacheSizeMb = l_blConfigData->cacheSizeMB;
 
-        // TODO RTC 208792: Read and pass over the cache size from SBE to HBBL
-        l_memstate.size = g_blData->blToHbData.cacheSizeMb;//l_blConfigData->cacheSize;
+        l_memstate.size = g_blData->blToHbData.cacheSizeMb;
         writeScratchReg(MMIO_SCRATCH_MEMORY_STATE, l_memstate.fullData);
 
         //We dont know what the start of pnor is because we dont know the size

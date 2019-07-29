@@ -242,7 +242,7 @@ void PageManager::_initialize()
     printk("Hostboot base image ends at 0x%lX...\n", firstPageAddr());
 
     uint64_t totalPages = 0;
-    // Extend memory footprint to half the cache
+    // Extend memory footprint
     // There is a preserved area after the base image and boot loader to HB
     // communication area. The page table must be 256KB aligned, so it is
     // likely to not be flush against the preserved area end.
