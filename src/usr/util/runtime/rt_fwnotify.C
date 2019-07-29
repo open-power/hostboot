@@ -766,7 +766,7 @@ void firmware_notify( uint64_t i_len, void *i_data )
                            0, 0, false );
         }
 
-        l_err->collectTrace( "FW_REQ", 256);
+        l_err->collectTrace(RUNTIME_COMP_NAME, 256);
     }
 
     if (l_err)
