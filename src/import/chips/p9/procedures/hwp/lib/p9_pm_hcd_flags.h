@@ -129,6 +129,7 @@ enum PM_CME_FLAGS_DEFS
     CME_FLAGS_DROOP_SUSPEND_ENTRY                       = 14,
     CME_FLAGS_SAFE_MODE                                 = 16,
     CME_FLAGS_PSTATES_SUSPENDED                         = 17,
+    CME_FLAGS_DB0_COMM_RECV_STARVATION_CNT_ENABLED      = 18,
     CME_FLAGS_SPWU_CHECK_ENABLE                         = 22,
     CME_FLAGS_BLOCK_ENTRY_STOP11                        = 23,
     CME_FLAGS_PSTATES_ENABLED                           = 24,
