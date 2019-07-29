@@ -548,6 +548,10 @@ int32_t obus_callout_L0( ExtensibleChip * i_chip,
 {
     int32_t rc = SUCCESS;
 
+    // TODO: Temporary fix to avoid asserts for bits that are reused for
+    //       OpenCAPI.
+    if ( !obusInSmpMode(i_chip->getTrgt()) ) return SUCCESS;
+
     // Need the obus target
     TargetHandle_t rxTrgt = i_chip->getTrgt();
     // Call out LINK0 in SMPGROUP
@@ -564,6 +568,10 @@ int32_t obus_callout_L1( ExtensibleChip * i_chip,
                          STEP_CODE_DATA_STRUCT & i_sc )
 {
    int32_t rc = SUCCESS;
+
+    // TODO: Temporary fix to avoid asserts for bits that are reused for
+    //       OpenCAPI.
+    if ( !obusInSmpMode(i_chip->getTrgt()) ) return SUCCESS;
 
     // Need the obus target
     TargetHandle_t rxTrgt = i_chip->getTrgt();
@@ -779,6 +787,10 @@ int32_t obus_fail_L0( ExtensibleChip * i_chip,
 {
     int32_t rc = SUCCESS;
 
+    // TODO: Temporary fix to avoid asserts for bits that are reused for
+    //       OpenCAPI.
+    if ( !obusInSmpMode(i_chip->getTrgt()) ) return SUCCESS;
+
     TargetHandle_t  rxTrgt = i_chip->getTrgt();
     TargetHandle_t  txTrgt = getTxBusEndPt(rxTrgt);
 
@@ -811,6 +823,10 @@ int32_t obus_fail_L1( ExtensibleChip * i_chip,
                       STEP_CODE_DATA_STRUCT & i_sc )
 {
    int32_t rc = SUCCESS;
+
+    // TODO: Temporary fix to avoid asserts for bits that are reused for
+    //       OpenCAPI.
+    if ( !obusInSmpMode(i_chip->getTrgt()) ) return SUCCESS;
 
     TargetHandle_t  rxTrgt = i_chip->getTrgt();
     TargetHandle_t  txTrgt = getTxBusEndPt(rxTrgt);
@@ -993,6 +1009,10 @@ int32_t calloutBusInterface( ExtensibleChip * i_chip,
 int32_t spareDeployed( ExtensibleChip * i_chip,
                        STEP_CODE_DATA_STRUCT & io_sc )
 {
+    // TODO: Temporary fix to avoid asserts for bits that are reused for
+    //       OpenCAPI.
+    if ( !obusInSmpMode(i_chip->getTrgt()) ) return SUCCESS;
+
     if ( CHECK_STOP != io_sc.service_data->getPrimaryAttnType() )
         return handleLaneRepairEvent(i_chip, io_sc, true);
     else
@@ -1014,6 +1034,10 @@ PRDF_PLUGIN_DEFINE_NS( axone_obus,     LaneRepair, spareDeployed );
 int32_t maxSparesExceeded( ExtensibleChip * i_chip,
                            STEP_CODE_DATA_STRUCT & io_sc )
 {
+    // TODO: Temporary fix to avoid asserts for bits that are reused for
+    //       OpenCAPI.
+    if ( !obusInSmpMode(i_chip->getTrgt()) ) return SUCCESS;
+
     if ( CHECK_STOP != io_sc.service_data->getPrimaryAttnType() )
         return handleLaneRepairEvent(i_chip, io_sc, false);
     else
@@ -1035,6 +1059,10 @@ PRDF_PLUGIN_DEFINE_NS( axone_obus,     LaneRepair, maxSparesExceeded );
 int32_t tooManyBusErrors( ExtensibleChip * i_chip,
                           STEP_CODE_DATA_STRUCT & io_sc )
 {
+    // TODO: Temporary fix to avoid asserts for bits that are reused for
+    //       OpenCAPI.
+    if ( !obusInSmpMode(i_chip->getTrgt()) ) return SUCCESS;
+
     if ( CHECK_STOP != io_sc.service_data->getPrimaryAttnType() )
         return handleLaneRepairEvent(i_chip, io_sc, false);
     else
@@ -1056,6 +1084,10 @@ PRDF_PLUGIN_DEFINE_NS( axone_obus,     LaneRepair, tooManyBusErrors );
 int32_t calloutBusInterfacePlugin( ExtensibleChip * i_chip,
                                    STEP_CODE_DATA_STRUCT & io_sc )
 {
+    // TODO: Temporary fix to avoid asserts for bits that are reused for
+    //       OpenCAPI.
+    if ( !obusInSmpMode(i_chip->getTrgt()) ) return SUCCESS;
+
     calloutBusInterface(i_chip, io_sc, MRU_LOW);
     return SUCCESS;
 }
