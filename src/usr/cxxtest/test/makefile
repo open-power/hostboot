@@ -25,9 +25,8 @@
 
 ROOTPATH = ../../../..
 
-# FIXME RTC: 210975
 
 MODULE = testcxxtest
-#TESTS = *.H
+TESTS = *.H
 
 include ${ROOTPATH}/config.mk

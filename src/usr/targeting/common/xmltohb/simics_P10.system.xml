@@ -53,6 +53,20 @@
         <id>PHYS_PATH</id>
         <default>physical:sys-0</default>
     </attribute>
+    <attribute>
+        <id>EARLY_TESTCASES_ISTEP</id>
+        <default>0x060C</default>
+    </attribute>
+    <attribute>
+        <id>PAYLOAD_BASE</id>
+                     <!-- Value of 0x0 for standalone systems, no payload to start -->
+        <default>0x0</default>
+    </attribute>
+    <attribute>
+        <id>PAYLOAD_ENTRY</id>
+                    <!-- Value of 0x0 for standalone systems, no payload to start -->
+        <default>0x0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>

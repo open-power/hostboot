@@ -29,9 +29,8 @@ MODULE = cxxtest
 SUBDIRS += test.d
 SUBDIRS += runtime.d
 
-# FIXME RTC: 210975
 
-#OBJS += TestSuite.o
-#OBJS += cxxtestexec.o
+OBJS += TestSuite.o
+OBJS += cxxtestexec.o
 
 include ${ROOTPATH}/config.mk

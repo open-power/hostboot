@@ -223,11 +223,11 @@ EXTENDED_MODULES += expaccess
 #***************************************
 # Working test modules
 #***************************************
-#TESTCASE_MODULES += cxxtest
-#TESTCASE_MODULES += testtrace
+TESTCASE_MODULES += cxxtest
+TESTCASE_MODULES += testtrace
 #TESTCASE_MODULES += testdevicefw
 #TESTCASE_MODULES += initsvctesttask
-#TESTCASE_MODULES += testcxxtest
+TESTCASE_MODULES += testcxxtest
 #TESTCASE_MODULES += testpnor
 #TESTCASE_MODULES += testvfs
 #TESTCASE_MODULES += testutil
