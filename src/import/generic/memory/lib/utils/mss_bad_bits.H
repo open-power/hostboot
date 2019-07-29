@@ -46,6 +46,17 @@ namespace mss
 {
 
 ///
+/// @brief A generic bad bits getter
+/// @tparam MC type memory controller type
+/// @param[in] i_target the fapi2 target oon which training was conducted
+/// @param[out] o_array the bad bits array
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+template <mss::mc_type MC>
+fapi2::ReturnCode get_bad_dq_bitmap(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                    uint8_t (&o_array)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT]);
+
+///
 /// @brief A generic bad bits setter
 /// @tparam MC type memory controller type
 /// @param[in] i_target the fapi2 target oon which training was conducted
@@ -55,6 +66,23 @@ namespace mss
 template <mss::mc_type MC>
 fapi2::ReturnCode set_bad_dq_bitmap(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                     uint8_t (&i_array)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT]);
+
+///
+/// @brief combine the two bad bits arrays into the io_bad_bits array
+/// @param[in] i_new_bad_bits bad bits to append
+/// @param[in,out] io_bad_bits will contain the bitwise or of the original io_bad_bits and i_new_bad_bits
+///
+inline void combine_bad_bits(const uint8_t (&i_new_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
+                             uint8_t (&io_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT])
+{
+    for (uint8_t l_rank = 0; l_rank < BAD_BITS_RANKS; ++ l_rank)
+    {
+        for (uint8_t l_bad_dq_byte = 0; l_bad_dq_byte < BAD_DQ_BYTE_COUNT; ++l_bad_dq_byte)
+        {
+            io_bad_bits[l_rank][l_bad_dq_byte] |= i_new_bad_bits[l_rank][l_bad_dq_byte];
+        }
+    }
+}
 
 ///
 /// @brief Records bad bits into the bad bits attribute

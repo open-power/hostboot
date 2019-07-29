@@ -46,12 +46,25 @@
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/mss_buffer_utils.H>
+#include <lib/phy/exp_train_display.H>
+#include <lib/phy/exp_train_handler.H>
+#include <exp_data_structs.H>
 #include <stdio.h>
 
 namespace mss
 {
 namespace exp
 {
+
+///
+/// @brief Phy init mode for host_fw_command struct
+///
+enum phy_init_mode
+{
+    NORMAL = 0,
+    EYE_CAPTURE_STEP_1 = 1,
+    EYE_CAPTURE_STEP_2 = 2,
+};
 
 ///
 /// @brief defines the supported DIMM types in Explorer
@@ -149,17 +162,125 @@ enum odt_fields
 };
 
 ///
+/// @brief Perform normal host FW phy init
+///
+/// @param[in] i_target OCMB target
+/// @param[in] i_crc CRC value
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode host_fw_phy_normal_init(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const uint32_t i_crc);
+
+///
+/// @brief Perform host FW phy init with eye capture
+///
+/// @param[in] i_target OCMB target
+/// @param[in] i_crc CRC value
+/// @param[in] i_phy_params PHY params struct
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+/// @note the goal here is to attempt to send both phy_inits even in the event of a bad return code from the read & display
+///
+fapi2::ReturnCode host_fw_phy_init_with_eye_capture(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const uint32_t i_crc,
+        const user_input_msdg& i_phy_params);
+
+///
+/// @brief Process return codes from PHY init with eye capture operations
+///
+/// @param[in] i_target OCMB target
+/// @param[in] i_response_1 response struct for EYE_CAPTURE_STEP_1
+/// @param[in] i_response_2 response struct for EYE_CAPTURE_STEP_2
+/// @param[in] i_response_1_rc response from check_host_fw_response from EYE_CAPTURE_STEP_1
+/// @param[in] i_response_2_rc response from check_host_fw_response from EYE_CAPTURE_STEP_2
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else an error from above as defined in the function algorithm
+/// @note return codes are passed by value, caller should not expect these to change
+///
+fapi2::ReturnCode process_eye_capture_return_codes(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const user_2d_eye_response_1_msdg& i_response_1,
+        const user_2d_eye_response_2_msdg& i_response_2,
+        fapi2::ReturnCode i_response_1_rc,
+        fapi2::ReturnCode i_response_2_rc);
+
+///
+/// @brief Send PHY init command given the provided phy mode and CRC
+///
+/// @param[in] i_target OCMB target
+/// @param[in] i_crc CRC field
+/// @param[in] i_phy_init_mode normal / eye capture step 1 or 2
+/// @param[out] host_fw_command_struct used for initialization
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode send_host_phy_init_cmd(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const uint32_t i_crc,
+        const uint8_t i_phy_init_mode,
+        host_fw_command_struct& o_cmd);
+
+///
+/// @brief Get and check the host fw response from the explorer
+/// @param[in] i_target OCMB chip
+/// @param[in] i_cmd host_fw_command_struct used to generate the response
+/// @param[out] o_rsp_data response data
+/// @param[out] o_rc return code from mss::exp::check::response()
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode check_host_fw_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        host_fw_command_struct& i_cmd,
+        std::vector<uint8_t>& o_rsp_data,
+        fapi2::ReturnCode& o_rc);
+
+///
+/// @brief Reads and displays the normal draminit training response
+///
+/// @param[in] i_target OCMB target
+/// @param[in] i_resp_data RESP data
+/// @param[in] i_rc return code from checking response
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode read_and_display_normal_training_repsonse(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const std::vector<uint8_t> i_resp_data,
+    const fapi2::ReturnCode i_rc);
+
+///
+/// @brief Reads and displays the user 2d eye response 1
+///
+/// @tparam T response struct
+/// @param[in] i_target OCMB target
+/// @param[in] i_resp_data RESP data
+/// @param[out] o_rc return code from checking response
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff success
+///
+template <typename T>
+inline fapi2::ReturnCode read_and_display_user_2d_eye_response(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const std::vector<uint8_t> i_resp_data,
+    T& o_train_response)
+{
+    // Proccesses the response data
+    FAPI_TRY(mss::exp::read_user_2d_eye_response<T>(i_target, i_resp_data, o_train_response),
+             "Failed read_training_response for %s", mss::c_str(i_target));
+
+    // Displays the training response
+    FAPI_TRY(mss::exp::train::display_user_2d_eye_info<T>(i_target, o_train_response));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief host_fw_command_struct structure setup
 /// @param[in] i_target the OCMB being acted upon
 /// @param[in] i_cmd_data_crc the command data CRC
 /// @param[in] i_cmd_length the length of the command present in the data buffer (if any)
+/// @param[in] i_phy_init_mode PHY init mode
 /// @param[out] o_cmd the command parameters to set
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 fapi2::ReturnCode setup_cmd_params(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
     const uint32_t i_cmd_data_crc,
-    const uint8_t i_cmd_length,
+    const uint32_t i_cmd_length,
+    const uint8_t i_phy_init_mode,
     host_fw_command_struct& o_cmd);
 
 ///

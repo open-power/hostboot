@@ -700,4 +700,17 @@
     </gard>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_EXP_UNKNOWN_PHY_INIT_MODE</rc>
+    <description>
+      The PHY init mode attribute value was unknown. Valid: 0 (NORMAL), 1 (WITH_EYE_CAPTURE)
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>VALUE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+
 </hwpErrors>
