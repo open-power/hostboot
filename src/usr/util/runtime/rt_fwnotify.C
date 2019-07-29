@@ -464,33 +464,33 @@ void firmware_notify( uint64_t i_len, void *i_data )
 
     if (l_badMessage)
     {
-       /*@
-        * @errortype
-        * @severity     ERRL_SEV_PREDICTIVE
-        * @moduleid     MOD_RT_FIRMWARE_NOTIFY
-        * @reasoncode   RC_FW_NOTIFY_RT_INVALID_MSG
-        * @userdata1[0:31]  Firmware Request type
-        * @userdata1[32:63] Sequence number (FSP msg)
-        * @userdata2[0:31]  MBOX message type (FSP msg)
-        * @userdata2[32:63] Message Type (FSP msg)
-        * @devdesc      Error with Firmware Notify request
-        */
-       l_err = new ErrlEntry(ERRL_SEV_PREDICTIVE,
-                             MOD_RT_FIRMWARE_NOTIFY,
-                             RC_FW_NOTIFY_RT_INVALID_MSG,
-                             l_userData1,
-                             l_userData2,
-                             true);
+        /*@
+         * @errortype
+         * @severity     ERRL_SEV_PREDICTIVE
+         * @moduleid     MOD_RT_FIRMWARE_NOTIFY
+         * @reasoncode   RC_FW_NOTIFY_RT_INVALID_MSG
+         * @userdata1[0:31]  Firmware Request type
+         * @userdata1[32:63] Sequence number (FSP msg)
+         * @userdata2[0:31]  MBOX message type (FSP msg)
+         * @userdata2[32:63] Message Type (FSP msg)
+         * @devdesc      Error with Firmware Notify request
+         */
+        l_err = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                              MOD_RT_FIRMWARE_NOTIFY,
+                              RC_FW_NOTIFY_RT_INVALID_MSG,
+                              l_userData1,
+                              l_userData2,
+                              true);
 
-      if (i_len > 0)
-      {
-         l_err->addFFDC(RUNTIME_COMP_ID,
-                        i_data,
-                        i_len,
-                        0, 0, false );
-      }
+        if (i_len > 0)
+        {
+            l_err->addFFDC(RUNTIME_COMP_ID,
+                           i_data,
+                           i_len,
+                           0, 0, false );
+        }
 
-      l_err->collectTrace( "FW_REQ", 256);
+        l_err->collectTrace(RUNTIME_COMP_NAME, 256);
     }
 
     if (l_err)
