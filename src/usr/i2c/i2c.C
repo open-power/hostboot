@@ -1293,11 +1293,22 @@ errlHndl_t i2cAccessMux( TARGETING::Target*           i_masterTarget,
         if (! (l_i2cMuxTarget->tryGetAttr<TARGETING::ATTR_FAPI_I2C_CONTROL_INFO>(l_muxData)) )
         {
             TRACFCOMP(g_trac_i2c,
-            "i2cAccessMux(): get attributes failed");
+            "i2cAccessMux(): getting ATTR_FAPI_I2C_CONTROL_INFO failed");
             break;
         }
 
-        uint8_t l_muxSelector = i_i2cMuxBusSelector;
+        TARGETING::ATTR_MODEL_type l_muxModel;
+        if (! (l_i2cMuxTarget->tryGetAttr<TARGETING::ATTR_MODEL>(l_muxModel)) )
+        {
+            TRACFCOMP(g_trac_i2c,
+            "i2cAccessMux(): getting ATTR_MODEL failed");
+            break;
+        }
+
+        assert(l_muxModel == TARGETING::MODEL_PCA9847, "Invalid model of mux detected");
+        const uint8_t PCA9847_ENABLE_BIT = 8;
+
+        uint8_t l_muxSelector = i_i2cMuxBusSelector | PCA9847_ENABLE_BIT;
         uint8_t *l_ptrMuxSelector = &l_muxSelector;
         size_t l_muxSelectorSize = sizeof(l_muxSelector);
 

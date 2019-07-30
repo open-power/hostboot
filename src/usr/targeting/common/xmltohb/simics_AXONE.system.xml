@@ -8498,7 +8498,7 @@
             <!-- Engine 3 Port 1 connects to a 3 to 8 MUX attached to DDIMM0-7 in the simics axone model -->
             <field><id>port</id><value>1</value></field>
             <field><id>devAddr</id><value>0x40</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0x08</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0x00</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
     </attribute>
@@ -8518,8 +8518,8 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
-            <!-- Valid Mux Bus Selections are 0x08-0x0F -->
-            <field><id>i2cMuxBusSelector</id><value>0x08</value></field>
+            <!-- Valid Mux Bus Selections are 0x00-0x07 -->
+            <field><id>i2cMuxBusSelector</id><value>0x00</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
     </attribute>
@@ -8568,7 +8568,7 @@
             <!-- Engine 3 Port 1 connects to a 3 to 8 MUX attached to DDIMM0-7 in the simics axone model -->
             <field><id>port</id><value>1</value></field>
             <field><id>devAddr</id><value>0x40</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0x09</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0x01</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
     </attribute>
@@ -8589,8 +8589,8 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
-            <!-- Valid Mux Bus Selections are 0x08-0x0F -->
-            <field><id>i2cMuxBusSelector</id><value>0x09</value></field>
+            <!-- Valid Mux Bus Selections are 0x00-0x07 -->
+            <field><id>i2cMuxBusSelector</id><value>0x01</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
     </attribute>
@@ -8639,7 +8639,7 @@
             <!-- Engine 3 Port 1 connects to a 3 to 8 MUX attached to DDIMM0-7 in the simics axone model -->
             <field><id>port</id><value>1</value></field>
             <field><id>devAddr</id><value>0x40</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0x0A</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0x2</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
     </attribute>
@@ -8659,8 +8659,8 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
-            <!-- Valid Mux Bus Selections are 0x08-0x0F -->
-            <field><id>i2cMuxBusSelector</id><value>0x0A</value></field>
+            <!-- Valid Mux Bus Selections are 0x00-0x07 -->
+            <field><id>i2cMuxBusSelector</id><value>0x02</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
     </attribute>
@@ -8709,7 +8709,7 @@
             <!-- Engine 3 Port 1 connects to a 3 to 8 MUX attached to DDIMM0-7 in the simics axone model -->
             <field><id>port</id><value>1</value></field>
             <field><id>devAddr</id><value>0x40</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0x0B</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0x03</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
     </attribute>
@@ -8729,8 +8729,8 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
-            <!-- Valid Mux Bus Selections are 0x08-0x0F -->
-            <field><id>i2cMuxBusSelector</id><value>0x0B</value></field>
+            <!-- Valid Mux Bus Selections are 0x00-0x07 -->
+            <field><id>i2cMuxBusSelector</id><value>0x03</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
     </attribute>
@@ -8779,7 +8779,7 @@
             <!-- Engine 3 Port 1 connects to a 3 to 8 MUX attached to DDIMM0-7 in the simics axone model -->
             <field><id>port</id><value>1</value></field>
             <field><id>devAddr</id><value>0x40</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0x0C</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0x04</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
     </attribute>
@@ -8798,8 +8798,8 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
-            <!-- Valid Mux Bus Selections are 0x08-0x0F -->
-            <field><id>i2cMuxBusSelector</id><value>0x0C</value></field>
+            <!-- Valid Mux Bus Selections are 0x00-0x07 -->
+            <field><id>i2cMuxBusSelector</id><value>0x04</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
     </attribute>
@@ -8848,7 +8848,7 @@
             <!-- Engine 3 Port 1 connects to a 3 to 8 MUX attached to DDIMM0-7 in the simics axone model -->
             <field><id>port</id><value>1</value></field>
             <field><id>devAddr</id><value>0x40</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0x0D</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0x05</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
     </attribute>
@@ -8867,8 +8867,8 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
-            <!-- Valid Mux Bus Selections are 0x08-0x0F -->
-            <field><id>i2cMuxBusSelector</id><value>0x0D</value></field>
+            <!-- Valid Mux Bus Selections are 0x00-0x07 -->
+            <field><id>i2cMuxBusSelector</id><value>0x05</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
     </attribute>
@@ -8917,7 +8917,7 @@
             <!-- Engine 3 Port 1 connects to a 3 to 8 MUX attached to DDIMM0-7 in the simics axone model -->
             <field><id>port</id><value>1</value></field>
             <field><id>devAddr</id><value>0x40</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0x0E</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0x06</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
     </attribute>
@@ -8936,8 +8936,8 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
-            <!-- Valid Mux Bus Selections are 0x08-0x0F -->
-            <field><id>i2cMuxBusSelector</id><value>0x0E</value></field>
+            <!-- Valid Mux Bus Selections are 0x00-0x07 -->
+            <field><id>i2cMuxBusSelector</id><value>0x06</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
     </attribute>
@@ -8986,7 +8986,7 @@
             <!-- Engine 3 Port 1 connects to a 3 to 8 MUX attached to DDIMM0-7 in the simics axone model -->
             <field><id>port</id><value>1</value></field>
             <field><id>devAddr</id><value>0x40</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0x0F</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0x07</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
     </attribute>
@@ -9005,8 +9005,8 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
-            <!-- Valid Mux Bus Selections are 0x08-0x0F -->
-            <field><id>i2cMuxBusSelector</id><value>0x0F</value></field>
+            <!-- Valid Mux Bus Selections are 0x00-0x07 -->
+            <field><id>i2cMuxBusSelector</id><value>0x07</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
     </attribute>
