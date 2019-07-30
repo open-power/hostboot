@@ -220,6 +220,29 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
+    <rc>RC_DDIMM_UNSUPPORTED_FREQUENCY</rc>
+    <description>Chosen frequency not supported by this DDIMM</description>
+    <ffdc>UNSUPPORTED_FREQ</ffdc>
+    <ffdc>SUPPORTED_FREQS</ffdc>
+    <ffdc>OCMB_CHIP_TARGET</ffdc>
+    <ffdc>VPD_TYPE</ffdc>
+    <ffdc>DDR_TYPE</ffdc>
+    <!-- This is always a code bug. -->
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <!-- It could also be bogus SPD content -->
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>OCMB_CHIP_TARGET</refTarget>
+      </hw>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
     <rc>RC_DDIMM_GET_EFD_UNSUPPORTED_FREQUENCY</rc>
     <description>Invalid Frequency. Valid values are 12800, 14930, 17060,
                  19200, 21330, 23460 and 25600.</description>
