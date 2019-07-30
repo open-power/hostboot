@@ -85,6 +85,8 @@ const uint16_t SPD_EFD_COUNT_MASK = 0x003F;
 // Offset to the EFD meta data within the SPD.
 // size is 128 bytes; address 288 to 415; 32 EFD meta data's sized 4 bytes each
 const size_t SPD_EFD_META_DATA_ADDR = 288;
+// Offset to Host Interface Speed Supported within the SPD.
+const size_t SPD_SUPPORTED_HOST_SPEEDS_ADDR = 205;
 
 /// SPD - EFD meta data constants
 // Size of the EFD meta data's within the SPD
@@ -423,6 +425,8 @@ extern "C"
         const uint8_t* l_efdMetaDataNptr(nullptr);
         // Pointer to an individual EFD
         const uint8_t* l_efdDataNptr(nullptr);
+        // Host Interface Supported Speeds field
+        uint16_t l_supportedSpeeds(0);
 
         // Fill in a data buffer for FFDC purposes that contains
         //  the first 8 bytes from the SPD (freq,rank,channel,dimms)
@@ -662,7 +666,7 @@ extern "C"
         // No need to swap endian, already in host format
         l_freqMask = ddrFrequencyToBitMask(io_vpdInfo.iv_omi_freq_mhz);
 
-        FAPI_DBG ( "ddr4_get_efd: Caller supplied frquency = %d",
+        FAPI_DBG ( "ddr4_get_efd: Caller supplied frequency = %d",
                    io_vpdInfo.iv_omi_freq_mhz );
 
         // Confirm that mapping the frequency succeeded
@@ -698,7 +702,7 @@ extern "C"
             FAPI_TRY(fapi2::FAPI2_RC_FALSE);
         }
 
-        FAPI_DBG ("ddr4_get_efd: Caller supplied frquency = %d, "
+        FAPI_DBG ("ddr4_get_efd: Caller supplied frequency = %d, "
                   "converted to frequency bit value mask = 0x%.4X",
                   io_vpdInfo.iv_omi_freq_mhz, l_freqMask);
 
@@ -745,6 +749,24 @@ extern "C"
 
         //// Fourthly, find the EFD that matches the given frequency
         //// and master rank
+
+        // Check the master list of supported frequencies before walking
+        //  through the EFDs
+        l_supportedSpeeds = *reinterpret_cast<const uint16_t*>
+                            (i_spdBuffer + SPD_SUPPORTED_HOST_SPEEDS_ADDR);
+        l_supportedSpeeds = le16toh(l_supportedSpeeds);
+        FAPI_ASSERT( l_freqMask & l_supportedSpeeds,
+                     fapi2::DDIMM_UNSUPPORTED_FREQUENCY().
+                     set_UNSUPPORTED_FREQ(static_cast<uint32_t>
+                                          (io_vpdInfo.iv_omi_freq_mhz)).
+                     set_SUPPORTED_FREQS(l_supportedSpeeds).
+                     set_OCMB_CHIP_TARGET(i_ocmbFapi2Target).
+                     set_VPD_TYPE(io_vpdInfo.iv_vpd_type).
+                     set_DDR_TYPE(static_cast<uint32_t>
+                                  (i_spdBuffer[SPD_MEM_TYPE_ADDR])),
+                     "Invalid frequency for this DIMM - request=%d, supported mask=%.4X",
+                     io_vpdInfo.iv_omi_freq_mhz, l_supportedSpeeds );
+
 
         // Point to the beginning of the EFD meta data, AKA EFD[0] meta data.
         l_efdMetaDataPtr = i_spdBuffer + SPD_EFD_META_DATA_ADDR;
