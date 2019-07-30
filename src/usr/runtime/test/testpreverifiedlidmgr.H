@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -118,11 +118,11 @@ class PreVerifiedLidMgrTest : public CxxTest::TestSuite
             // RINGOVD not permitted in secure mode. Meaning the Header and
             // Content lid will be missing.
             l_expectedLids -= 2;
-
-            // VERSION is only an OpenPOWER partition so we need to adjust for
-            // it here since it doesn't exist for standalone.
-            l_expectedLids -= 2;
         }
+
+        // VERSION is only an OpenPOWER partition so we need to adjust for
+        // it here since it doesn't exist for standalone.
+        l_expectedLids -= 2;
 
         // Ensure the expected number of lids were loaded.
         if (l_preVerLidMgr.cv_lidsLoaded.size() != l_expectedLids)
