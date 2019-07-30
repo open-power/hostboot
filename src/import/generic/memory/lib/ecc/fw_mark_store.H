@@ -37,7 +37,7 @@
 #define _MSS_FW_MARK_STORE_H_
 
 #include <fapi2.H>
-#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_address.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_fwms_address.H>
 #include <generic/memory/lib/utils/scom.H>
 #include <generic/memory/lib/ecc/ecc_traits.H>
 
@@ -573,9 +573,9 @@ template< fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits
 inline void get_address( const fapi2::buffer<uint64_t>& i_data, mcbist::address& o_address )
 {
     // construct fwms::address from i_data
-    const auto l_addr = address<>(uint64_t(i_data));
+    const auto l_addr = mss::ecc::fwms::address<>(uint64_t(i_data));
     // construct mcbist::address from fwms::address
-    o_address = mcbist::address(l_addr);
+    o_address = l_addr.operator mss::mcbist::address();
     FAPI_INF("get_address: 0x%016lx", uint64_t(l_addr));
 }
 

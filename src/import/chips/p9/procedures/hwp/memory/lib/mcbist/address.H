@@ -42,6 +42,8 @@
 #include <lib/ecc/ecc_traits_nimbus.H>
 #include <lib/mcbist/mcbist_traits.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_address.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_ecc_trap_address.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_fwms_address.H>
 
 // This file is still necessary to put traits and generic code together
 
