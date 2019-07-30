@@ -906,6 +906,10 @@ sub buildAffinity
                 foreach my $conn (@{$conn->{CONN}})
                 {
                     my $source = $conn->{SOURCE};
+                    if ($source =~ /omic/i)
+                    {
+                        next;
+                    }
                     my @targets = split(/\//, $source);
                     # Split the source into proc#, mc#, mi#, mcc#, omi#
                     # Source example:
@@ -1043,6 +1047,12 @@ sub buildAffinity
                 {
                     my $source = $conn->{SOURCE};
                     my @targets = split(/\//, $source);
+
+                    if ($source =~ /omic/i)
+                    {
+                        next;
+                    }
+
                     # Split the source into proc#, mc#, mi#, mcc#, omi#
                     # Source example:
                     # /sys-#/node-#/Pallid-#/proc_socket-#/Hopper-#/p9_axone/mc#/mi#/mcc#/omi#
@@ -1154,6 +1164,11 @@ sub buildAffinity
                     # Split the source into proc#, mc#, mi#, mcc#, omi#
                     # Source example:
                     # /sys-#/node-#/Pallid-#/proc_socket-#/Hopper-#/p9_axone/mc#/mi#/mcc#/omi#
+                    if ($source =~ /omic/i)
+                    {
+                        next;
+                    }
+
                     foreach my $target (@targets)
                     {
                         $target =~ s/\D//g;
