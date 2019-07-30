@@ -26,10 +26,9 @@
 ROOTPATH = ../../../..
 MODULE = testexpaccess
 
-#include test.mk
+include test.mk
 
 #TODO RTC:196806 re-enable mmio communication tests when mmio works
-# FIXME RTC: 210975 Re-enable once P10 EKB is updated
-# TESTS = expscomtest.H
+TESTS = expscomtest.H
 
 include ${ROOTPATH}/config.mk

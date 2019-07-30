@@ -29,12 +29,10 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/pnor/
 
 MODULE = testpnor
 
-# FIXME RTC: 210975
-
-#TESTS = pnorddtest.H ecctest.H pnorrptest.H pnorutilsTest.H
+TESTS = pnorddtest.H ecctest.H pnorrptest.H pnorutilsTest.H
 
 #SFC Implementations
-#TESTS += $(if $(CONFIG_SFC_IS_IBM_DPSS),sfc_ibmtest.H)
+TESTS += $(if $(CONFIG_SFC_IS_IBM_DPSS),sfc_ibmtest.H)
 #@fixme-RTC:146146-Reenable testcases once ECC issues are resolved
 #TESTS += $(if $(CONFIG_SFC_IS_AST2400),sfc_ast2400test.H)
 

@@ -190,17 +190,17 @@ EXTENDED_MODULES += attn
 EXTENDED_MODULES += prdf
 EXTENDED_MODULES += $(if $(CONFIG_VPO_COMPILE),,mdia)
 EXTENDED_MODULES += thread_activate
-#EXTENDED_MODULES += $(if $(CONFIG_VPO_COMPILE),,dump)
+EXTENDED_MODULES += $(if $(CONFIG_VPO_COMPILE),,dump)
 EXTENDED_MODULES += $(if $(CONFIG_VPO_COMPILE),,runtime)
 EXTENDED_MODULES += $(if $(CONFIG_TPMDD),secureboot_trusted,)
 EXTENDED_MODULES += sbe
 EXTENDED_MODULES += imageprocs
 EXTENDED_MODULES += sbeio
-#EXTENDED_MODULES += $(if $(CONFIG_HTMGT),htmgt)
-#EXTENDED_MODULES += $(if $(CONFIG_GPIODD),gpio,)
+EXTENDED_MODULES += $(if $(CONFIG_HTMGT),htmgt)
+EXTENDED_MODULES += $(if $(CONFIG_GPIODD),gpio,)
 EXTENDED_MODULES += $(if $(CONFIG_CONSOLE_OUTPUT_ERRORDISPLAY),errldisplay)
-#EXTENDED_MODULES += $(if $(CONFIG_BMC_IPMI),ipmiext)
-#EXTENDED_MODULES += xz
+EXTENDED_MODULES += $(if $(CONFIG_BMC_IPMI),ipmiext)
+EXTENDED_MODULES += xz
 #EXTENDED_MODULES += p9_stop_util
 #EXTENDED_MODULES += isteps_mss
 EXTENDED_MODULES += p9_cpuWkup
@@ -214,8 +214,8 @@ EXTENDED_MODULES += isteps_nest
 #EXTENDED_MODULES += isteps_io
 EXTENDED_MODULES += node_comm
 #EXTENDED_MODULES += $(if $(CONFIG_NVDIMM),nvdimm)
-#EXTENDED_MODULES += $(if $(CONFIG_UCD_FLASH_UPDATES),ucd)
-#EXTENDED_MODULES += $(if $(CONFIG_FSP_BUILD),,nvram)
+EXTENDED_MODULES += $(if $(CONFIG_UCD_FLASH_UPDATES),ucd)
+EXTENDED_MODULES += $(if $(CONFIG_FSP_BUILD),,nvram)
 EXTENDED_MODULES += mmio
 EXTENDED_MODULES += smf
 EXTENDED_MODULES += expaccess
@@ -225,45 +225,52 @@ EXTENDED_MODULES += expaccess
 #***************************************
 TESTCASE_MODULES += cxxtest
 TESTCASE_MODULES += testtrace
-#TESTCASE_MODULES += testdevicefw
-#TESTCASE_MODULES += initsvctesttask
+TESTCASE_MODULES += testdevicefw
+TESTCASE_MODULES += initsvctesttask
 TESTCASE_MODULES += testcxxtest
-#TESTCASE_MODULES += testpnor
-#TESTCASE_MODULES += testvfs
-#TESTCASE_MODULES += testutil
-#TESTCASE_MODULES += testscan
-#TESTCASE_MODULES += testsecureboot
-#TESTCASE_MODULES += testfsiscom
-#TESTCASE_MODULES += testlpc
+TESTCASE_MODULES += testpnor
+TESTCASE_MODULES += testvfs
+TESTCASE_MODULES += testutil
+TESTCASE_MODULES += testscan
+TESTCASE_MODULES += testsecureboot
+TESTCASE_MODULES += testfsiscom
+TESTCASE_MODULES += testlpc
 #TODO: RTC 213102 to properly add & execute HTMGT test
 #TESTCASE_MODULES += $(if $(CONFIG_HTMGT),testhtmgt)
-#TESTCASE_MODULES += testinitservice
-#TESTCASE_MODULES += testfsi
-#TESTCASE_MODULES += testxscom
-#TESTCASE_MODULES += testkernel
-#TESTCASE_MODULES += testtargeting
-#TESTCASE_MODULES += testmemoize
+TESTCASE_MODULES += testinitservice
+TESTCASE_MODULES += testfsi
+TESTCASE_MODULES += testxscom
+TESTCASE_MODULES += testkernel
+TESTCASE_MODULES += testtargeting
+TESTCASE_MODULES += testmemoize
+#TODO RTC 210975
 #TESTCASE_MODULES += testprdf
 #TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testmdia)
-#TESTCASE_MODULES += testpirformat
+TESTCASE_MODULES += testpirformat
+#TODO RTC 213602
 #TESTCASE_MODULES += testi2c
+#TODO RTC 210643
 #TESTCASE_MODULES += testmbox
 #TESTCASE_MODULES += $(if $(or $(CONFIG_EARLY_TESTCASES),${CONFIG_AXONE_BRING_UP}) ,,testrtloader)
+#TODO RTC 213023
 #TESTCASE_MODULES += testsbe
 #TESTCASE_MODULES += testsbeio
-#TESTCASE_MODULES += testerrl
+TESTCASE_MODULES += testerrl
+#TODO RTC 208782
 #TESTCASE_MODULES += testhwas
+#TODO RTC 213602
 #TESTCASE_MODULES += testvpd
-#TESTCASE_MODULES += testsyslib
-#TESTCASE_MODULES += testtlsmod
-#TESTCASE_MODULES += testscom
+TESTCASE_MODULES += testsyslib
+TESTCASE_MODULES += testtlsmod
+TESTCASE_MODULES += testscom
 #TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testruntime)
+#TODO RTC 210643
 #TESTCASE_MODULES += testintr
-#TESTCASE_MODULES += testfapi2
-#TESTCASE_MODULES += $(if $(CONFIG_EARLY_TESTCASES) && $(FSP_BUILD) ,,testnvram)
+TESTCASE_MODULES += testfapi2
+TESTCASE_MODULES += $(if $(CONFIG_EARLY_TESTCASES) && $(FSP_BUILD) ,,testnvram)
 #TODO RTC: 206800 Investigate why SMF tests fail in Axone
 #TESTCASE_MODULES += $(if $(CONFIG_AXONE_BRING_UP),,testsmf)
-#TESTCASE_MODULES += testexpaccess
+TESTCASE_MODULES += testexpaccess
 
 #******************************************************************
 #KNOWN ISSUES (I might let these run but there is something wrong)

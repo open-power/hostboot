@@ -26,15 +26,13 @@ ROOTPATH = ../../../..
 
 MODULE = testtlsmod
 
-# FIXME RTC: 210975
+TESTS += tlsmod.H
+TESTS += tlsfile.H
+TESTS += nontrivial.H
+TESTS += trivial.H
 
-#TESTS += tlsmod.H
-#TESTS += tlsfile.H
-#TESTS += nontrivial.H
-#TESTS += trivial.H
-
-#OBJS += tlsfile.o
-#OBJS += nontrivial.o
-#OBJS += trivial.o
-#OBJS += tlsmod.o
+OBJS += tlsfile.o
+OBJS += nontrivial.o
+OBJS += trivial.o
+OBJS += tlsmod.o
 include ${ROOTPATH}/config.mk

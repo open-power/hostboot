@@ -26,11 +26,10 @@ ROOTPATH = ../../../..
 
 MODULE = testutil
 
-# FIXME RTC: 210975
-#TESTS += $(if $(CONFIG_EARLY_TESTCASES),,testmclmgr.H)
-#TESTS += $(if $(CONFIG_EARLY_TESTCASES),,testtcemgr.H)
-#TESTS += $(if $(CONFIG_EARLY_TESTCASES),,testlidmgr.H)
-#TESTS += threadpool.H
+TESTS += $(if $(CONFIG_EARLY_TESTCASES),,testmclmgr.H)
+TESTS += $(if $(CONFIG_EARLY_TESTCASES),,testtcemgr.H)
+TESTS += $(if $(CONFIG_EARLY_TESTCASES),,testlidmgr.H)
+TESTS += threadpool.H
 
 include ${ROOTPATH}/config.mk
 

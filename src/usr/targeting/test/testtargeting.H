@@ -614,6 +614,8 @@ class TargetingTestSuite : public CxxTest::TestSuite
 
     void testPciPhbTarget()
     {
+        // TODO RTC 208782 : Enable once PHB chiplets are marked functional
+/*
         TS_TRACE(ENTER_MRK "testPciPhbTarget" );
 
         using namespace ERRORLOG;
@@ -657,10 +659,13 @@ class TargetingTestSuite : public CxxTest::TestSuite
         }
 
         TS_TRACE(EXIT_MRK "testPciPhbTarget");
+*/
     }
 
     void testNvTarget()
     {
+        // TODO RTC 210975 : Need to replace OBUS_BRICK with something else for p10?
+/*
         TS_TRACE(ENTER_MRK "testNvTarget" );
 
         using namespace ERRORLOG;
@@ -694,6 +699,7 @@ class TargetingTestSuite : public CxxTest::TestSuite
         }
 
         TS_TRACE(EXIT_MRK "testNvTarget");
+*/
     }
 
 

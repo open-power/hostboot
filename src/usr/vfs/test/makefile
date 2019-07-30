@@ -26,8 +26,7 @@ ROOTPATH = ../../../..
 
 MODULE = testvfs
 
-# FIXME RTC: 210975
-#TESTS = *.H
+TESTS = *.H
 
 ${ROOTPATH}/img/testdata:
 	echo "This is a test image" > ${ROOTPATH}/img/testdata

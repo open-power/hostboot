@@ -25,7 +25,6 @@
 ROOTPATH = ../../../..
 
 MODULE = testxscom
-# TODO RTC: 210975
-#TESTS = *.H
+TESTS = *.H
 
 include ${ROOTPATH}/config.mk

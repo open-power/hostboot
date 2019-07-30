@@ -98,6 +98,10 @@
       <id>ASSUME_SBE_QUIESCED</id>
     </attribute>
     <attribute>
+      <id>EEPROM_PAGE_ARRAY</id>
+      <default>2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2</default>
+    </attribute>
+    <attribute>
       <id>FSI_MASTER_MUTEX</id>
     </attribute>
     <attribute>
@@ -257,6 +261,9 @@
     </attribute>
     <attribute>
       <id>HIDDEN_ERRLOGS_ENABLE</id>
+    </attribute>
+    <attribute>
+      <id>IPC_NODE_BUFFER_GLOBAL_ADDRESS</id>
     </attribute>
     <attribute>
       <id>IS_MPIPL_HB</id>

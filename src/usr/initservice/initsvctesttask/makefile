@@ -25,7 +25,6 @@
 ROOTPATH = ../../../..
 MODULE = initsvctesttask
 
-# FIXME RTC: 210975
-#OBJS +=  tasktest2.o
+OBJS +=  tasktest2.o
 
 include ${ROOTPATH}/config.mk

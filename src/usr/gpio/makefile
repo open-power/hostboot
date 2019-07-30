@@ -26,9 +26,7 @@
 ROOTPATH = ../../..
 MODULE = gpio
 
-# FIXME RTC: 210975
-
-#OBJS += $(if $(CONFIG_GPIODD),gpiodd.o,)
+OBJS += $(if $(CONFIG_GPIODD),gpiodd.o,)
 
 # no way to test this at the moment TODO RTC 111415
 #SUBDIRS = test.d

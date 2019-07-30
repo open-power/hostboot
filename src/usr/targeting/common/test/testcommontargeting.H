@@ -966,24 +966,24 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
                     "should have matched system ");
         }
 
-        PredicateCTM l_noWild(CLASS_SYS,TYPE_SYS,MODEL_POWER9);
+        PredicateCTM l_noWild(CLASS_SYS,TYPE_SYS,MODEL_POWER10);
         if( ! l_noWild(l_pTopLevel) )
         {
-            TARG_TS_FAIL("CTM class sys, type sys, model power9 should have "
+            TARG_TS_FAIL("CTM class sys, type sys, model power10 should have "
                     "matched system ");
         }
 
-        PredicateCTM l_classWild(CLASS_NA,TYPE_SYS,MODEL_POWER9);
+        PredicateCTM l_classWild(CLASS_NA,TYPE_SYS,MODEL_POWER10);
         if( ! l_classWild(l_pTopLevel) )
         {
-            TARG_TS_FAIL("CTM class wild, type sys, model power9 should have "
+            TARG_TS_FAIL("CTM class wild, type sys, model power10 should have "
                     "matched system ");
         }
 
-        PredicateCTM l_typeWild(CLASS_SYS,TYPE_NA,MODEL_POWER9);
+        PredicateCTM l_typeWild(CLASS_SYS,TYPE_NA,MODEL_POWER10);
         if( ! l_typeWild(l_pTopLevel) )
         {
-            TARG_TS_FAIL("CTM class sys, wild, model power9 should have "
+            TARG_TS_FAIL("CTM class sys, wild, model power10 should have "
                     "matched system ");
         }
 
@@ -1105,14 +1105,14 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
 #endif
 
         PredicateCTM l_sysType(CLASS_NA,TYPE_SYS);
-        PredicateCTM l_power9Model(CLASS_NA,TYPE_NA,MODEL_POWER9);
+        PredicateCTM l_power10Model(CLASS_NA,TYPE_NA,MODEL_POWER10);
         PredicatePostfixExpr l_expr;
         l_expr.push(&l_sysClass).push(&l_sysType).And();
-        l_expr.push(&l_power9Model).And();
+        l_expr.push(&l_power10Model).And();
 
         if(!l_expr(l_pTopLevel) )
         {
-            TARG_TS_FAIL("CTM of class sys && type sys && model power9 should "
+            TARG_TS_FAIL("CTM of class sys && type sys && model power10 should "
                     "have matched system");
         }
 
@@ -1120,7 +1120,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
 
         if(l_expr(l_pTopLevel) )
         {
-            TARG_TS_FAIL("CTM of class sys && type sys && model power9 should "
+            TARG_TS_FAIL("CTM of class sys && type sys && model power10 should "
                     "npt have matched system after negation");
         }
 
@@ -1129,13 +1129,13 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
 
         if(!l_expr(l_pTopLevel) )
         {
-            TARG_TS_FAIL("CTM of class sys && type sys && model power9 should "
+            TARG_TS_FAIL("CTM of class sys && type sys && model power10 should "
                     "have matched system after negation then || sys class");
         }
 
         PredicatePostfixExpr* l_pExpr = new PredicatePostfixExpr;
         l_pExpr->push(&l_sysClass).push(&l_sysType).And();
-        l_pExpr->push(&l_power9Model).And();
+        l_pExpr->push(&l_power10Model).And();
         delete (static_cast<PredicateBase*>(l_pExpr));
 
 #if 0

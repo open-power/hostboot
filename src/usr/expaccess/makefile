@@ -29,9 +29,8 @@ MODULE = expaccess
 SUBDIRS += test.d
 SUBDIRS += runtime.d
 
-#include expaccess.mk
+include expaccess.mk
 
 include ${ROOTPATH}/config.mk
 
-# FIXME RTC: 210975
-#VPATH += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
+VPATH += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/

@@ -24,9 +24,7 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
 
-# FIXME RTC: 210975
-
 MODULE = testerrl
-#TESTS = *.H
+TESTS = *.H
 
 include ${ROOTPATH}/config.mk

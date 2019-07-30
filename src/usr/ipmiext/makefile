@@ -25,15 +25,13 @@
 ROOTPATH = ../../..
 MODULE = ipmiext
 
-# FIXME RTC: 210975
-
 #include common ojects between hostboot and runtime hostboot
-#include ipmi.mk
+include ipmi.mk
 
-#OBJS += ipmifru.o
-#OBJS += ipmifruinv.o
-#OBJS += ipmipowerstate.o
-#OBJS += ipmichassiscontrol.o
+OBJS += ipmifru.o
+OBJS += ipmifruinv.o
+OBJS += ipmipowerstate.o
+OBJS += ipmichassiscontrol.o
 
 SUBDIRS += runtime.d
 

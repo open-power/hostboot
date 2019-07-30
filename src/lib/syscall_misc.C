@@ -72,6 +72,7 @@ size_t cpu_thread_count()
         case CORE_POWER9_NIMBUS:
         case CORE_POWER9_CUMULUS:
         case CORE_POWER9_AXONE:
+        case CORE_POWER10:
             threads = 4;
             break;
 

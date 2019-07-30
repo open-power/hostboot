@@ -26,9 +26,7 @@ ROOTPATH = ../../../..
 
 MODULE = testnvram
 
-# FIXME RTC: 210975
-
-#TESTS = testnvram.H
+TESTS = testnvram.H
 
 include ${ROOTPATH}/config.mk
 

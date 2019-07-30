@@ -25,7 +25,6 @@
 ROOTPATH = ../../../..
 
 MODULE = testinitservice
-# FIXME RTC: 210975
-#TESTS = *.H
+TESTS = *.H
 
 include ${ROOTPATH}/config.mk

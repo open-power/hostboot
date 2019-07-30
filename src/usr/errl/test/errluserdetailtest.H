@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -406,7 +406,7 @@ public:
             pMembufEUDA.addData(ATTR_EC);
             pMembufEUDA.addData(ATTR_CHIP_ID);
             pMembufEUDA.addData(ATTR_MSS_VOLT_VDDR_MILLIVOLTS);
-            pMembufEUDA.addData(ATTR_MSS_FREQ);
+            //pMembufEUDA.addData(ATTR_MSS_FREQ); // TODO RTC 210975
 
             // skipped - not there
             pMembufEUDA.addData(ATTR_SCRATCH_UINT8_1);
@@ -435,7 +435,7 @@ public:
             pDimmEUDA.addData(ATTR_EC);
             pDimmEUDA.addData(ATTR_CHIP_ID);
             pDimmEUDA.addData(ATTR_MSS_VOLT_VDDR_MILLIVOLTS);
-            pDimmEUDA.addData(ATTR_MSS_FREQ);
+            //pDimmEUDA.addData(ATTR_MSS_FREQ); // TODO RTC 210975
 
             // skipped - not there
             pDimmEUDA.addData(ATTR_SCRATCH_UINT8_1);

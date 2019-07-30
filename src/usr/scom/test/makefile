@@ -25,10 +25,9 @@
 ROOTPATH = ../../../..
 
 MODULE = testscom
-# FIXME RTC: 210975
-#TESTS = *.H
+TESTS = *.H
 
-#OBJS+=retryWorkaroundTestData.o
+OBJS+=retryWorkaroundTestData.o
 
 #To enable tracing of SCOM Unit Tests
 # TRACE_SCOM_UNIT_TEST=1 make -j32

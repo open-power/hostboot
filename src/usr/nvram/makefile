@@ -29,12 +29,10 @@ MODULE = nvram
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/nvram/import
 
-# FIXME RTC: 210975
+OBJS += nvram_interface.o
+OBJS += nvram-format.o
 
-#OBJS += nvram_interface.o
-#OBJS += nvram-format.o
-
-#VPATH += import
+VPATH += import
 
 SUBDIRS += test.d
 

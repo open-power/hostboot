@@ -27,8 +27,6 @@ ROOTPATH = ../../../..
 
 MODULE = ucd
 
-# FIXME RTC: 210975
-
-#OBJS += updateUcdFlash.o
+OBJS += updateUcdFlash.o
 
 include ${ROOTPATH}/config.mk
