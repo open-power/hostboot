@@ -2362,8 +2362,7 @@ fapi2::ReturnCode unmaskMCFIR(const fapi2::Target<T> i_target)
     }
 
     l_mcfirmask_and.clearBit<MCS_MCFIR_MC_INTERNAL_RECOVERABLE_ERROR>();
-    //Temporary mask to enable other teams for bringup
-    //l_mcfirmask_and.clearBit<MCS_MCFIR_MC_INTERNAL_NONRECOVERABLE_ERROR>();
+    l_mcfirmask_and.clearBit<MCS_MCFIR_MC_INTERNAL_NONRECOVERABLE_ERROR>();
     l_mcfirmask_and.clearBit<MCS_MCFIR_POWERBUS_PROTOCOL_ERROR>();
     l_mcfirmask_and.clearBit<MCS_MCFIR_MULTIPLE_BAR>();
 
@@ -2376,8 +2375,7 @@ fapi2::ReturnCode unmaskMCFIR(const fapi2::Target<T> i_target)
 
     if (T == fapi2::TARGET_TYPE_MI)
     {
-        //Temporary mask to enable other teams for bringup
-        //l_mcfirmask_and.clearBit<MCS_MCFIR_MS_WAT_DEBUG_CONFIG_REG_ERROR>();
+        l_mcfirmask_and.clearBit<MCS_MCFIR_MS_WAT_DEBUG_CONFIG_REG_ERROR>();
     }
 
     // Defect HW451708, HW451711

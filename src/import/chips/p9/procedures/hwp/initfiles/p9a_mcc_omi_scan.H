@@ -32,15 +32,17 @@
 
 #ifdef IFCOMPILER_PLAT
 #define INITFILE_PROCEDURE \
-    p9a_mcc_omi_scan(TGT0);
+    p9a_mcc_omi_scan(TGT0, TGT1);
 #endif
 
-typedef fapi2::ReturnCode (*p9a_mcc_omi_scan_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
+typedef fapi2::ReturnCode (*p9a_mcc_omi_scan_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
+        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>&);
 
 extern "C"
 {
 
-    fapi2::ReturnCode p9a_mcc_omi_scan(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT0);
+    fapi2::ReturnCode p9a_mcc_omi_scan(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT0,
+                                       const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT1);
 
 }
 
