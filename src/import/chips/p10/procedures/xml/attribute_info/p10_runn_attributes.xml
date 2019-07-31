@@ -6,6 +6,7 @@
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
 <!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
+<!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
@@ -62,7 +63,7 @@
     Provided by: platform (FW platforms init to 0)
   </description>
   <valueType>uint64</valueType>
-  <platInit/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -74,7 +75,7 @@
     Provided by: platform (FW platforms init to 0)
   </description>
   <valueType>uint64</valueType>
-  <platInit/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -86,7 +87,7 @@
     Provided by: platform (FW platforms init to 0)
   </description>
   <valueType>uint8</valueType>
-  <platInit/>
+  <initToZero/>
   <enum>
     0_CYCLES = 0x0,
     1_CYCLE  = 0x1,
