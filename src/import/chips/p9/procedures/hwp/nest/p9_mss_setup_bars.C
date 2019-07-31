@@ -2333,17 +2333,17 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Apply Gemini MDI bit workaround
+/// @brief Apply Gemini MDI bit workaround and mask Channel Timeout
 ///
 /// @param[in] i_target target to set actions/mask
 ///
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 ///
-fapi2::ReturnCode fixGeminiMDI(const fapi2::Target<fapi2::TARGET_TYPE_MCC> i_target)
+fapi2::ReturnCode applyGeminiFixes(const fapi2::Target<fapi2::TARGET_TYPE_MCC> i_target)
 {
     FAPI_DBG("Entering fixGeminiMDI on %s", mss::c_str(i_target));
 
-    fapi2::buffer<uint64_t> l_ustlcfg_scom_data;
+    fapi2::buffer<uint64_t> l_scom_data;
     uint8_t l_any_gemini = 0;
     const auto l_omiChiplets = i_target.getChildren<fapi2::TARGET_TYPE_OMI>();
 
@@ -2364,12 +2364,22 @@ fapi2::ReturnCode fixGeminiMDI(const fapi2::Target<fapi2::TARGET_TYPE_MCC> i_tar
 
     if(l_any_gemini)
     {
-        FAPI_TRY(fapi2::getScom(i_target, P9A_MCC_USTLCFG, l_ustlcfg_scom_data),
+        // MDI Workaround
+        FAPI_TRY(fapi2::getScom(i_target, P9A_MCC_USTLCFG, l_scom_data),
                  "Error reading from MCC_USTLCFG reg");
-        l_ustlcfg_scom_data.setBit<P9A_MCC_USTLCFG_DEFAULT_META_DATA_ENABLE>();
-        l_ustlcfg_scom_data.insertFromRight<P9A_MC_USTLCFG_DEFAULT_META_DATA,
-                                            P9A_MC_USTLCFG_DEFAULT_META_DATA_LEN>(USTL_MDI_EQUAL_ONE);
-        FAPI_TRY(fapi2::putScom(i_target, P9A_MCC_USTLCFG, l_ustlcfg_scom_data),
+        l_scom_data.setBit<P9A_MCC_USTLCFG_DEFAULT_META_DATA_ENABLE>();
+        l_scom_data.insertFromRight<P9A_MC_USTLCFG_DEFAULT_META_DATA,
+                                    P9A_MC_USTLCFG_DEFAULT_META_DATA_LEN>(USTL_MDI_EQUAL_ONE);
+        FAPI_TRY(fapi2::putScom(i_target, P9A_MCC_USTLCFG, l_scom_data),
+                 "Error writing to MCC_USTLCFG reg");
+
+
+        fapi2::Target<fapi2::TARGET_TYPE_MI> l_mi_target = i_target.getParent<fapi2::TARGET_TYPE_MI>();
+        // Channel Timeout
+        FAPI_TRY(fapi2::getScom(l_mi_target, P9A_MI_MCTO, l_scom_data),
+                 "Error reading from MCC_USTLCFG reg");
+        l_scom_data.clearBit<P9A_MI_MCTO_ENABLE_CHANNEL_HANG>();
+        FAPI_TRY(fapi2::putScom(l_mi_target, P9A_MI_MCTO, l_scom_data),
                  "Error writing to MCC_USTLCFG reg");
     }
 
@@ -2575,7 +2585,7 @@ fapi2::ReturnCode p9_mss_setup_bars(
         // Apply Gemini MDI bit workaround
         for (fapi2::Target<fapi2::TARGET_TYPE_MCC> l_target : l_mccChiplets)
         {
-            FAPI_TRY(fixGeminiMDI(l_target),
+            FAPI_TRY(applyGeminiFixes(l_target),
                      "fixGeminiMDI() returns error, l_rc 0x%.8X",
                      uint64_t(fapi2::current_err));
         }
