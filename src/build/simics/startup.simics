@@ -112,6 +112,7 @@ try {
     run-python-file (lookup-file hbfw/hb-simdebug.py)
 } except { echo "ERROR: Failed to load Hostboot debug tools (hb-simdebug.py)" }
 
+
 # Determine security state
 $hw_security=(shell "echo $SECURITY_HW_POLICY")
 if($hw_security == "") {
@@ -133,13 +134,27 @@ if($hw_security == "1") {
     $jumperApplied=FALSE
 }
 
-# Load jumper state to each processor
-foreach $procX in (get-object-list p9_proc) {
-
+if ($hb_machine == "AXONE") {
     # Set logical jumper state in SIMICS based on HW policy
     #     "TRUE"=jumper applied(security disabled, default)
     #     "FALSE"=jumper removed(security enabled)
-    (($procX)->secure_jumper=$jumperApplied)
+
+    # Load jumper state to the master processor
+    $hb_masterproc.set-secure-jumper value = $jumperApplied
+
+    # Load jumper state to all slave processors
+    foreach $procS in ($hb_masterproc.get-slave-procs) {
+        $procS.set-secure-jumper value = $jumperApplied
+    }
+} else {
+  # Load jumper state to each processor
+  foreach $procX in (get-object-list p9_proc) {
+
+      # Set logical jumper state in SIMICS based on HW policy
+      #     "TRUE"=jumper applied(security disabled, default)
+      #     "FALSE"=jumper removed(security enabled)
+      (($procX)->secure_jumper=$jumperApplied)
+  }
 }
 
 if ($hb_mode == 0) {
