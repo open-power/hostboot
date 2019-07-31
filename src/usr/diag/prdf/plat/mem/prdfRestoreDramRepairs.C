@@ -99,7 +99,7 @@ void commitErrl( errlHndl_t i_errl, TargetHandle_t i_trgt )
 
 template<TARGETING::TYPE T>
 void __calloutDimm( errlHndl_t & io_errl, TargetHandle_t i_portTrgt,
-                    TargetHandle_t i_dimmTrgt )
+                    TargetHandle_t i_dimmTrgt, bool i_nvdimmNoGard = false )
 {
     #define PRDF_FUNC "[RDR::__calloutDimm] "
 
@@ -113,10 +113,10 @@ void __calloutDimm( errlHndl_t & io_errl, TargetHandle_t i_portTrgt,
     HWAS::GARD_ErrorType gardPolicy   = HWAS::GARD_Predictive;
 
     #ifdef CONFIG_NVDIMM
-    // If the DIMM is an NVDIMM, change the gard and deconfig options to no
-    // gard/deconfig and call nvdimmNotifyProtChange to indicate a
-    // save/restore may work
-    if ( isNVDIMM(i_dimmTrgt) )
+    // For the "RDR: All repairs used" case, If the DIMM is an NVDIMM, change
+    // the gard and deconfig options to no gard/deconfig and call
+    // nvdimmNotifyProtChange to indicate a save/restore may work.
+    if ( i_nvdimmNoGard )
     {
         deconfigPolicy = HWAS::NO_DECONFIG;
         gardPolicy     = HWAS::GARD_NULL;
@@ -261,7 +261,12 @@ bool processRepairedRanks( TargetHandle_t i_trgt, uint8_t i_repairedRankMask )
         // Callout all DIMMs in the map.
         for ( auto const & dimm : calloutList )
         {
-            __calloutDimm<T>( errl, i_trgt, dimm.first );
+            bool nvdimmNoGard = false;
+            #ifdef CONFIG_NVDIMM
+            if ( isNVDIMM(dimm.first) ) nvdimmNoGard = true;
+            #endif
+
+            __calloutDimm<T>( errl, i_trgt, dimm.first, nvdimmNoGard );
         }
 
         // Commit the error log, if needed.
@@ -391,7 +396,12 @@ bool processRepairedRanks<TYPE_MBA>( TargetHandle_t i_trgt,
             // Callout all DIMMs in the map.
             for ( auto const & dimm : calloutList )
             {
-                __calloutDimm<TYPE_MBA>( errl, i_trgt, dimm.first );
+                bool nvdimmNoGard = false;
+                #ifdef CONFIG_NVDIMM
+                if ( isNVDIMM(dimm.first) ) nvdimmNoGard = true;
+                #endif
+
+                __calloutDimm<TYPE_MBA>(errl, i_trgt, dimm.first, nvdimmNoGard);
             }
 
             o_calloutMade = true;
