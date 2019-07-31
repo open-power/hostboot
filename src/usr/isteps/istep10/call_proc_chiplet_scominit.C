@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -73,6 +73,8 @@ void* call_proc_chiplet_scominit( void *io_pArgs )
     IStepError l_stepError;
 
     TRACFCOMP(g_trac_isteps_trace, ENTER_MRK"call_proc_chiplet_scominit entry" );
+    
+    do{
 
     if (!INITSERVICE::isSMPWrapConfig())
     {
@@ -107,6 +109,72 @@ void* call_proc_chiplet_scominit( void *io_pArgs )
                          HWPF_COMP_ID);
         }
     }
+    
+    // TODO RTC: 213932 Remove workaround to ignore MC channel hang
+    #ifdef CONFIG_AXONE_BRING_UP
+    TARGETING::TargetHandleList l_cpuTargetList;
+    getAllChips(l_cpuTargetList, TYPE_PROC);
+
+    //
+    //  Identify the master processor
+    //
+    TARGETING::Target * l_masterProc =   nullptr;
+    TARGETING::Target * l_masterNode =   nullptr;
+    const bool l_onlyFunctional = true; // Make sure masterproc is functional
+    l_err = TARGETING::targetService().queryMasterProcChipTargetHandle(
+                                              l_masterProc,
+                                              l_masterNode,
+                                              l_onlyFunctional);
+
+    if(l_err)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR : call_proc_chiplet_scominit: "
+                    "queryMasterProcChipTargetHandle() returned PLID=0x%x",
+                    l_err->plid() );
+        // Create IStep error log and cross reference error that occurred
+        l_stepError.addErrorDetails(l_err);
+        // Commit error
+        errlCommit( l_err, HWPF_COMP_ID );
+        break;
+    }
+
+    TARGETING::TargetHandleList l_miTargetList;
+    TARGETING::getChildAffinityTargets( l_miTargetList, l_masterProc, CLASS_UNIT, TYPE_MI );
+
+    const uint64_t MCS_TIMEOUT_CONTROL_REG = 0x501081B;
+
+    for(const auto & l_mi : l_miTargetList)
+    {
+        uint64_t l_mcsTimeoutControlValue;
+        size_t l_regSize = sizeof(l_mcsTimeoutControlValue);
+        l_err = deviceRead(l_mi, &l_mcsTimeoutControlValue, l_regSize,
+                            DEVICE_SCOM_ADDRESS(MCS_TIMEOUT_CONTROL_REG));
+
+        // Clear bit 33 and re-write the scom register with new value.
+        // When this bit is cleared it allows extra time for gemini card
+        // before a channel hang is declared
+        l_mcsTimeoutControlValue &= ~(1UL << 30);
+
+        l_err = deviceWrite(l_mi, &l_mcsTimeoutControlValue, l_regSize,
+                            DEVICE_SCOM_ADDRESS(MCS_TIMEOUT_CONTROL_REG));
+
+        if(l_err)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "ERROR : call_proc_chiplet_scominit: "
+                        "deviceWrite on DEVICE_SCOM_ADDRESS MCS_TIMEOUT_CONTROL_REG returned PLID=0x%x",
+                        l_err->plid() );
+            // Create IStep error log and cross reference error that occurred
+            l_stepError.addErrorDetails(l_err);
+            // Commit error
+            errlCommit( l_err, HWPF_COMP_ID );
+            break;
+        }
+    }
+    #endif
+    
+    }while(0);
 
     TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_proc_chiplet_scominit exit" );
 
