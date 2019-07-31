@@ -2085,9 +2085,9 @@ ReturnCode platGetFreqMcaMhz(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
 /// values in the MEM_PLL_FREQ_BUCKETS tree. The key's used to lookup values in that
 /// tree are the ATTR_FREQ_OMI_MHZ and ATTR_OMI_PLL_VCO attributes. These are on the
 /// processor target but it is expected that all of the values match.
-//  @param[out] o_omiFreq  OMI Frequency of the system
-//  @param[out] o_omiVco   OMI VCO of the system
-//  @return ReturnCode Zero on success, else platform specified error.
+///  @param[out] o_omiFreq  OMI Frequency of the system
+///  @param[out] o_omiVco   OMI VCO of the system
+///  @return ReturnCode Zero on success, else platform specified error.
 errlHndl_t getOmiFreqAndVco(TARGETING::ATTR_FREQ_OMI_MHZ_type & o_omiFreq,
                             TARGETING::ATTR_OMI_PLL_VCO_type & o_omiVco)
 {
@@ -2096,16 +2096,31 @@ errlHndl_t getOmiFreqAndVco(TARGETING::ATTR_FREQ_OMI_MHZ_type & o_omiFreq,
     // Get all functional Proc targets
     TARGETING::TargetHandleList l_procsList;
     getAllChips(l_procsList, TARGETING::TYPE_PROC);
+    uint8_t l_firstValidProc = 0;
+    bool l_outValueSet = false;
 
     // Until we are told we need to support individual processor frequency
     // assert that all of the processors have the same values
     for(uint8_t i = 0; i < l_procsList.size(); i++)
     {
-        // First processor's value will be used to compare against all other processors
-        if(i == 0)
+        // Get a list of functional OCMB targets under this processor
+        TARGETING::TargetHandleList l_childOcmbList;
+        TARGETING::getChildAffinityTargets(l_childOcmbList, l_procsList[i],
+                                           TARGETING::CLASS_CHIP,
+                                           TARGETING::TYPE_OCMB_CHIP);
+        // If there are no OCMB children for this processor then ignore it;
+        if(l_childOcmbList.size() == 0)
+        {
+            continue;
+        }
+
+        // First valid processor's values will be used to compare against all other processors
+        if(!l_outValueSet)
         {
             o_omiFreq = l_procsList[i]->getAttr<TARGETING::ATTR_FREQ_OMI_MHZ>();
             o_omiVco = l_procsList[i]->getAttr<TARGETING::ATTR_OMI_PLL_VCO>();
+            l_outValueSet = true;
+            l_firstValidProc = i;
             continue;
         }
 
@@ -2120,7 +2135,7 @@ errlHndl_t getOmiFreqAndVco(TARGETING::ATTR_FREQ_OMI_MHZ_type & o_omiFreq,
             FAPI_ERR("platGetMcPllBucket: Detected two processors with difference OMI VCO / FREQ combinations."
                       " Proc 0x%.08X has OMI freq = %d and OMI vco = %d. "
                       " Proc 0x%.08X has OMI freq = %d and OMI vco = %d. " ,
-                    get_huid(l_procsList[0]), o_omiFreq, o_omiVco,
+                    get_huid(l_procsList[l_firstValidProc]), o_omiFreq, o_omiVco,
                     get_huid(l_procsList[i]), l_omiFreqToCmp, l_omiVcoToCmp );
 
             /*@
