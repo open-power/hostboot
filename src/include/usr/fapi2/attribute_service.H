@@ -521,6 +521,16 @@ ReturnCode platGetMBvpdSlopeInterceptData(
                                    const uint32_t i_attr,
                                    uint32_t& o_val);
 
+/// @brief This function is called by the FAPI_ATTR_GET functions that lookup
+/// values in the MEM_PLL_FREQ_BUCKETS tree. The key's used to lookup values in that
+/// tree are the ATTR_FREQ_OMI_MHZ and ATTR_OMI_PLL_VCO attributes. These are on the
+/// processor target but it is expected that all of the values match.
+///  @param[out] o_omiFreq  OMI Frequency of the system
+///  @param[out] o_omiVco   OMI VCO of the system
+///  @return ReturnCode Zero on success, else platform specified error.
+errlHndl_t getOmiFreqAndVco(TARGETING::ATTR_FREQ_OMI_MHZ_type & o_omiFreq,
+                            TARGETING::ATTR_OMI_PLL_VCO_type & o_omiVco);
+
 /// @brief This function is called by the FAPI_ATTR_GET macro when getting
 //  ATTR_FREQ_MCA_MHZ
 //  @param[in] i_fapiTarget    FAPI2 Target pointer

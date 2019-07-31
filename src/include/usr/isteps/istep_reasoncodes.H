@@ -68,8 +68,7 @@ namespace ISTEP
         MOD_MSS_SCRUB                                     = 0x25,
         MOD_CALL_UPDATE_UCD_FLASH                         = 0x26,
         MOD_LOAD_HCODE                                    = 0x27,
-        MOD_GET_OMI_FREQ                                  = 0x28,
-        MOD_DISCOVER_TARGETS                              = 0x29,
+        MOD_DISCOVER_TARGETS                              = 0x28,
     };
 
     /**
@@ -144,8 +143,7 @@ namespace ISTEP
         RC_SLAVE_CORE_WAKEUP_ERROR               = ISTEP_COMP_ID | 0x4E,
         RC_UCD_IMG_NOT_IN_CONTAINER              = ISTEP_COMP_ID | 0x4F,
         RC_MM_UNMAP_FAILED                       = ISTEP_COMP_ID | 0x50,
-        RC_OMI_FREQ_MISMATCH                     = ISTEP_COMP_ID | 0x51,
-        RC_CANNOT_BOOT_WITH_MISMATCHED_BARS      = ISTEP_COMP_ID | 0x52,
+        RC_CANNOT_BOOT_WITH_MISMATCHED_BARS      = ISTEP_COMP_ID | 0x51,
     };
 
 };

@@ -72,18 +72,6 @@ using   namespace   ISTEP_ERROR;
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 
-#ifdef CONFIG_AXONE
-/**
-  * @brief Look at all FREQ_OMI_MHZ attribute on all processors, make sure
-  *        they are the same and return the value.
-  * @param[out] o_omiFreq  the frequency of the OMI link between proc and ocmbs
-  * @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-  *
-  * @note returns error if all OMIs do not have matching frequency set
-  */
-errlHndl_t getOmiFreq(TARGETING::ATTR_FREQ_OMI_MHZ_type & o_omiFreq);
-#endif
-
 //
 //  Wrapper function to call mss_freq
 //
@@ -261,13 +249,14 @@ void*    call_mss_freq( void *io_pArgs )
         TARGETING::Target * l_sys = nullptr;
         TARGETING::targetService().getTopLevelTarget( l_sys );
 
-        uint32_t l_originalNestFreq = Util::getBootNestFreq();
+        TARGETING::ATTR_FREQ_PB_MHZ_type l_originalNestFreq = Util::getBootNestFreq();
 
         // Omi Freq is only used in P9a and beyond, to limit #ifdef
         // craziness below just leave it at 0 so it never changes
-        uint32_t l_originalOmiFreq = 0;
+        TARGETING::ATTR_FREQ_OMI_MHZ_type l_originalOmiFreq = 0;
 #ifdef CONFIG_AXONE
-        l_err = getOmiFreq(l_originalOmiFreq);
+        TARGETING::ATTR_OMI_PLL_VCO_type l_originalOmiVco = 0; // unused but needed for func call
+        l_err = fapi2::platAttrSvc::getOmiFreqAndVco(l_originalOmiFreq, l_originalOmiVco);
         if(l_err)
         {
             l_StepError.addErrorDetails( l_err );
@@ -277,7 +266,7 @@ void*    call_mss_freq( void *io_pArgs )
 #endif
 
         // Read MC_SYNC_MODE from SBE itself and set the attribute
-        uint8_t l_bootSyncMode = 0;
+        TARGETING::ATTR_MC_SYNC_MODE_type l_bootSyncMode = 0;
         l_err = SBE::getBootMcSyncMode( l_bootSyncMode );
         if( l_err )
         {
@@ -381,12 +370,12 @@ void*    call_mss_freq( void *io_pArgs )
         }
 
         // Get latest MC_SYNC_MODE and FREQ_PB_MHZ
-        uint8_t l_mcSyncMode = l_masterProc->getAttr<TARGETING::ATTR_MC_SYNC_MODE>();
-        uint32_t l_newOmiFreq = 0;
-
-        uint32_t l_newNestFreq = l_sys->getAttr<TARGETING::ATTR_FREQ_PB_MHZ>();
+        TARGETING::ATTR_MC_SYNC_MODE_type l_mcSyncMode = l_masterProc->getAttr<TARGETING::ATTR_MC_SYNC_MODE>();
+        TARGETING::ATTR_FREQ_OMI_MHZ_type l_newOmiFreq = 0;
+        TARGETING::ATTR_FREQ_PB_MHZ_type l_newNestFreq = l_sys->getAttr<TARGETING::ATTR_FREQ_PB_MHZ>();
 #ifdef CONFIG_AXONE
-        l_err = getOmiFreq(l_newOmiFreq);
+        TARGETING::ATTR_OMI_PLL_VCO_type l_newOmiVco = 0;  // unused but needed for func call
+        l_err = fapi2::platAttrSvc::getOmiFreqAndVco(l_newOmiFreq, l_newOmiVco);
         if(l_err)
         {
             l_StepError.addErrorDetails( l_err );
@@ -501,55 +490,5 @@ void*    call_mss_freq( void *io_pArgs )
 
     return l_StepError.getErrorHandle();
 }
-
-#ifdef CONFIG_AXONE
-errlHndl_t getOmiFreq(TARGETING::ATTR_FREQ_OMI_MHZ_type & o_omiFreq)
-{
-    errlHndl_t l_err = nullptr;
-    TARGETING::TargetHandleList l_procTargetList;
-        getAllChips(l_procTargetList, TYPE_PROC);
-
-    assert( l_procTargetList.size() > 0, "getOmiFreq: Expected at least one functional processor");
-
-    o_omiFreq = l_procTargetList[0]->getAttr<TARGETING::ATTR_FREQ_OMI_MHZ>();
-    // Until we are told we need to support individual processor frequency
-    // assert that all of the processors have the same values
-    for(uint8_t i = 1; i < l_procTargetList.size(); i++)
-    {
-
-        TARGETING::ATTR_FREQ_OMI_MHZ_type l_tmpFreq =
-              l_procTargetList[i]->getAttr<TARGETING::ATTR_FREQ_OMI_MHZ>();
-
-        if(o_omiFreq != l_tmpFreq)
-        {
-            /*@
-            * @errortype         ERRL_SEV_UNRECOVERABLE
-            * @moduleid          MOD_GET_OMI_FREQ
-            * @reasoncode        RC_OMI_FREQ_MISMATCH
-            * @userdata1[0:31]   First OMI freq found
-            * @userdata1[32:63]  Mismatched OMI freq found
-            * @userdata2[0:31]   Huid of first proc found
-            * @userdata2[32:63]  Huid of proc w/ mismatched OMI freq
-            * @devdesc           Processor have mismatch OMI freq
-            * @custdesc          Invalid processor frequency settings
-            */
-            l_err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                          MOD_GET_OMI_FREQ,
-                          RC_OMI_FREQ_MISMATCH,
-                          TWO_UINT32_TO_UINT64(
-                              TO_UINT32(o_omiFreq),
-                              TO_UINT32(l_tmpFreq)),
-                          TWO_UINT32_TO_UINT64(
-                              get_huid(l_procTargetList[0]),
-                              get_huid(l_procTargetList[i])),
-                          ErrlEntry::ADD_SW_CALLOUT);
-
-            break;
-        }
-    }
-
-    return l_err;
-}
-#endif
 
 };   // end namespace
