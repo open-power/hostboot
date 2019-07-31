@@ -2029,6 +2029,9 @@
       <id>SP_FUNCTIONS</id>
     </attribute>
     <attribute>
+      <id>TPM_REQUIRED</id>
+    </attribute>
+    <attribute>
       <default>SYS</default>
       <id>TYPE</id>
     </attribute>
