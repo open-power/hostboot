@@ -41,27 +41,30 @@ enum P10_SETUP_REF_CLOCK_Private_Constants
 {
     RCS_CONTRL_DC_CFAM_RESET_VAL = 0x0200004,
     TP_MUX0A_CLKIN_SEL = 0,
-    TP_MUX0B_CLKIN_SEL = 1,
-    TP_MUX0C_CLKIN_SEL = 2,
+    TP_MUX0A_CLKIN_SEL_LENGTH = 2,
+    TP_MUX0B_CLKIN_SEL = 2,
+    TP_MUX0B_CLKIN_SEL_LENGTH = 2,
+    TP_MUX0C_CLKIN_SEL = 4,
     TP_MUX0C_CLKIN_SEL_LENGTH = 2,
-    TP_MUX0D_CLKIN_SEL = 4,
+    TP_MUX0D_CLKIN_SEL = 6,
+    TP_MUX0D_CLKIN_SEL_LENGTH = 2,
 
-    TP_MUX10_CLKIN_SEL = 6,
+    TP_MUX10_CLKIN_SEL = 8,
 
-    TP_MUX11_CLKIN_SEL = 7,
+    TP_MUX11_CLKIN_SEL = 9,
 
-    TP_MUX12_CLKIN_SEL = 8,
+    TP_MUX12_CLKIN_SEL = 10,
     TP_MUX12_CLKIN_SEL_LENGTH = 2,
 
-    TP_MUX13_CLKIN_SEL = 10,
+    TP_MUX13_CLKIN_SEL = 12,
     TP_MUX13_CLKIN_SEL_LENGTH = 2,
 
-    TP_MUX14_CLKIN_SEL = 12,
+    TP_MUX14_CLKIN_SEL = 14,
 
-    TP_MUX23_CLKIN_SEL = 14,
+    TP_MUX23_CLKIN_SEL = 15,
     TP_MUX23_CLKIN_SEL_LENGTH = 2,
 
-    TP_TOD_MUX_CLKIN_SEL = 16,
+    TP_TOD_MUX_CLKIN_SEL = 17,
 
     TP_MUX1_CLKIN_SEL = 20,
 
@@ -143,14 +146,16 @@ fapi2::ReturnCode p10_setup_ref_clock(const
     FAPI_DBG("Setup clocking");
     l_read_reg.flush<0>();
 
-    // RC4 bits 0:4
+    // RC4 bits 0:7
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CLOCK_MUX0A_RCS_PLL_INPUT, i_target_chip, l_attr_mux0_rcs_pll),
              "Error from FAPI_ATTR_GET (ATTR_CLOCK_MUX0A_RCS_PLL)");
-    l_read_reg.writeBit<TP_MUX0A_CLKIN_SEL>(l_attr_mux0_rcs_pll.getBit<7>());
+    l_read_reg.insertFromRight< TP_MUX0A_CLKIN_SEL,
+                                TP_MUX0A_CLKIN_SEL_LENGTH >(l_attr_mux0_rcs_pll);
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CLOCK_MUX0B_RCS_PLL_INPUT, i_target_chip, l_attr_mux0_rcs_pll),
              "Error from FAPI_ATTR_GET (ATTR_CLOCK_MUX0B_RCS_PLL)");
-    l_read_reg.writeBit<TP_MUX0B_CLKIN_SEL>(l_attr_mux0_rcs_pll.getBit<7>());
+    l_read_reg.insertFromRight< TP_MUX0B_CLKIN_SEL,
+                                TP_MUX0B_CLKIN_SEL_LENGTH >(l_attr_mux0_rcs_pll);
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CLOCK_MUX0C_RCS_PLL_INPUT, i_target_chip, l_attr_mux0_rcs_pll),
              "Error from FAPI_ATTR_GET (ATTR_CLOCK_MUX0C_RCS_PLL)");
@@ -159,48 +164,49 @@ fapi2::ReturnCode p10_setup_ref_clock(const
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CLOCK_MUX0D_RCS_PLL_INPUT, i_target_chip, l_attr_mux0_rcs_pll),
              "Error from FAPI_ATTR_GET (ATTR_CLOCK_MUX0D_RCS_PLL)");
-    l_read_reg.writeBit<TP_MUX0D_CLKIN_SEL>(l_attr_mux0_rcs_pll.getBit<7>());
+    l_read_reg.insertFromRight< TP_MUX0D_CLKIN_SEL,
+                                TP_MUX0D_CLKIN_SEL_LENGTH >(l_attr_mux0_rcs_pll);
 
-    // RC4 bit 6
+    // RC4 bit 8
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CLOCK_MUX10_PAU_DPLL_INPUT, i_target_chip, l_attr_mux_dpll),
              "Error from FAPI_ATTR_GET (ATTR_CLOCK_MUX10_PAU_DPLL_INPUT)");
 
     l_read_reg.writeBit<TP_MUX10_CLKIN_SEL>(l_attr_mux_dpll.getBit<7>());
 
-    // RC4 bit 7
+    // RC4 bit 9
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CLOCK_MUX11_NEST_DPLL_INPUT, i_target_chip, l_attr_mux_dpll),
              "Error from FAPI_ATTR_GET (ATTR_CLOCK_MUX11_NEST_DPLL_INPUT)");
 
     l_read_reg.writeBit<TP_MUX11_CLKIN_SEL>(l_attr_mux_dpll.getBit<7>());
 
-    // RC4 bits 8:9
+    // RC4 bits 10:11
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CLOCK_MUX12_OMI_LCPLL_INPUT, i_target_chip, l_attr_mux_omi_lcpll),
              "Error from FAPI_ATTR_GET (ATTR_CLOCK_MUX12_OMI_LCPLL_INPUT)");
 
     l_read_reg.insertFromRight< TP_MUX12_CLKIN_SEL,
                                 TP_MUX12_CLKIN_SEL_LENGTH >(l_attr_mux_omi_lcpll);
 
-    // RC4 bits 10:11
+    // RC4 bits 12:13
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CLOCK_MUX13_OPT_133_SOURCE_INPUT, i_target_chip, l_attr_mux_input),
              "Error from FAPI_ATTR_GET (ATTR_CLOCK_MUX13_OPT_133_SOURCE_INPUT)");
 
     l_read_reg.insertFromRight< TP_MUX13_CLKIN_SEL,
                                 TP_MUX13_CLKIN_SEL_LENGTH >(l_attr_mux_input);
 
-    // RC4 bit 12
+    // RC4 bit 14
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CLOCK_MUX14_OPT_156_SOURCE_INPUT, i_target_chip, l_attr_mux_input),
              "Error from FAPI_ATTR_GET (ATTR_CLOCK_MUX14_OPT_156_SOURCE_INPUT)");
 
     l_read_reg.writeBit<TP_MUX14_CLKIN_SEL>(l_attr_mux_input.getBit<7>());
 
-    // RC4 bits 14:15
+    // RC4 bits 15:16
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CLOCK_MUX23_PCI_INPUT, i_target_chip, l_attr_mux_input),
              "Error from FAPI_ATTR_GET (ATTR_CLOCK_MUX23_PCI_INPUT)");
 
     l_read_reg.insertFromRight< TP_MUX23_CLKIN_SEL,
                                 TP_MUX23_CLKIN_SEL_LENGTH >(l_attr_mux_input);
 
-    // RC4 bit 16
+    // RC4 bit 17
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CLOCK_PLL_MUX_TOD, i_target_chip, l_attr_clock_pll_mux_tod),
              "Error from FAPI_ATTR_GET (ATTR_CLOCK_PLL_MUX_TOD)");
 
