@@ -2003,17 +2003,17 @@ typedef enum
 /**************************************************************************/
 typedef enum
 {
-    P9_XIP_SECTION_IOPPE_IOF      = P9_XIP_SECTIONS_PLUS(0),
-    P9_XIP_SECTION_IOPPE_IOO_ABUS = P9_XIP_SECTIONS_PLUS(1),
-    P9_XIP_SECTION_IOPPE_IOO_NV   = P9_XIP_SECTIONS_PLUS(2),
-    P9_XIP_SECTIONS_IOPPE         = P9_XIP_SECTIONS_PLUS(3) // # sections
+    P9_XIP_SECTION_IOPPE_IOO     = P9_XIP_SECTIONS_PLUS(0),
+    P9_XIP_SECTION_IOPPE_MEMREGS = P9_XIP_SECTIONS_PLUS(1),
+    P9_XIP_SECTION_IOPPE_NV      = P9_XIP_SECTIONS_PLUS(2),
+    P9_XIP_SECTIONS_IOPPE        = P9_XIP_SECTIONS_PLUS(3) // # sections
 } p9_xip_section_ioppe_t;
 
 #define P9_XIP_SECTION_NAMES_IOPPE(var)        \
     P9_XIP_SECTION_NAMES(var,                  \
-                         ".iof",               \
-                         ".ioo_abus",          \
-                         ".ioo_nv")
+                         ".ioo",               \
+                         ".memregs",           \
+                         ".nv")
 
 #endif  // ifndef __ASSEMBLER__
 
