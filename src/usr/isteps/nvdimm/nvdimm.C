@@ -264,7 +264,7 @@ errlHndl_t nvdimmReadReg(Target* i_nvdimm,
                                     i_nvdimm,
                                     &o_data,
                                     l_numBytes,
-                                    DEVICE_NVDIMM_ADDRESS(l_reg_addr));
+                                    DEVICE_NVDIMM_RAW_ADDRESS(l_reg_addr));
     }while(0);
 
     TRACUCOMP(g_trac_nvdimm, EXIT_MRK"NVDIMM Read HUID 0x%X, page 0x%X, addr 0x%X = 0x%X",
@@ -334,7 +334,7 @@ errlHndl_t nvdimmWriteReg(Target* i_nvdimm,
                                     i_nvdimm,
                                     &i_data,
                                     l_numBytes,
-                                    DEVICE_NVDIMM_ADDRESS(l_reg_addr));
+                                    DEVICE_NVDIMM_RAW_ADDRESS(l_reg_addr));
     }while(0);
 
     TRACUCOMP(g_trac_nvdimm, EXIT_MRK"NVDIMM Write HUID 0x%X, page = 0x%X, addr 0x%X = 0x%X",

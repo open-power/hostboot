@@ -138,6 +138,49 @@ errlHndl_t nvdimmPerformOp( DeviceFW::OperationType i_opType,
                             int64_t i_accessType,
                             va_list i_args );
 
+/**
+*
+* @brief Route the read/write operator (i_opType) to the correct
+*        nvdimmReadReg/nvdimmWriteReg call.
+*
+* @details This is essentially a wrapper around the nvdimmPerformOp method
+*          which is called via the nvdimmReadReg/nvdimmWriteReg call. This
+*          ensures that the page is set correctly whenever a NVDIMM register
+*          is accessed.
+*
+* @param[in] i_opType - Operation Type - See DeviceFW::OperationType in
+*       driververif.H
+*
+* @param[in] i_target - Target device.
+*
+* @param[in/out] io_buffer
+*       INPUT: Pointer to the data that will be  written to the target
+*           device.
+*       OUTPUT: Pointer to the data that was read from the target device.
+*
+* @param[in/out] io_buflen
+*       INPUT: Length of the buffer to be written to target device.
+*       OUTPUT: Length of buffer that was written, or length of buffer
+*           to be read from target device.
+*
+* @param [in] i_accessType - Access Type - See DeviceFW::AccessType in
+*       usrif.H
+*
+* @param [in] i_args - This is an argument list for the device driver
+*       framework.  This argument list consists of the internal offset
+*       to use on the slave I2C device.
+*
+* @return errlHndl_t - NULL if successful, otherwise a pointer to the
+*       error log.
+*
+*/
+errlHndl_t nvdimmPerformOpRouter( DeviceFW::OperationType i_opType,
+                                  TARGETING::Target * i_target,
+                                  void * io_buffer,
+                                  size_t & io_buflen,
+                                  int64_t i_accessType,
+                                  va_list i_args );
+
 /*
  * @brief On the NV Controller, the page is selected by writing to offset
  *        0x00 with the page you would like to switch too. e.g. to activate

@@ -97,11 +97,81 @@ static bool errorIsRetryable(uint16_t reasonCode)
 namespace NVDIMM
 {
 
-// Register the perform Op with the routing code for DIMMs.
+// Register the perform Op router with the routing code for DIMMs.
 DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,
                        DeviceFW::NVDIMM,
                        TARGETING::TYPE_DIMM,
+                       nvdimmPerformOpRouter  );
+
+// Register the perform Op with the routing code for DIMMs.
+DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,
+                       DeviceFW::NVDIMM_RAW,
+                       TARGETING::TYPE_DIMM,
                        nvdimmPerformOp );
+
+// ------------------------------------------------------------------
+// nvdimmPerformOpRouter
+// ------------------------------------------------------------------
+errlHndl_t nvdimmPerformOpRouter( DeviceFW::OperationType i_opType,
+                                  TARGETING::Target * i_target,
+                                  void * io_buffer,
+                                  size_t & io_buflen,
+                                  int64_t i_accessType,
+                                  va_list i_args )
+{
+    errlHndl_t l_err(nullptr);
+
+    TRACDCOMP( g_trac_nvdimm,
+               ENTER_MRK"nvdimmPerformOpRouter()" );
+
+    // Get the NVDIMM register's address, where data will be accessed from
+    // Although the data is being retrieved as a 64 bit value
+    // it is really a 16 bit value.  Data passed via an arg list
+    // are retrieved in 64 bit chunks.
+    uint16_t l_registerAddress =
+            static_cast<uint16_t>(va_arg(i_args, uint64_t));
+
+    // Get a handle to the data buffer for easy referencing
+    uint8_t* l_data = static_cast<uint8_t*>(io_buffer);
+
+    TRACUCOMP(g_trac_nvdimm, INFO_MRK"nvdimmPerformOpRouter(): "
+              "operation type=%d, target HUID=0x%.8X, access type=%d, "
+              "buffer length=%d, buffer data=0x%.8X, register address=0x%.8X",
+              static_cast<uint64_t>(i_opType), get_huid(i_target), i_accessType,
+              io_buflen, *l_data, l_registerAddress);
+
+    // Make the right read/write call based on operation type
+    if( i_opType == DeviceFW::READ )
+    {
+        l_err = nvdimmReadReg( i_target,
+                               l_registerAddress,
+                               *l_data,
+                               PAGE_VERIFY);
+        if (!l_err)
+        {
+            TRACUCOMP (g_trac_nvdimm, INFO_MRK"nvdimmPerformOpRouter(): "
+                       "Read data(0x%X) from register(0x%X)",
+                       *l_data, l_registerAddress);
+        }
+    }
+    else if( i_opType == DeviceFW::WRITE )
+    {
+        TRACUCOMP (g_trac_nvdimm, INFO_MRK"nvdimmPerformOpRouter(): "
+                   "Writing data(0x%X) to register(0x%X) ...",
+                   *l_data, l_registerAddress);
+
+        l_err = nvdimmWriteReg( i_target,
+                                l_registerAddress,
+                                *l_data,
+                                PAGE_VERIFY);
+    }
+
+    TRACDCOMP(g_trac_nvdimm,
+              EXIT_MRK"nvdimmPerformOpRouter() returning with %s",
+              (l_err == nullptr ? "no error, success" : "an error, failure") );
+
+    return l_err;
+}
 
 // ------------------------------------------------------------------
 // nvdimmPerformOp

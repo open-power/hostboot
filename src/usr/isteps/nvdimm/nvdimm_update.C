@@ -1432,7 +1432,7 @@ errlHndl_t NvdimmInstalledImage::byteRegionBlockTransfer(const uint8_t * i_data,
                                         iv_dimm,
                                         pCurrentBlockData,
                                         l_numBytes,
-                                        DEVICE_NVDIMM_ADDRESS(l_reg_addr) );
+                                        DEVICE_NVDIMM_RAW_ADDRESS(l_reg_addr) );
             if (l_err)
             {
                 TRACFCOMP(g_trac_nvdimm_upd, ERR_MRK"byteRegionBlockTransfer: "

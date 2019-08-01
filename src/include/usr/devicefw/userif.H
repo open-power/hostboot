@@ -68,7 +68,8 @@ namespace DeviceFW
         AHB_SIO,      // AST Hostbridge via SIO
         DVPD,         // Direct access memory VPD
         NODECOMM,     // Internode communication
-        NVDIMM,       // Non-volatile DIMM controller access
+        NVDIMM,       // Routes message to non-volatile DIMM controller access
+        NVDIMM_RAW,   // Non-volatile DIMM controller access
         FAPI_I2C,     // FAPI2-triggered i2c accesses
         MMIO,         // Memory Mapped I/O
         IDEC,         // Read and set EC and CHIPID values
@@ -379,12 +380,30 @@ namespace DeviceFW
             static_cast<uint64_t>(( i_mailbox_id ))
 
     /**
-     * Construct the device addressing parameters for the NVDIMM device ops.
-     * @param[i] i_address - NVDIMM address to internal register
+     * @brief Construct the device addressing parameters for the
+     *        NVDIMM device ops.
+     * @details This call includes setting the page based off the address
+     *          and then performing the read/write of that NVDIMM address.
+     * @see DEVICE_NVDIMM_RAW_ADDRESS for an NVDIMM read/write call without
+     *                                page setting.
+     * @param[i] i_address - NVDIMM address to an internal register
      */
     #define DEVICE_NVDIMM_ADDRESS(i_address)\
         DeviceFW::NVDIMM, static_cast<uint64_t>((i_address))
 
+    /**
+     * @brief Construct the device addressing parameters for the
+     *        NVDIMM RAW device ops.
+     * @details This a raw call to read/write a NVDIMM address which means it
+     *          will not set the page before it does the read/write call. Hence,
+     *          for this call to work properly, the page must have been set
+     *          properly beforehand.
+     * @see DEVICE_NVDIMM_ADDRESS for a NVDIMM read/write call with
+     *                            page setting.
+     * @param[i] i_address - NVDIMM address to an internal register
+     */
+    #define DEVICE_NVDIMM_RAW_ADDRESS(i_address)\
+        DeviceFW::NVDIMM_RAW, static_cast<uint64_t>((i_address))
 
     /**
      * Construct the device addressing parameters for the FAPI I2C operation
