@@ -34,6 +34,7 @@
 #include <trace/interface.H>
 #include <targeting/common/targetservice.H>
 #include <initservice/istepdispatcherif.H>
+#include <isteps/nvdimm/bpmreasoncodes.H>
 
 namespace NVDIMM
 {
@@ -519,10 +520,35 @@ errlHndl_t Bpm::issueCommand(const uint8_t i_command,
         // size the BPM is able to receive.
         if ((i_payload.size() + SYNC_BYTE_SIZE) > MAX_PAYLOAD_SIZE)
         {
-            //@TODO RTC 212447: Error
+            uint8_t payloadSize = i_payload.size() + SYNC_BYTE_SIZE;
+            uint8_t payloadHeaderDataSize =
+                i_payload[PAYLOAD_HEADER_DATA_LENGTH_INDEX];
             TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::issueCommand(): "
                      "payload size %d exceeds max payload size of %d",
-                     (i_payload.size() + SYNC_BYTE_SIZE), MAX_PAYLOAD_SIZE);
+                     payloadSize, MAX_PAYLOAD_SIZE);
+            /*@
+            * @errortype
+            * @severity         ERRORLOG::ERRL_SEV_PREDICTIVE
+            * @moduleid         BPM_RC::BPM_ISSUE_COMMAND
+            * @reasoncode       BPM_RC::BPM_INVALID_PAYLOAD_SIZE
+            * @userdata1[00:31] Full Payload Size, including SYNC_BYTE
+            * @userdata1[32:63] MAX_PAYLOAD_SIZE
+            * @userdata2[00:31] Payload Header + Data size
+            * @userdata2[32:63] NVDIMM Target HUID associated with this BPM
+            * @devdesc          The maximum payload size to be sent to the BPM
+            *                   was exceeded.
+            * @custdesc         A problem occurred during IPL of the system.
+            */
+            errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                           BPM_RC::BPM_ISSUE_COMMAND,
+                                           BPM_RC::BPM_INVALID_PAYLOAD_SIZE,
+                                           TWO_UINT16_TO_UINT32(payloadSize,
+                                                    MAX_PAYLOAD_SIZE),
+                                           TWO_UINT32_TO_UINT64(
+                                               payloadHeaderDataSize,
+                                               TARGETING::get_huid(iv_nvdimm))
+                                           );
+            errl->collectTrace(BPM_COMP_NAME);
             break;
         }
 
@@ -728,6 +754,7 @@ errlHndl_t Bpm::runUpdate(BpmFirmwareLidImage i_fwImage,
             // @TODO RTC 212447: Add support for multiple update attempts.
             TRACFCOMP(g_trac_bpm, "Bpm:: runUpdate(): "
                      "Final CRC check failed. Attempting update again...");
+            iv_attemptAnotherUpdate = !iv_attemptAnotherUpdate;
             break;
         }
 
@@ -737,6 +764,8 @@ errlHndl_t Bpm::runUpdate(BpmFirmwareLidImage i_fwImage,
     errlHndl_t exitErrl = resetDevice();
     if (exitErrl != nullptr)
     {
+        TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runUpdate(): "
+                  "Failed to reset the device");
         //@TODO RTC 212447 Do something with the error.
         delete exitErrl;
     }
@@ -817,9 +846,23 @@ errlHndl_t Bpm::inUpdateMode()
 
         if (!isUpdateInProgress)
         {
-            // @TODO RTC 212447 Error
             TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::inUpdateMode(): "
                      "Failed to enter update mode");
+            /*@
+            * @errortype
+            * @severity         ERRORLOG::ERRL_SEV_PREDICTIVE
+            * @moduleid         BPM_RC::BPM_IN_UPDATE_MODE
+            * @reasoncode       BPM_RC::BPM_UPDATE_MODE_VERIFICATION_FAIL
+            * @userdata1        NVDIMM Target HUID associated with this BPM
+            * @devdesc          Failed to verify update mode was entered using
+            *                   the BSL interface.
+            * @custdesc         A problem occurred during IPL of the system.
+            */
+            errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                     BPM_RC::BPM_IN_UPDATE_MODE,
+                                     BPM_RC::BPM_UPDATE_MODE_VERIFICATION_FAIL,
+                                     TARGETING::get_huid(iv_nvdimm));
+            errl->collectTrace(BPM_COMP_NAME);
             break;
         }
 
@@ -1000,13 +1043,29 @@ errlHndl_t Bpm::updateFirmware(BpmFirmwareLidImage i_image)
                              "Retrying...",
                              status,
                              RESET_VECTOR_RECEIVE_SUCCESS);
+
                     if (++retry > MAX_RETRY)
                     {
                         TRACFCOMP(g_trac_bpm, "Bpm::updateFirmware(): "
                                   "Never received RESET_VECTOR_RECEIVE_SUCCESS "
                                   "status from BPM in three attempts. "
                                   "Aborting Update");
-                        //TODO RTC 212447 Error
+                        /*@
+                        * @errortype
+                        * @severity         ERRORLOG::ERRL_SEV_PREDICTIVE
+                        * @moduleid         BPM_RC::BPM_UPDATE_FIRMWARE
+                        * @reasoncode       BPM_RC::BPM_RESET_VECTOR_NEVER_RECEIVED
+                        * @userdata1        NVDIMM Target HUID associated with this BPM
+                        * @devdesc          RESET_VECTOR_RECEIVE_SUCCESS status was not
+                        *                   received in three attempts.
+                        * @custdesc         A problem occurred during IPL of the system.
+                        */
+                        errl = new ERRORLOG::ErrlEntry(
+                                        ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                        BPM_RC::BPM_UPDATE_FIRMWARE,
+                                        BPM_RC::BPM_RESET_VECTOR_NEVER_RECEIVED,
+                                        TARGETING::get_huid(iv_nvdimm));
+                        errl->collectTrace(BPM_COMP_NAME);
 
                         // Flip the status of iv_attemptAnotherUpdate to signal
                         // if another update attempt should occur.
@@ -1110,7 +1169,7 @@ errlHndl_t Bpm::enterBootstrapLoaderMode()
 
         // Entering BSL mode depends on the state of the BPM and it may need
         // several retries in order to successfully enter BSL mode.
-        int retry = 10;
+        int retry = 5;
         bool inBslMode = false;
 
         while (retry != 0)
@@ -1163,10 +1222,22 @@ errlHndl_t Bpm::enterBootstrapLoaderMode()
 
         if (!inBslMode)
         {
-            // @TODO RTC 212447 Error
             TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::enterBootstrapLoaderMode(): "
                      "Failed to enter BSL mode on the BPM");
-
+            /*@
+            * @errortype
+            * @severity         ERRORLOG::ERRL_SEV_PREDICTIVE
+            * @moduleid         BPM_RC::BPM_ENTER_BSL_MODE
+            * @reasoncode       BPM_RC::BPM_FAILED_TO_ENTER_BSL_MODE
+            * @userdata1[0:63]  NVDIMM Target HUID associated with this BPM
+            * @devdesc          Failed to enter BSL mode after several attempts.
+            * @custdesc         A problem occurred during IPL of the system.
+            */
+            errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                           BPM_RC::BPM_ENTER_BSL_MODE,
+                                           BPM_RC::BPM_FAILED_TO_ENTER_BSL_MODE,
+                                           TARGETING::get_huid(iv_nvdimm));
+            errl->collectTrace(BPM_COMP_NAME);
             break;
         }
 
@@ -1238,12 +1309,29 @@ errlHndl_t Bpm::setupPayload(payload_t                    & o_payload,
 
     if (blockDataSize > MAX_PAYLOAD_DATA_SIZE)
     {
-        // @TODO RTC 212447 Error
         TRACFCOMP(g_trac_bpm, ERR_MRK
                  "Bpm::setupPayload(): Block Data Size %d exceeds max payload "
                  "size of %d",
                  blockDataSize,
                  MAX_PAYLOAD_DATA_SIZE);
+        /*@
+        * @errortype
+        * @severity         ERRORLOG::ERRL_SEV_PREDICTIVE
+        * @moduleid         BPM_RC::BPM_SETUP_PAYLOAD
+        * @reasoncode       BPM_RC::BPM_INVALID_PAYLOAD_DATA_SIZE
+        * @userdata1[0:7]   Block Data Size
+        * @userdata1[8:15]  MAX_PAYLOAD_DATA_SIZE
+        * @userdata2[0:63]  NVDIMM Target HUID associated with this BPM
+        * @devdesc          Failed to enter BSL mode after several attempts.
+        * @custdesc         A problem occurred during IPL of the system.
+        */
+        errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                       BPM_RC::BPM_SETUP_PAYLOAD,
+                                       BPM_RC::BPM_INVALID_PAYLOAD_DATA_SIZE,
+                                       TWO_UINT8_TO_UINT16(blockDataSize,
+                                           MAX_PAYLOAD_DATA_SIZE),
+                                       TARGETING::get_huid(iv_nvdimm));
+        errl->collectTrace(BPM_COMP_NAME);
         break;
     }
 
@@ -1559,7 +1647,20 @@ errlHndl_t Bpm::disableWriteProtection()
         {
             TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::disableWriteProtection(): "
                       "Failed to disable write protection. I2C_REG_PROTECT");
-            //@TODO RTC 212447 Error
+            /*@
+            * @errortype
+            * @severity         ERRORLOG::ERRL_SEV_PREDICTIVE
+            * @moduleid         BPM_RC::BPM_DISABLE_WRITE_PROTECTION
+            * @reasoncode       BPM_RC::BPM_DISABLE_WRITE_PROTECTION_FAILED
+            * @userdata1        NVDIMM Target HUID associated with this BPM
+            * @devdesc          Failed to enter BSL mode after several attempts.
+            * @custdesc         A problem occurred during IPL of the system.
+            */
+            errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                 BPM_RC::BPM_DISABLE_WRITE_PROTECTION,
+                                 BPM_RC::BPM_DISABLE_WRITE_PROTECTION_FAILED,
+                                 TARGETING::get_huid(iv_nvdimm));
+            errl->collectTrace(BPM_COMP_NAME);
             break;
         }
 
@@ -1621,13 +1722,37 @@ errlHndl_t Bpm::writeToMagicRegisters(
         if (  (magic_data[0] != i_magicValues[0])
            || (magic_data[1] != i_magicValues[1]))
         {
-            // @TODO RTC 212447 Error
             TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::writeToMagicRegisters(): "
                      "Magic values read from BPM didn't match expected values "
                      "BPM_MAGIC_REG1 Expected 0x%.2X Actual 0x%.2X "
                      "BPM_MAGIC_REG2 Expected 0x%.2X Actual 0x%.2X",
                      i_magicValues[0], magic_data[0],
                      i_magicValues[1], magic_data[1]);
+
+            /*@
+            * @errortype
+            * @severity         ERRORLOG::ERRL_SEV_PREDICTIVE
+            * @moduleid         BPM_RC::BPM_WRITE_MAGIC_REG
+            * @reasoncode       BPM_RC::BPM_WRITE_TO_MAGIC_REG_FAILED
+            * @userdata1[0:7]   BPM_MAGIC_REG1 expected value
+            * @userdata1[8:15]  BPM_MAGIC_REG1 actual value
+            * @userdata1[16:23] BPM_MAGIC_REG2 expected value
+            * @userdata1[24:31] BPM_MAGIC_REG2 actual value
+            * @userdata2[0:63]  NVDIMM Target HUID associated with this BPM
+            * @devdesc          Failed to write values to the magic registers on
+            *                   the BPM.
+            * @custdesc         A problem occurred during IPL of the system.
+            */
+            errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                     BPM_RC::BPM_WRITE_MAGIC_REG,
+                                     BPM_RC::BPM_WRITE_TO_MAGIC_REG_FAILED,
+                                     TWO_UINT16_TO_UINT32(
+                                        TWO_UINT8_TO_UINT16(i_magicValues[0],
+                                            magic_data[0]),
+                                        TWO_UINT8_TO_UINT16(i_magicValues[1],
+                                            magic_data[1])),
+                                     TARGETING::get_huid(iv_nvdimm));
+            errl->collectTrace(BPM_COMP_NAME);
             break;
         }
 
@@ -1671,11 +1796,47 @@ errlHndl_t Bpm::dumpSegment(uint16_t const i_segmentCode,
 
         if (status.bit.Bpm_Bsl_Mode)
         {
-            //@TODO RTC 212447 Error
             TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::dumpSegment(): "
-                     "Couldn't dump Segment %X. BSL Mode is enabled.",
-                     getSegmentIdentifier(i_segmentCode));
-            break;
+                     "BSL Mode is enabled. Attempting to exit BSL mode.");
+
+            // Try to exit BSL mode
+            errl = resetDevice();
+            if (errl != nullptr)
+            {
+                break;
+            }
+
+            errl = nvdimmReadReg(iv_nvdimm,
+                                 SCAP_STATUS,
+                                 status.full);
+            if (errl != nullptr)
+            {
+                break;
+            }
+            if (status.bit.Bpm_Bsl_Mode)
+            {
+                TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::dumpSegment(): "
+                         "Couldn't dump Segment %X. BSL Mode is enabled.",
+                         getSegmentIdentifier(i_segmentCode));
+
+                /*@
+                * @errortype
+                * @severity         ERRORLOG::ERRL_SEV_PREDICTIVE
+                * @moduleid         BPM_RC::BPM_DUMP_SEGMENT
+                * @reasoncode       BPM_RC::BPM_BSL_MODE_ENABLED
+                * @userdata1[0:63]  NVDIMM Target HUID associated with this BPM
+                * @devdesc          Couldn't dump segment data because BSL mode
+                *                   was enabled.
+                * @custdesc         A problem occurred during IPL of the system.
+                */
+                errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                               BPM_RC::BPM_DUMP_SEGMENT,
+                                               BPM_RC::BPM_BSL_MODE_ENABLED,
+                                               TARGETING::get_huid(iv_nvdimm));
+                errl->collectTrace(BPM_COMP_NAME);
+
+                break;
+            }
         }
 
         // First the NVDIMM MAGIC registers BPM_MAGIC_REG1 and BPM_MAGIC_REG2
@@ -2189,10 +2350,28 @@ errlHndl_t Bpm::getResponse(uint8_t * const o_responseData,
                                           PAYLOAD_HEADER_SIZE + i_responseSize);
         if (responseCrc != expectedCrc)
         {
-            // @TODO RTC 212447: Error, invalid data read from BPM.
             TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::getResponse(): "
                       "Response CRC verification failed. "
                       "Received invalid data from BPM.");
+            /*@
+            * @errortype
+            * @severity         ERRORLOG::ERRL_SEV_PREDICTIVE
+            * @moduleid         BPM_RC::BPM_GET_RESPONSE
+            * @reasoncode       BPM_RC::BPM_RESPONSE_CRC_MISMATCH
+            * @userdata1[0:15]  Expected Response CRC
+            * @userdata1[16:31] Actual Response CRC
+            * @userdata2[0:63]  NVDIMM Target HUID associated with this BPM
+            * @devdesc          The response CRC calculated by the BPM didn't
+            *                   match the CRC calculated by hostboot.
+            * @custdesc         A problem occurred during IPL of the system.
+            */
+            errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                           BPM_RC::BPM_GET_RESPONSE,
+                                           BPM_RC::BPM_RESPONSE_CRC_MISMATCH,
+                                           TWO_UINT16_TO_UINT32(expectedCrc,
+                                               responseCrc),
+                                           TARGETING::get_huid(iv_nvdimm));
+            errl->collectTrace(BPM_COMP_NAME);
             break;
         }
 
@@ -2321,7 +2500,22 @@ errlHndl_t Bpm::blockWrite(payload_t i_payload)
     } while (++retry <= MAX_RETRY);
     if (retry > MAX_RETRY)
     {
-        // @TODO RTC 212447 error, flag for retry update
+        /*@
+        * @errortype
+        * @severity         ERRORLOG::ERRL_SEV_PREDICTIVE
+        * @moduleid         BPM_RC::BPM_RETRY_BLOCK_WRITE
+        * @reasoncode       BPM_RC::BPM_EXCEEDED_RETRY_LIMIT
+        * @userdata1[0:63]  NVDIMM Target HUID associated with this BPM
+        * @devdesc          The block of data to be written to the BPM
+        *                   failed to write successfully in the given number
+        *                   of retries.
+        * @custdesc         A problem occurred during IPL of the system.
+        */
+        errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                       BPM_RC::BPM_RETRY_BLOCK_WRITE,
+                                       BPM_RC::BPM_EXCEEDED_RETRY_LIMIT,
+                                       TARGETING::get_huid(iv_nvdimm));
+        errl->collectTrace(BPM_COMP_NAME);
 
         // Flip the state of iv_attemptAnotherUpdate. This will signal
         // another update attempt or cease further attempts.
@@ -2364,11 +2558,25 @@ errlHndl_t Bpm::waitForCommandStatusBitReset(
 
             if (--retry <= 0)
             {
-                //@TODO RTC 212447: Error
                 TRACFCOMP(g_trac_bpm, ERR_MRK
                          "BPM::waitForCommandStatusBitReset(): "
                          "BSP_CMD_IN_PROGRESS bit has not reset in allotted "
                          "number of retries. Cancel update procedure");
+                /*@
+                * @errortype
+                * @severity         ERRORLOG::ERRL_SEV_PREDICTIVE
+                * @moduleid         BPM_RC::BPM_WAIT_FOR_CMD_BIT_RESET
+                * @reasoncode       BPM_RC::BPM_EXCEEDED_RETRY_LIMIT
+                * @userdata1[0:63]  NVDIMM Target HUID associated with this BPM
+                * @devdesc          The command status bit failed to reset in
+                *                   the given number of retries.
+                * @custdesc         A problem occurred during IPL of the system.
+                */
+                errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                           BPM_RC::BPM_WAIT_FOR_CMD_BIT_RESET,
+                                           BPM_RC::BPM_EXCEEDED_RETRY_LIMIT,
+                                           TARGETING::get_huid(iv_nvdimm));
+                errl->collectTrace(BPM_COMP_NAME);
                 break;
             }
 
@@ -2392,9 +2600,24 @@ errlHndl_t Bpm::waitForCommandStatusBitReset(
                 break;
             }
 
-            // @TODO RTC 212447 Error
-            TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::getBslVersion(): "
+            TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::waitForCommandStatusBitReset(): "
                       "BPM_CMD_STATUS Error Flag is set");
+            /*@
+            * @errortype
+            * @severity         ERRORLOG::ERRL_SEV_PREDICTIVE
+            * @moduleid         BPM_RC::BPM_WAIT_FOR_CMD_BIT_RESET
+            * @reasoncode       BPM_RC::BPM_CMD_STATUS_ERROR_BIT_SET
+            * @userdata1[0:7]   Error status code returned by BPM
+            * @userdata2[0:63]  NVDIMM Target HUID associated with this BPM
+            * @devdesc          The command status register returned an error.
+            * @custdesc         A problem occurred during IPL of the system.
+            */
+            errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                       BPM_RC::BPM_WAIT_FOR_CMD_BIT_RESET,
+                                       BPM_RC::BPM_CMD_STATUS_ERROR_BIT_SET,
+                                       error,
+                                       TARGETING::get_huid(iv_nvdimm));
+            errl->collectTrace(BPM_COMP_NAME);
             break;
 
         }
@@ -2432,10 +2655,24 @@ errlHndl_t Bpm::waitForBusyBit()
 
         if (retry <= 0)
         {
-            //@TODO RTC 212447 Error
             TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::waitForBusyBit(): "
                       "SCAP_STATUS Busy bit failed to reset to 0 "
                       "in 10 retries.");
+            /*@
+            * @errortype
+            * @severity         ERRORLOG::ERRL_SEV_PREDICTIVE
+            * @moduleid         BPM_RC::BPM_WAIT_FOR_BUSY_BIT_RESET
+            * @reasoncode       BPM_RC::BPM_EXCEEDED_RETRY_LIMIT
+            * @userdata1[0:63]  NVDIMM Target HUID associated with this BPM
+            * @devdesc          The SCAP status register busy bit failed to
+            *                   reset in given number of retries.
+            * @custdesc         A problem occurred during IPL of the system.
+            */
+            errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                       BPM_RC::BPM_WAIT_FOR_BUSY_BIT_RESET,
+                                       BPM_RC::BPM_EXCEEDED_RETRY_LIMIT,
+                                       TARGETING::get_huid(iv_nvdimm));
+            errl->collectTrace(BPM_COMP_NAME);
             break;
         }
 
@@ -2508,14 +2745,35 @@ errlHndl_t Bpm::checkFirmwareCrc()
         }
 
         TRACFCOMP(g_trac_bpm, "Bpm::checkFirmwareCrc(): "
-                  "CRC check status = 0x%.X, CRC_Low = 0x%.X, CRC_Hi = 0x%.X",
+                  "Response Packet CRC check status = 0x%.X, CRC_Low = 0x%.X, "
+                  "CRC_Hi = 0x%.X",
                   responseData[0],
                   responseData[1],
                   responseData[2]);
 
         if (responseData[0] != SUCCESSFUL_OPERATION)
         {
-            // @TODO RTC 212447 Error
+            /*@
+            * @errortype
+            * @severity         ERRORLOG::ERRL_SEV_PREDICTIVE
+            * @moduleid         BPM_RC::BPM_CHECK_FIRMWARE_CRC
+            * @reasoncode       BPM_RC::BPM_FIRMWARE_CRC_VERIFY_FAILURE
+            * @userdata1[0:7]   CRC check response status code. See bpm_update.H
+            * @userdata1[8:15]  CRC low byte
+            * @userdata1[16:23] CRC high byte
+            * @userdata2[0:63]  NVDIMM Target HUID associated with this BPM
+            * @devdesc          The firmware CRC check failed. Cross check the
+            *                   CRC check response status code for more details.
+            * @custdesc         A problem occurred during IPL of the system.
+            */
+            errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                       BPM_RC::BPM_CHECK_FIRMWARE_CRC,
+                                       BPM_RC::BPM_FIRMWARE_CRC_VERIFY_FAILURE,
+                                       FOUR_UINT8_TO_UINT32(responseData[0],
+                                                             responseData[1],
+                                                             responseData[2],
+                                                             0),
+                                       TARGETING::get_huid(iv_nvdimm));
             break;
         }
 
@@ -2527,6 +2785,7 @@ errlHndl_t Bpm::checkFirmwareCrc()
                   "Error occurred during BPM Firmware CRC check. "
                   "Firmware image will not load on BPM and update must be "
                   "attempted again.");
+        errl->collectTrace(BPM_COMP_NAME);
     }
 
     return errl;
