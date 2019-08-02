@@ -69,6 +69,16 @@ fapi2::ReturnCode prbs_ocmb(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> i_ocmb_chip,
     const uint8_t i_dl_x4_backoff_en);
 
+///
+/// @brief Determine if we need to bypass MENTERP register reads/writes
+///
+/// @param[in] i_target OCMB chip
+/// @param[out] o_workaround true (1) for gemini, else false (0)
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode gem_menterp(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> i_target,
+                              uint8_t& o_workaround);
+
 } // omi
 } // workarounds
 } // exp

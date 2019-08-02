@@ -118,6 +118,24 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Determine if we need to bypass MENTERP register reads/writes
+///
+/// @param[in] i_target OCMB chip
+/// @param[out] o_workaround true (1) for gemini, else false (0)
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode gem_menterp(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> i_target,
+                              uint8_t& o_workaround)
+{
+    o_workaround = 0;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_GEMINI_MENTERP_WORKAROUND, i_target, o_workaround),
+             "Error getting ATTR_CHIP_EC_FEATURE_GEMINI_MENTERP_WORKAROUND");
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 } // omi
 } // workarounds
 } // exp
