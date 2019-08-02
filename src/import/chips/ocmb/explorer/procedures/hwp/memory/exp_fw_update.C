@@ -34,6 +34,7 @@
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
+#include <exp_fw_update.H>
 #include <lib/inband/exp_inband.H>
 #include <lib/shared/exp_consts.H>
 #include <exp_data_structs.H>
@@ -41,34 +42,15 @@
 #include <lib/omi/crc32.H>
 #include <mmio_access.H>
 
-extern "C"
+namespace mss
+{
+namespace exp
 {
 
-    namespace mss
-    {
-    namespace exp
-    {
+constexpr uint32_t FLASH_WRITE_BLOCK_SIZE = 256;
 
-    constexpr uint32_t FLASH_WRITE_BLOCK_SIZE = 256;
-
-    namespace bupg
-    {
-
-///
-/// @brief Defines the sub-commands available for the EXP_FW_BINARY_UPGRADE
-///        command
-///
-    typedef enum sub_cmd_id
-    {
-        SUB_CMD_NULL              = 0x00,
-        SUB_CMD_WRITE             = 0x01,
-        SUB_CMD_COMMIT            = 0x02,
-        SUB_CMD_WRITE_ABORT       = 0x03,
-        SUB_CMD_PART_INFO_GET     = 0x04,
-        SUB_CMD_READ              = 0x05,
-        SUB_CMD_PART_ERASE        = 0x06,
-        SUB_CMD_MAX
-    } sub_cmd_id_t;
+namespace bupg
+{
 
 ///
 /// @brief Checks explorer response argument for a successful command
@@ -76,39 +58,40 @@ extern "C"
 /// @param[in] i_rsp response command
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-    fapi2::ReturnCode check_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                                     const host_fw_response_struct& i_rsp)
-    {
-        std::vector<uint8_t> resp_arg;
-        uint8_t  success_flag = 0;
-        uint16_t err_code = 0;
-        uint32_t index = 0;
+fapi2::ReturnCode check_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                 const host_fw_response_struct& i_rsp)
+{
+    std::vector<uint8_t> resp_arg;
+    uint8_t  success_flag = 0;
+    uint16_t err_code = 0;
+    uint32_t index = 0;
 
-        //copy response_argument field into a vector that can be used by
-        //readCrctEndian()
-        resp_arg.assign(i_rsp.response_argument,
-                        i_rsp.response_argument + ARGUMENT_SIZE);
+    //copy response_argument field into a vector that can be used by
+    //readCrctEndian()
+    resp_arg.assign(i_rsp.response_argument,
+                    i_rsp.response_argument + ARGUMENT_SIZE);
 
-        //convert fields to native endianness
-        FAPI_TRY(mss::exp::ib::readCrctEndian(resp_arg, index, success_flag));
-        FAPI_TRY(mss::exp::ib::readCrctEndian(resp_arg, index, err_code));
+    //convert fields to native endianness
+    FAPI_TRY(mss::exp::ib::readCrctEndian(resp_arg, index, success_flag));
+    FAPI_TRY(mss::exp::ib::readCrctEndian(resp_arg, index, err_code));
 
-        // Check if cmd was successful
-        FAPI_ASSERT(success_flag == omi::response_arg::SUCCESS,
-                    fapi2::EXP_UPDATE_CMD_FAILED().
-                    set_TARGET(i_target).
-                    set_RSP_ID(i_rsp.response_id).
-                    set_REQ_ID(i_rsp.request_identifier).
-                    set_ERROR_CODE(err_code).
-                    set_RSP_DATA(i_rsp),
-                    "Recieved failure response for firmware update command on %s",
-                    mss::c_str(i_target));
+    // Check if cmd was successful
+    FAPI_ASSERT(success_flag == omi::response_arg::SUCCESS,
+                fapi2::EXP_UPDATE_CMD_FAILED().
+                set_TARGET(i_target).
+                set_RSP_ID(i_rsp.response_id).
+                set_REQ_ID(i_rsp.request_identifier).
+                set_ERROR_CODE(err_code).
+                set_RSP_DATA(i_rsp),
+                "Recieved failure response for firmware update command on %s,"
+                " with success_flag = 0x%01x and error_code = 0x%02x",
+                mss::c_str(i_target), success_flag, err_code);
 
-    fapi_try_exit:
-        return fapi2::current_err;
-    }
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
-    }//bupg
+}//bupg
 
 ///
 /// @brief host_fw_command_struct structure setup for flash_write
@@ -118,69 +101,71 @@ extern "C"
 /// @param[out] o_cmd the command packet to update
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-    fapi2::ReturnCode setup_flash_write_cmd(const uint32_t i_binary_size,
-                                            const uint16_t i_seq_number,
-                                            const uint32_t i_cmd_data_crc,
-                                            host_fw_command_struct& o_cmd)
+fapi2::ReturnCode setup_flash_write_cmd(const uint32_t i_binary_size,
+                                        const uint16_t i_seq_number,
+                                        const uint32_t i_cmd_data_crc,
+                                        host_fw_command_struct& o_cmd)
+{
+    std::vector<uint8_t> swapped32;
+    std::vector<uint8_t> cmd_args;
+    std::vector<uint8_t> test16_vec;
+    const uint16_t test16_value = 1;
+
+    memset(&o_cmd, 0, sizeof(host_fw_command_struct));
+
+    // Issue EXP_FW_BINARY_UPGRADE cmd though EXP-FW REQ buffer
+    o_cmd.cmd_id = mss::exp::omi::EXP_FW_BINARY_UPGRADE;
+    o_cmd.cmd_flags = mss::exp::omi::ADDITIONAL_DATA;
+
+    // Host generated id number (returned in response packet)
+    o_cmd.request_identifier = 0xfed1;
+
+    //always send a block of data
+    o_cmd.cmd_length = FLASH_WRITE_BLOCK_SIZE;
+
+    o_cmd.cmd_crc = i_cmd_data_crc;
+    o_cmd.host_work_area = 0;
+    o_cmd.cmd_work_area = 0;
+    memset(o_cmd.padding, 0, sizeof(o_cmd.padding));
+
+    //populate command arguments using correct endian byte ordering
+    //NOTE: putCMD can not do the byte ordering of the command_arguments
+    //      field for us.
+
+    //sub-command id is single byte.  Never requires byte-swapping.
+    cmd_args.push_back(bupg::SUB_CMD_WRITE);
+
+    //forceCrctEndian can only handle 1, 2, 4, and 8 byte integers, so
+    //for the flash_binary_size field, which is a 3 byte integer, treat
+    //it as a 4 byte value and shift result right or left one byte
+    //depending on if it is little or big endian.
+    FAPI_TRY(mss::exp::ib::forceCrctEndian(i_binary_size, swapped32));
+
+    // Test for big or little endian value on a known value (0x1)
+    FAPI_TRY(mss::exp::ib::forceCrctEndian(test16_value, test16_vec));
+
+    //if the least significant byte ended up in byte 0, then the
+    //result is a little endian value.
+    if(test16_vec[0] == 1)
     {
-        std::vector<uint8_t> swapped32;
-        std::vector<uint8_t> cmd_args;
-        std::vector<uint8_t> test16_vec;
-        const uint16_t test16_value = 1;
-
-        // Issue EXP_FW_BINARY_UPGRADE cmd though EXP-FW REQ buffer
-        o_cmd.cmd_id = mss::exp::omi::EXP_FW_BINARY_UPGRADE;
-        o_cmd.cmd_flags = mss::exp::omi::ADDITIONAL_DATA;
-
-        // Host generated id number (returned in response packet)
-        o_cmd.request_identifier = 0xfed1;
-
-        //always send a block of data
-        o_cmd.cmd_length = FLASH_WRITE_BLOCK_SIZE;
-
-        o_cmd.cmd_crc = i_cmd_data_crc;
-        o_cmd.host_work_area = 0;
-        o_cmd.cmd_work_area = 0;
-        memset(o_cmd.padding, 0, sizeof(o_cmd.padding));
-
-        //populate command arguments using correct endian byte ordering
-        //NOTE: putCMD can not do the byte ordering of the command_arguments
-        //      field for us.
-
-        //sub-command id is single byte.  Never requires byte-swapping.
-        cmd_args.push_back(bupg::SUB_CMD_WRITE);
-
-        //forceCrctEndian can only handle 1, 2, 4, and 8 byte integers, so
-        //for the flash_binary_size field, which is a 3 byte integer, treat
-        //it as a 4 byte value and shift result right or left one byte
-        //depending on if it is little or big endian.
-        FAPI_TRY(mss::exp::ib::forceCrctEndian(i_binary_size, swapped32));
-
-        // Test for big or little endian value on a known value (0x1)
-        FAPI_TRY(mss::exp::ib::forceCrctEndian(test16_value, test16_vec));
-
-        //if the least significant byte ended up in byte 0, then the
-        //result is a little endian value.
-        if(test16_vec[0] == 1)
-        {
-            //use first 3 bytes of 4 byte value
-            cmd_args.insert(cmd_args.end(), swapped32.begin(), swapped32.end() - 1);
-        }
-        else //big endian
-        {
-            //use last 3 bytes of 4 byte value
-            cmd_args.insert(cmd_args.end(), swapped32.begin() + 1, swapped32.end());
-        }
-
-        //add the sequence number
-        FAPI_TRY(mss::exp::ib::forceCrctEndian(i_seq_number, cmd_args));
-
-        //copy cmd_args vector into command_args array
-        std::copy(cmd_args.begin(), cmd_args.end(), &o_cmd.command_argument[0]);
-
-    fapi_try_exit:
-        return fapi2::current_err;
+        //use first 3 bytes of 4 byte value
+        cmd_args.insert(cmd_args.end(), swapped32.begin(), swapped32.end() - 1);
     }
+    else //big endian
+    {
+        //use last 3 bytes of 4 byte value
+        cmd_args.insert(cmd_args.end(), swapped32.begin() + 1, swapped32.end());
+    }
+
+    //add the sequence number
+    FAPI_TRY(mss::exp::ib::forceCrctEndian(i_seq_number, cmd_args));
+
+    //copy cmd_args vector into command_args array
+    std::copy(cmd_args.begin(), cmd_args.end(), &o_cmd.command_argument[0]);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Sets the command_argument fields for flash_commit sub-command
@@ -188,29 +173,34 @@ extern "C"
 ///
 /// @param[out] o_cmd the command packet to update
 ///
-    void setup_flash_commit_cmd(host_fw_command_struct& o_cmd)
-    {
-        // Issue EXP_FW_BINARY_UPGRADE cmd though EXP-FW REQ buffer
-        o_cmd.cmd_id = mss::exp::omi::EXP_FW_BINARY_UPGRADE;
-        o_cmd.cmd_flags = 0;
+void setup_flash_commit_cmd(host_fw_command_struct& o_cmd)
+{
+    memset(&o_cmd, 0, sizeof(host_fw_command_struct));
 
-        // Host generated id number (returned in response packet)
-        // NOTE: This is arbitrarily chosen until it is decided how we want to
-        //       use this field.
-        o_cmd.request_identifier = 0xfcfc;
-        o_cmd.cmd_length = 0;
+    // Issue EXP_FW_BINARY_UPGRADE cmd though EXP-FW REQ buffer
+    o_cmd.cmd_id = mss::exp::omi::EXP_FW_BINARY_UPGRADE;
+    o_cmd.cmd_flags = 0;
 
-        o_cmd.cmd_crc = 0xffffffff;
-        o_cmd.host_work_area = 0;
-        o_cmd.cmd_work_area = 0;
-        memset(o_cmd.padding, 0, sizeof(o_cmd.padding));
+    // Host generated id number (returned in response packet)
+    // NOTE: This is arbitrarily chosen until it is decided how we want to
+    //       use this field.
+    o_cmd.request_identifier = 0xfcfc;
+    o_cmd.cmd_length = 0;
 
-        // Set the sub-command ID in the command argument field to FLASH_COMMIT
-        o_cmd.command_argument[0] = bupg::SUB_CMD_COMMIT;
-    }
+    o_cmd.cmd_crc = 0xffffffff;
+    o_cmd.host_work_area = 0;
+    o_cmd.cmd_work_area = 0;
+    memset(o_cmd.padding, 0, sizeof(o_cmd.padding));
 
-    }//exp
-    }//mss
+    // Set the sub-command ID in the command argument field to FLASH_COMMIT
+    o_cmd.command_argument[0] = bupg::SUB_CMD_COMMIT;
+}
+
+}//exp
+}//mss
+
+extern "C"
+{
 
 ///
 /// @brief Updates explorer firmware
@@ -260,6 +250,10 @@ extern "C"
             // calculate the crc
             block_crc = crc32_gen(buffer);
 
+            // endian swap
+            FAPI_TRY(mss::exp::ib::correctMMIOEndianForStruct(buffer));
+            FAPI_TRY(mss::exp::ib::correctMMIOword_order(buffer));
+
             // write block to data buffer on explorer
             FAPI_TRY(fapi2::putMMIO(i_target,
                                     mss::exp::ib::EXPLR_IB_DATA_ADDR,
@@ -292,17 +286,36 @@ extern "C"
                 host_fw_response_struct response;
                 std::vector<uint8_t> rsp_data;
 
-                // Read response from buffer
-                FAPI_TRY(mss::exp::ib::getRSP(i_target, response, rsp_data),
-                         "exp_fw_update: getRSP() failed for flash_write "
-                         "on %s! seq_num[%u]",
-                         mss::c_str(i_target), seq_num);
+                // Normally we need to poll the outbound doorbell and read/check the
+                // fw_response_struct to make sure the command completed. In this case,
+                // we will only check the fw_response_struct for every 16th transfer to
+                // speed things up.
+                // We still have to poll the doorbell to make sure the command completed
+                if ((seq_num % 16) == 0)
+                {
+                    // Read response from buffer
+                    FAPI_TRY(mss::exp::ib::getRSP(i_target, response, rsp_data),
+                             "exp_fw_update: getRSP() failed for flash_write "
+                             "on %s! seq_num[%u]",
+                             mss::c_str(i_target), seq_num);
 
-                // Check status in response packet
-                FAPI_TRY(mss::exp::bupg::check_response(i_target, response),
-                         "exp_fw_update: error response for flash_write "
-                         "on %s! seq_num[%u]",
-                         mss::c_str(i_target), seq_num);
+                    // Check status in response packet
+                    FAPI_TRY(mss::exp::bupg::check_response(i_target, response),
+                             "exp_fw_update: error response for flash_write "
+                             "on %s! seq_num[%u]",
+                             mss::c_str(i_target), seq_num);
+                }
+                else
+                {
+                    // Poll response doorbell only
+                    FAPI_TRY(mss::exp::ib::poll_for_response_ready(i_target),
+                             "exp_fw_update: error polling response for flash_write "
+                             "on %s! seq_num[%u]",
+                             mss::c_str(i_target), seq_num);
+
+                    // Clear response doorbell
+                    FAPI_TRY(mss::exp::ib::clear_outbound_doorbell(i_target));
+                }
             }
 
             //increment sequence number after each 256 byte block is written
@@ -322,6 +335,18 @@ extern "C"
         {
             host_fw_response_struct response;
             std::vector<uint8_t> rsp_data;
+
+            // Wait a little while first (value based on MCHP estimations):
+            // 2 sec for image authentication
+            // 7 sec to erase 600K on flash part
+            // 1800 usec to program flash image
+            // = 10.8 sec, so wait 15 sec to be safe
+            FAPI_INF("Waiting for flash image commit to complete on %s...", mss::c_str(i_target));
+
+            for (uint64_t l_seconds = 0; l_seconds < 15; ++l_seconds)
+            {
+                FAPI_TRY(fapi2::delay(mss::DELAY_1S, 200));
+            }
 
             FAPI_TRY(mss::exp::ib::getRSP(i_target, response, rsp_data),
                      "exp_fw_update: getRSP() failed for flash_commit on %s!",

@@ -95,12 +95,13 @@ enum mcbist_common_consts
 enum common_timings
 {
     DELAY_1NS               = 1,
-    DELAY_10NS              = 10 ,      ///< general purpose 10  ns delay for HW mode
-    DELAY_100NS             = 100,      ///< general purpose 100 ns delay for HW mode
-    DELAY_1US               = 1000,     ///< general purpose 1 usec delay for HW mode
-    DELAY_10US              = 10000,    ///< general purpose 1 usec delay for HW mode
-    DELAY_100US             = 100000,   ///< general purpose 100 usec delay for HW mode
-    DELAY_1MS               = 1000000,  ///< general purpose 1 ms delay for HW mode
+    DELAY_10NS              = 10 ,         ///< general purpose 10  ns delay for HW mode
+    DELAY_100NS             = 100,         ///< general purpose 100 ns delay for HW mode
+    DELAY_1US               = 1000,        ///< general purpose 1 usec delay for HW mode
+    DELAY_10US              = 10000,       ///< general purpose 1 usec delay for HW mode
+    DELAY_100US             = 100000,      ///< general purpose 100 usec delay for HW mode
+    DELAY_1MS               = 1000000,     ///< general purpose 1 ms delay for HW mode
+    DELAY_1S                = 1000000000,  ///< general purpose 1 sec delay for HW mode
 };
 
 ///
