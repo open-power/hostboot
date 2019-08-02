@@ -42,5 +42,21 @@
     </chipEcFeature>
   </attribute>
   <!-- ******************************************************************** -->
-
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_GEMINI_MENTERP_WORKAROUND</id>
+    <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    <description>
+      Bypass MENTERP register read/writes on gemini due to FW bug
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_GEMINI</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
 </attributes>
