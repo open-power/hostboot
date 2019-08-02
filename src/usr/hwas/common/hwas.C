@@ -1066,7 +1066,12 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
             break;
         }
 
-        const auto l_targetCU = i_desc->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+        TARGETING::ATTR_CHIP_UNIT_type l_targetCU = 0;
+
+        if (!i_desc->tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_targetCU))
+        {
+            break;
+        }
 
         // Iterate through the list of partial good logic for this target. If
         // any of them fail then the target is non-functional.

@@ -31,31 +31,15 @@
 #include <hwas/common/hwasError.H>
 
 #include <array>
+#include <iterator>
 #include <stdio.h>
 
 using namespace HWAS::COMMON;
 
-// Convenience function for getting the number of elements in an array.
-template<typename T, size_t Size>
-static size_t _countof(T(&)[Size])
-{
-    return Size;
-}
+using HWAS::cu_mask;
 
 namespace PARTIAL_GOOD
 {
-    // Returns a single-bit mask for the given chip unit; i.e. chip unit 5 will
-    // be 0x20, etc.
-    static constexpr cu_mask_t cu_mask(const uint8_t i_chipUnit) {
-        // The chip unit mask of CU 0 is represented by a mask with only the
-        // least significant bit set.
-
-        // Left shift the encoded value a number of times equal to the value
-        // of i_chipUnit. This puts the ON bit under the correct position to
-        // be compared against the chip unit mask.
-        return 1ull << i_chipUnit;
-    }
-
     // Target Type Masks
     // PG Masks are created such that:
     //      pgData[ pgIndex ] & pgMask
@@ -198,7 +182,7 @@ namespace PARTIAL_GOOD
     // MODEL_MASK_NONE if there is no association.
     static const model_mask_t lookup_model_mask(const TARGETING::ATTR_MODEL_type model)
     {
-        const auto end = model_lookup_table + _countof(model_lookup_table);
+        const auto end = model_lookup_table + std::size(model_lookup_table);
         const auto it = std::find_if(model_lookup_table,
                                      end,
                                      [model](const model_to_model_mask pair) {
@@ -334,8 +318,9 @@ namespace PARTIAL_GOOD
     ) const
     {
         snprintf(buffer, bufsize,
-                 "pgData[%d] & 0x%08X: actual 0x%08X, expected 0x%08X",
-                 iv_pgIndex,
+                 "(pgData[%d] = 0x%08x) & 0x%08X: actual 0x%08X, expected 0x%08X",
+                 getRealPgIndex(i_desc),
+                 i_pgData[getRealPgIndex(i_desc)],
                  iv_pgMask,
                  i_pgData[getRealPgIndex(i_desc)] & iv_pgMask,
                  iv_agMask);
@@ -360,7 +345,7 @@ namespace PARTIAL_GOOD
         // the ekb XML
         //i_desc->setAttr<TARGETING::ATTR_PG_MVPD>(l_pg);
 
-        return l_pg & PERV_BIT_PG_MASK;
+        return !(l_pg & PERV_BIT_PG_MASK);
     }
 
     // This is the table which associates target types to rules to determine
@@ -546,26 +531,26 @@ namespace PARTIAL_GOOD
                   "PG rules map must be in sorted order");
 
     errlHndl_t findRulesForTarget(
-            const TARGETING::TargetHandle_t &i_target,
+            const TARGETING::TargetHandle_t i_target,
             const PartialGoodRule*& o_pgRules,
             size_t& o_numPgRules
     )
     {
-        errlHndl_t l_errl = nullptr;
+        using namespace TARGETING;
 
-        const auto l_targetChipletId = i_target->getAttr<TARGETING::ATTR_CHIPLET_ID>();
+        errlHndl_t l_errl = nullptr;
 
         // We have no rules initially, then we will increment this below for
         // each rule that matches.
         o_numPgRules = 0;
 
-        const auto l_targetType = i_target->getAttr<TARGETING::ATTR_TYPE>();
+        const auto l_targetType = i_target->getAttr<ATTR_TYPE>();
 
         // Lookup the target in the PG Rules Table
         auto l_rulesIterator
             = std::lower_bound(pgRules_map.cbegin(), pgRules_map.cend(),
                                l_targetType,
-                               [](const PartialGoodRule& r, const TARGETING::TYPE t)
+                               [](const PartialGoodRule& r, const TYPE t)
                                {
                                    return r.type() < t;
                                });
@@ -586,6 +571,9 @@ namespace PARTIAL_GOOD
 
             if (l_rulesIterator->useChipletIdAsIndex())
             {
+                const auto l_targetChipletId
+                    = i_target->getAttr<ATTR_CHIPLET_ID>();
+
                 if (l_targetChipletId >= HWAS::VPD_CP00_PG_DATA_ENTRIES)
                 {
                     /*@

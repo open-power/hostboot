@@ -167,10 +167,10 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
 
 
 /**
- * @brief                         Checks the PG keyword data to determine if all
- *                                of the descendant chiplets are functional. The
- *                                caller is responsible for allocating and
- *                                de-allocating the PG keyword space.
+ * @brief                         Checks the PG keyword data to determine if at
+ *                                least one of the descendant chiplets is
+ *                                functional. The caller is responsible for
+ *                                allocating and de-allocating the PG keyword space.
  *
  * @param[in]  i_pTarget          The target whose descendants need to be
  *                                checked.

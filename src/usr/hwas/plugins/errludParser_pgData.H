@@ -67,7 +67,10 @@ namespace HWAS
         {
             if (i_version > HWAS_UDT_VERSION_1)
             {
-                i_parser.PrintHeading("HWAS PG FFDC: Unknown Version (too new)");
+                i_parser.PrintHeading("HWAS PG FFDC: Unknown Version (too new) "
+                                      "- hexdump:");
+
+                i_parser.PrintHexDump(i_pBuffer, i_buflen);
             }
             else
             {

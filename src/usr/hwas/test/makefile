@@ -27,12 +27,10 @@ ROOTPATH = ../../../..
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 
 MODULE = testhwas
-# FIXME RTC: 210975
-#TESTS = *.H
+TESTS = hwas1test.H
 
-#OBJS += attributestrings.o
+OBJS += attributestrings.o
 
 include ${ROOTPATH}/config.mk
 
-#vpath %.C ${GENDIR}
-
+vpath %.C ${GENDIR}

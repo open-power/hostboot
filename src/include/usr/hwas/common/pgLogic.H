@@ -258,7 +258,7 @@ namespace PARTIAL_GOOD
      *                             logic or nullptr.
      */
     errlHndl_t findRulesForTarget(
-        const TARGETING::TargetHandle_t &i_target,
+        const TARGETING::TargetHandle_t i_target,
         const PartialGoodRule*& o_pgRules,
         size_t& o_numPgRules
     );

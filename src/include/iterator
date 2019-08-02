@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -62,11 +64,11 @@ struct iterator_traits<T*>
  * @param[in] i - The iterator to advance.
  * @param[in] n - The distance to advance the iterator.
  *
- * This function is equivalent to calling (++i) n times.  
+ * This function is equivalent to calling (++i) n times.
  *
- * If the iterator supports random access then this function will be 
+ * If the iterator supports random access then this function will be
  * implemented in linear time with respect to n.
- * 
+ *
  */
 template <typename InputIterator, typename Distance>
 void advance(InputIterator& i, Distance n)
@@ -90,13 +92,39 @@ void advance(InputIterator& i, Distance n)
  *  access iterators.
  */
 template <typename InputIterator>
-typename iterator_traits<InputIterator>::difference_type 
+typename iterator_traits<InputIterator>::difference_type
     distance(InputIterator first, InputIterator last)
 {
     return Util::__Util_Iterator_Impl::distance<
-                InputIterator, 
+                InputIterator,
                 typename iterator_traits<InputIterator>::difference_type>
         (first, last);
+}
+
+/** Determine the size of an array.
+ *
+ *  @param[in] array - The array
+ *
+ *  @return The number of elements in the array. Will not work with 0-size
+ *  arrays because those are a GNU extension and technically illegal in C++.
+ */
+template <typename T, size_t Size>
+constexpr size_t size(T(&array)[Size])
+{
+    return Size;
+}
+
+/** Determine the size of a container.
+ *
+ *  @param[in] c - The container
+ *
+ *  @return The number of elements in the container (by calling the container's
+ *  size() member function).
+ */
+template <typename Container>
+constexpr auto size(const Container& c)
+{
+    return c.size();
 }
 
 /** A OutputIterator which operates by push_back onto a container.
@@ -129,7 +157,7 @@ class back_insert_iterator
         /** Dereference operator.
          *
          *  This is used to make the standard pattern '*i = x' work on
-         *  an iterator.  Since we need to 'push_back' into the 
+         *  an iterator.  Since we need to 'push_back' into the
          *  container we don't actually return anything except ourself,
          *  which allows the operator= to be called.
          */
@@ -168,11 +196,11 @@ class back_insert_iterator
  *      copy(v.rbegin(), v.rend(), back_inserter(v2));
  *
  *  @param[in] s - Sequence to create an iterator for.
- *  
+ *
  *  @return The back_insert_iterator.
  */
 template <typename BackInsertionSequence>
-back_insert_iterator<BackInsertionSequence> 
+back_insert_iterator<BackInsertionSequence>
     back_inserter(BackInsertionSequence& s)
 {
     return back_insert_iterator<BackInsertionSequence>(s);

@@ -58,6 +58,36 @@ using namespace TARGETING;
 const pg_mask_t NO_ALWAYS_GOOD_BITS = 0;
 const pg_idx_t USE_CHIP_UNIT = 0xFE;
 const pg_idx_t USE_CHIPLET_ID = 0xFF;
+const cu_mask_t ALL_CHIP_UNITS = 0;
+
+// This structure is used to hold test cases for each target type that has PG
+// bits.
+struct pg_test_info
+{
+    ATTR_TYPE_type target_type; // Type of targets this test applies to
+    pg_mask_t pg_idx;           // Use this number to index PGV (can be
+                                // USE_CHIPLET_ID or USE_CHIP_UNIT)
+    pg_mask_t bad_bits;         // Bits to set in the specified PG entry
+};
+
+// The list of test cases for targets that immediately go bad when PG bits are
+// set (i.e. because of a PG rule, without upward or downward status
+// propagation). (Not a std::array because we want size deduction)
+const pg_test_info simple_pg_tests[] =
+{
+    { TYPE_CORE,           // This rule applies to all CORE targets
+      USE_CHIPLET_ID,      // Use the chiplet's ID for indexing into PG data
+      // Set the bits in the entry that correspond to the CORE PG info
+      ~(VPD_CP00_PG_EQ_ALL_GOOD | VPD_CP00_PG_EQ_ALWAYS_GOOD_MASK)
+    },
+
+    { TYPE_PEC,  USE_CHIPLET_ID, ~VPD_CP00_PG_PCI_ALL_GOOD },
+    { TYPE_PERV, USE_CHIP_UNIT,  VPD_CP00_PG_PERV_BIT },
+    { TYPE_MC,   USE_CHIPLET_ID, ~VPD_CP00_PG_MC_ALL_GOOD },
+    { TYPE_PAU,  USE_CHIPLET_ID, ~VPD_CP00_PG_PAUC_SW_NW_ALL_GOOD },
+    { TYPE_IOHS, USE_CHIPLET_ID, ~VPD_CP00_PG_IOHS_ALL_GOOD }
+
+};
 
 // This structure is used to hold test cases when the test suite checks that,
 // from a parent's perspective, errors in itself propagate to at least one
@@ -65,27 +95,41 @@ const pg_idx_t USE_CHIPLET_ID = 0xFF;
 struct parent_target_info
 {
     ATTR_TYPE_type target_type; // Type of targets this test applies to
-    pg_mask_t pg_idx;           // Use this number to index PGV (can be USE_CHIPLET_ID)
+    pg_mask_t pg_idx;           // Use this number to index PGV (can be
+                                // USE_CHIPLET_ID)
     pg_mask_t always_good_mask; // Avoid setting these bits because they're
                                 // already checked in the test for
                                 // isChipFunctional
+    cu_mask_t all_bad_cu_mask;  // Disable/enable all-bad test for certain chip
+                                // units (0 = enabled, 1 = disabled)
 };
 
-// The list of test cases for targets that have children which need to go bad
-// when their parent goes bad. (Not an std::array so that we get size deduction)
+// The list of test cases for targets that have both PG bits and children which
+// need to go bad when their parent PG bits go bad. (Not an std::array so that
+// we get size deduction). Only targets with PG bits for PARTIAL-GOOD children
+// should go in this array.
 const parent_target_info targets_with_children[] =
 {
-    { TYPE_PEC,           // Rule applies to chips of type PEC (which represent
-                          // PCI units)
-      USE_CHIPLET_ID,     // Use the target's chiplet ID to index data from the PGV
-      NO_ALWAYS_GOOD_BITS // There are no always-good bits to avoid setting
+    { TYPE_PAUC,                // Rule applies to PAUC targets
+      USE_CHIPLET_ID,           // Use the chiplet's ID as the PGV index
+
+      // Avoid setting the AG bits the PAUC target
+      VPD_CP00_PG_PAUC_ALWAYS_GOOD_MASK,
+
+      // Disable all-bad test for CUs 0 and 1 because they have IOHS children
+      // that do not have PAU children
+      cu_mask(0) | cu_mask(1)
     },
 
-    { TYPE_PAUC, USE_CHIPLET_ID, VPD_CP00_PG_PAUC_ALWAYS_GOOD_MASK },
-    { TYPE_IOHS, USE_CHIPLET_ID, NO_ALWAYS_GOOD_BITS },
-    { TYPE_MC,   USE_CHIPLET_ID, NO_ALWAYS_GOOD_BITS },
-    { TYPE_EQ,   USE_CHIPLET_ID, VPD_CP00_PG_EQ_ALWAYS_GOOD_MASK },
-    { TYPE_PERV, USE_CHIP_UNIT,  VPD_CP00_PG_PERV_BIT },
+    { TYPE_EQ,
+      USE_CHIPLET_ID,
+      VPD_CP00_PG_EQ_ALWAYS_GOOD_MASK,
+      ALL_CHIP_UNITS
+    },
+
+    // IOHS is not included in this list because while it does have a child
+    // (PAU), the child it has is not dependent on the IOHS's PG bits, and units
+    // for the PG bits it does have (NDL) are not represented by a target.
 };
 
 const pg_idx_t USE_PARENT_CHIPLET_ID = 0xFF;
@@ -96,41 +140,36 @@ const pg_idx_t USE_PARENT_CHIPLET_ID = 0xFF;
 struct child_target_info
 {
     ATTR_TYPE_type target_type; // Type of target this rule applies to
+    ATTR_TYPE_type parent_type; // Type of the target whose PGV has the PG bits
+                                // for the target of this test
     pg_idx_t parent_pg_idx;     // Use this number to index PGV (can be
                                 // USE_PARENT_CHIPLET_ID)
     pg_entry_t parent_pg_entry_bits_to_set; // Set these bits in the parent's PG
                                             // entry to cause it to go bad
 };
 
-// For targets that have to modify their parent bits to check themselves (not an
-// std::array so that we get size deduction)
+// For targets that need to go bad when their parents go bad because of their
+// parent's PG bits (this is not an std::array so that we get size
+// deduction). No children of ALWAYS-GOOD parents should go in this array.
 const child_target_info targets_with_parents[] =
 {
-    { TYPE_CORE,             // Rule applies to CORE targets
+    // PHB are children of PEC units (which represent PCI units)
+    { TYPE_PHB,              // Rule applies to CORE targets
+      TYPE_PEC,              // The PG ancestor of a PHB is a PEC
       USE_PARENT_CHIPLET_ID, // Use our parent EQ chiplet's ID to set bad bits in
                              // the PGV
 
-      // Cause the parent to go bad by setting all the bits in the parent EQ's
-      // PGV entry that are optional (i.e. not RESERVED and also not in the
-      // ALWAYS_GOOD_MASK)
-      ~(VPD_CP00_PG_EQ_ALWAYS_GOOD_MASK | VPD_CP00_PG_EQ_ALL_GOOD)
-    },
+      // Cause the parent to go bad by setting bits in the parent PEC's
+      // PGV entry that will make it go bad
+      ~VPD_CP00_PG_PCI_ALL_GOOD },
 
-    { TYPE_FC,        USE_PARENT_CHIPLET_ID, ~(VPD_CP00_PG_EQ_ALWAYS_GOOD_MASK
-                                               | VPD_CP00_PG_EQ_ALL_GOOD) },
-
-    // PHB are children of PEC units (which represent PCI units)
-    { TYPE_PHB,       USE_PARENT_CHIPLET_ID, ~VPD_CP00_PG_PCI_ALL_GOOD },
-
-    // PAU are children of IOHS units
-    { TYPE_PAU,       USE_PARENT_CHIPLET_ID, ~VPD_CP00_PG_IOHS_ALL_GOOD },
-    { TYPE_IOHS,      USE_PARENT_CHIPLET_ID, ~(VPD_CP00_PG_PAUC_ALWAYS_GOOD_MASK
-                                               | VPD_CP00_PG_PAUC_SW_NW_ALL_GOOD) },
-    { TYPE_DIMM,      USE_PARENT_CHIPLET_ID, ~VPD_CP00_PG_MC_ALL_GOOD },
-    { TYPE_MEM_PORT,  USE_PARENT_CHIPLET_ID, ~VPD_CP00_PG_MC_ALL_GOOD },
-    { TYPE_OCMB_CHIP, USE_PARENT_CHIPLET_ID, ~VPD_CP00_PG_MC_ALL_GOOD },
-    { TYPE_OMI,       USE_PARENT_CHIPLET_ID, ~VPD_CP00_PG_MC_ALL_GOOD },
-    { TYPE_MCC,       USE_PARENT_CHIPLET_ID, ~VPD_CP00_PG_MC_ALL_GOOD },
+    // PAU are children of IOHS units even though their PG bits are in PAUC units
+    { TYPE_PAU,       TYPE_IOHS, USE_PARENT_CHIPLET_ID, ~VPD_CP00_PG_IOHS_ALL_GOOD },
+    { TYPE_DIMM,      TYPE_MC,   USE_PARENT_CHIPLET_ID, ~VPD_CP00_PG_MC_ALL_GOOD },
+    { TYPE_MEM_PORT,  TYPE_MC,   USE_PARENT_CHIPLET_ID, ~VPD_CP00_PG_MC_ALL_GOOD },
+    { TYPE_OCMB_CHIP, TYPE_MC,   USE_PARENT_CHIPLET_ID, ~VPD_CP00_PG_MC_ALL_GOOD },
+    { TYPE_OMI,       TYPE_MC,   USE_PARENT_CHIPLET_ID, ~VPD_CP00_PG_MC_ALL_GOOD },
+    { TYPE_MCC,       TYPE_MC,   USE_PARENT_CHIPLET_ID, ~VPD_CP00_PG_MC_ALL_GOOD },
 };
 
 // Look up an entry in one of the arrays above with the given target type.
@@ -192,25 +231,17 @@ private:
         // parent state down to child state and it doesn't
         // consider parent state when checking a given
         // target, if we check this target directly it will
-        // return true since there are no pg rules for this
-        // target.
+        // return true.
         if (!HWAS::isDescFunctional(i_pChild, i_pgData, targetStates))
         {
             TS_FAIL("testHWAScheckPartialGoodForDescendants> "
-                    "i_pChild HUID 0x %.8x "
+                    "i_pChild HUID 0x %08x "
                     "should be true",
                     get_huid(i_pChild));
         }
 
-        // Now check the parent. Since the PG bits are wrong it should return
-        // false.
-        else if (HWAS::isDescFunctional(i_pParent, i_pgData, targetStates))
-        {
-            TS_FAIL("testHWAScheckPartialGoodForDescendants> "
-                    "i_pParent HUID 0x %.8x "
-                    "should be false",
-                    get_huid(i_pParent));
-        }
+        // Now check the parent and mark it good or bad
+        HWAS::isDescFunctional(i_pParent, i_pgData, targetStates);
 
         // Now we propagate the non-functional state of the parent to the child.
         // If this function is working correctly, then the child will now be
@@ -422,12 +453,10 @@ public:
             {
                 const auto l_pgIndex = VPD_CP00_PG_ALWAYS_GOOD_INDEX[i];
                 const auto l_alwaysGoodMask = VPD_CP00_PG_ALWAYS_GOOD_MASKS[i];
-                const char* const l_name = attrToString<ATTR_TYPE>(pTarget->getAttr<ATTR_TYPE>());
 
                 const pg_entry_t original_entry = pgDataAllGood[l_pgIndex];
 
-                TS_INFO("testHWASisChipFunctional: %s [non-]functionality check",
-                        l_name);
+                TS_INFO("testHWASisChipFunctional [non-]functionality check");
 
                 // The pgdata we will be modifying
                 partialGoodVector bad_pgData = pgDataAllGood;
@@ -444,7 +473,7 @@ public:
                     // functional when it's off.
                     if (l_alwaysGoodMask & l_mask || !(original_entry & l_mask))
                     {
-                        const bool l_shouldChipBeFunctional = l_alwaysGoodMask & l_mask;
+                        const bool l_shouldChipBeFunctional = !(l_alwaysGoodMask & l_mask);
 
                         const pg_entry_t l_newEntry = original_entry | l_mask;
 
@@ -454,12 +483,14 @@ public:
                             != l_shouldChipBeFunctional)
                         {
                             TS_FAIL("testHWASisChipFunctional>"
-                                    "functional = %d, should be %d, "
-                                    "%s = 0x%08x, mask = 0x%08x, "
+                                    "functional [%d] = %d, should be %d, "
+                                    "testentry = 0x%08x, mask = 0x%08x, "
+                                    "original = 0x%08x, "
                                     "HUID = 0x %08x",
+                                    i,
                                     !l_shouldChipBeFunctional,
                                     l_shouldChipBeFunctional,
-                                    l_name, l_newEntry, l_mask,
+                                    l_newEntry, l_mask, original_entry,
                                     get_huid(pTarget));
                         }
                     }
@@ -468,6 +499,107 @@ public:
         }
 
         TS_INFO( "testHWASisChipFunctional exit" );
+    }
+
+    /**
+     * @brief   Test whether targets with PG bits go bad when the PG bits go bad
+     */
+    void testHWAScheckBasicPGFunctionality()
+    {
+        TargetHandleList pCheckPres;
+        getAllChips( pCheckPres, TYPE_PROC, true );
+
+        TS_INFO( "%s() entry", __func__);
+
+        for (TargetHandleList::const_iterator pTarget_it = pCheckPres.begin();
+             pTarget_it != pCheckPres.end();
+             ++pTarget_it
+            )
+        {
+            TargetHandle_t pTarget = *pTarget_it;
+
+            TargetHandleList pDescList;
+            targetService().getAssociated( pDescList, pTarget,
+                TargetService::CHILD, TargetService::ALL);
+
+            for (TargetHandleList::const_iterator pDesc_it = pDescList.begin();
+                    pDesc_it != pDescList.end();
+                    ++pDesc_it)
+            {
+                const TargetHandle_t pDesc = *pDesc_it;
+                const ATTR_TYPE_type l_type = pDesc->getAttr<ATTR_TYPE>();
+                const ATTR_CHIPLET_ID_type l_chipletID
+                    = pDesc->getAttr<ATTR_CHIPLET_ID>();
+                const ATTR_CHIP_UNIT_type l_chipUnit
+                    = pDesc->getAttr<ATTR_CHIP_UNIT>();
+
+                const auto l_targetInfo
+                    = lookup_target_info(simple_pg_tests, l_type);
+
+                if (!l_targetInfo)
+                {
+                    continue;
+                }
+
+                const char* const l_type_str = attrToString<ATTR_TYPE>(l_type);
+
+                TS_INFO("testHWAScheckBasicPGFunctionality: "
+                        "Bad PG data (%s) - "
+                        "attr type 0x%08X, chip unit %d, "
+                        "HUID 0x %08X",
+                        l_type_str, l_type, l_chipUnit, get_huid(pDesc));
+
+                {
+                    HWAS::pgState_map targetStates;
+
+                    if (!isDescFunctional(pDesc, pgDataAllGood, targetStates))
+                    {
+                        TS_FAIL("testHWAScheckBasicPGFunctionality>"
+                                "functional = false, should be true, "
+                                "type = %s, chip unit = %d, chiplet ID = 0x%02x. "
+                                "pDesc HUID 0x %08x",
+                                l_type_str,
+                                l_chipUnit,
+                                l_chipletID,
+                                get_huid(pDesc));
+                    }
+                }
+
+                if (l_targetInfo)
+                {
+                    HWAS::pgState_map targetStates;
+                    auto bad_pgData = pgDataAllGood;
+
+                    pg_entry_t l_pgIdx = 0;
+
+                    switch (l_targetInfo->pg_idx) {
+                    case USE_CHIPLET_ID:
+                        l_pgIdx = l_chipletID;
+                        break;
+                    case USE_CHIP_UNIT:
+                        l_pgIdx = l_chipUnit;
+                        break;
+                    default:
+                        l_pgIdx = l_targetInfo->pg_idx;
+                        break;
+                    }
+
+                    bad_pgData[l_pgIdx] |= l_targetInfo->bad_bits;
+
+                    if (isDescFunctional(pDesc, bad_pgData, targetStates))
+                    {
+                        TS_FAIL("testHWAScheckBasicPGFunctionality>"
+                                "functional = true, should be false, "
+                                "[0x%02x] = 0x %08x, pDesc HUID 0x %08x",
+                                l_pgIdx,
+                                bad_pgData[l_pgIdx],
+                                get_huid(pDesc));
+                    }
+                }
+            } // for pDesc_it
+        }
+
+        TS_INFO( "%s exit", __func__ );
     }
 
     /**
@@ -525,13 +657,13 @@ public:
                     }
                 }
 
+                const char* const l_type_str = attrToString<ATTR_TYPE>(l_type);
+
                 TS_INFO("testHWAScheckPartialGoodForDescendants: "
-                        "descendant functional - "
+                        "descendant functional (%s) - "
                         "attr type 0x%08X, chip unit %d, "
                         "HUID 0x %08X",
-                        l_type, l_chipUnit, get_huid(pDesc));
-
-                const char* const l_type_str = attrToString<ATTR_TYPE>(l_type);
+                        l_type_str, l_type, l_chipUnit, get_huid(pDesc));
 
                 if (!checkPartialGoodForDescendants(pDesc, pgDataAllGood))
                 {
@@ -545,7 +677,7 @@ public:
                     TS_FAIL("testHWAScheckPartialGoodForDescendants>"
                             "functional = false, should be true, "
                             "type = %s, chip unit = %d%s, chiplet ID = 0x%02x. "
-                            "pDesc HUID 0x %.8x",
+                            "pDesc HUID 0x %08x",
                             l_type_str,
                             l_chipUnit,
                             l_pgDataStr,
@@ -555,10 +687,27 @@ public:
 
                 if (l_targetInfo)
                 {
+                    const size_t l_num_children = ({
+                            TargetHandleList childList;
+                            targetService().getAssociated( childList, pDesc,
+                                                           TargetService::CHILD,
+                                                           TargetService::IMMEDIATE);
+                            childList.size();
+                        });
+
+                    /* Only one child at a time should go bad, so the parent
+                       should be functional or not based on whether we have more
+                       than one child. */
+                    const bool l_shouldSucceed = l_num_children > 1;
+
                     TS_INFO( "testHWAScheckPartialGoodForDescendants: "
-                             "%s (chiplet ID = 0x%02x) is not functional",
+                             "%s (chiplet ID = 0x%02x) is not functional"
+                             "(%d children, should %sbe functional)",
                              l_type_str,
-                             l_chipletID);
+                             l_chipletID,
+                             static_cast<int>(l_num_children),
+                             l_shouldSucceed ? "" : "not "
+                        );
 
                     const pg_entry_t l_original_entry = pgDataAllGood[l_pgIdx];
 
@@ -573,31 +722,54 @@ public:
                     // The pgdata we will be modifying
                     partialGoodVector bad_pgData = pgDataAllGood;
 
-                    // Iterate with a mask over every bit of the pg entry of this unit
+                    // Iterate with a mask over every bit of the pg entry of
+                    // this unit
                     for (pg_mask_t l_mask = 1u << (sizeof(pg_mask_t) * 8 - 1);
                          l_mask != 0;
                          l_mask >>= 1)
                     {
                         // if a bit is set to GOOD (not including the
                         // always-good bits of always-good targets, if any),
-                        // then flip it and make sure that at least one child
-                        // turns bad.
+                        // then flip it and make sure that if we only have one
+                        // child, our state turns bad; and if not, it doesn't.
                         if (!(l_mask & l_original_entry_without_always_good_bits))
                         {
                             // set the bit to BAD
                             bad_pgData[l_pgIdx] = l_original_entry | l_mask;
 
-                            if (checkPartialGoodForDescendants(pDesc, bad_pgData))
+                            if (checkPartialGoodForDescendants(pDesc, bad_pgData)
+                                != l_shouldSucceed)
                             {
                                 TS_FAIL("testHWAScheckPartialGoodForDescendants>"
-                                        "functional = true, should be false, "
-                                        " = 0x%08x, mask = 0x%08x. "
-                                        "pDesc HUID 0x %.8x",
-                                        l_type_str,
+                                        "functional = %d, should be %d, "
+                                        "[0x%02x] = 0x%08x, mask = 0x%08x. "
+                                        "pDesc HUID 0x %08x",
+                                        !l_shouldSucceed, l_shouldSucceed,
+                                        l_pgIdx,
                                         bad_pgData[l_pgIdx],
                                         l_mask,
                                         get_huid(pDesc));
                             }
+                        }
+                    }
+
+                    if (!(cu_mask(l_chipUnit) & l_targetInfo->all_bad_cu_mask))
+                    {
+                        // Now test that the parent goes bad when we set all the
+                        // PG bits to BAD (i.e. all children go bad).
+                        bad_pgData[l_pgIdx]
+                            |= ~l_original_entry_without_always_good_bits;
+
+                        if (checkPartialGoodForDescendants(pDesc, bad_pgData))
+                        {
+                            TS_FAIL("testHWAScheckPartialGoodForDescendants>"
+                                    "setting all to bad: "
+                                    "functional = true, should be false, "
+                                    "[0x%02x] = 0x%08x, "
+                                    "pDesc HUID 0x %08x",
+                                    l_pgIdx,
+                                    bad_pgData[l_pgIdx],
+                                    get_huid(pDesc));
                         }
                     }
                 }
@@ -630,21 +802,51 @@ public:
             for (const TargetHandle_t pDesc : pDescList)
             {
                 const ATTR_TYPE_type l_type = pDesc->getAttr<ATTR_TYPE>();
-                const ATTR_CHIPLET_ID_type l_chipletID
-                    = pDesc->getAttr<ATTR_CHIPLET_ID>();
-                const ATTR_CHIP_UNIT_type l_chipUnit
-                    = pDesc->getAttr<ATTR_CHIP_UNIT>();
+                ATTR_CHIPLET_ID_type l_chipletID = 0;
+                pDesc->tryGetAttr<ATTR_CHIPLET_ID>(l_chipletID);
+                ATTR_CHIP_UNIT_type l_chipUnit = 0;
+                pDesc->tryGetAttr<ATTR_CHIP_UNIT>(l_chipUnit);
 
                 const char* const l_type_str = attrToString<ATTR_TYPE>(l_type);
 
-                const TargetHandle_t l_parentTarget
-                    = getImmediateParentByAffinity(pTarget);
+                TargetHandle_t l_parentTarget = pDesc;
 
-                const auto l_parentChipletID
-                    = l_parentTarget->getAttr<ATTR_CHIPLET_ID>();
+                ATTR_CHIPLET_ID_type l_parentChipletID = 0;
 
                 const auto l_targetInfo
                     = lookup_target_info(targets_with_parents, l_type);
+
+                // In this block we are traversing up the target hierarchy until
+                // we have the ancestor of this target which owns the PG bits
+                // that will cause this target to go bad
+                if (l_targetInfo)
+                {
+                    do {
+                        l_parentTarget
+                            = getImmediateParentByAffinity(l_parentTarget);
+
+                        if (!l_parentTarget)
+                        {
+                            TS_FAIL(
+                                "testHWAScheckMarkChildrenNonFunctional>"
+                                "Failed to find parent of type %s "
+                                "for target %s "
+                                "HUID = 0x %08x",
+                                attrToString<ATTR_TYPE>(l_targetInfo->parent_type),
+                                l_type_str, get_huid(pDesc)
+                                );
+                            break;
+                        }
+                    } while (l_parentTarget->getAttr<ATTR_TYPE>()
+                             != l_targetInfo->parent_type);
+
+                    if (!l_parentTarget)
+                    {
+                        continue;
+                    }
+
+                    l_parentChipletID = l_parentTarget->getAttr<ATTR_CHIPLET_ID>();
+                }
 
                 TS_INFO("testHWAScheckMarkChildrenNonFunctional: "
                         "descendant functional - "
@@ -661,7 +863,9 @@ public:
                 }
 
                 // Make sure we're starting out with good state at the beginning
-                if (!checkPropagationOfBadState(pTarget, pDesc, pgDataAllGood))
+                if (!checkPropagationOfBadState(l_parentTarget,
+                                                pDesc,
+                                                pgDataAllGood))
                 {
                     char l_pgDataStr[32] = { };
 
@@ -673,7 +877,7 @@ public:
                     TS_FAIL("testHWAScheckMarkChildrenNonFunctional>"
                             "functional = false, should be true, "
                             "type = %s, chip unit = %d%s, chiplet ID = 0x%02x. "
-                            "pDesc HUID 0x %.8x",
+                            "pDesc HUID 0x %08x",
                             l_type_str,
                             l_chipUnit,
                             l_pgDataStr,
@@ -697,15 +901,19 @@ public:
                     // we're also bad
                     bad_pgData[l_pgIdx] |= l_targetInfo->parent_pg_entry_bits_to_set;
 
-                    if (checkPropagationOfBadState(pTarget, pDesc, bad_pgData))
+                    if (checkPropagationOfBadState(l_parentTarget,
+                                                   pDesc,
+                                                   bad_pgData))
                     {
                         TS_FAIL("testHWAScheckMarkChildrenNonFunctional>"
                                 "functional = true, should be false, "
                                 " = 0x%08x. "
-                                "pDesc HUID 0x %.8x",
-                                l_type_str,
+                                "pDesc HUID 0x %08x, parent HUID 0x %08x, "
+                                "pg idx = %d",
                                 bad_pgData[l_pgIdx],
-                                get_huid(pDesc));
+                                get_huid(pDesc),
+                                get_huid(l_parentTarget),
+                                l_pgIdx);
                     }
                 }
             } // for pDesc_it
