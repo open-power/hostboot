@@ -293,6 +293,12 @@
      </attribute>
 
     <attribute>
+          <id>ATTR_MSS_OCMB_EXP_STRUCT_MMIO_WORD_SWAP</id>
+          <default>NO_SWAP</default><!-- @fixme : RTC: 202491 -->
+          <no_export/>
+    </attribute>
+
+    <attribute>
           <id>ATTR_SYSTEM_IPL_PHASE</id>
           <default>HB_IPL</default>
      </attribute>
