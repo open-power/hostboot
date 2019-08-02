@@ -263,7 +263,7 @@ bool processRepairedRanks( TargetHandle_t i_trgt, uint8_t i_repairedRankMask )
         {
             bool nvdimmNoGard = false;
             #ifdef CONFIG_NVDIMM
-            if ( isNVDIMM(dimm) ) nvdimmNoGard = true;
+            if ( isNVDIMM(dimm.first) ) nvdimmNoGard = true;
             #endif
 
             __calloutDimm<T>( errl, i_trgt, dimm.first, nvdimmNoGard );
