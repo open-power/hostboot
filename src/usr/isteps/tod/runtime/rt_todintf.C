@@ -31,7 +31,7 @@
 #include <runtime/interface.h>        // g_hostInterfaces
 #include <util/runtime/rt_fwreq_helper.H>  // firmware_request_helper
 #include <tod_init_reasoncodes.H>     // TOD_RT_TOPOLOGY_RESET_BACKUP, etc
-#include <errl/errlentry.H>
+#include <errlmanager_common.C>       // errlCommit
 
 
 using namespace ERRORLOG;
