@@ -901,7 +901,7 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_HW446279</id>
+    <id>ATTR_CHIP_EC_FEATURE_HW446279_USE_PPE</id>
     <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       HW446279 SMP Abus Cable Failure
@@ -911,26 +911,19 @@
       <chip>
         <name>ENUM_ATTR_NAME_CUMULUS</name>
         <ec>
-          <value>0x10</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
-        </ec>
-      </chip>
-      <chip>
-        <name>ENUM_ATTR_NAME_AXONE</name>
-        <ec>
-          <value>0x10</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
+          <value>0x13</value>
+          <test>LESS_THAN</test>
         </ec>
       </chip>
     </chipEcFeature>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_HW446279_DISABLE_FIX</id>
+    <id>ATTR_CHIP_EC_FEATURE_HW446279_USE_HW</id>
     <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       HW446279 SMP Abus Cable Failure
-      Disable HW fixes to rely on PPE SW recovery
+      Enable HW fixes, don't rely on PPE SW recovery
     </description>
     <chipEcFeature>
       <chip>

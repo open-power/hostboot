@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -702,14 +702,14 @@ fapi2::ReturnCode p9_omi_halt_ppe(const OMIC_TGT i_tgt)
     const uint64_t HALT             = 0x1000000000000000ull; // xcr cmd=001
     fapi2::buffer<uint64_t> l_xcr_data(HALT);
 
-    fapi2::ATTR_CHIP_EC_FEATURE_P9C_LOGIC_ONLY_Type l_p9c;
+    fapi2::ATTR_CHIP_EC_FEATURE_HW446279_USE_PPE_Type l_hw446279_use_ppe;
 
     auto l_chip = i_tgt.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_P9C_LOGIC_ONLY,
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW446279_USE_PPE,
                            l_chip,
-                           l_p9c));
+                           l_hw446279_use_ppe));
 
-    if(l_p9c)
+    if(l_hw446279_use_ppe)
     {
         FAPI_TRY(fapi2::putScom(i_tgt,
                                 OMI_PPE_XCR_ADDR,

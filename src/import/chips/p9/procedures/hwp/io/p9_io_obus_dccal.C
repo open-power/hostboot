@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -691,7 +691,7 @@ fapi_try_exit:
 
 
 /**
- * @brief Halt Obus PPE if HW446279 is enabled
+ * @brief Halt Obus PPE if HW446279_USE_PPE is enabled
  * @param[in] i_tgt         FAPI2 Target
  * @retval ReturnCode
  */
@@ -702,14 +702,14 @@ fapi2::ReturnCode p9_obus_halt_ppe(const OBUS_TGT i_tgt)
     const uint64_t HALT              = 0x1000000000000000ull; // xcr cmd=001
     fapi2::buffer<uint64_t> l_xcr_data(HALT);
 
-    fapi2::ATTR_CHIP_EC_FEATURE_HW446279_Type l_hw446279;
+    fapi2::ATTR_CHIP_EC_FEATURE_HW446279_USE_PPE_Type l_hw446279_use_ppe;
 
     auto l_chip = i_tgt.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW446279,
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW446279_USE_PPE,
                            l_chip,
-                           l_hw446279));
+                           l_hw446279_use_ppe));
 
-    if(l_hw446279)
+    if(l_hw446279_use_ppe)
     {
         FAPI_TRY(fapi2::putScom(i_tgt,
                                 OBUS_PPE_XCR_ADDR,
@@ -758,7 +758,7 @@ fapi2::ReturnCode p9_io_obus_dccal( const OBUS_TGT i_tgt, const uint32_t i_lane_
 
     FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_IO_OBUS_DCCAL_FLAGS, i_tgt, dccal_flags ) );
 
-    // Halt PPE if HW446279 is enabled
+    // Halt PPE if HW446279_USE_PPE is enabled
     FAPI_TRY( p9_obus_halt_ppe( i_tgt ) );
 
     // Power up Clock Distribution & Lanes

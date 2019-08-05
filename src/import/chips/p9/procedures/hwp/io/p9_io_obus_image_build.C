@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -108,7 +108,7 @@ fapi2::ReturnCode p9_io_obus_image_build(CONST_OBUS& iTgt, void* const iHwImageP
     uint8_t configMode = 0;
     int xipSectionId = 0;
     bool loadImage = false;
-    fapi2::ATTR_CHIP_EC_FEATURE_HW446279_Type l_hw446279;
+    fapi2::ATTR_CHIP_EC_FEATURE_HW446279_USE_PPE_Type l_hw446279_use_ppe;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OPTICS_CONFIG_MODE, iTgt, configMode),
              "Error from FAPI_ATTR_GET(ATTR_OPTICS_CONFIG_MODE)");
@@ -128,11 +128,11 @@ fapi2::ReturnCode p9_io_obus_image_build(CONST_OBUS& iTgt, void* const iHwImageP
         FAPI_IMP("ABUS IMAGE.");
         xipSectionId = P9_XIP_SECTION_IOPPE_IOO_ABUS;
         auto l_chip = iTgt.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW446279,
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW446279_USE_PPE,
                                l_chip,
-                               l_hw446279));
+                               l_hw446279_use_ppe));
 
-        if(l_hw446279)
+        if(l_hw446279_use_ppe)
         {
             FAPI_IMP("ABUS IMAGE LOAD.");
             loadImage = true;

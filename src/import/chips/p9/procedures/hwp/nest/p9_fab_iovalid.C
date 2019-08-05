@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -879,7 +879,7 @@ fapi_try_exit:
 
 
 
-/// @brief Resume I/O PPE engines if HW446279
+/// @brief Resume I/O PPE engines if HW446279_USE_PPE
 ///
 /// @param[in]  i_target          Processor chip target
 /// @param[in]  i_loc_link_ctl    X/A link control structure for link local end
@@ -945,40 +945,68 @@ fapi2::ReturnCode p9_fab_iovalid_link_validate_wrap(
     bool& o_retrain,
     std::vector<fapi2::ReturnCode>& o_rcs)
 {
-    fapi2::ReturnCode l_rc;
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     l_rc = p9_fab_iovalid_link_validate<T>(
                i_target,
                i_loc_link_ctl,
                i_rem_link_ctl);
 
-    if (((l_rc == (fapi2::ReturnCode) fapi2::RC_P9_FAB_IOVALID_DL_NOT_TRAINED_RETRAIN_NONE_ERR) ||
-         (l_rc == (fapi2::ReturnCode) fapi2::RC_P9_FAB_IOVALID_DL_NOT_TRAINED_RETRAIN_HALF_ERR)) &&
-        (T == fapi2::TARGET_TYPE_OBUS))
+    do
     {
-        o_retrain = true;
-        o_rcs.push_back(l_rc);
-        return fapi2::FAPI2_RC_SUCCESS;
-    }
-    else
-    {
-        o_retrain = false;
-
-        if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+        if (((l_rc == (fapi2::ReturnCode) fapi2::RC_P9_FAB_IOVALID_DL_NOT_TRAINED_RETRAIN_NONE_ERR) ||
+             (l_rc == (fapi2::ReturnCode) fapi2::RC_P9_FAB_IOVALID_DL_NOT_TRAINED_RETRAIN_HALF_ERR)) &&
+            (T == fapi2::TARGET_TYPE_OBUS))
         {
-            FAPI_ERR("Error from p9_fab_iovalid_link_validate_wrap");
+            o_retrain = true;
+            o_rcs.push_back(l_rc);
+            break;
         }
-        else if (T == fapi2::TARGET_TYPE_OBUS)
+        else
         {
-            // At this point, both halves of the SMP ABUS have completed training and
-            //   we will kick off the ppe if we need HW446279
-            l_rc = p9_fab_iovalid_enable_ppe(
-                       i_target,
-                       i_loc_link_ctl,
-                       i_rem_link_ctl);
+            o_retrain = false;
+
+            if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+            {
+                FAPI_ERR("Error from p9_fab_iovalid_link_validate_wrap");
+                break;
+            }
+
+            if (T == fapi2::TARGET_TYPE_OBUS)
+            {
+                fapi2::ATTR_CHIP_EC_FEATURE_HW446279_USE_PPE_Type l_hw446279_use_ppe;
+
+                l_rc = FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW446279_USE_PPE,
+                                     i_target,
+                                     l_hw446279_use_ppe);
+
+                if (l_rc)
+                {
+                    FAPI_ERR("Error from FAPI_ATTR_GET (fapi2::ATTR_CHIP_EC_FEATURE_HW446279_USE_PPE");
+                    break;
+                }
+
+                if (l_hw446279_use_ppe)
+                {
+                    // At this point, both halves of the SMP ABUS have completed training and
+                    // we will kick off the ppe if we need HW446279_USE_PPE
+                    l_rc = p9_fab_iovalid_enable_ppe(
+                               i_target,
+                               i_loc_link_ctl,
+                               i_rem_link_ctl);
+
+                    if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+                    {
+                        FAPI_ERR("Error from p9_fab_iovalid_enable_ppe");
+                        break;
+                    }
+                }
+            }
         }
 
-        return l_rc;
     }
+    while(0);
+
+    return l_rc;
 }
 
 
