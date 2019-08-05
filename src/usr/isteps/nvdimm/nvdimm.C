@@ -2047,7 +2047,7 @@ bool nvdimm_encrypt_unlock(TargetHandleList &i_nvdimmList)
                                        HWAS::SRCI_PRIORITY_HIGH);
                 l_err->addHwCallout( l_nvdimm,
                                      HWAS::SRCI_PRIORITY_MED,
-                                     HWAS::DECONFIG,
+                                     HWAS::DELAYED_DECONFIG,
                                      HWAS::GARD_NULL );
 
                 errlCommit( l_err, NVDIMM_COMP_ID );
