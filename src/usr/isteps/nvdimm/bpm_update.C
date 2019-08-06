@@ -28,6 +28,7 @@
 #include "nvdimm_update.H"
 
 #include <errl/hberrltypes.H>
+#include <errl/errlmanager.H>
 #include <endian.h>
 #include <sys/time.h>
 #include <hbotcompid.H>
@@ -180,6 +181,44 @@ bool isBslCommand(const uint8_t i_command)
     }
 
     return result;
+}
+
+
+/**
+ *  @brief Helper function to handle two potential errors that might occur in a
+ *         function that only returns a single error log. If the return error is
+ *         not nullptr then the second error will be linked to it and committed.
+ *         Otherwise, the return error will point to the second's error and the
+ *         second error will point to nullptr.
+ *
+ *  @param[in/out]      io_returnErrl   A pointer to the error that would be
+ *                                      returned by the function that called
+ *                                      this one. If nullptr, then it will be
+ *                                      set point to the secondary error and
+ *                                      that error will become nullptr.
+ *
+ *  @param[in/out]     io_secondErrl    The secondary error that occurred which
+ *                                      in addition to the usual returned error.
+ */
+void handleMultipleErrors(errlHndl_t& io_returnErrl, errlHndl_t& io_secondErrl)
+{
+    if (io_returnErrl != nullptr)
+    {
+        io_secondErrl->plid(io_returnErrl->plid());
+        TRACFCOMP(g_trac_bpm, "Committing second error eid=0x%X with plid of "
+                 "returned error: 0x%X",
+                 io_secondErrl->eid(),
+                 io_returnErrl->plid());
+        io_secondErrl->collectTrace(BPM_COMP_NAME);
+        ERRORLOG::errlCommit(io_secondErrl, BPM_COMP_ID);
+    }
+    else
+    {
+        io_returnErrl = io_secondErrl;
+        io_secondErrl = nullptr;
+    }
+
+
 }
 
 /**
@@ -751,7 +790,7 @@ errlHndl_t Bpm::runUpdate(BpmFirmwareLidImage i_fwImage,
         errl = checkFirmwareCrc();
         if (errl != nullptr)
         {
-            // @TODO RTC 212447: Add support for multiple update attempts.
+            // @TODO RTC 212448: Add support for multiple update attempts.
             TRACFCOMP(g_trac_bpm, "Bpm:: runUpdate(): "
                      "Final CRC check failed. Attempting update again...");
             iv_attemptAnotherUpdate = !iv_attemptAnotherUpdate;
@@ -760,14 +799,15 @@ errlHndl_t Bpm::runUpdate(BpmFirmwareLidImage i_fwImage,
 
     } while(0);
 
+    do {
     // Reset the device. This will exit BSL mode.
     errlHndl_t exitErrl = resetDevice();
     if (exitErrl != nullptr)
     {
         TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runUpdate(): "
                   "Failed to reset the device");
-        //@TODO RTC 212447 Do something with the error.
-        delete exitErrl;
+        handleMultipleErrors(errl, exitErrl);
+        break;
     }
 
     // Exit update mode
@@ -776,8 +816,8 @@ errlHndl_t Bpm::runUpdate(BpmFirmwareLidImage i_fwImage,
     {
         TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runUpdate(): "
                   "Failed to exit update mode");
-        //@TODO RTC 212447 Do something with the error.
-        delete exitErrl;
+        handleMultipleErrors(errl, exitErrl);
+        break;
     }
 
     // To see the BPM firmware level updated we must reset the controller
@@ -788,8 +828,8 @@ errlHndl_t Bpm::runUpdate(BpmFirmwareLidImage i_fwImage,
     {
         TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runUpdate(): "
                  "Could not reset NVDIMM Controller");
-        //@TODO RTC 212447: Do something with the error.
-        delete exitErrl;
+        handleMultipleErrors(errl, exitErrl);
+        break;
     }
 
     TRACFCOMP(g_trac_bpm, "Bpm::runUpdate(): "
@@ -802,8 +842,8 @@ errlHndl_t Bpm::runUpdate(BpmFirmwareLidImage i_fwImage,
     {
         TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runUpdate(): "
                  "Could not determine firmware version on the BPM");
-        //@TODO RTC 212447 Do something with the error.
-        delete exitErrl;
+        handleMultipleErrors(errl, exitErrl);
+        break;
     }
 
     if (i_fwImage.getVersion() == bpmFwVersion)
@@ -812,6 +852,8 @@ errlHndl_t Bpm::runUpdate(BpmFirmwareLidImage i_fwImage,
                  "Firmware version on the BPM matches the version in the "
                  "image. Update Successful.");
     }
+
+    } while(0);
 
     TRACFCOMP(g_trac_bpm, EXIT_MRK"Bpm::runUpdate(): "
               "Concluding BPM Update for NVDIMM 0x%.8X",
@@ -1943,7 +1985,7 @@ errlHndl_t Bpm::dumpSegment(uint16_t const i_segmentCode,
                 TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::dumpSegment(): "
                          "Failed to write DEFAULT_REG_PAGE low byte!! "
                          "NVDIMM will be stuck on this segment's page!!");
-                // @TODO RTC 212447 Do something with the error.
+                handleMultipleErrors(errl, closeSegmentErrl);
                 break;
             }
 
@@ -1955,7 +1997,7 @@ errlHndl_t Bpm::dumpSegment(uint16_t const i_segmentCode,
                 TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::dumpSegment(): "
                          "Failed to write DEFAULT_REG_PAGE high byte!! "
                          "NVDIMM will be stuck on this segment's page!!");
-                // @TODO RTC 212447 Do something with the error.
+                handleMultipleErrors(errl, closeSegmentErrl);
                 break;
             }
 
@@ -1972,7 +2014,7 @@ errlHndl_t Bpm::dumpSegment(uint16_t const i_segmentCode,
         {
             TRACFCOMP(g_trac_bpm, "Bpm::dumpSegment(): "
                       "Failed to write production magic numbers.");
-            // @TODO RTC 212447 Do something with the error.
+            handleMultipleErrors(errl, magicErrl);
         }
     }
 
