@@ -119,7 +119,7 @@ sub generateFirmwareImage
     my ($i_fileName, $i_outputDir) = @_;
     my $this_func = (caller(0))[3];
 
-    my $intermediateFileName = generateIntermediateImage($i_fileName);
+    my $intermediateFileName = generateIntermediateImage($i_fileName,$i_outputDir);
 
     open my $inputFileHandle, '<:encoding(UTF-8)', $intermediateFileName
         or die "Failed to open $intermediateFileName";
@@ -745,7 +745,7 @@ sub generateOutputNameAndVersion
 ################################################################################
 sub generateIntermediateImage
 {
-    my $i_fileName = shift;
+    my ($i_fileName, $i_outputDir) = @_;
 
     # Parse the file name into its filename, path, and suffix.
     my ($name, $path, $suffix) = fileparse($i_fileName, ".txt");
@@ -753,7 +753,7 @@ sub generateIntermediateImage
     # Parse the file name into its filename, path, and suffix.
     my ($utilName, $utilPath, $utilSuffix) = fileparse($bpmUtilScript, ".txt");
 
-    my $intermediateFileName = $utilPath . $name . ".crc";
+    my $intermediateFileName = $i_outputDir . $name . ".crc";
 
     # Call the python script which will insert the CRC
     my $pythonReturn = system($bpmUtilScript,
