@@ -37,7 +37,7 @@
 #include <errl/errlentry.H>
 #include <fapi2.H>
 #include <plat_hwp_invoker.H>
-#include <exp_inband.H>
+#include <lib/inband/exp_inband.H>
 #include <exp_data_structs.H>
 #include <exp_fw_update.H>
 #include <generic/memory/lib/utils/endian_utils.H>

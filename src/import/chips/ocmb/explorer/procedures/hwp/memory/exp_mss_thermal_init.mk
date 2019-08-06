@@ -28,5 +28,4 @@
 
 PROCEDURE=exp_mss_thermal_init
 $(eval $(call ADD_EXP_MEMORY_INCDIRS,$(PROCEDURE)))
-lib$(PROCEDURE)_DEPLIBS+=exp_inband
 $(call BUILD_PROCEDURE)

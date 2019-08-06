@@ -35,7 +35,7 @@
 
 #include <fapi2.H>
 #include <lib/exp_mss_thermal_init_utils.H>
-#include <exp_inband.H>
+#include <lib/inband/exp_inband.H>
 #include <lib/shared/exp_consts.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <explorer_scom_addresses.H>

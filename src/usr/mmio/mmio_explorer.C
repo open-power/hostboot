@@ -28,7 +28,7 @@
 #include <errl/errludtarget.H>
 #include <errl/errludlogregister.H>
 #include <explorer_scom_addresses.H>
-#include <exp_inband.H>
+#include <lib/inband/exp_inband.H>
 #include <mmio/mmio_reasoncodes.H>
 
 // Trace definition

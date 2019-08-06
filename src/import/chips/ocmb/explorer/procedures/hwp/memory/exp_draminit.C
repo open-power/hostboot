@@ -34,7 +34,7 @@
 // *HWP Consumed by: FSP:HB
 
 #include <lib/shared/exp_consts.H>
-#include <exp_inband.H>
+#include <lib/inband/exp_inband.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/mss_bad_bits.H>
 #include <lib/exp_draminit_utils.H>

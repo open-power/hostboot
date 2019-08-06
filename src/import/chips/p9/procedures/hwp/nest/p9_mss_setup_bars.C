@@ -51,7 +51,7 @@
 #include <map>
 #include <lib/shared/mss_const.H>
 #include <generic/memory/lib/utils/memory_size.H>
-#include <exp_inband.H>
+#include <lib/inband/exp_inband.H>
 
 ///----------------------------------------------------------------------------
 /// Constant definitions

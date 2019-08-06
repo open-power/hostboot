@@ -45,7 +45,7 @@
 #include <p9_mc_scom_addresses.H>
 #include <p9a_misc_scom_addresses.H>
 #include <p9a_misc_scom_addresses_fld.H>
-#include <exp_inband.H>
+#include <lib/inband/exp_inband.H>
 
 //-----------------------------------------------------------------------------------
 // Function definitions

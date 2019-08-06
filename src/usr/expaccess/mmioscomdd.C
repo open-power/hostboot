@@ -31,7 +31,7 @@
 /*****************************************************************************/
 // I n c l u d e s
 /*****************************************************************************/
-#include <exp_inband.H>              // mmio_get_scom
+#include <lib/inband/exp_inband.H>              // mmio_get_scom
 #include <lib/shared/exp_consts.H>   // IBM_SCOM_INDICATOR
 #include <hwpf/fapi2/include/fapi2_hwp_executor.H>// FAPI_EXEC_HWP
 #include "mmioscomdd.H"   //mmioScomPerformOp

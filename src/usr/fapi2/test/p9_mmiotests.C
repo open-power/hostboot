@@ -38,7 +38,7 @@
 
 
 // Write/Read from the inband response address (shouldn't hurt anything)
-//Constants from #include <exp_inband.H>
+// Constants from #include <lib/inband/exp_inband.H>
 static const uint64_t EXPLR_IB_MMIO_OFFSET   = 0x0000000100000000ull; // 4GB
 static const uint64_t EXPLR_IB_SRAM_BASE     = 0x01000000; // MSCCRNGE 01000000 020FFFFF
 static const uint64_t EXPLR_IB_RSP_SRAM_ADDR  = EXPLR_IB_SRAM_BASE | 0x03FF00;

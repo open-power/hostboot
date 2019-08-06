@@ -83,6 +83,7 @@ MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/freq/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/power_thermal/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/omi/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/i2c/
+MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/inband/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/fir/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/mcbist/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/phy/
