@@ -36,7 +36,7 @@
 #include <fapi2.H>
 #include <generic/memory/lib/utils/find.H>
 #include <lib/exp_mss_thermal_init_utils.H>
-#include <exp_inband.H>
+#include <lib/inband/exp_inband.H>
 #include <exp_mss_thermal_init.H>
 
 extern "C"
