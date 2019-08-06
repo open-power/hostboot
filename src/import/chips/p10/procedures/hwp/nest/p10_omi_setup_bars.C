@@ -42,7 +42,7 @@
 #include <p10_scom_mc_8.H>
 #include <p10_scom_mc_e.H>
 
-#include <exp_inband.H>
+#include <lib/inband/exp_inband.H>
 
 //-----------------------------------------------------------------------------------
 // Function definitions
