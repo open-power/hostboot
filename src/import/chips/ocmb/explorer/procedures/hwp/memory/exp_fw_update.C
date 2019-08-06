@@ -32,7 +32,7 @@
 /// *HWP Consumed by: HB
 
 #include <fapi2.H>
-#include <exp_inband.H>
+#include <lib/inband/exp_inband.H>
 #include <lib/shared/exp_consts.H>
 #include <exp_data_structs.H>
 #include <generic/memory/lib/utils/c_str.H>
