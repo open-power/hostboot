@@ -589,6 +589,10 @@ class mcbistTraits<mss::mc_type::NIMBUS, fapi2::TARGET_TYPE_MCA>
         static constexpr uint64_t XLTATE1 = MCA_MBA_MCP0XLT1;
         static constexpr uint64_t XLTATE2 = MCA_MBA_MCP0XLT2;
 
+        // Maintenance data location within the array
+        static constexpr uint64_t MAINT_DATA_INDEX_START = 0b111110000;
+        static constexpr uint64_t MAINT_DATA_INDEX_END   = 0b111111000;
+
         enum
         {
             // Register field constants

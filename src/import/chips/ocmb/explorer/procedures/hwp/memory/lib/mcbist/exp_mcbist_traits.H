@@ -601,6 +601,10 @@ class mcbistTraits< mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_MEM_PORT>
         static constexpr uint64_t XLTATE1 = EXPLR_MCBIST_MBXLT1;
         static constexpr uint64_t XLTATE2 = EXPLR_MCBIST_MBXLT2;
 
+        // Maintenance data location within the array
+        static constexpr uint64_t MAINT_DATA_INDEX_START = 0b000000000;
+        static constexpr uint64_t MAINT_DATA_INDEX_END   = 0b000001000;
+
         enum
         {
             // Register field constants

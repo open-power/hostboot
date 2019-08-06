@@ -397,27 +397,6 @@ enum broadcast_timebase
     TB_COUNT_128   = 0b1111111,
 };
 
-enum rmw_address
-{
-    // 32B block addresses into the maint portion of the rmw buffer
-    DW0            = 0b111110000,
-    DW1            = 0b111110001,
-    DW2            = 0b111110010,
-    DW3            = 0b111110011,
-    DW4            = 0b111110100,
-    DW5            = 0b111110101,
-    DW6            = 0b111110110,
-    DW7            = 0b111110111,
-    DW8            = 0b111111000,
-    DW9            = 0b111111001,
-    DWA            = 0b111111010,
-    DWB            = 0b111111011,
-    DWC            = 0b111111100,
-    DWD            = 0b111111101,
-    DWE            = 0b111111110,
-    DWF            = 0b111111111,
-};
-
 enum data_rotate_mode
 {
     // MCBIST data rotate modes refer to register MCBDRCR bits 0:3

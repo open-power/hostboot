@@ -3009,7 +3009,7 @@ fapi2::ReturnCode load_maint_pattern( const fapi2::Target<T>& i_target, const pa
     // set ecc mode bit on
     l_aacr
     .template writeBit<PT::RMW_WRT_BUFFER_SEL>(mss::states::OFF)
-    .template insertFromRight<PT::RMW_WRT_ADDRESS, PT::RMW_WRT_ADDRESS_LEN>(mss::mcbist::rmw_address::DW0)
+    .template insertFromRight<PT::RMW_WRT_ADDRESS, PT::RMW_WRT_ADDRESS_LEN>(PT::MAINT_DATA_INDEX_START)
     .template writeBit<PT::RMW_WRT_AUTOINC>(mss::states::ON)
     .template writeBit<PT::RMW_WRT_ECCGEN>(mss::states::ON);
 
@@ -3021,7 +3021,7 @@ fapi2::ReturnCode load_maint_pattern( const fapi2::Target<T>& i_target, const pa
 
     for (const auto& p : l_ports)
     {
-        l_aacr.template insertFromRight<PT::RMW_WRT_ADDRESS, PT::RMW_WRT_ADDRESS_LEN>(mss::mcbist::rmw_address::DW0);
+        l_aacr.template insertFromRight<PT::RMW_WRT_ADDRESS, PT::RMW_WRT_ADDRESS_LEN>(PT::MAINT_DATA_INDEX_START);
 
         for (auto l_num_writes = 0; l_num_writes < 2; ++l_num_writes)
         {
@@ -3049,7 +3049,7 @@ fapi2::ReturnCode load_maint_pattern( const fapi2::Target<T>& i_target, const pa
                 FAPI_TRY( fapi2::putScom(p, PT::RMW_WRT_BUF_ECC_REG, 0) );
             }
 
-            l_aacr.template insertFromRight<PT::RMW_WRT_ADDRESS, PT::RMW_WRT_ADDRESS_LEN>(mss::mcbist::rmw_address::DW8);
+            l_aacr.template insertFromRight<PT::RMW_WRT_ADDRESS, PT::RMW_WRT_ADDRESS_LEN>(PT::MAINT_DATA_INDEX_END);
         }
     }
 
