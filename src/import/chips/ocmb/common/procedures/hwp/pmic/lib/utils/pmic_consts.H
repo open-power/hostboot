@@ -95,7 +95,7 @@ enum rail
     SWD = 3,
 };
 
-enum attr_eff_engine_fields
+enum class attr_eff_engine_fields
 {
     // Template recursive base case
     ATTR_EFF_BASE_CASE = 0,
@@ -157,7 +157,7 @@ enum attr_eff_engine_fields
     DRAM_MODULE_HEIGHT                  = 45,
 
     // Dispatcher set to last enum value
-    ATTR_EFF_DISPATCHER = DRAM_MODULE_HEIGHT,
+    DISPATCHER = DRAM_MODULE_HEIGHT,
 };
 
 ///

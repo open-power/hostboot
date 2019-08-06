@@ -37,9 +37,7 @@
 #define _MSS_PMIC_EFD_PROCESSING_H_
 
 #include <fapi2.H>
-#include <generic/memory/lib/data_engine/data_engine_traits_def.H>
-#include <generic/memory/lib/data_engine/data_engine.H>
-#include <generic/memory/lib/spd/spd_facade.H>
+#include <generic/memory/lib/spd/ddimm/efd_decoder.H>
 
 namespace mss
 {
