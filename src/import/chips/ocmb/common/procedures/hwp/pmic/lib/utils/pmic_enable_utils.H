@@ -780,6 +780,10 @@ inline fapi2::ReturnCode enable_chip<mss::pmic::module_height::HEIGHT_1U>(
                  mss::c_str(i_pmic_target));
     }
 
+    // Start VR Enable
+    FAPI_TRY(mss::pmic::start_vr_enable(i_pmic_target),
+             "Error starting VR_ENABLE on PMIC %s", mss::c_str(i_pmic_target));
+
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:

@@ -57,6 +57,13 @@ extern "C"
         auto l_dimms = mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_ocmb_target);
         auto l_pmics = mss::find_targets<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target);
 
+        // Check that we have PMICs (we wouldn't on gemini, for example)
+        if (l_pmics.empty())
+        {
+            FAPI_INF("No PMICs to enable on %s, exiting.", mss::c_str(i_ocmb_target));
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
         // Sort by index (low to high) since find_targets may not return the correct order
         std::sort(l_dimms.begin(), l_dimms.end(),
                   [] (const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& l_first_dimm,

@@ -179,7 +179,6 @@ fapi_try_exit:
 /// @param[in] i_dimm_target dimm target of PMIC
 /// @param[in] i_id PMIC0 or PMIC1
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
-/// @note TK - this function may greatly change. It relies on SPD fields that may not be correct.
 ///
 fapi2::ReturnCode bias_with_spd_startup_seq(
     const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
@@ -202,6 +201,15 @@ fapi2::ReturnCode bias_with_spd_startup_seq(
                                                           mss::pmic::get_swc_sequence_delay,
                                                           mss::pmic::get_swd_sequence_delay
                                                          };
+
+    static const std::vector<uint8_t> SEQUENCE_REGS =
+    {
+        0, // 0 would imply no sequence config (won't occur due to assert in bias_with_spd_startup_seq)
+        REGS::R40_POWER_ON_SEQUENCE_CONFIG_1,
+        REGS::R41_POWER_ON_SEQUENCE_CONFIG_2,
+        REGS::R42_POWER_ON_SEQUENCE_CONFIG_3,
+        REGS::R43_POWER_ON_SEQUENCE_CONFIG_4
+    };
 
     // Arrays to store the attribute data
     uint8_t l_sequence_orders[CONSTS::NUMBER_OF_RAILS];
@@ -229,6 +237,7 @@ fapi2::ReturnCode bias_with_spd_startup_seq(
 
     {
         fapi2::buffer<uint8_t> l_power_on_sequence_config;
+        uint8_t l_highest_sequence = 0;
 
         // Zero out sequence registers first
         FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, REGS::R40_POWER_ON_SEQUENCE_CONFIG_1, l_power_on_sequence_config));
@@ -236,18 +245,39 @@ fapi2::ReturnCode bias_with_spd_startup_seq(
         FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, REGS::R42_POWER_ON_SEQUENCE_CONFIG_3, l_power_on_sequence_config));
         FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, REGS::R43_POWER_ON_SEQUENCE_CONFIG_4, l_power_on_sequence_config));
 
-        // Set the registers appropriately.
-        // We do manual reversing here (see above) so that we can also place in the delays as they're supposed to be
+        // Set the registers appropriately. We kind of need to do this greedy algorithm here since
+        // the SPD has fields of sequence per rail, the PMIC wants rails per sequence.
+        // 1. For each rail, set that bit in the corresponding sequence, and enable that sequence
+        // 2. Set that rail bit for each of the following sequences
+        // 3. Record the highest sequence used throughout the run
+        // 4. Clear out registers of sequences higher than the highest used (clear the set rail bits)
+        // We do this because for each rail, we may not know what the highest sequence will be yet.
+        // It makes the most sense to assume all sequences, then clear those that aren't used.
         for (uint8_t l_rail_index = mss::pmic::rail::SWA; l_rail_index <= mss::pmic::rail::SWD; ++l_rail_index)
         {
-            if (l_sequence_orders[l_rail_index] != 0) // If 0, it will not be sequenced
+            static constexpr uint8_t NO_SEQUENCE = 0;
+            const uint8_t l_rail_sequence = l_sequence_orders[l_rail_index];
+
+            if (l_rail_sequence != NO_SEQUENCE) // If 0, it will not be sequenced
             {
+                // Update the new highest working sequence
+                l_highest_sequence = std::max(l_rail_sequence, l_highest_sequence);
                 // Set the register contents appropriately
                 FAPI_TRY(mss::pmic::set_startup_seq_register(i_pmic_target, l_rail_index,
-                         l_sequence_orders[l_rail_index], l_sequence_delays[l_rail_index]));
+                         l_rail_sequence, l_sequence_delays[l_rail_index]));
             }
 
             // else, zero, do nothing.
+        }
+
+        // Now erase the registers that are higher than our highest sequence (in order to satisfy note 2
+        // for registers R40 - R43):
+        // - 2. If bit [7] = ‘0’, bits [6:3] must be programmed as ‘0000’. If bit [7] = ‘1’,
+        // - at least one of the bits [6:3] must be programmed as ‘1’.
+        for (++l_highest_sequence; l_highest_sequence < SEQUENCE_REGS.size(); ++l_highest_sequence)
+        {
+            fapi2::buffer<uint8_t> l_clear;
+            FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, SEQUENCE_REGS[l_highest_sequence], l_power_on_sequence_config));
         }
     }
 
@@ -326,10 +356,24 @@ fapi2::ReturnCode set_startup_seq_register(
     l_power_on_sequence_config.clearBit<DELAY_START, FIELDS::DELAY_FLD_LENGTH>();
     l_power_on_sequence_config = l_power_on_sequence_config + i_delay;
 
-    l_power_on_sequence_config.setBit(SEQUENCE_BITS[i_rail]);
-    l_power_on_sequence_config.setBit(SEQUENCE_ENABLE_REVERSED);
+    FAPI_TRY(l_power_on_sequence_config.setBit(SEQUENCE_BITS[i_rail]));
+    FAPI_TRY(l_power_on_sequence_config.setBit(SEQUENCE_ENABLE_REVERSED));
 
     FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, SEQUENCE_REGS[i_round], l_power_on_sequence_config));
+
+    // The startup sequence registers after the provided one must set the bits of the rail we just enabled in
+    // the current sequence. So here, we iterate through the remaining sequences and set those bits.
+    // since we don't know the information about all the rails within this one function (others may be
+    // set in later calls to this function) we will set these for each sequence register now, and then
+    // clear them out later when we know exactly which sequences will be enabled and which ones won't
+    for (uint8_t l_round_modify = i_round; l_round_modify < SEQUENCE_REGS.size(); ++l_round_modify)
+    {
+        l_power_on_sequence_config.flush<0>();
+        FAPI_TRY(mss::pmic::i2c::reg_read(i_pmic_target, SEQUENCE_REGS[l_round_modify], l_power_on_sequence_config));
+        FAPI_TRY(l_power_on_sequence_config.setBit(SEQUENCE_BITS[i_rail]));
+        FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, SEQUENCE_REGS[l_round_modify], l_power_on_sequence_config));
+    }
+
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
