@@ -285,7 +285,13 @@ namespace HBPM
 
         do
         {
+            // TODO RTC: 214257
+            // Remove workaround forcing use of NIMBUS lid for Axone's hcode lid
+            #ifdef CONFIG_AXONE_BRING_UP
+            bool l_isNimbus = true;
+            #else
             bool l_isNimbus = (i_target->getAttr<ATTR_MODEL>() == MODEL_NIMBUS);
+            #endif
             uint32_t l_lidId = (l_isNimbus) ? Util::NIMBUS_HCODE_LIDID
                                             : Util::CUMULUS_HCODE_LIDID;
             if(g_pHcodeLidMgr.get() == nullptr)
