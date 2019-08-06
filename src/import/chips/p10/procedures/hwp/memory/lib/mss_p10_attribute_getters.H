@@ -23,8 +23,8 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // mss_p10_attribute_getters.H
-#ifndef MSS_P9A_ATTR_GETTERS_H_
-#define MSS_P9A_ATTR_GETTERS_H_
+#ifndef MSS_P10_ATTR_GETTERS_H_
+#define MSS_P10_ATTR_GETTERS_H_
 
 #include <fapi2.H>
 #include <generic/memory/lib/utils/index.H>
