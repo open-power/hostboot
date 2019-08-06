@@ -23,6 +23,4 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p10_tod_init
-# FIXME @RTC 213485 port to P10
-$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/common/include)
 $(call BUILD_PROCEDURE)

@@ -57,13 +57,13 @@ typedef fapi2::ReturnCode (*p10_tod_init_FP_t) (
 
 extern "C" {
 
-/// @brief Initialized the TOD to 'running' state
+/// @brief Initialize the TOD to 'running' state
 /// @param[in] i_tod_node Pointer to TOD topology (including FAPI targets)
 /// @param[out] o_failingTodProc Pointer to the fapi target, will be populated
 ///             with processor target unable to receive proper signals from OSC.
-//              Caller needs to look at this parameter only when p10_tod_init
-///             fails and reason code indicated OSC failure. Defaulted to NULL.
-/// @return FAPI_RC_SUCCESS if TOD topology is successfully initialized else
+///              Caller needs to look at this parameter only when p10_tod_init
+///             fails and the reason code indicated OSC failure. Defaulted to NULL.
+/// @return FAPI2_RC_SUCCESS if TOD topology is successfully initialized else
 ///         error
     fapi2::ReturnCode p10_tod_init(
         const tod_topology_node* i_tod_node,

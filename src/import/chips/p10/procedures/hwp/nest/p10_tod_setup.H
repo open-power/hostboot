@@ -59,10 +59,10 @@ typedef fapi2::ReturnCode (*p10_tod_setup_FP_t) (
 extern "C" {
 
 /// @brief Setup the TOD network
-/// @param[in] i_tod_node Reference to TOD topology (included FAPI targets)
+/// @param[in,out] i_tod_node Reference to TOD topology (included FAPI targets)
 /// @param[in] i_tod_sel Specifies the topology to configure
 /// @param[in] i_osc_sel Specifies the oscillator to use for the master
-/// @return FAPI_RC_SUCCESS if TOD topology is successfully configured else
+/// @return FAPI2_RC_SUCCESS if TOD topology is successfully configured else
 ///         error
     fapi2::ReturnCode p10_tod_setup(
         tod_topology_node* i_tod_node,

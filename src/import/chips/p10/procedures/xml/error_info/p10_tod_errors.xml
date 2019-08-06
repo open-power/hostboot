@@ -26,31 +26,29 @@
   <!-- ******************************************************************** -->
   <registerFfdc>
     <id>REG_FFDC_TOD_STATUS</id>
-<!-- FIXME @RTC 213485 port over to P10
-    <scomRegister>PERV_TOD_M_PATH_CTRL_REG</scomRegister>
-    <scomRegister>PERV_TOD_PRI_PORT_0_CTRL_REG</scomRegister>
-    <scomRegister>PERV_TOD_PRI_PORT_1_CTRL_REG</scomRegister>
-    <scomRegister>PERV_TOD_SEC_PORT_0_CTRL_REG</scomRegister>
-    <scomRegister>PERV_TOD_SEC_PORT_1_CTRL_REG</scomRegister>
-    <scomRegister>PERV_TOD_S_PATH_CTRL_REG</scomRegister>
-    <scomRegister>PERV_TOD_I_PATH_CTRL_REG</scomRegister>
-    <scomRegister>PERV_TOD_PSS_MSS_CTRL_REG</scomRegister>
-    <scomRegister>PERV_TOD_PSS_MSS_STATUS_REG</scomRegister>
-    <scomRegister>PERV_TOD_M_PATH_STATUS_REG</scomRegister>
-    <scomRegister>PERV_TOD_S_PATH_STATUS_REG</scomRegister>
-    <scomRegister>PERV_TOD_M_PATH_0_STEP_STEER_REG</scomRegister>
-    <scomRegister>PERV_TOD_M_PATH_1_STEP_STEER_REG</scomRegister>
-    <scomRegister>PERV_TOD_CHIP_CTRL_REG</scomRegister>
-    <scomRegister>PERV_TOD_TRACE_DATA_1_REG</scomRegister>
-    <scomRegister>PERV_TOD_TRACE_DATA_2_REG</scomRegister>
-    <scomRegister>PERV_TOD_TRACE_DATA_3_REG</scomRegister>
-    <scomRegister>PERV_TOD_FSM_REG</scomRegister>
-    <scomRegister>PERV_TOD_TX_TTYPE_CTRL_REG</scomRegister>
-    <scomRegister>PERV_TOD_RX_TTYPE_CTRL_REG</scomRegister>
-    <scomRegister>PERV_TOD_ERROR_REG</scomRegister>
-    <scomRegister>PERV_TOD_ERROR_MASK_REG</scomRegister>
-    <scomRegister>PERV_TOD_ERROR_ROUTING_REG</scomRegister>
--->
+    <scomRegister>scomt::perv::TOD_M_PATH_CTRL_REG</scomRegister>
+    <scomRegister>scomt::perv::TOD_PRI_PORT_0_CTRL_REG</scomRegister>
+    <scomRegister>scomt::perv::TOD_PRI_PORT_1_CTRL_REG</scomRegister>
+    <scomRegister>scomt::perv::TOD_SEC_PORT_0_CTRL_REG</scomRegister>
+    <scomRegister>scomt::perv::TOD_SEC_PORT_1_CTRL_REG</scomRegister>
+    <scomRegister>scomt::perv::TOD_S_PATH_CTRL_REG</scomRegister>
+    <scomRegister>scomt::perv::TOD_I_PATH_CTRL_REG</scomRegister>
+    <scomRegister>scomt::perv::TOD_PSS_MSS_CTRL_REG</scomRegister>
+    <scomRegister>scomt::perv::TOD_PSS_MSS_STATUS_REG</scomRegister>
+    <scomRegister>scomt::perv::TOD_M_PATH_STATUS_REG</scomRegister>
+    <scomRegister>scomt::perv::TOD_S_PATH_STATUS_REG</scomRegister>
+    <scomRegister>scomt::perv::TOD_M_PATH_0_STEP_STEER_REG</scomRegister>
+    <scomRegister>scomt::perv::TOD_M_PATH_1_STEP_STEER_REG</scomRegister>
+    <scomRegister>scomt::perv::TOD_CHIP_CTRL_REG</scomRegister>
+    <scomRegister>scomt::perv::TOD_TRACE_DATA_1_REG</scomRegister>
+    <scomRegister>scomt::perv::TOD_TRACE_DATA_2_REG</scomRegister>
+    <scomRegister>scomt::perv::TOD_TRACE_DATA_3_REG</scomRegister>
+    <scomRegister>scomt::perv::TOD_FSM_REG</scomRegister>
+    <scomRegister>scomt::perv::TOD_TX_TTYPE_CTRL_REG</scomRegister>
+    <scomRegister>scomt::perv::TOD_RX_TTYPE_CTRL_REG</scomRegister>
+    <scomRegister>scomt::perv::TOD_ERROR_REG</scomRegister>
+    <scomRegister>scomt::perv::TOD_ERROR_MASK_REG</scomRegister>
+    <scomRegister>scomt::perv::TOD_ERROR_ROUTING_REG</scomRegister>
   </registerFfdc>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -235,17 +233,6 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_P10_TOD_MOVE_TOD_TO_TB_INVALID_THREAD_NUM</rc>
-    <description>
-      Procedure: p10_tod_imove_tod_to_tb
-      There is an invalid thread number
-    </description>
-    <ffdc>TARGET</ffdc>
-    <ffdc>THREAD_NUMBER</ffdc>
-    <!-- no callout, deconfig, gard tags as FW does not consume             -->
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
     <rc>RC_P10_TOD_MF_CLK_FAILURE</rc>
     <description>
       Procedure: p10_tod_init
@@ -296,4 +283,15 @@
     </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P10_TOD_MOVE_TOD_TO_TB_SCOM_XLATE_ERR</rc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>CU_TYPE</ffdc>
+    <ffdc>EC</ffdc>
+    <ffdc>CU_NUM</ffdc>
+    <ffdc>ADDR</ffdc>
+    <description>
+      Error translating chip unit relative SCOM address
+    </description>
+  </hwpError>
 </hwpErrors>

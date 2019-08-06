@@ -37,6 +37,14 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <p10_tod_init.H>
+#include <p10_scom_perv.H>
+
+//------------------------------------------------------------------------------
+// Namespace declarations
+//------------------------------------------------------------------------------
+
+using namespace scomt;
+using namespace scomt::perv;
 
 //------------------------------------------------------------------------------
 // Constant definitions
@@ -50,13 +58,16 @@ const uint64_t  C_SSCG_NS_PER_TOD_COUNT = 32;
 const uint32_t  C_SSCG_START_POLL_DELAY = C_SSCG_START_DELAY * C_SSCG_NS_PER_TOD_COUNT;
 const uint32_t  C_SSCG_START_POLL_COUNT = 10;
 
+// FIXME @RTC 213485 -- temporary, if defined, then implement workaround for defect HW500611
+#define P10_TOD_HW500611_IMPLEMENT_WORKAROUND
+
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
 
 /// @brief Clears TOD error register
 /// @param[in] i_tod_node Pointer to TOD topology (including FAPI targets)
-/// @return FAPI_RC_SUCCESS if TOD topology is cleared of previous errors
+/// @return FAPI2_RC_SUCCESS if TOD topology is cleared of previous errors
 ///         else FAPI or ECMD error is sent through
 fapi2::ReturnCode p10_tod_clear_error_reg(const tod_topology_node* i_tod_node)
 
@@ -64,13 +75,12 @@ fapi2::ReturnCode p10_tod_clear_error_reg(const tod_topology_node* i_tod_node)
     FAPI_DBG("Start");
 
     // Clear the TOD error register by writing all bits to 1
-    FAPI_DBG("Clear any previous errors from PERV_TOD_ERROR_REG");
+    FAPI_DBG("Clear any previous errors from TOD_ERROR_REG");
     fapi2::buffer<uint64_t> l_data;
     l_data.flush<1>();
-    FAPI_TRY(fapi2::putScom(*(i_tod_node->i_target),
-                            PERV_TOD_ERROR_REG,
-                            l_data),
-             "Error from putScom (PERV_TOD_ERROR_REG)!");
+    FAPI_TRY(PREP_TOD_ERROR_REG(*(i_tod_node->i_target)));
+    FAPI_TRY(PUT_TOD_ERROR_REG(*(i_tod_node->i_target), l_data),
+             "Error from PUT_TOD_ERROR_REG");
 
     // Clear the TOD error register on all children
     for (auto l_child = (i_tod_node->i_children).begin();
@@ -82,14 +92,14 @@ fapi2::ReturnCode p10_tod_clear_error_reg(const tod_topology_node* i_tod_node)
     }
 
 fapi_try_exit:
-    FAPI_DBG("Exiting...");
+    FAPI_DBG("End");
     return fapi2::current_err;
 }
 
 /// @brief Retrieves targets in the TOD topology
 /// @param[in] i_tod_node Reference to TOD topology
 /// @param[in] i_depth Current depth into TOD topology network
-/// @param[in] o_targets Vector of targets, to be appended
+/// @param[out] o_targets Vector of targets, to be appended
 /// @return void
 void get_targets(
     const tod_topology_node* i_tod_node,
@@ -125,7 +135,7 @@ fapi_try_exit:
 /// @brief Distribute synchronization signal to SS PLL using
 ///        TOD network
 /// @param[in] i_tod_node Reference to TOD topology
-/// @return FAPI_RC_SUCCESS if TOD sync is succesful else error
+/// @return FAPI2_RC_SUCCESS if TOD sync is succesful else error
 fapi2::ReturnCode sync_spread(
     const tod_topology_node* i_tod_node)
 {
@@ -136,55 +146,25 @@ fapi2::ReturnCode sync_spread(
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_master_chip;
     fapi2::buffer<uint64_t> l_tod_value_data;
     fapi2::buffer<uint64_t> l_tod_timer_data;
-    uint8_t l_sync_spread = 0;
 
     FAPI_ASSERT(l_targets.size(),
                 fapi2::P10_TOD_SETUP_NULL_NODE(),
                 "Null node or target passed into function!");
     l_master_chip = l_targets.front();
 
-#if 0
-    // FIXME @RTC 213485 port to P10
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FORCE_SYNC_SS_PLL_SPREAD,
-                           fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                           l_sync_spread),
-             "Error from FAPI_ATTR_GET (ATTR_FORCE_SYNC_SS_PLL_SPREAD)");
-#endif
-
-#if 0
-
-    // FIXME @RTC 213485 port to P10
-    if (!l_sync_spread)
-    {
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_SYNC_SS_PLL_SPREAD,
-                               l_master_chip,
-                               l_sync_spread),
-                 "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_SYNC_SS_PLL_SPREAD)");
-    }
-
-#endif
-
-    if (!l_sync_spread)
-    {
-        goto fapi_try_exit;
-    }
-
     // Read tod_value from TOD Value Register
-    FAPI_TRY(fapi2::getScom(l_master_chip,
-                            PERV_TOD_VALUE_REG,
-                            l_tod_value_data),
-             "Error reading TOD_VALUE_REG");
+    FAPI_TRY(GET_TOD_VALUE_REG(l_master_chip, l_tod_value_data),
+             "Error from GET_TOD_VALUE_REG");
 
-    l_tod_timer_data = ((l_tod_value_data + (C_SSCG_START_DELAY << 4)) &
-                        0xFFFFFFFFFFFFFFF0ULL) | 0xC;
-
-    // Write value > tod_value to TOD Timer Register
+    // Write value > tod_value to TOD Timer Register and enable timers
     for (auto l_chip : l_targets)
     {
-        FAPI_TRY(fapi2::putScom(l_chip,
-                                PERV_TOD_TIMER_REG,
-                                l_tod_timer_data),
-                 "Error writing to TOD_TIMER_REG");
+        FAPI_TRY(PREP_TOD_TIMER_REG(l_chip));
+        SET_TOD_TIMER_REG_VALUE(l_tod_value_data + C_SSCG_START_DELAY, l_tod_timer_data);
+        SET_TOD_TIMER_REG_ENABLE0(l_tod_timer_data);
+        SET_TOD_TIMER_REG_ENABLE1(l_tod_timer_data);
+        FAPI_TRY(PUT_TOD_TIMER_REG(l_chip, l_tod_timer_data),
+                 "Error from PUT_TOD_TIMER_REG");
     }
 
     // Wait for SSCG start signal
@@ -198,12 +178,11 @@ fapi2::ReturnCode sync_spread(
              l_chip_it != l_targets.end();
             )
         {
-            FAPI_TRY(fapi2::getScom(*l_chip_it,
-                                    PERV_TOD_TIMER_REG,
-                                    l_tod_timer_data),
+            FAPI_TRY(GET_TOD_TIMER_REG(*l_chip_it,
+                                       l_tod_timer_data),
                      "Error polling TOD_TIMER_REG");
 
-            if (l_tod_timer_data.getBit<PERV_TOD_TIMER_REG_STATUS>())
+            if (GET_TOD_TIMER_REG_STATUS1(l_tod_timer_data))
             {
                 l_chip_it = l_targets.erase(l_chip_it);
             }
@@ -224,13 +203,44 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+/// FIXME @RTC 213485 -- temporary, inserted for debug of HW500611.
+//     Remove once fixed, since the entire TOD error register is checked
+//     in the init_tod_node() routine.
+/// @brief Check for the master request error in the TOD error register.
+/// @param[in] i_target Chip target
+/// @return FAPI2_RC_SUCCESS if no errors, else error
+fapi2::ReturnCode p10_tod_check_error_reg_mreq(
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> i_target )
+{
+    fapi2::buffer<uint64_t> l_tod_err_reg = 0;
+    fapi2::ReturnCode l_rc_fapi(fapi2::FAPI2_RC_SUCCESS);
+
+    FAPI_TRY(GET_TOD_ERROR_REG(i_target, l_tod_err_reg),
+             "Error from GET_TOD_ERROR_REG");
+
+    if (GET_TOD_ERROR_REG_PIB_MASTER_REQUEST_ERROR(l_tod_err_reg))
+    {
+        l_rc_fapi = fapi2::FAPI2_RC_FALSE;
+    }
+
+fapi_try_exit:
+
+    if (l_rc_fapi != fapi2::FAPI2_RC_SUCCESS)
+    {
+        fapi2::current_err = l_rc_fapi;
+    }
+
+    return fapi2::current_err;
+}
+
+
 /// @brief Helper function for p10_tod_init
 /// @param[in] i_tod_node Pointer to TOD topology (including FAPI targets)
 /// @param[out] o_failingTodProc Pointer to the fapi target, will be populated
 ///             with processor target unable to receive proper signals from OSC.
 //              Caller needs to look at this parameter only when p10_tod_init
 ///             fails and reason code indicated OSC failure. Defaulted to NULL.
-/// @return FAPI_RC_SUCCESS if TOD topology is successfully initialized
+/// @return FAPI2_RC_SUCCESS if TOD topology is successfully initialized
 ///         else error
 fapi2::ReturnCode init_tod_node(
     const tod_topology_node* i_tod_node,
@@ -241,56 +251,121 @@ fapi2::ReturnCode init_tod_node(
     fapi2::buffer<uint64_t> l_tod_fsm_reg;
     // Flag to check if the TOD FSM is running
     bool l_tod_running = false;
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_target;
     FAPI_DBG("Start");
+
+    FAPI_ASSERT((i_tod_node != NULL) &&
+                (i_tod_node->i_target != NULL),
+                fapi2::P10_TOD_SETUP_NULL_NODE(),
+                "Null node or target passed into function!");
+
+    l_target = *(i_tod_node->i_target);
 
     // Sequence details are in TOD Workbook section 1.6.3
     // Is the current TOD being processed the master drawer master TOD?
     if (i_tod_node->i_tod_master && i_tod_node->i_drawer_master)
     {
         fapi2::buffer<uint64_t> l_data;
-        // TOD Step checkers enable - write TOD_TX_TTYPE_2_REG to enable
-        // TOD STEP checking on all chips
-        FAPI_DBG("Master: Chip TOD step checkers enable");
-        l_data.flush<0>().setBit<PERV_TOD_TX_TTYPE_2_REG_TRIGGER>();
-        FAPI_TRY(fapi2::putScom(*(i_tod_node->i_target),
-                                PERV_TOD_TX_TTYPE_2_REG,
-                                l_data),
-                 "Master: Error from putScom (PERV_TOD_TX_TTYPE_2_REG)!");
 
+        //  Load-TOD-mod:
+        //  TOD_LOAD_TOD_MOD_REG(@0x18)[00]= 0b1
         FAPI_DBG("Master: switch local Chip TOD to 'Not Set' state");
-        l_data.flush<0>().setBit<PERV_TOD_LOAD_TOD_MOD_REG_FSM_TRIGGER>();
-        FAPI_TRY(fapi2::putScom(*(i_tod_node->i_target),
-                                PERV_TOD_LOAD_TOD_MOD_REG,
-                                l_data),
-                 "Master: Error from putScom (PERV_TOD_LOAD_TOD_MOD_REG)!");
+        FAPI_TRY(PREP_TOD_LOAD_MOD_REG(l_target));
+        l_data.flush<0>();
+        SET_TOD_LOAD_MOD_REG_TRIGGER(l_data);
+        FAPI_TRY(PUT_TOD_LOAD_MOD_REG(l_target, l_data),
+                 "Master: Error from PUT_TOD_LOAD_MOD_REG");
 
-        FAPI_DBG("Master: switch all Chip TOD in the system to 'Not Set' state");
-        l_data.flush<0>().setBit<PERV_TOD_TX_TTYPE_5_REG_TRIGGER>();
-        FAPI_TRY(fapi2::putScom(*(i_tod_node->i_target),
-                                PERV_TOD_TX_TTYPE_5_REG,
-                                l_data),
-                 "Master: Error from putScom (PERV_TOD_TX_TTYPE_5_REG)!");
-
+        // Load-TOD:
+        // TOD_LOAD_TOD_REG(@0x21)
+        // [00:59] = desired TOD value
         FAPI_DBG("Master: Chip TOD load value (move TB to TOD)");
-        l_data = PERV_TOD_LOAD_REG_LOAD_VALUE;
-        FAPI_TRY(fapi2::putScom(*(i_tod_node->i_target),
-                                PERV_TOD_LOAD_TOD_REG,
-                                l_data),
-                 "Master: Error from putScom (PERV_TOD_LOAD_TOD_REG)!");
+        FAPI_TRY(PREP_TOD_LOAD_REG(l_target));
+        // FIXME @RTC 213485 -- double-check this setting, See Table 1.4.1 in P10_perv workbook.
+        SET_TOD_LOAD_REG_LOAD_TOD_VALUE( P10_TOD_LOAD_REG_LOAD_VALUE , l_data);
+        // FIXME @RTC 213485 -- double-check this setting, See Table 1.4.1 in P10_perv workbook.
+        SET_TOD_LOAD_REG_WOF( P10_TOD_LOAD_REG_START_TOD, l_data);
+        FAPI_TRY(PUT_TOD_LOAD_REG(l_target, l_data),
+                 "Master: Error from PUT_TOD_LOAD_REG");
 
-        FAPI_DBG("Master: Chip TOD start_tod (switch local Chip TOD to 'Running' state)");
-        l_data.flush<0>().setBit<PERV_TOD_START_TOD_REG_FSM_TRIGGER>();
-        FAPI_TRY(fapi2::putScom(*(i_tod_node->i_target),
-                                PERV_TOD_START_TOD_REG,
-                                l_data),
-                 "Master: Error from putScom (PERV_TOD_START_TOD_REG)!");
+#ifdef P10_TOD_HW500611_IMPLEMENT_WORKAROUND
+        // FIXME @RTC 213485 -- temporary, workaround for defect HW500611
+        FAPI_INF("Implementing workaround for defect HW500611");
+#else
+        // STEP checking enable:
+        // TOD_TX_TTYPE_2_REG(@0x13)[00] = 0b1: TX-TTYPE-2
+        FAPI_DBG("Master: Chip TOD step checkers enable");
+        FAPI_TRY(PREP_TOD_TX_TTYPE_2_REG(l_target));
+        l_data.flush<0>();
+        SET_TOD_TX_TTYPE_2_REG_TX_TTYPE_2_TRIGGER(l_data);
+        FAPI_TRY(PUT_TOD_TX_TTYPE_2_REG(l_target, l_data),
+                 "Master: Error from PUT_TOD_TX_TTYPE_2_REG");
 
+        // FIXME @RTC 213485 -- temporary, inserted for debug of HW500611
+        FAPI_TRY(p10_tod_check_error_reg_mreq(l_target),
+                 "Error from p10_tod_check_error_reg_mreq");
+
+        // Load-TOD-mod:
+        // Initiate a TX-TTYPE-5 from the TOD master:
+        // TOD_TX_TTYPE_5_REG(@0x16)[00] = 0b1
+        FAPI_DBG("Master: switch all Chip TOD in the system to 'Not Set' state");
+        FAPI_TRY(PREP_TOD_TX_TTYPE_5_REG(l_target));
+        l_data.flush<0>();
+        SET_TOD_TX_TTYPE_5_REG_TX_TTYPE_5_TRIGGER(l_data);
+        FAPI_TRY(PUT_TOD_TX_TTYPE_5_REG(l_target, l_data),
+                 "Master: Error from PUT_TOD_TX_TTYPE_5_REG");
+
+        // FIXME @RTC 213485 -- temporary, inserted for debug of HW500611
+        FAPI_TRY(p10_tod_check_error_reg_mreq(l_target),
+                 "Error from p10_tod_check_error_reg_mreq");
+
+        // Load-TOD:
+        // Initiate a TTYPE-4 from the TOD master:
+        // TOD_TX_TTYPE_4_REG(@0x15)[00] = 0b1
         FAPI_DBG("Master: Send local Chip TOD value to all Chip TODs");
-        l_data.flush<0>().setBit<PERV_TOD_TX_TTYPE_4_REG_TRIGGER>();
-        FAPI_TRY(fapi2::putScom(*(i_tod_node->i_target),
-                                PERV_TOD_TX_TTYPE_4_REG,
-                                l_data),
-                 "Master: Error from putScom (PERV_TOD_TX_TTYPE_4_REG)!");
+        FAPI_TRY(PREP_TOD_TX_TTYPE_4_REG(l_target));
+        l_data.flush<0>();
+        SET_TOD_TX_TTYPE_4_REG_TX_TTYPE_4_TRIGGER(l_data);
+        FAPI_TRY(PUT_TOD_TX_TTYPE_4_REG(l_target, l_data),
+                 "Master: Error from PUT_TOD_TX_TTYPE_4_REG");
+
+        // FIXME @RTC 213485 -- temporary, inserted for debug of HW500611
+        FAPI_TRY(p10_tod_check_error_reg_mreq(l_target),
+                 "Error from p10_tod_check_error_reg_mreq");
+
+        // STEP checking enable:
+        // Initiate a TTYPE-2 from the TOD master:
+        // TOD_TX_TTYPE_2_REG(@0x13)[00] = 0b1
+        // Already done above.
+        FAPI_DBG("Master: Chip TOD step checkers enable");
+        FAPI_TRY(PREP_TOD_TX_TTYPE_2_REG(l_target));
+        l_data.flush<0>();
+        SET_TOD_TX_TTYPE_2_REG_TX_TTYPE_2_TRIGGER(l_data);
+        FAPI_TRY(PUT_TOD_TX_TTYPE_2_REG(l_target, l_data),
+                 "Master: Error from PUT_TOD_TX_TTYPE_2_REG");
+
+        // FIXME @RTC 213485 -- temporary, inserted for debug of HW500611
+        FAPI_TRY(p10_tod_check_error_reg_mreq(l_target),
+                 "Error from p10_tod_check_error_reg_mreq");
+#endif
+
+        // FIXME @RTC 213485 -- this config write was in the P9 code,
+        // but I can't find the requirement for this config write in
+        // the design specification.  But it seems to be required
+        // to get the TOD FSM into the Running State.
+        // See P10_perv workbook, Figure 1.4.17
+        FAPI_DBG("Master: Chip TOD start_tod (switch local Chip TOD to 'Running' state)");
+        FAPI_TRY(PREP_TOD_START_REG(l_target));
+        l_data.flush<0>();
+        SET_TOD_START_REG_FSM_START_TOD_TRIGGER(l_data);
+        // The DATA02 bit was NOT set in P9 HWP. However it seems to be required
+        // in order to avoid an I_PATH_SYNC_CHECK_ERROR in the TOD_ERROR_REG in P10.
+        // This bit forces the FSM to wait for a Sync before proceeding
+        // to the Running State.  See P10_perv workbook, Figure 1.4.17
+        SET_TOD_START_REG_FSM_START_TOD_DATA02(l_data);
+        FAPI_TRY(PUT_TOD_START_REG(l_target, l_data),
+                 "Master: Error from PUT_TOD_START_REG");
+
     }
 
     FAPI_DBG("Check TOD is Running");
@@ -300,12 +375,10 @@ fapi2::ReturnCode init_tod_node(
         FAPI_DBG("Waiting for TOD to assert TOD_FSM_REG_TOD_IS_RUNNING...");
         FAPI_TRY(fapi2::delay(P10_TOD_UTILS_HW_NS_DELAY, P10_TOD_UTILS_SIM_CYCLE_DELAY),
                  "Error from delay!");
-        FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
-                                PERV_TOD_FSM_REG,
-                                l_tod_fsm_reg),
-                 "Error from getScom (PERV_TOD_FSM_REG)!");
+        FAPI_TRY(GET_TOD_FSM_REG(l_target, l_tod_fsm_reg),
+                 "Error from GET_TOD_FSM_REG");
 
-        if (l_tod_fsm_reg.getBit<PERV_TOD_FSM_REG_IS_RUNNING>())
+        if (GET_TOD_FSM_REG_TOD_IS_RUNNING(l_tod_fsm_reg))
         {
             FAPI_DBG("TOD is running!");
             l_tod_running = true;
@@ -319,20 +392,18 @@ fapi2::ReturnCode init_tod_node(
     {
         FAPI_DBG("TOD FSM failed !");
         fapi2::buffer<uint64_t> l_tod_err_reg = 0;
-        FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
-                                PERV_TOD_ERROR_REG,
-                                l_tod_err_reg),
-                 "Error from getScom (PERV_TOD_ERROR_REG)!");
+        FAPI_TRY(GET_TOD_ERROR_REG(l_target, l_tod_err_reg),
+                 "Error from GET_TOD_ERROR_REG");
 
-        FAPI_ASSERT(!l_tod_err_reg.getBit<PERV_TOD_ERROR_ROUTING_REG_OSCSWITCH_INTERRUPT>(),
+        FAPI_ASSERT(!GET_TOD_ERROR_REG_OSCSWITCH_INTERRUPT(l_tod_err_reg),
                     fapi2::P10_TOD_MF_CLK_FAILURE()
-                    .set_TARGET(*(i_tod_node->i_target)),
+                    .set_TARGET(l_target),
                     "Interrupt from TOD Oscillator Switch");
     }
 
     FAPI_ASSERT((l_tod_init_pending_count < P10_TOD_UTIL_TIMEOUT_COUNT),
                 fapi2::P10_TOD_INIT_NOT_RUNNING()
-                .set_TARGET(*(i_tod_node->i_target))
+                .set_TARGET(l_target)
                 .set_COUNT(l_tod_init_pending_count)
                 .set_TOD_FSM_DATA(l_tod_fsm_reg()),
                 "TOD is expected to be running, but is not!");
@@ -341,55 +412,53 @@ fapi2::ReturnCode init_tod_node(
         FAPI_DBG("Clear TTYPE#2, TTYPE#4, and TTYPE#5 status");
         fapi2::buffer<uint64_t> l_tod_err_reg = 0;
         fapi2::buffer<uint64_t> l_tod_err_mask_reg = 0;
-        l_tod_err_reg.setBit<PERV_TOD_ERROR_REG_RX_TTYPE_2>();
-        l_tod_err_reg.setBit<PERV_TOD_ERROR_REG_RX_TTYPE_4>();
-        l_tod_err_reg.setBit<PERV_TOD_ERROR_REG_RX_TTYPE_5>();
-        FAPI_TRY(fapi2::putScom(*(i_tod_node->i_target),
-                                PERV_TOD_ERROR_REG,
-                                l_tod_err_reg),
-                 "Error from putScom (PERV_TOD_ERROR_REG)!");
+
+        FAPI_TRY(PREP_TOD_ERROR_REG(l_target));
+        SET_TOD_ERROR_REG_RX_TTYPE_2(l_tod_err_reg);
+        SET_TOD_ERROR_REG_RX_TTYPE_4(l_tod_err_reg);
+        SET_TOD_ERROR_REG_RX_TTYPE_5(l_tod_err_reg);
+        FAPI_TRY(PUT_TOD_ERROR_REG(l_target, l_tod_err_reg),
+                 "Error from PUT_TOD_ERROR_REG");
 
         FAPI_DBG("Checking for TOD errors");
-        FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
-                                PERV_TOD_ERROR_REG,
-                                l_tod_err_reg),
-                 "Error from getScom (PERV_TOD_ERROR_REG)!");
+        FAPI_TRY(GET_TOD_ERROR_REG(l_target, l_tod_err_reg),
+                 "Error from GET_TOD_ERROR_REG");
 
-        // going to assert, populate pointer prior to exit
-        if (l_tod_err_reg.getBit<PERV_TOD_ERROR_REG_M_PATH_0_STEP_CHECK>() ||
-            l_tod_err_reg.getBit<PERV_TOD_ERROR_REG_M_PATH_1_STEP_CHECK>())
+        // Before going to assertion checks, populate pointer prior to exit
+        if (o_failingTodProc != NULL &&
+            (GET_TOD_ERROR_REG_M_PATH_0_STEP_CHECK_ERROR(l_tod_err_reg) ||
+             GET_TOD_ERROR_REG_M_PATH_1_STEP_CHECK_ERROR(l_tod_err_reg)))
         {
-            *o_failingTodProc = *(i_tod_node->i_target);
+            *o_failingTodProc = l_target;
         }
 
-        FAPI_ASSERT(!l_tod_err_reg.getBit<PERV_TOD_ERROR_REG_M_PATH_0_STEP_CHECK>(),
+        FAPI_ASSERT(!GET_TOD_ERROR_REG_M_PATH_0_STEP_CHECK_ERROR(l_tod_err_reg),
                     fapi2::P10_TOD_INIT_M_PATH_0_STEP_CHECK_ERROR()
-                    .set_TARGET(*(i_tod_node->i_target))
+                    .set_TARGET(l_target)
                     .set_TOD_ERROR_REG(l_tod_err_reg),
                     "M_PATH_0_STEP_CHECK_ERROR!");
-        FAPI_ASSERT(!l_tod_err_reg.getBit<PERV_TOD_ERROR_REG_M_PATH_1_STEP_CHECK>(),
+        FAPI_ASSERT(!GET_TOD_ERROR_REG_M_PATH_1_STEP_CHECK_ERROR(l_tod_err_reg),
                     fapi2::P10_TOD_INIT_M_PATH_1_STEP_CHECK_ERROR()
-                    .set_TARGET(*(i_tod_node->i_target))
+                    .set_TARGET(l_target)
                     .set_TOD_ERROR_REG(l_tod_err_reg),
                     "M_PATH_1_STEP_CHECK_ERROR!");
         FAPI_ASSERT(!l_tod_err_reg(),
                     fapi2::P10_TOD_INIT_ERROR()
-                    .set_TARGET(*(i_tod_node->i_target))
+                    .set_TARGET(l_target)
                     .set_TOD_ERROR_REG(l_tod_err_reg),
-                    "FIR bit active!");
+                    "TOD FIR bit active!");
 
         FAPI_DBG("Set error mask to runtime configuration");
         // Mask TTYPE received informational bits 38:43
-        l_tod_err_mask_reg.setBit<PERV_TOD_ERROR_MASK_REG_RX_TTYPE_0>()
-        .setBit<PERV_TOD_ERROR_MASK_REG_RX_TTYPE_1>()
-        .setBit<PERV_TOD_ERROR_MASK_REG_RX_TTYPE_2>()
-        .setBit<PERV_TOD_ERROR_MASK_REG_RX_TTYPE_3>()
-        .setBit<PERV_TOD_ERROR_MASK_REG_RX_TTYPE_4>()
-        .setBit<PERV_TOD_ERROR_MASK_REG_RX_TTYPE_5>();
-        FAPI_TRY(fapi2::putScom(*(i_tod_node->i_target),
-                                PERV_TOD_ERROR_MASK_REG,
-                                l_tod_err_mask_reg),
-                 "Error from putScom (PERV_TOD_ERROR_MASK_REG)");
+        FAPI_TRY(PREP_TOD_ERROR_MASK_REG(l_target));
+        SET_TOD_ERROR_MASK_REG_RX_TTYPE_0_MASK(l_tod_err_mask_reg);
+        SET_TOD_ERROR_MASK_REG_RX_TTYPE_1_MASK(l_tod_err_mask_reg);
+        SET_TOD_ERROR_MASK_REG_RX_TTYPE_2_MASK(l_tod_err_mask_reg);
+        SET_TOD_ERROR_MASK_REG_RX_TTYPE_3_MASK(l_tod_err_mask_reg);
+        SET_TOD_ERROR_MASK_REG_RX_TTYPE_4_MASK(l_tod_err_mask_reg);
+        SET_TOD_ERROR_MASK_REG_RX_TTYPE_5_MASK(l_tod_err_mask_reg);
+        FAPI_TRY(PUT_TOD_ERROR_MASK_REG(l_target, l_tod_err_mask_reg),
+                 "Error from PUT_TOD_ERROR_MASK_REG");
     }
 
     // recursively configure downstream nodes
@@ -402,7 +471,7 @@ fapi2::ReturnCode init_tod_node(
     }
 
 fapi_try_exit:
-    FAPI_DBG("Exiting...");
+    FAPI_DBG("End");
     return fapi2::current_err;
 }
 
@@ -414,6 +483,19 @@ fapi2::ReturnCode p10_tod_init(
 {
     FAPI_DBG("Start");
 
+    FAPI_ASSERT((i_tod_node != NULL) &&
+                (i_tod_node->i_target != NULL),
+                fapi2::P10_TOD_SETUP_NULL_NODE(),
+                "Null node or target passed into function!");
+
+    FAPI_ASSERT((i_tod_node->i_tod_master) &&
+                (i_tod_node->i_drawer_master),
+                fapi2::P10_TOD_SETUP_INVALID_TOPOLOGY()
+                .set_TARGET(*(i_tod_node->i_target))
+                .set_OSCSEL(0)    // not used
+                .set_TODSEL(0),   // not used
+                "Non-root (slave) node passed into main function!");
+
     // Clear the error register so we don't get any "fake" errors
     FAPI_TRY(p10_tod_clear_error_reg(i_tod_node),
              "Error from p10_tod_clear_error_reg!");
@@ -422,11 +504,16 @@ fapi2::ReturnCode p10_tod_init(
     FAPI_TRY(init_tod_node(i_tod_node, o_failingTodProc),
              "Error from init_tod_node!");
 
+#ifdef P10_TOD_HW500611_IMPLEMENT_WORKAROUND
+    // FIXME @RTC 213485 -- temporary, workaround for defect HW500611
+    FAPI_INF("Implementing workaround for defect HW500611");
+#else
     // sync spread across chips in topology
     FAPI_TRY(sync_spread(i_tod_node),
              "Error from sync_spread!");
+#endif
 
 fapi_try_exit:
-    FAPI_DBG("Exiting...");
+    FAPI_DBG("End");
     return fapi2::current_err;
 }

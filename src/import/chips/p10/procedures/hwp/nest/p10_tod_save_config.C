@@ -37,6 +37,14 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <p10_tod_save_config.H>
+#include <p10_scom_perv.H>
+
+//------------------------------------------------------------------------------
+// Namespace declarations
+//------------------------------------------------------------------------------
+
+using namespace scomt;
+using namespace scomt::perv;
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -45,52 +53,45 @@
 // NOTE: description in header
 fapi2::ReturnCode p10_tod_save_config(tod_topology_node* i_tod_node)
 {
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_target = *(i_tod_node->i_target);
+
     FAPI_DBG("Start");
 
-    FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
-                            PERV_TOD_M_PATH_CTRL_REG,
-                            i_tod_node->o_todRegs.tod_m_path_ctrl_reg),
-             "Error from getScom (PERV_TOD_M_PATH_CTRL_REG)!");
+    FAPI_TRY(GET_TOD_M_PATH_CTRL_REG(l_target,
+                                     i_tod_node->o_todRegs.tod_m_path_ctrl_reg),
+             "Error from GET_TOD_M_PATH_CTRL_REG");
 
-    FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
-                            PERV_TOD_PRI_PORT_0_CTRL_REG,
-                            i_tod_node->o_todRegs.tod_pri_port_0_ctrl_reg),
-             "Error from getScom (PERV_TOD_PRI_PORT_0_CTRL_REG)!");
+    FAPI_TRY(GET_TOD_PRI_PORT_0_CTRL_REG(l_target,
+                                         i_tod_node->o_todRegs.tod_pri_port_0_ctrl_reg),
+             "Error from GET_TOD_PRI_PORT_0_CTRL_REG");
 
-    FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
-                            PERV_TOD_PRI_PORT_1_CTRL_REG,
-                            i_tod_node->o_todRegs.tod_pri_port_1_ctrl_reg),
-             "Error from getScom (PERV_TOD_PRI_PORT_1_CTRL_REG)!");
+    FAPI_TRY(GET_TOD_PRI_PORT_1_CTRL_REG(l_target,
+                                         i_tod_node->o_todRegs.tod_pri_port_1_ctrl_reg),
+             "Error from GET_TOD_PRI_PORT_1_CTRL_REG");
 
-    FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
-                            PERV_TOD_SEC_PORT_0_CTRL_REG,
-                            i_tod_node->o_todRegs.tod_sec_port_0_ctrl_reg),
-             "Error from getScom (PERV_TOD_SEC_PORT_0_CTRL_REG)!");
+    FAPI_TRY(GET_TOD_SEC_PORT_0_CTRL_REG(l_target,
+                                         i_tod_node->o_todRegs.tod_sec_port_0_ctrl_reg),
+             "Error from GET_TOD_SEC_PORT_0_CTRL_REG");
 
-    FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
-                            PERV_TOD_SEC_PORT_1_CTRL_REG,
-                            i_tod_node->o_todRegs.tod_sec_port_1_ctrl_reg),
-             "Error from getScom (PERV_TOD_SEC_PORT_1_CTRL_REG)!");
+    FAPI_TRY(GET_TOD_SEC_PORT_1_CTRL_REG(l_target,
+                                         i_tod_node->o_todRegs.tod_sec_port_1_ctrl_reg),
+             "Error from GET_TOD_SEC_PORT_1_CTRL_REG");
 
-    FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
-                            PERV_TOD_S_PATH_CTRL_REG,
-                            i_tod_node->o_todRegs.tod_s_path_ctrl_reg),
-             "Error from getScom (PERV_TOD_S_PATH_CTRL_REG)!");
+    FAPI_TRY(GET_TOD_S_PATH_CTRL_REG(l_target,
+                                     i_tod_node->o_todRegs.tod_s_path_ctrl_reg),
+             "Error from GET_TOD_S_PATH_CTRL_REG");
 
-    FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
-                            PERV_TOD_I_PATH_CTRL_REG,
-                            i_tod_node->o_todRegs.tod_i_path_ctrl_reg),
-             "Error from getScom (PERV_TOD_I_PATH_CTRL_REG)!");
+    FAPI_TRY(GET_TOD_I_PATH_CTRL_REG(l_target,
+                                     i_tod_node->o_todRegs.tod_i_path_ctrl_reg),
+             "Error from GET_TOD_I_PATH_CTRL_REG");
 
-    FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
-                            PERV_TOD_PSS_MSS_CTRL_REG,
-                            i_tod_node->o_todRegs.tod_pss_mss_ctrl_reg),
-             "Error from getScom (PERV_TOD_PSS_MSS_CTRL_REG)!");
+    FAPI_TRY(GET_TOD_PSS_MSS_CTRL_REG(l_target,
+                                      i_tod_node->o_todRegs.tod_pss_mss_ctrl_reg),
+             "Error from GET_TOD_PSS_MSS_CTRL_REG");
 
-    FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
-                            PERV_TOD_CHIP_CTRL_REG,
-                            i_tod_node->o_todRegs.tod_chip_ctrl_reg),
-             "Error from getScom (PERV_TOD_CHIP_CTRL_REG)!");
+    FAPI_TRY(GET_TOD_CHIP_CTRL_REG(l_target,
+                                   i_tod_node->o_todRegs.tod_chip_ctrl_reg),
+             "Error from TOD_CHIP_CTRL_REG");
 
     // Recurse to save configuration of children
     for (auto l_child = (i_tod_node->i_children).begin();

@@ -56,11 +56,11 @@ typedef fapi2::ReturnCode (*p10_tod_save_config_FP_t) (tod_topology_node*);
 extern "C"
 {
 
-/// @brief Saves TOD configuration registers to topology structure
-/// @param[in] i_tod_node Reference to TOD topology (FAPI targets included
-///                       within)
-/// @return FAPI_RC_SUCCESS if all registers were read and saved in node
-///         structure else FAPI or ECMD error is sent through
+    /// @brief Saves TOD configuration registers to topology structure
+    /// @param[in] i_tod_node Reference to TOD topology (FAPI targets included
+    ///                       within)
+    /// @return FAPI2_RC_SUCCESS if all registers were read and saved in node
+    ///         structure else FAPI or ECMD error
     fapi2::ReturnCode p10_tod_save_config(tod_topology_node* i_tod_node);
 
 } // extern "C"

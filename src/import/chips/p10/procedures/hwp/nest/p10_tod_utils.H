@@ -40,17 +40,11 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <fapi2.H>
-// FIXME @RTC 213485 port to P10
-#include <p9_perv_scom_addresses.H>
-#include <p9_perv_scom_addresses_fld.H>
-#include <p9_misc_scom_addresses.H>
-#include <p9_misc_scom_addresses_fld.H>
-#include <p9_quad_scom_addresses.H>
-#include <p9_quad_scom_addresses_fld.H>
 
 //------------------------------------------------------------------------------
 // Constant definitions
 //------------------------------------------------------------------------------
+// FIXME @RTC 213485 port to P10 as part of link delays
 // TOD-grid-cycles added to MDMT delay to account for slave staging
 const uint32_t MDMT_TOD_GRID_CYCLE_STAGING_DELAY = 6;
 
@@ -68,53 +62,41 @@ const uint32_t P10_TOD_UTILS_SIM_CYCLE_DELAY = 50000;
 // TOD retry count for hardware-cleared bits
 const uint32_t P10_TOD_UTIL_TIMEOUT_COUNT = 20;
 
-// SCOMC register field definitions
-const uint32_t SPRC_REG_SEL_TFMR_T0 = 8;
-const uint32_t SPRC_REG_SEL_TFMR_T1 = 9;
-const uint32_t SPRC_REG_SEL_TFMR_T2 = 10;
-const uint32_t SPRC_REG_SEL_TFMR_T3 = 11;
-const uint32_t SPRC_REG_SEL_TFMR_T4 = 12;
-const uint32_t SPRC_REG_SEL_TFMR_T5 = 13;
-const uint32_t SPRC_REG_SEL_TFMR_T6 = 14;
-const uint32_t SPRC_REG_SEL_TFMR_T7 = 15;
-const uint32_t SPRC_REG_SEL = 54;
-const uint32_t SPRC_REG_SEL_LEN = 7;
-
-// C_SPR_MODE register field definitions
-const uint32_t SPR_MODE_REG_MODE_SPRC0_SEL = 16;
-const uint32_t SPR_MODE_REG_MODE_SPRC_WR_EN = 3;
-
 // TFMR register field definitions
+const uint32_t TFMR_MAX_CYC_BET_STEPS      = 0;
+const uint32_t TFMR_MAX_CYC_BET_STEPS_LEN  = 8;
+const uint32_t TFMR_N_CLKS_PER_STEP        = 8;
+const uint32_t TFMR_N_CLKS_PER_STEP_LEN    = 2;
+const uint32_t TFMR_SYNC_BIT_SEL           = 11;
+const uint32_t TFMR_SYNC_BIT_SEL_LEN       = 3;
+const uint32_t TFMR_TB_ECLIPZ              = 14;
+const uint32_t TFMR_LOAD_TOD_MOD           = 16;
+const uint32_t TFMR_MOVE_CHIP_TOD_TO_TB    = 18;
+const uint32_t TFMR_CLEAR_TB_ERRORS        = 24;
+const uint32_t TFMR_HDEC_PARITY_ERROR      = 26;
+const uint32_t TFMR_TBST_CORRUPT           = 27;
+const uint32_t TFMR_TB_ENABLED             = 40;
+const uint32_t TFMR_TB_VALID               = 41;
+const uint32_t TFMR_TB_SYNC_OCCURRED       = 42;
+const uint32_t TFMR_TB_MISSING_SYNC        = 43;
+const uint32_t TFMR_TB_MISSING_STEP        = 44;
+const uint32_t TFMR_TB_RESIDUE_ERROR       = 45;
+const uint32_t TFMR_FW_CONTROL_ERROR       = 46;
+const uint32_t TFMR_CHIP_TOD_STATUS        = 47;
+const uint32_t TFMR_CHIP_TOD_STATUS_LEN    = 4;
+const uint32_t TFMR_CHIP_TOD_PARITY_ERROR  = 56;
+const uint32_t TFMR_TBST_LAST              = 32;
+const uint32_t TFMR_TBST_LAST_LEN          = 4;
+const uint32_t TFMR_TBST_ENCODED           = 28;
+const uint32_t TFMR_TBST_ENCODED_LEN       = 4;
+const uint32_t TFMR_CHIP_TOD_INTERRUPT     = 51;
+
 const uint32_t TFMR_N_CLKS_PER_STEP_4CLK  = 3;
 
 const uint32_t TFMR_SYNC_BIT_SEL_16US = 4;
 
-const uint32_t TFMR_STATE_TB_RESET = 0;
-const uint32_t TFMR_STATE_TB_NOT_SET = 2;
-const uint32_t TFMR_STATE_TB_SYNC_WAIT = 6;
-const uint32_t TFMR_STATE_GET_TOD = 7;
-const uint32_t TFMR_STATE_TB_RUNNING = 8;
-
 // PB_[EO]LINK_DLY register field definitions
 const uint32_t PB_EOLINK_DLY_FMR_LINK_DELAY_LEN = 12;
-
-// PB_ELINK_RT_DELAY register field definitions
-const uint32_t PB_ELINK_RT_DELAY_CTL_SET_LINK_0 = 0;
-const uint32_t PB_ELINK_RT_DELAY_CTL_SET_LINK_1 = 1;
-const uint32_t PB_ELINK_RT_DELAY_CTL_SET_LINK_2 = 2;
-const uint32_t PB_ELINK_RT_DELAY_CTL_SET_LINK_3 = 3;
-const uint32_t PB_ELINK_RT_DELAY_CTL_SET_LINK_4 = 4;
-const uint32_t PB_ELINK_RT_DELAY_CTL_SET_LINK_5 = 5;
-
-// PB_OLINK_RT_DELAY register field definitions
-const uint32_t PB_OLINK_RT_DELAY_CTL_SET_LINK_0 = 0;
-const uint32_t PB_OLINK_RT_DELAY_CTL_SET_LINK_1 = 1;
-const uint32_t PB_OLINK_RT_DELAY_CTL_SET_LINK_2 = 2;
-const uint32_t PB_OLINK_RT_DELAY_CTL_SET_LINK_3 = 3;
-const uint32_t PB_OLINK_RT_DELAY_CTL_SET_LINK_4 = 4;
-const uint32_t PB_OLINK_RT_DELAY_CTL_SET_LINK_5 = 5;
-const uint32_t PB_OLINK_RT_DELAY_CTL_SET_LINK_6 = 6;
-const uint32_t PB_OLINK_RT_DELAY_CTL_SET_LINK_7 = 7;
 
 // TOD_M_PATH_CTRL_REG register field definitions
 const uint32_t TOD_M_PATH_CTRL_REG_M_PATH_SYNC_CREATE_SPS_512  = 0;
@@ -180,10 +162,25 @@ const uint32_t TOD_CHIP_CTRL_REG_LOW_ORDER_STEP_VAL_4  = 0x4;
 const uint32_t TOD_CHIP_CTRL_REG_LOW_ORDER_STEP_VAL_3F = 0x3F;
 
 // TOD_LOAD_REG register field definitions
-const uint64_t PERV_TOD_LOAD_REG_LOAD_VALUE = 0x0000000000003FFCULL;
+// FIXME @RTC 213485 -- double-check this setting, See Table 1.4.1 in P10_perv workbook
+// const uint64_t P10_TOD_LOAD_REG_LOAD_VALUE = 0x0000000000003FFCULL;
+const uint64_t P10_TOD_LOAD_REG_LOAD_VALUE    = 0x00000000000003FFULL;
+// Bit which causes TOD FSM to transition out of the Not Set state to the Stopped state
+const uint64_t P10_TOD_LOAD_REG_START_TOD     = 0x0000000000000001ULL;
 
-// TOD_TX_TTYPE_CTRL_REG register field definitions
-const uint64_t PERV_TOD_TX_TTYPE_CTRL_REG_MASK_VALUE = 0x00010AA310000000ULL;
+// TOD_[RX,TX]_TTYPE_CTRL_REG register field definitions
+const uint64_t TOD_TTYPE_CTRL_REG_TTYPE0 = 0x8000000000000080ULL;
+const uint64_t TOD_TTYPE_CTRL_REG_TTYPE1 = 0x4000000000000080ULL;
+const uint64_t TOD_TTYPE_CTRL_REG_TTYPE2 = 0x2000000000000080ULL;
+const uint64_t TOD_TTYPE_CTRL_REG_TTYPE3 = 0x1000000000000080ULL;
+const uint64_t TOD_TTYPE_CTRL_REG_TTYPE4 = 0x0000000000000001ULL;
+const uint64_t TOD_TTYPE_CTRL_REG_TTYPE5 = 0x0400000000000080ULL;
+
+// TOD_TX_TTYPE_[0-5]_REG register field definitions
+const uint64_t TOD_TX_TTYPE_REG_TX_TTYPE_TRIGGER = 0x8000000000000000ULL;
+
+// TOD_LOAD_TOD_REG register field definitions
+const uint64_t TOD_LOAD_TOD_REG_GOTO_STOPPED_STATE = 0x0000000000000001ULL;
 
 // TOD_[PRI, SEC]_PORT_[0,1]_CTRL_REG register field definitions
 const uint32_t TOD_PORT_CTRL_REG_TX_X0_SEL = 4;
@@ -222,6 +219,7 @@ const uint32_t TOD_PORT_CTRL_REG_S_PATH_1 = 0x1;
 const uint32_t TOD_PORT_CTRL_REG_M_PATH_0 = 0x2;
 const uint32_t TOD_PORT_CTRL_REG_M_PATH_1 = 0x3;
 
+const uint32_t NUM_THREADS_PER_CORE = 4;
 
 //------------------------------------------------------------------------------
 // Structure definitions
@@ -237,25 +235,25 @@ extern "C" {
     enum p10_tod_setup_bus
     {
         // for MDMT
-        NONE,
+        TOD_SETUP_BUS_NONE,
         // FBC x0
-        XBUS0,
+        TOD_SETUP_BUS_XBUS0,
         // FBC x1
-        XBUS1,
+        TOD_SETUP_BUS_XBUS1,
         // FBC x2
-        XBUS2,
+        TOD_SETUP_BUS_XBUS2,
         // FBC x3/a0
-        OBUS0,
+        TOD_SETUP_BUS_OBUS0,
         // FBC x4/a1
-        OBUS1,
+        TOD_SETUP_BUS_OBUS1,
         // FBC x5/a2
-        OBUS2,
+        TOD_SETUP_BUS_OBUS2,
         // FBC x6/a3
-        OBUS3,
+        TOD_SETUP_BUS_OBUS3,
         // should not be used
-        XBUS7,
+        TOD_SETUP_BUS_XBUS7,
         // added to satisfy HWSV code dependencies
-        BUS_MAX = OBUS3
+        TOD_SETUP_BUS_BUS_MAX = TOD_SETUP_BUS_OBUS3
     };
 
     enum tod_action
@@ -264,7 +262,6 @@ extern "C" {
         TOD_INIT,
         TOD_STATUS,
         TOD_CLEANUP,
-        TOD_CHECK_OSC,
         TOD_MOVE_TOD_TO_TB,
         TOD_SAVE_CONFIG
     };
@@ -292,6 +289,31 @@ extern "C" {
         TOD_OSC_DISABLE_NONE
     };
 
+    // TFMR states, see PC workbook
+    enum p10_tod_tfmr_state
+    {
+        TFMR_STATE_TB_RESET = 0,
+        TFMR_STATE_TB_SEND_TOD_MOD = 1,
+        TFMR_STATE_TB_NOT_SET = 2,
+        TFMR_STATE_TB_SYNC_WAIT = 6,
+        TFMR_STATE_TB_GET_TOD = 7,
+        TFMR_STATE_TB_RUNNING = 8,
+        TFMR_STATE_TB_ERROR = 9
+    };
+
+    // TOD FSM states inside register TOD_FSM_REG
+    enum p10_tod_fsm_state
+    {
+        TOD_FSM_STATE_ERROR = 0,
+        TOD_FSM_STATE_STOPPED = 1,
+        TOD_FSM_STATE_RUNNING = 2,
+        TOD_FSM_STATE_NOT_SET = 7,
+        TOD_FSM_STATE_RUNNING_STEP = 10,
+        TOD_FSM_STATE_NOT_SET_STEP = 11,
+        TOD_FSM_STATE_WAIT_SYNC = 13,
+        TOD_FSM_STATE_RUNNING_SYNC = 14
+    };
+
     struct p10_tod_setup_conf_regs
     {
         fapi2::buffer<uint64_t> tod_m_path_ctrl_reg;
@@ -314,7 +336,9 @@ extern "C" {
         //   received ("Receive Port" in eiinfo)
         p10_tod_setup_bus i_bus_tx; // Upstream node's bus from which step/sync
         //   is transmitted ("Drive Port" in eiinfo)
-        std::list<tod_topology_node*> i_children;
+        std::list<tod_topology_node*> i_children;  // Children of current node
+        tod_topology_node* i_parent;              // Parent of current node (or Upstream node),
+        // TOD SYNCs are received from parent.
         p10_tod_setup_conf_regs o_todRegs;
         uint32_t o_int_path_delay;
     };
