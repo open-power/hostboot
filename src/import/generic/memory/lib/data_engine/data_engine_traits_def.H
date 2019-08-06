@@ -115,9 +115,12 @@ enum class attr_eff_engine_fields
     PRIM_STACK_TYPE = 20,
     COLUMN_ADDR_BITS = 21,
     ROW_ADDR_BITS = 22,
+    DRAM_MFG_ID = 23,
+    RCD_MFG_ID = 24,
+    DRAM_MODULE_HEIGHT = 25,
 
     // Dispatcher set to last enum value
-    DISPATCHER = ROW_ADDR_BITS,
+    DISPATCHER = DRAM_MODULE_HEIGHT,
 };
 
 ///

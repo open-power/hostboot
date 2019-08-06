@@ -5551,6 +5551,44 @@ class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC1_PHASE_COMBIN, R >
         using COMPARISON_OP = std::less_equal<T>;
 };
 
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note DRAM_MFR_ID_CODE_LSB field specialization
+/// @note valid for all revisions
+///
+template< rev R >
+class readerTraits < fields<DDR4, DDIMM_MODULE>::DRAM_MFR_ID_CODE_LSB, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x00;
+        static constexpr const char* FIELD_STR = "DRAM manufacturer ID code, LSB";
+
+        template <typename T>
+        using COMPARISON_OP = std::greater_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note DRAM_MFR_ID_CODE_MSB field specialization
+/// @note valid for all revisions
+///
+template< rev R >
+class readerTraits < fields<DDR4, DDIMM_MODULE>::DRAM_MFR_ID_CODE_MSB, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x00;
+        static constexpr const char* FIELD_STR = "DRAM manufacturer ID code, MSB";
+
+        template <typename T>
+        using COMPARISON_OP = std::greater_equal<T>;
+};
+
 }// spd
 }// mss
 

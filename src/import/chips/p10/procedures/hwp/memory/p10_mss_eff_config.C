@@ -41,6 +41,7 @@
 #include <generic/memory/lib/spd/ddimm/efd_factory.H>
 #include <vpd_access.H>
 #include <mss_generic_attribute_getters.H>
+#include <generic/memory/lib/data_engine/attr_engine_traits.H>
 #include <lib/eff_config/explorer_attr_engine_traits.H>
 #include <lib/eff_config/pmic_attr_engine_traits.H>
 #include <lib/eff_config/explorer_efd_processing.H>

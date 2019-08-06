@@ -788,6 +788,66 @@ class base_cnfg_decoder
         }
 
         ///
+        /// @brief Decodes Fine Offset for tWTR_L
+        /// @param[out] o_value tWTR_L offset in FTB units
+        /// @return FAPI2_RC_SUCCESS iff okay
+        /// @warning not an actual SPD field, defaulted to zero to simplify calculations
+        ///
+        virtual fapi2::ReturnCode fine_offset_min_twtr_l( int64_t& o_value ) const
+        {
+            o_value = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes Fine Offset for twtr_s
+        /// @param[out] o_value twtr_s offset in FTB units
+        /// @return FAPI2_RC_SUCCESS iff okay
+        /// @warning not an actual SPD field, defaulted to zero to simplify calculations
+        ///
+        virtual fapi2::ReturnCode fine_offset_min_twtr_s( int64_t& o_value ) const
+        {
+            o_value = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes Fine Offset for tfaw
+        /// @param[out] o_value tfaw offset in FTB units
+        /// @return FAPI2_RC_SUCCESS iff okay
+        /// @warning not an actual SPD field, defaulted to zero to simplify calculations
+        ///
+        virtual fapi2::ReturnCode fine_offset_min_tfaw( int64_t& o_value ) const
+        {
+            o_value = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes Fine Offset for tras
+        /// @param[out] o_value tras offset in FTB units
+        /// @return FAPI2_RC_SUCCESS iff okay
+        /// @warning not an actual SPD field, defaulted to zero to simplify calculations
+        ///
+        virtual fapi2::ReturnCode fine_offset_min_tras( int64_t& o_value ) const
+        {
+            o_value = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes Fine Offset for twr
+        /// @param[out] o_value twr offset in FTB units
+        /// @return FAPI2_RC_SUCCESS iff okay
+        /// @warning not an actual SPD field, defaulted to zero to simplify calculations
+        ///
+        virtual fapi2::ReturnCode fine_offset_min_twr( int64_t& o_value ) const
+        {
+            o_value = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
         /// @brief Decodes Cyclical Redundancy Code (CRC) for Base Configuration Section
         /// @param[out] o_value crc value from SPD
         /// @return FAPI2_RC_SUCCESS iff okay

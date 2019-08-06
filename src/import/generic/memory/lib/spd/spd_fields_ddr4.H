@@ -1176,6 +1176,12 @@ class fields<DDR4, DDIMM_MODULE>
             PMIC1_PHASE_COMBIN_BYTE = 259,
             PMIC1_PHASE_COMBIN_START = 4,
             PMIC1_PHASE_COMBIN_LEN = 4,
+
+            // Byte 552-553
+            DRAM_MFR_ID_CODE_LSB_BYTE = 552,
+            DRAM_MFR_ID_CODE_MSB_BYTE = 553,
+            DRAM_MFR_ID_CODE_START = 0,
+            DRAM_MFR_ID_CODE_LEN = 8,
         };
 
     public:
@@ -1408,6 +1414,9 @@ class fields<DDR4, DDIMM_MODULE>
         // Byte 259: PMIC1 Phase Combination
         static constexpr field_t PMIC1_PHASE_COMBIN{PMIC1_PHASE_COMBIN_BYTE, PMIC1_PHASE_COMBIN_START, PMIC1_PHASE_COMBIN_LEN};
 
+        // Byte 552 and 553: DRAM manufacturing ID for DDIMMs
+        static constexpr field_t DRAM_MFR_ID_CODE_LSB{DRAM_MFR_ID_CODE_LSB_BYTE, DRAM_MFR_ID_CODE_START, DRAM_MFR_ID_CODE_LEN};
+        static constexpr field_t DRAM_MFR_ID_CODE_MSB{DRAM_MFR_ID_CODE_MSB_BYTE, DRAM_MFR_ID_CODE_START, DRAM_MFR_ID_CODE_LEN};
 };
 
 }// spd

@@ -294,11 +294,11 @@ class readerTraits
 {
     public:
 
-        static constexpr size_t COMPARISON_VAL = 0x00;
+        static constexpr size_t COMPARISON_VAL = 0x0F;
         static constexpr const char* FIELD_STR = "PHY Slew Rate DQ_DQS";
 
         template <typename T>
-        using COMPARISON_OP = std::equal_to<T>;
+        using COMPARISON_OP = std::less_equal<T>;
 };
 
 ///
@@ -332,11 +332,11 @@ class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUS
 {
     public:
 
-        static constexpr size_t COMPARISON_VAL = 0x00;
+        static constexpr size_t COMPARISON_VAL = 0x0E;
         static constexpr const char* FIELD_STR = "ATX Slew rate";
 
         template <typename T>
-        using COMPARISON_OP = std::equal_to<T>;
+        using COMPARISON_OP = std::less_equal<T>;
 };
 
 ///
@@ -370,11 +370,11 @@ class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUS
 {
     public:
 
-        static constexpr size_t COMPARISON_VAL = 0x00;
+        static constexpr size_t COMPARISON_VAL = 0x0E;
         static constexpr const char* FIELD_STR = "CK Slew rate";
 
         template <typename T>
-        using COMPARISON_OP = std::equal_to<T>;
+        using COMPARISON_OP = std::less_equal<T>;
 };
 
 ///
@@ -408,11 +408,11 @@ class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUS
 {
     public:
 
-        static constexpr size_t COMPARISON_VAL = 0x00;
+        static constexpr size_t COMPARISON_VAL = 0x07;
         static constexpr const char* FIELD_STR = "DRAM RTT Nom";
 
         template <typename T>
-        using COMPARISON_OP = std::equal_to<T>;
+        using COMPARISON_OP = std::less_equal<T>;
 };
 
 ///
@@ -503,11 +503,11 @@ class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUS
 {
     public:
 
-        static constexpr size_t COMPARISON_VAL = 0x00;
+        static constexpr size_t COMPARISON_VAL = 0x04;
         static constexpr const char* FIELD_STR = "DRAM RTT WR";
 
         template <typename T>
-        using COMPARISON_OP = std::equal_to<T>;
+        using COMPARISON_OP = std::less_equal<T>;
 };
 
 ///
@@ -598,11 +598,11 @@ class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUS
 {
     public:
 
-        static constexpr size_t COMPARISON_VAL = 0x00;
+        static constexpr size_t COMPARISON_VAL = 0x07;
         static constexpr const char* FIELD_STR = "DRAM RTT Park";
 
         template <typename T>
-        using COMPARISON_OP = std::equal_to<T>;
+        using COMPARISON_OP = std::less_equal<T>;
 };
 
 ///
@@ -784,7 +784,7 @@ class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUS
 /// @note valid for all revs
 ///
 template< mss::spd::rev R >
-class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PHY_VREF_PERCENT, R >
+class readerTraits < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::INIT_PHY_VREF, R >
 {
     public:
 

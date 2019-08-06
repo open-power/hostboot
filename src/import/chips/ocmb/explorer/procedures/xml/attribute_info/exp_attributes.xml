@@ -146,18 +146,6 @@
 
     <!-- user_input_msdg attribute overrides start -->
     <attribute>
-        <id>ATTR_MEM_EXP_CS_PRESENT</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-            Indicate presence of DRAM at each Chip Select for PHY
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint16</valueType>
-        <writeable/>
-        <mssAccessorName>exp_cs_present</mssAccessorName>
-    </attribute>
-
-    <attribute>
         <id>ATTR_MEM_EXP_INIT_VREF_DQ</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
@@ -166,6 +154,7 @@
         <valueType>uint8</valueType>
         <initToZero></initToZero>
         <writeable/>
+        <array>2 4</array>
         <mssAccessorName>exp_init_vref_dq</mssAccessorName>
     </attribute>
 
@@ -175,9 +164,10 @@
         <description>
            Initial DQ Vref setting of PHY before training
         </description>
-        <valueType>uint16</valueType>
+        <valueType>uint8</valueType>
         <initToZero></initToZero>
         <writeable/>
+        <array>2 4</array>
         <mssAccessorName>exp_init_phy_vref</mssAccessorName>
     </attribute>
 
@@ -230,19 +220,6 @@
         <valueType>uint16</valueType>
         <writeable/>
         <mssAccessorName>exp_rcd_slew_rate</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EXP_3DS_HEIGHT</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-            Explorer setting for 3DS stack
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint16</valueType>
-        <enum>PLANAR = 0, H2 = 2, H4 = 4, H8 = 8</enum>
-        <writeable/>
-        <mssAccessorName>exp_3ds_height</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -331,6 +308,22 @@
             LITTLE_ENDIAN = 1
         </enum>
         <writeable/>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_OCMB_EXP_OMI_CFG_ENDIAN_CTRL</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+          Controls whether OMI CFG reg accesses
+          are considered big or little endian.
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            LITTLE_ENDIAN = 0,
+            BIG_ENDIAN = 1
+        </enum>
+        <platInit/>
+        <default>LITTLE_ENDIAN</default>
     </attribute>
 
     <attribute>

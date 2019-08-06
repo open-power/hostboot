@@ -214,6 +214,12 @@ enum generic_ffdc_codes
     SET_PRIM_BUS_WIDTH = 0x1069,
     SET_PRIM_DIE_COUNT = 0x1070,
     SET_DRAM_DENSITY = 0x1071,
+
+    // Power thermal functions
+    POWER_LIMIT = 0x1072,
+    SLOPE = 0x1073,
+    INTERCEPT = 0x1074,
+
     SET_SI_RD_VREF_DQ = 0x1075,
     SET_CAC_DELAY_A = 0x1076,
     SET_CAC_DELAY_B = 0x1077,
@@ -237,24 +243,22 @@ enum generic_ffdc_codes
     SET_DRAM_TRRD_L = 0x1091,
     SET_DRAM_TRFC = 0x1092,
     SET_DRAM_TRFC_DLR = 0x1093,
-
-
-    // Power thermal functions
-    POWER_LIMIT = 0x1072,
-    SLOPE = 0x1073,
-    INTERCEPT = 0x1074,
+    SET_DRAM_MFG_ID = 0x1094,
 
     // Used in fw_mark_store.H for MSS_INVALID_RANK_PASSED
-    FWMS_READ = 30,
-    FWMS_WRITE = 31,
+    FWMS_READ = 0x1095,
+    FWMS_WRITE = 0x1096,
 
     // Used in hw_mark_store.H for MSS_INVALID_RANK_PASSED
-    HWMS_READ = 40,
-    HWMS_WRITE = 41,
+    HWMS_READ = 0x1097,
+    HWMS_WRITE = 0x1098,
 
     // MSS_INVALID_INDEX_PASSED
-    SYMBOL_COUNT_READ = 50,
-    SYMBOL_COUNT_WRITE = 51,
+    SYMBOL_COUNT_READ = 0x1099,
+    SYMBOL_COUNT_WRITE = 0x109A,
+
+    SET_RCD_MFG_ID = 0x109B,
+    SET_DRAM_MODULE_HEIGHT = 0x109C,
 };
 
 ///

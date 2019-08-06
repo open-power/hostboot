@@ -48,6 +48,8 @@ inline fapi2::ReturnCode get_raw_data(const fapi2::Target<fapi2::TARGET_TYPE_DIM
     FAPI_TRY( fapi2::getSPD(i_target, nullptr, l_size),
               "%s. Failed to retrieve SPD blob size", spd::c_str(i_target) );
 
+    FAPI_DBG( "SPD size %d for %s", l_size, spd::c_str(i_target) );
+
     // Reassign container size with the retrieved size
     // Arbitrarily set the data to zero since it will be overwritten
     o_spd.assign(l_size, 0);
@@ -74,6 +76,7 @@ class facade final
         std::vector<uint8_t> iv_data;
         std::shared_ptr<dimm_module_decoder> iv_dimm_module_decoder;
         std::shared_ptr<base_cnfg_decoder> iv_base_cnfg_decoder;
+        uint8_t iv_dimm_type;
 
     public:
 
@@ -94,6 +97,11 @@ class facade final
 
             FAPI_TRY(l_factories.create_decoder(iv_dimm_module_decoder));
             FAPI_TRY(l_factories.create_decoder(iv_base_cnfg_decoder));
+
+            // Variable to deal with dimm modules (e.g. DDIMM) that has
+            // fields that are not disjoint between the
+            // general and dimm module section of the SPD (i.e. a hack variable)
+            FAPI_TRY( iv_base_cnfg_decoder->base_module(iv_dimm_type) );
 
             o_rc = fapi2::FAPI2_RC_SUCCESS;
             return;
@@ -854,6 +862,75 @@ class facade final
         }
 
         ///
+        /// @brief Decodes Fine Offset for Minimum Write to Read Time - Same Bank Group
+        /// @param[out] o_value SPD encoded value
+        /// @return FAPI2_RC_SUCCESS iff okay
+        /// @warning not an actual SPD field, defaulted to zero to simplify calculations
+        ///
+        fapi2::ReturnCode fine_offset_min_twtr_l( int64_t& o_value ) const
+        {
+            FAPI_TRY( iv_base_cnfg_decoder->fine_offset_min_twtr_l(o_value) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes Fine Offset for Minimum Write to Read Time - Different Bank Group
+        /// @param[out] o_value SPD encoded value
+        /// @return FAPI2_RC_SUCCESS iff okay
+        /// @warning not an actual SPD field, defaulted to zero to simplify calculations
+        ///
+        fapi2::ReturnCode fine_offset_min_twtr_s( int64_t& o_value ) const
+        {
+            FAPI_TRY( iv_base_cnfg_decoder->fine_offset_min_twtr_s(o_value) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes Fine Offset for SDRAM Minimum Four Activate Window Delay Time
+        /// @param[out] o_value SPD encoded value
+        /// @return FAPI2_RC_SUCCESS iff okay
+        /// @warning not an actual SPD field, defaulted to zero to simplify calculations
+        ///
+        fapi2::ReturnCode fine_offset_min_tfaw( int64_t& o_value ) const
+        {
+            FAPI_TRY( iv_base_cnfg_decoder->fine_offset_min_tfaw(o_value) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes Fine Offset for SDRAM Minimum Active to Precharge Delay Time in MTB
+        /// @param[out] o_value SPD encoded value
+        /// @return FAPI2_RC_SUCCESS iff okay
+        /// @warning not an actual SPD field, defaulted to zero to simplify calculations
+        ///
+        fapi2::ReturnCode fine_offset_min_tras( int64_t& o_value ) const
+        {
+            FAPI_TRY( iv_base_cnfg_decoder->fine_offset_min_tras(o_value) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes Fine Offset for Minimum Write Recovery Time
+        /// @param[out] o_value SPD encoded value
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        fapi2::ReturnCode fine_offset_min_twr( int64_t& o_value ) const
+        {
+            FAPI_TRY( iv_base_cnfg_decoder->fine_offset_min_twr(o_value) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
         /// @brief Decodes Fine Offset for Minimum Activate to Activate Delay Time - Same Bank Group
         /// @param[out] o_value SPD encoded value
         /// @return FAPI2_RC_SUCCESS iff okay
@@ -1041,7 +1118,17 @@ class facade final
         ///
         fapi2::ReturnCode dram_manufacturer_id_code( uint16_t& o_value ) const
         {
-            FAPI_TRY( iv_base_cnfg_decoder->dram_manufacturer_id_code(o_value) );
+            // Some module fields are duplicated in the general section and
+            // dimm module sections of the SPD.  For DDIMMs, we want get it
+            // from the dimm module section instead of the general section.
+            if( iv_dimm_type == spd::DDIMM )
+            {
+                FAPI_TRY( iv_dimm_module_decoder->dram_manufacturer_id_code(o_value) );
+            }
+            else
+            {
+                FAPI_TRY( iv_base_cnfg_decoder->dram_manufacturer_id_code(o_value) );
+            }
 
         fapi_try_exit:
             return fapi2::current_err;
