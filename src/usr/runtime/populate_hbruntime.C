@@ -2886,6 +2886,12 @@ errlHndl_t populate_hbTpmInfo()
         // if single node system
         if (!hb_images)
         {
+            // TODO RTC: 214260   Remove workaround skipping the population
+            // of the TPM info for runtime on single node on Axone systems
+            #ifdef CONFIG_AXONE_BRING_UP
+            TRACFCOMP( g_trac_runtime, "SKIPPING populate_hbTpmInfo: Single node system");
+            break;
+            #endif
             TRACDCOMP( g_trac_runtime, "populate_hbTpmInfo: Single node system");
             l_elog = populate_TpmInfoByNode(0); // 0 for single node
             if(l_elog != nullptr)
