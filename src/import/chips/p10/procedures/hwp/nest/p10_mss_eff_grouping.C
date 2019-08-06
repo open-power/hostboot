@@ -46,7 +46,7 @@
 #include <p10_scom_mc.H>
 #include <memory_size.H>
 #include <exp_consts.H>
-#include <exp_inband.H>
+#include <lib/inband/exp_inband.H>
 
 //------------------------------------------------------------------------------
 // scomt name spaces
@@ -4430,13 +4430,13 @@ void displayMemoryBarRegs(const fapi2::ATTR_MEMORY_BAR_REGS_Type i_memBarRegs)
         FAPI_INF("       MCFGPM1  0x%.16llX 0x%.16llX",
                  i_memBarRegs[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGPM1][BAR_REGS_DATA_IDX],
                  i_memBarRegs[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGPM1][BAR_REGS_MASK_IDX]);
-        FAPI_INF("       MCFGP0A  0x%.16llX 0x%.16llX ",
+        FAPI_INF("       MCFGP0A  0x%.16llX 0x%.16llX",
                  i_memBarRegs[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGP0A][BAR_REGS_DATA_IDX],
                  i_memBarRegs[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGP0A][BAR_REGS_MASK_IDX]);
         FAPI_INF("       MCFGP1A  0x%.16llX 0x%.16llX",
                  i_memBarRegs[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGP1A][BAR_REGS_DATA_IDX],
                  i_memBarRegs[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGP1A][BAR_REGS_MASK_IDX]);
-        FAPI_INF("       MCFGPM0A 0x%.16llX 0x%.16llX ",
+        FAPI_INF("       MCFGPM0A 0x%.16llX 0x%.16llX",
                  i_memBarRegs[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGPM0A][BAR_REGS_DATA_IDX],
                  i_memBarRegs[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGPM0A][BAR_REGS_MASK_IDX]);
         FAPI_INF("       MCFGPM1A 0x%.16llX 0x%.16llX",

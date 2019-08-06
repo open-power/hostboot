@@ -34,7 +34,7 @@
 
 #include <exp_omi_init.H>
 #include <exp_oc_regs.H>
-#include <exp_inband.H>
+#include <lib/inband/exp_inband.H>
 #include <chips/common/utils/chipids.H>
 #include <mss_explorer_attribute_getters.H>
 #include <mss_p10_attribute_getters.H>
