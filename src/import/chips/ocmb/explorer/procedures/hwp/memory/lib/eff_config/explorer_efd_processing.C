@@ -43,6 +43,7 @@
 #include <mss_explorer_attribute_getters.H>
 #include <mss_explorer_attribute_setters.H>
 #include <lib/eff_config/explorer_efd_processing.H>
+#include <generic/memory/lib/mss_generic_attribute_setters.H>
 
 namespace mss
 {
@@ -116,25 +117,63 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Processes the Host RD VREF DQ
+/// @brief Processes the Host INIT RD VREF DQ
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_efd_data the EFD data to process
+/// @return fapi2::FAPI2_RC_SUCCESS iff function completes successfully
+/// @note this is pulled in for exp_draminit. The individual fields are pulled into the SI engine
+///
+fapi2::ReturnCode init_vref_dq(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                               const std::shared_ptr<mss::efd::base_decoder>& i_efd_data)
+{
+    // See Byte 44 of SPD Document (Bit 6 from right = Bit 1 from left)
+    static const uint8_t VREF_RANGE_BIT_LEFT_ALGINED = 1;
+
+    // Get the data
+    uint8_t l_vref_dq[mss::exp::sizes::MAX_RANK_PER_DIMM] = {0};
+
+    uint8_t l_range = 0;
+    uint8_t l_value = 0;
+    fapi2::buffer<uint8_t> l_combined_vref;
+
+    FAPI_TRY(mss::attr::get_exp_init_vref_dq(i_target, l_vref_dq));
+
+    // Piece together the field
+    FAPI_TRY(i_efd_data->wr_vref_dq_range(l_range));
+    FAPI_TRY(i_efd_data->wr_vref_dq_value(l_value));
+
+    l_combined_vref = l_value;
+    l_combined_vref.writeBit<VREF_RANGE_BIT_LEFT_ALGINED>(l_range);
+
+    // Insert
+    l_vref_dq[i_efd_data->get_rank()] = l_combined_vref;
+
+    // Set the attribute
+    FAPI_TRY(mss::attr::set_exp_init_vref_dq(i_target, l_vref_dq));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Processes the Host INIT PHY VREF
 /// @param[in] i_target the target on which to operate
 /// @param[in] i_efd_data the EFD data to process
 /// @return fapi2::FAPI2_RC_SUCCESS iff function completes successfully
 ///
-fapi2::ReturnCode host_rd_vref_dq(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                  const std::shared_ptr<mss::efd::base_decoder>& i_efd_data)
+fapi2::ReturnCode init_phy_vref(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                const std::shared_ptr<mss::efd::base_decoder>& i_efd_data)
 {
     // Get the data
-    uint8_t l_vref = 0;
-    const auto& l_port = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
+    uint8_t l_phy_vref[mss::exp::sizes::MAX_RANK_PER_DIMM] = {0};
 
-    FAPI_TRY(mss::attr::get_exp_init_vref_dq(l_port, l_vref));
+    FAPI_TRY(mss::attr::get_exp_init_phy_vref(i_target, l_phy_vref));
 
     // Update the values
-    FAPI_TRY(i_efd_data->phy_vref_percent(l_vref));
+    FAPI_TRY(i_efd_data->init_phy_vref(l_phy_vref[i_efd_data->get_rank()]));
 
     // Set the attribute
-    FAPI_TRY(mss::attr::set_exp_init_vref_dq(l_port, l_vref));
+    FAPI_TRY(mss::attr::set_exp_init_phy_vref(i_target, l_phy_vref));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -220,7 +259,8 @@ fapi_try_exit:
 fapi2::ReturnCode process(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                           const std::shared_ptr<mss::efd::base_decoder>& i_efd_data)
 {
-    FAPI_TRY(host_rd_vref_dq(i_target, i_efd_data));
+    FAPI_TRY(init_vref_dq(i_target, i_efd_data));
+    FAPI_TRY(init_phy_vref(i_target, i_efd_data));
     FAPI_TRY(cs_cmd_latency(i_target, i_efd_data));
     FAPI_TRY(ca_parity_latency(i_target, i_efd_data));
     FAPI_TRY(dfimrl_ddrclk(i_target, i_efd_data));

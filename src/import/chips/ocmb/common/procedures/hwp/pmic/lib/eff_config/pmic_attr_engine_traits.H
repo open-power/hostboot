@@ -59,56 +59,6 @@ namespace mss
 template< proc_type P>
 struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::ATTR_EFF_BASE_CASE> {};
 
-///
-/// @brief Traits for attr_engine
-/// @class attrEngineTraits
-/// @tparam P processor type
-/// @note P, pmic::attr_eff_engine_fields, DRAM_MODULE_HEIGHT partial specialization
-///
-template< proc_type P>
-struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::DRAM_MODULE_HEIGHT>
-{
-    using attr_type = fapi2::ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_Type;
-    using attr_integral_type = std::remove_all_extents<attr_type>::type;
-    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_TargetType;
-    static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_DRAM_MODULE_HEIGHT;
-
-    ///
-    /// @brief attribute getter
-    /// @param[in] i_target the fapi2 target
-    /// @param[out] o_setting array to populate
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                      attr_type& o_setting)
-    {
-        return attr::get_dram_module_height(i_target, o_setting);
-    }
-
-    ///
-    /// @brief attribute setter
-    /// @param[in] i_target the fapi2 target
-    /// @param[in] i_setting array to set
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                      attr_type& i_setting)
-    {
-        return attr::set_dram_module_height(i_target, i_setting);
-    }
-
-    ///
-    /// @brief Computes setting for attribute
-    /// @param[in] i_spd_data EFD data
-    /// @param[out] o_setting value we want to set attr with
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
-            attr_integral_type& o_setting)
-    {
-        return i_spd_data.module_base_height(o_setting);
-    }
-};
 
 //----------------------------------------
 // PMIC 0

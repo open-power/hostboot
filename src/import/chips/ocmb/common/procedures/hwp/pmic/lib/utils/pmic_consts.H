@@ -154,10 +154,8 @@ enum class attr_eff_engine_fields
     PMIC0_MFG_ID                        = 43,
     PMIC1_MFG_ID                        = 44,
 
-    DRAM_MODULE_HEIGHT                  = 45,
-
     // Dispatcher set to last enum value
-    DISPATCHER = DRAM_MODULE_HEIGHT,
+    DISPATCHER = PMIC1_MFG_ID,
 };
 
 ///
