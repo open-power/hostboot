@@ -32,7 +32,7 @@
 // *HWP Team: Memory
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB
-
+#ifdef P10_READY_FOR_EXP_HWP
 #ifndef __MSS_EXP_DRAMINIT_UTILS__
 #define __MSS_EXP_DRAMINIT_UTILS__
 
@@ -1030,4 +1030,5 @@ fapi2::ReturnCode response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_
 }// exp
 }// mss
 
+#endif
 #endif

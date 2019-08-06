@@ -106,7 +106,7 @@
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
-        <enum>OHM34 = 34, OHM48 = 48</enum>
+        <enum>DISABLE = 0, OHM34 = 34, OHM48 = 48</enum>
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_dram_drv_imp_dq_dqs</mssAccessorName>
         <array>2 4</array>
@@ -140,7 +140,7 @@
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
-        <enum>DISABLE = 0, OHM34 = 34, OHM40 = 40, OHM48 = 48, OHM60 = 60, OHM80 = 80, OHM120 = 120, OHM240 = 240</enum>
+        <enum>DISABLE = 0, OHM34 = 34, OHM40 = 40, OHM60 = 60, OHM80 = 80, OHM120 = 120, OHM240 = 240</enum>
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_dram_rtt_nom</mssAccessorName>
         <array>2 4</array>
@@ -172,39 +172,10 @@
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
-        <enum>DISABLE = 0, HIGHZ = 1, OHM80 = 80, OHM120 = 120, OHM240 = 240</enum>
+        <enum>DISABLE = 0, OHM80 = 80, OHM120 = 120, OHM240 = 240</enum>
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_dram_rtt_wr</mssAccessorName>
         <array>2 4</array>
-    </attribute>
-
-    <attribute>
-      <id>ATTR_MEM_SI_VREF_DQ_TRAIN_VALUE</id>
-      <targetType>TARGET_TYPE_MEM_PORT</targetType>
-      <description>
-        ARRAY[DIMM][RANK]
-        vrefdq_train value. This is for DDR4 MRS6.
-      </description>
-      <initToZero></initToZero>
-      <valueType>uint8</valueType>
-      <writeable/>
-      <array>2 4</array>
-      <mssAccessorName>si_vref_dq_train_value</mssAccessorName>
-    </attribute>
-
-    <attribute>
-      <id>ATTR_MEM_SI_VREF_DQ_TRAIN_RANGE</id>
-      <targetType>TARGET_TYPE_MEM_PORT</targetType>
-      <description>
-        ARRAY[DIMM][RANK]
-        vrefdq_train range. This is for DDR4 MRS6.
-      </description>
-      <initToZero></initToZero>
-      <valueType>uint8</valueType>
-      <enum>RANGE1 = 0, RANGE2 = 1</enum>
-      <writeable/>
-      <array>2 4</array>
-      <mssAccessorName>si_vref_dq_train_range</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -278,7 +249,7 @@
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
-        <enum>DISABLE = 0</enum>
+        <enum>DISABLE = 0, OHM_20 = 20, OHM_24 = 24, OHM_30 = 30, OHM_40 = 40, OHM_60 = 60, OHM_120 = 120</enum>
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_drv_imp_clk</mssAccessorName>
         <array>2 4</array>
@@ -294,7 +265,7 @@
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
-        <enum>DISABLE = 0</enum>
+        <enum>DISABLE = 0, OHM_20 = 20, OHM_24 = 24, OHM_30 = 30, OHM_40 = 40, OHM_60 = 60, OHM_120 = 120</enum>
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_drv_imp_cmd_addr</mssAccessorName>
         <array>2 4</array>
@@ -340,9 +311,11 @@
           Memory Controller side Drive Impedance Pull Down for Data and Data Strobe Lines in Ohms.
         </description>
         <initToZero></initToZero>
-        <valueType>uint8</valueType>
+        <valueType>uint16</valueType>
         <writeable/>
-        <enum>DISABLE = 0</enum>
+        <enum>DISABLE = 0, OHM_28 = 28, OHM_30 = 30, OHM_32 = 32, OHM_34 = 34, OHM_36 = 36, OHM_40 = 40, OHM_43 = 43,
+              OHM_48 = 48, OHM_53 = 53, OHM_60 = 60, OHM_68 = 68, OHM_80 = 80, OHM_96 = 96, OHM_120 = 120, OHM_160 = 160,
+              OHM_240 = 240, OHM_480 = 480</enum>
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_drv_imp_dq_dqs_pull_down</mssAccessorName>
         <array>2 4</array>
@@ -356,9 +329,11 @@
           Memory Controller side Drive Impedance Pull Up for Data and Data Strobe Lines in Ohms.
         </description>
         <initToZero></initToZero>
-        <valueType>uint8</valueType>
+        <valueType>uint16</valueType>
         <writeable/>
-        <enum>DISABLE = 0</enum>
+        <enum>DISABLE = 0, OHM_28 = 28, OHM_30 = 30, OHM_32 = 32, OHM_34 = 34, OHM_36 = 36, OHM_40 = 40, OHM_43 = 43,
+              OHM_48 = 48, OHM_53 = 53, OHM_60 = 60, OHM_68 = 68, OHM_80 = 80, OHM_96 = 96, OHM_120 = 120, OHM_160 = 160,
+              OHM_240 = 240, OHM_480 = 480</enum>
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_drv_imp_dq_dqs_pull_up</mssAccessorName>
         <array>2 4</array>
@@ -453,7 +428,7 @@
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
-        <enum>DISABLE = 0</enum>
+        <enum>DISABLE = 0, OHM_40 = 40, OHM_48 = 48, OHM_60 = 60, OHM_80 = 80, OHM_120 = 120, OHM_240 = 240</enum>
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_rcv_imp_alert_n</mssAccessorName>
         <array>2 4</array>
@@ -469,7 +444,7 @@
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
-        <enum>DISABLE = 0</enum>
+        <enum>DISABLE = 0, OHM_40 = 40, OHM_60 = 60, OHM_80 = 80, OHM_120 = 120, OHM_240 = 240</enum>
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_rcv_imp_dq_dqs</mssAccessorName>
         <array>2 4</array>

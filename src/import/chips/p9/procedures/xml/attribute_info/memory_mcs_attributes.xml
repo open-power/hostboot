@@ -1178,18 +1178,6 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_MEM_PORT_POS_OF_FAIL_THROTTLE</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-          This is the fapi position of the port that failed to calculate
-          memory throttles given the passed in watt target and or utilization
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint64</valueType>
-        <writeable/>
-    </attribute>
-
-    <attribute>
         <id>ATTR_MSS_MEM_M_DRAM_CLOCKS</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
@@ -1599,8 +1587,8 @@
             creator: mss_eff_cnfg
             consumer: various
             firmware notes: none
-    </description>
-    <initToZero></initToZero>
+        </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, 3CYC = 3, 4CYC = 4, 5CYC = 5, 6CYC = 6, 8CYC = 8</enum>
         <writeable/>
@@ -3033,6 +3021,19 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MSS_LRDIMM_TRAINING_PATTERN</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+	    Patterns for LRDIMM training steps
+        </description>
+        <initToZero></initToZero>
+        <writeable/>
+        <valueType>uint8</valueType>
+        <array> 5 </array>
+        <mssAccessorName>lrdimm_training_pattern</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MSS_EFF_ODT_RD</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
@@ -3061,6 +3062,34 @@
         <writeable/>
         <mssAccessorName>eff_odt_wr</mssAccessorName>
         <array>2 2 4</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_EFF_DPHY_WLO</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Write latency offset in number of clocks
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits>nCK</mssUnits>
+        <mssAccessorName>eff_dphy_wlo</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_EFF_DPHY_RLO</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Read latency offset in number of clocks
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits>nCK</mssUnits>
+        <mssAccessorName>eff_dphy_rlo</mssAccessorName>
+        <array>2</array>
     </attribute>
 
     <attribute>
@@ -3213,21 +3242,6 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_REORDER_QUEUE_SETTING</id>
-        <targetType>TARGET_TYPE_MCBIST</targetType>
-        <description>
-            Contains the settings for write/read reorder queue
-        </description>
-        <default>REORDER</default>
-        <initToZero></initToZero>
-        <writeable/>
-        <enum>REORDER = 0, FIFO = 1</enum>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>reorder_queue_setting</mssAccessorName>
-    </attribute>
-
-    <attribute>
         <id>ATTR_EFF_RANK_GROUP_OVERRIDE</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
@@ -3309,9 +3323,27 @@
       <valueType>int8</valueType>
       <platInit/>
       <overrideOnly/>
-      <initToZero/>
+        <initToZero></initToZero>
       <writeable/>
       <mssAccessorName>wr_vref_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_SBE_NVDIMM_IN_PORT</id>
+        <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+        <description>
+          A bitmap to indicate which ports under the processor have NVDIMM
+          plugged. This is needed to support SBE to trigger CSAVE during
+          controlled shutdown, warm reboot, and MPIPL.
+          For example, 0b11000000 indicates port 0 and 1 contain NVDIMMs.
+          creator: eff_confg
+          consumer: SBE
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <enum> NO = 0, YES = 1 </enum>
+        <mssAccessorName>sbe_nvdimm_in_port</mssAccessorName>
     </attribute>
 
 </attributes>

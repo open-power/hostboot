@@ -187,6 +187,7 @@
     </description>
     <initToZero></initToZero>
     <valueType>uint8</valueType>
+    <enum> NUM10 = 10</enum>
     <writeable/>
     <array>2</array>
     <mssAccessorName>dram_column_bits</mssAccessorName>
@@ -586,6 +587,20 @@
     <writeable/>
     <array>2</array>
     <mssAccessorName>logical_ranks_per_dimm</mssAccessorName>
+  </attribute>
+
+    <attribute>
+      <id>ATTR_MEM_3DS_HEIGHT</id>
+      <targetType>TARGET_TYPE_MEM_PORT</targetType>
+      <description>
+        Setting for 3DS stack. Calculated from logical_ranks / master_ranks
+      </description>
+      <initToZero></initToZero>
+      <valueType>uint16</valueType>
+      <enum>PLANAR = 0, H2 = 2, H4 = 4, H8 = 8</enum>
+      <array>2</array>
+      <writeable/>
+      <mssAccessorName>3ds_height</mssAccessorName>
   </attribute>
 
   <attribute>

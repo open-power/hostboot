@@ -76,8 +76,13 @@ fapi2::ReturnCode p10_mss_freq( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>
             // Checks that the facade was setup correctly
             FAPI_TRY( l_rc, "Failed to initialize SPD facade for %s", mss::spd::c_str(d) );
 
-            FAPI_TRY( mss::attr_eff_engine<mss::pre_data_init_fields>::set(l_spd_decoder) );
-            FAPI_TRY( mss::attr_derived_engine<mss::generic_metadata_fields>::set(d) );
+            // Set pre-eff_config SPD driven attributes
+            FAPI_TRY( (mss::gen::attr_engine<mss::proc_type::P10, mss::pre_data_init_fields>::set(l_spd_decoder)),
+                      "Failed gen::attr_engine<mss::proc_type::P10, mss::pre_data_init_fields>::set on %s", mss::spd::c_str(d) );
+
+            // Set pre_eff_config attributes derived from other attributes
+            FAPI_TRY( (mss::gen::attr_engine<mss::proc_type::P10, mss::generic_metadata_fields>::set(d)),
+                      "Failed gen::attr_engine<mss::proc_type::P10, mss::generic_metadata_fields>::set on %s", mss::spd::c_str(d) );
         }
 
     }

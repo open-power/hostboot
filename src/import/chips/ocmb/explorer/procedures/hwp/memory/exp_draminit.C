@@ -33,16 +33,20 @@
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
-#include <lib/shared/exp_consts.H>
-#include <exp_inband.H>
-#include <lib/shared/exp_consts.H>
-#include <generic/memory/lib/utils/c_str.H>
-#include <generic/memory/lib/utils/mss_bad_bits.H>
-#include <lib/exp_draminit_utils.H>
-#include <lib/phy/exp_train_display.H>
-#include <lib/phy/exp_train_handler.H>
-#include <lib/shared/exp_consts.H>
-#include <generic/memory/mss_git_data_helper.H>
+#include <exp_draminit.H>
+
+#ifdef P10_READY_FOR_EXP_HWP
+    #include <lib/exp_draminit_utils.H>
+    #include <lib/shared/exp_consts.H>
+    #include <exp_inband.H>
+    #include <lib/shared/exp_consts.H>
+    #include <generic/memory/lib/utils/c_str.H>
+    #include <generic/memory/lib/utils/mss_bad_bits.H>
+    #include <lib/phy/exp_train_display.H>
+    #include <lib/phy/exp_train_handler.H>
+    #include <lib/shared/exp_consts.H>
+    #include <generic/memory/mss_git_data_helper.H>
+#endif
 
 extern "C"
 {
@@ -53,6 +57,8 @@ extern "C"
     ///
     fapi2::ReturnCode exp_draminit(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
     {
+#ifdef P10_READY_FOR_EXP_HWP
+
         mss::display_git_commit_info("exp_draminit");
 
         uint32_t l_crc = 0;
@@ -116,5 +122,7 @@ extern "C"
         // If any FIR's have lit up, this draminit fail could have been caused by the FIR, rather than bad hardware
         // So, let PRD retrigger this step to see if we can resolve the issue
         return mss::check::fir_or_pll_fail<mss::mc_type::EXPLORER>(i_target, fapi2::current_err);
+#endif
+        return fapi2::FAPI2_RC_SUCCESS;
     }
 }

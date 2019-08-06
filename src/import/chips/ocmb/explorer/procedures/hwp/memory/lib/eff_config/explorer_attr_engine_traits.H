@@ -58,7 +58,7 @@ namespace mss
 /// @note exp::attr_eff_engine_fields, SPD_TAA_MIN
 ///
 template< >
-struct setTimingTraits< exp::attr_eff_engine_fields, exp::SPD_TAA_MIN >
+struct setTimingTraits< exp::attr_eff_engine_fields, exp::attr_eff_engine_fields::SPD_TAA_MIN >
 {
     static constexpr const char* TIMING_NAME = "tAAmin";
 
@@ -74,19 +74,72 @@ struct setTimingTraits< exp::attr_eff_engine_fields, exp::SPD_TAA_MIN >
 ///
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
+/// @tparam P processor type
 /// @note attr_eff_engine_fields, ATTR_EFF_BASE_CASE specialization
 /// NOP for base case needed to trigger partial specialization of attr_engine
 ///
-template<>
-struct attrEngineTraits<exp::attr_eff_engine_fields, exp::ATTR_EFF_BASE_CASE> {};
+template< proc_type P >
+struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fields::ATTR_EFF_BASE_CASE> {};
 
 ///
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
+/// @tparam P processor type
+/// @note attr_eff_engine_fields, ADDRESS_MIRROR specialization
+///
+template< proc_type P >
+struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fields::ADDRESS_MIRROR>
+{
+    using attr_type = fapi2::ATTR_MEM_EXP_DRAM_ADDRESS_MIRRORING_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EXP_DRAM_ADDRESS_MIRRORING_TargetType;
+    static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_EXP_DRAM_ADDRESS_MIRRORING;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_exp_dram_address_mirroring(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_exp_dram_address_mirroring(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_spd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
+            attr_integral_type& o_setting)
+    {
+        return i_spd_data.address_mirroring(o_setting);
+    }
+};
+
+///
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @tparam P processor type
 /// @note attr_eff_engine_fields, BYTE_ENABLES specialization
 ///
-template<>
-struct attrEngineTraits<exp::attr_eff_engine_fields, exp::BYTE_ENABLES>
+template< proc_type P >
+struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fields::BYTE_ENABLES>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_BYTE_ENABLES_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -133,10 +186,11 @@ struct attrEngineTraits<exp::attr_eff_engine_fields, exp::BYTE_ENABLES>
 ///
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
+/// @tparam P processor type
 /// @note attr_eff_engine_fields, NIBBLE_ENABLES specialization
 ///
-template<>
-struct attrEngineTraits<exp::attr_eff_engine_fields, exp::NIBBLE_ENABLES>
+template< proc_type P >
+struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fields::NIBBLE_ENABLES>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_NIBBLE_ENABLES_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -183,10 +237,11 @@ struct attrEngineTraits<exp::attr_eff_engine_fields, exp::NIBBLE_ENABLES>
 ///
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
+/// @tparam P processor type
 /// @note attr_eff_engine_fields, SPD_TAA_MIN specialization
 ///
-template<>
-struct attrEngineTraits<exp::attr_eff_engine_fields, exp::SPD_TAA_MIN>
+template< proc_type P >
+struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fields::SPD_TAA_MIN>
 {
     using attr_type = fapi2::ATTR_MEM_EXP_SPD_TAA_MIN_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -226,17 +281,19 @@ struct attrEngineTraits<exp::attr_eff_engine_fields, exp::SPD_TAA_MIN>
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        return  mss::calc_spd_time_in_ps<exp::attr_eff_engine_fields, exp::SPD_TAA_MIN>(i_spd_data, o_setting);
+        return  mss::calc_spd_time_in_ps<exp::attr_eff_engine_fields, exp::attr_eff_engine_fields::SPD_TAA_MIN>(i_spd_data,
+                o_setting);
     }
 };
 
 ///
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
+/// @tparam P processor type
 /// @note attr_eff_engine_fields, FOUR_RANK_MODE specialization
 ///
-template<>
-struct attrEngineTraits<exp::attr_eff_engine_fields, exp::FOUR_RANK_MODE>
+template< proc_type P >
+struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fields::FOUR_RANK_MODE>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_FOUR_RANK_MODE_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -290,10 +347,11 @@ struct attrEngineTraits<exp::attr_eff_engine_fields, exp::FOUR_RANK_MODE>
 ///
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
+/// @tparam P processor type
 /// @note attr_eff_engine_fields, DDP_COMPATIBILITY specialization
 ///
-template<>
-struct attrEngineTraits<exp::attr_eff_engine_fields, exp::DDP_COMPATIBILITY>
+template< proc_type P >
+struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fields::DDP_COMPATIBILITY>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DDP_COMPATIBILITY_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -347,10 +405,11 @@ struct attrEngineTraits<exp::attr_eff_engine_fields, exp::DDP_COMPATIBILITY>
 ///
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
+/// @tparam P processor type
 /// @note attr_eff_engine_fields, TSV_8H_SUPPORT specialization
 ///
-template<>
-struct attrEngineTraits<exp::attr_eff_engine_fields, exp::TSV_8H_SUPPORT>
+template< proc_type P >
+struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fields::TSV_8H_SUPPORT>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_TSV_8H_SUPPORT_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -397,10 +456,11 @@ struct attrEngineTraits<exp::attr_eff_engine_fields, exp::TSV_8H_SUPPORT>
 ///
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
+/// @tparam P processor type
 /// @note attr_eff_engine_fields, PSTATES specialization
 ///
-template<>
-struct attrEngineTraits<exp::attr_eff_engine_fields, exp::PSTATES>
+template< proc_type P >
+struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fields::PSTATES>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PSTATES_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -447,10 +507,11 @@ struct attrEngineTraits<exp::attr_eff_engine_fields, exp::PSTATES>
 ///
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
+/// @tparam P processor type
 /// @note attr_eff_engine_fields, MRAM_SUPPORT specialization
 ///
-template<>
-struct attrEngineTraits<exp::attr_eff_engine_fields, exp::MRAM_SUPPORT>
+template< proc_type P >
+struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fields::MRAM_SUPPORT>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_MRAM_SUPPORT_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -504,61 +565,11 @@ struct attrEngineTraits<exp::attr_eff_engine_fields, exp::MRAM_SUPPORT>
 ///
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields, HEIGHT_3DS specialization
-///
-template<>
-struct attrEngineTraits<exp::attr_eff_engine_fields, exp::HEIGHT_3DS>
-{
-    using attr_type = fapi2::ATTR_MEM_EXP_3DS_HEIGHT_Type;
-    using attr_integral_type = std::remove_all_extents<attr_type>::type;
-    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EXP_3DS_HEIGHT_TargetType;
-    static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_3DS_HEIGHT;
-
-    ///
-    /// @brief attribute getter
-    /// @param[in] i_target the fapi2 target
-    /// @param[out] o_setting array to populate
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                      attr_type& o_setting)
-    {
-        return mss::attr::get_exp_3ds_height(i_target, o_setting);
-    }
-
-    ///
-    /// @brief attribute setter
-    /// @param[in] i_target the fapi2 target
-    /// @param[in] i_setting array to set
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                      attr_type& i_setting)
-    {
-        return mss::attr::set_exp_3ds_height(i_target, i_setting);
-    }
-
-    ///
-    /// @brief Computes setting for attribute
-    /// @param[in] i_spd_data EFD data
-    /// @param[out] o_setting value we want to set attr with
-    /// @return FAPI2_RC_SUCCESS iff okay
-    ///
-    static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
-            attr_integral_type& o_setting)
-    {
-
-        return fapi2::FAPI2_RC_SUCCESS;
-    }
-};
-
-///
-/// @brief Traits for attr_engine
-/// @class attrEngineTraits
+/// @tparam P processor type
 /// @note attr_eff_engine_fields, SPD_CL_SUPPORTED specialization
 ///
-template<>
-struct attrEngineTraits<exp::attr_eff_engine_fields, exp::SPD_CL_SUPPORTED>
+template< proc_type P >
+struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fields::SPD_CL_SUPPORTED>
 {
     using attr_type = fapi2::ATTR_MEM_EXP_SPD_CL_SUPPORTED_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -611,10 +622,11 @@ struct attrEngineTraits<exp::attr_eff_engine_fields, exp::SPD_CL_SUPPORTED>
 ///
 /// @brief Traits for pre_data_engine
 /// @class attrEngineTraits
+/// @tparam P processor type
 /// @note AXONE, DIMM_TYPE_METADATA specialization
 ///
-template<>
-struct attrEngineTraits<generic_metadata_fields, DIMM_TYPE_METADATA>
+template< proc_type P >
+struct attrEngineTraits<P, generic_metadata_fields, generic_metadata_fields::DIMM_TYPE_METADATA>
 {
     using attr_type = fapi2::ATTR_MEM_DIMM_TYPE_METADATA_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -695,10 +707,11 @@ class dimmPosTraits<mss::mc_type::EXPLORER>
 ///
 /// @brief Traits for pre_data_engine
 /// @class attrEngineTraits
+/// @tparam P processor type
 /// @note generic_metadata_fields, DRAM_GEN_METADATA specialization
 ///
-template<>
-struct attrEngineTraits<generic_metadata_fields, DRAM_GEN_METADATA>
+template< proc_type P >
+struct attrEngineTraits<P, generic_metadata_fields, generic_metadata_fields::DRAM_GEN_METADATA>
 {
     using attr_type = fapi2::ATTR_MEM_DRAM_GEN_METADATA_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -745,10 +758,11 @@ struct attrEngineTraits<generic_metadata_fields, DRAM_GEN_METADATA>
 ///
 /// @brief Traits for pre_data_engine
 /// @class attrEngineTraits
+/// @tparam P processor type
 /// @note generic_metadata_fields, DIMM_POS_METADATA specialization
 ///
-template<>
-struct attrEngineTraits<generic_metadata_fields, DIMM_POS_METADATA>
+template< proc_type P >
+struct attrEngineTraits<P, generic_metadata_fields, generic_metadata_fields::DIMM_POS_METADATA>
 {
     using attr_type = fapi2::ATTR_MEM_DIMM_POS_METADATA_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -791,33 +805,6 @@ struct attrEngineTraits<generic_metadata_fields, DIMM_POS_METADATA>
         using TT = mss::dimmPosTraits<mss::mc_type::EXPLORER>;
         return gen::dimm_pos<TT>(i_target, o_setting);
     }
-};
-
-////////////////////////////////////////////////////////
-// Explorer specific traits for attrEnumTraits
-////////////////////////////////////////////////////////
-
-
-///
-/// @brief Value traits for attr_eff_engine_fields
-/// @class attrEngineTraits
-/// @note exp::attr_eff_engine_fields are exp DDIMM SPD fields
-///
-template < >
-struct attrEnumTraits<exp::attr_eff_engine_fields>
-{
-    static constexpr size_t DISPATCHER = exp::ATTR_EFF_DISPATCHER;
-};
-
-///
-/// @brief Value traits for attr_eff_engine_fields
-/// @class attrEngineTraits
-/// @note generic_metadata_fields used for dimm pos setting
-///
-template < >
-struct attrEnumTraits<generic_metadata_fields>
-{
-    static constexpr size_t DISPATCHER = ATTR_METADATA_DISPATCHER;
 };
 
 }//mss

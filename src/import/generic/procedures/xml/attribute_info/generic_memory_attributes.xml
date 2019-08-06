@@ -404,4 +404,31 @@
     <mssAccessorName>mss_omi_edpl_disable</mssAccessorName>
   </attribute>
 
+    <attribute>
+        <id>ATTR_MSS_REORDER_QUEUE_SETTING</id>
+        <targetType>TARGET_TYPE_MCBIST</targetType>
+        <description>
+            Contains the settings for write/read reorder queue
+        </description>
+        <default>REORDER</default>
+        <initToZero></initToZero>
+        <writeable/>
+        <enum>REORDER = 0, FIFO = 1</enum>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>reorder_queue_setting</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_MEM_PORT_POS_OF_FAIL_THROTTLE</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+          This is the fapi position of the port that failed to calculate
+          memory throttles given the passed in watt target and or utilization
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint64</valueType>
+        <writeable/>
+    </attribute>
+
 </attributes>

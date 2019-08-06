@@ -89,6 +89,26 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_FAILED_TO_FIND_TRFC</rc>
+    <description>
+        Unable to find tRFC (ps) from map with SDRAM density key
+    </description>
+    <ffdc>SDRAM_DENSITY</ffdc>
+    <ffdc>REFRESH_MODE</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+ </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_FREQ_CL_EXCEEDS_TAA_MAX</rc>
     <description>
         Calculated Cas Latency exceeds JEDEC value for TAA Max
@@ -349,6 +369,20 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_INVALID_FREQ_PASSED_IN</rc>
+    <description>
+        An invalid Freq value has been set
+    </description>
+    <ffdc>FREQ</ffdc>
+    <ffdc>FUNCTION</ffdc>
+    <ffdc>DIMM_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_INVALID_FREQUENCY</rc>
     <description>
       An invalid frequency was passed to frequency to clock period
@@ -367,6 +401,18 @@
     </description>
     <ffdc>SIZE</ffdc>
     <ffdc>EXPECTED</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_FINE_REFRESH_MODE</rc>
+    <description>
+      Invalid fine refresh mode received from the mrw
+    </description>
+    <ffdc>FINE_REF_MODE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -418,6 +464,19 @@
     <ffdc>FUNCTION</ffdc>
     <ffdc>RANK</ffdc>
     <ffdc>PORT_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_REFRESH_RATE_REQUEST</rc>
+    <description>
+      Invalid refresh request rate received.
+      Possibly due to bad MRW setting for ATTR_MSS_MRW_REFRESH_RATE_REQUEST.
+    </description>
+    <ffdc>REFRESH_RATE_REQUEST</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -540,6 +599,18 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_MCBIST_INCORRECT_PATTERN_LENGTH</rc>
+    <description>MCBIST pattern has an incorrect length</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>ACTUAL</ffdc>
+    <ffdc>EXPECTED</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_VOLT_WRONG_NUMBER_OF_VOLTAGES</rc>
     <description>Incorrect number of voltages supplied to set_voltage_attributes function</description>
     <ffdc>VOLT_TARGET</ffdc>
@@ -642,6 +713,7 @@
         Settings are incorrect for received data.
         This could be code problem (decoding) or bad data.
     </description>
+    <ffdc>TARGET</ffdc>
     <ffdc>VALUE</ffdc>
     <ffdc>BYTE</ffdc>
     <ffdc>FFDC_CODE</ffdc>
@@ -1059,6 +1131,115 @@
     </callout>
     <ffdc>TARGET</ffdc>
     <ffdc>RANK</ffdc>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_GALOIS_TO_SYMBOL</rc>
+    <description> An invalid galois code was found</description>
+    <ffdc>GALOIS</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_SYMBOL_FOR_GALOIS</rc>
+    <description> An invalid symbol was passed to symbol_to_galois</description>
+    <ffdc>SYMBOL</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+      <rc>RC_MSS_INVALID_DQ_TO_SYMBOL</rc>
+    <description> An invalid DQ bit index received to map to Galois symbol</description>
+    <ffdc>DQ</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+      <rc>RC_MSS_INVALID_SYMBOL_TO_DQ</rc>
+    <description> An invalid symbol received to map to DQ bit index</description>
+    <ffdc>SYMBOL</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_RANK_PASSED</rc>
+    <description> An invalid rank was passed to ecc::read function</description>
+    <ffdc>RANK</ffdc>
+    <ffdc>FUNCTION</ffdc>
+    <ffdc>TARGET</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_INDEX_PASSED</rc>
+    <description> An invalid index was passed to MODAL_SYMBOL_COUNT function</description>
+    <ffdc>INDEX</ffdc>
+    <ffdc>FUNCTION</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_DRAM_WIDTH</rc>
+    <description>
+        Code only supports x4 and x8 drams at this time
+    </description>
+    <ffdc>DRAM_WIDTH</ffdc>
+    <callout>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_PAGE_SIZE</rc>
+    <description>
+        Invalid page size
+    </description>
+    <ffdc>DRAM_WIDTH</ffdc>
+    <callout>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
+      <priority>HIGH</priority>
+    </callout>
+     <callout>
+      <target>DIMM_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
   </hwpError>
 
 </hwpErrors>

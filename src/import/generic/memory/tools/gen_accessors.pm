@@ -43,28 +43,16 @@ use Data::Dumper;
 
 use constant {
     TARGET_TYPES => {
-        AXONE => {
+        P10 => {
             PORT_GROUP => 'TARGET_TYPE_OCMB_CHIP',
             PORT       => 'TARGET_TYPE_MEM_PORT',
             DIMM       => 'TARGET_TYPE_DIMM',
         },
-        NIMBUS => {
-            PORT_GROUP => 'TARGET_TYPE_MCS',
-            PORT       => 'TARGET_TYPE_MCA',
-            DIMM       => 'TARGET_TYPE_DIMM',
-            MC         => 'TARGET_TYPE_MCBIST',
-        },
     },
 
-    DIMM_PER_PORT => {
-        AXONE  => 2,
-        NIMBUS => 2,
-    },
+    DIMM_PER_PORT => { P10 => 2, },
 
-    PORTS_PER_GROUP => {
-        AXONE  => 1,
-        NIMBUS => 2,
-    },
+    PORTS_PER_GROUP => { P10 => 1, },
 
     # Size, in bytes, of the various value-types
     BYTE_SIZE => {

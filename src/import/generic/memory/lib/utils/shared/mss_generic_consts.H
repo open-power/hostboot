@@ -22,13 +22,17 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
 ///
 /// @file mss_generic_consts.H
 /// @brief Common constants to be shared
 ///
-/// *HWP HW Maintainer: Louis Stermole <stermole@us.ibm.com>
-/// *HWP FW Maintainer: Christian Geddes <crgeddes@us.ibm.com>
-/// *HWP Consumed by: HB
+
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: HB:FSP
 
 #ifndef _MSS_GENERIC_CONSTS_H_
 #define _MSS_GENERIC_CONSTS_H_
@@ -215,12 +219,42 @@ enum generic_ffdc_codes
     SET_CAC_DELAY_B = 0x1077,
     EFD_CA_LATENCY_MODE = 0x1080,
     EFD_CA_PL_MODE = 0x1081,
+    SET_COL_ADDR_BITS = 0x1082,
+    SET_ROW_ADDR_BITS = 0x1083,
+    SET_3DS_HEIGHT = 0x1084,
+    SET_DRAM_CWL = 0x1085,
+    SET_DRAM_TREFI = 0x1086,
+    SET_DRAM_TCCD_L = 0x1087,
+    SET_DRAM_TWTR_L = 0x1088,
+    SET_DRAM_TWTR_S = 0x1089,
+    SET_DRAM_TFAW = 0x108A,
+    SET_DRAM_TRCD = 0x108B,
+    SET_DRAM_TRP = 0x108C,
+    SET_DRAM_TRAS = 0x108D,
+    SET_DRAM_TWR = 0x108E,
+    SET_DRAM_TRTP = 0x108F,
+    SET_DRAM_TRRD_S = 0x1090,
+    SET_DRAM_TRRD_L = 0x1091,
+    SET_DRAM_TRFC = 0x1092,
+    SET_DRAM_TRFC_DLR = 0x1093,
 
 
     // Power thermal functions
     POWER_LIMIT = 0x1072,
     SLOPE = 0x1073,
     INTERCEPT = 0x1074,
+
+    // Used in fw_mark_store.H for MSS_INVALID_RANK_PASSED
+    FWMS_READ = 30,
+    FWMS_WRITE = 31,
+
+    // Used in hw_mark_store.H for MSS_INVALID_RANK_PASSED
+    HWMS_READ = 40,
+    HWMS_WRITE = 41,
+
+    // MSS_INVALID_INDEX_PASSED
+    SYMBOL_COUNT_READ = 50,
+    SYMBOL_COUNT_WRITE = 51,
 };
 
 ///
@@ -229,7 +263,7 @@ enum generic_ffdc_codes
 ///
 enum class proc_type
 {
-    P10     = 0xA00,
+    P10 = 0xA00,
 };
 
 ///

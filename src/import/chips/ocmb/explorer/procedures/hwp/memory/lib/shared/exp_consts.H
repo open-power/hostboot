@@ -90,9 +90,9 @@ enum attr_delay_index
 /// @brief enum list of explorer SPD derived attributes to set
 /// @note these attrs are strictly derived from SPD
 /// @warning wrapped in exp namesapce to be distinguished from
-/// the generic attr_eff_engine_fields
+/// the exp::attr_eff_engine_fields
 ///
-enum attr_eff_engine_fields
+enum class attr_eff_engine_fields
 {
     // Template recursive base case
     ATTR_EFF_BASE_CASE = 0,
@@ -106,11 +106,11 @@ enum attr_eff_engine_fields
     TSV_8H_SUPPORT = 6,
     PSTATES = 7,
     MRAM_SUPPORT = 8,
-    HEIGHT_3DS = 9,
-    SPD_CL_SUPPORTED = 10,
+    SPD_CL_SUPPORTED = 9,
+    ADDRESS_MIRROR = 10,
 
     // Dispatcher set to last enum value
-    ATTR_EFF_DISPATCHER = SPD_CL_SUPPORTED,
+    DISPATCHER = ADDRESS_MIRROR,
 };
 
 ///
@@ -121,7 +121,8 @@ enum sizes
     MAX_PORT_PER_OCMB = 1,
     MAX_DIMM_PER_PORT = 2,
     MAX_RANK_PER_DIMM = 4,
-    MAX_BITS_PER_PORT = 80,
+    MAX_DQ_BITS_PER_PORT = 80,
+    MAX_SYMBOLS_PER_PORT = 72,
     MAX_RANKS_DIMM1 = 2,
     MAX_MRANK_PER_PORT = MAX_DIMM_PER_PORT * MAX_RANK_PER_DIMM,
 };
@@ -138,6 +139,7 @@ enum ffdc_codes
     READ_CRCT_ENDIAN = 0x0005,
     READ_TRAINING_RESPONSE_STRUCT = 0x0006,
 
+    SET_EXP_DRAM_ADDRESS_MIRRORING = 0x1040,
     SET_BYTE_ENABLES = 0x1041,
     SET_NIBBLE_ENABLES = 0x1042,
     SET_TAA_MIN = 0x1043,
@@ -147,9 +149,8 @@ enum ffdc_codes
     SET_VREF_DQ_TRAIN_RANGE = 0x1047,
     SET_PSTATES = 0x1048,
     SET_MRAM_SUPPORT = 0x1049,
-    SET_3DS_HEIGHT = 0x1050,
-    SET_SPD_CL_SUPPORTED = 0x1051,
-    SET_SERDES_FREQ = 0x1052,
+    SET_SPD_CL_SUPPORTED = 0x1050,
+    SET_SERDES_FREQ = 0x1051,
 };
 
 ///

@@ -31,7 +31,7 @@
 // *HWP Team: Memory
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB
-
+#ifdef P10_READY_FOR_EXP_HWP
 #include <generic/memory/lib/utils/c_str.H>
 #include <lib/exp_draminit_utils.H>
 
@@ -178,3 +178,4 @@ fapi_try_exit:
 
 }// exp
 }// mss
+#endif

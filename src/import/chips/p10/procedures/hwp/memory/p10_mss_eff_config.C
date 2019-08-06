@@ -27,10 +27,11 @@
 /// @file p10_mss_eff_config.C
 /// @brief Command and Control for the memory subsystem - populate attributes
 ///
-//// *HWP HW Maintainer: Louis Stermole <stermole@us.ibm.com>
-/// *HWP FW Maintainer: Glenn Miles <milesg@ibm.com>
-/// *HWP Consumed by: HB
-
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 1
+// *HWP Consumed by: FSP:HB
 
 // fapi2
 #include <fapi2.H>
@@ -93,7 +94,7 @@ fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
             FAPI_TRY( mss::efd::factory(l_ocmb, l_vpd_raw, l_vpd_info.iv_rank, l_efd_data) );
 
             // Set up SI ATTRS
-            FAPI_TRY( mss::attr_si_engine<mss::attr_si_engine_fields>::set(l_efd_data) );
+            FAPI_TRY( (mss::gen::attr_engine<mss::proc_type::P10, mss::attr_si_engine_fields>::set(l_efd_data)) );
 
             // Explorer EFD
             FAPI_TRY( mss::exp::efd::process(dimm, l_efd_data));
@@ -114,18 +115,18 @@ fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
                 FAPI_TRY( l_rc, "Failed to initialize SPD facade for %s", mss::spd::c_str(dimm) );
 
                 // Set up generic SPD ATTRS
-                FAPI_TRY( mss::attr_eff_engine<mss::attr_eff_engine_fields>::set(l_spd_decoder) );
+                FAPI_TRY( (mss::gen::attr_engine<mss::proc_type::P10, mss::attr_eff_engine_fields>::set(l_spd_decoder)) );
 
                 // Set up explorer SPD ATTRS
-                FAPI_TRY( mss::attr_eff_engine<mss::exp::attr_eff_engine_fields>::set(l_spd_decoder) );
+                FAPI_TRY( (mss::gen::attr_engine<mss::proc_type::P10, mss::exp::attr_eff_engine_fields>::set(l_spd_decoder)) );
 
                 // Set up pmic SPD ATTRS
-                FAPI_TRY( mss::attr_eff_engine<mss::pmic::attr_eff_engine_fields>::set(l_spd_decoder) );
+                FAPI_TRY( (mss::gen::attr_engine<mss::proc_type::P10, mss::pmic::attr_eff_engine_fields>::set(l_spd_decoder)) );
             }
         }
 
         // Set up derived ATTRS
-        FAPI_TRY( mss::attr_derived_engine<mss::attr_engine_derived_fields>::set(dimm) );
+        FAPI_TRY( (mss::gen::attr_engine<mss::proc_type::P10, mss::attr_engine_derived_fields>::set(dimm)) );
 
     }// dimm
 
