@@ -86,6 +86,7 @@ void* call_mss_scrub (void *io_pArgs)
         {
             case MODEL_CUMULUS: maintTrgtType = TYPE_MBA;       break;
             case MODEL_NIMBUS:  maintTrgtType = TYPE_MCBIST;    break;
+            case MODEL_AXONE:   maintTrgtType = TYPE_OCMB_CHIP; break;
             default:
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ISTEP_FUNC
                            "Master PROC model %d not supported",

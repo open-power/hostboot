@@ -1352,6 +1352,8 @@ uint32_t startBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
 
     uint32_t o_rc = SUCCESS;
 
+    PRDF_TRAC( PRDF_FUNC "Background scrubbing not yet supported." );
+
     /* TODO RTC 207273 - no HWP support yet
     // Get the OCMB fapi target
     fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiTrgt (i_ocmb->getTrgt());
