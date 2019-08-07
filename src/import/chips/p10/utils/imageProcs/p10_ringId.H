@@ -57,6 +57,14 @@ const ChipletType_t QME_NUM_CHIPLETS = 1;
 
 #include "p10_ring_properties.H"
 
+static inline const char* ringid_get_ring_name(RingID i_id)
+{
+#ifdef __PPE__
+    return "";
+#else
+    return (i_id < NUM_RING_IDS) ? RING_PROPERTIES[i_id].ringName : "INVALID RING ID";
+#endif
+}
 
 // Returns data structure assocated with chipletType
 int
