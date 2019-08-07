@@ -57,11 +57,11 @@ extern uint32_t restoreDramRepairs( const TARGETING::TargetHandle_t i_trgt );
 
 /**
  * @brief  Analyzes IPL CE statistics during MNFG IPL
- * @param  i_mba An MBA target.
+ * @param  i_trgt An MBA, MCBIST, or OCMB_CHIP target.
  * @param  o_calloutMade True if callout has been made, false otherwise .
  * @return Non-SUCCESS if internal function fails, SUCCESS otherwise.
  */
-extern int32_t analyzeIplCEStats( const TARGETING::TargetHandle_t i_mba,
+extern int32_t analyzeIplCEStats( const TARGETING::TargetHandle_t i_trgt,
                                   bool &o_calloutMade );
 
 /**

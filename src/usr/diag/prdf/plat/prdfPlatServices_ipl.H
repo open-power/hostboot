@@ -66,7 +66,7 @@ int32_t mdiaSendEventMsg( TARGETING::TargetHandle_t i_trgt,
 
 /**
  * @brief  Initiates a reconfig loop due to an RCD parity error.
- * @param  i_trgt An MCA or MEM_PORT target.
+ * @param  i_trgt An MCA target.
  * @return True if the number of allowed reconfig loops has been exceeded.
  *         False otherwise.
  */
@@ -113,7 +113,7 @@ bool isBroadcastModeCapable( ExtensibleChip * i_chip );
 /**
  * @brief  Starts a super fast read command from the first address of the given
  *         rank to the end of memory.
- * @param  i_chip MCBIST/MCA, MBA, or MEM_PORT chip.
+ * @param  i_chip MCBIST/MCA, MBA, or OCMB chip.
  * @param  i_rank Will start the command on the first address of this slave
  *         rank. To ensure the command is started on a master rank boundary,
  *         make sure the slave rank value is 0.

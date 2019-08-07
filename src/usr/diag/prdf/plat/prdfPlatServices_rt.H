@@ -70,7 +70,7 @@ void sendPredDeallocRequest( uint64_t i_saddr, uint64_t i_eaddr );
 
 /**
  * @brief  Stops Background Scrubbing.
- * @param  i_chip MCBIST, MCA, MBA, MEM_PORT, or OCMB chip.
+ * @param  i_chip MCBIST, MCA, MBA, or OCMB chip.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
@@ -89,7 +89,7 @@ uint32_t stopBgScrub( ExtensibleChip * i_chip );
  *       due to an error. It should not be called after executing a Targeted
  *       Diagnotics procedure.
  *
- * @param  i_chip MCBIST, MCA, MBA, MEM_PORT, or OCMB chip.
+ * @param  i_chip MCBIST, MCA, MBA, or OCMB chip.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>

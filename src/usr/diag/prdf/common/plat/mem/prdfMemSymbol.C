@@ -205,7 +205,7 @@ uint8_t MemSymbol::getDramRelCenDqs() const
     const uint8_t X8_DRAM_SPARE = 9;
 
     bool isX4 = true;
-    if ( TYPE_MEM_PORT == getTargetType(iv_trgt) )
+    if ( TYPE_OCMB_CHIP == getTargetType(iv_trgt) )
     {
         TargetHandle_t dimm = getConnectedDimm(iv_trgt, iv_rank, getPortSlct());
         isX4 = isDramWidthX4( dimm );
@@ -246,7 +246,7 @@ uint8_t MemSymbol::getDramPins() const
 {
     TYPE trgtType = getTargetType( iv_trgt );
     bool isX4 = true;
-    if ( TYPE_MEM_PORT == getTargetType(iv_trgt) )
+    if ( TYPE_OCMB_CHIP == trgtType )
     {
         TargetHandle_t dimm = getConnectedDimm(iv_trgt, iv_rank, getPortSlct());
         isX4 = isDramWidthX4( dimm );
@@ -285,7 +285,7 @@ uint8_t MemSymbol::getDramSymbol() const
     uint8_t dramSymbol = SYMBOLS_PER_RANK;
     TYPE trgtType = getTargetType( iv_trgt );
     bool isX4 = true;
-    if ( TYPE_MEM_PORT == getTargetType(iv_trgt) )
+    if ( TYPE_OCMB_CHIP == trgtType )
     {
         TargetHandle_t dimm = getConnectedDimm(iv_trgt, iv_rank, getPortSlct());
         isX4 = isDramWidthX4( dimm );

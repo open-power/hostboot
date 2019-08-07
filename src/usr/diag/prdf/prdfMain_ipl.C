@@ -42,6 +42,7 @@
 #include <prdfCenMbaDataBundle.H>
 #include <prdfPlatServices.H>
 #include <prdfP9McaDataBundle.H>
+#include <prdfOcmbDataBundle.H>
 #include <prdfMemBgScrub.H>
 
 // Custom compile configs
@@ -96,6 +97,11 @@ int32_t analyzeIplCEStats( TargetHandle_t i_trgt, bool &o_calloutMade )
     {
         // Analyze the CE stats for the MBA.
         MbaDataBundle * db = getMbaDataBundle( chip );
+        o_calloutMade = db->getIplCeStats()->analyzeStats();
+    }
+    else if ( TYPE_OCMB_CHIP == type )
+    {
+        OcmbDataBundle * db = getOcmbDataBundle( chip );
         o_calloutMade = db->getIplCeStats()->analyzeStats();
     }
     else

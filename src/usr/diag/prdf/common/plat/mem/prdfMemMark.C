@@ -1468,17 +1468,8 @@ uint32_t chipMarkCleanup( ExtensibleChip * i_chip, const MemRank & i_rank,
         // Set the chip mark in the DRAM Repairs VPD.
         if ( !areDramRepairsDisabled() )
         {
-            if ( TYPE_OCMB_CHIP == i_chip->getType() )
-            {
-                TargetHandle_t memPort = getConnectedChild( i_chip->getTrgt(),
-                    TYPE_MEM_PORT, chipMark.getSymbol().getPortSlct() );
-                o_rc = setDramInVpd( memPort, i_rank, chipMark.getSymbol() );
-            }
-            else
-            {
-                o_rc = setDramInVpd( i_chip->getTrgt(), i_rank,
-                                     chipMark.getSymbol() );
-            }
+            o_rc = setDramInVpd( i_chip->getTrgt(), i_rank,
+                                 chipMark.getSymbol() );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "setDramInVpd(0x%08x,0x%02x) failed",

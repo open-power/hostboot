@@ -1054,14 +1054,6 @@ SCAN_COMM_REGISTER_CLASS * __getEccFirAnd<TYPE_OCMB_CHIP>(
 }
 
 template<>
-SCAN_COMM_REGISTER_CLASS * __getEccFirAnd<TYPE_MEM_PORT>(
-                                                ExtensibleChip * i_chip )
-{
-    ExtensibleChip * ocmbChip = getConnectedParent( i_chip, TYPE_OCMB_CHIP );
-    return ocmbChip->getRegister( "RDFFIR_AND" );
-}
-
-template<>
 SCAN_COMM_REGISTER_CLASS * __getEccFirAnd<TYPE_MBA>( ExtensibleChip * i_chip )
 {
     ExtensibleChip * membChip = getConnectedParent( i_chip, TYPE_MEMBUF );
@@ -1144,83 +1136,6 @@ uint32_t __findChipMarks( TdRankList<TC> & i_rankList )
     #undef PRDF_FUNC
 }
 
-template <>
-uint32_t __findChipMarks<TYPE_MEM_PORT>(
-    TdRankList<TYPE_OCMB_CHIP> & i_rankList )
-{
-    #define PRDF_FUNC "[__findChipMarks] "
-
-    uint32_t o_rc = SUCCESS;
-
-    for ( auto & entry : i_rankList.getList() )
-    {
-        ExtensibleChip * ocmb = entry.getChip();
-        MemRank          rank = entry.getRank();
-
-        // Call readChipMark to get MemMark.
-        MemMark chipMark;
-        o_rc = MarkStore::readChipMark<TYPE_OCMB_CHIP>( ocmb, rank, chipMark );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "readChipMark(0x%08x,0x%02x) failed",
-                      ocmb->getHuid(), rank.getKey() );
-            break;
-        }
-
-        if ( !chipMark.isValid() ) continue; // no chip mark present
-
-        // Get the DQ Bitmap data.
-        MemDqBitmap dqBitmap;
-        o_rc = getBadDqBitmap( ocmb->getTrgt(), rank, dqBitmap );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getBadDqBitmap(0x%08x,0x%02x)",
-                      ocmb->getHuid(), rank.getKey() );
-            break;
-        }
-
-        // Check if the chip mark is verified or not.
-        bool cmVerified = false;
-        o_rc = dqBitmap.isChipMark( chipMark.getSymbol(), cmVerified );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "dqBitmap.isChipMark() failed on 0x%08x "
-                      "0x%02x", ocmb->getHuid(), rank.getKey() );
-            break;
-        }
-
-        // If the chip mark is unverified, add a VcmEvent to the TD queue.
-        if ( !cmVerified )
-        {
-            // Chip mark is not present in VPD. Add it to queue.
-            TdEntry * e = new VcmEvent<TYPE_OCMB_CHIP>{ ocmb, rank, chipMark };
-            MemDbUtils::pushToQueue<TYPE_OCMB_CHIP>( ocmb, e );
-
-            // We will want to clear the MPE attention for the unverified chip
-            // mark so we don't get any redundant attentions for chip marks that
-            // are already in the queue. This is reset/reload safe because
-            // initialize() will be called again and we can redetect the
-            // unverified chip marks.
-            SCAN_COMM_REGISTER_CLASS* reg =__getEccFirAnd<TYPE_OCMB_CHIP>(ocmb);
-            reg->setAllBits();
-            reg->ClearBit(  0 + rank.getMaster() ); // fetch
-            reg->ClearBit( 20 + rank.getMaster() ); // scrub
-            o_rc = reg->Write();
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "Write() failed on ECC FIR AND: 0x%08x",
-                          ocmb->getHuid() );
-                break;
-            }
-        }
-    }
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-
 template<>
 uint32_t MemTdCtlr<TYPE_MCBIST>::initialize()
 {
@@ -1281,7 +1196,7 @@ uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::initialize()
         }
 
         // Find all unverified chip marks.
-        o_rc = __findChipMarks<TYPE_MEM_PORT>( iv_rankList );
+        o_rc = __findChipMarks<TYPE_OCMB_CHIP>( iv_rankList );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "__findChipMarks() failed on 0x%08x",
@@ -1516,7 +1431,7 @@ uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::handleRrFo()
                                                             chipMark );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "readChipMark<TYPE_MEM_PORT>(0x%08x,%d) "
+                PRDF_ERR( PRDF_FUNC "readChipMark<TYPE_OCMB_CHIP>(0x%08x,%d) "
                           "failed", ocmbChip->getHuid(), rank.getMaster() );
                 break;
             }

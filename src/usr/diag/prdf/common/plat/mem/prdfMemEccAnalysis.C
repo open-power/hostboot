@@ -149,7 +149,6 @@ uint32_t handleMemUe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
     uint32_t o_rc = SUCCESS;
 
-    PRDF_ERR( PRDF_FUNC "Function not supported yet" );
     do
     {
         // First check to see if this is a side-effect UE.

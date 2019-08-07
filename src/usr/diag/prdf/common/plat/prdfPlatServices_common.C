@@ -971,7 +971,7 @@ int32_t mssGetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
 
     uint8_t port0Spare, port1Spare, eccSpare;
 
-    fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> fapiPort(i_memPort);
+    fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiPort(i_ocmb);
     FAPI_INVOKE_HWP( errl, mss_check_steering, fapiPort,
             i_rank.getMaster(), port0Spare, port1Spare, eccSpare );
 
@@ -979,15 +979,15 @@ int32_t mssGetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
     {
         PRDF_ERR( "[PlatServices::mssGetSteerMux] mss_check_steering() "
                   "failed. HUID: 0x%08x rank: %d",
-                  getHuid(i_memPort), i_rank.getMaster() );
+                  getHuid(i_ocmb), i_rank.getMaster() );
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         o_rc = FAIL;
     }
     else
     {
-        o_port0Spare = MemSymbol::fromSymbol( i_memPort, i_rank, port0Spare );
-        o_port1Spare = MemSymbol::fromSymbol( i_memPort, i_rank, port1Spare );
-        o_eccSpare   = MemSymbol::fromSymbol( i_memPort, i_rank, eccSpare   );
+        o_port0Spare = MemSymbol::fromSymbol( i_ocmb, i_rank, port0Spare );
+        o_port1Spare = MemSymbol::fromSymbol( i_ocmb, i_rank, port1Spare );
+        o_eccSpare   = MemSymbol::fromSymbol( i_ocmb, i_rank, eccSpare   );
     }
 #endif
     */
