@@ -423,7 +423,7 @@ errlHndl_t ocmbTranslateSpdToIdec(const uint16_t  i_value,
 
     const uint16_t OCMB_ID = i_isID ? i_value : i_id;
 
-    const uint32_t GEMINI_EC        = 0x0000;
+    const uint32_t GEMINI_EC        = 0x0010;
     const uint32_t GEMINI_SPD_EC    = 0x0000;
     const uint32_t EXPLORER_EC      = 0x0010;
     const uint32_t EXPLORER_SPD_EC  = 0x0000;
