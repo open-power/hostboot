@@ -409,6 +409,8 @@ sub checkSpaceConstraints
 
     my %sectionHash = %{$$i_pnorLayoutRef{sections}};
 
+    print "Note: the following metrics are not a true representation of section utilization, since some sections are substantially padded before applying ECC\n";
+
     for $key ( keys %{$i_binFiles})
     {
         my $filesize = -s $$i_binFiles{$key};
@@ -422,9 +424,8 @@ sub checkSpaceConstraints
         my $eyeCatch = $sectionHash{$layoutKey}{eyeCatch};
         my $physicalRegionSize = $sectionHash{$layoutKey}{physicalRegionSize};
 
-        my $pctUtilized = sprintf("%.2f", $filesize / $physicalRegionSize * 100);
         my $freeBytes = $physicalRegionSize - $filesize;
-        print "$eyeCatch is $pctUtilized% utilized ($freeBytes of $physicalRegionSize bytes free)\n";
+        print "$eyeCatch section size: $physicalRegionSize, bytes used: $filesize, bytes unused: $freeBytes\n";
 
         if($filesize > $physicalRegionSize)
         {

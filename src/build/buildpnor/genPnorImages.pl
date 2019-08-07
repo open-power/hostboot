@@ -61,6 +61,11 @@ my $programName = File::Basename::basename $0;
 my @systemBinFiles =  ();
 my %pnorLayout = ();
 my %PhysicalOffsets = ();
+my %partitionUtilHash;
+
+# percentage utilization threshold, if crossed display warning message
+# that partition is almost full
+use constant CRITICAL_THRESHOLD => 85.00;
 
 # Truncate SHA to n bytes
 use constant SHA_TRUNCATE_SIZE => 32;
@@ -409,6 +414,17 @@ foreach my $binFilesCSV (@systemBinFiles)
     manipulateImages(\%pnorLayout, \%binFiles, $system_target);
 }
 
+# display percentage utilization data for each eyecatch
+foreach my $key (keys %partitionUtilHash) {
+
+    print "$key is $partitionUtilHash{$key}{pctUtilized} utilized ($partitionUtilHash{$key}{freeBytes} of $partitionUtilHash{$key}{physicalRegionSize} bytes free)\n";
+
+    # if percentage is greater than critical threshold, surface warning
+    if ($partitionUtilHash{$key}{pctUtilized} > CRITICAL_THRESHOLD) {
+        print "Warning: Percent utilization for $key shows that partition is almost full.\n";
+    }
+}
+
 ################################################################################
 # Subroutines
 ################################################################################
@@ -452,6 +468,7 @@ sub partitionDepSort
 ################################################################################
 # manipulateImages - Perform any ECC/padding/sha/signing manipulations
 ################################################################################
+
 sub manipulateImages
 {
     my ($i_pnorLayoutRef, $i_binFilesRef, $system_target) = @_;
@@ -496,6 +513,7 @@ sub manipulateImages
         }
 
         my $eyeCatch = $sectionHash{$layoutKey}{eyeCatch};
+        my $physicalRegionSize = $sectionHash{$layoutKey}{physicalRegionSize};
         my %tempImages = (
             HDR_PHASE => "$bin_dir/$parallelPrefix.$eyeCatch.temp.hdr.bin",
             TEMP_SHA_IMG => "$bin_dir/$parallelPrefix.$eyeCatch.temp.sha.bin",
@@ -748,6 +766,22 @@ sub manipulateImages
                 }
 
                 setCallerHwHdrFields(\%callerHwHdrFields, $tempImages{HDR_PHASE});
+
+
+                # store binary file size + header size in hash
+
+                # If section will passed through ecc, include this in size calculation
+                if( ($sectionHash{$layoutKey}{ecc} eq "yes") )
+                {
+                    $partitionUtilHash{$eyeCatch}{logicalFileSize} = %callerHwHdrFields->{totalContainerSize} * (9/8);
+                }
+                else
+                {
+                    $partitionUtilHash{$eyeCatch}{logicalFileSize} = %callerHwHdrFields->{totalContainerSize};
+                }
+                $partitionUtilHash{$eyeCatch}{pctUtilized} = sprintf("%.2f", $partitionUtilHash{$eyeCatch}{logicalFileSize} / $physicalRegionSize * 100);
+                $partitionUtilHash{$eyeCatch}{freeBytes} = $physicalRegionSize - $partitionUtilHash{$eyeCatch}{logicalFileSize};
+                $partitionUtilHash{$eyeCatch}{physicalRegionSize} = $physicalRegionSize;
 
                 # Padding Phase
                 if ($eyeCatch eq "HBI" && $testRun)
