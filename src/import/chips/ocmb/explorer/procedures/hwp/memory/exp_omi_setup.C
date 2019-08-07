@@ -99,7 +99,7 @@ extern "C"
         FAPI_TRY(mss::exp::omi::read_dlx_config1(i_target, dlx_config1_data));
         mss::exp::omi::set_edpl_enable_bit(dlx_config1_data, l_edpl_disable);
         FAPI_TRY(mss::exp::omi::write_dlx_config1(i_target, dlx_config1_data));
-        FAPI_INF("%s EDPL enable: ", mss::c_str(i_target), l_edpl_disable ? "false" : "true");
+        FAPI_INF("%s EDPL enable: %s", mss::c_str(i_target), (l_edpl_disable ? "false" : "true"));
 
         // Run the workaround if it's needed
         FAPI_TRY(mss::exp::workarounds::omi::is_prbs_ocmb_required(i_target, l_workaround_required));
