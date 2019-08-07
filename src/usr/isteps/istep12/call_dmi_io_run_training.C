@@ -119,23 +119,12 @@ void* call_dmi_io_run_training (void *io_pArgs)
         fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target
             (l_ocmb_target);
 
-        // check EXPLORER first as this is most likely the configuration
-        uint32_t chipId = l_ocmb_target->getAttr< TARGETING::ATTR_CHIP_ID>();
-        if (chipId == POWER_CHIPID::EXPLORER_16)
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "exp_omi_setup HWP target HUID 0x%.08x",
-                TARGETING::get_huid(l_ocmb_target));
 
-            FAPI_INVOKE_HWP(l_err, exp_omi_setup, l_fapi_ocmb_target);
-        }
-        else
-        {
-            // Gemini, just skip omi_setup call
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "Skipping omi_setup HWP on target HUID 0x%.8X, chipId 0x%.4X",
-                TARGETING::get_huid(l_ocmb_target), chipId );
-        }
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "exp_omi_setup HWP target HUID 0x%.08x",
+            TARGETING::get_huid(l_ocmb_target));
+
+        FAPI_INVOKE_HWP(l_err, exp_omi_setup, l_fapi_ocmb_target);
 
         //  process return code.
         if ( l_err )
@@ -155,31 +144,44 @@ void* call_dmi_io_run_training (void *io_pArgs)
         }
         else
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "Start omi training on target HUID 0x%.8X",
-                TARGETING::get_huid(l_ocmb_target) );
-            FAPI_INVOKE_HWP(l_err, exp_omi_train, l_fapi_ocmb_target);
-
-            //  process return code.
-            if ( l_err )
+            // Only run exp_omi_train on EXPLORER OCMB targets. This step
+            // cannot run on GEMINI targets.
+            uint32_t chipId = l_ocmb_target->getAttr< TARGETING::ATTR_CHIP_ID>();
+            if (chipId == POWER_CHIPID::EXPLORER_16)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR 0x%.8X:  exp_omi_train HWP on target HUID 0x%.08x",
-                    l_err->reasonCode(), TARGETING::get_huid(l_ocmb_target) );
+                    "Start omi training on target HUID 0x%.8X",
+                    TARGETING::get_huid(l_ocmb_target) );
+                FAPI_INVOKE_HWP(l_err, exp_omi_train, l_fapi_ocmb_target);
 
-                // capture the target data in the elog
-                ErrlUserDetailsTarget(l_ocmb_target).addToLog( l_err );
+                //  process return code.
+                if ( l_err )
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "ERROR 0x%.8X:  exp_omi_train HWP on target HUID 0x%.08x",
+                        l_err->reasonCode(), TARGETING::get_huid(l_ocmb_target) );
 
-                // Create IStep error log and cross reference to error that occurred
-                l_StepError.addErrorDetails( l_err );
+                    // capture the target data in the elog
+                    ErrlUserDetailsTarget(l_ocmb_target).addToLog( l_err );
 
-                // Commit Error , continue on to next OCMB
-                errlCommit( l_err, ISTEP_COMP_ID );
+                    // Create IStep error log and cross reference to error that occurred
+                    l_StepError.addErrorDetails( l_err );
+
+                    // Commit Error , continue on to next OCMB
+                    errlCommit( l_err, ISTEP_COMP_ID );
+                }
+                else
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                         "SUCCESS :  exp_omi_train HWP on target 0x%.08X", TARGETING::get_huid(l_ocmb_target));
+                }
             }
             else
             {
+                // Gemini, just skip omi_setup call
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                     "SUCCESS :  exp_omi_train HWP on target 0x%.08X", TARGETING::get_huid(l_ocmb_target));
+                    "Skipping exp_omi_train HWP on because target HUID 0x%.8X, chipId 0x%.4X is a Gemini OCMB",
+                    TARGETING::get_huid(l_ocmb_target), chipId );
             }
         }
 
