@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,6 +71,9 @@
 #include <sys/misc.h>
 
 #include <isteps/mem_utils.H>
+
+#include <secureboot/smf_utils.H>
+#include <initservice/mboxRegs.H>
 
 namespace   ISTEP_07
 {
@@ -305,6 +308,33 @@ errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
               (l_procIds[i].proc)->
                   getAttr<ATTR_PROC_EFF_FABRIC_CHIP_ID>(),
               (l_procIds[i].proc)->getAttr<ATTR_FABRIC_CHIP_ID>());
+    }
+
+    TARGETING::Target* l_sys = nullptr;
+    TARGETING::targetService().getTopLevelTarget(l_sys);
+    assert(l_sys != nullptr, "Top level target is nullptr!");
+
+    TARGETING::ATTR_MASTER_MBOX_SCRATCH_type l_scratchRegs;
+    assert(
+          l_sys->tryGetAttr<TARGETING::ATTR_MASTER_MBOX_SCRATCH>(l_scratchRegs),
+          "failed to get MASTER_MBOX_SCRATCH");
+    INITSERVICE::SPLESS::MboxScratch6_t l_scratch6 {
+        l_scratchRegs[INITSERVICE::SPLESS::SCRATCH_6]};
+
+    // If the smfConfig bit in scratch reg6 does not match the SMF_ENABLED
+    // setting on the system, then the SBE is in disagreement with the system on
+    // whether SMF mode should be enabled. We need to force SBE update here so
+    // that the XSCOM BAR on the slave proc is set correctly before
+    // we try to perform XSCOM operations in istep10.
+    if(l_scratch6.smfConfig != SECUREBOOT::SMF::isSmfEnabled())
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "SBE and SYS disagree on the SMF setting; SBE thinks it "
+                  "should be %s, but it should actually be %s;"
+                  "requesting SBE update.",
+                  l_scratch6.smfConfig ? "enabled" : "disabled",
+                  SECUREBOOT::SMF::isSmfEnabled() ? "enabled" : "disabled");
+        l_updateNeeded = true;
     }
 
     if(l_updateNeeded)

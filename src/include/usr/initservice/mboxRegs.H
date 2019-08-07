@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -157,10 +157,12 @@ namespace SPLESS
         struct
         {
             uint32_t procMemToUse        :7;    //0:6
-            uint32_t reserved1           :23;   //7:22
+            uint32_t reserved1           :9;    //7:15
+            uint32_t smfConfig           :1;    //16
+            uint32_t reserved2           :6;    //17:22
             uint32_t groupPumpMode       :1;    //23
             uint32_t isSlave             :1;    //24
-            uint32_t reserved2           :1;    //25
+            uint32_t reserved3           :1;    //25
             uint32_t groupId             :3;    //26:28
             uint32_t chipId              :3;    //29:31
         } PACKED;
