@@ -105,17 +105,6 @@ uint32_t clearCmdCompleteAttn<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
                                        0xffdfffffffffffffull );
 }
 
-template<>
-uint32_t clearCmdCompleteAttn<TYPE_MEM_PORT>( ExtensibleChip * i_chip )
-{
-    PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MEM_PORT == i_chip->getType() );
-
-    ExtensibleChip * ocmbChip = getConnectedParent( i_chip, TYPE_OCMB_CHIP );
-
-    return clearCmdCompleteAttn<TYPE_OCMB_CHIP>( ocmbChip );
-}
-
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>
@@ -184,17 +173,6 @@ template<>
 uint32_t clearEccCounters<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
 {
     return __clearEccCounters<TYPE_OCMB_CHIP>( i_chip, "MCB_CNTL", 7 );
-}
-
-template<>
-uint32_t clearEccCounters<TYPE_MEM_PORT>( ExtensibleChip * i_chip )
-{
-    PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MEM_PORT == i_chip->getType() );
-
-    ExtensibleChip * ocmbChip = getConnectedParent( i_chip, TYPE_OCMB_CHIP );
-
-    return clearEccCounters<TYPE_OCMB_CHIP>( ocmbChip );
 }
 
 //------------------------------------------------------------------------------
@@ -283,17 +261,6 @@ uint32_t clearEccFirs<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
     } while(0);
 
     return o_rc;
-}
-
-template<>
-uint32_t clearEccFirs<TYPE_MEM_PORT>( ExtensibleChip * i_chip )
-{
-    PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MEM_PORT == i_chip->getType() );
-
-    ExtensibleChip * ocmbChip = getConnectedParent( i_chip, TYPE_OCMB_CHIP );
-
-    return clearEccFirs<TYPE_OCMB_CHIP>( ocmbChip );
 }
 
 //------------------------------------------------------------------------------

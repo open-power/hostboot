@@ -231,12 +231,6 @@ uint32_t getScrubCeThreshold( ExtensibleChip * i_chip, const MemRank & i_rank )
 }
 
 // need these templates to avoid linker errors
-template
-uint32_t getScrubCeThreshold<TYPE_MCA>( ExtensibleChip * i_chip,
-                                        const MemRank & i_rank );
-template
-uint32_t getScrubCeThreshold<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
-                                             const MemRank & i_rank );
 
 } // end namespace PRDF
 

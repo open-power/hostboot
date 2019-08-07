@@ -41,6 +41,7 @@
 // Platform includes
 #include <prdfPlatServices.H>
 #include <prdfP9McaDataBundle.H>
+#include <prdfOcmbDataBundle.H>
 #include <prdfMemBgScrub.H>
 
 // Custom compile configs
@@ -90,6 +91,11 @@ int32_t analyzeIplCEStats( TargetHandle_t i_trgt, bool &o_calloutMade )
             McaDataBundle * db = getMcaDataBundle( mcaChip );
             if ( db->getIplCeStats()->analyzeStats() ) o_calloutMade = true;
         }
+    }
+    else if ( TYPE_OCMB_CHIP == type )
+    {
+        OcmbDataBundle * db = getOcmbDataBundle( chip );
+        o_calloutMade = db->getIplCeStats()->analyzeStats();
     }
     else
     {

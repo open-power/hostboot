@@ -81,7 +81,7 @@ class TdRankListEntry
   private:
 
     ExtensibleChip * iv_chip = nullptr;    ///< MCA, MBA, or OCMB chip.
-    MemRank          iv_rank = MemRank(0); ///< Any rank on the MCA/MBA/MEM_PORT
+    MemRank          iv_rank = MemRank(0); ///< Any rank on the MCA/MBA/OCMB
 };
 
 /**

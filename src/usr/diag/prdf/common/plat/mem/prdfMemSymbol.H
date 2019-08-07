@@ -79,7 +79,7 @@ class MemSymbol
 
     /**
      * @brief  Creates a MemSymbol from a symbol.
-     * @param  i_trgt   MBA, MCA, or MEM_PORT target.
+     * @param  i_trgt   MBA, MCA, or OCMB_CHIP target.
      * @param  i_rank   The rank this symbol is on.
      * @param  i_symbol The input symbol.
      * @return A MemSymbol. Must call isValid() to determine if the function was
@@ -216,7 +216,7 @@ class MemSymbol
 
 /**
  * @brief  Reads the memory NCE/TCE vector trap register from hardware.
- * @param  i_chip   MCA, MBA, or MEM_PORT.
+ * @param  i_chip   MCA, MBA, or OCMB_CHIP.
  * @param  i_rank   The rank this symbol is on.
  * @param  o_sym1   The first symbol. Should always be valid for both NCE/TCE.
  * @param  o_sym2   The second symbol. Only valid for TCEs.

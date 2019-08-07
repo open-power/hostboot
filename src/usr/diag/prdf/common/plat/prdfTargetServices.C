@@ -1580,14 +1580,6 @@ void getMasterRanks<TYPE_MCA>( TargetHandle_t i_trgt,
 }
 
 template<>
-void getMasterRanks<TYPE_MEM_PORT>( TargetHandle_t i_trgt,
-                                    std::vector<MemRank> & o_ranks,
-                                    uint8_t i_ds )
-{
-    __getMasterRanks<TYPE_MEM_PORT>( i_trgt, o_ranks, 0, i_ds );
-}
-
-template<>
 void getMasterRanks<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
                                      std::vector<MemRank> & o_ranks,
                                      uint8_t i_ds )
@@ -1656,11 +1648,7 @@ void getSlaveRanks<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
                                     std::vector<MemRank> & o_ranks,
                                     uint8_t i_ds )
 {
-    // TODO RTC 210072 - Explorer only has one port, however, multiple ports
-    // will be supported in the future. Updates will need to be made here so we
-    // can get the relevant port.
-    TargetHandle_t memPort = getConnectedChild( i_trgt, TYPE_MEM_PORT, 0 );
-    __getSlaveRanks<TYPE_MEM_PORT>( memPort, o_ranks, i_ds );
+    __getSlaveRanks<TYPE_OCMB_CHIP>( i_trgt, o_ranks, i_ds );
 }
 
 //------------------------------------------------------------------------------
@@ -1734,13 +1722,6 @@ uint8_t getNumMasterRanksPerDimm<TYPE_MCA>( TargetHandle_t i_trgt,
 }
 
 template<>
-uint8_t getNumMasterRanksPerDimm<TYPE_MEM_PORT>( TargetHandle_t i_trgt,
-                                                 uint8_t i_ds )
-{
-    return __getNumMasterRanksPerDimm<TYPE_MEM_PORT>( i_trgt, 0, i_ds );
-}
-
-template<>
 uint8_t getNumMasterRanksPerDimm<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
                                                   uint8_t i_ds )
 {
@@ -1748,7 +1729,7 @@ uint8_t getNumMasterRanksPerDimm<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
     // will be supported in the future. Updates will need to be made here so we
     // can get the relevant port.
     TargetHandle_t memPort = getConnectedChild( i_trgt, TYPE_MEM_PORT, 0 );
-    return getNumMasterRanksPerDimm<TYPE_MEM_PORT>( memPort, i_ds );
+    return __getNumMasterRanksPerDimm<TYPE_MEM_PORT>( memPort, 0, i_ds );
 }
 //------------------------------------------------------------------------------
 
@@ -1817,19 +1798,13 @@ uint8_t getNumRanksPerDimm<TYPE_MCA>( TargetHandle_t i_trgt, uint8_t i_ds )
 }
 
 template<>
-uint8_t getNumRanksPerDimm<TYPE_MEM_PORT>( TargetHandle_t i_trgt, uint8_t i_ds )
-{
-    return __getNumRanksPerDimm<TYPE_MEM_PORT>( i_trgt, 0, i_ds );
-}
-
-template<>
 uint8_t getNumRanksPerDimm<TYPE_OCMB_CHIP>(TargetHandle_t i_trgt, uint8_t i_ds)
 {
     // TODO RTC 210072 - Explorer only has one port, however, multiple ports
     // will be supported in the future. Updates will need to be made here so we
     // can get the relevant port.
     TargetHandle_t memPort = getConnectedChild( i_trgt, TYPE_MEM_PORT, 0 );
-    return getNumRanksPerDimm<TYPE_MEM_PORT>( memPort, i_ds );
+    return __getNumRanksPerDimm<TYPE_MEM_PORT>( memPort, 0, i_ds );
 }
 
 //##############################################################################

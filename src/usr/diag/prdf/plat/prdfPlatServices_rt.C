@@ -216,6 +216,8 @@ uint32_t stopBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
 
     uint32_t rc = SUCCESS;
 
+    PRDF_TRAC( PRDF_FUNC "Function not supported yet" );
+
     /* TODO RTC 207273 - no HWP support yet
     fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiTrgt ( i_chip->getTrgt() );
 
@@ -246,6 +248,8 @@ uint32_t resumeBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
     PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
 
     uint32_t o_rc = SUCCESS;
+
+    PRDF_TRAC( PRDF_FUNC "Function not supported yet" );
 
     /* TODO RTC 207273 - no hwp support yet
 
