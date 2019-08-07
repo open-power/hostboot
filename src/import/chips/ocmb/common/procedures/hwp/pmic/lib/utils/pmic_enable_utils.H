@@ -51,16 +51,6 @@ namespace mss
 {
 namespace pmic
 {
-
-///
-/// @brief Different enable operations
-///
-enum enable_mode
-{
-    SPD = 0, // Use values from the SPD (default). Overwrite the vendor region with SPD settings
-    MANUAL = 1, // Use voltage settings currently in the vendor region. (Changed via pmic_update, or factory defaults)
-};
-
 /// @brief pointer to PMIC attribute getters for DIMM target
 typedef fapi2::ReturnCode (*pmic_attr_ptr)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, uint8_t& o_value);
 typedef fapi2::ReturnCode (*pmic_attr_ptr_signed)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
