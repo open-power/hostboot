@@ -153,6 +153,8 @@ errlHndl_t startScrub( const TargetHandle_t i_trgt )
         switch ( chip->getType() )
         {
             case TYPE_MCBIST: startInitialBgScrub<TYPE_MCBIST>(chip); break;
+            case TYPE_OCMB_CHIP:
+                startInitialBgScrub<TYPE_OCMB_CHIP>(chip); break;
             default:
                 PRDF_ERR( PRDF_FUNC "Unsupported maintenance target type "
                           "0x%02x", chip->getType() );

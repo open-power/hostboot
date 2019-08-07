@@ -67,7 +67,7 @@ extern int32_t analyzeIplCEStats( const TARGETING::TargetHandle_t i_trgt,
 /**
  * @brief  Starts memory background scrubbing on the given target.
  * @param  i_trgt A target that contains the maintenance command logic (i.e.
- *                MCBIST or MBA).
+ *                MCBIST or MBA or OCMB_CHIP).
  * @return If an error log is returned, then some internal function failed. See
  *         the FFDC in the error log for failure details.
  */
