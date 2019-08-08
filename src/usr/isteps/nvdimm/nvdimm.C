@@ -3112,6 +3112,12 @@ errlHndl_t notifyNvdimmProtectionChange(Target* i_target,
 
 #ifdef __HOSTBOOT_RUNTIME
 
+        // Don't send message to OPAL
+        if (TARGETING::is_sapphire_load())
+        {
+            break;
+        }
+
         // Send combined status to phyp
         // Get the Proc Chip Id
         RT_TARG::rtChipId_t l_chipId = 0;
@@ -3187,7 +3193,6 @@ errlHndl_t notifyNvdimmProtectionChange(Target* i_target,
                                         &l_req_fw_msg,
                                         &l_resp_fw_msg_size,
                                         &l_resp_fw_msg);
-
 #endif
 
     } while (0);
