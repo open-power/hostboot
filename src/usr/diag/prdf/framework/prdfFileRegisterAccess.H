@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,7 +71,7 @@ class FileScomAccessor : public ScomAccessor
     virtual uint32_t Access(TARGETING::TargetHandle_t i_target,
                             BitString & bs,
                             uint64_t registerId,
-                            MopRegisterAccess::Operation operation) const;
+                            RegisterAccess::Operation operation) const;
 };
 
 } // End namespace PRDF

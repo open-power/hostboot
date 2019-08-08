@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,7 +43,7 @@ SimScomAccessor::~SimScomAccessor()
 uint32_t SimScomAccessor::Access(TARGETING::TargetHandle_t i_target,
                                      BitString & bs,
                                      uint64_t registerId,
-                                     MopRegisterAccess::Operation operation) const
+                                     RegisterAccess::Operation operation) const
 {
     PRDF_DENTER("SimScomAccessor::Access()");
     uint32_t rc = SUCCESS;
@@ -53,8 +53,8 @@ uint32_t SimScomAccessor::Access(TARGETING::TargetHandle_t i_target,
     {
         switch (operation)
             {
-        case MopRegisterAccess::WRITE: l_op = ScrDB::WRITE; break;
-        case MopRegisterAccess::READ:  l_op = ScrDB::READ;  break;
+        case RegisterAccess::WRITE: l_op = ScrDB::WRITE; break;
+        case RegisterAccess::READ:  l_op = ScrDB::READ;  break;
         default:
             PRDF_ERR( "SimScomAccessor::Access() unsupported operation: 0x%X", operation );
             rc = PRD_SCANCOM_FAILURE;

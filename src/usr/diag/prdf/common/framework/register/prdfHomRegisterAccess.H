@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,7 +35,6 @@
 // Includes
 //--------------------------------------------------------------------
 
-#include <iipMopRegisterAccess.h>
 #include <vector>
 #include <prdfPlatServices.H>
 #include <prdfErrlUtil.H>
@@ -46,6 +45,15 @@
 
 namespace PRDF
 {
+
+namespace RegisterAccess
+{
+    enum Operation
+    {
+        READ  = 0,
+        WRITE = 1,
+    };
+}
 
 class ScomAccessor
 {
@@ -75,7 +83,7 @@ class ScomAccessor
     virtual uint32_t Access( TARGETING::TargetHandle_t i_target,
                              BitString & bs,
                              uint64_t registerId,
-                             MopRegisterAccess::Operation operation) const;
+                             RegisterAccess::Operation operation) const;
 
   private:
 
@@ -142,7 +150,7 @@ class ScomService
     virtual uint32_t Access(TARGETING::TargetHandle_t i_target,
                             BitString & bs,
                             uint64_t registerId,
-                            MopRegisterAccess::Operation operation) const;
+                            RegisterAccess::Operation operation) const;
 
   private:
 
