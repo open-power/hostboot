@@ -161,7 +161,9 @@ const uint16_t SPD_DDR4_DMB_MFG_ID_IBM = 0xA480;
 // SPD - DDR4 expected value for the DMB revision.
 // Currently at initial revision - revision 0
 // size is 1 byte
-const uint8_t SPD_DDR4_EXPECTED_DMB_REVISION_MICROCHIP = 0x00;
+const uint8_t SPD_DDR4_EXPECTED_DMB_REVISION_0_MICROCHIP = 0x00;
+const uint8_t SPD_DDR4_EXPECTED_DMB_REVISION_A0_MICROCHIP = 0xA0;
+const uint8_t SPD_DDR4_EXPECTED_DMB_REVISION_A1_MICROCHIP = 0xA1;
 const uint8_t SPD_DDR4_EXPECTED_DMB_REVISION_IBM = 0x00;
 
 // Maximum number of FFDC elements we will save off
@@ -220,12 +222,31 @@ bool check_valid_mfg_id(const uint16_t i_mfg_id)
 /// @brief Gets the expected DMB revision of a particular MFG ID
 ///
 /// @param[in] i_mfg_id MFG ID
+/// @param[in] i_dmb_revision DMB revision
 /// @return expected DMB revision for ID
 ///
-uint16_t get_expected_dmb_revision(const uint16_t i_mfg_id)
+uint16_t check_valid_dmb_revision(const uint16_t i_mfg_id, const uint16_t i_dmb_revision)
 {
-    return (i_mfg_id == SPD_DDR4_DMB_MFG_ID_IBM) ?
-           SPD_DDR4_EXPECTED_DMB_REVISION_IBM : SPD_DDR4_EXPECTED_DMB_REVISION_MICROCHIP;
+    if (i_mfg_id == SPD_DDR4_DMB_MFG_ID_IBM)
+    {
+        FAPI_DBG("ddr4_get_efd: SPD DMB revision = 0x%.2X, expected DMB revision = 0x%.2X",
+                 i_dmb_revision, SPD_DDR4_EXPECTED_DMB_REVISION_IBM);
+
+        return (i_dmb_revision == SPD_DDR4_EXPECTED_DMB_REVISION_IBM);
+    }
+    else // == SPD_DDR4_EXPECTED_DMB_REVISION_MICROCHIP
+    {
+        // We asserted earlier that we are either MCHP or IBM mfg ID
+        FAPI_DBG("ddr4_get_efd: SPD DMB revision = 0x%.2X, expected DMB revision = 0x%.2X or 0x%.2X or 0x%.2X",
+                 i_dmb_revision,
+                 SPD_DDR4_EXPECTED_DMB_REVISION_0_MICROCHIP,
+                 SPD_DDR4_EXPECTED_DMB_REVISION_A0_MICROCHIP,
+                 SPD_DDR4_EXPECTED_DMB_REVISION_A1_MICROCHIP);
+
+        return ((i_dmb_revision == SPD_DDR4_EXPECTED_DMB_REVISION_0_MICROCHIP) ||
+                (i_dmb_revision == SPD_DDR4_EXPECTED_DMB_REVISION_A0_MICROCHIP) ||
+                (i_dmb_revision == SPD_DDR4_EXPECTED_DMB_REVISION_A1_MICROCHIP));
+    }
 }
 
 /// Local utilities
@@ -441,7 +462,7 @@ extern "C"
         uint16_t l_efdCount{0};         // The number of EFDs
         size_t l_efdSize{0};            // The size of an EFD, not EFD meta data
         uint16_t l_dmbMfgId{0};         // The DMB manufacture ID
-        uint16_t l_expected_revision{0};// Expected revision of MFG
+        uint16_t l_dmb_revision{0};
         uint16_t l_freqMask{0};         // The frequency mask as found in EFD
         uint8_t l_rankMask{0};          // The rank mask as found in EFD
         size_t ii{0};                   // A loop index
@@ -652,31 +673,30 @@ extern "C"
         FAPI_DBG ( "ddr4_get_efd: SPD DMB manufacturer ID = 0x%.4X",
                    io_vpdInfo.iv_dmb_mfg_id);
 
-        l_expected_revision = get_expected_dmb_revision(l_dmbMfgId);
-
-        FAPI_DBG ( "ddr4_get_efd: SPD DMB revision = 0x%.2X, "
-                   "expected DMB revision = 0x%.2X",
-                   i_spdBuffer[SPD_DMB_REVISION_ADDR],
-                   l_expected_revision );
+        l_dmb_revision = *reinterpret_cast<const uint16_t*>(&i_spdBuffer[SPD_DMB_REVISION_ADDR]);
+        // Swap endianess to host format.
+        l_dmb_revision = le16toh(l_dmb_revision);
 
         // Confirm that the DMB revision is what is expected
-        FAPI_ASSERT( (l_expected_revision ==
-                      i_spdBuffer[SPD_DMB_REVISION_ADDR]),
+        FAPI_ASSERT( check_valid_dmb_revision(l_dmbMfgId, l_dmb_revision),
                      fapi2::DDIMM_GET_EFD_UNSUPPORTED_DMB_REVISION().
                      set_DMB_REVISION(static_cast<uint32_t>
-                                      (i_spdBuffer[SPD_DMB_REVISION_ADDR])).
-                     set_EXPECTED(l_expected_revision).
+                                      (l_dmb_revision)).
                      set_OCMB_CHIP_TARGET(i_ocmbFapi2Target).
                      set_VPD_TYPE(io_vpdInfo.iv_vpd_type).
                      set_DDR_TYPE(static_cast<uint32_t>
                                   (i_spdBuffer[SPD_MEM_TYPE_ADDR])),
-                     "ddr4_get_efd: SPD DMB revision 0x%.2X is not the expected "
-                     "revision 0x%.2X",
-                     i_spdBuffer[SPD_DMB_REVISION_ADDR],
-                     l_expected_revision);
+                     "ddr4_get_efd: SPD DMB revision 0x%.2X is not an expected revision: "
+                     "IBM expected: 0x%.2X "
+                     "MCHP expected: 0x%.2X or 0x%.2X or 0x%.2X",
+                     l_dmb_revision,
+                     SPD_DDR4_EXPECTED_DMB_REVISION_IBM,
+                     SPD_DDR4_EXPECTED_DMB_REVISION_0_MICROCHIP,
+                     SPD_DDR4_EXPECTED_DMB_REVISION_A0_MICROCHIP,
+                     SPD_DDR4_EXPECTED_DMB_REVISION_A1_MICROCHIP);
 
         // Set the outgoing DMB revision
-        io_vpdInfo.iv_dmb_revision = i_spdBuffer[SPD_DMB_REVISION_ADDR];
+        io_vpdInfo.iv_dmb_revision = l_dmb_revision;
 
         FAPI_DBG ( "ddr4_get_efd: SPD DMB revision = 0x%.2X",
                    io_vpdInfo.iv_dmb_revision);
