@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,7 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 #include "prdfsimScrDB.H"
-#include <iipMopRegisterAccess.h>
+#include <prdfHomRegisterAccess.H>
 #include <prdfTrace.H>
 #include <prdfPlatServices.H>
 #include "prdfsimServices.H"

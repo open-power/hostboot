@@ -117,7 +117,7 @@ void ScomService::setScomAccessor(ScomAccessor & i_ScomAccessor)
 uint32_t ScomService::Access(TargetHandle_t i_target,
                              BitString & bs,
                              uint64_t registerId,
-                             MopRegisterAccess::Operation operation) const
+                             RegisterAccess::Operation operation) const
 {
     PRDF_DENTER("ScomService::Access()");
     uint32_t rc = SUCCESS;
@@ -136,7 +136,7 @@ uint32_t ScomService::Access(TargetHandle_t i_target,
 uint32_t ScomAccessor::Access(TargetHandle_t i_target,
                                 BitString & bs,
                                 uint64_t registerId,
-                                MopRegisterAccess::Operation operation) const
+                                RegisterAccess::Operation operation) const
 {
     PRDF_DENTER("ScomAccessor::Access()");
 
@@ -146,7 +146,7 @@ uint32_t ScomAccessor::Access(TargetHandle_t i_target,
     {
         switch (operation)
         {
-            case MopRegisterAccess::WRITE:
+            case RegisterAccess::WRITE:
             {
                 rc = PRDF::PlatServices::putScom(i_target, bs, registerId);
 
@@ -198,7 +198,7 @@ uint32_t ScomAccessor::Access(TargetHandle_t i_target,
                 break;
             }
 
-            case MopRegisterAccess::READ:
+            case RegisterAccess::READ:
                 bs.clearAll(); // clear all bits
 
                 rc = PRDF::PlatServices::getScom(i_target, bs, registerId);

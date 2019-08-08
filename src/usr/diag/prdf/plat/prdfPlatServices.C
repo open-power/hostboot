@@ -49,7 +49,7 @@
 #include <time.h>
 #include <initservice/initserviceif.H>
 #include <devicefw/userif.H>
-#include <iipMopRegisterAccess.h>
+#include <prdfHomRegisterAccess.H>
 #include <ibscomreasoncodes.H>
 #include <scom/scomreasoncodes.H>
 #include <p9_proc_gettracearray.H>

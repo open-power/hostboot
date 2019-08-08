@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,7 +37,7 @@ uint32_t FileScomAccessor::Access(
                             TargetHandle_t i_target,
                             BitString & bs,
                             uint64_t registerId,
-                            MopRegisterAccess::Operation operation) const
+                            RegisterAccess::Operation operation) const
 {
     #define PRDF_FUNC "[FileScomAccessor::Access()] "
 
@@ -48,13 +48,13 @@ uint32_t FileScomAccessor::Access(
 
     switch (operation)
     {
-        case MopRegisterAccess::WRITE:
+        case RegisterAccess::WRITE:
             // TODO: RTC 62076 move BitString class to 64-bit
             data = (((uint64_t)bs.getFieldJustify( 0, 32)) << 32) |
                     ((uint64_t)bs.getFieldJustify(32, 32));
             firData.putScom( i_target, registerId, data);
             break;
-        case MopRegisterAccess::READ:
+        case RegisterAccess::READ:
             firData.getScom( i_target, registerId, data);
             // TODO: RTC 62076 move BitString class to 64-bit
             bs.setFieldJustify( 0, 32, data >> 32);
