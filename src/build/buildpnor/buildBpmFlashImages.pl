@@ -145,11 +145,6 @@ sub generateFirmwareImage
     use constant FW_START_ADDRESS_8000 => "\@8000";
     use constant FW_START_ADDRESS_A000 => "\@A000";
 
-    # Each line is plain text where each byte is separated by spaces.
-    # To determine how many bytes are on the line divide by characters per byte
-    # and number of spaces between bytes. 2 characters per byte + 1 space = 3
-    use constant BYTES_PER_LINE_EXCLUDING_SPACES => 3;
-
     # Spec for BPM updates says that the maximum size for the data portion of
     # the payload is 16 bytes
     use constant MAXIMUM_DATA_BYTES_FOR_PAYLOAD => 16;
@@ -211,7 +206,7 @@ sub generateFirmwareImage
         # The length of the payload data. The maximum size of payload data is 16
         # bytes which is conveniently the maximum size of any line in the file
         # minus spaces and carriage return/line feeds.
-        my $dataLength = length($line) / BYTES_PER_LINE_EXCLUDING_SPACES;
+        my $dataLength = calculateDataLength($line);
 
         if ($dataLength > MAXIMUM_DATA_BYTES_FOR_PAYLOAD)
         {
@@ -374,11 +369,6 @@ sub generateConfigImage
     use constant SEGMENT_B_START_ADDRESS => 0x100;
     use constant SEGMENT_A_START_ADDRESS => 0x180;
 
-    # Each line is plain text where each byte is separated by spaces.
-    # To determine how many bytes are on the line, divide by characters per byte
-    # and number of spaces between bytes. 2 characters per byte + 1 space = 3
-    use constant BYTES_PER_LINE_EXCLUDING_SPACES => 3;
-
     # Spec for BPM updates says that the maximum size for the data portion of
     # the payload is 16 bytes
     use constant MAXIMUM_DATA_BYTES_FOR_PAYLOAD => 16;
@@ -445,7 +435,7 @@ sub generateConfigImage
         # Bytes: The bytes to write to the BPM config data dump buffer.
 
         # The length of the line. The maximum size of any line is 16 bytes.
-        my $dataLength = length($line) / BYTES_PER_LINE_EXCLUDING_SPACES;
+        my $dataLength = calculateDataLength($line);
 
         if ($dataLength > MAXIMUM_DATA_BYTES_FOR_PAYLOAD)
         {
@@ -812,6 +802,29 @@ sub createFragment
     $_[0] = 0;     # $io_fragmentSize
 
     return $fragment;
+}
+
+################################################################################
+# @brief Calculates the data length of the line by stripping all spaces for it
+#        dividing by the number of bytes on the line.
+#
+# @param[in] i_line        The line to calculate the length on.
+#
+# @return                  The number of bytes on the line (length).
+################################################################################
+sub calculateDataLength
+{
+    my $i_line = shift;
+
+    # Strip all the spaces from the line.
+    $i_line =~ s/\s+//g;
+
+    # Each line is plain text where each byte is separated by spaces.
+    # To determine how many bytes are on the line, divide by characters per byte
+    use constant CHARS_PER_BYTE => 2;
+    my $dataLength = length($i_line) / CHARS_PER_BYTE;
+
+    return $dataLength;
 }
 
 __END__
