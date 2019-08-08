@@ -100,6 +100,14 @@ extern "C"
             uint32_t& o_modifiedChipUnitNum,
             const uint32_t i_mode = 0);
 
+    /// @brief Validate the chip unit number to be within range
+    ///        of a chip unit type.
+    /// @param[in] i_chipUnitNum   Value of chip unit number (instance)
+    /// @param[in] i_chipUnitType  Chip unit type
+    /// @retval Non-zero if error
+    uint8_t validateChipUnitNum(const uint8_t i_chipUnitNum,
+                                const p10ChipUnits_t i_chipUnitType);
+
 } // extern "C"
 
 #endif /* P10_SCOMINFO_H */

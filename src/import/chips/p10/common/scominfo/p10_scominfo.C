@@ -34,7 +34,6 @@
 // includes
 #include <p10_scominfo.H>
 #include <p10_scom_addr.H>
-#include <p10_cu_utils.H>
 
 #define P10_SCOMINFO_C
 
@@ -801,6 +800,61 @@ extern "C"
         return rc;
     }
 
+    //################################################################################
+    uint8_t validateChipUnitNum(const uint8_t i_chipUnitNum,
+                                const p10ChipUnits_t i_chipUnitType)
+    {
+        uint8_t l_rc = 0;
+        uint8_t l_index;
+
+        for (l_index = 0;
+             l_index < (sizeof(ChipUnitDescriptionTable) / sizeof(p10_chipUnitDescription_t));
+             l_index++)
+        {
+            // Looking for input chip unit type in table
+            if (i_chipUnitType == ChipUnitDescriptionTable[l_index].enumVal)
+            {
+                // Found a match, check input i_chipUnitNum to be <= max chip unit num
+                // for this unit type
+                if (i_chipUnitNum > ChipUnitDescriptionTable[l_index].maxChipUnitNum)
+                {
+                    l_rc = 1;
+                }
+
+                // Additional check for PERV targets, where there are gaps between instances
+                else if (i_chipUnitType == PU_PERV_CHIPUNIT)
+                {
+                    // Note: We allow content in chiplet ID = 0x00 to be referenced with a perv target instance,
+                    //       so do not check for instance = 0 here.
+                    if ( ((i_chipUnitNum > 3) && (i_chipUnitNum < 8)) ||
+                         ((i_chipUnitNum > 9) && (i_chipUnitNum < 12)) ||
+                         ((i_chipUnitNum > 19) && (i_chipUnitNum < 24)) )
+                    {
+                        l_rc = 1;
+                    }
+                }
+
+                // Additional check for PAU targets, where instance 1 and 2 are not valid
+                else if (i_chipUnitType == PU_PAU_CHIPUNIT)
+                {
+                    if ( (i_chipUnitNum == 1) || (i_chipUnitNum == 2) )
+                    {
+                        l_rc = 1;
+                    }
+                }
+
+                break;
+            }
+        }
+
+        // Can't find i_chipUnitType in table
+        if ( l_index >= (sizeof(ChipUnitDescriptionTable) / sizeof(p10_chipUnitDescription_t)) )
+        {
+            l_rc = 1;
+        }
+
+        return (l_rc);
+    }
 
 } // extern "C"
 
