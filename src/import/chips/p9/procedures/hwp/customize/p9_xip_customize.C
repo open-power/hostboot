@@ -305,6 +305,7 @@ fapi2::ReturnCode writeMboxRegs (
     MBOX_ATTR_WRITE (ATTR_PROC_EPS_WRITE_CYCLES_T2, FAPI_SYSTEM,    i_image);
     MBOX_ATTR_WRITE (ATTR_LPC_CONSOLE_CNFG,         i_procTarget,   i_image);
     MBOX_ATTR_WRITE (ATTR_SBE_NVDIMM_IN_PORT,       i_procTarget,   i_image);
+    MBOX_ATTR_WRITE (ATTR_SMF_CONFIG,               FAPI_SYSTEM,    i_image);
 
     // for backwards compatiblity with images that don't contain
     // the OB/MC PLL bucket attributes, ensure that the item exists
