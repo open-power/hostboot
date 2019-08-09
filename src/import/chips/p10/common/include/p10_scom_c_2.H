@@ -91,31 +91,31 @@ static const uint32_t CPMS_FMMR_OVERRIDE_VECTOR_LIMIT = 61;
 static const uint32_t CPMS_FMMR_OVERRIDE_VECTOR_LIMIT_LEN = 3;
 // c/reg00002.H
 
-static const uint64_t EC_LS_LSU_HOLD_OUT_REG10 = 0x200206caull;
+static const uint64_t EC_LS_LSU_HOLD_OUT_REG10 = 0x202106caull;
 // c/reg00002.H
 
-static const uint64_t EC_LS_LSU_HOLD_OUT_REG6 = 0x200206c6ull;
+static const uint64_t EC_LS_LSU_HOLD_OUT_REG6 = 0x202106c6ull;
 // c/reg00002.H
 
-static const uint64_t EC_PC_SCR4 = 0x2002048aull;
+static const uint64_t EC_PC_SCR4 = 0x2021048aull;
 // c/reg00002.H
 
-static const uint64_t EC_PC_THRCTL_TCTLCOM_HOLD_OUT = 0x20020455ull;
+static const uint64_t EC_PC_THRCTL_TCTLCOM_HOLD_OUT = 0x20210455ull;
 // c/reg00002.H
 
-static const uint64_t EC_PC_TOD_SYNC010 = 0x200204a3ull;
+static const uint64_t EC_PC_TOD_SYNC010 = 0x202104a3ull;
 
 static const uint32_t EC_PC_TOD_SYNC010_CHIP_TOD_STATUS = 60;
 static const uint32_t EC_PC_TOD_SYNC010_CHIP_TOD_STATUS_LEN = 4;
 // c/reg00002.H
 
-static const uint64_t EC_PC_TOD_SYNC101 = 0x200204a3ull;
+static const uint64_t EC_PC_TOD_SYNC101 = 0x202104a3ull;
 
 static const uint32_t EC_PC_TOD_SYNC101_CHIP_TOD_STATUS = 60;
 static const uint32_t EC_PC_TOD_SYNC101_CHIP_TOD_STATUS_LEN = 4;
 // c/reg00002.H
 
-static const uint64_t EC_PC_TRACE1_TR0_TRACE_LO_DATA_REG = 0x20020a41ull;
+static const uint64_t EC_PC_TRACE1_TR0_TRACE_LO_DATA_REG = 0x20210a41ull;
 
 static const uint32_t EC_PC_TRACE1_TR0_TRACE_LO_DATA_REG_LO_DATA = 0;
 static const uint32_t EC_PC_TRACE1_TR0_TRACE_LO_DATA_REG_LO_DATA_LEN = 32;
@@ -130,7 +130,7 @@ static const uint32_t EC_PC_TRACE1_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS = 54;
 static const uint32_t EC_PC_TRACE1_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
 // c/reg00002.H
 
-static const uint64_t L2_L2MISC_L2CERRS_ERR_RPT0 = 0x20020012ull;
+static const uint64_t L2_L2MISC_L2CERRS_ERR_RPT0 = 0x20210012ull;
 
 static const uint32_t L2_L2MISC_L2CERRS_ERR_RPT0_14_RCCO_FSM_PARITY_ERR = 0;
 static const uint32_t L2_L2MISC_L2CERRS_ERR_RPT0_14_NCCTL_RLD_BARRIER_ERR = 1;
@@ -176,7 +176,7 @@ static const uint32_t L2_L2MISC_L2CERRS_ERR_RPT0_14_RCX_UNEXP_IDLE_PB_CRESP_ERR 
 static const uint32_t L2_L2MISC_L2CERRS_ERR_RPT0_14_COX_UNEXP_IDLE_PB_CRESP_ERR = 41;
 // c/reg00002.H
 
-static const uint64_t L2_L2MISC_L2CERRS_MODE_REG1 = 0x2002000bull;
+static const uint64_t L2_L2MISC_L2CERRS_MODE_REG1 = 0x2021000bull;
 
 static const uint32_t L2_L2MISC_L2CERRS_MODE_REG1_CFG_ECCCK_CE_UE_SUE_ERR_DET_DIS = 0;
 static const uint32_t L2_L2MISC_L2CERRS_MODE_REG1_CFG_ECCCK_UE_SUE_DET_DIS = 1;
@@ -195,7 +195,7 @@ static const uint32_t L2_L2MISC_L2CERRS_MODE_REG1_PM_L23_EVENT_TID_SEL_NUM = 26;
 static const uint32_t L2_L2MISC_L2CERRS_MODE_REG1_PM_L23_EVENT_TID_SEL_NUM_LEN = 2;
 // c/reg00002.H
 
-static const uint64_t L2_L2MISC_L2CERRS_TOPOTABLE3 = 0x20020017ull;
+static const uint64_t L2_L2MISC_L2CERRS_TOPOTABLE3 = 0x20210017ull;
 
 static const uint32_t L2_L2MISC_L2CERRS_TOPOTABLE3_24_VAL = 0;
 static const uint32_t L2_L2MISC_L2CERRS_TOPOTABLE3_25_VAL = 1;
@@ -223,13 +223,13 @@ static const uint32_t L2_L2MISC_L2CERRS_TOPOTABLE3_31 = 36;
 static const uint32_t L2_L2MISC_L2CERRS_TOPOTABLE3_31_LEN = 4;
 // c/reg00002.H
 
-static const uint64_t L2TRA_TR1_TRACE_HI_DATA_REG = 0x20020080ull;
+static const uint64_t L2TRA_TR1_TRACE_HI_DATA_REG = 0x20210080ull;
 
 static const uint32_t L2TRA_TR1_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
 static const uint32_t L2TRA_TR1_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
 // c/reg00002.H
 
-static const uint64_t L2TRA_TR1_CONFIG_2 = 0x20020085ull;
+static const uint64_t L2TRA_TR1_CONFIG_2 = 0x20210085ull;
 
 static const uint32_t L2TRA_TR1_CONFIG_2_A = 0;
 static const uint32_t L2TRA_TR1_CONFIG_2_A_LEN = 24;
@@ -237,7 +237,7 @@ static const uint32_t L2TRA_TR1_CONFIG_2_B = 24;
 static const uint32_t L2TRA_TR1_CONFIG_2_B_LEN = 24;
 // c/reg00002.H
 
-static const uint64_t L3_MISC_L3CERRS_TOPOLOGY_TBL0_SCOM_RD = 0x20010625ull;
+static const uint64_t L3_MISC_L3CERRS_TOPOLOGY_TBL0_SCOM_RD = 0x20200625ull;
 
 static const uint32_t L3_MISC_L3CERRS_TOPOLOGY_TBL0_SCOM_RD_0_VALID = 0;
 static const uint32_t L3_MISC_L3CERRS_TOPOLOGY_TBL0_SCOM_RD_1_VALID = 1;
@@ -265,7 +265,7 @@ static const uint32_t L3_MISC_L3CERRS_TOPOLOGY_TBL0_SCOM_RD_7 = 36;
 static const uint32_t L3_MISC_L3CERRS_TOPOLOGY_TBL0_SCOM_RD_7_LEN = 4;
 // c/reg00002.H
 
-static const uint64_t NC_NCCHTM_NCCHTSC_HTM_MODE = 0x20010680ull;
+static const uint64_t NC_NCCHTM_NCCHTSC_HTM_MODE = 0x20200680ull;
 
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MODE_HTM_ENABLE = 0;
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MODE_CONTENT_SEL = 1;
@@ -288,7 +288,7 @@ static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MODE_VGTARGET = 24;
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MODE_VGTARGET_LEN = 8;
 // c/reg00002.H
 
-static const uint64_t NC_NCMISC_NCSCOMS_NCU_SPEC_BAR_REG = 0x20010650ull;
+static const uint64_t NC_NCMISC_NCSCOMS_NCU_SPEC_BAR_REG = 0x20200650ull;
 
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_SPEC_BAR_REG_EN = 0;
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_SPEC_BAR_REG_256K = 1;

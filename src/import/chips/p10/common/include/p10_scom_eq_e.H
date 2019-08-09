@@ -269,8 +269,8 @@ static const uint32_t OPCG_REG1_NSL_FILL_COUNT_LEN = 5;
 
 static const uint64_t QME_CRCR = 0x200e0300ull;
 
-static const uint32_t QME_CRCR_QME_CRCR_CYCLE_REPRO_COMPARE_VALUE = 1;
-static const uint32_t QME_CRCR_QME_CRCR_CYCLE_REPRO_COMPARE_VALUE_LEN = 7;
+static const uint32_t QME_CRCR_QME_CRCR_COMPARE_VALUE = 0;
+static const uint32_t QME_CRCR_QME_CRCR_COMPARE_VALUE_LEN = 8;
 // eq/reg00014.H
 
 static const uint64_t QME_DERP = 0x200e0250ull;

@@ -49,7 +49,6 @@ static const uint64_t CPLT_CTRL1_WO_CLEAR = 0x0c000021ull;
 static const uint64_t CPLT_CTRL1_WO_OR = 0x0c000011ull;
 
 static const uint32_t CPLT_CTRL1_UNIT_MULTICYCLE_TEST_FENCE_DC = 0;
-static const uint32_t CPLT_CTRL1_VITL_FENCE_DC = 3;
 static const uint32_t CPLT_CTRL1_REGION0_FENCE_DC = 4;
 static const uint32_t CPLT_CTRL1_REGION1_FENCE_DC = 5;
 static const uint32_t CPLT_CTRL1_REGION2_FENCE_DC = 6;

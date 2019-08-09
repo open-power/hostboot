@@ -263,6 +263,9 @@ static const uint32_t PB_PTL_FIR_ACTION1_REG_PB_PTL_FIR_ACTION1 = 0;
 static const uint32_t PB_PTL_FIR_ACTION1_REG_PB_PTL_FIR_ACTION1_LEN = 40;
 // pauc/reg00005.H
 
+static const uint64_t PB_TL_LINK_ERR_INJECT_REG = 0x1001180dull;
+// pauc/reg00005.H
+
 static const uint64_t SCAN_LONG_ROTATE = 0x10039000ull;
 // pauc/reg00005.H
 

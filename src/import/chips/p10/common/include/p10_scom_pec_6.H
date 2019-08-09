@@ -52,6 +52,7 @@ static const uint32_t CPLT_CONF1_LANE_CFG_DC_5H = 5;
 static const uint32_t CPLT_CONF1_IOVALID_DC_8H = 8;
 static const uint32_t CPLT_CONF1_IOVALID_DC_9H = 9;
 static const uint32_t CPLT_CONF1_IOVALID_DC_10H = 10;
+static const uint32_t CPLT_CONF1_RATIO_OVERRIDE_DC = 11;
 static const uint32_t CPLT_CONF1_APP0_RATIO_DC_12H = 12;
 static const uint32_t CPLT_CONF1_APP0_RATIO_DC_13H = 13;
 static const uint32_t CPLT_CONF1_APP0_RATIO_DC_14H = 14;
@@ -67,9 +68,11 @@ static const uint32_t CPLT_CONF1_APP2_RATIO_DC_23H = 23;
 static const uint32_t CPLT_CONF1_APP2_RATIO_DC_24H = 24;
 static const uint32_t CPLT_CONF1_APP2_RATIO_DC_25H = 25;
 static const uint32_t CPLT_CONF1_APP2_RATIO_DC_26H = 26;
-static const uint32_t CPLT_CONF1_SWAP_DC_28H = 28;
-static const uint32_t CPLT_CONF1_SWAP_DC_29H = 29;
-static const uint32_t CPLT_CONF1_SWAP_DC_30H = 30;
+static const uint32_t CPLT_CONF1_APP3_RATIO_DC_27H = 27;
+static const uint32_t CPLT_CONF1_APP3_RATIO_DC_28H = 28;
+static const uint32_t CPLT_CONF1_APP3_RATIO_DC_29H = 29;
+static const uint32_t CPLT_CONF1_APP3_RATIO_DC_30H = 30;
+static const uint32_t CPLT_CONF1_APP3_RATIO_DC_31H = 31;
 // pec/reg00006.H
 
 static const uint64_t CPLT_CTRL1_RW = 0x08000001ull;
@@ -77,7 +80,6 @@ static const uint64_t CPLT_CTRL1_WO_CLEAR = 0x08000021ull;
 static const uint64_t CPLT_CTRL1_WO_OR = 0x08000011ull;
 
 static const uint32_t CPLT_CTRL1_UNIT_MULTICYCLE_TEST_FENCE_DC = 0;
-static const uint32_t CPLT_CTRL1_VITL_FENCE_DC = 3;
 static const uint32_t CPLT_CTRL1_REGION0_FENCE_DC = 4;
 static const uint32_t CPLT_CTRL1_REGION1_FENCE_DC = 5;
 static const uint32_t CPLT_CTRL1_REGION2_FENCE_DC = 6;

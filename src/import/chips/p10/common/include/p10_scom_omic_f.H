@@ -49,13 +49,14 @@ static const uint32_t CTL_REGS_RX_CNTL2_PG_CAL_LANE_PG_PHY_GCRMSG_LEN = 5;
 static const uint32_t CTL_REGS_RX_CNTL2_PG_AMP_SERVO_MASK_H0 = 56;
 static const uint32_t CTL_REGS_RX_CNTL2_PG_AMP_SERVO_VOTE_BIAS_INC = 57;
 static const uint32_t CTL_REGS_RX_CNTL2_PG_AMP_SERVO_VOTE_BIAS_DEC = 58;
+static const uint32_t CTL_REGS_RX_CNTL2_PG_SERVO_REVERSE_LATCH_DAC = 59;
 // omic/reg00015.H
 
 static const uint64_t CTL_REGS_RX_MODE11_PG = 0x8008584010012c3full;
 
 static const uint32_t CTL_REGS_RX_MODE11_PG_CTL_DATASM_CLKDIST_PDWN = 48;
 static const uint32_t CTL_REGS_RX_MODE11_PG_AMP_START_VAL = 49;
-static const uint32_t CTL_REGS_RX_MODE11_PG_AMP_START_VAL_LEN = 9;
+static const uint32_t CTL_REGS_RX_MODE11_PG_AMP_START_VAL_LEN = 8;
 // omic/reg00015.H
 
 static const uint64_t CTL_REGS_RX_MODE21_PG = 0x8008a84010012c3full;

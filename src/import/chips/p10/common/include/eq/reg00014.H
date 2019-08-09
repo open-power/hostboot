@@ -11956,47 +11956,47 @@ fapi_try_exit:
 }
 
 
-static inline fapi2::buffer<uint64_t>& SET_QME_CRCR_QME_CRCR_CYCLE_REPRO_COMPARE_VALUE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_QME_CRCR_QME_CRCR_COMPARE_VALUE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(QME_CRCR));
 #endif
-    return o_data.insertFromRight<QME_CRCR_QME_CRCR_CYCLE_REPRO_COMPARE_VALUE,
-           QME_CRCR_QME_CRCR_CYCLE_REPRO_COMPARE_VALUE_LEN>(i_data);
+    return o_data.insertFromRight<QME_CRCR_QME_CRCR_COMPARE_VALUE,
+           QME_CRCR_QME_CRCR_COMPARE_VALUE_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access QME_CRCR_QME_CRCR_CYCLE_REPRO_COMPARE_VALUE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access QME_CRCR_QME_CRCR_COMPARE_VALUE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_QME_CRCR_QME_CRCR_CYCLE_REPRO_COMPARE_VALUE(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_QME_CRCR_QME_CRCR_COMPARE_VALUE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(QME_CRCR));
 #endif
-    return o_data.insertFromRight<QME_CRCR_QME_CRCR_CYCLE_REPRO_COMPARE_VALUE,
-           QME_CRCR_QME_CRCR_CYCLE_REPRO_COMPARE_VALUE_LEN>(i_data);
+    return o_data.insertFromRight<QME_CRCR_QME_CRCR_COMPARE_VALUE,
+           QME_CRCR_QME_CRCR_COMPARE_VALUE_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access QME_CRCR_QME_CRCR_CYCLE_REPRO_COMPARE_VALUE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access QME_CRCR_QME_CRCR_COMPARE_VALUE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_QME_CRCR_QME_CRCR_CYCLE_REPRO_COMPARE_VALUE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_QME_CRCR_QME_CRCR_COMPARE_VALUE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(QME_CRCR));
 #endif
-    return i_data.extractToRight<QME_CRCR_QME_CRCR_CYCLE_REPRO_COMPARE_VALUE,
-           QME_CRCR_QME_CRCR_CYCLE_REPRO_COMPARE_VALUE_LEN>(o_data);
+    return i_data.extractToRight<QME_CRCR_QME_CRCR_COMPARE_VALUE,
+           QME_CRCR_QME_CRCR_COMPARE_VALUE_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access QME_CRCR_QME_CRCR_CYCLE_REPRO_COMPARE_VALUE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access QME_CRCR_QME_CRCR_COMPARE_VALUE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

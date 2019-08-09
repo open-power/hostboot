@@ -78,1769 +78,1898 @@ fapi_try_exit:
 }
 
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_SPARE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_MESO_BUFFER_ENABLE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_SPARE,
-           CMN_CONFIG_SPARE_LEN>(i_data);
+    return o_data.insertFromRight<CMN_CONFIG_MESO_BUFFER_ENABLE,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_MESO_BUFFER_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_SPARE(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_MESO_BUFFER_ENABLE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_SPARE,
-           CMN_CONFIG_SPARE_LEN>(i_data);
+    return o_data.insertFromRight<CMN_CONFIG_MESO_BUFFER_ENABLE,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_MESO_BUFFER_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_SPARE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_MESO_BUFFER_ENABLE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.setBit<CMN_CONFIG_MESO_BUFFER_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_MESO_BUFFER_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_CMN_CONFIG_MESO_BUFFER_ENABLE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.clearBit<CMN_CONFIG_MESO_BUFFER_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_MESO_BUFFER_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_MESO_BUFFER_ENABLE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return i_data.extractToRight<CMN_CONFIG_SPARE,
-           CMN_CONFIG_SPARE_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_RX_EDGE_ENA(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.insertFromRight<CMN_CONFIG_RX_EDGE_ENA,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_RX_EDGE_ENA chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_RX_EDGE_ENA(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.insertFromRight<CMN_CONFIG_RX_EDGE_ENA,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_RX_EDGE_ENA chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_RX_EDGE_ENA(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.setBit<CMN_CONFIG_RX_EDGE_ENA>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_RX_EDGE_ENA chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_CMN_CONFIG_RX_EDGE_ENA(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.clearBit<CMN_CONFIG_RX_EDGE_ENA>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_RX_EDGE_ENA chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_RX_EDGE_ENA(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return i_data.extractToRight<CMN_CONFIG_RX_EDGE_ENA,
+    return i_data.extractToRight<CMN_CONFIG_MESO_BUFFER_ENABLE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_RX_EDGE_ENA chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_MESO_BUFFER_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CMN_CONFIG_RX_EDGE_ENA(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CMN_CONFIG_MESO_BUFFER_ENABLE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return i_data.getBit<CMN_CONFIG_RX_EDGE_ENA>();
+    return i_data.getBit<CMN_CONFIG_MESO_BUFFER_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_RX_EDGE_ENA chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_MESO_BUFFER_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_RX_EDGE_MARGIN(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_MESO_BUFFER_START(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_RX_EDGE_MARGIN,
-           CMN_CONFIG_RX_EDGE_MARGIN_LEN>(i_data);
+    return o_data.insertFromRight<CMN_CONFIG_MESO_BUFFER_START,
+           CMN_CONFIG_MESO_BUFFER_START_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_RX_EDGE_MARGIN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_MESO_BUFFER_START chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_RX_EDGE_MARGIN(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_MESO_BUFFER_START(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_RX_EDGE_MARGIN,
-           CMN_CONFIG_RX_EDGE_MARGIN_LEN>(i_data);
+    return o_data.insertFromRight<CMN_CONFIG_MESO_BUFFER_START,
+           CMN_CONFIG_MESO_BUFFER_START_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_RX_EDGE_MARGIN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_MESO_BUFFER_START chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_RX_EDGE_MARGIN(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_MESO_BUFFER_START(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return i_data.extractToRight<CMN_CONFIG_RX_EDGE_MARGIN,
-           CMN_CONFIG_RX_EDGE_MARGIN_LEN>(o_data);
+    return i_data.extractToRight<CMN_CONFIG_MESO_BUFFER_START,
+           CMN_CONFIG_MESO_BUFFER_START_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_RX_EDGE_MARGIN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_MESO_BUFFER_START chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_PSAV_STS_ENABLE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_SPARE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_PSAV_STS_ENABLE,
-           1>(i_data);
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_SPARE,
+           CMN_CONFIG_CFG_CMN_SPARE_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_PSAV_STS_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_PSAV_STS_ENABLE(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_SPARE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_PSAV_STS_ENABLE,
-           1>(i_data);
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_SPARE,
+           CMN_CONFIG_CFG_CMN_SPARE_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_PSAV_STS_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_PSAV_STS_ENABLE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.setBit<CMN_CONFIG_PSAV_STS_ENABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_PSAV_STS_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_CMN_CONFIG_PSAV_STS_ENABLE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.clearBit<CMN_CONFIG_PSAV_STS_ENABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_PSAV_STS_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_PSAV_STS_ENABLE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CFG_CMN_SPARE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return i_data.extractToRight<CMN_CONFIG_PSAV_STS_ENABLE,
+    return i_data.extractToRight<CMN_CONFIG_CFG_CMN_SPARE,
+           CMN_CONFIG_CFG_CMN_SPARE_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_RX_EDGE_ENA(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_RX_EDGE_ENA,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_RX_EDGE_ENA chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_RX_EDGE_ENA(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_RX_EDGE_ENA,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_RX_EDGE_ENA chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_RX_EDGE_ENA(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.setBit<CMN_CONFIG_CFG_CMN_RX_EDGE_ENA>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_RX_EDGE_ENA chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_CMN_CONFIG_CFG_CMN_RX_EDGE_ENA(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.clearBit<CMN_CONFIG_CFG_CMN_RX_EDGE_ENA>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_RX_EDGE_ENA chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CFG_CMN_RX_EDGE_ENA(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return i_data.extractToRight<CMN_CONFIG_CFG_CMN_RX_EDGE_ENA,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_PSAV_STS_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_RX_EDGE_ENA chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CMN_CONFIG_PSAV_STS_ENABLE(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CMN_CONFIG_CFG_CMN_RX_EDGE_ENA(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return i_data.getBit<CMN_CONFIG_PSAV_STS_ENABLE>();
+    return i_data.getBit<CMN_CONFIG_CFG_CMN_RX_EDGE_ENA>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_PSAV_STS_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_RX_EDGE_ENA chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_RECAL_TIMER(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_RX_EDGE_MARGIN(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_RECAL_TIMER,
-           CMN_CONFIG_RECAL_TIMER_LEN>(i_data);
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_RX_EDGE_MARGIN,
+           CMN_CONFIG_CFG_CMN_RX_EDGE_MARGIN_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_RECAL_TIMER chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_RX_EDGE_MARGIN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_RECAL_TIMER(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_RX_EDGE_MARGIN(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_RECAL_TIMER,
-           CMN_CONFIG_RECAL_TIMER_LEN>(i_data);
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_RX_EDGE_MARGIN,
+           CMN_CONFIG_CFG_CMN_RX_EDGE_MARGIN_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_RECAL_TIMER chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_RX_EDGE_MARGIN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_RECAL_TIMER(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CFG_CMN_RX_EDGE_MARGIN(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return i_data.extractToRight<CMN_CONFIG_RECAL_TIMER,
-           CMN_CONFIG_RECAL_TIMER_LEN>(o_data);
+    return i_data.extractToRight<CMN_CONFIG_CFG_CMN_RX_EDGE_MARGIN,
+           CMN_CONFIG_CFG_CMN_RX_EDGE_MARGIN_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_RECAL_TIMER chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_RX_EDGE_MARGIN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_1US_TMR(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_PSAV_STS_ENABLE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_1US_TMR,
-           CMN_CONFIG_1US_TMR_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_1US_TMR chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_1US_TMR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.insertFromRight<CMN_CONFIG_1US_TMR,
-           CMN_CONFIG_1US_TMR_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_1US_TMR chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_1US_TMR(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return i_data.extractToRight<CMN_CONFIG_1US_TMR,
-           CMN_CONFIG_1US_TMR_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_1US_TMR chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_DBG_EN(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.insertFromRight<CMN_CONFIG_DBG_EN,
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_PSAV_STS_ENABLE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_DBG_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_PSAV_STS_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_DBG_EN(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_PSAV_STS_ENABLE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_DBG_EN,
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_PSAV_STS_ENABLE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_DBG_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_PSAV_STS_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_DBG_EN(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_PSAV_STS_ENABLE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.setBit<CMN_CONFIG_DBG_EN>();
+    return o_data.setBit<CMN_CONFIG_CFG_CMN_PSAV_STS_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_DBG_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_PSAV_STS_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CMN_CONFIG_DBG_EN(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CMN_CONFIG_CFG_CMN_PSAV_STS_ENABLE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.clearBit<CMN_CONFIG_DBG_EN>();
+    return o_data.clearBit<CMN_CONFIG_CFG_CMN_PSAV_STS_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_DBG_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_PSAV_STS_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_DBG_EN(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CFG_CMN_PSAV_STS_ENABLE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return i_data.extractToRight<CMN_CONFIG_DBG_EN,
+    return i_data.extractToRight<CMN_CONFIG_CFG_CMN_PSAV_STS_ENABLE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_DBG_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_PSAV_STS_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CMN_CONFIG_DBG_EN(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CMN_CONFIG_CFG_CMN_PSAV_STS_ENABLE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return i_data.getBit<CMN_CONFIG_DBG_EN>();
+    return i_data.getBit<CMN_CONFIG_CFG_CMN_PSAV_STS_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_DBG_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_PSAV_STS_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_DBG_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_RECAL_TIMER(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_DBG_SEL,
-           CMN_CONFIG_DBG_SEL_LEN>(i_data);
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_RECAL_TIMER,
+           CMN_CONFIG_CFG_CMN_RECAL_TIMER_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_DBG_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_RECAL_TIMER chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_DBG_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_RECAL_TIMER(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_DBG_SEL,
-           CMN_CONFIG_DBG_SEL_LEN>(i_data);
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_RECAL_TIMER,
+           CMN_CONFIG_CFG_CMN_RECAL_TIMER_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_DBG_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_RECAL_TIMER chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_DBG_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CFG_CMN_RECAL_TIMER(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return i_data.extractToRight<CMN_CONFIG_DBG_SEL,
-           CMN_CONFIG_DBG_SEL_LEN>(o_data);
+    return i_data.extractToRight<CMN_CONFIG_CFG_CMN_RECAL_TIMER,
+           CMN_CONFIG_CFG_CMN_RECAL_TIMER_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_DBG_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_RECAL_TIMER chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_RD_RST(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_1US_TMR(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_RD_RST,
-           1>(i_data);
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_1US_TMR,
+           CMN_CONFIG_CFG_CMN_1US_TMR_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_RD_RST chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_1US_TMR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_RD_RST(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_1US_TMR(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_RD_RST,
-           1>(i_data);
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_1US_TMR,
+           CMN_CONFIG_CFG_CMN_1US_TMR_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_RD_RST chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_1US_TMR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_RD_RST(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.setBit<CMN_CONFIG_RD_RST>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_RD_RST chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_CMN_CONFIG_RD_RST(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.clearBit<CMN_CONFIG_RD_RST>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_RD_RST chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_RD_RST(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CFG_CMN_1US_TMR(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return i_data.extractToRight<CMN_CONFIG_RD_RST,
+    return i_data.extractToRight<CMN_CONFIG_CFG_CMN_1US_TMR,
+           CMN_CONFIG_CFG_CMN_1US_TMR_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_1US_TMR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_DBG_EN(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_DBG_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_DBG_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_DBG_EN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_DBG_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_DBG_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_DBG_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.setBit<CMN_CONFIG_CFG_CMN_DBG_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_DBG_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_CMN_CONFIG_CFG_CMN_DBG_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.clearBit<CMN_CONFIG_CFG_CMN_DBG_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_DBG_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CFG_CMN_DBG_EN(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return i_data.extractToRight<CMN_CONFIG_CFG_CMN_DBG_EN,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_RD_RST chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_DBG_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CMN_CONFIG_RD_RST(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CMN_CONFIG_CFG_CMN_DBG_EN(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return i_data.getBit<CMN_CONFIG_RD_RST>();
+    return i_data.getBit<CMN_CONFIG_CFG_CMN_DBG_EN>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_RD_RST chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_DBG_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_PRE_SCALAR(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_DBG_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_PRE_SCALAR,
-           CMN_CONFIG_PRE_SCALAR_LEN>(i_data);
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_DBG_SEL,
+           CMN_CONFIG_CFG_CMN_DBG_SEL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_PRE_SCALAR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_DBG_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_PRE_SCALAR(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_DBG_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_PRE_SCALAR,
-           CMN_CONFIG_PRE_SCALAR_LEN>(i_data);
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_DBG_SEL,
+           CMN_CONFIG_CFG_CMN_DBG_SEL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_PRE_SCALAR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_DBG_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_PRE_SCALAR(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CFG_CMN_DBG_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return i_data.extractToRight<CMN_CONFIG_PRE_SCALAR,
-           CMN_CONFIG_PRE_SCALAR_LEN>(o_data);
+    return i_data.extractToRight<CMN_CONFIG_CFG_CMN_DBG_SEL,
+           CMN_CONFIG_CFG_CMN_DBG_SEL_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_PRE_SCALAR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_DBG_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_FREEZE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_RD_RST(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_FREEZE,
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_RD_RST,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_FREEZE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_RD_RST chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_FREEZE(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_RD_RST(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_FREEZE,
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_RD_RST,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_FREEZE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_RD_RST chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_FREEZE(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_RD_RST(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.setBit<CMN_CONFIG_FREEZE>();
+    return o_data.setBit<CMN_CONFIG_CFG_CMN_RD_RST>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_FREEZE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_RD_RST chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CMN_CONFIG_FREEZE(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CMN_CONFIG_CFG_CMN_RD_RST(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.clearBit<CMN_CONFIG_FREEZE>();
+    return o_data.clearBit<CMN_CONFIG_CFG_CMN_RD_RST>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_FREEZE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_RD_RST chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_FREEZE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CFG_CMN_RD_RST(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return i_data.extractToRight<CMN_CONFIG_FREEZE,
+    return i_data.extractToRight<CMN_CONFIG_CFG_CMN_RD_RST,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_FREEZE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_RD_RST chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CMN_CONFIG_FREEZE(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CMN_CONFIG_CFG_CMN_RD_RST(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return i_data.getBit<CMN_CONFIG_FREEZE>();
+    return i_data.getBit<CMN_CONFIG_CFG_CMN_RD_RST>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_FREEZE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_RD_RST chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_PORT_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_PRE_SCALAR(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_PORT_SEL,
-           CMN_CONFIG_PORT_SEL_LEN>(i_data);
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_PRE_SCALAR,
+           CMN_CONFIG_CFG_CMN_PRE_SCALAR_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_PORT_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_PRE_SCALAR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_PORT_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_PRE_SCALAR(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_PORT_SEL,
-           CMN_CONFIG_PORT_SEL_LEN>(i_data);
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_PRE_SCALAR,
+           CMN_CONFIG_CFG_CMN_PRE_SCALAR_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_PORT_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_PRE_SCALAR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_PORT_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CFG_CMN_PRE_SCALAR(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return i_data.extractToRight<CMN_CONFIG_PORT_SEL,
-           CMN_CONFIG_PORT_SEL_LEN>(o_data);
+    return i_data.extractToRight<CMN_CONFIG_CFG_CMN_PRE_SCALAR,
+           CMN_CONFIG_CFG_CMN_PRE_SCALAR_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_PORT_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_PRE_SCALAR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR3_PS(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_FREEZE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_CNTR3_PS,
-           CMN_CONFIG_CNTR3_PS_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR3_PS chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR3_PS(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.insertFromRight<CMN_CONFIG_CNTR3_PS,
-           CMN_CONFIG_CNTR3_PS_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR3_PS chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CNTR3_PS(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return i_data.extractToRight<CMN_CONFIG_CNTR3_PS,
-           CMN_CONFIG_CNTR3_PS_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR3_PS chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR3_ES(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.insertFromRight<CMN_CONFIG_CNTR3_ES,
-           CMN_CONFIG_CNTR3_ES_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR3_ES chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR3_ES(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.insertFromRight<CMN_CONFIG_CNTR3_ES,
-           CMN_CONFIG_CNTR3_ES_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR3_ES chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CNTR3_ES(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return i_data.extractToRight<CMN_CONFIG_CNTR3_ES,
-           CMN_CONFIG_CNTR3_ES_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR3_ES chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR2_PS(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.insertFromRight<CMN_CONFIG_CNTR2_PS,
-           CMN_CONFIG_CNTR2_PS_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR2_PS chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR2_PS(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.insertFromRight<CMN_CONFIG_CNTR2_PS,
-           CMN_CONFIG_CNTR2_PS_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR2_PS chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CNTR2_PS(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return i_data.extractToRight<CMN_CONFIG_CNTR2_PS,
-           CMN_CONFIG_CNTR2_PS_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR2_PS chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR2_ES(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.insertFromRight<CMN_CONFIG_CNTR2_ES,
-           CMN_CONFIG_CNTR2_ES_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR2_ES chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR2_ES(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.insertFromRight<CMN_CONFIG_CNTR2_ES,
-           CMN_CONFIG_CNTR2_ES_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR2_ES chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CNTR2_ES(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return i_data.extractToRight<CMN_CONFIG_CNTR2_ES,
-           CMN_CONFIG_CNTR2_ES_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR2_ES chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR1_PS(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.insertFromRight<CMN_CONFIG_CNTR1_PS,
-           CMN_CONFIG_CNTR1_PS_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR1_PS chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR1_PS(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.insertFromRight<CMN_CONFIG_CNTR1_PS,
-           CMN_CONFIG_CNTR1_PS_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR1_PS chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CNTR1_PS(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return i_data.extractToRight<CMN_CONFIG_CNTR1_PS,
-           CMN_CONFIG_CNTR1_PS_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR1_PS chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR1_ES(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.insertFromRight<CMN_CONFIG_CNTR1_ES,
-           CMN_CONFIG_CNTR1_ES_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR1_ES chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR1_ES(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.insertFromRight<CMN_CONFIG_CNTR1_ES,
-           CMN_CONFIG_CNTR1_ES_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR1_ES chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CNTR1_ES(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return i_data.extractToRight<CMN_CONFIG_CNTR1_ES,
-           CMN_CONFIG_CNTR1_ES_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR1_ES chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR0_PS(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.insertFromRight<CMN_CONFIG_CNTR0_PS,
-           CMN_CONFIG_CNTR0_PS_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR0_PS chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR0_PS(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.insertFromRight<CMN_CONFIG_CNTR0_PS,
-           CMN_CONFIG_CNTR0_PS_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR0_PS chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CNTR0_PS(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return i_data.extractToRight<CMN_CONFIG_CNTR0_PS,
-           CMN_CONFIG_CNTR0_PS_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR0_PS chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR0_ES(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.insertFromRight<CMN_CONFIG_CNTR0_ES,
-           CMN_CONFIG_CNTR0_ES_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR0_ES chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR0_ES(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.insertFromRight<CMN_CONFIG_CNTR0_ES,
-           CMN_CONFIG_CNTR0_ES_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR0_ES chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CNTR0_ES(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return i_data.extractToRight<CMN_CONFIG_CNTR0_ES,
-           CMN_CONFIG_CNTR0_ES_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR0_ES chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR3_PE(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.insertFromRight<CMN_CONFIG_CNTR3_PE,
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_FREEZE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR3_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_FREEZE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR3_PE(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_FREEZE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_CNTR3_PE,
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_FREEZE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR3_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_FREEZE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR3_PE(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_FREEZE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.setBit<CMN_CONFIG_CNTR3_PE>();
+    return o_data.setBit<CMN_CONFIG_CFG_CMN_FREEZE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR3_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_FREEZE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CMN_CONFIG_CNTR3_PE(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CMN_CONFIG_CFG_CMN_FREEZE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.clearBit<CMN_CONFIG_CNTR3_PE>();
+    return o_data.clearBit<CMN_CONFIG_CFG_CMN_FREEZE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR3_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_FREEZE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CNTR3_PE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CFG_CMN_FREEZE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return i_data.extractToRight<CMN_CONFIG_CNTR3_PE,
+    return i_data.extractToRight<CMN_CONFIG_CFG_CMN_FREEZE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR3_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_FREEZE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CMN_CONFIG_CNTR3_PE(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CMN_CONFIG_CFG_CMN_FREEZE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return i_data.getBit<CMN_CONFIG_CNTR3_PE>();
+    return i_data.getBit<CMN_CONFIG_CFG_CMN_FREEZE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR3_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_FREEZE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR2_PE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_PORT_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_CNTR2_PE,
-           1>(i_data);
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_PORT_SEL,
+           CMN_CONFIG_CFG_CMN_PORT_SEL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR2_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_PORT_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR2_PE(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_PORT_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_CNTR2_PE,
-           1>(i_data);
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_PORT_SEL,
+           CMN_CONFIG_CFG_CMN_PORT_SEL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR2_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_PORT_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR2_PE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.setBit<CMN_CONFIG_CNTR2_PE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR2_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_CMN_CONFIG_CNTR2_PE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.clearBit<CMN_CONFIG_CNTR2_PE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR2_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CNTR2_PE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CFG_CMN_PORT_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return i_data.extractToRight<CMN_CONFIG_CNTR2_PE,
-           1>(o_data);
+    return i_data.extractToRight<CMN_CONFIG_CFG_CMN_PORT_SEL,
+           CMN_CONFIG_CFG_CMN_PORT_SEL_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR2_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_PORT_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CMN_CONFIG_CNTR2_PE(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return i_data.getBit<CMN_CONFIG_CNTR2_PE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR2_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR1_PE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR3_PS(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_CNTR1_PE,
-           1>(i_data);
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_CNTR3_PS,
+           CMN_CONFIG_CFG_CMN_CNTR3_PS_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR1_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR3_PS chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR1_PE(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR3_PS(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_CNTR1_PE,
-           1>(i_data);
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_CNTR3_PS,
+           CMN_CONFIG_CFG_CMN_CNTR3_PS_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR1_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR3_PS chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR1_PE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.setBit<CMN_CONFIG_CNTR1_PE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR1_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_CMN_CONFIG_CNTR1_PE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.clearBit<CMN_CONFIG_CNTR1_PE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR1_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CNTR1_PE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CFG_CMN_CNTR3_PS(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return i_data.extractToRight<CMN_CONFIG_CNTR1_PE,
-           1>(o_data);
+    return i_data.extractToRight<CMN_CONFIG_CFG_CMN_CNTR3_PS,
+           CMN_CONFIG_CFG_CMN_CNTR3_PS_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR1_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR3_PS chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CMN_CONFIG_CNTR1_PE(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return i_data.getBit<CMN_CONFIG_CNTR1_PE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR1_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR0_PE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR3_ES(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_CNTR0_PE,
-           1>(i_data);
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_CNTR3_ES,
+           CMN_CONFIG_CFG_CMN_CNTR3_ES_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR0_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR3_ES chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR0_PE(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR3_ES(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_CNTR0_PE,
-           1>(i_data);
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_CNTR3_ES,
+           CMN_CONFIG_CFG_CMN_CNTR3_ES_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR0_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR3_ES chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR0_PE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.setBit<CMN_CONFIG_CNTR0_PE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR0_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_CMN_CONFIG_CNTR0_PE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.clearBit<CMN_CONFIG_CNTR0_PE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR0_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CNTR0_PE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CFG_CMN_CNTR3_ES(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return i_data.extractToRight<CMN_CONFIG_CNTR0_PE,
-           1>(o_data);
+    return i_data.extractToRight<CMN_CONFIG_CFG_CMN_CNTR3_ES,
+           CMN_CONFIG_CFG_CMN_CNTR3_ES_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR0_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR3_ES chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CMN_CONFIG_CNTR0_PE(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return i_data.getBit<CMN_CONFIG_CNTR0_PE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR0_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR3_EN(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR2_PS(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_CNTR3_EN,
-           1>(i_data);
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_CNTR2_PS,
+           CMN_CONFIG_CFG_CMN_CNTR2_PS_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR3_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR2_PS chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR3_EN(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR2_PS(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_CNTR3_EN,
-           1>(i_data);
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_CNTR2_PS,
+           CMN_CONFIG_CFG_CMN_CNTR2_PS_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR3_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR2_PS chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR3_EN(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.setBit<CMN_CONFIG_CNTR3_EN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR3_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_CMN_CONFIG_CNTR3_EN(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.clearBit<CMN_CONFIG_CNTR3_EN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR3_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CNTR3_EN(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CFG_CMN_CNTR2_PS(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return i_data.extractToRight<CMN_CONFIG_CNTR3_EN,
-           1>(o_data);
+    return i_data.extractToRight<CMN_CONFIG_CFG_CMN_CNTR2_PS,
+           CMN_CONFIG_CFG_CMN_CNTR2_PS_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR3_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR2_PS chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CMN_CONFIG_CNTR3_EN(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return i_data.getBit<CMN_CONFIG_CNTR3_EN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR3_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR2_EN(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR2_ES(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_CNTR2_EN,
-           1>(i_data);
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_CNTR2_ES,
+           CMN_CONFIG_CFG_CMN_CNTR2_ES_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR2_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR2_ES chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR2_EN(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR2_ES(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_CNTR2_EN,
-           1>(i_data);
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_CNTR2_ES,
+           CMN_CONFIG_CFG_CMN_CNTR2_ES_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR2_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR2_ES chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR2_EN(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.setBit<CMN_CONFIG_CNTR2_EN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR2_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_CMN_CONFIG_CNTR2_EN(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.clearBit<CMN_CONFIG_CNTR2_EN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR2_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CNTR2_EN(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CFG_CMN_CNTR2_ES(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return i_data.extractToRight<CMN_CONFIG_CNTR2_EN,
-           1>(o_data);
+    return i_data.extractToRight<CMN_CONFIG_CFG_CMN_CNTR2_ES,
+           CMN_CONFIG_CFG_CMN_CNTR2_ES_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR2_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR2_ES chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CMN_CONFIG_CNTR2_EN(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return i_data.getBit<CMN_CONFIG_CNTR2_EN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR2_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR1_EN(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR1_PS(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_CNTR1_EN,
-           1>(i_data);
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_CNTR1_PS,
+           CMN_CONFIG_CFG_CMN_CNTR1_PS_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR1_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR1_PS chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR1_EN(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR1_PS(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_CNTR1_EN,
-           1>(i_data);
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_CNTR1_PS,
+           CMN_CONFIG_CFG_CMN_CNTR1_PS_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR1_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR1_PS chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR1_EN(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.setBit<CMN_CONFIG_CNTR1_EN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR1_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_CMN_CONFIG_CNTR1_EN(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.clearBit<CMN_CONFIG_CNTR1_EN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR1_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CNTR1_EN(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CFG_CMN_CNTR1_PS(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return i_data.extractToRight<CMN_CONFIG_CNTR1_EN,
-           1>(o_data);
+    return i_data.extractToRight<CMN_CONFIG_CFG_CMN_CNTR1_PS,
+           CMN_CONFIG_CFG_CMN_CNTR1_PS_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR1_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR1_PS chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CMN_CONFIG_CNTR1_EN(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return i_data.getBit<CMN_CONFIG_CNTR1_EN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR1_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR0_EN(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR1_ES(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_CNTR0_EN,
-           1>(i_data);
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_CNTR1_ES,
+           CMN_CONFIG_CFG_CMN_CNTR1_ES_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR0_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR1_ES chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR0_EN(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR1_ES(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return o_data.insertFromRight<CMN_CONFIG_CNTR0_EN,
-           1>(i_data);
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_CNTR1_ES,
+           CMN_CONFIG_CFG_CMN_CNTR1_ES_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR0_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR1_ES chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CNTR0_EN(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.setBit<CMN_CONFIG_CNTR0_EN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR0_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_CMN_CONFIG_CNTR0_EN(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
-#endif
-    return o_data.clearBit<CMN_CONFIG_CNTR0_EN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR0_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CNTR0_EN(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CFG_CMN_CNTR1_ES(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return i_data.extractToRight<CMN_CONFIG_CNTR0_EN,
-           1>(o_data);
+    return i_data.extractToRight<CMN_CONFIG_CFG_CMN_CNTR1_ES,
+           CMN_CONFIG_CFG_CMN_CNTR1_ES_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR0_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR1_ES chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CMN_CONFIG_CNTR0_EN(fapi2::buffer<uint64_t>& i_data)
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR0_PS(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CMN_CONFIG));
 #endif
-    return i_data.getBit<CMN_CONFIG_CNTR0_EN>();
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_CNTR0_PS,
+           CMN_CONFIG_CFG_CMN_CNTR0_PS_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CMN_CONFIG_CNTR0_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR0_PS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR0_PS(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_CNTR0_PS,
+           CMN_CONFIG_CFG_CMN_CNTR0_PS_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR0_PS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CFG_CMN_CNTR0_PS(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return i_data.extractToRight<CMN_CONFIG_CFG_CMN_CNTR0_PS,
+           CMN_CONFIG_CFG_CMN_CNTR0_PS_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR0_PS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR0_ES(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_CNTR0_ES,
+           CMN_CONFIG_CFG_CMN_CNTR0_ES_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR0_ES chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR0_ES(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_CNTR0_ES,
+           CMN_CONFIG_CFG_CMN_CNTR0_ES_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR0_ES chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CFG_CMN_CNTR0_ES(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return i_data.extractToRight<CMN_CONFIG_CFG_CMN_CNTR0_ES,
+           CMN_CONFIG_CFG_CMN_CNTR0_ES_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR0_ES chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR3_PE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_CNTR3_PE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR3_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR3_PE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_CNTR3_PE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR3_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR3_PE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.setBit<CMN_CONFIG_CFG_CMN_CNTR3_PE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR3_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_CMN_CONFIG_CFG_CMN_CNTR3_PE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.clearBit<CMN_CONFIG_CFG_CMN_CNTR3_PE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR3_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CFG_CMN_CNTR3_PE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return i_data.extractToRight<CMN_CONFIG_CFG_CMN_CNTR3_PE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR3_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_CMN_CONFIG_CFG_CMN_CNTR3_PE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return i_data.getBit<CMN_CONFIG_CFG_CMN_CNTR3_PE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR3_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR2_PE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_CNTR2_PE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR2_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR2_PE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_CNTR2_PE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR2_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR2_PE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.setBit<CMN_CONFIG_CFG_CMN_CNTR2_PE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR2_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_CMN_CONFIG_CFG_CMN_CNTR2_PE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.clearBit<CMN_CONFIG_CFG_CMN_CNTR2_PE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR2_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CFG_CMN_CNTR2_PE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return i_data.extractToRight<CMN_CONFIG_CFG_CMN_CNTR2_PE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR2_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_CMN_CONFIG_CFG_CMN_CNTR2_PE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return i_data.getBit<CMN_CONFIG_CFG_CMN_CNTR2_PE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR2_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR1_PE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_CNTR1_PE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR1_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR1_PE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_CNTR1_PE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR1_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR1_PE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.setBit<CMN_CONFIG_CFG_CMN_CNTR1_PE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR1_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_CMN_CONFIG_CFG_CMN_CNTR1_PE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.clearBit<CMN_CONFIG_CFG_CMN_CNTR1_PE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR1_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CFG_CMN_CNTR1_PE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return i_data.extractToRight<CMN_CONFIG_CFG_CMN_CNTR1_PE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR1_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_CMN_CONFIG_CFG_CMN_CNTR1_PE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return i_data.getBit<CMN_CONFIG_CFG_CMN_CNTR1_PE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR1_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR0_PE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_CNTR0_PE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR0_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR0_PE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_CNTR0_PE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR0_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR0_PE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.setBit<CMN_CONFIG_CFG_CMN_CNTR0_PE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR0_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_CMN_CONFIG_CFG_CMN_CNTR0_PE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.clearBit<CMN_CONFIG_CFG_CMN_CNTR0_PE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR0_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CFG_CMN_CNTR0_PE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return i_data.extractToRight<CMN_CONFIG_CFG_CMN_CNTR0_PE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR0_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_CMN_CONFIG_CFG_CMN_CNTR0_PE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return i_data.getBit<CMN_CONFIG_CFG_CMN_CNTR0_PE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR0_PE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR3_EN(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_CNTR3_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR3_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR3_EN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_CNTR3_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR3_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR3_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.setBit<CMN_CONFIG_CFG_CMN_CNTR3_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR3_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_CMN_CONFIG_CFG_CMN_CNTR3_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.clearBit<CMN_CONFIG_CFG_CMN_CNTR3_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR3_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CFG_CMN_CNTR3_EN(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return i_data.extractToRight<CMN_CONFIG_CFG_CMN_CNTR3_EN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR3_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_CMN_CONFIG_CFG_CMN_CNTR3_EN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return i_data.getBit<CMN_CONFIG_CFG_CMN_CNTR3_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR3_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR2_EN(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_CNTR2_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR2_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR2_EN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_CNTR2_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR2_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR2_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.setBit<CMN_CONFIG_CFG_CMN_CNTR2_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR2_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_CMN_CONFIG_CFG_CMN_CNTR2_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.clearBit<CMN_CONFIG_CFG_CMN_CNTR2_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR2_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CFG_CMN_CNTR2_EN(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return i_data.extractToRight<CMN_CONFIG_CFG_CMN_CNTR2_EN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR2_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_CMN_CONFIG_CFG_CMN_CNTR2_EN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return i_data.getBit<CMN_CONFIG_CFG_CMN_CNTR2_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR2_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR1_EN(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_CNTR1_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR1_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR1_EN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_CNTR1_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR1_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR1_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.setBit<CMN_CONFIG_CFG_CMN_CNTR1_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR1_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_CMN_CONFIG_CFG_CMN_CNTR1_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.clearBit<CMN_CONFIG_CFG_CMN_CNTR1_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR1_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CFG_CMN_CNTR1_EN(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return i_data.extractToRight<CMN_CONFIG_CFG_CMN_CNTR1_EN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR1_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_CMN_CONFIG_CFG_CMN_CNTR1_EN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return i_data.getBit<CMN_CONFIG_CFG_CMN_CNTR1_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR1_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR0_EN(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_CNTR0_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR0_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR0_EN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.insertFromRight<CMN_CONFIG_CFG_CMN_CNTR0_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR0_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CMN_CONFIG_CFG_CMN_CNTR0_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.setBit<CMN_CONFIG_CFG_CMN_CNTR0_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR0_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_CMN_CONFIG_CFG_CMN_CNTR0_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return o_data.clearBit<CMN_CONFIG_CFG_CMN_CNTR0_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR0_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CMN_CONFIG_CFG_CMN_CNTR0_EN(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return i_data.extractToRight<CMN_CONFIG_CFG_CMN_CNTR0_EN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR0_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_CMN_CONFIG_CFG_CMN_CNTR0_EN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CMN_CONFIG));
+#endif
+    return i_data.getBit<CMN_CONFIG_CFG_CMN_CNTR0_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CMN_CONFIG_CFG_CMN_CNTR0_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

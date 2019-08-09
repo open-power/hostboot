@@ -205,6 +205,14 @@ static const uint32_t CS_SM0_MCP_MISC_CERR_HOLD1_PBF_8 = 24;
 static const uint32_t CS_SM0_MCP_MISC_CERR_HOLD1_PBF_9 = 25;
 static const uint32_t CS_SM0_MCP_MISC_CERR_HOLD1_PBF_10 = 26;
 static const uint32_t CS_SM0_MCP_MISC_CERR_HOLD1_PBF_11 = 27;
+static const uint32_t CS_SM0_MCP_MISC_CERR_HOLD1_LDA_0 = 28;
+static const uint32_t CS_SM0_MCP_MISC_CERR_HOLD1_LDA_1 = 29;
+static const uint32_t CS_SM0_MCP_MISC_CERR_HOLD1_LDA_2 = 30;
+static const uint32_t CS_SM0_MCP_MISC_CERR_HOLD1_LDA_3 = 31;
+static const uint32_t CS_SM0_MCP_MISC_CERR_HOLD1_STA_0 = 32;
+static const uint32_t CS_SM0_MCP_MISC_CERR_HOLD1_STA_1 = 33;
+static const uint32_t CS_SM0_MCP_MISC_CERR_HOLD1_STA_2 = 34;
+static const uint32_t CS_SM0_MCP_MISC_CERR_HOLD1_STA_3 = 35;
 // pau/reg00004.H
 
 static const uint64_t CS_SM0_MCP_MISC_CERR_MESSAGE3 = 0x10010809ull;
@@ -275,10 +283,10 @@ static const uint32_t CS_SM0_SNP_MISC_CERR_MASK0_NLG_20 = 56;
 static const uint32_t CS_SM0_SNP_MISC_CERR_MASK0_NLG_21 = 57;
 static const uint32_t CS_SM0_SNP_MISC_CERR_MASK0_NLG_22 = 58;
 static const uint32_t CS_SM0_SNP_MISC_CERR_MASK0_NLG_23 = 59;
-static const uint32_t CS_SM0_SNP_MISC_CERR_MASK0_SMV_0 = 60;
-static const uint32_t CS_SM0_SNP_MISC_CERR_MASK0_SMV_1 = 61;
-static const uint32_t CS_SM0_SNP_MISC_CERR_MASK0_SMV_2 = 62;
-static const uint32_t CS_SM0_SNP_MISC_CERR_MASK0_SMV_3 = 63;
+static const uint32_t CS_SM0_SNP_MISC_CERR_MASK0_PBF_0 = 60;
+static const uint32_t CS_SM0_SNP_MISC_CERR_MASK0_PBF_1 = 61;
+static const uint32_t CS_SM0_SNP_MISC_CERR_MASK0_PBF_2 = 62;
+static const uint32_t CS_SM0_SNP_MISC_CERR_MASK0_PBF_3 = 63;
 // pau/reg00004.H
 
 static const uint64_t CS_SM0_SNP_MISC_CONFIG_RELAXED_BRK4 = 0x1001084aull;
@@ -391,8 +399,18 @@ static const uint32_t CS_SM1_MCP_MISC_CONFIG2__ENABLE_PHASE1_CLEAN = 18;
 static const uint32_t CS_SM1_MCP_MISC_CONFIG2__ENABLE_PHASE1_AMO = 19;
 static const uint32_t CS_SM1_MCP_MISC_CONFIG2__DCARM_TIMER = 20;
 static const uint32_t CS_SM1_MCP_MISC_CONFIG2__DCARM_TIMER_LEN = 12;
-static const uint32_t CS_SM1_MCP_MISC_CONFIG2_2_RESERVED = 32;
-static const uint32_t CS_SM1_MCP_MISC_CONFIG2_2_RESERVED_LEN = 32;
+static const uint32_t CS_SM1_MCP_MISC_CONFIG2__BRK0_EXT_MEM_TAGS = 32;
+static const uint32_t CS_SM1_MCP_MISC_CONFIG2__BRK0_EXT_MEM_TAGS_LEN = 2;
+static const uint32_t CS_SM1_MCP_MISC_CONFIG2__BRK1_EXT_MEM_TAGS = 34;
+static const uint32_t CS_SM1_MCP_MISC_CONFIG2__BRK1_EXT_MEM_TAGS_LEN = 2;
+static const uint32_t CS_SM1_MCP_MISC_CONFIG2__BRK2_EXT_MEM_TAGS = 36;
+static const uint32_t CS_SM1_MCP_MISC_CONFIG2__BRK2_EXT_MEM_TAGS_LEN = 2;
+static const uint32_t CS_SM1_MCP_MISC_CONFIG2__BRK3_EXT_MEM_TAGS = 38;
+static const uint32_t CS_SM1_MCP_MISC_CONFIG2__BRK3_EXT_MEM_TAGS_LEN = 2;
+static const uint32_t CS_SM1_MCP_MISC_CONFIG2__BRK4_EXT_MEM_TAGS = 40;
+static const uint32_t CS_SM1_MCP_MISC_CONFIG2__BRK4_EXT_MEM_TAGS_LEN = 2;
+static const uint32_t CS_SM1_MCP_MISC_CONFIG2_2_RESERVED = 42;
+static const uint32_t CS_SM1_MCP_MISC_CONFIG2_2_RESERVED_LEN = 22;
 // pau/reg00004.H
 
 static const uint64_t CS_SM1_MCP_MISC_PERF_MASK_CONFIG = 0x10010879ull;
@@ -714,7 +732,7 @@ static const uint32_t FIR_REG_2_OTL_RXI_VC2FIFO_OVERRUN = 29;
 static const uint32_t FIR_REG_2_OTL_DATA_LENGTH_UNSUPPORTED = 30;
 static const uint32_t FIR_REG_2_TXI_OPCODE_ERROR = 31;
 static const uint32_t FIR_REG_2_RXI_MALFORMED_PACKET_TYPE4 = 32;
-static const uint32_t FIR_REG_2_OTL_RSVD_29 = 33;
+static const uint32_t FIR_REG_2_HAPPI_NO_BAR_MATCH = 33;
 static const uint32_t FIR_REG_2_OTL_RSVD_30 = 34;
 static const uint32_t FIR_REG_2_OTL_RSVD_31 = 35;
 static const uint32_t FIR_REG_2_XSL_MMIO_INVALIDATE_REQ_WHILE_1_INPROG = 36;

@@ -3408,6 +3408,97 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_USTL_USTLCFG2(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = USTL_USTLCFG2;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_USTL_USTLCFG2(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = USTL_USTLCFG2;
+#endif
+    return fapi2::getScom(i_target, USTL_USTLCFG2, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_USTL_USTLCFG2(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(USTL_USTLCFG2));
+#endif
+    return fapi2::putScom(i_target, USTL_USTLCFG2, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLCFG2_USTLCFG2_RESP_QUEUE_STALL_THRESH(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(USTL_USTLCFG2));
+#endif
+    return o_data.insertFromRight<USTL_USTLCFG2_USTLCFG2_RESP_QUEUE_STALL_THRESH,
+           USTL_USTLCFG2_USTLCFG2_RESP_QUEUE_STALL_THRESH_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access USTL_USTLCFG2_USTLCFG2_RESP_QUEUE_STALL_THRESH chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLCFG2_USTLCFG2_RESP_QUEUE_STALL_THRESH(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(USTL_USTLCFG2));
+#endif
+    return o_data.insertFromRight<USTL_USTLCFG2_USTLCFG2_RESP_QUEUE_STALL_THRESH,
+           USTL_USTLCFG2_USTLCFG2_RESP_QUEUE_STALL_THRESH_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access USTL_USTLCFG2_USTLCFG2_RESP_QUEUE_STALL_THRESH chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_USTL_USTLCFG2_USTLCFG2_RESP_QUEUE_STALL_THRESH(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(USTL_USTLCFG2));
+#endif
+    return i_data.extractToRight<USTL_USTLCFG2_USTLCFG2_RESP_QUEUE_STALL_THRESH,
+           USTL_USTLCFG2_USTLCFG2_RESP_QUEUE_STALL_THRESH_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access USTL_USTLCFG2_USTLCFG2_RESP_QUEUE_STALL_THRESH chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_WRITE_READCFG(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
@@ -4477,47 +4568,137 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_READCFG_RESERVED_34_39(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_CFG_RD_WAT_FASTPATH_EVENT(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return o_data.insertFromRight<WRITE_READCFG_READCFG_RESERVED_34_39,
-           WRITE_READCFG_READCFG_RESERVED_34_39_LEN>(i_data);
+    return o_data.insertFromRight<WRITE_READCFG_CFG_RD_WAT_FASTPATH_EVENT,
+           WRITE_READCFG_CFG_RD_WAT_FASTPATH_EVENT_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_RESERVED_34_39 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_RD_WAT_FASTPATH_EVENT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_READCFG_RESERVED_34_39(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_CFG_RD_WAT_FASTPATH_EVENT(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return o_data.insertFromRight<WRITE_READCFG_READCFG_RESERVED_34_39,
-           WRITE_READCFG_READCFG_RESERVED_34_39_LEN>(i_data);
+    return o_data.insertFromRight<WRITE_READCFG_CFG_RD_WAT_FASTPATH_EVENT,
+           WRITE_READCFG_CFG_RD_WAT_FASTPATH_EVENT_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_RESERVED_34_39 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_RD_WAT_FASTPATH_EVENT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_WRITE_READCFG_READCFG_RESERVED_34_39(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_WRITE_READCFG_CFG_RD_WAT_FASTPATH_EVENT(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return i_data.extractToRight<WRITE_READCFG_READCFG_RESERVED_34_39,
-           WRITE_READCFG_READCFG_RESERVED_34_39_LEN>(o_data);
+    return i_data.extractToRight<WRITE_READCFG_CFG_RD_WAT_FASTPATH_EVENT,
+           WRITE_READCFG_CFG_RD_WAT_FASTPATH_EVENT_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_RESERVED_34_39 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_RD_WAT_FASTPATH_EVENT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_CFG_RD_WAT_STALL_EVENT(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(WRITE_READCFG));
+#endif
+    return o_data.insertFromRight<WRITE_READCFG_CFG_RD_WAT_STALL_EVENT,
+           WRITE_READCFG_CFG_RD_WAT_STALL_EVENT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_RD_WAT_STALL_EVENT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_CFG_RD_WAT_STALL_EVENT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(WRITE_READCFG));
+#endif
+    return o_data.insertFromRight<WRITE_READCFG_CFG_RD_WAT_STALL_EVENT,
+           WRITE_READCFG_CFG_RD_WAT_STALL_EVENT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_RD_WAT_STALL_EVENT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_WRITE_READCFG_CFG_RD_WAT_STALL_EVENT(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(WRITE_READCFG));
+#endif
+    return i_data.extractToRight<WRITE_READCFG_CFG_RD_WAT_STALL_EVENT,
+           WRITE_READCFG_CFG_RD_WAT_STALL_EVENT_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_RD_WAT_STALL_EVENT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_READCFG_RESERVED_38_39(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(WRITE_READCFG));
+#endif
+    return o_data.insertFromRight<WRITE_READCFG_READCFG_RESERVED_38_39,
+           WRITE_READCFG_READCFG_RESERVED_38_39_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_RESERVED_38_39 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_READCFG_RESERVED_38_39(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(WRITE_READCFG));
+#endif
+    return o_data.insertFromRight<WRITE_READCFG_READCFG_RESERVED_38_39,
+           WRITE_READCFG_READCFG_RESERVED_38_39_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_RESERVED_38_39 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_WRITE_READCFG_READCFG_RESERVED_38_39(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(WRITE_READCFG));
+#endif
+    return i_data.extractToRight<WRITE_READCFG_READCFG_RESERVED_38_39,
+           WRITE_READCFG_READCFG_RESERVED_38_39_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_RESERVED_38_39 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

@@ -50,36 +50,44 @@ static const uint32_t CPMS_CERRMSK_FTC_EVENT_MASK = 5;
 static const uint32_t CPMS_CERRMSK_FTC_EVENT_MASK_LEN = 3;
 // c/reg00007.H
 
-static const uint64_t EC_LS_LSU_HOLD_OUT_REG0 = 0x200206c0ull;
+static const uint64_t EC_LS_LSU_HOLD_OUT_REG0 = 0x202106c0ull;
 // c/reg00007.H
 
-static const uint64_t EC_PC_FIR_HOLD_OUT = 0x20020451ull;
+static const uint64_t EC_PC_FIR_HOLD_OUT = 0x20210451ull;
 // c/reg00007.H
 
-static const uint64_t EC_PC_FIR_RAM_MODEREG = 0x2002044eull;
+static const uint64_t EC_PC_FIR_RAM_MODEREG = 0x2021044eull;
 
 static const uint32_t EC_PC_FIR_RAM_MODEREG_RAM_MODE_ENABLE = 0;
 // c/reg00007.H
 
-static const uint64_t EC_PC_SCR2 = 0x20020488ull;
+static const uint64_t EC_PC_SCR2 = 0x20210488ull;
 // c/reg00007.H
 
-static const uint64_t EC_PC_THRCTL_TCTLCOM_RAS_MODEREG = 0x20020453ull;
+static const uint64_t EC_PC_THRCTL_TCTLCOM_RAS_MODEREG = 0x20210453ull;
+
+static const uint32_t EC_PC_THRCTL_TCTLCOM_RAS_MODEREG_DIS_PMON_INTR = 56;
+static const uint32_t EC_PC_THRCTL_TCTLCOM_RAS_MODEREG_FENCE_INTERRUPTS = 57;
+static const uint32_t EC_PC_THRCTL_TCTLCOM_RAS_MODEREG_BLOCK_HMI_IN_MAINT = 62;
+static const uint32_t EC_PC_THRCTL_TCTLCOM_RAS_MODEREG_FENCE_INTR_ON_CHECKSTOP = 63;
 // c/reg00007.H
 
-static const uint64_t EC_PC_TRACE1_TR0_TRACE_HI_DATA_REG = 0x20020a40ull;
+static const uint64_t EC_PC_TRACE1_TR0_TRACE_HI_DATA_REG = 0x20210a40ull;
 
 static const uint32_t EC_PC_TRACE1_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
 static const uint32_t EC_PC_TRACE1_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
 // c/reg00007.H
 
-static const uint64_t EC_PC_TRACE2_TR0_CONFIG_0 = 0x20020a83ull;
+static const uint64_t EC_PC_TRACE2_TR0_CONFIG_0 = 0x20210a83ull;
 
 static const uint32_t EC_PC_TRACE2_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63 = 0;
 static const uint32_t EC_PC_TRACE2_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63_LEN = 64;
 // c/reg00007.H
 
-static const uint64_t L2TRA_TR1_TRACE_LO_DATA_REG = 0x20020081ull;
+static const uint64_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT1 = 0x20210641ull;
+// c/reg00007.H
+
+static const uint64_t L2TRA_TR1_TRACE_LO_DATA_REG = 0x20210081ull;
 
 static const uint32_t L2TRA_TR1_TRACE_LO_DATA_REG_LO_DATA = 0;
 static const uint32_t L2TRA_TR1_TRACE_LO_DATA_REG_LO_DATA_LEN = 32;
@@ -94,7 +102,7 @@ static const uint32_t L2TRA_TR1_TRACE_LO_DATA_REG_HOLD_ADDRESS = 54;
 static const uint32_t L2TRA_TR1_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
 // c/reg00007.H
 
-static const uint64_t L2TRA_TR1_CONFIG_4 = 0x20020087ull;
+static const uint64_t L2TRA_TR1_CONFIG_4 = 0x20210087ull;
 
 static const uint32_t L2TRA_TR1_CONFIG_4_A = 0;
 static const uint32_t L2TRA_TR1_CONFIG_4_A_LEN = 24;
@@ -102,7 +110,7 @@ static const uint32_t L2TRA_TR1_CONFIG_4_B = 24;
 static const uint32_t L2TRA_TR1_CONFIG_4_B_LEN = 24;
 // c/reg00007.H
 
-static const uint64_t L3_MISC_L3CERRS_PRD_PURGE_REG = 0x2001060eull;
+static const uint64_t L3_MISC_L3CERRS_PRD_PURGE_REG = 0x2020060eull;
 
 static const uint32_t L3_MISC_L3CERRS_PRD_PURGE_REG_PURGE_REQ = 0;
 static const uint32_t L3_MISC_L3CERRS_PRD_PURGE_REG_PURGE_TTYPE = 1;
@@ -116,7 +124,7 @@ static const uint32_t L3_MISC_L3CERRS_PRD_PURGE_REG_PURGE_DIR_ADDR = 16;
 static const uint32_t L3_MISC_L3CERRS_PRD_PURGE_REG_PURGE_DIR_ADDR_LEN = 11;
 // c/reg00007.H
 
-static const uint64_t L3_MISC_L3CERRS_TOPOLOGY_TBL3_SCOM_RD = 0x20010628ull;
+static const uint64_t L3_MISC_L3CERRS_TOPOLOGY_TBL3_SCOM_RD = 0x20200628ull;
 
 static const uint32_t L3_MISC_L3CERRS_TOPOLOGY_TBL3_SCOM_RD_24_VALID = 0;
 static const uint32_t L3_MISC_L3CERRS_TOPOLOGY_TBL3_SCOM_RD_25_VALID = 1;
@@ -144,7 +152,7 @@ static const uint32_t L3_MISC_L3CERRS_TOPOLOGY_TBL3_SCOM_RD_31 = 36;
 static const uint32_t L3_MISC_L3CERRS_TOPOLOGY_TBL3_SCOM_RD_31_LEN = 4;
 // c/reg00007.H
 
-static const uint64_t NC_NCMISC_NCSCOMS_NCU_STATUS_REG = 0x2001064full;
+static const uint64_t NC_NCMISC_NCSCOMS_NCU_STATUS_REG = 0x2020064full;
 
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_STATUS_REG_CORE0_REQ_ACTIVE = 0;
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_STATUS_REG_CORE1_REQ_ACTIVE = 1;
@@ -152,7 +160,7 @@ static const uint32_t NC_NCMISC_NCSCOMS_NCU_STATUS_REG_CORE_OR_SNP_REQ_ACTIVE = 
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_STATUS_REG_ANY_REQ_ACTIVE = 3;
 // c/reg00007.H
 
-static const uint64_t NC_NCMISC_NCSCOMS_NCU_TOPOTABLE_REG3 = 0x20010657ull;
+static const uint64_t NC_NCMISC_NCSCOMS_NCU_TOPOTABLE_REG3 = 0x20200657ull;
 
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_TOPOTABLE_REG3_24_VAL = 0;
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_TOPOTABLE_REG3_25_VAL = 1;

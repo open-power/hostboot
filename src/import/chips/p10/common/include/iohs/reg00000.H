@@ -7723,47 +7723,47 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_SYN_CAPTURE_SLECC_INFO(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_SYN_CAPTURE_RESERVED(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(DLP_LINK0_SYN_CAPTURE));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_SYN_CAPTURE_SLECC_INFO,
-           DLP_LINK0_SYN_CAPTURE_SLECC_INFO_LEN>(i_data);
+    return o_data.insertFromRight<DLP_LINK0_SYN_CAPTURE_RESERVED,
+           DLP_LINK0_SYN_CAPTURE_RESERVED_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLP_LINK0_SYN_CAPTURE_SLECC_INFO chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DLP_LINK0_SYN_CAPTURE_RESERVED chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_SYN_CAPTURE_SLECC_INFO(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_SYN_CAPTURE_RESERVED(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(DLP_LINK0_SYN_CAPTURE));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_SYN_CAPTURE_SLECC_INFO,
-           DLP_LINK0_SYN_CAPTURE_SLECC_INFO_LEN>(i_data);
+    return o_data.insertFromRight<DLP_LINK0_SYN_CAPTURE_RESERVED,
+           DLP_LINK0_SYN_CAPTURE_RESERVED_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLP_LINK0_SYN_CAPTURE_SLECC_INFO chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DLP_LINK0_SYN_CAPTURE_RESERVED chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_SYN_CAPTURE_SLECC_INFO(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_SYN_CAPTURE_RESERVED(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(DLP_LINK0_SYN_CAPTURE));
 #endif
-    return i_data.extractToRight<DLP_LINK0_SYN_CAPTURE_SLECC_INFO,
-           DLP_LINK0_SYN_CAPTURE_SLECC_INFO_LEN>(o_data);
+    return i_data.extractToRight<DLP_LINK0_SYN_CAPTURE_RESERVED,
+           DLP_LINK0_SYN_CAPTURE_RESERVED_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DLP_LINK0_SYN_CAPTURE_SLECC_INFO chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DLP_LINK0_SYN_CAPTURE_RESERVED chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

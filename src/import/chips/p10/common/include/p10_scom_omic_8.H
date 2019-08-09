@@ -118,6 +118,27 @@ static const uint32_t TX_CTL_SM_REGS_CTLSM_STAT6_PG_LS_FAIL = 49;
 static const uint32_t TX_CTL_SM_REGS_CTLSM_STAT6_PG_HS_FAIL = 50;
 // omic/reg00008.H
 
+static const uint64_t TX_SYNC = 0x0c01174dull;
+
+static const uint32_t TX_SYNC_ENA = 31;
+static const uint32_t TX_SYNC_DL7_DELAY = 32;
+static const uint32_t TX_SYNC_DL7_DELAY_LEN = 4;
+static const uint32_t TX_SYNC_DL6_DELAY = 36;
+static const uint32_t TX_SYNC_DL6_DELAY_LEN = 4;
+static const uint32_t TX_SYNC_DL5_DELAY = 40;
+static const uint32_t TX_SYNC_DL5_DELAY_LEN = 4;
+static const uint32_t TX_SYNC_DL4_DELAY = 44;
+static const uint32_t TX_SYNC_DL4_DELAY_LEN = 4;
+static const uint32_t TX_SYNC_DL3_DELAY = 48;
+static const uint32_t TX_SYNC_DL3_DELAY_LEN = 4;
+static const uint32_t TX_SYNC_DL2_DELAY = 52;
+static const uint32_t TX_SYNC_DL2_DELAY_LEN = 4;
+static const uint32_t TX_SYNC_DL1_DELAY = 56;
+static const uint32_t TX_SYNC_DL1_DELAY_LEN = 4;
+static const uint32_t TX_SYNC_DL0_DELAY = 60;
+static const uint32_t TX_SYNC_DL0_DELAY_LEN = 4;
+// omic/reg00008.H
+
 #ifndef __PPE_HCODE__
 }
 }

@@ -120,6 +120,12 @@ static const uint32_t DSTL_DSTLINJ_RESERVED_4_15 = 4;
 static const uint32_t DSTL_DSTLINJ_RESERVED_4_15_LEN = 12;
 // mcc/reg00007.H
 
+static const uint64_t USTL_USTLCFG2 = 0x0c010e17ull;
+
+static const uint32_t USTL_USTLCFG2_USTLCFG2_RESP_QUEUE_STALL_THRESH = 0;
+static const uint32_t USTL_USTLCFG2_USTLCFG2_RESP_QUEUE_STALL_THRESH_LEN = 6;
+// mcc/reg00007.H
+
 static const uint64_t WRITE_READCFG = 0x0c010f4dull;
 
 static const uint32_t WRITE_READCFG_CFG_RD_EINJ_TARGET = 0;
@@ -143,8 +149,12 @@ static const uint32_t WRITE_READCFG_CFG_P1PF_DROP_THRESHOLD_LEN = 7;
 static const uint32_t WRITE_READCFG_CFG_P1PF_EN_PEND_ADJ = 26;
 static const uint32_t WRITE_READCFG_CFG_P1PF_STOP_THRESHOLD = 27;
 static const uint32_t WRITE_READCFG_CFG_P1PF_STOP_THRESHOLD_LEN = 7;
-static const uint32_t WRITE_READCFG_READCFG_RESERVED_34_39 = 34;
-static const uint32_t WRITE_READCFG_READCFG_RESERVED_34_39_LEN = 6;
+static const uint32_t WRITE_READCFG_CFG_RD_WAT_FASTPATH_EVENT = 34;
+static const uint32_t WRITE_READCFG_CFG_RD_WAT_FASTPATH_EVENT_LEN = 2;
+static const uint32_t WRITE_READCFG_CFG_RD_WAT_STALL_EVENT = 36;
+static const uint32_t WRITE_READCFG_CFG_RD_WAT_STALL_EVENT_LEN = 2;
+static const uint32_t WRITE_READCFG_READCFG_RESERVED_38_39 = 38;
+static const uint32_t WRITE_READCFG_READCFG_RESERVED_38_39_LEN = 2;
 // mcc/reg00007.H
 
 static const uint64_t WRITE_WRT_DSTL_ECC = 0x0c010f4cull;
