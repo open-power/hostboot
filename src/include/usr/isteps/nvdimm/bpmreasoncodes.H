@@ -50,6 +50,10 @@ namespace BPM_RC
         BPM_WAIT_FOR_CMD_BIT_RESET          = 0x0A,
         BPM_WAIT_FOR_BUSY_BIT_RESET         = 0x0B,
         BPM_CHECK_FIRMWARE_CRC              = 0x0C,
+        BPM_VERIFY_GOOD_BPM_STATE           = 0x0D,
+        BPM_RUN_FW_UPDATES                  = 0x0F,
+        BPM_START_UPDATE                    = 0xFD,
+        BPM_END_UPDATE                      = 0xFE,
         BPM_DUMMY_ERROR                     = 0xFF,
     };
 
@@ -67,6 +71,9 @@ namespace BPM_RC
         BPM_EXCEEDED_RETRY_LIMIT            = BPM_COMP_ID | 0x09,
         BPM_CMD_STATUS_ERROR_BIT_SET        = BPM_COMP_ID | 0x0A,
         BPM_FIRMWARE_CRC_VERIFY_FAILURE     = BPM_COMP_ID | 0x0B,
+        BPM_VERSION_MISMATCH                = BPM_COMP_ID | 0x0C,
+        BPM_ENTER_UPDATE_MODE               = BPM_COMP_ID | 0xFD,
+        BPM_EXIT_UPDATE_MODE                = BPM_COMP_ID | 0xFE,
         BPM_DUMMY_REASONCODE                = BPM_COMP_ID | 0xFF,
     };
 

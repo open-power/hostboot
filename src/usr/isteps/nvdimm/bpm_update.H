@@ -177,6 +177,7 @@ constexpr uint8_t PAYLOAD_HEADER_SIZE = 4;
 // These indices have been subtracted by 1 from the given payload format because
 // after a payload is constructed the sync byte is removed from the front.
 constexpr uint8_t PAYLOAD_COMMAND_INDEX = 0;
+constexpr uint8_t PAYLOAD_ADDRESS_START_INDEX = 3;
 constexpr uint8_t PAYLOAD_DATA_START_INDEX = 7;
 constexpr uint8_t PAYLOAD_HEADER_DATA_LENGTH_INDEX = 1;
 
@@ -437,6 +438,15 @@ private:
     // yet.
     bool iv_segmentDMerged;
     bool iv_segmentBMerged;
+
+    // Keeps track of if an update has been attempted at least once.
+    bool iv_updateAttempted;
+
+     /**
+      * @brief Determines if another update attempt should occur for this BPM.
+      */
+    void setAttemptAnotherUpdate();
+
     /**
      * @brief Gets the BSL version from the BPM and sets the iv_bslVersion
      *        member. Only needs to be called once.
@@ -531,11 +541,32 @@ private:
     errlHndl_t updateFirmware(BpmFirmwareLidImage i_image);
 
     /**
+     * @brief Helper function that executes the firmware portion of the BPM
+     *        update by calling all necessary functions in order.
+     *
+     * @param[in]   i_image     The BPM firmware LID image to apply to the BPM.
+     *
+     * @return  errlHndl_t  nullptr if no errors occurred.
+     *                      Otherwise, pointer to an errlEntry.
+     */
+    errlHndl_t runFirmwareUpdates(BpmFirmwareLidImage i_image);
+
+    /**
      *  @brief Executes the config portion of the BPM update.
      *
      *  @return errlHndl_t  nullptr on success. Otherwise, an Error.
      */
     errlHndl_t updateConfig();
+
+    /**
+     *  @brief Helper function that executes the config portion of the BPM
+     *         update by calling all necessary functions in order.
+     *
+     * @param[in]   i_image     The BPM config LID image to apply to the BPM.
+     *
+     *  @return errlHndl_t  nullptr on success. Otherwise, an Error.
+     */
+    errlHndl_t runConfigUpdates(BpmConfigLidImage i_image);
 
     /**
      * @brief Commands the BPM to enter BSL mode to allow for BSL commands to be
@@ -767,6 +798,8 @@ private:
      */
     errlHndl_t waitForCommandStatusBitReset(
             command_status_register_t i_commandStatus);
+
+    errlHndl_t verifyGoodBpmState();
 
     /**
      *  @brief Helper function for the SCAP register functions that will poll

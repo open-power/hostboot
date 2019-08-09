@@ -63,6 +63,9 @@ const size_t BPM_PASSWORD_LENGTH = 4;
 // These are the production magic values for the BPM that should be written in
 // BPM_MAGIC_REG1 and BPM_MAGIC_REG2 respectively.
 const uint8_t PRODUCTION_MAGIC_VALUES[NUM_MAGIC_REGISTERS] = {0x55, 0xAA};
+// These magic values to enable nvdimm-bpm interface. They must be written to
+// the magic registers BEFORE writing flash updates to the BPM in BSL mode.
+const uint8_t UPDATE_MODE_MAGIC_VALUES[NUM_MAGIC_REGISTERS] = {0xB0, 0xDA};
 
 // These are the segment codes used to dump out a particular config data segment
 // on the BPM.
@@ -378,7 +381,6 @@ void runBpmUpdates(bpmList_t           * const i_16gb_BPMs,
     } while(0);
 }
 
-
 // =============================================================================
 //                      BpmFirmwareLidImage Class Functions
 // =============================================================================
@@ -501,7 +503,8 @@ Bpm::Bpm(const TARGETING::TargetHandle_t i_nvdimm)
       iv_firmwareStartAddress(0),
       iv_attemptAnotherUpdate(false),
       iv_segmentDMerged(false),
-      iv_segmentBMerged(false)
+      iv_segmentBMerged(false),
+      iv_updateAttempted(false)
 {
     assert((i_nvdimm != nullptr) && (isNVDIMM(i_nvdimm)),
           "BPM::Bpm(): An nvdimm target must be given.");
@@ -514,6 +517,27 @@ Bpm::Bpm(const TARGETING::TargetHandle_t i_nvdimm)
 bool Bpm::attemptAnotherUpdate()
 {
     return iv_attemptAnotherUpdate;
+}
+
+void Bpm::setAttemptAnotherUpdate()
+{
+
+    if (iv_updateAttempted)
+    {
+        // Since iv_updateAttempted is true that means that this function was
+        // called on a subsequent update attempt, meaning we should no longer
+        // attempt updates if the current attempt fails.
+        iv_attemptAnotherUpdate = false;
+    }
+    else
+    {
+        // Since iv_updateAttempted is false that means that this function was
+        // called on the first update attempt because by default
+        // iv_updateAttempted is false and is only set to true as the last part
+        // of the update procedure.
+        iv_attemptAnotherUpdate = true;
+    }
+
 }
 
 const TARGETING::TargetHandle_t Bpm::getNvdimm()
@@ -583,11 +607,14 @@ errlHndl_t Bpm::readBslVersion()
 
         TRACFCOMP(g_trac_bpm, "Bpm::readBslVersion(): BSL Version is 0x%X",
                   iv_bslVersion);
+    } while(0);
 
+    do {
         // Reset the device. This will exit BSL mode.
         errlHndl_t exitErrl = resetDevice();
         if (exitErrl != nullptr)
         {
+            handleMultipleErrors(errl, exitErrl);
             break;
         }
 
@@ -595,10 +622,9 @@ errlHndl_t Bpm::readBslVersion()
         exitErrl = exitUpdateMode();
         if (exitErrl != nullptr)
         {
+            handleMultipleErrors(errl, exitErrl);
             break;
         }
-
-
     } while(0);
 
     return errl;
@@ -821,12 +847,13 @@ errlHndl_t Bpm::runUpdate(BpmFirmwareLidImage i_fwImage,
             break;
         }
 
+        TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::runUpdate(): "
+                  "Firmware version on the BPM 0x%.4X, "
+                  "Firmware version of image 0x%.4X.",
+                  bpmFwVersion, i_fwImage.getVersion());
+
         if (i_fwImage.getVersion() == bpmFwVersion)
         {
-            TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::runUpdate(): "
-                     "Firmware version on the BPM matches the version in the "
-                     "image. Skipping update.");
-
             break;
         }
 
@@ -844,144 +871,35 @@ errlHndl_t Bpm::runUpdate(BpmFirmwareLidImage i_fwImage,
         {
             TRACFCOMP(g_trac_bpm, "Bpm::runUpdate(): "
                       "Unsupported BSL Version 0x%.2X detected on BPM. "
-                      "Skipping Update.");
+                      "Cancelling Update.");
 
             break;
         }
 
-        TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::runUpdate(): "
-                  "Firmware version on the BPM 0x%.4X, "
-                  "Firmware version of image 0x%.4X. Running Update",
-                  bpmFwVersion, i_fwImage.getVersion());
-
-        // Before the update begins, we must do some preprocessing prior to the
-        // config part of the update. Segment D and B need to be dumped from the
-        // BPM into buffers and then the config data from the image needs to be
-        // inserted into them. This must happen before enterUpdateMode() as both
-        // tamper with the BPM_MAGIC_REGs. Additionally, to dump segment data,
-        // it is required to have working firmware which will not be the case
-        // during update.
-        errl = preprocessSegments(i_configImage);
+        errl = runConfigUpdates(i_configImage);
         if (errl != nullptr)
         {
             break;
         }
 
-        // Enter Update mode
-        errl = enterUpdateMode();
+        errl = runFirmwareUpdates(i_fwImage);
         if (errl != nullptr)
         {
             break;
         }
-
-        // Verify in Update mode
-        errl = inUpdateMode();
-        if (errl != nullptr)
-        {
-            break;
-        }
-
-        // Enter Bootstrap Loader (BSL) mode to perform firmware update
-        errl = enterBootstrapLoaderMode();
-        if (errl != nullptr)
-        {
-            break;
-        }
-
-        // Unlock the device. This is a BSL command so we must already be in
-        // BSL mode to execute it.
-        errl = unlockDevice();
-        if (errl != nullptr)
-        {
-            break;
-        }
-
-        // Run Firmware Update
-        errl = updateFirmware(i_fwImage);
-        if (errl != nullptr)
-        {
-            break;
-        }
-
-        // Perform the configuration data segment updates.
-        // As of BSL 1.4 this is done via the BSL interface instead of SCAP
-        // registers.
-        errl = updateConfig();
-        if (errl != nullptr)
-        {
-            break;
-        }
-
-        errl = checkFirmwareCrc();
-        if (errl != nullptr)
-        {
-            TRACFCOMP(g_trac_bpm, "Bpm:: runUpdate(): "
-                     "Final CRC check failed. Attempting update again...");
-            iv_attemptAnotherUpdate = !iv_attemptAnotherUpdate;
-            break;
-        }
-
-    } while(0);
-
-    do {
-    // Reset the device. This will exit BSL mode.
-    errlHndl_t exitErrl = resetDevice();
-    if (exitErrl != nullptr)
-    {
-        TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runUpdate(): "
-                  "Failed to reset the device");
-        handleMultipleErrors(errl, exitErrl);
-        break;
-    }
-
-    // Exit update mode
-    exitErrl = exitUpdateMode();
-    if (exitErrl != nullptr)
-    {
-        TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runUpdate(): "
-                  "Failed to exit update mode");
-        handleMultipleErrors(errl, exitErrl);
-        break;
-    }
-
-    // To see the BPM firmware level updated we must reset the controller
-    exitErrl = nvdimmWriteReg(iv_nvdimm,
-                              NVDIMM_MGT_CMD0,
-                              0x01);
-    if (exitErrl != nullptr)
-    {
-        TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runUpdate(): "
-                 "Could not reset NVDIMM Controller");
-        handleMultipleErrors(errl, exitErrl);
-        break;
-    }
-
-    TRACFCOMP(g_trac_bpm, "Bpm::runUpdate(): "
-              "Reset command sent to NVDIMM controller, sleep for 15 seconds");
-    longSleep(15);
-
-    uint16_t bpmFwVersion = INVALID_VERSION;
-    exitErrl = getFwVersion(bpmFwVersion);
-    if (exitErrl != nullptr)
-    {
-        TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runUpdate(): "
-                 "Could not determine firmware version on the BPM");
-        handleMultipleErrors(errl, exitErrl);
-        break;
-    }
-
-    if (i_fwImage.getVersion() == bpmFwVersion)
-    {
-        TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::runUpdate(): "
-                 "Firmware version on the BPM matches the version in the "
-                 "image. Update Successful.");
-    }
 
     } while(0);
 
     TRACFCOMP(g_trac_bpm, EXIT_MRK"Bpm::runUpdate(): "
-              "Concluding BPM Update for NVDIMM 0x%.8X",
-              TARGETING::get_huid(iv_nvdimm));
+              "Concluding BPM Update for NVDIMM 0x%.8X %s",
+              TARGETING::get_huid(iv_nvdimm),
+              (errl != nullptr) ? "with errors" : "without errors");
+
+    // An update has been attempted at least once. Set member variable to true
+    // to dictate future update attempts. This variable should only be set at
+    // the end of the update procedure in order to properly control future
+    // update attempts.
+    iv_updateAttempted = true;
 
     return errl;
 }
@@ -1053,8 +971,7 @@ errlHndl_t Bpm::enterUpdateMode()
         }
 
         // Write the magic values to enable nvdimm-bpm interface
-        const uint8_t magic_values[NUM_MAGIC_REGISTERS] = {0xB0, 0xDA};
-        errl = writeToMagicRegisters(magic_values);
+        errl = writeToMagicRegisters(UPDATE_MODE_MAGIC_VALUES);
         if (errl != nullptr)
         {
             TRACFCOMP(g_trac_bpm, "Bpm::enterUpdateMode(): "
@@ -1071,6 +988,23 @@ errlHndl_t Bpm::enterUpdateMode()
 
         nanosleep(2,0);
 
+        /*@
+        * @errortype
+        * @severity         ERRORLOG::ERRL_SEV_INFORMATIONAL
+        * @moduleid         BPM_RC::BPM_START_UPDATE
+        * @reasoncode       BPM_RC::BPM_ENTER_UPDATE_MODE
+        * @userdata1        NVDIMM Target HUID associated with this BPM
+        * @devdesc          BPM has entered update mode.
+        * @custdesc         Informational log associated with DIMM updates.
+        */
+        errlHndl_t infoErrl = new ERRORLOG::ErrlEntry(
+                                            ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                            BPM_RC::BPM_START_UPDATE,
+                                            BPM_RC::BPM_ENTER_UPDATE_MODE,
+                                            TARGETING::get_huid(iv_nvdimm));
+        infoErrl->collectTrace(BPM_COMP_NAME);
+        ERRORLOG::errlCommit(infoErrl, BPM_COMP_ID);
+
     } while(0);
 
     return errl;
@@ -1083,10 +1017,31 @@ errlHndl_t Bpm::exitUpdateMode()
 
     do {
 
-        errl = issueCommand(BPM_LOCAL, BCL_END_UPDATE, WRITE);
+
+        errl = issueCommand(BPM_LOCAL, BCL_IS_UPDATE_IN_PROGRESS, READ);
         if (errl != nullptr)
         {
             break;
+        }
+
+        uint8_t isUpdateInProgress = 0;
+        errl = nvdimmReadReg(iv_nvdimm,
+                             BPM_REG_ERR_STATUS,
+                             isUpdateInProgress);
+        if (errl != nullptr)
+        {
+            TRACFCOMP(g_trac_bpm, "Bpm::inUpdateMode(): "
+                      "Failed to read error status register");
+            break;
+        }
+
+        if (isUpdateInProgress)
+        {
+            errl = issueCommand(BPM_LOCAL, BCL_END_UPDATE, WRITE);
+            if (errl != nullptr)
+            {
+                break;
+            }
         }
 
         // Write back the production magic values
@@ -1098,6 +1053,22 @@ errlHndl_t Bpm::exitUpdateMode()
                       "disable update mode.");
             break;
         }
+
+        /*@
+        * @errortype
+        * @severity         ERRORLOG::ERRL_SEV_INFORMATIONAL
+        * @moduleid         BPM_RC::BPM_END_UPDATE
+        * @reasoncode       BPM_RC::BPM_EXIT_UPDATE_MODE
+        * @userdata1        NVDIMM Target HUID associated with this BPM
+        * @devdesc          BPM has exited update mode.
+        * @custdesc         Informational log associated with DIMM updates.
+        */
+        errlHndl_t infoErrl = new ERRORLOG::ErrlEntry(
+                                            ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                            BPM_RC::BPM_END_UPDATE,
+                                            BPM_RC::BPM_EXIT_UPDATE_MODE);
+        infoErrl->collectTrace(BPM_COMP_NAME);
+        ERRORLOG::errlCommit(infoErrl, BPM_COMP_ID);
 
     } while(0);
 
@@ -1160,8 +1131,24 @@ errlHndl_t Bpm::updateFirmware(BpmFirmwareLidImage i_image)
             }
 
             TRACFCOMP(g_trac_bpm, "Bpm::updateFirmware(): "
-                      "Performing BSL_MASS_ERASE, sleep for 5 seconds.");
+                      "Performing BSL_MASS_ERASE on BPM, sleep for 5 seconds.",
+                      iv_firmwareStartAddress);
             longSleep(5);
+
+            TRACFCOMP(g_trac_bpm, "Bpm::updateFirmware(): "
+                     "Begin writing flash image to BPM "
+                     "with a starting address of 0x%.4X",
+                     iv_firmwareStartAddress);
+
+        }
+
+        if (block->iv_addressOffset % 0x400 == 0)
+        {
+            TRACFCOMP(g_trac_bpm, "Bpm::updateFirmware(): "
+                     "Writing to address offset 0x%.4X. "
+                     "Firmware blocks written: %d; Remaining: %d",
+                     block->iv_addressOffset,
+                     i, NUMBER_OF_BLOCKS);
         }
 
         // Construct the payload for this block in the image
@@ -1174,6 +1161,11 @@ errlHndl_t Bpm::updateFirmware(BpmFirmwareLidImage i_image)
 
         if (block->iv_addressOffset == RESET_VECTOR_ADDRESS)
         {
+            TRACFCOMP(g_trac_bpm, "Bpm::updateFirmware(): "
+                     "Encountered RESET_VECTOR_ADDRESS 0x%.4X. "
+                     "Attempt to write RESET_VECTOR to BPM up to %d times.",
+                     RESET_VECTOR_ADDRESS,
+                     MAX_RETRY);
             // Attempting to BSL_VERIFY_BLOCK on the reset vector data will
             // fail. To verify that this data is written correctly we will check
             // the response packet sent by the BPM.
@@ -1233,9 +1225,9 @@ errlHndl_t Bpm::updateFirmware(BpmFirmwareLidImage i_image)
                                         TARGETING::get_huid(iv_nvdimm));
                         errl->collectTrace(BPM_COMP_NAME);
 
-                        // Flip the status of iv_attemptAnotherUpdate to signal
+                        // Change the state of iv_attemptAnotherUpdate to signal
                         // if another update attempt should occur.
-                        iv_attemptAnotherUpdate = !iv_attemptAnotherUpdate;
+                        setAttemptAnotherUpdate();
 
                         break;
                     }
@@ -1267,13 +1259,17 @@ errlHndl_t Bpm::updateFirmware(BpmFirmwareLidImage i_image)
             }
         }
 
-
         // Move to the next block
         // iv_blocksize doesn't include the sizeof itself. So, add another byte
         // for it.
         data += block->iv_blockSize + sizeof(uint8_t);
         block = reinterpret_cast<firmware_image_block_t const *>(data);
     }
+
+    TRACFCOMP(g_trac_bpm, EXIT_MRK"Bpm::updateFirmware(): "
+             "Firmware flash image write and verification completed "
+             "%s",
+             (errl == nullptr) ? "without errors" : "with errors");
 
     return errl;
 }
@@ -1965,8 +1961,22 @@ errlHndl_t Bpm::dumpSegment(uint16_t const i_segmentCode,
             TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::dumpSegment(): "
                      "BSL Mode is enabled. Attempting to exit BSL mode.");
 
-            // Try to exit BSL mode
+            // Try to exit BSL mode. This function will exit BSL.
             errl = resetDevice();
+            if (errl != nullptr)
+            {
+                break;
+            }
+
+            // To maintain proper update flow we must exit and re-enter update
+            // mode.
+            errl = exitUpdateMode();
+            if (errl != nullptr)
+            {
+                break;
+            }
+
+            errl = enterUpdateMode();
             if (errl != nullptr)
             {
                 break;
@@ -2133,11 +2143,11 @@ errlHndl_t Bpm::dumpSegment(uint16_t const i_segmentCode,
     if (magicValuesChanged)
     {
         // Write back the production magic values.
-        errlHndl_t magicErrl = writeToMagicRegisters(PRODUCTION_MAGIC_VALUES);
+        errlHndl_t magicErrl = writeToMagicRegisters(UPDATE_MODE_MAGIC_VALUES);
         if (magicErrl != nullptr)
         {
             TRACFCOMP(g_trac_bpm, "Bpm::dumpSegment(): "
-                      "Failed to write production magic numbers.");
+                      "Failed to write update mode magic numbers.");
             handleMultipleErrors(errl, magicErrl);
         }
     }
@@ -2161,10 +2171,10 @@ errlHndl_t Bpm::mergeSegment(BpmConfigLidImage const i_configImage,
     }
     else
     {
-        //@TODO RTC 212447 Error
         TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::mergeSegment(): "
                  "Couldn't find start offset for Segment %X",
                  getSegmentIdentifier(i_segmentCode));
+        assert(false, "Add the missing Segment %X Start Offset to the offset map", getSegmentIdentifier(i_segmentCode));
     }
 
     TRACFCOMP(g_trac_bpm, "Bpm::mergeSegment(): "
@@ -2280,6 +2290,12 @@ errlHndl_t Bpm::eraseSegment(uint16_t i_segmentCode)
 
     } while(0);
 
+    TRACFCOMP(g_trac_bpm, EXIT_MRK"Bpm::eraseSegment(): "
+             "Segment %X erase operation completed "
+             "%s",
+             getSegmentIdentifier(i_segmentCode),
+             (errl == nullptr) ? "without errors" : "with errors");
+
     return errl;
 }
 
@@ -2327,6 +2343,15 @@ errlHndl_t Bpm::writeSegment(uint8_t const (&i_buffer)[SEGMENT_SIZE],
                 break;
             }
 
+            if (addressOffset % 0x20 == 0)
+            {
+                TRACFCOMP(g_trac_bpm, "Bpm::writeSegment(): "
+                         "Writing to address offset 0x%.4X. "
+                         "Config bytes written: 0x%X; Remaining: 0x%X",
+                         addressOffset,
+                         offset, SEGMENT_SIZE);
+            }
+
             // Attempt to write the payload using a retry loop.
             errl = blockWrite(payload);
             if (errl != nullptr)
@@ -2340,6 +2365,12 @@ errlHndl_t Bpm::writeSegment(uint8_t const (&i_buffer)[SEGMENT_SIZE],
         }
 
     } while(0);
+
+    TRACFCOMP(g_trac_bpm, EXIT_MRK"Bpm::writeSegment(): "
+             "Segment %X write and verification completed "
+             "%s",
+             getSegmentIdentifier(i_segmentCode),
+             (errl == nullptr) ? "without errors" : "with errors");
 
     return errl;
 }
@@ -2359,14 +2390,6 @@ errlHndl_t Bpm::preprocessSegments(BpmConfigLidImage const i_configImage)
             TRACFCOMP(g_trac_bpm, "Bpm::preprocessSegments(): "
                       "Segment data was merged in a previous update attempt, "
                       "skipping preprocessing and using existing data.");
-            break;
-        }
-
-        // Disable write protection on the BPM. Otherwise, we can't write the
-        // magic values that will enable segment preprocessing.
-        errl = disableWriteProtection();
-        if (errl != nullptr)
-        {
             break;
         }
 
@@ -2564,13 +2587,14 @@ errlHndl_t Bpm::verifyBlockWrite(payload_t  i_payload,
     do {
 
         // Pull the address to verify out of the payload. It was inserted in
-        // little endian form so it needs to be converted back to big endian.
-        uint16_t address = (i_payload[PAYLOAD_HEADER_SIZE])
-                         & (i_payload[PAYLOAD_HEADER_SIZE + 1] << 8);
+        // little endian form so it needs to be converted back to big endian
+        // because setupPayload expects an address in big endian.
+        uint16_t address = (i_payload[PAYLOAD_ADDRESS_START_INDEX])
+                         | (i_payload[PAYLOAD_ADDRESS_START_INDEX + 1] << 8);
 
         // The data section of the payload is organized in the following way:
         // 2 bytes: uint16_t size of data to verify in little endian format
-        // 2 bytes: CRC of the data to be verified on the BPM.
+        // 2 bytes: CRC of the data to be verified on the BPM in little endian.
         const size_t VERIFY_BLOCK_PAYLOAD_DATA_SIZE = 4;
         uint8_t data[VERIFY_BLOCK_PAYLOAD_DATA_SIZE] = {0};
 
@@ -2583,8 +2607,8 @@ errlHndl_t Bpm::verifyBlockWrite(payload_t  i_payload,
         // Calculate the uint16_t CRC for the data that was written to the BPM.
         // The BPM will compare its calculated CRC with this one to verify if
         // the block was written correctly.
-        uint16_t crc = crc16_calc(&i_payload[PAYLOAD_DATA_START_INDEX],
-                                  i_dataLength);
+        uint16_t crc = htole16(crc16_calc(&i_payload[PAYLOAD_DATA_START_INDEX],
+                                  i_dataLength));
 
         memcpy(&data[2], &crc, sizeof(uint16_t));
 
@@ -2624,8 +2648,11 @@ errlHndl_t Bpm::blockWrite(payload_t i_payload)
           "Can only retry for BSL_RX_DATA_BLOCK commands");
 
     errlHndl_t errl = nullptr;
-    uint8_t retry = 1;
+    uint8_t retry = 0;
 
+    // Any status from verifyBlockWrite that is non-zero is considered a
+    // fail. So, assume a fail and check.
+    uint8_t wasVerified = 0xFF;
     do {
 
         // Send the payload data over as a pass-through command
@@ -2638,9 +2665,6 @@ errlHndl_t Bpm::blockWrite(payload_t i_payload)
         // Sleep for 0.001 second
         nanosleep(0, 1 * NS_PER_MSEC);
 
-        // Any status from verifyBlockWrite that is non-zero is considered a
-        // fail. So, assume a fail and check.
-        uint8_t wasVerified = 0xFF;
         uint8_t dataLength = i_payload[PAYLOAD_HEADER_DATA_LENGTH_INDEX]
                            - PAYLOAD_HEADER_SIZE;
         errl = verifyBlockWrite(i_payload,
@@ -2651,11 +2675,11 @@ errlHndl_t Bpm::blockWrite(payload_t i_payload)
             break;
         }
 
-        if (!wasVerified)
+        if (wasVerified != 0)
         {
             TRACFCOMP(g_trac_bpm, "Bpm::blockWrite(): "
-                     "BSL_VERIFY_BLOCK failed. Retry %d/%d",
-                     retry,
+                     "BSL_VERIFY_BLOCK failed. Attempt %d/%d",
+                     (retry + 1),
                      MAX_RETRY);
         }
         else
@@ -2663,9 +2687,12 @@ errlHndl_t Bpm::blockWrite(payload_t i_payload)
             break;
         }
 
-    } while (++retry <= MAX_RETRY);
-    if (retry > MAX_RETRY)
+    } while (++retry < MAX_RETRY);
+    if ((retry >= MAX_RETRY) && (wasVerified != 0))
     {
+        TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::blockWrite(): "
+                 "Failed to write payload data to BPM after %d retries.",
+                 MAX_RETRY);
         /*@
         * @errortype
         * @severity         ERRORLOG::ERRL_SEV_PREDICTIVE
@@ -2683,9 +2710,9 @@ errlHndl_t Bpm::blockWrite(payload_t i_payload)
                                        TARGETING::get_huid(iv_nvdimm));
         errl->collectTrace(BPM_COMP_NAME);
 
-        // Flip the state of iv_attemptAnotherUpdate. This will signal
+        // Change the state of iv_attemptAnotherUpdate. This will signal
         // another update attempt or cease further attempts.
-        iv_attemptAnotherUpdate = !iv_attemptAnotherUpdate;
+        setAttemptAnotherUpdate();
     }
 
     return errl;
@@ -2707,7 +2734,9 @@ errlHndl_t Bpm::waitForCommandStatusBitReset(
             break;
         }
 
-        int retry = 10;
+        // Give the BPM 20 seconds to complete any given command before we time
+        // out and cancel the update procedure.
+        int retry = 20 * MS_PER_SEC;
 
         while (i_commandStatus.bits.Bsp_Cmd_In_Progress)
         {
@@ -2793,6 +2822,66 @@ errlHndl_t Bpm::waitForCommandStatusBitReset(
     return errl;
 }
 
+errlHndl_t Bpm::verifyGoodBpmState()
+{
+    errlHndl_t errl = nullptr;
+    int retry = 100;
+    scap_status_register_t status;
+    const uint8_t BPM_PRESENT_AND_ENABLED = 0x11;
+
+    while (retry > 0)
+    {
+
+        errl = nvdimmReadReg(iv_nvdimm,
+                             SCAP_STATUS,
+                             status.full);
+        if (errl != nullptr)
+        {
+            TRACFCOMP(g_trac_bpm, "Bpm::verifyGoodBpmState(): "
+                      "Failed to read SCAP_STATUS to determine "
+                      "state of BPM.");
+            break;
+        }
+
+        if ((status.full & 0xFF) == BPM_PRESENT_AND_ENABLED)
+        {
+            // BPM is present and enabled. Stop retries.
+            break;
+        }
+
+        if (retry <= 0)
+        {
+            TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::verifyGoodBpmState(): "
+                      "BPM failed to become present and enabled "
+                      "in 100 retries.");
+            /*@
+            * @errortype
+            * @severity         ERRORLOG::ERRL_SEV_PREDICTIVE
+            * @moduleid         BPM_RC::BPM_VERIFY_GOOD_BPM_STATE
+            * @reasoncode       BPM_RC::BPM_EXCEEDED_RETRY_LIMIT
+            * @userdata1        NVDIMM Target HUID associated with this BPM
+            * @userdata2        SCAP_STATUS register contents. See nvdimm.H
+            *                   for bits associated with this register.
+            * @devdesc          The BPM did not become present and enabled
+            *                   in given number of retries.
+            * @custdesc         A problem occurred during IPL of the system.
+            */
+            errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                       BPM_RC::BPM_VERIFY_GOOD_BPM_STATE,
+                                       BPM_RC::BPM_EXCEEDED_RETRY_LIMIT,
+                                       TARGETING::get_huid(iv_nvdimm),
+                                       status.full);
+            errl->collectTrace(BPM_COMP_NAME);
+            break;
+        }
+
+        --retry;
+        nanosleep(0, 1 * NS_PER_MSEC);
+    }
+
+    return errl;
+}
+
 errlHndl_t Bpm::waitForBusyBit()
 {
     errlHndl_t errl = nullptr;
@@ -2849,6 +2938,254 @@ errlHndl_t Bpm::waitForBusyBit()
     return errl;
 }
 
+errlHndl_t Bpm::runConfigUpdates(BpmConfigLidImage i_configImage)
+{
+    TRACFCOMP(g_trac_bpm, ENTER_MRK"Bpm::runConfigUpdates()");
+    errlHndl_t errl = nullptr;
+
+    do {
+        // Enter Update mode
+        errl = enterUpdateMode();
+        if (errl != nullptr)
+        {
+            break;
+        }
+
+        // Verify in Update mode
+        errl = inUpdateMode();
+        if (errl != nullptr)
+        {
+            break;
+        }
+
+        // Before the entering BSL mode, we must do preprocessing prior to the
+        // config part of the update. Segment D and B need to be dumped from the
+        // BPM into buffers and then the config data from the image needs to be
+        // inserted into them. To dump segment data, it is required to have
+        // working firmware which will not be the case during BSL mode.
+        errl = preprocessSegments(i_configImage);
+        if (errl != nullptr)
+        {
+            break;
+        }
+
+        // Enter Bootstrap Loader (BSL) mode to perform firmware update
+        errl = enterBootstrapLoaderMode();
+        if (errl != nullptr)
+        {
+            break;
+        }
+
+        // Unlock the device. This is a BSL command so we must already be in
+        // BSL mode to execute it.
+        errl = unlockDevice();
+        if (errl != nullptr)
+        {
+            break;
+        }
+
+        // Perform the configuration data segment updates.
+        // As of BSL 1.4 this is done via the BSL interface instead of SCAP
+        // registers.
+        errl = updateConfig();
+        if (errl != nullptr)
+        {
+            break;
+        }
+
+    } while(0);
+
+    do {
+
+        // Reset the device. This will exit BSL mode.
+        errlHndl_t exitErrl = resetDevice();
+        if (exitErrl != nullptr)
+        {
+            TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runConfigUpdates(): "
+                      "Failed to reset the device");
+            handleMultipleErrors(errl, exitErrl);
+            break;
+        }
+
+        // Exit update mode
+        exitErrl = exitUpdateMode();
+        if (exitErrl != nullptr)
+        {
+            TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runConfigUpdates(): "
+                      "Failed to exit update mode");
+            handleMultipleErrors(errl, exitErrl);
+            break;
+        }
+
+    } while(0);
+
+    return errl;
+}
+
+errlHndl_t Bpm::runFirmwareUpdates(BpmFirmwareLidImage i_image)
+{
+    TRACFCOMP(g_trac_bpm, ENTER_MRK"bpm::runFirmwareUpdates()");
+    errlHndl_t errl = nullptr;
+
+    do {
+
+        // Enter Update mode
+        errl = enterUpdateMode();
+        if (errl != nullptr)
+        {
+            break;
+        }
+
+        // Verify in Update mode
+        errl = inUpdateMode();
+        if (errl != nullptr)
+        {
+            break;
+        }
+
+        // Enter Bootstrap Loader (BSL) mode to perform firmware update
+        errl = enterBootstrapLoaderMode();
+        if (errl != nullptr)
+        {
+            break;
+        }
+
+        // Unlock the device. This is a BSL command so we must already be in
+        // BSL mode to execute it.
+        errl = unlockDevice();
+        if (errl != nullptr)
+        {
+            break;
+        }
+
+        // Run Firmware Update
+        errl = updateFirmware(i_image);
+        if (errl != nullptr)
+        {
+            break;
+        }
+
+        TRACFCOMP(g_trac_bpm, "Bpm::runFirmwareUpdates(): "
+                 "Perform final CRC check on entire BPM flash to load "
+                 "new firmware.");
+
+        errl = checkFirmwareCrc();
+        if (errl != nullptr)
+        {
+            setAttemptAnotherUpdate();
+            TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm:: runFirmwareUpdates(): "
+                     "Final CRC check failed. %s ",
+                     (iv_attemptAnotherUpdate == false) ?
+                     "Attempt another update..."
+                     : "Attempts to update the BPM have failed. Firmware will not load.");
+            break;
+        }
+
+    } while(0);
+
+    do {
+
+        // Reset the device. This will exit BSL mode.
+        errlHndl_t exitErrl = resetDevice();
+        if (exitErrl != nullptr)
+        {
+            TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runFirmwareUpdates(): "
+                      "Failed to reset the device");
+            handleMultipleErrors(errl, exitErrl);
+            break;
+        }
+
+        // Exit update mode
+        exitErrl = exitUpdateMode();
+        if (exitErrl != nullptr)
+        {
+            TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runFirmwareUpdates(): "
+                      "Failed to exit update mode");
+            handleMultipleErrors(errl, exitErrl);
+            break;
+        }
+
+        // If the update was successful then we must wait for 10 seconds before
+        // polling the status of the BPM since it has to finish updating its
+        // firmware and resetting.
+        TRACFCOMP(g_trac_bpm, "Bpm::runFirmwareUpdates(): "
+                  "Wait for the BPM to finish update and reset procedure, "
+                  "sleep for 15 seconds");
+        longSleep(15);
+
+        // Poll SCAP_STATUS register for BPM state before we check final
+        // firmware version.
+        exitErrl = verifyGoodBpmState();
+        if (exitErrl != nullptr)
+        {
+            TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runFirmwareUpdates(): "
+                     "Could not verify that BPM was present and enabled!");
+            handleMultipleErrors(errl, exitErrl);
+            break;
+        }
+
+        uint16_t bpmFwVersion = INVALID_VERSION;
+        exitErrl = getFwVersion(bpmFwVersion);
+        if (exitErrl != nullptr)
+        {
+            TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runFirmwareUpdates(): "
+                     "Could not determine firmware version on the BPM");
+            handleMultipleErrors(errl, exitErrl);
+            break;
+        }
+
+        TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::runFirmwareUpdates(): "
+                  "Firmware version on the BPM 0x%.4X, "
+                  "Firmware version of image 0x%.4X.",
+                  bpmFwVersion, i_image.getVersion());
+
+        if (i_image.getVersion() == bpmFwVersion)
+        {
+            TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::runFirmwareUpdates(): "
+                     "Firmware version on the BPM matches the version in the "
+                     "image. Update Successful.");
+            iv_attemptAnotherUpdate = false;
+        }
+        else
+        {
+            // Attempt another update if one hasn't already been attempted.
+            setAttemptAnotherUpdate();
+            TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm:: runFirmwareUpdates(): "
+                     "Version on BPM didn't match image. %s ",
+                     iv_attemptAnotherUpdate ?
+                     "Attempt another update..."
+                     : "Attempts to update the BPM have failed.");
+            if (iv_attemptAnotherUpdate == false)
+            {
+                /*@
+                * @errortype
+                * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                * @moduleid         BPM_RC::BPM_RUN_FW_UPDATES
+                * @reasoncode       BPM_RC::BPM_VERSION_MISMATCH
+                * @userdata1[00:31] Version on the BPM
+                * @userdata1[32:63] Version of the flash image
+                * @userdata2        NVDIMM Target HUID associated with this BPM
+                * @devdesc          The version on the BPM didn't match the
+                *                   version in the flash image.
+                * @custdesc         A problem occurred during IPL of the system.
+                */
+                exitErrl = new ERRORLOG::ErrlEntry(
+                                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           BPM_RC::BPM_RUN_FW_UPDATES,
+                                           BPM_RC::BPM_VERSION_MISMATCH,
+                                           TWO_UINT32_TO_UINT64(bpmFwVersion,
+                                               i_image.getVersion()),
+                                           TARGETING::get_huid(iv_nvdimm));
+                exitErrl->collectTrace(BPM_COMP_NAME);
+                handleMultipleErrors(errl, exitErrl);
+            }
+        }
+
+    } while(0);
+
+    return errl;
+}
+
 errlHndl_t Bpm::checkFirmwareCrc()
 {
     TRACFCOMP(g_trac_bpm, ENTER_MRK"Bpm::checkFirmwareCrc()");
@@ -2900,8 +3237,8 @@ errlHndl_t Bpm::checkFirmwareCrc()
          }
 
         // Wait 10 seconds for the CRC check to complete.
-         TRACFCOMP(g_trac_bpm, "Bpm::checkFirmwareCrc(): "
-                  "Allow CRC check to complete on BPM by waiting 10 seconds.");
+        TRACFCOMP(g_trac_bpm, "Bpm::checkFirmwareCrc(): "
+                 "Allow CRC check to complete on BPM by waiting 10 seconds.");
         longSleep(10);
 
         errl = getResponse(responseData, CRC_CHECK_RESPONSE_SIZE);
@@ -2911,8 +3248,8 @@ errlHndl_t Bpm::checkFirmwareCrc()
         }
 
         TRACFCOMP(g_trac_bpm, "Bpm::checkFirmwareCrc(): "
-                  "Response Packet CRC check status = 0x%.X, CRC_Low = 0x%.X, "
-                  "CRC_Hi = 0x%.X",
+                  "Response Packet CRC check status = 0x%X, CRC_Low = 0x%X, "
+                  "CRC_Hi = 0x%X",
                   responseData[0],
                   responseData[1],
                   responseData[2]);
