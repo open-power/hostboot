@@ -59,6 +59,79 @@ namespace mss
 namespace workarounds
 {
 
+// Putting the NVDIMM workarounds here as it's a bit of a hybrid case
+// Also there are issues as the nvdimm_workarounds.* files are picked up externally
+namespace nvdimm
+{
+
+///
+/// @brief Checks if the NVDIMM RD DQ delay adjust is needed
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_is_needed true if the workaround is needed
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode is_adjust_rd_dq_delay_needed( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        bool& o_is_needed )
+{
+    uint8_t l_hybrid_type[mss::MAX_DIMM_PER_PORT] = {};
+    uint8_t l_is_hybrid[mss::MAX_DIMM_PER_PORT] = {};
+    o_is_needed = false;
+
+    FAPI_TRY(mss::eff_hybrid_memory_type(i_target, l_hybrid_type));
+    FAPI_TRY(mss::eff_hybrid(i_target, l_is_hybrid));
+
+    // This workaround is only needed if we're dealing with NVDIMM
+    // We only need DIMM0 as NVDIMM will only ever be single drop
+    o_is_needed = (l_hybrid_type[0] == fapi2::ENUM_ATTR_EFF_HYBRID_IS_HYBRID) &&
+                  (l_is_hybrid[0] == fapi2::ENUM_ATTR_EFF_HYBRID_MEMORY_TYPE_NVDIMM);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Adjusts NVDIMM RD DQ delays
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_rp the rank pair on which to adjust delays
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode adjust_rd_dq_delay( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, const uint64_t i_rp )
+{
+    // Constexpr's for some general beautification
+    constexpr uint64_t VALUE0_START = MCA_DDRPHY_DP16_READ_DELAY0_RANK_PAIR0_P0_0_01_RD;
+    constexpr uint64_t VALUE1_START = MCA_DDRPHY_DP16_READ_DELAY0_RANK_PAIR0_P0_0_01_RD_DELAY1;
+    typedef mss::dp16Traits<fapi2::TARGET_TYPE_MCA> TT;
+
+    bool l_is_needed = false;
+    std::vector<fapi2::buffer<uint64_t>> l_data;
+    FAPI_TRY(is_adjust_rd_dq_delay_needed(i_target, l_is_needed));
+
+    // If the adjust is not needed, exit out
+    if(!l_is_needed)
+    {
+        FAPI_INF("%s RD DQ delay adjust isn't needed. Skipping the workaround", mss::c_str(i_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Read
+    FAPI_TRY(mss::scom_suckah(i_target, TT::READ_DELAY_REG[i_rp], l_data));
+
+    // Modify
+    for(auto& l_info : l_data)
+    {
+        update_rd_dq_delay<VALUE0_START>(l_info);
+        update_rd_dq_delay<VALUE1_START>(l_info);
+    }
+
+    // Write
+    FAPI_TRY(mss::scom_blastah(i_target, TT::READ_DELAY_REG[i_rp], l_data));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+} // close namespace nvdimm
+
 namespace dp16
 {
 

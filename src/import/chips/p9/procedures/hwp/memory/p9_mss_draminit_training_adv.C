@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,7 @@
 #include <lib/phy/seq.H>
 #include <lib/phy/ddr_phy.H>
 #include <lib/phy/mss_training.H>
+#include <lib/workarounds/dp16_workarounds.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
@@ -125,6 +126,9 @@ extern "C"
                 {
                     FAPI_TRY( l_step->execute(p, rp, l_cal_abort_on_error) );
                 }
+
+                // Adjusts values for NVDIMM's
+                FAPI_TRY(mss::workarounds::nvdimm::adjust_rd_dq_delay(p, rp));
             }// rank pairs
 
             // Resetting current_err.

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,6 +51,48 @@ namespace mss
 
 namespace workarounds
 {
+
+// Putting the NVDIMM workarounds here as it's a bit of a hybrid case
+// Also there are issues as the nvdimm_workarounds.* files are picked up externally
+namespace nvdimm
+{
+
+///
+/// @brief Updates a single RD DQ value for the NVDIMM workaround
+/// @tparam P the bit position to update
+/// @param[in,out] io_data the data bufffer to update
+///
+template<uint64_t P>
+void update_rd_dq_delay(fapi2::buffer<uint64_t>& io_data)
+{
+    constexpr uint64_t MAX_VALUE = 0x7f;
+    constexpr uint64_t OFFSET = 2;
+    constexpr uint64_t LEN = MCA_DDRPHY_DP16_READ_DELAY0_RANK_PAIR0_P0_0_01_RD_LEN;
+    uint64_t l_value = 0;
+    io_data.extractToRight<P, LEN>(l_value);
+    l_value += OFFSET;
+    l_value = std::min(l_value, MAX_VALUE);
+    io_data.insertFromRight<P, LEN>(l_value);
+}
+
+///
+/// @brief Checks if the NVDIMM RD DQ delay adjust is needed
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_is_needed true if the workaround is needed
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode is_adjust_rd_dq_delay_needed( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        bool& o_is_needed );
+
+///
+/// @brief Adjusts NVDIMM RD DQ delays
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_rp the rank pair on which to adjust delays
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode adjust_rd_dq_delay( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, const uint64_t i_rp );
+
+} // close namespace nvdimm
 
 namespace dp16
 {
