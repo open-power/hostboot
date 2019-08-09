@@ -25,7 +25,6 @@
 #ifndef __HCODE_IMG_BUILD_H_
 #define __HCODE_IMG_BUILD_H_
 
-#include <stdint.h>
 
 ///
 /// @file   p10_hcode_image_build.H
@@ -42,6 +41,8 @@
 // Includes
 //--------------------------------------------------------------------------
 #include <fapi2.H>
+#include <stdint.h>
+#include <p10_infrastruct_help.H>
 
 extern "C"
 {
@@ -69,8 +70,8 @@ extern "C"
      */
     enum
     {
-        HW_IMG_RING_SIZE    =  (300 * 1024), //300K to accomodate WOF data
-        WORK_BUF_SIZE       =  (60 * 1024),
+        HW_IMG_RING_SIZE    =  MAX_SEEPROM_IMAGE_SIZE,
+        WORK_BUF_SIZE       =  MAX_RING_BUF_SIZE,
     };
 
     /**

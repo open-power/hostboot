@@ -49,6 +49,7 @@
 #include <p10_ipl_customize.H>
 #include <p10_stop_api.H>
 #include <p10_pstate_parameter_block.H>
+#include <p10_qme_customize.H>
 
 extern "C"
 {
@@ -157,7 +158,8 @@ class ImageBuildRecord
         iv_maxSizeList["XGPE Boot Loader"]  =   XGPE_BOOT_LOADER_LENGTH;
         iv_maxSizeList["XGPE Hcode"]        =   XGPE_HCODE_SIZE;
         iv_maxSizeList["QME Hcode"]         =   QME_HCODE_SIZE;
-        iv_maxSizeList["QME Ring Blob"]     =   QME_RING_SECTION_SIZE;
+        iv_maxSizeList["QME Common Ring"]   =   QME_COMMON_RING_SIZE;
+        iv_maxSizeList["QME Inst Sectn"]    =   QME_INST_RING_SIZE;
         iv_maxSizeList["QME SRAM Size"]     =   QME_SRAM_SIZE;
         iv_maxSizeList["SELF BIN"]          =   SMF_THREAD_LAUNCHER_SIZE;
         iv_maxSizeList["SELF"]              =   SELF_SAVE_RESTORE_REGION_SIZE;
@@ -963,6 +965,97 @@ fapi_try_exit:
 //------------------------------------------------------------------------------
 
 /**
+ * @brief builds QME instance specific region in HOMER
+ * @param[in]   i_procTgt           fapi2 target for P10 chip
+ * @param[in]   i_pChipHomer        models P10 chip HOMER
+ * @param[in]   i_ringData          various buffer pointer
+ * @param[in]   i_procFuncModel     summarizes P10 chip configuration
+ * @param[in]   i_qmeBuildRecord    Image build record of QME.
+ * @return      fapi2 return code
+ */
+fapi2::ReturnCode buildQmeSpecificRing( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t *i_pChipHomer, RingBufData & i_ringData,
+                                        P10FuncModel & i_procFuncModel, ImageBuildRecord & i_qmeBuildRecord )
+{
+    uint32_t l_maxQmeRingSize   =   0;
+    uint32_t l_instRingOffset   =   i_qmeBuildRecord.getCurrentOffset();
+    uint32_t l_localPsParam     =   0;
+    uint32_t l_instSpecLength   =   l_localPsParam;
+    uint32_t l_currentIndex     =   l_instRingOffset - QME_IMAGE_CPMR_OFFSET;
+    uint32_t l_workBufSize      =   i_ringData.iv_sizeWorkBuf1;
+
+    //let us make Instance Ring start a multiple of 32B for compatibility with QME BCE
+    l_currentIndex      =   l_currentIndex + BCE_RD_BLOCK_SIZE - 1;
+    l_currentIndex      =   (( l_currentIndex >> SHIFT_RD_BLOCK_SIZE ) << SHIFT_RD_BLOCK_SIZE );
+    l_instRingOffset    =   l_currentIndex + QME_IMAGE_CPMR_OFFSET;
+
+    for( uint8_t l_superChiplet = 0; l_superChiplet < MAX_QUADS_PER_CHIP;
+         l_superChiplet++ )
+    {
+        if( !i_procFuncModel.isQuadFunctional( l_superChiplet ) )
+        {
+            continue;
+        }
+
+        FAPI_TRY( p10_qme_customize( i_procTgt,
+                                     (uint8_t *)i_ringData.iv_pRingBuffer,
+                                     ( CUSTOM_RING_OP )l_superChiplet,
+                                     (uint8_t *)i_ringData.iv_pWorkBuf1,
+                                     l_workBufSize,
+                                     0 ),
+                 "Chiplet Specific Ring Customization Failed For QME" );
+
+        if( l_maxQmeRingSize < l_workBufSize )
+        {
+            l_maxQmeRingSize    =   l_workBufSize;
+        }
+
+        l_workBufSize   =   i_ringData.iv_sizeWorkBuf1;
+    }
+
+    l_instSpecLength    +=   l_maxQmeRingSize;
+
+    l_instSpecLength     =  ( l_instSpecLength + BCE_RD_BLOCK_SIZE - 1 );
+    l_instSpecLength     =  (( l_instSpecLength >> SHIFT_RD_BLOCK_SIZE ) << SHIFT_RD_BLOCK_SIZE );
+
+    for( size_t l_superChiplet = 0; l_superChiplet < MAX_QUADS_PER_CHIP;
+         l_superChiplet++ )
+    {
+        if( !i_procFuncModel.isQuadFunctional( l_superChiplet ) )
+        {
+            FAPI_DBG( "Skipping Quad %d For Core Specific Ring", l_superChiplet );
+            continue;
+        }
+
+        l_workBufSize       =   i_ringData.iv_sizeWorkBuf1;
+
+        memset( (uint8_t *)i_ringData.iv_pWorkBuf1, 0x00, i_ringData.iv_sizeWorkBuf1 );
+
+        FAPI_TRY( p10_qme_customize( i_procTgt,
+                                     (uint8_t *)i_ringData.iv_pRingBuffer,
+                                     ( CUSTOM_RING_OP ) l_superChiplet,
+                                     (uint8_t *)i_ringData.iv_pWorkBuf1,
+                                     l_workBufSize,
+                                     0 ),
+                 "Chiplet Specific Ring Customization Failed For QME" );
+
+        memcpy( &i_pChipHomer->iv_cpmrRegion.iv_qmeSramRegion[l_currentIndex],
+            i_ringData.iv_pWorkBuf1, l_workBufSize );
+
+        FAPI_INF( "Current Index 0x%08x", l_currentIndex );
+
+        l_currentIndex  +=  l_instSpecLength;
+
+    }
+
+    i_qmeBuildRecord.setSection( "QME Inst Sectn", l_instRingOffset, l_instSpecLength );
+
+fapi_try_exit:
+    return fapi2::current_err;;
+}
+
+//------------------------------------------------------------------------------
+
+/**
  * @brief       copies QME section from hardware image to HOMER.
  * @param[in]   i_pImageIn      points to start of hardware image.
  * @param[in]   i_pChipHomer    points to HOMER image.
@@ -1033,7 +1126,7 @@ fapi_try_exit:
  * @brief       builds QME image in CPMR section of HOMER
  * @param[in]   i_procTgt       fapi2 target for P10 proc chip
  * @param[in]   i_pImageIn      points to HW Image
- * @param[in]   i_pChibuildQmeRingpHomer    models HOMER region of memory
+ * @param[in]   i_pChipHomer    models HOMER region of memory
  * @param[in]   i_procFuncModel contains P10 chip configuration details.
  * @param[in]   i_imageRecord   an instance of ImageBuildRecord
  * @return      fapi2 return code.
@@ -1043,30 +1136,17 @@ fapi2::ReturnCode buildQmeRing( CONST_FAPI2_PROC& i_procTgt, void * const i_pIma
                                 ImageBuildRecord & i_qmeBuildRecord )
 {
     FAPI_INF( ">> buildQmeRing" );
-    P9XipSection    l_xipSection;
-    uint32_t l_qmeImgSize       =   0;
-    uint32_t l_rc               =   0;
-    //uint8_t  *l_pQmeImg         =   NULL;
-    uint32_t  l_bootCoreMask    =   ENABLE_ALL_CORE;
+    uint32_t l_hwImgSize       =   0;
     ImgSectnSumm    l_qmeSectn;
 
-    l_rc    =   p9_xip_get_sub_section( i_pImageIn, P9_XIP_SECTION_HW_QME,
-                                        P9_XIP_SECTION_QME_RINGS, &l_xipSection, i_procFuncModel.getChipLevel() );
+    p9_xip_image_size( i_pImageIn, &l_hwImgSize );
 
-    FAPI_ASSERT( ( IMG_BUILD_SUCCESS == l_rc ),
-                 fapi2::QME_RING_SECTN_EXTRACTION_FAIL()
-                 .set_EC_LEVEL( i_procFuncModel.getChipLevel() ),
-                 "Failed To Find Rings From QME XIP Image" );
-
-    //l_pQmeImg       =   (uint8_t *)i_pImageIn  +   l_xipSection.iv_offset;
-    l_rc = p9_xip_image_size( i_pImageIn, &l_qmeImgSize );
-    //l_qmeImgSize    =   l_xipSection.iv_size;
-    //l_qmeImgSize    =   HW_IMG_RING_SIZE;
-
+    uint32_t  l_bootCoreMask   =   ENABLE_ALL_CORE;
+    uint32_t  l_workBufSize    =   i_ringData.iv_sizeWorkBuf1;
     FAPI_TRY( p10_ipl_customize( i_procTgt,
                                  i_pImageIn,
                                  i_pImageIn,
-                                 l_qmeImgSize,
+                                 l_hwImgSize,
                                  i_ringData.iv_pRingBuffer,
                                  i_ringData.iv_ringBufSize,
                                  SYSPHASE_RT_QME,
@@ -1078,18 +1158,30 @@ fapi2::ReturnCode buildQmeRing( CONST_FAPI2_PROC& i_procTgt, void * const i_pIma
                                  i_ringData.iv_sizeWorkBuf3,
                                  l_bootCoreMask ),
                 "p10_ipl_customize Failed For QME" );
+    memset( i_ringData.iv_pWorkBuf1, 0x00, i_ringData.iv_sizeWorkBuf1 );
+
+    FAPI_TRY( p10_qme_customize( i_procTgt,
+                                 (uint8_t *)i_ringData.iv_pRingBuffer,
+                                 CUSTOMIZE_QME_COMMON_RING,
+                                 (uint8_t *)i_ringData.iv_pWorkBuf1,
+                                 l_workBufSize,
+                                 0 ),
+             "Core Common Ring Customization Failed For QME" );
 
     i_qmeBuildRecord.getSection( "QME Hcode", l_qmeSectn );
 
     memcpy( &i_pChipHomer->iv_cpmrRegion.iv_qmeSramRegion[l_qmeSectn.iv_sectnLength],
-            i_ringData.iv_pRingBuffer, i_ringData.iv_ringBufSize );
+            i_ringData.iv_pWorkBuf1, l_workBufSize );
 
-    i_qmeBuildRecord.setSection( "QME Ring Blob",
+    FAPI_INF( "Common Ring 0x%08x", l_workBufSize );
+
+    i_qmeBuildRecord.setSection( "QME Common Ring",
                               ( &i_pChipHomer->iv_cpmrRegion.iv_qmeSramRegion[l_qmeSectn.iv_sectnLength] - (uint8_t *)&i_pChipHomer->iv_cpmrRegion ),
                                 i_ringData.iv_ringBufSize );
 
-    FAPI_DBG("l_xipSection.iv_offset = 0x%08X, l_xipSection.iv_size = 0x%08X",
-             l_xipSection.iv_offset, l_xipSection.iv_size);
+    FAPI_TRY( buildQmeSpecificRing( i_procTgt, i_pChipHomer, i_ringData, i_procFuncModel, i_qmeBuildRecord ),
+              "QME Instance Specific Section Build Failed" );
+
     fapi_try_exit:
     FAPI_INF( "<< buildQmeRing" );
     return fapi2::current_err;
@@ -1127,11 +1219,25 @@ fapi2::ReturnCode buildQmeHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   *
 
     pImgHdr->g_qme_cpmr_PhyAddr        =   htobe64(l_cpmrPhyAdd);
 
-    if( !i_qmeBuildRecord.getSection( "QME Ring Blob", l_imgSectn ) )
+    if( !i_qmeBuildRecord.getSection( "QME Common Ring", l_imgSectn ) )
     {
-        pImgHdr->g_qme_common_ring_offset   =   htobe32(l_imgSectn.iv_sectnOffset - l_tempWord );
-        pImgHdr->g_qme_common_ring_length   =   htobe32(l_imgSectn.iv_sectnLength);
+        pImgHdr->g_qme_common_ring_offset   =   l_imgSectn.iv_sectnOffset - l_tempWord;
+        pImgHdr->g_qme_common_ring_length   =   l_imgSectn.iv_sectnLength;
     }
+
+    if( !i_qmeBuildRecord.getSection( "QME Inst Sectn", l_imgSectn ) )
+    {
+        pImgHdr->g_qme_inst_spec_ring_offset    =
+                    pImgHdr->g_qme_common_ring_offset + pImgHdr->g_qme_common_ring_length;
+        pImgHdr->g_qme_max_spec_ring_length     =   l_imgSectn.iv_sectnLength;
+    }
+
+#ifndef __HOSTBOOT_MODULE
+   pImgHdr->g_qme_common_ring_offset    =   htobe32(pImgHdr->g_qme_common_ring_offset);
+   pImgHdr->g_qme_common_ring_length    =   htobe32(pImgHdr->g_qme_common_ring_length);
+   pImgHdr->g_qme_inst_spec_ring_offset =   htobe32(pImgHdr->g_qme_inst_spec_ring_offset);
+   pImgHdr->g_qme_max_spec_ring_length  =   htobe32(pImgHdr->g_qme_max_spec_ring_length);
+#endif
 
    fapi_try_exit:
     FAPI_INF( "<< buildQmeHeader" )
@@ -1249,20 +1355,20 @@ fapi2::ReturnCode buildCpmrHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   
         pCpmrHdr->iv_selfRestoreLength  =    htobe32( l_imgSectn.iv_sectnLength );
     }
 
-    if( !i_qmeBuildRecord.getSection( "QME Ring Blob", l_imgSectn ) )
+    if( !i_qmeBuildRecord.getSection( "QME Common Ring", l_imgSectn ) )
     {
-        //pCpmrHdr->iv_commonRingOffset   =   htobe32( l_imgSectn.iv_sectnOffset );
-        pCpmrHdr->iv_commonRingOffset   =   htobe32( htobe32(pCpmrHdr->iv_qmeImgOffset) + htobe32(pCpmrHdr->iv_qmeImgLength));
-        // TODO enable scanning
-        // pCpmrHdr->iv_commonRingLength   =   htobe32( l_imgSectn.iv_sectnLength );
-        pCpmrHdr->iv_commonRingLength   =   0;
-
-        FAPI_INF( "Common Ring Offset       0x%08x", htobe32( pCpmrHdr->iv_commonRingOffset ) );
-        FAPI_INF( "Common Ring Length       0x%08x", htobe32( pCpmrHdr->iv_commonRingLength ) );
+        pCpmrHdr->iv_commonRingOffset   =   htobe32( l_imgSectn.iv_sectnOffset );
+        pCpmrHdr->iv_commonRingLength   =   htobe32( l_imgSectn.iv_sectnLength );
     }
 
     pCpmrHdr->iv_maxCoreL2ScomEntry   =     htobe32(MAX_CORE_SCOM_ENTRIES + MAX_L2_SCOM_ENTRIES);
     pCpmrHdr->iv_maxEqL3ScomEntry     =     htobe32(MAX_EQ_SCOM_ENTRIES + MAX_L3_SCOM_ENTRIES);
+
+    if( !i_qmeBuildRecord.getSection( "QME Inst Sectn", l_imgSectn ) )
+    {
+        pCpmrHdr->iv_specRingOffset     =   htobe32( l_imgSectn.iv_sectnOffset );
+        pCpmrHdr->iv_specRingLength     =   htobe32( l_imgSectn.iv_sectnLength );
+    }
 
     i_qmeBuildRecord.dumpBuildRecord();
 
@@ -1270,6 +1376,12 @@ fapi2::ReturnCode buildCpmrHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   
 
     FAPI_INF( "Max Core L2 SCOM Entry       0x%08x", htobe32( pCpmrHdr->iv_maxCoreL2ScomEntry) );
     FAPI_INF( "Max Cache L3 SCOM Entry      0x%08x",  htobe32( pCpmrHdr->iv_maxEqL3ScomEntry) );
+    FAPI_INF( "QME Hcode Offset             0x%08x",  htobe32( pCpmrHdr->iv_qmeImgOffset ));
+    FAPI_INF( "QME Hcode Length             0x%08x",  htobe32( pCpmrHdr->iv_qmeImgLength ));
+    FAPI_INF( "Core Common Ring Offset      0x%08x",  htobe32( pCpmrHdr->iv_commonRingOffset ));
+    FAPI_INF( "Core Common Ring Length      0x%08x",  htobe32( pCpmrHdr->iv_commonRingLength ));
+    FAPI_INF( "Core Spec Ring Offset        0x%08x",  htobe32( pCpmrHdr->iv_specRingOffset ));
+    FAPI_INF( "Core Spec Ring Length        0x%08x",  htobe32( pCpmrHdr->iv_specRingLength ));
 
  fapi_try_exit:
     FAPI_INF( "<< buildCpmrHeader" )
@@ -1398,8 +1510,8 @@ fapi2::ReturnCode buildCpmrImage( CONST_FAPI2_PROC& i_procTgt,
     FAPI_TRY( buildQmeImage( i_pImageIn, i_pChipHomer, i_imgType, i_chipFuncModel, l_qmeBuildRecord ),
               "Failed To Copy QME Section In HOMER" );
 
-    //FAPI_TRY( buildQmeRing( i_procTgt, i_pImageIn, i_pChipHomer, i_chipFuncModel, i_ringData, l_qmeBuildRecord ),
-    //          "Failed To Build QME Ring Region" );
+    FAPI_TRY( buildQmeRing( i_procTgt, i_pImageIn, i_pChipHomer, i_chipFuncModel, i_ringData, l_qmeBuildRecord ),
+              "Failed To Build QME Ring Region" );
 
     FAPI_TRY( buildQmeHeader( i_procTgt, i_pChipHomer, l_qmeBuildRecord ),
               "Failed To Build CME Image Header" );
@@ -1879,11 +1991,9 @@ fapi2::ReturnCode p10_hcode_image_build(    CONST_FAPI2_PROC& i_procTgt,
     FAPI_TRY( buildCpmrImage( i_procTgt, i_pImageIn, pChipHomer, i_phase,
                               i_imgType, l_chipFuncModel, l_ringData ),
               "Failed To Build CPMR Region of HOMER " );
-
     FAPI_TRY( buildPpmrImage( i_procTgt, i_pImageIn, pChipHomer, i_phase,
                               i_imgType, l_chipFuncModel ),
               "Failed To Build PPMR Region of HOMER" );
-
     FAPI_TRY( populateMagicWord( pChipHomer ),
               "Failed To Copy Magic Words" );
 
