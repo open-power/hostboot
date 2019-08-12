@@ -37,19 +37,10 @@ const char MSS_LIBRARY_NAME[17]         = "libisteps_mss.so";
 
 /**
  * @brief Generic function to load a module
- * @param o_module_loaded - returns true if module is loaded by this function
  * @param i_modName - module name to load
  * @return error handle if module_load call fails
  */
-errlHndl_t loadModule(bool & o_module_loaded, const char * i_modName);
-
-/**
- * @brief Generic function to unload a module
- * @param i_modName - module name to load
- * @return error handle if module_unload call fails
- *
- */
-errlHndl_t unloadModule(const char * i_modName);
+errlHndl_t loadModule(const char * i_modName);
 
 /**
  * @brief Get the mutex pointer for syncronizing tests

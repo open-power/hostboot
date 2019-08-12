@@ -51,14 +51,12 @@ const char EXPUPD_LIBRARY_NAME[] = "libexpupd.so";
 
 /**
  * @brief Generic function to load a module
- * @param o_module_loaded - returns true if module is loaded by this function
  * @param i_modName - module name to load
  * @return error handle if module_load call fails
  */
-errlHndl_t loadModule(bool & o_module_loaded, const char * i_modName)
+errlHndl_t loadModule(const char * i_modName)
 {
     errlHndl_t err = nullptr;
-    o_module_loaded = false;
 
 // VFS functions only compilable in non-runtime environment
 #ifndef __HOSTBOOT_RUNTIME
@@ -71,7 +69,6 @@ errlHndl_t loadModule(bool & o_module_loaded, const char * i_modName)
         }
         else
         {
-            o_module_loaded = true;
             TS_TRACE("loadModule: %s loaded", i_modName);
         }
     }
@@ -79,29 +76,6 @@ errlHndl_t loadModule(bool & o_module_loaded, const char * i_modName)
     return err;
 }
 
-/**
- * @brief Generic function to unload a module
- * @param i_modName - module name to load
- * @return error handle if module_unload call fails
- */
-errlHndl_t unloadModule(const char * i_modName)
-{
-    errlHndl_t err = nullptr;
-
-// VFS function only compilable in non-runtime environment
-#ifndef __HOSTBOOT_RUNTIME
-    err = VFS::module_unload(i_modName);
-    if(err)
-    {
-        TS_FAIL("unloadExplorerModule() - %s unload failed", i_modName );
-    }
-    else
-    {
-        TS_TRACE("unloadModule: %s unloaded", i_modName);
-    }
-#endif
-    return err;
-}
 
 class ExpUpdateTest: public CxxTest::TestSuite
 {
@@ -167,21 +141,18 @@ class ExpUpdateTest: public CxxTest::TestSuite
      */
     ExpUpdateTest() : CxxTest::TestSuite()
     {
-        mss_module_loaded = false;
-        expupd_module_loaded = false;
-
         // All modules are loaded by runtime,
         // so testcase loading of modules is not required
 #ifndef __HOSTBOOT_RUNTIME
         errlHndl_t err = nullptr;
 
-        err = loadModule(mss_module_loaded, MSS_LIBRARY_NAME);
+        err = loadModule(MSS_LIBRARY_NAME);
         if(err)
         {
             TS_FAIL("ExpUpdateTest() - Constuctor: failed to load MSS module");
             errlCommit( err, CXXTEST_COMP_ID );
         }
-        err = loadModule(expupd_module_loaded, EXPUPD_LIBRARY_NAME);
+        err = loadModule(EXPUPD_LIBRARY_NAME);
         if(err)
         {
             TS_FAIL("ExpUpdateTest() - Constuctor: failed to load EXPUPD module");
@@ -196,33 +167,9 @@ class ExpUpdateTest: public CxxTest::TestSuite
      */
     ~ExpUpdateTest()
     {
-        errlHndl_t err = nullptr;
-        if (mss_module_loaded)
-        {
-            err = unloadModule(MSS_LIBRARY_NAME);
-            if(err)
-            {
-                TS_FAIL("~ExpUpdateTest() - Destructor: failed to unload MSS module");
-                errlCommit( err, CXXTEST_COMP_ID );
-            }
-        }
-        if (expupd_module_loaded)
-        {
-            err = unloadModule(EXPUPD_LIBRARY_NAME);
-            if(err)
-            {
-                TS_FAIL("~ExpUpdateTest() - Destructor: failed to unload EXPUPD module");
-                errlCommit( err, CXXTEST_COMP_ID );
-            }
-        }
-
     };
 
     private:
-      // use this to keep track of if we need to unload any
-      // modules loaded by this testcase
-      bool mss_module_loaded;
-      bool expupd_module_loaded;
 };
 
 #endif

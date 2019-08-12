@@ -28,10 +28,9 @@
 
 namespace exptest
 {
-    errlHndl_t loadModule(bool & o_module_loaded, const char * i_modName)
+    errlHndl_t loadModule(const char * i_modName)
     {
         errlHndl_t err = NULL;
-        o_module_loaded = false;
 
     // VFS functions only compilable in non-runtime environment
     #ifndef __HOSTBOOT_RUNTIME
@@ -44,28 +43,8 @@ namespace exptest
             }
             else
             {
-                o_module_loaded = true;
                 FAPI_INF("loadModule: %s loaded", i_modName);
             }
-        }
-    #endif
-        return err;
-    }
-
-    errlHndl_t unloadModule(const char * i_modName)
-    {
-        errlHndl_t err = NULL;
-
-    // VFS function only compilable in non-runtime environment
-    #ifndef __HOSTBOOT_RUNTIME
-        err = VFS::module_unload(i_modName);
-        if(err)
-        {
-            TS_FAIL("unloadModule() - %s unload failed", i_modName );
-        }
-        else
-        {
-            FAPI_INF("unloadModule: %s unloaded", i_modName);
         }
     #endif
         return err;

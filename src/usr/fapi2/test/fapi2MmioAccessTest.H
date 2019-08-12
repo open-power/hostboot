@@ -256,13 +256,11 @@ void test_fapi2MmioAccess()
  */
 Fapi2MmioAccessTest() : CxxTest::TestSuite()
 {
-    mss_module_loaded = false;
-
     // All modules are loaded by runtime,
     // so testcase loading of modules is not required
 #ifndef __HOSTBOOT_RUNTIME
     errlHndl_t err = nullptr;
-    err = exptest::loadModule(mss_module_loaded, exptest::MSS_LIBRARY_NAME);
+    err = exptest::loadModule(exptest::MSS_LIBRARY_NAME);
     if(err)
     {
         TS_FAIL("Fapi2MmioAccessTest() - Constuctor: failed to load MSS module");
@@ -277,22 +275,10 @@ Fapi2MmioAccessTest() : CxxTest::TestSuite()
  */
 ~Fapi2MmioAccessTest()
 {
-    errlHndl_t err = nullptr;
-    if (mss_module_loaded)
-    {
-        err = exptest::unloadModule(exptest::MSS_LIBRARY_NAME);
-        if(err)
-        {
-            TS_FAIL("~Fapi2MmioAccessTest() - Destructor: failed to unload MSS module");
-            errlCommit( err, TARG_COMP_ID );
-        }
-    }
 }
 
 
 private:
-  // keep track if this test loaded mss_module
-  bool mss_module_loaded;
   // This is used for tests that need to not run operations at the same time
   TARGETING::HB_MUTEX_SERIALIZE_TEST_LOCK_ATTR iv_serializeTestMutex;
 
