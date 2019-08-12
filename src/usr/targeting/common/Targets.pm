@@ -22,6 +22,7 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
 package Targets;
 
 use strict;
@@ -100,6 +101,7 @@ sub new
         targeting    => undef,
         enumerations => undef,
         MAX_MCS      => 0,
+        master_proc  => undef,
         UNIT_COUNTS  => undef,
         huid_idx     => undef,
         mru_idx      => undef,
@@ -558,6 +560,13 @@ sub buildHierarchy
                       ->{BUS}
                   },
                 $b
+            );
+            push(
+                @{
+                    $self->{data}->{TARGETS}->{$source_target}->{CONNECTION}
+                      ->{BUS_PARENT}
+                  },
+                $key
             );
             my %bus_entry;
             $bus_entry{SOURCE_TARGET} = $source_target;
@@ -2392,6 +2401,15 @@ sub getConnectionBus
     return $target_ptr->{CONNECTION}->{BUS}->[$i];
 }
 
+sub getConnectionBusParent
+{
+    my $self       = shift;
+    my $target     = shift;
+    my $i          = shift;
+    my $target_ptr = $self->getTarget($target);
+    return $target_ptr->{CONNECTION}->{BUS_PARENT}->[$i];
+}
+
 sub findFirstEndpoint
 {
     my $self     = shift;
@@ -3176,6 +3194,19 @@ sub setMruid
     $self->{mru_idx}->{$node}->{$type}++;
 }
 
+sub getMasterProc
+{
+    my $self = shift;
+    return $self->{master_proc};
+}
+
+sub setMasterProc
+{
+    my $self = shift;
+    my $target = shift;
+    $self->{master_proc}=$target;
+}
+
 sub getSystemName
 {
     my $self = shift;
@@ -3408,10 +3439,15 @@ C<TARGET_STRING>.  The bus data structure is also a target with attributes.
 Returns the target string of the C<INDEX> target found connected to
 C<TARGET_STRING>.
 
-=item getConnectionBus(C<TARGET_STRING>)
+=item getConnectionBus(C<TARGET_STRING>,C<INDEX>)
 
 Returns the data structure of the C<INDEX> bus target found connected to
 C<TARGET_STRING>.
+
+=item getConnectionBusParent(C<TARGET_STRING>,C<INDEX>)
+
+Returns C<PARENT_TARGET_STRING> of the parent target for the bus target found
+connected to C<TARGET_STRING>
 
 =item findEndpoint(C<TARGET_STRING>,C<BUS_TYPE>,C<ENDPOINT_MRW_TYPE>)
 
