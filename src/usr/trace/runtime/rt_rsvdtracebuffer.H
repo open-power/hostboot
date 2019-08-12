@@ -43,9 +43,25 @@ namespace TRACE
      *
      *  @brief Class to manage the Reserved Trace Buffer
      *
-     *  This is a utility class to manage the buffer - looking for space
-     *  for an entry, adding entries and removing entries.
-     *
+     *  @details This is a utility class to manage the buffer - looking
+     *           for space for an entry, adding entries and removing entries.
+     *           When a system crashes, this buffer will persist the last
+     *           few traces. When HB is IPLed again, the persisted data
+     *           will be retrieved for inspection.
+     *           With PHYP, the buffer will be retrieved at the same memory
+     *           location as before the crash.  With OPAL, the buffer may be
+     *           relocated to a different location and all the pointers within
+     *           the buffer will be invalid.  If the buffer does get relocated,
+     *           this class will correct the pointers.
+     *           To correct the pointers, a section at the beginning of the
+     *           persisted buffer is reserved to save the address of the buffer.
+     *           Such that when the buffer is retrieved after a crash, if that
+     *           data does not match the current buffer address, then we can
+     *           conclude it has been relocated and the pointers in the buffer
+     *           need to be updated/corrected.
+     *           If the data at the beginning of the buffer is 0, then this is
+     *           first time this buffer is being used and therefore no need to
+     *           correct pointers.
      */
     class RsvdTraceBuffer
     {
@@ -89,12 +105,12 @@ namespace TRACE
              *             If o_data is valid and the i_size is greater than
              *             the size of trace_buf_head_t, then as many trace
              *             entries will be returned in the o_data buffer that
-             *             i_size will allow.
+             *             i_size will allow, minus size of trace_buf_head_t.
              *
-             *  @param[in]  o_data - if not null, the buffer area to copy
+             *  @param[out]  o_data - if not null, the buffer area to copy
              *                       trace data into
              *
-             *  @param[out] i_dataSize - if not 0, the size of the buffer area,
+             *  @param[in]  i_dataSize - if not 0, the size of the buffer area,
              *                           which dictates how many trace entries'
              *                           payload (or data the entry contains)
              *                           that can be copied
@@ -123,7 +139,23 @@ namespace TRACE
              */
             uint32_t getNumberOfEntries() const;
 
+        // Private methods
         private:
+
+            /** @brief Checks the buffer to see if it has been relocated and if
+             *         so, realign the pointers within the buffer.
+             */
+            void checkBuffer();
+
+
+            /** @brief When and if buffer has been relocated this method will
+             *         realign the pointers within the buffer.
+             *
+             *  @param[in]  i_offset - the offset the buffer has moved
+             *                         within memory
+             */
+            void realignListPointers(intptr_t i_offset);
+
             /** @brief This function will find a contiguous piece of memory that
              *         is large enough in size to accommodate the space needed.
              *         If not enough free contiguous memory exists to accommodate
@@ -147,7 +179,8 @@ namespace TRACE
              *             requested is not larger in size to the buffer size,
              *             then an available space will eventually be returned.
              *
-             *  @param[in]  i_spaceNeeded - @see insertEntry::i_dataSize above
+             *  @param[in]  i_spaceNeeded - The size of the contiguous piece
+             *                              of memory caller desires
              *
              *  @param[out] o_availableAddress - A pointer to the contiguous
              *                 piece of memory found that satisfies the caller's
@@ -160,8 +193,8 @@ namespace TRACE
                                        char* &o_availableAddress);
 
             /** @brief Returns a contiguous piece of memory that will satisfy
-             *         the space that is needed if large enough space can be
-             *         had, else returns the size of the largest contiguous
+             *         the space that is needed if a large enough space can be
+             *         found, else return the size of the largest contiguous
              *         piece of memory.
              *
              *  @algorithm There are three cases to consider:
@@ -228,13 +261,16 @@ namespace TRACE
              *            Case 2: Contiguous space desired: 40 bytes
              *                    Return the 30 bytes between Tail and Head.
              *
-             *  @param[in]  i_spaceNeeded - @see insertEntry::i_dataSize above
+             *  @param[in]  i_spaceNeeded - The size of the contiguous piece
+             *                              of memory caller desires
              *
-             *  @param[out] o_availableAddress - @see makeSpaceForEntry above
+             *  @param[out] o_availableAddress - A pointer to the biggest
+             *                 piece of contiguous memory found. May or may
+             *                 not satisfy i_spaceNeeded.
              *
              *  @return The minimum size of the space found that meets the
              *          requested space needed; or the largest size that comes
-             *          close to meeting the space needed
+             *          close to meeting the space needed.
              *
              */
             uint32_t getAvailableSpace(uint32_t  i_spaceNeeded,
@@ -256,7 +292,7 @@ namespace TRACE
             uint32_t getAggregateSizeOfEntries() const;
 
             /** @brief This will return as many data entries that can be
-             *         accommodated by size
+             *         accommodated by i_dataSize
              *
              *  @param[out] o_data - the buffer area to copy trace data into
              *
@@ -447,9 +483,13 @@ namespace TRACE
             void clearPtrToHead()
                 {   iv_ptrToHead = nullptr; }
 
+        // Private data members
+        private:
+            uintptr_t* iv_ptrToRsvdMem; //< Pointer to Reserved Memory. Used to
+                                        // realign pointers if RsvdMem relocates
+            uintptr_t* iv_ptrToHead; //< Pointer to oldest Entry (time wise)
             char *iv_bufferBeginningBoundary; //< Pointer to beginning of buffer
             char *iv_bufferEndingBoundary;    //< Pointer to end of buffer
-            uintptr_t* iv_ptrToHead; //< Pointer to oldest Entry (time wise)
             bool iv_isBufferValid; //< Indicates an initialized buffer
 
             // For testing purposes only
