@@ -2030,11 +2030,11 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
 
                                         uint32_t l_dimmId = 0;
                                         l_dimmId |=
-                                            1 << (31 - l_pOcmbTarget->getAttr
-                                            <TARGETING::ATTR_REL_POS>());
+                                            1 << (31 - l_pOmiTarget->getAttr
+                                            <TARGETING::ATTR_CHIP_UNIT>());
                                         l_dimmId |=
                                            1 << (31 - (l_pmemPortTarget->getAttr
-                                           <TARGETING::ATTR_REL_POS>()+16));
+                                           <TARGETING::ATTR_CHIP_UNIT>()+16));
                                         l_dimmId |=
                                             1 << (31 - (l_pDimmTarget->getAttr
                                             <TARGETING::ATTR_REL_POS>()+20));
