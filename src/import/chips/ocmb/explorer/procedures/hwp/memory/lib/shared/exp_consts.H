@@ -214,6 +214,7 @@ enum cmd_id : uint8_t
     FW_PQM_HORIZONTAL_BATHTUB_GET            = 0x18,
     FW_PQM_VERTICAL_BATHTUB_GET              = 0x19,
     FW_PQM_2D_BATHTUB_GET                    = 0x1A,
+    EXP_FW_PQM_FORCE_DELAY_LINE_UPDATE       = 0x1B,
 };
 
 ///

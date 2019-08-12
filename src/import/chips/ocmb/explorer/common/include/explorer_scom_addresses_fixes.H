@@ -3148,5 +3148,6 @@ static const uint64_t EXP_DDR4_PHY_DBYTE9_RXPBDLYTG3_R7 = 0x04065dacull;
 static const uint64_t EXP_DDR4_PHY_DBYTE9_RXPBDLYTG3_R8 = 0x040661acull;
 static const uint64_t EXPLR_RDF_MCBCM2                  = 0x08011c35ull;
 static const uint64_t EXPLR_TP_MB_UNIT_TOP_TR1_TRACE_TRCTRL_CONFIG = 0x08010442ull;
+static const uint64_t EXP_APBONLY0_MICROCONTMUXSEL      = 0x04340000ull;
 
 #endif

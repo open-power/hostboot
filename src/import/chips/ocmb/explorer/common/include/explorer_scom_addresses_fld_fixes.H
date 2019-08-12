@@ -49,5 +49,6 @@ static const uint8_t EXPLR_MCBIST_MBSSYMEC9Q_MODAL_SYMBOL_COUNTER_79_LEN       =
 static const uint8_t EXPLR_RDF_MCBCM2_MCBIST_HALF_COMPARE_MASK                 = 0   ;
 static const uint8_t EXPLR_RDF_MCBCM2_MCBIST_HALF_COMPARE_MASK_LEN             = 40  ;
 static const uint8_t EXPLR_TP_MB_UNIT_TOP_TR1_TRACE_TRCTRL_CONFIG_TRA_MASTER_CLOCK_ENABLE = 22;
+static const uint8_t EXP_APBONLY0_MICROCONTMUXSEL_MICROCONTMUXSEL              = 63  ;
 
 #endif
