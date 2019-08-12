@@ -250,17 +250,36 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WRITE,
  *
  * @return     uint64_t     The converted result.
  */
-uint64_t formatOcmbIdecToCfamStandard(const uint64_t i_idec)
+uint64_t formatOcmbIdecToCfamStandard(const uint64_t i_idec,
+                                      const TARGETING::ATTR_CHIP_ID_type i_chipType )
 {
     uint64_t convertedIdec = 0;
 
-    // Need to convert register contents from Mm0L00CC to MLmCC000
+    // Need to convert IDEC register
+    // i_idec is in formation:  Mm0L00CC for explorer
+    //                          MmL000CC for gemini
+    //
+    // We must convert to format MLmCC000
     uint32_t idec = static_cast<uint32_t>(i_idec);
     uint32_t major = 0xF0000000 & idec;
     uint32_t minor = 0x0F000000 & idec;
-    uint32_t location = 0x000F0000 & idec;
-    convertedIdec = (major | (location << 8) | (minor >> 4)
-                    | ((idec & 0x000000FF) << 12));
+
+    // Location byte is in a different location
+    // for Gemini cards
+    uint32_t location;
+
+    if(i_chipType == POWER_CHIPID::EXPLORER_16)
+    {
+        location = 0x000F0000 & idec;
+        convertedIdec = (major | (location << 8) | (minor >> 4)
+                        | ((idec & 0x000000FF) << 12));
+    }
+    else
+    {
+        location = 0x00F00000 & idec;
+        convertedIdec = (major | (location << 4) | (minor >> 4)
+                        | ((idec & 0x000000FF) << 12));
+    }
 
     return convertedIdec;
 }
@@ -693,22 +712,24 @@ errlHndl_t ocmbIdecPhase1(const TARGETING::TargetHandle_t& i_target)
 
 errlHndl_t ocmbIdecPhase2(const TARGETING::TargetHandle_t& i_target)
 {
-    //@TODO RTC-209353: Read IDEC for Gemini.
-    const uint16_t OCMB_IDEC_REGISTER = 0x2134;
+
+    const uint32_t EXP_IDEC_SCOM_REGISTER = 0x2134;
+    const uint32_t GEM_IDEC_SCOM_REGISTER = 0x0801240e;
+    const TARGETING::ATTR_CHIP_ID_type chipIdFromSpd =
+                              i_target->getAttr<TARGETING::ATTR_CHIP_ID>();
+
+    uint32_t idec_reg = (chipIdFromSpd == POWER_CHIPID::EXPLORER_16) ?
+                            EXP_IDEC_SCOM_REGISTER : GEM_IDEC_SCOM_REGISTER ;
 
     errlHndl_t error = nullptr;
     uint64_t idec = 0;
     size_t op_size = sizeof(idec);
 
     do {
-        // Read the ID/EC
-        // @TODO RTC-209353: Make this work for both Gemini and Explorer cards
-        //                   when more information is known about which
-        //                   registers to read from.
         error = DeviceFW::deviceRead(i_target,
                                      &idec,
                                      op_size,
-                                     DEVICE_SCOM_ADDRESS(OCMB_IDEC_REGISTER));
+                                     DEVICE_SCOM_ADDRESS(idec_reg));
 
         if (error != nullptr)
         {
@@ -718,7 +739,7 @@ errlHndl_t ocmbIdecPhase2(const TARGETING::TargetHandle_t& i_target)
             break;
         }
 
-        idec = formatOcmbIdecToCfamStandard(idec);
+        idec = formatOcmbIdecToCfamStandard(idec, chipIdFromSpd);
 
         uint8_t ec = POWER_CHIPID::extract_ddlevel(idec);
         uint32_t id = POWER_CHIPID::extract_chipid16(idec);
@@ -730,23 +751,17 @@ errlHndl_t ocmbIdecPhase2(const TARGETING::TargetHandle_t& i_target)
                  ec,
                  idec);
 
-        // Get the id that was translated from the SPD read during phase 1.
-        const uint16_t translatedId =
-            i_target->getAttr<TARGETING::ATTR_CHIP_ID>();
-
-        //@TODO RTC-209353: Read IDEC for Gemini.
-        if ( translatedId != POWER_CHIPID::GEMINI_16 &&
-             id != translatedId)
+        if (id != chipIdFromSpd)
         {
             HWAS_ERR("ocmbIdecPhase2> OCMB Chip Id and associated SPD Chip Id "
-                     "don't match: OCMB ID=0x%.4X; Translated SPD ID=0x%.4X;",
+                     "don't match: OCMB ID=0x%.4X; SPD ID=0x%.4X;",
                      id,
-                     translatedId);
+                     chipIdFromSpd);
 
-            HWAS_ERR("ocmbIdecPhase2> Previous CHIP_ID 0x%.4X translated from "
-                     "SPD read will be overwritten with OCMB IDEC register "
+            HWAS_ERR("ocmbIdecPhase2> Previous CHIP_ID 0x%.4X was set based on values from "
+                     "SPD read will now be overwritten with values from OCMB IDEC register "
                      "ID=0x%.4X",
-                     translatedId,
+                     chipIdFromSpd,
                      id);
             /*@
             * @errortype
@@ -754,7 +769,7 @@ errlHndl_t ocmbIdecPhase2(const TARGETING::TargetHandle_t& i_target)
             * @moduleid          MOD_OCMB_IDEC
             * @reasoncode        RC_OCMB_CHIP_ID_MISMATCH
             * @userdata1[00:31]  OCMB IDEC Register ID
-            * @userdata1[32:63]  Translated SPD ID
+            * @userdata1[32:63]  IDEC ID found in OCMB's SPD
             * @userdata2[32:63]  HUID of OCMB target
             * @devdesc           The IDEC info read from the OCMB and SPD
             *                    did not match the expected values.
@@ -763,7 +778,7 @@ errlHndl_t ocmbIdecPhase2(const TARGETING::TargetHandle_t& i_target)
             error = hwasError(ERRORLOG::ERRL_SEV_PREDICTIVE,
                               MOD_OCMB_IDEC,
                               RC_OCMB_CHIP_ID_MISMATCH,
-                              TWO_UINT32_TO_UINT64(id, translatedId),
+                              TWO_UINT32_TO_UINT64(id, chipIdFromSpd),
                               TARGETING::get_huid(i_target));
 
             // Add callouts and commit
@@ -776,21 +791,19 @@ errlHndl_t ocmbIdecPhase2(const TARGETING::TargetHandle_t& i_target)
             i_target->setAttr<TARGETING::ATTR_CHIP_ID>(id);
         }
 
-        const uint8_t translatedEc = i_target->getAttr<TARGETING::ATTR_EC>();
+        const uint8_t ecFromSpd = i_target->getAttr<TARGETING::ATTR_EC>();
 
-        //@TODO RTC-209353: Read IDEC for Gemini.
-        if (translatedId != POWER_CHIPID::GEMINI_16 &&
-            ec != translatedEc)
+        if (ec != ecFromSpd)
         {
             HWAS_ERR("ocmbIdecPhase2> OCMB Revision and associated SPD "
                      "Revision don't match: OCMB EC=0x%.2X; "
-                     "Translated SPD EC=0x%.2X; ",
-                     ec, translatedEc);
+                     "SPD EC=0x%.2X; ",
+                     ec, ecFromSpd);
 
-            HWAS_ERR("ocmbIdecPhase2> Previous EC and HDAT_EC 0x%.2X "
-                     "translated from SPD read will be overwritten with OCMB "
-                     "IDEC register ID=0x%.2X",
-                     translatedEc,
+            HWAS_ERR("ocmbIdecPhase2> Previous EC and HDAT_EC attributes 0x%.2X,"
+                     " which were set with values found in SPD will be overwritten"
+                     "  with value from OCMB IDEC register ID=0x%.2X",
+                     ecFromSpd,
                      ec);
 
             /*@
@@ -799,7 +812,7 @@ errlHndl_t ocmbIdecPhase2(const TARGETING::TargetHandle_t& i_target)
             * @moduleid          MOD_OCMB_IDEC
             * @reasoncode        RC_OCMB_SPD_REVISION_MISMATCH
             * @userdata1[00:31]  OCMB IDEC register EC
-            * @userdata1[32:63]  Translated SPD EC
+            * @userdata1[32:63]  EC found in OCMB's SPD
             * @userdata2[00:31]  OCMB Chip ID Attribute
             * @userdata2[32:63]  HUID of OCMB target
             * @devdesc           The EC (Revision) info read from the OCMB and
@@ -809,7 +822,7 @@ errlHndl_t ocmbIdecPhase2(const TARGETING::TargetHandle_t& i_target)
             error = hwasError(ERRORLOG::ERRL_SEV_PREDICTIVE,
                               MOD_OCMB_IDEC,
                               RC_OCMB_SPD_REVISION_MISMATCH,
-                              TWO_UINT32_TO_UINT64(ec, translatedEc),
+                              TWO_UINT32_TO_UINT64(ec, ecFromSpd),
                               TWO_UINT32_TO_UINT64(
                                   i_target->getAttr<TARGETING::ATTR_CHIP_ID>(),
                                   TARGETING::get_huid(i_target)));
