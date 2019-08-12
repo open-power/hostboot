@@ -28,6 +28,18 @@
 
 namespace TRACE
 {
+
+/// Some constants to help keep track of the structure of the buffer
+/// Have these build on each other
+// A pointer of where the reserved memory points to itself.  Helps to determine
+// if the buffer has been relocated
+const uint32_t RESERVED_MEMORY_POINTER_OFFSET = 0;
+// The location of the buffer for Entries.
+const uint32_t BUFFER_BEGINNINIG_BOUNDARY_OFFSET =
+                           sizeof(uintptr_t) + RESERVED_MEMORY_POINTER_OFFSET;
+// Minimum size of the buffer, based on the buffers needs to be functional
+const uint32_t MINIMUM_SIZE_OF_BUFFER_IN_BYTES =
+                                            BUFFER_BEGINNINIG_BOUNDARY_OFFSET;
 /**
  *  ctor
  */
@@ -50,18 +62,82 @@ void RsvdTraceBuffer::init(uint32_t   i_bufferSize,
 {
     // If buffer is not already initialized and incoming data is legit
     if ( (false == isBufferValid())   &&
-         (i_bufferSize > 0 )          &&
+         (i_bufferSize > MINIMUM_SIZE_OF_BUFFER_IN_BYTES )          &&
          (i_addressToBuffer > 0)      &&
          (nullptr != i_addressToHead) )
     {
-        setBeginningBoundary(convertToCharPointer(i_addressToBuffer));
-        setEndingBoundary(convertToCharPointer(i_addressToBuffer +
-                                                             i_bufferSize - 1));
+        // Set the list head pointer.  This needs to be set first.
         setListHeadPtr(i_addressToHead);
+
+        // Set the reserved memory pointer
+        iv_ptrToRsvdMem = reinterpret_cast<uintptr_t*>
+                           (i_addressToBuffer + RESERVED_MEMORY_POINTER_OFFSET);
+
+        setBeginningBoundary(convertToCharPointer
+                       (i_addressToBuffer + BUFFER_BEGINNINIG_BOUNDARY_OFFSET));
+        setEndingBoundary(convertToCharPointer
+                       (i_addressToBuffer + i_bufferSize - 1));
+
+        // Check if buffer has moved and if so, realign the pointers
+        checkBuffer();
 
         // Now that there is an actual/real buffer to point to, the buffer is
         // valid, although it may/may not have any entries associated with it.
         setBufferValidity(true);
+    }
+}
+
+/**
+ *  checkBuffer
+ */
+void RsvdTraceBuffer::checkBuffer()
+{
+    intptr_t l_offset(0);
+
+    // If the reserved memory data is not zero, meaning that buffer is being
+    // revisited again, and the memory does not match the current pointer of
+    // the reserved memory data, then the buffer has been relocated and the
+    // pointer info in the buffer needs to be realigned/corrected.
+    // The buffer gets revisited to pull data when a crash happens. Please
+    // see the details section for the class in the .H file.
+    if ((0 != iv_ptrToRsvdMem[0]) &&
+        (reinterpret_cast<uintptr_t>(iv_ptrToRsvdMem) != iv_ptrToRsvdMem[0]))
+    {
+        // Get the difference in memory location
+        l_offset = reinterpret_cast<uintptr_t>
+                                      (iv_ptrToRsvdMem) - iv_ptrToRsvdMem[0];
+
+        realignListPointers(l_offset);
+    }
+
+    // Persist the current buffer location
+    iv_ptrToRsvdMem[0] = reinterpret_cast<uintptr_t>(iv_ptrToRsvdMem);
+}
+
+/**
+ *  realignListPointers
+ */
+void RsvdTraceBuffer::realignListPointers(intptr_t l_offset)
+{
+    // Verify that there is actual data to realign
+    Entry* l_head = getListHead();
+    if (l_head)
+    {
+        // Update the pointer to the list
+        *iv_ptrToHead = *iv_ptrToHead + l_offset;
+
+        // Get the the head of list to traverse over and correct pointers
+        Entry* l_entry = l_head = getListHead();
+        do
+        {
+            // Update the pointers of Entry item
+            l_entry->next = reinterpret_cast<Entry *>(
+                         reinterpret_cast<uintptr_t>(l_entry->next) + l_offset);
+            l_entry->prev = reinterpret_cast<Entry *>(
+                         reinterpret_cast<uintptr_t>(l_entry->prev) + l_offset);
+
+            l_entry = l_entry->next;
+        } while (l_entry != l_head);
     }
 }
 
@@ -170,7 +246,7 @@ uint32_t RsvdTraceBuffer::getAvailableSpace(uint32_t i_spaceNeeded,
             // space needed, then return that value else return the space
             // available at the beginning of the buffer.  If the space at the
             // end does not have enough of the needed space, then space will
-            // ultimately be made at the beginning of the
+            // ultimately be made at the beginning of the buffer.
             //
             // Right now, you are probably thinking, what if I only need 5 free
             // spaces and if the end has 10 available and the beginning has 7

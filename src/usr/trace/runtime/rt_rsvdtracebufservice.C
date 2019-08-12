@@ -80,10 +80,10 @@ void RsvdTraceBufService::init()
         // If the data is not NULL, then retrieve crashed data
         // I want NULL in this case, not nullptr; *l_addressToHead is an int.
         // If I use nullptr; compiler complains
-        //if (*l_addressToHead != NULL)
-        //{
-        //    retrieveDataFromLastCrash();
-        //}
+        if (*l_addressToHead != NULL)
+        {
+            retrieveDataFromLastCrash();
+        }
 
         // After gathering trace info from previous crash, clear buffer data
         iv_rsvdTraceBuffer.clearBuffer();

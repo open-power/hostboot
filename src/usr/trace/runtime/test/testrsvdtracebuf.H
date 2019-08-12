@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,10 +25,8 @@
 #include <cxxtest/TestSuite.H>
 
 #include <trace/runtime/rt_rsvdtracebuffer.H>     // TRACE::RsvdTraceBuffer
-#include <trace/runtime/rt_rsvdtracebufservice.H> // TRACE::RsvdTraceBufService
-#include <trace/entry.H>             // TRACE::Entry
-#include <trace/compdesc.H>          // TRACE::ComponentDesc
-#include <util/runtime/util_rt.H>    // hb_get_rt_rsvd_mem
+#include <trace/entry.H>                          // TRACE::Entry
+#include <trace/compdesc.H>                       // TRACE::ComponentDesc
 
 #include <stdint.h>                  // uint32_t
 #include <stdlib.h>                  // malloc
@@ -83,7 +81,7 @@ void testRsvdTraceBuffConstructor()
     }
 
     TRACFCOMP(g_trac_test, EXIT_MRK"RsvdTraceBuffTestSuite:%s", __func__);
-} // void testRsvdTraceBuffConstructor()
+} // end void testRsvdTraceBuffConstructor
 
 // Some more simple tests - the initializer
 void testRsvdTraceBuffInit()
@@ -108,7 +106,7 @@ void testRsvdTraceBuffInit()
                 l_addressToHead);
 
     char* l_bufferBegin = reinterpret_cast<char*>(l_bufferAddr +
-                                                        sizeof(uintptr_t));
+                                                       (2 * sizeof(uintptr_t)));
     char* l_bufferEnd = reinterpret_cast<char*>(l_bufferAddr +
                                                         l_bufferSize - 1);
 
@@ -155,7 +153,7 @@ void testRsvdTraceBuffInit()
     }
 
     TRACFCOMP(g_trac_test, EXIT_MRK"RsvdTraceBuffTestSuite:%s", __func__);
-}  // end void testRsvdTraceBuffInit()
+}  // end void testRsvdTraceBuffInit
 
 // Test where buffer is too small to accommodate any Entry size
 void testRsvdTraceBuffBufferToSmall()
@@ -225,7 +223,7 @@ void testRsvdTraceBuffBufferToSmall()
     free(l_buffer);
 
     TRACFCOMP(g_trac_test, EXIT_MRK"RsvdTraceBuffTestSuite:%s", __func__);
-} // end void testRsvdTraceBuffBufferToSmall()
+} // end void testRsvdTraceBuffBufferToSmall
 
 // Test where buffer is just the right size to fit a single Entry
 void testRsvdTraceBuffOnlyAccommodateOneItem()
@@ -283,7 +281,8 @@ void testRsvdTraceBuffOnlyAccommodateOneItem()
         TS_FAIL("%s:%s: Pointer to list is not correct", __FILE__, __func__);
     }
 
-    if (true != runSelfDiagnostics(l_rsvd))
+    uint32_t l_itemCount(0);
+    if (true != runSelfDiagnostics(l_rsvd, l_itemCount))
     {
         TS_FAIL("%s:%s: self diagnostics discovered an error",
                 __FILE__, __func__);
@@ -329,7 +328,8 @@ void testRsvdTraceBuffOnlyAccommodateOneItem()
         TS_FAIL("%s:%s: Pointer to list is not correct", __FILE__, __func__);
     }
 
-    if (true != runSelfDiagnostics(l_rsvd))
+    l_itemCount = 0;
+    if (true != runSelfDiagnostics(l_rsvd, l_itemCount))
     {
         TS_FAIL("%s:%s: self diagnostics discovered an error",
                 __FILE__, __func__);
@@ -354,7 +354,8 @@ void testRsvdTraceBuffOnlyAccommodateOneItem()
         TS_FAIL("%s:%s: Pointer to list is not correct", __FILE__, __func__);
     }
 
-    if (true != runSelfDiagnostics(l_rsvd))
+    l_itemCount = 0;
+    if (true != runSelfDiagnostics(l_rsvd, l_itemCount))
     {
         TS_FAIL("%s:%s: self diagnostics discovered an error",
                 __FILE__, __func__);
@@ -363,7 +364,7 @@ void testRsvdTraceBuffOnlyAccommodateOneItem()
     free(l_buffer);
 
     TRACFCOMP(g_trac_test, EXIT_MRK"RsvdTraceBuffTestSuite:%s", __func__);
-} // end void testRsvdTraceBuffOnlyAccommodateOneItem()
+} // end void testRsvdTraceBuffOnlyAccommodateOneItem
 
 // Test where buffer is just the right size to fit a single Entry plus size
 void testRsvdTraceBuffOnlyAccommodateOneItemPlusSize()
@@ -378,7 +379,7 @@ void testRsvdTraceBuffOnlyAccommodateOneItemPlusSize()
                                               l_rsvd);
 
     // Adjust buffer to the area we are interested in
-    char* l_buffer = l_fullBuffer + sizeof(uintptr_t);
+    char* l_buffer = l_fullBuffer + (2 * sizeof(uintptr_t));
 
     if (l_rsvd.getBufferSize() != l_bufferSize)
     {
@@ -434,8 +435,8 @@ void testRsvdTraceBuffOnlyAccommodateOneItemPlusSize()
                 __FILE__, __func__);
     }
 
-
-    if (true != runSelfDiagnostics(l_rsvd))
+    uint32_t l_itemCount(0);
+    if (true != runSelfDiagnostics(l_rsvd, l_itemCount))
     {
         TS_FAIL("%s:%s: self diagnostics discovered an error",
                 __FILE__, __func__);
@@ -533,7 +534,8 @@ void testRsvdTraceBuffOnlyAccommodateOneItemPlusSize()
                 __FILE__, __func__);
     }
 
-    if (true != runSelfDiagnostics(l_rsvd))
+    l_itemCount = 0;
+    if (true != runSelfDiagnostics(l_rsvd, l_itemCount))
     {
         TS_FAIL("%s:%s: self diagnostics discovered an error",
                 __FILE__, __func__);
@@ -603,7 +605,8 @@ void testRsvdTraceBuffOnlyAccommodateOneItemPlusSize()
                 __FILE__, __func__);
     }
 
-    if (true != runSelfDiagnostics(l_rsvd))
+    l_itemCount = 0;
+    if (true != runSelfDiagnostics(l_rsvd, l_itemCount))
     {
         TS_FAIL("%s:%s: self diagnostics discovered an error",
                 __FILE__, __func__);
@@ -682,7 +685,7 @@ void testRsvdTraceBuffOnlyAccommodateOneItemPlusSize()
     free(l_fullBuffer);
 
     TRACFCOMP(g_trac_test, EXIT_MRK"RsvdTraceBuffTestSuite:%s", __func__);
-} // end void testRsvdTraceBuffOnlyAccommodateOneItemPlusSize()
+} // end void testRsvdTraceBuffOnlyAccommodateOneItemPlusSize
 
 // Test where buffer is just the right size to fit two Entries
 void testRsvdTraceBuffOnlyAccommodateTwoItems()
@@ -697,7 +700,7 @@ void testRsvdTraceBuffOnlyAccommodateTwoItems()
                                               l_rsvd);
 
     // Adjust buffer to the area we are interested in
-    char* l_buffer = l_fullBuffer + sizeof(uintptr_t);
+    char* l_buffer = l_fullBuffer + (2 * sizeof(uintptr_t));
 
     if (l_rsvd.getBufferSize() != l_bufferSize)
     {
@@ -741,7 +744,8 @@ void testRsvdTraceBuffOnlyAccommodateTwoItems()
                 __FILE__, __func__);
     }
 
-    if (true != runSelfDiagnostics(l_rsvd))
+    uint32_t l_itemCount(0);
+    if (true != runSelfDiagnostics(l_rsvd, l_itemCount))
     {
         TS_FAIL("%s:%s: self diagnostics discovered an error",
                 __FILE__, __func__);
@@ -790,7 +794,8 @@ void testRsvdTraceBuffOnlyAccommodateTwoItems()
                 __FILE__, __func__);
     }
 
-    if (true != runSelfDiagnostics(l_rsvd))
+    l_itemCount = 0;
+    if (true != runSelfDiagnostics(l_rsvd, l_itemCount))
     {
         TS_FAIL("%s:%s: self diagnostics discovered an error",
                 __FILE__, __func__);
@@ -833,7 +838,8 @@ void testRsvdTraceBuffOnlyAccommodateTwoItems()
                 __FILE__, __func__);
     }
 
-    if (true != runSelfDiagnostics(l_rsvd))
+    l_itemCount = 0;
+    if (true != runSelfDiagnostics(l_rsvd, l_itemCount))
     {
         TS_FAIL("%s:%s: self diagnostics discovered an error",
                 __FILE__, __func__);
@@ -887,7 +893,8 @@ void testRsvdTraceBuffOnlyAccommodateTwoItems()
                 __FILE__, __func__);
     }
 
-    if (true != runSelfDiagnostics(l_rsvd))
+    l_itemCount = 0;
+    if (true != runSelfDiagnostics(l_rsvd, l_itemCount))
     {
         TS_FAIL("%s:%s: self diagnostics discovered an error",
                 __FILE__, __func__);
@@ -912,7 +919,7 @@ void testRsvdTraceBuffTestTheEnds()
                                               l_rsvd);
 
     // Adjust buffer to the area we are interested in
-    char* l_buffer = l_fullBuffer + sizeof(uintptr_t);
+    char* l_buffer = l_fullBuffer + (2 * sizeof(uintptr_t));
 
     if (l_rsvd.getBufferSize() != l_bufferSize)
     {
@@ -991,7 +998,8 @@ void testRsvdTraceBuffTestTheEnds()
                 __FILE__, __func__);
     }
 
-    if (true != runSelfDiagnostics(l_rsvd))
+    uint32_t l_itemCount(0);
+    if (true != runSelfDiagnostics(l_rsvd, l_itemCount))
     {
         TS_FAIL("%s:%s: self diagnostics discovered an error",
                 __FILE__, __func__);
@@ -1028,7 +1036,8 @@ void testRsvdTraceBuffTestTheEnds()
                 __FILE__, __func__);
     }
 
-    if (true != runSelfDiagnostics(l_rsvd))
+    l_itemCount = 0;
+    if (true != runSelfDiagnostics(l_rsvd, l_itemCount))
     {
         TS_FAIL("%s:%s: self diagnostics discovered an error",
                 __FILE__, __func__);
@@ -1064,7 +1073,8 @@ void testRsvdTraceBuffTestTheEnds()
                 __FILE__, __func__);
     }
 
-    if (true != runSelfDiagnostics(l_rsvd))
+    l_itemCount = 0;
+    if (true != runSelfDiagnostics(l_rsvd, l_itemCount))
     {
         TS_FAIL("%s:%s: self diagnostics discovered an error",
                 __FILE__, __func__);
@@ -1089,16 +1099,18 @@ void testRsvdTraceBuffTestReentrant ()
     iv_buffer = initializeRsvdBuffer(iv_bufferSize,
                                      l_rsvd);
 
+
     iv_bufferBeginningBoundary = l_rsvd.iv_bufferBeginningBoundary;
     iv_bufferEndingBoundary = l_rsvd.iv_bufferEndingBoundary;
 
     // Adjust buffer to the area we are interested in
-    char* l_buffer = iv_buffer + sizeof(uintptr_t);
+    char* l_buffer = iv_buffer + (2 * sizeof(uintptr_t));
 
-    if (l_rsvd.getBufferSize() != iv_bufferSize)
+    if (l_rsvd.getBufferSize() != (iv_bufferSize - sizeof(uintptr_t)))
     {
-        TS_FAIL("%s:%s: buffer size is not correct",
-                __FILE__, __func__);
+        TS_FAIL("%s:%s: buffer size is not correct %d %d",
+                __FILE__, __func__, l_rsvd.getBufferSize(),
+                (iv_bufferSize - sizeof(uintptr_t)));
     }
 
     if (true != l_rsvd.isBufferValid())
@@ -1149,7 +1161,8 @@ void testRsvdTraceBuffTestReentrant ()
                 __FILE__, __func__);
     }
 
-    if (true != runSelfDiagnostics(l_rsvd))
+    uint32_t l_itemCount(0);
+    if (true != runSelfDiagnostics(l_rsvd, l_itemCount))
     {
         TS_FAIL("%s:%s: self diagnostics discovered an error",
                 __FILE__, __func__);
@@ -1168,7 +1181,7 @@ void testRsvdTraceBuffTestReentrant2()
     TRACE::RsvdTraceBuffer l_rsvd;
     initializeRsvdBufferForReentrant(l_rsvd);
 
-    if (l_rsvd.getBufferSize() != iv_bufferSize)
+    if (l_rsvd.getBufferSize() != (iv_bufferSize - sizeof(uintptr_t)))
     {
         TS_FAIL("%s:%s: buffer size is not correct",
                 __FILE__, __func__);
@@ -1196,7 +1209,8 @@ void testRsvdTraceBuffTestReentrant2()
         TS_FAIL("%s:%s: buffer is not valid", __FILE__, __func__);
     }
 
-    if (true != runSelfDiagnostics(l_rsvd))
+    uint32_t l_itemCount(0);
+    if (true != runSelfDiagnostics(l_rsvd, l_itemCount))
     {
         TS_FAIL("%s:%s: self diagnostics discovered an error",
                 __FILE__, __func__);
@@ -1259,7 +1273,7 @@ void testRsvdTraceBuffTestReentrant3()
     TRACE::RsvdTraceBuffer l_rsvd;
     initializeRsvdBufferForReentrant(l_rsvd);
 
-    if (l_rsvd.getBufferSize() != iv_bufferSize)
+    if (l_rsvd.getBufferSize() != (iv_bufferSize - sizeof(uintptr_t)))
     {
         TS_FAIL("%s:%s: buffer size is not correct",
                 __FILE__, __func__);
@@ -1353,7 +1367,7 @@ void testRsvdTraceBuffTestReentrant4()
     TRACE::RsvdTraceBuffer l_rsvd;
     initializeRsvdBufferForReentrant(l_rsvd);
 
-    if (l_rsvd.getBufferSize() != iv_bufferSize)
+    if (l_rsvd.getBufferSize() != (iv_bufferSize - sizeof(uintptr_t)))
     {
         TS_FAIL("%s:%s: buffer size is not correct",
                 __FILE__, __func__);
@@ -1423,7 +1437,7 @@ void testRsvdTraceBuffTestReentrant5()
     TRACE::RsvdTraceBuffer l_rsvd;
     initializeRsvdBufferForReentrant(l_rsvd);
 
-    if (l_rsvd.getBufferSize() != iv_bufferSize)
+    if (l_rsvd.getBufferSize() != (iv_bufferSize - sizeof(uintptr_t)))
     {
         TS_FAIL("%s:%s: buffer size is not correct",
                 __FILE__, __func__);
@@ -1474,11 +1488,175 @@ void testRsvdTraceBuffTestReentrant5()
     TRACFCOMP(g_trac_test, EXIT_MRK"RsvdTraceBuffTestSuite:%s", __func__);
 }  // end void testRsvdTraceBuffTestReentrant5
 
+// Test when the buffer has been relocated
+// To simulate that the buffer has been relocated in memory and the pointers
+// within the buffer corrected, I create a buffer and divided it into
+// 3 sections.  I populate the middle section with data and verify that it
+// is valid.  Then I copy the middle buffer data over to the top section,
+// basically a memory location before the middle buffer.  Zero out the middle
+// section to keep myself honest, then hand that buffer over to the
+// RsvdTraceBuffer class, which should detect that the buffer has been relocated
+// and correct the pointers.  Once the RsvdTraceBuffer class has worked it's
+// magic, the buffer is tested for correctness.  I repeat this process by
+// moving the buffer data to the bottom buffer, basically a memory location
+// after the top and repeat this test.
+void testRsvdTraceBuffTestBufferRelocation()
+{
+    TRACFCOMP(g_trac_test, ENTER_MRK"RsvdTraceBuffTestSuite:%s", __func__);
+
+    // Size of each buffer segment (top buffer, middle buffer, bottom buffer)
+    const uint32_t SEGMENT_BUFFER_SIZE = 1024;
+    const uint32_t NUM_SEGMENTS = 3;
+    // Aggregate the size of the 3 buffer segments.
+    uint32_t l_bufferSize = NUM_SEGMENTS * SEGMENT_BUFFER_SIZE;
+    // Create the buffer of all combined segments and 'zero' out
+    char l_buffer[l_bufferSize];
+    memset(l_buffer, 0, l_bufferSize);
+
+    // Segment the buffer into 3 sections, top, middle, bottom
+    char * l_niflheim = l_buffer;
+    char * l_midgard = &(l_buffer[1 * SEGMENT_BUFFER_SIZE]);
+    char * l_muspelheim = &(l_buffer[2 * SEGMENT_BUFFER_SIZE]);
+
+    uint32_t l_itemCount(0);
+    uint32_t l_expectedItemCount(3);
+    TRACE::RsvdTraceBuffer l_rsvd;
+
+    // Populate middle buffer with data and verify it is correct
+    // This is just setting up the data before simulating a relocation
+    {
+        // Get the address of buffer
+        uintptr_t l_bufferAddr = reinterpret_cast<uintptr_t>(l_midgard);
+
+        // Get a pointer to where the list head needs to reside in the buffer
+        uintptr_t *l_addressToListHead = reinterpret_cast<uintptr_t *>(l_bufferAddr);
+
+
+        l_rsvd.init(SEGMENT_BUFFER_SIZE - sizeof(uintptr_t), // subtract list head pointer
+                    l_bufferAddr + sizeof(uintptr_t),        // 'hop' over list head pointer
+                    l_addressToListHead);
+
+        // populate the middle buffer (l_midgard) with data
+        l_rsvd.insertEntry(sizeof(TRACE::Entry) + 20);
+        l_rsvd.insertEntry(sizeof(TRACE::Entry) + 5);
+        l_rsvd.insertEntry(sizeof(TRACE::Entry) + 30);
+
+        // Validate the buffer
+        l_itemCount = 0;
+        if (true != runSelfDiagnostics(l_rsvd, l_itemCount))
+        {
+            TS_FAIL("%s:%s: Entry datas in midgard are corrupt",
+                    __FILE__, __func__);
+        }
+
+        if (l_itemCount != l_expectedItemCount)
+        {
+            TS_FAIL("%s:%s: The number of items found in midgard is incorrect, "
+                    " expected %d, but got back %d",
+                    __FILE__, __func__, l_expectedItemCount, l_itemCount);
+        }
+    }
+
+    // Copy data over to the top buffer and clear out the middle buffer
+    // Simulate a relocation of the buffer to a memory address that precedes
+    // the original buffer's memory location
+    memcpy(l_niflheim, l_midgard, SEGMENT_BUFFER_SIZE);
+    memset(l_midgard, 0, SEGMENT_BUFFER_SIZE);
+
+    // Test the top buffer
+    {
+        // Get the address of buffer
+        uintptr_t l_bufferAddr = reinterpret_cast<uintptr_t>(l_niflheim);
+
+        // Get a pointer to where the list head needs to reside in the buffer
+        uintptr_t *l_addressToListHead = reinterpret_cast<uintptr_t *>(l_bufferAddr);
+
+        // First invalidate buffer
+        // We need to invalidate the buffer before using it again.  Saying
+        // it is invalid is probably a misnomer here, it really should be
+        // 'buffer is not initialized'. In a real situation, HB would have
+        // crashed and restarted.  The validity of the buffer would be false
+        // since that info is not persisted.  The buffer gets initialized with
+        // buffer data, which may or may not be empty.  During the
+        // initialization the buffer gets evaluated to see if there is crash
+        // data to retrieve and a buffer that may or may not need the pointers
+        // corrected.
+        l_rsvd.iv_isBufferValid = false;
+        l_rsvd.init(SEGMENT_BUFFER_SIZE - sizeof(uintptr_t), // subtract list head pointer
+                    l_bufferAddr + sizeof(uintptr_t),        // 'hop' over list head pointer
+                    l_addressToListHead);
+
+        // Validate the buffer
+        l_itemCount = 0;
+        if (true != runSelfDiagnostics(l_rsvd, l_itemCount))
+        {
+            TS_FAIL("%s:%s: Entry datas in niflheim are corrupt",
+                    __FILE__, __func__);
+        }
+
+        if (l_itemCount != l_expectedItemCount)
+        {
+            TS_FAIL("%s:%s: The number of items found in niflheim is incorrect, "
+                    " expected %d, but got back %d",
+                    __FILE__, __func__, l_expectedItemCount, l_itemCount);
+
+        }
+    }
+
+    // Copy data over to the bottom buffer and clear out the top buffer
+    // Simulate a relocation of the buffer to a memory address that succeeds
+    // the original buffer's memory location
+    memcpy(l_muspelheim, l_niflheim, SEGMENT_BUFFER_SIZE);
+    memset(l_niflheim, 0, SEGMENT_BUFFER_SIZE);
+
+    // Test the bottom buffer
+    {
+        // Get the address of buffer
+        uintptr_t l_bufferAddr = reinterpret_cast<uintptr_t>(l_muspelheim);
+
+        // Get a pointer to where the list head needs to reside in the buffer
+        uintptr_t *l_addressToListHead = reinterpret_cast<uintptr_t *>(l_bufferAddr);
+
+        // First invalidate buffer
+        // We need to invalidate the buffer before using it again.  Saying
+        // it is invalid is probably a misnomer here, it really should be
+        // 'buffer is not initialized'. In a real situation, HB would have
+        // crashed and restarted.  The validity of the buffer would be false
+        // since that info is not persisted.  The buffer gets initialized with
+        // buffer data, which may or may not be empty.  During the
+        // initialization the buffer gets evaluated to see if there is crash
+        // data to retrieve and a buffer that may or may not need the pointers
+        // corrected.
+        l_rsvd.iv_isBufferValid = false;
+        l_rsvd.init(SEGMENT_BUFFER_SIZE - sizeof(uintptr_t), // subtract list head pointer
+                    l_bufferAddr + sizeof(uintptr_t),        // 'hop' over list head pointer
+                    l_addressToListHead);
+
+        // Validate the buffer
+        l_itemCount = 0;
+        if (true != runSelfDiagnostics(l_rsvd, l_itemCount))
+        {
+            TS_FAIL("%s:%s: Entry datas in muspelheim are corrupt",
+                    __FILE__, __func__);
+        }
+
+        if (l_itemCount != l_expectedItemCount)
+        {
+            TS_FAIL("%s:%s: The number of items found in muspelheim is incorrect, "
+                    " expected %d, but got back %d",
+                    __FILE__, __func__, l_expectedItemCount, l_itemCount);
+        }
+    }
+    TRACFCOMP(g_trac_test, EXIT_MRK"RsvdTraceBuffTestSuite:%s", __func__);
+} // end void testRsvdTraceBuffTestBufferRelocation
+
 private:
 // Helpful methods to help in testing
 char* initializeRsvdBuffer(uint32_t i_bufferSize,
                            TRACE::RsvdTraceBuffer& i_rsvd)
 {
+    i_bufferSize += sizeof(uintptr_t);
+    iv_bufferSize  = i_bufferSize;
     // Create a buffer
     uint32_t l_realBufferSize = i_bufferSize + sizeof(uintptr_t);
     char *l_buffer = reinterpret_cast<char*>(malloc(l_realBufferSize));
@@ -1513,7 +1691,7 @@ void initializeRsvdBufferForReentrant(TRACE::RsvdTraceBuffer& i_rsvd)
 }
 
 
-bool runSelfDiagnostics(TRACE::RsvdTraceBuffer& l_rsvd)
+bool runSelfDiagnostics(TRACE::RsvdTraceBuffer& l_rsvd, uint32_t & o_itemCount)
 {
     bool l_everythingChecksOut = true;
     uintptr_t l_bufferBeginningBoundary = l_rsvd.getAddressOfPtr
@@ -1521,15 +1699,15 @@ bool runSelfDiagnostics(TRACE::RsvdTraceBuffer& l_rsvd)
     uintptr_t l_bufferEndingBoundary = l_rsvd.getAddressOfPtr
                          (l_rsvd.iv_bufferEndingBoundary);
 
+    o_itemCount = 0;
+
     if (!l_rsvd.isListEmpty())
     {
-        uint32_t l_itemCount(0);
-
         TRACE::Entry* l_entry  = l_rsvd.getListHead();
         TRACE::Entry* l_head = l_entry;
         do
         {
-            ++l_itemCount;
+            ++o_itemCount;
             uintptr_t l_entryAddr = l_rsvd.getAddressOfPtr(l_entry);
             uintptr_t l_entryAddrEnd =
                             l_rsvd.getEndingAddressOfEntry(l_entry);
@@ -1539,7 +1717,7 @@ bool runSelfDiagnostics(TRACE::RsvdTraceBuffer& l_rsvd)
                 TS_FAIL("Item [%d] at address (0x%X) precedes the "
                         "allocated memory location at address "
                         "(0x%X) by %d byte(s)",
-                        l_itemCount, l_entryAddr, l_bufferBeginningBoundary,
+                        o_itemCount, l_entryAddr, l_bufferBeginningBoundary,
                         (l_bufferBeginningBoundary - l_entryAddr));
                 l_everythingChecksOut = false;
             }
@@ -1548,7 +1726,7 @@ bool runSelfDiagnostics(TRACE::RsvdTraceBuffer& l_rsvd)
                 TS_FAIL("Item [%d] at address (0x%X) is beyond the "
                         "ending allocated memory location at address "
                         "(0x%X) by %d byte(s)",
-                        l_itemCount, l_entryAddr, l_bufferEndingBoundary,
+                        o_itemCount, l_entryAddr, l_bufferEndingBoundary,
                         (l_entryAddr - l_bufferEndingBoundary));
                 l_everythingChecksOut = false;
             }
@@ -1557,7 +1735,7 @@ bool runSelfDiagnostics(TRACE::RsvdTraceBuffer& l_rsvd)
                 TS_FAIL("Item [%d] at address (0x%X) overruns the "
                         "ending allocated memory location at address "
                         "(0x%X) by %d byte(s)",
-                        l_itemCount, l_entryAddr, l_bufferEndingBoundary,
+                        o_itemCount, l_entryAddr, l_bufferEndingBoundary,
                         (l_entryAddrEnd - l_bufferEndingBoundary));
                 l_everythingChecksOut = false;
             }
@@ -1570,7 +1748,7 @@ bool runSelfDiagnostics(TRACE::RsvdTraceBuffer& l_rsvd)
                 {
                     TS_FAIL("Item [%d] at address (0x%X) overruns the "
                             "next item at address (0x%X) by %d byte(s)",
-                            l_itemCount, l_entryAddr, l_entryNextAddr,
+                            o_itemCount, l_entryAddr, l_entryNextAddr,
                             (l_entryAddrEnd - l_entryNextAddr + 1));
                     l_everythingChecksOut = false;
                 }
