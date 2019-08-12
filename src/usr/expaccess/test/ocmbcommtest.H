@@ -232,14 +232,12 @@ class OCMBCommTest: public CxxTest::TestSuite
      */
     OCMBCommTest() : CxxTest::TestSuite()
     {
-        mss_module_loaded = false;
-
         // All modules are loaded by runtime,
         // so testcase loading of modules is not required
 #ifndef __HOSTBOOT_RUNTIME
         errlHndl_t err = nullptr;
 
-        err = exptest::loadModule(mss_module_loaded, exptest::MSS_LIBRARY_NAME);
+        err = exptest::loadModule(exptest::MSS_LIBRARY_NAME);
         if(err)
         {
             TS_FAIL("OCMBCommTest() - Constuctor: failed to load MSS module");
@@ -254,23 +252,9 @@ class OCMBCommTest: public CxxTest::TestSuite
      */
     ~OCMBCommTest()
     {
-        errlHndl_t err = nullptr;
-        if (mss_module_loaded)
-        {
-            err = exptest::unloadModule(exptest::MSS_LIBRARY_NAME);
-            if(err)
-            {
-                TS_FAIL("~OCMBCommTest() - Destructor: failed to unload MSS module");
-                errlCommit( err, TARG_COMP_ID );
-            }
-        }
     };
 
     private:
-      // use this to keep track of if we need to unload any
-      // modules loaded by this testcase
-      bool mss_module_loaded;
-
       // This is used for tests that need to not run operations at the same time
       TARGETING::HB_MUTEX_SERIALIZE_TEST_LOCK_ATTR iv_serializeTestMutex;
 

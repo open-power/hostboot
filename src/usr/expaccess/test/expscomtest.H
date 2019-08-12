@@ -109,9 +109,7 @@ private:
       return fapi2::getScom(i_target,i_address,o_data);
     }
 
-    // use this to keep track of if we need to unload any
-    // modules loaded by this testcase
-    bool mss_module_loaded;
+    // This is used for tests that need to not run operations at the same time
     HB_MUTEX_SERIALIZE_TEST_LOCK_ATTR iv_serializeTestMutex;
 
 public:
@@ -807,14 +805,12 @@ public:
      */
     expscomTest() : CxxTest::TestSuite()
     {
-        mss_module_loaded = false;
-
         // All modules are loaded by runtime,
         // so testcase loading of modules is not required
 #ifndef __HOSTBOOT_RUNTIME
         errlHndl_t err = nullptr;
 
-        err = exptest::loadModule(mss_module_loaded, exptest::MSS_LIBRARY_NAME);
+        err = exptest::loadModule(exptest::MSS_LIBRARY_NAME);
         if(err)
         {
             TS_FAIL("expscomTest() - Constuctor: failed to load MSS module");
@@ -830,16 +826,6 @@ public:
      */
     ~expscomTest()
     {
-        errlHndl_t err = nullptr;
-        if (mss_module_loaded)
-        {
-            err = exptest::unloadModule(exptest::MSS_LIBRARY_NAME);
-            if(err)
-            {
-                TS_FAIL("~expscomTest() - Destructor: failed to unload MSS module");
-                errlCommit( err, CXXTEST_COMP_ID );
-            }
-        }
     };
 
 };
