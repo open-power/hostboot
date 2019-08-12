@@ -624,7 +624,6 @@ inline fapi2::ReturnCode bias_with_spd_voltages<mss::pmic::vendor::TI>(
         FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, mss::pmic::VOLT_SETTING_ACTIVE_REGS[l_rail_index], l_volt_buffer),
                  "Error writing address 0x%02hhX of PMIC %s", mss::pmic::VOLT_SETTING_ACTIVE_REGS[l_rail_index],
                  mss::c_str(i_pmic_target));
-
     }
 
     return fapi2::FAPI2_RC_SUCCESS;

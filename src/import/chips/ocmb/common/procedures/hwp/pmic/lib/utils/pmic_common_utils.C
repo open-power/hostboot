@@ -71,7 +71,7 @@ fapi2::ReturnCode poll_for_pbulk_good(
         FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(i_pmic_target, REGS::R08, l_pbulk_status_buffer),
         "pmic_enable: Could not read 0x%02hhX on %s ", REGS::R08, mss::c_str(i_pmic_target));
 
-        return l_pbulk_status_buffer.getBit<FIELDS::VIN_BULK_INPUT_PWR_GOOD_STATUS>() ==
+        return l_pbulk_status_buffer.getBit<FIELDS::R08_VIN_BULK_INPUT_PWR_GOOD_STATUS>() ==
         mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>::PWR_GOOD;
 
     fapi_try_exit:
