@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -233,6 +233,20 @@
     <ffdc>CURR_REGION_SIZE_LEFT</ffdc>
     <ffdc>MAX_REGION_IDX</ffdc>
     <ffdc>MAX_REGION_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+<hwpError>
+    <rc>RC_MSS_EFF_GROUPING_ADDRESS_NOT_ALIGNED</rc>
+    <description>
+        NHTM BAR address is not aligned with requested size.
+    </description>
+    <ffdc>NHTM_BAR_BASE</ffdc>
+    <ffdc>NHTM_SIZE</ffdc>
+    <ffdc>CHTM_SIZE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>

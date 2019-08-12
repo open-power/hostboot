@@ -1553,7 +1553,8 @@ fapi2::ReturnCode EffGroupingBaseSizeData::set_HTM_OCC_base_addr(
     }
 
     // Setting NHTM & OCC base addresses
-    if ( (l_nhtmSize + l_chtmSize) < i_procAttrs.iv_occSandboxSize)
+    // Set larger allocations on top (at higher addresses)
+    if ( (l_nhtmSize + l_chtmSize) >= i_procAttrs.iv_occSandboxSize)
     {
         iv_occ_sandbox_base = l_mem_bases[l_index] + l_mem_sizes[l_index];
         iv_nhtm_bar_base = iv_occ_sandbox_base + i_procAttrs.iv_occSandboxSize;
@@ -1562,6 +1563,22 @@ fapi2::ReturnCode EffGroupingBaseSizeData::set_HTM_OCC_base_addr(
     {
         iv_nhtm_bar_base = l_mem_bases[l_index] + l_mem_sizes[l_index];
         iv_occ_sandbox_base = iv_nhtm_bar_base + l_nhtmSize + l_chtmSize;
+    }
+
+    // Verify NHTM base addresses aligned with allocated size.
+    // The OCC sandbox base is just a FW scratch area and no HW
+    // functions mapped to it so we don't need to check its base alignment.
+    if (iv_nhtm_bar_base & (l_nhtmSize + l_chtmSize - 1) )
+    {
+        FAPI_ASSERT(false,
+                    fapi2::MSS_EFF_GROUPING_ADDRESS_NOT_ALIGNED()
+                    .set_NHTM_BAR_BASE(iv_nhtm_bar_base)
+                    .set_NHTM_SIZE(l_nhtmSize)
+                    .set_CHTM_SIZE(l_chtmSize),
+                    "EffGroupingBaseSizeData::set_HTM_OCC_base_addr: "
+                    "NHTM BAR base address is not aligned with its size "
+                    "NHTM_BAR_BASE 0x%.16llX, NHTM_SIZE 0x%.16llX, CTHM_SIZE 0x%.16llX",
+                    iv_nhtm_bar_base, l_nhtmSize, l_chtmSize);
     }
 
     // Setting CHTM base addresses
@@ -1839,7 +1856,7 @@ fapi2::ReturnCode EffGroupingBaseSizeData::setSMFBaseSizeData(
                  ii, l_mem_bases[ii], l_mem_sizes[ii]);
     }
 
-    FAPI_INF("SMF_BASE  %.16lld (%d GB)", iv_smf_bar_base, iv_smf_bar_base >> 30);
+    FAPI_INF("SMF_BASE  0x%.16llX", iv_smf_bar_base);
 
     for (uint8_t ii = 0; ii < l_numRegions; ii++)
     {
