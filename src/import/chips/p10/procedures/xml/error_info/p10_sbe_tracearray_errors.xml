@@ -1,0 +1,83 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p10/procedures/xml/error_info/p10_sbe_tracearray_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2020                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<hwpErrors>
+  <hwpError>
+    <sbeError/>
+    <rc>RC_PROC_GETTRACEARRAY_INVALID_BUS</rc>
+    <description>The specified trace bus ID is invalid.</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>TRACE_BUS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <sbeError/>
+    <rc>RC_PROC_GETTRACEARRAY_INVALID_TARGET</rc>
+    <description>An invalid target type was supplied for the requested trace array.</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>TRACE_BUS</ffdc>
+    <ffdc>REQUIRED_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <sbeError/>
+    <rc>RC_PROC_GETTRACEARRAY_CORE_NOT_DUMPABLE</rc>
+    <description>An attempt was made to dump a core trace array, but this chip's core cannot be dumped via SCOM.</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>TRACE_BUS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <sbeError/>
+    <rc>RC_PROC_GETTRACEARRAY_TRACE_RUNNING</rc>
+    <description>An attempt was made to dump a trace array while it was still running.</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>TRACE_BUS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <sbeError/>
+    <rc>RC_PROC_GETTRACEARRAY_TRACE_MUX_INCORRECT</rc>
+    <description>The requested trace array's primary trace mux is not set up to capture the requested trace bus.</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>TRACE_BUS</ffdc>
+    <ffdc>MUX_SELECT</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+</hwpErrors>
