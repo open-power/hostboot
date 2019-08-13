@@ -62,30 +62,30 @@ static const uint32_t CPMS_L3_PFETSTAT_VCS_PFET_ENABLE_ACTUAL_LEN = 8;
 static const uint32_t CPMS_L3_PFETSTAT_SRAM_ENABLE_ACTUAL = 63;
 // c/reg00011.H
 
-static const uint64_t EC_LS_LSU_HOLD_OUT_REG2 = 0x202106c2ull;
+static const uint64_t EC_LS_LSU_HOLD_OUT_REG2 = 0x200206c2ull;
 // c/reg00011.H
 
-static const uint64_t EC_PC_COMMON_SPR_SPATTN_RW = 0x20210499ull;
-static const uint64_t EC_PC_COMMON_SPR_SPATTN_WO_AND = 0x20210498ull;
-static const uint64_t EC_PC_COMMON_SPR_SPATTN_WO_OR = 0x20210497ull;
+static const uint64_t EC_PC_COMMON_SPR_SPATTN_RW = 0x20020499ull;
+static const uint64_t EC_PC_COMMON_SPR_SPATTN_WO_AND = 0x20020498ull;
+static const uint64_t EC_PC_COMMON_SPR_SPATTN_WO_OR = 0x20020497ull;
 // c/reg00011.H
 
-static const uint64_t EC_PC_FIR_CORE_ACTION0 = 0x20210446ull;
+static const uint64_t EC_PC_FIR_CORE_ACTION0 = 0x20020446ull;
 // c/reg00011.H
 
-static const uint64_t EC_PC_PMU_SPRCOR_SCOMC = 0x20210408ull;
+static const uint64_t EC_PC_PMU_SPRCOR_SCOMC = 0x20020408ull;
 // c/reg00011.H
 
-static const uint64_t EC_PC_SCR0 = 0x20210486ull;
+static const uint64_t EC_PC_SCR0 = 0x20020486ull;
 // c/reg00011.H
 
-static const uint64_t EC_PC_SPURR_FREQ_DETECT_CYC_CNT = 0x2021049full;
+static const uint64_t EC_PC_SPURR_FREQ_DETECT_CYC_CNT = 0x2002049full;
 
 static const uint32_t EC_PC_SPURR_FREQ_DETECT_CYC_CNT_CYCLE_COUNT = 0;
 static const uint32_t EC_PC_SPURR_FREQ_DETECT_CYC_CNT_CYCLE_COUNT_LEN = 8;
 // c/reg00011.H
 
-static const uint64_t EC_PC_TRACE1_TR0_CONFIG_9 = 0x20210a49ull;
+static const uint64_t EC_PC_TRACE1_TR0_CONFIG_9 = 0x20020a49ull;
 
 static const uint32_t EC_PC_TRACE1_TR0_CONFIG_9_DISABLE_COMPRESSION = 0;
 static const uint32_t EC_PC_TRACE1_TR0_CONFIG_9_ERROR_BIT_COMPRESSION_CARE_MASK = 1;
@@ -116,7 +116,7 @@ static const uint32_t EC_PC_TRACE1_TR0_CONFIG_9_TRIG1_ERR_CMP = 35;
 static const uint32_t EC_PC_TRACE1_TR0_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
 // c/reg00011.H
 
-static const uint64_t EC_PC_TRACE2_TR0_CONFIG_2 = 0x20210a85ull;
+static const uint64_t EC_PC_TRACE2_TR0_CONFIG_2 = 0x20020a85ull;
 
 static const uint32_t EC_PC_TRACE2_TR0_CONFIG_2_A = 0;
 static const uint32_t EC_PC_TRACE2_TR0_CONFIG_2_A_LEN = 24;
@@ -124,10 +124,10 @@ static const uint32_t EC_PC_TRACE2_TR0_CONFIG_2_B = 24;
 static const uint32_t EC_PC_TRACE2_TR0_CONFIG_2_B_LEN = 24;
 // c/reg00011.H
 
-static const uint64_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT3 = 0x20210643ull;
+static const uint64_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT3 = 0x20020643ull;
 // c/reg00011.H
 
-static const uint64_t L2_L2MISC_L2CERRS_LINEDEL_TRIG_REG = 0x2021000dull;
+static const uint64_t L2_L2MISC_L2CERRS_LINEDEL_TRIG_REG = 0x2002000dull;
 
 static const uint32_t L2_L2MISC_L2CERRS_LINEDEL_TRIG_REG_TRIG = 0;
 static const uint32_t L2_L2MISC_L2CERRS_LINEDEL_TRIG_REG_DONE = 1;
@@ -135,7 +135,7 @@ static const uint32_t L2_L2MISC_L2CERRS_LINEDEL_TRIG_REG_SPARE = 2;
 static const uint32_t L2_L2MISC_L2CERRS_LINEDEL_TRIG_REG_SPARE_LEN = 2;
 // c/reg00011.H
 
-static const uint64_t L3_MISC_L3CERRS_RD_EPSILON_CFG_REG = 0x20200629ull;
+static const uint64_t L3_MISC_L3CERRS_RD_EPSILON_CFG_REG = 0x20010629ull;
 
 static const uint32_t L3_MISC_L3CERRS_RD_EPSILON_CFG_REG_WT4CR_RD_TIER0_EPS_VAL = 0;
 static const uint32_t L3_MISC_L3CERRS_RD_EPSILON_CFG_REG_WT4CR_RD_TIER0_EPS_VAL_LEN = 12;
@@ -146,7 +146,7 @@ static const uint32_t L3_MISC_L3CERRS_RD_EPSILON_CFG_REG_WT4CR_RD_TIER2_EPS_VAL_
 static const uint32_t L3_MISC_L3CERRS_RD_EPSILON_CFG_REG_RD_EPS_MODE_SEL_CFG = 36;
 // c/reg00011.H
 
-static const uint64_t NC_NCCHTM_NCCHTSC_HTM_MEM = 0x20200681ull;
+static const uint64_t NC_NCCHTM_NCCHTSC_HTM_MEM = 0x20010681ull;
 
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_ALLOC = 0;
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_SCOPE = 1;
@@ -161,10 +161,10 @@ static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_SIZE = 40;
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_SIZE_LEN = 9;
 // c/reg00011.H
 
-static const uint64_t NC_NCCHTM_NCCHTSC_MEM_OP_CTR = 0x20200688ull;
+static const uint64_t NC_NCCHTM_NCCHTSC_MEM_OP_CTR = 0x20010688ull;
 // c/reg00011.H
 
-static const uint64_t NC_NCMISC_NCSCOMS_NCU_TOPOTABLE_REG1 = 0x20200655ull;
+static const uint64_t NC_NCMISC_NCSCOMS_NCU_TOPOTABLE_REG1 = 0x20010655ull;
 
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_TOPOTABLE_REG1_08_VAL = 0;
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_TOPOTABLE_REG1_09_VAL = 1;

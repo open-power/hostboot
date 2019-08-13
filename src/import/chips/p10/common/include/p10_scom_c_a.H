@@ -39,16 +39,16 @@ namespace c
 #endif
 
 
-static const uint64_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT1 = 0x20210601ull;
+static const uint64_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT1 = 0x20020601ull;
 // c/reg00010.H
 
-static const uint64_t EC_PC_FIR_CORE_SYS = 0x2021044aull;
+static const uint64_t EC_PC_FIR_CORE_SYS = 0x2002044aull;
 // c/reg00010.H
 
-static const uint64_t EC_PC_FIR_CORE_WOF = 0x20210448ull;
+static const uint64_t EC_PC_FIR_CORE_WOF = 0x20020448ull;
 // c/reg00010.H
 
-static const uint64_t EC_PC_FIR_RAM_STATUS = 0x20210450ull;
+static const uint64_t EC_PC_FIR_RAM_STATUS = 0x20020450ull;
 
 static const uint32_t EC_PC_FIR_RAM_STATUS_RAM_CONTROL_ACCESS_DURING_RECOV = 0;
 static const uint32_t EC_PC_FIR_RAM_STATUS_RAM_COMPLETION = 1;
@@ -56,10 +56,10 @@ static const uint32_t EC_PC_FIR_RAM_STATUS_RAM_EXCEPTION = 2;
 static const uint32_t EC_PC_FIR_RAM_STATUS_LSU_EMPTY = 3;
 // c/reg00010.H
 
-static const uint64_t EC_PC_PMC_UPDATE = 0x20210414ull;
+static const uint64_t EC_PC_PMC_UPDATE = 0x20020414ull;
 // c/reg00010.H
 
-static const uint64_t EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG = 0x20210a81ull;
+static const uint64_t EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG = 0x20020a81ull;
 
 static const uint32_t EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LO_DATA = 0;
 static const uint32_t EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LO_DATA_LEN = 32;
@@ -74,31 +74,31 @@ static const uint32_t EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS = 54;
 static const uint32_t EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
 // c/reg00010.H
 
-static const uint64_t L2_L2MISC_L2CERRS_FIR_ACTION0_REG = 0x20210006ull;
+static const uint64_t L2_L2MISC_L2CERRS_FIR_ACTION0_REG = 0x20020006ull;
 
 static const uint32_t L2_L2MISC_L2CERRS_FIR_ACTION0_REG_FIR_ACTION0 = 0;
 static const uint32_t L2_L2MISC_L2CERRS_FIR_ACTION0_REG_FIR_ACTION0_LEN = 40;
 // c/reg00010.H
 
-static const uint64_t L2_L2MISC_L2CERRS_FIR_ACTION1_REG = 0x20210007ull;
+static const uint64_t L2_L2MISC_L2CERRS_FIR_ACTION1_REG = 0x20020007ull;
 
 static const uint32_t L2_L2MISC_L2CERRS_FIR_ACTION1_REG_FIR_ACTION1 = 0;
 static const uint32_t L2_L2MISC_L2CERRS_FIR_ACTION1_REG_FIR_ACTION1_LEN = 40;
 // c/reg00010.H
 
-static const uint64_t L2TRA_TR0_TRACE_HI_DATA_REG = 0x20210040ull;
+static const uint64_t L2TRA_TR0_TRACE_HI_DATA_REG = 0x20020040ull;
 
 static const uint32_t L2TRA_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
 static const uint32_t L2TRA_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
 // c/reg00010.H
 
-static const uint64_t L2TRA_TR0_CONFIG_0 = 0x20210043ull;
+static const uint64_t L2TRA_TR0_CONFIG_0 = 0x20020043ull;
 
 static const uint32_t L2TRA_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63 = 0;
 static const uint32_t L2TRA_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63_LEN = 64;
 // c/reg00010.H
 
-static const uint64_t L2TRA_TR1_CONFIG_9 = 0x20210089ull;
+static const uint64_t L2TRA_TR1_CONFIG_9 = 0x20020089ull;
 
 static const uint32_t L2TRA_TR1_CONFIG_9_DISABLE_COMPRESSION = 0;
 static const uint32_t L2TRA_TR1_CONFIG_9_ERROR_BIT_COMPRESSION_CARE_MASK = 1;
@@ -129,7 +129,7 @@ static const uint32_t L2TRA_TR1_CONFIG_9_TRIG1_ERR_CMP = 35;
 static const uint32_t L2TRA_TR1_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
 // c/reg00010.H
 
-static const uint64_t L3_MISC_L3CERRS_LRU_VIC_ALLOC_REG = 0x20200611ull;
+static const uint64_t L3_MISC_L3CERRS_LRU_VIC_ALLOC_REG = 0x20010611ull;
 
 static const uint32_t L3_MISC_L3CERRS_LRU_VIC_ALLOC_REG_SEGR_COLUMN_CFG = 0;
 static const uint32_t L3_MISC_L3CERRS_LRU_VIC_ALLOC_REG_SEGR_COLUMN_CFG_LEN = 16;

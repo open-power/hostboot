@@ -90,31 +90,31 @@ static const uint32_t CPMS_FLMR_SPARE2 = 52;
 static const uint32_t CPMS_FLMR_SPARE2_LEN = 2;
 // c/reg00005.H
 
-static const uint64_t EC_LS_LSU_HOLD_OUT_REG8 = 0x202106c8ull;
+static const uint64_t EC_LS_LSU_HOLD_OUT_REG8 = 0x200206c8ull;
 // c/reg00005.H
 
-static const uint64_t EC_PC_PMU_SPRCOR_CORE_FUSES = 0x2021040eull;
+static const uint64_t EC_PC_PMU_SPRCOR_CORE_FUSES = 0x2002040eull;
 // c/reg00005.H
 
-static const uint64_t EC_PC_SPURR_FREQ_REF = 0x202104a1ull;
+static const uint64_t EC_PC_SPURR_FREQ_REF = 0x200204a1ull;
 
 static const uint32_t EC_PC_SPURR_FREQ_REF_FREQUENCY_REFERENCE = 0;
 static const uint32_t EC_PC_SPURR_FREQ_REF_FREQUENCY_REFERENCE_LEN = 8;
 // c/reg00005.H
 
-static const uint64_t EC_PC_TOD_SYNC001 = 0x202104a3ull;
+static const uint64_t EC_PC_TOD_SYNC001 = 0x200204a3ull;
 
 static const uint32_t EC_PC_TOD_SYNC001_CHIP_TOD_STATUS = 60;
 static const uint32_t EC_PC_TOD_SYNC001_CHIP_TOD_STATUS_LEN = 4;
 // c/reg00005.H
 
-static const uint64_t EC_PC_TOD_SYNC110 = 0x202104a3ull;
+static const uint64_t EC_PC_TOD_SYNC110 = 0x200204a3ull;
 
 static const uint32_t EC_PC_TOD_SYNC110_CHIP_TOD_STATUS = 60;
 static const uint32_t EC_PC_TOD_SYNC110_CHIP_TOD_STATUS_LEN = 4;
 // c/reg00005.H
 
-static const uint64_t EC_PC_TRACE1_TR0_CONFIG_3 = 0x20210a46ull;
+static const uint64_t EC_PC_TRACE1_TR0_CONFIG_3 = 0x20020a46ull;
 
 static const uint32_t EC_PC_TRACE1_TR0_CONFIG_3_C = 0;
 static const uint32_t EC_PC_TRACE1_TR0_CONFIG_3_C_LEN = 24;
@@ -122,7 +122,7 @@ static const uint32_t EC_PC_TRACE1_TR0_CONFIG_3_D = 24;
 static const uint32_t EC_PC_TRACE1_TR0_CONFIG_3_D_LEN = 24;
 // c/reg00005.H
 
-static const uint64_t L2TRA_TR0_CONFIG_5 = 0x20210048ull;
+static const uint64_t L2TRA_TR0_CONFIG_5 = 0x20020048ull;
 
 static const uint32_t L2TRA_TR0_CONFIG_5_C = 0;
 static const uint32_t L2TRA_TR0_CONFIG_5_C_LEN = 24;
@@ -130,7 +130,7 @@ static const uint32_t L2TRA_TR0_CONFIG_5_D = 24;
 static const uint32_t L2TRA_TR0_CONFIG_5_D_LEN = 24;
 // c/reg00005.H
 
-static const uint64_t L3_MISC_L3CERRS_ERR_INJ_REG = 0x2020060dull;
+static const uint64_t L3_MISC_L3CERRS_ERR_INJ_REG = 0x2001060dull;
 
 static const uint32_t L3_MISC_L3CERRS_ERR_INJ_REG_SINGLE_CAC_ERR_INJ = 0;
 static const uint32_t L3_MISC_L3CERRS_ERR_INJ_REG_SOLID_CAC_ERR_INJ = 1;
@@ -143,7 +143,7 @@ static const uint32_t L3_MISC_L3CERRS_ERR_INJ_REG_SINGLE_LRU_ERR_INJ = 7;
 static const uint32_t L3_MISC_L3CERRS_ERR_INJ_REG_SOLID_LRU_ERR_INJ = 8;
 // c/reg00005.H
 
-static const uint64_t L3_MISC_L3CERRS_MODE_REG0 = 0x2020062bull;
+static const uint64_t L3_MISC_L3CERRS_MODE_REG0 = 0x2001062bull;
 
 static const uint32_t L3_MISC_L3CERRS_MODE_REG0__DISABLED_CFG = 0;
 static const uint32_t L3_MISC_L3CERRS_MODE_REG0__DMAP_CI_EN_CFG = 1;
@@ -171,7 +171,7 @@ static const uint32_t L3_MISC_L3CERRS_MODE_REG0__CERRS_LRU_DECR_SUB_SEL_CFG_LEN 
 static const uint32_t L3_MISC_L3CERRS_MODE_REG0__DYN_INSTR_XLAT_LCO_HEUR_OVERRIDE_EN_CFG = 36;
 // c/reg00005.H
 
-static const uint64_t NC_NCCHTM_NCCHTSC_HTM_IMA_PDBAR = 0x2020068bull;
+static const uint64_t NC_NCCHTM_NCCHTSC_HTM_IMA_PDBAR = 0x2001068bull;
 
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_IMA_PDBAR_HTMSC_IMA_PDBAR_SPARE1TO4 = 1;
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_IMA_PDBAR_HTMSC_IMA_PDBAR_SPARE1TO4_LEN = 4;
@@ -183,7 +183,7 @@ static const uint32_t NC_NCCHTM_NCCHTSC_HTM_IMA_PDBAR_HTMSC_IMA_PDBAR = 12;
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_IMA_PDBAR_HTMSC_IMA_PDBAR_LEN = 41;
 // c/reg00005.H
 
-static const uint64_t NC_NCCHTM_NCCHTSC_HTM_TRIG = 0x20200684ull;
+static const uint64_t NC_NCCHTM_NCCHTSC_HTM_TRIG = 0x20010684ull;
 
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_TRIG_START = 0;
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_TRIG_STOP = 1;
@@ -195,7 +195,7 @@ static const uint32_t NC_NCCHTM_NCCHTSC_HTM_TRIG_MARK_TYPE = 6;
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_TRIG_MARK_TYPE_LEN = 10;
 // c/reg00005.H
 
-static const uint64_t NC_NCMISC_NCSCOMS_NCU_SLOW_LPAR_REG0 = 0x20200652ull;
+static const uint64_t NC_NCMISC_NCSCOMS_NCU_SLOW_LPAR_REG0 = 0x20010652ull;
 
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_SLOW_LPAR_REG0_8_LPAR_VALID = 0;
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_SLOW_LPAR_REG0_8_LPAR_ID = 1;

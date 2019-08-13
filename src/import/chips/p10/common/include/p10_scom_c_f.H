@@ -65,13 +65,13 @@ static const uint32_t CPMS_MMAR_AVAILABLE = 0;
 static const uint32_t CPMS_MMAR_FUNC_RESET = 1;
 // c/reg00015.H
 
-static const uint64_t EC_PC_COMMON_SPR_SCOMD = 0x20210481ull;
+static const uint64_t EC_PC_COMMON_SPR_SCOMD = 0x20020481ull;
 // c/reg00015.H
 
-static const uint64_t EC_PC_COMMON_SPR_TFAC_HOLD_OUT = 0x202104b7ull;
+static const uint64_t EC_PC_COMMON_SPR_TFAC_HOLD_OUT = 0x200204b7ull;
 // c/reg00015.H
 
-static const uint64_t EC_PC_PWM_EVENTS = 0x202104a2ull;
+static const uint64_t EC_PC_PWM_EVENTS = 0x200204a2ull;
 
 static const uint32_t EC_PC_PWM_EVENTS_PWM_EVENTS_RESERVED_32 = 32;
 static const uint32_t EC_PC_PWM_EVENTS_FREQ_SCALE_A_THRESHOLD = 33;
@@ -95,19 +95,19 @@ static const uint32_t EC_PC_PWM_EVENTS_PMCM_THRESHOLD = 62;
 static const uint32_t EC_PC_PWM_EVENTS_PMCM_THRESHOLD_LEN = 2;
 // c/reg00015.H
 
-static const uint64_t EC_PC_TRACE1_TR0_CONFIG_0 = 0x20210a43ull;
+static const uint64_t EC_PC_TRACE1_TR0_CONFIG_0 = 0x20020a43ull;
 
 static const uint32_t EC_PC_TRACE1_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63 = 0;
 static const uint32_t EC_PC_TRACE1_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63_LEN = 64;
 // c/reg00015.H
 
-static const uint64_t EC_PC_TRACE2_TR0_TRACE_HI_DATA_REG = 0x20210a80ull;
+static const uint64_t EC_PC_TRACE2_TR0_TRACE_HI_DATA_REG = 0x20020a80ull;
 
 static const uint32_t EC_PC_TRACE2_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
 static const uint32_t EC_PC_TRACE2_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
 // c/reg00015.H
 
-static const uint64_t L2_L2MISC_L2CERRS_ERR_INJ_REG = 0x2021000cull;
+static const uint64_t L2_L2MISC_L2CERRS_ERR_INJ_REG = 0x2002000cull;
 
 static const uint32_t L2_L2MISC_L2CERRS_ERR_INJ_REG_DW_TYPE = 0;
 static const uint32_t L2_L2MISC_L2CERRS_ERR_INJ_REG_DW_TYPE_LEN = 3;
@@ -121,7 +121,7 @@ static const uint32_t L2_L2MISC_L2CERRS_ERR_INJ_REG_LVDIR_EN = 13;
 static const uint32_t L2_L2MISC_L2CERRS_ERR_INJ_REG_LRU_EN = 14;
 // c/reg00015.H
 
-static const uint64_t L2TRA_TR0_TRACE_LO_DATA_REG = 0x20210041ull;
+static const uint64_t L2TRA_TR0_TRACE_LO_DATA_REG = 0x20020041ull;
 
 static const uint32_t L2TRA_TR0_TRACE_LO_DATA_REG_LO_DATA = 0;
 static const uint32_t L2TRA_TR0_TRACE_LO_DATA_REG_LO_DATA_LEN = 32;
@@ -136,7 +136,7 @@ static const uint32_t L2TRA_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS = 54;
 static const uint32_t L2TRA_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
 // c/reg00015.H
 
-static const uint64_t L2TRA_TR0_CONFIG = 0x20210042ull;
+static const uint64_t L2TRA_TR0_CONFIG = 0x20020042ull;
 
 static const uint32_t L2TRA_TR0_CONFIG_STORE_ON_TRIG_MODE = 0;
 static const uint32_t L2TRA_TR0_CONFIG_WRITE_ON_RUN_MODE = 1;
@@ -154,15 +154,15 @@ static const uint32_t L2TRA_TR0_CONFIG_TRACE_RUN_STICKY = 20;
 static const uint32_t L2TRA_TR0_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
 // c/reg00015.H
 
-static const uint64_t L3_MISC_L3CERRS_WIFSM_INJ_DIS_REG = 0x2020060cull;
+static const uint64_t L3_MISC_L3CERRS_WIFSM_INJ_DIS_REG = 0x2001060cull;
 
 static const uint32_t L3_MISC_L3CERRS_WIFSM_INJ_DIS_REG_L3_WIFSM_INJ_DIS_CFG = 0;
 static const uint32_t L3_MISC_L3CERRS_WIFSM_INJ_DIS_REG_L3_WIFSM_INJ_DIS_CFG_LEN = 2;
 // c/reg00015.H
 
-static const uint64_t NC_NCMISC_NCSCOMS_FIR_REG_RW = 0x20200640ull;
-static const uint64_t NC_NCMISC_NCSCOMS_FIR_REG_WO_AND = 0x20200641ull;
-static const uint64_t NC_NCMISC_NCSCOMS_FIR_REG_WO_OR = 0x20200642ull;
+static const uint64_t NC_NCMISC_NCSCOMS_FIR_REG_RW = 0x20010640ull;
+static const uint64_t NC_NCMISC_NCSCOMS_FIR_REG_WO_AND = 0x20010641ull;
+static const uint64_t NC_NCMISC_NCSCOMS_FIR_REG_WO_OR = 0x20010642ull;
 
 static const uint32_t NC_NCMISC_NCSCOMS_FIR_REG_CONTROL_ERR = 0;
 static const uint32_t NC_NCMISC_NCSCOMS_FIR_REG_TLBIE_CONTROL_ERR = 1;
@@ -183,7 +183,7 @@ static const uint32_t NC_NCMISC_NCSCOMS_FIR_REG_DARN_EN_ERR = 20;
 static const uint32_t NC_NCMISC_NCSCOMS_FIR_REG_DARN_ADDR_ERR = 21;
 // c/reg00015.H
 
-static const uint64_t NC_NCMISC_NCSCOMS_NCU_MODE_REG = 0x2020064aull;
+static const uint64_t NC_NCMISC_NCSCOMS_NCU_MODE_REG = 0x2001064aull;
 
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_MODE_REG_HTM_QUEUE_LIMIT = 0;
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_MODE_REG_HTM_QUEUE_LIMIT_LEN = 2;

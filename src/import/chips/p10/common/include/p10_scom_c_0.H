@@ -70,16 +70,16 @@ static const uint32_t CPMS_L3_PFETCNTL_VCS_PG_SEL_LEN = 4;
 static const uint32_t CPMS_L3_PFETCNTL_SRAM_ENABLE = 63;
 // c/reg00000.H
 
-static const uint64_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT2 = 0x20210602ull;
+static const uint64_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT2 = 0x20020602ull;
 // c/reg00000.H
 
-static const uint64_t EC_PC_COMMON_SPR_HMEER = 0x20210496ull;
+static const uint64_t EC_PC_COMMON_SPR_HMEER = 0x20020496ull;
 // c/reg00000.H
 
-static const uint64_t EC_PC_PMU_SPRCOR_INV_ERATE = 0x2021040full;
+static const uint64_t EC_PC_PMU_SPRCOR_INV_ERATE = 0x2002040full;
 // c/reg00000.H
 
-static const uint64_t EC_PC_TRACE1_TR0_CONFIG_5 = 0x20210a48ull;
+static const uint64_t EC_PC_TRACE1_TR0_CONFIG_5 = 0x20020a48ull;
 
 static const uint32_t EC_PC_TRACE1_TR0_CONFIG_5_C = 0;
 static const uint32_t EC_PC_TRACE1_TR0_CONFIG_5_C_LEN = 24;
@@ -87,7 +87,7 @@ static const uint32_t EC_PC_TRACE1_TR0_CONFIG_5_D = 24;
 static const uint32_t EC_PC_TRACE1_TR0_CONFIG_5_D_LEN = 24;
 // c/reg00000.H
 
-static const uint64_t L2TRA_TR0_CONFIG_3 = 0x20210046ull;
+static const uint64_t L2TRA_TR0_CONFIG_3 = 0x20020046ull;
 
 static const uint32_t L2TRA_TR0_CONFIG_3_C = 0;
 static const uint32_t L2TRA_TR0_CONFIG_3_C_LEN = 24;
@@ -95,17 +95,17 @@ static const uint32_t L2TRA_TR0_CONFIG_3_D = 24;
 static const uint32_t L2TRA_TR0_CONFIG_3_D_LEN = 24;
 // c/reg00000.H
 
-static const uint64_t L3_MISC_L3CERRS_PM_PURGE_REG = 0x20200613ull;
+static const uint64_t L3_MISC_L3CERRS_PM_PURGE_REG = 0x20010613ull;
 
 static const uint32_t L3_MISC_L3CERRS_PM_PURGE_REG_REQ = 0;
 static const uint32_t L3_MISC_L3CERRS_PM_PURGE_REG_BUSY_ERR = 1;
 static const uint32_t L3_MISC_L3CERRS_PM_PURGE_REG_ABORT = 2;
 // c/reg00000.H
 
-static const uint64_t NC_NCCHTM_NCCHTSC_HTM_CSEL = 0x20200687ull;
+static const uint64_t NC_NCCHTM_NCCHTSC_HTM_CSEL = 0x20010687ull;
 // c/reg00000.H
 
-static const uint64_t NC_NCMISC_NCSCOMS_NCU_MODE_REG3 = 0x2020064cull;
+static const uint64_t NC_NCMISC_NCSCOMS_NCU_MODE_REG3 = 0x2001064cull;
 
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_MODE_REG3_TLBIE_STALL_EN = 0;
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_MODE_REG3_TLBIE_STALL_THRESHOLD = 1;

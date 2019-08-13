@@ -78,23 +78,23 @@ static const uint32_t CPMS_DHCR_EVENT_COUNT = 8;
 static const uint32_t CPMS_DHCR_EVENT_COUNT_LEN = 8;
 // c/reg00012.H
 
-static const uint64_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT0 = 0x20210600ull;
+static const uint64_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT0 = 0x20020600ull;
 // c/reg00012.H
 
-static const uint64_t EC_PC_COMMON_SPR_SCOMC = 0x20210480ull;
+static const uint64_t EC_PC_COMMON_SPR_SCOMC = 0x20020480ull;
 
 static const uint32_t EC_PC_COMMON_SPR_SCOMC_MODE_CX_SCOMC = 54;
 static const uint32_t EC_PC_COMMON_SPR_SCOMC_MODE_CX_SCOMC_LEN = 7;
 // c/reg00012.H
 
-static const uint64_t EC_PC_SPURR_FREQ_SCALE = 0x202104a0ull;
+static const uint64_t EC_PC_SPURR_FREQ_SCALE = 0x200204a0ull;
 
 static const uint32_t EC_PC_SPURR_FREQ_SCALE_OVERRIDE_EN = 0;
 static const uint32_t EC_PC_SPURR_FREQ_SCALE_FACTOR = 1;
 static const uint32_t EC_PC_SPURR_FREQ_SCALE_FACTOR_LEN = 7;
 // c/reg00012.H
 
-static const uint64_t EC_PC_THRCTL_TCTLCOM_RAS_STATUS = 0x20210454ull;
+static const uint64_t EC_PC_THRCTL_TCTLCOM_RAS_STATUS = 0x20020454ull;
 
 static const uint32_t EC_PC_THRCTL_TCTLCOM_RAS_STATUS_0_CORE_MAINT = 0;
 static const uint32_t EC_PC_THRCTL_TCTLCOM_RAS_STATUS_0_THREAD_QUIESCED = 1;
@@ -118,7 +118,7 @@ static const uint32_t EC_PC_THRCTL_TCTLCOM_RAS_STATUS_3_LSU_QUIESCED = 27;
 static const uint32_t EC_PC_THRCTL_TCTLCOM_RAS_STATUS_3_STEP_SUCCESS = 28;
 // c/reg00012.H
 
-static const uint64_t L2_L2MISC_L2CERRS_PHYP_PURGE_CMD_REG = 0x2021000full;
+static const uint64_t L2_L2MISC_L2CERRS_PHYP_PURGE_CMD_REG = 0x2002000full;
 
 static const uint32_t L2_L2MISC_L2CERRS_PHYP_PURGE_CMD_REG_TRIGGER = 0;
 static const uint32_t L2_L2MISC_L2CERRS_PHYP_PURGE_CMD_REG_TYPE = 1;
@@ -134,7 +134,7 @@ static const uint32_t L2_L2MISC_L2CERRS_PHYP_PURGE_CMD_REG_BANK = 28;
 static const uint32_t L2_L2MISC_L2CERRS_PHYP_PURGE_CMD_REG_ERR = 29;
 // c/reg00012.H
 
-static const uint64_t L2_L2MISC_L2CERRS_WR_EPS_REG = 0x20210011ull;
+static const uint64_t L2_L2MISC_L2CERRS_WR_EPS_REG = 0x20020011ull;
 
 static const uint32_t L2_L2MISC_L2CERRS_WR_EPS_REG_TIER1_WR_EPS_VALUE = 0;
 static const uint32_t L2_L2MISC_L2CERRS_WR_EPS_REG_TIER1_WR_EPS_VALUE_LEN = 12;
@@ -148,13 +148,13 @@ static const uint32_t L2_L2MISC_L2CERRS_WR_EPS_REG_L2_EPS_STEP_MODE = 30;
 static const uint32_t L2_L2MISC_L2CERRS_WR_EPS_REG_L2_EPS_STEP_MODE_LEN = 4;
 // c/reg00012.H
 
-static const uint64_t L2TRA_TR0_CONFIG_1 = 0x20210044ull;
+static const uint64_t L2TRA_TR0_CONFIG_1 = 0x20020044ull;
 
 static const uint32_t L2TRA_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87 = 0;
 static const uint32_t L2TRA_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN = 24;
 // c/reg00012.H
 
-static const uint64_t NC_NCMISC_NCSCOMS_NCU_DARN_BAR_REG = 0x20200651ull;
+static const uint64_t NC_NCMISC_NCSCOMS_NCU_DARN_BAR_REG = 0x20010651ull;
 
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_DARN_BAR_REG_EN = 0;
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_DARN_BAR_REG_ADDR = 12;

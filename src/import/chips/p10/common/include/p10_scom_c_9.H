@@ -94,7 +94,7 @@ static const uint32_t CPMS_FDIR_IRRITATE_WEIGHT_SELECT_LEN = 2;
 static const uint32_t CPMS_FDIR_INJECT_DPT_SUSPEND = 31;
 // c/reg00009.H
 
-static const uint64_t EC_PC_COMMON_SPR_CTRL = 0x20210485ull;
+static const uint64_t EC_PC_COMMON_SPR_CTRL = 0x20020485ull;
 
 static const uint32_t EC_PC_COMMON_SPR_CTRL_0_RUN_Q = 48;
 static const uint32_t EC_PC_COMMON_SPR_CTRL_1_RUN_Q = 49;
@@ -106,7 +106,7 @@ static const uint32_t EC_PC_COMMON_SPR_CTRL_6_RUN_Q = 54;
 static const uint32_t EC_PC_COMMON_SPR_CTRL_7_RUN_Q = 55;
 // c/reg00009.H
 
-static const uint64_t EC_PC_IMA_TRACE = 0x20210401ull;
+static const uint64_t EC_PC_IMA_TRACE = 0x20020401ull;
 
 static const uint32_t EC_PC_IMA_TRACE_SAMPSEL = 0;
 static const uint32_t EC_PC_IMA_TRACE_SAMPSEL_LEN = 2;
@@ -120,10 +120,10 @@ static const uint32_t EC_PC_IMA_TRACE_BUFFERSIZE = 48;
 static const uint32_t EC_PC_IMA_TRACE_BUFFERSIZE_LEN = 3;
 // c/reg00009.H
 
-static const uint64_t EC_PC_TFX_SM = 0x2021049bull;
+static const uint64_t EC_PC_TFX_SM = 0x2002049bull;
 // c/reg00009.H
 
-static const uint64_t EC_PC_THRCTL_TCTLCOM_HANG_CONTROL = 0x20210452ull;
+static const uint64_t EC_PC_THRCTL_TCTLCOM_HANG_CONTROL = 0x20020452ull;
 
 static const uint32_t EC_PC_THRCTL_TCTLCOM_HANG_CONTROL_CORE_HANG_LIMIT = 0;
 static const uint32_t EC_PC_THRCTL_TCTLCOM_HANG_CONTROL_CORE_HANG_LIMIT_LEN = 8;
@@ -141,13 +141,13 @@ static const uint32_t EC_PC_THRCTL_TCTLCOM_HANG_CONTROL_TLBIE_STALL_LIMIT = 34;
 static const uint32_t EC_PC_THRCTL_TCTLCOM_HANG_CONTROL_TLBIE_STALL_LIMIT_LEN = 8;
 // c/reg00009.H
 
-static const uint64_t EC_PC_TRACE1_TR0_CONFIG_1 = 0x20210a44ull;
+static const uint64_t EC_PC_TRACE1_TR0_CONFIG_1 = 0x20020a44ull;
 
 static const uint32_t EC_PC_TRACE1_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87 = 0;
 static const uint32_t EC_PC_TRACE1_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN = 24;
 // c/reg00009.H
 
-static const uint64_t L3_MISC_L3CERRS_WR_EPSILON_CFG_REG = 0x2020062aull;
+static const uint64_t L3_MISC_L3CERRS_WR_EPSILON_CFG_REG = 0x2001062aull;
 
 static const uint32_t L3_MISC_L3CERRS_WR_EPSILON_CFG_REG_L3_WT4CR_WR_TIER1_EPS_VAL = 0;
 static const uint32_t L3_MISC_L3CERRS_WR_EPSILON_CFG_REG_L3_WT4CR_WR_TIER1_EPS_VAL_LEN = 12;
@@ -162,7 +162,7 @@ static const uint32_t L3_MISC_L3CERRS_WR_EPSILON_CFG_REG_L3_EPS_DIVIDER_MODE_LEN
 static const uint32_t L3_MISC_L3CERRS_WR_EPSILON_CFG_REG_EPS_CNT_USE_L3_DIVIDER_EN = 34;
 // c/reg00009.H
 
-static const uint64_t L3_MISC_L3CERRS_PHYP_PURGE_REG = 0x20200614ull;
+static const uint64_t L3_MISC_L3CERRS_PHYP_PURGE_REG = 0x20010614ull;
 
 static const uint32_t L3_MISC_L3CERRS_PHYP_PURGE_REG_PURGE_REQ = 0;
 static const uint32_t L3_MISC_L3CERRS_PHYP_PURGE_REG_PURGE_TTYPE = 1;
@@ -176,7 +176,7 @@ static const uint32_t L3_MISC_L3CERRS_PHYP_PURGE_REG_PURGE_DIR_ADDR = 16;
 static const uint32_t L3_MISC_L3CERRS_PHYP_PURGE_REG_PURGE_DIR_ADDR_LEN = 11;
 // c/reg00009.H
 
-static const uint64_t NC_NCCHTM_NCCHTSC_HTM_IMA_STATUS = 0x2020068aull;
+static const uint64_t NC_NCCHTM_NCCHTSC_HTM_IMA_STATUS = 0x2001068aull;
 
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_IMA_STATUS_IMA_ERROR = 0;
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_IMA_STATUS_IMA_TRACE_ACTIVE = 1;
@@ -189,7 +189,7 @@ static const uint32_t NC_NCCHTM_NCCHTSC_HTM_IMA_STATUS_IMA_COUNT = 12;
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_IMA_STATUS_IMA_COUNT_LEN = 4;
 // c/reg00009.H
 
-static const uint64_t NC_NCCHTM_NCCHTSC_HTM_LAST = 0x20200683ull;
+static const uint64_t NC_NCCHTM_NCCHTSC_HTM_LAST = 0x20010683ull;
 
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS = 12;
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS_LEN = 45;
