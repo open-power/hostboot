@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -309,7 +309,8 @@ errlHndl_t HdatMsArea::addAddrRange(hdatMsAddr_t &i_start,
                                     bool i_rangeIsMirrorable,
                                     uint8_t i_mirroringAlgorithm,
                                     hdatMsAddr_t &i_startMirrAddr,
-                                    uint32_t  i_memcntlrId)
+                                    uint32_t  i_memcntlrId,
+                                    bool i_hdatSmf)
 {
     HDAT_ENTER();
     errlHndl_t l_errlHndl = NULL;
@@ -324,9 +325,10 @@ errlHndl_t HdatMsArea::addAddrRange(hdatMsAddr_t &i_start,
         l_addr->hdatMsAreaStrAddr = i_start;
         l_addr->hdatMsAreaEndAddr = i_end;
         l_addr->hatMsAreaProcChipId = i_procChipId;
-        l_addr->hdatSMMAttributes.hdatRangeIsMirrorable = 
-                i_rangeIsMirrorable ? 1 : 0; 
+        l_addr->hdatSMMAttributes.hdatRangeIsMirrorable =
+                i_rangeIsMirrorable ? 1 : 0;
         l_addr->hdatSMMAttributes.hdatMirroringAlgorithm = i_mirroringAlgorithm;
+        l_addr->hdatSMMAttributes.hdatIsSMFmemory = i_hdatSmf;
         l_addr->hdatStartMirrAddr = i_startMirrAddr;
         l_addr->hdatMsAreaMemCntId = i_memcntlrId;
         iv_addrRngArrayHdr.hdatArrayCnt++;
@@ -343,7 +345,7 @@ errlHndl_t HdatMsArea::addAddrRange(hdatMsAddr_t &i_start,
          * @userdata2 maximum number of array entries
          * @userdata3 ID number of mainstore area
          * @userdata4 none
-         * @devdesc Failed trying to add another entry to a mainstore area 
+         * @devdesc Failed trying to add another entry to a mainstore area
          *          address range array
          */
         hdatBldErrLog(l_errlHndl,

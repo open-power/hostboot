@@ -636,6 +636,7 @@ class HdatMsVpd : public HdatHdif
          * @param[in] i_startMirrAddr - Specifies the starting mirrorable
          *                          address for range
          * @param[in] i_hdatMemCntlID - Memory Controller ID
+         * @param[in] i_hdatSmf - Whether the range is in SMF memory
          *
          * @return A null error log handle if successful, else the return code
          * pointed to by errlHndl_t contains one of:
@@ -649,7 +650,8 @@ class HdatMsVpd : public HdatHdif
                                  bool i_rangeIsMirrorable = false,
                                  uint8_t i_mirroringAlgorithm = 0,
                                  uint64_t i_startMirrAddr = 0,
-                                 uint32_t i_hdatMemCntlID = 0);
+                                 uint32_t i_hdatMemCntlID = 0,
+                                 bool i_hdatSmf = false);
 
 
         /**

@@ -609,7 +609,8 @@ errlHndl_t HdatMsVpd::addMsAreaAddr(uint16_t i_msAreaId,
                                     bool i_rangeIsMirrorable,
                                     uint8_t i_mirroringAlgorithm,
                                     uint64_t i_startMirrAddr,
-                                    uint32_t i_hdatMemCntrlID)
+                                    uint32_t i_hdatMemCntrlID,
+                                    bool i_hdatSmf)
 {
     errlHndl_t l_errlHndl = NULL;
     HdatMsArea *l_obj;
@@ -620,8 +621,14 @@ errlHndl_t HdatMsVpd::addMsAreaAddr(uint16_t i_msAreaId,
     if (i_msAreaId < iv_actMsAreaCnt)
     {
         l_obj = HDAT_MS_AREA(i_msAreaId);
-        l_errlHndl = l_obj->addAddrRange(i_start, i_end, i_procChipId,
-        i_rangeIsMirrorable, i_mirroringAlgorithm, l_startMirrAddr, i_hdatMemCntrlID);
+        l_errlHndl = l_obj->addAddrRange(i_start,
+                                         i_end,
+                                         i_procChipId,
+                                         i_rangeIsMirrorable,
+                                         i_mirroringAlgorithm,
+                                         l_startMirrAddr,
+                                         i_hdatMemCntrlID,
+                                         i_hdatSmf);
     }
     else
     {
@@ -1094,6 +1101,8 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
 
         for(;l_procs;++l_procs)
         {
+            bool l_smfAdded = false;
+
             TARGETING::Target *l_pProcTarget = *(l_procs);
             TARGETING::ATTR_ORDINAL_ID_type l_procChipId
                          = l_pProcTarget->getAttr<TARGETING::ATTR_ORDINAL_ID>();
@@ -1639,9 +1648,69 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                                 l_nhtmSize=0; //only add 1 entry
                             }
                             l_addr_range = l_end;
+
+                            auto l_smfStartAddr = l_pProcTarget->
+                              getAttr<TARGETING::ATTR_PROC_SMF_BAR_BASE_ADDR>();
+                            auto l_smfSize = l_pProcTarget->
+                                getAttr<TARGETING::ATTR_PROC_SMF_BAR_SIZE>();
+
+                            if(l_smfSize && !l_smfAdded)
+                            {
+                                hdatMsAddr_t l_hdatSmfStartAddr{};
+                                hdatMsAddr_t l_hdatSmfEndAddr{};
+                                l_hdatSmfStartAddr.hi =
+                                 (l_smfStartAddr & 0xFFFFFFFF00000000ull) >> 32;
+                                l_hdatSmfStartAddr.lo =
+                                    l_smfStartAddr & 0x00000000FFFFFFFFull;
+                                l_hdatSmfStartAddr.hi |= HDAT_REAL_ADDRESS_MASK;
+
+                                l_hdatSmfEndAddr.hi =
+                                    ((l_smfStartAddr + l_smfSize) &
+                                    0xFFFFFFFF00000000ull) >>32;
+                                l_hdatSmfEndAddr.lo =
+                                    (l_smfStartAddr + l_smfSize) &
+                                    0x00000000FFFFFFFFull;
+                                l_hdatSmfEndAddr.hi |= HDAT_REAL_ADDRESS_MASK;
+
+                                l_err = addMsAreaAddr(l_index,
+                                                      l_hdatSmfStartAddr,
+                                                      l_hdatSmfEndAddr,
+                                                      l_procChipId,
+                                                      false, //rangeIsMirrorable
+                                                      0, // i_mirroringAlgorithm
+                                                      0, // i_startMirrAddr
+                                                      l_hdatMemcntrlID,
+                                                      true); // i_hdatsmf
+                                l_smfAdded = true;
+                            }
+
+                            if(l_err)
+                            {
+                                HDAT_ERR("Could not add SMF memory range to "
+                                         "HDAT at index[%d]", l_index);
+                                break;
+                            }
+                            else
+                            {
+                                HDAT_INF("Added SMF memory range to HDAT at "
+                                        "index[%d]; start addr: 0x%08x; end addr: 0x%08x"
+                                        "; size: 0x%08x",
+                                        l_smfStartAddr,
+                                        l_smfStartAddr + l_smfSize,
+                                        l_smfSize);
+                            }
+
                             l_index++;
                         } //end of mca list
+                        if(l_err)
+                        {
+                            break;
+                        }
                     } //end of MCS list
+                    if(l_err)
+                    {
+                        break;
+                    }
                 } //end of MCBIST list
             }
             else //if model is Axone
@@ -2231,11 +2300,79 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                                         l_nhtmSize=0; //only add 1 entry
                                     }
                                     l_addr_range = l_end;
+
+                                    // Add SMF memory addr range
+                                    auto l_smfStartAddr = l_pProcTarget->
+                                        getAttr<TARGETING::ATTR_PROC_SMF_BAR_BASE_ADDR>();
+                                    auto l_smfSize = l_pProcTarget->
+                                        getAttr<TARGETING::ATTR_PROC_SMF_BAR_SIZE>();
+
+                                    if(l_smfSize && !l_smfAdded)
+                                    {
+                                        hdatMsAddr_t l_hdatSmfStartAddr{};
+                                        hdatMsAddr_t l_hdatSmfEndAddr{};
+                                        l_hdatSmfStartAddr.hi =
+                                            (l_smfStartAddr & 0xFFFFFFFF00000000ull) >> 32;
+                                        l_hdatSmfStartAddr.lo =
+                                            l_smfStartAddr & 0x00000000FFFFFFFFull;
+                                        l_hdatSmfStartAddr.hi |= HDAT_REAL_ADDRESS_MASK;
+
+                                        l_hdatSmfEndAddr.hi =
+                                            ((l_smfStartAddr + l_smfSize) &
+                                            0xFFFFFFFF00000000ull) >>32;
+                                        l_hdatSmfEndAddr.lo =
+                                            (l_smfStartAddr + l_smfSize) &
+                                            0x00000000FFFFFFFFull;
+                                        l_hdatSmfEndAddr.hi |= HDAT_REAL_ADDRESS_MASK;
+
+                                        l_err = addMsAreaAddr(l_index,
+                                                              l_hdatSmfStartAddr,
+                                                              l_hdatSmfEndAddr,
+                                                              l_procChipId,
+                                                              false, //rangeIsMirrorable
+                                                              0, // i_mirroringAlgorithm
+                                                              0, // i_startMirrAddr
+                                                              l_hdatMemcntrlID,
+                                                              true); // i_hdatsmf
+                                        l_smfAdded = true;
+                                    }
+
+                                    if(l_err)
+                                    {
+                                        HDAT_ERR("Could not add SMF memory range to "
+                                             "HDAT at index[%d]", l_index);
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        HDAT_INF("Added SMF memory range to HDAT at "
+                                            "index[%d]; start addr: 0x%08x; end addr: 0x%08x"
+                                            "; size: 0x%08x",
+                                            l_smfStartAddr,
+                                            l_smfStartAddr + l_smfSize,
+                                            l_smfSize);
+                                    }
                                     l_index++;
                                 } // end of OCMB_CHIP list
+                                if(l_err)
+                                {
+                                    break;
+                                }
                             } //end of OMI list
+                            if(l_err)
+                            {
+                                break;
+                            }
                         } //end of MCC list
+                        if(l_err)
+                        {
+                            break;
+                        }
                     } //end of MI list
+                    if(l_err)
+                    {
+                        break;
+                    }
                 } //end of MC list
             }
             if(l_err)
