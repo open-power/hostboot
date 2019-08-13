@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -119,10 +119,11 @@ struct hdatMsAreaSize_t
  */
 struct hdatSMMAttributes_t
 {
-    uint8_t  hdatRangeIsMirrorable;  // 0x0000 Memory range is mirrorable
-    uint8_t  hdatMirroringAlgorithm; // 0x0001 Hardware mirroring algorithm to
+    uint8_t hdatRangeIsMirrorable;  // 0x0000 Memory range is mirrorable
+    uint8_t hdatMirroringAlgorithm; // 0x0001 Hardware mirroring algorithm to
                                       // use
-    uint16_t hdatReserved;           // 0x0002
+    uint8_t hdatIsSMFmemory;        // 0x0002 SMF memory region
+    uint8_t hdatReserved;           // 0x0003
 }  __attribute__ ((packed));
 
 
@@ -418,6 +419,7 @@ public:
    * @param[in] i_startMirrAddr - Specifies the starting mirrorable
    *                          address for range
    * @param[in] i_memcntlrId - Memory Controller ID
+   * @param[in] i_hdatSmf - Whether the range is in SMF memory
    *
    * @return A null error log handle if successful, else the return code pointed
    *         to by o_errlHndl contains one of:
@@ -427,10 +429,11 @@ public:
   errlHndl_t addAddrRange(hdatMsAddr_t &i_start,
                           hdatMsAddr_t &i_end,
                           uint32_t i_procChipId,
-			  bool i_rangeIsMirrorable,
-			  uint8_t i_mirroringAlgorithm,
-			  hdatMsAddr_t &i_startMirrAddr,
-              uint32_t  i_memcntlrId);
+                          bool i_rangeIsMirrorable,
+                          uint8_t i_mirroringAlgorithm,
+                          hdatMsAddr_t &i_startMirrAddr,
+                          uint32_t  i_memcntlrId,
+                          bool i_hdatSmf);
 
 
   /**
