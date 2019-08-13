@@ -138,6 +138,16 @@ enum TargetType : uint64_t
     TARGET_TYPE_ABUS_ENDPOINT = TARGET_TYPE_ABUS,
 };
 
+// The fsp x86 compiler is too old to support the full C++11 standard and
+// they have not been able to upgrade to a later compiler yet due to a
+// requirement to run tools on LCB machines which are still running RHEL6
+// which doesn't have the necessary runtime support for executables compiled
+// with the newer compiler versions.
+//
+// Don't compile this forward declaration unless c++11 or greater is being
+// used.
+//
+#if(__GNUC__ && (__cplusplus >= 201103L))
 ///
 /// Target filter 64-bit
 /// Declare the enumeration size so that target.H will compile without chip specific filter.
@@ -145,6 +155,7 @@ enum TargetType : uint64_t
 /// target_filters.H, which would have the enumerator list of values.
 ///
 enum TargetFilter : uint64_t;
+#endif
 
 // attributeOverride tool requires x86.nfp compile
 #ifndef CONTEXT_x86_nfp
