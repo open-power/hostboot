@@ -1374,7 +1374,30 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_DRAM
         };
         const auto l_ocmb = i_efd_data->get_ocmb_target();
 
-        FAPI_TRY(i_efd_data->dram_rtt_nom(l_rtt_nom));
+        switch(i_efd_data->get_rank())
+        {
+            case 0:
+                FAPI_TRY( i_efd_data->dram_rtt_nom_rank0(l_rtt_nom) );
+                break;
+
+            case 1:
+                FAPI_TRY( i_efd_data->dram_rtt_nom_rank1(l_rtt_nom) );
+                break;
+
+            case 2:
+                FAPI_TRY( i_efd_data->dram_rtt_nom_rank2(l_rtt_nom) );
+                break;
+
+            case 3:
+                FAPI_TRY( i_efd_data->dram_rtt_nom_rank3(l_rtt_nom) );
+                break;
+
+            default:
+                // TODO Add FFDC
+                fapi2::Assert(false);
+                break;
+        };
+
         // Map SPD value to desired setting
         FAPI_TRY(lookup_table_check(l_ocmb, RTT_NOM_MAP, mss::SET_SI_DRAM_RTT_NOM, l_rtt_nom, o_setting));
 
@@ -1442,7 +1465,30 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_DRAM
         };
         const auto l_ocmb = i_efd_data->get_ocmb_target();
 
-        FAPI_TRY(i_efd_data->dram_rtt_wr(l_rtt_wr));
+        switch(i_efd_data->get_rank())
+        {
+            case 0:
+                FAPI_TRY( i_efd_data->dram_rtt_wr_rank0(l_rtt_wr) );
+                break;
+
+            case 1:
+                FAPI_TRY( i_efd_data->dram_rtt_wr_rank1(l_rtt_wr) );
+                break;
+
+            case 2:
+                FAPI_TRY( i_efd_data->dram_rtt_wr_rank2(l_rtt_wr) );
+                break;
+
+            case 3:
+                FAPI_TRY( i_efd_data->dram_rtt_wr_rank3(l_rtt_wr) );
+                break;
+
+            default:
+                // TODO Add FFDC
+                fapi2::Assert(false);
+                break;
+        };
+
         // Map SPD value to desired setting
         FAPI_TRY(lookup_table_check(l_ocmb, RTT_WR_MAP, mss::SET_SI_DRAM_RTT_WR, l_rtt_wr, o_setting));
 
@@ -1515,7 +1561,30 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_DRAM
         };
         const auto l_ocmb = i_efd_data->get_ocmb_target();
 
-        FAPI_TRY(i_efd_data->dram_rtt_park(l_rtt_park));
+        switch(i_efd_data->get_rank())
+        {
+            case 0:
+                FAPI_TRY( i_efd_data->dram_rtt_park_rank0(l_rtt_park) );
+                break;
+
+            case 1:
+                FAPI_TRY( i_efd_data->dram_rtt_park_rank1(l_rtt_park) );
+                break;
+
+            case 2:
+                FAPI_TRY( i_efd_data->dram_rtt_park_rank2(l_rtt_park) );
+                break;
+
+            case 3:
+                FAPI_TRY( i_efd_data->dram_rtt_park_rank3(l_rtt_park) );
+                break;
+
+            default:
+                // TODO Add FFDC
+                fapi2::Assert(false);
+                break;
+        };
+
         // Map SPD value to desired setting
         FAPI_TRY(lookup_table_check(l_ocmb, RTT_PARK_MAP, mss::SET_SI_DRAM_RTT_PARK, l_rtt_park, o_setting));
 
