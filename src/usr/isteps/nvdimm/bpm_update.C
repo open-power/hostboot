@@ -33,9 +33,11 @@
 #include <sys/time.h>
 #include <hbotcompid.H>
 #include <trace/interface.H>
-#include <targeting/common/targetservice.H>
 #include <initservice/istepdispatcherif.H>
 #include <isteps/nvdimm/bpmreasoncodes.H>
+
+#include <targeting/common/targetservice.H>
+#include <attributeenums.H>
 
 namespace NVDIMM
 {
@@ -847,6 +849,17 @@ errlHndl_t Bpm::runUpdate(BpmFirmwareLidImage i_fwImage,
             break;
         }
 
+        // Get the sys target to check for attribute overrides.
+        TARGETING::Target* sys = nullptr;
+        TARGETING::targetService().getTopLevelTarget(sys);
+
+        auto updateOverride =
+            sys->getAttr<TARGETING::ATTR_BPM_UPDATE_OVERRIDE>();
+
+        // Determine if updates are necessary and save that decision to
+        // influence attribute override behavior.
+        bool shouldPerformUpdate = true;
+
         TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::runUpdate(): "
                   "Firmware version on the BPM 0x%.4X, "
                   "Firmware version of image 0x%.4X.",
@@ -854,6 +867,21 @@ errlHndl_t Bpm::runUpdate(BpmFirmwareLidImage i_fwImage,
 
         if (i_fwImage.getVersion() == bpmFwVersion)
         {
+            shouldPerformUpdate = false;
+            if (updateOverride == TARGETING::BPM_UPDATE_BEHAVIOR_DEFAULT_ALL)
+            {
+                TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::runUpdate(): "
+                         "Firmware version on the BPM matches the version in "
+                         "the image. Skipping update.");
+                break;
+            }
+        }
+
+        if (updateOverride == TARGETING::BPM_UPDATE_BEHAVIOR_SKIP_ALL)
+        {
+            TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::runUpdate(): "
+                     "ATTR_BPM_UPDATE_OVERRIDE set to SKIP_ALL. "
+                     "Skipping update.");
             break;
         }
 
@@ -876,16 +904,53 @@ errlHndl_t Bpm::runUpdate(BpmFirmwareLidImage i_fwImage,
             break;
         }
 
-        errl = runConfigUpdates(i_configImage);
-        if (errl != nullptr)
+        uint16_t configOverrideFlag = (updateOverride & 0x00FF);
+        if ((shouldPerformUpdate
+                || (configOverrideFlag == TARGETING::BPM_UPDATE_BEHAVIOR_FORCE_CONFIG))
+           && !(configOverrideFlag == TARGETING::BPM_UPDATE_BEHAVIOR_SKIP_CONFIG))
         {
-            break;
+            if (configOverrideFlag == TARGETING::BPM_UPDATE_BEHAVIOR_FORCE_CONFIG)
+            {
+                TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::runUpdate(): "
+                         "ATTR_BPM_UPDATE_OVERRIDE set to force config "
+                         "portion of BPM updates. Running Config Update...");
+            }
+            errl = runConfigUpdates(i_configImage);
+            if (errl != nullptr)
+            {
+                break;
+            }
+        }
+        else
+        {
+            TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::runUpdate(): "
+                     "ATTR_BPM_UPDATE_OVERRIDE set to skip config "
+                     "portion of BPM updates. Skipping Config Update...");
         }
 
-        errl = runFirmwareUpdates(i_fwImage);
-        if (errl != nullptr)
+        uint16_t firmwareOverrideFlag = (updateOverride & 0xFF00);
+        if ((shouldPerformUpdate
+                || (firmwareOverrideFlag == TARGETING::BPM_UPDATE_BEHAVIOR_FORCE_FW))
+           && !(firmwareOverrideFlag == TARGETING::BPM_UPDATE_BEHAVIOR_SKIP_FW))
         {
-            break;
+            if (firmwareOverrideFlag == TARGETING::BPM_UPDATE_BEHAVIOR_FORCE_FW)
+            {
+                TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::runUpdate(): "
+                         "ATTR_BPM_UPDATE_OVERRIDE set to force firmware "
+                         "portion of BPM updates. Running Firmware Update...");
+            }
+
+            errl = runFirmwareUpdates(i_fwImage);
+            if (errl != nullptr)
+            {
+                break;
+            }
+        }
+        else
+        {
+            TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::runUpdate(): "
+                     "ATTR_BPM_UPDATE_OVERRIDE set to skip firmware "
+                     "portion of BPM updates. Skipping Firmware Update...");
         }
 
     } while(0);

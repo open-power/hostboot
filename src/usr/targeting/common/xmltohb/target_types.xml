@@ -1799,6 +1799,9 @@
       <id>BOOT_FREQ_MHZ</id>
     </attribute>
     <attribute>
+      <id>BPM_UPDATE_OVERRIDE</id>
+    </attribute>
+    <attribute>
       <id>BRAZOS_RX_FIFO_OVERRIDE</id>
     </attribute>
     <attribute>

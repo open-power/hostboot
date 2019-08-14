@@ -187,6 +187,62 @@
     </simpleType>
   </attribute>
 
+  <enumerationType>
+    <default>DEFAULT_ALL</default>
+    <description>Enumeration for the various BPM update behaviors</description>
+    <enumerator>
+      <name>DEFAULT_ALL</name>
+      <value>0x0000</value>
+    </enumerator>
+    <enumerator>
+      <name>SKIP_ALL</name>
+      <value>0x1010</value>
+    </enumerator>
+    <enumerator>
+      <name>FORCE_ALL</name>
+      <value>0x1111</value>
+    </enumerator>
+    <enumerator>
+      <name>SKIP_FW</name>
+      <value>0x1000</value>
+    </enumerator>
+    <enumerator>
+      <name>FORCE_FW</name>
+      <value>0x1100</value>
+    </enumerator>
+    <enumerator>
+      <name>SKIP_CONFIG</name>
+      <value>0x0010</value>
+    </enumerator>
+    <enumerator>
+      <name>FORCE_CONFIG</name>
+      <value>0x0011</value>
+    </enumerator>
+    <enumerator>
+      <name>FORCE_CONFIG_SKIP_FW</name>
+      <value>0x1011</value>
+    </enumerator>
+    <enumerator>
+      <name>SKIP_CONFIG_FORCE_FW</name>
+      <value>0x1110</value>
+    </enumerator>
+    <id>BPM_UPDATE_BEHAVIOR</id>
+  </enumerationType>
+
+  <attribute>
+    <id>BPM_UPDATE_OVERRIDE</id>
+    <description>
+        If non-zero then use value to determine which portion of BPM updates to
+        skip/force/default behavior.
+    </description>
+    <simpleType>
+      <uint16_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <no_export/>
+  </attribute>
+
   <attribute>
     <id>BRAZOS_RX_FIFO_OVERRIDE</id>
     <description>
