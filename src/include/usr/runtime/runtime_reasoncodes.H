@@ -68,7 +68,8 @@ namespace RUNTIME
         MOD_OPEN_UNTRUSTED_SP_AREAS      = 0x28,  /**< populate_hbruntime.C */
         MOD_SEND_ATTRIBUTES_TO_FSP       = 0x29,  /**< hbrt_utilities.H */
         MOD_RT_DO_NVDIMM_OP              = 0x2A,  /**< rt_fwnotify.C */
-        SET_ATTR_NVDIMM_ENCRYPTION_ENABLE = 0x2B,  /**< rt_fwnotify.C */
+        SET_ATTR_NVDIMM_ENCRYPTION_ENABLE = 0x2B, /**< rt_fwnotify.C */
+        MOD_CONFIGURE_HBRT_HYP_IDS       = 0x2C,
     };
 
     enum RuntimeReasonCode

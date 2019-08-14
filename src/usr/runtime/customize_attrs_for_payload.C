@@ -78,7 +78,8 @@ errlHndl_t createProcNotFoundError(
      * @reasoncode  RUNTIME::RT_NO_PROC_TARGET
      * @userdata1   Input targeting target's HUID
      * @devdesc     No processor targeting target was found for the given
-     *     targeting target
+     *              targeting target
+     * @custdesc    Unexpected internal firmware error
      */
     pError = new ERRORLOG::ErrlEntry(
         ERRORLOG::ERRL_SEV_INFORMATIONAL,
@@ -86,7 +87,7 @@ errlHndl_t createProcNotFoundError(
         RUNTIME::RT_NO_PROC_TARGET,
         huid,
         0,
-        true);
+        ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
 
     ERRORLOG::ErrlUserDetailsTarget(i_pTarget,"Targeting target").
         addToLog(pError);
@@ -165,6 +166,7 @@ errlHndl_t computeNonPhypRtTarget(
                  * @userdata1   MEMBUF targeting target's HUID
                  * @devdesc     No associated DMI targeting target(s) found for
                  *              given MEMBUF targeting target
+                 * @custdesc    Unexpected internal firmware error
                  */
                 pError = new ERRORLOG::ErrlEntry(
                     ERRORLOG::ERRL_SEV_INFORMATIONAL,
@@ -172,7 +174,7 @@ errlHndl_t computeNonPhypRtTarget(
                     RUNTIME::RT_UNIT_TARGET_NOT_FOUND,
                     huid,
                     0,
-                    true);
+                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
 
                 ERRORLOG::ErrlUserDetailsTarget(i_pTarget,"Targeting Target").
                     addToLog(pError);
@@ -257,6 +259,7 @@ errlHndl_t computeNonPhypRtTarget(
                  * @userdata1   OCMB targeting target's HUID
                  * @devdesc     No associated OMI targeting target(s) found for
                  *              given OCMB targeting target
+                 * @custdesc    Unexpected internal firmware error
                  */
                 pError = new ERRORLOG::ErrlEntry(
                     ERRORLOG::ERRL_SEV_INFORMATIONAL,
@@ -264,7 +267,7 @@ errlHndl_t computeNonPhypRtTarget(
                     RUNTIME::RT_NO_OMI_TARGET_FOUND,
                     huid,
                     0,
-                    true);
+                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
 
                 ERRORLOG::ErrlUserDetailsTarget(i_pTarget,"Targeting Target").
                     addToLog(pError);
@@ -319,6 +322,7 @@ errlHndl_t computeNonPhypRtTarget(
              * @userdata2   Targeting target's type
              * @devdesc     The targeting type of the input targeting target is
              *              not supported by runtime code
+             * @custdesc    Unexpected internal firmware error
              */
             pError = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_INFORMATIONAL,
@@ -326,7 +330,7 @@ errlHndl_t computeNonPhypRtTarget(
                 RUNTIME::RT_TARGET_TYPE_NOT_SUPPORTED,
                 huid,
                 targetingTargetType,
-                true);
+                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
 
             ERRORLOG::ErrlUserDetailsTarget(i_pTarget,"Targeting Target").
                 addToLog(pError);
@@ -402,6 +406,7 @@ errlHndl_t getRtTypeForTarget(
          * @userdata1   Target's HUID
          * @userdata2   Target's targeting type
          * @devdesc     Targeting target's type not supported by runtime code
+         * @custdesc    Unexpected internal firmware error
          */
         pError = new ERRORLOG::ErrlEntry(
             ERRORLOG::ERRL_SEV_INFORMATIONAL,
@@ -409,7 +414,7 @@ errlHndl_t getRtTypeForTarget(
             RUNTIME::RT_TARGET_TYPE_NOT_SUPPORTED,
             huid,
             targetingTargetType,
-            true);
+            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
 
         ERRORLOG::ErrlUserDetailsTarget(i_pTarget,"Targeting Target").
             addToLog(pError);
@@ -543,9 +548,38 @@ errlHndl_t configureHbrtHypIds(const bool i_configForPhyp)
                     hbrtHypId += pos; // Add OMI chip unit to end
                     break;
                 }
-              default: // just PROC
+              case TARGETING::TYPE_PROC:
                 {
                     hbrtHypId = (*pIt)->getAttr<TARGETING::ATTR_ORDINAL_ID>();
+                    break;
+                }
+              default:
+                {
+                    auto huid = get_huid(*pIt);
+                    auto targetType = (*pIt)->getAttr<TARGETING::ATTR_TYPE>();
+                    TRACFCOMP(g_trac_runtime, ERR_MRK
+                        "configureHbrtHypIds> 0x%08X is not a supported type. "
+                        "HUID: 0x%08X", targetType, huid);
+                    /*@
+                     * @errortype
+                     * @moduleid    RUNTIME::MOD_CONFIGURE_HBRT_HYP_IDS
+                     * @reasoncode  RUNTIME::RT_TARGET_TYPE_NOT_SUPPORTED
+                     * @userdata1   Target's HUID
+                     * @userdata2   Target's targeting type
+                     * @devdesc     Targeting target's type not supported by runtime code
+                     * @custdesc    Unexpected internal firmware error
+                     */
+                    pError = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                        RUNTIME::MOD_CONFIGURE_HBRT_HYP_IDS,
+                        RUNTIME::RT_TARGET_TYPE_NOT_SUPPORTED,
+                        huid,
+                        targetType,
+                        ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+                    ERRORLOG::ErrlUserDetailsTarget(*pIt,"Targeting Target").
+                        addToLog(pError);
+                    break;
                 }
             } // end of ATTR_TYPE switch
             hbrtHypId |= rtType;
@@ -557,6 +591,12 @@ errlHndl_t configureHbrtHypIds(const bool i_configForPhyp)
             {
                 break;
             }
+        }
+
+        // Only set HBRT_HYP_ID attribute if no error found
+        if (pError)
+        {
+            break;
         }
 
         (*pIt)->setAttr<TARGETING::ATTR_HBRT_HYP_ID>(hbrtHypId);
