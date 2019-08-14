@@ -66,6 +66,7 @@ namespace RUNTIME
         MOD_CHECK_HB_RES_MEM_LIMIT       = 0x26,  /**< populate_hbruntime.C */
         MOD_INIT_RT_RES_MEM_TRACE_BUF    = 0x27,  /**< rt_rsvdtracebuffer.C */
         MOD_OPEN_UNTRUSTED_SP_AREAS      = 0x28,  /**< populate_hbruntime.C */
+        MOD_CONFIGURE_HBRT_HYP_IDS       = 0x2C,
     };
 
     enum RuntimeReasonCode

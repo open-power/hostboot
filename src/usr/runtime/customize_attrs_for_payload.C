@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,7 +78,8 @@ errlHndl_t createProcNotFoundError(
      * @reasoncode  RUNTIME::RT_NO_PROC_TARGET
      * @userdata1   Input targeting target's HUID
      * @devdesc     No processor targeting target was found for the given
-     *     targeting target
+     *              targeting target
+     * @custdesc    Unexpected internal firmware error
      */
     pError = new ERRORLOG::ErrlEntry(
         ERRORLOG::ERRL_SEV_INFORMATIONAL,
@@ -86,7 +87,7 @@ errlHndl_t createProcNotFoundError(
         RUNTIME::RT_NO_PROC_TARGET,
         huid,
         0,
-        true);
+        ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
 
     ERRORLOG::ErrlUserDetailsTarget(i_pTarget,"Targeting target").
         addToLog(pError);
@@ -165,6 +166,7 @@ errlHndl_t computeNonPhypRtTarget(
                  * @userdata1   MEMBUF targeting target's HUID
                  * @devdesc     No associated DMI targeting target(s) found for
                  *              given MEMBUF targeting target
+                 * @custdesc    Unexpected internal firmware error
                  */
                 pError = new ERRORLOG::ErrlEntry(
                     ERRORLOG::ERRL_SEV_INFORMATIONAL,
@@ -172,7 +174,7 @@ errlHndl_t computeNonPhypRtTarget(
                     RUNTIME::RT_UNIT_TARGET_NOT_FOUND,
                     huid,
                     0,
-                    true);
+                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
 
                 ERRORLOG::ErrlUserDetailsTarget(i_pTarget,"Targeting Target").
                     addToLog(pError);
@@ -246,6 +248,7 @@ errlHndl_t computeNonPhypRtTarget(
              * @userdata2   Targeting target's type
              * @devdesc     The targeting type of the input targeting target is
              *              not supported by runtime code
+             * @custdesc    Unexpected internal firmware error
              */
             pError = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_INFORMATIONAL,
@@ -253,7 +256,7 @@ errlHndl_t computeNonPhypRtTarget(
                 RUNTIME::RT_TARGET_TYPE_NOT_SUPPORTED,
                 huid,
                 targetingTargetType,
-                true);
+                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
 
             ERRORLOG::ErrlUserDetailsTarget(i_pTarget,"Targeting Target").
                 addToLog(pError);
@@ -325,6 +328,7 @@ errlHndl_t getRtTypeForTarget(
          * @userdata1   Target's HUID
          * @userdata2   Target's targeting type
          * @devdesc     Targeting target's type not supported by runtime code
+         * @custdesc    Unexpected internal firmware error
          */
         pError = new ERRORLOG::ErrlEntry(
             ERRORLOG::ERRL_SEV_INFORMATIONAL,
@@ -332,7 +336,7 @@ errlHndl_t getRtTypeForTarget(
             RUNTIME::RT_TARGET_TYPE_NOT_SUPPORTED,
             huid,
             targetingTargetType,
-            true);
+            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
 
         ERRORLOG::ErrlUserDetailsTarget(i_pTarget,"Targeting Target").
             addToLog(pError);
@@ -376,70 +380,104 @@ errlHndl_t configureHbrtHypIds(const bool i_configForPhyp)
                 break;
             }
 
-            if(   (*pIt)->getAttr<TARGETING::ATTR_TYPE>()
-               == TARGETING::TYPE_CORE)
+            switch ((*pIt)->getAttr<TARGETING::ATTR_TYPE>())
             {
-                if(TARGETING::is_fused_mode())
+                case TARGETING::TYPE_CORE:
                 {
-                    // If we're in fused core mode, all core ID's must
-                    // match that of the parent EX
-                    auto type = TARGETING::TYPE_EX;
-                    const TARGETING::Target* pEx =
-                            TARGETING::getParent(*pIt,type);
+                    if(TARGETING::is_fused_mode())
+                    {
+                        // If we're in fused core mode, all core ID's must
+                        // match that of the parent EX
+                        auto type = TARGETING::TYPE_EX;
+                        const TARGETING::Target* pEx =
+                                TARGETING::getParent(*pIt,type);
 
-                    // If this fails, everything is already hosed
-                    assert(pEx != NULL);
+                        // If this fails, everything is already hosed
+                        assert(pEx != NULL);
 
-                    hbrtHypId = (pEx)->getAttr<TARGETING::ATTR_ORDINAL_ID>();
-                }else
+                        hbrtHypId = (pEx)->getAttr<TARGETING::ATTR_ORDINAL_ID>();
+                    }
+                    else
+                    {
+                        hbrtHypId = (*pIt)->getAttr<TARGETING::ATTR_ORDINAL_ID>();
+                    }
+                    break;
+                }
+                case TARGETING::TYPE_MEMBUF:
+                {
+                    //MEMBUF
+                    // 0b1000.0000.0000.0000.0000.0PPP.PPPP.MMMM
+                    // where PP is the parent proc's id, MMMM is memory channel
+                    //
+                    TARGETING::TargetHandleList targetList;
+
+                    getParentAffinityTargets(targetList,
+                                             (*pIt),
+                                             TARGETING::CLASS_UNIT,
+                                             TARGETING::TYPE_DMI, false);
+                    assert( !targetList.empty() );
+
+                    auto dmi_target = targetList[0];
+                    auto pos = dmi_target->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+
+                    targetList.clear();
+                    getParentAffinityTargets(targetList,
+                                             dmi_target,
+                                             TARGETING::CLASS_CHIP,
+                                             TARGETING::TYPE_PROC, false);
+                    assert( !targetList.empty() );
+
+                    auto procTarget = targetList[0];
+                    hbrtHypId = procTarget->getAttr<TARGETING::ATTR_ORDINAL_ID>();
+                    hbrtHypId = (hbrtHypId << RT_TARG::MEMBUF_ID_SHIFT);
+                    hbrtHypId += pos;
+                    break;
+                }
+                case TARGETING::TYPE_PROC:
                 {
                     hbrtHypId = (*pIt)->getAttr<TARGETING::ATTR_ORDINAL_ID>();
+                    break;
                 }
-            }
-            else if( (*pIt)->getAttr<TARGETING::ATTR_TYPE>()
-                     == TARGETING::TYPE_MEMBUF )
-            {
-                //MEMBUF
-                // 0b1000.0000.0000.0000.0000.0PPP.PPPP.MMMM
-                // where PP is the parent proc's id, MMMM is memory channel
-                //
-                TARGETING::TargetHandleList targetList;
+                default:
+                {
+                    auto huid = get_huid(*pIt);
+                    auto targetType = (*pIt)->getAttr<TARGETING::ATTR_TYPE>();
+                    TRACFCOMP(g_trac_runtime, ERR_MRK
+                        "configureHbrtHypIds> 0x%08X is not a supported type. "
+                        "HUID: 0x%08X", targetType, huid);
+                    /*@
+                     * @errortype
+                     * @moduleid    RUNTIME::MOD_CONFIGURE_HBRT_HYP_IDS
+                     * @reasoncode  RUNTIME::RT_TARGET_TYPE_NOT_SUPPORTED
+                     * @userdata1   Target's HUID
+                     * @userdata2   Target's targeting type
+                     * @devdesc     Targeting target's type not supported by runtime code
+                     * @custdesc    Unexpected internal firmware error
+                     */
+                    pError = new ERRORLOG::ErrlEntry(
+                                          ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                          RUNTIME::MOD_CONFIGURE_HBRT_HYP_IDS,
+                                          RUNTIME::RT_TARGET_TYPE_NOT_SUPPORTED,
+                                          huid,
+                                          targetType,
+                                          ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
 
-                getParentAffinityTargets(targetList,
-                                         (*pIt),
-                                         TARGETING::CLASS_UNIT,
-                                         TARGETING::TYPE_DMI, false);
-                assert( !targetList.empty() );
-
-                auto dmi_target = targetList[0];
-                auto pos = dmi_target->getAttr<TARGETING::ATTR_CHIP_UNIT>();
-
-                targetList.clear();
-                getParentAffinityTargets(targetList,
-                                         dmi_target,
-                                         TARGETING::CLASS_CHIP,
-                                         TARGETING::TYPE_PROC, false);
-                assert( !targetList.empty() );
-
-                auto procTarget = targetList[0];
-                hbrtHypId = procTarget->getAttr<TARGETING::ATTR_ORDINAL_ID>();
-                hbrtHypId = (hbrtHypId << RT_TARG::MEMBUF_ID_SHIFT);
-                hbrtHypId += pos;
-            }
-            else // just PROC
-            {
-                hbrtHypId = (*pIt)->getAttr<TARGETING::ATTR_ORDINAL_ID>();
-            }
-
+                    ERRORLOG::ErrlUserDetailsTarget(*pIt,"Targeting Target").
+                        addToLog(pError);
+                    break;
+                }
+            } // end of ATTR_TYPE switch
             hbrtHypId |= rtType;
         }
         else
         {
             pError = computeNonPhypRtTarget(*pIt,hbrtHypId);
-            if(pError)
-            {
-                break;
-            }
+        }
+
+        // Only set HBRT_HYP_ID attribute if no error found
+        if (pError)
+        {
+            break;
         }
 
         (*pIt)->setAttr<TARGETING::ATTR_HBRT_HYP_ID>(hbrtHypId);
