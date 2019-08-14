@@ -69,7 +69,7 @@ MemoryMru::MemoryMru( uint32_t i_memMru ) :
         PRDF_ASSERT( false );
     }
 
-    // If our target is MBA, get the chnlPos from the membuf
+    // If our target is MCA
     if ( 1 == iv_memMruMeld.s.isMca )
     {
         iv_target = getConnectedChild( proc, TYPE_MCA,
@@ -82,7 +82,40 @@ MemoryMru::MemoryMru( uint32_t i_memMru ) :
             PRDF_ASSERT( false );
         }
     }
+    // If our target is OCMB
+    else if ( 1 == iv_memMruMeld.s.isOcmb )
+    {
+        // chnlPos specifies the position of the MCC relative to the proc
+        TargetHandle_t mcc = getConnectedChild( proc, TYPE_MCC,
+                                                iv_memMruMeld.s.chnlPos );
+        if ( nullptr == mcc )
+        {
+            PRDF_ERR( PRDF_FUNC "Could not find functional mcc attached to "
+                      "proc 0x%08x at pos: %u", getHuid(proc),
+                      iv_memMruMeld.s.chnlPos );
+            PRDF_ASSERT( false );
+        }
 
+        // mbaPos specifies the position of the OMI relative to the MCC
+        TargetHandle_t omi = getConnectedChild( mcc, TYPE_OMI,
+                                                iv_memMruMeld.s.mbaPos );
+        if ( nullptr == omi )
+        {
+            PRDF_ERR( PRDF_FUNC "Could not find functional omi attached to "
+                      "mcc 0x%08x at pos: %u", getHuid(mcc),
+                      iv_memMruMeld.s.mbaPos );
+            PRDF_ASSERT( false );
+        }
+
+        // There is only one OCMB attached per OMI
+        iv_target = getConnectedChild( omi, TYPE_OCMB_CHIP, 0 );
+        if ( nullptr == iv_target )
+        {
+            PRDF_ERR( PRDF_FUNC "Could not find functional ocmb attached to "
+                      "omi 0x%08x", getHuid(mcc) );
+            PRDF_ASSERT( false );
+        }
+    }
 
     // Get the rank
     iv_rank = MemRank( iv_memMruMeld.s.mrank, iv_memMruMeld.s.srank );
@@ -185,7 +218,8 @@ TargetHandleList MemoryMru::getCalloutList() const
     }
     else
     {
-        if ( TARGETING::TYPE_MCA == getTargetType(iv_target) )
+        if ( TARGETING::TYPE_MCA == getTargetType(iv_target) ||
+             TARGETING::TYPE_OCMB_CHIP == getTargetType(iv_target) )
         {
             if ( CALLOUT_ALL_MEM == iv_special )
             {
@@ -237,6 +271,11 @@ void MemoryMru::getCommonVars()
     {
         proc = getConnectedParent( iv_target, TYPE_PROC );
     }
+    else if ( TYPE_OCMB_CHIP == trgtType )
+    {
+        TargetHandle_t mcc = getConnectedParent( iv_target, TYPE_MCC );
+        proc = getConnectedParent( mcc, TYPE_PROC );
+    }
     else
     {
         PRDF_ERR( PRDF_FUNC "Invalid target type" );
@@ -250,6 +289,22 @@ void MemoryMru::getCommonVars()
     {
         iv_memMruMeld.s.isMca   = 1;
         iv_memMruMeld.s.chnlPos = getTargetPosition( iv_target );
+    }
+    // If our target is an OCMB, then chnlPos will specify the MCC position and
+    // mbaPos will specify the OMI position.
+    else if ( TYPE_OCMB_CHIP == getTargetType(iv_target) )
+    {
+        TargetHandle_t omi = getConnectedParent( iv_target, TYPE_OMI );
+        TargetHandle_t mcc = getConnectedParent( omi, TYPE_MCC );
+
+        iv_memMruMeld.s.isOcmb  = 1;
+        iv_memMruMeld.s.chnlPos = getTargetPosition(mcc) % MAX_MCC_PER_PROC;
+        iv_memMruMeld.s.mbaPos  = getTargetPosition(omi) % MAX_OMI_PER_MCC;
+    }
+    else
+    {
+        PRDF_ERR( PRDF_FUNC "Invalid target type" );
+        PRDF_ASSERT(false);
     }
 
     iv_memMruMeld.s.nodePos    = getTargetPosition( node );

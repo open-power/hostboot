@@ -88,6 +88,10 @@ union MemMruMeld
         //       version field so that the error log parser know which format to
         //       used.
 
+        // NOTE: For OCMBs, specified by the isOcmb field, chnlPos will specify
+        //       the MCC position within the proc and mbaPos will specify the
+        //       OMI position within the channel.
+
 #if !( __BYTE_ORDER == __LITTLE_ENDIAN )
 
         uint32_t valid      : 1; ///< Used to indicate nothing failed while
@@ -106,13 +110,15 @@ union MemMruMeld
         uint32_t eccSpared  : 1; ///< True if symbol is on ECC DRAM
         uint32_t srank      : 3; ///< Slave rank (0-7)
         // If isMca is specified, then chnlPos above will specify the MCA pos
-        // and the mbaPos field will be unused
+        // and the mbaPos field will be unused. See above note for OCMB usage.
         uint32_t isMca      : 1; ///< True if MCA is used as opposed to MBA
-        uint32_t unused     : 3; ///< 3 Bits currently unused
+        uint32_t isOcmb     : 1; ///< True if OCMB is used
+        uint32_t unused     : 2; ///< 2 Bits currently unused
 #else
         // Need to reverse this to make the uint32_t look right in the
         // simulator.
-        uint32_t unused     : 3;
+        uint32_t unused     : 2;
+        uint32_t isOcmb     : 1;
         uint32_t isMca      : 1;
         uint32_t srank      : 3;
         uint32_t eccSpared  : 1;

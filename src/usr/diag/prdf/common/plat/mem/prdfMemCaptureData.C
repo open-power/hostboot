@@ -65,7 +65,7 @@ void addExtMemMruData( const MemoryMru & i_memMru, errlHndl_t io_errl )
     {
         TargetHandle_t trgt = i_memMru.getTrgt();
 
-        if ( TYPE_MEM_PORT == getTargetType(trgt) )
+        if ( TYPE_OCMB_CHIP == getTargetType(trgt) )
         {
             TargetHandle_t dimm = getConnectedDimm( trgt, i_memMru.getRank() );
             extMemMru.isX4Dram = isDramWidthX4( dimm ) ? 1 : 0;
@@ -94,9 +94,9 @@ void addExtMemMruData( const MemoryMru & i_memMru, errlHndl_t io_errl )
                 {
                     getDimmDqAttr<TYPE_MCA>( trgt, extMemMru.dqMapping );
                 }
-                else if ( TYPE_MEM_PORT == getTargetType(trgt) )
+                else if ( TYPE_OCMB_CHIP == getTargetType(trgt) )
                 {
-                    getDimmDqAttr<TYPE_MEM_PORT>( trgt, extMemMru.dqMapping );
+                    getDimmDqAttr<TYPE_OCMB_CHIP>( trgt, extMemMru.dqMapping );
                 }
                 else
                 {

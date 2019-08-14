@@ -164,11 +164,24 @@ void initMemMruStrings( MemoryMruData::MemMruMeld i_mm, bool & o_addDramSite,
     memset( o_header, '\0', HEADER_SIZE );
     memset( o_data,   '\0', DATA_SIZE   );
 
-    // Get the position info (default MCA).
-    const char * compStr = "mca";
+    // Get the position info (default invalid).
+    const char * compStr = "";
     uint8_t      nodePos = i_mm.s.nodePos;
-    uint8_t      chipPos = i_mm.s.procPos;
-    uint8_t      compPos = i_mm.s.chnlPos;
+    uint8_t      chipPos = 0;
+    uint8_t      compPos = 0;
+
+    if ( i_mm.s.isMca ) // MCA
+    {
+        compStr = "mca";
+        chipPos = i_mm.s.procPos;
+        compPos = i_mm.s.chnlPos;
+    }
+    else if ( i_mm.s.isOcmb ) // OCMB
+    {
+        compStr = "ocmb";
+        chipPos = (i_mm.s.procPos << 3) | i_mm.s.chnlPos;
+        compPos = i_mm.s.mbaPos;
+    }
 
     // Build the header string.
     snprintf( o_header, HEADER_SIZE, "  %s(n%dp%dc%d) Rank:m%ds%d",
