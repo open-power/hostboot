@@ -1675,9 +1675,9 @@ sub processMcbist
 ##
 sub processMc
 {
-    # TODO, work needs to be done for OMI_INBAND_BAR_BASE_ADDR_OFFSET
-    # Will be added in a later commit along with the other BARs
-    # RTC:210315
+    # NOTE: OMI_INBAND_BAR_BASE_ADDR_OFFSET will be set for the MC
+    # targets via a specific child OMI Target. View the
+    # processOmi function for further details.
     my $targetObj    = shift;
     my $target       = shift;
 
@@ -1778,7 +1778,7 @@ sub processOmi
     $value = "physical:sys-0/node-0/proc-$proc_num/" . $omi_map{$num};
     $targetObj->setAttribute($target, "OMIC_PARENT", $value);
 
-    my $omi = Math::BigInt->new($targetObj->getAttribute($target,"FAPI_POS"));
+    my $omi = Math::BigInt->new($targetObj->getAttribute($target,"CHIP_UNIT"));
     # Base omi bar offset
     # We use this base address in simics_AXONE.system.xml and want our
     # addresses to match the ones in that xml

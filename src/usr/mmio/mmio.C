@@ -89,8 +89,20 @@ errlHndl_t mmioSetup()
             auto l_omiBaseAddr =
                   l_mcTarget->getAttr<TARGETING::ATTR_OMI_INBAND_BAR_BASE_ADDR_OFFSET>();
 
-            // Apply the MMIO base offset so we get the real address
-            uint64_t  l_realAddr = ( l_omiBaseAddr | MEMMAP::MMIO_BASE );
+            // TODO RTC 214701 -- Need to use TOPOLOGY ID here
+            // Build up the full address with group/chip address considerations
+            auto l_procType = TARGETING::TYPE_PROC;
+            TARGETING::Target* l_parentChip = getParent(l_mcTarget, l_procType);
+            uint8_t l_groupId =
+                   l_parentChip->getAttr<ATTR_PROC_EFF_FABRIC_GROUP_ID>();
+            uint8_t l_chipId  =
+                   l_parentChip->getAttr<ATTR_PROC_EFF_FABRIC_CHIP_ID>();
+            uint64_t  l_realAddr = computeMemoryMapOffset( MMIO_BASE,
+                                                           l_groupId,
+                                                           l_chipId );
+
+            //  Apply the MMIO base offset so we get the final address
+            l_realAddr += l_omiBaseAddr;
 
             // Map the device with a kernal call, each device, the MC,  is 32 GB
             uint64_t l_virtAddr = reinterpret_cast<uint64_t>
