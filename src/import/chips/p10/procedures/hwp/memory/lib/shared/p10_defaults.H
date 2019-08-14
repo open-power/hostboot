@@ -24,7 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 ///
-/// @file axone_defaults.H
+/// @file p10_defaults.H
 /// @brief default types associated with Nimbus system
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>

@@ -26,9 +26,11 @@
 /// @file p10_sync.H
 /// @brief Synchronous function implementations for P10
 ///
-/// *HWP HW Maintainer: Louis Stermole <stermole@us.ibm.com>
-/// *HWP FW Maintainer: Christian Geddes <crgeddes@us.ibm.com>
-/// *HWP Consumed by: HB
+/// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+/// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
+/// *HWP Team: Memory
+/// *HWP Level: 3
+/// *HWP Consumed by: HB:FSP
 
 #ifndef _P10_MSS_SYNC_H_
 #define _P10_MSS_SYNC_H_

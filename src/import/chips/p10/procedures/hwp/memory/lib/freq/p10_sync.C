@@ -22,13 +22,16 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
 ///
-/// @file P10_sync.C
-/// @brief Synchronous function implementations for P10
+/// @file p10_sync.C
+/// @brief Synchronous function implementations for Axone
 ///
-/// *HWP HW Maintainer: Louis Stermole <stermole@us.ibm.com>
-/// *HWP FW Maintainer: Christian Geddes <crgeddes@us.ibm.com>
-/// *HWP Consumed by: HB
+/// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+/// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
+/// *HWP Team: Memory
+/// *HWP Level: 3
+/// *HWP Consumed by: HB:FSP
 
 #include <fapi2.H>
 #include <vpd_access.H>
@@ -202,7 +205,7 @@ fapi2::ReturnCode select_omi_freq(const std::map< fapi2::Target<fapi2::TARGET_TY
                 // select a DIMM freq the OMI couldn't support.
 
 #ifndef __HOSTBOOT_MODULE
-                // On Cronus if the o_selected_omi_freq != i_omi_freq we've got a mismatch. Note that p9a_mss_freq ensures
+                // On Cronus if the o_selected_omi_freq != i_omi_freq we've got a mismatch. Note that p10_mss_freq ensures
                 // we don't select an invalid freq, but doesn't ensure we select the current OMI freq.
                 FAPI_ASSERT(o_selected_omi_freq == i_omi_freq,
                             fapi2::P10_MSS_FAILED_SYNC_MODE()
