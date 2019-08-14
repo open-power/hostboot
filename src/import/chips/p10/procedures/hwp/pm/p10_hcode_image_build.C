@@ -1189,7 +1189,7 @@ fapi2::ReturnCode buildPpmrHeader( Homerlayout_t* i_pChipHomer, ImageBuildRecord
     //PGPE Boot Loader
     i_ppmrBuildRecord.getSection( "PGPE Boot Loader", l_sectn );
     l_pPpmrHdr->iv_bootLoaderOffset = l_sectn.iv_sectnOffset;
-    l_pPpmrHdr->iv_bootLoaderLength = htobe32(PGPE_BOOT_LOADER_SIZE);
+    l_pPpmrHdr->iv_bootLoaderLength = PGPE_BOOT_LOADER_SIZE;
 
     //PGPE Hcode
     i_ppmrBuildRecord.getSection( "PGPE Hcode", l_sectn );
@@ -1380,6 +1380,47 @@ fapi_try_exit:
     FAPI_INF( " << buildPpmrImage" );
 }
 
+//---------------------------------------------------------------------------
+
+/**
+ * @brief updates the IVPR attributes for PGPE, XGPE.
+ * @param[in]   i_pChipHomer    points to start of HOMER
+ * @param[in]   i_procTgt       target associated with P10 chip
+ * @return      fapi2 return code
+ */
+fapi2::ReturnCode updateGpeAttributes( Homerlayout_t* i_pChipHomer,
+                                       CONST_FAPI2_PROC& i_procTgt )
+{
+    FAPI_INF(">> updateGpeAttributes");
+
+    PpmrHeader_t* pPpmrHdr = (PpmrHeader_t*) i_pChipHomer->iv_ppmrRegion.iv_ppmrHeader;
+//    XpmrHeader_t* pxpmrHdr = (xpmrHeader_t*)i_pChipHomer->xpmrRegion.xgpeRegion.xpmrHeader;
+
+    uint32_t attrVal = htobe32(pPpmrHdr->iv_bootCopierOffset);
+    attrVal |= (0x80000000 | PPMR_HOMER_OFFSET);
+
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PGPE_BOOT_COPIER_IVPR_OFFSET,
+                           i_procTgt,
+                           attrVal ),
+             "Error from FAPI_ATTR_SET for attribute ATTR_PGPE_BOOT_COPIER_IVPR_OFFSET");
+
+    FAPI_DBG("Set ATTR_PGPE_BOOT_COPIER_IVPR_OFFSET to 0x%08X", attrVal );
+
+//     attrVal = htobe32(pXpmrHdr->iv_bootCopierOffset);
+//     attrVal |= (0x80000000 | ONE_MB);
+//
+//     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_XGPE_BOOT_COPIER_IVPR_OFFSET,
+//                            i_procTgt,
+//                            attrVal ),
+//              "Error from FAPI_ATTR_SET for attribute ATTR_XGPE_BOOT_COPIER_IVPR_OFFSET");
+//
+//     FAPI_DBG("Set ATTR_XGPE_BOOT_COPIER_IVPR_OFFSET to 0x%08X", attrVal );
+
+fapi_try_exit:
+    FAPI_INF("<< updateGpeAttributes");
+    return fapi2::current_err;
+}
+
 
 //-------------------------------------------------------------------------------------------------------
 
@@ -1450,6 +1491,10 @@ fapi2::ReturnCode p10_hcode_image_build(    CONST_FAPI2_PROC& i_procTgt,
 
     FAPI_TRY( populateMagicWord( pChipHomer ),
               "Failed To Copy Magic Words" );
+
+    //Update the attributes storing PGPE and XGPE's boot copier offset.
+    FAPI_TRY( updateGpeAttributes( pChipHomer, i_procTgt ),
+              "Failed to update XGPE/PGPE IVPR attributes" );
 
 fapi_try_exit:
     FAPI_IMP("<< p10_hcode_image_build" );

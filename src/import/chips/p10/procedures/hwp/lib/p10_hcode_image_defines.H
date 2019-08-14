@@ -169,6 +169,8 @@ HCD_HDR_UINT32( iv_hcodeOffset,         0);
 HCD_HDR_UINT32( iv_hcodeLength,         0);
 HCD_HDR_UINT32( iv_gpspbOffset,         0);
 HCD_HDR_UINT32( iv_gpspbLength,         0);
+HCD_HDR_UINT32( iv_lpspbOffset,         0);
+HCD_HDR_UINT32( iv_lpspbLength,         0);
 HCD_HDR_UINT32( iv_opspbOffset,         0);
 HCD_HDR_UINT32( iv_opspbLength,         0);
 HCD_HDR_UINT32( iv_pstateOffset,        0);
@@ -369,7 +371,7 @@ typedef struct
 } SmfSprRestoreRegion_t;
 
 /**
- * @brief   models image section of XGPE in HOMER.
+ * @brief   models image section of CPMR in HOMER.
  */
 typedef union CPMRSelfRestoreLayout
 {
@@ -411,7 +413,7 @@ typedef struct
 } PPMRLayout_t;
 
 /**
- * @brief   models QPMR in HOMER.
+ * @brief   models XPMR in HOMER.
  */
 typedef struct
 {

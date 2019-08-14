@@ -46,7 +46,7 @@
 
 extern const char* PM_FLOW_MODE_NAME[];
 
-#define PM_FLOW_MODE_NAME   \
+#define PM_FLOW_MODE_NAME_STRINGS   \
     {                           \
         "PM_HALT",              \
         "PM_START",             \
@@ -58,7 +58,7 @@ extern const char* PM_FLOW_MODE_NAME[];
         "PM_INIT_SPECIAL"       \
     }
 
-#define PM_MODE_NAME_VAR PM_FLOW_MODE_NAME[] = PM_FLOW_MODE_NAME
+#define PM_MODE_NAME_VAR PM_FLOW_MODE_NAME[] = PM_FLOW_MODE_NAME_STRINGS
 
 #define PM_MODE_NAME(_mi_mode)(         \
                                         PM_FLOW_MODE_NAME[_mi_mode-1]    \
