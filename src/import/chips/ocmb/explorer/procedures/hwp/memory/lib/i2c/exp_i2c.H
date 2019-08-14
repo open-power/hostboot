@@ -422,7 +422,7 @@ inline  fapi2::ReturnCode fw_reg_write(const fapi2::Target<fapi2::TARGET_TYPE_OC
 {
     // create byte vector that will hold command bytes in sequence that will do the scom
     std::vector<uint8_t> l_cmd_vector;
-    std::vector<uint8_t> l_be_vector;
+    std::vector<uint8_t> l_byte_vector;
 
     uint32_t l_input_data = static_cast<uint32_t>(i_data_buffer);
 
@@ -434,21 +434,20 @@ inline  fapi2::ReturnCode fw_reg_write(const fapi2::Target<fapi2::TARGET_TYPE_OC
     // write them directly to the cmd_vector in the same order they
     // currently are
     // Byte 2:5 = Address
-    forceBE(i_addr, l_be_vector);
+    forceBE(i_addr, l_byte_vector);
 
-    for(std::vector<uint8_t>::iterator it = l_be_vector.begin(); it != l_be_vector.end(); ++it)
+    for(const auto l_byte : l_byte_vector)
     {
-        l_cmd_vector.push_back(*it);
+        l_cmd_vector.push_back(l_byte);
     }
 
-    l_be_vector.clear();
-    forceBE(l_input_data, l_be_vector);
+    l_byte_vector.clear();
+    forceBE(l_input_data, l_byte_vector);
 
     // Byte 6:9 = Data
-
-    for(std::vector<uint8_t>::iterator it = l_be_vector.begin(); it != l_be_vector.end(); ++it)
+    for(const auto l_byte : l_byte_vector)
     {
-        l_cmd_vector.push_back(*it);
+        l_cmd_vector.push_back(l_byte);
     }
 
     // Use fapi2 putI2c interface to execute command
@@ -479,13 +478,13 @@ inline fapi2::ReturnCode fw_reg_read(const fapi2::Target<fapi2::TARGET_TYPE_OCMB
 {
     // create byte vector that will hold command bytes in sequence that will do the scom
     std::vector<uint8_t> l_cmd_vector;
-    std::vector<uint8_t> l_tmp_vector;
+    std::vector<uint8_t> l_byte_vector;
 
     // Flush o_data_buffer w/ all 0's to avoid stale data
     o_data_buffer.flush<0>();
 
     // Force the address to be BE
-    forceBE(i_addr, l_tmp_vector);
+    forceBE(i_addr, l_byte_vector);
 
     // Build the cmd vector for the Read
     l_cmd_vector.push_back(FW_REG_ADDR_LATCH);         // Byte 0 = 0x03 (FW_REG_ADDR_LATCH)
@@ -496,9 +495,9 @@ inline fapi2::ReturnCode fw_reg_read(const fapi2::Target<fapi2::TARGET_TYPE_OCMB
     // currently is in
     // Byte 2:5 = Address
 
-    for(std::vector<uint8_t>::iterator it = l_tmp_vector.begin(); it != l_tmp_vector.end(); ++it)
+    for(const auto l_byte : l_byte_vector)
     {
-        l_cmd_vector.push_back(*it);
+        l_cmd_vector.push_back(l_byte);
     }
 
     // Use fapi2 putI2c interface to execute command
@@ -511,36 +510,44 @@ inline fapi2::ReturnCode fw_reg_read(const fapi2::Target<fapi2::TARGET_TYPE_OCMB
              "Invalid Status after FW_REG_ADDR_LATCH operation to 0x%.8X on OCMB w/ fapiPos = 0x%.8X",
              i_addr, mss::fapi_pos(i_target));
 
-    // Clear out the tmp_vector because we will re-use as the read buffer
-    l_tmp_vector.clear();
-
     // Clear out cmd vector as i2c op is complete and we must prepare for next
     l_cmd_vector.clear();
 
     // Cmd vector is a single byte with FW_REG_READ code
     l_cmd_vector.push_back(FW_REG_READ); // Byte 0 = 0x04 (FW_REG_READ)
-    l_cmd_vector.push_back(0x4); // Remaining bytes dont matter to HB firmware
-    l_cmd_vector.push_back(0x0); // but the hw is expecting something there so
-    l_cmd_vector.push_back(0x0); // we should write something
-    l_cmd_vector.push_back(0x0);
-    l_cmd_vector.push_back(0x0);
+    l_cmd_vector.push_back(0x4); // length of read
+
+    // i_addr was converted to BE above so we can write it
+    // directly to the cmd_vector in the same order it
+    // currently is in
+    // Byte 2:5 = Address
+    // NOTE: Techinically Explorer says this is not needed but was found
+    // to be needed in Gemini and Explorer says they don't care why the
+    // next 4 bytes are so we will fill it in regardless
+    for(const auto l_byte : l_byte_vector)
+    {
+        l_cmd_vector.push_back(l_byte);
+    }
+
+    // Clear out the tmp_vector because we will re-use as the read buffer
+    l_byte_vector.clear();
 
     // Use fapi2 getI2c interface to execute command
-    FAPI_TRY(fapi2::getI2c(i_target, FW_I2C_SCOM_READ_SIZE,  l_cmd_vector, l_tmp_vector),
+    FAPI_TRY(fapi2::getI2c(i_target, FW_I2C_SCOM_READ_SIZE,  l_cmd_vector, l_byte_vector),
              "getI2c returned error for FW_REG_READ operation to 0x%.8X on OCMB w/ fapiPos = 0x%.8X",
              i_addr, mss::fapi_pos(i_target));
 
     // The first byte returned should be the size of the remaining data
     // We requested FW_REG_ADDR_LATCH_SIZE bytes so that is what we
     // expect to see as the first byte.
-    FAPI_ASSERT(  (l_tmp_vector.front() == FW_REG_ADDR_LATCH_SIZE),
+    FAPI_ASSERT(  (l_byte_vector.front() == FW_REG_ADDR_LATCH_SIZE),
                   fapi2::I2C_GET_SCOM_INVALID_READ_SIZE()
                   .set_TARGET(i_target)
                   .set_ADDRESS(i_addr)
-                  .set_SIZE_RETURNED(l_tmp_vector[0])
+                  .set_SIZE_RETURNED(l_byte_vector[0])
                   .set_SIZE_REQUESTED(FW_REG_ADDR_LATCH_SIZE),
                   "First byte of read data was expected to be 0x%lx but byte read = 0x%x",
-                  FW_REG_ADDR_LATCH_SIZE, l_tmp_vector[0] );
+                  FW_REG_ADDR_LATCH_SIZE, l_byte_vector[0] );
 
     // Check i2c status after operation
     FAPI_TRY(fw_status(i_target, DELAY_1MS, 100),
@@ -551,10 +558,10 @@ inline fapi2::ReturnCode fw_reg_read(const fapi2::Target<fapi2::TARGET_TYPE_OCMB
     // returned in BE so no translation neccesary. Faster to just access
     // the 4 bytes and shift than to perform vector operations to pop off front
     // entry and convert vector to uint32.
-    o_data_buffer = ( l_tmp_vector[1] << 24 |
-                      l_tmp_vector[2] << 16 |
-                      l_tmp_vector[3] << 8 |
-                      l_tmp_vector[4]);
+    o_data_buffer = ( l_byte_vector[1] << 24 |
+                      l_byte_vector[2] << 16 |
+                      l_byte_vector[3] << 8 |
+                      l_byte_vector[4]);
 fapi_try_exit:
     return fapi2::current_err;
 }
