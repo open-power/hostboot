@@ -370,36 +370,31 @@ enum P10_HCD_SCAN0_CONSTANTS
 // XSR defines
 enum XSR_DEFS
 {
-    HALTED_STATE         = 0,
-    HALT_CONDITION_START = 1,
-    HALT_CONDITION_LEN   = 3,
-    XCR_CMD_HALT         = 1,
-    WDT_HALT             = 2,
-    UMI_HALT             = 3,
-    DEBUG_HALT           = 4,
-    DBCR_HALT            = 5,
-    INPUT_HALT           = 6,
-    HW_FAILURE           = 7
+    XSR_HALTED_STATE         = 0,
+    XSR_HALT_CONDITION_START = 1,
+    XSR_HALT_CONDITION_LEN   = 3,
+    XSR_XCR_CMD_HALT         = 1,
+    XSR_WDT_HALT             = 2,
+    XSR_UMI_HALT             = 3,
+    XSR_DEBUG_HALT           = 4,
+    XSR_DBCR_HALT            = 5,
+    XSR_INPUT_HALT           = 6,
+    XSR_HW_FAILURE           = 7
 };
 
 // XCR defines
 enum XCR_DEFS
 {
-    CLEAR_DEBUG_STATUS = 0,
-    HALT               = 1,
-    RESUME             = 2,
-    SINGLE_STEP        = 3,
-    TOGGLE_XSR_TRH     = 4,
-    SOFT_RESET         = 5,
-    HARD_RESET         = 6,
-    FORCE_HALT         = 7
+    XCR_CLEAR_DEBUG_STATUS  = 0,
+    XCR_HALT                = 1,
+    XCR_RESUME              = 2,
+    XCR_SINGLE_STEP         = 3,
+    XCR_TOGGLE_XSR_TRH      = 4,
+    XCR_SOFT_RESET          = 5,
+    XCR_HARD_RESET          = 6,
+    XCR_FORCE_HALT          = 7
 };
 
-enum SLAVE_CONFIG_DEFS
-{
-    CFG_PM_DISABLE     = 6,
-    CFG_PM_MUX_DISABLE = 7
-};
 
 /**
  * @brief  various SCOM operations supported for QME

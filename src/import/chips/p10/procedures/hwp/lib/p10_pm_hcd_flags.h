@@ -68,7 +68,7 @@ enum PM_GPE_OCCFLG2_DEFS
     PGPE_PSTATE_PROTOCOL_STOP               = 0,
     PGPE_PSTATE_PROTOCOL_AUTO_ACTIVATE      = 1,
     PGPE_SAFE_MODE                          = 2,
-    PM_COMPLEX_SUSPEND                      = 3,
+    PGPE_XSTOP_ON_SAFE_MODE                 = 3,
     PGPE_DEBUG_TRAP_ENABLE                  = 4,
     PGPE_DEBUG_HALT_ENABLE                  = 5,
     PGPE_HCODE_ERROR_INJECT                 = 6,
@@ -79,7 +79,6 @@ enum PM_GPE_OCCFLG2_DEFS
     PGPE_ACTIVE                             = 16,
     PGPE_PSTATE_PROTOCOL_ACTIVE             = 17,
     PGPE_SAFE_MODE_ACTIVE                   = 18,
-    PM_COMPLEX_SUSPENDED                    = 19,
     PGPE_SAFE_MODE_ERROR                    = 21,
     PGPE_CEFFOVR_CONTROL_LOOP               = 22,
     PGPE_WOF_VALUE_ATOMIC_FLAG              = 28,
@@ -94,6 +93,7 @@ enum PM_GPE_OCCFLG3_DEFS
     XGPE_IODLR_ENABLE                       = 0,
     AUX_THREAD_ACTIVATE                     = 1,
     XGPE_PM_COMPLEX_SUSPEND                 = 3,
+    PM_COMPLEX_SUSPEND                      = 3,  // Leaving a generic for use in p10_pm_suspend.
     XGPE_DEBUG_TRAP_ENABLE                  = 4,
     XGPE_DEBUG_HALT_ENABLE                  = 5,
     XGPE_HCODE_ERROR_INJECT                 = 6,
@@ -110,6 +110,7 @@ enum PM_GPE_OCCFLG3_DEFS
     XGPE_IODLR_ACTIVE                       = 17,
     AUX_THREAD_ACTIVE                       = 18,
     XGPE_PM_COMPLEX_SUSPENDED               = 19,
+    PM_COMPLEX_SUSPENDED                    = 19,  // Leaving a generic for use in p10_pm_suspend.
     CORE_THROT_CONTIN_CHANGE_ENABLE         = 29,
     CORE_THROT_SINGLE_EVENT_INJECT          = 30,
     CORE_THROT_TYPE_SEL                     = 31,
