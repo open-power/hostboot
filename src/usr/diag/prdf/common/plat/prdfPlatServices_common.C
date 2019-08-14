@@ -880,6 +880,17 @@ void getDimmDqAttr<TYPE_MEM_PORT>( TargetHandle_t i_target,
 } // end function getDimmDqAttr
 
 template<>
+void getDimmDqAttr<TYPE_OCMB_CHIP>( TargetHandle_t i_target,
+                                    uint8_t (&o_dqMapPtr)[DQS_PER_DIMM] )
+{
+    PRDF_ASSERT( TYPE_OCMB_CHIP == getTargetType(i_target) );
+
+    // TODO RTC 210072 - Support for multiple ports per OCMB
+    TargetHandle_t memPort = getConnectedChild( i_target, TYPE_MEM_PORT, 0 );
+    getDimmDqAttr<TYPE_MEM_PORT>( memPort, o_dqMapPtr );
+}
+
+template<>
 void getDimmDqAttr<TYPE_DIMM>( TargetHandle_t i_target,
                                uint8_t (&o_dqMapPtr)[DQS_PER_DIMM] )
 {

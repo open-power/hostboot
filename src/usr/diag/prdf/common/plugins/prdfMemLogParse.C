@@ -2848,17 +2848,22 @@ void initMemMruStrings( MemoryMruData::MemMruMeld i_mm, bool & o_addDramSite,
     memset( o_header, '\0', HEADER_SIZE );
     memset( o_data,   '\0', DATA_SIZE   );
 
-    // Get the position info (default MCA).
-    const char * compStr = "mca";
-    uint8_t      nodePos = i_mm.s.nodePos;
-    uint8_t      chipPos = i_mm.s.procPos;
-    uint8_t      compPos = i_mm.s.chnlPos;
+    // Get the position info (default MBA).
 
-    if ( !i_mm.s.isMca ) // MBA
+    const char * compStr = "mba";
+    uint8_t      nodePos = i_mm.s.nodePos;
+    uint8_t      chipPos = (i_mm.s.procPos << 3) | i_mm.s.chnlPos;
+    uint8_t      compPos = i_mm.s.mbaPos;
+
+    if ( i_mm.s.isMca ) // MCA
     {
-        compStr = "mba";
-        chipPos = (i_mm.s.procPos << 3) | i_mm.s.chnlPos;
-        compPos =  i_mm.s.mbaPos;
+        compStr = "mca";
+        chipPos = i_mm.s.procPos;
+        compPos = i_mm.s.chnlPos;
+    }
+    else if ( i_mm.s.isOcmb ) // OCMB
+    {
+        compStr = "ocmb";
     }
 
     // Build the header string.
@@ -2953,13 +2958,13 @@ void addDramSiteString( const MemoryMruData::ExtendedData & i_extMemMru,
             }
         }
     }
-    else // IS DIMMs
+    else // Dram site locations not supported
     {
         // Add DQ info.
         char tmp[DATA_SIZE] = { '\0' };
         strcat( io_data, "DQ:" );
 
-        if ( mm.s.isMca ) // MCA
+        if ( mm.s.isMca || mm.s.isOcmb ) // MCA, OCMB
         {
             // There is only one DQ per symbol.
             snprintf( tmp, DATA_SIZE, "%d", i_extMemMru.dqMapping[dqIdx] );
