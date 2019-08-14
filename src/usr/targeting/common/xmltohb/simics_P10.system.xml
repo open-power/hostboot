@@ -5976,23 +5976,29 @@
         <id>VPD_REC_NUM</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>devAddr</id><value>0x40</value></field>
+        </default>
+    </attribute>
     <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
          that we preload in standalone simics. No cache updates should be needed -->
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
-            <!-- TODO RTC 213602 Use correct values once available in simics-->
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>port</id><value>1</value></field>
+            <field><id>port</id><value>0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0x08</value></field>
-            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -6028,12 +6034,20 @@
         <id>VPD_REC_NUM</id>
         <default>1</default>
     </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>devAddr</id><value>0x40</value></field>
+        </default>
+    </attribute>
     <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
          that we preload in standalone simics. No cache updates should be needed -->
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
-            <!-- TODO RTC 213602 Use correct values once available in simics-->
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
@@ -6043,8 +6057,6 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0x09</value></field>
-            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -6080,23 +6092,27 @@
         <id>VPD_REC_NUM</id>
         <default>2</default>
     </attribute>
-    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
-         that we preload in standalone simics. No cache updates should be needed -->
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>2</value></field>
+            <field><id>devAddr</id><value>0x40</value></field>
+        </default>
+    </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
-            <!-- TODO RTC 213602 Use correct values once available in simics-->
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>port</id><value>1</value></field>
+            <field><id>port</id><value>2</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0x0A</value></field>
-            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -6132,27 +6148,32 @@
         <id>VPD_REC_NUM</id>
         <default>3</default>
     </attribute>
-    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
-         that we preload in standalone simics. No cache updates should be needed -->
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>3</value></field>
+            <field><id>devAddr</id><value>0x40</value></field>
+        </default>
+    </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
-            <!-- TODO RTC 213602 Use correct values once available in simics-->
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>port</id><value>1</value></field>
+            <field><id>port</id><value>3</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0x0B</value></field>
-            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
     </attribute>
 </targetInstance>
 
+<!-- TODO RTC 213602: Uncomment this once presence detection works
 <targetInstance>
     <id>sys0node0ocmb4</id>
     <type>chip-ocmb</type>
@@ -6184,23 +6205,27 @@
         <id>VPD_REC_NUM</id>
         <default>4</default>
     </attribute>
-    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
-         that we preload in standalone simics. No cache updates should be needed -->
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>4</value></field>
+            <field><id>devAddr</id><value>0x40</value></field>
+        </default>
+    </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
-            <!-- TODO RTC 213602 Use correct values once available in simics-->
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>port</id><value>1</value></field>
+            <field><id>port</id><value>4</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0x0C</value></field>
-            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -6236,23 +6261,27 @@
         <id>VPD_REC_NUM</id>
         <default>5</default>
     </attribute>
-    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
-         that we preload in standalone simics. No cache updates should be needed -->
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>5</value></field>
+            <field><id>devAddr</id><value>0x40</value></field>
+        </default>
+    </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
-            <!-- TODO RTC 213602 Use correct values once available in simics-->
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>port</id><value>1</value></field>
+            <field><id>port</id><value>5</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0x0D</value></field>
-            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -6288,23 +6317,27 @@
         <id>VPD_REC_NUM</id>
         <default>6</default>
     </attribute>
-    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
-         that we preload in standalone simics. No cache updates should be needed -->
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>6</value></field>
+            <field><id>devAddr</id><value>0x40</value></field>
+        </default>
+    </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
-            <!-- TODO RTC 213602 Use correct values once available in simics-->
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>port</id><value>1</value></field>
+            <field><id>port</id><value>6</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0x0E</value></field>
-            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -6340,23 +6373,27 @@
         <id>VPD_REC_NUM</id>
         <default>7</default>
     </attribute>
-    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
-         that we preload in standalone simics. No cache updates should be needed -->
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>7</value></field>
+            <field><id>devAddr</id><value>0x40</value></field>
+        </default>
+    </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
-            <!-- TODO RTC 213602 Use correct values once available in simics-->
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>port</id><value>1</value></field>
+            <field><id>port</id><value>7</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0x0F</value></field>
-            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -6392,28 +6429,31 @@
         <id>VPD_REC_NUM</id>
         <default>8</default>
     </attribute>
-    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
-         that we preload in standalone simics. No cache updates should be needed -->
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>8</value></field>
+            <field><id>devAddr</id><value>0x40</value></field>
+        </default>
+    </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
-            <!-- TODO RTC 213602 Use correct values once available in simics-->
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>0</value></field>
+            <field><id>port</id><value>8</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>20</value></field>
             <field><id>writePageSize</id><value>32</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
-            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
         </default>
     </attribute>
 </targetInstance>
 
-<!-- TODO RTC 213602: Uncomment this once presence detection works
 <targetInstance>
     <id>sys0node0ocmb9</id>
     <type>chip-ocmb</type>
@@ -6446,19 +6486,26 @@
         <default>9</default>
     </attribute>
     <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>9</value></field>
+            <field><id>devAddr</id><value>0x40</value></field>
+        </default>
+    </attribute>
+    <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>1</value></field>
+            <field><id>port</id><value>9</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>20</value></field>
             <field><id>writePageSize</id><value>32</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
-            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -6495,19 +6542,26 @@
         <default>10</default>
     </attribute>
     <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>10</value></field>
+            <field><id>devAddr</id><value>0x40</value></field>
+        </default>
+    </attribute>
+    <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>devAddr</id><value>0xA4</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>1</value></field>
+            <field><id>port</id><value>10</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>20</value></field>
             <field><id>writePageSize</id><value>32</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
-            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -6544,19 +6598,26 @@
         <default>11</default>
     </attribute>
     <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>11</value></field>
+            <field><id>devAddr</id><value>0x40</value></field>
+        </default>
+    </attribute>
+    <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>devAddr</id><value>0xA6</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>1</value></field>
+            <field><id>port</id><value>11</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>20</value></field>
             <field><id>writePageSize</id><value>32</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
-            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -6593,19 +6654,26 @@
         <default>12</default>
     </attribute>
     <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>12</value></field>
+            <field><id>devAddr</id><value>0x40</value></field>
+        </default>
+    </attribute>
+    <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>2</value></field>
+            <field><id>port</id><value>12</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>20</value></field>
             <field><id>writePageSize</id><value>32</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
-            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -6642,19 +6710,26 @@
         <default>13</default>
     </attribute>
     <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>13</value></field>
+            <field><id>devAddr</id><value>0x40</value></field>
+        </default>
+    </attribute>
+    <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>devAddr</id><value>0xA4</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>2</value></field>
+            <field><id>port</id><value>13</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>20</value></field>
             <field><id>writePageSize</id><value>32</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
-            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -6691,19 +6766,26 @@
         <default>14</default>
     </attribute>
     <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>14</value></field>
+            <field><id>devAddr</id><value>0x40</value></field>
+        </default>
+    </attribute>
+    <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>devAddr</id><value>0xA6</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>2</value></field>
+            <field><id>port</id><value>14</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>20</value></field>
             <field><id>writePageSize</id><value>32</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
-            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -6740,20 +6822,768 @@
         <default>15</default>
     </attribute>
     <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>15</value></field>
+            <field><id>devAddr</id><value>0x40</value></field>
+        </default>
+    </attribute>
+    <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>devAddr</id><value>0xA8</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>2</value></field>
+            <field><id>port</id><value>15</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>20</value></field>
             <field><id>writePageSize</id><value>32</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
-            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
         </default>
+    </attribute>
+</targetInstance>
+-->
+
+<!-- ===================================================================== -->
+<!-- PMIC Units -->
+<!-- ===================================================================== -->
+<targetInstance>
+    <id>sys0node0pmic0</id>
+    <type>pmic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00360000</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/pmic-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pmic:k0:n0:s0:p00</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>devAddr</id><value>0x90</value></field>
+        </default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/pmic-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0pmic1</id>
+    <type>pmic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00360001</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/pmic-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pmic:k0:n0:s0:p01</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>devAddr</id><value>0xC0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>1</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/pmic-1</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0pmic4</id>
+    <type>pmic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00360004</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/pmic-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pmic:k0:n0:s0:p04</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>devAddr</id><value>0x90</value></field>
+        </default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>4</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/pmic-4</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0pmic5</id>
+    <type>pmic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00360005</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/pmic-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pmic:k0:n0:s0:p05</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>5</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>devAddr</id><value>0xC0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>5</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/pmic-5</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0pmic8</id>
+    <type>pmic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00360008</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/pmic-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pmic:k0:n0:s0:p08</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>8</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>2</value></field>
+            <field><id>devAddr</id><value>0x90</value></field>
+        </default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>8</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/pmic-8</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0pmic9</id>
+    <type>pmic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00360009</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/pmic-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pmic:k0:n0:s0:p09</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>9</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>2</value></field>
+            <field><id>devAddr</id><value>0xC0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>9</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/pmic-9</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0pmic12</id>
+    <type>pmic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0036000C</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/pmic-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pmic:k0:n0:s0:p12</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>12</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>3</value></field>
+            <field><id>devAddr</id><value>0x90</value></field>
+        </default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>12</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/pmic-12</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0pmic13</id>
+    <type>pmic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0036000D</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/pmic-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pmic:k0:n0:s0:p13</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>13</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>3</value></field>
+            <field><id>devAddr</id><value>0xC0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>13</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/pmic-13</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<!-- TODO RTC 213602: Uncomment this once presence detection works
+<targetInstance>
+    <id>sys0node0pmic16</id>
+    <type>pmic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00360010</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/pmic-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pmic:k0:n0:s0:p16</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>4</value></field>
+            <field><id>devAddr</id><value>0x90</value></field>
+        </default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>16</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/pmic-16</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0pmic17</id>
+    <type>pmic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00360011</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/pmic-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pmic:k0:n0:s0:p17</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>17</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>4</value></field>
+            <field><id>devAddr</id><value>0xC0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>17</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/pmic-17</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0pmic20</id>
+    <type>pmic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00360014</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/pmic-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pmic:k0:n0:s0:p20</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>5</value></field>
+            <field><id>devAddr</id><value>0x90</value></field>
+        </default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>20</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/pmic-20</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0pmic21</id>
+    <type>pmic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00360015</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/pmic-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pmic:k0:n0:s0:p21</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>5</value></field>
+            <field><id>devAddr</id><value>0xC0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>21</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/pmic-21</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0pmic24</id>
+    <type>pmic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00360018</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/pmic-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pmic:k0:n0:s0:p24</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>24</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>6</value></field>
+            <field><id>devAddr</id><value>0x90</value></field>
+        </default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>24</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/pmic-24</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0pmic25</id>
+    <type>pmic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00360019</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/pmic-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pmic:k0:n0:s0:p25</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>6</value></field>
+            <field><id>devAddr</id><value>0xC0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>25</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/pmic-25</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0pmic28</id>
+    <type>pmic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0036001C</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/pmic-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pmic:k0:n0:s0:p28</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>28</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>7</value></field>
+            <field><id>devAddr</id><value>0x90</value></field>
+        </default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>28</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/pmic-28</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0pmic29</id>
+    <type>pmic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0036001D</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/pmic-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pmic:k0:n0:s0:p29</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>7</value></field>
+            <field><id>devAddr</id><value>0xC0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>29</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/pmic-29</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0pmic32</id>
+    <type>pmic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00360020</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/pmic-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pmic:k0:n0:s0:p32</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>32</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>8</value></field>
+            <field><id>devAddr</id><value>0x90</value></field>
+        </default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>32</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/pmic-32</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0pmic33</id>
+    <type>pmic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00360021</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/pmic-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pmic:k0:n0:s0:p33</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>33</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>8</value></field>
+            <field><id>devAddr</id><value>0xC0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>33</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/pmic-33</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 -->
@@ -7058,7 +7888,6 @@
     </attribute>
 </targetInstance>
 
-<!-- TODO RTC 213602: Uncomment this once presence detection works
 <targetInstance>
     <id>sys0node0ocmb9memport0</id>
     <type>unit-mem_port</type>
@@ -7289,7 +8118,6 @@
         <default>0</default>
     </attribute>
 </targetInstance>
--->
 
 <!-- ===================================================================== -->
 <!-- DIMM Units -->
@@ -7338,18 +8166,15 @@
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
-            <!-- TODO RTC 213602 Use correct values once available in simics-->
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>port</id><value>1</value></field>
+            <field><id>port</id><value>0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0x08</value></field>
-            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -7398,7 +8223,6 @@
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
-            <!-- TODO RTC 213602 Use correct values once available in simics-->
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
@@ -7408,8 +8232,6 @@
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0x09</value></field>
-            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -7453,23 +8275,18 @@
         <id>VPD_REC_NUM</id>
         <default>2</default>
     </attribute>
-    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
-         that we preload in standalone simics. No cache updates should be needed -->
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
-            <!-- TODO RTC 213602 Use correct values once available in simics-->
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>port</id><value>1</value></field>
+            <field><id>port</id><value>2</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0x0A</value></field>
-            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -7513,27 +8330,23 @@
         <id>VPD_REC_NUM</id>
         <default>3</default>
     </attribute>
-    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
-         that we preload in standalone simics. No cache updates should be needed -->
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
-            <!-- TODO RTC 213602 Use correct values once available in simics-->
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>port</id><value>1</value></field>
+            <field><id>port</id><value>3</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0x0B</value></field>
-            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
     </attribute>
 </targetInstance>
 
+<!-- TODO RTC 213602: Uncomment once presence detection works
 <targetInstance>
     <id>sys0node0dimm4</id>
     <type>lcard-dimm-ddimm</type>
@@ -7573,23 +8386,18 @@
         <id>VPD_REC_NUM</id>
         <default>4</default>
     </attribute>
-    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
-         that we preload in standalone simics. No cache updates should be needed -->
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
-            <!-- TODO RTC 213602 Use correct values once available in simics-->
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>port</id><value>1</value></field>
+            <field><id>port</id><value>4</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0x0C</value></field>
-            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -7633,23 +8441,18 @@
         <id>VPD_REC_NUM</id>
         <default>5</default>
     </attribute>
-    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
-         that we preload in standalone simics. No cache updates should be needed -->
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
-            <!-- TODO RTC 213602 Use correct values once available in simics-->
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>port</id><value>1</value></field>
+            <field><id>port</id><value>5</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0x0D</value></field>
-            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -7693,23 +8496,18 @@
         <id>VPD_REC_NUM</id>
         <default>6</default>
     </attribute>
-    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
-         that we preload in standalone simics. No cache updates should be needed -->
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
-            <!-- TODO RTC 213602 Use correct values once available in simics-->
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>port</id><value>1</value></field>
+            <field><id>port</id><value>6</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0x0E</value></field>
-            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -7753,23 +8551,18 @@
         <id>VPD_REC_NUM</id>
         <default>7</default>
     </attribute>
-    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
-         that we preload in standalone simics. No cache updates should be needed -->
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
-            <!-- TODO RTC 213602 Use correct values once available in simics-->
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>port</id><value>1</value></field>
+            <field><id>port</id><value>7</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0x0F</value></field>
-            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -7813,28 +8606,22 @@
         <id>VPD_REC_NUM</id>
         <default>8</default>
     </attribute>
-    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
-         that we preload in standalone simics. No cache updates should be needed -->
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
-            <!-- TODO RTC 213602 Use correct values once available in simics-->
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>0</value></field>
+            <field><id>port</id><value>8</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>20</value></field>
             <field><id>writePageSize</id><value>32</value></field>
-            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
-            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
         </default>
     </attribute>
 </targetInstance>
 
-<!-- TODO RTC 213602: Uncomment once presence detection works
 <targetInstance>
     <id>sys0node0dimm9</id>
     <type>lcard-dimm-ddimm</type>
@@ -7879,7 +8666,7 @@
         <default>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>2</value></field>
+            <field><id>port</id><value>9</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
@@ -7934,7 +8721,7 @@
         <default>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>3</value></field>
+            <field><id>port</id><value>10</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
@@ -7989,7 +8776,7 @@
         <default>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>4</value></field>
+            <field><id>port</id><value>11</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
@@ -8044,7 +8831,7 @@
         <default>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>5</value></field>
+            <field><id>port</id><value>12</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
@@ -8099,7 +8886,7 @@
         <default>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>6</value></field>
+            <field><id>port</id><value>13</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
@@ -8154,7 +8941,7 @@
         <default>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>7</value></field>
+            <field><id>port</id><value>14</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
@@ -8209,7 +8996,7 @@
         <default>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>8</value></field>
+            <field><id>port</id><value>15</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
@@ -9450,44 +10237,6 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-39</default>
-    </attribute>
-</targetInstance>
-
-<!-- ===================================================================== -->
-<!-- I2C_MUX -->
-<!-- ===================================================================== -->
-<!-- TODO RTC 213602 Remove this once correct model is available in simics-->
-<targetInstance>
-    <id>sys0node0i2cmux0</id>
-    <type>i2c_mux_pca9847</type>
-    <attribute>
-        <id>HUID</id>
-        <default>0x004D0000</default>
-    </attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/i2c_mux-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/i2c_mux-0</default>
-    </attribute>
-    <attribute>
-        <id>ORDINAL_ID</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_NAME</id>
-        <default>NA</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_I2C_CONTROL_INFO</id>
-        <default>
-            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
-            <field><id>port</id><value>1</value></field>
-            <field><id>devAddr</id><value>0xE0</value></field>
-            <field><id>engine</id><value>3</value></field>
-        </default>
     </attribute>
 </targetInstance>
 
