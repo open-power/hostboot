@@ -43,8 +43,6 @@
 // *HWP FW Maintainer   : Raja Das <rajadas2@in.ibm.com>
 // *HWP Consumed by     : Cronus, SBE
 //------------------------------------------------------------------------------
-//TODO: RTC:202264
-//TODO: Replace all comments with p10 specific code
 
 #ifndef _PROC_GETTRACEARRAY_H_
 #define _PROC_GETTRACEARRAY_H_
@@ -54,16 +52,19 @@
 //------------------------------------------------------------------------------
 
 #include <fapi2.H>
-//#include "p10_tracearray_defs.H"
-
+#include <target_filters.H>
+#include "p10_tracearray_defs.H"
 #include "p10_sbe_tracearray.H"
 
 static const fapi2::TargetType PROC_GETTRACEARRAY_TARGET_TYPES =
     fapi2::TARGET_TYPE_PROC_CHIP |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MCBIST |
-    fapi2::TARGET_TYPE_EX |
-    fapi2::TARGET_TYPE_CORE;
+    fapi2::TARGET_TYPE_IOHS |
+    fapi2::TARGET_TYPE_PAUC |
+    fapi2::TARGET_TYPE_MI |
+    fapi2::TARGET_TYPE_PEC |
+    fapi2::TARGET_TYPE_CORE |
+    fapi2::TARGET_TYPE_EQ ;
+
 
 // function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode
@@ -85,21 +86,29 @@ extern "C"
         {
             return fapi2::TARGET_TYPE_PROC_CHIP;
         }
-        else if (i_trace_bus <= _PROC_TB_LAST_OBUS_TARGET)
+        else if (i_trace_bus <= _PROC_TB_LAST_PEC_TARGET)
         {
-            return fapi2::TARGET_TYPE_OBUS;
+            return fapi2::TARGET_TYPE_PEC;
         }
         else if (i_trace_bus <= _PROC_TB_LAST_MC_TARGET)
         {
-            return fapi2::TARGET_TYPE_MCBIST;
+            return fapi2::TARGET_TYPE_MI;
         }
-        else if (i_trace_bus <= _PROC_TB_LAST_EX_TARGET)
+        else if (i_trace_bus <= _PROC_TB_LAST_PAUC_TARGET)
         {
-            return fapi2::TARGET_TYPE_EX;
+            return fapi2::TARGET_TYPE_PAUC;
+        }
+        else if (i_trace_bus <= _PROC_TB_LAST_IOHS_TARGET)
+        {
+            return fapi2::TARGET_TYPE_IOHS;
+        }
+        else if (i_trace_bus <= _PROC_TB_LAST_CORE_EQ_TARGET)
+        {
+            return fapi2::TARGET_TYPE_CORE;
         }
         else
         {
-            return fapi2::TARGET_TYPE_CORE;
+            return fapi2::TARGET_TYPE_EQ;
         }
     }
 
@@ -108,8 +117,6 @@ extern "C"
      * @param[in] i_buffer a buffer containing the trace entry
      * @param[in] i_offset the bit offset of the entry inside the buffer, defaults to 0 if omitted
      * @return FAPI2_RC_SUCCESS  if the entry _is_ a start marker
-     *         FAPI2_RC_FALSE    if the entry is _not_ a start marker
-     *         FAPI2_RC_OVERFLOW if the buffer did not contain enough bits
      */
     static inline fapi2::ReturnCodes p10_tracearray_is_trace_start_marker(
         const fapi2::variable_buffer i_buffer, uint32_t i_offset = 0)
@@ -136,6 +143,7 @@ extern "C"
                fapi2::FAPI2_RC_SUCCESS : fapi2::FAPI2_RC_FALSE;
     }
 
+
 //------------------------------------------------------------------------------
 // Function prototype
 //------------------------------------------------------------------------------
@@ -153,18 +161,6 @@ extern "C"
      *                  entry and ending with the newest.
      * @return FAPI2_RC_SUCCESS
      *             if trace array dump sequence completes successfully,
-     *         RC_PROC_GETTRACEARRAY_INVALID_BUS
-     *             if an invalid trace bus ID has been requested
-     *         RC_PROC_GETTRACEARRAY_INVALID_TARGET
-     *             if the supplied target type does not match the requested trace bus
-     *         RC_PROC_GETTRACEARRAY_CORE_NOT_DUMPABLE
-     *             if a core trace array has been requested but the chip's core
-     *             is not dumpable via SCOM -> use fastarray instead
-     *         RC_PROC_GETTRACEARRAY_TRACE_RUNNING
-     *             if trace array is running when dump collection is attempted,
-     *         RC_PROC_GETTRACEARRAY_TRACE_MUX_INCORRECT
-     *             if the primary trace mux is not set up to trace the requested bus,
-     *         else FAPI getscom/putscom return code for failing operation
      */
     fapi2::ReturnCode p10_proc_gettracearray(const fapi2::Target<PROC_GETTRACEARRAY_TARGET_TYPES>& i_target,
             const proc_gettracearray_args& i_args,

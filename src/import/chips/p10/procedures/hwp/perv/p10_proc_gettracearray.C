@@ -43,8 +43,6 @@
 // *HWP FW Maintainer   : Raja Das <rajadas2@in.ibm.com>
 // *HWP Consumed by     : Cronus, SBE
 //------------------------------------------------------------------------------
-//TODO: RTC:202264
-//TODO: Replace all comments with p10 specific code
 
 //------------------------------------------------------------------------------
 // Includes
@@ -65,30 +63,48 @@ extern "C" fapi2::ReturnCode p10_proc_gettracearray(
     FAPI_INF("Entering ...");
 
     fapi2::Target<P10_SBE_TRACEARRAY_TARGET_TYPES> l_target;
+    fapi2::TargetFilter target_filter;
+    fapi2::ATTR_CHIP_UNIT_POS_Type l_pec_chiplet_num = 0;
     const uint8_t l_chiplet_num = i_target.getChipletNumber();
+    uint32_t NUM_TRACE_ROWS = 0;
+    NUM_TRACE_ROWS = max_rows(i_args.trace_bus);
 
-    if(IS_MCBIST(l_chiplet_num) || IS_OBUS(l_chiplet_num))
+    FAPI_DBG("Chiplet Number: %llx", i_target.getChipletNumber());
+
+    if(IS_MC(l_chiplet_num) || IS_PAUC(l_chiplet_num) || IS_IOHS(l_chiplet_num))
     {
         l_target = i_target.getParent<fapi2::TARGET_TYPE_PERV>();
+    }
+
+    if (IS_PEC(i_args.trace_bus))
+    {
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
+                               i_target,
+                               l_pec_chiplet_num),
+                 "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+        target_filter = (l_chiplet_num == 0) ? fapi2::TARGET_FILTER_PCI0 : fapi2::TARGET_FILTER_PCI1;
+        l_target = (i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>().getChildren<fapi2::TARGET_TYPE_PERV>
+                    (target_filter, fapi2::TARGET_STATE_FUNCTIONAL)[0]);
     }
     else
     {
         l_target = i_target.get();
     }
 
-    o_ta_data.resize(P10_TRACEARRAY_NUM_ROWS * P10_TRACEARRAY_BITS_PER_ROW).flush<0>();
-    uint64_t l_data_buffer[P10_TRACEARRAY_NUM_ROWS * P10_TRACEARRAY_BITS_PER_ROW / 8 / sizeof(uint64_t)] = {};
+
+    o_ta_data.resize(NUM_TRACE_ROWS * P10_TRACEARRAY_BITS_PER_ROW).flush<0>();
+    uint64_t l_data_buffer[NUM_TRACE_ROWS * P10_TRACEARRAY_BITS_PER_ROW / 8 / sizeof(uint64_t)];
 
     l_fapiRc = p10_sbe_tracearray(
                    l_target,
                    i_args,
                    l_data_buffer,
                    0,
-                   P10_TRACEARRAY_NUM_ROWS);
+                   NUM_TRACE_ROWS);
     FAPI_TRY(l_fapiRc,
              "p10_sbe_tracearray failed");
 
-    for(uint32_t i = 0; i < P10_TRACEARRAY_NUM_ROWS; i++)
+    for(uint32_t i = 0; i < NUM_TRACE_ROWS; i++)
     {
         FAPI_TRY(o_ta_data.set<uint64_t>(l_data_buffer[2 * i + 0], 2 * i + 0),
                  "Failed to insert data into trace buffer");

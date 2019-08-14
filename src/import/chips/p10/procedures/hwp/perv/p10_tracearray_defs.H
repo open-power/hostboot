@@ -32,8 +32,6 @@
 // *HWP FW Maintainer   : Raja Das <rajadas2@in.ibm.com>
 // *HWP Consumed by     : Cronus, SBE
 //------------------------------------------------------------------------------
-//TODO: RTC:202264
-//TODO: Replace all comments with p10 specific code
 
 #ifndef _P10_TRACEARRAY_DEFS_H
 #define _P10_TRACEARRAY_DEFS_H
@@ -43,11 +41,15 @@
 
 // maximum trace array entries supported by P10 chip design
 static const uint8_t P10_TRACEARRAY_NUM_ROWS = 128;
+static const uint16_t P10_TRACEARRAY_NUM_CORE_ROWS = 256;
 // bits to store per trace array entry
 static const uint8_t P10_TRACEARRAY_BITS_PER_ROW = 128;
 // maximum trace array size in bytes
 static const uint16_t PROC_TRACEARRAY_MAX_SIZE =
     (P10_TRACEARRAY_NUM_ROWS* P10_TRACEARRAY_BITS_PER_ROW) / 8;
+
+static const uint32_t PROC_TRACEARRAY_CORE_MAX_SIZE =
+    (P10_TRACEARRAY_NUM_CORE_ROWS* P10_TRACEARRAY_BITS_PER_ROW) / 8;
 
 //------------------------------------------------------------------------------
 // Structure definitions
@@ -62,6 +64,7 @@ static const uint16_t PROC_TRACEARRAY_MAX_SIZE =
  */
 enum p10_tracearray_bus_id
 {
+    NO_TB = 0,
     /* Pervasive chiplet - TARGET_TYPE_PROC_CHIP */
     PROC_TB_PIB     = 1,
     PROC_TB_OCC,
@@ -82,89 +85,73 @@ enum p10_tracearray_bus_id
     PROC_TB_PB9,
     PROC_TB_PB10,
     PROC_TB_PB11,
-    PROC_TB_PB12,
-    PROC_TB_PB13,
-    PROC_TB_MCS0,
-    PROC_TB_MCS1,
-    PROC_TB_MCS2,
-    PROC_TB_MCS3,
-    PROC_TB_MCD0,
-    PROC_TB_MCD1,
-    PROC_TB_VAS,
-    PROC_TB_PBIO0,
-    PROC_TB_PBIO1,
-    PROC_TB_PBIOE0,
-    PROC_TB_PBIOE1,
-    PROC_TB_CXA0,
-    PROC_TB_CXA1,
+    PROC_TB_MCD,
     PROC_TB_NX,
-    PROC_TB_IOPSI,
-    PROC_TB_PCIS0,
-    PROC_TB_PCIS1,
-    PROC_TB_PCIS2,
-    PROC_TB_NPU0,
-    PROC_TB_NPU1,
-    PROC_TB_NMMU0,
-    PROC_TB_NMMU1,
+    PROC_TB_VAS,
+    PROC_TB_PE0,
+    PROC_TB_PE1,
+    PROC_TB_NMMU0_0,
+    PROC_TB_NMMU0_1,
+    PROC_TB_NMMU1_0,
+    PROC_TB_NMMU1_1,
     PROC_TB_INT,
-    PROC_TB_BRIDGE,
+    PROC_TB_PSI,
+    PROC_TB_PBA,
+    PROC_TB_ADU,
+    PROC_TB_BR,
 
-    /* XBUS chiplet - TARGET_TYPE_PROC_CHIP */
-    PROC_TB_IOX0,
-    PROC_TB_IOX1,
-    PROC_TB_IOX2,
-    PROC_TB_PBIOX0,
-    PROC_TB_PBIOX1,
-    PROC_TB_PBIOX2,
+    _PROC_TB_LAST_PROC_TARGET = 0x40,
 
-    /* PCI chiplets - TARGET_TYPE_PROC_CHIP */
-    PROC_TB_PCI0X,
-    PROC_TB_PCI00,
-    PROC_TB_PCI1X,
-    PROC_TB_PCI11,
-    PROC_TB_PCI12,
-    PROC_TB_PCI2X,
-    PROC_TB_PCI23,
-    PROC_TB_PCI24,
-    PROC_TB_PCI25,
+    /* PCI chiplets - TARGET_TYPE_PEC */
+    PROC_TB_PE_0,
+    PROC_TB_PE_1,
+    PROC_TB_PE_2,
+    PROC_TB_AIB,
+    _PROC_TB_LAST_PEC_TARGET = 0x60,
 
-    _PROC_TB_LAST_PROC_TARGET = PROC_TB_PCI25,
+    /* MemCtrl chiplets - TARGET_TYPE_MC */
+    PROC_TB_MC0,
+    PROC_TB_MC1,
+    PROC_TB_DLM01_45,
+    PROC_TB_DLM23_67,
 
-    /* OBus chiplets - TARGET_TYPE_OBUS */
-    PROC_TB_PBIOOA,
-    PROC_TB_IOO,
+    _PROC_TB_LAST_MC_TARGET = 0x80,
 
-    _PROC_TB_LAST_OBUS_TARGET = PROC_TB_IOO,
+    /* PAUC chiplets - TARGET_TYPE_PAUC */
+    PROC_TB_PAU0_0,
+    PROC_TB_PAU0_1,
+    PROC_TB_PAU1_0,
+    PROC_TB_PAU1_1,
+    PROC_TB_PTL0,
+    PROC_TB_PTL1,
+    PROC_TB_IOPPE,
 
-    /* MemCtrl chiplets - TARGET_TYPE_MCS */
-    PROC_TB_MCA0,
-    PROC_TB_MCA1,
-    PROC_TB_IOMC0,
-    PROC_TB_IOMC1,
-    PROC_TB_IOMC2,
-    PROC_TB_IOMC3,
+    _PROC_TB_LAST_PAUC_TARGET = 0xA0,
 
-    _PROC_TB_LAST_MC_TARGET = PROC_TB_IOMC3,
+    /* AXON chiplets - TARGET_TYPE_IOHS */
+    PROC_TB_ODL,
+    PROC_TB_NDL,
+    PROC_TB_PDL,
 
-    /* Cache chiplets - TARGET_TYPE_EX */
-    PROC_TB_L30,
-    PROC_TB_L31,
-    PROC_TB_NCU0,
-    PROC_TB_NCU1,
-    PROC_TB_CME,
-    PROC_TB_EQPB,    // note: only for odd EX instances
-    PROC_TB_IVRM,
-    PROC_TB_SKEWADJ, // note: only for even EX instances
+    _PROC_TB_LAST_IOHS_TARGET  = 0xC0,
+    /* Core regions - TARGET_TYPE_CORE */
     PROC_TB_L20,
     PROC_TB_L21,
-    PROC_TB_SKIT10,
-    PROC_TB_SKIT11,
-
-    _PROC_TB_LAST_EX_TARGET = PROC_TB_SKIT11,
-
-    /* Core chiplets - TARGET_TYPE_CORE */
     PROC_TB_CORE0,
     PROC_TB_CORE1,
+
+    _PROC_TB_LAST_CORE_TARGET  = 0xE0,
+    /* EQ chiplets passed by core - TARGET_TYPE_CORE */
+    PROC_TB_L3_0,
+    PROC_TB_L3_1,
+    PROC_TB_NCU_0,
+    PROC_TB_NCU_1,
+    PROC_TB_CLKADJ,
+
+    _PROC_TB_LAST_CORE_EQ_TARGET = 0xF0,
+    /* EQ chiplets - TARGET_TYPE_EQ */
+    PROC_TB_QME
+
 };
 
 #endif //_P10_TRACEARRAY_DEFS_H

@@ -43,8 +43,6 @@
 // *HWP FW Maintainer   : Raja Das <rajadas2@in.ibm.com>
 // *HWP Consumed by     : Cronus, SBE
 //------------------------------------------------------------------------------
-//TODO: RTC:202264
-//TODO: Replace all comments with p10 specific code
 
 #ifndef _P10_SBE_TRACEARRAY_H
 #define _P10_SBE_TRACEARRAY_H
@@ -56,18 +54,27 @@
 #include "p10_tracearray_defs.H"
 
 constexpr uint32_t P10_TRACEARRAY_FIRST_ROW  = 0;
-constexpr uint32_t MCBIST_CHIPLET_ID_START  = 0x07;
-constexpr uint32_t MCBIST_CHIPLET_ID_END    = 0x08;
-constexpr uint32_t OBUS_CHIPLET_ID_START    = 0x09;
-constexpr uint32_t OBUS_CHIPLET_ID_END      = 0x0C;
+constexpr uint32_t PEC_CHIPLET_ID_START  = 0x08;
+constexpr uint32_t PEC_CHIPLET_ID_END    = 0x09;
+constexpr uint32_t MC_CHIPLET_ID_START   = 0x0C;
+constexpr uint32_t MC_CHIPLET_ID_END     = 0x0F;
+constexpr uint32_t PAUC_CHIPLET_ID_START  = 0x10;
+constexpr uint32_t PAUC_CHIPLET_ID_END    = 0x13;
+constexpr uint32_t IOHS_CHIPLET_ID_START = 0x18;
+constexpr uint32_t IOHS_CHIPLET_ID_END   = 0x1F;
 
-#define IS_MCBIST(chipletId) \
-    ((chipletId >= MCBIST_CHIPLET_ID_START) && \
-     (chipletId <= MCBIST_CHIPLET_ID_END))
-
-#define IS_OBUS(chipletId) \
-    ((chipletId >= OBUS_CHIPLET_ID_START) && \
-     (chipletId <= OBUS_CHIPLET_ID_END))
+#define IS_MC(chipletId) \
+    ((chipletId >= MC_CHIPLET_ID_START) && \
+     (chipletId <= MC_CHIPLET_ID_END))
+#define IS_PAUC(chipletId) \
+    ((chipletId >= PAUC_CHIPLET_ID_START) && \
+     (chipletId <= PAUC_CHIPLET_ID_END))
+#define IS_IOHS(chipletId) \
+    ((chipletId >= IOHS_CHIPLET_ID_START) && \
+     (chipletId <= IOHS_CHIPLET_ID_END))
+#define IS_PEC(busId) \
+    ((busId > _PROC_TB_LAST_PROC_TARGET) && \
+     (busId <= _PROC_TB_LAST_PEC_TARGET))
 
 // structure to represent HWP arguments
 struct proc_gettracearray_args
@@ -83,8 +90,8 @@ struct proc_gettracearray_args
 static const fapi2::TargetType P10_SBE_TRACEARRAY_TARGET_TYPES =
     fapi2::TARGET_TYPE_PROC_CHIP |
     fapi2::TARGET_TYPE_PERV |
-    fapi2::TARGET_TYPE_EX |
-    fapi2::TARGET_TYPE_CORE;
+    fapi2::TARGET_TYPE_CORE |
+    fapi2::TARGET_TYPE_EQ;
 
 //function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p10_sbe_tracearray_FP_t) (
@@ -111,22 +118,21 @@ extern "C" {
         {
             return fapi2::TARGET_TYPE_PROC_CHIP;
         }
-        else if (i_trace_bus <= _PROC_TB_LAST_MC_TARGET)
+        else if(i_trace_bus <= _PROC_TB_LAST_IOHS_TARGET)
         {
             return fapi2::TARGET_TYPE_PERV;
         }
-        else if (i_trace_bus <= _PROC_TB_LAST_EX_TARGET)
-        {
-            return fapi2::TARGET_TYPE_EX;
-        }
-        else
+        else if (i_trace_bus <= _PROC_TB_LAST_CORE_EQ_TARGET)
         {
             return fapi2::TARGET_TYPE_CORE;
         }
+        else
+        {
+            return fapi2::TARGET_TYPE_EQ;
+        }
     }
 
-    /* TODO via RTC:164528 - Look at optimization to improve performance
-     * @brief Retrieve trace array data, based on the number of
+    /* @brief Retrieve trace array data, based on the number of
      *        rows requested, from selected trace array via SCOM.
      *        Optionally performing trace stop (prior to dump) and/or
      *        trace restart, reset (after dump).
@@ -149,18 +155,6 @@ extern "C" {
      *
      * @return FAPI2_RC_SUCCESS
      *             if trace array dump sequence completes successfully,
-     *         RC_PROC_GETTRACEARRAY_INVALID_BUS
-     *             if an invalid trace bus ID has been requested
-     *         RC_PROC_GETTRACEARRAY_INVALID_TARGET
-     *             if the supplied target type does not match the requested trace bus
-     *         RC_PROC_GETTRACEARRAY_CORE_NOT_DUMPABLE
-     *             if a core trace array has been requested but the chip's core
-     *             is not dumpable via SCOM -> use fastarray instead
-     *         RC_PROC_GETTRACEARRAY_TRACE_RUNNING
-     *             if trace array is running when dump collection is attempted,
-     *         RC_PROC_GETTRACEARRAY_TRACE_MUX_INCORRECT
-     *             if the primary trace mux is not set up to trace the requested bus,
-     *         else FAPI getscom/putscom return code for failing operation
      */
     fapi2::ReturnCode p10_sbe_tracearray(
         const fapi2::Target<P10_SBE_TRACEARRAY_TARGET_TYPES>& i_target,
@@ -169,5 +163,12 @@ extern "C" {
         const uint32_t i_cur_row = P10_TRACEARRAY_FIRST_ROW,
         const uint32_t i_num_rows = P10_TRACEARRAY_NUM_ROWS
     );
+
+    static inline uint16_t max_rows(const p10_tracearray_bus_id i_trace_bus)
+    {
+        return ((i_trace_bus == PROC_TB_CORE0 || i_trace_bus == PROC_TB_CORE1) ?
+                P10_TRACEARRAY_NUM_CORE_ROWS : P10_TRACEARRAY_NUM_ROWS);
+    }
+
 } // extern "C"
 #endif //_P10_SBE_TRACEARRAY_H
