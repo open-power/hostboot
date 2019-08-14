@@ -653,6 +653,117 @@ int doNvDimmOperation(const hostInterfaces::nvdimm_operation_t& i_nvDimmOp)
 }
 
 /**
+ *  @brief Log the gard event from PHYP/OPAL
+ *
+ *  @param[in] i_gardEvent - The details of the gard event
+ *                           @see hostInterfaces::gard_event_t for more info
+ *
+ **/
+void logGardEvent(const hostInterfaces::gard_event_t& i_gardEvent)
+{
+    // Trace input components
+    TRACFCOMP(g_trac_runtime,
+              ENTER_MRK"logGardEvent: Gard Event Data: "
+                       "error type(0x%.8X), processor ID(0x%.8X), "
+                       "PLID(0x%.8X), sub unit mask(0x.%4X), "
+                       "recovery level(0x.%4X)",
+                       i_gardEvent.i_error_type,
+                       i_gardEvent.i_procId,
+                       i_gardEvent.i_plid,
+                       i_gardEvent.i_sub_unit_mask,
+                       i_gardEvent.i_recovery_level);
+
+    errlHndl_t l_err{nullptr};
+
+    do
+    {
+        // Make sure the error type is valid, if not, log it
+        if ((i_gardEvent.i_error_type == hostInterfaces::HBRT_GARD_ERROR_UNKNOWN )   ||
+            (i_gardEvent.i_error_type >= hostInterfaces::HBRT_GARD_ERROR_LAST) )
+        {
+            TRACFCOMP(g_trac_runtime, "logGardEvent: ERROR: unknown/invalid "
+                                      "error type 0x%.8X",
+                                      i_gardEvent.i_error_type);
+
+            /* @
+             * @errortype
+             * @severity         ERRL_SEV_PREDICTIVE
+             * @moduleid         MOD_RT_FIRMWARE_NOTIFY
+             * @reasoncode       RC_LOG_GARD_EVENT_UNKNOWN_ERROR_TYPE
+             * @userdata1[0:31]  GARD error type
+             * @userdata1[32:63] Processor ID
+             * @userdata2[0:31]  Sub unit mask
+             * @userdata2[32:63] Recovery level
+             * @devdesc          Unknown/invalid error type
+             * @custdesc         Internal firmware error
+             */
+            l_err = new ErrlEntry( ERRL_SEV_PREDICTIVE,
+                                   MOD_RT_FIRMWARE_NOTIFY,
+                                   RC_LOG_GARD_EVENT_UNKNOWN_ERROR_TYPE,
+                                   TWO_UINT32_TO_UINT64(
+                                        i_gardEvent.i_error_type,
+                                        i_gardEvent.i_procId),
+                                   TWO_UINT32_TO_UINT64(
+                                        i_gardEvent.i_sub_unit_mask,
+                                        i_gardEvent.i_recovery_level),
+                                   ErrlEntry::ADD_SW_CALLOUT);
+            break;
+        }
+
+
+        // Get the Target associated with processor ID
+        TARGETING::TargetHandle_t l_procTarget{nullptr};
+        l_err = RT_TARG::getHbTarget(i_gardEvent.i_procId, l_procTarget);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_runtime, "logGardEvent: Error getting "
+                                      "HB Target from processor ID 0x%0X, "
+                                      "exiting ...",
+                                      i_gardEvent.i_procId);
+            break;
+        }
+
+        // Log the GARD event
+        /* @
+         * @errortype
+         * @severity         ERRL_SEV_PREDICTIVE
+         * @moduleid         MOD_RT_FIRMWARE_NOTIFY
+         * @reasoncode       RC_LOG_GARD_EVENT
+         * @userdata1[0:31]  GARD error type
+         * @userdata1[32:63] Processor ID
+         * @userdata2[0:31]  Sub unit mask
+         * @userdata2[32:63] Recovery level
+         * @devdesc          Gard event from Opal/Phyp
+         * @custdesc         Hardware error detected at runtime
+         */
+        l_err = new ErrlEntry( ERRL_SEV_PREDICTIVE,
+                               MOD_RT_FIRMWARE_NOTIFY,
+                               RC_LOG_GARD_EVENT,
+                               TWO_UINT32_TO_UINT64(
+                                    i_gardEvent.i_error_type,
+                                    i_gardEvent.i_procId),
+                               TWO_UINT32_TO_UINT64(
+                                    i_gardEvent.i_sub_unit_mask,
+                                    i_gardEvent.i_recovery_level));
+
+        // Set the PLID to the given gard event PLID if it exist
+        if (i_gardEvent.i_plid)
+        {
+            l_err->plid(i_gardEvent.i_plid);
+        }
+
+        // Do the actual gard
+        l_err->addHwCallout( l_procTarget, HWAS::SRCI_PRIORITY_MED,
+                             HWAS::NO_DECONFIG, HWAS::GARD_PHYP);
+    } while(0);
+
+    // Commit any error log that occurred.
+    errlCommit(l_err, RUNTIME_COMP_ID);
+
+    TRACFCOMP(g_trac_runtime, EXIT_MRK"logGardEvent")
+}
+
+/**
  * @see  src/include/runtime/interface.h for definition of call
  *
  */
@@ -762,6 +873,31 @@ void firmware_notify( uint64_t i_len, void *i_data )
 
                 doNvDimmOperation(l_hbrt_fw_msg->nvdimm_operation);
             } // END case hostInterfaces::HBRT_FW_MSG_TYPE_NVDIMM_OPERATION:
+            break;
+
+            case hostInterfaces::HBRT_FW_MSG_TYPE_GARD_EVENT:
+            {
+                uint64_t l_minMsgSize = hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
+                                sizeof(hostInterfaces::hbrt_fw_msg::gard_event);
+                if (i_len < l_minMsgSize)
+                {
+                    l_badMessage = true;
+
+                    TRACFCOMP(g_trac_runtime, ERR_MRK"firmware_notify: "
+                     "Received message HBRT_FW_MSG_TYPE_GARD_EVENT, "
+                     "but size of message data(%d) is not adequate for a "
+                     "complete message of this type, with size requirement of "
+                     "%d", i_len, l_minMsgSize );
+
+                    // Pack user data 1 with the message input type, the only
+                    // data that can be safely retrieved
+                    l_userData1 = l_hbrt_fw_msg->io_type;
+
+                    break;
+                }
+
+                logGardEvent(l_hbrt_fw_msg->gard_event);
+            } // END case hostInterfaces::HBRT_FW_MSG_TYPE_GARD_EVENT:
             break;
 
             default:

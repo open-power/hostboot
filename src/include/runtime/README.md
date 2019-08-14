@@ -2,7 +2,7 @@
 How to create an HBRT to FW request message interface
     0) If passing an HBRT to FSP via MBOX or receiving a firmware notify message,
        then use instruction 'generic_hbrt_fsp_message.H::GenericFspMboxMessage_t'
-       below.
+       and/or 'How to create an HBRT Firmware Notify message' below.
     1) The biggest part will be defining the interface.  Inspect the current
        interfaces (req_hcode_update, error_log, etc) for inspiration.
     2) Once an interface has been designed, add it to the anonymous
@@ -35,13 +35,14 @@ How to create an HBRT to FW request message interface
         1) The biggest part will be defining the interface.  Inspect the current
            interfaces (AttributeSetter_t, SingleScomOpHbrtFspData_t,
            TargetDeconfigHbrtFspData_t, etc) for inspiration.
-        2) Once an interface has been designed, add the structure to this file
-           with the other interfaces.
+        2) Once an interface has been designed, add the structure to the file,
+           generic_hbrt_fsp_message.H, among the other interfaces.
         3) Create an MBOX message queue enum for the interface and add to:
            /hostboot/src/include/usr/mbox/mbox_queues.H::queue_id_t
            see current message queues for example
         4) Add a new message type for the interface to:
-           enum generic_hbrt_fsp_message.H::GENERIC_FSP_MBOX_MESSAGE_MSG_TYPE.
+           enum GenericFspMboxMessage_t::GENERIC_FSP_MBOX_MESSAGE_MSG_TYPE in
+           file generic_hbrt_fsp_message.H.
         5) How to use the new interface to pass a message
            a) Make sure g_hostInterfaces and g_hostInterfaces->firmware_request
               are not NULL.

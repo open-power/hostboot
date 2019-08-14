@@ -552,17 +552,18 @@ typedef struct hostInterfaces
 
     enum  // hbrt_fw_msg::io_type             the struct associated with io_type
     {
-       HBRT_FW_MSG_TYPE_REQ_NOP = 0,
-       HBRT_FW_MSG_TYPE_RESP_NOP = 1,           // struct resp_generic
-       HBRT_FW_MSG_TYPE_RESP_GENERIC = 2,       // struct resp_generic
-       HBRT_FW_MSG_TYPE_REQ_HCODE_UPDATE = 3,   // struct req_hcode_update
-       HBRT_FW_MSG_HBRT_FSP_REQ = 4,            // struct GenericFspMboxMessage_t
-       HBRT_FW_MSG_TYPE_ERROR_LOG = 5,          // struct error_log
-       HBRT_FW_MSG_HBRT_FSP_RESP = 6,           // struct GenericFspMboxMessage_t
-       HBRT_FW_MSG_TYPE_I2C_LOCK = 7,           // struct req_i2c_lock
-       HBRT_FW_MSG_TYPE_SBE_STATE = 8,          // struct sbe_state
-       HBRT_FW_MSG_TYPE_NVDIMM_PROTECTION = 9,  // struct nvdimm_protection_state
+       HBRT_FW_MSG_TYPE_REQ_NOP           =  0,
+       HBRT_FW_MSG_TYPE_RESP_NOP          =  1, // struct resp_generic
+       HBRT_FW_MSG_TYPE_RESP_GENERIC      =  2, // struct resp_generic
+       HBRT_FW_MSG_TYPE_REQ_HCODE_UPDATE  =  3, // struct req_hcode_update
+       HBRT_FW_MSG_HBRT_FSP_REQ           =  4, // struct GenericFspMboxMessage_t
+       HBRT_FW_MSG_TYPE_ERROR_LOG         =  5, // struct error_log
+       HBRT_FW_MSG_HBRT_FSP_RESP          =  6, // struct GenericFspMboxMessage_t
+       HBRT_FW_MSG_TYPE_I2C_LOCK          =  7, // struct req_i2c_lock
+       HBRT_FW_MSG_TYPE_SBE_STATE         =  8, // struct sbe_state
+       HBRT_FW_MSG_TYPE_NVDIMM_PROTECTION =  9, // struct nvdimm_protection_state
        HBRT_FW_MSG_TYPE_NVDIMM_OPERATION  = 10, // struct nvdimm_operation_t
+       HBRT_FW_MSG_TYPE_GARD_EVENT        = 11, // struct gard_event_t
     };
 
     // NVDIMM protection state enum
@@ -609,6 +610,39 @@ typedef struct hostInterfaces
         uint16_t    rsvd2;   // reserved
         NVDIMM_Op_t opType;  // NVDIMM operation(s) to perform,
                              // see @note associated with NVDIMM_Op_t above
+    } __attribute__ ((packed));
+
+    // Gard event error type
+    // @note This needs to stay in sync with the FSP Mailbox specification for
+    //       command : Gard-able Error Detected - cmd 0xCE, s/c 0x63, mod 01
+    enum GARD_ERROR_t: uint32_t
+    {
+        HBRT_GARD_ERROR_UNKNOWN                  = 0x0000,
+        HBRT_GARD_ERROR_COMPUTATION_TEST_FAILURE = 0x0001,
+        HBRT_GARD_ERROR_SLB                      = 0x0002,
+        HBRT_GARD_ERROR_CHIP_TOD_FAILURE         = 0x0003,
+        HBRT_GARD_ERROR_TIMEFAC_FAILURE          = 0x0004,
+        HBRT_GARD_ERROR_PROC_RECOVERY_THRESHOLD  = 0x0005,
+        HBRT_GARD_ERROR_NX                       = 0x0008,
+        HBRT_GARD_ERROR_SLW                      = 0x0009,
+        HBRT_GARD_ERROR_CAPP_UNIT                = 0x000A,
+
+        // Mark the end of the gard error types.
+        // This is not valid, just a marker
+        HBRT_GARD_ERROR_LAST,
+    };
+
+    // Gard event (PHYP/OPAL -> HBRT)
+    struct gard_event_t
+    {
+        GARD_ERROR_t i_error_type;     // Gard event error type enum
+        uint32_t     i_procId;         // Processor ID for
+                                       // error types 0x0001 to 0x0005
+                                       // Chip ID for
+                                       // error types 0x0008 to 0x000A
+        uint32_t     i_plid;           // Platform log identifier
+        uint16_t     i_sub_unit_mask;  // Currently not being used
+        uint16_t     i_recovery_level; // Currently not being used
     } __attribute__ ((packed));
 
     struct hbrt_fw_msg   // define struct hbrt_fw_msg
@@ -684,6 +718,10 @@ typedef struct hostInterfaces
           // This struct is sent from PHYP to HBRT with
           // io_type set to HBRT_FW_MSG_TYPE_NVDIMM_OPERATION
           struct nvdimm_operation_t nvdimm_operation;
+
+          // This struct is sent from PHYP/OPAL to HBRT with
+          // io_type set to HBRT_FW_MSG_TYPE_GARD_EVENT
+          struct gard_event_t gard_event;
 
           // This struct is sent from HBRT with
           // io_type set to HBRT_FW_MSG_HBRT_FSP_REQ or
