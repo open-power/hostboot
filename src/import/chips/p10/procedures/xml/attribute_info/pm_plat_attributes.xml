@@ -2309,4 +2309,23 @@
     <group>dlr</group>
   </attribute>
   <!-- *********************************************************************-->
+  <attribute>
+    <id>ATTR_SAFE_MODE_XSTOP</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Enables a system checkstop upon entering safe mode for debug.
+    Producer:  Override/Lab
+    Consumers: p10_pm_pgpe_init
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+        OFF=0,
+        ON=1
+    </enum>
+    <platInit/>
+    <overrideOnly/>
+    <default>OFF</default>
+    <group>debug</group>
+  </attribute>
+  <!-- *********************************************************************-->
 </attributes>

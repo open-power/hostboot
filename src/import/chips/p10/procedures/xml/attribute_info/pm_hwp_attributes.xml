@@ -525,5 +525,23 @@
     <writeable/>
     <group>pstates</group>
   </attribute>
-
+  <!-- *********************************************************************-->
+  <attribute>
+    <id>ATTR_HOMER_LOCATION</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Defines the location where HOMER is located.
+    Producer:  Override/Lab
+    Consumers: p10_pm_pba_init
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+        MEMORY=0,
+        CACHE=1
+    </enum>
+    <overrideOnly/>
+    <writeable/>
+    <initToZero/>
+    <group>debug</group>
+  </attribute>
 </attributes>
