@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -139,6 +139,13 @@ namespace RUNTIME
         RC_SP_ATTN_AREA_OVERFLOW       = RUNTIME_COMP_ID | 0x42,
         RC_SP_ATTN_AREA1_SIZE_OVERFLOW = RUNTIME_COMP_ID | 0x43,
         RC_UNKNOWN_LABEL               = RUNTIME_COMP_ID | 0x44,
+        RC_NULL_FIRMWARE_MSG_PTR       = RUNTIME_COMP_ID | 0x45,
+        RC_SERIALIZE_ATTRIBUTE_FAILED  = RUNTIME_COMP_ID | 0x46,
+        RC_NO_SPACE_FOR_ATTRIBUTE_SERIALIZATION = RUNTIME_COMP_ID | 0x47,
+        RC_CANNOT_MAKE_ATTRIBUTE       = RUNTIME_COMP_ID | 0x48,
+        RT_NO_OMI_TARGET_FOUND         = RUNTIME_COMP_ID | 0x49,
+        RC_LOG_GARD_EVENT_UNKNOWN_ERROR_TYPE   = RUNTIME_COMP_ID | 0x4A,
+        RC_LOG_GARD_EVENT              = RUNTIME_COMP_ID | 0x4B,
     };
 
     enum UserDetailsTypes
