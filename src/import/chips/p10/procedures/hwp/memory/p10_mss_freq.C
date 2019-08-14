@@ -38,7 +38,7 @@
 #include <p10_mss_freq.H>
 
 #include <lib/freq/p10_freq_traits.H>
-#include <generic/memory/lib/data_engine/p10/p10_data_init_traits.H>
+#include <lib/eff_config/p10_data_init_traits.H>
 #include <lib/eff_config/explorer_attr_engine_traits.H>
 #include <generic/memory/lib/data_engine/data_engine.H>
 #include <generic/memory/lib/utils/find.H>
