@@ -969,8 +969,7 @@ int32_t calloutBusInterface( ExtensibleChip * i_chip,
         else if ( (TYPE_OMI == rxType && TYPE_OCMB_CHIP == txType) ||
                   (TYPE_OCMB_CHIP == rxType && TYPE_OMI == txType) )
         {
-            //TODO RTC 199028
-            //hwasType = HWAS::OMI_BUS_TYPE;
+            hwasType = HWAS::OMI_BUS_TYPE;
         }
         else
         {

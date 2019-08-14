@@ -1594,7 +1594,7 @@ void getMasterRanks<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>
-void __getSlaveRanks( TargetHandle_t i_trgt, std::vector<MemRank> & o_ranks,
+void getSlaveRanks( TargetHandle_t i_trgt, std::vector<MemRank> & o_ranks,
                       uint8_t i_ds )
 {
     PRDF_ASSERT( nullptr != i_trgt );
@@ -1635,21 +1635,14 @@ void __getSlaveRanks( TargetHandle_t i_trgt, std::vector<MemRank> & o_ranks,
     }
 }
 
-template<>
+template
 void getSlaveRanks<TYPE_MCA>( TargetHandle_t i_trgt,
                               std::vector<MemRank> & o_ranks,
-                              uint8_t i_ds )
-{
-    __getSlaveRanks<TYPE_MCA>( i_trgt, o_ranks, i_ds );
-}
-
-template<>
+                              uint8_t i_ds );
+template
 void getSlaveRanks<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
                                     std::vector<MemRank> & o_ranks,
-                                    uint8_t i_ds )
-{
-    __getSlaveRanks<TYPE_OCMB_CHIP>( i_trgt, o_ranks, i_ds );
-}
+                                    uint8_t i_ds );
 
 //------------------------------------------------------------------------------
 
