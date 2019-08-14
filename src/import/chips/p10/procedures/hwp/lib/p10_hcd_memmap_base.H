@@ -59,14 +59,10 @@ HCD_CONST(QME_BUILD_VERSION,                    0x001) // QME__1.0
 HCD_CONST(XGPE_BUILD_VERSION,                   0x001) // XGPE_1.0
 HCD_CONST(PGPE_BUILD_VERSION,                   0x001) // PGPE_1.0
 
-HCD_CONST64(CPMR_MAGIC_NUMBER_BASE,                  ULL(0x43504d525f302e30))  // CPMR_0.0
-HCD_CONST(CPMR_REGION_CHECK_WORD,                    (0x43504d52))             // CPMR
-HCD_CONST64(QME_MAGIC_NUMBER_BASE ,                  ULL(0x434d455f5f302e30))  // QME__0.0
-HCD_CONST64(XPMR_MAGIC_NUMBER_BASE,                  ULL(0x51504d525f302e30))  // XPMR_0.0
-HCD_CONST64(XGPE_MAGIC_NUMBER_BASE,                  ULL(0x534750455f302e30))  // XGPE_0.0
-HCD_CONST64(PPMR_MAGIC_NUMBER_BASE,                  ULL(0x50504d525f302e30))  // PPMR_0.0
-HCD_CONST64(PGPE_MAGIC_NUMBER_BASE,                  ULL(0x504750455F302E30))  // PGPE_0.0
-HCD_CONST(SCOM_REST_MAGIC_WORD,                      (0x5343))//SC
+
+HCD_CONST(CPMR_REGION_CHECK_WORD,               (0x43504d52))             // CPMR
+HCD_CONST(SCOM_REST_MAGIC_WORD,                 (0x5343))//SC
+HCD_CONST(CPMR_BUILD_VER,                       1)
 
 
 /// Size constants
@@ -137,6 +133,21 @@ HCD_CONST(FFDC_REGION_SIZE,  (80 * ONE_KB))
 //end offset of FFDC region wrt to XPMR base
 HCD_CONST(FFDC_REGION_XPMR_END_OFFSET, (FFDC_REGION_XPMR_BASE_OFFSET +
                                         FFDC_REGION_SIZE ))
+//---------------------------------------------------------------------------------------
+
+//XPMR Header
+HCD_CONST(XGPE_BUILD_VER,                       1)
+HCD_CONST(XPMR_BUILD_VER,                       1)
+HCD_CONST(XPMR_HEADER_SIZE,                     512)
+HCD_CONST(XGPE_INT_VECTOR_SIZE,                 384)
+HCD_CONST(XGPE_HEADER_IMAGE_OFFSET,             XGPE_INT_VECTOR_SIZE)
+HCD_CONST(XGPE_BOOT_COPIER_OFFSET,              512)
+HCD_CONST(XGPE_BOOT_COPIER_LENGTH,              ONE_KB)
+HCD_CONST(XGPE_BOOT_LOADER_OFFSET,
+          XGPE_BOOT_COPIER_OFFSET + XGPE_BOOT_COPIER_LENGTH )
+HCD_CONST(XGPE_BOOT_LOADER_LENGTH,              ONE_KB)
+HCD_CONST(XGPE_HCODE_OFFSET,
+          XGPE_BOOT_LOADER_OFFSET + XGPE_BOOT_LOADER_LENGTH )
 //---------------------------------------------------------------------------------------
 
 /// CPMR Header
@@ -235,6 +246,7 @@ HCD_CONST(SCOM_RESTORE_L3_CACHE,
 HCD_CONST(QME_IMAGE_CPMR_OFFSET,                0x50000) // assumes SCOMs are expandable to 96KB
 //HCD_CONST(QME_IMAGE_SIZE,                       0)
 HCD_CONST(QME_INT_VECTOR_SIZE,                  384)
+HCD_CONST(QME_HCODE_OFFSET,                     (SELF_SAVE_RESTORE_REGION_SIZE + SCOM_RESTORE_SIZE_TOTAL))
 
 /// QME Header
 

@@ -159,6 +159,68 @@ typedef struct QMEImageFlags
 
 #endif //__ASSEMBLER__
 
+#ifdef __ASSEMBLER__
+.macro  .xpmr_hdr
+.section ".xpmr" , "aw"
+.balign    8
+#else
+typedef struct
+{
+#endif
+HCD_HDR_UINT64( iv_magicWord,           XPMR_MAGIC_NUMBER);
+HCD_HDR_UINT32( iv_bootCopierOffset,    0);
+HCD_HDR_UINT32( iv_reserve1,            0);
+HCD_HDR_UINT32( iv_bootLoaderOffset,    0);
+HCD_HDR_UINT32( iv_bootLoaderLength,    0);
+HCD_HDR_UINT32( iv_buildDate,           0);
+HCD_HDR_UINT32( iv_version,             0);
+HCD_HDR_UINT32( iv_reserve2,            0);
+HCD_HDR_UINT32( iv_reserve3,            0);
+HCD_HDR_UINT32( iv_xgpeHcodeOffset,     0);
+HCD_HDR_UINT32( iv_xgpeHcodeLength,     0);
+HCD_HDR_UINT32( iv_xgpeBootProgCode,    0);
+HCD_HDR_UINT32( iv_xgpeSramSize,        0);
+HCD_HDR_PAD(XPMR_HEADER_SIZE);
+#ifdef __ASSEMBLER__
+.endm
+#else
+} __attribute__((packed, aligned(512))) XpmrHeader_t;
+#endif
+
+#ifdef __ASSEMBLER__
+.macro  .xgpe_header
+.section ".xgpe_header" , "aw"
+.balign    8
+#else
+typedef struct
+{
+#endif
+HCD_HDR_UINT64( g_magicWord,                XGPE_MAGIC_NUMBER);
+HCD_HDR_UINT32( g_sysResetAddress,          0 ); //FIXME need to add correct address
+HCD_HDR_UINT32( g_sharedSramAddress,        0 ); //FIXME need to add correct address
+HCD_HDR_UINT32( g_ivprAddress,              0 ); //FIXME need to add correct address
+HCD_HDR_UINT32( g_sharedSramLength,         0 );
+HCD_HDR_UINT32( g_buildDate,                0 );
+HCD_HDR_UINT32( g_buildVer,                 0 );
+HCD_HDR_UINT16( g_xgpeFlags,                0 );
+HCD_HDR_UINT16( g_reserve1,                 0 );
+HCD_HDR_UINT32( g_timeBaseHz,               0 );
+HCD_HDR_UINT32( g_gpspbSramAddress,         0 );
+HCD_HDR_UINT32( g_xgpeHcodeLength,          0 );
+HCD_HDR_UINT32( g_reserve2,                 0 );
+HCD_HDR_UINT32( g_gpspbLength,              0 );
+HCD_HDR_UINT32( g_coreThrottleAssertCnt,    0 );
+HCD_HDR_UINT32( g_coreThrottleDeAssertCnt,  0 );
+HCD_HDR_UINT32( g_charactControls,          0 );
+HCD_HDR_UINT32( g_xgpeOpTracePointer,       0 );
+HCD_HDR_UINT32( g_xgpeDeepOpTraceMemAddr,   0 );
+HCD_HDR_UINT32( g_xgpeDeepOpTraceLength, 0 );
+HCD_HDR_PAD(IMG_HDR_ALIGN_SIZE);
+#ifdef __ASSEMBLER__
+.endm
+#else
+} __attribute__((packed, aligned(32))) XgpeHeader_t;
+#endif
 
 #ifndef __ASSEMBLER__
 
