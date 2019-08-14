@@ -34,6 +34,32 @@
 <hwpErrors>
   <!-- *********************************************************************** -->
   <registerFfdc>
+    <id>PGPE_STATE_REGISTERS</id>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCCFLG2_RW</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXIDBGPRO</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXIRAMDBG</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXIRAMEDR</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXIIR</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXIXSR</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXILR</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXISRR0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEIVPR</scomRegister>
+  </registerFfdc>
+    <!-- *********************************************************************** -->
+  <registerFfdc>
+    <id>XGPE_STATE_REGISTERS</id>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCCFLG3_RW</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXIDBGPRO</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXIRAMDBG</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXIRAMEDR</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXIIR</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXIXSR</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXILR</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXISRR0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEIVPR</scomRegister>
+  </registerFfdc>
+  <!-- *********************************************************************** -->
+  <registerFfdc>
     <id>XGPE_FFDC_REGISTERS</id>
     <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCCFLG3_RW</scomRegister>
     <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXIDBGPRO</scomRegister>
@@ -85,6 +111,10 @@
   <registerFfdc>
     <id>PGPE_FFDC_REGISTERS</id>
     <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCCFLG2_RW</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXIIR</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXIXSR</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXILR</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXISRR0</scomRegister>
     <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXIDBGPRO</scomRegister>
     <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXIRAMDBG</scomRegister>
     <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXIRAMEDR</scomRegister>
@@ -102,9 +132,6 @@
   <registerFfdc>
     <id>PBA_FFDC_BASIC_REGISTERS</id>
     <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVCTL0</scomRegister>
-    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVCTL1</scomRegister>
-    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVCTL2</scomRegister>
-    <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVCTL3</scomRegister>
     <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVCTL1</scomRegister>
     <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVCTL2</scomRegister>
     <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVCTL3</scomRegister>
@@ -402,7 +429,7 @@
     <id>CHECK_MASTER_STOP15_FFDC_REGS_EQ</id>
     <scomRegister>scomt::eq::QME_FLAGS_RW</scomRegister>
     <scomRegister>scomt::eq::QME_SCRA_RW</scomRegister>
-    <scomRegister>scomt::eq::QME_SCRB_RW</scomRegister>    
+    <scomRegister>scomt::eq::QME_SCRB_RW</scomRegister>
     <scomRegister>scomt::eq::QME_LFIR_RW</scomRegister>
     <scomRegister>scomt::eq::QME_SCOM_XIXCR</scomRegister>
     <scomRegister>scomt::eq::QME_SCOM_XIRAMDBG</scomRegister>
