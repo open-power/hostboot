@@ -28,7 +28,7 @@
 ///        exit sequence
 
 //
-// *HWP HW Maintainer: Nicholas Landi <nlandi@ibm.com>
+// *HWP HW Maintainer: Joe McGill <jmcgill@us.ibm.com>
 // *HWP FW Maintainer: Raja Das <rajadas2@in.ibm.com>
 // *HWP Consumed by  : SBE
 //

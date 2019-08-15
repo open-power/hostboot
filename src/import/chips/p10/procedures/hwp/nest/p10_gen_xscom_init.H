@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p10/procedures/hwp/nest/p10_exit_cache_contained.H $ */
+/* $Source: src/import/chips/p10/procedures/hwp/nest/p10_gen_xscom_init.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,8 +23,10 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 ///
-/// @file p10_exit_cache_contained.H
-/// @brief Trigger SBE assist to exit HB cache containment
+/// @file p10_gen_xscom_init.H
+/// @brief Generate XSCOM init for specified SCOM address given data and
+///        data valid mask.  Data bit positions with zero in corresponding
+///        data valid mask bit positions will be sampled from HW via SCOM.
 
 //
 // *HWP HW Maintainer: Joe McGill <jmcgill@us.ibm.com>
@@ -32,43 +34,43 @@
 // *HWP Consumed by  : HB
 //
 
-#ifndef _P10_EXIT_CACHE_CONTAINED_H_
-#define _P10_EXIT_CACHE_CONTAINED_H_
+#ifndef _P10_GEN_XSCOM_INIT_H_
+#define _P10_GEN_XSCOM_INIT_H_
 
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
 #include <fapi2.H>
-#include <p10_sbe_exit_cache_contained.H>
-
-//------------------------------------------------------------------------------
-// Structure definitions
-//------------------------------------------------------------------------------
-
-// Function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode (*p10_exit_cache_contained_FP_t)(
-    const std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>>& i_targets,
-    const p10_sbe_exit_cache_contained_step_t&);
+#include <p10_scominfo.H>
 
 //------------------------------------------------------------------------------
 // Function prototypes
 //------------------------------------------------------------------------------
-extern "C"
-{
 
 ///
-/// @brief Trigger SBE assist to exit HB cache containment
+/// @brief Generate XSCOM init for specified SCOM address given data and
+///        data valid mask.  Data bit positions with zero in corresponding
+///        data valid mask bit positions will be sampled from HW via SCOM.
 ///
-/// @param[in] i_targets   Collection of processor chip targets in drawer scope
-/// @param[in] i_step      Enum defining steps of HWP sequence which should
-///                        be run
+/// @param[in]  i_target            Reference to processor chip target
+/// @param[in]  i_cu_pairing        Chip unit and instance number associated
+///                                 with i_scom_addr
+/// @param[in]  i_scom_addr         Requested SCOM address, relative to
+///                                 chip unit type in i_cu_pairing
+/// @param[in]  i_data              Data to write
+/// @param[in]  i_data_valid_mask   Data valid bitmask
+/// @param[out] o_xscom_inits       Vector (address/data pairs) to append
+///                                 required XSCOM inits
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
-    fapi2::ReturnCode p10_exit_cache_contained(
-        const std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>>& i_targets,
-        const p10_sbe_exit_cache_contained_step_t& i_step);
+fapi2::ReturnCode p10_gen_xscom_init(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const p10_chipUnitPairing_t i_cu_pairing,
+    const uint64_t i_scom_addr,
+    const uint64_t i_data,
+    const uint64_t i_data_valid_mask,
+    std::vector<std::pair<uint64_t, uint64_t>>& o_xscom_inits);
 
-} // extern "C"
 
-#endif // _P10_EXIT_CACHE_CONTAINED_H_
+#endif // _P10_GEN_XSCOM_INIT_H_

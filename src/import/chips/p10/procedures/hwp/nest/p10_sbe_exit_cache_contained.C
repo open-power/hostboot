@@ -35,7 +35,7 @@
 ///          main memory
 
 //
-// *HWP HW Maintainer: Nicholas Landi <nlandi@ibm.com>
+// *HWP HW Maintainer: Joe McGill <jmcgill@us.ibm.com>
 // *HWP FW Maintainer: Raja Das <rajadas2@in.ibm.com>
 // *HWP Consumed by  : SBE
 //
@@ -46,7 +46,7 @@
 #include <p10_sbe_exit_cache_contained.H>
 #include <p10_sbe_stop_hb.H>
 #include <p10_revert_sbe_mcs_setup.H>
-#include <p10_sbe_setup_memory_bars.H>
+#include <p10_sbe_apply_xscom_inits.H>
 #include <p10_sbe_purge_hb.H>
 #include <p10_sbe_instruct_start.H>
 
@@ -260,13 +260,13 @@ p10_sbe_exit_cache_contained(
              p10_sbe_exit_cache_contained_step_t::SETUP_MEMORY_BARS))
         {
             FAPI_EXEC_HWP(l_rc,
-                          p10_sbe_setup_memory_bars,
+                          p10_sbe_apply_xscom_inits,
                           i_target,
                           i_reg_inits);
 
             if (l_rc)
             {
-                FAPI_ERR("Error from p10_sbe_setup_memory_bars");
+                FAPI_ERR("Error from p10_sbe_apply_xscom_inits");
                 break;
             }
         }

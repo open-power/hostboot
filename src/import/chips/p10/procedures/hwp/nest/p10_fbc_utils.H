@@ -82,6 +82,7 @@ enum p10_fbc_utils_addr_mode
 
     // fbc base address determination constants
     const uint8_t FABRIC_ADDR_SMF_BIT = 12;
+    const uint64_t FABRIC_ADDR_SMF_MASK = 0x0008000000000000ULL;
     const uint8_t FABRIC_ADDR_MSEL_START_BIT = 13;
     const uint8_t FABRIC_ADDR_MSEL_END_BIT = 14;
     const uint8_t FABRIC_ADDR_TOPO_ID_INDEX_START_BIT = 15;

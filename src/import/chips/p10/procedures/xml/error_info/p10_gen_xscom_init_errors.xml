@@ -1,7 +1,7 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/import/chips/p10/procedures/xml/error_info/p10_exit_cache_contained_errors.xml $ -->
+<!-- $Source: src/import/chips/p10/procedures/xml/error_info/p10_gen_xscom_init_errors.xml $ -->
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
@@ -25,36 +25,27 @@
 <hwpErrors>
   <!-- ********************************************************************* -->
   <hwpError>
-    <rc>RC_P10_EXIT_CACHE_CONTAINED_MULTIPLE_MASTER_ERR</rc>
-    <ffdc>MASTER_CHIP1</ffdc>
-    <ffdc>MASTER_CHIP2</ffdc>
-    <description>
-      Multiple chips found with ATTR_PROC_SBE_MASTER_CHIP set
-    </description>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <rc>RC_P10_EXIT_CACHE_CONTAINED_NO_MASTER_ERR</rc>
-    <ffdc>MASTER_CHIP1</ffdc>
-    <ffdc>MASTER_CHIP2</ffdc>
-    <description>
-      No chips were found with ATTR_PROC_SBE_MASTER_CHIP set
-    </description>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <rc>RC_P10_EXIT_CACHE_CONTAINED_INVALID_MCD_GROUP_SIZE_ERR</rc>
-    <description>
-      Unsupported MCD group size
-    </description>
+    <rc>RC_P10_GEN_XSCOM_INIT_UNSUPPORTED_SCOM_ERR</rc>
     <ffdc>TARGET</ffdc>
-    <ffdc>RANGE_BASE_ADDR</ffdc>
-    <ffdc>RANGE_SIZE</ffdc>
-    <ffdc>MCD_RANGE_REG</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
+    <ffdc>CU_TYPE</ffdc>
+    <ffdc>EC</ffdc>
+    <ffdc>CU_NUM</ffdc>
+    <ffdc>ADDR</ffdc>
+    <description>
+      Unsupported indirect/multicast SCOM address
+    </description>
   </hwpError>
-  <!-- ******************************************************************** -->
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_P10_GEN_XSCOM_INIT_SCOM_XLATE_ERR</rc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>CU_TYPE</ffdc>
+    <ffdc>EC</ffdc>
+    <ffdc>CU_NUM</ffdc>
+    <ffdc>ADDR</ffdc>
+    <description>
+      Error translating chip unit relative SCOM address
+    </description>
+  </hwpError>
+  <!-- ********************************************************************* -->
 </hwpErrors>
