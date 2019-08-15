@@ -85,16 +85,20 @@ fapi2::ReturnCode p10_setup_ref_clock(const
 {
     fapi2::buffer<uint32_t> l_read_reg;
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-    uint8_t l_cp_term, l_io_term, l_cp_refclck_select ;
+    uint8_t l_sys0_term, l_sys1_term, l_pci0_term, l_pci1_term, l_cp_refclck_select ;
     fapi2::buffer<uint8_t> l_attr_mux0_rcs_pll, l_attr_mux_dpll, l_attr_mux_omi_lcpll, l_attr_mux_input,
           l_attr_clock_pll_mux_tod;
 
     FAPI_INF("p10_setup_ref_clock: Entering ...");
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CP_REFCLOCK_RCVR_TERM, FAPI_SYSTEM, l_cp_term),
-             "Error from FAPI_ATTR_GET (ATTR_CP_REFCLOCK_RCVR_TERM)");
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IO_REFCLOCK_RCVR_TERM, FAPI_SYSTEM, l_io_term),
-             "Error from FAPI_ATTR_GET (ATTR_IO_REFCLOCK_RCVR_TERM)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYS0_REFCLOCK_RCVR_TERM, FAPI_SYSTEM, l_sys0_term),
+             "Error from FAPI_ATTR_GET (ATTR_SYS0_REFCLOCK_RCVR_TERM)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYS1_REFCLOCK_RCVR_TERM, FAPI_SYSTEM, l_sys1_term),
+             "Error from FAPI_ATTR_GET (ATTR_SYS1_REFCLOCK_RCVR_TERM)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PCI0_REFCLOCK_RCVR_TERM, FAPI_SYSTEM, l_pci0_term),
+             "Error from FAPI_ATTR_GET (ATTR_PCI0_REFCLOCK_RCVR_TERM)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PCI1_REFCLOCK_RCVR_TERM, FAPI_SYSTEM, l_pci1_term),
+             "Error from FAPI_ATTR_GET (ATTR_PCI1_REFCLOCK_RCVR_TERM)");
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CP_REFCLOCK_SELECT, i_target_chip, l_cp_refclck_select),
              "Error from FAPI_ATTR_GET (ATTR_CP_REFCLOCK_SELECT)");
 
@@ -131,10 +135,10 @@ fapi2::ReturnCode p10_setup_ref_clock(const
 
     FAPI_DBG("Setup receiver termination");
     l_read_reg.flush<0>();
-    l_read_reg.insertFromRight<PERV_ROOT_CTRL6_TP_PLLREFCLK_RCVR_TERM_DC,
-                               PERV_ROOT_CTRL6_TP_PLLREFCLK_RCVR_TERM_DC_LEN>(l_cp_term);
-    l_read_reg.insertFromRight<PERV_ROOT_CTRL6_TP_PCIREFCLK_RCVR_TERM_DC,
-                               PERV_ROOT_CTRL6_TP_PCIREFCLK_RCVR_TERM_DC_LEN>(l_io_term);
+    l_read_reg.insertFromRight<0, 2>(l_sys0_term);
+    l_read_reg.insertFromRight<2, 2>(l_sys1_term);
+    l_read_reg.insertFromRight<4, 2>(l_pci0_term);
+    l_read_reg.insertFromRight<6, 2>(l_pci1_term);
 
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_ROOT_CTRL6_FSI, l_read_reg));
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_ROOT_CTRL6_COPY_FSI, l_read_reg));
