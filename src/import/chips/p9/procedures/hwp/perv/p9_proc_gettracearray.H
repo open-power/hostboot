@@ -63,6 +63,7 @@ static const fapi2::TargetType PROC_GETTRACEARRAY_TARGET_TYPES =
     fapi2::TARGET_TYPE_PROC_CHIP |
     fapi2::TARGET_TYPE_OBUS |
     fapi2::TARGET_TYPE_MCBIST |
+    fapi2::TARGET_TYPE_MC |
     fapi2::TARGET_TYPE_EX |
     fapi2::TARGET_TYPE_CORE;
 
@@ -105,6 +106,10 @@ extern "C"
         else if (i_trace_bus <= _PROC_TB_LAST_AXONE_CHIP_TARGET)
         {
             return fapi2::TARGET_TYPE_PROC_CHIP;
+        }
+        else if (i_trace_bus <= _PROC_TB_LAST_AXONE_MC_TARGET)
+        {
+            return fapi2::TARGET_TYPE_MC;
         }
         else
         {

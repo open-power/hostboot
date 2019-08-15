@@ -128,6 +128,10 @@ extern "C" {
         {
             return fapi2::TARGET_TYPE_PROC_CHIP;
         }
+        else if (i_trace_bus <= _PROC_TB_LAST_AXONE_MC_TARGET)
+        {
+            return fapi2::TARGET_TYPE_PERV;
+        }
         else
         {
             return fapi2::TARGET_TYPE_EX;
