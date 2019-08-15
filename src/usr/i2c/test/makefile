@@ -26,7 +26,7 @@ ROOTPATH = ../../../..
 
 MODULE = testi2c
 TESTS = eepromddtest.H
-TESTS = $(if $(CONFIG_SUPPORT_EEPROM_CACHING), eecachetest.H, )
+TESTS += $(if $(CONFIG_SUPPORT_EEPROM_CACHING), eecachetest.H, )
 TESTS += i2ctest.H
 TESTS += $(if $(CONFIG_TPMDD),tpmddtest.H,)
 
