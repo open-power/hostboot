@@ -32,7 +32,6 @@ HWP_PATH_CEN += ${ROOTPATH}/src/import/chips/centaur/procedures/hwp/memory
 # Axone
 HWP_PATH_P9A += ${ROOTPATH}/src/import/chips/p9a/procedures/hwp/memory
 HWP_PATH_P9A += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic
-
 # Explorer
 HWP_PATH_EXP += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory
 
