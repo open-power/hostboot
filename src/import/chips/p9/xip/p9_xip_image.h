@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1619,6 +1619,7 @@ p9_xip_decode_toc_dump(void* i_image, void* i_dump,
     .macro .xip_toc, index:req, type:req, address:req, elements=1
 
         .if (((\type) < 1) || ((\type) > P9_XIP_MAX_TYPE_INDEX))
+            // cppcheck-suppress syntaxError
             .error ".xip_toc : Illegal type index"
         .endif
 
