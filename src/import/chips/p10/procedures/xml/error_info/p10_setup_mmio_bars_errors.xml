@@ -1,0 +1,158 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p10/procedures/xml/error_info/p10_setup_mmio_bars_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P10_SETUP_MMIO_BARS_FSP_BAR_ATTR_ERR</rc>
+    <description>
+      Procedure: p10_setup_mmio_bars
+      FSP BAR attributes are not aligned to HW implementation
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>BAR_OFFSET</ffdc>
+    <ffdc>BAR_OFFSET_MASK</ffdc>
+    <ffdc>BAR_OVERLAP</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P10_SETUP_MMIO_BARS_PSI_BAR_ATTR_ERR</rc>
+    <description>
+      Procedure: p10_setup_mmio_bars
+      PSI BAR attributes are not aligned to HW implementation
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>BAR_OFFSET</ffdc>
+    <ffdc>BAR_OFFSET_MASK</ffdc>
+    <ffdc>BAR_OVERLAP</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P10_SETUP_MMIO_BARS_PAU_MMIO_BAR_ATTR_ERR</rc>
+    <description>
+      Procedure: p10_setup_mmio_bars
+      PAU MMIO BAR attributes are not aligned to HW implementation
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>BAR_OFFSET</ffdc>
+    <ffdc>BAR_OFFSET_MASK</ffdc>
+    <ffdc>BAR_OVERLAP</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P10_SETUP_MMIO_BARS_INT_NVPG_BAR_ATTR_ERR</rc>
+    <description>
+      Procedure: p10_setup_mmio_bars
+      INT NVPG BAR attributes are not aligned to HW implementation
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>BAR_OFFSET</ffdc>
+    <ffdc>BAR_OFFSET_MASK</ffdc>
+    <ffdc>BAR_OVERLAP</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P10_SETUP_MMIO_BARS_INT_NVC_BAR_ATTR_ERR</rc>
+    <description>
+      Procedure: p10_setup_mmio_bars
+      INT NVC BAR attributes are not aligned to HW implementation
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>BAR_OFFSET</ffdc>
+    <ffdc>BAR_OFFSET_MASK</ffdc>
+    <ffdc>BAR_OVERLAP</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P10_SETUP_MMIO_BARS_INT_TM_BAR_ATTR_ERR</rc>
+    <description>
+      Procedure: p10_setup_mmio_bars
+      INT TM BAR attributes are not aligned to HW implementation
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>BAR_OFFSET</ffdc>
+    <ffdc>BAR_OFFSET_MASK</ffdc>
+    <ffdc>BAR_OVERLAP</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P10_SETUP_MMIO_BARS_INT_IC_BAR_ATTR_ERR</rc>
+    <description>
+      Procedure: p10_setup_mmio_bars
+      INT IC BAR attributes are not aligned to HW implementation
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>BAR_OFFSET</ffdc>
+    <ffdc>BAR_OFFSET_MASK</ffdc>
+    <ffdc>BAR_OVERLAP</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P10_SETUP_MMIO_BARS_RANGE_OVERLAP_ERR</rc>
+    <description>
+      Procedure: p10_setup_mmio_bars
+      Overlapping memory/MMIO address ranges detected
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>BASE_ADDR1</ffdc>
+    <ffdc>END_ADDR1</ffdc>
+    <ffdc>ENABLED1</ffdc>
+    <ffdc>BASE_ADDR2</ffdc>
+    <ffdc>END_ADDR2</ffdc>
+    <ffdc>ENABLED2</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+</hwpErrors>
