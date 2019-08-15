@@ -41,6 +41,7 @@
 #include <explorer_scom_addresses.H>
 #include <explorer_scom_addresses_fld.H>
 
+#include <lib/shared/exp_consts.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_address.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_traits.H>
