@@ -48,7 +48,8 @@ if ($hb_mode == 1) {
     }
 
 }else{
-    $hb_machine = "AXONE"
+    # simics now provides us the chip type (starting w/ p9a ) 
+    $hb_machine = $proc_chip_type
 }
 
 python "os.environ['HB_MACHINE'] = \""+$hb_machine+"\""
@@ -134,7 +135,7 @@ if($hw_security == "1") {
     $jumperApplied=FALSE
 }
 
-if ($hb_machine == "AXONE") {
+if ($hb_machine == "p9a") {
     # Set logical jumper state in SIMICS based on HW policy
     #     "TRUE"=jumper applied(security disabled, default)
     #     "FALSE"=jumper removed(security enabled)

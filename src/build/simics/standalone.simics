@@ -24,8 +24,7 @@ if ($hb_skip_vpd_preload == 0) {
         $procChipType=(get-object-list p9_proc)[0]->chip_type
         python "os.environ['HB_PROC_CHIP_TYPE'] = \""+$procChipType+"\""
     } else {
-        $procChipType=($hb_masterproc)->chip_type
-        python "os.environ['HB_PROC_CHIP_TYPE'] = \""+$procChipType+"\""
+        python "os.environ['HB_PROC_CHIP_TYPE'] = \""+$proc_chip_type+"\""
     }
 
 
