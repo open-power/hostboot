@@ -63,7 +63,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
     creator: platform
-    consumer: p10_setup_bars
+    consumer: p10_setup_mmio_bars
     firmware notes: none
   </description>
   <valueType>uint8</valueType>
@@ -77,7 +77,7 @@
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
     creator: platform
-    consumer: p10_setup_bars
+    consumer: p10_setup_mmio_bars
     firmware notes:
       Defines range mapped for FSP MMIO
       Attribute holds offset (relative to chip MMIO origin) to program into
@@ -93,7 +93,7 @@
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
     creator: platform
-    consumer: p10_setup_bars
+    consumer: p10_setup_mmio_bars
     firmware notes: none
   </description>
   <valueType>uint64</valueType>
@@ -121,18 +121,18 @@
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
     creator: platform
-    consumer: p10_setup_bars
+    consumer: p10_setup_mmio_bars
     firmware notes:
       AND mask applied to RA 32:35 when transmitting address to FSP
       NOTE: RA 8:31 are always replaced with zero
   </description>
-  <valueType>uint64</valueType>
+  <valueType>uint8</valueType>
   <enum>
-      4_GB = 0x00F0000000000000,
-      2_GB = 0x0070000000000000,
-      1_GB = 0x0030000000000000,
-    512_MB = 0x0010000000000000,
-    256_MB = 0x0000000000000000
+      4_GB = 0xF,
+      2_GB = 0x7,
+      1_GB = 0x3,
+    512_MB = 0x1,
+    256_MB = 0x0
   </enum>
   <platInit/>
   <mrwHide/>
@@ -140,10 +140,10 @@
 <!-- ********************************************************************** -->
 <attribute>
   <id>ATTR_PROC_PAU_MMIO_BAR_ENABLE</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <targetType>TARGET_TYPE_PAU</targetType>
   <description>
     creator: platform
-    consumer: p10_setup_bars
+    consumer: p10_setup_mmio_bars
     firmware notes: none
   </description>
   <valueType>uint8</valueType>
@@ -153,11 +153,28 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_PROC_PAU_MMIO_BAR_BASE_ADDR_OFFSET</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    creator: platform
+    consumer: p10_setup_mmio_bars
+    firmware notes:
+      Defines 16MB range (size implied) mapped for PAU MMIO
+      Attribute holds offset (relative to chip MMIO origin) to program into
+      chip address range field of BAR -- RA bits 15:39
+  </description>
+  <valueType>uint64</valueType>
+  <platInit/>
+  <array>8</array>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_PROC_PSI_BRIDGE_BAR_ENABLE</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
     creator: platform
-    consumer: p10_setup_bars
+    consumer: p10_setup_mmio_bars
     firmware notes: none
   </description>
   <valueType>uint8</valueType>
@@ -171,7 +188,7 @@
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
     creator: platform
-    consumer: p10_setup_bars
+    consumer: p10_setup_mmio_bars
     firmware notes:
       Defines 1MB range (size implied) mapped for PSI host-bridge
       Attribute holds offset (relative to chip MMIO origin) to program into
@@ -453,4 +470,304 @@
   <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_INT_IC_BAR_ENABLE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>INT IC (Interrupt Controller) BAR enable
+    creator: platform
+    consumer: p10_setup_mmio_bars
+    firmware notes: none
+  </description>
+  <valueType>uint8</valueType>
+  <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
+  <platInit/>
+  <initToZero/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************* -->
+<attribute>
+  <id>ATTR_PROC_INT_IC_BAR_BASE_ADDR_OFFSET</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>INT IC (Interrupt Controller) BAR base address offset
+    creator: platform
+    consumer: p10_setup_mmio_bars
+    firmware notes:
+      Attribute holds offset (relative to chip MMIO origin) to program into
+      chip address range field of BAR (excludes system/memsel/group/chip fields)
+  </description>
+  <valueType>uint64</valueType>
+  <platInit/>
+  <initToZero/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************* -->
+<attribute>
+  <id>ATTR_PROC_INT_IC_BAR_PAGE_SIZE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>INT IC (Interrupt Controller) BAR page size
+    creator: platform
+    consumer: p10_setup_mmio_bars
+    firmware notes: none
+  </description>
+  <valueType>uint8</valueType>
+  <enum>4K = 0x0, 64K = 0x1</enum>
+  <platInit/>
+  <default>0x1</default>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************* -->
+<attribute>
+  <id>ATTR_PROC_INT_TM_BAR_ENABLE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>INT TM BAR enable
+    creator: platform
+    consumer: p10_setup_mmio_bars
+    firmware notes: none
+  </description>
+  <valueType>uint8</valueType>
+  <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
+  <platInit/>
+  <initToZero/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************* -->
+<attribute>
+  <id>ATTR_PROC_INT_TM_BAR_BASE_ADDR_OFFSET</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>INT TM BAR base address offset
+    creator: platform
+    consumer: p10_setup_mmio_bars
+    firmware notes:
+      Attribute holds offset (relative to chip MMIO origin) to program into
+      chip address range field of BAR (excludes system/memsel/group/chip fields)
+  </description>
+  <valueType>uint64</valueType>
+  <platInit/>
+  <initToZero/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************* -->
+<attribute>
+  <id>ATTR_PROC_INT_TM_BAR_PAGE_SIZE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>INT TM BAR page size
+    creator: platform
+    consumer: p10_setup_mmio_bars
+    firmware notes: none
+  </description>
+  <valueType>uint8</valueType>
+  <enum>4K = 0x0, 64K = 0x1</enum>
+  <platInit/>
+  <default>0x1</default>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************* -->
+<attribute>
+  <id>ATTR_PROC_INT_NVPG_BAR_ENABLE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>INT NVPG BAR enable
+    creator: platform
+    consumer: p10_setup_mmio_bars
+    firmware notes: none
+  </description>
+  <valueType>uint8</valueType>
+  <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
+  <platInit/>
+  <initToZero/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************* -->
+<attribute>
+  <id>ATTR_PROC_INT_NVPG_BAR_PAGE_SIZE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>INT NVPG BAR page size
+    creator: platform
+    consumer: p10_setup_mmio_bars
+    firmware notes: none
+  </description>
+  <valueType>uint8</valueType>
+  <enum>4K = 0x0, 64K = 0x1</enum>
+  <platInit/>
+  <default>0x1</default>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************* -->
+<attribute>
+  <id>ATTR_PROC_INT_NVPG_BAR_BASE_ADDR_OFFSET</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>INT NVPG BAR base address offset
+    creator: platform
+    consumer: p10_setup_mmio_bars
+    firmware notes:
+      Attribute holds offset (relative to chip MMIO origin) to program into
+      chip address range field of BAR (excludes system/memsel/group/chip fields)
+  </description>
+  <valueType>uint64</valueType>
+  <platInit/>
+  <initToZero/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************* -->
+<attribute>
+  <id>ATTR_PROC_INT_NVPG_BAR_SET_DIVISION_SELECTOR</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>INT NVPG BAR set division selector
+    creator: platform
+    consumer: p10_setup_mmio_bars
+    firmware notes: none
+  </description>
+  <valueType>uint8</valueType>
+  <platInit/>
+  <initToZero/>
+  <enum>
+     1_SET = 0x00,
+     2_SET = 0x01,
+     4_SET = 0x02,
+     8_SET = 0x03,
+    16_SET = 0x04
+  </enum>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************* -->
+<attribute>
+  <id>ATTR_PROC_INT_NVPG_BAR_RANGE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>INT NVPG BAR range selection
+    creator: platform
+    consumer: p10_setup_mmio_bars
+    firmware notes: none
+  </description>
+  <valueType>uint8</valueType>
+  <platInit/>
+  <default>0x03</default>
+  <enum>
+     16_TB = 0x14,
+      8_TB = 0x13,
+      4_TB = 0x12,
+      2_TB = 0x11,
+      1_TB = 0x10,
+    512_GB = 0x0F,
+    256_GB = 0x0E,
+    128_GB = 0x0D,
+     64_GB = 0x0C,
+     32_GB = 0x0B,
+     16_GB = 0x0A,
+      8_GB = 0x09,
+      4_GB = 0x08,
+      2_GB = 0x07,
+      1_GB = 0x06,
+    512_MB = 0x05,
+    256_MB = 0x04,
+    128_MB = 0x03,
+     64_MB = 0x02,
+     32_MB = 0x01,
+     16_MB = 0x00
+  </enum>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************* -->
+<attribute>
+  <id>ATTR_PROC_INT_NVC_BAR_ENABLE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>INT NVC BAR enable
+    creator: platform
+    consumer: p10_setup_mmio_bars
+    firmware notes: none
+  </description>
+  <valueType>uint8</valueType>
+  <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
+  <platInit/>
+  <initToZero/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************* -->
+<attribute>
+  <id>ATTR_PROC_INT_NVC_BAR_PAGE_SIZE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>INT NVC BAR page size
+    creator: platform
+    consumer: p10_setup_mmio_bars
+    firmware notes: none
+  </description>
+  <valueType>uint8</valueType>
+  <enum>4K = 0x0, 64K = 0x1</enum>
+  <platInit/>
+  <default>0x1</default>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************* -->
+<attribute>
+  <id>ATTR_PROC_INT_NVC_BAR_BASE_ADDR_OFFSET</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>INT NVC BAR base address offset
+    creator: platform
+    consumer: p10_setup_mmio_bars
+    firmware notes:
+      Attribute holds offset (relative to chip MMIO origin) to program into
+      chip address range field of BAR (excludes system/memsel/group/chip fields)
+  </description>
+  <valueType>uint64</valueType>
+  <platInit/>
+  <initToZero/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************* -->
+<attribute>
+  <id>ATTR_PROC_INT_NVC_BAR_SET_DIVISION_SELECTOR</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>INT NVC BAR set division selector
+    creator: platform
+    consumer: p10_setup_mmio_bars
+    firmware notes: none
+  </description>
+  <valueType>uint8</valueType>
+  <platInit/>
+  <initToZero/>
+  <enum>
+     1_SET = 0x00,
+     2_SET = 0x01,
+     4_SET = 0x02,
+     8_SET = 0x03,
+    16_SET = 0x04
+  </enum>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************* -->
+<attribute>
+  <id>ATTR_PROC_INT_NVC_BAR_RANGE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>INT NVC BAR range selection
+    creator: platform
+    consumer: p10_setup_mmio_bars
+    firmware notes: none
+  </description>
+  <valueType>uint8</valueType>
+  <platInit/>
+  <default>0x03</default>
+  <enum>
+     16_TB = 0x14,
+      8_TB = 0x13,
+      4_TB = 0x12,
+      2_TB = 0x11,
+      1_TB = 0x10,
+    512_GB = 0x0F,
+    256_GB = 0x0E,
+    128_GB = 0x0D,
+     64_GB = 0x0C,
+     32_GB = 0x0B,
+     16_GB = 0x0A,
+      8_GB = 0x09,
+      4_GB = 0x08,
+      2_GB = 0x07,
+      1_GB = 0x06,
+    512_MB = 0x05,
+    256_MB = 0x04,
+    128_MB = 0x03,
+     64_MB = 0x02,
+     32_MB = 0x01,
+     16_MB = 0x00
+  </enum>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************* -->
 </attributes>

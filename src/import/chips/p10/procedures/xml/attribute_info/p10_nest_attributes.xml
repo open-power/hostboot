@@ -51,8 +51,8 @@
   </description>
   <valueType>uint8</valueType>
   <enum>
-    CHIP       = 0x00,
-    HEMISPHERE = 0x01
+    HEMISPHERE = 0x00,
+    CHIP       = 0x01
   </enum>
   <platInit/>
   <initToZero/>
@@ -74,6 +74,23 @@
   </enum>
   <writeable/>
   <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_FABRIC_PRESENT_GROUPS</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Bit mask of group IDs which will be present in the fully configured
+    CEC configuration.
+      Bit 0 -> group 0 present
+      Bit 1 -> group 1 present
+      ...
+      Bit 6 -> group 6 present
+      Bit 7 -> group 7 present
+  </description>
+  <valueType>uint8</valueType>
+  <platInit/>
+  <mrwHide/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
