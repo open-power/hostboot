@@ -26,26 +26,50 @@
 <attributes>
 <!-- ********************************************************************** -->
 <attribute>
-  <id>ATTR_CP_REFCLOCK_RCVR_TERM</id>
+  <id>ATTR_SYS0_REFCLOCK_RCVR_TERM</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
-    Defines system specific value of processor refclock receiver termination
+    Defines system specific value of SYS0 refclock receiver termination
   </description>
-  <enum>NONE = 0, FIFTY_OHM = 1</enum>
+  <enum>NONE = 3, FIFTY_OHM = 2, ONE_HUNDRED_OHM = 0</enum>
   <valueType>uint8</valueType>
-  <initToZero/>
+  <default>NONE</default>
   <platInit/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
-  <id>ATTR_IO_REFCLOCK_RCVR_TERM</id>
+  <id>ATTR_SYS1_REFCLOCK_RCVR_TERM</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
-    Defines system specific value of PCI refclock receiver termination
+    Defines system specific value of SYS1 refclock receiver termination
   </description>
-  <enum>NONE = 0, FIFTY_OHM = 1, ONE_HUNDRED_OHM = 3</enum>
+  <enum>NONE = 3, FIFTY_OHM = 2, ONE_HUNDRED_OHM = 0</enum>
   <valueType>uint8</valueType>
-  <initToZero/>
+  <default>NONE</default>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PCI0_REFCLOCK_RCVR_TERM</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Defines system specific value of PCI0 refclock receiver termination
+  </description>
+  <enum>NONE = 3, FIFTY_OHM = 2, ONE_HUNDRED_OHM = 0</enum>
+  <valueType>uint8</valueType>
+  <default>NONE</default>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PCI1_REFCLOCK_RCVR_TERM</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Defines system specific value of PCI1 refclock receiver termination
+  </description>
+  <enum>NONE = 3, FIFTY_OHM = 2, ONE_HUNDRED_OHM = 0</enum>
+  <valueType>uint8</valueType>
+  <default>NONE</default>
   <platInit/>
 </attribute>
 <!-- ********************************************************************** -->
