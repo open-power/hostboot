@@ -48,7 +48,6 @@
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/utils/conversions.H>
 #include <generic/memory/lib/utils/pos.H>
-#include <generic/memory/lib/utils/find_magic.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/utils/poll.H>
 
@@ -56,6 +55,29 @@
 namespace mss
 {
 
+///
+/// @brief Determine if a thing is functional
+/// @tparam I, the type of the item we want to check for
+/// @tparam P, the type of the parent which holds the things of interest
+/// @param[in] i_target the parent containing the thing we're looking for
+/// @param[in] i_rel_pos the relative position of the item of interest.
+/// @return bool true iff the thing at i_rel_pos is noted as functional
+///
+template< fapi2::TargetType I, fapi2::TargetType P >
+inline bool is_functional( const fapi2::Target<P>& i_target, const uint64_t i_rel_pos )
+{
+    // Not sure of a good way to do this ... we get all the functional
+    // children of the parent and look for our relative position ...
+    for (const auto& i : i_target.template getChildren<I>(fapi2::TARGET_STATE_FUNCTIONAL))
+    {
+        if (mss::template relative_pos<P>(i) == i_rel_pos)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
 
 namespace mcbist
 {
