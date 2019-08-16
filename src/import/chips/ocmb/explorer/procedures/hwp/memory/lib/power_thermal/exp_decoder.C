@@ -86,16 +86,16 @@ fapi2::ReturnCode decoder<mss::mc_type::EXPLORER>::find_slope (
                 2);
 
     // To get thermal power slope
-    get_power_thermal_value<TT::THERMAL_START, TT::THERMAL_LENGTH, SLOPE>(
-        *i_slope[0],
-        "ATTR_MSS_MRW_OCMB_THERMAL_MEMORY_PWR_SLOPE",
-        iv_total_slope);
+    FAPI_TRY( (get_power_thermal_value<TT::THERMAL_START, TT::THERMAL_LENGTH, SLOPE>(
+                   *i_slope[0],
+                   "ATTR_MSS_MRW_OCMB_THERMAL_MEMORY_PWR_SLOPE",
+                   iv_total_slope)) );
 
     // To get power slope
-    get_power_thermal_value<TT::POWER_SLOPE_START, TT::POWER_SLOPE_LENGTH, SLOPE>(
-        *i_slope[1],
-        "ATTR_MSS_MRW_OCMB_CURRENT_CURVE_WITH_LIMIT",
-        iv_vddr_slope);
+    FAPI_TRY( (get_power_thermal_value<TT::POWER_SLOPE_START, TT::POWER_SLOPE_LENGTH, SLOPE>(
+                   *i_slope[1],
+                   "ATTR_MSS_MRW_OCMB_CURRENT_CURVE_WITH_LIMIT",
+                   iv_vddr_slope)) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -126,16 +126,16 @@ fapi2::ReturnCode decoder<mss::mc_type::EXPLORER>::find_intercept (
                 2);
 
     // To get thermal power intercept
-    get_power_thermal_value<TT::THERMAL_START, TT::THERMAL_LENGTH, INTERCEPT>(
-        *i_intercept[0],
-        "ATTR_MSS_MRW_OCMB_POWER_INTERCEPT",
-        iv_total_intercept);
+    FAPI_TRY( (get_power_thermal_value<TT::THERMAL_START, TT::THERMAL_LENGTH, INTERCEPT>(
+                   *i_intercept[0],
+                   "ATTR_MSS_MRW_OCMB_POWER_INTERCEPT",
+                   iv_total_intercept)) );
 
     // To get power intercept
-    get_power_thermal_value<TT::POWER_INTERCEPT_START, TT::POWER_INTERCEPT_LENGTH, INTERCEPT>(
-        *i_intercept[1],
-        "ATTR_MSS_MRW_OCMB_CURRENT_CURVE_WITH_LIMIT",
-        iv_vddr_intercept);
+    FAPI_TRY( (get_power_thermal_value<TT::POWER_INTERCEPT_START, TT::POWER_INTERCEPT_LENGTH, INTERCEPT>(
+                   *i_intercept[1],
+                   "ATTR_MSS_MRW_OCMB_CURRENT_CURVE_WITH_LIMIT",
+                   iv_vddr_intercept)) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -167,16 +167,16 @@ fapi2::ReturnCode decoder<mss::mc_type::EXPLORER>::find_thermal_power_limit (
                 2);
 
     // To get thermal power limit
-    get_power_thermal_value<TT::THERMAL_START, TT::THERMAL_LENGTH, POWER_LIMIT>(
-        *i_thermal_limits[0],
-        "ATTR_MSS_MRW_OCMB_THERMAL_MEMORY_POWER_LIMIT",
-        iv_thermal_power_limit);
+    FAPI_TRY( (get_power_thermal_value<TT::THERMAL_START, TT::THERMAL_LENGTH, POWER_LIMIT>(
+                   *i_thermal_limits[0],
+                   "ATTR_MSS_MRW_OCMB_THERMAL_MEMORY_POWER_LIMIT",
+                   iv_thermal_power_limit)) );
 
     // To get power intercept
-    get_power_thermal_value<TT::POWER_LIMIT_START, TT::POWER_LIMIT_LENGTH, POWER_LIMIT>(
-        *i_thermal_limits[1],
-        "ATTR_MSS_MRW_OCMB_CURRENT_CURVE_WITH_LIMIT",
-        iv_power_limit);
+    FAPI_TRY( (get_power_thermal_value<TT::POWER_LIMIT_START, TT::POWER_LIMIT_LENGTH, POWER_LIMIT>(
+                   *i_thermal_limits[1],
+                   "ATTR_MSS_MRW_OCMB_CURRENT_CURVE_WITH_LIMIT",
+                   iv_power_limit)) );
 
 fapi_try_exit:
     return fapi2::current_err;
