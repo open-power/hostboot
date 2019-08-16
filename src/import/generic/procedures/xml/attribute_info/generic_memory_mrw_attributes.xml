@@ -737,4 +737,18 @@
     <initToZero/>
     <mssAccessorName>mrw_safemode_dram_databus_util</mssAccessorName>
   </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_PORT_POS_OF_FAIL_THROTTLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      This is the fapi position of the port that failed to calculate
+      memory throttles given the passed in watt target and or utilization
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint64</valueType>
+    <mssAccessorName>port_pos_of_fail_throttle</mssAccessorName>
+    <writeable/>
+  </attribute>
+
 </attributes>
