@@ -374,8 +374,8 @@ enum cmd_and_response_id
     // find the flash loader version information
     EXP_FW_FLASH_LOADER_VERSION_INFO = 0x09,
 
-    // read the error logs from various modules of Explorer block
-    EXP_FW_ERROR_LOG_GET = 0x0A,
+    // read the FW logs from various modules of Explorer block
+    EXP_FW_LOG = 0x0A,
 };
 
 ///

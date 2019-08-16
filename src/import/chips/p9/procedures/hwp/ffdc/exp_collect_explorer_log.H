@@ -29,7 +29,7 @@
 // *HWP HWP Owner: Matt Derksen <mderkse1@us.ibm.com>
 // *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 2
 // *HWP Consumed by: HB
 // ----------------------------------------
 #ifndef _COLLECT_EXPLORER_LOG_H_
@@ -38,10 +38,23 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
+#include <return_code.H>
+#include <error_info_defs.H>
 
 //------------------------------------------------------------------------------
 // Structure definitions
 //------------------------------------------------------------------------------
+
+// function pointer typedef definition for HWP call support
+typedef fapi2::ReturnCode (*exp_collect_explorer_active_log_FP_t)(
+    const fapi2::ffdc_t&,
+    const fapi2::ffdc_t&,
+    fapi2::ReturnCode& );
+
+typedef fapi2::ReturnCode (*exp_collect_explorer_saved_log_FP_t)(
+    const fapi2::ffdc_t&,
+    const fapi2::ffdc_t&,
+    fapi2::ReturnCode& );
 
 //------------------------------------------------------------------------------
 // Constant definitions
@@ -52,4 +65,45 @@
 // Function prototypes
 //------------------------------------------------------------------------------
 
-#endif // _COLLECT_EXPLORER_ERROR_H_
+extern "C"
+{
+///
+/// @brief  Procedure to grab active (RAM) log traces from Explorer chip
+///         and add those traces to the HWP error
+///  @param[in]  i_ocmb_chip - OCMB chip target
+///  @param[in]  i_size - allowable total size (add entries upto this size)
+///  @param[out] o_rc - return code to add FFDC data to.
+///
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+/// NOTE: All input parameters must be of type fapi2::ffdc_t and converted
+///       to the correct type inside the function.
+///
+    fapi2::ReturnCode exp_collect_explorer_active_log(
+        const fapi2::ffdc_t& i_ocmb_chip,
+        const fapi2::ffdc_t& i_size,
+        fapi2::ReturnCode& o_rc );
+
+
+///
+/// @brief  Procedure to grab saved (SPI flash) log traces from Explorer chip
+///         and add those traces to the HWP error
+///  @param[in]  i_ocmb_chip - OCMB chip target
+///  @param[in]  i_size - allowable total size (add entries upto this size)
+///  @param[out] o_rc - return code to add FFDC data to.
+///
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+/// NOTE: All input parameters must be of type fapi2::ffdc_t and converted
+///       to the correct type inside the function.
+///
+    fapi2::ReturnCode exp_collect_explorer_saved_log(
+        const fapi2::ffdc_t& i_ocmb_chip,
+        const fapi2::ffdc_t& i_size,
+        fapi2::ReturnCode& o_rc );
+
+
+} // extern "C"
+
+
+#endif // _COLLECT_EXPLORER_LOG_H_

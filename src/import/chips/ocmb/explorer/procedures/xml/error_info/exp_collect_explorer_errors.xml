@@ -1,0 +1,49 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/ocmb/explorer/procedures/xml/error_info/exp_collect_explorer_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+    <hwpError>
+      <rc>RC_COLLECT_EXPLORER_ERROR</rc>
+      <description>Collects error log data from Explorer chip</description>
+      <collectFfdc>exp_collect_explorer_active_log, OCMB_CHIP_TARGET, EXP_ACTIVE_LOG_SIZE</collectFfdc>
+      <collectFfdc>exp_collect_explorer_saved_log, OCMB_CHIP_TARGET, EXP_SAVED_LOG_SIZE</collectFfdc>
+      <ffdc>OCMB_CHIP_TARGET</ffdc>
+      <ffdc>EXP_ACTIVE_LOG_SIZE</ffdc>
+      <ffdc>EXP_SAVED_LOG_SIZE</ffdc>
+    </hwpError>
+  <!-- ******************************************************************** -->
+    <hwpError>
+      <rc>RC_EXPLORER_ACTIVE_ERROR_LOG</rc>
+      <description>Collect active explorer errors during exp_collect_explorer_active_log</description>
+      <ffdc>UNIT_FFDC_EXP_ERROR</ffdc>
+    </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+      <rc>RC_EXPLORER_SAVED_ERROR_LOG</rc>
+      <description>Collect saved explorer errors during exp_collect_explorer_saved_log</description>
+      <ffdc>UNIT_FFDC_EXP_ERROR</ffdc>
+    </hwpError>
+  <!-- ******************************************************************** -->
+</hwpErrors>
