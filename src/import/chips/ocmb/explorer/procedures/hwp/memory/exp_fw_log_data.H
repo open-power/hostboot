@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p9/procedures/hwp/ffdc/ffdc_includes.H $     */
+/* $Source: src/import/chips/ocmb/explorer/procedures/hwp/memory/exp_fw_log_data.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2019                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,18 +22,56 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __FFDC_INCLUDES_H
-#define __FFDC_INCLUDES_H
-
-/// @file ffdc_includes.H
 ///
-/// @brief main file used to export all include files for FFDC procedures
+/// @file exp_fw_log_data.H
+/// @brief Procedure declaration to get Explorer log data
 ///
+// ----------------------------------------
+// *HWP HWP Owner: Matt Derksen <mderkse1@us.ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: HB
+// ----------------------------------------
+#ifndef __EXP_FW_LOG_DATA__
+#define __EXP_FW_LOG_DATA__
 
-#include <p9_collect_some_ffdc.H>
-#include <p9_pib2pcb_mux_seq.H>
-#include <p9_collect_ppe_state.H>
-#include <p9_eq_clear_atomic_lock.H>
-#include <p9_collect_lpc_regs.H>
+#include <fapi2.H>
+#include <vector>
 
+// Required for Cronus
+typedef fapi2::ReturnCode (*exp_active_log_FP_t) (
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
+    std::vector<uint8_t>& );
+
+typedef fapi2::ReturnCode (*exp_saved_log_FP_t) (
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
+    std::vector<uint8_t>& );
+
+extern "C"
+{
+
+    ///
+    /// @brief Grab active log entries from Explorer RAM
+    /// @param[in] i_target the controller
+    /// @param[out] o_data - where to put error log data
+    ///
+    /// @return FAPI2_RC_SUCCESS iff ok
+    ///
+    fapi2::ReturnCode exp_active_log(
+        const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmbTarget,
+        std::vector<uint8_t>& o_data );
+
+    ///
+    /// @brief Grab saved log entries from Explorer SPI flash
+    /// @param[in] i_target the controller
+    /// @param[out] o_data - where to put error log data
+    ///
+    /// @return FAPI2_RC_SUCCESS iff ok
+    ///
+    fapi2::ReturnCode exp_saved_log(
+        const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmbTarget,
+        std::vector<uint8_t>& o_data );
+
+}// extern C
 #endif
