@@ -922,6 +922,7 @@ errlHndl_t nvdimmWriteData( TARGETING::Target * i_target,
                ENTER_MRK"nvdimmWriteData()");
     errlHndl_t err = nullptr;
     errlHndl_t err_retryable = nullptr;
+    size_t data_length;
     do
     {
         /***********************************************************/
@@ -931,13 +932,15 @@ errlHndl_t nvdimmWriteData( TARGETING::Target * i_target,
               retry <= NVDIMM_MAX_RETRIES;
               retry++)
         {
+            data_length = i_dataLen;
+
             // Do the actual data write
             if ( i_dataLen == sizeof(uint16_t) )
             {
                 err = deviceOp( DeviceFW::WRITE,
                                 i_target,
                                 i_dataToWrite,
-                                i_dataLen,
+                                data_length,
                                 DeviceFW::I2C,
                                 I2C_SMBUS_RW_W_CMD_PARAMS(
                                     DeviceFW::I2C_SMBUS_WORD_NO_PEC,
@@ -954,7 +957,7 @@ errlHndl_t nvdimmWriteData( TARGETING::Target * i_target,
                 err = deviceOp( DeviceFW::WRITE,
                                 i_target,
                                 i_dataToWrite,
-                                i_dataLen,
+                                data_length,
                                 DEVICE_I2C_ADDRESS_OFFSET(
                                             i_i2cInfo.port,
                                             i_i2cInfo.engine,
@@ -978,7 +981,7 @@ errlHndl_t nvdimmWriteData( TARGETING::Target * i_target,
                            "Write Non-Retryable fail %d/%d/0x%X, "
                            "ldl=%d, offset=0x%X, aS=%d, retry=%d",
                            i_i2cInfo.port, i_i2cInfo.engine,
-                           i_i2cInfo.devAddr, i_dataLen,
+                           i_i2cInfo.devAddr, data_length,
                            i_i2cInfo.offset, i_i2cInfo.addrSize, retry);
 
                  // Printing mux info separately, if combined, nothing is displayed
