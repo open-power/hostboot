@@ -158,12 +158,12 @@ namespace Bootloader{
         // Read SBE HB shared data.
         const auto l_blConfigData = reinterpret_cast<BootloaderConfigData_t *>(
                                                               SBE_HB_COMM_ADDR);
-
         // Set copy keyaddr stash data
-        // Ensure SBE to Bootloader structure has key addr stash info
         memcpy(&g_blData->blToHbData.keyAddrStashData,
                &l_blConfigData->pair,
-               sizeof(keyAddrPair_t));
+               (l_blConfigData->numKeyAddrPair * sizeof(keyAddrPair_t)));
+
+        g_blData->blToHbData.numKeyAddrPair = l_blConfigData->numKeyAddrPair;
     }
 
     void copyBlToHbtoHbLocation()
@@ -541,16 +541,8 @@ namespace Bootloader{
                 writeScratchReg(MMIO_SCRATCH_HOSTBOOT_ACTIVE,
                                 hostboot_string);
 
-                //Determine if P9N or P9C and apply URMOR hack
-                uint64_t l_urmor_hack_required = 0x0;
-                PVR_t l_pvr(getPVR());
-                if((l_pvr.chipFamily == PVR_t::P9_ALL))
-                {
-                    l_urmor_hack_required = 1;
-                }
-
                 // Start executing HBB
-                enterHBB(HBB_HRMOR, HBB_RUNNING_OFFSET, l_urmor_hack_required);
+                enterHBB(HBB_HRMOR, HBB_RUNNING_OFFSET);
             }
             else
             {

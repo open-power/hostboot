@@ -137,18 +137,16 @@ if($hw_security == "1") {
     $jumperApplied=FALSE
 }
 
-if ($hb_machine == "P10") {
-    # Set logical jumper state in SIMICS based on HW policy
-    #     "TRUE"=jumper applied(security disabled, default)
-    #     "FALSE"=jumper removed(security enabled)
+# Set logical jumper state in SIMICS based on HW policy
+#     "TRUE"=jumper applied(security disabled, default)
+#     "FALSE"=jumper removed(security enabled)
 
-    # Load jumper state to the master processor
-    $hb_masterproc.set-secure-jumper value = $jumperApplied
+# Load jumper state to the master processor
+$hb_masterproc.set-secure-jumper value = $jumperApplied
 
-    # Load jumper state to all slave processors
-    foreach $procS in ($hb_masterproc.get-slave-procs) {
-        $procS.set-secure-jumper value = $jumperApplied
-    }
+# Load jumper state to all slave processors
+foreach $procS in ($hb_masterproc.get-slave-procs) {
+    $procS.set-secure-jumper value = $jumperApplied
 }
 
 if ($hb_mode == 0) {
@@ -162,13 +160,14 @@ if ($hb_mode == 0) {
 system_cmp0.phys_mem.set address = 0x8200000 size = 4 0x48003000
 # The version of SBE
 system_cmp0.phys_mem.set address = 0x8200004 size = 4 0x00100001
-# 1B sbeBootSide 1B lpcConsoleEnable 2B cacheSizeMB (8MB)
+# 0th byte: sbeBootSide 1 byte:lpcConsoleEnable 3-4 byte: cacheSizeMB (8MB)
 system_cmp0.phys_mem.set address = 0x8200008 size = 4 0x00000008
 # The size of the HBBL + 0x3000 offset. Note that all mem after that address and before
 # HBB will be zeroed out.
 system_cmp0.phys_mem.set address = 0x820000c size = 8 0x9000
 system_cmp0.phys_mem.set address = 0x8200014 size = 2 0x0900
-system_cmp0.phys_mem.set address = 0x8200016 size = 8 0x0006
+# 0th byte: numKeyAddrPair; 1-7 byte: start of the XSCOM BAR
+system_cmp0.phys_mem.set address = 0x8200016 size = 8 0x080006
 system_cmp0.phys_mem.set address = 0x820001e size = 2 0x03fc
 system_cmp0.phys_mem.set address = 0x8200020 size = 8 0x00060300
 

@@ -45,7 +45,7 @@
 
 extern "C"
     void kernel_shutdown(size_t, uint64_t, uint64_t, uint64_t,
-                         uint64_t, uint64_t, uint64_t) NO_RETURN;
+                         uint64_t, uint64_t) NO_RETURN;
 
 extern HB_Descriptor kernel_hbDescriptor;
 
@@ -120,14 +120,6 @@ namespace KernelMisc
             }
             else
             {
-                //Determine if P9N/P9C and apply URMOR hack
-                uint64_t l_urmor_hack = 0x0;
-                PVR_t l_pvr(getPVR());
-                if((l_pvr.chipFamily == PVR_t::P9_ALL))
-                {
-                    l_urmor_hack = 1;
-                }
-
                 static Barrier* l_barrier = new Barrier(CpuManager::getCpuCount());
                 static uint64_t l_lowestPIR = 0xfffffffffffffffful;
 
@@ -226,8 +218,7 @@ namespace KernelMisc
                                 g_payload_entry,
                                 g_payload_data,
                                 local_master_pir,  //master PIR if local master
-                                start_payload_data_area_address,
-                                l_urmor_hack);
+                                start_payload_data_area_address);
             }
         }
         else

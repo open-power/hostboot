@@ -787,14 +787,18 @@ namespace TARGETING
     {
         // Setup physical TOC address
         uint64_t l_toc_addr = 0;
-        Bootloader::keyAddrPair_t l_keyAddrPairs =
-            g_BlToHbDataManager.getKeyAddrPairs();
+        const auto l_keys = g_BlToHbDataManager.getKeys();
 
-        for (uint8_t keyIndex = 0; keyIndex < MAX_ROW_COUNT; keyIndex++)
+        // Iterate over the number of key/addr structures until we find one
+        // that matches
+        for (uint8_t keyIndex = 0;
+             keyIndex < g_BlToHbDataManager.getNumKeyAddrPair();
+             ++keyIndex)
         {
-            if(l_keyAddrPairs.key[keyIndex] == SBEIO::RSV_MEM_ATTR_ADDR)
+            if(l_keys[keyIndex] == SBEIO::RSV_MEM_ATTR_ADDR)
             {
-                l_toc_addr = l_keyAddrPairs.addr[keyIndex];
+                const auto l_address = g_BlToHbDataManager.getAddresses();
+                l_toc_addr = l_address[keyIndex];
                 break;
             }
         }
@@ -813,14 +817,18 @@ namespace TARGETING
     uint64_t AttrRP::getHbDataRelocPayloadAddr()
     {
         uint64_t payload_addr = 0;
-        Bootloader::keyAddrPair_t l_keyAddrPairs =
-            g_BlToHbDataManager.getKeyAddrPairs();
+        const auto l_keys = g_BlToHbDataManager.getKeys();
 
-        for (uint8_t keyIndex = 0; keyIndex < MAX_ROW_COUNT; keyIndex++)
+        // Iterate over the number of key/addr structures until we find one
+        // that matches
+        for(size_t keyIndex = 0;
+            keyIndex < g_BlToHbDataManager.getNumKeyAddrPair();
+            ++keyIndex)
         {
-            if(l_keyAddrPairs.key[keyIndex] == SBEIO::RELOC_PAYLOAD_ADDR)
+            if(l_keys[keyIndex] == SBEIO::RELOC_PAYLOAD_ADDR)
             {
-                payload_addr = l_keyAddrPairs.addr[keyIndex];
+                const auto l_address = g_BlToHbDataManager.getAddresses();
+                payload_addr = l_address[keyIndex];
                 break;
             }
         }

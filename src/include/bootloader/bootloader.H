@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,8 +44,7 @@
 #include <bootloader/hbblreasoncodes.H>
 
 extern "C" void task_end_stub();
-extern "C" void enterHBB(uint64_t i_hbb_hrmor, uint64_t i_hbb_offset,
-                         uint64_t i_urmor_hack_req);
+extern "C" void enterHBB(uint64_t i_hbb_hrmor, uint64_t i_hbb_offset);
 
 #define printk(format...)
 

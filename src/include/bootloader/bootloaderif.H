@@ -46,6 +46,9 @@ namespace Bootloader{
 // Max Pairs
 #define MAX_ROW_COUNT 8
 
+// Max number of key/addr pairs
+#define MAX_KEY_ADDR_PAIRS 256
+
 // Location of running copy of HBB
 #ifdef BOOTLOADER
 #define HBB_HRMOR               (getHRMOR() - ( 2*MEGABYTE))
@@ -84,18 +87,21 @@ enum
 //-----------------------------------------------------------------------------------
 
 
-// To keep all the Stashed Keys & Addrs together within this struct
+// A struct to store a key/address pair.
 struct keyAddrPair_t
 {
-    keyAddrPair_t(uint8_t initVal) {
-        for(uint8_t i=0; i < MAX_ROW_COUNT; i++)
-        {
-            key[i] = initVal;
-            addr[i] = initVal;
-        }
+    // Initialize all struct members to the provided value
+    keyAddrPair_t(uint8_t initVal) : key(initVal), addr(initVal)
+    {
     }
-    uint8_t  key[MAX_ROW_COUNT];
-    uint64_t addr[MAX_ROW_COUNT];
+
+    // Default constructor - initialize all members to 0
+    keyAddrPair_t() : key(0), addr(0)
+    {
+    }
+
+    uint8_t  key;
+    uint64_t addr;
 } __attribute__((packed));
 
 
@@ -118,8 +124,11 @@ struct BlToHbData
                    xscomBAR(MEMMAP::MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR),
                    lpcBAR(MEMMAP::MMIO_GROUP0_CHIP0_LPC_BASE_ADDR),
                    securityOverride(0), allowAttrOverrides(0),
-                   sizeOfStructure(0), keyAddrStashData(0),
-                   secBackdoorBit(0), cacheSizeMb(0) {}
+                   sizeOfStructure(0), secBackdoorBit(0),
+                   cacheSizeMb(0), numKeyAddrPair(0)
+    {
+        memset(keyAddrStashData, 0, sizeof(keyAddrStashData));
+    }
 
     // Simple way to tell if data is valid
     uint64_t eyeCatch;
@@ -151,12 +160,15 @@ struct BlToHbData
     bool allowAttrOverrides;
     // Size of this structure (Use for backwards compatibility)
     size_t sizeOfStructure;
-    //keyAddr stash data
-    keyAddrPair_t  keyAddrStashData;
     // Secure Setting - SBE Security Backdoor
     bool secBackdoorBit;
     // The cache size available to HB (in MB)
     uint16_t cacheSizeMb;
+    // The number of keyAddrPair structures included in SBE to BL comm area
+    size_t numKeyAddrPair;
+    //keyAddr stash data
+    keyAddrPair_t keyAddrStashData[MAX_KEY_ADDR_PAIRS];
+
 } __attribute__((packed));
 
 /**

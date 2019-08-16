@@ -135,8 +135,10 @@ void BlToHbDataManager::initValid (const Bootloader::BlToHbData& i_data)
             iv_data.lpcBAR, iv_data.xscomBAR, static_cast<void *>(&iv_data) );
 
     iv_data.sizeOfStructure = i_data.sizeOfStructure;
-    memcpy(&iv_data.keyAddrStashData, &i_data.keyAddrStashData,
-           sizeof(Bootloader::keyAddrPair_t));
+    iv_data.numKeyAddrPair = i_data.numKeyAddrPair;
+    memcpy(iv_data.keyAddrStashData,
+           i_data.keyAddrStashData,
+           (i_data.numKeyAddrPair * sizeof(Bootloader::keyAddrPair_t)));
 
     iv_data.cacheSizeMb = i_data.cacheSizeMb;
     printk("Hostboot cache size=%d MB\n", iv_data.cacheSizeMb);
@@ -329,9 +331,24 @@ const uint64_t BlToHbDataManager::getXscomBAR() const
     return reinterpret_cast<uint64_t>(iv_data.xscomBAR);
 }
 
-const Bootloader::keyAddrPair_t BlToHbDataManager::getKeyAddrPairs() const
+const size_t BlToHbDataManager::getNumKeyAddrPair() const
 {
-    return iv_data.keyAddrStashData;
+    return iv_data.numKeyAddrPair;
+}
+
+const uint8_t* BlToHbDataManager::getKeys() const
+{
+    return &(iv_data.keyAddrStashData[0].key);
+}
+
+const uint64_t* BlToHbDataManager::getAddresses() const
+{
+    // To fetch the first address, we need to get the address
+    // of the start of the key/addr structure in memory and skip
+    // over all the keys (numKeyAddrPair * sizeof(key) bytes forward).
+    const uint8_t* l_firstKey = getKeys();
+    return reinterpret_cast<const uint64_t*>(
+        (l_firstKey + getNumKeyAddrPair() * sizeof(*l_firstKey)));
 }
 
 const size_t BlToHbDataManager::getBlToHbDataSize() const

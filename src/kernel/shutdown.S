@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2018
+# Contributors Listed Below - COPYRIGHT 2012,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -75,7 +75,6 @@
     ;// @param[in] r6 - Payload Data
     ;// @param[in] r7 - PIR of local master cpu - only set by local master
     ;// @param[in] r8 - System address of start_payload_data_area
-    ;// @param[in] r9 - Perform URMOR Hack
     ;//
 .global kernel_shutdown
 kernel_shutdown:
@@ -123,17 +122,6 @@ kernel_shutdown_ea0_1_mode:
     mfmsr r10
     andis. r10, r10, 64  ;// Check if 41 (SMF) is on
     beq skip_urmor       ;// if result of AND = zero then CR[EQ] bit set
-
-    ;// See if we need to do the URMOR hack
-    ;// Due to bug in P9, need to subtract op-code
-
-    cmpwi cr0, r9, 0x1   ;// Hack requested == 0x1
-    bne cr0, skip_urmor_hack
-
-    lis r10, P9_URMOR_OPAL_HACK@h
-    ori r10, r10, P9_URMOR_OPAL_HACK@l
-    sub r4,r4,r10
-skip_urmor_hack:
     mtspr URMOR, r4
 skip_urmor:
 

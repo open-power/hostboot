@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2018
+# Contributors Listed Below - COPYRIGHT 2015,2019
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -352,9 +352,6 @@ STD_INTERRUPT(debug, HBBL_debug)
     ;//
     ;// @param[in] r3 - Hostboot HRMOR
     ;// @param[in] r4 - Hostboot Entry
-    ;// @param[in] r5 - Apply P9C/P9N hack. Due to a bug on p9 chips, URMOR val
-    ;//                 comes with operation code attached to it. We need to
-    ;//                 subtract that op code to get the actual URMOR value.
     ;//
 .global enterHBB
 enterHBB:
@@ -388,17 +385,8 @@ switchToHBB:
     mfmsr r6
     andis. r6, r6, MSR_SMF_AND_MASK    ;// Check if 41 (SMF) is on
     beq skip_urmor       ;// if result of AND = zero then CR[EQ] bit set
-
-    cmpwi cr0, r5, 0x1   ;// Hack requested == 0x1
-    bne cr0, skip_urmor_hack
-
-        ;// Due to bug in P9N, P9C early levels need to subtract op-code
-    lis r10, P9N_URMOR_HACK@h
-    ori r10, r10, P9N_URMOR_HACK@l
-    sub r3,r3,r10
-
-skip_urmor_hack:
     mtspr URMOR, r3
+
 skip_urmor:
 
         ;// Clear out SLBs, ERATs, etc.

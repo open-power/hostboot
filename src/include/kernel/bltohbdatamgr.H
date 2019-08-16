@@ -203,12 +203,32 @@ class BlToHbDataManager
          */
         const size_t getBlToHbDataSize() const;
 
-        /*
-        * @brief Returns internal BlToHbData keyAddr pairs
+       /**
+        * @brief returns the number of key/address pairs passed to BL by SBE
         *
-        * @return keyAddrPair_t     Key Address Pairs Struct
+        * @return size_t the number of key/address pairs
         */
-        const Bootloader::keyAddrPair_t getKeyAddrPairs() const;
+        const size_t getNumKeyAddrPair() const;
+
+        /*
+        * @brief The key/addr array is stored in the memory like so:
+        *        [key0key1...keyNAddr0Addr1...AddrN]. This function will return
+        *        the pointer to the key0. The number N can be fetched via
+        *        getNumKeyAddrPairs().
+        *
+        * @return uint8_t* A Pointer to the first key in the key/addr array.
+        */
+        const uint8_t* getKeys() const;
+
+        /*
+        * @brief The key/addr array is stored in the memory like so:
+        *        [key0key1...keyNAddr0Addr1...AddrN]. This function will return
+        *        the pointer to the Addr0. The number N can be fetched via
+        *        getNumKeyAddrPairs().
+        *
+        * @return uint64_t* A Pointer to the first address in the key/addr array
+        */
+        const uint64_t* getAddresses() const;
 
         /*
         * @brief Returns the value of SBE security backdoor enabled bit
