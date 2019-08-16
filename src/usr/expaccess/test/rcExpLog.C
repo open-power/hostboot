@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/expscom/expscom_reasoncodes.H $               */
+/* $Source: src/usr/expaccess/test/rcExpLog.C $                           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2019                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,33 +22,34 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __EXPSCOM_REASONCODES_H
-#define __EXPSCOM_REASONCODES_H
+/**
+ *  @file rcExpLog.C
+ *  @brief Call fapi2::ReturnCode functions for explorer logs
+ */
+#include <cxxtest/TestSuite.H>
+#include <fapi2.H>
+#include <plat_hwp_invoker.H>
+#include <hwp_error_info.H>
+#include <hwp_ffdc_classes.H>
 
-#include <hbotcompid.H>
+#include <rcExpLog.H>
 
-namespace EXPSCOM
+fapi2::ReturnCode exp_error_rc(
+    fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const uint32_t i_active_log_size,
+    const uint32_t i_saved_log_size)
 {
-    enum EXPSCOMModuleId
-    {
-        MOD_OCMBSCOM_INVALID    = 0x00, // Zero is an invalid module id
-        MOD_OCMB_UTILS          = 0x01, // expscom_utils.C
-    };
+    FAPI_INF("Enter exp_error_rc (active %d, saved %d)...",
+      i_active_log_size, i_saved_log_size);
 
-    enum EXPSCOMReasonCode
-    {
-        RC_INVALID                   = EXPSCOM_COMP_ID | 0x00,
-        RC_INVALID_LENGTH            = EXPSCOM_COMP_ID | 0x01,
-        RC_INVALID_MODEL_TYPE        = EXPSCOM_COMP_ID | 0x02,
-        RC_INVALID_OPTYPE            = EXPSCOM_COMP_ID | 0x03,
-        RC_INVALID_ADDRESS           = EXPSCOM_COMP_ID | 0x04,
-    };
+    FAPI_ASSERT(0, fapi2::COLLECT_EXPLORER_ERROR()
+                   .set_OCMB_CHIP_TARGET(i_ocmb_target)
+                   .set_EXP_ACTIVE_LOG_SIZE(i_active_log_size)
+                   .set_EXP_SAVED_LOG_SIZE(i_saved_log_size),
+                   "Testcase exp_error_rc assert");
 
-    enum UserDetailsTypes
-    {
-        EXPSCOM_UDT_ACTIVE_LOG     = 0x01,
-        EXPSCOM_UDT_SAVED_LOG      = 0x02,
-    };
-};
+fapi_try_exit:
 
-#endif
+    FAPI_INF("Exiting exp_error_rc...");
+    return fapi2::current_err;
+}

@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/expscom/expscom_reasoncodes.H $               */
+/* $Source: src/usr/expaccess/plugins/expscomUdParserFactory.H $          */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2019                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,32 +22,36 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __EXPSCOM_REASONCODES_H
-#define __EXPSCOM_REASONCODES_H
+/**
+ *  @file  expscomUdParserFactory.H
+ *  @brief Registers Explorer User Detail parsers
+ */
+#if !defined(_EXPSCOMUDPARSERFACTORY_H)
+#define _EXPSCOMUDPARSERFACTORY_H
 
-#include <hbotcompid.H>
+#include "errludparserfactory.H"
+#include "errludP_expscom.H"
 
 namespace EXPSCOM
 {
-    enum EXPSCOMModuleId
+    class UserDetailsParserFactory
+        : public ERRORLOG::ErrlUserDetailsParserFactory
     {
-        MOD_OCMBSCOM_INVALID    = 0x00, // Zero is an invalid module id
-        MOD_OCMB_UTILS          = 0x01, // expscom_utils.C
-    };
+        public:
+            UserDetailsParserFactory()
+            {
+                registerParser<UdParserExpActiveLog>
+                  (EXPSCOM_UDT_ACTIVE_LOG);
 
-    enum EXPSCOMReasonCode
-    {
-        RC_INVALID                   = EXPSCOM_COMP_ID | 0x00,
-        RC_INVALID_LENGTH            = EXPSCOM_COMP_ID | 0x01,
-        RC_INVALID_MODEL_TYPE        = EXPSCOM_COMP_ID | 0x02,
-        RC_INVALID_OPTYPE            = EXPSCOM_COMP_ID | 0x03,
-        RC_INVALID_ADDRESS           = EXPSCOM_COMP_ID | 0x04,
-    };
+                registerParser<UdParserExpSavedLog>
+                  (EXPSCOM_UDT_SAVED_LOG);
+            }
 
-    enum UserDetailsTypes
-    {
-        EXPSCOM_UDT_ACTIVE_LOG     = 0x01,
-        EXPSCOM_UDT_SAVED_LOG      = 0x02,
+        private:
+
+            UserDetailsParserFactory(const UserDetailsParserFactory &);
+            UserDetailsParserFactory & operator=
+                (const UserDetailsParserFactory &);
     };
 };
 

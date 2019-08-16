@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/expscom/expscom_reasoncodes.H $               */
+/* $Source: src/usr/expaccess/test/rcExpLog.H $                           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2019                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,33 +22,28 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __EXPSCOM_REASONCODES_H
-#define __EXPSCOM_REASONCODES_H
+/**
+ * @file  rcExpLog.H
+ *
+ * @brief These procedures provide fapi2 return codes with desired data to
+ *        support testing from expErrlTest
+ */
+#ifndef _RC_EXPLOG_H_
+#define _RC_EXPLOG_H_
 
-#include <hbotcompid.H>
+#include <fapi2.H>
 
-namespace EXPSCOM
-{
-    enum EXPSCOMModuleId
-    {
-        MOD_OCMBSCOM_INVALID    = 0x00, // Zero is an invalid module id
-        MOD_OCMB_UTILS          = 0x01, // expscom_utils.C
-    };
 
-    enum EXPSCOMReasonCode
-    {
-        RC_INVALID                   = EXPSCOM_COMP_ID | 0x00,
-        RC_INVALID_LENGTH            = EXPSCOM_COMP_ID | 0x01,
-        RC_INVALID_MODEL_TYPE        = EXPSCOM_COMP_ID | 0x02,
-        RC_INVALID_OPTYPE            = EXPSCOM_COMP_ID | 0x03,
-        RC_INVALID_ADDRESS           = EXPSCOM_COMP_ID | 0x04,
-    };
-
-    enum UserDetailsTypes
-    {
-        EXPSCOM_UDT_ACTIVE_LOG     = 0x01,
-        EXPSCOM_UDT_SAVED_LOG      = 0x02,
-    };
-};
+/**
+ * @brief Creates a test RC with added Explorer log trace data
+ * @param i_ocmb_target - Explorer target
+ * @param i_active_log_size - maximum size of active (RAM) data to add
+ * @param i_saved_log_size - maximum size of saved (SPI flash) data to add
+ * @return ReturnCode with added error log data
+ */
+fapi2::ReturnCode exp_error_rc(
+               fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+               const uint32_t i_active_log_size,
+               const uint32_t i_saved_log_size );
 
 #endif
