@@ -1272,7 +1272,7 @@ int32_t AnalyzeNvdimmHealthStatRegs( ExtensibleChip * i_chip,
         // some intermittent error must be triggering the FIR that isn't a
         // persistency lost error which would cause us to mask. The rule code
         // handles the actual thresholding here.
-        if ( io_sc.service_data->IsAtThreshold() )
+        if ( io_sc.service_data->IsAtThreshold() && !errFound )
         {
             io_sc.service_data->setSignature( getHuid(dimm),
                                               PRDFSIG_IntNvdimmErr );
