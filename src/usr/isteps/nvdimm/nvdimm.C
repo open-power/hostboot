@@ -130,6 +130,24 @@ static constexpr size_t MAX_TPM_SIZE = 34;
 static constexpr uint8_t KEY_TERMINATE_BYTE = 0x00;
 static constexpr uint8_t KEY_ABORT_BYTE = 0xFF;
 
+#ifndef __HOSTBOOT_RUNTIME
+// Warning thresholds
+static constexpr uint8_t THRESHOLD_ES_LIFETIME = 0x07;    // 7%
+static constexpr uint8_t THRESHOLD_NVM_LIFETIME = 0x31;   // 49%
+
+// 12 bit fixed point temperature in celsius degrees
+// with following bit format:
+//  [15:13]Reserved
+//  [12]Sign 0 = positive, 1 = negative The value of 0 C should be expressed as a positive value
+//  [11]128 [10]64 [9]32 [8]16 [7]8 [6]4 [5]2 [4]1 [3]0.5 [2]0.25
+//  [1]0.125   Optional for temperature reporting fields; not used for temperature threshold fields
+//  [0]0.0625  Optional for temperature reporting fields; not used for temperature threshold fields
+static constexpr uint8_t THRESHOLD_ES_TEMP_HIGH_1 = 0x03; // 52.5 C
+static constexpr uint8_t THRESHOLD_ES_TEMP_HIGH_0 = 0x48; // 52.5 C
+static constexpr uint8_t THRESHOLD_ES_TEMP_LOW_1 = 0x00;  // 2.5 C
+static constexpr uint8_t THRESHOLD_ES_TEMP_LOW_0 = 0x28;  // 2.5 C
+#endif
+
 // Definition of ENCRYPTION_KEY_VALIDATION -- page 5 offset 0x2A
 typedef union {
     uint8_t whole;
@@ -2077,6 +2095,97 @@ errlHndl_t nvdimm_init(Target *i_nvdimm)
 
 
     return l_err;
+}
+
+
+void nvdimm_thresholds(TARGETING::TargetHandleList &i_nvdimmList)
+{
+    TRACUCOMP(g_trac_nvdimm, ENTER_MRK"nvdimm_thresholds()");
+
+    errlHndl_t l_err = nullptr;
+
+    for (const auto & l_nvdimm : i_nvdimmList)
+    {
+        // ES_LIFETIME_WARNING_THRESHOLD
+        l_err = nvdimmWriteReg(l_nvdimm,
+                               ES_LIFETIME_WARNING_THRESHOLD,
+                               THRESHOLD_ES_LIFETIME);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm,
+                      ERR_MRK"nvdimm_thresholds() nvdimm[%X] "
+                      "error setting ES_LIFETIME_WARNING_THRESHOLD",
+                      get_huid(l_nvdimm));
+            errlCommit( l_err, NVDIMM_COMP_ID );
+        }
+
+        // NVM_LIFETIME_WARNING_THRESHOLD
+        l_err = nvdimmWriteReg(l_nvdimm,
+                               NVM_LIFETIME_WARNING_THRESHOLD,
+                               THRESHOLD_NVM_LIFETIME);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm,
+                      ERR_MRK"nvdimm_thresholds() nvdimm[%X] "
+                      "error setting NVM_LIFETIME_WARNING_THRESHOLD",
+                      get_huid(l_nvdimm));
+            errlCommit( l_err, NVDIMM_COMP_ID );
+        }
+
+        // ES_TEMP_WARNING_HIGH_THRESHOLD1
+        l_err = nvdimmWriteReg(l_nvdimm,
+                               ES_TEMP_WARNING_HIGH_THRESHOLD1,
+                               THRESHOLD_ES_TEMP_HIGH_1);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm,
+                      ERR_MRK"nvdimm_thresholds() nvdimm[%X] "
+                      "error setting ES_TEMP_WARNING_HIGH_THRESHOLD1",
+                      get_huid(l_nvdimm));
+            errlCommit( l_err, NVDIMM_COMP_ID );
+        }
+
+        // ES_TEMP_WARNING_HIGH_THRESHOLD0
+        l_err = nvdimmWriteReg(l_nvdimm,
+                               ES_TEMP_WARNING_HIGH_THRESHOLD0,
+                               THRESHOLD_ES_TEMP_HIGH_0);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm,
+                      ERR_MRK"nvdimm_thresholds() nvdimm[%X] "
+                      "error setting ES_TEMP_WARNING_HIGH_THRESHOLD0",
+                      get_huid(l_nvdimm));
+            errlCommit( l_err, NVDIMM_COMP_ID );
+        }
+
+        // ES_TEMP_WARNING_LOW_THRESHOLD1
+        l_err = nvdimmWriteReg(l_nvdimm,
+                               ES_TEMP_WARNING_LOW_THRESHOLD1,
+                               THRESHOLD_ES_TEMP_LOW_1);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm,
+                      ERR_MRK"nvdimm_thresholds() nvdimm[%X] "
+                      "error setting ES_TEMP_WARNING_LOW_THRESHOLD1",
+                      get_huid(l_nvdimm));
+            errlCommit( l_err, NVDIMM_COMP_ID );
+        }
+
+        // ES_TEMP_WARNING_LOW_THRESHOLD0
+        l_err = nvdimmWriteReg(l_nvdimm,
+                               ES_TEMP_WARNING_LOW_THRESHOLD0,
+                               THRESHOLD_ES_TEMP_LOW_0);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm,
+                      ERR_MRK"nvdimm_thresholds() nvdimm[%X] "
+                      "error setting ES_TEMP_WARNING_LOW_THRESHOLD0",
+                      get_huid(l_nvdimm));
+            errlCommit( l_err, NVDIMM_COMP_ID );
+        }
+    }
+
+    TRACUCOMP(g_trac_nvdimm, EXIT_MRK"nvdimm_thresholds()");
 }
 
 

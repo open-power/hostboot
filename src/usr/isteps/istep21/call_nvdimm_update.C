@@ -68,6 +68,9 @@ void call_nvdimm_update()
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                     "call_nvdimm_update(): nvdimm update failed");
         }
+
+        // Set the threshold warnings
+        NVDIMM::nvdimm_thresholds(l_nvdimmTargetList);
     }
 
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,EXIT_MRK"call_nvdimm_update()");

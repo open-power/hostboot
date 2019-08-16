@@ -72,6 +72,15 @@ errlHndl_t nvdimm_restore(TARGETING::TargetHandleList &i_nvdimmList);
 bool nvdimm_update(TARGETING::TargetHandleList &i_nvdimmList);
 
 
+/**
+ * @brief Entry function to set NVDIMM thresholds
+ *
+ * @param[in] i_nvdimmList - list of nvdimm targets
+ *
+ **/
+void nvdimm_thresholds(TARGETING::TargetHandleList &i_nvdimmList);
+
+
 #endif
 
 
