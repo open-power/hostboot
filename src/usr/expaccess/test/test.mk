@@ -30,6 +30,16 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include
 EXTRAINCDIR += ${ROOTPATH}/src/import
+EXTRAINCDIR += ${ROOTPATH}/src/usr/expaccess
+EXTRAINCDIR += ${ROOTPATH}/src/usr/expaccess/test
 
+# FIXME RTC: 210975
+#VPATH += ${ROOTPATH}/src/usr/expaccess/test/
+#VPATH += ${ROOTPATH}/src/usr/expaccess/
+#VPATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
+
+#OBJS += exptest_utils.o
+#OBJS += exp_collect_explorer_log.o
+#OBJS += rcExpLog.o
 
 include ${ROOTPATH}/config.mk
