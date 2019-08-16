@@ -269,8 +269,8 @@ inline fapi2::ReturnCode calc_trfc_dlr(const fapi2::Target<fapi2::TARGET_TYPE_DI
             // which they "shouldn't" mess up as long as use "attribute" enums.
             // if openpower messes this up we can at least catch it
             FAPI_ASSERT( false,
-                         fapi2::MSS_INVALID_FINE_REFRESH()
-                         .set_REFRESH_MODE(i_refresh_mode),
+                         fapi2::MSS_INVALID_FINE_REFRESH_MODE()
+                         .set_FINE_REF_MODE(i_refresh_mode),
                          "Incorrect Fine Refresh Mode received: %d ",
                          i_refresh_mode);
             break;

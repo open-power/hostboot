@@ -1178,18 +1178,6 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_MEM_PORT_POS_OF_FAIL_THROTTLE</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-          This is the fapi position of the port that failed to calculate
-          memory throttles given the passed in watt target and or utilization
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint64</valueType>
-        <writeable/>
-    </attribute>
-
-    <attribute>
         <id>ATTR_MSS_MEM_M_DRAM_CLOCKS</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>

@@ -369,6 +369,20 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_INVALID_FREQ_PASSED_IN</rc>
+    <description>
+        An invalid Freq value has been set
+    </description>
+    <ffdc>FREQ</ffdc>
+    <ffdc>FUNCTION</ffdc>
+    <ffdc>DIMM_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_INVALID_FREQUENCY</rc>
     <description>
       An invalid frequency was passed to frequency to clock period
@@ -1179,6 +1193,52 @@
     <callout>
         <procedure>CODE</procedure>
         <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_DRAM_WIDTH</rc>
+    <description>
+        Code only supports x4 and x8 drams at this time
+    </description>
+    <ffdc>DRAM_WIDTH</ffdc>
+    <callout>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_PAGE_SIZE</rc>
+    <description>
+        Invalid page size
+    </description>
+    <ffdc>DRAM_WIDTH</ffdc>
+    <callout>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
+      <priority>HIGH</priority>
+    </callout>
+     <callout>
+      <target>DIMM_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
     </callout>
   </hwpError>
 

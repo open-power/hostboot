@@ -272,7 +272,7 @@ fapi2::ReturnCode generate_wildcard_mask(const uint32_t i_hash, uint32_t& o_mask
 
     if(ANY_SIZE == l_uint32_buf)
     {
-        l_mask.setBit(TT::DIMM_SIZE_START, TT::DIMM_SIZE_LEN);
+        l_mask.setBit<TT::DIMM_SIZE_START, TT::DIMM_SIZE_LEN>();
     }
 
     //DRAM_GEN wildcard
@@ -283,7 +283,7 @@ fapi2::ReturnCode generate_wildcard_mask(const uint32_t i_hash, uint32_t& o_mask
 
     if(ANY_GEN == l_uint8_buf)
     {
-        l_mask.setBit(TT::DRAM_GEN_START, TT::DRAM_GEN_LEN);
+        l_mask.setBit<TT::DRAM_GEN_START, TT::DRAM_GEN_LEN>();
     }
 
     //DIMM_TYPE wildcard
@@ -294,7 +294,7 @@ fapi2::ReturnCode generate_wildcard_mask(const uint32_t i_hash, uint32_t& o_mask
 
     if(ANY_TYPE == l_uint8_buf)
     {
-        l_mask.setBit(TT::DIMM_TYPE_START, TT::DIMM_TYPE_LEN);
+        l_mask.setBit<TT::DIMM_TYPE_START, TT::DIMM_TYPE_LEN>();
     }
 
     //DRAM_WIDTH wildcard
@@ -305,7 +305,7 @@ fapi2::ReturnCode generate_wildcard_mask(const uint32_t i_hash, uint32_t& o_mask
 
     if(ANY_WIDTH == l_uint8_buf)
     {
-        l_mask.setBit(TT::DRAM_WIDTH_START, TT::DRAM_WIDTH_LEN);
+        l_mask.setBit<TT::DRAM_WIDTH_START, TT::DRAM_WIDTH_LEN>();
     }
 
     //DRAM_DENSITY wildcard
@@ -316,7 +316,7 @@ fapi2::ReturnCode generate_wildcard_mask(const uint32_t i_hash, uint32_t& o_mask
 
     if(ANY_DENSITY == l_uint8_buf)
     {
-        l_mask.setBit(TT::DRAM_DENSITY_START, TT::DRAM_DENSITY_LEN);
+        l_mask.setBit<TT::DRAM_DENSITY_START, TT::DRAM_DENSITY_LEN>();
     }
 
     //DRAM_STACK_TYPE wildcard
@@ -327,7 +327,7 @@ fapi2::ReturnCode generate_wildcard_mask(const uint32_t i_hash, uint32_t& o_mask
 
     if(ANY_STACK_TYPE == l_uint8_buf)
     {
-        l_mask.setBit(TT::DRAM_STACK_TYPE_START, TT::DRAM_STACK_TYPE_LEN);
+        l_mask.setBit<TT::DRAM_STACK_TYPE_START, TT::DRAM_STACK_TYPE_LEN>();
     }
 
     //DRAM_MFGID wildcard
@@ -338,7 +338,7 @@ fapi2::ReturnCode generate_wildcard_mask(const uint32_t i_hash, uint32_t& o_mask
 
     if(ANY_MFGID == l_uint16_buf)
     {
-        l_mask.setBit(TT::DRAM_MFGID_START, TT::DRAM_MFGID_LEN);
+        l_mask.setBit<TT::DRAM_MFGID_START, TT::DRAM_MFGID_LEN>();
     }
 
 
@@ -352,7 +352,7 @@ fapi2::ReturnCode generate_wildcard_mask(const uint32_t i_hash, uint32_t& o_mask
 
         if(ANY_PORT == l_uint8_buf)
         {
-            l_mask.setBit(TT::DIMMS_PER_PORT_START, TT::DIMMS_PER_PORT_LEN);
+            l_mask.setBit<TT::DIMMS_PER_PORT_START, TT::DIMMS_PER_PORT_LEN>();
         }
     }
 
@@ -366,7 +366,7 @@ fapi2::ReturnCode generate_wildcard_mask(const uint32_t i_hash, uint32_t& o_mask
 
         if(ANY_HEIGHT == l_uint8_buf)
         {
-            l_mask.setBit(TT::DIMM_MODULE_HEIGHT_START, TT::DIMM_MODULE_HEIGHT_LEN);
+            l_mask.setBit<TT::DIMM_MODULE_HEIGHT_START, TT::DIMM_MODULE_HEIGHT_LEN>();
         }
     }
 

@@ -41,6 +41,7 @@
 #include <generic/memory/lib/utils/power_thermal/gen_throttle_traits.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/mss_generic_system_attribute_getters.H>
+#include <generic/memory/lib/mss_generic_system_attribute_setters.H>
 #include <generic/memory/lib/mss_generic_attribute_setters.H>
 #include <generic/memory/lib/utils/mss_math.H>
 #include <generic/memory/lib/utils/pos.H>
@@ -1110,6 +1111,7 @@ fapi2::ReturnCode equalize_throttles (const std::vector< fapi2::Target<T> >& i_t
 
             if (mss::count_dimm(l_port) == 0)
             {
+                FAPI_INF("Seeing no DIMMs on %s -- skipping", mss::c_str(l_port));
                 continue;
             }
 
@@ -1140,6 +1142,7 @@ fapi2::ReturnCode equalize_throttles (const std::vector< fapi2::Target<T> >& i_t
 
                 if (mss::count_dimm(l_port) == 0)
                 {
+                    FAPI_INF("Seeing no DIMMs on %s -- skipping", mss::c_str(l_port));
                     continue;
                 }
 
@@ -1149,7 +1152,7 @@ fapi2::ReturnCode equalize_throttles (const std::vector< fapi2::Target<T> >& i_t
                 l_fin_slot = l_min_slot;
                 l_fin_port = l_min_port;
 
-                //Need to create throttle object for each mca in order to get dimm configuration and power curves
+                //Need to create throttle object for each port in order to get dimm configuration and power curves
                 //To calculate the slot/port utilization and total port power consumption
                 fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
 
@@ -1179,10 +1182,9 @@ fapi2::ReturnCode equalize_throttles (const std::vector< fapi2::Target<T> >& i_t
                 {
                     //Need this because of pos traits and templating stuff
                     uint64_t l_fail = mss::fapi_pos(l_port);
+
                     //Set the failing port. OCC just needs one failing port, doesn't need all of them
-                    FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_MSS_MEM_PORT_POS_OF_FAIL_THROTTLE,
-                                             fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                                             l_fail) );
+                    FAPI_TRY( attr::set_port_pos_of_fail_throttle(l_fail) );
 
                     FAPI_ASSERT_NOEXIT( false,
                                         fapi2::MSS_CALC_PORT_POWER_EXCEEDS_MAX()

@@ -129,15 +129,15 @@ extern "C"
 
                     // Set the thermal power throttle
                     //Set the PMIC current slope, intercept and limit
-                    mss::power_thermal::get_power_attrs (l_throttle_type,
-                                                         l_port,
-                                                         l_thermal_power_slope_v,
-                                                         l_thermal_power_intecept_v,
-                                                         l_thermal_power_limit_v,
-                                                         l_current_curve_with_limit_v,
-                                                         l_slope,
-                                                         l_intercept,
-                                                         l_limit);
+                    FAPI_TRY( mss::power_thermal::get_power_attrs (l_throttle_type,
+                              l_port,
+                              l_thermal_power_slope_v,
+                              l_thermal_power_intecept_v,
+                              l_thermal_power_limit_v,
+                              l_current_curve_with_limit_v,
+                              l_slope,
+                              l_intercept,
+                              l_limit) );
 
                     FAPI_TRY(mss::attr::set_total_pwr_slope(l_port, l_slope));
                     FAPI_TRY(mss::attr::set_total_pwr_intercept(l_port, l_intercept));
