@@ -40,33 +40,125 @@ namespace NVDIMM
 namespace BPM
 {
 
-// All of the various commands used for the BPM update
-// BSL: Bootstrap Loader commands
-// BPM: Backup Power Module
+/*
+ * All of the various commands used for the BPM update. All commands can only be
+ * sent after write protection on the BPM has been disabled and the update magic
+ * values have been written to the BPM's magic registers.
+ *
+ * BSL: Bootstrap Loader commands
+ * BPM: Backup Power Module
+*/
 enum COMMAND : uint8_t
 {
+    // A payload sent with this command will be interpreted and processed by the
+    // NVDIMM module.
+    BPM_LOCAL                 = 0xFF,
+
+    /*
+     * These are LOCAL commands. These commands MUST be sent only outside of BSL
+     * BSL mode and must be paired with the BSP command BPM_LOCAL. Otherwise,
+     * unpredicatable errors will occur.
+     *
+     * When using issueCommand() for these commands they should always be sent
+     * with a 0 ms delay. This will ensure that the response packet is not
+     * checked from the BPM. Since these are processed by the NVDIMM it makes
+     * no sense to get a response from the BPM and attempting to do so will
+     * cause errors.
+     */
     BCL_ENTER_BSL_MODE        = 0x01,
     BCL_IS_BSL_MODE           = 0x02,
     BCL_WRITE_REG             = 0x03,
     BCL_START_UPDATE          = 0x04,
     BCL_END_UPDATE            = 0x05,
     BCL_IS_UPDATE_IN_PROGRESS = 0x06,
-    BSL_RX_DATA_BLOCK         = 0x10,
-    BSL_RX_PASSWORD           = 0x11,
-    BSL_ERASE_SEGMENT         = 0x12,
-    BSL_TOGGLE_INFO           = 0x13,
-    BSL_ERASE_BLOCK           = 0x14,
-    BSL_MASS_ERASE            = 0x15,
-    BSL_CRC_CHECK             = 0x16,
-    BSL_LOAD_PC               = 0x17,
-    BSL_TX_DATA_BLOCK         = 0x18,
-    BSL_TX_BSL_VERSION        = 0x19,
-    BSL_TX_BUFFER_SIZE        = 0x1A,
-    BSL_RX_DATA_BLOCK_FAST    = 0x1B,
-    BSL_RESET_DEVICE          = 0x1C,
-    BSL_VERIFY_BLOCK          = 0x1D,
+
+    // A payload sent with this command will be sent transparently to the BPM.
+    // This command must only be used while the BPM is in BSL mode.
     BPM_PASSTHROUGH           = 0xFE,
-    BPM_LOCAL                 = 0xFF,
+
+    /*
+     * These are PASSTHROUGH commands. These commands MUST be sent only while in
+     * BSL mode and must be paired with BSP command BPM_PASSTHROUGH. Otherwise,
+     * unpredicatable errors will occur.
+     */
+    // Writes a block of data to the BPM.
+    // Delay 1ms (default)
+    BSL_RX_DATA_BLOCK         = 0x10,
+    // Unlocks the BPM that is in BSL mode so that updates can occur.
+    // Delay 1ms (default)
+    BSL_RX_PASSWORD           = 0x11,
+    // Erases 128 bytes at the given address offset.
+    // WARNING: Due to BSL memory limitations, BSL cannot verify the address
+    //          is a valid config segment address offset and will blindly
+    //          erase 128 bytes of data starting at that offset. If an invalid
+    //          address is sent then the BPM will be bricked in a very
+    //          unpredicatable/unrecoverable way.
+    // Delay 250ms
+    BSL_ERASE_SEGMENT         = 0x12,
+    // Unknown, unused.
+    // Delay 0ms
+    BSL_TOGGLE_INFO           = 0x13,
+    // Unknown, unused.
+    // Delay 1ms (default)
+    BSL_ERASE_BLOCK           = 0x14,
+    // Erases the full firmware section on the BPM. The start of the firmware
+    // address must be supplied with this command.
+    // WARNING: Due to BSL memory limitations, BSL cannot verify the address
+    //          is a valid firmware address offset and will blindly erase 128
+    //          data starting at that offset. If an invalid address is sent
+    //          then the BPM will be bricked in a very
+    //          unpredicatable/unrecoverable way.
+    // Delay 250ms
+    BSL_MASS_ERASE            = 0x15,
+    // Sends the command to the BPM to perform the final CRC check on the
+    // firmware written to the BPM. If the CRC check doesn't match the expected
+    // CRC in the flash image then the firmware will not load on the BPM and it
+    // will remain in BSL mode until new firmware is loaded onto it.
+    //
+    // Delay 0
+    // The response packet must be checked externally from the issueCommand()
+    // function because the response packet returned from this command is unique
+    // to this command and will return the results of this command. For more
+    // info see the checkFirmwareCrc() function description, implementation, and
+    // the COMMAND_BSL_CRC_CHECK_RESPONSE_CODES enum.
+    BSL_CRC_CHECK             = 0x16,
+    // Unknown, unused.
+    // Delay 1ms (default)
+    BSL_LOAD_PC               = 0x17,
+    // Unknown, unused.
+    // Delay 1ms (default)
+    BSL_TX_DATA_BLOCK         = 0x18,
+    // Checks the Bootstrap Loader mode version on the BPM. Depending on this
+    // version, some parts of the update procedure may have changed.
+    //
+    // Delay 0ms
+    // The response packet must be checked externally from the issueCommand()
+    // function because the response packet returned from this command is unique
+    // to this command and will return the results of this command. For more
+    // info see the readBslVersion() function description and implementation.
+    BSL_TX_BSL_VERSION        = 0x19,
+    // Unknown, unused.
+    // Delay 1ms (default)
+    BSL_TX_BUFFER_SIZE        = 0x1A,
+    // Unknown, unused.
+    // Delay 1ms (default)
+    BSL_RX_DATA_BLOCK_FAST    = 0x1B,
+    // Resets the BPM and exits BSL mode.
+    // Delay 0ms
+    // Never check for a response packet from the BPM after sending the reset
+    // command because the BPM may not be back up and if it is it will not be
+    // in BSL mode anymore. If the response packet is checked then errors will
+    // occur.
+    BSL_RESET_DEVICE          = 0x1C,
+    // Verifies the block of data written to the BPM flash is identical to what
+    // was sent to it in a prior write. For more information see the
+    // verifyBlockWrite() description and implementation.
+    //
+    // Delay 0ms
+    // The response packet must be checked externally from the issueCommand()
+    // function because the response packet returned from this command is unique
+    // to this command and will return the results of this command.
+    BSL_VERIFY_BLOCK          = 0x1D,
 };
 
 // These are the various response codes returned by the BPM after the
@@ -195,6 +287,16 @@ constexpr size_t ALL_SEGMENTS_SIZE = 512;
 
 // Number of magic registers for the BPM
 constexpr size_t NUM_MAGIC_REGISTERS = 2;
+
+// These are the production magic values for the BPM that should be written in
+// BPM_MAGIC_REG1 and BPM_MAGIC_REG2 respectively.
+const uint8_t PRODUCTION_MAGIC_VALUES[NUM_MAGIC_REGISTERS] = {0x55, 0xAA};
+// These magic values to enable nvdimm-bpm interface. They must be written to
+// the magic registers BEFORE writing flash updates to the BPM in BSL mode.
+const uint8_t UPDATE_MODE_MAGIC_VALUES[NUM_MAGIC_REGISTERS] = {0xB0, 0xDA};
+// These are the segment read magic values that allow dumping of the segment
+// data from the BPM.
+const uint8_t SEGMENT_READ_MAGIC_VALUES[NUM_MAGIC_REGISTERS] = {0xBA, 0xAB};
 
 typedef std::vector<uint8_t> payload_t;
 
@@ -409,6 +511,14 @@ public:
     bool attemptAnotherUpdate();
 
     /**
+     *  @brief Returns if an update has been attempted on this BPM.
+     *
+     *  @return     bool        true if an update has been attempted before.
+     *                          Otherwise, false.
+     */
+    bool hasAttemptedUpdate();
+
+    /**
      *  @brief returns the nvdimm that is associated with this BPM.
      */
     const TARGETING::TargetHandle_t getNvdimm();
@@ -476,12 +586,20 @@ private:
      * @param[in]   i_opType    The operation type of the command. Must be one
      *                          of the COMMAND_STATUS_REGISTER_OP_TYPES
      *
+     * @param[in]   i_msDelay   How long to wait before the response from the
+     *                          BPM should be checked. Default 1 ms. If a delay
+     *                          of 0 ms is given then the response will not be
+     *                          read and it is the caller's responsibilty to
+     *                          check the response status. See COMMAND enum for
+     *                          required delays.
+     *
      * @return  errlHndl_t  nullptr on success. Otherwise, pointer to an
      *                      errlEntry.
      */
     errlHndl_t issueCommand(uint8_t i_command,
                             payload_t i_payload,
-                            uint8_t i_opType);
+                            uint8_t i_opType,
+                            int     i_msDelay = 1);
 
     /**
      * @brief This function issues a BSP command to the BPM by setting up a
@@ -499,12 +617,20 @@ private:
      * @param[in]   i_opType       The operation type of the BSP command. Must
      *                             be a COMMAND_STATUS_REGISTER_OP_TYPES
      *
+     * @param[in]   i_msDelay   How long to wait before the response from the
+     *                          BPM should be checked. Default 1 ms. If a delay
+     *                          of 0 ms is given then the response will not be
+     *                          read and it is the caller's responsibilty to
+     *                          check the response status. See COMMAND enum for
+     *                          required delays.
+     *
      * @return  errlHndl_t  nullptr on success. Otherwise, pointer to an
      *                      errlEntry.
      */
     errlHndl_t issueCommand(uint8_t i_bspCommand,
                             uint8_t i_command,
-                            uint8_t i_opType);
+                            uint8_t i_opType,
+                            int     i_msDelay = 1);
 
     /**
      * @brief This function checks if the BPM has entered update mode
@@ -680,6 +806,19 @@ private:
             uint8_t const (&i_magicValues)[NUM_MAGIC_REGISTERS]);
 
     /**
+     *  @brief Switches the page on the BPM to the given page. This function
+     *         must be executed only after the segment read magic values have
+     *         been written to the BPM's magic registers.
+     *
+     *  @param[in]  i_segmentCode   The segment code that corresponds to the
+     *                              page to switch to on the BPM.
+     *
+     *  @return     errlHndl_t      nullptr on success. Otherwise, an error
+     *
+     */
+    errlHndl_t switchBpmPage(uint16_t i_segmentCode);
+
+    /**
      *  @brief Dumps the given segment data from the BPM. CANNOT be in BSL mode.
      *
      *  @param[in]  i_segmentCode   The segment code that corresponds to the
@@ -838,6 +977,28 @@ private:
      */
     errlHndl_t getResponse(uint8_t * o_responseData,
                            uint8_t   i_responseSize);
+
+
+    /**
+     *  @brief Helper function to handle two potential errors that might occur in a
+     *         function that only returns a single error log. If the return error is
+     *         not nullptr then the second error will be linked to it and committed
+     *         if this is the final update attempt. Otherwise, it will be deleted
+     *         since the update procedure will occur again and may be successful.
+     *         If the return error is nullptr then the return error will point to
+     *         the second's error and the second error will point to nullptr.
+     *
+     *  @param[in/out]      io_returnErrl   A pointer to the error that would be
+     *                                      returned by the function that called
+     *                                      this one. If nullptr, then it will be
+     *                                      set point to the secondary error and
+     *                                      that error will become nullptr.
+     *
+     *  @param[in/out]     io_secondErrl    The secondary error that occurred which
+     *                                      in addition to the usual returned error.
+     */
+    void handleMultipleErrors(errlHndl_t& io_returnErrl,
+                              errlHndl_t& io_secondErrl);
 
     /**
      * @brief Calculates the CRC16 bytes for the BSL payload. This CRC differs

@@ -50,6 +50,8 @@ TRAC_INIT(&g_trac_bpm, BPM_COMP_NAME, 4*KILOBYTE);
 // For debug traces
 #define TRACUCOMP(args...)
 //#define TRACUCOMP(args...) TRACFCOMP(args)
+#define TRACUBIN(args...)
+//#define TRACUBIN(args...) TRACUBIN(args)
 
 // These constants are kept out of the header file since they aren't relevant
 // outside of this file.
@@ -61,13 +63,6 @@ const uint16_t BPM_CONFIG_START_ADDRESS = 0x1800;
 // defined by this constant. The sequence is SMOD
 const uint8_t BPM_PASSWORD[] = {0x53, 0x4D, 0x4F, 0x44};
 const size_t BPM_PASSWORD_LENGTH = 4;
-
-// These are the production magic values for the BPM that should be written in
-// BPM_MAGIC_REG1 and BPM_MAGIC_REG2 respectively.
-const uint8_t PRODUCTION_MAGIC_VALUES[NUM_MAGIC_REGISTERS] = {0x55, 0xAA};
-// These magic values to enable nvdimm-bpm interface. They must be written to
-// the magic registers BEFORE writing flash updates to the BPM in BSL mode.
-const uint8_t UPDATE_MODE_MAGIC_VALUES[NUM_MAGIC_REGISTERS] = {0xB0, 0xDA};
 
 // These are the segment codes used to dump out a particular config data segment
 // on the BPM.
@@ -93,7 +88,7 @@ const std::map<uint16_t, size_t> segmentMap
     {SEGMENT_D_CODE, SEGMENT_D_START_ADDR},
 };
 
-const size_t MAX_RETRY = 3;
+const uint8_t MAX_RETRY = 3;
 
 /**
  * @brief A helper function used in assert statements to verify the correct
@@ -192,9 +187,11 @@ bool isBslCommand(const uint8_t i_command)
 /**
  *  @brief Helper function to handle two potential errors that might occur in a
  *         function that only returns a single error log. If the return error is
- *         not nullptr then the second error will be linked to it and committed.
- *         Otherwise, the return error will point to the second's error and the
- *         second error will point to nullptr.
+ *         not nullptr then the second error will be linked to it and committed
+ *         if this is the final update attempt. Otherwise, it will be deleted
+ *         since the update procedure will occur again and may be successful.
+ *         If the return error is nullptr then the return error will point to
+ *         the second's error and the second error will point to nullptr.
  *
  *  @param[in/out]      io_returnErrl   A pointer to the error that would be
  *                                      returned by the function that called
@@ -205,9 +202,10 @@ bool isBslCommand(const uint8_t i_command)
  *  @param[in/out]     io_secondErrl    The secondary error that occurred which
  *                                      in addition to the usual returned error.
  */
-void handleMultipleErrors(errlHndl_t& io_returnErrl, errlHndl_t& io_secondErrl)
+void Bpm::handleMultipleErrors(errlHndl_t& io_returnErrl, errlHndl_t& io_secondErrl)
 {
-    if (io_returnErrl != nullptr)
+
+    if (iv_updateAttempted && (io_returnErrl != nullptr))
     {
         io_secondErrl->plid(io_returnErrl->plid());
         TRACFCOMP(g_trac_bpm, "Committing second error eid=0x%X with plid of "
@@ -217,9 +215,15 @@ void handleMultipleErrors(errlHndl_t& io_returnErrl, errlHndl_t& io_secondErrl)
         io_secondErrl->collectTrace(BPM_COMP_NAME);
         ERRORLOG::errlCommit(io_secondErrl, BPM_COMP_ID);
     }
-    else
+    else if (io_returnErrl == nullptr)
     {
         io_returnErrl = io_secondErrl;
+        io_secondErrl = nullptr;
+    }
+    else
+    {
+        // Another update attempt will be made, delete this secondary error.
+        delete io_secondErrl;
         io_secondErrl = nullptr;
     }
 
@@ -282,8 +286,6 @@ void runBpmUpdates(bpmList_t           * const i_16gb_BPMs,
     errlHndl_t errl = nullptr;
 
     do {
-        // @TODO RTC 212448 Enable updates once everything works
-        break;
 
         if (   (i_16gb_BPMs != nullptr)
             && (i_16gb_fwImage != nullptr)
@@ -304,10 +306,10 @@ void runBpmUpdates(bpmList_t           * const i_16gb_BPMs,
                         TRACFCOMP(g_trac_bpm, ERR_MRK
                                  "An error occurred during a 16GB_TYPE BPM "
                                  "update for NVDIMM 0x%.8X. "
-                                 "Commit and try again.",
+                                 "Try again.",
                                  nvdimmHuid);
-                        ERRORLOG::errlCommit(errl, BPM_COMP_ID);
 
+                        delete errl;
                         errl = bpm.runUpdate(*i_16gb_fwImage,
                                              *i_16gb_configImage);
                         if (errl != nullptr)
@@ -352,10 +354,10 @@ void runBpmUpdates(bpmList_t           * const i_16gb_BPMs,
                         TRACFCOMP(g_trac_bpm, ERR_MRK
                                  "An error occurred during a 32GB_TYPE BPM "
                                  "update for NVDIMM 0x%.8X. "
-                                 "Commit and try again.",
+                                 "Try again.",
                                  nvdimmHuid);
-                        ERRORLOG::errlCommit(errl, BPM_COMP_ID);
 
+                        delete errl;
                         errl = bpm.runUpdate(*i_32gb_fwImage,
                                              *i_32gb_configImage);
                         if (errl != nullptr)
@@ -521,6 +523,11 @@ bool Bpm::attemptAnotherUpdate()
     return iv_attemptAnotherUpdate;
 }
 
+bool Bpm::hasAttemptedUpdate()
+{
+    return iv_updateAttempted;
+}
+
 void Bpm::setAttemptAnotherUpdate()
 {
 
@@ -592,7 +599,7 @@ errlHndl_t Bpm::readBslVersion()
         }
 
         // Issue the BSL command
-        errl = issueCommand(BPM_PASSTHROUGH, payload, WRITE);
+        errl = issueCommand(BPM_PASSTHROUGH, payload, WRITE, 0);
         if (errl != nullptr)
         {
             break;
@@ -611,23 +618,19 @@ errlHndl_t Bpm::readBslVersion()
                   iv_bslVersion);
     } while(0);
 
-    do {
-        // Reset the device. This will exit BSL mode.
-        errlHndl_t exitErrl = resetDevice();
-        if (exitErrl != nullptr)
-        {
-            handleMultipleErrors(errl, exitErrl);
-            break;
-        }
+    // Reset the device. This will exit BSL mode.
+    errlHndl_t exitErrl = resetDevice();
+    if (exitErrl != nullptr)
+    {
+        handleMultipleErrors(errl, exitErrl);
+    }
 
-        // Exit update mode
-        exitErrl = exitUpdateMode();
-        if (exitErrl != nullptr)
-        {
-            handleMultipleErrors(errl, exitErrl);
-            break;
-        }
-    } while(0);
+    // Exit update mode
+    exitErrl = exitUpdateMode();
+    if (exitErrl != nullptr)
+    {
+        handleMultipleErrors(errl, exitErrl);
+    }
 
     return errl;
 }
@@ -668,7 +671,8 @@ errlHndl_t Bpm::getFwVersion(uint16_t & o_fwVersion) const
 
 errlHndl_t Bpm::issueCommand(const uint8_t i_bspCommand,
                              const uint8_t i_command,
-                             const uint8_t i_opType)
+                             const uint8_t i_opType,
+                             const int     i_msDelay)
 {
     assert(isBspCommand(i_bspCommand),
            "i_bspCommand must be a valid BSP command");
@@ -687,14 +691,15 @@ errlHndl_t Bpm::issueCommand(const uint8_t i_bspCommand,
     payload_t payloadCommand;
     payloadCommand.push_back(i_command);
 
-    errl = issueCommand(i_bspCommand, payloadCommand, i_opType);
+    errl = issueCommand(i_bspCommand, payloadCommand, i_opType, i_msDelay);
 
     return errl;
 }
 
 errlHndl_t Bpm::issueCommand(const uint8_t i_command,
                              payload_t     i_payload,
-                             const uint8_t i_opType)
+                             const uint8_t i_opType,
+                             const int     i_msDelay)
 {
     assert(isBspCommand(i_command),
            "i_bspCommand must be a valid BSP command");
@@ -823,6 +828,48 @@ errlHndl_t Bpm::issueCommand(const uint8_t i_command,
             break;
         }
 
+        // If a delay was given then wait for the delay and check the response.
+        // Otherwise, do not wait and do not check the response. For a list of
+        // commands and delays, see bpm_update.H for more info.
+        if (i_msDelay > 0)
+        {
+            // Wait the given time in ms. Default 1ms for most commands.
+            nanosleep(0, i_msDelay * NS_PER_MSEC);
+
+            // Check the response from the BPM. A non-zero response value
+            // indicates failure. So, assume a failure and check for success.
+            uint8_t data = 0xFF;
+            errl = getResponse(&data, sizeof(uint8_t));
+            if (errl != nullptr)
+            {
+                break;
+            }
+
+            // If the data read from the response is a non-zero value then the
+            // issued command failed.
+            if (data != 0)
+            {
+                /*@
+                * @errortype
+                * @severity         ERRORLOG::ERRL_SEV_PREDICTIVE
+                * @moduleid         BPM_RC::BPM_ISSUE_COMMAND
+                * @reasoncode       BPM_RC::BPM_BAD_RESPONSE
+                * @userdata1        The command that failed to execute.
+                *                   See bpm_update.H for list of commands.
+                * @userdata2        NVDIMM Target HUID associated with this BPM
+                * @devdesc          The command sent to the BPM failed.
+                * @custdesc         A problem occurred during IPL of the system.
+                */
+                errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                         BPM_RC::BPM_ISSUE_COMMAND,
+                                         BPM_RC::BPM_BAD_RESPONSE,
+                                         i_payload[PAYLOAD_COMMAND_INDEX],
+                                         TARGETING::get_huid(iv_nvdimm));
+                errl->collectTrace(BPM_COMP_NAME);
+                break;
+            }
+        }
+
     } while(0);
 
     return errl;
@@ -904,30 +951,6 @@ errlHndl_t Bpm::runUpdate(BpmFirmwareLidImage i_fwImage,
             break;
         }
 
-        uint16_t configOverrideFlag = (updateOverride & 0x00FF);
-        if ((shouldPerformUpdate
-                || (configOverrideFlag == TARGETING::BPM_UPDATE_BEHAVIOR_FORCE_CONFIG))
-           && !(configOverrideFlag == TARGETING::BPM_UPDATE_BEHAVIOR_SKIP_CONFIG))
-        {
-            if (configOverrideFlag == TARGETING::BPM_UPDATE_BEHAVIOR_FORCE_CONFIG)
-            {
-                TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::runUpdate(): "
-                         "ATTR_BPM_UPDATE_OVERRIDE set to force config "
-                         "portion of BPM updates. Running Config Update...");
-            }
-            errl = runConfigUpdates(i_configImage);
-            if (errl != nullptr)
-            {
-                break;
-            }
-        }
-        else
-        {
-            TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::runUpdate(): "
-                     "ATTR_BPM_UPDATE_OVERRIDE set to skip config "
-                     "portion of BPM updates. Skipping Config Update...");
-        }
-
         uint16_t firmwareOverrideFlag = (updateOverride & 0xFF00);
         if ((shouldPerformUpdate
                 || (firmwareOverrideFlag == TARGETING::BPM_UPDATE_BEHAVIOR_FORCE_FW))
@@ -953,6 +976,31 @@ errlHndl_t Bpm::runUpdate(BpmFirmwareLidImage i_fwImage,
                      "portion of BPM updates. Skipping Firmware Update...");
         }
 
+        uint16_t configOverrideFlag = (updateOverride & 0x00FF);
+        if ((shouldPerformUpdate
+                || (configOverrideFlag == TARGETING::BPM_UPDATE_BEHAVIOR_FORCE_CONFIG))
+           && !(configOverrideFlag == TARGETING::BPM_UPDATE_BEHAVIOR_SKIP_CONFIG))
+        {
+            if (configOverrideFlag == TARGETING::BPM_UPDATE_BEHAVIOR_FORCE_CONFIG)
+            {
+                TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::runUpdate(): "
+                         "ATTR_BPM_UPDATE_OVERRIDE set to force config "
+                         "portion of BPM updates. Running Config Update...");
+            }
+            errl = runConfigUpdates(i_configImage);
+            if (errl != nullptr)
+            {
+                break;
+            }
+        }
+        else
+        {
+            TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::runUpdate(): "
+                     "ATTR_BPM_UPDATE_OVERRIDE set to skip config "
+                     "portion of BPM updates. Skipping Config Update...");
+        }
+
+
     } while(0);
 
     TRACFCOMP(g_trac_bpm, EXIT_MRK"Bpm::runUpdate(): "
@@ -976,7 +1024,7 @@ errlHndl_t Bpm::inUpdateMode()
 
     do {
 
-        errl = issueCommand(BPM_LOCAL, BCL_IS_UPDATE_IN_PROGRESS, READ);
+        errl = issueCommand(BPM_LOCAL, BCL_IS_UPDATE_IN_PROGRESS, READ, 0);
         if (errl != nullptr)
         {
             break;
@@ -1045,7 +1093,10 @@ errlHndl_t Bpm::enterUpdateMode()
             break;
         }
 
-        errl = issueCommand(BPM_LOCAL, BCL_START_UPDATE, WRITE);
+        TRACFCOMP(g_trac_bpm, "Bpm::enterUpdateMode(): "
+                 "Issuing BPM_LOCAL BCL_START_UPDATE command.");
+
+        errl = issueCommand(BPM_LOCAL, BCL_START_UPDATE, WRITE, 0);
         if (errl != nullptr)
         {
             break;
@@ -1082,8 +1133,16 @@ errlHndl_t Bpm::exitUpdateMode()
 
     do {
 
+        errl = writeToMagicRegisters(UPDATE_MODE_MAGIC_VALUES);
+        if (errl != nullptr)
+        {
+            TRACFCOMP(g_trac_bpm, "Bpm::exitUpdateMode(): "
+                      "Failed to write the update magic values to "
+                      " be able to send BPM_LOCAL commands.");
+            break;
+        }
 
-        errl = issueCommand(BPM_LOCAL, BCL_IS_UPDATE_IN_PROGRESS, READ);
+        errl = issueCommand(BPM_LOCAL, BCL_IS_UPDATE_IN_PROGRESS, READ, 0);
         if (errl != nullptr)
         {
             break;
@@ -1095,18 +1154,27 @@ errlHndl_t Bpm::exitUpdateMode()
                              isUpdateInProgress);
         if (errl != nullptr)
         {
-            TRACFCOMP(g_trac_bpm, "Bpm::inUpdateMode(): "
-                      "Failed to read error status register");
+            TRACFCOMP(g_trac_bpm, "Bpm::exitUpdateMode(): "
+                      "Failed to read BPM_REG_ERR_STATUS register to determine "
+                      "if BPM is in update mode.");
             break;
         }
 
+        // Sending the exit update command when the BPM isn't in update mode can
+        // cause unpredicatable behavior and errors.
         if (isUpdateInProgress)
         {
-            errl = issueCommand(BPM_LOCAL, BCL_END_UPDATE, WRITE);
+            errl = issueCommand(BPM_LOCAL, BCL_END_UPDATE, WRITE, 0);
             if (errl != nullptr)
             {
                 break;
             }
+        }
+        else
+        {
+            TRACFCOMP(g_trac_bpm, "Bpm::exitUpdateMode(): "
+                      "Not in update mode. "
+                      "Don't send the exit update command.");
         }
 
         // Write back the production magic values
@@ -1189,15 +1257,14 @@ errlHndl_t Bpm::updateFirmware(BpmFirmwareLidImage i_image)
                 break;
             }
 
-            errl = issueCommand(BPM_PASSTHROUGH, payload, WRITE);
+            errl = issueCommand(BPM_PASSTHROUGH, payload, WRITE, 250);
             if (errl != nullptr)
             {
                 break;
             }
 
             TRACFCOMP(g_trac_bpm, "Bpm::updateFirmware(): "
-                      "Performing BSL_MASS_ERASE on BPM, sleep for 5 seconds.",
-                      iv_firmwareStartAddress);
+                      "Performing BSL_MASS_ERASE on BPM, sleep for 5 seconds.");
             longSleep(5);
 
             TRACFCOMP(g_trac_bpm, "Bpm::updateFirmware(): "
@@ -1213,7 +1280,7 @@ errlHndl_t Bpm::updateFirmware(BpmFirmwareLidImage i_image)
                      "Writing to address offset 0x%.4X. "
                      "Firmware blocks written: %d; Remaining: %d",
                      block->iv_addressOffset,
-                     i, NUMBER_OF_BLOCKS);
+                     i, (NUMBER_OF_BLOCKS - i));
         }
 
         // Construct the payload for this block in the image
@@ -1239,7 +1306,7 @@ errlHndl_t Bpm::updateFirmware(BpmFirmwareLidImage i_image)
             do
             {
                 // Issue the write command to the BPM.
-                errl = issueCommand(BPM_PASSTHROUGH, payload, WRITE);
+                errl = issueCommand(BPM_PASSTHROUGH, payload, WRITE, 0);
                 if (errl != nullptr)
                 {
                     break;
@@ -1364,6 +1431,7 @@ errlHndl_t Bpm::updateConfig()
             break;
         }
 
+
         // Erase Segment B on the BPM via the BSL interface.
         errl = eraseSegment(SEGMENT_B_CODE);
         if (errl != nullptr)
@@ -1402,7 +1470,7 @@ errlHndl_t Bpm::enterBootstrapLoaderMode()
         while (retry != 0)
         {
 
-            errl = issueCommand(BPM_LOCAL, BCL_IS_BSL_MODE, WRITE);
+            errl = issueCommand(BPM_LOCAL, BCL_IS_BSL_MODE, WRITE, 0);
             if (errl != nullptr)
             {
                 break;
@@ -1432,7 +1500,7 @@ errlHndl_t Bpm::enterBootstrapLoaderMode()
             // Sleep for 0.001 second.
             nanosleep(0, 1 * NS_PER_MSEC);
 
-            errl = issueCommand(BPM_LOCAL, BCL_ENTER_BSL_MODE, WRITE);
+            errl = issueCommand(BPM_LOCAL, BCL_ENTER_BSL_MODE, WRITE, 0);
             if (errl != nullptr)
             {
                 break;
@@ -1445,6 +1513,10 @@ errlHndl_t Bpm::enterBootstrapLoaderMode()
             nanosleep(2,0);
             --retry;
 
+        }
+        if (errl != nullptr)
+        {
+            break;
         }
 
         if (!inBslMode)
@@ -1701,25 +1773,45 @@ errlHndl_t Bpm::resetDevice()
 
     do {
 
-        // This is a BSL command, so it must be formatted into a payload.
-        payload_t payload;
-        errl = setupPayload(payload, BSL_RESET_DEVICE, BPM_ADDRESS_ZERO);
+        // Verify we are in BSL mode by checking SCAP_STATUS because if we aren't
+        // then we don't need to do anything.
+        scap_status_register_t status;
+        errl = nvdimmReadReg(iv_nvdimm,
+                             SCAP_STATUS,
+                             status.full);
         if (errl != nullptr)
         {
             break;
         }
 
-        errl = issueCommand(BPM_PASSTHROUGH, payload, WRITE);
-        if (errl != nullptr)
+        if (status.bit.Bpm_Bsl_Mode)
         {
+            // This is a BSL command, so it must be formatted into a payload.
+            payload_t payload;
+            errl = setupPayload(payload, BSL_RESET_DEVICE, BPM_ADDRESS_ZERO);
+            if (errl != nullptr)
+            {
+                break;
+            }
+
+            errl = issueCommand(BPM_PASSTHROUGH, payload, WRITE, 0);
+            if (errl != nullptr)
+            {
+                break;
+            }
+
+
+            TRACFCOMP(g_trac_bpm, "Bpm::resetDevice(): "
+                      "Resetting BPM for NVDIMM 0x%.8X, sleep for 10 seconds.",
+                      TARGETING::get_huid(iv_nvdimm));
+            longSleep(10);
+        }
+        else
+        {
+            TRACFCOMP(g_trac_bpm, "Bpm::resetDevice(): "
+                      "Not in BSL Mode. Don't send the reset command.");
             break;
         }
-
-
-        TRACFCOMP(g_trac_bpm, "Bpm::resetDevice(): "
-                  "Resetting BPM for NVDIMM 0x%.8X, sleep for 10 seconds.",
-                  TARGETING::get_huid(iv_nvdimm));
-        longSleep(10);
 
     } while(0);
 
@@ -1784,44 +1876,175 @@ errlHndl_t Bpm::writeViaScapRegister(uint8_t const i_reg, uint8_t const i_data)
 
     do {
 
-        // Wait for the SCAP_STATUS Busy bit to be zero.
-        errl = waitForBusyBit();
+        uint8_t retry = 0;
+        uint8_t data = 0;
+        do {
+
+            // Wait for the SCAP_STATUS Busy bit to be zero.
+            errl = waitForBusyBit();
+            if (errl != nullptr)
+            {
+                break;
+            }
+
+            // Write to SCAP register which register we're attempting to access
+            // on the BPM
+            errl = nvdimmWriteReg(iv_nvdimm,
+                                  SCAP_REG,
+                                  i_reg);
+            if (errl != nullptr)
+            {
+                TRACFCOMP(g_trac_bpm, "Bpm::writeViaScapRegister(): "
+                          "Failed to set SCAP_REG to register 0x%.2X",
+                          i_reg);
+                break;
+            }
+
+            // Wait for the SCAP_STATUS Busy bit to be zero.
+            errl = waitForBusyBit();
+            if (errl != nullptr)
+            {
+                break;
+            }
+
+            // Wait 100ms
+            nanosleep(0, 100 * NS_PER_MSEC);
+
+            errl = nvdimmReadReg(iv_nvdimm,
+                                 SCAP_REG,
+                                 data);
+            if (errl != nullptr)
+            {
+                TRACFCOMP(g_trac_bpm, "BPM::writeViaScapRegister(): "
+                         "Failed to read from SCAP_REG to verify that "
+                         "requested register 0x%.2X was written successfully.",
+                         i_reg);
+                break;
+            }
+
+            if (data == i_reg)
+            {
+                TRACFCOMP(g_trac_bpm, "Bpm::writeViaScapRegister(): "
+                         "REG 0x%X was successfully written to SCAP_REG 0x434. "
+                         "Stop retries.",
+                         i_reg);
+                break;
+            }
+
+        } while(++retry < MAX_RETRY);
         if (errl != nullptr)
         {
             break;
         }
-
-        // Write to SCAP register which register we're attempting to access on
-        // the BPM
-        errl = nvdimmWriteReg(iv_nvdimm,
-                              SCAP_REG,
-                              i_reg);
-        if (errl != nullptr)
+        if ((retry >= MAX_RETRY) && (data != i_reg))
         {
-            TRACFCOMP(g_trac_bpm, "Bpm::writeViaScapRegister(): "
-                      "Failed to set SCAP_REG to register 0x%.2X",
-                      i_reg);
+            /*@
+            * @errortype
+            * @severity         ERRORLOG::ERRL_SEV_PREDICTIVE
+            * @moduleid         BPM_RC::BPM_WRITE_VIA_SCAP
+            * @reasoncode       BPM_RC::BPM_EXCEEDED_RETRY_LIMIT_REG
+            * @userdata1[0:31]  The register that we were attempting to write to
+            *                   SCAP_REG.
+            * @userdata1[32:63] The data that was found in the register on the
+            *                   final attempt.
+            * @userdata2        NVDIMM Target HUID associated with this BPM
+            * @devdesc          The command sent to the BPM failed.
+            * @custdesc         A problem occurred during IPL of the system.
+            */
+            errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                           BPM_RC::BPM_WRITE_VIA_SCAP,
+                                           BPM_RC::BPM_EXCEEDED_RETRY_LIMIT_REG,
+                                           TWO_UINT32_TO_UINT64(i_reg,
+                                               data),
+                                           TARGETING::get_huid(iv_nvdimm));
+            errl->collectTrace(BPM_COMP_NAME);
             break;
         }
 
-        // Wait for the SCAP_STATUS Busy bit to be zero.
-        errl = waitForBusyBit();
+        retry = 0;
+        data = 0;
+        do {
+
+            // Wait for the SCAP_STATUS Busy bit to be zero.
+            errl = waitForBusyBit();
+            if (errl != nullptr)
+            {
+                break;
+            }
+
+            // Write the data to the register we're attempting to access
+            // on the BPM.
+            errl = nvdimmWriteReg(iv_nvdimm,
+                                  SCAP_DATA,
+                                  i_data);
+            if (errl != nullptr)
+            {
+                TRACFCOMP(g_trac_bpm, "BPM::writeViaScapRegister(): "
+                         "Failed to write data 0x%.2X to SCAP_DATA for "
+                         "register 0x%.2X.",
+                         i_data,
+                         i_reg);
+                break;
+            }
+
+            // Wait for the SCAP_STATUS Busy bit to be zero.
+            errl = waitForBusyBit();
+            if (errl != nullptr)
+            {
+                break;
+            }
+
+            // Wait 100ms
+            nanosleep(0, 100 * NS_PER_MSEC);
+
+            errl = nvdimmReadReg(iv_nvdimm,
+                                 SCAP_DATA,
+                                 data);
+            if (errl != nullptr)
+            {
+                TRACFCOMP(g_trac_bpm, "BPM::writeViaScapRegister(): "
+                         "Failed to read from SCAP_DATA to verify "
+                         "that requested data 0x%.2X was written successfully.",
+                         i_data);
+                break;
+            }
+
+            if (data == i_data)
+            {
+                TRACFCOMP(g_trac_bpm, "Bpm::writeViaScapRegister(): "
+                         "DATA 0x%X was successfully written to SCAP_DATA 0x435."
+                         " Stop retries.",
+                         i_data);
+                break;
+            }
+
+        } while(++retry < MAX_RETRY);
         if (errl != nullptr)
         {
             break;
         }
-
-        // Write the data to the register we're attempting to access on the BPM.
-        errl = nvdimmWriteReg(iv_nvdimm,
-                              SCAP_DATA,
-                              i_data);
-        if (errl != nullptr)
+        if ((retry >= MAX_RETRY) && (data != i_data))
         {
-            TRACFCOMP(g_trac_bpm, "BPM::writeViaScapRegister(): "
-                     "Failed to write data 0x%.2X to SCAP_DATA for "
-                     "register 0x%.2X.",
-                     i_data,
-                     i_reg);
+            /*@
+            * @errortype
+            * @severity         ERRORLOG::ERRL_SEV_PREDICTIVE
+            * @moduleid         BPM_RC::BPM_WRITE_VIA_SCAP
+            * @reasoncode       BPM_RC::BPM_EXCEEDED_RETRY_LIMIT_DATA
+            * @userdata1[0:31]  The data that we were attempting to write to
+            *                   SCAP_DATA.
+            * @userdata1[32:63] The data that was found in the register on the
+            *                   final attempt.
+            * @userdata2        NVDIMM Target HUID associated with this BPM
+            * @devdesc          The command sent to the BPM failed.
+            * @custdesc         A problem occurred during IPL of the system.
+            */
+            errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                          BPM_RC::BPM_WRITE_VIA_SCAP,
+                                          BPM_RC::BPM_EXCEEDED_RETRY_LIMIT_DATA,
+                                          TWO_UINT32_TO_UINT64(i_data,
+                                              data),
+                                          TARGETING::get_huid(iv_nvdimm));
+            errl->collectTrace(BPM_COMP_NAME);
             break;
         }
 
@@ -1896,10 +2119,86 @@ errlHndl_t Bpm::disableWriteProtection()
     return errl;
 }
 
+errlHndl_t Bpm::switchBpmPage(uint16_t const i_segmentCode)
+{
+
+    errlHndl_t errl = nullptr;
+
+    do {
+        const uint8_t SPECIAL_CONTROL_COMMAND1 = 0x3E;
+        const uint8_t SPECIAL_CONTROL_COMMAND2 = 0x3F;
+        // Next, switch to the desired BPM segment by writing the segment code
+        // to the BPM's Special Control Command registers.
+        //
+        // Since the SCAP_DATA register can only hold 1 byte at a time we must
+        // do this in two steps.
+        // According to SMART, the segment code must be written in the following
+        // form to those registers:
+        // Register 0x3E gets LO(i_segmentCode) byte
+        // Register 0x3F gets HI(i_segmentCode) byte
+        // Example: 0x9D5E is the segment code for Segment D. It must be written
+        //          as follows
+        // 0x3E, 0x5E
+        // 0x3F, 0x9D
+        const uint8_t loSegCode = i_segmentCode & 0xFF;
+        const uint8_t hiSegCode = (i_segmentCode >> 8) & 0xFF;
+
+        TRACUCOMP(g_trac_bpm, "Bpm::switchBpmPage(): "
+                 "Writing 0x%.2X to SPECIAL_CONTROL_COMMAND1 and "
+                 "0x%.2X to SPECIAL_CONTROL_COMMAND2",
+                 loSegCode,
+                 hiSegCode);
+
+        // First, clear the SPECIAL_CONTROL_COMMAND2 register so that we can
+        // write the full sequence without issue.
+        errl = writeViaScapRegister(SPECIAL_CONTROL_COMMAND2, 0x00);
+        if (errl != nullptr)
+        {
+            TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::switchBpmPage(): "
+                     "Writing 0x%.2X to SPECIAL_CONTROL_COMMAND2 "
+                     "FAILED. BPM page will not have switched properly!!",
+                     hiSegCode);
+            break;
+        }
+
+        // Write the LO segment code.
+        errl = writeViaScapRegister(SPECIAL_CONTROL_COMMAND1, loSegCode);
+        if (errl != nullptr)
+        {
+            TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::switchBpmPage(): "
+                     "Writing 0x%.2X to SPECIAL_CONTROL_COMMAND1 "
+                     "FAILED. BPM page will not have switched properly!!",
+                     loSegCode);
+            break;
+        }
+
+        // Write the HI segment code.
+        errl = writeViaScapRegister(SPECIAL_CONTROL_COMMAND2, hiSegCode);
+        if (errl != nullptr)
+        {
+            TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::switchBpmPage(): "
+                     "Writing 0x%.2X to SPECIAL_CONTROL_COMMAND2 "
+                     "FAILED. BPM page will not have switched properly!!",
+                     hiSegCode);
+            break;
+        }
+
+
+        // Request to open segment page is sent.
+        // Wait a few seconds for the operation to complete.
+        nanosleep(2,0);
+
+    } while(0);
+
+    return errl;
+}
+
 errlHndl_t Bpm::writeToMagicRegisters(
         uint8_t const (&i_magicValues)[NUM_MAGIC_REGISTERS])
 {
-    TRACFCOMP(g_trac_bpm, ENTER_MRK"Bpm::writeToMagicRegisters()");
+    TRACFCOMP(g_trac_bpm, ENTER_MRK"Bpm::writeToMagicRegisters() 0x%.2X 0x%.2X",
+             i_magicValues[0],
+             i_magicValues[1]);
     errlHndl_t errl = nullptr;
 
     do {
@@ -2000,16 +2299,18 @@ errlHndl_t Bpm::dumpSegment(uint16_t const i_segmentCode,
 {
     TRACFCOMP(g_trac_bpm, ENTER_MRK"Bpm::dumpSegment(): Segment %X",
               getSegmentIdentifier(i_segmentCode));
+    assert(i_segmentCode == SEGMENT_B_CODE, "Bpm::dumpSegment(): Only Segment B is supported.");
+
     errlHndl_t errl = nullptr;
 
-    memset(&o_buffer, 0, SEGMENT_SIZE);
-
-    const uint8_t SPECIAL_CONTROL_COMMAND1 = 0x3E;
-    const uint8_t SPECIAL_CONTROL_COMMAND2 = 0x3F;
-
-    bool isSegmentPageOpen = false, magicValuesChanged = false;
-
     do {
+
+        errl = disableWriteProtection();
+        if (errl != nullptr)
+        {
+            break;
+        }
+
         // We cannot be in BSL mode when dumping the config segments. Verify we
         // aren't in BSL mode by checking SCAP_STATUS
         scap_status_register_t status;
@@ -2033,15 +2334,8 @@ errlHndl_t Bpm::dumpSegment(uint16_t const i_segmentCode,
                 break;
             }
 
-            // To maintain proper update flow we must exit and re-enter update
-            // mode.
+            // Exit update mode if on and write back production magic values.
             errl = exitUpdateMode();
-            if (errl != nullptr)
-            {
-                break;
-            }
-
-            errl = enterUpdateMode();
             if (errl != nullptr)
             {
                 break;
@@ -2092,130 +2386,135 @@ errlHndl_t Bpm::dumpSegment(uint16_t const i_segmentCode,
             break;
         }
 
-        // Magic values were changed. Need to write back production values.
-        magicValuesChanged = true;
+        uint8_t retry = 1;
+        // Attempt to switch to the correct page and dump data twice.
+        do {
+            // Set buffer to be all zeroes.
+            memset(&o_buffer, 0, SEGMENT_SIZE);
 
-        // Next, switch to the desired BPM segment by writing the segment code
-        // to the BPM's Special Control Command registers.
-        //
-        // Since the SCAP_DATA register can only hold 1 byte at a time we must
-        // do this in two steps.
-        // According to SMART, the segment code must be written in the following
-        // form to those registers:
-        // Register 0x3E gets LO(i_segmentCode) byte
-        // Register 0x3F gets HI(i_segmentCode) byte
-        // Example: 0x9D5E is the segment code for Segment D. It must be written
-        //          as follows
-        // 0x3E, 0x5E
-        // 0x3F, 0x9D
-        const uint8_t loSegCode = i_segmentCode & 0xFF;
-        const uint8_t hiSegCode = (i_segmentCode >> 8) & 0xFF;
-
-        TRACUCOMP(g_trac_bpm, "Bpm::dumpSegment(): "
-                 "Writing 0x%.2X to SPECIAL_CONTROL_COMMAND1 and "
-                 "0x%.2X to SPECIAL_CONTROL_COMMAND2",
-                 loSegCode,
-                 hiSegCode);
-
-        // Write the LO segment code first.
-        errl = writeViaScapRegister(SPECIAL_CONTROL_COMMAND1, loSegCode);
-        if (errl != nullptr)
-        {
-            break;
-        }
-
-        // Write the HI segment code next.
-        errl = writeViaScapRegister(SPECIAL_CONTROL_COMMAND2, hiSegCode);
-        if (errl != nullptr)
-        {
-            break;
-        }
-
-        // Request to open segment page is sent.
-        // Wait 2 seconds for the operation to complete.
-        nanosleep(2,0);
-        isSegmentPageOpen = true;
-
-        TRACFCOMP(g_trac_bpm, "Bpm::dumpSegment(): "
-                 "Dumping Segment %X to buffer.",
-                 getSegmentIdentifier(i_segmentCode));
-
-        // Dump the segment data
-        for (uint8_t reg = 0; reg < SEGMENT_SIZE; ++reg)
-        {
-            errl = readViaScapRegister(reg, o_buffer[reg]);
+            // Open this segments page on the BPM.
+            errl = switchBpmPage(i_segmentCode);
             if (errl != nullptr)
             {
                 break;
             }
-        }
+
+            TRACFCOMP(g_trac_bpm, "Bpm::dumpSegment(): "
+                     "Dumping Segment %X to buffer.",
+                     getSegmentIdentifier(i_segmentCode));
+
+            // Dump the segment data
+            bool wrongPage = false;
+            for (uint8_t reg = 0; reg < SEGMENT_SIZE; ++reg)
+            {
+                errl = readViaScapRegister(reg, o_buffer[reg]);
+                if (errl != nullptr)
+                {
+                    break;
+                }
+
+                // We can determine if the page switch succeeded based on the
+                // first three bytes from regs 0x10-0x12. If Segment B was
+                // opened, then 0x10-0x1F is serial number for the BPM.
+                // SMART guarantees the first three bytes to be as follows:
+                if ((reg == 0x10) && (o_buffer[reg] != 0x53))
+                {
+                    TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::dumpSegment "
+                             "data 0x%.2X at offset 0x%.2x wasn't expected "
+                             "value 0x53",
+                             o_buffer[reg], reg);
+                    wrongPage = true;
+                }
+                if ((reg == 0x11) && (o_buffer[reg] != 0x46))
+                {
+                    TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::dumpSegment "
+                             "data 0x%.2X at offset 0x%.2x wasn't expected "
+                             "value 0x46",
+                             o_buffer[reg], reg);
+                    wrongPage = true;
+                }
+                if ((reg == 0x12) && (o_buffer[reg] != 0x52))
+                {
+                    TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::dumpSegment "
+                             "data 0x%.2X at offset 0x%.2x wasn't expected "
+                             "value 0x52",
+                             o_buffer[reg], reg);
+                    wrongPage = true;
+                }
+
+                if (wrongPage && (reg == 0x20))
+                {
+                    break;
+                }
+
+            }
+
+            TRACUBIN(g_trac_bpm, "Segment BIN DUMP", o_buffer, SEGMENT_SIZE);
+
+            if ((errl != nullptr) || (wrongPage == false))
+            {
+                break;
+            }
+
+            // Close this segments page on the BPM before making another
+            // attempt.
+            errlHndl_t closeSegmentErrl = switchBpmPage(DEFAULT_REG_PAGE);
+            if (closeSegmentErrl != nullptr)
+            {
+                handleMultipleErrors(errl, closeSegmentErrl);
+                break;
+            }
+
+        } while(++retry < MAX_RETRY);
         if (errl != nullptr)
         {
             break;
         }
-
-
-    } while(0);
-
-    do {
-        errlHndl_t closeSegmentErrl = nullptr;
-        if (isSegmentPageOpen)
+        if (retry >= MAX_RETRY)
         {
-            // Close the segment by writing the DEFAULT_REG_PAGE code to the
-            // BPM's SPECIAL_CONTROL_COMMAND registers.
-            // This must also be done as described above
-            const uint8_t lo = DEFAULT_REG_PAGE & 0xFF;
-            const uint8_t hi = (DEFAULT_REG_PAGE >> 8) & 0xFF;
-
-            TRACFCOMP(g_trac_bpm, "Bpm::dumpSegment(): "
-                     "Closing Segment %X's page.",
-                     getSegmentIdentifier(i_segmentCode));
-            TRACUCOMP(g_trac_bpm, "Bpm::dumpSegment(): "
-                     "Writing 0x%.2X to SPECIAL_CONTROL_COMMAND1 and "
-                     "0x%.2X to SPECIAL_CONTROL_COMMAND2",
-                     lo,
-                     hi);
-
-            // Write the LO segment code first.
-            closeSegmentErrl = writeViaScapRegister(SPECIAL_CONTROL_COMMAND1,
-                                                    lo);
-            if (closeSegmentErrl != nullptr)
-            {
-                TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::dumpSegment(): "
-                         "Failed to write DEFAULT_REG_PAGE low byte!! "
-                         "NVDIMM will be stuck on this segment's page!!");
-                handleMultipleErrors(errl, closeSegmentErrl);
-                break;
-            }
-
-            // Write the HI segment code next.
-            closeSegmentErrl = writeViaScapRegister(SPECIAL_CONTROL_COMMAND2,
-                                                    hi);
-            if (closeSegmentErrl != nullptr)
-            {
-                TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::dumpSegment(): "
-                         "Failed to write DEFAULT_REG_PAGE high byte!! "
-                         "NVDIMM will be stuck on this segment's page!!");
-                handleMultipleErrors(errl, closeSegmentErrl);
-                break;
-            }
-
-            // Sleep for 2 seconds to allow time for segment page to close.
-            nanosleep(2, 0);
+            /*@
+            * @errortype
+            * @severity         ERRORLOG::ERRL_SEV_PREDICTIVE
+            * @moduleid         BPM_RC::BPM_DUMP_SEGMENT
+            * @reasoncode       BPM_RC::BPM_EXCEEDED_RETRY_LIMIT
+            * @userdata1        The segment code for the page that failed to
+            *                   open.
+            * @userdata2        NVDIMM Target HUID associated with this BPM
+            * @devdesc          Failed to open the segment page in the given
+            *                   amount of retries.
+            * @custdesc         A problem occurred during IPL of the system.
+            */
+            errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                           BPM_RC::BPM_DUMP_SEGMENT,
+                                           BPM_RC::BPM_EXCEEDED_RETRY_LIMIT,
+                                           i_segmentCode,
+                                           TARGETING::get_huid(iv_nvdimm));
+            errl->collectTrace(BPM_COMP_NAME);
+            setAttemptAnotherUpdate();
+            break;
         }
+
     } while(0);
 
-    if (magicValuesChanged)
-    {
+        TRACFCOMP(g_trac_bpm, "Bpm::dumpSegment(): "
+                 "Closing Segment %X's page.",
+                 getSegmentIdentifier(i_segmentCode));
+
+        // Close the Segment page by switching back to the default page.
+        errlHndl_t closeSegmentErrl = switchBpmPage(DEFAULT_REG_PAGE);
+        if (closeSegmentErrl != nullptr)
+        {
+            handleMultipleErrors(errl, closeSegmentErrl);
+        }
+
         // Write back the production magic values.
-        errlHndl_t magicErrl = writeToMagicRegisters(UPDATE_MODE_MAGIC_VALUES);
+        errlHndl_t magicErrl = writeToMagicRegisters(PRODUCTION_MAGIC_VALUES);
         if (magicErrl != nullptr)
         {
             TRACFCOMP(g_trac_bpm, "Bpm::dumpSegment(): "
                       "Failed to write update mode magic numbers.");
             handleMultipleErrors(errl, magicErrl);
         }
-    }
 
     return errl;
 }
@@ -2247,16 +2546,7 @@ errlHndl_t Bpm::mergeSegment(BpmConfigLidImage const i_configImage,
              getSegmentIdentifier(i_segmentCode),
              segmentStartOffset);
 
-    memset(&o_buffer, 0, SEGMENT_SIZE);
-
     do {
-
-        // Dump the segment into a buffer.
-        errl = dumpSegment(i_segmentCode, o_buffer);
-        if (errl != nullptr)
-        {
-            break;
-        }
 
         const size_t NUMBER_OF_FRAGMENTS = i_configImage.getNumberOfFragments();
         char const * data = reinterpret_cast<char const *>(
@@ -2320,6 +2610,8 @@ errlHndl_t Bpm::mergeSegment(BpmConfigLidImage const i_configImage,
             fragment = reinterpret_cast<config_image_fragment_t const *>(data);
         }
 
+        TRACUBIN(g_trac_bpm, "Merged Segment", o_buffer, SEGMENT_SIZE);
+
     } while(0);
 
     return errl;
@@ -2334,13 +2626,29 @@ errlHndl_t Bpm::eraseSegment(uint16_t i_segmentCode)
     do {
 
         payload_t payload;
-        errl = setupPayload(payload, BSL_ERASE_SEGMENT, i_segmentCode);
+
+        size_t segmentStartOffset = 0;
+        auto it = segmentMap.find(i_segmentCode);
+        if (it != segmentMap.end())
+        {
+            segmentStartOffset = it->second;
+        }
+        else
+        {
+            TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::mergeSegment(): "
+                     "Couldn't find start offset for Segment %X",
+                     getSegmentIdentifier(i_segmentCode));
+            assert(false, "Add the missing Segment %X Start Offset to the offset map", getSegmentIdentifier(i_segmentCode));
+        }
+        errl = setupPayload(payload,
+                            BSL_ERASE_SEGMENT,
+                            BPM_CONFIG_START_ADDRESS + segmentStartOffset);
         if (errl != nullptr)
         {
             break;
         }
 
-        errl = issueCommand(BPM_PASSTHROUGH, payload, WRITE);
+        errl = issueCommand(BPM_PASSTHROUGH, payload, WRITE, 250);
         if (errl != nullptr)
         {
             break;
@@ -2414,7 +2722,7 @@ errlHndl_t Bpm::writeSegment(uint8_t const (&i_buffer)[SEGMENT_SIZE],
                          "Writing to address offset 0x%.4X. "
                          "Config bytes written: 0x%X; Remaining: 0x%X",
                          addressOffset,
-                         offset, SEGMENT_SIZE);
+                         offset, (SEGMENT_SIZE - offset));
             }
 
             // Attempt to write the payload using a retry loop.
@@ -2458,7 +2766,9 @@ errlHndl_t Bpm::preprocessSegments(BpmConfigLidImage const i_configImage)
             break;
         }
 
-        // Merge the fragments for D with the data from the BPM.
+        // Merge the fragments for D with the data from the BPM. For D, this
+        // will just populate the empty segment with the data from the flash
+        // image.
         if (!iv_segmentDMerged)
         {
             errl = mergeSegment(i_configImage, SEGMENT_D_CODE, iv_segmentD);
@@ -2480,6 +2790,14 @@ errlHndl_t Bpm::preprocessSegments(BpmConfigLidImage const i_configImage)
         // Merge the fragments for B with the data from the BPM.
         if (!iv_segmentBMerged)
         {
+            // Dump the segment into a buffer. This is only necessary for
+            // segment B as segment D comes straight from the flash image file.
+            errl = dumpSegment(SEGMENT_B_CODE, iv_segmentB);
+            if (errl != nullptr)
+            {
+                break;
+            }
+
             errl = mergeSegment(i_configImage, SEGMENT_B_CODE, iv_segmentB);
             if (errl != nullptr)
             {
@@ -2604,6 +2922,7 @@ errlHndl_t Bpm::getResponse(uint8_t * const o_responseData,
                                           PAYLOAD_HEADER_SIZE + i_responseSize);
         if (responseCrc != expectedCrc)
         {
+            memset(o_responseData, 0xFF, i_responseSize);
             TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::getResponse(): "
                       "Response CRC verification failed. "
                       "Received invalid data from BPM.");
@@ -2612,9 +2931,9 @@ errlHndl_t Bpm::getResponse(uint8_t * const o_responseData,
             * @severity         ERRORLOG::ERRL_SEV_PREDICTIVE
             * @moduleid         BPM_RC::BPM_GET_RESPONSE
             * @reasoncode       BPM_RC::BPM_RESPONSE_CRC_MISMATCH
-            * @userdata1[0:15]  Expected Response CRC
-            * @userdata1[16:31] Actual Response CRC
-            * @userdata2[0:63]  NVDIMM Target HUID associated with this BPM
+            * @userdata1[00:31] Expected Response CRC (in Big Endian)
+            * @userdata1[32:63] Actual Response CRC   (in Big Endian)
+            * @userdata2        NVDIMM Target HUID associated with this BPM
             * @devdesc          The response CRC calculated by the BPM didn't
             *                   match the CRC calculated by hostboot.
             * @custdesc         A problem occurred during IPL of the system.
@@ -2622,7 +2941,7 @@ errlHndl_t Bpm::getResponse(uint8_t * const o_responseData,
             errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
                                            BPM_RC::BPM_GET_RESPONSE,
                                            BPM_RC::BPM_RESPONSE_CRC_MISMATCH,
-                                           TWO_UINT16_TO_UINT32(expectedCrc,
+                                           TWO_UINT32_TO_UINT64(expectedCrc,
                                                responseCrc),
                                            TARGETING::get_huid(iv_nvdimm));
             errl->collectTrace(BPM_COMP_NAME);
@@ -2689,7 +3008,7 @@ errlHndl_t Bpm::verifyBlockWrite(payload_t  i_payload,
         }
 
         // Issue the command to the BPM.
-        errl = issueCommand(BPM_PASSTHROUGH, verifyPayload, WRITE);
+        errl = issueCommand(BPM_PASSTHROUGH, verifyPayload, WRITE, 0);
         if (errl != nullptr)
         {
             break;
@@ -2735,8 +3054,19 @@ errlHndl_t Bpm::blockWrite(payload_t i_payload)
         errl = verifyBlockWrite(i_payload,
                                 dataLength,
                                 wasVerified);
-        if (errl != nullptr)
+        if (  (errl != nullptr)
+           && (errl->reasonCode() == BPM_RC::BPM_RESPONSE_CRC_MISMATCH)
+           && ((retry + 1) < MAX_RETRY))
         {
+            // Delete the retryable error and continue
+            TRACFCOMP(g_trac_bpm, "Bpm::blockWrite(): "
+                     "Encountered a retryable error. Delete and continue.");
+            delete errl;
+            errl = nullptr;
+        }
+        else
+        {
+            // A non-retryable error occurred. Break from retry loop.
             break;
         }
 
@@ -2753,7 +3083,7 @@ errlHndl_t Bpm::blockWrite(payload_t i_payload)
         }
 
     } while (++retry < MAX_RETRY);
-    if ((retry >= MAX_RETRY) && (wasVerified != 0))
+    if ((errl == nullptr) && (retry >= MAX_RETRY) && (wasVerified != 0))
     {
         TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::blockWrite(): "
                  "Failed to write payload data to BPM after %d retries.",
@@ -2781,7 +3111,6 @@ errlHndl_t Bpm::blockWrite(payload_t i_payload)
     }
 
     return errl;
-
 }
 
 errlHndl_t Bpm::waitForCommandStatusBitReset(
@@ -2914,34 +3243,32 @@ errlHndl_t Bpm::verifyGoodBpmState()
             break;
         }
 
-        if (retry <= 0)
-        {
-            TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::verifyGoodBpmState(): "
-                      "BPM failed to become present and enabled "
-                      "in 100 retries.");
-            /*@
-            * @errortype
-            * @severity         ERRORLOG::ERRL_SEV_PREDICTIVE
-            * @moduleid         BPM_RC::BPM_VERIFY_GOOD_BPM_STATE
-            * @reasoncode       BPM_RC::BPM_EXCEEDED_RETRY_LIMIT
-            * @userdata1        NVDIMM Target HUID associated with this BPM
-            * @userdata2        SCAP_STATUS register contents. See nvdimm.H
-            *                   for bits associated with this register.
-            * @devdesc          The BPM did not become present and enabled
-            *                   in given number of retries.
-            * @custdesc         A problem occurred during IPL of the system.
-            */
-            errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
-                                       BPM_RC::BPM_VERIFY_GOOD_BPM_STATE,
-                                       BPM_RC::BPM_EXCEEDED_RETRY_LIMIT,
-                                       TARGETING::get_huid(iv_nvdimm),
-                                       status.full);
-            errl->collectTrace(BPM_COMP_NAME);
-            break;
-        }
-
         --retry;
         nanosleep(0, 1 * NS_PER_MSEC);
+    }
+    if (retry <= 0)
+    {
+        TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::verifyGoodBpmState(): "
+                  "BPM failed to become present and enabled "
+                  "in 100 retries.");
+        /*@
+        * @errortype
+        * @severity         ERRORLOG::ERRL_SEV_PREDICTIVE
+        * @moduleid         BPM_RC::BPM_VERIFY_GOOD_BPM_STATE
+        * @reasoncode       BPM_RC::BPM_EXCEEDED_RETRY_LIMIT
+        * @userdata1        NVDIMM Target HUID associated with this BPM
+        * @userdata2        SCAP_STATUS register contents. See nvdimm.H
+        *                   for bits associated with this register.
+        * @devdesc          The BPM did not become present and enabled
+        *                   in given number of retries.
+        * @custdesc         A problem occurred during IPL of the system.
+        */
+        errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                   BPM_RC::BPM_VERIFY_GOOD_BPM_STATE,
+                                   BPM_RC::BPM_EXCEEDED_RETRY_LIMIT,
+                                   TARGETING::get_huid(iv_nvdimm),
+                                   status.full);
+        errl->collectTrace(BPM_COMP_NAME);
     }
 
     return errl;
@@ -3009,6 +3336,18 @@ errlHndl_t Bpm::runConfigUpdates(BpmConfigLidImage i_configImage)
     errlHndl_t errl = nullptr;
 
     do {
+
+        // Before the entering BSL mode, we must do preprocessing prior to the
+        // config part of the update. Segment D and B need to be dumped from the
+        // BPM into buffers and then the config data from the image needs to be
+        // inserted into them. To dump segment data, it is required to have
+        // working firmware which will not be the case during BSL mode.
+        errl = preprocessSegments(i_configImage);
+        if (errl != nullptr)
+        {
+            break;
+        }
+
         // Enter Update mode
         errl = enterUpdateMode();
         if (errl != nullptr)
@@ -3018,17 +3357,6 @@ errlHndl_t Bpm::runConfigUpdates(BpmConfigLidImage i_configImage)
 
         // Verify in Update mode
         errl = inUpdateMode();
-        if (errl != nullptr)
-        {
-            break;
-        }
-
-        // Before the entering BSL mode, we must do preprocessing prior to the
-        // config part of the update. Segment D and B need to be dumped from the
-        // BPM into buffers and then the config data from the image needs to be
-        // inserted into them. To dump segment data, it is required to have
-        // working firmware which will not be the case during BSL mode.
-        errl = preprocessSegments(i_configImage);
         if (errl != nullptr)
         {
             break;
@@ -3060,36 +3388,31 @@ errlHndl_t Bpm::runConfigUpdates(BpmConfigLidImage i_configImage)
 
     } while(0);
 
-    do {
+    // Reset the device. This will exit BSL mode.
+    errlHndl_t exitErrl = resetDevice();
+    if (exitErrl != nullptr)
+    {
+        TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runConfigUpdates(): "
+                  "Failed to reset the device");
+        handleMultipleErrors(errl, exitErrl);
+    }
 
-        // Reset the device. This will exit BSL mode.
-        errlHndl_t exitErrl = resetDevice();
-        if (exitErrl != nullptr)
-        {
-            TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runConfigUpdates(): "
-                      "Failed to reset the device");
-            handleMultipleErrors(errl, exitErrl);
-            break;
-        }
+    // Exit update mode
+    exitErrl = exitUpdateMode();
+    if (exitErrl != nullptr)
+    {
+        TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runConfigUpdates(): "
+                  "Failed to exit update mode");
+        handleMultipleErrors(errl, exitErrl);
+    }
 
-        // Exit update mode
-        exitErrl = exitUpdateMode();
-        if (exitErrl != nullptr)
-        {
-            TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runConfigUpdates(): "
-                      "Failed to exit update mode");
-            handleMultipleErrors(errl, exitErrl);
-            break;
-        }
-
-    } while(0);
 
     return errl;
 }
 
 errlHndl_t Bpm::runFirmwareUpdates(BpmFirmwareLidImage i_image)
 {
-    TRACFCOMP(g_trac_bpm, ENTER_MRK"bpm::runFirmwareUpdates()");
+    TRACFCOMP(g_trac_bpm, ENTER_MRK"Bpm::runFirmwareUpdates()");
     errlHndl_t errl = nullptr;
 
     do {
@@ -3148,105 +3471,107 @@ errlHndl_t Bpm::runFirmwareUpdates(BpmFirmwareLidImage i_image)
 
     } while(0);
 
-    do {
+    // Reset the device. This will exit BSL mode.
+    errlHndl_t exitErrl = resetDevice();
+    if (exitErrl != nullptr)
+    {
+        TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runFirmwareUpdates(): "
+                  "Failed to reset the device");
+        handleMultipleErrors(errl, exitErrl);
+    }
 
-        // Reset the device. This will exit BSL mode.
-        errlHndl_t exitErrl = resetDevice();
-        if (exitErrl != nullptr)
-        {
-            TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runFirmwareUpdates(): "
-                      "Failed to reset the device");
-            handleMultipleErrors(errl, exitErrl);
-            break;
-        }
+    // Exit update mode
+    exitErrl = exitUpdateMode();
+    if (exitErrl != nullptr)
+    {
+        TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runFirmwareUpdates(): "
+                  "Failed to exit update mode");
+        handleMultipleErrors(errl, exitErrl);
+    }
 
-        // Exit update mode
-        exitErrl = exitUpdateMode();
-        if (exitErrl != nullptr)
-        {
-            TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runFirmwareUpdates(): "
-                      "Failed to exit update mode");
-            handleMultipleErrors(errl, exitErrl);
-            break;
-        }
+    exitErrl = nvdimmWriteReg(iv_nvdimm,
+                              NVDIMM_MGT_CMD0,
+                              0x01);
+    if (exitErrl != nullptr)
+    {
+        TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runFirmwareUpdates() "
+                 "Couldn't reset NVDIMM controller.");
+        handleMultipleErrors(errl, exitErrl);
+    }
 
-        // If the update was successful then we must wait for 10 seconds before
-        // polling the status of the BPM since it has to finish updating its
-        // firmware and resetting.
-        TRACFCOMP(g_trac_bpm, "Bpm::runFirmwareUpdates(): "
-                  "Wait for the BPM to finish update and reset procedure, "
-                  "sleep for 15 seconds");
-        longSleep(15);
+    // If the update was successful then we must wait for 15 seconds before
+    // polling the status of the BPM since it has to finish updating its
+    // firmware and resetting.
+    TRACFCOMP(g_trac_bpm, "Bpm::runFirmwareUpdates(): "
+              "Wait for the BPM to finish update and reset procedure, "
+              "sleep for 15 seconds");
+    longSleep(15);
 
-        // Poll SCAP_STATUS register for BPM state before we check final
-        // firmware version.
-        exitErrl = verifyGoodBpmState();
-        if (exitErrl != nullptr)
-        {
-            TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runFirmwareUpdates(): "
-                     "Could not verify that BPM was present and enabled!");
-            handleMultipleErrors(errl, exitErrl);
-            break;
-        }
+    // Poll SCAP_STATUS register for BPM state before we check final
+    // firmware version.
+    exitErrl = verifyGoodBpmState();
+    if (exitErrl != nullptr)
+    {
+        TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runFirmwareUpdates(): "
+                 "Could not verify that BPM was present and enabled!");
+        handleMultipleErrors(errl, exitErrl);
+    }
 
-        uint16_t bpmFwVersion = INVALID_VERSION;
-        exitErrl = getFwVersion(bpmFwVersion);
-        if (exitErrl != nullptr)
-        {
-            TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runFirmwareUpdates(): "
-                     "Could not determine firmware version on the BPM");
-            handleMultipleErrors(errl, exitErrl);
-            break;
-        }
+    uint16_t bpmFwVersion = INVALID_VERSION;
+    exitErrl = getFwVersion(bpmFwVersion);
+    if (exitErrl != nullptr)
+    {
+        TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runFirmwareUpdates(): "
+                 "Could not determine firmware version on the BPM");
+        handleMultipleErrors(errl, exitErrl);
+    }
 
+    TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::runFirmwareUpdates(): "
+              "Firmware version on the BPM 0x%.4X, "
+              "Firmware version of image 0x%.4X.",
+              bpmFwVersion, i_image.getVersion());
+
+    if (i_image.getVersion() == bpmFwVersion)
+    {
         TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::runFirmwareUpdates(): "
-                  "Firmware version on the BPM 0x%.4X, "
-                  "Firmware version of image 0x%.4X.",
-                  bpmFwVersion, i_image.getVersion());
-
-        if (i_image.getVersion() == bpmFwVersion)
+                 "Firmware version on the BPM matches the version in the "
+                 "image. Update Successful.");
+        iv_attemptAnotherUpdate = false;
+    }
+    else
+    {
+        // Attempt another update if one hasn't already been attempted.
+        setAttemptAnotherUpdate();
+        TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm:: runFirmwareUpdates(): "
+                 "Version on BPM didn't match image. %s ",
+                 iv_attemptAnotherUpdate ?
+                 "Attempt another update..."
+                 : "Attempts to update the BPM have failed.");
+        if (iv_attemptAnotherUpdate == false)
         {
-            TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::runFirmwareUpdates(): "
-                     "Firmware version on the BPM matches the version in the "
-                     "image. Update Successful.");
-            iv_attemptAnotherUpdate = false;
+            /*@
+            * @errortype
+            * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+            * @moduleid         BPM_RC::BPM_RUN_FW_UPDATES
+            * @reasoncode       BPM_RC::BPM_VERSION_MISMATCH
+            * @userdata1[00:31] Version on the BPM
+            * @userdata1[32:63] Version of the flash image
+            * @userdata2        NVDIMM Target HUID associated with this BPM
+            * @devdesc          The version on the BPM didn't match the
+            *                   version in the flash image.
+            * @custdesc         A problem occurred during IPL of the system.
+            */
+            exitErrl = new ERRORLOG::ErrlEntry(
+                                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                       BPM_RC::BPM_RUN_FW_UPDATES,
+                                       BPM_RC::BPM_VERSION_MISMATCH,
+                                       TWO_UINT32_TO_UINT64(bpmFwVersion,
+                                           i_image.getVersion()),
+                                       TARGETING::get_huid(iv_nvdimm));
+            exitErrl->collectTrace(BPM_COMP_NAME);
+            handleMultipleErrors(errl, exitErrl);
         }
-        else
-        {
-            // Attempt another update if one hasn't already been attempted.
-            setAttemptAnotherUpdate();
-            TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm:: runFirmwareUpdates(): "
-                     "Version on BPM didn't match image. %s ",
-                     iv_attemptAnotherUpdate ?
-                     "Attempt another update..."
-                     : "Attempts to update the BPM have failed.");
-            if (iv_attemptAnotherUpdate == false)
-            {
-                /*@
-                * @errortype
-                * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                * @moduleid         BPM_RC::BPM_RUN_FW_UPDATES
-                * @reasoncode       BPM_RC::BPM_VERSION_MISMATCH
-                * @userdata1[00:31] Version on the BPM
-                * @userdata1[32:63] Version of the flash image
-                * @userdata2        NVDIMM Target HUID associated with this BPM
-                * @devdesc          The version on the BPM didn't match the
-                *                   version in the flash image.
-                * @custdesc         A problem occurred during IPL of the system.
-                */
-                exitErrl = new ERRORLOG::ErrlEntry(
-                                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           BPM_RC::BPM_RUN_FW_UPDATES,
-                                           BPM_RC::BPM_VERSION_MISMATCH,
-                                           TWO_UINT32_TO_UINT64(bpmFwVersion,
-                                               i_image.getVersion()),
-                                           TARGETING::get_huid(iv_nvdimm));
-                exitErrl->collectTrace(BPM_COMP_NAME);
-                handleMultipleErrors(errl, exitErrl);
-            }
-        }
-
-    } while(0);
+    }
 
     return errl;
 }
@@ -3295,7 +3620,7 @@ errlHndl_t Bpm::checkFirmwareCrc()
              break;
          }
 
-         errl = issueCommand(BPM_PASSTHROUGH, crcPayload, WRITE);
+         errl = issueCommand(BPM_PASSTHROUGH, crcPayload, WRITE, 0);
          if (errl != nullptr)
          {
              break;
