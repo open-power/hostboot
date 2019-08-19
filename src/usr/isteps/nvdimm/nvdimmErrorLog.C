@@ -32,7 +32,6 @@
 #include <targeting/common/util.H>
 #include <targeting/common/utilFilter.H>
 #include <fapi2.H>
-#include <lib/shared/nimbus_defaults.H>
 #include <isteps/nvdimm/nvdimmreasoncodes.H>
 #include <isteps/nvdimm/nvdimm.H>
 #include "errlud_nvdimm.H"
@@ -254,6 +253,14 @@ void nvdimmTraceRegs(Target *i_nvdimm, nvdimm_reg_t& o_RegInfo)
         errlCommit( l_err, NVDIMM_COMP_ID );
     }
     o_RegInfo.Set_Event_Notification_Status = l_data;
+
+    // Read NVDIMM Encryption Configuration and Status Register for Security Errors
+    l_err = nvdimmReadReg(i_nvdimm, ENCRYPTION_CONFIG_STATUS, l_data);
+    if(l_err)
+    {
+        errlCommit( l_err, NVDIMM_COMP_ID );
+    }
+    o_RegInfo.Encryption_Config_Status = l_data;
 }
 
 /**
@@ -294,16 +301,16 @@ bool nvdimmCalloutDimm(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
                 nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
 
                 // Callout dimm but do not deconfig or gard
-                o_err->addPartCallout( i_nvdimm,
-                                       HWAS::NV_CONTROLLER_PART_TYPE,
-                                       HWAS::SRCI_PRIORITY_LOW);
+                o_err->addHwCallout( i_nvdimm,
+                                       HWAS::SRCI_PRIORITY_LOW,
+                                       HWAS::NO_DECONFIG,
+                                       HWAS::GARD_NULL);
             }
             else
             {
                 // Callout, deconfig and gard the dimm
-                o_err->addPartCallout( i_nvdimm,
-                                       HWAS::NV_CONTROLLER_PART_TYPE,
-                                       HWAS::SRCI_PRIORITY_LOW,
+                o_err->addHwCallout( i_nvdimm,
+                                       HWAS::SRCI_PRIORITY_HIGH,
                                        HWAS::DECONFIG,
                                        HWAS::GARD_Fatal);
             }
@@ -332,17 +339,16 @@ bool nvdimmCalloutDimm(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
                 nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
 
                 // Callout dimm but do not deconfig or gard
-                o_err->addPartCallout( i_nvdimm,
-                                       HWAS::NV_CONTROLLER_PART_TYPE,
-                                       HWAS::SRCI_PRIORITY_LOW);
-
+                o_err->addHwCallout( i_nvdimm,
+                                       HWAS::SRCI_PRIORITY_LOW,
+                                       HWAS::NO_DECONFIG,
+                                       HWAS::GARD_NULL);
             }
             else
             {
                 // Callout, deconfig and gard the dimm
-                o_err->addPartCallout( i_nvdimm,
-                                       HWAS::NV_CONTROLLER_PART_TYPE,
-                                       HWAS::SRCI_PRIORITY_LOW,
+                o_err->addHwCallout( i_nvdimm,
+                                       HWAS::SRCI_PRIORITY_HIGH,
                                        HWAS::DECONFIG,
                                        HWAS::GARD_Fatal);
             }
@@ -371,10 +377,11 @@ bool nvdimmCalloutDimm(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
                 // Set ATTR_NV_STATUS_FLAG to partially working as data may still persist
                 nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
 
-                // Callout dimm but do not deconfig or gard
-                o_err->addPartCallout( i_nvdimm,
-                                       HWAS::NV_CONTROLLER_PART_TYPE,
-                                       HWAS::SRCI_PRIORITY_LOW);
+                // Callout dimm and gard
+                o_err->addHwCallout( i_nvdimm,
+                                       HWAS::SRCI_PRIORITY_LOW,
+                                       HWAS::NO_DECONFIG,
+                                       HWAS::GARD_Fatal);
             }
             else
             {
@@ -385,12 +392,11 @@ bool nvdimmCalloutDimm(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
                     errlCommit( l_err, NVDIMM_COMP_ID );
                 }
 
-                // Callout, deconfig and gard the dimm
-                o_err->addPartCallout( i_nvdimm,
-                                       HWAS::NV_CONTROLLER_PART_TYPE,
+                // Callout the dimm but do not deconfig or gard
+                o_err->addHwCallout( i_nvdimm,
                                        HWAS::SRCI_PRIORITY_LOW,
                                        HWAS::NO_DECONFIG,
-                                       HWAS::GARD_Fatal);
+                                       HWAS::GARD_NULL);
             }
 
             break;
@@ -400,9 +406,10 @@ bool nvdimmCalloutDimm(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
         case HEALTH_POST_ARM:
         {
             // Callout dimm but do not deconfig or gard
-            o_err->addPartCallout( i_nvdimm,
-                                   HWAS::NV_CONTROLLER_PART_TYPE,
-                                   HWAS::SRCI_PRIORITY_LOW);
+            o_err->addHwCallout( i_nvdimm,
+                                   HWAS::SRCI_PRIORITY_LOW,
+                                   HWAS::NO_DECONFIG,
+                                   HWAS::GARD_NULL);
 
             // Set ATTR_NV_STATUS_FLAG to partially working as data may persist despite errors
             nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
@@ -461,16 +468,16 @@ bool nvdimmBPMCableCallout(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
                 nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
 
                 // Callout dimm but do not deconfig or gard
-                o_err->addPartCallout( i_nvdimm,
-                                       HWAS::NV_CONTROLLER_PART_TYPE,
-                                       HWAS::SRCI_PRIORITY_LOW);
+                o_err->addHwCallout( i_nvdimm,
+                                       HWAS::SRCI_PRIORITY_LOW,
+                                       HWAS::NO_DECONFIG,
+                                       HWAS::GARD_NULL);
             }
             else
             {
                 // Callout dimm, deconfig and gard
-                o_err->addPartCallout( i_nvdimm,
-                                       HWAS::NV_CONTROLLER_PART_TYPE,
-                                       HWAS::SRCI_PRIORITY_LOW,
+                o_err->addHwCallout( i_nvdimm,
+                                       HWAS::SRCI_PRIORITY_HIGH,
                                        HWAS::DECONFIG,
                                        HWAS::GARD_Fatal);
             }
@@ -507,16 +514,16 @@ bool nvdimmBPMCableCallout(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
                 nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
 
                 // Callout dimm but do not deconfig or gard
-                o_err->addPartCallout( i_nvdimm,
-                                       HWAS::NV_CONTROLLER_PART_TYPE,
-                                       HWAS::SRCI_PRIORITY_LOW);
+                o_err->addHwCallout( i_nvdimm,
+                                       HWAS::SRCI_PRIORITY_LOW,
+                                       HWAS::NO_DECONFIG,
+                                       HWAS::GARD_NULL);
             }
             else
             {
                 // Callout dimm, deconfig and gard
-                o_err->addPartCallout( i_nvdimm,
-                                       HWAS::NV_CONTROLLER_PART_TYPE,
-                                       HWAS::SRCI_PRIORITY_LOW,
+                o_err->addHwCallout( i_nvdimm,
+                                       HWAS::SRCI_PRIORITY_HIGH,
                                        HWAS::DECONFIG,
                                        HWAS::GARD_Fatal);
             }
@@ -553,9 +560,10 @@ bool nvdimmBPMCableCallout(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
                 nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
 
                 // Callout dimm but do not deconfig or gard
-                o_err->addPartCallout( i_nvdimm,
-                                       HWAS::NV_CONTROLLER_PART_TYPE,
-                                       HWAS::SRCI_PRIORITY_LOW);
+                o_err->addHwCallout( i_nvdimm,
+                                       HWAS::SRCI_PRIORITY_LOW,
+                                       HWAS::NO_DECONFIG,
+                                       HWAS::GARD_NULL);
             }
             else
             {
@@ -566,9 +574,8 @@ bool nvdimmBPMCableCallout(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
                     errlCommit( l_err, NVDIMM_COMP_ID );
                 }
                 // Callout dimm, deconfig and gard
-                o_err->addPartCallout( i_nvdimm,
-                                       HWAS::NV_CONTROLLER_PART_TYPE,
-                                       HWAS::SRCI_PRIORITY_LOW,
+                o_err->addHwCallout( i_nvdimm,
+                                       HWAS::SRCI_PRIORITY_HIGH,
                                        HWAS::DECONFIG,
                                        HWAS::GARD_Fatal);
             }
@@ -586,9 +593,10 @@ bool nvdimmBPMCableCallout(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
             o_err->addPartCallout( i_nvdimm,
                                    HWAS::BPM_CABLE_PART_TYPE,
                                    HWAS::SRCI_PRIORITY_HIGH);
-            o_err->addPartCallout( i_nvdimm,
-                                   HWAS::NV_CONTROLLER_PART_TYPE,
-                                   HWAS::SRCI_PRIORITY_LOW);
+            o_err->addHwCallout( i_nvdimm,
+                                       HWAS::SRCI_PRIORITY_LOW,
+                                       HWAS::NO_DECONFIG,
+                                       HWAS::GARD_NULL);
 
             // Set ATTR_NV_STATUS_FLAG to partially working as data may still persist
             nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
@@ -631,9 +639,10 @@ bool nvdimmBPMCallout(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
                                    HWAS::SRCI_PRIORITY_HIGH);
 
             // Callout dimm but do not deconfig or gard
-            o_err->addPartCallout( i_nvdimm,
-                                   HWAS::NV_CONTROLLER_PART_TYPE,
-                                   HWAS::SRCI_PRIORITY_LOW);
+            o_err->addHwCallout( i_nvdimm,
+                                   HWAS::SRCI_PRIORITY_LOW,
+                                   HWAS::NO_DECONFIG,
+                                   HWAS::GARD_NULL);
 
             // Set ATTR_NV_STATUS_FLAG to partially working as data may still persist
             nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
@@ -650,9 +659,10 @@ bool nvdimmBPMCallout(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
                                    HWAS::SRCI_PRIORITY_HIGH);
 
             // Callout dimm but do not deconfig or gard
-            o_err->addPartCallout( i_nvdimm,
-                                   HWAS::NV_CONTROLLER_PART_TYPE,
-                                   HWAS::SRCI_PRIORITY_LOW);
+            o_err->addHwCallout( i_nvdimm,
+                                   HWAS::SRCI_PRIORITY_LOW,
+                                   HWAS::NO_DECONFIG,
+                                   HWAS::GARD_NULL);
 
             // Set ATTR_NV_STATUS_FLAG to partially working as data may still persist
             nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
@@ -680,9 +690,10 @@ bool nvdimmBPMCallout(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
                                    HWAS::SRCI_PRIORITY_HIGH);
 
             // Callout dimm but do not deconfig or gard
-            o_err->addPartCallout( i_nvdimm,
-                                   HWAS::NV_CONTROLLER_PART_TYPE,
-                                   HWAS::SRCI_PRIORITY_LOW);
+            o_err->addHwCallout( i_nvdimm,
+                                   HWAS::SRCI_PRIORITY_LOW,
+                                   HWAS::NO_DECONFIG,
+                                   HWAS::GARD_NULL);
 
             // Check arm status and set dimm status accordingly
             if(!l_continue)
@@ -712,9 +723,10 @@ bool nvdimmBPMCallout(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
                                    HWAS::SRCI_PRIORITY_HIGH);
 
             // Callout dimm but do not deconfig or gard
-            o_err->addPartCallout( i_nvdimm,
-                                   HWAS::NV_CONTROLLER_PART_TYPE,
-                                   HWAS::SRCI_PRIORITY_LOW);
+            o_err->addHwCallout( i_nvdimm,
+                                   HWAS::SRCI_PRIORITY_LOW,
+                                   HWAS::NO_DECONFIG,
+                                   HWAS::GARD_NULL);
 
             // Set ATTR_NV_STATUS_FLAG to partially working as data may still persist
             nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
@@ -1052,9 +1064,8 @@ errlHndl_t nvdimmHealthStatusCheck(Target *i_nvdimm, uint8_t i_step, bool& o_con
 
         if(l_arm_timeout)
         {
-            // Callout, deconfig and gard the dimm
-            l_err->addPartCallout( i_nvdimm,
-                                   HWAS::NV_CONTROLLER_PART_TYPE,
+            // Callout and gard the dimm
+            l_err->addHwCallout( i_nvdimm,
                                    HWAS::SRCI_PRIORITY_LOW,
                                    HWAS::NO_DECONFIG,
                                    HWAS::GARD_Fatal);
@@ -1288,9 +1299,10 @@ errlHndl_t nvdimmHealthStatusCheck(Target *i_nvdimm, uint8_t i_step, bool& o_con
                                                ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
             o_continue = true;
             // Callout dimm but no deconfig and gard
-            l_err_t->addPartCallout( i_nvdimm,
-                                   HWAS::NV_CONTROLLER_PART_TYPE,
-                                   HWAS::SRCI_PRIORITY_LOW);
+            l_err_t->addHwCallout( i_nvdimm,
+                                   HWAS::SRCI_PRIORITY_LOW,
+                                   HWAS::NO_DECONFIG,
+                                   HWAS::GARD_NULL);
         }
     }
 

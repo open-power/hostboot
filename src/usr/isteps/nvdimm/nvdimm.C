@@ -131,6 +131,10 @@ static constexpr size_t MAX_TPM_SIZE = 34;
 static constexpr uint8_t KEY_TERMINATE_BYTE = 0x00;
 static constexpr uint8_t KEY_ABORT_BYTE = 0xFF;
 
+// NVDIMM CSAVE_FAIL_INFO1 Bit mask
+// Currently only bits 1:6 need to be checked during init
+static constexpr uint8_t CSAVE_FAIL_BITS_MASK = 0x7E;
+
 #ifndef __HOSTBOOT_RUNTIME
 // Warning thresholds
 static constexpr uint8_t THRESHOLD_ES_LIFETIME = 0x07;    // 7%
@@ -552,8 +556,7 @@ errlHndl_t nvdimmReady(Target *i_nvdimm)
 
             // If nvdimm is not ready for access by now, this is
             // a failing indication on the NV controller
-            l_err->addPartCallout( i_nvdimm,
-                                   HWAS::NV_CONTROLLER_PART_TYPE,
+            l_err->addHwCallout( i_nvdimm,
                                    HWAS::SRCI_PRIORITY_HIGH,
                                    HWAS::DECONFIG,
                                    HWAS::GARD_Fatal);
@@ -1245,17 +1248,8 @@ errlHndl_t nvdimmRestore(TargetHandleList& i_nvdimmList, uint8_t &i_mpipl)
                             ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
                 break;
             }
-        }
 
-        if (l_err)
-        {
-            TRACFCOMP(g_trac_nvdimm, "restore encountered an error");
-            break;
-        }
-
-        // Exit self-refresh
-        for (const auto & l_nvdimm : i_nvdimmList)
-        {
+            // Exit self-refresh
             TargetHandleList l_mcaList;
             getParentAffinityTargets(l_mcaList, l_nvdimm, CLASS_UNIT, TYPE_MCA);
             assert(l_mcaList.size(), "nvdimmRestore() failed to find parent MCA.");
@@ -1344,12 +1338,10 @@ errlHndl_t nvdimmEraseCheck(Target *i_nvdimm)
     {
         // For both Erase timeout and Erase fail
         // Callout nvdimm on high, gard and deconfig
-        l_err->addPartCallout( i_nvdimm,
-                               HWAS::NV_CONTROLLER_PART_TYPE,
-                               HWAS::SRCI_PRIORITY_HIGH,
-                               HWAS::DECONFIG,
-                               HWAS::GARD_Fatal);
-
+        l_err->addHwCallout( i_nvdimm,
+                             HWAS::SRCI_PRIORITY_HIGH,
+                             HWAS::DECONFIG,
+                             HWAS::GARD_Fatal);
 
         // Collect register data for FFDC Traces
         nvdimmTraceRegs ( i_nvdimm, l_RegInfo );
@@ -1721,8 +1713,7 @@ errlHndl_t nvdimm_restore(TargetHandleList &i_nvdimmList)
 
             // Invalid restore could be due to dram not in self-refresh
             // or controller issue. Data should not be trusted at this point
-            l_err->addPartCallout( l_nvdimm,
-                                   HWAS::NV_CONTROLLER_PART_TYPE,
+            l_err->addHwCallout( l_nvdimm,
                                    HWAS::SRCI_PRIORITY_HIGH,
                                    HWAS::DECONFIG,
                                    HWAS::GARD_Fatal);
@@ -1901,6 +1892,8 @@ errlHndl_t nvdimm_init(Target *i_nvdimm)
     errlHndl_t l_err = nullptr;
     bool l_continue = true;
     uint8_t l_data = 0;
+    uint8_t l_failinfo0 = 0;
+    uint8_t l_failinfo1 = 0;
     nvdimm_reg_t l_RegInfo;
     uint32_t l_poll = 0;
 
@@ -2015,8 +2008,7 @@ errlHndl_t nvdimm_init(Target *i_nvdimm)
             {
                 // May have to move the error handling to the caller
                 // as different op could have different error severity
-                l_err->addPartCallout( i_nvdimm,
-                                       HWAS::NV_CONTROLLER_PART_TYPE,
+                l_err->addHwCallout( i_nvdimm,
                                        HWAS::SRCI_PRIORITY_HIGH,
                                        HWAS::DECONFIG,
                                        HWAS::GARD_Fatal);
@@ -2027,13 +2019,27 @@ errlHndl_t nvdimm_init(Target *i_nvdimm)
             }
         }
 
-        // Check CSAVE_ERROR Register
-        l_err = nvdimmReadReg( i_nvdimm, CSAVE_FAIL_INFO0, l_data );
+        // Check CSAVE FAIL INFO registers for fail errors
+        l_err = nvdimmReadReg( i_nvdimm, CSAVE_FAIL_INFO0, l_failinfo0 );
         if (l_err)
         {
             break;
         }
-        else if (l_data != ZERO)
+        l_err = nvdimmReadReg ( i_nvdimm, CSAVE_FAIL_INFO1, l_failinfo1 );
+        if (l_err)
+        {
+            break;
+        }
+        // Apply mask for relevant 1:6 bits to failinfo1
+        l_failinfo1 &= CSAVE_FAIL_BITS_MASK;
+
+        // Check CSAVE_STATUS Register
+        l_err = nvdimmReadReg( i_nvdimm, CSAVE_STATUS, l_data );
+        if (l_err)
+        {
+            break;
+        }
+        else if ((l_data == SAVE_ERROR) && ((l_failinfo0 != ZERO) || (l_failinfo1 != ZERO)))
         {
             /*@
              *@errortype
@@ -2066,8 +2072,7 @@ errlHndl_t nvdimm_init(Target *i_nvdimm)
             if ( l_RegInfo.CSave_Info != VALID_IMAGE )
             {
                 // Callout and gard dimm if image is not valid
-                l_err->addPartCallout( i_nvdimm,
-                                       HWAS::NV_CONTROLLER_PART_TYPE,
+                l_err->addHwCallout( i_nvdimm,
                                        HWAS::SRCI_PRIORITY_HIGH,
                                        HWAS::DECONFIG,
                                        HWAS::GARD_Fatal);

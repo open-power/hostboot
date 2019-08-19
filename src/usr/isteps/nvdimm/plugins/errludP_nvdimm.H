@@ -198,7 +198,7 @@ public:
         char* l_databuf = static_cast<char*>(i_pBuffer);
         i_parser.PrintHeading("NVDIMM I2C Register Traces");
 
-        //***** Memorr Layout *****
+        //***** Memory Layout *****
         // 1 byte   : MODULE_HEALTH
         // 1 byte   : MODULE_HEALTH_STATUS0
         // 1 byte   : MODULE_HEALTH_STATUS1
@@ -224,6 +224,7 @@ public:
         // 1 byte   : ARM_TIMEOUT0
         // 1 byte   : ARM_TIMEOUT1
         // 1 byte   : SET_EVENT_NOTIFICATION_STATUS
+        // 1 byte   : ENCRYPTION_CONFIG_STATUS
         //
 
         i_parser.PrintNumber("Module Health Register: ","%.2lX",TO_UINT8(l_databuf));
@@ -239,6 +240,10 @@ public:
         i_parser.PrintNumber("CSave Fail Info0 Register: ","%.2lX",TO_UINT8(l_databuf));
         ++l_databuf;
         i_parser.PrintNumber("CSave Fail Info1 Register: ","%.2lX",TO_UINT8(l_databuf));
+        ++l_databuf;
+        i_parser.PrintNumber("CSave Timeout Info0 Register: ","%.2lX",TO_UINT8(l_databuf));
+        ++l_databuf;
+        i_parser.PrintNumber("CSave Timeout Info1 Register: ","%.2lX",TO_UINT8(l_databuf));
         ++l_databuf;
         i_parser.PrintNumber("CSave Timeout Info0 Register: ","%.2lX",TO_UINT8(l_databuf));
         ++l_databuf;
@@ -275,6 +280,8 @@ public:
         i_parser.PrintNumber("Arm Timeout1 Register: ","%.2lX",TO_UINT8(l_databuf));
         ++l_databuf;
         i_parser.PrintNumber("Set Event Notification Status Register: ","%.2lX",TO_UINT8(l_databuf));
+        ++l_databuf;
+        i_parser.PrintNumber("NVDIMM Encryption Configuration and Status Register: ","%.2lX",TO_UINT8(l_databuf));
         ++l_databuf;
     }
 

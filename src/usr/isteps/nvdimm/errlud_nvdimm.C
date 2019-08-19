@@ -178,6 +178,8 @@ UdNvdimmOPParms::UdNvdimmOPParms( const nvdimm_reg_t &i_RegInfo )
    // 1 byte   : CSAVE_INFO
    // 1 byte   : CSAVE_FAIL_INFO0
    // 1 byte   : CSAVE_FAIL_INFO1
+   // 1 byte   : CSAVE_TIMEOUT_INFO0
+   // 1 byte   : CSAVE_TIMEOUT_INFO1
    // 1 byte   : ERROR_THRESHOLD_STATUS
    // 1 byte   : NVDIMM_READY
    // 1 byte   : NVDIMM_CMD_STATUS0
@@ -192,6 +194,7 @@ UdNvdimmOPParms::UdNvdimmOPParms( const nvdimm_reg_t &i_RegInfo )
    // 1 byte   : RESTORE_TIMEOUT1
    // 1 byte   : ARM_STATUS
    // 1 byte   : SET_EVENT_NOTIFICATION_STATUS
+   // 1 byte   : ENCRYPTION_CONFIG_STATUS
 
    char * l_pBuf = reinterpret_cast<char *>( reallocUsrBuf(sizeof(i_RegInfo)));
    memcpy(l_pBuf, &i_RegInfo, sizeof(i_RegInfo));

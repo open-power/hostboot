@@ -354,6 +354,8 @@ enum i2c_out_values : uint8_t
     ES_POLICY_ERROR             = 0x02,
     ARM_ERROR                   = 0X02,
     RSTR_ERROR                  = 0x02,
+    SAVE_ERROR                  = 0x02,
+    ARM_CLEAR                   = 0x20,
 };
 
 // Timeout-related enum
@@ -467,7 +469,28 @@ enum event_n : uint8_t
 {
     PERSISTENCY_NOTIFICATION            = 0x01,
     SET_EVENT_NOTIFICATION_ERROR        = 0x02,
+    WARNING_THRESHOLD_NOTIFICATION      = 0x02,
     PERSISTENCY_ENABLED                 = 0x04,
+    WARNING_THRESHOLD_ENABLED           = 0x08,
+    ENABLE_NOTIFICATIONS                = 0x03,
+    NOTIFICATIONS_ENABLED               = 0x0C,
+};
+
+// MBACALFIR register addresses
+enum mbacal_addresses : uint32_t
+{
+    MBACALFIR_AND_MASK_REG = 0x07010904,
+    MBACALFIR_OR_MASK_REG  = 0x07010905,
+    MBACALFIR_ACTION0_REG  = 0x07010906,
+    MBACALFIR_ACTION1_REG  = 0x07010907,
+};
+
+// MBACALFIR bit masks for event n
+enum mbacal_bitmask_values : uint64_t
+{
+    MBACALFIR_EVENTN_AND_BIT = 0xff7fffffffffffff,
+    MBACALFIR_EVENTN_OR_BIT  = 0x0080000000000000,
+    MBACALFIR_UNMASK_BIT     = 0xff7fffffffffffff,
 };
 
 /**

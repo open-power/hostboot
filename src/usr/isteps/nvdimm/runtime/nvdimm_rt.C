@@ -41,7 +41,6 @@
 #include <usr/runtime/rt_targeting.H>
 #include <runtime/interface.h>
 #include <arch/ppc.H>
-#include <lib/shared/nimbus_defaults.H>
 #include <isteps/nvdimm/nvdimmreasoncodes.H>
 #include "../errlud_nvdimm.H"
 #include "../nvdimmErrorLog.H"
@@ -142,10 +141,9 @@ errlHndl_t nvdimmCheckArmSuccess(Target *i_nvdimm, bool i_arm_timeout)
         // Failure to arm could mean internal NV controller error or
         // even error on the battery pack. NVDIMM will lose persistency
         // if failed to arm trigger
-        l_err->addPartCallout( i_nvdimm,
-                               HWAS::NV_CONTROLLER_PART_TYPE,
+        l_err->addHwCallout( i_nvdimm,
                                HWAS::SRCI_PRIORITY_HIGH,
-                               HWAS::DECONFIG,
+                               HWAS::NO_DECONFIG,
                                HWAS::GARD_Fatal);
     }
 
@@ -162,12 +160,36 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
     bool l_arm_timeout = false;
     uint8_t l_data;
     auto l_RegInfo = nvdimm_reg_t();
+    uint64_t l_writeData;
+    uint32_t l_writeAddress;
+    size_t l_writeSize = sizeof(l_writeData);
 
     TRACFCOMP(g_trac_nvdimm, ENTER_MRK"nvdimmArm() %d",
         i_nvdimmTargetList.size());
 
     errlHndl_t l_err = nullptr;
     errlHndl_t l_err_t = nullptr;
+
+    // Mask MBACALFIR EventN to separate ARM handling
+    for (TargetHandleList::iterator it = i_nvdimmTargetList.begin();
+         it != i_nvdimmTargetList.end();)
+    {
+        TargetHandleList l_mcaList;
+        getParentAffinityTargets(l_mcaList, *it, CLASS_UNIT, TYPE_MCA);
+        assert(l_mcaList.size(), "nvdimmArm() failed to find parent MCA.");
+
+        l_writeAddress = MBACALFIR_OR_MASK_REG;
+        l_writeData = MBACALFIR_EVENTN_OR_BIT;
+        l_err = deviceWrite(l_mcaList[0], &l_writeData, l_writeSize,
+                            DEVICE_SCOM_ADDRESS(l_writeAddress));
+        if(l_err)
+        {
+              TRACFCOMP(g_trac_nvdimm, "SCOM to address 0x%08x failed",
+                        l_writeAddress);
+             errlCommit( l_err, NVDIMM_COMP_ID );
+        }
+        it++;
+    }
 
     for (auto const l_nvdimm : i_nvdimmTargetList)
     {
@@ -202,14 +224,22 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
             l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
             l_err->collectTrace(NVDIMM_COMP_NAME);
 
-            // Callout nvdimm on high, gard and deconfig
-            l_err->addPartCallout( l_nvdimm,
-                                   HWAS::NV_CONTROLLER_PART_TYPE,
+            // Callout the nvdimm on high and gard
+            l_err->addHwCallout( l_nvdimm,
                                    HWAS::SRCI_PRIORITY_HIGH,
                                    HWAS::NO_DECONFIG,
                                    HWAS::GARD_Fatal);
 
             errlCommit( l_err, NVDIMM_COMP_ID );
+            break;
+        }
+
+        // Clear ARM status register
+        l_err = nvdimmWriteReg(l_nvdimm, NVDIMM_MGT_CMD0, ARM_CLEAR);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmArm() nvdimm[%X] - error clearing ARM status register",
+                      get_huid(l_nvdimm));
             break;
         }
 
@@ -365,24 +395,26 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
             errlCommit(l_err, NVDIMM_COMP_ID);
         }
 
-        // Enable event notification
-        l_err = nvdimmWriteReg(l_nvdimm, SET_EVENT_NOTIFICATION_CMD, PERSISTENCY_NOTIFICATION);
+        // Enable Persistency and Warning Threshold notifications
+        l_err = nvdimmWriteReg(l_nvdimm, SET_EVENT_NOTIFICATION_CMD, ENABLE_NOTIFICATIONS);
         if (l_err)
         {
-            TRACFCOMP(g_trac_nvdimm, ERR_MRK"NDVIMM HUID[%X] error initiating erase!!",
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"NDVIMM HUID[%X] setting persistency notification",
                       TARGETING::get_huid(l_nvdimm));
-            errlCommit(l_err, NVDIMM_COMP_ID);
+            break;
         }
 
         // Check notification status and errors
         l_err = nvdimmReadReg(l_nvdimm, SET_EVENT_NOTIFICATION_STATUS, l_data);
         if (l_err)
         {
-            errlCommit( l_err, NVDIMM_COMP_ID );
+            break;
         }
-        else if (((l_data & SET_EVENT_NOTIFICATION_ERROR) == SET_EVENT_NOTIFICATION_ERROR) || ((l_data & PERSISTENCY_ENABLED) != PERSISTENCY_ENABLED))
+        else if (((l_data & SET_EVENT_NOTIFICATION_ERROR) == SET_EVENT_NOTIFICATION_ERROR)
+                   || ((l_data & NOTIFICATIONS_ENABLED) != NOTIFICATIONS_ENABLED))
         {
-            TRACFCOMP(g_trac_nvdimm, "nvdimmArm() nvdimm[%X] failed to set event notification", get_huid(l_nvdimm));
+            TRACFCOMP(g_trac_nvdimm, "nvdimmArm() nvdimm[%X] failed to set event notification",
+                      get_huid(l_nvdimm));
 
             // Set NVDIMM Status flag to partial working, as error detected but data might persist
             nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR_VAL_SR);
@@ -407,11 +439,11 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
 
             l_err->collectTrace( NVDIMM_COMP_NAME );
 
-            // Callout, deconfig and gard the dimm
-            l_err->addPartCallout( l_nvdimm,
-                                   HWAS::NV_CONTROLLER_PART_TYPE,
-                                   HWAS::SRCI_PRIORITY_LOW);
-
+            // Callout the dimm
+            l_err->addHwCallout( l_nvdimm,
+                                   HWAS::SRCI_PRIORITY_LOW,
+                                   HWAS::NO_DECONFIG,
+                                   HWAS::GARD_NULL);
 
             // Read relevant regs for trace data
             nvdimmTraceRegs(l_nvdimm, l_RegInfo);
@@ -436,6 +468,83 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
             break;
         }
 
+    }
+
+    // Check for uncommited i2c fail error logs
+    if (l_err)
+    {
+        TRACFCOMP(g_trac_nvdimm, "nvdimmArm() failed an i2c read/write");
+        errlCommit( l_err, NVDIMM_COMP_ID );
+        nvdimmDisarm(i_nvdimmTargetList);
+        return false;
+    }
+
+    // Unmask MBACALFIR EventN and set to recoverable
+    for (TargetHandleList::iterator it = i_nvdimmTargetList.begin();
+         it != i_nvdimmTargetList.end();)
+    {
+        TargetHandleList l_mcaList;
+        getParentAffinityTargets(l_mcaList, *it, CLASS_UNIT, TYPE_MCA);
+        assert(l_mcaList.size(), "nvdimmArm() failed to find parent MCA.");
+
+        // Set MBACALFIR_ACTION0 to recoverable
+        l_writeAddress = MBACALFIR_ACTION0_REG;
+        l_writeData = 0;
+        l_err = deviceRead(l_mcaList[0], &l_writeData, l_writeSize,
+                           DEVICE_SCOM_ADDRESS(l_writeAddress));
+        if(l_err)
+        {
+              TRACFCOMP(g_trac_nvdimm, "SCOM to address 0x%08x failed",
+                        l_writeAddress);
+             errlCommit( l_err, NVDIMM_COMP_ID );
+        }
+
+
+        l_writeData &= MBACALFIR_EVENTN_AND_BIT;
+        l_err = deviceWrite(l_mcaList[0], &l_writeData, l_writeSize,
+                               DEVICE_SCOM_ADDRESS(l_writeAddress));
+        if(l_err)
+        {
+              TRACFCOMP(g_trac_nvdimm, "SCOM to address 0x%08x failed",
+                        l_writeAddress);
+             errlCommit( l_err, NVDIMM_COMP_ID );
+        }
+
+        // Set MBACALFIR_ACTION1 to recoverable
+        l_writeAddress = MBACALFIR_ACTION1_REG;
+        l_writeData = 0;
+        l_err = deviceRead(l_mcaList[0], &l_writeData, l_writeSize,
+                           DEVICE_SCOM_ADDRESS(l_writeAddress));
+        if(l_err)
+        {
+              TRACFCOMP(g_trac_nvdimm, "SCOM to address 0x%08x failed",
+                        l_writeAddress);
+             errlCommit( l_err, NVDIMM_COMP_ID );
+        }
+
+        l_writeData |= MBACALFIR_EVENTN_OR_BIT;
+        l_err = deviceWrite(l_mcaList[0], &l_writeData, l_writeSize,
+                            DEVICE_SCOM_ADDRESS(l_writeAddress));
+        if(l_err)
+        {
+              TRACFCOMP(g_trac_nvdimm, "SCOM to address 0x%08x failed",
+                        l_writeAddress);
+             errlCommit( l_err, NVDIMM_COMP_ID );
+        }
+
+        // Unmask MBACALFIR[8]
+        l_writeAddress = MBACALFIR_AND_MASK_REG;
+        l_writeData = MBACALFIR_UNMASK_BIT;
+        l_err = deviceWrite(l_mcaList[0], &l_writeData, l_writeSize,
+                            DEVICE_SCOM_ADDRESS(l_writeAddress));
+        if(l_err)
+        {
+              TRACFCOMP(g_trac_nvdimm, "SCOM to address 0x%08x failed",
+                        l_writeAddress);
+             errlCommit( l_err, NVDIMM_COMP_ID );
+        }
+
+        it++;
     }
 
     TRACFCOMP(g_trac_nvdimm, EXIT_MRK"nvdimmArm() returning %d",

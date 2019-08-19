@@ -122,6 +122,7 @@ struct nvdimm_reg_t
     uint8_t Arm_Timeout0;
     uint8_t Arm_Timeout1;
     uint8_t Set_Event_Notification_Status;
+    uint8_t Encryption_Config_Status;
 
     /**
      *  @brief Construct a default nvdimm_reg_t
@@ -151,8 +152,8 @@ struct nvdimm_reg_t
           Arm_Status(0),
           Arm_Timeout0(0),
           Arm_Timeout1(0),
-          Set_Event_Notification_Status(0)
-
+          Set_Event_Notification_Status(0),
+          Encryption_Config_Status(0)
     {
     }
 
