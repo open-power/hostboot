@@ -342,6 +342,7 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
 
             // Dump Traces for error logs
             nvdimmTraceRegs( l_nvdimm, l_RegInfo );
+            nvdimmAddPage4Regs(l_nvdimm,l_err);
 
             // Add reg traces to the error log
             NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
@@ -451,6 +452,7 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
 
             // Read relevant regs for trace data
             nvdimmTraceRegs(l_nvdimm, l_RegInfo);
+            nvdimmAddPage4Regs(l_nvdimm,l_err);
 
             // Add reg traces to the error log
             NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
@@ -852,6 +854,7 @@ bool nvDimmEsCheckHealthStatus(const TargetHandleList &i_nvdimmTargetList)
             l_err->addPartCallout( l_nvdimm,
                                    HWAS::BPM_PART_TYPE,
                                    HWAS::SRCI_PRIORITY_HIGH);
+            nvdimmAddPage4Regs(l_nvdimm,l_err);
             // Collect the error
             errlCommit(l_err, NVDIMM_COMP_ID);
 
@@ -890,6 +893,7 @@ bool nvDimmEsCheckHealthStatus(const TargetHandleList &i_nvdimmTargetList)
             l_err->addPartCallout( l_nvdimm,
                                    HWAS::BPM_PART_TYPE,
                                    HWAS::SRCI_PRIORITY_HIGH);
+            nvdimmAddPage4Regs(l_nvdimm,l_err);
             // Collect the error
             errlCommit(l_err, NVDIMM_COMP_ID);
 
@@ -965,6 +969,7 @@ bool nvDimmEsCheckHealthStatus(const TargetHandleList &i_nvdimmTargetList)
                 l_err->addPartCallout( l_nvdimm,
                                        HWAS::BPM_PART_TYPE,
                                        HWAS::SRCI_PRIORITY_HIGH);
+                nvdimmAddPage4Regs(l_nvdimm,l_err);
                 // Collect the error
                 errlCommit(l_err, NVDIMM_COMP_ID);
 
@@ -1016,6 +1021,7 @@ bool nvDimmEsCheckHealthStatus(const TargetHandleList &i_nvdimmTargetList)
             l_err->addPartCallout( l_nvdimm,
                                    HWAS::BPM_PART_TYPE,
                                    HWAS::SRCI_PRIORITY_HIGH);
+            nvdimmAddPage4Regs(l_nvdimm,l_err);
             // Collect the error
             errlCommit(l_err, NVDIMM_COMP_ID);
 

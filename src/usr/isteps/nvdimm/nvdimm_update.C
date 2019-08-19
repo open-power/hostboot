@@ -405,6 +405,7 @@ errlHndl_t NvdimmInstalledImage::updateImage(NvdimmLidImage * i_lidImage)
                                    HWAS::SRCI_PRIORITY_HIGH );
             l_err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
                                         HWAS::SRCI_PRIORITY_LOW );
+            nvdimmAddPage4Regs(iv_dimm,l_err);
             break;
         }
 
@@ -581,6 +582,7 @@ errlHndl_t NvdimmInstalledImage::updateImage(NvdimmLidImage * i_lidImage)
             // possible code issue
             l_err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
                                         HWAS::SRCI_PRIORITY_LOW );
+            nvdimmAddPage4Regs(iv_dimm,l_err);
             break;
         }
 
@@ -789,6 +791,7 @@ errlHndl_t NvdimmInstalledImage::updateImageData(NvdimmLidImage * i_lidImage)
                                       0x00000000),
                                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
             l_err->collectTrace( NVDIMM_COMP_NAME, 256 );
+            nvdimmAddPage4Regs(iv_dimm,l_err);
             break;
         }
 
@@ -950,6 +953,7 @@ errlHndl_t NvdimmInstalledImage::updateImageData(NvdimmLidImage * i_lidImage)
                                        HWAS::SRCI_PRIORITY_HIGH );
                 l_err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
                                             HWAS::SRCI_PRIORITY_LOW );
+                nvdimmAddPage4Regs(iv_dimm,l_err);
 
                 break;
             }
@@ -1019,6 +1023,7 @@ errlHndl_t NvdimmInstalledImage::changeFwUpdateMode(fw_update_mode i_mode)
                                            HWAS::SRCI_PRIORITY_HIGH );
                     l_err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
                                                 HWAS::SRCI_PRIORITY_LOW );
+                    nvdimmAddPage4Regs(iv_dimm,l_err);
                 }
             }
         }
@@ -1101,6 +1106,7 @@ errlHndl_t NvdimmInstalledImage::waitFwOpsBlockReceived()
                                HWAS::SRCI_PRIORITY_HIGH );
         l_err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
                                     HWAS::SRCI_PRIORITY_LOW );
+        nvdimmAddPage4Regs(iv_dimm,l_err);
     }
 
     return l_err;
@@ -1179,6 +1185,7 @@ errlHndl_t NvdimmInstalledImage::waitFwOpsComplete()
                                    HWAS::SRCI_PRIORITY_HIGH );
             l_err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
                                         HWAS::SRCI_PRIORITY_LOW );
+            nvdimmAddPage4Regs(iv_dimm,l_err);
         }
     }
     return l_err;
@@ -1545,6 +1552,7 @@ errlHndl_t NvdimmInstalledImage::validateFwHeader()
                                            HWAS::SRCI_PRIORITY_HIGH );
                     l_err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
                                                 HWAS::SRCI_PRIORITY_LOW );
+                    nvdimmAddPage4Regs(iv_dimm,l_err);
                 }
             }
         }
@@ -1594,6 +1602,7 @@ errlHndl_t NvdimmInstalledImage::commitFwRegion()
                                            HWAS::SRCI_PRIORITY_HIGH );
                     l_err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
                                                 HWAS::SRCI_PRIORITY_LOW );
+                    nvdimmAddPage4Regs(iv_dimm,l_err);
                 }
             }
         }
@@ -1644,6 +1653,7 @@ errlHndl_t NvdimmInstalledImage::clearFwDataBlock()
                                        HWAS::SRCI_PRIORITY_HIGH );
                 l_err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
                                             HWAS::SRCI_PRIORITY_LOW );
+                nvdimmAddPage4Regs(iv_dimm,l_err);
             }
         }
     }
@@ -1693,6 +1703,7 @@ errlHndl_t NvdimmInstalledImage::validateFwImage()
                                            HWAS::SRCI_PRIORITY_HIGH );
                     l_err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
                                                 HWAS::SRCI_PRIORITY_LOW );
+                    nvdimmAddPage4Regs(iv_dimm,l_err);
 
                 }
             }
@@ -1978,6 +1989,7 @@ bool NvdimmsUpdate::runUpdate(void)
                                    HWAS::SRCI_PRIORITY_HIGH );
             l_err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
                                         HWAS::SRCI_PRIORITY_LOW );
+            nvdimmAddPage4Regs(l_nvdimm,l_err);
             ERRORLOG::errlCommit(l_err, NVDIMM_COMP_ID);
 
             // Delete the unused NvdimmInstalledImage object

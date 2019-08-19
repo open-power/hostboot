@@ -316,6 +316,27 @@ errlHndl_t notifyNvdimmProtectionChange(TARGETING::Target* i_target,
                                   const nvdimm_protection_t i_state);
 
 /**
+ * @brief Function to add some NVDIMM Page 4 status regs to errorlog FFDC
+ *        PANIC_CNT                  Counts FPGA firmware events
+ *        PARITY_ERROR_COUNT         Counts FPGA SRAM parity errors
+ *        FLASH_ERROR_COUNT0         Counts FLASH read/write errors
+ *        FLASH_ERROR_COUNT1
+ *        FLASH_ERROR_COUNT2
+ *        FLASH_BAD_BLOCK_COUNT0     Counts bad blocks within the flash array
+ *        FLASH_BAD_BLOCK_COUNT1
+ *        SCAP_STATUS                BackupPowerModule/SuperCap state
+ *        STATUS_EVENT_INT_INFO1     NVDIMM error info
+ *        STATUS_EVENT_INT_INFO2
+ *
+ * @param[in] i_nvdimm - nvdimm target
+ *
+ * @param[inout] io_err - error log to add FFDC data
+ *
+ */
+void nvdimmAddPage4Regs(TARGETING::Target *i_nvdimm, errlHndl_t& io_err);
+
+
+/**
  * @brief Entry function to NVDIMM initialization
  *        - Checks for ready state
  *        - Waits for the ongoing backup to complete

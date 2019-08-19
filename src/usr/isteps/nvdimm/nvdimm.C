@@ -28,6 +28,7 @@
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
+#include <errl/errludlogregister.H>
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/util.H>
 #include <targeting/common/utilFilter.H>
@@ -293,6 +294,11 @@ errlHndl_t nvdimmReadReg(Target* i_nvdimm,
                                     DEVICE_NVDIMM_RAW_ADDRESS(l_reg_addr));
     }while(0);
 
+    if (l_err)
+    {
+        nvdimmAddPage4Regs(i_nvdimm,l_err);
+    }
+
     TRACUCOMP(g_trac_nvdimm, EXIT_MRK"NVDIMM Read HUID 0x%X, page 0x%X, addr 0x%X = 0x%X",
               get_huid(i_nvdimm), l_reg_page, l_reg_addr, o_data);
 
@@ -362,6 +368,11 @@ errlHndl_t nvdimmWriteReg(Target* i_nvdimm,
                                     l_numBytes,
                                     DEVICE_NVDIMM_RAW_ADDRESS(l_reg_addr));
     }while(0);
+
+    if (l_err)
+    {
+        nvdimmAddPage4Regs(i_nvdimm,l_err);
+    }
 
     TRACUCOMP(g_trac_nvdimm, EXIT_MRK"NVDIMM Write HUID 0x%X, page = 0x%X, addr 0x%X = 0x%X",
               get_huid(i_nvdimm), l_reg_page, l_reg_addr, i_data);
@@ -563,6 +574,7 @@ errlHndl_t nvdimmReady(Target *i_nvdimm)
 
             // Add Register Traces to error log
             NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
+            nvdimmAddPage4Regs(i_nvdimm,l_err);
         }
 
     }while(0);
@@ -694,6 +706,7 @@ errlHndl_t nvdimmPollStatus ( Target *i_nvdimm,
                     ERRORLOG::ErrlEntry::NO_SW_CALLOUT  );
 
         l_err->collectTrace(NVDIMM_COMP_NAME);
+        nvdimmAddPage4Regs(i_nvdimm,l_err);
     }
 
     return l_err;
@@ -746,6 +759,7 @@ errlHndl_t nvdimmPollBackupDone(Target* i_nvdimm,
 
         // Collect register data for FFDC Traces
         nvdimmTraceRegs ( i_nvdimm, l_RegInfo );
+        nvdimmAddPage4Regs(i_nvdimm,l_err);
 
         // Add reg traces to the error log
         NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
@@ -809,6 +823,7 @@ errlHndl_t nvdimmPollRestoreDone(Target* i_nvdimm,
 
         // Collect register data for FFDC Traces
         nvdimmTraceRegs ( i_nvdimm, l_RegInfo );
+        nvdimmAddPage4Regs(i_nvdimm,l_err);
 
         // Add reg traces to the error log
         NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
@@ -863,7 +878,7 @@ errlHndl_t nvdimmPollEraseDone(Target* i_nvdimm,
                                          ERRORLOG::ErrlEntry::NO_SW_CALLOUT  );
 
         l_err->collectTrace( NVDIMM_COMP_NAME );
-
+        nvdimmAddPage4Regs(i_nvdimm,l_err);
     }
 
     TRACUCOMP(g_trac_nvdimm, EXIT_MRK"nvdimmPollEraseDone() nvdimm[%X]",
@@ -1007,6 +1022,7 @@ errlHndl_t nvdimmSetESPolicy(Target* i_nvdimm)
 
             // Read relevant regs for trace data
             nvdimmTraceRegs(i_nvdimm, l_RegInfo);
+            nvdimmAddPage4Regs(i_nvdimm,l_err);
 
             // Add reg traces to the error log
             NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
@@ -1246,6 +1262,7 @@ errlHndl_t nvdimmRestore(TargetHandleList& i_nvdimmList, uint8_t &i_mpipl)
                             get_huid(l_nvdimm),
                             0x0,
                             ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
+                nvdimmAddPage4Regs(l_nvdimm,l_err);
                 break;
             }
 
@@ -1264,6 +1281,7 @@ errlHndl_t nvdimmRestore(TargetHandleList& i_nvdimmList, uint8_t &i_mpipl)
             {
                 TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmRestore() HUID[%X] post_restore_transition failed!",
                           get_huid(l_nvdimm));
+                nvdimmAddPage4Regs(l_nvdimm,l_err);
                 break;
             }
             else
@@ -1345,6 +1363,7 @@ errlHndl_t nvdimmEraseCheck(Target *i_nvdimm)
 
         // Collect register data for FFDC Traces
         nvdimmTraceRegs ( i_nvdimm, l_RegInfo );
+        nvdimmAddPage4Regs(i_nvdimm,l_err);
 
         // Add reg traces to the error log
         NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
@@ -1487,6 +1506,7 @@ errlHndl_t nvdimmOpenPage(Target *i_nvdimm,
             l_err->addPartCallout( i_nvdimm,
                                    HWAS::NV_CONTROLLER_PART_TYPE,
                                    HWAS::SRCI_PRIORITY_HIGH);
+            nvdimmAddPage4Regs(i_nvdimm,l_err);
         }
     }while(0);
 
@@ -1606,6 +1626,7 @@ errlHndl_t nvdimmEpowSetup(TargetHandleList &i_nvdimmList)
                           get_huid(*it));
 
                 nvdimmSetStatusFlag(*it, NSTD_VAL_SR_FAILED);
+                nvdimmAddPage4Regs(*it,l_err);
                 break;
             }
             it++;
@@ -1720,6 +1741,7 @@ errlHndl_t nvdimm_restore(TargetHandleList &i_nvdimmList)
 
             // Collect register data for FFDC Traces
             nvdimmTraceRegs ( l_nvdimm, l_RegInfo );
+            nvdimmAddPage4Regs(l_nvdimm,l_err);
 
             // Add reg traces to the error log
             NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
@@ -1867,6 +1889,7 @@ errlHndl_t nvdimm_factory_reset(Target *i_nvdimm)
             l_err->addPartCallout( i_nvdimm,
                                    HWAS::NV_CONTROLLER_PART_TYPE,
                                    HWAS::SRCI_PRIORITY_HIGH);
+            nvdimmAddPage4Regs(i_nvdimm,l_err);
         }
     } while(0);
 
@@ -1994,6 +2017,7 @@ errlHndl_t nvdimm_init(Target *i_nvdimm)
 
             // Collect register data for FFDC Traces
             nvdimmTraceRegs ( i_nvdimm, l_RegInfo );
+            nvdimmAddPage4Regs(i_nvdimm,l_err);
 
             // Add reg traces to the error log
             NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
@@ -2064,6 +2088,7 @@ errlHndl_t nvdimm_init(Target *i_nvdimm)
 
             // Collect register data for FFDC Traces
             nvdimmTraceRegs ( i_nvdimm, l_RegInfo );
+            nvdimmAddPage4Regs(i_nvdimm,l_err);
 
             // Add reg traces to the error log
             NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
@@ -2435,6 +2460,7 @@ bool nvdimm_encrypt_unlock(TargetHandleList &i_nvdimmList)
                                      HWAS::DELAYED_DECONFIG,
                                      HWAS::GARD_NULL );
 
+                nvdimmAddPage4Regs(l_nvdimm,l_err);
                 errlCommit( l_err, NVDIMM_COMP_ID );
                 nvdimmSetEncryptionError(l_nvdimm);
                 l_success = false;
@@ -2945,6 +2971,7 @@ errlHndl_t nvdimm_setKeyReg(Target* i_nvdimm,
                     l_err->addPartCallout( i_nvdimm,
                                            HWAS::NV_CONTROLLER_PART_TYPE,
                                            HWAS::SRCI_PRIORITY_HIGH);
+                    nvdimmAddPage4Regs(i_nvdimm,l_err);
                 }
                 else
                 {
@@ -3121,6 +3148,7 @@ bool nvdimm_encrypt_enable(TargetHandleList &i_nvdimmList)
                                     HWAS::NV_CONTROLLER_PART_TYPE,
                                     HWAS::SRCI_PRIORITY_HIGH);
 
+                nvdimmAddPage4Regs(l_nvdimm,l_err);
                 errlCommit( l_err, NVDIMM_COMP_ID );
                 nvdimmSetEncryptionError(l_nvdimm);
                 l_success = false;
@@ -3260,6 +3288,7 @@ bool nvdimm_crypto_erase(TargetHandleList &i_nvdimmList)
                                     HWAS::NV_CONTROLLER_PART_TYPE,
                                     HWAS::SRCI_PRIORITY_HIGH);
 
+                nvdimmAddPage4Regs(l_nvdimm,l_err);
                 errlCommit( l_err, NVDIMM_COMP_ID );
                 nvdimmSetEncryptionError(l_nvdimm);
                 l_success = false;
@@ -3334,6 +3363,7 @@ bool nvdimm_crypto_erase(TargetHandleList &i_nvdimmList)
                                     HWAS::NV_CONTROLLER_PART_TYPE,
                                     HWAS::SRCI_PRIORITY_HIGH);
 
+                nvdimmAddPage4Regs(l_nvdimm,l_err);
                 errlCommit( l_err, NVDIMM_COMP_ID );
                 nvdimmSetEncryptionError(l_nvdimm);
                 l_success = false;
@@ -3622,6 +3652,77 @@ errlHndl_t notifyNvdimmProtectionChange(Target* i_target,
 
     return l_err;
 }
+
+
+/*
+ * @brief Add Page 4 regs to FFDC
+ *        Added to all NVDIMM HW errors
+ */
+void nvdimmAddPage4Regs( TARGETING::Target* i_nvdimm, errlHndl_t& io_err )
+{
+    errlHndl_t l_err = nullptr;
+
+    do
+    {
+        // Get the page4 attribute, if set we are already
+        // reading the page4 regs, exit
+        auto l_page4 = i_nvdimm->getAttr<ATTR_NVDIMM_READING_PAGE4>();
+        if (l_page4)
+        {
+            break;
+        }
+
+        // Set the page4 attribute so we don't recursively
+        // execute the nvdimmAddPage4Regs function
+        l_page4 = 0x1;
+        i_nvdimm->setAttr<ATTR_NVDIMM_READING_PAGE4>(l_page4);
+
+        ERRORLOG::ErrlUserDetailsLogRegister l_regUD(i_nvdimm);
+        uint32_t l_regList[] = {
+            PANIC_CNT,
+            PARITY_ERROR_COUNT,
+            FLASH_ERROR_COUNT0,
+            FLASH_ERROR_COUNT1,
+            FLASH_ERROR_COUNT2,
+            FLASH_BAD_BLOCK_COUNT0,
+            FLASH_BAD_BLOCK_COUNT1,
+            SCAP_STATUS,
+            STATUS_EVENT_INT_INFO1,
+            STATUS_EVENT_INT_INFO2
+        };
+        uint8_t l_readData = 0;
+
+        for (auto l_reg : l_regList)
+        {
+            l_err = nvdimmReadReg(i_nvdimm,
+                                l_regList[l_reg],
+                                l_readData);
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_nvdimm, ERR_MRK
+                        "nvdimmAddPage4Regs() nvdimm[%X] error reading 0x%X",
+                        get_huid(i_nvdimm), l_reg);
+
+                // Don't commit, just delete the error and continue
+                delete l_err;
+                l_err = nullptr;
+                continue;
+            }
+
+            l_regUD.addDataBuffer(&l_readData,
+                                sizeof(l_readData),
+                                DEVICE_NVDIMM_ADDRESS(l_reg));
+        }
+
+        l_regUD.addToLog(io_err);
+
+        // Clear the page4 attribute before exiting
+        l_page4 = 0x0;
+        i_nvdimm->setAttr<ATTR_NVDIMM_READING_PAGE4>(l_page4);
+
+    } while(0);
+}
+
 
 /*
  * @brief Utility function to send the value of

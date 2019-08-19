@@ -246,6 +246,9 @@
       <id>DIMM_SPD_BYTE_SIZE</id>
     </attribute>
     <attribute>
+      <id>NVDIMM_READING_PAGE4</id>
+    </attribute>
+    <attribute>
       <id>PART_NUMBER</id>
     </attribute>
     <attribute>
