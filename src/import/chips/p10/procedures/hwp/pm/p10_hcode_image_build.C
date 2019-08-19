@@ -156,6 +156,12 @@ class ImageBuildRecord
         iv_maxSizeList["QME SRAM Size"]     =   QME_SRAM_SIZE;
         iv_maxSizeList["SELF BIN"]          =   SMF_THREAD_LAUNCHER_SIZE;
         iv_maxSizeList["SELF"]              =   SELF_SAVE_RESTORE_REGION_SIZE;
+        iv_maxSizeList["PPMR Header"]       =   PPMR_HEADER_SIZE;
+        iv_maxSizeList["PGPE Boot Copier"]  =   PGPE_BOOT_COPIER_SIZE;
+        iv_maxSizeList["PGPE Boot Loader"]  =   PGPE_BOOT_LOADER_SIZE;
+        iv_maxSizeList["PGPE Hcode"]        =   PGPE_HCODE_SIZE;
+        iv_maxSizeList["GPSPB"]             =   PGPE_GLOBAL_PSTATE_PARAM_BLOCK_SIZE;
+        iv_maxSizeList["PGPE SRAM Size"]    =   PGPE_SRAM_SIZE;
     }
 
     /**
@@ -1082,9 +1088,15 @@ fapi2::ReturnCode populateMagicWord( Homerlayout_t   *i_pChipHomer )
         (CpmrHeader_t*) & ( i_pChipHomer->iv_cpmrRegion.iv_selfRestoreRegion.iv_CPMR_SR.elements.iv_CPMRHeader);
     QmeHeader_t* pQmeImgHdr     =
             (QmeHeader_t*) & i_pChipHomer->iv_cpmrRegion.iv_qmeSramRegion[QME_INT_VECTOR_SIZE];
+    PgpeHeader_t * pPgpeHeader   =
+            ( PgpeHeader_t *) &i_pChipHomer->iv_ppmrRegion.iv_pgpeSramRegion[PGPE_INT_VECTOR_SIZE];
+    PpmrHeader_t * l_pPpmrHdr   =
+            (PpmrHeader_t *) i_pChipHomer->iv_ppmrRegion.iv_ppmrHeader;
 
-    pCpmrHdr->iv_magicWord          =   htobe64(CPMR_MAGIC_NUMBER);
+    pCpmrHdr->iv_cpmrMagicWord      =   htobe64(CPMR_MAGIC_NUMBER);
     pQmeImgHdr->g_qme_magic_number  =   htobe64(QME_MAGIC_NUMBER);
+    l_pPpmrHdr->iv_ppmrMagicWord    =   htobe64(PPMR_MAGIC_NUMBER);
+    pPgpeHeader->g_pgpe_magicWord   =   htobe64(PGPE_MAGIC_NUMBER);
 
     FAPI_INF( "<< populateMagicWord" );
     return fapi2::current_err;
@@ -1092,6 +1104,17 @@ fapi2::ReturnCode populateMagicWord( Homerlayout_t   *i_pChipHomer )
 
 //----------------------------------------------------------------------------------------------
 
+/**
+ * @brief   build CPMR region
+ * @param[in]   i_procTgt       fapi2 target for P10 chip
+ * @param[in]   i_pImageIn      points to hardware reference image
+ * @param[in]   i_pChipHomer    models HOMER
+ * @param[in]   i_phase         IPL or Runtime
+ * @param[in]   i_imgType       image type to be built
+ * @param[in]   i_chipFuncModel P10 chip configuration
+ * @param[in]   i_ringData      buffers to extract and process rings.
+ * @return      fapi2 return code.
+ */
 fapi2::ReturnCode buildCpmrImage( CONST_FAPI2_PROC& i_procTgt,
                                   void* const     i_pImageIn,
                                   Homerlayout_t   *i_pChipHomer,
@@ -1144,6 +1167,219 @@ fapi_try_exit:
     return fapi2::current_err;
 
 }
+
+//-------------------------------------------------------------------------------------------------------
+
+/**
+ * @brief   builds PPMR header in the HOMER.
+ * @param[in]   i_pChipHomer        models P10's HOMER.
+ * @param[in]   i_ppmrBuildRecord   PPMR region image build metadata
+ * @return      fapi2 return code.
+ */
+fapi2::ReturnCode buildPpmrHeader( Homerlayout_t* i_pChipHomer, ImageBuildRecord & i_ppmrBuildRecord )
+{
+    ImgSectnSumm   l_sectn;
+    PpmrHeader_t * l_pPpmrHdr   =
+            (PpmrHeader_t *) i_pChipHomer->iv_ppmrRegion.iv_ppmrHeader;
+
+    //PGPE Boot Copier
+    i_ppmrBuildRecord.getSection( "PGPE Boot Copier", l_sectn );
+    l_pPpmrHdr->iv_bootCopierOffset = l_sectn.iv_sectnOffset;
+
+    //PGPE Boot Loader
+    i_ppmrBuildRecord.getSection( "PGPE Boot Loader", l_sectn );
+    l_pPpmrHdr->iv_bootLoaderOffset = l_sectn.iv_sectnOffset;
+    l_pPpmrHdr->iv_bootLoaderLength = htobe32(PGPE_BOOT_LOADER_SIZE);
+
+    //PGPE Hcode
+    i_ppmrBuildRecord.getSection( "PGPE Hcode", l_sectn );
+    l_pPpmrHdr->iv_hcodeOffset = l_sectn.iv_sectnOffset;
+    l_pPpmrHdr->iv_hcodeLength = l_sectn.iv_sectnLength;
+
+    //PGPE SRAM
+    i_ppmrBuildRecord.getSection( "PGPE SRAM", l_sectn );
+    l_pPpmrHdr->iv_sramSize = l_sectn.iv_sectnLength;
+
+#ifndef __HOSTBOOT_MODULE
+    l_pPpmrHdr->iv_bootCopierOffset =   htobe32(l_pPpmrHdr->iv_bootCopierOffset);
+    l_pPpmrHdr->iv_bootLoaderOffset =   htobe32(l_pPpmrHdr->iv_bootLoaderOffset);
+    l_pPpmrHdr->iv_bootLoaderLength =   htobe32(l_pPpmrHdr->iv_bootLoaderLength);
+    l_pPpmrHdr->iv_hcodeOffset      =   htobe32(l_pPpmrHdr->iv_hcodeOffset);
+    l_pPpmrHdr->iv_hcodeLength      =   htobe32(l_pPpmrHdr->iv_hcodeLength);
+    l_pPpmrHdr->iv_sramSize         =   htobe32(l_pPpmrHdr->iv_sramSize);
+
+    FAPI_DBG( "====================== PPMR Header =======================" );
+    FAPI_DBG( "PPMR BC Offset             0x%08x", htobe32(l_pPpmrHdr->iv_bootCopierOffset));
+    FAPI_DBG( "PPMR BL Offset             0x%08x", htobe32(l_pPpmrHdr->iv_bootLoaderOffset));
+    FAPI_DBG( "PPMR BL Length             0x%08x", htobe32(l_pPpmrHdr->iv_bootLoaderLength));
+    FAPI_DBG( "PPMR Hcode Offset          0x%08x", htobe32(l_pPpmrHdr->iv_hcodeOffset));
+    FAPI_DBG( "PPMR Hcode Length          0x%08x", htobe32(l_pPpmrHdr->iv_hcodeLength));
+    FAPI_DBG( "==========================================================" );
+#endif
+
+    return fapi2::current_err;
+}
+
+//-------------------------------------------------------------------------------------------------------
+
+/**
+ * @brief   populates few fields of PGPE image  header in HOMER.
+ * @param[in]   i_pChipHomer    models P10's HOMER.
+ * @param[in]   i_ppmrBuildRecord     PPMR region image build metadata
+ * @return      fapi2 return code.
+ */
+fapi2::ReturnCode buildPgpeHeader( Homerlayout_t* i_pChipHomer, ImageBuildRecord & i_ppmrBuildRecord )
+{
+    ImgSectnSumm   l_sectn;
+    i_ppmrBuildRecord.getSection( "PGPE Hcode", l_sectn );
+    PgpeHeader_t * pPgpeHeader   =
+            ( PgpeHeader_t *) &i_pChipHomer->iv_ppmrRegion.iv_pgpeSramRegion[PGPE_INT_VECTOR_SIZE];
+
+    pPgpeHeader->g_pgpe_hcodeLength         =   l_sectn.iv_sectnLength;
+    pPgpeHeader->g_pgpe_sysResetAddress     =   PGPE_SRAM_BASE_ADDR + PPE_RESET_VECTOR;
+    pPgpeHeader->g_pgpe_ivprAddress         =   PGPE_SRAM_BASE_ADDR;
+
+#ifndef __HOSTBOOT_MODULE
+    pPgpeHeader->g_pgpe_hcodeLength         =   htobe32( pPgpeHeader->g_pgpe_hcodeLength );
+    pPgpeHeader->g_pgpe_sysResetAddress     =   htobe32( pPgpeHeader->g_pgpe_sysResetAddress );
+    pPgpeHeader->g_pgpe_ivprAddress         =   htobe32( pPgpeHeader->g_pgpe_ivprAddress );
+
+    FAPI_DBG( "====================== PGPE Header =======================" );
+    FAPI_INF( "PGPE Hcode Length        0x%08x", htobe32( pPgpeHeader->g_pgpe_hcodeLength ) );
+    FAPI_INF( "PGPE Sys Reset Address   0x%08x", htobe32( pPgpeHeader->g_pgpe_sysResetAddress ) );
+    FAPI_INF( "PGPE IVPR Address        0x%08x", htobe32( pPgpeHeader->g_pgpe_ivprAddress ) );
+
+    FAPI_DBG( "==========================================================" );
+#endif
+
+    return fapi2::current_err;
+}
+
+//-------------------------------------------------------------------------------------------------------
+
+/**
+ * @brief   builds PPMR region
+ * @param[in]   i_procTgt       fapi2 target for P10 chip
+ * @param[in]   i_pImageIn      points to hardware reference image
+ * @param[in]   i_pChipHomer    models HOMER
+ * @param[in]   i_phase         IPL or Runtime
+ * @param[in]   i_imgType       image type to be built
+ * @param[in]   i_chipFuncModel P10 chip configuration
+ * @param[in]   i_ringData      buffers to extract and process rings.
+ * @return      fapi2 return code.
+ */
+fapi2::ReturnCode buildPpmrImage( CONST_FAPI2_PROC& i_procTgt,
+                                  void* const     i_pImageIn,
+                                  Homerlayout_t   *i_pChipHomer,
+                                  SysPhase_t      i_phase,
+                                  ImageType_t     i_imgType,
+                                  P10FuncModel    &i_chipFuncModel )
+{
+    FAPI_INF( ">> buildPpmrImage" );
+    uint32_t rcTemp     =   IMG_BUILD_SUCCESS;
+    fapi2::current_err  =   fapi2::FAPI2_RC_SUCCESS;
+    //Let us find XIP Header for PGPE
+    P9XipSection ppeSection;
+    uint8_t* pPgpeImg   =   NULL;
+    ImageBuildRecord    l_pgpeBuildRecord( (uint8_t *)(&i_pChipHomer->iv_occHostRegion), "PGPE" );
+
+    if( i_imgType.pgpeImageBuild )
+    {
+        //Init PGPE region with zero
+        memset( i_pChipHomer->iv_ppmrRegion.iv_ppmrHeader, 0x00, ONE_MB );
+
+        rcTemp = p9_xip_get_section( i_pImageIn, P9_XIP_SECTION_HW_PGPE, &ppeSection );
+
+        FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rcTemp ),
+                     fapi2::PGPE_IMG_NOT_FOUND_IN_HW_IMG()
+                     .set_XIP_FAILURE_CODE( rcTemp )
+                     .set_EC_LEVEL( i_chipFuncModel.getChipLevel() ),
+                     "Failed To Find PGPE Sub-Image In HW Image" );
+
+        pPgpeImg = ppeSection.iv_offset + (uint8_t*) (i_pImageIn );
+        FAPI_DBG("HW image PGPE Offset = 0x%08X", ppeSection.iv_offset);
+
+        FAPI_INF("PPMR Header");
+        rcTemp = copySectionToHomer( i_pChipHomer->iv_ppmrRegion.iv_ppmrHeader,
+                                     pPgpeImg,
+                                     l_pgpeBuildRecord,
+                                     P9_XIP_SECTION_PGPE_PPMR_HDR,
+                                     i_chipFuncModel.getChipLevel(),
+                                     ppeSection );
+
+        FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rcTemp ),
+                     fapi2::P10_XIP_SECTION_PGPE_PPMR()
+                     .set_EC_LEVEL( i_chipFuncModel.getChipLevel() )
+                     .set_MAX_ALLOWED_SIZE( rcTemp )
+                     .set_ACTUAL_SIZE( ppeSection.iv_size ),
+                     "Failed To Update PPMR Region Of HOMER" );
+
+        l_pgpeBuildRecord.setSection( "PPMR Header", 0, PPMR_HEADER_SIZE );
+
+        rcTemp = copySectionToHomer( i_pChipHomer->iv_ppmrRegion.iv_bootCopier,
+                                     pPgpeImg,
+                                     l_pgpeBuildRecord,
+                                     P9_XIP_SECTION_PGPE_LVL1_BL,
+                                     i_chipFuncModel.getChipLevel(),
+                                     ppeSection );
+
+        FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rcTemp ),
+                     fapi2::P10_PGPE_BOOT_COPIER_BUILD_FAIL()
+                     .set_EC_LEVEL( i_chipFuncModel.getChipLevel() )
+                     .set_MAX_ALLOWED_SIZE( rcTemp )
+                     .set_ACTUAL_SIZE( ppeSection.iv_size ),
+                     "Failed To Update PGPE Boot Copier Region Of HOMER" );
+
+        l_pgpeBuildRecord.setSection( "PGPE Boot Copier", PGPE_BOOT_COPIER_PPMR_OFFSET, ppeSection.iv_size );
+
+        rcTemp = copySectionToHomer( i_pChipHomer->iv_ppmrRegion.iv_bootLoader,
+                                     pPgpeImg,
+                                     l_pgpeBuildRecord,
+                                     P9_XIP_SECTION_PGPE_LVL2_BL,
+                                     i_chipFuncModel.getChipLevel(),
+                                     ppeSection );
+
+        FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rcTemp ),
+                     fapi2::P10_PGPE_BOOT_LOADER_BUILD_FAIL()
+                     .set_EC_LEVEL( i_chipFuncModel.getChipLevel() )
+                     .set_MAX_ALLOWED_SIZE( rcTemp )
+                     .set_ACTUAL_SIZE( ppeSection.iv_size ),
+                     "Failed To Update PGPE Boot Loader Region Of HOMER" );
+
+        l_pgpeBuildRecord.setSection( "PGPE Boot Loader", PGPE_BOOT_LOADER_PPMR_OFFSET, ppeSection.iv_size );
+        rcTemp = copySectionToHomer( i_pChipHomer->iv_ppmrRegion.iv_pgpeSramRegion,
+                                     pPgpeImg,
+                                     l_pgpeBuildRecord,
+                                     P9_XIP_SECTION_PGPE_HCODE,
+                                     i_chipFuncModel.getChipLevel(),
+                                     ppeSection );
+
+        FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rcTemp ),
+                     fapi2::P10_PGPE_HCODE_BUILD_FAIL()
+                     .set_EC_LEVEL( i_chipFuncModel.getChipLevel() )
+                     .set_MAX_ALLOWED_SIZE( rcTemp )
+                     .set_ACTUAL_SIZE( ppeSection.iv_size ),
+                     "Failed To Update PGPE Hcode Region Of HOMER" );
+
+        l_pgpeBuildRecord.setSection( "PGPE Hcode", PGPE_IMAGE_PPMR_OFFSET, ppeSection.iv_size );
+
+        FAPI_DBG( "PGPE Hcode       0x%08x",    ppeSection.iv_size );
+
+        l_pgpeBuildRecord.setSection( "PGPE SRAM Size", PGPE_IMAGE_PPMR_OFFSET, ppeSection.iv_size );
+
+        FAPI_TRY( buildPpmrHeader( i_pChipHomer, l_pgpeBuildRecord ),
+                  "Failed To Build PPMR Header" );
+
+        FAPI_TRY( buildPgpeHeader( i_pChipHomer, l_pgpeBuildRecord ),
+                  "Failed To Build PGPE Header" );
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+    FAPI_INF( " << buildPpmrImage" );
+}
+
 
 //-------------------------------------------------------------------------------------------------------
 
@@ -1204,8 +1440,13 @@ fapi2::ReturnCode p10_hcode_image_build(    CONST_FAPI2_PROC& i_procTgt,
         i_imgType.configBuildPhase();
     }
 
-    FAPI_TRY( buildCpmrImage( i_procTgt, i_pImageIn, pChipHomer, i_phase, i_imgType, l_chipFuncModel, l_ringData ),
+    FAPI_TRY( buildCpmrImage( i_procTgt, i_pImageIn, pChipHomer, i_phase,
+                              i_imgType, l_chipFuncModel, l_ringData ),
               "Failed To Build CPMR Region of HOMER " );
+
+    FAPI_TRY( buildPpmrImage( i_procTgt, i_pImageIn, pChipHomer, i_phase,
+                              i_imgType, l_chipFuncModel ),
+              "Failed To Build PPMR Region of HOMER" );
 
     FAPI_TRY( populateMagicWord( pChipHomer ),
               "Failed To Copy Magic Words" );
