@@ -384,8 +384,7 @@ ${GENDIR}/${XMLTOHB_FULL_ATTRIBUTE_TYPES}: \
 	$(addprefix --ekbXmlFile=,${GENDIR}/${XMLTOHB_EKB_ATTRIBUTE_TYPES}) \
 	$(addprefix --hbXmlFile=,${GENDIR}/${XMLTOHB_SRC_ATTRIBUTE_TYPES}) \
 	$(addprefix --fapi2Header=,${ROOTPATH}/src/include/usr/fapi2/attribute_service.H) \
-	$(addprefix --outFile=,${GENDIR}/${XMLTOHB_FULL_ATTRIBUTE_TYPES}) \
-        --verbose
+	$(addprefix --outFile=,${GENDIR}/${XMLTOHB_FULL_ATTRIBUTE_TYPES})
 
 # Add EKB attribute xml to config xml to produce the final output.
 # Skip adding any attributes that already exists in the src xml
@@ -396,8 +395,7 @@ ${GENDIR}/${XMLTOHB_SP_ATTRIBUTE_TYPES}: \
 	$(addprefix --ekbXmlFile=,${GENDIR}/${XMLTOHB_EKB_ATTRIBUTE_TYPES}) \
 	$(addprefix --hbXmlFile=,${GENDIR}/${XMLTOHB_CONFIG_ATTRIBUTE_TYPES}) \
 	$(addprefix --fapi2Header=,${ROOTPATH}/src/include/usr/fapi2/attribute_service.H) \
-	$(addprefix --outFile=,${GENDIR}/${XMLTOHB_SP_ATTRIBUTE_TYPES}) \
-        --verbose
+	$(addprefix --outFile=,${GENDIR}/${XMLTOHB_SP_ATTRIBUTE_TYPES})
 
 # generic XML is created from the generic sources only
 ${GENDIR}/${XMLTOHB_GENERIC_XML}: \
