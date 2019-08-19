@@ -141,6 +141,7 @@ namespace   INITSERVICE
                 ISTEP_07::call_mss_volt,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
+/*
         {
                 ISTEPNAME(07,03,"mss_freq"),
                 ISTEP_07::call_mss_freq,
@@ -156,6 +157,7 @@ namespace   INITSERVICE
                 ISTEP_07::call_mss_attr_update,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
+*/
 };
 
 
@@ -166,7 +168,6 @@ const DepModInfo g_istep07Dependancies = {
         DEP_LIB(libisteps_mss.so),
         DEP_LIB(libsbe.so),
         DEP_LIB(libimageprocs.so),
-        DEP_LIB(libcen.so),
 #ifndef CONFIG_FSP_BUILD
         DEP_LIB(libnvram.so),
 #endif

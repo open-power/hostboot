@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,6 +22,13 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+/**
+ *  @file istepHelperFuncs.C
+ *
+ *  Contains miscellaneous helper functions used by istep functions
+ */
+
 #include    "istepHelperFuncs.H"
 #include    <stdint.h>
 
@@ -60,18 +67,12 @@ void set_eff_config_attrs_helper( const EFF_CONFIG_ATTRIBUTES_BASE i_base,
     o_post_dram_inits_found = false;
 
     // Local Variables ('pdi_' means 'post dram init')
-    uint32_t pdi_ddr3_vddr_slope=0;
-    uint32_t pdi_ddr3_vddr_intercept=0;
-    uint32_t pdi_ddr3_vddr_max_limit=0;
     uint32_t pdi_ddr4_vddr_slope=0;
     uint32_t pdi_ddr4_vddr_intercept=0;
     uint32_t pdi_ddr4_vddr_max_limit=0;
     uint32_t pdi_vpp_slope=0;
     uint32_t pdi_vpp_intercept=0;
 
-    uint32_t eff_conf_ddr3_vddr_slope=0;
-    uint32_t eff_conf_ddr3_vddr_intercept=0;
-    uint32_t eff_conf_ddr3_vddr_max_limit=0;
     uint32_t eff_conf_ddr4_vddr_slope=0;
     uint32_t eff_conf_ddr4_vddr_intercept=0;
     uint32_t eff_conf_ddr4_vddr_max_limit=0;
@@ -84,9 +85,9 @@ void set_eff_config_attrs_helper( const EFF_CONFIG_ATTRIBUTES_BASE i_base,
             i_base);
 
     // Get Node Target
-    TARGETING::Target* sysTgt = NULL;
+    TARGETING::Target* sysTgt = nullptr;
     TARGETING::targetService().getTopLevelTarget(sysTgt);
-    assert(sysTgt != NULL,"set_eff_config_attrs_helper: "
+    assert(sysTgt != nullptr,"set_eff_config_attrs_helper: "
                         "System target was NULL.");
 
     TARGETING::TargetHandleList l_nodeList;
@@ -111,19 +112,6 @@ void set_eff_config_attrs_helper( const EFF_CONFIG_ATTRIBUTES_BASE i_base,
     // Look for POST_DRAM_INIT Attributes if requested
     if ( i_base == POST_DRAM_INIT )
     {
-        // POST_DRAM_INIT DDR3 VDDR
-        pdi_ddr3_vddr_slope =
-                 nodeTgt->getAttr<
-                 TARGETING::ATTR_MSS_VOLT_DDR3_VDDR_SLOPE_POST_DRAM_INIT>();
-
-        pdi_ddr3_vddr_intercept =
-                 nodeTgt->getAttr<
-                 TARGETING::ATTR_MSS_VOLT_DDR3_VDDR_INTERCEPT_POST_DRAM_INIT>();
-
-        pdi_ddr3_vddr_max_limit =
-                 nodeTgt->getAttr<
-                 TARGETING::ATTR_MRW_DDR3_VDDR_MAX_LIMIT_POST_DRAM_INIT>();
-
         // POST_DRAM_INIT DDR4 VDDR
         pdi_ddr4_vddr_slope =
                  nodeTgt->getAttr<
@@ -147,53 +135,10 @@ void set_eff_config_attrs_helper( const EFF_CONFIG_ATTRIBUTES_BASE i_base,
                  nodeTgt->getAttr<
                  TARGETING::ATTR_MSS_VOLT_VPP_INTERCEPT_POST_DRAM_INIT>();
     }
-    o_post_dram_inits_found = ( pdi_ddr3_vddr_slope || pdi_ddr3_vddr_intercept ||
-                                pdi_ddr3_vddr_max_limit ||
-                                pdi_ddr4_vddr_slope || pdi_ddr4_vddr_intercept ||
+    o_post_dram_inits_found = ( pdi_ddr4_vddr_slope || pdi_ddr4_vddr_intercept ||
                                 pdi_ddr4_vddr_max_limit ||
                                 pdi_vpp_slope || pdi_vpp_intercept )
                               ? true : false;
-
-    // -----------------------------------
-    // EFF CONFIG: DDR3 VDDR
-    if ( o_post_dram_inits_found == false )
-    {
-        // Use default system values
-        eff_conf_ddr3_vddr_slope =
-                 sysTgt->getAttr<TARGETING::ATTR_MSS_VOLT_DDR3_VDDR_SLOPE>();
-
-        eff_conf_ddr3_vddr_intercept =
-                 sysTgt->getAttr<
-                         TARGETING::ATTR_MSS_VOLT_DDR3_VDDR_INTERCEPT>();
-
-        eff_conf_ddr3_vddr_max_limit =
-                 sysTgt->getAttr<
-                    TARGETING::ATTR_MRW_DDR3_VDDR_MAX_LIMIT>();
-    }
-    else
-    {
-        // Use POST_DRAM INIT values
-        eff_conf_ddr3_vddr_slope     = pdi_ddr3_vddr_slope;
-        eff_conf_ddr3_vddr_intercept = pdi_ddr3_vddr_intercept;
-        eff_conf_ddr3_vddr_max_limit = pdi_ddr3_vddr_max_limit;
-    }
-
-    nodeTgt->setAttr<TARGETING::ATTR_MSS_VOLT_DDR3_VDDR_SLOPE_EFF_CONFIG>\
-             (eff_conf_ddr3_vddr_slope);
-
-    nodeTgt->setAttr<TARGETING::ATTR_MSS_VOLT_DDR3_VDDR_INTERCEPT_EFF_CONFIG>\
-             (eff_conf_ddr3_vddr_intercept);
-
-    nodeTgt->setAttr<TARGETING::ATTR_MRW_DDR3_VDDR_MAX_LIMIT_EFF_CONFIG>\
-             (eff_conf_ddr3_vddr_max_limit);
-
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"set_eff_config_attrs_helper: "
-               "DDR3 _EFF_CONFIG(%d, %d): slope=%d, intercept=%d, max_limit=%d",
-               i_base, o_post_dram_inits_found,
-               eff_conf_ddr3_vddr_slope,
-               eff_conf_ddr3_vddr_intercept,
-               eff_conf_ddr3_vddr_max_limit);
-
 
     // -----------------------------------
     // EFF CONFIG: DDR4 VDDR

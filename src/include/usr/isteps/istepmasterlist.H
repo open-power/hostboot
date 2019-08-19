@@ -66,10 +66,10 @@
 
 //FIXME RTC: 210975 istepdispatcher.C includes this file and references all of
 // the isteps' function names, which creates many undefined symbols, since we're
-// only compiling istep06 at this time.
+// only compiling isteps 6 and 7 at this time.
 #include    "istep06list.H"
-/*
 #include    "istep07list.H"
+/*
 #include    "istep08list.H"
 #include    "istep09list.H"
 #include    "istep10list.H"
@@ -100,7 +100,7 @@ const  ExtTaskInfo  g_isteps[]    =   {
         { NULL, 0, NULL },                              //  dummy IStep 4
         { NULL, 0, NULL },                              //  dummy IStep 5
         INITSERVICE::g_istep06TaskList,                 //  HWAS  IStep 6
-        { NULL, 0, NULL },                              //  dummy IStep 7
+        INITSERVICE::g_istep07TaskList,                 //        IStep 7
         { NULL, 0, NULL },                              //  dummy IStep 8
         { NULL, 0, NULL },                              //  dummy IStep 9
         { NULL, 0, NULL },                              //  dummy IStep 10
@@ -112,7 +112,6 @@ const  ExtTaskInfo  g_isteps[]    =   {
         { NULL, 0, NULL },                              //  dummy IStep 16
 
 /*
-        INITSERVICE::g_istep07TaskList,                 //        IStep 7
         INITSERVICE::g_istep08TaskList,                 //        IStep 8
         INITSERVICE::g_istep09TaskList,                 //        IStep 9
         INITSERVICE::g_istep10TaskList,                 //        IStep 10

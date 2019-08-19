@@ -44,15 +44,12 @@ EXTRAINCDIR += ${HWP_PATH_1}/hwp/memory/lib/rosetta_map
 EXTRAINCDIR += ${HWP_PATH_1}/hwp/perv
 EXTRAINCDIR += ${HWP_PATH_1}/hwp/pm
 EXTRAINCDIR += ${HWP_PATH_1}/hwp/ffdc
-EXTRAINCDIR += ${HWP_PATH_2}/hwp/memory
-EXTRAINCDIR += ${HWP_PATH_2}/hwp/memory/lib/
-EXTRAINCDIR += ${HWP_PATH_2}/hwp/memory/lib/shared/
-EXTRAINCDIR += ${HWP_PATH_2}/hwp/memory/lib/utils/
-EXTRAINCDIR += ${HWP_PATH_2}/vpd_accessors/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/scom/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/
+EXTRAINCDIR += ${HWP_PATH_1}/hwp/accessors/
 
 include ${ROOTPATH}/src/build/mkrules/verbose.rules.mk
 define __CLEAN_TARGET
@@ -67,10 +64,10 @@ OBJS += plat_attr_override_sync.o
 #OBJS += plat_hwp_invoker.o
 OBJS += target.o
 OBJS += plat_hw_access.o
-#OBJS += plat_spd_access.o
+OBJS += plat_spd_access.o
 #OBJS += plat_mvpd_access.o
 #OBJS += plat_mbvpd_access.o
-#OBJS += plat_vpd_access.o
+OBJS += plat_vpd_access.o
 #OBJS += plat_wof_access.o
 #OBJS += dimmBadDqBitmapFuncs.o
 #OBJS += rowRepairsFuncs.o
@@ -79,16 +76,15 @@ OBJS += plat_hw_access.o
 
 
 #Required include before all the procedure.mk are included
-#include ${ROOTPATH}/procedure.rules.mk
+include ${ROOTPATH}/procedure.rules.mk
 
-#include ${HWP_PATH_1}/hwp/accessors/p9_get_mem_vpd_keyword.mk
-#include ${HWP_PATH_1}/hwp/accessors/ddimm_get_efd.mk
+include ${HWP_PATH_1}/hwp/accessors/ddimm_get_efd.mk
 
 # FIXME RTC: 210975
 
 #EKB Objects (mirrored in src/import)
 OBJS += error_info.o
-#OBJS += ffdc.o
+OBJS += ffdc.o
 #OBJS += fapi2_utils.o
 #OBJS += p9_collect_some_ffdc.o
 #OBJS += p9_pib2pcb_mux_seq.o
@@ -103,7 +99,7 @@ OBJS += error_info.o
 
 #Generated Objects
 OBJS += fapi2_attribute_service.o
-#OBJS += collect_reg_ffdc_regs.o
+OBJS += collect_reg_ffdc_regs.o
 
 #------------------------------------------------------------------------------
 # Set fapi2 build environment
@@ -121,24 +117,16 @@ FAPI2_ERROR_XML += $(wildcard \
 FAPI2_ERROR_XML += $(wildcard \
   $(ROOTPATH)/src/import/chips/ocmb/explorer/procedures/xml/error_info/*.xml)
 FAPI2_ERROR_XML += $(wildcard \
-  $(ROOTPATH)/src/import/chips/p9a/procedures/xml/error_info/*.xml)
-FAPI2_ERROR_XML += $(wildcard \
-  $(ROOTPATH)/src/import/chips/ocmb/gemini/procedures/xml/error_info/*.xml)
-FAPI2_ERROR_XML += $(wildcard \
   $(ROOTPATH)/src/import/chips/p10/procedures/xml/error_info/*.xml)
 
 
 # Attribute XML files.
 FAPI2_ATTR_XML += $(wildcard \
   $(ROOTPATH)/src/import/hwpf/fapi2/xml/attribute_info/*.xml)
-#FAPI2_ATTR_XML += $(wildcard \
-  $(ROOTPATH)/src/import/chips/p9/procedures/xml/attribute_info/*.xml)
 FAPI2_ATTR_XML += $(wildcard \
   $(ROOTPATH)/src/import/generic/procedures/xml/attribute_info/*.xml)
 FAPI2_ATTR_XML += $(wildcard \
   $(ROOTPATH)/src/import/chips/ocmb/explorer/procedures/xml/attribute_info/*.xml)
-FAPI2_ATTR_XML += $(wildcard \
-  $(ROOTPATH)/src/import/chips/ocmb/gemini/procedures/xml/attribute_info/*.xml)
 FAPI2_ATTR_XML += $(wildcard \
   $(ROOTPATH)/src/import/chips/p10/procedures/xml/attribute_info/*.xml)
 FAPI2_ATTR_XML += $(wildcard \
@@ -172,7 +160,10 @@ $(call GENPLUGINTARGET, ${PLAT_HWP_ERR_PARSER}) : \
 GEN_PASS_BODY += $(GEN_TARGETS)
 CLEAN_TARGETS += $(GEN_TARGETS)
 
-#include ${ROOTPATH}/procedure.rules.mk
+# force parseErrorInfo.mk to use the parseErrorInfo_p10.pl script
+PROJECT_NAME = p10
+
+include ${ROOTPATH}/procedure.rules.mk
 include ${ROOTPATH}/src/import/tools/build/common.dir/script.rules.mk
 include ${ROOTPATH}/src/import/hwpf/fapi2/tools/parseErrorInfo.mk
 include ${ROOTPATH}/src/import/hwpf/fapi2/tools/parseAttributeInfo.mk
@@ -189,9 +180,9 @@ include ${ROOTPATH}/src/import/hwpf/fapi2/tools/createIfAttrService.mk
 
 VPATH += ${HWP_PATH_1}/hwp/accessors
 VPATH += ${ROOTPATH}/src/import/hwpf/fapi2/src/
-VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
-VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
-VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib/
+VPATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/pm/
+VPATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
+VPATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/lib/
 VPATH += ${HWP_PATH_1}/hwp/perv/
-VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/initfiles/
+VPATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/initfiles/
 VPATH += ${GENPATH}

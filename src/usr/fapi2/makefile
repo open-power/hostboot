@@ -36,10 +36,8 @@ SUBDIRS += runtime.d
 
 include fapi2.mk
 
-# FIXME RTC: 210975
-
 OBJS += plat_attr_task.o
 
 include ${ROOTPATH}/config.mk
 
-#vpath %.C ${GENDIR}
+vpath %.C ${GENDIR}

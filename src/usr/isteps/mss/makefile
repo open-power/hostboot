@@ -25,19 +25,16 @@
 ROOTPATH = ../../../..
 
 IMPORT_PATH              = ${ROOTPATH}/src/import
-PROCEDURES_PATH          = ${IMPORT_PATH}/chips/p9/procedures
-AXONE_PROCEDURES_PATH    = ${IMPORT_PATH}/chips/p9a/procedures
+PROCEDURES_PATH          = ${IMPORT_PATH}/chips/p10/procedures
 EXPLORER_PROCEDURES_PATH = ${IMPORT_PATH}/chips/ocmb/explorer/procedures
-GEMINI_PROCEDURES_PATH   = ${IMPORT_PATH}/chips/ocmb/gemini/procedures
 
 #Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 EXTRAINCDIR += ${IMPORT_PATH}/chips/ocmb/explorer/common/include/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/generic/memory/lib/
@@ -69,11 +66,6 @@ MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/utils/
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/utils/shared/
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/utils/freq/
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/utils/mcbist/
-MSS_LIB += ${AXONE_PROCEDURES_PATH}/hwp/memory/
-MSS_LIB += ${AXONE_PROCEDURES_PATH}/hwp/memory/lib/
-MSS_LIB += ${AXONE_PROCEDURES_PATH}/hwp/memory/lib/eff_config/
-MSS_LIB += ${AXONE_PROCEDURES_PATH}/hwp/memory/lib/utils/
-MSS_LIB += ${AXONE_PROCEDURES_PATH}/hwp/memory/lib/freq/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/eff_config/
@@ -86,16 +78,12 @@ MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/fir/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/mcbist/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/phy/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/ecc/
-MSS_LIB += ${GEMINI_PROCEDURES_PATH}/hwp/memory/
-MSS_LIB += ${GEMINI_PROCEDURES_PATH}/hwp/memory/lib/
 
 
 EXTRAINCDIR += ${MSS_LIB}
 
-# FIXME RTC: 210975
-
-#include ${ROOTPATH}/src/build/mkrules/script.rules.mk
-#include ${ROOTPATH}/src/build/mkrules/verbose.rules.mk
+include ${ROOTPATH}/src/build/mkrules/script.rules.mk
+include ${ROOTPATH}/src/build/mkrules/verbose.rules.mk
 
 # Generate generic_system_accessors header file
 MSS_GENERIC_PATH := $(IMPORT_PATH)/generic/memory/lib
@@ -110,14 +98,14 @@ FILE_PREFIX = mss_generic_system
 
 SOURCES += $(IMPORT_PATH)/hwpf/fapi2/xml/attribute_info/system_attributes.xml
 SOURCES += $(IMPORT_PATH)/generic/procedures/xml/attribute_info/generic_memory_mrw_attributes.xml
-SOURCES += $(IMPORT_PATH)/chips/p9/procedures/xml/attribute_info/freq_attributes.xml
+SOURCES += $(IMPORT_PATH)/chips/p10/procedures/xml/attribute_info/p10_freq_attributes.xml
 
 CLEAN_TARGETS += ${OUTPATH}/mss_generic_system_attribute_getters.H
 CLEAN_TARGETS += ${OUTPATH}/.generic_system_accessors.built
 
 define generic_system_accessors_RUN
 		$(C1) mkdir $(OUTPATH) -p
-		$(C1) $$< --system=AXONE --output-dir=$(OUTPATH) --output-file-prefix=$(FILE_PREFIX) $$(filter-out $$<,$$^)
+		$(C1) $$< --system=P10 --output-dir=$(OUTPATH) --output-file-prefix=$(FILE_PREFIX) $$(filter-out $$<,$$^)
 endef
 
 $(call BUILD_GENERATED)
@@ -141,7 +129,7 @@ CLEAN_TARGETS += ${OUTPATH}/.generic_accessors.built
 
 define generic_accessors_RUN
 		$(C1) mkdir $(OUTPATH) -p
-		$(C1) $$< --system=AXONE --output-dir=$(OUTPATH) --output-file-prefix=$(FILE_PREFIX) $$(filter-out $$<,$$^)
+		$(C1) $$< --system=P10 --output-dir=$(OUTPATH) --output-file-prefix=$(FILE_PREFIX) $$(filter-out $$<,$$^)
 endef
 
 $(call BUILD_GENERATED)
@@ -162,29 +150,29 @@ CLEAN_TARGETS += ${OUTPATH}/.gen_exp_accessors.built
 
 define gen_exp_accessors_RUN
 		$(C1) mkdir $(OUTPATH) -p
-		$(C1) $$< --system=AXONE --output-dir=$(OUTPATH) --output-file-prefix=$(FILE_PREFIX) $$(filter-out $$<,$$^)
+		$(C1) $$< --system=P10 --output-dir=$(OUTPATH) --output-file-prefix=$(FILE_PREFIX) $$(filter-out $$<,$$^)
 endef
 
 $(call BUILD_GENERATED)
 
-GENERATED = gen_p9a_accessors
+GENERATED = gen_p10_accessors
 COMMAND= gen_accessors.pl
 $(GENERATED)_COMMAND_PATH = $(IMPORT_PATH)/generic/memory/tools/
 
-OUTPATH = ${ROOTPATH}/obj/genfiles/chips/p9a/procedures/hwp/memory/lib/
-FILE_PREFIX = mss_p9a
+OUTPATH = ${ROOTPATH}/obj/genfiles/chips/p10/procedures/hwp/memory/lib/
+FILE_PREFIX = mss_p10
 
-SOURCES += $(ROOTPATH)/chips/p9/procedures/xml/attribute_info/p9a_io_attributes.xml
-SOURCES += $(ROOTPATH)/chips/p9/procedures/xml/attribute_info/p9a_omi_setup_bars.xml
-SOURCES += $(ROOTPATH)/chips/p9/procedures/xml/attribute_info/p9a_omi_init.xml
+SOURCES += $(ROOTPATH)/chips/p10/procedures/xml/attribute_info/p10_io_attributes.xml
+SOURCES += $(ROOTPATH)/chips/p10/procedures/xml/attribute_info/p10_omi_setup_bars.xml
+SOURCES += $(ROOTPATH)/chips/p10/procedures/xml/attribute_info/p10_omi_init.xml
 
-CLEAN_TARGETS += ${OUTPATH}/mss_p9a_attribute_getters.H
-CLEAN_TARGETS += ${OUTPATH}/mss_p9a_attribute_setters.H
-CLEAN_TARGETS += ${OUTPATH}/.gen_p9a_accessors.built
+CLEAN_TARGETS += ${OUTPATH}/mss_p10_attribute_getters.H
+CLEAN_TARGETS += ${OUTPATH}/mss_p10_attribute_setters.H
+CLEAN_TARGETS += ${OUTPATH}/.gen_p10_accessors.built
 
-define gen_p9a_accessors_RUN
+define gen_p10_accessors_RUN
 		$(C1) mkdir $(OUTPATH) -p
-		$(C1) $$< --system=AXONE --output-dir=$(OUTPATH) --output-file-prefix=$(FILE_PREFIX) $$(filter-out $$<,$$^)
+		$(C1) $$< --system=P10 --output-dir=$(OUTPATH) --output-file-prefix=$(FILE_PREFIX) $$(filter-out $$<,$$^)
 endef
 
 $(call BUILD_GENERATED)
@@ -199,31 +187,21 @@ MSS_PATH_GENERIC_MEMORY := ${ROOTPATH}/src/import/generic/memory/lib
 MSS_GENERIC_MEMORY_SOURCE := $(shell find $(MSS_PATH_GENERIC_MEMORY) -name '*.C' -exec basename {} \;)
 MSS_MODULE_OBJS += $(patsubst %.C,%.o,$(MSS_GENERIC_MEMORY_SOURCE))
 
-MSS_PATH_AXONE := $(AXONE_PROCEDURES_PATH)/hwp/memory/lib
-MSS_AXONE_SOURCE := $(shell find $(MSS_PATH_AXONE) -name '*.C' -exec basename {} \;)
-MSS_MODULE_OBJS += $(if $(CONFIG_AXONE),$(patsubst %.C,%.o,$(MSS_AXONE_SOURCE)),)
-
 MSS_PATH_EXPLORER := $(EXPLORER_PROCEDURES_PATH)/hwp/memory/lib
 MSS_EXPLORER_SOURCE := $(shell find $(MSS_PATH_EXPLORER) -name '*.C' -exec basename {} \;)
-#must bring explorer_memory_size.o in even in Nimbus/Cumulus builds because of p9_mss_grouping nest HWP
-MSS_MODULE_OBJS += $(if $(CONFIG_AXONE),$(patsubst %.C,%.o,$(MSS_EXPLORER_SOURCE)),explorer_memory_size.o)
-
-MSS_PATH_GEMINI := $(GEMINI_PROCEDURES_PATH)/hwp/memory/lib
-MSS_GEMINI_SOURCE := $(shell find $(MSS_PATH_GEMINI) -name '*.C' -exec basename {} \;)
-MSS_MODULE_OBJS += $(if $(CONFIG_AXONE),$(patsubst %.C,%.o,$(MSS_GEMINI_SOURCE)),)
-
+MSS_MODULE_OBJS += $(patsubst %.C,%.o,$(MSS_EXPLORER_SOURCE))
 
 MODULE = isteps_mss
 
-#OBJS += $(MSS_MODULE_OBJS)
-#$(call BUILD_MODULE)
+OBJS += $(MSS_MODULE_OBJS)
+$(call BUILD_MODULE)
 
-#VPATH += ${MSS_LIB}
+VPATH += ${MSS_LIB}
 
 SUBDIRS += runtime
 
 #HWP build tool
-#include ${ROOTPATH}/procedure.rules.mk
+include ${ROOTPATH}/procedure.rules.mk
 include ${ROOTPATH}/config.mk
 
 

@@ -1273,6 +1273,21 @@
       <id>MODEL</id>
     </attribute>
     <attribute>
+      <id>MRW_DDR4_VDDR_MAX_LIMIT_EFF_CONFIG</id>
+    </attribute>
+    <attribute>
+      <id>MSS_VOLT_DDR4_VDDR_INTERCEPT_EFF_CONFIG</id>
+    </attribute>
+    <attribute>
+      <id>MSS_VOLT_DDR4_VDDR_SLOPE_EFF_CONFIG</id>
+    </attribute>
+    <attribute>
+      <id>MSS_VOLT_VPP_INTERCEPT_EFF_CONFIG</id>
+    </attribute>
+    <attribute>
+      <id>MSS_VOLT_VPP_SLOPE_EFF_CONFIG</id>
+    </attribute>
+    <attribute>
       <default>NODE</default>
       <id>TYPE</id>
     </attribute>
@@ -1992,6 +2007,30 @@
     <attribute>
       <default>POWER10</default>
       <id>MODEL</id>
+    </attribute>
+    <attribute>
+      <id>MRW_DDR4_VDDR_MAX_LIMIT</id>
+    </attribute>
+    <attribute>
+      <id>MRW_DDR4_VDDR_MAX_LIMIT_POST_DRAM_INIT</id>
+    </attribute>
+    <attribute>
+      <id>MSS_VOLT_DDR4_VDDR_INTERCEPT</id>
+    </attribute>
+    <attribute>
+      <id>MSS_VOLT_DDR4_VDDR_INTERCEPT_POST_DRAM_INIT</id>
+    </attribute>
+    <attribute>
+      <id>MSS_VOLT_DDR4_VDDR_SLOPE</id>
+    </attribute>
+    <attribute>
+      <id>MSS_VOLT_DDR4_VDDR_SLOPE_POST_DRAM_INIT</id>
+    </attribute>
+    <attribute>
+      <id>MSS_VOLT_VPP_INTERCEPT</id>
+    </attribute>
+    <attribute>
+      <id>MSS_VOLT_VPP_SLOPE</id>
     </attribute>
     <attribute>
       <id>NEST_PLL_FREQ_BUCKETS</id>

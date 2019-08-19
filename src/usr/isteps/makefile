@@ -73,7 +73,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
 #OBJS += mem_utils.o
 OBJS += hwpisteperror.o
 OBJS += hwpistepud.o
-#OBJS += istepHelperFuncs.o
+OBJS += istepHelperFuncs.o
 #OBJS += pbusLinkSvc.o
 
 #OBJS += $(if $(CONFIG_OPENPOWER_VOLTMSG),openpower_vddr.o,hbToHwsvVoltageMsg.o)

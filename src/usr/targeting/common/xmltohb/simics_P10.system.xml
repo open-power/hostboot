@@ -55,7 +55,7 @@
     </attribute>
     <attribute>
         <id>EARLY_TESTCASES_ISTEP</id>
-        <default>0x060C</default>
+        <default>0x0702</default>
     </attribute>
     <attribute>
         <id>PAYLOAD_BASE</id>
