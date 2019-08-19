@@ -83,9 +83,9 @@
         0: PowerSave;
         1: CF1;
         2: CF2;
-        3: WOF Base;
-        4: CF3;
-        5: CF4;
+        3: CF3;
+        4: CF4;
+        5: CF5;
         6: UltraTurbo;
         7: Fmax;
         8: Enable
@@ -141,201 +141,7 @@
     <overrideOnly/>
     <group>dds</group>
   </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_DDS_DROOP_EXTREME_OVERRIDE</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>
-    Digital Droop Sensors (DDS) Extreme Threshold Select Value per VPD point.
-    a negative value below the DDS setting that will trigger droop event.  This
-    attibute overrides the
 
-    Array of 9 entries-:
-        0: PowerSave;
-        1: CF1;
-        2: CF2;
-        3: WOF Base;
-        4: CF3;
-        5: CF4;
-        6: UltraTurbo;
-        7: Fmax;
-        8: Enable
-
-    If index 8 is non-zero, the other entries are considered valid.
-
-    Producer: Override
-    </description>
-    <valueType>uint8</valueType>
-    <array>9</array>
-    <platInit/>
-    <enum>
-        OFF= 0x00,
-        8mV= 0x01,
-        16mV = 0x02,
-        24mV = 0x03,
-        32mV = 0x04,
-        40mV = 0x05,
-        48mV = 0x06,
-        56mV = 0x07,
-        64mV = 0x08,
-        72mV = 0x09,
-        80mV = 0x0A,
-        88mV = 0x0B,
-        92mV = 0x0C,
-        96mV = 0x0D
-    </enum>
-    <initToZero/>
-    <overrideOnly/>
-    <group>dds</group>
-  </attribute>
-
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_DDS_DROOP_LARGE_OVERRIDE</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>
-    Digital Droop Sensors (DDS) Large Threshold Select Value per VPD point.
-    a negative value below the DDS setting that will trigger droop event.
-
-    Array of 9 entries-:
-        0: PowerSave;
-        1: CF1;
-        2: CF2;
-        3: WOF Base;
-        4: CF3;
-        5: CF4;
-        6: UltraTurbo;
-        7: Fmax;
-        8: Enable
-
-    If index 8 is non-zero, the other entries are considered valid.
-
-    Producer: Override
-    </description>
-    <valueType>uint8</valueType>
-    <array>9</array>
-    <platInit/>
-    <enum>
-        OFF= 0x00,
-        8mV= 0x01,
-        16mV = 0x02,
-        24mV = 0x03,
-        32mV = 0x04,
-        40mV = 0x05,
-        48mV = 0x06,
-        56mV = 0x07,
-        64mV = 0x08,
-        72mV = 0x09,
-        80mV = 0x0A,
-        88mV = 0x0B,
-        92mV = 0x0C,
-        96mV = 0x0D
-    </enum>
-    <initToZero/>
-    <overrideOnly/>
-    <group>dds</group>
-  </attribute>
-
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_DDS_DROOP_SMALL_OVERRIDE</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>
-    Digital Droop Sensors (DDS) Small Select Value per VPD point. Indicates a
-    value below the DDS setting that will trigger droop event.
-
-    Array of 9 entries-:
-        0: PowerSave;
-        1: CF1;
-        2: CF2;
-        3: WOF Base;
-        4: CF3;
-        5: CF4;
-        6: UltraTurbo;
-        7: Fmax;
-        8: Enable
-
-    If index 8 is non-zero, the other entries are considered valid.
-
-    Producer: Override
-    </description>
-    <valueType>uint8</valueType>
-    <array>9</array>
-    <platInit/>
-    <enum>
-        OFF= 0x00,
-        8mV= 0x01,
-        16mV = 0x02,
-        24mV = 0x03,
-        32mV = 0x04,
-        40mV = 0x05,
-        48mV = 0x06,
-        56mV = 0x07,
-        64mV = 0x08,
-        72mV = 0x09,
-        80mV = 0x0A,
-        88mV = 0x0B,
-        92mV = 0x0C,
-        96mV = 0x0D
-    </enum>
-    <initToZero/>
-    <overrideOnly/>
-    <group>dds</group>
-  </attribute>
-
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_DDS_EXTREME_THOTTLE_ENABLE</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>
-    Controls the enablement of Digital Droop Sensors (DDS) to throttle the core
-    extreme droop event.
-
-    Producer:Machine Readable Workbook
-
-    Consumers: QME attribute?
-    </description>
-    <valueType>uint8</valueType>
-    <platInit/>
-    <enum>
-        OFF = 0x00,
-        ON = 0x01
-    </enum>
-    <initToZero/>
-    <group>dds</group>
-  </attribute>
-
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_DDS_FREQ_RETURN_L_S_OVERRIDE</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>
-    DPLL response override of the respective #W VPD content for returning from a
-    Droop value to the Small value. Values are in 1/32ths with values being
-    N being less than or equal to 8.
-
-    Array of 9 entries-:
-        0: PowerSave;
-        1: CF1;
-        2: CF2;
-        3: WOF Base;
-        4: CF3;
-        5: CF4;
-        6: UltraTurbo;
-        7: Fmax;
-        8: Enable
-
-    If index 8 is non-zero, the other entries are considered valid.
-
-    Producer: Override
-    </description>
-    <valueType>uint8</valueType>
-    <array>9</array>
-    <platInit/>
-    <initToZero/>
-    <overrideOnly/>
-    <group>dds</group>
-  </attribute>
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_SAVE_MODE_NODDS_UPLIFT_MV</id>
@@ -352,225 +158,23 @@
     <group>dds</group>
   </attribute>
 
-
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_DDS_FREQ_RETURN_S_N_OVERRIDE</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>
-    DPLL response override of the respective #W VPD content for returning from a
-    Droop value to the Normal value. Values are in 1/32ths with values being
-    N being less than or equal to 8.
-
-    Array of 9 entries-:
-        0: PowerSave;
-        1: CF1;
-        2: CF2;
-        3: WOF Base;
-        4: CF3;
-        5: CF4;
-        6: UltraTurbo;
-        7: Fmax;
-        8: Enable
-
-    If index 8 is non-zero, the other entries are considered valid.
-
-    Producer: Override
-    </description>
-    <valueType>uint8</valueType>
-    <array>9</array>
-    <platInit/>
-    <initToZero/>
-    <overrideOnly/>
-    <group>dds</group>
-  </attribute>
-
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_DDS_LARGE_FREQ_DROP_N_L_OVERRIDE</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>
-    DPLL response override of the respective #W VPD content for a Voltage Droop
-    Large Frequency Drop (eg Normal to Large). Values are in 1/32ths legal
-    being of N being less than or equal to 8.
-
-    Array of 9 entries-:
-        0: PowerSave;
-        1: CF1;
-        2: CF2;
-        3: WOF Base;
-        4: CF3;
-        5: CF4;
-        6: UltraTurbo;
-        7: Fmax;
-        8: Enable
-
-    If index 8 is non-zero, the other entries are considered valid.
-
-    Producer: Override
-    </description>
-    <valueType>uint8</valueType>
-    <array>9</array>
-    <platInit/>
-    <initToZero/>
-    <overrideOnly/>
-    <group>dds</group>
-  </attribute>
-
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_DDS_OVERVOLT_OVERRIDE</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>
-    Digital Droop Sensor (DDS) OverVoltage Threshold Select Value per VPD. The
-    a positive value above the VDM setting that will an overvolt condition.
-
-    Array of 9 entries-:
-        0: PowerSave;
-        1: CF1;
-        2: CF2;
-        3: WOF Base;
-        4: CF3;
-        5: CF4;
-        6: UltraTurbo;
-        7: Fmax;
-        8: Enable
-
-    If index 8 is non-zero, the other entries are considered valid.
-
-    Producer: Override
-    </description>
-    <valueType>uint8</valueType>
-    <array>9</array>
-    <platInit/>
-    <enum>
-        FORCE = 0x00,
-        8mV = 0x01,
-        16mV= 0x02,
-        24mV= 0x03,
-        32mV= 0x04,
-        40mV= 0x05,
-        48mV= 0x06,
-        56mV= 0x07,
-        64mV= 0x08
-    </enum>
-    <initToZero/>
-    <overrideOnly/>
-    <group>dds</group>
-  </attribute>
-
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_DDS_SMALL_FREQ_DROP_N_S_OVERRIDE</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>
-    DPLL response override of the respective #W VPD content for a Digital Droop
-    (DDS) Small Frequency Drop (eg Normal to Small). Values are in 1/32ths
-    being of N being less than or equal to 8.
-
-    Array of 9 entries-:
-        0: PowerSave;
-        1: CF1;
-        2: CF2;
-        3: WOF Base;
-        4: CF3;
-        5: CF4;
-        6: UltraTurbo;
-        7: Fmax;
-        8: Enable
-
-    If index 8 is non-zero, the other entries are considered valid
-
-    Producer: Override
-    </description>
-    <valueType>uint8</valueType>
-    <array>9</array>
-    <platInit/>
-    <initToZero/>
-    <overrideOnly/>
-    <group>dds</group>
-  </attribute>
-
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_DDS_VID_COMPARE_BIAS_0P5PCT</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-    DDS Voltage Compare Bias - % of bias (signed twos complement in 0.5 percent
-    is applied to the #W DDS VID Compare before placement in the Pstate
-    Blocks that will be consumed by Hcode.
-
-    Array of 9 entries-:
-        0: PowerSave;
-        1: CF1;
-        2: CF2;
-        3: WOF Base;
-        4: CF3;
-        5: CF4;
-        6: UltraTurbo;
-        7: Fmax
-
-    Producer: Override
-    </description>
-    <valueType>int8</valueType>
-    <array>8</array>
-    <platInit/>
-    <initToZero/>
-    <overrideOnly/>
-    <group>dds</group>
-  </attribute>
-
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_DDS_VID_COMPARE_OVERRIDE_MV</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>
-    Voltage Droop Monitor (VDM) Voltage Compare Voltage to expect when no droop
-    (binary in mV). A default value of 0 indicates no override
-
-    Array of 9 entries-:
-        0: PowerSave;
-        1: CF1;
-        2: CF2;
-        3: WOF Base;
-        4: CF3;
-        5: CF4;
-        6: UltraTurbo;
-        7: Fmax;
-        8: Enable
-
-    If index 8 is non-zero, the other entries are considered valid
-
-    Producer: Override
-    </description>
-    <valueType>uint8</valueType>
-    <array>9</array>
-    <platInit/>
-    <initToZero/>
-    <overrideOnly/>
-    <group>dds</group>
-  </attribute>
-
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_DPLL_DDS_RESPONSE</id>
+    <id>ATTR_DDS_DPLL_SLEW_MODE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
     Indicates the response of the DPLL frequency upon DDS events if is not ON.
 
-    NONE -> DPLL Mode 2 DROOP_PROTECT -> DPLL Mode 3 DROOP_PROTECT_OVERVOLT ->
-    3.5 DYNAMIC -> DPLL Mode 4 DYNAMIC_PROTECT -> DPLL Mode 5
+    NONE -> DPLL Mode 2, JUMP_PROTECT -> DPLL Mode 3,  SLEW_MODE -> DPLL Mode 4
 
     Producer: MRWB
     </description>
     <valueType>uint8</valueType>
     <platInit/>
     <enum>
-        DROOP_PROTECT = 0x00,
-        DROOP_PROTECT_OVERVOLT = 0x01,
-        DYNAMIC = 0x02,
-        DYNAMIC_PROTECT = 0x03,
-        NONE = 0x04
+        NONE = 0x00,
+        JUMP_PROTECT = 0x01,
+        SLEW_MODE = 0x02
     </enum>
     <initToZero/>
     <group>dds</group>
@@ -629,8 +233,8 @@
     <id>ATTR_XGPE_PM_SUSPEND_DISABLE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
-    Enables the XGPE Hcode to support the MPIPL function that coordinates the 
-    suspension of the Power Management subsystem. If ON (DISABLED), XGPE provides 
+    Enables the XGPE Hcode to support the MPIPL function that coordinates the
+    suspension of the Power Management subsystem. If ON (DISABLED), XGPE provides
     and immediate good response to allow for general integration testing
 
     Consumer: p10_hcode_image_build.c -> XGPE Header field
@@ -644,7 +248,7 @@
         ON = 0x01
     </enum>
     <!-- TODO RTC 210233 -->
-    <default>ON</default> 
+    <default>ON</default>
     <group>debug</group>
   </attribute>
 
@@ -684,7 +288,7 @@
     <initToZero/>
     <group>debug</group>
   </attribute>
-  
+
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_POUND_V_STATIC_DATA_ENABLE</id>
@@ -2024,15 +1628,66 @@
 
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_DDS_DPLL_FMAX_FAST_DISABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Disable the Fast Fmax Slewing function of the DPLL when in SLEW_MODE
+
+    Producer: Override
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+        OFF=0,
+        ON=1
+    </enum>
+    <platInit/>
+    <initToZero/>
+    <overrideOnly/>
+    <group>dds</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_DDS_DPLL_FMIN_FAST_DISABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Disable the Fast Fmin Slewing function of the DPLL when in SLEW_MODE
+
+    Producer: Override
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+        OFF=0,
+        ON=1
+    </enum>
+    <platInit/>
+    <initToZero/>
+    <overrideOnly/>
+    <group>dds</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_DDS_FMAX_OVERRIDE_KHZ</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
-    ?????
+    Override for DPLL Fmax value when in ATTR_DDS_DPLL_SLEW_MODE.SLEW_MODE
+
+    [Point] ->9 entries-:
+        0: CF0;
+        1: CF1;
+        2: CF2;
+        3: CF3;
+        4: CF4;
+        5: CF5;
+        6: CF6;
+        7: CF7;
+        8: Enable
 
     Producer: Override
     </description>
     <valueType>uint16</valueType>
-    <array>5</array>
+    <array>9</array>
     <platInit/>
     <initToZero/>
     <overrideOnly/>
@@ -2044,7 +1699,18 @@
     <id>ATTR_DDS_FMIN_OVERRIDE_KHZ</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
-    ?????
+    Override for DPLL Fmin value when in ATTR_DDS_DPLL_SLEW_MODE.SLEW_MODE
+
+    [Point] ->9 entries-:
+        0: CF0;
+        1: CF1;
+        2: CF2;
+        3: CF3;
+        4: CF4;
+        5: CF5;
+        6: CF6;
+        7: CF7;
+        8: Enable
 
     Producer: Override
     </description>
@@ -2345,7 +2011,8 @@
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
     Boot bias applied to uplift the PowerSave #V VDD and VCS Voltages to boot the
-    chip - % of bias (signed twos complement in 0.5 percent).
+    chip - % of bias (signed twos complement in 0.5 percent). This is to handle timing
+    margin until droop protection is enabled.
 
     Producer: Override
 
@@ -2396,10 +2063,10 @@
 
   <!-- *********************************************************************-->
   <attribute>
-    <id>ATTR_DDS_CAL_PSTATE_ENABLE</id>
+    <id>ATTR_DDS_THRESHOLD_PSTATE_ENABLE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-    Enables the updating of the DDS calibration settings upon Pstate changes.
+    Enables the updating of the DDS threshold settings upon Pstate changes.
 
     Producer:  Override/Lab
     Consumers: p10_build_pstate_datablock
@@ -2421,27 +2088,6 @@
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
     Enables coarse throttle reaction to DDS events.
-
-    Producer:  Override/Lab
-    Consumers: p10_build_pstate_datablock
-    </description>
-    <valueType>uint8</valueType>
-    <enum>
-        OFF=0,
-        ON=1
-    </enum>
-    <platInit/>
-    <overrideOnly/>
-    <default>OFF</default>
-    <group>dds</group>
-  </attribute>
-
-  <!-- *********************************************************************-->
-  <attribute>
-    <id>ATTR_DDS_FREQ_JUMP_ENABLE</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-    Enables frequency jump reaction to DDS events.
 
     Producer:  Override/Lab
     Consumers: p10_build_pstate_datablock
@@ -2524,6 +2170,7 @@
     <description>
     Mode of the throttle control function.
 
+    NONE - No throttling
     ICTMN - Instruction Core Throttle / M/N windows
     PP_PCT_RED - Power Proxy Percent Reduction
     PP_TARGET - Power Proxy Target
@@ -2533,9 +2180,10 @@
     </description>
     <valueType>uint32</valueType>
     <enum>
-        ICTMN,
-        PP_PCT_RED,
-        PP_TARGET
+        NONE=0,
+        ICTMN=1,
+        PP_PCT_RED=2,
+        PP_TARGET=3
     </enum>
     <platInit/>
     <initToZero/>
