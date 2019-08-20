@@ -24,16 +24,15 @@
 # IBM_PROLOG_END_TAG
 
 
-VPATH += ${ROOTPATH}/src/import/chips/p9/common/scominfo/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/scominfo/
+VPATH += ${ROOTPATH}/src/import/chips/p10/common/scominfo/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/scominfo/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 
 
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/pm/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 
 
@@ -48,4 +47,5 @@ OBJS += ibscom_retry.o
 OBJS += handleSpecialWakeup.o
 
 # Objects From Import Directory
-OBJS += p9_scominfo.o
+OBJS += p10_scominfo.o
+OBJS += p10_scom_addr.o

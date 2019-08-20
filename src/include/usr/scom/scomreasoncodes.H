@@ -36,7 +36,6 @@ namespace SCOM
         SCOM_PERFORM_TRANSLATE          = 0x02,
         SCOM_FIND_PARENT_TARGET         = 0x03,
         SCOM_CHECK_INDIRECT_AND_DO_SCOM = 0x04,
-        SCOM_TRANSLATE_P9               = 0x05,
         SCOM_DO_FORM_1_INDIRECT_SCOM    = 0x06,
         SCOM_HANDLE_SPECIAL_WAKEUP      = 0x07,
         // 0x08 unused
@@ -46,6 +45,7 @@ namespace SCOM
         SCOM_CALL_WAKEUP_HYP            = 0x0E,
         SCOM_CALL_WAKEUP_HWP            = 0x0F,
         SCOM_DO_MULTICAST_WORKAROUND    = 0x10,
+        SCOM_TRANSLATE_P10              = 0x11,
     };
 
     enum scomReasonCode
@@ -58,7 +58,6 @@ namespace SCOM
         SCOM_INDIRECT_READ_TIMEOUT     = SCOM_COMP_ID | 0x06,
         SCOM_INDIRECT_WRITE_FAIL       = SCOM_COMP_ID | 0x07,
         SCOM_INDIRECT_WRITE_TIMEOUT    = SCOM_COMP_ID | 0x08,
-        SCOM_P9_TRANS_INVALID_TYPE     = SCOM_COMP_ID | 0x09,
         SCOM_INVALID_TRANSLATION       = SCOM_COMP_ID | 0x0A,
         SCOM_TRANS_CANT_FIND_PARENT    = SCOM_COMP_ID | 0x0B,
         SCOM_TARGET_ADDR_MISMATCH      = SCOM_COMP_ID | 0x0C,
@@ -81,6 +80,7 @@ namespace SCOM
         SCOM_INVALID_WAKEUP_PARM       = SCOM_COMP_ID | 0x1D,
         SCOM_UNEXPECTED_FORCE_WAKEUP   = SCOM_COMP_ID | 0x1E,
         SCOM_UNSUPPORTED_MULTICAST_OP  = SCOM_COMP_ID | 0x1F,
+        SCOM_P10_TRANS_INVALID_TYPE    = SCOM_COMP_ID | 0x20,
     };
 
     enum UserDetailsTypes

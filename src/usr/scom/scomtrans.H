@@ -26,7 +26,7 @@
 #define __SCOMTRANS_H
 
 #include <devicefw/driverif.H>
-#include <p9_cu.H>
+#include <p10_cu.H>
 
 /** @file  scomtrans.H
  *  @brief Provides the interfaces to perform a SCom
@@ -61,7 +61,7 @@ errlHndl_t startScomProcess(DeviceFW::OperationType i_opType,
                   va_list i_args);
 
 /**
- * @brief This function translates a p9 scom address using
+ * @brief This function translates a p10 scom address using
  *        the interface that the HW team provided.
  *
  * @param[in]      i_target      SCom target is passed in
@@ -71,29 +71,29 @@ errlHndl_t startScomProcess(DeviceFW::OperationType i_opType,
  * @param[in]      i_opMode      Defaults to 0 (Standard)
  * @return         errlHndl_t
  */
-errlHndl_t p9_translation (TARGETING::Target * &i_target,
-                           TARGETING::TYPE i_type,
-                           uint64_t &io_addr,
-                           bool & o_needsWakeup,
-                           uint64_t i_opMode = 0);
+errlHndl_t p10_translation (TARGETING::Target * &i_target,
+                            TARGETING::TYPE i_type,
+                            uint64_t &io_addr,
+                            bool & o_needsWakeup,
+                            uint64_t i_opMode = 0);
 
 /**
- * @brief This function gets the p9 chip unit for this target type.
+ * @brief This function gets the p10 chip unit for this target type.
  *
  * @param[in]      i_type        Type of the target
  * @param[out]     o_chipUnit    Chip unit related to target type
  * @return         bool          True if there was an error trying to find
  *                               a chipUnit related to the inputed target type
  */
-bool getChipUnitP9 (TARGETING::TYPE i_type,
-                    p9ChipUnits_t &o_chipUnit);
+bool getChipUnitP10 (TARGETING::TYPE i_type,
+                     p10ChipUnits_t &o_chipUnit);
 
 /**
  * @brief Computes the chip/ddlevel value to be passed into translator
  *
  * @param[in]      i_target      SCom target is passed in
  * @return         uint32_t      Chip/ddlevel mode value for target,
- *                               see p9_scominfo.H for values
+ *                               see p10_scominfo.H for values
  */
 uint32_t getChipLevel (TARGETING::Target* i_target);
 

@@ -40,13 +40,12 @@
 #include "postopchecks.H"
 #include <scom/scomreasoncodes.H>
 #include <scom/errlud_pib.H>
-#include <ibscom/ibscomreasoncodes.H>
 #include <sys/time.h>
 #include <xscom/piberror.H>
 #include <errl/errludtarget.H>
 #include <errl/errludlogregister.H>
 #include <hw_access_def.H>
-#include <p9_scom_addr.H>
+#include <p10_scom_addr.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/namedtarget.H>
 
@@ -126,11 +125,6 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
 
 DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                       DeviceFW::SCOM,
-                      TARGETING::TYPE_MEMBUF,
-                      scomMemBufPerformOp);
-
-DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
-                      DeviceFW::SCOM,
                       TARGETING::TYPE_OCMB_CHIP,
                       scomPerformOp);
 
@@ -155,19 +149,6 @@ errlHndl_t scomPerformOp(DeviceFW::OperationType i_opType,
                                    i_accessType,
                                    l_scomAddr);
 
-    return l_err;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-errlHndl_t scomMemBufPerformOp(DeviceFW::OperationType i_opType,
-                               TARGETING::Target* i_target,
-                               void* io_buffer,
-                               size_t& io_buflen,
-                               int64_t i_accessType,
-                               va_list i_args)
-{
-    errlHndl_t l_err = NULL;
     return l_err;
 }
 
@@ -852,15 +833,6 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
                                  DEVICE_SBEFIFOSCOM_ADDRESS(i_addr));
                 if( l_err ) { break; }
             }
-            else if(scomSetting.useInbandScom)
-            {   //do IBSCOM
-                l_err = deviceOp(i_opType,
-                                 i_target,
-                                 io_buffer,
-                                 io_buflen,
-                                 DEVICE_IBSCOM_ADDRESS(i_addr));
-                if( l_err ) { break; }
-            }
             else if(scomSetting.useFsiScom)
             {   //do FSISCOM
                 l_err = deviceOp(i_opType,
@@ -873,7 +845,7 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
             else
             {
                 assert(0,"SCOM::scomPerformOp> ATTR_SCOM_SWITCHES does not "
-                        "indicate Xscom, SBESCOM, Ibscom, or FSISCOM is "
+                        "indicate Xscom, SBESCOM, or FSISCOM is "
                         "supported. i_target=0x%.8x", get_huid(i_target));
                 l_remainingAttempts = 0;
                 break;
@@ -926,7 +898,7 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
     while(l_remainingAttempts > 0);
 
 
-    if( l_err && p9_scom_addr(i_addr).is_multicast() && l_multicastBugError )
+    if( l_err && p10_scom_addr(i_addr).isMulticast() && l_multicastBugError )
     {
         //Delete the error if the mask matches the pib err
         for(auto data : l_err->getUDSections(SCOM_COMP_ID, SCOM::SCOM_UDT_PIB))
@@ -968,6 +940,7 @@ void addScomFailFFDC( errlHndl_t i_err,
     TARGETING::TYPE l_type = TARGETING::TYPE_NA;
     uint32_t l_badChiplet = 0x00;
 
+    // TODO RTC 214958: Investigate the thread safety of this construct
     static bool l_insideFFDC = false;
     if( l_insideFFDC )
     {
@@ -986,7 +959,7 @@ void addScomFailFFDC( errlHndl_t i_err,
     }
 
     //Multicast scoms on the processor
-    if( p9_scom_addr(i_addr).is_multicast()
+    if( p10_scom_addr(i_addr).isMulticast()
         && (TARGETING::TYPE_PROC == l_type) )
     {
         addit = true;
@@ -1069,21 +1042,21 @@ void addScomFailFFDC( errlHndl_t i_err,
              x < (sizeof(ffdc_regs3)/sizeof(ffdc_regs3[0]));
              x++ )
         {
-            p9_scom_addr l_scom(ffdc_regs3[x]);
-            l_scom.set_chiplet_id(l_badChiplet);
-            l_scom_data.addData(DEVICE_SCOM_ADDRESS(l_scom.get_addr()));
+            p10_scom_addr l_scom(ffdc_regs3[x]);
+            l_scom.setChipletId(l_badChiplet);
+            l_scom_data.addData(DEVICE_SCOM_ADDRESS(l_scom.getAddr()));
         }
     }
 
     //Any non-PCB Slave and non TP reg on the processor
     if( ((i_addr & 0x00FF0000) != 0x000F0000) //PCB slave
-        && (p9_scom_addr(i_addr).get_chiplet_id() != 0x00) //TP
+        && (p10_scom_addr(i_addr).getChipletId() != 0x00) //TP
         && (TARGETING::TYPE_PROC == l_type) )
     {
         addit = true;
         if( l_badChiplet == 0x00 )
         {
-            l_badChiplet = p9_scom_addr(i_addr).get_chiplet_id();
+            l_badChiplet = p10_scom_addr(i_addr).getChipletId();
         }
         //grab some data related to the PCB slave state
         uint64_t ffdc_regs[] = {
@@ -1094,9 +1067,9 @@ void addScomFailFFDC( errlHndl_t i_err,
         };
         for( size_t x = 0; x < (sizeof(ffdc_regs)/sizeof(ffdc_regs[0])); x++ )
         {
-            p9_scom_addr l_scom(ffdc_regs[x]);
-            l_scom.set_chiplet_id(l_badChiplet);
-            l_scom_data.addData(DEVICE_SCOM_ADDRESS(l_scom.get_addr()));
+            p10_scom_addr l_scom(ffdc_regs[x]);
+            l_scom.setChipletId(l_badChiplet);
+            l_scom_data.addData(DEVICE_SCOM_ADDRESS(l_scom.getAddr()));
         }
 
         //Osc Switch Sense 1 register
@@ -1125,30 +1098,30 @@ void addScomFailFFDC( errlHndl_t i_err,
         //look for hung operations on the PBA
         uint64_t ffdc_regs[] = {
             //grab the PBA buffers in case something is hung
-            0x05012850, //PBARBUFVAL0
-            0x05012851, //PBARBUFVAL1
-            0x05012852, //PBARBUFVAL2
-            0x05012853, //PBARBUFVAL3
-            0x05012854, //PBARBUFVAL4
-            0x05012855, //PBARBUFVAL5
-            0x05012858, //PBAWBUFVAL0
-            0x05012859, //PBAWBUFVAL1
+            0x03021C90, //PBARBUFVAL0
+            0x03021C91, //PBARBUFVAL1
+            0x03021C92, //PBARBUFVAL2
+            0x03021C93, //PBARBUFVAL3
+            0x03021C94, //PBARBUFVAL4
+            0x03021C95, //PBARBUFVAL5
+            0x03021C98, //PBAWBUFVAL0
+            0x03021C99, //PBAWBUFVAL1
         };
         for( size_t x = 0; x < (sizeof(ffdc_regs)/sizeof(ffdc_regs[0])); x++ )
         {
             l_scom_data.addData(DEVICE_SCOM_ADDRESS(ffdc_regs[x]));
         }
     }
-    //Core/EX/EQ scoms on the processor (not including PCB slave regs)
-    else if( (((i_addr & 0xF0000000) == 0x10000000) //CACHE
-              || ((i_addr & 0xF0000000) == 0x20000000)) //CORE
-             && ((i_addr & 0x00FF0000) != 0x000F0000) //PCB slave
-             && (TARGETING::TYPE_PROC == l_type) )
+    //Core/FC/EQ scoms on the processor (not including PCB slave regs)
+    else if(    ((i_addr & 0xF0000000) == 0x20000000) // include core/cache/eq
+             && ((i_addr & 0x000F0000) != 0x000F0000) // Exclude PCB slave regs
+             && TARGETING::TYPE_PROC == l_type )
     {
         addit = true;
-        uint8_t l_badChiplet = p9_scom_addr(i_addr).get_chiplet_id();
+        uint8_t l_badChiplet = p10_scom_addr(i_addr).getChipletId();
         //grab some data related to the PCB slave state
         uint64_t ffdc_regs[] = {
+            // TODO RTC 214959: Update FFDC SCOM registers for P10
             0x0F010A, //Special Wakeup Other
             0x0F010B, //Special Wakeup FSP
             0x0F010C, //Special Wakeup OCC
@@ -1157,9 +1130,9 @@ void addScomFailFFDC( errlHndl_t i_err,
         };
         for( size_t x = 0; x < (sizeof(ffdc_regs)/sizeof(ffdc_regs[0])); x++ )
         {
-            p9_scom_addr l_scom(ffdc_regs[x]);
-            l_scom.set_chiplet_id(l_badChiplet);
-            l_scom_data.addData(DEVICE_SCOM_ADDRESS(l_scom.get_addr()));
+            p10_scom_addr l_scom(ffdc_regs[x]);
+            l_scom.setChipletId(l_badChiplet);
+            l_scom_data.addData(DEVICE_SCOM_ADDRESS(l_scom.getAddr()));
         }
     }
 
@@ -1175,6 +1148,8 @@ void addScomFailFFDC( errlHndl_t i_err,
 
 /**
  * @brief Perform a manual multicast operation if appropriate
+ *
+ * TODO RTC 203303: Remove this workaround function
  */
 errlHndl_t doMulticastWorkaround( DeviceFW::OperationType i_opType,
                                   TARGETING::Target* i_target,

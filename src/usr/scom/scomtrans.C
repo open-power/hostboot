@@ -33,7 +33,7 @@
 
 //Flow of the file:
 //Call startScomProcess --which calls--> scomTranslate
-// --which calls--> p9 translate --which returns to-->
+// --which calls--> p10 translate --which returns to-->
 //startScomProcces --which then calls--> SCOM::checkIndirectAndDoScom
 
 /****************************************************************************/
@@ -51,8 +51,8 @@
 #include <scom/scomreasoncodes.H>
 #include <errl/errludtarget.H>
 #include <initservice/initserviceif.H>
-#include <p9_scom_addr.H>
-#include <p9_scominfo.H>
+#include <p10_scom_addr.H>
+#include <p10_scominfo.H>
 #include <hw_access_def.H>
 
 #if __HOSTBOOT_RUNTIME
@@ -74,32 +74,7 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
 
 DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                     DeviceFW::SCOM,
-                    TARGETING::TYPE_EX,
-                    startScomProcess);
-
-DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
-                    DeviceFW::SCOM,
-                    TARGETING::TYPE_MBA,
-                    startScomProcess);
-
-DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
-                    DeviceFW::SCOM,
-                    TARGETING::TYPE_MCS,
-                    startScomProcess);
-
-DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
-                    DeviceFW::SCOM,
-                    TARGETING::TYPE_XBUS,
-                    startScomProcess);
-
-DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
-                    DeviceFW::SCOM,
-                    TARGETING::TYPE_ABUS,
-                    startScomProcess);
-
-DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
-                    DeviceFW::SCOM,
-                    TARGETING::TYPE_MCA,
+                    TARGETING::TYPE_FC,
                     startScomProcess);
 
 DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
@@ -119,37 +94,7 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
 
 DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                     DeviceFW::SCOM,
-                    TARGETING::TYPE_MCBIST,
-                    startScomProcess);
-
-DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
-                    DeviceFW::SCOM,
                     TARGETING::TYPE_MI,
-                    startScomProcess);
-
-DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
-                    DeviceFW::SCOM,
-                    TARGETING::TYPE_DMI,
-                    startScomProcess);
-
-DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
-                    DeviceFW::SCOM,
-                    TARGETING::TYPE_OBUS,
-                    startScomProcess);
-
-DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
-                    DeviceFW::SCOM,
-                    TARGETING::TYPE_OBUS_BRICK,
-                    startScomProcess);
-
-DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
-                    DeviceFW::SCOM,
-                    TARGETING::TYPE_SBE,
-                    startScomProcess);
-
-DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
-                    DeviceFW::SCOM,
-                    TARGETING::TYPE_PPE,
                     startScomProcess);
 
 DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
@@ -168,13 +113,18 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                     startScomProcess);
 
 DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
-                        DeviceFW::SCOM,
-                        TARGETING::TYPE_CAPP,
-                        startScomProcess);
+                      DeviceFW::SCOM,
+                      TARGETING::TYPE_MCC,
+                      startScomProcess);
 
 DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                       DeviceFW::SCOM,
-                      TARGETING::TYPE_MCC,
+                      TARGETING::TYPE_NMMU,
+                      startScomProcess);
+
+DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
+                      DeviceFW::SCOM,
+                      TARGETING::TYPE_IOHS,
                       startScomProcess);
 
 DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
@@ -185,6 +135,16 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
 DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                       DeviceFW::SCOM,
                       TARGETING::TYPE_OMI,
+                      startScomProcess);
+
+DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
+                      DeviceFW::SCOM,
+                      TARGETING::TYPE_PAU,
+                      startScomProcess);
+
+DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
+                      DeviceFW::SCOM,
+                      TARGETING::TYPE_PAUC,
                       startScomProcess);
 
 //////////////////////////////////////////////////////////////////////////////
@@ -236,8 +196,9 @@ errlHndl_t startScomProcess(DeviceFW::OperationType i_opType,
 
                 //capture the target data in the elog
                 ERRORLOG::ErrlUserDetailsTarget(i_target,"SCOM Target")
-                                                    .addToLog(l_err);
-                l_err->collectTrace(SCOM_COMP_NAME,1024);
+                    .addToLog(l_err);
+
+                l_err->collectTrace(SCOM_COMP_NAME);
                 break;
             }
         }
@@ -296,50 +257,82 @@ errlHndl_t scomTranslate(TARGETING::Target * &i_target,
     // Get the type attribute.
     TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
 
-    l_err = p9_translation(i_target,
-                           l_type,
-                           io_addr,
-                           o_needsWakeup,
-                           i_opMode);
+    l_err = p10_translation(i_target,
+                            l_type,
+                            io_addr,
+                            o_needsWakeup,
+                            i_opMode);
 
     return l_err;
 }
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-errlHndl_t p9_translation (TARGETING::Target * &i_target,
-                           TARGETING::TYPE i_type,
-                           uint64_t &io_addr,
-                           bool & o_needsWakeup,
-                           uint64_t i_opMode)
+errlHndl_t p10_translation (TARGETING::Target * &i_target,
+                            TARGETING::TYPE i_type,
+                            uint64_t &io_addr,
+                            bool & o_needsWakeup,
+                            uint64_t i_opMode)
 {
     errlHndl_t l_err = NULL;
     do  {
         uint64_t l_original_addr = io_addr;
-        uint32_t l_chip_mode = STANDARD_MODE;
+        p10TranslationMode_t l_chip_mode = P10_DEFAULT_MODE;
         bool l_scomAddrIsRelatedToUnit = false;
         bool l_scomAddrAndTargetTypeMatch = false;
 
         uint16_t l_instance = 0;
-        p9ChipUnits_t l_chipUnit = NONE;
-        std::vector<p9_chipUnitPairing_t> l_scomPairings;
+        p10ChipUnits_t l_chipUnit = NONE;
+        std::vector<p10_chipUnitPairing_t> l_scomPairings;
 
         //Need to pass the chip/ec level into the translate function
         uint32_t l_chipLevel = getChipLevel(i_target);
-        l_chip_mode |= l_chipLevel;
 
+        if(getChipUnitP10(i_type, l_chipUnit))
+        {
+            //Send an errorlog because we are targeting an unsupported type.
+            TRACFCOMP(g_trac_scom, "p10_translation.. Invalid P10 target type=0x%X", i_type);
+
+            /*@
+            * @errortype
+            * @moduleid         SCOM::SCOM_TRANSLATE_P10
+            * @reasoncode       SCOM::SCOM_P10_TRANS_INVALID_TYPE
+            * @userdata1        Address
+            * @userdata2[0:31]  Target's Type
+            * @userdata2[32:63] Target's Huid
+            * @devdesc          Scom Translate not supported for this type
+            * @custdesc         Firmware error during system IPL
+            */
+            l_err = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                SCOM_TRANSLATE_P10,
+                SCOM_P10_TRANS_INVALID_TYPE,
+                io_addr,
+                TWO_UINT32_TO_UINT64(i_type, TARGETING::get_huid(i_target)),
+                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+            //Add this target to the FFDC
+            ERRORLOG::ErrlUserDetailsTarget(i_target,"SCOM Target")
+                .addToLog(l_err);
+
+            l_err->collectTrace(SCOM_COMP_NAME);
+            break;
+        }
 
         //Make sure that scom addr is related to a chip unit
-        uint32_t isChipUnitScomRC = p9_scominfo_isChipUnitScom(io_addr,
-                                  l_scomAddrIsRelatedToUnit,
-                                  l_scomPairings,
-                                  l_chip_mode);
+        uint32_t isChipUnitScomRC
+            = p10_scominfo_isChipUnitScom(l_chipUnit,
+                                          l_chipLevel,
+                                          io_addr,
+                                          l_scomAddrIsRelatedToUnit,
+                                          l_scomPairings,
+                                          l_chip_mode);
 
         if(isChipUnitScomRC)
         {
                 /*@
                 * @errortype
-                * @moduleid     SCOM::SCOM_TRANSLATE_P9
+                * @moduleid     SCOM::SCOM_TRANSLATE_P10
                 * @reasoncode   SCOM::SCOM_ISCHIPUNITSCOM_INVALID
                 * @userdata1    Input address
                 * @userdata2[0:31] Target huid
@@ -347,25 +340,28 @@ errlHndl_t p9_translation (TARGETING::Target * &i_target,
                 * @devdesc      EKB code has detected and error in the scom
                 * @custdesc     Firmware error during system IPL
                 */
-                l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                                SCOM_TRANSLATE_P9,
-                                                SCOM_ISCHIPUNITSCOM_INVALID,
-                                                l_original_addr,
-                                                TWO_UINT32_TO_UINT64(
-                                                i_target->getAttr<TARGETING::ATTR_HUID>(),
-                                                i_type),
-                                                true/*SW Error*/);
+                l_err = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                    SCOM_TRANSLATE_P10,
+                    SCOM_ISCHIPUNITSCOM_INVALID,
+                    l_original_addr,
+                    TWO_UINT32_TO_UINT64(
+                        i_target->getAttr<TARGETING::ATTR_HUID>(),
+                        i_type),
+                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
                 //Add this target to the FFDC
                 ERRORLOG::ErrlUserDetailsTarget(i_target,"SCOM Target")
-                  .addToLog(l_err);
-                l_err->collectTrace(SCOM_COMP_NAME,1024);
+                    .addToLog(l_err);
+
+                l_err->collectTrace(SCOM_COMP_NAME);
                 break;
         }
 
 
 #if __HOSTBOOT_RUNTIME
         if(((i_type == TARGETING::TYPE_EQ) ||
-            (i_type == TARGETING::TYPE_EX) ||
+            (i_type == TARGETING::TYPE_FC) ||
             (i_type == TARGETING::TYPE_CORE)) &&
             (!g_wakeupInProgress) &&
             !(i_opMode & fapi2::DO_NOT_DO_WAKEUP) )
@@ -399,7 +395,7 @@ errlHndl_t p9_translation (TARGETING::Target * &i_target,
                                       l_scomAddrAndTargetTypeMatch);
             uint16_t userdata16_2 = TWO_UINT8_TO_UINT16(
                                       l_chipUnit,
-                                      TARGETING::MODEL_POWER9);
+                                      TARGETING::MODEL_POWER10);
             uint32_t userdata32_2 = TWO_UINT16_TO_UINT32(
                                       userdata16_1,
                                       userdata16_2);
@@ -408,58 +404,31 @@ errlHndl_t p9_translation (TARGETING::Target * &i_target,
                                       userdata32_2);
             /*@
             * @errortype
-            * @moduleid     SCOM::SCOM_TRANSLATE_P9
-            * @reasoncode   SCOM::SCOM_INVALID_ADDR
-            * @userdata1    Address
-            * @userdata2[0:15] Target's Type
-            * @userdata2[16:31] Instance of this type
-            * @userdata2[32:39] Is this SCOM addr related to a chip unit?
-            * @userdata2[40:47] Does the target type and addr type match?
-            * @userdata2[48:55] Chip unit of the target
-            * @userdata2[56:63] Model of the target (ex: POWER9)
-            * @devdesc      The scom address provided was invalid, check
-            *               to see if the address matches a target in the
-            *               scomdef file.
-            * @custdesc     Firmware error during system IPL
+            * @moduleid          SCOM::SCOM_TRANSLATE_P10
+            * @reasoncode        SCOM::SCOM_INVALID_ADDR
+            * @userdata1         Address
+            * @userdata2[0:15]   Target's Type
+            * @userdata2[16:31]  Instance of this type
+            * @userdata2[32:39]  Is this SCOM addr related to a chip unit?
+            * @userdata2[40:47]  Does the target type and addr type match?
+            * @userdata2[48:55]  Chip unit of the target
+            * @userdata2[56:63]  Model of the target (ex: POWER10)
+            * @devdesc           The scom address provided was invalid, check
+            *                    to see if the address matches a target in the
+            *                    scomdef file.
+            * @custdesc          Firmware error during system IPL
             */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                            SCOM_TRANSLATE_P9,
+                                            SCOM_TRANSLATE_P10,
                                             SCOM_INVALID_ADDR,
                                             io_addr,
                                             userdata64_1,
-                                            true/*SW Error*/);
+                                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             //Add this target to the FFDC
             ERRORLOG::ErrlUserDetailsTarget(i_target,"SCOM Target")
-              .addToLog(l_err);
-            l_err->collectTrace(SCOM_COMP_NAME,1024);
-            break;
-        }
+                .addToLog(l_err);
 
-        if(getChipUnitP9 (i_type, l_chipUnit))
-        {
-            //Send an errorlog because we are targeting an unsupported type.
-            TRACFCOMP(g_trac_scom, "SCOM_TRANSLATE.. Invalid P9 target type=0x%X", i_type);
-
-            /*@
-            * @errortype
-            * @moduleid     SCOM::SCOM_TRANSLATE_P9
-            * @reasoncode   SCOM::SCOM_P9_TRANS_INVALID_TYPE
-            * @userdata1    Address
-            * @userdata2[0:31] Target's Type
-            * @userdata2[32:63] Target's Huid
-            * @devdesc      Scom Translate not supported for this type
-            */
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                              SCOM_TRANSLATE_P9,
-                                              SCOM_P9_TRANS_INVALID_TYPE,
-                                              io_addr,
-                                              TWO_UINT32_TO_UINT64(i_type,
-                                              TARGETING::get_huid(i_target)),
-                                              true/*SW Error*/);
-            //Add this target to the FFDC
-            ERRORLOG::ErrlUserDetailsTarget(i_target,"SCOM Target")
-            .addToLog(l_err);
-            l_err->collectTrace(SCOM_COMP_NAME,1024);
+            l_err->collectTrace(SCOM_COMP_NAME);
             break;
         }
 
@@ -497,7 +466,7 @@ errlHndl_t p9_translation (TARGETING::Target * &i_target,
                                       l_scomAddrAndTargetTypeMatch);
             uint16_t userdata16_2 = TWO_UINT8_TO_UINT16(
                                       l_chipUnit,
-                                      TARGETING::MODEL_POWER9);
+                                      TARGETING::MODEL_POWER10);
             uint32_t userdata32_2 = TWO_UINT16_TO_UINT32(
                                       userdata16_1,
                                       userdata16_2);
@@ -506,37 +475,41 @@ errlHndl_t p9_translation (TARGETING::Target * &i_target,
                                       userdata32_2);
             /*@
             * @errortype
-            * @moduleid     SCOM::SCOM_TRANSLATE_P9
-            * @reasoncode   SCOM::SCOM_TARGET_ADDR_MISMATCH
-            * @userdata1    Address
-            * @userdata2[0:15]  Target's Type
-            * @userdata2[16:31] Instance of this type
-            * @userdata2[32:39] Is this SCOM addr related to a chip unit?
-            * @userdata2[40:47] Does the target type and addr type match?
-            * @userdata2[48:55] Chip unit of the target
-            * @userdata2[56:63] Model of the target (ex: POWER9)
-            * @devdesc      The scom target did not match the provided
-            *               address
-            * @custdesc     Firmware error during system IPL
+            * @moduleid          SCOM::SCOM_TRANSLATE_P10
+            * @reasoncode        SCOM::SCOM_TARGET_ADDR_MISMATCH
+            * @userdata1         Address
+            * @userdata2[0:15]   Target's Type
+            * @userdata2[16:31]  Instance of this type
+            * @userdata2[32:39]  Is this SCOM addr related to a chip unit?
+            * @userdata2[40:47]  Does the target type and addr type match?
+            * @userdata2[48:55]  Chip unit of the target
+            * @userdata2[56:63]  Model of the target (ex: POWER10)
+            * @devdesc           The scom target did not match the provided
+            *                    address
+            * @custdesc          Firmware error during system IPL
             */
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                            SCOM_TRANSLATE_P9,
-                                            SCOM_TARGET_ADDR_MISMATCH,
-                                            io_addr,
-                                            userdata64_1,
-                                            true/*SW Error*/);
+            l_err = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                SCOM_TRANSLATE_P10,
+                SCOM_TARGET_ADDR_MISMATCH,
+                io_addr,
+                userdata64_1,
+                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
             //Add this target to the FFDC
             ERRORLOG::ErrlUserDetailsTarget(i_target,"SCOM Target")
-              .addToLog(l_err);
-            l_err->collectTrace(SCOM_COMP_NAME,1024);
+                .addToLog(l_err);
+
+            l_err->collectTrace(SCOM_COMP_NAME);
             break;
         }
 
         l_instance = i_target->getAttr<TARGETING::ATTR_CHIP_UNIT>();
-        io_addr = p9_scominfo_createChipUnitScomAddr(l_chipUnit,
-                                                  l_instance,
-                                                  io_addr,
-                                                  l_chip_mode);
+        io_addr = p10_scominfo_createChipUnitScomAddr(l_chipUnit,
+                                                      l_chipLevel,
+                                                      l_instance,
+                                                      io_addr,
+                                                      l_chip_mode);
 
         if(io_addr == FAILED_TRANSLATION)
         {
@@ -557,7 +530,7 @@ errlHndl_t p9_translation (TARGETING::Target * &i_target,
                                     TARGETING::get_huid(i_target));
             /*@
             * @errortype
-            * @moduleid     SCOM::SCOM_TRANSLATE_P9
+            * @moduleid     SCOM::SCOM_TRANSLATE_P10
             * @reasoncode   SCOM::SCOM_INVALID_TRANSLATION
             * @userdata1    Original Address
             * @userdata2[0:15]  l_chipUnit
@@ -566,16 +539,18 @@ errlHndl_t p9_translation (TARGETING::Target * &i_target,
             * @devdesc      Scom Translation did not modify the address
             */
             l_err = new ERRORLOG::ErrlEntry(
-                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                    SCOM_TRANSLATE_P9,
-                                    SCOM_INVALID_TRANSLATION,
-                                    l_original_addr,
-                                    userdata64,
-                                    true/*SW Error*/);
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                SCOM_TRANSLATE_P10,
+                SCOM_INVALID_TRANSLATION,
+                l_original_addr,
+                userdata64,
+                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
             //Add this target to the FFDC
             ERRORLOG::ErrlUserDetailsTarget(i_target,"SCOM Target")
-            .addToLog(l_err);
-            l_err->collectTrace(SCOM_COMP_NAME,1024);
+                .addToLog(l_err);
+
+            l_err->collectTrace(SCOM_COMP_NAME);
             break;
         }
 
@@ -586,29 +561,14 @@ errlHndl_t p9_translation (TARGETING::Target * &i_target,
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @brief Gets p9 chip unit for this target type
+ * @brief Gets p10 chip unit for this target type
  */
-bool getChipUnitP9 (TARGETING::TYPE i_type,
-                    p9ChipUnits_t &o_chipUnit)
+bool getChipUnitP10 (TARGETING::TYPE i_type,
+                     p10ChipUnits_t &o_chipUnit)
 {
     bool l_isError = false;
     switch(i_type)
     {
-        case(TARGETING::TYPE_EX):
-        {
-            o_chipUnit = PU_EX_CHIPUNIT;
-            break;
-        }
-        case(TARGETING::TYPE_MCS):
-        {
-            o_chipUnit = PU_MCS_CHIPUNIT;
-            break;
-        }
-        case(TARGETING::TYPE_XBUS):
-        {
-            o_chipUnit = PU_XBUS_CHIPUNIT;
-            break;
-        }
         case(TARGETING::TYPE_CORE) :
         {
             o_chipUnit = PU_C_CHIPUNIT;
@@ -624,44 +584,9 @@ bool getChipUnitP9 (TARGETING::TYPE i_type,
             o_chipUnit = PU_EQ_CHIPUNIT;
             break;
         }
-        case(TARGETING::TYPE_MCBIST) :
-        {
-            o_chipUnit = PU_MCBIST_CHIPUNIT;
-            break;
-        }
-        case(TARGETING::TYPE_MCA) :
-        {
-            o_chipUnit = PU_MCA_CHIPUNIT;
-            break;
-        }
         case(TARGETING::TYPE_MI) :
         {
             o_chipUnit = PU_MI_CHIPUNIT;
-            break;
-        }
-        case(TARGETING::TYPE_DMI) :
-        {
-            o_chipUnit = PU_DMI_CHIPUNIT;
-            break;
-        }
-        case(TARGETING::TYPE_OBUS) :
-        {
-            o_chipUnit = PU_OBUS_CHIPUNIT;
-            break;
-        }
-        case(TARGETING::TYPE_OBUS_BRICK) :
-        {
-            o_chipUnit = PU_NV_CHIPUNIT;
-            break;
-        }
-        case(TARGETING::TYPE_SBE) :
-        {
-            o_chipUnit = PU_SBE_CHIPUNIT;
-            break;
-        }
-        case(TARGETING::TYPE_PPE) :
-        {
-            o_chipUnit = PU_PPE_CHIPUNIT;
             break;
         }
         case(TARGETING::TYPE_PEC) :
@@ -672,11 +597,6 @@ bool getChipUnitP9 (TARGETING::TYPE i_type,
         case(TARGETING::TYPE_PHB) :
         {
             o_chipUnit = PU_PHB_CHIPUNIT;
-            break;
-        }
-        case(TARGETING::TYPE_CAPP) :
-        {
-            o_chipUnit = PU_CAPP_CHIPUNIT;
             break;
         }
         case(TARGETING::TYPE_MC) :
@@ -694,9 +614,29 @@ bool getChipUnitP9 (TARGETING::TYPE i_type,
             o_chipUnit = PU_OMI_CHIPUNIT;
             break;
         }
+        case(TARGETING::TYPE_NMMU) :
+        {
+            o_chipUnit = PU_NMMU_CHIPUNIT;
+            break;
+        }
+        case(TARGETING::TYPE_IOHS) :
+        {
+            o_chipUnit = PU_IOHS_CHIPUNIT;
+            break;
+        }
         case(TARGETING::TYPE_OMIC) :
         {
             o_chipUnit = PU_OMIC_CHIPUNIT;
+            break;
+        }
+        case(TARGETING::TYPE_PAU) :
+        {
+            o_chipUnit = PU_PAU_CHIPUNIT;
+            break;
+        }
+        case(TARGETING::TYPE_PAUC) :
+        {
+            o_chipUnit = PU_PAUC_CHIPUNIT;
             break;
         }
         default:

@@ -189,7 +189,6 @@ public:
    * @brief SCOM test Indirect SCOM
    *
    */
-// @TODO RTC 142928 Enable Indirect Scoms in Simics
   void test_IndirectScom(void)
   {
       TRACFCOMP( g_trac_scom, "ScomTest::test_IndirectScom> Start" );
@@ -258,13 +257,9 @@ public:
           bool     isFail;
           TARGETING::ATTR_MODEL_type model;
       } test_data[] = {
-          { scom_targets[myPROC0], 0x80000C010D010C3F ,0x1234432112344321, false, TARGETING::MODEL_POWER9 },
-          { scom_targets[myPROC0], 0x80000C0107011C3F, 0x123443211234ABAB, false, TARGETING::MODEL_NIMBUS },
-          { scom_targets[myPROC0], 0x80000C0107011C3F, 0x123443211234ABAB, false, TARGETING::MODEL_CUMULUS },
-#ifndef CONFIG_AXONE_BRING_UP
-          { scom_targets[myPROC0], 0x800040000701103F, 0x123443211234ABAB, false, TARGETING::MODEL_AXONE },
-#endif
-          { scom_targets[myPROC0], 0x8FFFFFFFFFFFFFFF, 0x123443211234ABAB, true,  TARGETING::MODEL_POWER9 },
+          // @TODO RTC 214308: Update this testcase
+          //{ scom_targets[myPROC0], 0x800C940010012C3F, 0x1234432112344321, false, TARGETING::MODEL_POWER10 },
+          { scom_targets[myPROC0], 0x8FFFFFFFFFFFFFFF, 0x123443211234ABAB, true,  TARGETING::MODEL_POWER10 },
       };
       const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
 
@@ -281,7 +276,7 @@ public:
 
           // only run if this is the right kind of target
           auto l_model = test_data[x].target->getAttr<TARGETING::ATTR_MODEL>();
-          if( (TARGETING::MODEL_POWER9 != test_data[x].model)
+          if( (TARGETING::MODEL_POWER10 != test_data[x].model)
               && (l_model != test_data[x].model) )
           {
               continue;
@@ -331,7 +326,7 @@ public:
 
           // only run if this is the right kind of target
           auto l_model = test_data[x].target->getAttr<TARGETING::ATTR_MODEL>();
-          if( (TARGETING::MODEL_POWER9 != test_data[x].model)
+          if( (TARGETING::MODEL_POWER10 != test_data[x].model)
               && (l_model != test_data[x].model) )
           {
               continue;
@@ -586,449 +581,203 @@ public:
   }
 
 
-  void test_P9_ScomTranslations(void)
+  void test_P10_ScomTranslations(void)
   {
-    TRACFCOMP( g_trac_scom, "ScomTest::test_P9_ScomTranslations> Start" );
+    TRACFCOMP( g_trac_scom, "ScomTest::test_P10_ScomTranslations> Start" );
 
     uint64_t fails = 0;
     uint64_t total = 0;
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
 
     // Setup some targets to use
-    enum {
-        myEX0,
-        myEX1,
+    enum myTarget_t {
         myCORE0,
         myCORE1,
         myEQ0,
         myEQ5,
-        myMCS0,
-        myMCS3,
-        myXBUS1,
-        myMCBIST0,
-        myMCBIST1,
-        myMCA0,
-        myMCA1,
-        myPERV1,
+        myPERV2,
         myPERV32,
         myPEC0,
         myPEC1,
         myPHB0,
-        myPHB5,
-        myOBUS0,
-        myOBUS3,
-        myNV0,
-        myNV1,
-        myPPE0,
-        myPPE1,
-        myOCC0,
-        myOCC1,
-        mySBE0,
-        mySBE1,
-        myCAPP0,
+        myPHB2,
         myMC0,
         myMC1,
         myMI0,
-        myMI3,
+        myMI1,
         myMCC0,
-        myMCC7,
+        myMCC1,
         myOMI0,
-        myOMI15,
+        myOMI1,
         myOMIC0,
-        myOMIC5,
+        myOMIC1,
+        myNMMU0,
+        myNMMU1,
+        myIOHS0,
+        myIOHS2,
         NUM_TARGETS
     };
-
-
-    TARGETING::Target* scom_targets[NUM_TARGETS];
-    for( uint64_t x = 0; x < NUM_TARGETS; x++ )
-    {
-        scom_targets[x] = NULL;
-    }
-
 
     /////////////////////////////////////////////////////////////////
     // Set up targets
     /////////////////////////////////////////////////////////////////
 
-    // Target Proc 0
-    TARGETING::EntityPath epath(TARGETING::EntityPath::PATH_PHYSICAL);
-    epath.addLast(TARGETING::TYPE_SYS,0);
-    epath.addLast(TARGETING::TYPE_NODE,0);
-    epath.addLast(TARGETING::TYPE_PROC,0);
-
-    auto l_systemModel = TARGETING::targetService().toTarget(epath)->getAttr<TARGETING::ATTR_MODEL>();
+    using namespace TARGETING;
+
+    Target* scom_targets[NUM_TARGETS] = { };
+
+    EntityPath sys0node0proc0(EntityPath::PATH_PHYSICAL);
+
+    // Start at /sys0/node0/proc0/
+    sys0node0proc0.addLast(TYPE_SYS, 0);
+    sys0node0proc0.addLast(TYPE_NODE, 0);
+    sys0node0proc0.addLast(TYPE_PROC, 0);
+
+    { // Begin locating targets for SCOM access tests
+
+    // This struct holds a path from a PROC to the target corresponding to one
+    // of the myTarget_t enumeration values
+    struct TestTargetPath
+    {
+        myTarget_t my_type;
+
+        struct TargetInfo
+        {
+            TYPE target_type;
+            int instance;
+        };
+
+        const std::vector<TargetInfo> path;
+    };
+
+    // This array holds the paths to all the targets we want to test SCOM ops on
+    const TestTargetPath target_paths[] =
+    {
+        { myCORE0,  {{ TYPE_EQ, 0    }, { TYPE_FC, 0   }, { TYPE_CORE, 0 }} },
+        { myCORE1,  {{ TYPE_EQ, 0    }, { TYPE_FC, 0   }, { TYPE_CORE, 1 }} },
+        { myEQ0,    {{ TYPE_EQ, 0    }} },
+        { myEQ5,    {{ TYPE_EQ, 5    }} },
+        { myPERV2,  {{ TYPE_PERV, 2  }} },
+        { myPERV32, {{ TYPE_PERV, 32 }} },
+        { myPEC0,   {{ TYPE_PEC, 0   }} },
+        { myPEC1,   {{ TYPE_PEC, 1   }} },
+        { myPHB0,   {{ TYPE_PEC, 0   }, { TYPE_PHB, 0  }} },
+        { myPHB2,   {{ TYPE_PEC, 1   }, { TYPE_PHB, 2  }} },
+        { myMC0,    {{ TYPE_MC, 0    }} },
+        { myMC1,    {{ TYPE_MC, 1    }} },
+        { myMI0,    {{ TYPE_MC, 0    }, { TYPE_MI, 0   }} },
+        { myMI1,    {{ TYPE_MC, 1    }, { TYPE_MI, 0   }} },
+        { myMCC0,   {{ TYPE_MC, 0    }, { TYPE_MI, 0   }, { TYPE_MCC, 0  }} },
+        { myMCC1,   {{ TYPE_MC, 1    }, { TYPE_MI, 0   }, { TYPE_MCC, 1  }} },
+        { myOMI0,   {{ TYPE_MC, 0    }, { TYPE_MI, 0   }, { TYPE_MCC, 0  }, { TYPE_OMI, 0 }} },
+        { myOMI1,   {{ TYPE_MC, 1    }, { TYPE_MI, 0   }, { TYPE_MCC, 1  }, { TYPE_OMI, 1 }} },
+        { myOMIC0,  {{ TYPE_MC, 0    }, { TYPE_OMIC, 0 }} },
+        { myOMIC1,  {{ TYPE_MC, 1    }, { TYPE_OMIC, 1 }} },
+        { myNMMU0,  {{ TYPE_NMMU, 0  }} },
+        { myNMMU1,  {{ TYPE_NMMU, 1  }} },
+        { myIOHS0,  {{ TYPE_PAUC, 0  }, { TYPE_IOHS, 0 }} },
+        { myIOHS2,  {{ TYPE_PAUC, 2  }, { TYPE_IOHS, 1 }} },
+    };
+
+    static_assert(sizeof(target_paths) / sizeof(*target_paths) == NUM_TARGETS,
+                  "Missing test case in SCOM TRANSLATE test");
+
+    for (int i = 0; i < NUM_TARGETS; ++i)
+    {
+        EntityPath epath = sys0node0proc0;
+
+        // Descend the target hierarchy to find the target we want
+        for (const auto path_component : target_paths[i].path)
+        {
+            epath.addLast(path_component.target_type, path_component.instance);
+        }
+
+        // Make sure we don't overwrite something we've already found
+        assert(scom_targets[i] == nullptr);
+
+        // Save the target at this path into scom_targets
+        scom_targets[i] = targetService().toTarget(epath);
+
+        // Make sure we found our target
+        assert(scom_targets[i]);
+    }
+
+    } // End locating targets for SCOM access tests
+
+    const auto l_systemModel = targetService().toTarget(sys0node0proc0)->getAttr<ATTR_MODEL>();
 
-    epath.addLast(TARGETING::TYPE_EQ,0);
-    scom_targets[myEQ0] = TARGETING::targetService().toTarget(epath);
-
-    //add EX0 target
-    epath.addLast(TARGETING::TYPE_EX,0);
-    scom_targets[myEX0] = TARGETING::targetService().toTarget(epath);
-
-    //add CORE0 target
-    epath.addLast(TARGETING::TYPE_CORE,0);
-    scom_targets[myCORE0] = TARGETING::targetService().toTarget(epath);
-
-    // remove CORE0 target
-    epath.removeLast();
-
-    // add CORE1 target.
-    epath.addLast(TARGETING::TYPE_CORE,1);
-    scom_targets[myCORE1] = TARGETING::targetService().toTarget(epath);
-
-    // remove CORE1 target
-    epath.removeLast();
-    // remove EX0 target
-    epath.removeLast();
-
-    // add EX1 target.
-    epath.addLast(TARGETING::TYPE_EX,1);
-    scom_targets[myEX1] = TARGETING::targetService().toTarget(epath);
-
-    // remove EX1 target
-    epath.removeLast();
-    // remove EQ0 target
-    epath.removeLast();
-
-    // add EQ5 target.
-    epath.addLast(TARGETING::TYPE_EQ,5);
-    scom_targets[myEQ5] = TARGETING::targetService().toTarget(epath);
-
-    // remove EQ5 target
-    epath.removeLast();
-
-    //add MCS0 target
-    epath.addLast(TARGETING::TYPE_MCS,0);
-    scom_targets[myMCS0] = TARGETING::targetService().toTarget(epath);
-
-    //add MCA0 target
-    epath.addLast(TARGETING::TYPE_MCA,0);
-    scom_targets[myMCA0] = TARGETING::targetService().toTarget(epath);
-
-    // remove MCA0 target
-    epath.removeLast();
-
-    // add MCA1 target.
-    epath.addLast(TARGETING::TYPE_MCA,1);
-    scom_targets[myMCA1] = TARGETING::targetService().toTarget(epath);
-
-    // remove MCA1 target
-    epath.removeLast();
-    // remove MCS0 target
-    epath.removeLast();
-
-    // add MCS3 target.
-    epath.addLast(TARGETING::TYPE_MCS,3);
-    scom_targets[myMCS3] = TARGETING::targetService().toTarget(epath);
-
-    // remove MCS3 target
-    epath.removeLast();
-
-    // add MC0 target
-    epath.addLast(TARGETING::TYPE_MC,0);
-    scom_targets[myMC0] = TARGETING::targetService().toTarget(epath);
-
-    // add MI0 target
-    epath.addLast(TARGETING::TYPE_MI,0);
-    scom_targets[myMI0] = TARGETING::targetService().toTarget(epath);
-
-    // add MCC0 target
-    epath.addLast(TARGETING::TYPE_MCC,0);
-    scom_targets[myMCC0] = TARGETING::targetService().toTarget(epath);
-
-    // add OMI0 target
-    epath.addLast(TARGETING::TYPE_OMI,0);
-    scom_targets[myOMI0] = TARGETING::targetService().toTarget(epath);
-
-    // remove OMI0 target
-    epath.removeLast();
-    // remove MCC0 target
-    epath.removeLast();
-    // remove MI0 target
-    epath.removeLast();
-
-    // add OMIC0 target
-    epath.addLast(TARGETING::TYPE_OMIC,0);
-    scom_targets[myOMIC0] = TARGETING::targetService().toTarget(epath);
-
-    // remove OMIC0 target
-    epath.removeLast();
-
-    // remove MC0 target
-    epath.removeLast();
-
-    // add MC1 target
-    epath.addLast(TARGETING::TYPE_MC,1);
-    scom_targets[myMC1] = TARGETING::targetService().toTarget(epath);
-
-    // add MI3 target
-    epath.addLast(TARGETING::TYPE_MI,3);
-    scom_targets[myMI3] = TARGETING::targetService().toTarget(epath);
-
-    // add MCC7 target
-    epath.addLast(TARGETING::TYPE_MCC,7);
-    scom_targets[myMCC7] = TARGETING::targetService().toTarget(epath);
-
-    // add OMI15 target
-    epath.addLast(TARGETING::TYPE_OMI,15);
-    scom_targets[myOMI15] = TARGETING::targetService().toTarget(epath);
-
-    // remove OMI15 target
-    epath.removeLast();
-    // remove MCC7 target
-    epath.removeLast();
-    // remove MI3 target
-    epath.removeLast();
-
-    // add OMIC5 target
-    epath.addLast(TARGETING::TYPE_OMIC,5);
-    scom_targets[myOMIC5] = TARGETING::targetService().toTarget(epath);
-
-    // remove MI3 target
-    epath.removeLast();
-
-    //add XBUS1 target
-    epath.addLast(TARGETING::TYPE_XBUS,0);
-    scom_targets[myXBUS1] = TARGETING::targetService().toTarget(epath);
-
-    // remove XBUS1 target
-    epath.removeLast();
-
-    //add MCBIST0 target
-    epath.addLast(TARGETING::TYPE_MCBIST,0);
-    scom_targets[myMCBIST0] = TARGETING::targetService().toTarget(epath);
-
-    // remove MCBIST0 target
-    epath.removeLast();
-
-    // add MCBIST1 target.
-    epath.addLast(TARGETING::TYPE_MCBIST,1);
-    scom_targets[myMCBIST1] = TARGETING::targetService().toTarget(epath);
-
-    // remove MCBIST1 target
-    epath.removeLast();
-
-    //add PERV1 target
-    epath.addLast(TARGETING::TYPE_PERV,1);
-    scom_targets[myPERV1] = TARGETING::targetService().toTarget(epath);
-
-    // remove PERV1 target
-    epath.removeLast();
-
-    // add PERV32 target.
-    epath.addLast(TARGETING::TYPE_PERV,32);
-    scom_targets[myPERV32] = TARGETING::targetService().toTarget(epath);
-
-    // remove PERV32 target
-    epath.removeLast();
-
-    //add PEC0 target
-    epath.addLast(TARGETING::TYPE_PEC,0);
-    scom_targets[myPEC0] = TARGETING::targetService().toTarget(epath);
-
-    //add PHB0 target
-    epath.addLast(TARGETING::TYPE_PHB,0);
-    scom_targets[myPHB0] = TARGETING::targetService().toTarget(epath);
-
-    // remove PHB0 target
-    epath.removeLast();
-
-    // add PHB5 target.
-    epath.addLast(TARGETING::TYPE_PHB,5);
-    scom_targets[myPHB5] = TARGETING::targetService().toTarget(epath);
-
-    // remove PHB5 target
-    epath.removeLast();
-
-    // remove PEC0 target
-    epath.removeLast();
-
-    // add PEC1 target.
-    epath.addLast(TARGETING::TYPE_PEC,1);
-    scom_targets[myPEC1] = TARGETING::targetService().toTarget(epath);
-
-    // remove PEC1 target
-    epath.removeLast();
-
-    //add OBUS0 target
-    epath.addLast(TARGETING::TYPE_OBUS,0);
-    scom_targets[myOBUS0] = TARGETING::targetService().toTarget(epath);
-
-    // remove OBUS0 target
-    epath.removeLast();
-
-    // add OBUS3 target.
-    epath.addLast(TARGETING::TYPE_OBUS,3);
-    scom_targets[myOBUS3] = TARGETING::targetService().toTarget(epath);
-
-    // remove OBUS3 target
-    epath.removeLast();
-
-    //add OBUS_BRICK0 target
-    epath.addLast(TARGETING::TYPE_OBUS_BRICK,0);
-    scom_targets[myNV0] = TARGETING::targetService().toTarget(epath);
-
-    // remove OBUS_BRICK0 target
-    epath.removeLast();
-
-    // add OBUS_BRICK1 target.
-    epath.addLast(TARGETING::TYPE_OBUS_BRICK,1);
-    scom_targets[myNV1] = TARGETING::targetService().toTarget(epath);
-
-    // remove OBUS_BRICK1 target
-    epath.removeLast();
-
-    //add PPE0 target
-    epath.addLast(TARGETING::TYPE_PPE,0);
-    scom_targets[myPPE0] = TARGETING::targetService().toTarget(epath);
-
-    // remove PPE0 target
-    epath.removeLast();
-
-    // add PPE1 target.
-    epath.addLast(TARGETING::TYPE_PPE,1);
-    scom_targets[myPPE1] = TARGETING::targetService().toTarget(epath);
-
-    // remove PPE1 target
-    epath.removeLast();
-
-    //add OCC0 target
-    epath.addLast(TARGETING::TYPE_OCC,0);
-    scom_targets[myOCC0] = TARGETING::targetService().toTarget(epath);
-
-    // remove OCC0 target
-    epath.removeLast();
-
-    // add OCC1 target.
-    epath.addLast(TARGETING::TYPE_OCC,1);
-    scom_targets[myOCC1] = TARGETING::targetService().toTarget(epath);
-
-    // remove OCC1 target
-    epath.removeLast();
-
-    //add SBE0 target
-    epath.addLast(TARGETING::TYPE_SBE,0);
-    scom_targets[mySBE0] = TARGETING::targetService().toTarget(epath);
-
-    // remove SBE0 target
-    epath.removeLast();
-
-    // add SBE1 target.
-    epath.addLast(TARGETING::TYPE_SBE,1);
-    scom_targets[mySBE1] = TARGETING::targetService().toTarget(epath);
-
-    // remove SBE1 target
-    epath.removeLast();
-
-    epath.addLast(TARGETING::TYPE_CAPP,0);
-    scom_targets[myCAPP0] = TARGETING::targetService().toTarget(epath);
     struct {
-    TARGETING::Target* target;
-    uint64_t initAddr;
-    uint64_t expectedAddr;
-    bool     expectError;
-    TARGETING::ATTR_MODEL_type model;
+        Target* target;
+        uint64_t initAddr;
+        uint64_t expectedAddr;
+        bool     expectError;
+        ATTR_MODEL_type model;
     } test_data[] = {
-      //Target            Address       Expected    error
-    { scom_targets[myEX0], 0x21000000 , 0x21000000, false, TARGETING::MODEL_POWER9},
-    { scom_targets[myEX0], 0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_POWER9},
-    { scom_targets[myEX1], 0x21000000, 0x23000000, false, TARGETING::MODEL_POWER9},
-    { scom_targets[myEX1], 0x0FFFFFFF, 0x0FFFFFFF ,true, TARGETING::MODEL_POWER9},
-    //This address is tricky, it is within EQ0 chip unit but
-    //the ring value puts it in the EX1 chip unit space,
-    // so you cannot use this address with EX targets
-    { scom_targets[myEX1], 0x10012400, 0x10012400, true, TARGETING::MODEL_POWER9},
-    { scom_targets[myCORE0], 0x20010A46, 0x20010A46, false, TARGETING::MODEL_POWER9},
-    { scom_targets[myCORE0], 0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_POWER9},
-    { scom_targets[myCORE1], 0x20010A46, 0x21010A46, false, TARGETING::MODEL_POWER9},
-    { scom_targets[myCORE1], 0x0FFFFFFF, 0x0FFFFFFF ,true, TARGETING::MODEL_POWER9},
-    { scom_targets[myCORE0], 0x12012826, 0x12012826, true, TARGETING::MODEL_POWER9},
-    { scom_targets[myEQ0], 0x10000008 , 0x10000008, false, TARGETING::MODEL_POWER9},
-    { scom_targets[myEQ0], 0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_POWER9},
-    { scom_targets[myEQ5], 0x10000008, 0x15000008, false, TARGETING::MODEL_POWER9},
-    { scom_targets[myEQ5], 0x0FFFFFFF, 0x0FFFFFFF ,true, TARGETING::MODEL_POWER9},
-    { scom_targets[myEQ5], 0x24030008, 0x24030008, true, TARGETING::MODEL_POWER9},
-    { scom_targets[myMCS0], 0x05010800 , 0x05010800, false, TARGETING::MODEL_NIMBUS},
-    { scom_targets[myMCS0], 0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_NIMBUS},
-    { scom_targets[myMCS3], 0x05010800, 0x03010880, false, TARGETING::MODEL_NIMBUS},
-    { scom_targets[myMCS3], 0x0FFFFFFF, 0x0FFFFFFF ,true, TARGETING::MODEL_NIMBUS},
-    { scom_targets[myMCS0], 0x12012826, 0x12012826, true, TARGETING::MODEL_NIMBUS},
-    { scom_targets[myMCS3], 0x24030008, 0x24030008, true, TARGETING::MODEL_NIMBUS},
-    { scom_targets[myXBUS1], 0x0FFFFFFFFFFFFFFF , 0x0FFFFFFFFFFFFFFF, true , TARGETING::MODEL_POWER9},
-    { scom_targets[myXBUS1], 0x12012826, 0x12012826, true, TARGETING::MODEL_POWER9},
-    { scom_targets[myXBUS1], 0x24030008, 0x24030008, true, TARGETING::MODEL_POWER9},
-//TODO: RTC 143005 Add MCBIST Targets to scomtest.H
-//     { scom_targets[myMCBIST0], 0x07010F15 ,0x07010F15 , false},
-//     { scom_targets[myMCBIST0], 0x0FFFFFFF, 0x0FFFFFFF, true},
-//     { scom_targets[myMCBIST1], 0x07010F15,0x08010F15 , false},
-//     { scom_targets[myMCBIST1], 0x0FFFFFFF, 0x0FFFFFFF ,true},
-//     { scom_targets[myMCBIST0], 0x12012826, 0x12012826, true},
-//     { scom_targets[myMCBIST1], 0x24030008, 0x24030008, true},
-     { scom_targets[myMCA0], 0x07010915, 0x07010915, false, TARGETING::MODEL_NIMBUS},
-     { scom_targets[myMCA0], 0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_NIMBUS},
-     { scom_targets[myMCA1], 0x07010915, 0x07010955, false, TARGETING::MODEL_NIMBUS},
-     { scom_targets[myMCA1], 0x0FFFFFFF, 0x0FFFFFFF ,true, TARGETING::MODEL_NIMBUS},
-     { scom_targets[myMCA0], 0x12012826, 0x12012826, true, TARGETING::MODEL_NIMBUS},
-     { scom_targets[myMCA1], 0x24030008, 0x24030008, true, TARGETING::MODEL_NIMBUS},
-     { scom_targets[myPERV1], 0x00030009, 0x01030009, false, TARGETING::MODEL_POWER9},
-     { scom_targets[myPERV1], 0x0FF6FFFF, 0x0FF6FFFF, true, TARGETING::MODEL_POWER9},
-     { scom_targets[myPERV32], 0x00030009, 0x20030009, false, TARGETING::MODEL_POWER9},
-     { scom_targets[myPERV32], 0x0FF6FFFF, 0x0FF6FFFF ,true, TARGETING::MODEL_POWER9},
-     { scom_targets[myPERV1], 0x07010A0A, 0x32010A0A, true, TARGETING::MODEL_POWER9},
-     { scom_targets[myPERV32], 0x0D010400, 0x0D010400, true, TARGETING::MODEL_POWER9},
-     { scom_targets[myPEC0], 0x04010C03, 0x04010C03, false, TARGETING::MODEL_POWER9},
-     { scom_targets[myPEC1], 0x04010C03, 0x04011003 ,false, TARGETING::MODEL_POWER9},
-     { scom_targets[myPEC0], 0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_POWER9},
-     { scom_targets[myPEC1], 0x0FFFFFFF, 0x0FFFFFFF ,true, TARGETING::MODEL_POWER9},
-     { scom_targets[myPEC0], 0x12012826, 0x12012826, true, TARGETING::MODEL_POWER9},
-     { scom_targets[myPEC1], 0x24030008, 0x24030008, true, TARGETING::MODEL_POWER9},
-     { scom_targets[myPHB0], 0x04010C4E, 0x04010C4E, false, TARGETING::MODEL_POWER9},
-     { scom_targets[myPHB5], 0x04010C4E, 0x04010C4E ,false, TARGETING::MODEL_POWER9},
-     { scom_targets[myPHB0], 0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_POWER9},
-     { scom_targets[myPHB5], 0x0FFFFFFF, 0x0FFFFFFF ,true, TARGETING::MODEL_POWER9},
-     { scom_targets[myPHB0], 0x12012826, 0x12012826, true, TARGETING::MODEL_POWER9},
-     { scom_targets[myPHB5], 0x24030008, 0x24030008, true, TARGETING::MODEL_POWER9},
-     { scom_targets[myOBUS0], 0x09010C55, 0x09010C55, false, TARGETING::MODEL_POWER9},
-     { scom_targets[myOBUS3], 0x09010C55, 0x0C010C55 ,false, TARGETING::MODEL_POWER9},
-     { scom_targets[myOBUS0], 0x12012826, 0x12012826, true, TARGETING::MODEL_POWER9},
-     { scom_targets[myOBUS3], 0x24030008, 0x24030008, true, TARGETING::MODEL_POWER9},
-     { scom_targets[myNV0], 0x050110D4, 0x050110D4, false, TARGETING::MODEL_POWER9},
-     { scom_targets[myNV1], 0x050110D4, 0x050110F4,false, TARGETING::MODEL_POWER9},
-     { scom_targets[myNV0], 0x12012826, 0x12012826, true, TARGETING::MODEL_POWER9},
-     { scom_targets[myNV1], 0x24030008, 0x24030008, true, TARGETING::MODEL_POWER9},
-     { scom_targets[myCAPP0],0x2010803, 0x2010803, false, TARGETING::MODEL_POWER9},
-     { scom_targets[myMC0],0x07010008, 0x07010008, false, TARGETING::MODEL_AXONE},
-     { scom_targets[myMC1],0x07010008, 0x08010008, false, TARGETING::MODEL_AXONE},
-     { scom_targets[myMC0],0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_AXONE},
-     { scom_targets[myMC1],0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_AXONE},
-#ifndef CONFIG_AXONE_BRING_UP
-     { scom_targets[myMI0],0x02010803, 0x02010803, false, TARGETING::MODEL_AXONE},
-     { scom_targets[myMI3],0x02010803, 0x03010803, false, TARGETING::MODEL_AXONE},
-#endif
-     { scom_targets[myMI0],0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_AXONE},
-     { scom_targets[myMI3],0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_AXONE},
-     { scom_targets[myMCC0],0x07010900, 0x07010900, false, TARGETING::MODEL_AXONE},
-     { scom_targets[myMCC7],0x07010900, 0x080109c0, false, TARGETING::MODEL_AXONE},
-     { scom_targets[myMCC0],0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_AXONE},
-     { scom_targets[myMCC7],0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_AXONE},
-     { scom_targets[myOMI0],0x0701183f, 0x0701183f, false, TARGETING::MODEL_AXONE},
-     { scom_targets[myOMI15],0x0701183f, 0x0801143f, false, TARGETING::MODEL_AXONE},
-     { scom_targets[myOMI0],0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_AXONE},
-     { scom_targets[myOMI15],0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_AXONE},
-     { scom_targets[myOMIC0],0x07011000, 0x07011000, false, TARGETING::MODEL_AXONE},
-     { scom_targets[myOMIC5],0x07011000, 0x08011800, false, TARGETING::MODEL_AXONE},
-     { scom_targets[myOMIC5],0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_AXONE},
-     { scom_targets[myOMIC5],0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_AXONE},
+        //Target                   Address      Expected     error   model
+        { scom_targets[myCORE0],   0x20018652,  0x20018652,  false,  MODEL_POWER10 },
+        { scom_targets[myCORE0],   0x0FFFFFFF,  0x0FFFFFFF,  true,   MODEL_POWER10 },
+        { scom_targets[myCORE1],   0x20018652,  0x20014652,  false,  MODEL_POWER10 },
+        { scom_targets[myCORE1],   0x0FFFFFFF,  0x0FFFFFFF,  true,   MODEL_POWER10 },
+        { scom_targets[myCORE0],   0x12012826,  0x12012826,  true,   MODEL_POWER10 },
+
+        { scom_targets[myEQ0],     0x20000020,  0x20000020,  false,  MODEL_POWER10 },
+        { scom_targets[myEQ0],     0x0FFFFFFF,  0x0FFFFFFF,  true,   MODEL_POWER10 },
+        { scom_targets[myEQ5],     0x20000020,  0x25000020,  false,  MODEL_POWER10 },
+        { scom_targets[myEQ5],     0x0FFFFFFF,  0x0FFFFFFF,  true,   MODEL_POWER10 },
+        { scom_targets[myEQ5],     0x24030008,  0x24030008,  true,   MODEL_POWER10 },
+
+        { scom_targets[myPERV2],   0x000F0001,  0x020F0001,  false,  MODEL_POWER10 },
+        { scom_targets[myPERV2],   0x0FF6FFFF,  0x0FF6FFFF,  true,   MODEL_POWER10 },
+        { scom_targets[myPERV2],   0x07010A0A,  0x32010A0A,  true,   MODEL_POWER10 },
+        { scom_targets[myPERV32],  0x000F0001,  0x200F0001,  false,  MODEL_POWER10 },
+        { scom_targets[myPERV32],  0x0FF6FFFF,  0x0FF6FFFF,  true,   MODEL_POWER10 },
+        { scom_targets[myPERV32],  0x0D010400,  0x0D010400,  true,   MODEL_POWER10 },
+
+        { scom_targets[myPEC0],    0x08010002,  0x08010002,  false,  MODEL_POWER10 },
+        { scom_targets[myPEC0],    0x0FFFFFFF,  0x0FFFFFFF,  true,   MODEL_POWER10 },
+        { scom_targets[myPEC0],    0x12012826,  0x12012826,  true,   MODEL_POWER10 },
+        { scom_targets[myPEC1],    0x08010002,  0x09010002,  false,  MODEL_POWER10 },
+        { scom_targets[myPEC1],    0x0FFFFFFF,  0x0FFFFFFF,  true,   MODEL_POWER10 },
+        { scom_targets[myPEC1],    0x24030008,  0x24030008,  true,   MODEL_POWER10 },
+
+        { scom_targets[myPHB0],    0x08010900,  0x08010900,  false,  MODEL_POWER10 },
+        { scom_targets[myPHB0],    0x0FFFFFFF,  0x0FFFFFFF,  true,   MODEL_POWER10 },
+        { scom_targets[myPHB0],    0x12012826,  0x12012826,  true,   MODEL_POWER10 },
+        { scom_targets[myPHB2],    0x08010900,  0x09010980,  false,  MODEL_POWER10 },
+        { scom_targets[myPHB2],    0x0FFFFFFF,  0x0FFFFFFF,  true,   MODEL_POWER10 },
+        { scom_targets[myPHB2],    0x24030008,  0x24030008,  true,   MODEL_POWER10 },
+
+        { scom_targets[myMC0],     0x0C000008,  0x0C000008,  false,  MODEL_POWER10 },
+        { scom_targets[myMC0],     0x0FFFFFFF,  0x0FFFFFFF,  true,   MODEL_POWER10 },
+        { scom_targets[myMC1],     0x0C000008,  0x0D000008,  false,  MODEL_POWER10 },
+        { scom_targets[myMC1],     0x0FFFFFFF,  0x0FFFFFFF,  true,   MODEL_POWER10 },
+
+        { scom_targets[myMI0],     0x0C000008,  0x0C000008,  false,  MODEL_POWER10 },
+        { scom_targets[myMI0],     0x0FFFFFFF,  0x0FFFFFFF,  true,   MODEL_POWER10 },
+        { scom_targets[myMI1],     0x0C000008,  0x0D000008,  false,  MODEL_POWER10 },
+        { scom_targets[myMI1],     0x0FFFFFFF,  0x0FFFFFFF,  true,   MODEL_POWER10 },
+
+        { scom_targets[myMCC0],    0x0C010D02,  0x0C010D02,  false,  MODEL_POWER10 },
+        { scom_targets[myMCC0],    0x0FFFFFFF,  0x0FFFFFFF,  true,   MODEL_POWER10 },
+        { scom_targets[myMCC1],    0x0C010D02,  0x0D010D42,  false,  MODEL_POWER10 },
+        { scom_targets[myMCC1],    0x0FFFFFFF,  0x0FFFFFFF,  true,   MODEL_POWER10 },
+
+        { scom_targets[myOMI0],    0x0C011750,  0x0C011750,  false,  MODEL_POWER10 },
+        { scom_targets[myOMI1],    0x0C011750,  0x0D011B60,  false,  MODEL_POWER10 },
+        { scom_targets[myOMI0],    0x0FFFFFFF,  0x0FFFFFFF,  true,   MODEL_POWER10 },
+        { scom_targets[myOMI1],    0x0FFFFFFF,  0x0FFFFFFF,  true,   MODEL_POWER10 },
+
+        { scom_targets[myOMIC0],   0x0C011740,  0x0C011740,  false,  MODEL_POWER10 },
+        { scom_targets[myOMIC1],   0x0C011740,  0x0D011B40,  false,  MODEL_POWER10 },
+        { scom_targets[myOMIC0],   0x0FFFFFFF,  0x0FFFFFFF,  true,   MODEL_POWER10 },
+        { scom_targets[myOMIC1],   0x0FFFFFFF,  0x0FFFFFFF,  true,   MODEL_POWER10 },
     };
 
     int numOfAddr = sizeof test_data / sizeof(test_data[0]);
 
     for (int i = 0; i < numOfAddr; i++)
       {
-        if(test_data[i].target != NULL &&
-            ((test_data[i].model == TARGETING::MODEL_POWER9) ||
-             (test_data[i].model == l_systemModel)))
+        if(test_data[i].target != NULL && test_data[i].model == l_systemModel)
         {
             total++;
             uint64_t tempAddr = test_data[i].initAddr;
@@ -1039,36 +788,36 @@ public:
 
             if( l_err && !test_data[i].expectError)
             {
-                TS_FAIL( "ScomTest::test_P9_translate> ERROR : Unexpected error log from translating addr=0x%X for HUID 0x%X", test_data[i].initAddr,
-                          TARGETING::get_huid(test_data[i].target)) ;
+                TS_FAIL( "ScomTest::test_P10_translate> ERROR : Unexpected error log from translating addr=0x%X for HUID 0x%X", test_data[i].initAddr,
+                          get_huid(test_data[i].target)) ;
                 errlCommit(l_err,SCOM_COMP_ID);
                 fails++;
             }
             else if(l_err == NULL && test_data[i].expectError)
             {
-                TS_FAIL( "ScomTest::test_P9_translate> ERROR : Expected an error and did not recieve one after translating addr=0x%X for HUID 0x%X",
-                        test_data[i].initAddr, TARGETING::get_huid(test_data[i].target)) ;
+                TS_FAIL( "ScomTest::test_P10_translate> ERROR : Expected an error and did not recieve one after translating addr=0x%X for HUID 0x%X",
+                        test_data[i].initAddr, get_huid(test_data[i].target)) ;
                 fails++;
             }
             else if(tempAddr!= test_data[i].expectedAddr &&
                     l_err == NULL && !test_data[i].expectError)
             {
-                TS_FAIL("ScomTest::test_P9_translate_scom> Incorrect translation of: 0x%X produced: 0x%X  expected: 0x%X",
+                TS_FAIL("ScomTest::test_P10_translate_scom> Incorrect translation of: 0x%X produced: 0x%X  expected: 0x%X",
                     test_data[i].initAddr, tempAddr, test_data[i].expectedAddr);
                 fails++;
             }
             else if(l_err && test_data[i].expectError)
             {
                 delete l_err;
-                TRACFCOMP(g_trac_scom, "ScomTest::test_P9_translate_scom> Previous error expected");
+                TRACFCOMP(g_trac_scom, "ScomTest::test_P10_translate_scom> Previous error expected");
             }
         }
         else
         {
-          TRACFCOMP(g_trac_scom, "ScomTest::test_P9_translate_scom> Target %d in the list of targets does not exist in the system", i);
+          TRACFCOMP(g_trac_scom, "ScomTest::test_P10_translate_scom> Target %d in the list of targets does not exist in the system", i);
         }
       }
-         TRACFCOMP( g_trac_scom, "ScomTest::test_P9_translateScom_SBE> %d/%d fails", fails, total );
+         TRACFCOMP( g_trac_scom, "ScomTest::test_P10_translate_scom> %d/%d fails", fails, total );
   }
 
   /**

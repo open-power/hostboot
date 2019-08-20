@@ -966,7 +966,7 @@ public:
 #endif
 
         // Instead verify that we ended up with exactly the right number
-        //  enabled cores that we expect for our NIMBUS standalone config
+        //  enabled cores that we expect for our P10 standalone config
         TargetHandleList l_funcProcs;
         getAllChips( l_funcProcs, TYPE_PROC, true );
         for( const auto& l_proc : l_funcProcs )
@@ -974,8 +974,8 @@ public:
             TargetHandleList l_funcCores;
             getChildChiplets( l_funcCores, l_proc, TYPE_CORE, true );
 
-            // Currently we have 4 ECs configured in the PG record
-            const size_t l_numCores = 4;
+            // Currently we have 32 ECs configured in the PG record
+            const size_t l_numCores = 32;
             if( l_funcCores.size() != l_numCores )
             {
                 TS_FAIL("testHWASrestrictECunits> Expected %d cores, but saw %d",
