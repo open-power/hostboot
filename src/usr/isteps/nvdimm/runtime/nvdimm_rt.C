@@ -729,7 +729,7 @@ bool nvDimmCheckHealthStatus(TargetHandleList &i_nvdimmTargetList)
                                    NVDIMM_HEALTH_CHECK_IN_PROGRESS_FAILURE,
                                    get_huid(l_nvdimm),
                                    l_healthCheck,
-                                   ErrlEntry::ADD_SW_CALLOUT );
+                                   ErrlEntry::NO_SW_CALLOUT );
             l_err->collectTrace(NVDIMM_COMP_NAME);
 
             // Add a BPM callout
@@ -768,7 +768,7 @@ bool nvDimmCheckHealthStatus(TargetHandleList &i_nvdimmTargetList)
                                    NVDIMM_HEALTH_CHECK_REPORTED_FAILURE,
                                    get_huid(l_nvdimm),
                                    l_healthCheck,
-                                   ErrlEntry::ADD_SW_CALLOUT );
+                                   ErrlEntry::NO_SW_CALLOUT );
             l_err->collectTrace(NVDIMM_COMP_NAME);
 
             // Add a BPM callout
@@ -843,7 +843,7 @@ bool nvDimmCheckHealthStatus(TargetHandleList &i_nvdimmTargetList)
                                        TWO_UINT32_TO_UINT64(
                                            l_lifetimePercentage,
                                            LIFETIME_MINIMUM_REQUIREMENT),
-                                       ErrlEntry::ADD_SW_CALLOUT );
+                                       ErrlEntry::NO_SW_CALLOUT );
                 l_err->collectTrace(NVDIMM_COMP_NAME);
 
                 // Add a BPM callout
@@ -893,7 +893,7 @@ bool nvDimmCheckHealthStatus(TargetHandleList &i_nvdimmTargetList)
                                    NVDIMM_HEALTH_CHECK_NEVER_INITIATED,
                                    get_huid(l_nvdimm),
                                    l_healthCheck,
-                                   ErrlEntry::ADD_SW_CALLOUT );
+                                   ErrlEntry::NO_SW_CALLOUT );
             l_err->collectTrace(NVDIMM_COMP_NAME);
 
             // Add a BPM callout
