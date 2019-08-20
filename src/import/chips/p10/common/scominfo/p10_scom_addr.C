@@ -150,24 +150,32 @@ extern "C"
             l_pecTarget = isPervTarget();
         }
 
-        // Endpoint must be PSCOM (0x1) and Sat ID must be 0
-        if ( (getEndpoint() == PSCOM_ENDPOINT) &&  // 0x1
-             (getSatId() == PEC_SAT_ID) )          // 0
+        // Endpoint must be PSCOM (0x1)
+        if (getEndpoint() == PSCOM_ENDPOINT)  // 0x1
         {
-            // For PEC addresses via NEST regions, ring ID must be 0x6
+            // For PEC addresses via NEST regions:
+            // Ring ID must be 0x6, sat ID must be 0
             if ( (getChipletId() >= N0_CHIPLET_ID) &&  // 0x2
                  (getChipletId() <= N1_CHIPLET_ID) &&  // 0x3
-                 (getRingId() == N0_PE1_RING_ID) )     // 0x6
+                 (getRingId() == N0_PE1_RING_ID) &&    // 0x6
+                 (getSatId() == PEC_SAT_ID) )          // 0x0
+
             {
                 l_pecTarget = true;
             }
-
-            // For PEC addresses via PCIE, ring ID must be 0x2
+            // For PEC addresses via PCIE:
             else if ( (getChipletId() >= PCI0_CHIPLET_ID) &&  // 0x8
-                      (getChipletId() <= PCI1_CHIPLET_ID) &&  // 0x9
-                      (getRingId() == PCI_RING_ID) )          // 0x2
+                      (getChipletId() <= PCI1_CHIPLET_ID) )   // 0x9
             {
-                l_pecTarget = true;
+                // Ring IDs must be 0x3-0x4 (iopci rings) or
+                // Ring ID is 0x2 (pci ring) and sat Id = 0x0
+                if ( (getRingId() == IO_PCI0_RING_ID) ||   // 0x3
+                     (getRingId() == IO_PCI1_RING_ID) ||   // 0x4
+                     ((getRingId() == PCI_RING_ID) &&      // 0x2
+                      (getSatId() == PEC_SAT_ID)) )        // 0x0
+                {
+                    l_pecTarget = true;
+                }
             }
         }
 
@@ -204,14 +212,7 @@ extern "C"
             if ( (getChipletId() >= PCI0_CHIPLET_ID) && // 0x8
                  (getChipletId() <= PCI1_CHIPLET_ID) )  // 0x9
             {
-                // Ring ID of 0x3, 0x4, or 0x5
-                if ( (getRingId() >= IO_PCI0_RING_ID) &&  // 0x3
-                     (getRingId() <= IO_PCI2_RING_ID) )   // 0x5
-                {
-                    l_phbTarget = true;
-                }
-
-                // or, Ring ID of 0x2, Sat ID 1-6
+                // Ring ID of 0x2, Sat ID 1-6
                 if ( (getRingId() == PCI_RING_ID) && // 0x2
                      (getSatId() >= PHB0_AIB_SAT_ID) &&  // 0x1
                      (getSatId() <= PHB2_PHB_SAT_ID) )   // 0x6

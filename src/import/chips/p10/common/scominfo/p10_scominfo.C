@@ -343,11 +343,6 @@ extern "C"
                                 l_scom.setSatId(4 + (i_chipUnitNum % 3));
                             }
                         }
-                        else
-                        {
-                            l_scom.setRingId(3 + (i_chipUnitNum % 3));
-                        }
-
                     }
 
                     break;

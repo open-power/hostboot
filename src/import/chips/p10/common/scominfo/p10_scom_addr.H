@@ -132,7 +132,6 @@ extern "C"
         PCI_RING_ID      = 0x2,
         IO_PCI0_RING_ID  = 0x3,
         IO_PCI1_RING_ID  = 0x4,
-        IO_PCI2_RING_ID  = 0x5,
     } p10_PCI_RingId_t;
 
     /// P10 PERV chiplet and PSCOM ring ID enumeration
