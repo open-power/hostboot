@@ -164,16 +164,16 @@ errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC,
                    "Null TOC Buffer found while checking TOC"
                    " during pnor initialization");
             /*@
-            * @errortype
-            * @moduleid PNOR::MOD_PNORRP_READTOC
-            * @reasoncode PNOR::RC_NULL_TOC_BUFFER
-            * @userdata1 Address of toc buffer
-            * @userdata2 Error code
-            * @devdesc Expected buffer to have contents of TOC,
-            *                      instead was NULL
-            * @custdesc A problem occurred while reading
-            *           Processor NOR flash partition table
-            */
+             * @errortype
+             * @moduleid PNOR::MOD_PNORRP_READTOC
+             * @reasoncode PNOR::RC_NULL_TOC_BUFFER
+             * @userdata1 Address of toc buffer
+             * @userdata2 Error code
+             * @devdesc Expected buffer to have contents of TOC,
+             *                      instead was NULL
+             * @custdesc A problem occurred while reading
+             *           Processor NOR flash partition table
+             */
             l_errhdl = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                     PNOR::MOD_PNORRP_READTOC,
@@ -201,15 +201,16 @@ errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC,
                       "PNOR::parseTOC Found checksum error in TOC's header"
                       " during pnor initialization");
 
-            /* @errortype
-            * @moduleid PNOR::MOD_PNORRP_READTOC
-            * @reasoncode PNOR::RC_TOC_HDR_CHECKSUM_ERR
-            * @userdata1 Address of toc buffer
-            * @userdata2 Error Code
-            * @devdesc Hdr of TOC of PNOR failed checksum
-            * @custdesc A problem occurred while reading
-            *           Processor NOR flash partition table
-            */
+            /*@
+             * @errortype
+             * @moduleid PNOR::MOD_PNORRP_READTOC
+             * @reasoncode PNOR::RC_TOC_HDR_CHECKSUM_ERR
+             * @userdata1 Address of toc buffer
+             * @userdata2 Error Code
+             * @devdesc Hdr of TOC of PNOR failed checksum
+             * @custdesc A problem occurred while reading
+             *           Processor NOR flash partition table
+             */
             l_errhdl = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                     PNOR::MOD_PNORRP_READTOC,
@@ -234,15 +235,16 @@ errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC,
             assert(i_pnorInitialized,
                       "PNOR::parseTOC Error found parsing hdr of TOC"
                       " during pnor initialization");
-            /* @errortype
-            * @moduleid PNOR::MOD_PNORRP_READTOC
-            * @reasoncode PNOR::RC_BAD_TOC_HEADER
-            * @userdata1 Address of toc buffer
-            * @userdata2 Error Code
-            * @devdesc Hdr of TOC of PNOR failed series of tests
-            * @custdesc A problem occurred while reading
-            *           Processor NOR flash partition table
-            */
+            /*@
+             * @errortype
+             * @moduleid PNOR::MOD_PNORRP_READTOC
+             * @reasoncode PNOR::RC_BAD_TOC_HEADER
+             * @userdata1 Address of toc buffer
+             * @userdata2 Error Code
+             * @devdesc Hdr of TOC of PNOR failed series of tests
+             * @custdesc A problem occurred while reading
+             *           Processor NOR flash partition table
+             */
             l_errhdl = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                     PNOR::MOD_PNORRP_READTOC,
@@ -280,15 +282,16 @@ errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC,
                     "PNOR::parseTOC parseEntries returned an error code"
                     " during pnor initialization");
 
-            /* @errortype
-            * @moduleid PNOR::MOD_PNORRP_READTOC
-            * @reasoncode PNOR::RC_PNOR_PARSE_ENTRIES_ERR
-            * @userdata1 Address of toc buffer
-            * @userdata2 Error Code
-            * @devdesc Error while parsing pnor TOC entries
-            * @custdesc A problem occurred while reading
-            *           Processor NOR flash partition table
-            */
+            /*@
+             * @errortype
+             * @moduleid PNOR::MOD_PNORRP_READTOC
+             * @reasoncode PNOR::RC_PNOR_PARSE_ENTRIES_ERR
+             * @userdata1 Address of toc buffer
+             * @userdata2 Error Code
+             * @devdesc Error while parsing pnor TOC entries
+             * @custdesc A problem occurred while reading
+             *           Processor NOR flash partition table
+             */
             l_errhdl = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                     PNOR::MOD_PNORRP_READTOC,

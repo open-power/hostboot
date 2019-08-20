@@ -3850,7 +3850,7 @@ errlHndl_t updateProcCompatibilityRiskLevel()
                         "force compatibility of invalid MRW risk level %d",
                         l_risk);
 
-                    /*
+                    /*@
                      * @errortype
                      * @severity           ERRL_SEV_UNRECOVERABLE
                      * @moduleid           MOD_UPDATE_PROC_COMPAT_RISK_LEVEL
@@ -3917,7 +3917,7 @@ errlHndl_t updateProcCompatibilityRiskLevel()
                     "force native compatibility of mixed processor levels",
                     " (0x%02X and 0x%02X)", l_firstEc, l_lastEc );
 
-                /*
+                /*@
                  * @errortype
                  * @severity           ERRL_SEV_UNRECOVERABLE
                  * @moduleid           MOD_UPDATE_PROC_COMPAT_RISK_LEVEL
@@ -3988,7 +3988,7 @@ errlHndl_t updateProcCompatibilityRiskLevel()
                     "force native compatibility of DD2.3 for risk level %d",
                     l_risk);
 
-                /*
+                /*@
                  * @errortype
                  * @severity           ERRL_SEV_UNRECOVERABLE
                  * @moduleid           MOD_UPDATE_PROC_COMPAT_RISK_LEVEL
