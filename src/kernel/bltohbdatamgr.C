@@ -26,7 +26,6 @@
 #include <util/align.H>
 #include <kernel/console.H>
 #include <assert.h>
-#include <arch/memorymap.H>
 #include <bootloader/bootloaderif.H>
 #include <kernel/vmmmgr.H>
 

@@ -34,7 +34,6 @@
 
 #include <lpc_const.H>
 #include <pnor_utils.H>
-#include <arch/memorymap.H>
 #include <arch/pvrformat.H>
 
 

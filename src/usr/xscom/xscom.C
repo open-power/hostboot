@@ -859,21 +859,20 @@ uint64_t readRemoteScom( uint64_t i_node,
     // Symmetry between nodes is enforced so we know the remote
     //  node contains this chip
     TARGETING::Target * l_MasterProcTarget = nullptr;
+    TARGETING::Target* l_sys = nullptr;
     TARGETING::TargetService & l_tgtServ = TARGETING::targetService();
     l_tgtServ.masterProcChipTargetHandle( l_MasterProcTarget );
+    l_tgtServ.getTopLevelTarget(l_sys);
+    assert(l_sys, "Top lever target is nullptr!");
 
-    // TODO RTC 212966
-    // Enable when attributes are pulled in.
-    //const auto l_localTopoId =
-    //    l_MasterProcTarget->getAttr<ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID>();
-    //const auto topoMode_t l_topoMode =
-    //    l_MasterProcTarget->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_MODE>();
-    //uint8_t l_chipId;
-    //uint8_t l_groupId;
-    //mmioExtractGroupAndChip(l_topoMode, l_localtopoId, l_groupId, l_chipId);
-    //const auto l_remoteTopoId = mmioMakeTopoId(l_topoMode, i_node, l_chipId);
-    topoMode_t l_topoMode = topoMode_t::PROC_FABRIC_TOPOLOGY_MODE_MODE0;
-    topoId_t l_remoteTopoId = 0;
+    const auto l_localTopoId =
+        l_MasterProcTarget->getAttr<ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID>();
+    const auto l_topoMode =
+        l_sys->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_MODE>();
+    uint8_t l_chipId = 0;
+    uint8_t l_groupId = 0;
+    extractGroupAndChip(l_topoMode, l_localTopoId, l_groupId, l_chipId);
+    const auto l_remoteTopoId = makeTopoId(l_topoMode, i_node, l_chipId);
 
     // compute xscom address & control
     // This will return xscom base of the remote node

@@ -27,26 +27,22 @@
 
 #include <limits.h>
 #include <usr/initservice/mboxRegs.H>
+#if !(defined(BOOTLOADER) || defined(HOSTBOOT_KERNEL))
+#include <attributetraits.H>
+#include <attributeenums.H>
+#endif
 
-//TODO RTC 212966
-//Remove these once attributes are available from EKB
 using namespace INITSERVICE;
 using namespace SPLESS;
-namespace TARGETING
-{
-    using ATTR_PROC_FABRIC_TOPOLOGY_MODE_type = MboxScratch6_t::fabricTopologyMode_t;
-    using ATTR_PROC_FABRIC_TOPOLOGY_ID_type = uint8_t;
-    using ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID_type = uint8_t;
-}
 
 namespace MEMMAP
 {
 
-using namespace TARGETING;
+#if !(defined(BOOTLOADER) || defined(HOSTBOOT_KERNEL))
 
 // Shortened type name for convenience
-using topoId_t = ATTR_PROC_FABRIC_TOPOLOGY_ID_type;
-using topoMode_t = ATTR_PROC_FABRIC_TOPOLOGY_MODE_type;
+using topoId_t = TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID_type;
+using topoMode_t = TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_MODE_type;
 using groupId_t = uint8_t;
 using chipId_t = uint8_t;
 
@@ -133,7 +129,7 @@ inline uint64_t computeMemoryMapOffset( const uint64_t i_baseAddr,
     topologyIndexBits_t l_indexBits;
     l_indexBits.topoIndex = 0;
 
-    if(i_topologyMode == topoMode_t::PROC_FABRIC_TOPOLOGY_MODE_MODE0)
+    if(i_topologyMode == TARGETING::PROC_FABRIC_TOPOLOGY_MODE_MODE0)
     {
         l_indexBits.mode0.group = l_idBits.mode0.group;
         l_indexBits.mode0.chip = l_idBits.mode0.chip;
@@ -166,7 +162,7 @@ inline void extractGroupAndChip(const topoMode_t i_topologyMode,
     //       mode 1 -> GGCC
     topologyIdBits_t l_idBits;
     l_idBits.topoId = i_topologyId;
-    if(i_topologyMode == topoMode_t::PROC_FABRIC_TOPOLOGY_MODE_MODE0)
+    if(i_topologyMode == TARGETING::PROC_FABRIC_TOPOLOGY_MODE_MODE0)
     {
         o_group = l_idBits.mode0.group;
         o_chip = l_idBits.mode0.chip;
@@ -196,7 +192,7 @@ inline topoId_t makeTopoId(const topoMode_t i_topologyMode,
     //       mode 1 -> GGCC
     topologyIdBits_t l_idBits;
     l_idBits.topoId = 0;
-    if (i_topologyMode == topoMode_t::PROC_FABRIC_TOPOLOGY_MODE_MODE0)
+    if (i_topologyMode == TARGETING::PROC_FABRIC_TOPOLOGY_MODE_MODE0)
     {
         l_idBits.mode0.group = i_group;
         l_idBits.mode0.chip = i_chip;
@@ -210,6 +206,7 @@ inline topoId_t makeTopoId(const topoMode_t i_topologyMode,
     return l_idBits.topoId;
 };
 
+#endif // if !(defined(BOOTLOADER) || defined(HOSTBOOT_KERNEL))
 
 /**
  *  @brief  A few default values that will need to be known

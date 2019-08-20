@@ -27,6 +27,8 @@ ROOTPATH = ../..
 # we need HBB to be small
 HOSTBOOT_PROFILE_NO_INSTRUMENT=1
 
+COMMONFLAGS += -DHOSTBOOT_KERNEL
+
 OBJS += start.o
 OBJS += kernel.o
 OBJS += console.o

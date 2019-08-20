@@ -1422,15 +1422,12 @@ sub setupBars
     #--------------------------------------------------
     ## Setup BARs
 
-    #TODO RTC 212966
     #The topology ID is a 4 bit value that must be converted to
     #a 5-bit topology index before we can use it to calculate the
     #address offset.
     #The conversion method depends on the topology mode.
-    #my $topoId = $targetObj->getAttribute($target, "PROC_FABRIC_TOPOLOGY_ID");
-    #my $topoMode = $targetObj->getAttribute($target, "PROC_FABRIC_TOPOLOGY_MODE");
-    my $topoId = 0;
-    my $topoMode = 0;
+    my $topoId = $targetObj->getAttribute($target, "PROC_FABRIC_TOPOLOGY_ID");
+    my $topoMode = $targetObj->getAttribute($target, "PROC_FABRIC_TOPOLOGY_MODE");
 
     #Assume topo mode 1 (GGCC -> 0GGCC)
     my $topoIndex = $topoId;

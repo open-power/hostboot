@@ -765,21 +765,15 @@ static void initializeAttributes(TargetService& i_targetService,
 
                 ATTR_FABRIC_PRESENT_GROUPS_type l_fabric_groups = 0;
 
-                // TODO RTC 212966
                 // Get the topology mode (same for all chips).
-                //const auto l_topoMode =
-                //    l_chip->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_MODE>();
                 const auto l_topoMode =
-                    topoMode_t::PROC_FABRIC_TOPOLOGY_MODE_MODE0;
+                    l_pTopLevel->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_MODE>();
 
                 for(auto l_chip : l_chips)
                 {
-                    // TODO RTC 212966
                     // Read the fabric topology id
-                    //const auto l_topoId =
-                    //    l_chip->getAttr<ATTR_PROC_EFF_FABRIC_TOPOLOGY_ID>();
-                    (void)l_chip;
-                    const topoId_t l_topoId = 0;
+                    const auto l_topoId =
+                        l_chip->getAttr<ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID>();
 
                     // Extract the group ID from the topology ID
                     groupId_t l_groupId;
@@ -869,12 +863,9 @@ static void adjustMemoryMap( TargetService& i_targetService )
     TARGETING::TargetHandleList l_funcProcs;
     getAllChips(l_funcProcs, TYPE_PROC, false );
 
-    // TODO RTC 212966
     // Get topology mode (same for all procs)
-    //const auto l_topologyMode =
-    //    l_procChip->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_MODE>();
     const auto l_topologyMode =
-        topoMode_t::PROC_FABRIC_TOPOLOGY_MODE_MODE0;
+        l_pTopLevel->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_MODE>();
 
     for( auto & l_procChip : l_funcProcs )
     {
@@ -882,13 +873,10 @@ static void adjustMemoryMap( TargetService& i_targetService )
 
         // Set effective fabric ids back to default values
 
-        // TODO RTC 212966
-        //const auto l_topologyId =
-        //    l_procChip->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_ID>();
-        topoId_t l_topologyId = 0;
+        const auto l_topologyId =
+            l_procChip->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_ID>();
 
-        // TODO RTC 212966
-        //l_procChip->setAttr<ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID>(l_topologyId);
+        l_procChip->setAttr<ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID>(l_topologyId);
 
         ATTR_XSCOM_BASE_ADDRESS_type l_xscomBAR =
             computeMemoryMapOffset(l_xscomBase, l_topologyMode, l_topologyId);
@@ -908,8 +896,7 @@ static void adjustMemoryMap( TargetService& i_targetService )
             l_swapVictim = l_procChip;
             TARG_INF( "Master Proc %.8X is using XSCOM BAR from %.8X, BAR=%.16llX", get_huid(l_pMasterProcChip), get_huid(l_swapVictim), l_curXscomBAR );
 
-            // TODO RTC 212966
-            //l_swapAttrs[ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID] = l_topologyId;
+            l_swapAttrs[ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID] = l_topologyId;
             l_swapAttrs[ATTR_XSCOM_BASE_ADDRESS] = l_xscomBAR;
         }
 
@@ -987,9 +974,8 @@ static void adjustMemoryMap( TargetService& i_targetService )
     {
         // Walk through all of the attributes we cached above
 
-        // TODO RTC 212966
-        //SWAP_ATTRIBUTE( ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID, l_pMasterProcChip,
-        //                l_swapVictim, l_swapAttrs );
+        SWAP_ATTRIBUTE( ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID, l_pMasterProcChip,
+                        l_swapVictim, l_swapAttrs );
         SWAP_ATTRIBUTE( ATTR_XSCOM_BASE_ADDRESS, l_pMasterProcChip,
                         l_swapVictim, l_swapAttrs );
         SWAP_ATTRIBUTE( ATTR_LPC_BUS_ADDR, l_pMasterProcChip,
