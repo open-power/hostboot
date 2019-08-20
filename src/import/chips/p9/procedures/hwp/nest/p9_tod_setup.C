@@ -782,6 +782,8 @@ fapi2::ReturnCode configure_m_path_ctrl_reg(
     fapi2::buffer<uint64_t> l_root_ctrl8_reg = 0;
     bool l_tod_on_lpc_clock = false;
 
+    const bool is_mdmt = (i_tod_node->i_tod_master && i_tod_node->i_drawer_master);
+
     // Read ROOT_CTRL8 to determine TOD input clock selection
     FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
                             PERV_ROOT_CTRL8_SCOM,
@@ -796,87 +798,91 @@ fapi2::ReturnCode configure_m_path_ctrl_reg(
                             l_m_path_ctrl_reg),
              "Error from getScom (PERV_TOD_M_PATH_CTRL_REG)!");
 
+    // Configure single or dual edge detect based on tod clock select
     l_m_path_ctrl_reg.writeBit<PERV_TOD_M_PATH_CTRL_REG_STEP_CREATE_DUAL_EDGE_DISABLE>(l_tod_on_lpc_clock);
 
-    // Configure Master OSC0/OSC1 path
-    FAPI_DBG("Configuring Master OSC path in PERV_TOD_M_PATH_CTRL_REG");
-
-    if (i_osc_sel == TOD_OSC_0             ||
-        i_osc_sel == TOD_OSC_0_AND_1       ||
-        i_osc_sel == TOD_OSC_0_AND_1_SEL_0 ||
-        i_osc_sel == TOD_OSC_0_AND_1_SEL_1)
+    if (is_mdmt)
     {
-        FAPI_DBG("OSC0 is valid; master path-0 will be configured.");
+        // Configure Master OSC0/OSC1 path
+        FAPI_DBG("Configuring Master OSC path in PERV_TOD_M_PATH_CTRL_REG");
 
-        // OSC0 is connected
-        l_m_path_ctrl_reg.clearBit<PERV_TOD_M_PATH_CTRL_REG_0_OSC_NOT_VALID>();
+        if (i_osc_sel == TOD_OSC_0             ||
+            i_osc_sel == TOD_OSC_0_AND_1       ||
+            i_osc_sel == TOD_OSC_0_AND_1_SEL_0 ||
+            i_osc_sel == TOD_OSC_0_AND_1_SEL_1)
+        {
+            FAPI_DBG("OSC0 is valid; master path-0 will be configured.");
 
-        // OSC0 step alignment enabled
-        l_m_path_ctrl_reg.clearBit<PERV_TOD_M_PATH_CTRL_REG_0_STEP_ALIGN_DISABLE>();
+            // OSC0 is connected
+            l_m_path_ctrl_reg.clearBit<PERV_TOD_M_PATH_CTRL_REG_0_OSC_NOT_VALID>();
 
-        // Set 512 steps per sync for path 0
-        l_m_path_ctrl_reg.insertFromRight<PERV_TOD_M_PATH_CTRL_REG_SYNC_CREATE_SPS_SELECT,
-                                          PERV_TOD_M_PATH_CTRL_REG_SYNC_CREATE_SPS_SELECT_LEN>(
-                                              TOD_M_PATH_CTRL_REG_M_PATH_SYNC_CREATE_SPS_512);
+            // OSC0 step alignment enabled
+            l_m_path_ctrl_reg.clearBit<PERV_TOD_M_PATH_CTRL_REG_0_STEP_ALIGN_DISABLE>();
 
-        // Set step check CPS deviation to 50%
-        l_m_path_ctrl_reg.insertFromRight<PERV_TOD_M_PATH_CTRL_REG_0_STEP_CHECK_CPS_DEVIATION,
-                                          PERV_TOD_M_PATH_CTRL_REG_0_STEP_CHECK_CPS_DEVIATION_LEN>(
-                                              STEP_CHECK_CPS_DEVIATION_50_00_PCENT);
+            // Set 512 steps per sync for path 0
+            l_m_path_ctrl_reg.insertFromRight<PERV_TOD_M_PATH_CTRL_REG_SYNC_CREATE_SPS_SELECT,
+                                              PERV_TOD_M_PATH_CTRL_REG_SYNC_CREATE_SPS_SELECT_LEN>(
+                                                  TOD_M_PATH_CTRL_REG_M_PATH_SYNC_CREATE_SPS_512);
 
-        // 8 valid steps are required before step check is enabled
-        l_m_path_ctrl_reg.insertFromRight<PERV_TOD_M_PATH_CTRL_REG_0_STEP_CHECK_VALIDITY_COUNT,
-                                          PERV_TOD_M_PATH_CTRL_REG_0_STEP_CHECK_VALIDITY_COUNT_LEN>(
-                                              STEP_CHECK_VALIDITY_COUNT_8);
+            // Set step check CPS deviation to 50%
+            l_m_path_ctrl_reg.insertFromRight<PERV_TOD_M_PATH_CTRL_REG_0_STEP_CHECK_CPS_DEVIATION,
+                                              PERV_TOD_M_PATH_CTRL_REG_0_STEP_CHECK_CPS_DEVIATION_LEN>(
+                                                  STEP_CHECK_CPS_DEVIATION_50_00_PCENT);
+
+            // 8 valid steps are required before step check is enabled
+            l_m_path_ctrl_reg.insertFromRight<PERV_TOD_M_PATH_CTRL_REG_0_STEP_CHECK_VALIDITY_COUNT,
+                                              PERV_TOD_M_PATH_CTRL_REG_0_STEP_CHECK_VALIDITY_COUNT_LEN>(
+                                                  STEP_CHECK_VALIDITY_COUNT_8);
+        }
+        else
+        {
+            FAPI_DBG("OSC0 is not connected.");
+
+            // OSC0 is not connected; any previous path-0 settings will be ignored
+            l_m_path_ctrl_reg.setBit<PERV_TOD_M_PATH_CTRL_REG_0_OSC_NOT_VALID>();
+        }
+
+        if (i_osc_sel == TOD_OSC_1             ||
+            i_osc_sel == TOD_OSC_0_AND_1       ||
+            i_osc_sel == TOD_OSC_0_AND_1_SEL_0 ||
+            i_osc_sel == TOD_OSC_0_AND_1_SEL_1)
+        {
+            FAPI_DBG("OSC1 is valid; master path-1 will be configured.");
+
+            // OSC1 is connected
+            l_m_path_ctrl_reg.clearBit<PERV_TOD_M_PATH_CTRL_REG_1_OSC_NOT_VALID>();
+
+            // OSC1 step alignment enabled
+            l_m_path_ctrl_reg.clearBit<PERV_TOD_M_PATH_CTRL_REG_1_STEP_ALIGN_DISABLE>();
+
+            // Set 512 steps per sync for path 1
+            l_m_path_ctrl_reg.insertFromRight<PERV_TOD_M_PATH_CTRL_REG_SYNC_CREATE_SPS_SELECT,
+                                              PERV_TOD_M_PATH_CTRL_REG_SYNC_CREATE_SPS_SELECT_LEN>(
+                                                  TOD_M_PATH_CTRL_REG_M_PATH_SYNC_CREATE_SPS_512);
+
+            // Set step check CPS deviation to 50%
+            l_m_path_ctrl_reg.insertFromRight<PERV_TOD_M_PATH_CTRL_REG_1_STEP_CHECK_CPS_DEVIATION,
+                                              PERV_TOD_M_PATH_CTRL_REG_1_STEP_CHECK_CPS_DEVIATION_LEN>(
+                                                  STEP_CHECK_CPS_DEVIATION_50_00_PCENT);
+
+            // 8 valid steps are required before step check is enabled
+            l_m_path_ctrl_reg.insertFromRight<PERV_TOD_M_PATH_CTRL_REG_1_STEP_CHECK_VALIDITY_COUNT,
+                                              PERV_TOD_M_PATH_CTRL_REG_1_STEP_CHECK_VALIDITY_COUNT_LEN>(
+                                                  STEP_CHECK_VALIDITY_COUNT_8);
+        }
+        else
+        {
+            FAPI_DBG("OSC1 is not connected.");
+
+            // OSC1 is not connected; any previous path-1 settings will be ignored
+            l_m_path_ctrl_reg.setBit<PERV_TOD_M_PATH_CTRL_REG_1_OSC_NOT_VALID>();
+        }
+
+        // CPS deviation factor configures both path-0 and path-1
+        l_m_path_ctrl_reg.insertFromRight<PERV_TOD_M_PATH_CTRL_REG_STEP_CHECK_CPS_DEVIATION_FACTOR,
+                                          PERV_TOD_M_PATH_CTRL_REG_STEP_CHECK_CPS_DEVIATION_FACTOR_LEN>(
+                                              STEP_CHECK_CPS_DEVIATION_FACTOR_1);
     }
-    else
-    {
-        FAPI_DBG("OSC0 is not connected.");
-
-        // OSC0 is not connected; any previous path-0 settings will be ignored
-        l_m_path_ctrl_reg.setBit<PERV_TOD_M_PATH_CTRL_REG_0_OSC_NOT_VALID>();
-    }
-
-    if (i_osc_sel == TOD_OSC_1             ||
-        i_osc_sel == TOD_OSC_0_AND_1       ||
-        i_osc_sel == TOD_OSC_0_AND_1_SEL_0 ||
-        i_osc_sel == TOD_OSC_0_AND_1_SEL_1)
-    {
-        FAPI_DBG("OSC1 is valid; master path-1 will be configured.");
-
-        // OSC1 is connected
-        l_m_path_ctrl_reg.clearBit<PERV_TOD_M_PATH_CTRL_REG_1_OSC_NOT_VALID>();
-
-        // OSC1 step alignment enabled
-        l_m_path_ctrl_reg.clearBit<PERV_TOD_M_PATH_CTRL_REG_1_STEP_ALIGN_DISABLE>();
-
-        // Set 512 steps per sync for path 1
-        l_m_path_ctrl_reg.insertFromRight<PERV_TOD_M_PATH_CTRL_REG_SYNC_CREATE_SPS_SELECT,
-                                          PERV_TOD_M_PATH_CTRL_REG_SYNC_CREATE_SPS_SELECT_LEN>(
-                                              TOD_M_PATH_CTRL_REG_M_PATH_SYNC_CREATE_SPS_512);
-
-        // Set step check CPS deviation to 50%
-        l_m_path_ctrl_reg.insertFromRight<PERV_TOD_M_PATH_CTRL_REG_1_STEP_CHECK_CPS_DEVIATION,
-                                          PERV_TOD_M_PATH_CTRL_REG_1_STEP_CHECK_CPS_DEVIATION_LEN>(
-                                              STEP_CHECK_CPS_DEVIATION_50_00_PCENT);
-
-        // 8 valid steps are required before step check is enabled
-        l_m_path_ctrl_reg.insertFromRight<PERV_TOD_M_PATH_CTRL_REG_1_STEP_CHECK_VALIDITY_COUNT,
-                                          PERV_TOD_M_PATH_CTRL_REG_1_STEP_CHECK_VALIDITY_COUNT_LEN>(
-                                              STEP_CHECK_VALIDITY_COUNT_8);
-    }
-    else
-    {
-        FAPI_DBG("OSC1 is not connected.");
-
-        // OSC1 is not connected; any previous path-1 settings will be ignored
-        l_m_path_ctrl_reg.setBit<PERV_TOD_M_PATH_CTRL_REG_1_OSC_NOT_VALID>();
-    }
-
-    // CPS deviation factor configures both path-0 and path-1
-    l_m_path_ctrl_reg.insertFromRight<PERV_TOD_M_PATH_CTRL_REG_STEP_CHECK_CPS_DEVIATION_FACTOR,
-                                      PERV_TOD_M_PATH_CTRL_REG_STEP_CHECK_CPS_DEVIATION_FACTOR_LEN>(
-                                          STEP_CHECK_CPS_DEVIATION_FACTOR_1);
 
     FAPI_TRY(fapi2::putScom(*(i_tod_node->i_target),
                             PERV_TOD_M_PATH_CTRL_REG,
@@ -1071,13 +1077,10 @@ fapi2::ReturnCode configure_tod_node(
                                       i_osc_sel),
              "Error from configure_port_ctrl_regs!");
 
-    if (is_mdmt)
-    {
-        FAPI_TRY(configure_m_path_ctrl_reg(i_tod_node,
-                                           i_tod_sel,
-                                           i_osc_sel),
-                 "Error from configure_m_path_ctrl_reg!");
-    }
+    FAPI_TRY(configure_m_path_ctrl_reg(i_tod_node,
+                                       i_tod_sel,
+                                       i_osc_sel),
+             "Error from configure_m_path_ctrl_reg!");
 
     FAPI_TRY(configure_i_path_ctrl_reg(i_tod_node,
                                        i_tod_sel,
