@@ -1,13 +1,4 @@
-
-$hb_mode = 1  #Old Mode -- No simics internals changed
-$runsim_lookup = (lookup-file -query "%simics%/runsim")
-if ($runsim_lookup) {
-    $hb_mode = 0 #New Mode -- Some simics internal changes
-}
-
-# $hb_script_to_run is only set in Axone Standalone and onwards
-# we need to add the script directory in the Axone standalone model
-# for the older models the directory is already in the path
+# We need to add the script directory in the P10 standalone model
 if defined hb_script_to_run {
     $hb_script_location = (python "''.join(map('/'.__add__,\""+$hb_script_to_run+"\"[1:].split('/')[0:-1]))")
     $script_dir = (python "''.join(map('/'.__add__,\""+$hb_script_location+"\"[1:].split('/')[0:-1]))")
@@ -16,56 +7,20 @@ if defined hb_script_to_run {
 
 $hb_startup_path = (lookup-file hbfw/startup.simics)
 
-# if we are in older simics models (before Axone standalone)
-# we must now set $hb_script_location as it is not above
-if not defined hb_script_location {
-    $hb_script_location = (python "''.join(map('/'.__add__,\""+$hb_startup_path+"\"[1:].split('/')[0:-1]))")
-}
-
 python "os.environ['HB_TOOLPATH'] = \""+$hb_script_location+"\""
 
-# TODO RTC: 204842 Revist once we get way to read CEC_TYPE from simics
-if ($hb_mode == 1) {
-
-    $model=""
-    if(env -x CEC_TYPE) {
-        $model = (env CEC_TYPE)
-    }
-
-    $machine_name=""
-    if(env -x MACHINE) {
-        $machine_name = (env MACHINE)
-    }
-
-    $hb_machine = "unknown"
-    if ($model == "p9_zztop")     {$hb_machine = "zztop"}
-    if ($model == "p9_zeppelin")  {$hb_machine = "zeppelin"}
-    if ($model == "p9_fleetwood") {$hb_machine = "fleetwood"}
-    if ($model == "p9_nimbus")    {$hb_machine = "nimbus"}
-    if ($model == "p9_cumulus") {
-        if ($machine_name == "CUMULUS_CDIMM") { $hb_machine = "cumulus_cdimm" }
-        if ($machine_name != "CUMULUS_CDIMM") { $hb_machine = "cumulus" }
-    }
-
-}else{
-    $hb_machine = "P10"
-}
+$hb_machine = "P10"
+# Simics relies on hb_mode; hb_mode is 0 for Axone and beyond
+$hb_mode = 0
 
 python "os.environ['HB_MACHINE'] = \""+$hb_machine+"\""
 echo "HB_MACHINE is: "+$hb_machine
 
 $hb_pnor = ""
 
-if( $hb_mode == 1) {
-  # Setup some common vars to use across machine types
-  $hb_masterproc = (get-master-proc)
-  $hb_masterproc_cecchip = (get-master-cec-chip)
-  $hb_pnor = (get-master-pnor)
-} else {
-  $hb_masterproc = (get-master-procs)[0]
-  $hb_masterproc_cecchip = (get-master-cec-chips)[0]
-  $hb_pnor = (get-master-pnors)[0]
-}
+$hb_masterproc = (get-master-procs)[0]
+$hb_masterproc_cecchip = (get-master-cec-chips)[0]
+$hb_pnor = (get-master-pnors)[0]
 
 echo "Master Proc is: "+$hb_masterproc
 echo "Master Proc Cec-Chip is: "+$hb_masterproc_cecchip
@@ -92,19 +47,12 @@ echo "Defaulting to CPU "+$hb_cpu+" for Hostboot tools"
 
 # Prevent SBE Updates from happening on an IPL
 echo "Altering SBE SEEPROM Versions to disable Update in IPL"
-if ($hb_mode == 1) {
-    foreach $cc in (get-object-list p9_proc) {
-        ($cc).seeprom1.seeprom1_image.set 0x3FED9 0x5A5A5A5A 8 -l
-        ($cc).seeprom3.seeprom3_image.set 0x3FED9 0x5A5A5A5A 8 -l
-    }
-} else {
-    foreach $cc in (get-all-procs) {
+foreach $cc in (get-all-procs) {
 # These commands cause P10 simics to fail because the seeprom*_image component
 # is not yet implemented in P10 simics. The lines need to be uncommented when
 # the SBE is implemented in the P10 model.
         #($cc).seeprom1_image.set 0x3FED9 0x5A5A5A5A 8 -l
         #($cc).seeprom3_image.set 0x3FED9 0x5A5A5A5A 8 -l
-    }
 }
 
 # Load HB debug tools.
@@ -149,38 +97,5 @@ foreach $procS in ($hb_masterproc.get-slave-procs) {
     $procS.set-secure-jumper value = $jumperApplied
 }
 
-if ($hb_mode == 0) {
-    run-command-file (lookup-file hbfw/standalone.simics)
-}
+run-command-file (lookup-file hbfw/standalone.simics)
 
-# Manually populate the SBE to HBBL communication area while we don't have a real SBE
-# Most of the data was copied from P9
-#
-# The "Jump forward x3000 instruction"
-system_cmp0.phys_mem.set address = 0x8200000 size = 4 0x48003000
-# The version of SBE
-system_cmp0.phys_mem.set address = 0x8200004 size = 4 0x00100001
-# 0th byte: sbeBootSide 1 byte:lpcConsoleEnable 3-4 byte: cacheSizeMB (8MB)
-system_cmp0.phys_mem.set address = 0x8200008 size = 4 0x00000008
-# The size of the HBBL + 0x3000 offset. Note that all mem after that address and before
-# HBB will be zeroed out.
-system_cmp0.phys_mem.set address = 0x820000c size = 8 0x9000
-system_cmp0.phys_mem.set address = 0x8200014 size = 2 0x0900
-# 0th byte: numKeyAddrPair; 1-7 byte: start of the XSCOM BAR
-system_cmp0.phys_mem.set address = 0x8200016 size = 8 0x080006
-system_cmp0.phys_mem.set address = 0x820001e size = 2 0x03fc
-system_cmp0.phys_mem.set address = 0x8200020 size = 8 0x00060300
-
-# Now force the HBBL image into the L3 cache (again, since SBE isn't there to do this).
-# Note that we need to skip over the exception vectors (to arrive at the 0x3000 offset).
-$sb_base = (env SANDBOXBASE)
-(get-master-procs)[0].l3_img.load-file (lookup-file $sb_base+"/obj/ppc/hbfw/img/hbbl.bin") 0x203000
-
-# TODO: Remove these lines and let SBE set the registers
-#echo "SETTING HRMOR/IAR"
-system_cmp0.cpu0_0_01_0.write-reg HRMOR 0x8000000
-($hb_cpu).write-reg HRMOR 0x8200000
-($hb_cpu).write-reg IAR 0
-
-# Enable mambo core to run instructions (previously done in entry.simics)
-(get-master-cpus)[0].enable

@@ -425,7 +425,8 @@ hb_startsimics()
 
     if [ "${MACHINE}" == "P10_STANDALONE" ]; then
         export MY_DIR="${SANDBOXBASE}/obj/ppc/simu/scripts/hbfw"
-        export RUNSIMCMD="cd ${SANDBOXBASE}/simics/ && ./runsim -m ${MACHINE} hb_script_to_run=${MY_DIR}/startup.simics pnor_img=${SANDBOXBASE}/obj/ppc/hbfw/img/p10.pnor sbe_seeprom_img=${SANDBOXBASE}/images/ppc/lab/flash/sbe_seeprom_p9a_10.bin.ecc enable_lpc_console=TRUE"
+        export RUNSIMCMD="cd ${SANDBOXBASE}/simics/ && ./runsim -m ${MACHINE} hb_script_to_run=${MY_DIR}/startup.simics pnor_img=${SANDBOXBASE}/obj/ppc/hbfw/img/p10.pnor sbe_seeprom_img=/gsa/ausgsa/projects/h/hostboot/simbuild/SBE_19b2530_HB_c391a8a_sbe_seeprom_p10.bin.ecc sbe_boot_mem='seeprom' enable_lpc_console=TRUE"
+
         echo "**********"
         echo $RUNSIMCMD
         echo "**********"

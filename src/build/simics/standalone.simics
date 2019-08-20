@@ -2,64 +2,10 @@
 # $hb_masterproc : name of master proc chip object
 # $hb_pnor : name of pnor object associated with master proc
 
-#($hb_masterproc).proc_fsi2host_mbox->responder_enable=1
-
-# Default value is to preload VPD into PNOR image
-if not defined hb_skip_vpd_preload {$hb_skip_vpd_preload = 0}
-
-
-if ($hb_mode == 0) { # Axone and beyond
-    # There is no VPD cache on Axone
-    $hb_skip_vpd_preload = 1;
-}
-
-# Preload VPD in PNOR unless told not to
-if ($hb_skip_vpd_preload == 0) {
-
-    # Pass processor chip type. All proc chip types should be the same.
-    if (get-object-list proc_hb_standalone) {
-        $procChipType=(get-object-list proc_hb_standalone)[0]->chip_type
-        python "os.environ['HB_PROC_CHIP_TYPE'] = \""+$procChipType+"\""
-    } else if (get-object-list p9_proc) {
-        $procChipType=(get-object-list p9_proc)[0]->chip_type
-        python "os.environ['HB_PROC_CHIP_TYPE'] = \""+$procChipType+"\""
-    } else {
-        $procChipType=($hb_masterproc)->chip_type
-        python "os.environ['HB_PROC_CHIP_TYPE'] = \""+$procChipType+"\""
-    }
-
-
-    try {
-            run-python-file (lookup-file hbfw/hb-pnor-vpd-preload.py)
-            # Must match pnor layout used (see eyecatch in layout)
-            echo "PNOR layout offset for VPD:"
-
-            if ($hb_mode == 1) {  # Nimbus/Cumulus
-                # PNOR eyecatch MVPD
-                echo "    - MVPD at 0x79000"
-                ($hb_pnor).load-file ./sysmvpd.dat.ecc 0x79000
-
-                # PNOR eyecatch DJVPD
-                echo "    - DJVPD at 0x31000"
-                ($hb_pnor).load-file ./sysspd.dat.ecc 0x31000
-
-                # PNOR eyecatch CVPD
-                echo "    - CVPD at 0x109000"
-                ($hb_pnor).load-file ./sysmemvpd.dat.ecc 0x109000
-            } else {  # Axone and beyond
-                # PNOR eyecatch MVPD
-                echo "    - MVPD at 0x31000"
-                ($hb_pnor).load-file ./sysmvpd.dat.ecc 0x31000
-            }
-    } except { echo "ERROR: Failed to preload VPD into PNOR." }
-}
-
-if ($hb_mode == 0) {
-    $eccPreload = (lookup-file "%simics%/eecache_prebuilt.bin.ecc")
-    # NOTE must change offset if PNOR layout changes EECACHE offsets
-    echo "    - Loading prebuilt EECACHE "+$eccPreload+" at 0x3C5C000 in PNOR"
-    ($hb_pnor).load-file $eccPreload 0x3C5C000
-}
+$eccPreload = (lookup-file "%simics%/eecache_prebuilt.bin.ecc")
+# NOTE must change offset if PNOR layout changes EECACHE offsets
+echo "    - Loading prebuilt EECACHE "+$eccPreload+" at 0x3C5C000 in PNOR"
+($hb_pnor).load-file $eccPreload 0x3C5C000
 
 
 # Turn on all processor cec-chips
@@ -76,26 +22,3 @@ echo "Enable IPMI Responder"
 try {
       run-python-file (lookup-file hbfw/ipmi_bt_responder.py)
 } except { echo "ERROR: Failed to load IPMIresponder." }
-
-#Cumulus/Nimbus
-if ($hb_mode == 1) {
-    # Setup fabric ID for master proc
-    ($hb_masterproc_cecchip).invoke parallel_store SCOM 0x1000008 "00000000_00000000" 64 #group=0, chip=0
-
-    ###################################
-    #Enable SBE
-    ###################################
-    echo "Enable the SBE"
-    # Set mailbox scratch registers so that the SBE starts in plck mode
-    # Set Boot Freq valid bit (bit 3) and valid data bit (bit 7)
-    ($hb_masterproc_cecchip).invoke parallel_store SCOM 0x5003F "31000000_00000000" 64
-    ($hb_masterproc_cecchip).invoke parallel_store SCOM 0x5003A "00000000_00000000" 64
-
-    # Set the Nest PLL Bucket ID to 5 in the 4th byte of Mbox Scratch Reg 4
-    ($hb_masterproc_cecchip).invoke parallel_store SCOM 0x5003B "00000005_00000000" 64
-    ($hb_masterproc_cecchip).invoke parallel_store FSIMBOX 0x01 "80000000" 32
-    ($hb_masterproc_cecchip).invoke parallel_store FSIMBOX 0x08 "00080000" 32
-
-    # Set the isMaster (24th) bit in Mbox Scratch Reg 6
-    ($hb_masterproc_cecchip).invoke parallel_store SCOM 0x5003D "00000080_00000000" 64
-}

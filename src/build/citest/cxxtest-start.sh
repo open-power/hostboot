@@ -41,6 +41,8 @@ then
         runsim -m $MACHINE \
         hb_script_to_run=$SANDBOXBASE/obj/ppc/simu/scripts/hbfw/startup.simics \
         pnor_img=$SANDBOXBASE/obj/ppc/hbfw/img/p10.pnor \
+        sbe_seeprom_img=/gsa/ausgsa/projects/h/hostboot/simbuild/SBE_19b2530_HB_c391a8a_sbe_seeprom_p10.bin.ecc \
+        sbe_boot_mem=seeprom \
         enable_lpc_console=TRUE"
 fi
 
