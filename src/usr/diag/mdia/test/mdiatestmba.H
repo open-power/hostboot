@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,33 +47,43 @@ class MdiaMbaTest : public CxxTest::TestSuite
             using namespace MDIA;
             using namespace TARGETING;
 
-            TS_TRACE(ENTER_MRK "testGetDiagnosticMode");
+            TS_TRACE( ENTER_MRK "testGetDiagnosticMode" );
 
-            TargetHandleList mbaList;
-            getAllChiplets(mbaList, TYPE_MBA);
+            TargetHandleList list;
+            fapi2::TargetType type = getMdiaTargetType();
+            if ( fapi2::TARGET_TYPE_MBA_CHIPLET == type )
+            {
+                TARGETING::getAllChiplets( list, TYPE_MBA );
+            }
+            else if ( fapi2::TARGET_TYPE_MCBIST == type )
+            {
+                TARGETING::getAllChiplets( list, TYPE_MCBIST );
+            }
+            else if ( fapi2::TARGET_TYPE_OCMB_CHIP == type )
+            {
+                TARGETING::getAllChiplets( list, TYPE_OCMB_CHIP );
+            }
 
-            if( !mbaList.empty() )
+            if( !list.empty() )
             {
                 DiagMode mode;
                 Globals globals;
-                TargetHandle_t mba = mbaList[0];
+                TargetHandle_t trgt = list[0];
 
-                errlHndl_t err = getDiagnosticMode(
-                                        globals, mba, mode);
+                errlHndl_t err = getDiagnosticMode( globals, trgt, mode );
 
                 if(err)
                 {
-                    TS_FAIL("getDiagnosticMode failed "
-                            "unexpectedly");
+                    TS_FAIL( "getDiagnosticMode failed unexpectedly" );
                 }
 
                 if(mode != ONE_PATTERN)
                 {
-                    TS_FAIL("mode != ONE_PATTERN");
+                    TS_FAIL( "mode != ONE_PATTERN" );
                 }
             }
 
-            TS_TRACE(EXIT_MRK "testGetDiagnosticMode");
+            TS_TRACE( EXIT_MRK "testGetDiagnosticMode" );
         }
 
         void testGetWorkFlow(void)
@@ -81,63 +91,74 @@ class MdiaMbaTest : public CxxTest::TestSuite
             using namespace MDIA;
             using namespace TARGETING;
 
-            TS_TRACE(ENTER_MRK "testGetWorkFlow");
+            TS_TRACE( ENTER_MRK "testGetWorkFlow" );
 
             Globals globals;
-            TargetHandle_t mba = 0;
+            TargetHandle_t trgt = 0;
             DiagMode mode;
             errlHndl_t err = NULL;
-            TargetHandleList mbaList;
-            getAllChiplets(mbaList, TYPE_MBA);
 
-            if( !mbaList.empty() )
+            TargetHandleList list;
+            fapi2::TargetType type = getMdiaTargetType();
+            if ( fapi2::TARGET_TYPE_MBA_CHIPLET == type )
             {
-                mba = mbaList[0];
-                err = getDiagnosticMode(
-                                globals, mba, mode);
+                TARGETING::getAllChiplets( list, TYPE_MBA );
+            }
+            else if ( fapi2::TARGET_TYPE_MCBIST == type )
+            {
+                TARGETING::getAllChiplets( list, TYPE_MCBIST );
+            }
+            else if ( fapi2::TARGET_TYPE_OCMB_CHIP == type )
+            {
+                TARGETING::getAllChiplets( list, TYPE_OCMB_CHIP );
+            }
 
-                if(err)
+            if( !list.empty() )
+            {
+                trgt = list[0];
+                err = getDiagnosticMode( globals, trgt, mode );
+
+                if( err )
                 {
-                    TS_FAIL("getDiagnosticMode "
-                            "failed unexpectedly");
+                    TS_FAIL( "getDiagnosticMode failed unexpectedly" );
                 }
 
-                if(mode != ONE_PATTERN)
+                if( mode != ONE_PATTERN )
                 {
-                    TS_FAIL("mode != ONE_PATTERN");
+                    TS_FAIL( "mode != ONE_PATTERN" );
+                }
+
+                WorkFlow wf, expected;
+
+                expected.push_back( RESTORE_DRAM_REPAIRS );
+                expected.push_back( START_PATTERN_0 );
+                expected.push_back( START_SCRUB );
+                expected.push_back( CLEAR_HW_CHANGED_STATE );
+
+                err = getWorkFlow( mode, wf, globals );
+
+                if( err )
+                {
+                    TS_FAIL( "getWorkFlow failed unexpectedly" );
+                }
+
+                if( wf.size() != expected.size() )
+                {
+                    TS_FAIL( "incorrect workflow size for init only mode" );
+                }
+
+                int64_t index = wf.size();
+
+                while( index-- != 0 )
+                {
+                    if( wf[index] != expected[index] )
+                    {
+                        TS_FAIL( "workflow entry incorrect or out of order" );
+                    }
                 }
             }
 
-            WorkFlow wf, expected;
-
-            expected.push_back(RESTORE_DRAM_REPAIRS);
-            expected.push_back(START_PATTERN_0);
-            expected.push_back(START_SCRUB);
-            expected.push_back(CLEAR_HW_CHANGED_STATE);
-
-            err = getWorkFlow(mode, wf, globals);
-
-            if(err)
-            {
-                TS_FAIL("getWorkFlow failed unexpectedly");
-            }
-
-            if(wf.size() != expected.size())
-            {
-                TS_FAIL("incorrect workflow size for init only mode");
-            }
-
-            int64_t index = wf.size();
-
-            while(index-- != 0)
-            {
-                if(wf[index] != expected[index])
-                {
-                    TS_FAIL("workflow entry incorrect or out of order");
-                }
-            }
-
-            TS_TRACE(EXIT_MRK "testGetWorkFlow");
+            TS_TRACE( EXIT_MRK "testGetWorkFlow" );
         }
 };
 #endif
