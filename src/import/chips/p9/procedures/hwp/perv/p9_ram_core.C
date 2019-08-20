@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,6 +49,8 @@ const uint32_t RAM_REG_MSR   = 2001;
 const uint32_t RAM_REG_CR    = 2002;
 const uint32_t RAM_REG_FPSCR = 2003;
 const uint32_t RAM_REG_VSCR  = 2004;
+const uint32_t RAM_REG_SLBE  = 2005;
+const uint32_t RAM_REG_SLBV  = 2006;
 
 // opcode for ramming
 const uint32_t OPCODE_MTSPR_FROM_GPR0_TO_SPRD      = 0x7C1543A6;
@@ -601,6 +603,16 @@ fapi2::ReturnCode RamCore::get_reg(const Enum_RegType i_type,
                 opcodes[7] = {&l_backup_vr0_dw1, OPCODE_MFSPR_FROM_SPRD_TO_GPR0, NULL};
                 opcodes[8] = {&l_backup_vr0_dw0, OPCODE_MFSPR_FROM_SPRD_TO_GPR0 + (1 << 21), NULL};
                 opcodes[9] = {NULL, OPCODE_MTVSRDD_FROM_GPR1_0_TO_VSR32, NULL};
+            }
+            else if(i_reg_num == RAM_REG_SLBE)
+            {
+                opcodes[0] = {NULL, OPCODE_SLBMFEE, NULL};
+                opcodes[1] = {NULL, OPCODE_MTSPR_FROM_GPR0_TO_SPRD, &o_buffer[0]};
+            }
+            else if(i_reg_num == RAM_REG_SLBV)
+            {
+                opcodes[0] = {NULL, OPCODE_SLBMFEV, NULL};
+                opcodes[1] = {NULL, OPCODE_MTSPR_FROM_GPR0_TO_SPRD, &o_buffer[0]};
             }
             else
             {

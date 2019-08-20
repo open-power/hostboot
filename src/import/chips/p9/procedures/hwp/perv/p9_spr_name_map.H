@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -234,7 +234,9 @@ typedef std::map<std::string, SPRMapEntry>::iterator SPR_MAP_IT;
     _op_(MSR      ,2001, ECP.SD.T<??T>_MSR                                ,FLAG_READ_WRITE ,SPR_PER_PT         ,64)\
     _op_(CR       ,2002, N/A                                              ,FLAG_READ_WRITE ,SPR_PER_PT         ,32)\
     _op_(FPSCR    ,2003, N/A                                              ,FLAG_READ_WRITE ,SPR_PER_PT         ,64)\
-    _op_(VSCR     ,2004, N/A                                              ,FLAG_READ_WRITE ,SPR_PER_PT         ,32)
+    _op_(VSCR     ,2004, N/A                                              ,FLAG_READ_WRITE ,SPR_PER_PT         ,32)\
+    _op_(SLBE     ,2005, N/A                                              ,FLAG_READ_ONLY  ,SPR_PER_PT         ,64)\
+    _op_(SLBV     ,2006, N/A                                              ,FLAG_READ_ONLY  ,SPR_PER_PT         ,64)
 
 #define DO_SPR_MAP(in_name, in_number, in_spy_name, in_flag, in_share_type, in_bit_length)\
     SPRMapEntry entry##in_name; \
