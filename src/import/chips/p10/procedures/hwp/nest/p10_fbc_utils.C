@@ -290,7 +290,7 @@ fapi2::ReturnCode p10_fbc_utils_get_fbc_state(
     FAPI_TRY(GET_PB_COM_SCOM_ES3_STATION_MODE(i_target, l_fbc_mode_data));
 
     // fabric is initialized if PB_INITIALIZED bit is one/set
-    o_is_initialized = GET_PB_COM_SCOM_ES3_STATION_MODE_ES3_PBIXXX_INIT(l_fbc_mode_data);
+    o_is_initialized = GET_PB_COM_SCOM_ES3_STATION_MODE_PB_ES3_PBIXXX_INIT(l_fbc_mode_data);
 
     // read ADU PMisc Mode Register state
     FAPI_TRY(GET_TP_TPBR_AD_SND_MODE_REG(i_target, l_pmisc_mode_data));

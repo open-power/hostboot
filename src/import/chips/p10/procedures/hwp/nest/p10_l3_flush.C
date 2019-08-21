@@ -83,15 +83,15 @@ fapi2::ReturnCode p10_l3_flush(
     FAPI_DBG("Verifying that a previous flush is not active");
     FAPI_TRY(GET_L3_MISC_L3CERRS_PRD_PURGE_REG(i_target, l_purge_reg_data));
 
-    FAPI_ASSERT(!(GET_L3_MISC_L3CERRS_PRD_PURGE_REG_PURGE_REQ(l_purge_reg_data)),
+    FAPI_ASSERT(!(GET_L3_MISC_L3CERRS_PRD_PURGE_REG_L3_PRD_PURGE_REQ(l_purge_reg_data)),
                 fapi2::P10_L3_FLUSH_PREVIOUS_PURGE_ACTIVE_ERR()
                 .set_TARGET(i_target)
                 .set_PURGEREG(l_purge_reg_data),
                 "Previous purge request has not completed error");
 
-    SET_L3_MISC_L3CERRS_PRD_PURGE_REG_PURGE_REQ(0x1, l_purge_reg_data);
-    SET_L3_MISC_L3CERRS_PRD_PURGE_REG_PURGE_TTYPE(i_purge_type, l_purge_reg_data);
-    SET_L3_MISC_L3CERRS_PRD_PURGE_REG_PURGE_DIR_ADDR(i_purge_addr, l_purge_reg_data);
+    SET_L3_MISC_L3CERRS_PRD_PURGE_REG_L3_PRD_PURGE_REQ(0x1, l_purge_reg_data);
+    SET_L3_MISC_L3CERRS_PRD_PURGE_REG_L3_PRD_PURGE_TTYPE(i_purge_type, l_purge_reg_data);
+    SET_L3_MISC_L3CERRS_PRD_PURGE_REG_L3_PRD_PURGE_DIR_ADDR(i_purge_addr, l_purge_reg_data);
 
     //Write the purge request
     FAPI_TRY(PUT_L3_MISC_L3CERRS_PRD_PURGE_REG(i_target, l_purge_reg_data));
@@ -106,7 +106,7 @@ fapi2::ReturnCode p10_l3_flush(
 
         FAPI_TRY(GET_L3_MISC_L3CERRS_PRD_PURGE_REG(i_target, l_purge_reg_data));
 
-        if (!GET_L3_MISC_L3CERRS_PRD_PURGE_REG_PURGE_REQ(l_purge_reg_data))
+        if (!GET_L3_MISC_L3CERRS_PRD_PURGE_REG_L3_PRD_PURGE_REQ(l_purge_reg_data))
         {
             FAPI_DBG("Purge complete!");
             break;

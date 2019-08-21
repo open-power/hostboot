@@ -99,7 +99,7 @@ p10_sbe_purge_hb(
 
         // mask L3 FIR tracking contained mode violations
         FAPI_TRY(PREP_L3_MISC_L3CERRS_FIR_REG_RW(l_core_target));
-        SET_L3_MISC_L3CERRS_FIR_REG_CHIP_CONTAINED_ERR(l_l3_fir_mask_or_reg);
+        SET_L3_MISC_L3CERRS_FIR_REG_L3_CHIP_CONTAINED_ERR(l_l3_fir_mask_or_reg);
         FAPI_TRY(PREP_L3_MISC_L3CERRS_FIR_MASK_REG_WO_OR(l_core_target));
         FAPI_TRY(PUT_L3_MISC_L3CERRS_FIR_MASK_REG_WO_OR(l_core_target, l_l3_fir_mask_or_reg));
     }
@@ -115,7 +115,7 @@ p10_sbe_purge_hb(
 
         // mask L3 FIR tracking contained mode violations
         FAPI_TRY(PREP_L3_MISC_L3CERRS_FIR_REG_RW(l_core_target));
-        SET_L3_MISC_L3CERRS_FIR_REG_CHIP_CONTAINED_ERR(l_l3_fir_mask_or_reg);
+        SET_L3_MISC_L3CERRS_FIR_REG_L3_CHIP_CONTAINED_ERR(l_l3_fir_mask_or_reg);
         FAPI_TRY(PREP_L3_MISC_L3CERRS_FIR_MASK_REG_WO_OR(l_core_target));
         FAPI_TRY(PUT_L3_MISC_L3CERRS_FIR_MASK_REG_WO_OR(l_core_target, l_l3_fir_mask_or_reg));
 

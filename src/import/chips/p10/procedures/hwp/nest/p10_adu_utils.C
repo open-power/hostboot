@@ -844,23 +844,28 @@ fapi2::ReturnCode p10_adu_utils_status_errors_check(
         // Check for errors in status register
         l_statusError =
             ( l_statusError ||
-              GET_TP_TPBR_AD_ALTD_STATUS_REG_WAIT_CMD_ARBIT(l_statusReg)  ||
-              !GET_TP_TPBR_AD_ALTD_STATUS_REG_ADDR_DONE(l_statusReg)      || //Address portion of the operation is not complete
-              GET_TP_TPBR_AD_ALTD_STATUS_REG_WAIT_RESP(l_statusReg)       || //Waiting for a clean combined response (cresp)
-              GET_TP_TPBR_AD_ALTD_STATUS_REG_OVERRUN_ERROR(l_statusReg)   || //New data written before old was used/read w/o new data
-              GET_TP_TPBR_AD_ALTD_STATUS_REG_AUTOINC_ERROR(l_statusReg)   || //Internal address counter rolled over the 0.5M boundary
-              GET_TP_TPBR_AD_ALTD_STATUS_REG_COMMAND_ERROR(l_statusReg)   || //New command was issued before previous one finished
-              GET_TP_TPBR_AD_ALTD_STATUS_REG_ADDRESS_ERROR(l_statusReg)   || //Invalid address; pb responded with addr_err cresp
+              GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_WAIT_CMD_ARBIT(l_statusReg)  ||
+              !GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_ADDR_DONE(l_statusReg)
+              || //Address portion of the operation is not complete
+              GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_WAIT_RESP(l_statusReg)       || //Waiting for a clean combined response (cresp)
+              GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_OVERRUN_ERROR(l_statusReg)
+              || //New data written before old was used/read w/o new data
+              GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_AUTOINC_ERROR(l_statusReg)
+              || //Internal address counter rolled over the 0.5M boundary
+              GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_COMMAND_ERROR(l_statusReg)
+              || //New command was issued before previous one finished
+              GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_ADDRESS_ERROR(l_statusReg)
+              || //Invalid address; pb responded with addr_err cresp
               l_statusReg.getBit<PU_ALTD_STATUS_REG_FBC_PBINIT_MISSING>() || //Attempt to start a command without pb_init active
-              GET_TP_TPBR_AD_ALTD_STATUS_REG_ECC_CE(l_statusReg)          || //ECC Correctable error
-              GET_TP_TPBR_AD_ALTD_STATUS_REG_ECC_UE(l_statusReg)          || //ECC Uncorrectable error
-              GET_TP_TPBR_AD_ALTD_STATUS_REG_ECC_SUE(l_statusReg)            //ECC Special Uncorrectable error
+              GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_ECC_CE(l_statusReg)          || //ECC Correctable error
+              GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_ECC_UE(l_statusReg)          || //ECC Uncorrectable error
+              GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_ECC_SUE(l_statusReg)            //ECC Special Uncorrectable error
             );
 
         // If address only operation, do not check for PU_ALTD_STATUS_REG_FBC_DATA_DONE otherwise it should be set
         if (i_addrOnlyOper == false)
         {
-            l_statusError |= !GET_TP_TPBR_AD_ALTD_STATUS_REG_DATA_DONE(l_statusReg);
+            l_statusError |= !GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_DATA_DONE(l_statusReg);
         }
 
         // Break out of checking status max_wait_poll times if status register is clean
@@ -879,7 +884,7 @@ fapi2::ReturnCode p10_adu_utils_status_errors_check(
     // throw errors if the status register is still not clean.
 
     // Throw an explicit error for address errors if detected
-    FAPI_ASSERT(!GET_TP_TPBR_AD_ALTD_STATUS_REG_ADDRESS_ERROR(l_statusReg),
+    FAPI_ASSERT(!GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_ADDRESS_ERROR(l_statusReg),
                 fapi2::P10_ADU_STATUS_REG_ADDRESS_ERR()
                 .set_TARGET(i_target)
                 .set_STATUSREG(l_statusReg),
