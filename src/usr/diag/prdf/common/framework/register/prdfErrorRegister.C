@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,7 +40,7 @@
 #include <prdfMain.H>
 #include <prdfAssert.h>
 #include <iipstep.h>
-#include <iipbits.h>
+#include <prdfBitString.H>
 #include <iipResolution.h>
 #include <iipscr.h>
 #include <prdfErrorSignature.H>

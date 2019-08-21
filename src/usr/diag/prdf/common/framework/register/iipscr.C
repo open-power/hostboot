@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 1997,2017                        */
+/* Contributors Listed Below - COPYRIGHT 1997,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,7 +41,7 @@
 /*  Includes                                                          */
 /*--------------------------------------------------------------------*/
 
-#include <iipbits.h>
+#include <prdfBitString.H>
 #include <iipscr.h>
 #include <iipconst.h>
 

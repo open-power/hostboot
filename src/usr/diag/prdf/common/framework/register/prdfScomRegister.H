@@ -37,7 +37,7 @@
  */
 
 #include <iipscr.h>
-#include <iipbits.h>
+#include <prdfBitString.H>
 #include <prdfHomRegisterAccess.H>
 #include <prdfTrace.H>
 

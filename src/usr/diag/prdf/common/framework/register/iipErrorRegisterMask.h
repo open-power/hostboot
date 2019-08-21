@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -70,9 +70,7 @@
 #include <iipErrorRegisterFilter.h>
 #endif
 
-#ifndef IIPBITS_H
-#include <iipbits.h>
-#endif
+#include <prdfBitString.H>
 
 namespace PRDF
 {
