@@ -161,6 +161,13 @@ enum COMMAND : uint8_t
     BSL_VERIFY_BLOCK          = 0x1D,
 };
 
+// These consts serve as reminders in the code for what was explained in the
+// COMMAND enum.
+const int NO_DELAY_NO_RESPONSE       = 0;
+const int NO_DELAY_EXTERNAL_RESPONSE = 0;
+const int ERASE_SEGMENT_DELAY        = 250;
+const int ERASE_FIRMWARE_DELAY       = 250;
+
 // These are the various response codes returned by the BPM after the
 // BSL_CRC_CHECK command is sent at the end of the update procedure.
 enum COMMAND_BSL_CRC_CHECK_RESPONSE_CODES : uint16_t
@@ -915,7 +922,8 @@ private:
                                 uint8_t & o_status);
 
     /**
-     *  @brief Attempts a BSL_RX_DATA_BLOCK command up to three times.
+     *  @brief Attempts a BSL_RX_DATA_BLOCK command up to three times by calling
+     *         blockWriteRetry.
      *
      *  @param[in]  i_payload       The payload containing the BSL_RX_DATA_BLOCK
      *                              command and the data to be attempted to be
@@ -924,6 +932,17 @@ private:
      *  @return     errlHndl_t      nullptr on success. Otherwise, an error.
      */
     errlHndl_t blockWrite(payload_t i_payload);
+
+    /**
+     *  @brief Attempts a BSL_RX_DATA_BLOCK command up to three times.
+     *
+     *  @param[in]  i_payload       The payload containing the BSL_RX_DATA_BLOCK
+     *                              command and the data to be attempted to be
+     *                              written.
+     *
+     *  @return     errlHndl_t      nullptr on success. Otherwise, an error.
+     */
+    errlHndl_t blockWriteRetry(payload_t i_payload);
 
     /**
      * @brief A helper function used to wait for the command status bit to reset

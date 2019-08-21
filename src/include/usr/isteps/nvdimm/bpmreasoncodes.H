@@ -53,6 +53,7 @@ namespace BPM_RC
         BPM_VERIFY_GOOD_BPM_STATE           = 0x0D,
         BPM_RUN_FW_UPDATES                  = 0x0F,
         BPM_WRITE_VIA_SCAP                  = 0x10,
+        BPM_BLOCK_WRITE                     = 0x11,
         BPM_START_UPDATE                    = 0xFD,
         BPM_END_UPDATE                      = 0xFE,
         BPM_DUMMY_ERROR                     = 0xFF,

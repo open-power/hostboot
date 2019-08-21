@@ -183,51 +183,19 @@ bool isBslCommand(const uint8_t i_command)
     return result;
 }
 
-
 /**
- *  @brief Helper function to handle two potential errors that might occur in a
- *         function that only returns a single error log. If the return error is
- *         not nullptr then the second error will be linked to it and committed
- *         if this is the final update attempt. Otherwise, it will be deleted
- *         since the update procedure will occur again and may be successful.
- *         If the return error is nullptr then the return error will point to
- *         the second's error and the second error will point to nullptr.
+ * @brief Helper function to pull out the BPM address offset in the given
+ *        payload.
  *
- *  @param[in/out]      io_returnErrl   A pointer to the error that would be
- *                                      returned by the function that called
- *                                      this one. If nullptr, then it will be
- *                                      set point to the secondary error and
- *                                      that error will become nullptr.
- *
- *  @param[in/out]     io_secondErrl    The secondary error that occurred which
- *                                      in addition to the usual returned error.
+ * @param[in]   i_payload       The payload from which to extract the address
+ *                              offset.
  */
-void Bpm::handleMultipleErrors(errlHndl_t& io_returnErrl, errlHndl_t& io_secondErrl)
+uint16_t getPayloadAddressBE(payload_t i_payload)
 {
-
-    if (iv_updateAttempted && (io_returnErrl != nullptr))
-    {
-        io_secondErrl->plid(io_returnErrl->plid());
-        TRACFCOMP(g_trac_bpm, "Committing second error eid=0x%X with plid of "
-                 "returned error: 0x%X",
-                 io_secondErrl->eid(),
-                 io_returnErrl->plid());
-        io_secondErrl->collectTrace(BPM_COMP_NAME);
-        ERRORLOG::errlCommit(io_secondErrl, BPM_COMP_ID);
-    }
-    else if (io_returnErrl == nullptr)
-    {
-        io_returnErrl = io_secondErrl;
-        io_secondErrl = nullptr;
-    }
-    else
-    {
-        // Another update attempt will be made, delete this secondary error.
-        delete io_secondErrl;
-        io_secondErrl = nullptr;
-    }
-
-
+    // Get the payload address and convert back to big endian.
+    uint16_t payloadAddress = (i_payload[PAYLOAD_ADDRESS_START_INDEX])
+                            | (i_payload[PAYLOAD_ADDRESS_START_INDEX + 1] << 8);
+    return payloadAddress;
 }
 
 /**
@@ -321,6 +289,10 @@ void runBpmUpdates(bpmList_t           * const i_16gb_BPMs,
                                      "next BPM",
                                      nvdimmHuid);
                         }
+                        else
+                        {
+                            continue;
+                        }
                     }
                     else
                     {
@@ -368,6 +340,10 @@ void runBpmUpdates(bpmList_t           * const i_16gb_BPMs,
                                      "NVDIMM 0x%.8X. Commit and move onto the "
                                      "next BPM",
                                      nvdimmHuid);
+                        }
+                        else
+                        {
+                            continue;
                         }
                     }
                     else
@@ -599,7 +575,10 @@ errlHndl_t Bpm::readBslVersion()
         }
 
         // Issue the BSL command
-        errl = issueCommand(BPM_PASSTHROUGH, payload, WRITE, 0);
+        errl = issueCommand(BPM_PASSTHROUGH,
+                            payload,
+                            WRITE,
+                            NO_DELAY_EXTERNAL_RESPONSE);
         if (errl != nullptr)
         {
             break;
@@ -1024,7 +1003,10 @@ errlHndl_t Bpm::inUpdateMode()
 
     do {
 
-        errl = issueCommand(BPM_LOCAL, BCL_IS_UPDATE_IN_PROGRESS, READ, 0);
+        errl = issueCommand(BPM_LOCAL,
+                            BCL_IS_UPDATE_IN_PROGRESS,
+                            READ,
+                            NO_DELAY_NO_RESPONSE);
         if (errl != nullptr)
         {
             break;
@@ -1096,7 +1078,10 @@ errlHndl_t Bpm::enterUpdateMode()
         TRACFCOMP(g_trac_bpm, "Bpm::enterUpdateMode(): "
                  "Issuing BPM_LOCAL BCL_START_UPDATE command.");
 
-        errl = issueCommand(BPM_LOCAL, BCL_START_UPDATE, WRITE, 0);
+        errl = issueCommand(BPM_LOCAL,
+                            BCL_START_UPDATE,
+                            WRITE,
+                            NO_DELAY_NO_RESPONSE);
         if (errl != nullptr)
         {
             break;
@@ -1142,7 +1127,10 @@ errlHndl_t Bpm::exitUpdateMode()
             break;
         }
 
-        errl = issueCommand(BPM_LOCAL, BCL_IS_UPDATE_IN_PROGRESS, READ, 0);
+        errl = issueCommand(BPM_LOCAL,
+                            BCL_IS_UPDATE_IN_PROGRESS,
+                            READ,
+                            NO_DELAY_NO_RESPONSE);
         if (errl != nullptr)
         {
             break;
@@ -1164,7 +1152,10 @@ errlHndl_t Bpm::exitUpdateMode()
         // cause unpredicatable behavior and errors.
         if (isUpdateInProgress)
         {
-            errl = issueCommand(BPM_LOCAL, BCL_END_UPDATE, WRITE, 0);
+            errl = issueCommand(BPM_LOCAL,
+                                BCL_END_UPDATE,
+                                WRITE,
+                                NO_DELAY_NO_RESPONSE);
             if (errl != nullptr)
             {
                 break;
@@ -1174,7 +1165,7 @@ errlHndl_t Bpm::exitUpdateMode()
         {
             TRACFCOMP(g_trac_bpm, "Bpm::exitUpdateMode(): "
                       "Not in update mode. "
-                      "Don't send the exit update command.");
+                      "Exit update command will not be sent.");
         }
 
         // Write back the production magic values
@@ -1257,7 +1248,10 @@ errlHndl_t Bpm::updateFirmware(BpmFirmwareLidImage i_image)
                 break;
             }
 
-            errl = issueCommand(BPM_PASSTHROUGH, payload, WRITE, 250);
+            errl = issueCommand(BPM_PASSTHROUGH,
+                                payload,
+                                WRITE,
+                                ERASE_FIRMWARE_DELAY);
             if (errl != nullptr)
             {
                 break;
@@ -1306,7 +1300,12 @@ errlHndl_t Bpm::updateFirmware(BpmFirmwareLidImage i_image)
             do
             {
                 // Issue the write command to the BPM.
-                errl = issueCommand(BPM_PASSTHROUGH, payload, WRITE, 0);
+                // The RESET_VECTOR is special in that its response is checked
+                // externally.
+                errl = issueCommand(BPM_PASSTHROUGH,
+                                    payload,
+                                    WRITE,
+                                    NO_DELAY_EXTERNAL_RESPONSE);
                 if (errl != nullptr)
                 {
                     break;
@@ -1470,7 +1469,10 @@ errlHndl_t Bpm::enterBootstrapLoaderMode()
         while (retry != 0)
         {
 
-            errl = issueCommand(BPM_LOCAL, BCL_IS_BSL_MODE, WRITE, 0);
+            errl = issueCommand(BPM_LOCAL,
+                                BCL_IS_BSL_MODE,
+                                WRITE,
+                                NO_DELAY_NO_RESPONSE);
             if (errl != nullptr)
             {
                 break;
@@ -1500,7 +1502,10 @@ errlHndl_t Bpm::enterBootstrapLoaderMode()
             // Sleep for 0.001 second.
             nanosleep(0, 1 * NS_PER_MSEC);
 
-            errl = issueCommand(BPM_LOCAL, BCL_ENTER_BSL_MODE, WRITE, 0);
+            errl = issueCommand(BPM_LOCAL,
+                                BCL_ENTER_BSL_MODE,
+                                WRITE,
+                                NO_DELAY_NO_RESPONSE);
             if (errl != nullptr)
             {
                 break;
@@ -1794,12 +1799,18 @@ errlHndl_t Bpm::resetDevice()
                 break;
             }
 
-            errl = issueCommand(BPM_PASSTHROUGH, payload, WRITE, 0);
+            // Despite this being a BSL command we cannot check the response
+            // because the BPM will either be offline and cannot respond or
+            // the command will have completed and we won't be in BSL mode
+            // anymore and therefor shouldn't check the response.
+            errl = issueCommand(BPM_PASSTHROUGH,
+                                payload,
+                                WRITE,
+                                NO_DELAY_NO_RESPONSE);
             if (errl != nullptr)
             {
                 break;
             }
-
 
             TRACFCOMP(g_trac_bpm, "Bpm::resetDevice(): "
                       "Resetting BPM for NVDIMM 0x%.8X, sleep for 10 seconds.",
@@ -1876,6 +1887,8 @@ errlHndl_t Bpm::writeViaScapRegister(uint8_t const i_reg, uint8_t const i_data)
 
     do {
 
+        // The SCAP_REG and SCAP_DATA registers require a few retries to get the
+        // values to stick. This loop sets SCAP_REG to i_reg
         uint8_t retry = 0;
         uint8_t data = 0;
         do {
@@ -1924,7 +1937,7 @@ errlHndl_t Bpm::writeViaScapRegister(uint8_t const i_reg, uint8_t const i_data)
 
             if (data == i_reg)
             {
-                TRACFCOMP(g_trac_bpm, "Bpm::writeViaScapRegister(): "
+                TRACUCOMP(g_trac_bpm, "Bpm::writeViaScapRegister(): "
                          "REG 0x%X was successfully written to SCAP_REG 0x434. "
                          "Stop retries.",
                          i_reg);
@@ -1961,6 +1974,8 @@ errlHndl_t Bpm::writeViaScapRegister(uint8_t const i_reg, uint8_t const i_data)
             break;
         }
 
+        // The SCAP_REG and SCAP_DATA registers require a few retries to get the
+        // values to stick. This loop sets SCAP_DATA to i_data
         retry = 0;
         data = 0;
         do {
@@ -1979,7 +1994,7 @@ errlHndl_t Bpm::writeViaScapRegister(uint8_t const i_reg, uint8_t const i_data)
                                   i_data);
             if (errl != nullptr)
             {
-                TRACFCOMP(g_trac_bpm, "BPM::writeViaScapRegister(): "
+                TRACFCOMP(g_trac_bpm, ERR_MRK"BPM::writeViaScapRegister(): "
                          "Failed to write data 0x%.2X to SCAP_DATA for "
                          "register 0x%.2X.",
                          i_data,
@@ -2002,7 +2017,7 @@ errlHndl_t Bpm::writeViaScapRegister(uint8_t const i_reg, uint8_t const i_data)
                                  data);
             if (errl != nullptr)
             {
-                TRACFCOMP(g_trac_bpm, "BPM::writeViaScapRegister(): "
+                TRACFCOMP(g_trac_bpm, ERR_MRK"BPM::writeViaScapRegister(): "
                          "Failed to read from SCAP_DATA to verify "
                          "that requested data 0x%.2X was written successfully.",
                          i_data);
@@ -2011,7 +2026,7 @@ errlHndl_t Bpm::writeViaScapRegister(uint8_t const i_reg, uint8_t const i_data)
 
             if (data == i_data)
             {
-                TRACFCOMP(g_trac_bpm, "Bpm::writeViaScapRegister(): "
+                TRACUCOMP(g_trac_bpm, "Bpm::writeViaScapRegister(): "
                          "DATA 0x%X was successfully written to SCAP_DATA 0x435."
                          " Stop retries.",
                          i_data);
@@ -2458,10 +2473,9 @@ errlHndl_t Bpm::dumpSegment(uint16_t const i_segmentCode,
 
             // Close this segments page on the BPM before making another
             // attempt.
-            errlHndl_t closeSegmentErrl = switchBpmPage(DEFAULT_REG_PAGE);
-            if (closeSegmentErrl != nullptr)
+            errl = switchBpmPage(DEFAULT_REG_PAGE);
+            if (errl != nullptr)
             {
-                handleMultipleErrors(errl, closeSegmentErrl);
                 break;
             }
 
@@ -2648,7 +2662,10 @@ errlHndl_t Bpm::eraseSegment(uint16_t i_segmentCode)
             break;
         }
 
-        errl = issueCommand(BPM_PASSTHROUGH, payload, WRITE, 250);
+        errl = issueCommand(BPM_PASSTHROUGH,
+                            payload,
+                            WRITE,
+                            ERASE_SEGMENT_DELAY);
         if (errl != nullptr)
         {
             break;
@@ -2973,8 +2990,7 @@ errlHndl_t Bpm::verifyBlockWrite(payload_t  i_payload,
         // Pull the address to verify out of the payload. It was inserted in
         // little endian form so it needs to be converted back to big endian
         // because setupPayload expects an address in big endian.
-        uint16_t address = (i_payload[PAYLOAD_ADDRESS_START_INDEX])
-                         | (i_payload[PAYLOAD_ADDRESS_START_INDEX + 1] << 8);
+        uint16_t address = getPayloadAddressBE(i_payload);
 
         // The data section of the payload is organized in the following way:
         // 2 bytes: uint16_t size of data to verify in little endian format
@@ -3008,7 +3024,10 @@ errlHndl_t Bpm::verifyBlockWrite(payload_t  i_payload,
         }
 
         // Issue the command to the BPM.
-        errl = issueCommand(BPM_PASSTHROUGH, verifyPayload, WRITE, 0);
+        errl = issueCommand(BPM_PASSTHROUGH,
+                            verifyPayload,
+                            WRITE,
+                            NO_DELAY_EXTERNAL_RESPONSE);
         if (errl != nullptr)
         {
             break;
@@ -3029,18 +3048,24 @@ errlHndl_t Bpm::blockWrite(payload_t i_payload)
 {
     assert(i_payload[PAYLOAD_COMMAND_INDEX] == BSL_RX_DATA_BLOCK,
           "Bpm::blockWrite(): "
-          "Can only retry for BSL_RX_DATA_BLOCK commands");
+          "Can only write BSL_RX_DATA_BLOCK commands");
 
     errlHndl_t errl = nullptr;
     uint8_t retry = 0;
+
+    // Get the payload address for trace output.
+    uint16_t payloadAddress = getPayloadAddressBE(i_payload);
 
     // Any status from verifyBlockWrite that is non-zero is considered a
     // fail. So, assume a fail and check.
     uint8_t wasVerified = 0xFF;
     do {
 
-        // Send the payload data over as a pass-through command
-        errl = issueCommand(BPM_PASSTHROUGH, i_payload, WRITE);
+
+        // Since the write command has its response packet checked within the
+        // issueCommand() function we must attempt to retry the write if we get
+        // a bad response from the BPM.
+        errl = blockWriteRetry(i_payload);
         if (errl != nullptr)
         {
             break;
@@ -3064,21 +3089,30 @@ errlHndl_t Bpm::blockWrite(payload_t i_payload)
             delete errl;
             errl = nullptr;
         }
-        else
+        else if (errl != nullptr)
         {
+            TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::blockWrite(): "
+                     "BSL_VERIFY_BLOCK failed for address 0x%.4X. "
+                     "A non-retryable error occurred on attempt %d/%d",
+                     payloadAddress,
+                     (retry + 1),
+                     MAX_RETRY);
             // A non-retryable error occurred. Break from retry loop.
             break;
         }
 
         if (wasVerified != 0)
         {
-            TRACFCOMP(g_trac_bpm, "Bpm::blockWrite(): "
-                     "BSL_VERIFY_BLOCK failed. Attempt %d/%d",
+            TRACUCOMP(g_trac_bpm, "Bpm::blockWrite(): "
+                     "BSL_VERIFY_BLOCK failed for address 0x%.4X. "
+                     "Attempt %d/%d",
+                     payloadAddress,
                      (retry + 1),
                      MAX_RETRY);
         }
         else
         {
+            // Write verified successfully, stop retries.
             break;
         }
 
@@ -3086,6 +3120,86 @@ errlHndl_t Bpm::blockWrite(payload_t i_payload)
     if ((errl == nullptr) && (retry >= MAX_RETRY) && (wasVerified != 0))
     {
         TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::blockWrite(): "
+                 "Failed to write payload data to BPM after %d retries.",
+                 MAX_RETRY);
+        /*@
+        * @errortype
+        * @severity         ERRORLOG::ERRL_SEV_PREDICTIVE
+        * @moduleid         BPM_RC::BPM_BLOCK_WRITE
+        * @reasoncode       BPM_RC::BPM_EXCEEDED_RETRY_LIMIT
+        * @userdata1[0:63]  NVDIMM Target HUID associated with this BPM
+        * @devdesc          The block of data to be written to the BPM
+        *                   failed to write successfully in the given number
+        *                   of retries.
+        * @custdesc         A problem occurred during IPL of the system.
+        */
+        errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                       BPM_RC::BPM_BLOCK_WRITE,
+                                       BPM_RC::BPM_EXCEEDED_RETRY_LIMIT,
+                                       TARGETING::get_huid(iv_nvdimm));
+        errl->collectTrace(BPM_COMP_NAME);
+
+    }
+
+    if (errl != nullptr)
+    {
+        // Change the state of iv_attemptAnotherUpdate. This will signal
+        // another update attempt or cease further attempts.
+        setAttemptAnotherUpdate();
+    }
+
+    return errl;
+}
+
+errlHndl_t Bpm::blockWriteRetry(payload_t i_payload)
+{
+    assert(i_payload[PAYLOAD_COMMAND_INDEX] == BSL_RX_DATA_BLOCK,
+          "Bpm::blockWriteRetry(): "
+          "Can only retry BSL_RX_DATA_BLOCK commands");
+
+    errlHndl_t errl = nullptr;
+    uint8_t retry = 0;
+
+    // Get the payload address for trace output.
+    uint16_t payloadAddress = getPayloadAddressBE(i_payload);
+
+    do {
+
+        // Send the payload data over as a pass-through command. The response
+        // will be checked internally.
+        errl = issueCommand(BPM_PASSTHROUGH, i_payload, WRITE);
+        if (errl == nullptr)
+        {
+            // Command was a success. Stop retries.
+            break;
+        }
+
+        if (  (errl != nullptr)
+           && (errl->reasonCode() == BPM_RC::BPM_RESPONSE_CRC_MISMATCH)
+           && ((retry + 1) < MAX_RETRY))
+        {
+            // Delete the retryable error and continue
+            TRACFCOMP(g_trac_bpm, "Bpm::blockWriteRetry(): "
+                     "Encountered a retryable error. Delete and continue.");
+            delete errl;
+            errl = nullptr;
+        }
+        else if (errl != nullptr)
+        {
+            TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::blockWriteRetry(): "
+                     "BSL_RX_DATA_BLOCK failed for address 0x%.4X. "
+                     "A non-retryable error occurred on attempt %d/%d",
+                     payloadAddress,
+                     (retry + 1),
+                     MAX_RETRY);
+            // A non-retryable error occurred. Break from retry loop.
+            break;
+        }
+
+    } while (++retry < MAX_RETRY);
+    if ((errl == nullptr) && (retry >= MAX_RETRY))
+    {
+        TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::blockWriteRetry(): "
                  "Failed to write payload data to BPM after %d retries.",
                  MAX_RETRY);
         /*@
@@ -3105,6 +3219,10 @@ errlHndl_t Bpm::blockWrite(payload_t i_payload)
                                        TARGETING::get_huid(iv_nvdimm));
         errl->collectTrace(BPM_COMP_NAME);
 
+    }
+
+    if (errl != nullptr)
+    {
         // Change the state of iv_attemptAnotherUpdate. This will signal
         // another update attempt or cease further attempts.
         setAttemptAnotherUpdate();
@@ -3338,9 +3456,9 @@ errlHndl_t Bpm::runConfigUpdates(BpmConfigLidImage i_configImage)
     do {
 
         // Before the entering BSL mode, we must do preprocessing prior to the
-        // config part of the update. Segment D and B need to be dumped from the
-        // BPM into buffers and then the config data from the image needs to be
-        // inserted into them. To dump segment data, it is required to have
+        // config part of the update. Segment B needs to be dumped from the
+        // BPM into a buffer and then the config data from the image needs to be
+        // inserted into it. To dump segment data, it is required to have
         // working firmware which will not be the case during BSL mode.
         errl = preprocessSegments(i_configImage);
         if (errl != nullptr)
@@ -3491,7 +3609,6 @@ errlHndl_t Bpm::runFirmwareUpdates(BpmFirmwareLidImage i_image)
 
     // Reset controller and unlock encryption if necessary
     exitErrl = nvdimmResetController(iv_nvdimm);
-
     if (exitErrl != nullptr)
     {
         TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runFirmwareUpdates() "
@@ -3535,7 +3652,7 @@ errlHndl_t Bpm::runFirmwareUpdates(BpmFirmwareLidImage i_image)
     {
         TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::runFirmwareUpdates(): "
                  "Firmware version on the BPM matches the version in the "
-                 "image. Update Successful.");
+                 "image. Firmware Update Successful.");
         iv_attemptAnotherUpdate = false;
     }
     else
@@ -3620,7 +3737,10 @@ errlHndl_t Bpm::checkFirmwareCrc()
              break;
          }
 
-         errl = issueCommand(BPM_PASSTHROUGH, crcPayload, WRITE, 0);
+         errl = issueCommand(BPM_PASSTHROUGH,
+                             crcPayload,
+                             WRITE,
+                             NO_DELAY_EXTERNAL_RESPONSE);
          if (errl != nullptr)
          {
              break;
@@ -3682,6 +3802,50 @@ errlHndl_t Bpm::checkFirmwareCrc()
     }
 
     return errl;
+}
+
+/**
+ *  @brief Helper function to handle two potential errors that might occur in a
+ *         function that only returns a single error log. If the return error is
+ *         not nullptr then the second error will be linked to it and committed
+ *         if this is the final update attempt. Otherwise, it will be deleted
+ *         since the update procedure will occur again and may be successful.
+ *         If the return error is nullptr then the return error will point to
+ *         the second's error and the second error will point to nullptr.
+ *
+ *  @param[in/out]      io_returnErrl   A pointer to the error that would be
+ *                                      returned by the function that called
+ *                                      this one. If nullptr, then it will be
+ *                                      set point to the secondary error and
+ *                                      that error will become nullptr.
+ *
+ *  @param[in/out]     io_secondErrl    The secondary error that occurred which
+ *                                      in addition to the usual returned error.
+ */
+void Bpm::handleMultipleErrors(errlHndl_t& io_returnErrl,
+                               errlHndl_t& io_secondErrl)
+{
+    if (iv_updateAttempted && (io_returnErrl != nullptr))
+    {
+        io_secondErrl->plid(io_returnErrl->plid());
+        TRACFCOMP(g_trac_bpm, "Committing second error eid=0x%X with plid of "
+                 "returned error: 0x%X",
+                 io_secondErrl->eid(),
+                 io_returnErrl->plid());
+        io_secondErrl->collectTrace(BPM_COMP_NAME);
+        ERRORLOG::errlCommit(io_secondErrl, BPM_COMP_ID);
+    }
+    else if (io_returnErrl == nullptr)
+    {
+        io_returnErrl = io_secondErrl;
+        io_secondErrl = nullptr;
+    }
+    else
+    {
+        // Another update attempt will be made, delete this secondary error.
+        delete io_secondErrl;
+        io_secondErrl = nullptr;
+    }
 }
 
 uint16_t Bpm::crc16_calc(const void* i_ptr, int i_size)
