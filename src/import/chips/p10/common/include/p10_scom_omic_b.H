@@ -58,6 +58,9 @@ static const uint32_t DATASM_REGS_RX_CNT29_PG_RX_B_LANE_DONE_0_15_LEN = 16;
 // omic/reg00011.H
 
 static const uint64_t DATASM_REGS_RX_STAT14_PG = 0x800af84010012c3full;
+
+static const uint32_t DATASM_REGS_RX_STAT14_PG_RX_AMP_HYST_MAX_RO_SIGNAL = 48;
+static const uint32_t DATASM_REGS_RX_STAT14_PG_RX_AMP_HYST_MAX_RO_SIGNAL_LEN = 8;
 // omic/reg00011.H
 
 static const uint64_t DATASM_REGS_RX_STAT24_PG = 0x800b484010012c3full;

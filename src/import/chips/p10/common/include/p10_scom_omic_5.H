@@ -70,15 +70,30 @@ static const uint32_t DATASM_REGS_RX_CNTL9_PG_RX_PSAVE_FORCE_REQ_0_15_LEN = 16;
 // omic/reg00005.H
 
 static const uint64_t DATASM_REGS_RX_STAT17_PG = 0x800b104010012c3full;
+
+static const uint32_t DATASM_REGS_RX_STAT17_PG_RX_LOFF_HYST_MAX_RO_SIGNAL = 48;
+static const uint32_t DATASM_REGS_RX_STAT17_PG_RX_LOFF_HYST_MAX_RO_SIGNAL_LEN = 8;
 // omic/reg00005.H
 
 static const uint64_t DATASM_REGS_RX_STAT27_PG = 0x800b604010012c3full;
+
+static const uint32_t DATASM_REGS_RX_STAT27_PG_RX_PSAVE_STS_PHY_16_23_RO_SIGNAL = 48;
+static const uint32_t DATASM_REGS_RX_STAT27_PG_RX_PSAVE_STS_PHY_16_23_RO_SIGNAL_LEN = 8;
 // omic/reg00005.H
 
 static const uint64_t DATASM_REGS_RX_STAT9_PG = 0x800ad04010012c3full;
+
+static const uint32_t DATASM_REGS_RX_STAT9_PG_RX_SCAN_P_16_23_RO_SIGNAL = 48;
+static const uint32_t DATASM_REGS_RX_STAT9_PG_RX_SCAN_P_16_23_RO_SIGNAL_LEN = 8;
 // omic/reg00005.H
 
 static const uint64_t TX_CTL_SM_REGS_FIR_PG = 0x800c844010012c3full;
+
+static const uint32_t TX_CTL_SM_REGS_FIR_PG_G_FIR_ERR_TX_SM_REGS_RO_SIGNAL = 48;
+static const uint32_t TX_CTL_SM_REGS_FIR_PG_G_FIR_ERR_CTL_REGS_RO_SIGNAL = 49;
+static const uint32_t TX_CTL_SM_REGS_FIR_PG_G_FIR_ERR_GCR_ARB_SM_RO_SIGNAL = 50;
+static const uint32_t TX_CTL_SM_REGS_FIR_PG_G_FIR_ERR_TX_PSAVE_SM_RO_SIGNAL = 51;
+static const uint32_t TX_CTL_SM_REGS_FIR_PG_L_FIR_ERR_RO_SIGNAL = 52;
 // omic/reg00005.H
 
 #ifndef __PPE_HCODE__

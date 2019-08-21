@@ -44,22 +44,22 @@ static const uint64_t BIST = 0x2003000bull;
 static const uint32_t BIST_TC_BIST_START_TEST_DC = 0;
 static const uint32_t BIST_TC_SRAM_ABIST_MODE_DC = 1;
 static const uint32_t BIST_TC_IOBIST_MODE_DC = 3;
-static const uint32_t BIST_BIST_PERV = 4;
-static const uint32_t BIST_BIST_UNIT1 = 5;
-static const uint32_t BIST_BIST_UNIT2 = 6;
-static const uint32_t BIST_BIST_UNIT3 = 7;
-static const uint32_t BIST_BIST_UNIT4 = 8;
-static const uint32_t BIST_BIST_UNIT5 = 9;
-static const uint32_t BIST_BIST_UNIT6 = 10;
-static const uint32_t BIST_BIST_UNIT7 = 11;
-static const uint32_t BIST_BIST_UNIT8 = 12;
-static const uint32_t BIST_BIST_UNIT9 = 13;
-static const uint32_t BIST_BIST_UNIT10 = 14;
-static const uint32_t BIST_BIST_UNIT11 = 15;
-static const uint32_t BIST_BIST_UNIT12 = 16;
-static const uint32_t BIST_BIST_UNIT13 = 17;
-static const uint32_t BIST_BIST_UNIT14 = 18;
-static const uint32_t BIST_BIST_STROBE_WINDOW_EN = 48;
+static const uint32_t BIST_PERV = 4;
+static const uint32_t BIST_UNIT1 = 5;
+static const uint32_t BIST_UNIT2 = 6;
+static const uint32_t BIST_UNIT3 = 7;
+static const uint32_t BIST_UNIT4 = 8;
+static const uint32_t BIST_UNIT5 = 9;
+static const uint32_t BIST_UNIT6 = 10;
+static const uint32_t BIST_UNIT7 = 11;
+static const uint32_t BIST_UNIT8 = 12;
+static const uint32_t BIST_UNIT9 = 13;
+static const uint32_t BIST_UNIT10 = 14;
+static const uint32_t BIST_UNIT11 = 15;
+static const uint32_t BIST_UNIT12 = 16;
+static const uint32_t BIST_UNIT13 = 17;
+static const uint32_t BIST_UNIT14 = 18;
+static const uint32_t BIST_STROBE_WINDOW_EN = 48;
 // eq/reg00015.H
 
 static const uint64_t CPLT_CTRL5_RW = 0x20000005ull;
@@ -206,9 +206,33 @@ static const uint32_t PROTECT_MODE_REG_WRITE_PROTECT_ENABLE = 1;
 static const uint64_t QME_PBCR_RW = 0x200e0044ull;
 static const uint64_t QME_PBCR_WO_CLEAR = 0x200e0047ull;
 static const uint64_t QME_PBCR_WO_OR = 0x200e0046ull;
+
+static const uint32_t QME_PBCR_DISABLE_LN_RD = 0;
+static const uint32_t QME_PBCR_DISABLE_NN_RN_RD = 1;
+static const uint32_t QME_PBCR_DISABLE_GROUP_RD = 2;
+static const uint32_t QME_PBCR_DISABLE_VG_RD = 3;
+static const uint32_t QME_PBCR_DISABLE_LN_WR = 4;
+static const uint32_t QME_PBCR_DISABLE_NN_RN_WR = 5;
+static const uint32_t QME_PBCR_DISABLE_GROUP_WR = 6;
+static const uint32_t QME_PBCR_DISABLE_VG_WR = 7;
+static const uint32_t QME_PBCR_SKIP_GROUP_SCOPE = 8;
+static const uint32_t QME_PBCR_USE_DMA_PR_W = 9;
+static const uint32_t QME_PBCR_FREEZE_ON_CRESP_ERR = 10;
+static const uint32_t QME_PBCR_SPARE = 11;
+static const uint32_t QME_PBCR_SPARE_LEN = 2;
+static const uint32_t QME_PBCR_TYPE = 13;
+static const uint32_t QME_PBCR_TYPE_LEN = 3;
+static const uint32_t QME_PBCR_HANG_POLL_MAX_CNT = 16;
+static const uint32_t QME_PBCR_HANG_POLL_MAX_CNT_LEN = 4;
+static const uint32_t QME_PBCR_HANG_DATA_MAX_CNT = 20;
+static const uint32_t QME_PBCR_HANG_DATA_MAX_CNT_LEN = 4;
+static const uint32_t QME_PBCR_DISABLE_PB_CACHE = 24;
 // eq/reg00015.H
 
 static const uint64_t QME_QSAR = 0x200e0074ull;
+
+static const uint32_t QME_QSAR_SRAM_ADDRESS = 16;
+static const uint32_t QME_QSAR_SRAM_ADDRESS_LEN = 13;
 // eq/reg00015.H
 
 static const uint64_t QME_SCOM_XIVDR6 = 0x200e028cull;
@@ -227,8 +251,8 @@ static const uint64_t VITAL_SCAN_OUT = 0x200f0017ull;
 
 static const uint64_t XSTOP_UNMASKED = 0x20040010ull;
 
-static const uint32_t XSTOP_UNMASKED_XSTOP_UNMASKED_IN = 1;
-static const uint32_t XSTOP_UNMASKED_XSTOP_UNMASKED_IN_LEN = 53;
+static const uint32_t XSTOP_UNMASKED_IN = 1;
+static const uint32_t XSTOP_UNMASKED_IN_LEN = 53;
 // eq/reg00015.H
 
 #ifndef __PPE_HCODE__

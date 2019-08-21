@@ -43,21 +43,21 @@ static const uint64_t CPLT_CONF1_RW = 0x20000009ull;
 static const uint64_t CPLT_CONF1_WO_CLEAR = 0x20000029ull;
 static const uint64_t CPLT_CONF1_WO_OR = 0x20000019ull;
 
-static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_DC_0H = 0;
-static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_DC_1H = 1;
-static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_DC_2H = 2;
-static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_3H = 3;
-static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_4H = 4;
-static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_5H = 5;
-static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_6H = 6;
-static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_7H = 7;
-static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_8H = 8;
-static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_9H = 9;
-static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_10H = 10;
-static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_11H = 11;
-static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_VMEAS_DC = 12;
-static const uint32_t CPLT_CONF1__ANEQ_VMEAS_CALIBRATE_DC = 13;
-static const uint32_t CPLT_CONF1__ANEQ_VMEAS_MEASURE_DC = 14;
+static const uint32_t CPLT_CONF1_AMUX_EQ_VSEL_DC_0H = 0;
+static const uint32_t CPLT_CONF1_AMUX_EQ_VSEL_DC_1H = 1;
+static const uint32_t CPLT_CONF1_AMUX_EQ_VSEL_DC_2H = 2;
+static const uint32_t CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_3H = 3;
+static const uint32_t CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_4H = 4;
+static const uint32_t CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_5H = 5;
+static const uint32_t CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_6H = 6;
+static const uint32_t CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_7H = 7;
+static const uint32_t CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_8H = 8;
+static const uint32_t CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_9H = 9;
+static const uint32_t CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_10H = 10;
+static const uint32_t CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_11H = 11;
+static const uint32_t CPLT_CONF1_AMUX_EQ_VSEL_VMEAS_DC = 12;
+static const uint32_t CPLT_CONF1_ANEQ_VMEAS_CALIBRATE_DC = 13;
+static const uint32_t CPLT_CONF1_ANEQ_VMEAS_MEASURE_DC = 14;
 static const uint32_t CPLT_CONF1_CPLT_ANEQ_VMEAS_RESET_CLK_STOPPED_DC = 15;
 // eq/reg00006.H
 
@@ -173,8 +173,8 @@ static const uint32_t LOCAL_XSTOP_MASK_15 = 15;
 
 static const uint64_t LOCAL_XSTOP_UNMASKED = 0x20040013ull;
 
-static const uint32_t LOCAL_XSTOP_UNMASKED_LOCAL_XSTOP_UNMASKED_IN = 1;
-static const uint32_t LOCAL_XSTOP_UNMASKED_LOCAL_XSTOP_UNMASKED_IN_LEN = 15;
+static const uint32_t LOCAL_XSTOP_UNMASKED_IN = 1;
+static const uint32_t LOCAL_XSTOP_UNMASKED_IN_LEN = 15;
 // eq/reg00006.H
 
 static const uint64_t QME_PPEBAR = 0x200e0050ull;
@@ -187,14 +187,14 @@ static const uint32_t QME_PPEBAR_SIZE_LEN = 3;
 
 static const uint64_t QME_RCTAR2 = 0x200e0198ull;
 
-static const uint32_t QME_RCTAR2_QME_RCTAR2_DATA = 0;
-static const uint32_t QME_RCTAR2_QME_RCTAR2_DATA_LEN = 64;
+static const uint32_t QME_RCTAR2_DATA = 0;
+static const uint32_t QME_RCTAR2_DATA_LEN = 64;
 // eq/reg00006.H
 
 static const uint64_t QME_SCOM_PBTXTR3 = 0x200e0043ull;
 
-static const uint32_t QME_SCOM_PBTXTR3__VALID = 0;
-static const uint32_t QME_SCOM_PBTXTR3__VALID_LEN = 8;
+static const uint32_t QME_SCOM_PBTXTR3_VALID = 0;
+static const uint32_t QME_SCOM_PBTXTR3_VALID_LEN = 8;
 static const uint32_t QME_SCOM_PBTXTR3_0 = 8;
 static const uint32_t QME_SCOM_PBTXTR3_0_LEN = 4;
 static const uint32_t QME_SCOM_PBTXTR3_1 = 12;

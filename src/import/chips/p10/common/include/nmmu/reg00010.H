@@ -4072,299 +4072,345 @@ fapi_try_exit:
 }
 
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_ERR_LOG_EN(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_ERR_LOG_RESERVED_0_1(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_ERR_LOG));
 #endif
-    return o_data.insertFromRight<NMMU_ERR_LOG_EN,
-           1>(i_data);
+    return o_data.insertFromRight<NMMU_ERR_LOG_RESERVED_0_1,
+           NMMU_ERR_LOG_RESERVED_0_1_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_RESERVED_0_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_ERR_LOG_EN(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_ERR_LOG_RESERVED_0_1(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_ERR_LOG));
 #endif
-    return o_data.insertFromRight<NMMU_ERR_LOG_EN,
-           1>(i_data);
+    return o_data.insertFromRight<NMMU_ERR_LOG_RESERVED_0_1,
+           NMMU_ERR_LOG_RESERVED_0_1_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_RESERVED_0_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_ERR_LOG_EN(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NMMU_ERR_LOG));
-#endif
-    return o_data.setBit<NMMU_ERR_LOG_EN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_ERR_LOG_EN(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NMMU_ERR_LOG));
-#endif
-    return o_data.clearBit<NMMU_ERR_LOG_EN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_NMMU_ERR_LOG_EN(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_ERR_LOG_RESERVED_0_1(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_ERR_LOG));
 #endif
-    return i_data.extractToRight<NMMU_ERR_LOG_EN,
+    return i_data.extractToRight<NMMU_ERR_LOG_RESERVED_0_1,
+           NMMU_ERR_LOG_RESERVED_0_1_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_RESERVED_0_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_EN(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NMMU_ERR_LOG));
+#endif
+    return o_data.insertFromRight<NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_EN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NMMU_ERR_LOG));
+#endif
+    return o_data.insertFromRight<NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NMMU_ERR_LOG));
+#endif
+    return o_data.setBit<NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NMMU_ERR_LOG));
+#endif
+    return o_data.clearBit<NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_EN(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NMMU_ERR_LOG));
+#endif
+    return i_data.extractToRight<NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_EN,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_NMMU_ERR_LOG_EN(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_EN(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_ERR_LOG));
 #endif
-    return i_data.getBit<NMMU_ERR_LOG_EN>();
+    return i_data.getBit<NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_EN>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_ERR_LOG_SNGL_SHOT_EN(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_SNGL_SHOT_EN(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_ERR_LOG));
 #endif
-    return o_data.insertFromRight<NMMU_ERR_LOG_SNGL_SHOT_EN,
+    return o_data.insertFromRight<NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_SNGL_SHOT_EN,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_SNGL_SHOT_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_SNGL_SHOT_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_ERR_LOG_SNGL_SHOT_EN(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_SNGL_SHOT_EN(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_ERR_LOG));
 #endif
-    return o_data.insertFromRight<NMMU_ERR_LOG_SNGL_SHOT_EN,
+    return o_data.insertFromRight<NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_SNGL_SHOT_EN,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_SNGL_SHOT_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_SNGL_SHOT_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_ERR_LOG_SNGL_SHOT_EN(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_SNGL_SHOT_EN(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_ERR_LOG));
 #endif
-    return o_data.setBit<NMMU_ERR_LOG_SNGL_SHOT_EN>();
+    return o_data.setBit<NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_SNGL_SHOT_EN>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_SNGL_SHOT_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_SNGL_SHOT_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_ERR_LOG_SNGL_SHOT_EN(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_SNGL_SHOT_EN(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_ERR_LOG));
 #endif
-    return o_data.clearBit<NMMU_ERR_LOG_SNGL_SHOT_EN>();
+    return o_data.clearBit<NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_SNGL_SHOT_EN>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_SNGL_SHOT_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_SNGL_SHOT_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_ERR_LOG_SNGL_SHOT_EN(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_SNGL_SHOT_EN(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_ERR_LOG));
 #endif
-    return i_data.extractToRight<NMMU_ERR_LOG_SNGL_SHOT_EN,
+    return i_data.extractToRight<NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_SNGL_SHOT_EN,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_SNGL_SHOT_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_SNGL_SHOT_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_NMMU_ERR_LOG_SNGL_SHOT_EN(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_SNGL_SHOT_EN(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_ERR_LOG));
 #endif
-    return i_data.getBit<NMMU_ERR_LOG_SNGL_SHOT_EN>();
+    return i_data.getBit<NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_SNGL_SHOT_EN>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_SNGL_SHOT_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_SNGL_SHOT_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_ERR_LOG_OVERLAP_EN(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_OVERLAP_EN(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_ERR_LOG));
 #endif
-    return o_data.insertFromRight<NMMU_ERR_LOG_OVERLAP_EN,
+    return o_data.insertFromRight<NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_OVERLAP_EN,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_OVERLAP_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_OVERLAP_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_ERR_LOG_OVERLAP_EN(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_OVERLAP_EN(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_ERR_LOG));
 #endif
-    return o_data.insertFromRight<NMMU_ERR_LOG_OVERLAP_EN,
+    return o_data.insertFromRight<NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_OVERLAP_EN,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_OVERLAP_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_OVERLAP_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_ERR_LOG_OVERLAP_EN(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_OVERLAP_EN(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_ERR_LOG));
 #endif
-    return o_data.setBit<NMMU_ERR_LOG_OVERLAP_EN>();
+    return o_data.setBit<NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_OVERLAP_EN>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_OVERLAP_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_OVERLAP_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_ERR_LOG_OVERLAP_EN(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_OVERLAP_EN(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_ERR_LOG));
 #endif
-    return o_data.clearBit<NMMU_ERR_LOG_OVERLAP_EN>();
+    return o_data.clearBit<NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_OVERLAP_EN>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_OVERLAP_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_OVERLAP_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_ERR_LOG_OVERLAP_EN(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_OVERLAP_EN(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_ERR_LOG));
 #endif
-    return i_data.extractToRight<NMMU_ERR_LOG_OVERLAP_EN,
+    return i_data.extractToRight<NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_OVERLAP_EN,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_OVERLAP_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_OVERLAP_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_NMMU_ERR_LOG_OVERLAP_EN(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_OVERLAP_EN(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_ERR_LOG));
 #endif
-    return i_data.getBit<NMMU_ERR_LOG_OVERLAP_EN>();
+    return i_data.getBit<NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_OVERLAP_EN>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_OVERLAP_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_OVERLAP_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_ERR_LOG_MULT_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_MULT_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_ERR_LOG));
 #endif
-    return o_data.insertFromRight<NMMU_ERR_LOG_MULT_SEL,
-           NMMU_ERR_LOG_MULT_SEL_LEN>(i_data);
+    return o_data.insertFromRight<NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_MULT_SEL,
+           NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_MULT_SEL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_MULT_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_MULT_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_ERR_LOG_MULT_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_MULT_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_ERR_LOG));
 #endif
-    return o_data.insertFromRight<NMMU_ERR_LOG_MULT_SEL,
-           NMMU_ERR_LOG_MULT_SEL_LEN>(i_data);
+    return o_data.insertFromRight<NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_MULT_SEL,
+           NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_MULT_SEL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_MULT_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_MULT_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_ERR_LOG_MULT_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_MULT_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_ERR_LOG));
 #endif
-    return i_data.extractToRight<NMMU_ERR_LOG_MULT_SEL,
-           NMMU_ERR_LOG_MULT_SEL_LEN>(o_data);
+    return i_data.extractToRight<NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_MULT_SEL,
+           NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_MULT_SEL_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_MULT_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_MULT_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

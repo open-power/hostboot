@@ -250,20 +250,20 @@ static const uint32_t QME_BCEBAR0_SIZE_LEN = 3;
 
 static const uint64_t QME_QSDR = 0x200e0078ull;
 
-static const uint32_t QME_QSDR_QME_QSDR_SRAM_DATA = 0;
-static const uint32_t QME_QSDR_QME_QSDR_SRAM_DATA_LEN = 64;
+static const uint32_t QME_QSDR_SRAM_DATA = 0;
+static const uint32_t QME_QSDR_SRAM_DATA_LEN = 64;
 // eq/reg00010.H
 
 static const uint64_t QME_RCTAR0 = 0x200e0190ull;
 
-static const uint32_t QME_RCTAR0_QME_RCTAR0_DATA = 0;
-static const uint32_t QME_RCTAR0_QME_RCTAR0_DATA_LEN = 64;
+static const uint32_t QME_RCTAR0_DATA = 0;
+static const uint32_t QME_RCTAR0_DATA_LEN = 64;
 // eq/reg00010.H
 
 static const uint64_t QME_SCOM_PBTXTR1 = 0x200e0041ull;
 
-static const uint32_t QME_SCOM_PBTXTR1__VALID = 0;
-static const uint32_t QME_SCOM_PBTXTR1__VALID_LEN = 8;
+static const uint32_t QME_SCOM_PBTXTR1_VALID = 0;
+static const uint32_t QME_SCOM_PBTXTR1_VALID_LEN = 8;
 static const uint32_t QME_SCOM_PBTXTR1_0 = 8;
 static const uint32_t QME_SCOM_PBTXTR1_0_LEN = 4;
 static const uint32_t QME_SCOM_PBTXTR1_1 = 12;

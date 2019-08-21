@@ -173,6 +173,58 @@ static const uint32_t OPCG_REG1_NSL_FILL_COUNT_LEN = 5;
 // pauc/reg00014.H
 
 static const uint64_t PB_DOB23_DIB23_INT_ERR_REG = 0x1001182aull;
+
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_RTAG_PBITERR = 0;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_RTAG_PERR = 1;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_MISC_PERR = 2;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_F0VC0_EVENPERR = 3;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_F0VC0_ODDPERR = 4;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_F0VC1_EVENPERR = 5;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_F0VC1_ODDPERR = 6;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_F1VC0_EVENPERR = 7;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_F1VC0_ODDPERR = 8;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_F1VC1_EVENPERR = 9;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_F1VC1_ODDPERR = 10;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_F0_UNDERFLOW = 11;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_F0_OVERFLOW = 12;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_F1_UNDERFLOW = 13;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_F1_OVERFLOW = 14;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_VC0_UNDERFLOW = 15;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_VC0_OVERFLOW = 16;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_VC1_UNDERFLOW = 17;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_VC1_OVERFLOW = 18;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_F0VC0_UNDERFLOW = 19;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_F0VC0_OVERFLOW = 20;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_F0VC1_UNDERFLOW = 21;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_F0VC1_OVERFLOW = 22;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_F1VC0_UNDERFLOW = 23;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_F1VC0_OVERFLOW = 24;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_F1VC1_UNDERFLOW = 25;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_F1VC1_OVERFLOW = 26;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_VC0_PREFETCH_OVERFLOW = 27;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_VC1_PREFETCH_OVERFLOW = 28;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_IB23_EVN0_UNDERFLOW = 29;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_IB23_EVN0_OVERFLOW = 30;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_IB23_EVN1_UNDERFLOW = 31;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_IB23_EVN1_OVERFLOW = 32;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_IB23_RTAG_PBITERR = 33;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_IB23_RTAG_PERR = 34;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_IB23_MISC_PERR = 35;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_IB23_ODD0_UNDERFLOW = 36;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_IB23_ODD0_OVERFLOW = 37;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_IB23_ODD1_UNDERFLOW = 38;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_IB23_ODD1_OVERFLOW = 39;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_IB23_RTAG_UNDERFLOW = 40;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_IB23_RTAG_OVERFLOW = 41;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_IB23_DATA_UNDERFLOW = 42;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_IB23_DATA_OVERFLOW = 43;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_IB23_VC0_UNDERFLOW = 44;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_IB23_VC0_OVERFLOW = 45;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_IB23_VC1_UNDERFLOW = 46;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_IB23_VC1_OVERFLOW = 47;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_DIBF0VC0_OVER_UNDERFLOW = 48;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_DIBF0VC1_OVER_UNDERFLOW = 49;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_DIBF1VC0_OVER_UNDERFLOW = 50;
 // pauc/reg00014.H
 
 static const uint64_t PB_MAILBOX_10_REG = 0x10011832ull;
@@ -182,6 +234,13 @@ static const uint64_t PB_MAILBOX_11_REG = 0x10011833ull;
 // pauc/reg00014.H
 
 static const uint64_t PB_PMU2_CNPM_COUNTER = 0x10011823ull;
+
+static const uint32_t PB_PMU2_CNPM_COUNTER_0 = 0;
+static const uint32_t PB_PMU2_CNPM_COUNTER_0_LEN = 16;
+static const uint32_t PB_PMU2_CNPM_COUNTER_1 = 16;
+static const uint32_t PB_PMU2_CNPM_COUNTER_1_LEN = 16;
+static const uint32_t PB_PMU2_CNPM_COUNTER_2 = 32;
+static const uint32_t PB_PMU2_CNPM_COUNTER_2_LEN = 16;
 // pauc/reg00014.H
 
 static const uint64_t PB_PTL_FIR_MASK_REG_RW = 0x10011803ull;
@@ -256,14 +315,14 @@ static const uint32_t RCMD_RATE_CFG_X_DISABLE_TURBO = 24;
 static const uint32_t RCMD_RATE_CFG_X_CMD_GAP_REFERENCE = 25;
 static const uint32_t RCMD_RATE_CFG_X_CMD_GAP_MODE = 26;
 static const uint32_t RCMD_RATE_CFG_X_CMD_GAP_TABLE = 27;
-static const uint32_t RCMD_RATE_CFG_X_CMD_GAP_SPARE = 28;
+static const uint32_t RCMD_RATE_CFG_X_DISABLE_CREDIT_BANK = 28;
 static const uint32_t RCMD_RATE_CFG_X_CMD_GAP_CFG = 29;
 static const uint32_t RCMD_RATE_CFG_X_CMD_GAP_CFG_LEN = 3;
 static const uint32_t RCMD_RATE_CFG_Y_DISABLE_TURBO = 32;
 static const uint32_t RCMD_RATE_CFG_Y_CMD_GAP_REFERENCE = 33;
 static const uint32_t RCMD_RATE_CFG_Y_CMD_GAP_MODE = 34;
 static const uint32_t RCMD_RATE_CFG_Y_CMD_GAP_TABLE = 35;
-static const uint32_t RCMD_RATE_CFG_Y_CMD_GAP_SPARE = 36;
+static const uint32_t RCMD_RATE_CFG_Y_DISABLE_CREDIT_BANK = 36;
 static const uint32_t RCMD_RATE_CFG_Y_CMD_GAP_CFG = 37;
 static const uint32_t RCMD_RATE_CFG_Y_CMD_GAP_CFG_LEN = 3;
 // pauc/reg00014.H
@@ -296,27 +355,27 @@ static const uint32_t TRA1_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN = 24;
 
 static const uint64_t XSTOP2 = 0x1003000dull;
 
-static const uint32_t XSTOP2_XSTOP2_MASK_B = 0;
+static const uint32_t XSTOP2_MASK_B = 0;
 static const uint32_t XSTOP2_ALIGNED_XSTOP2 = 1;
 static const uint32_t XSTOP2_TRIGGER_OPCG_ON_XSTOP2 = 2;
-static const uint32_t XSTOP2_XSTOP2_WAIT_ALLWAYS = 3;
-static const uint32_t XSTOP2_XSTOP2_PERV = 4;
-static const uint32_t XSTOP2_XSTOP2_UNIT1 = 5;
-static const uint32_t XSTOP2_XSTOP2_UNIT2 = 6;
-static const uint32_t XSTOP2_XSTOP2_UNIT3 = 7;
-static const uint32_t XSTOP2_XSTOP2_UNIT4 = 8;
-static const uint32_t XSTOP2_XSTOP2_UNIT5 = 9;
-static const uint32_t XSTOP2_XSTOP2_UNIT6 = 10;
-static const uint32_t XSTOP2_XSTOP2_UNIT7 = 11;
-static const uint32_t XSTOP2_XSTOP2_UNIT8 = 12;
-static const uint32_t XSTOP2_XSTOP2_UNIT9 = 13;
-static const uint32_t XSTOP2_XSTOP2_UNIT10 = 14;
-static const uint32_t XSTOP2_XSTOP2_UNIT11 = 15;
-static const uint32_t XSTOP2_XSTOP2_UNIT12 = 16;
-static const uint32_t XSTOP2_XSTOP2_UNIT13 = 17;
-static const uint32_t XSTOP2_XSTOP2_UNIT14 = 18;
-static const uint32_t XSTOP2_XSTOP2_WAIT_CYCLES = 48;
-static const uint32_t XSTOP2_XSTOP2_WAIT_CYCLES_LEN = 12;
+static const uint32_t XSTOP2_WAIT_ALLWAYS = 3;
+static const uint32_t XSTOP2_PERV = 4;
+static const uint32_t XSTOP2_UNIT1 = 5;
+static const uint32_t XSTOP2_UNIT2 = 6;
+static const uint32_t XSTOP2_UNIT3 = 7;
+static const uint32_t XSTOP2_UNIT4 = 8;
+static const uint32_t XSTOP2_UNIT5 = 9;
+static const uint32_t XSTOP2_UNIT6 = 10;
+static const uint32_t XSTOP2_UNIT7 = 11;
+static const uint32_t XSTOP2_UNIT8 = 12;
+static const uint32_t XSTOP2_UNIT9 = 13;
+static const uint32_t XSTOP2_UNIT10 = 14;
+static const uint32_t XSTOP2_UNIT11 = 15;
+static const uint32_t XSTOP2_UNIT12 = 16;
+static const uint32_t XSTOP2_UNIT13 = 17;
+static const uint32_t XSTOP2_UNIT14 = 18;
+static const uint32_t XSTOP2_WAIT_CYCLES = 48;
+static const uint32_t XSTOP2_WAIT_CYCLES_LEN = 12;
 // pauc/reg00014.H
 
 #ifndef __PPE_HCODE__

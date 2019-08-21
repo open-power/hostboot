@@ -44,22 +44,22 @@ static const uint64_t BIST = 0x0803000bull;
 static const uint32_t BIST_TC_BIST_START_TEST_DC = 0;
 static const uint32_t BIST_TC_SRAM_ABIST_MODE_DC = 1;
 static const uint32_t BIST_TC_IOBIST_MODE_DC = 3;
-static const uint32_t BIST_BIST_PERV = 4;
-static const uint32_t BIST_BIST_UNIT1 = 5;
-static const uint32_t BIST_BIST_UNIT2 = 6;
-static const uint32_t BIST_BIST_UNIT3 = 7;
-static const uint32_t BIST_BIST_UNIT4 = 8;
-static const uint32_t BIST_BIST_UNIT5 = 9;
-static const uint32_t BIST_BIST_UNIT6 = 10;
-static const uint32_t BIST_BIST_UNIT7 = 11;
-static const uint32_t BIST_BIST_UNIT8 = 12;
-static const uint32_t BIST_BIST_UNIT9 = 13;
-static const uint32_t BIST_BIST_UNIT10 = 14;
-static const uint32_t BIST_BIST_UNIT11 = 15;
-static const uint32_t BIST_BIST_UNIT12 = 16;
-static const uint32_t BIST_BIST_UNIT13 = 17;
-static const uint32_t BIST_BIST_UNIT14 = 18;
-static const uint32_t BIST_BIST_STROBE_WINDOW_EN = 48;
+static const uint32_t BIST_PERV = 4;
+static const uint32_t BIST_UNIT1 = 5;
+static const uint32_t BIST_UNIT2 = 6;
+static const uint32_t BIST_UNIT3 = 7;
+static const uint32_t BIST_UNIT4 = 8;
+static const uint32_t BIST_UNIT5 = 9;
+static const uint32_t BIST_UNIT6 = 10;
+static const uint32_t BIST_UNIT7 = 11;
+static const uint32_t BIST_UNIT8 = 12;
+static const uint32_t BIST_UNIT9 = 13;
+static const uint32_t BIST_UNIT10 = 14;
+static const uint32_t BIST_UNIT11 = 15;
+static const uint32_t BIST_UNIT12 = 16;
+static const uint32_t BIST_UNIT13 = 17;
+static const uint32_t BIST_UNIT14 = 18;
+static const uint32_t BIST_STROBE_WINDOW_EN = 48;
 // pec/reg00015.H
 
 static const uint64_t CPLT_CTRL5_RW = 0x08000005ull;
@@ -72,20 +72,20 @@ static const uint32_t CPLT_CTRL5_TC_CCFG_PMA2_MUX_SEL_DC = 2;
 static const uint32_t CPLT_CTRL5_TC_CCFG_PMA3_MUX_SEL_DC = 3;
 static const uint32_t CPLT_CTRL5_TC_CCFG_PCS01_MUX_SEL_DC = 4;
 static const uint32_t CPLT_CTRL5_TC_CCFG_PCS23_MUX_SEL_DC = 5;
-static const uint32_t CPLT_CTRL5_CPLT_CTRL5_06 = 6;
-static const uint32_t CPLT_CTRL5_CPLT_CTRL5_07 = 7;
-static const uint32_t CPLT_CTRL5_CPLT_CTRL5_08 = 8;
-static const uint32_t CPLT_CTRL5_CPLT_CTRL5_09 = 9;
-static const uint32_t CPLT_CTRL5_CPLT_CTRL5_010 = 10;
-static const uint32_t CPLT_CTRL5_CPLT_CTRL5_011 = 11;
-static const uint32_t CPLT_CTRL5_CPLT_CTRL5_012 = 12;
-static const uint32_t CPLT_CTRL5_CPLT_CTRL5_013 = 13;
-static const uint32_t CPLT_CTRL5_CPLT_CTRL5_014 = 14;
-static const uint32_t CPLT_CTRL5_CPLT_CTRL5_015 = 15;
-static const uint32_t CPLT_CTRL5_CPLT_CTRL5_016 = 16;
-static const uint32_t CPLT_CTRL5_CPLT_CTRL5_017 = 17;
-static const uint32_t CPLT_CTRL5_CPLT_CTRL5_018 = 18;
-static const uint32_t CPLT_CTRL5_CPLT_CTRL5_019 = 19;
+static const uint32_t CPLT_CTRL5_06 = 6;
+static const uint32_t CPLT_CTRL5_07 = 7;
+static const uint32_t CPLT_CTRL5_08 = 8;
+static const uint32_t CPLT_CTRL5_09 = 9;
+static const uint32_t CPLT_CTRL5_010 = 10;
+static const uint32_t CPLT_CTRL5_011 = 11;
+static const uint32_t CPLT_CTRL5_012 = 12;
+static const uint32_t CPLT_CTRL5_013 = 13;
+static const uint32_t CPLT_CTRL5_014 = 14;
+static const uint32_t CPLT_CTRL5_015 = 15;
+static const uint32_t CPLT_CTRL5_016 = 16;
+static const uint32_t CPLT_CTRL5_017 = 17;
+static const uint32_t CPLT_CTRL5_018 = 18;
+static const uint32_t CPLT_CTRL5_019 = 19;
 // pec/reg00015.H
 
 static const uint64_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2 = 0x08040082ull;
@@ -133,21 +133,22 @@ static const uint32_t MULTICAST_GROUP_3_MULTICAST3_GROUP_LEN = 3;
 
 static const uint64_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG = 0x03011811ull;
 
-static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_MODE = 0;
-static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_MODE_LEN = 2;
-static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_DISABLE_SCOPE = 2;
-static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_GROUP_MIN_CYCLES = 4;
-static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_GROUP_MIN_CYCLES_LEN = 4;
-static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_GROUP_MAX_CYCLES = 8;
-static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_GROUP_MAX_CYCLES_LEN = 4;
-static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_SYSTEM_MIN_CYCLES = 12;
-static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_SYSTEM_MIN_CYCLES_LEN = 4;
-static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_SYSTEM_MAX_CYCLES = 16;
-static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_SYSTEM_MAX_CYCLES_LEN = 4;
-static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_NUM_OF_CLEAN_RANGES = 20;
-static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_NUM_OF_CLEAN_RANGES_LEN = 4;
-static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_NUM_OF_HPCACK = 24;
-static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_NUM_OF_HPCACK_LEN = 4;
+static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_PE_WRITE_PACING_MODE = 0;
+static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_PE_WRITE_PACING_MODE_LEN = 2;
+static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_PE_WRITE_PACING_DISABLE_SCOPE = 2;
+static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_RESERVED_03 = 3;
+static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_PE_WRITE_PACING_GROUP_MIN_CYCLES = 4;
+static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_PE_WRITE_PACING_GROUP_MIN_CYCLES_LEN = 4;
+static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_PE_WRITE_PACING_GROUP_MAX_CYCLES = 8;
+static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_PE_WRITE_PACING_GROUP_MAX_CYCLES_LEN = 4;
+static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_PE_WRITE_PACING_SYSTEM_MIN_CYCLES = 12;
+static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_PE_WRITE_PACING_SYSTEM_MIN_CYCLES_LEN = 4;
+static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_PE_WRITE_PACING_SYSTEM_MAX_CYCLES = 16;
+static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_PE_WRITE_PACING_SYSTEM_MAX_CYCLES_LEN = 4;
+static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_PE_WRITE_PACING_NUM_OF_CLEAN_RANGES = 20;
+static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_PE_WRITE_PACING_NUM_OF_CLEAN_RANGES_LEN = 4;
+static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_PE_WRITE_PACING_NUM_OF_HPCACK = 24;
+static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_PE_WRITE_PACING_NUM_OF_HPCACK_LEN = 4;
 // pec/reg00015.H
 
 static const uint64_t PROTECT_MODE_REG = 0x080f03feull;
@@ -170,8 +171,8 @@ static const uint64_t VITAL_SCAN_OUT = 0x080f0017ull;
 
 static const uint64_t XSTOP_UNMASKED = 0x08040010ull;
 
-static const uint32_t XSTOP_UNMASKED_XSTOP_UNMASKED_IN = 1;
-static const uint32_t XSTOP_UNMASKED_XSTOP_UNMASKED_IN_LEN = 53;
+static const uint32_t XSTOP_UNMASKED_IN = 1;
+static const uint32_t XSTOP_UNMASKED_IN_LEN = 53;
 // pec/reg00015.H
 
 #ifndef __PPE_HCODE__

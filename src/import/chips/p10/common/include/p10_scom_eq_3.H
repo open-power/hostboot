@@ -216,18 +216,18 @@ static const uint32_t LOCAL_XSTOP_ANY_LOCAL_XSTOP = 0;
 static const uint32_t LOCAL_XSTOP_RESERVED1L = 1;
 static const uint32_t LOCAL_XSTOP_RESERVED2L = 2;
 static const uint32_t LOCAL_XSTOP_RESERVED3L = 3;
-static const uint32_t LOCAL_XSTOP_LOCAL_XSTOP_PERV = 4;
-static const uint32_t LOCAL_XSTOP_LOCAL_XSTOP_IN05 = 5;
-static const uint32_t LOCAL_XSTOP_LOCAL_XSTOP_IN06 = 6;
-static const uint32_t LOCAL_XSTOP_LOCAL_XSTOP_IN07 = 7;
-static const uint32_t LOCAL_XSTOP_LOCAL_XSTOP_IN08 = 8;
-static const uint32_t LOCAL_XSTOP_LOCAL_XSTOP_IN09 = 9;
-static const uint32_t LOCAL_XSTOP_LOCAL_XSTOP_IN10 = 10;
-static const uint32_t LOCAL_XSTOP_LOCAL_XSTOP_IN11 = 11;
-static const uint32_t LOCAL_XSTOP_LOCAL_XSTOP_IN12 = 12;
-static const uint32_t LOCAL_XSTOP_LOCAL_XSTOP_IN13 = 13;
-static const uint32_t LOCAL_XSTOP_LOCAL_XSTOP_IN14 = 14;
-static const uint32_t LOCAL_XSTOP_LOCAL_XSTOP_IN15 = 15;
+static const uint32_t LOCAL_XSTOP_PERV = 4;
+static const uint32_t LOCAL_XSTOP_IN05 = 5;
+static const uint32_t LOCAL_XSTOP_IN06 = 6;
+static const uint32_t LOCAL_XSTOP_IN07 = 7;
+static const uint32_t LOCAL_XSTOP_IN08 = 8;
+static const uint32_t LOCAL_XSTOP_IN09 = 9;
+static const uint32_t LOCAL_XSTOP_IN10 = 10;
+static const uint32_t LOCAL_XSTOP_IN11 = 11;
+static const uint32_t LOCAL_XSTOP_IN12 = 12;
+static const uint32_t LOCAL_XSTOP_IN13 = 13;
+static const uint32_t LOCAL_XSTOP_IN14 = 14;
+static const uint32_t LOCAL_XSTOP_IN15 = 15;
 // eq/reg00003.H
 
 static const uint64_t LXSTOP_INTERRUPT_REG = 0x200f002aull;
@@ -266,12 +266,14 @@ static const uint32_t NET_CTRL0_CPLT_RCTRL = 19;
 static const uint32_t NET_CTRL0_CPLT_DCTRL = 20;
 static const uint32_t NET_CTRL0_CPLT_RCTRL2 = 21;
 static const uint32_t NET_CTRL0_ADJ_FUNC_CLKSEL = 22;
+static const uint32_t NET_CTRL0_PM_ACCESS = 23;
 static const uint32_t NET_CTRL0_FUNC_LCB_EDIS = 24;
 static const uint32_t NET_CTRL0_TP_FENCE_PCB = 25;
 static const uint32_t NET_CTRL0_LVLTRANS_FENCE = 26;
 static const uint32_t NET_CTRL0_ARRAY_WRITE_ASSIST_EN = 27;
 static const uint32_t NET_CTRL0_HTB_INTEST = 28;
 static const uint32_t NET_CTRL0_HTB_EXTEST = 29;
+// ERROR Duplicate Dial         static const uint32_t NET_CTRL0_PM_ACCESS = 30;
 static const uint32_t NET_CTRL0_PLLFORCE_OUT_EN = 31;
 // eq/reg00003.H
 
@@ -292,6 +294,18 @@ static const uint32_t QME_DB1_DATA_LEN = 56;
 // eq/reg00003.H
 
 static const uint64_t QME_PCBSID = 0x200e0034ull;
+
+static const uint32_t QME_PCBSID_EQ_VLD = 0;
+static const uint32_t QME_PCBSID_EQ_MERGING_SCHEME = 2;
+static const uint32_t QME_PCBSID_EQ_MERGING_SCHEME_LEN = 3;
+static const uint32_t QME_PCBSID_SP_ACK = 7;
+static const uint32_t QME_PCBSID_EQ_RD_NOT_WR = 8;
+static const uint32_t QME_PCBSID_EQ_P = 9;
+static const uint32_t QME_PCBSID_EQ_LOCAL_ADDR_P = 10;
+static const uint32_t QME_PCBSID_EQ_PORT = 12;
+static const uint32_t QME_PCBSID_EQ_PORT_LEN = 4;
+static const uint32_t QME_PCBSID_EQ_LOCAL_ADDR = 16;
+static const uint32_t QME_PCBSID_EQ_LOCAL_ADDR_LEN = 16;
 // eq/reg00003.H
 
 static const uint64_t QME_RS4DBGS = 0x200e015cull;
@@ -323,8 +337,8 @@ static const uint32_t QME_SCOM_XIVDR4_5_LEN = 32;
 
 static const uint64_t QME_SCOM_XIXCR = 0x200e0200ull;
 
-static const uint32_t QME_SCOM_XIXCR_QME_SCOM_XIXCR_CTR = 32;
-static const uint32_t QME_SCOM_XIXCR_QME_SCOM_XIXCR_CTR_LEN = 32;
+static const uint32_t QME_SCOM_XIXCR_CTR = 32;
+static const uint32_t QME_SCOM_XIXCR_CTR_LEN = 32;
 // eq/reg00003.H
 
 static const uint64_t SPATTN_MASK_RW = 0x20040042ull;

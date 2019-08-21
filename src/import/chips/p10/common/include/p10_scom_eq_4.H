@@ -200,11 +200,42 @@ static const uint64_t QME_EISTR = 0x200e0270ull;
 
 static const uint64_t QME_LFIRACT0 = 0x200e0008ull;
 
-static const uint32_t QME_LFIRACT0_QME_LFIRACT0_FIR_ACTION1 = 0;
-static const uint32_t QME_LFIRACT0_QME_LFIRACT0_FIR_ACTION1_LEN = 28;
+static const uint32_t QME_LFIRACT0_FIR_ACTION1 = 0;
+static const uint32_t QME_LFIRACT0_FIR_ACTION1_LEN = 28;
 // eq/reg00004.H
 
 static const uint64_t QME_PLSR = 0x200e0148ull;
+
+static const uint32_t QME_PLSR_0_T0 = 0;
+static const uint32_t QME_PLSR_0_T0_LEN = 4;
+static const uint32_t QME_PLSR_0_T1 = 4;
+static const uint32_t QME_PLSR_0_T1_LEN = 4;
+static const uint32_t QME_PLSR_0_T2 = 8;
+static const uint32_t QME_PLSR_0_T2_LEN = 4;
+static const uint32_t QME_PLSR_0_T3 = 12;
+static const uint32_t QME_PLSR_0_T3_LEN = 4;
+static const uint32_t QME_PLSR_1_T0 = 16;
+static const uint32_t QME_PLSR_1_T0_LEN = 4;
+static const uint32_t QME_PLSR_1_T1 = 20;
+static const uint32_t QME_PLSR_1_T1_LEN = 4;
+static const uint32_t QME_PLSR_1_T2 = 24;
+static const uint32_t QME_PLSR_1_T2_LEN = 4;
+static const uint32_t QME_PLSR_1_T3 = 28;
+static const uint32_t QME_PLSR_1_T3_LEN = 4;
+static const uint32_t QME_PLSR_2_T0 = 32;
+static const uint32_t QME_PLSR_2_T0_LEN = 4;
+static const uint32_t QME_PLSR_2_T1 = 36;
+static const uint32_t QME_PLSR_2_T1_LEN = 4;
+static const uint32_t QME_PLSR_2_T2 = 40;
+static const uint32_t QME_PLSR_2_T2_LEN = 4;
+static const uint32_t QME_PLSR_2_T3 = 44;
+static const uint32_t QME_PLSR_2_T3_LEN = 4;
+static const uint32_t QME_PLSR_3_T0 = 48;
+static const uint32_t QME_PLSR_3_T0_LEN = 4;
+static const uint32_t QME_PLSR_3_T1 = 52;
+static const uint32_t QME_PLSR_3_T1_LEN = 4;
+static const uint32_t QME_PLSR_3_T2 = 56;
+static const uint32_t QME_PLSR_3_T2_LEN = 4;
 // eq/reg00004.H
 
 static const uint64_t QME_QHB = 0x200e0080ull;
@@ -219,16 +250,16 @@ static const uint64_t QME_RCSCR = 0x200e0184ull;
 static const uint64_t QME_RCSCR_WO_CLEAR = 0x200e0187ull;
 static const uint64_t QME_RCSCR_WO_OR = 0x200e0186ull;
 
-static const uint32_t QME_RCSCR__OFF_REQ = 0;
-static const uint32_t QME_RCSCR__OFF_REQ_LEN = 4;
-static const uint32_t QME_RCSCR__CHANGE_DONE = 4;
-static const uint32_t QME_RCSCR__CHANGE_DONE_LEN = 4;
-static const uint32_t QME_RCSCR__CHANGE_ACTIVE = 8;
-static const uint32_t QME_RCSCR__CHANGE_ACTIVE_LEN = 4;
-static const uint32_t QME_RCSCR__PARTIAL_GOOD = 12;
-static const uint32_t QME_RCSCR__PARTIAL_GOOD_LEN = 4;
-static const uint32_t QME_RCSCR__CHANGE_ERROR = 16;
-static const uint32_t QME_RCSCR__CHANGE_ERROR_LEN = 4;
+static const uint32_t QME_RCSCR_OFF_REQ = 0;
+static const uint32_t QME_RCSCR_OFF_REQ_LEN = 4;
+static const uint32_t QME_RCSCR_CHANGE_DONE = 4;
+static const uint32_t QME_RCSCR_CHANGE_DONE_LEN = 4;
+static const uint32_t QME_RCSCR_CHANGE_ACTIVE = 8;
+static const uint32_t QME_RCSCR_CHANGE_ACTIVE_LEN = 4;
+static const uint32_t QME_RCSCR_PARTIAL_GOOD = 12;
+static const uint32_t QME_RCSCR_PARTIAL_GOOD_LEN = 4;
+static const uint32_t QME_RCSCR_CHANGE_ERROR = 16;
+static const uint32_t QME_RCSCR_CHANGE_ERROR_LEN = 4;
 static const uint32_t QME_RCSCR_0_TARGET_INDEX = 35;
 static const uint32_t QME_RCSCR_0_TARGET_INDEX_LEN = 5;
 static const uint32_t QME_RCSCR_1_TARGET_INDEX = 43;
@@ -241,14 +272,14 @@ static const uint32_t QME_RCSCR_3_TARGET_INDEX_LEN = 5;
 
 static const uint64_t QME_RS4BAR = 0x200e0160ull;
 
-static const uint32_t QME_RS4BAR_QME_RS4BAR_BASE = 0;
-static const uint32_t QME_RS4BAR_QME_RS4BAR_BASE_LEN = 32;
+static const uint32_t QME_RS4BAR_BASE = 0;
+static const uint32_t QME_RS4BAR_BASE_LEN = 32;
 // eq/reg00004.H
 
 static const uint64_t QME_RS4DBGD = 0x200e0158ull;
 
-static const uint32_t QME_RS4DBGD_QME_RS4DBGD_SCAN_DATA_IN = 0;
-static const uint32_t QME_RS4DBGD_QME_RS4DBGD_SCAN_DATA_IN_LEN = 64;
+static const uint32_t QME_RS4DBGD_SCAN_DATA_IN = 0;
+static const uint32_t QME_RS4DBGD_SCAN_DATA_IN_LEN = 64;
 // eq/reg00004.H
 
 static const uint64_t REGION_CCFLUSH_STATUS = 0x20030016ull;
@@ -259,27 +290,27 @@ static const uint32_t REGION_CCFLUSH_STATUS_REGION_CCFLUSH_LEN = 15;
 
 static const uint64_t XSTOP1 = 0x2003000cull;
 
-static const uint32_t XSTOP1_XSTOP1_MASK_B = 0;
+static const uint32_t XSTOP1_MASK_B = 0;
 static const uint32_t XSTOP1_ALIGNED_XSTOP1 = 1;
 static const uint32_t XSTOP1_TRIGGER_OPCG_ON_XSTOP1 = 2;
-static const uint32_t XSTOP1_XSTOP1_WAIT_ALLWAYS = 3;
-static const uint32_t XSTOP1_XSTOP1_PERV = 4;
-static const uint32_t XSTOP1_XSTOP1_UNIT1 = 5;
-static const uint32_t XSTOP1_XSTOP1_UNIT2 = 6;
-static const uint32_t XSTOP1_XSTOP1_UNIT3 = 7;
-static const uint32_t XSTOP1_XSTOP1_UNIT4 = 8;
-static const uint32_t XSTOP1_XSTOP1_UNIT5 = 9;
-static const uint32_t XSTOP1_XSTOP1_UNIT6 = 10;
-static const uint32_t XSTOP1_XSTOP1_UNIT7 = 11;
-static const uint32_t XSTOP1_XSTOP1_UNIT8 = 12;
-static const uint32_t XSTOP1_XSTOP1_UNIT9 = 13;
-static const uint32_t XSTOP1_XSTOP1_UNIT10 = 14;
-static const uint32_t XSTOP1_XSTOP1_UNIT11 = 15;
-static const uint32_t XSTOP1_XSTOP1_UNIT12 = 16;
-static const uint32_t XSTOP1_XSTOP1_UNIT13 = 17;
-static const uint32_t XSTOP1_XSTOP1_UNIT14 = 18;
-static const uint32_t XSTOP1_XSTOP1_WAIT_CYCLES = 48;
-static const uint32_t XSTOP1_XSTOP1_WAIT_CYCLES_LEN = 12;
+static const uint32_t XSTOP1_WAIT_ALLWAYS = 3;
+static const uint32_t XSTOP1_PERV = 4;
+static const uint32_t XSTOP1_UNIT1 = 5;
+static const uint32_t XSTOP1_UNIT2 = 6;
+static const uint32_t XSTOP1_UNIT3 = 7;
+static const uint32_t XSTOP1_UNIT4 = 8;
+static const uint32_t XSTOP1_UNIT5 = 9;
+static const uint32_t XSTOP1_UNIT6 = 10;
+static const uint32_t XSTOP1_UNIT7 = 11;
+static const uint32_t XSTOP1_UNIT8 = 12;
+static const uint32_t XSTOP1_UNIT9 = 13;
+static const uint32_t XSTOP1_UNIT10 = 14;
+static const uint32_t XSTOP1_UNIT11 = 15;
+static const uint32_t XSTOP1_UNIT12 = 16;
+static const uint32_t XSTOP1_UNIT13 = 17;
+static const uint32_t XSTOP1_UNIT14 = 18;
+static const uint32_t XSTOP1_WAIT_CYCLES = 48;
+static const uint32_t XSTOP1_WAIT_CYCLES_LEN = 12;
 // eq/reg00004.H
 
 #ifndef __PPE_HCODE__

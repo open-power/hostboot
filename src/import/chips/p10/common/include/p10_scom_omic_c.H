@@ -43,6 +43,9 @@ static const uint64_t DATASM_REGS_RX_STAT10_PG = 0x800ad84010012c3full;
 // omic/reg00012.H
 
 static const uint64_t DATASM_REGS_RX_STAT20_PG = 0x800b284010012c3full;
+
+static const uint32_t DATASM_REGS_RX_STAT20_PG_RX_DL_PHY_RUN_LANE_16_23_RO_SIGNAL = 48;
+static const uint32_t DATASM_REGS_RX_STAT20_PG_RX_DL_PHY_RUN_LANE_16_23_RO_SIGNAL_LEN = 8;
 // omic/reg00012.H
 
 #ifndef __PPE_HCODE__

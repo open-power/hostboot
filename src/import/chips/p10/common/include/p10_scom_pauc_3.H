@@ -119,18 +119,18 @@ static const uint32_t LOCAL_XSTOP_ANY_LOCAL_XSTOP = 0;
 static const uint32_t LOCAL_XSTOP_RESERVED1L = 1;
 static const uint32_t LOCAL_XSTOP_RESERVED2L = 2;
 static const uint32_t LOCAL_XSTOP_RESERVED3L = 3;
-static const uint32_t LOCAL_XSTOP_LOCAL_XSTOP_PERV = 4;
-static const uint32_t LOCAL_XSTOP_LOCAL_XSTOP_IN05 = 5;
-static const uint32_t LOCAL_XSTOP_LOCAL_XSTOP_IN06 = 6;
-static const uint32_t LOCAL_XSTOP_LOCAL_XSTOP_IN07 = 7;
-static const uint32_t LOCAL_XSTOP_LOCAL_XSTOP_IN08 = 8;
-static const uint32_t LOCAL_XSTOP_LOCAL_XSTOP_IN09 = 9;
-static const uint32_t LOCAL_XSTOP_LOCAL_XSTOP_IN10 = 10;
-static const uint32_t LOCAL_XSTOP_LOCAL_XSTOP_IN11 = 11;
-static const uint32_t LOCAL_XSTOP_LOCAL_XSTOP_IN12 = 12;
-static const uint32_t LOCAL_XSTOP_LOCAL_XSTOP_IN13 = 13;
-static const uint32_t LOCAL_XSTOP_LOCAL_XSTOP_IN14 = 14;
-static const uint32_t LOCAL_XSTOP_LOCAL_XSTOP_IN15 = 15;
+static const uint32_t LOCAL_XSTOP_PERV = 4;
+static const uint32_t LOCAL_XSTOP_IN05 = 5;
+static const uint32_t LOCAL_XSTOP_IN06 = 6;
+static const uint32_t LOCAL_XSTOP_IN07 = 7;
+static const uint32_t LOCAL_XSTOP_IN08 = 8;
+static const uint32_t LOCAL_XSTOP_IN09 = 9;
+static const uint32_t LOCAL_XSTOP_IN10 = 10;
+static const uint32_t LOCAL_XSTOP_IN11 = 11;
+static const uint32_t LOCAL_XSTOP_IN12 = 12;
+static const uint32_t LOCAL_XSTOP_IN13 = 13;
+static const uint32_t LOCAL_XSTOP_IN14 = 14;
+static const uint32_t LOCAL_XSTOP_IN15 = 15;
 // pauc/reg00003.H
 
 static const uint64_t LXSTOP_INTERRUPT_REG = 0x100f002aull;
@@ -169,12 +169,14 @@ static const uint32_t NET_CTRL0_CPLT_RCTRL = 19;
 static const uint32_t NET_CTRL0_CPLT_DCTRL = 20;
 static const uint32_t NET_CTRL0_CPLT_RCTRL2 = 21;
 static const uint32_t NET_CTRL0_ADJ_FUNC_CLKSEL = 22;
+static const uint32_t NET_CTRL0_PM_ACCESS = 23;
 static const uint32_t NET_CTRL0_FUNC_LCB_EDIS = 24;
 static const uint32_t NET_CTRL0_TP_FENCE_PCB = 25;
 static const uint32_t NET_CTRL0_LVLTRANS_FENCE = 26;
 static const uint32_t NET_CTRL0_ARRAY_WRITE_ASSIST_EN = 27;
 static const uint32_t NET_CTRL0_HTB_INTEST = 28;
 static const uint32_t NET_CTRL0_HTB_EXTEST = 29;
+// ERROR Duplicate Dial         static const uint32_t NET_CTRL0_PM_ACCESS = 30;
 static const uint32_t NET_CTRL0_PLLFORCE_OUT_EN = 31;
 // pauc/reg00003.H
 
@@ -231,12 +233,83 @@ static const uint32_t PB_CFG_CNPM_REG_SPARE_LEN = 6;
 // pauc/reg00003.H
 
 static const uint64_t PB_FM0123_ERR = 0x10011827ull;
+
+static const uint32_t PB_FM0123_ERR_0_CONTROL_ERROR = 0;
+static const uint32_t PB_FM0123_ERR_0_ADDR_PERR = 1;
+static const uint32_t PB_FM0123_ERR_0_CC0_CREDITERR = 2;
+static const uint32_t PB_FM0123_ERR_0_CC1_CREDITERR = 3;
+static const uint32_t PB_FM0123_ERR_0_CC2_CREDITERR = 4;
+static const uint32_t PB_FM0123_ERR_0_CC3_CREDITERR = 5;
+static const uint32_t PB_FM0123_ERR_0_DAT_HI_PERR = 6;
+static const uint32_t PB_FM0123_ERR_0_DAT_LO_PERR = 7;
+static const uint32_t PB_FM0123_ERR_0_FRAME_CREDITERR = 8;
+static const uint32_t PB_FM0123_ERR_0_RT_SEQ_ERR = 9;
+static const uint32_t PB_FM0123_ERR_0_PRSP_PTYERR = 10;
+static const uint32_t PB_FM0123_ERR_0_TTAG_PERR = 11;
+static const uint32_t PB_FM0123_ERR_0_VC0_CREDITERR = 12;
+static const uint32_t PB_FM0123_ERR_0_VC1_CREDITERR = 13;
+static const uint32_t PB_FM0123_ERR_0_RTAG_PTYERR = 14;
+static const uint32_t PB_FM0123_ERR_0_RTAG_MISC_PTY = 15;
+static const uint32_t PB_FM0123_ERR_1_CONTROL_ERROR = 16;
+static const uint32_t PB_FM0123_ERR_1_ADDR_PERR = 17;
+static const uint32_t PB_FM0123_ERR_1_CC0_CREDITERR = 18;
+static const uint32_t PB_FM0123_ERR_1_CC1_CREDITERR = 19;
+static const uint32_t PB_FM0123_ERR_1_CC2_CREDITERR = 20;
+static const uint32_t PB_FM0123_ERR_1_CC3_CREDITERR = 21;
+static const uint32_t PB_FM0123_ERR_1_DAT_HI_PERR = 22;
+static const uint32_t PB_FM0123_ERR_1_DAT_LO_PERR = 23;
+static const uint32_t PB_FM0123_ERR_1_FRAME_CREDITERR = 24;
+static const uint32_t PB_FM0123_ERR_1_RT_SEQ_ERR = 25;
+static const uint32_t PB_FM0123_ERR_1_PRSP_PTYERR = 26;
+static const uint32_t PB_FM0123_ERR_1_TTAG_PERR = 27;
+static const uint32_t PB_FM0123_ERR_1_VC0_CREDITERR = 28;
+static const uint32_t PB_FM0123_ERR_1_VC1_CREDITERR = 29;
+static const uint32_t PB_FM0123_ERR_1_RTAG_PTYERR = 30;
+static const uint32_t PB_FM0123_ERR_1_RTAG_MISC_PTY = 31;
+static const uint32_t PB_FM0123_ERR_2_CONTROL_ERROR = 32;
+static const uint32_t PB_FM0123_ERR_2_ADDR_PERR = 33;
+static const uint32_t PB_FM0123_ERR_2_CC0_CREDITERR = 34;
+static const uint32_t PB_FM0123_ERR_2_CC1_CREDITERR = 35;
+static const uint32_t PB_FM0123_ERR_2_CC2_CREDITERR = 36;
+static const uint32_t PB_FM0123_ERR_2_CC3_CREDITERR = 37;
+static const uint32_t PB_FM0123_ERR_2_DAT_HI_PERR = 38;
+static const uint32_t PB_FM0123_ERR_2_DAT_LO_PERR = 39;
+static const uint32_t PB_FM0123_ERR_2_FRAME_CREDITERR = 40;
+static const uint32_t PB_FM0123_ERR_2_RT_SEQ_ERR = 41;
+static const uint32_t PB_FM0123_ERR_2_PRSP_PTYERR = 42;
+static const uint32_t PB_FM0123_ERR_2_TTAG_PERR = 43;
+static const uint32_t PB_FM0123_ERR_2_VC0_CREDITERR = 44;
+static const uint32_t PB_FM0123_ERR_2_VC1_CREDITERR = 45;
+static const uint32_t PB_FM0123_ERR_2_RTAG_PTYERR = 46;
+static const uint32_t PB_FM0123_ERR_2_RTAG_MISC_PTY = 47;
+static const uint32_t PB_FM0123_ERR_3_CONTROL_ERROR = 48;
+static const uint32_t PB_FM0123_ERR_3_ADDR_PERR = 49;
+static const uint32_t PB_FM0123_ERR_3_CC0_CREDITERR = 50;
+static const uint32_t PB_FM0123_ERR_3_CC1_CREDITERR = 51;
+static const uint32_t PB_FM0123_ERR_3_CC2_CREDITERR = 52;
+static const uint32_t PB_FM0123_ERR_3_CC3_CREDITERR = 53;
+static const uint32_t PB_FM0123_ERR_3_DAT_HI_PERR = 54;
+static const uint32_t PB_FM0123_ERR_3_DAT_LO_PERR = 55;
+static const uint32_t PB_FM0123_ERR_3_FRAME_CREDITERR = 56;
+static const uint32_t PB_FM0123_ERR_3_RT_SEQ_ERR = 57;
+static const uint32_t PB_FM0123_ERR_3_PRSP_PTYERR = 58;
+static const uint32_t PB_FM0123_ERR_3_TTAG_PERR = 59;
+static const uint32_t PB_FM0123_ERR_3_VC0_CREDITERR = 60;
+static const uint32_t PB_FM0123_ERR_3_VC1_CREDITERR = 61;
+static const uint32_t PB_FM0123_ERR_3_RTAG_PTYERR = 62;
 // pauc/reg00003.H
 
 static const uint64_t PB_MAILBOX_DATA_REG = 0x1001182full;
 // pauc/reg00003.H
 
 static const uint64_t PB_PMU0_CNPM_COUNTER = 0x10011821ull;
+
+static const uint32_t PB_PMU0_CNPM_COUNTER_0 = 0;
+static const uint32_t PB_PMU0_CNPM_COUNTER_0_LEN = 16;
+static const uint32_t PB_PMU0_CNPM_COUNTER_1 = 16;
+static const uint32_t PB_PMU0_CNPM_COUNTER_1_LEN = 16;
+static const uint32_t PB_PMU0_CNPM_COUNTER_2 = 32;
+static const uint32_t PB_PMU0_CNPM_COUNTER_2_LEN = 16;
 // pauc/reg00003.H
 
 static const uint64_t PB_TL_LINK_DATA_01_CFG_REG = 0x10011810ull;

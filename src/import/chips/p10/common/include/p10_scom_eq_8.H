@@ -40,6 +40,11 @@ namespace eq
 
 
 static const uint64_t ASSIST_INTERRUPT_REG = 0x200f0011ull;
+
+static const uint32_t ASSIST_INTERRUPT_REG_ATTN = 0;
+static const uint32_t ASSIST_INTERRUPT_REG_RECOV = 1;
+static const uint32_t ASSIST_INTERRUPT_REG_XSTOP = 2;
+static const uint32_t ASSIST_INTERRUPT_REG_LXSTOP = 3;
 // eq/reg00008.H
 
 static const uint64_t EDRAM_STATUS = 0x200f0029ull;
@@ -259,8 +264,8 @@ static const uint32_t QME_DORP_REMAINDER_LEN = 32;
 
 static const uint64_t QME_RVCR = 0x200e0084ull;
 
-static const uint32_t QME_RVCR_QME_RVCR_RVID_VALUE = 1;
-static const uint32_t QME_RVCR_QME_RVCR_RVID_VALUE_LEN = 7;
+static const uint32_t QME_RVCR_RVID_VALUE = 1;
+static const uint32_t QME_RVCR_RVID_VALUE_LEN = 7;
 // eq/reg00008.H
 
 static const uint64_t QME_SCOM_XIRAMRA = 0x200e0204ull;
@@ -286,11 +291,14 @@ static const uint64_t QME_SCRA_RW = 0x200e0124ull;
 static const uint64_t QME_SCRA_WO_CLEAR = 0x200e0127ull;
 static const uint64_t QME_SCRA_WO_OR = 0x200e0126ull;
 
-static const uint32_t QME_SCRA_QME_SCRA_DATA = 0;
-static const uint32_t QME_SCRA_QME_SCRA_DATA_LEN = 32;
+static const uint32_t QME_SCRA_DATA = 0;
+static const uint32_t QME_SCRA_DATA_LEN = 32;
 // eq/reg00008.H
 
 static const uint64_t SCAN_CAPTUREDR_LONG = 0x2003d000ull;
+
+static const uint32_t SCAN_CAPTUREDR_LONG_SCAN_CAPTUREDR_LONG_REG = 0;
+static const uint32_t SCAN_CAPTUREDR_LONG_SCAN_CAPTUREDR_LONG_REG_LEN = 32;
 // eq/reg00008.H
 
 static const uint64_t SCAN_REGION_TYPE = 0x20030005ull;
@@ -330,27 +338,27 @@ static const uint32_t SCAN_REGION_TYPE_SCAN_TYPE_INEX = 59;
 
 static const uint64_t XSTOP3 = 0x2003000eull;
 
-static const uint32_t XSTOP3_XSTOP3_MASK_B = 0;
+static const uint32_t XSTOP3_MASK_B = 0;
 static const uint32_t XSTOP3_ALIGNED_XSTOP3 = 1;
 static const uint32_t XSTOP3_TRIGGER_OPCG_ON_XSTOP3 = 2;
-static const uint32_t XSTOP3_XSTOP3_WAIT_ALLWAYS = 3;
-static const uint32_t XSTOP3_XSTOP3_PERV = 4;
-static const uint32_t XSTOP3_XSTOP3_UNIT1 = 5;
-static const uint32_t XSTOP3_XSTOP3_UNIT2 = 6;
-static const uint32_t XSTOP3_XSTOP3_UNIT3 = 7;
-static const uint32_t XSTOP3_XSTOP3_UNIT4 = 8;
-static const uint32_t XSTOP3_XSTOP3_UNIT5 = 9;
-static const uint32_t XSTOP3_XSTOP3_UNIT6 = 10;
-static const uint32_t XSTOP3_XSTOP3_UNIT7 = 11;
-static const uint32_t XSTOP3_XSTOP3_UNIT8 = 12;
-static const uint32_t XSTOP3_XSTOP3_UNIT9 = 13;
-static const uint32_t XSTOP3_XSTOP3_UNIT10 = 14;
-static const uint32_t XSTOP3_XSTOP3_UNIT11 = 15;
-static const uint32_t XSTOP3_XSTOP3_UNIT12 = 16;
-static const uint32_t XSTOP3_XSTOP3_UNIT13 = 17;
-static const uint32_t XSTOP3_XSTOP3_UNIT14 = 18;
-static const uint32_t XSTOP3_XSTOP3_WAIT_CYCLES = 48;
-static const uint32_t XSTOP3_XSTOP3_WAIT_CYCLES_LEN = 12;
+static const uint32_t XSTOP3_WAIT_ALLWAYS = 3;
+static const uint32_t XSTOP3_PERV = 4;
+static const uint32_t XSTOP3_UNIT1 = 5;
+static const uint32_t XSTOP3_UNIT2 = 6;
+static const uint32_t XSTOP3_UNIT3 = 7;
+static const uint32_t XSTOP3_UNIT4 = 8;
+static const uint32_t XSTOP3_UNIT5 = 9;
+static const uint32_t XSTOP3_UNIT6 = 10;
+static const uint32_t XSTOP3_UNIT7 = 11;
+static const uint32_t XSTOP3_UNIT8 = 12;
+static const uint32_t XSTOP3_UNIT9 = 13;
+static const uint32_t XSTOP3_UNIT10 = 14;
+static const uint32_t XSTOP3_UNIT11 = 15;
+static const uint32_t XSTOP3_UNIT12 = 16;
+static const uint32_t XSTOP3_UNIT13 = 17;
+static const uint32_t XSTOP3_UNIT14 = 18;
+static const uint32_t XSTOP3_WAIT_CYCLES = 48;
+static const uint32_t XSTOP3_WAIT_CYCLES_LEN = 12;
 // eq/reg00008.H
 
 #ifndef __PPE_HCODE__

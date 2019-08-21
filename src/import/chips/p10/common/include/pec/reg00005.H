@@ -7404,6 +7404,186 @@ fapi_try_exit:
 }
 
 
+static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_A(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_NESTTRC_REG));
+#endif
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_A,
+           PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_A_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_A chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_A(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_NESTTRC_REG));
+#endif
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_A,
+           PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_A_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_A chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_A(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_NESTTRC_REG));
+#endif
+    return i_data.extractToRight<PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_A,
+           PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_A_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_A chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_B(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_NESTTRC_REG));
+#endif
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_B,
+           PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_B_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_B chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_B(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_NESTTRC_REG));
+#endif
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_B,
+           PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_B_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_B chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_B(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_NESTTRC_REG));
+#endif
+    return i_data.extractToRight<PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_B,
+           PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_B_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_B chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_C(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_NESTTRC_REG));
+#endif
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_C,
+           PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_C_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_C chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_C(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_NESTTRC_REG));
+#endif
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_C,
+           PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_C_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_C chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_C(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_NESTTRC_REG));
+#endif
+    return i_data.extractToRight<PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_C,
+           PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_C_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_C chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_D(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_NESTTRC_REG));
+#endif
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_D,
+           PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_D_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_D chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_D(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_NESTTRC_REG));
+#endif
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_D,
+           PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_D_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_D chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_D(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_NESTTRC_REG));
+#endif
+    return i_data.extractToRight<PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_D,
+           PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_D_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_D chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
 static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_NESTTRC_REG_PE_TRACE_ENABLE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {

@@ -59,6 +59,9 @@ static const uint32_t CLOCK_STAT_ARY_UNIT14_ARY = 18;
 // perv/reg00006.H
 
 static const uint64_t COMP_INTR_ERROR_STATUS_REG = 0x000f0034ull;
+
+static const uint32_t COMP_INTR_ERROR_STATUS_REG_IPOLL_ERR_MASKED = 0;
+static const uint32_t COMP_INTR_ERROR_STATUS_REG_IPOLL_ERR_MASKED_LEN = 6;
 // perv/reg00006.H
 
 static const uint64_t EPS_FIR_LOCAL_ACTION2 = 0x00040109ull;
@@ -720,27 +723,27 @@ static const uint32_t TRA6_TR0_CONFIG_3_D_LEN = 24;
 
 static const uint64_t XSTOP1 = 0x0003000cull;
 
-static const uint32_t XSTOP1_XSTOP1_MASK_B = 0;
+static const uint32_t XSTOP1_MASK_B = 0;
 static const uint32_t XSTOP1_ALIGNED_XSTOP1 = 1;
 static const uint32_t XSTOP1_TRIGGER_OPCG_ON_XSTOP1 = 2;
-static const uint32_t XSTOP1_XSTOP1_WAIT_ALLWAYS = 3;
-static const uint32_t XSTOP1_XSTOP1_PERV = 4;
-static const uint32_t XSTOP1_XSTOP1_UNIT1 = 5;
-static const uint32_t XSTOP1_XSTOP1_UNIT2 = 6;
-static const uint32_t XSTOP1_XSTOP1_UNIT3 = 7;
-static const uint32_t XSTOP1_XSTOP1_UNIT4 = 8;
-static const uint32_t XSTOP1_XSTOP1_UNIT5 = 9;
-static const uint32_t XSTOP1_XSTOP1_UNIT6 = 10;
-static const uint32_t XSTOP1_XSTOP1_UNIT7 = 11;
-static const uint32_t XSTOP1_XSTOP1_UNIT8 = 12;
-static const uint32_t XSTOP1_XSTOP1_UNIT9 = 13;
-static const uint32_t XSTOP1_XSTOP1_UNIT10 = 14;
-static const uint32_t XSTOP1_XSTOP1_UNIT11 = 15;
-static const uint32_t XSTOP1_XSTOP1_UNIT12 = 16;
-static const uint32_t XSTOP1_XSTOP1_UNIT13 = 17;
-static const uint32_t XSTOP1_XSTOP1_UNIT14 = 18;
-static const uint32_t XSTOP1_XSTOP1_WAIT_CYCLES = 48;
-static const uint32_t XSTOP1_XSTOP1_WAIT_CYCLES_LEN = 12;
+static const uint32_t XSTOP1_WAIT_ALLWAYS = 3;
+static const uint32_t XSTOP1_PERV = 4;
+static const uint32_t XSTOP1_UNIT1 = 5;
+static const uint32_t XSTOP1_UNIT2 = 6;
+static const uint32_t XSTOP1_UNIT3 = 7;
+static const uint32_t XSTOP1_UNIT4 = 8;
+static const uint32_t XSTOP1_UNIT5 = 9;
+static const uint32_t XSTOP1_UNIT6 = 10;
+static const uint32_t XSTOP1_UNIT7 = 11;
+static const uint32_t XSTOP1_UNIT8 = 12;
+static const uint32_t XSTOP1_UNIT9 = 13;
+static const uint32_t XSTOP1_UNIT10 = 14;
+static const uint32_t XSTOP1_UNIT11 = 15;
+static const uint32_t XSTOP1_UNIT12 = 16;
+static const uint32_t XSTOP1_UNIT13 = 17;
+static const uint32_t XSTOP1_UNIT14 = 18;
+static const uint32_t XSTOP1_WAIT_CYCLES = 48;
+static const uint32_t XSTOP1_WAIT_CYCLES_LEN = 12;
 // perv/reg00006.H
 
 #ifndef __PPE_HCODE__

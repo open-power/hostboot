@@ -289,27 +289,27 @@ static const uint32_t TRA1_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN = 24;
 
 static const uint64_t XSTOP2 = 0x0c03000dull;
 
-static const uint32_t XSTOP2_XSTOP2_MASK_B = 0;
+static const uint32_t XSTOP2_MASK_B = 0;
 static const uint32_t XSTOP2_ALIGNED_XSTOP2 = 1;
 static const uint32_t XSTOP2_TRIGGER_OPCG_ON_XSTOP2 = 2;
-static const uint32_t XSTOP2_XSTOP2_WAIT_ALLWAYS = 3;
-static const uint32_t XSTOP2_XSTOP2_PERV = 4;
-static const uint32_t XSTOP2_XSTOP2_UNIT1 = 5;
-static const uint32_t XSTOP2_XSTOP2_UNIT2 = 6;
-static const uint32_t XSTOP2_XSTOP2_UNIT3 = 7;
-static const uint32_t XSTOP2_XSTOP2_UNIT4 = 8;
-static const uint32_t XSTOP2_XSTOP2_UNIT5 = 9;
-static const uint32_t XSTOP2_XSTOP2_UNIT6 = 10;
-static const uint32_t XSTOP2_XSTOP2_UNIT7 = 11;
-static const uint32_t XSTOP2_XSTOP2_UNIT8 = 12;
-static const uint32_t XSTOP2_XSTOP2_UNIT9 = 13;
-static const uint32_t XSTOP2_XSTOP2_UNIT10 = 14;
-static const uint32_t XSTOP2_XSTOP2_UNIT11 = 15;
-static const uint32_t XSTOP2_XSTOP2_UNIT12 = 16;
-static const uint32_t XSTOP2_XSTOP2_UNIT13 = 17;
-static const uint32_t XSTOP2_XSTOP2_UNIT14 = 18;
-static const uint32_t XSTOP2_XSTOP2_WAIT_CYCLES = 48;
-static const uint32_t XSTOP2_XSTOP2_WAIT_CYCLES_LEN = 12;
+static const uint32_t XSTOP2_WAIT_ALLWAYS = 3;
+static const uint32_t XSTOP2_PERV = 4;
+static const uint32_t XSTOP2_UNIT1 = 5;
+static const uint32_t XSTOP2_UNIT2 = 6;
+static const uint32_t XSTOP2_UNIT3 = 7;
+static const uint32_t XSTOP2_UNIT4 = 8;
+static const uint32_t XSTOP2_UNIT5 = 9;
+static const uint32_t XSTOP2_UNIT6 = 10;
+static const uint32_t XSTOP2_UNIT7 = 11;
+static const uint32_t XSTOP2_UNIT8 = 12;
+static const uint32_t XSTOP2_UNIT9 = 13;
+static const uint32_t XSTOP2_UNIT10 = 14;
+static const uint32_t XSTOP2_UNIT11 = 15;
+static const uint32_t XSTOP2_UNIT12 = 16;
+static const uint32_t XSTOP2_UNIT13 = 17;
+static const uint32_t XSTOP2_UNIT14 = 18;
+static const uint32_t XSTOP2_WAIT_CYCLES = 48;
+static const uint32_t XSTOP2_WAIT_CYCLES_LEN = 12;
 // mc/reg00014.H
 
 #ifndef __PPE_HCODE__

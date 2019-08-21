@@ -3253,1010 +3253,1010 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_PERV(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_PERV(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.insertFromRight<LOCAL_XSTOP_LOCAL_XSTOP_PERV,
+    return o_data.insertFromRight<LOCAL_XSTOP_PERV,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_PERV chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_PERV chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_PERV(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_PERV(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.insertFromRight<LOCAL_XSTOP_LOCAL_XSTOP_PERV,
+    return o_data.insertFromRight<LOCAL_XSTOP_PERV,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_PERV chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_PERV chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_PERV(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_PERV(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.setBit<LOCAL_XSTOP_LOCAL_XSTOP_PERV>();
+    return o_data.setBit<LOCAL_XSTOP_PERV>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_PERV chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_PERV chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_LOCAL_XSTOP_LOCAL_XSTOP_PERV(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_LOCAL_XSTOP_PERV(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.clearBit<LOCAL_XSTOP_LOCAL_XSTOP_PERV>();
+    return o_data.clearBit<LOCAL_XSTOP_PERV>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_PERV chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_PERV chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_LOCAL_XSTOP_LOCAL_XSTOP_PERV(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_LOCAL_XSTOP_PERV(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return i_data.extractToRight<LOCAL_XSTOP_LOCAL_XSTOP_PERV,
+    return i_data.extractToRight<LOCAL_XSTOP_PERV,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_PERV chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_PERV chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_LOCAL_XSTOP_LOCAL_XSTOP_PERV(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_LOCAL_XSTOP_PERV(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return i_data.getBit<LOCAL_XSTOP_LOCAL_XSTOP_PERV>();
+    return i_data.getBit<LOCAL_XSTOP_PERV>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_PERV chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_PERV chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_IN05(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_IN05(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.insertFromRight<LOCAL_XSTOP_LOCAL_XSTOP_IN05,
+    return o_data.insertFromRight<LOCAL_XSTOP_IN05,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN05 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN05 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_IN05(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_IN05(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.insertFromRight<LOCAL_XSTOP_LOCAL_XSTOP_IN05,
+    return o_data.insertFromRight<LOCAL_XSTOP_IN05,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN05 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN05 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_IN05(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_IN05(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.setBit<LOCAL_XSTOP_LOCAL_XSTOP_IN05>();
+    return o_data.setBit<LOCAL_XSTOP_IN05>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN05 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN05 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_LOCAL_XSTOP_LOCAL_XSTOP_IN05(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_LOCAL_XSTOP_IN05(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.clearBit<LOCAL_XSTOP_LOCAL_XSTOP_IN05>();
+    return o_data.clearBit<LOCAL_XSTOP_IN05>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN05 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN05 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_LOCAL_XSTOP_LOCAL_XSTOP_IN05(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_LOCAL_XSTOP_IN05(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return i_data.extractToRight<LOCAL_XSTOP_LOCAL_XSTOP_IN05,
+    return i_data.extractToRight<LOCAL_XSTOP_IN05,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN05 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN05 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_LOCAL_XSTOP_LOCAL_XSTOP_IN05(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_LOCAL_XSTOP_IN05(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return i_data.getBit<LOCAL_XSTOP_LOCAL_XSTOP_IN05>();
+    return i_data.getBit<LOCAL_XSTOP_IN05>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN05 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN05 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_IN06(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_IN06(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.insertFromRight<LOCAL_XSTOP_LOCAL_XSTOP_IN06,
+    return o_data.insertFromRight<LOCAL_XSTOP_IN06,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN06 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN06 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_IN06(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_IN06(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.insertFromRight<LOCAL_XSTOP_LOCAL_XSTOP_IN06,
+    return o_data.insertFromRight<LOCAL_XSTOP_IN06,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN06 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN06 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_IN06(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_IN06(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.setBit<LOCAL_XSTOP_LOCAL_XSTOP_IN06>();
+    return o_data.setBit<LOCAL_XSTOP_IN06>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN06 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN06 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_LOCAL_XSTOP_LOCAL_XSTOP_IN06(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_LOCAL_XSTOP_IN06(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.clearBit<LOCAL_XSTOP_LOCAL_XSTOP_IN06>();
+    return o_data.clearBit<LOCAL_XSTOP_IN06>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN06 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN06 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_LOCAL_XSTOP_LOCAL_XSTOP_IN06(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_LOCAL_XSTOP_IN06(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return i_data.extractToRight<LOCAL_XSTOP_LOCAL_XSTOP_IN06,
+    return i_data.extractToRight<LOCAL_XSTOP_IN06,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN06 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN06 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_LOCAL_XSTOP_LOCAL_XSTOP_IN06(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_LOCAL_XSTOP_IN06(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return i_data.getBit<LOCAL_XSTOP_LOCAL_XSTOP_IN06>();
+    return i_data.getBit<LOCAL_XSTOP_IN06>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN06 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN06 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_IN07(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_IN07(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.insertFromRight<LOCAL_XSTOP_LOCAL_XSTOP_IN07,
+    return o_data.insertFromRight<LOCAL_XSTOP_IN07,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN07 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN07 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_IN07(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_IN07(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.insertFromRight<LOCAL_XSTOP_LOCAL_XSTOP_IN07,
+    return o_data.insertFromRight<LOCAL_XSTOP_IN07,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN07 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN07 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_IN07(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_IN07(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.setBit<LOCAL_XSTOP_LOCAL_XSTOP_IN07>();
+    return o_data.setBit<LOCAL_XSTOP_IN07>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN07 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN07 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_LOCAL_XSTOP_LOCAL_XSTOP_IN07(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_LOCAL_XSTOP_IN07(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.clearBit<LOCAL_XSTOP_LOCAL_XSTOP_IN07>();
+    return o_data.clearBit<LOCAL_XSTOP_IN07>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN07 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN07 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_LOCAL_XSTOP_LOCAL_XSTOP_IN07(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_LOCAL_XSTOP_IN07(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return i_data.extractToRight<LOCAL_XSTOP_LOCAL_XSTOP_IN07,
+    return i_data.extractToRight<LOCAL_XSTOP_IN07,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN07 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN07 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_LOCAL_XSTOP_LOCAL_XSTOP_IN07(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_LOCAL_XSTOP_IN07(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return i_data.getBit<LOCAL_XSTOP_LOCAL_XSTOP_IN07>();
+    return i_data.getBit<LOCAL_XSTOP_IN07>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN07 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN07 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_IN08(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_IN08(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.insertFromRight<LOCAL_XSTOP_LOCAL_XSTOP_IN08,
+    return o_data.insertFromRight<LOCAL_XSTOP_IN08,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN08 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN08 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_IN08(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_IN08(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.insertFromRight<LOCAL_XSTOP_LOCAL_XSTOP_IN08,
+    return o_data.insertFromRight<LOCAL_XSTOP_IN08,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN08 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN08 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_IN08(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_IN08(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.setBit<LOCAL_XSTOP_LOCAL_XSTOP_IN08>();
+    return o_data.setBit<LOCAL_XSTOP_IN08>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN08 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN08 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_LOCAL_XSTOP_LOCAL_XSTOP_IN08(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_LOCAL_XSTOP_IN08(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.clearBit<LOCAL_XSTOP_LOCAL_XSTOP_IN08>();
+    return o_data.clearBit<LOCAL_XSTOP_IN08>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN08 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN08 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_LOCAL_XSTOP_LOCAL_XSTOP_IN08(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_LOCAL_XSTOP_IN08(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return i_data.extractToRight<LOCAL_XSTOP_LOCAL_XSTOP_IN08,
+    return i_data.extractToRight<LOCAL_XSTOP_IN08,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN08 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN08 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_LOCAL_XSTOP_LOCAL_XSTOP_IN08(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_LOCAL_XSTOP_IN08(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return i_data.getBit<LOCAL_XSTOP_LOCAL_XSTOP_IN08>();
+    return i_data.getBit<LOCAL_XSTOP_IN08>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN08 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN08 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_IN09(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_IN09(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.insertFromRight<LOCAL_XSTOP_LOCAL_XSTOP_IN09,
+    return o_data.insertFromRight<LOCAL_XSTOP_IN09,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN09 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN09 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_IN09(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_IN09(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.insertFromRight<LOCAL_XSTOP_LOCAL_XSTOP_IN09,
+    return o_data.insertFromRight<LOCAL_XSTOP_IN09,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN09 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN09 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_IN09(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_IN09(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.setBit<LOCAL_XSTOP_LOCAL_XSTOP_IN09>();
+    return o_data.setBit<LOCAL_XSTOP_IN09>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN09 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN09 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_LOCAL_XSTOP_LOCAL_XSTOP_IN09(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_LOCAL_XSTOP_IN09(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.clearBit<LOCAL_XSTOP_LOCAL_XSTOP_IN09>();
+    return o_data.clearBit<LOCAL_XSTOP_IN09>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN09 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN09 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_LOCAL_XSTOP_LOCAL_XSTOP_IN09(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_LOCAL_XSTOP_IN09(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return i_data.extractToRight<LOCAL_XSTOP_LOCAL_XSTOP_IN09,
+    return i_data.extractToRight<LOCAL_XSTOP_IN09,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN09 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN09 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_LOCAL_XSTOP_LOCAL_XSTOP_IN09(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_LOCAL_XSTOP_IN09(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return i_data.getBit<LOCAL_XSTOP_LOCAL_XSTOP_IN09>();
+    return i_data.getBit<LOCAL_XSTOP_IN09>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN09 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN09 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_IN10(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_IN10(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.insertFromRight<LOCAL_XSTOP_LOCAL_XSTOP_IN10,
+    return o_data.insertFromRight<LOCAL_XSTOP_IN10,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN10 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN10 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_IN10(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_IN10(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.insertFromRight<LOCAL_XSTOP_LOCAL_XSTOP_IN10,
+    return o_data.insertFromRight<LOCAL_XSTOP_IN10,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN10 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN10 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_IN10(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_IN10(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.setBit<LOCAL_XSTOP_LOCAL_XSTOP_IN10>();
+    return o_data.setBit<LOCAL_XSTOP_IN10>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN10 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN10 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_LOCAL_XSTOP_LOCAL_XSTOP_IN10(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_LOCAL_XSTOP_IN10(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.clearBit<LOCAL_XSTOP_LOCAL_XSTOP_IN10>();
+    return o_data.clearBit<LOCAL_XSTOP_IN10>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN10 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN10 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_LOCAL_XSTOP_LOCAL_XSTOP_IN10(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_LOCAL_XSTOP_IN10(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return i_data.extractToRight<LOCAL_XSTOP_LOCAL_XSTOP_IN10,
+    return i_data.extractToRight<LOCAL_XSTOP_IN10,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN10 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN10 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_LOCAL_XSTOP_LOCAL_XSTOP_IN10(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_LOCAL_XSTOP_IN10(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return i_data.getBit<LOCAL_XSTOP_LOCAL_XSTOP_IN10>();
+    return i_data.getBit<LOCAL_XSTOP_IN10>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN10 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN10 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_IN11(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_IN11(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.insertFromRight<LOCAL_XSTOP_LOCAL_XSTOP_IN11,
+    return o_data.insertFromRight<LOCAL_XSTOP_IN11,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN11 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN11 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_IN11(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_IN11(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.insertFromRight<LOCAL_XSTOP_LOCAL_XSTOP_IN11,
+    return o_data.insertFromRight<LOCAL_XSTOP_IN11,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN11 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN11 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_IN11(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_IN11(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.setBit<LOCAL_XSTOP_LOCAL_XSTOP_IN11>();
+    return o_data.setBit<LOCAL_XSTOP_IN11>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN11 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN11 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_LOCAL_XSTOP_LOCAL_XSTOP_IN11(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_LOCAL_XSTOP_IN11(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.clearBit<LOCAL_XSTOP_LOCAL_XSTOP_IN11>();
+    return o_data.clearBit<LOCAL_XSTOP_IN11>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN11 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN11 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_LOCAL_XSTOP_LOCAL_XSTOP_IN11(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_LOCAL_XSTOP_IN11(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return i_data.extractToRight<LOCAL_XSTOP_LOCAL_XSTOP_IN11,
+    return i_data.extractToRight<LOCAL_XSTOP_IN11,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN11 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN11 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_LOCAL_XSTOP_LOCAL_XSTOP_IN11(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_LOCAL_XSTOP_IN11(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return i_data.getBit<LOCAL_XSTOP_LOCAL_XSTOP_IN11>();
+    return i_data.getBit<LOCAL_XSTOP_IN11>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN11 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN11 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_IN12(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_IN12(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.insertFromRight<LOCAL_XSTOP_LOCAL_XSTOP_IN12,
+    return o_data.insertFromRight<LOCAL_XSTOP_IN12,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN12 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN12 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_IN12(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_IN12(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.insertFromRight<LOCAL_XSTOP_LOCAL_XSTOP_IN12,
+    return o_data.insertFromRight<LOCAL_XSTOP_IN12,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN12 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN12 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_IN12(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_IN12(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.setBit<LOCAL_XSTOP_LOCAL_XSTOP_IN12>();
+    return o_data.setBit<LOCAL_XSTOP_IN12>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN12 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN12 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_LOCAL_XSTOP_LOCAL_XSTOP_IN12(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_LOCAL_XSTOP_IN12(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.clearBit<LOCAL_XSTOP_LOCAL_XSTOP_IN12>();
+    return o_data.clearBit<LOCAL_XSTOP_IN12>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN12 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN12 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_LOCAL_XSTOP_LOCAL_XSTOP_IN12(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_LOCAL_XSTOP_IN12(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return i_data.extractToRight<LOCAL_XSTOP_LOCAL_XSTOP_IN12,
+    return i_data.extractToRight<LOCAL_XSTOP_IN12,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN12 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN12 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_LOCAL_XSTOP_LOCAL_XSTOP_IN12(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_LOCAL_XSTOP_IN12(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return i_data.getBit<LOCAL_XSTOP_LOCAL_XSTOP_IN12>();
+    return i_data.getBit<LOCAL_XSTOP_IN12>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN12 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN12 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_IN13(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_IN13(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.insertFromRight<LOCAL_XSTOP_LOCAL_XSTOP_IN13,
+    return o_data.insertFromRight<LOCAL_XSTOP_IN13,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN13 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN13 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_IN13(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_IN13(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.insertFromRight<LOCAL_XSTOP_LOCAL_XSTOP_IN13,
+    return o_data.insertFromRight<LOCAL_XSTOP_IN13,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN13 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN13 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_IN13(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_IN13(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.setBit<LOCAL_XSTOP_LOCAL_XSTOP_IN13>();
+    return o_data.setBit<LOCAL_XSTOP_IN13>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN13 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN13 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_LOCAL_XSTOP_LOCAL_XSTOP_IN13(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_LOCAL_XSTOP_IN13(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.clearBit<LOCAL_XSTOP_LOCAL_XSTOP_IN13>();
+    return o_data.clearBit<LOCAL_XSTOP_IN13>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN13 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN13 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_LOCAL_XSTOP_LOCAL_XSTOP_IN13(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_LOCAL_XSTOP_IN13(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return i_data.extractToRight<LOCAL_XSTOP_LOCAL_XSTOP_IN13,
+    return i_data.extractToRight<LOCAL_XSTOP_IN13,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN13 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN13 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_LOCAL_XSTOP_LOCAL_XSTOP_IN13(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_LOCAL_XSTOP_IN13(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return i_data.getBit<LOCAL_XSTOP_LOCAL_XSTOP_IN13>();
+    return i_data.getBit<LOCAL_XSTOP_IN13>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN13 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN13 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_IN14(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_IN14(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.insertFromRight<LOCAL_XSTOP_LOCAL_XSTOP_IN14,
+    return o_data.insertFromRight<LOCAL_XSTOP_IN14,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN14 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN14 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_IN14(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_IN14(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.insertFromRight<LOCAL_XSTOP_LOCAL_XSTOP_IN14,
+    return o_data.insertFromRight<LOCAL_XSTOP_IN14,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN14 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN14 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_IN14(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_IN14(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.setBit<LOCAL_XSTOP_LOCAL_XSTOP_IN14>();
+    return o_data.setBit<LOCAL_XSTOP_IN14>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN14 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN14 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_LOCAL_XSTOP_LOCAL_XSTOP_IN14(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_LOCAL_XSTOP_IN14(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.clearBit<LOCAL_XSTOP_LOCAL_XSTOP_IN14>();
+    return o_data.clearBit<LOCAL_XSTOP_IN14>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN14 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN14 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_LOCAL_XSTOP_LOCAL_XSTOP_IN14(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_LOCAL_XSTOP_IN14(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return i_data.extractToRight<LOCAL_XSTOP_LOCAL_XSTOP_IN14,
+    return i_data.extractToRight<LOCAL_XSTOP_IN14,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN14 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN14 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_LOCAL_XSTOP_LOCAL_XSTOP_IN14(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_LOCAL_XSTOP_IN14(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return i_data.getBit<LOCAL_XSTOP_LOCAL_XSTOP_IN14>();
+    return i_data.getBit<LOCAL_XSTOP_IN14>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN14 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN14 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_IN15(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_IN15(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.insertFromRight<LOCAL_XSTOP_LOCAL_XSTOP_IN15,
+    return o_data.insertFromRight<LOCAL_XSTOP_IN15,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN15 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN15 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_IN15(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_IN15(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.insertFromRight<LOCAL_XSTOP_LOCAL_XSTOP_IN15,
+    return o_data.insertFromRight<LOCAL_XSTOP_IN15,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN15 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN15 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_LOCAL_XSTOP_IN15(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_IN15(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.setBit<LOCAL_XSTOP_LOCAL_XSTOP_IN15>();
+    return o_data.setBit<LOCAL_XSTOP_IN15>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN15 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN15 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_LOCAL_XSTOP_LOCAL_XSTOP_IN15(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_LOCAL_XSTOP_IN15(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return o_data.clearBit<LOCAL_XSTOP_LOCAL_XSTOP_IN15>();
+    return o_data.clearBit<LOCAL_XSTOP_IN15>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN15 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN15 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_LOCAL_XSTOP_LOCAL_XSTOP_IN15(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_LOCAL_XSTOP_IN15(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return i_data.extractToRight<LOCAL_XSTOP_LOCAL_XSTOP_IN15,
+    return i_data.extractToRight<LOCAL_XSTOP_IN15,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN15 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN15 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_LOCAL_XSTOP_LOCAL_XSTOP_IN15(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_LOCAL_XSTOP_IN15(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP));
 #endif
-    return i_data.getBit<LOCAL_XSTOP_LOCAL_XSTOP_IN15>();
+    return i_data.getBit<LOCAL_XSTOP_IN15>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_LOCAL_XSTOP_IN15 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_IN15 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -6456,6 +6456,90 @@ fapi_try_exit:
 #endif
 }
 
+static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_PM_ACCESS(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
+#endif
+    return o_data.insertFromRight<NET_CTRL0_PM_ACCESS,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access NET_CTRL0_PM_ACCESS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_PM_ACCESS(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
+#endif
+    return o_data.insertFromRight<NET_CTRL0_PM_ACCESS,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access NET_CTRL0_PM_ACCESS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_PM_ACCESS(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
+#endif
+    return o_data.setBit<NET_CTRL0_PM_ACCESS>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access NET_CTRL0_PM_ACCESS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_PM_ACCESS(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
+#endif
+    return o_data.clearBit<NET_CTRL0_PM_ACCESS>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access NET_CTRL0_PM_ACCESS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_PM_ACCESS(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
+#endif
+    return i_data.extractToRight<NET_CTRL0_PM_ACCESS,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access NET_CTRL0_PM_ACCESS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_NET_CTRL0_PM_ACCESS(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
+#endif
+    return i_data.getBit<NET_CTRL0_PM_ACCESS>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access NET_CTRL0_PM_ACCESS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
 static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_FUNC_LCB_EDIS(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -7089,834 +7173,909 @@ fapi_try_exit:
 }
 
 
-static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_ENABLE(
+static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_ENABLE(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_ENABLE,
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_ENABLE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_ENABLE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_ENABLE(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
-#endif
-    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_ENABLE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_ENABLE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_ENABLE(
+static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_ENABLE(
+    const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return o_data.setBit<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_ENABLE>();
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_ENABLE,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_ENABLE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_ENABLE(
+static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_ENABLE(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return o_data.clearBit<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_ENABLE>();
+    return o_data.setBit<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_ENABLE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_ENABLE(
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_ENABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
+#endif
+    return o_data.clearBit<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_ENABLE(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return i_data.extractToRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_ENABLE,
+    return i_data.extractToRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_ENABLE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_ENABLE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_ENABLE(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_ENABLE(
+    fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return i_data.getBit<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_ENABLE>();
+    return i_data.getBit<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_ENABLE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_TYPE(
+static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_TYPE(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_TYPE,
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_TYPE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_TYPE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_TYPE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_TYPE(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
-#endif
-    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_TYPE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_TYPE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_TYPE(
+static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_TYPE(
+    const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return o_data.setBit<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_TYPE>();
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_TYPE,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_TYPE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_TYPE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_TYPE(
+static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_TYPE(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return o_data.clearBit<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_TYPE>();
+    return o_data.setBit<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_TYPE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_TYPE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_TYPE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_TYPE(
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_TYPE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
+#endif
+    return o_data.clearBit<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_TYPE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_TYPE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_TYPE(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return i_data.extractToRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_TYPE,
+    return i_data.extractToRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_TYPE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_TYPE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_TYPE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_TYPE(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_TYPE(
+    fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return i_data.getBit<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_TYPE>();
+    return i_data.getBit<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_TYPE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_TYPE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_TYPE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_DISABLE_SCOPE(
+static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_DISABLE_SCOPE(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_DISABLE_SCOPE,
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_DISABLE_SCOPE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_DISABLE_SCOPE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_DISABLE_SCOPE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_DISABLE_SCOPE(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
-#endif
-    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_DISABLE_SCOPE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_DISABLE_SCOPE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_DISABLE_SCOPE(
+static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_DISABLE_SCOPE(
+    const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return o_data.setBit<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_DISABLE_SCOPE>();
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_DISABLE_SCOPE,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_DISABLE_SCOPE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_DISABLE_SCOPE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_DISABLE_SCOPE(
+static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_DISABLE_SCOPE(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return o_data.clearBit<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_DISABLE_SCOPE>();
+    return o_data.setBit<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_DISABLE_SCOPE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_DISABLE_SCOPE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_DISABLE_SCOPE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_DISABLE_SCOPE(
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_DISABLE_SCOPE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
+#endif
+    return o_data.clearBit<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_DISABLE_SCOPE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_DISABLE_SCOPE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_DISABLE_SCOPE(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return i_data.extractToRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_DISABLE_SCOPE,
+    return i_data.extractToRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_DISABLE_SCOPE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_DISABLE_SCOPE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_DISABLE_SCOPE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_DISABLE_SCOPE(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_DISABLE_SCOPE(
+    fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return i_data.getBit<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_DISABLE_SCOPE>();
+    return i_data.getBit<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_DISABLE_SCOPE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_DISABLE_SCOPE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_DISABLE_SCOPE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_VALUE(
+static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_RESERVED_03_05(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_VALUE,
-           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_VALUE_LEN>(i_data);
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_RESERVED_03_05,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_RESERVED_03_05_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_VALUE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_RESERVED_03_05 chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_VALUE(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_RESERVED_03_05(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
+#endif
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_RESERVED_03_05,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_RESERVED_03_05_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_RESERVED_03_05 chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_RESERVED_03_05(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
+#endif
+    return i_data.extractToRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_RESERVED_03_05,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_RESERVED_03_05_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_RESERVED_03_05 chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_VALUE(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
+#endif
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_VALUE,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_VALUE_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_VALUE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_VALUE(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
+#endif
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_VALUE,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_VALUE_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_VALUE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_VALUE(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
+#endif
+    return i_data.extractToRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_VALUE,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_VALUE_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_VALUE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>&
+SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_MAX_OUTSTANDING_COUNT(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_VALUE,
-           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_VALUE_LEN>(i_data);
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_MAX_OUTSTANDING_COUNT,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_MAX_OUTSTANDING_COUNT_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_VALUE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_VALUE(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
-#endif
-    return i_data.extractToRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_VALUE,
-           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_VALUE_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_VALUE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_MAX_OUTSTANDING_COUNT(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
-#endif
-    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_MAX_OUTSTANDING_COUNT,
-           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_MAX_OUTSTANDING_COUNT_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_MAX_OUTSTANDING_COUNT chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_MAX_OUTSTANDING_COUNT chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_MAX_OUTSTANDING_COUNT(
-    const uint64_t i_data,
-    fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>&
+SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_MAX_OUTSTANDING_COUNT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_MAX_OUTSTANDING_COUNT,
-           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_MAX_OUTSTANDING_COUNT_LEN>(i_data);
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_MAX_OUTSTANDING_COUNT,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_MAX_OUTSTANDING_COUNT_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_MAX_OUTSTANDING_COUNT chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_MAX_OUTSTANDING_COUNT chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_MAX_OUTSTANDING_COUNT(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
+static inline fapi2::buffer<uint64_t>&
+GET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_MAX_OUTSTANDING_COUNT(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return i_data.extractToRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_MAX_OUTSTANDING_COUNT,
-           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_MAX_OUTSTANDING_COUNT_LEN>(o_data);
+    return i_data.extractToRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_MAX_OUTSTANDING_COUNT,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_MAX_OUTSTANDING_COUNT_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_MAX_OUTSTANDING_COUNT chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_MAX_OUTSTANDING_COUNT chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_MAX_CRESP_ATAG_VALUE(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>&
+SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_MAX_CRESP_ATAG_VALUE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_MAX_CRESP_ATAG_VALUE,
-           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_MAX_CRESP_ATAG_VALUE_LEN>(i_data);
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_MAX_CRESP_ATAG_VALUE,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_MAX_CRESP_ATAG_VALUE_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_MAX_CRESP_ATAG_VALUE chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_MAX_CRESP_ATAG_VALUE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_MAX_CRESP_ATAG_VALUE(
-    const uint64_t i_data,
-    fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>&
+SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_MAX_CRESP_ATAG_VALUE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_MAX_CRESP_ATAG_VALUE,
-           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_MAX_CRESP_ATAG_VALUE_LEN>(i_data);
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_MAX_CRESP_ATAG_VALUE,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_MAX_CRESP_ATAG_VALUE_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_MAX_CRESP_ATAG_VALUE chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_MAX_CRESP_ATAG_VALUE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_MAX_CRESP_ATAG_VALUE(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
+static inline fapi2::buffer<uint64_t>&
+GET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_MAX_CRESP_ATAG_VALUE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return i_data.extractToRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_MAX_CRESP_ATAG_VALUE,
-           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_MAX_CRESP_ATAG_VALUE_LEN>(o_data);
+    return i_data.extractToRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_MAX_CRESP_ATAG_VALUE,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_MAX_CRESP_ATAG_VALUE_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_MAX_CRESP_ATAG_VALUE chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_MAX_CRESP_ATAG_VALUE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_CRESP_ATAG_DELTA_VALUE(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>&
+SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_CRESP_ATAG_DELTA_VALUE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_CRESP_ATAG_DELTA_VALUE,
-           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_CRESP_ATAG_DELTA_VALUE_LEN>(i_data);
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_CRESP_ATAG_DELTA_VALUE,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_CRESP_ATAG_DELTA_VALUE_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_CRESP_ATAG_DELTA_VALUE chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_CRESP_ATAG_DELTA_VALUE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_CRESP_ATAG_DELTA_VALUE(
-    const uint64_t i_data,
-    fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>&
+SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_CRESP_ATAG_DELTA_VALUE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_CRESP_ATAG_DELTA_VALUE,
-           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_CRESP_ATAG_DELTA_VALUE_LEN>(i_data);
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_CRESP_ATAG_DELTA_VALUE,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_CRESP_ATAG_DELTA_VALUE_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_CRESP_ATAG_DELTA_VALUE chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_CRESP_ATAG_DELTA_VALUE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_CRESP_ATAG_DELTA_VALUE(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
+static inline fapi2::buffer<uint64_t>&
+GET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_CRESP_ATAG_DELTA_VALUE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return i_data.extractToRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_CRESP_ATAG_DELTA_VALUE,
-           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_CRESP_ATAG_DELTA_VALUE_LEN>(o_data);
+    return i_data.extractToRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_CRESP_ATAG_DELTA_VALUE,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_CRESP_ATAG_DELTA_VALUE_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_CRESP_ATAG_DELTA_VALUE chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_CRESP_ATAG_DELTA_VALUE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SAMPLE_RANGE_COUNT(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>&
+SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SAMPLE_RANGE_COUNT(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SAMPLE_RANGE_COUNT,
-           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SAMPLE_RANGE_COUNT_LEN>(i_data);
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SAMPLE_RANGE_COUNT,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SAMPLE_RANGE_COUNT_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SAMPLE_RANGE_COUNT chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SAMPLE_RANGE_COUNT chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SAMPLE_RANGE_COUNT(
-    const uint64_t i_data,
-    fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>&
+SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SAMPLE_RANGE_COUNT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SAMPLE_RANGE_COUNT,
-           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SAMPLE_RANGE_COUNT_LEN>(i_data);
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SAMPLE_RANGE_COUNT,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SAMPLE_RANGE_COUNT_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SAMPLE_RANGE_COUNT chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SAMPLE_RANGE_COUNT chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SAMPLE_RANGE_COUNT(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
+static inline fapi2::buffer<uint64_t>&
+GET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SAMPLE_RANGE_COUNT(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return i_data.extractToRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SAMPLE_RANGE_COUNT,
-           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SAMPLE_RANGE_COUNT_LEN>(o_data);
+    return i_data.extractToRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SAMPLE_RANGE_COUNT,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SAMPLE_RANGE_COUNT_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SAMPLE_RANGE_COUNT chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SAMPLE_RANGE_COUNT chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_RATE_CHANGE_DELTA(
+static inline fapi2::buffer<uint64_t>&
+SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_RATE_CHANGE_DELTA(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_RATE_CHANGE_DELTA,
-           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_RATE_CHANGE_DELTA_LEN>(i_data);
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_RATE_CHANGE_DELTA,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_RATE_CHANGE_DELTA_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_RATE_CHANGE_DELTA chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_RATE_CHANGE_DELTA chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_RATE_CHANGE_DELTA(
-    const uint64_t i_data,
-    fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>&
+SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_RATE_CHANGE_DELTA(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_RATE_CHANGE_DELTA,
-           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_RATE_CHANGE_DELTA_LEN>(i_data);
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_RATE_CHANGE_DELTA,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_RATE_CHANGE_DELTA_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_RATE_CHANGE_DELTA chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_RATE_CHANGE_DELTA chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_RATE_CHANGE_DELTA(
+static inline fapi2::buffer<uint64_t>&
+GET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_RATE_CHANGE_DELTA(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return i_data.extractToRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_RATE_CHANGE_DELTA,
-           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_RATE_CHANGE_DELTA_LEN>(o_data);
+    return i_data.extractToRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_RATE_CHANGE_DELTA,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_RATE_CHANGE_DELTA_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_RATE_CHANGE_DELTA chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_RATE_CHANGE_DELTA chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_RATE_CHANGE_DELTA(
+static inline fapi2::buffer<uint64_t>&
+SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_RATE_CHANGE_DELTA(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_RATE_CHANGE_DELTA,
-           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_RATE_CHANGE_DELTA_LEN>(i_data);
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_RATE_CHANGE_DELTA,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_RATE_CHANGE_DELTA_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_RATE_CHANGE_DELTA chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_RATE_CHANGE_DELTA chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_RATE_CHANGE_DELTA(
-    const uint64_t i_data,
-    fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>&
+SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_RATE_CHANGE_DELTA(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_RATE_CHANGE_DELTA,
-           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_RATE_CHANGE_DELTA_LEN>(i_data);
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_RATE_CHANGE_DELTA,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_RATE_CHANGE_DELTA_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_RATE_CHANGE_DELTA chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_RATE_CHANGE_DELTA chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_RATE_CHANGE_DELTA(
+static inline fapi2::buffer<uint64_t>&
+GET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_RATE_CHANGE_DELTA(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return i_data.extractToRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_RATE_CHANGE_DELTA,
-           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_RATE_CHANGE_DELTA_LEN>(o_data);
+    return i_data.extractToRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_RATE_CHANGE_DELTA,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_RATE_CHANGE_DELTA_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_RATE_CHANGE_DELTA chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_RATE_CHANGE_DELTA chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_DECREMENT_RATE(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>&
+SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_DECREMENT_RATE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_DECREMENT_RATE,
-           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_DECREMENT_RATE_LEN>(i_data);
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_DECREMENT_RATE,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_DECREMENT_RATE_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_DECREMENT_RATE chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_DECREMENT_RATE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_DECREMENT_RATE(
-    const uint64_t i_data,
-    fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>&
+SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_DECREMENT_RATE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_DECREMENT_RATE,
-           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_DECREMENT_RATE_LEN>(i_data);
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_DECREMENT_RATE,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_DECREMENT_RATE_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_DECREMENT_RATE chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_DECREMENT_RATE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_DECREMENT_RATE(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
+static inline fapi2::buffer<uint64_t>&
+GET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_DECREMENT_RATE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return i_data.extractToRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_DECREMENT_RATE,
-           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_DECREMENT_RATE_LEN>(o_data);
+    return i_data.extractToRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_DECREMENT_RATE,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_DECREMENT_RATE_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_DECREMENT_RATE chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_DECREMENT_RATE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_MINIMUM_DECREMENT_RATE(
+static inline fapi2::buffer<uint64_t>&
+SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_MINIMUM_DECREMENT_RATE(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_MINIMUM_DECREMENT_RATE,
-           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_MINIMUM_DECREMENT_RATE_LEN>(i_data);
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_MINIMUM_DECREMENT_RATE,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_MINIMUM_DECREMENT_RATE_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_MINIMUM_DECREMENT_RATE chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_MINIMUM_DECREMENT_RATE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_MINIMUM_DECREMENT_RATE(
-    const uint64_t i_data,
-    fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>&
+SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_MINIMUM_DECREMENT_RATE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_MINIMUM_DECREMENT_RATE,
-           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_MINIMUM_DECREMENT_RATE_LEN>(i_data);
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_MINIMUM_DECREMENT_RATE,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_MINIMUM_DECREMENT_RATE_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_MINIMUM_DECREMENT_RATE chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_MINIMUM_DECREMENT_RATE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_MINIMUM_DECREMENT_RATE(
+static inline fapi2::buffer<uint64_t>&
+GET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_MINIMUM_DECREMENT_RATE(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return i_data.extractToRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_MINIMUM_DECREMENT_RATE,
-           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_MINIMUM_DECREMENT_RATE_LEN>(o_data);
+    return i_data.extractToRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_MINIMUM_DECREMENT_RATE,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_MINIMUM_DECREMENT_RATE_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_GROUP_MINIMUM_DECREMENT_RATE chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_GROUP_MINIMUM_DECREMENT_RATE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_DECREMENT_RATE(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>&
+SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_DECREMENT_RATE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_DECREMENT_RATE,
-           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_DECREMENT_RATE_LEN>(i_data);
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_DECREMENT_RATE,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_DECREMENT_RATE_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_DECREMENT_RATE chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_DECREMENT_RATE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_DECREMENT_RATE(
-    const uint64_t i_data,
-    fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>&
+SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_DECREMENT_RATE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_DECREMENT_RATE,
-           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_DECREMENT_RATE_LEN>(i_data);
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_DECREMENT_RATE,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_DECREMENT_RATE_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_DECREMENT_RATE chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_DECREMENT_RATE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_DECREMENT_RATE(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
+static inline fapi2::buffer<uint64_t>&
+GET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_DECREMENT_RATE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return i_data.extractToRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_DECREMENT_RATE,
-           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_DECREMENT_RATE_LEN>(o_data);
+    return i_data.extractToRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_DECREMENT_RATE,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_DECREMENT_RATE_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_DECREMENT_RATE chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_DECREMENT_RATE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_MINIMUM_DECREMENT_RATE(
+static inline fapi2::buffer<uint64_t>&
+SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_MINIMUM_DECREMENT_RATE(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_MINIMUM_DECREMENT_RATE,
-           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_MINIMUM_DECREMENT_RATE_LEN>(i_data);
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_MINIMUM_DECREMENT_RATE,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_MINIMUM_DECREMENT_RATE_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_MINIMUM_DECREMENT_RATE chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_MINIMUM_DECREMENT_RATE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_MINIMUM_DECREMENT_RATE(
-    const uint64_t i_data,
-    fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>&
+SET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_MINIMUM_DECREMENT_RATE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_MINIMUM_DECREMENT_RATE,
-           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_MINIMUM_DECREMENT_RATE_LEN>(i_data);
+    return o_data.insertFromRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_MINIMUM_DECREMENT_RATE,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_MINIMUM_DECREMENT_RATE_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_MINIMUM_DECREMENT_RATE chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_MINIMUM_DECREMENT_RATE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_MINIMUM_DECREMENT_RATE(
+static inline fapi2::buffer<uint64_t>&
+GET_PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_MINIMUM_DECREMENT_RATE(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG));
 #endif
-    return i_data.extractToRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_MINIMUM_DECREMENT_RATE,
-           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_MINIMUM_DECREMENT_RATE_LEN>(o_data);
+    return i_data.extractToRight<PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_MINIMUM_DECREMENT_RATE,
+           PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_MINIMUM_DECREMENT_RATE_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_SYSTEM_MINIMUM_DECREMENT_RATE chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_MINIMUM_DECREMENT_RATE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif

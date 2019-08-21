@@ -44,22 +44,22 @@ static const uint64_t BIST = 0x1003000bull;
 static const uint32_t BIST_TC_BIST_START_TEST_DC = 0;
 static const uint32_t BIST_TC_SRAM_ABIST_MODE_DC = 1;
 static const uint32_t BIST_TC_IOBIST_MODE_DC = 3;
-static const uint32_t BIST_BIST_PERV = 4;
-static const uint32_t BIST_BIST_UNIT1 = 5;
-static const uint32_t BIST_BIST_UNIT2 = 6;
-static const uint32_t BIST_BIST_UNIT3 = 7;
-static const uint32_t BIST_BIST_UNIT4 = 8;
-static const uint32_t BIST_BIST_UNIT5 = 9;
-static const uint32_t BIST_BIST_UNIT6 = 10;
-static const uint32_t BIST_BIST_UNIT7 = 11;
-static const uint32_t BIST_BIST_UNIT8 = 12;
-static const uint32_t BIST_BIST_UNIT9 = 13;
-static const uint32_t BIST_BIST_UNIT10 = 14;
-static const uint32_t BIST_BIST_UNIT11 = 15;
-static const uint32_t BIST_BIST_UNIT12 = 16;
-static const uint32_t BIST_BIST_UNIT13 = 17;
-static const uint32_t BIST_BIST_UNIT14 = 18;
-static const uint32_t BIST_BIST_STROBE_WINDOW_EN = 48;
+static const uint32_t BIST_PERV = 4;
+static const uint32_t BIST_UNIT1 = 5;
+static const uint32_t BIST_UNIT2 = 6;
+static const uint32_t BIST_UNIT3 = 7;
+static const uint32_t BIST_UNIT4 = 8;
+static const uint32_t BIST_UNIT5 = 9;
+static const uint32_t BIST_UNIT6 = 10;
+static const uint32_t BIST_UNIT7 = 11;
+static const uint32_t BIST_UNIT8 = 12;
+static const uint32_t BIST_UNIT9 = 13;
+static const uint32_t BIST_UNIT10 = 14;
+static const uint32_t BIST_UNIT11 = 15;
+static const uint32_t BIST_UNIT12 = 16;
+static const uint32_t BIST_UNIT13 = 17;
+static const uint32_t BIST_UNIT14 = 18;
+static const uint32_t BIST_STROBE_WINDOW_EN = 48;
 // pauc/reg00015.H
 
 static const uint64_t CPLT_CTRL5_RW = 0x10000005ull;
@@ -163,6 +163,21 @@ static const uint32_t PB_MAILBOX_CTL_REG_B_SPARE_LEN = 4;
 // pauc/reg00015.H
 
 static const uint64_t PB_TL_LINK_SYN_01_REG = 0x10011812ull;
+
+static const uint32_t PB_TL_LINK_SYN_01_REG_0_SCOM_SYN0 = 0;
+static const uint32_t PB_TL_LINK_SYN_01_REG_0_SCOM_SYN0_LEN = 8;
+static const uint32_t PB_TL_LINK_SYN_01_REG_0_SCOM_SYN1 = 8;
+static const uint32_t PB_TL_LINK_SYN_01_REG_0_SCOM_SYN1_LEN = 8;
+static const uint32_t PB_TL_LINK_SYN_01_REG_0_SCOM_SYN2 = 16;
+static const uint32_t PB_TL_LINK_SYN_01_REG_0_SCOM_SYN2_LEN = 8;
+static const uint32_t PB_TL_LINK_SYN_01_REG_0_SCOM_SYN3 = 24;
+static const uint32_t PB_TL_LINK_SYN_01_REG_0_SCOM_SYN3_LEN = 8;
+static const uint32_t PB_TL_LINK_SYN_01_REG_1_SCOM_SYN0 = 32;
+static const uint32_t PB_TL_LINK_SYN_01_REG_1_SCOM_SYN0_LEN = 8;
+static const uint32_t PB_TL_LINK_SYN_01_REG_1_SCOM_SYN1 = 40;
+static const uint32_t PB_TL_LINK_SYN_01_REG_1_SCOM_SYN1_LEN = 8;
+static const uint32_t PB_TL_LINK_SYN_01_REG_1_SCOM_SYN2 = 48;
+static const uint32_t PB_TL_LINK_SYN_01_REG_1_SCOM_SYN2_LEN = 8;
 // pauc/reg00015.H
 
 static const uint64_t PROTECT_MODE_REG = 0x100f03feull;
@@ -181,6 +196,9 @@ static const uint32_t TRA0_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN = 24;
 // pauc/reg00015.H
 
 static const uint64_t TXIRLM_REGS_TX_IMPCAL3_PB = 0x800f140010012c3full;
+
+static const uint32_t TXIRLM_REGS_TX_IMPCAL3_PB_TX_ZCAL_SAMPLE_CNT_RO_SIGNAL = 48;
+static const uint32_t TXIRLM_REGS_TX_IMPCAL3_PB_TX_ZCAL_SAMPLE_CNT_RO_SIGNAL_LEN = 10;
 // pauc/reg00015.H
 
 static const uint64_t TXIRLM_REGS_TX_IMPCAL_SWO1_PB = 0x800f340010012c3full;
@@ -206,8 +224,8 @@ static const uint64_t VITAL_SCAN_OUT = 0x100f0017ull;
 
 static const uint64_t XSTOP_UNMASKED = 0x10040010ull;
 
-static const uint32_t XSTOP_UNMASKED_XSTOP_UNMASKED_IN = 1;
-static const uint32_t XSTOP_UNMASKED_XSTOP_UNMASKED_IN_LEN = 53;
+static const uint32_t XSTOP_UNMASKED_IN = 1;
+static const uint32_t XSTOP_UNMASKED_IN_LEN = 53;
 // pauc/reg00015.H
 
 #ifndef __PPE_HCODE__

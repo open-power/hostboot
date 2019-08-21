@@ -92,6 +92,9 @@ static const uint64_t DATASM_REGS_RX_CNTL2_PG = 0x8009904010012c3full;
 // omic/reg00004.H
 
 static const uint64_t DATASM_REGS_RX_STAT2_PG = 0x800a984010012c3full;
+
+static const uint32_t DATASM_REGS_RX_STAT2_PG_RX_LTE_DIR_CHG_CNT_RO_SIGNAL = 48;
+static const uint32_t DATASM_REGS_RX_STAT2_PG_RX_LTE_DIR_CHG_CNT_RO_SIGNAL_LEN = 5;
 // omic/reg00004.H
 
 static const uint64_t TX_CTL_SM_REGS_CTLSM_CNTL10_PG = 0x800d0c4010012c3full;

@@ -41,6 +41,8 @@ namespace nmmu
 
 static const uint64_t FBC_CQ_WRAP_NXCQ_SCOM_NX_PB_ERR_RPT_0 = 0x02010c22ull;
 
+static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_PB_ERR_RPT_0_NX_PBI_ERR_RPT_0_OUT = 0;
+static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_PB_ERR_RPT_0_NX_PBI_ERR_RPT_0_OUT_LEN = 52;
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_PB_ERR_RPT_0_NX_PBI_WRITE_IDLE = 52;
 // nmmu/reg00009.H
 

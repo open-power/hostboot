@@ -184,6 +184,9 @@ static const uint64_t RECOV_INTERRUPT_REG = 0x0c0f001bull;
 // mc/reg00001.H
 
 static const uint64_t SCAN32 = 0x0c038000ull;
+
+static const uint32_t SCAN32_SCAN32_REG = 0;
+static const uint32_t SCAN32_SCAN32_REG_LEN = 32;
 // mc/reg00001.H
 
 static const uint64_t SCAN64 = 0x0c03e000ull;

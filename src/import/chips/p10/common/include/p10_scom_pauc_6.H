@@ -159,8 +159,8 @@ static const uint32_t LOCAL_XSTOP_MASK_15 = 15;
 
 static const uint64_t LOCAL_XSTOP_UNMASKED = 0x10040013ull;
 
-static const uint32_t LOCAL_XSTOP_UNMASKED_LOCAL_XSTOP_UNMASKED_IN = 1;
-static const uint32_t LOCAL_XSTOP_UNMASKED_LOCAL_XSTOP_UNMASKED_IN_LEN = 15;
+static const uint32_t LOCAL_XSTOP_UNMASKED_IN = 1;
+static const uint32_t LOCAL_XSTOP_UNMASKED_IN_LEN = 15;
 // pauc/reg00006.H
 
 static const uint64_t PHY_PPE_WRAP_ARB_CSAR = 0x10012c0dull;

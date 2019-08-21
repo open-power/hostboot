@@ -85,6 +85,7 @@ static const uint32_t EPS_DBG_MODE_REG_STOP_ON_RECOV_ERR_SELECTION = 9;
 static const uint32_t EPS_DBG_MODE_REG_STOP_ON_SPATTN_SELECTION = 10;
 static const uint32_t EPS_DBG_MODE_REG_STOP_ON_HOSTATTN_SELECTION = 11;
 static const uint32_t EPS_DBG_MODE_REG_FREEZE_SEL_MODE = 12;
+static const uint32_t EPS_DBG_MODE_REG_TRACE_RUN_ON = 16;
 static const uint32_t EPS_DBG_MODE_REG_TRACE_RUN_STATUS = 17;
 static const uint32_t EPS_DBG_MODE_REG_TRACE_RUN_STATUS_LEN = 2;
 static const uint32_t EPS_DBG_MODE_REG_IS_FROZEN_STATUS = 19;
@@ -92,6 +93,8 @@ static const uint32_t EPS_DBG_MODE_REG_INST1_CONDITION_HISTORY_STATUS = 20;
 static const uint32_t EPS_DBG_MODE_REG_INST1_CONDITION_HISTORY_STATUS_LEN = 3;
 static const uint32_t EPS_DBG_MODE_REG_INST2_CONDITION_HISTORY_STATUS = 23;
 static const uint32_t EPS_DBG_MODE_REG_INST2_CONDITION_HISTORY_STATUS_LEN = 3;
+static const uint32_t EPS_DBG_MODE_REG_UNUSED = 26;
+static const uint32_t EPS_DBG_MODE_REG_UNUSED_LEN = 6;
 // perv/reg00018.H
 
 static const uint64_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK5 = 0x00040085ull;
@@ -305,8 +308,8 @@ static const uint32_t FSXCOMP_FSXLOG_SNS2LTH_RO = 0x0005001eull;
 
 static const uint64_t HOSTATTN_UNMASKED = 0x00040014ull;
 
-static const uint32_t HOSTATTN_UNMASKED_HOSTATTN_UNMASKED_IN = 1;
-static const uint32_t HOSTATTN_UNMASKED_HOSTATTN_UNMASKED_IN_LEN = 53;
+static const uint32_t HOSTATTN_UNMASKED_IN = 1;
+static const uint32_t HOSTATTN_UNMASKED_IN_LEN = 53;
 // perv/reg00018.H
 
 static const uint64_t L3TRA1_TR0_CONFIG_9 = 0x00018249ull;

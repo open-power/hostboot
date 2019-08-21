@@ -269,8 +269,8 @@ static const uint32_t OPCG_REG1_NSL_FILL_COUNT_LEN = 5;
 
 static const uint64_t QME_CRCR = 0x200e0300ull;
 
-static const uint32_t QME_CRCR_QME_CRCR_COMPARE_VALUE = 0;
-static const uint32_t QME_CRCR_QME_CRCR_COMPARE_VALUE_LEN = 8;
+static const uint32_t QME_CRCR_COMPARE_VALUE = 0;
+static const uint32_t QME_CRCR_COMPARE_VALUE_LEN = 8;
 // eq/reg00014.H
 
 static const uint64_t QME_DERP = 0x200e0250ull;
@@ -283,8 +283,8 @@ static const uint32_t QME_DERP_SOR_LEN = 32;
 
 static const uint64_t QME_EINR = 0x200e0274ull;
 
-static const uint32_t QME_EINR_QME_EINR_INTERRUPT_INPUT = 0;
-static const uint32_t QME_EINR_QME_EINR_INTERRUPT_INPUT_LEN = 64;
+static const uint32_t QME_EINR_INTERRUPT_INPUT = 0;
+static const uint32_t QME_EINR_INTERRUPT_INPUT_LEN = 64;
 // eq/reg00014.H
 
 static const uint64_t QME_LFIR_RW = 0x200e0000ull;
@@ -322,6 +322,12 @@ static const uint32_t QME_LFIR_SPARE27 = 27;
 // eq/reg00014.H
 
 static const uint64_t QME_PCBSII = 0x200e0038ull;
+
+static const uint32_t QME_PCBSII_EQ_ACK = 0;
+static const uint32_t QME_PCBSII_SP_P = 1;
+static const uint32_t QME_PCBSII_SP_VLD = 4;
+static const uint32_t QME_PCBSII_SP_INFO = 5;
+static const uint32_t QME_PCBSII_SP_INFO_LEN = 3;
 // eq/reg00014.H
 
 static const uint64_t SLAVE_CONFIG_REG = 0x200f001eull;
@@ -346,27 +352,27 @@ static const uint32_t SLAVE_CONFIG_REG_FORCE_0_QME = 21;
 
 static const uint64_t XSTOP2 = 0x2003000dull;
 
-static const uint32_t XSTOP2_XSTOP2_MASK_B = 0;
+static const uint32_t XSTOP2_MASK_B = 0;
 static const uint32_t XSTOP2_ALIGNED_XSTOP2 = 1;
 static const uint32_t XSTOP2_TRIGGER_OPCG_ON_XSTOP2 = 2;
-static const uint32_t XSTOP2_XSTOP2_WAIT_ALLWAYS = 3;
-static const uint32_t XSTOP2_XSTOP2_PERV = 4;
-static const uint32_t XSTOP2_XSTOP2_UNIT1 = 5;
-static const uint32_t XSTOP2_XSTOP2_UNIT2 = 6;
-static const uint32_t XSTOP2_XSTOP2_UNIT3 = 7;
-static const uint32_t XSTOP2_XSTOP2_UNIT4 = 8;
-static const uint32_t XSTOP2_XSTOP2_UNIT5 = 9;
-static const uint32_t XSTOP2_XSTOP2_UNIT6 = 10;
-static const uint32_t XSTOP2_XSTOP2_UNIT7 = 11;
-static const uint32_t XSTOP2_XSTOP2_UNIT8 = 12;
-static const uint32_t XSTOP2_XSTOP2_UNIT9 = 13;
-static const uint32_t XSTOP2_XSTOP2_UNIT10 = 14;
-static const uint32_t XSTOP2_XSTOP2_UNIT11 = 15;
-static const uint32_t XSTOP2_XSTOP2_UNIT12 = 16;
-static const uint32_t XSTOP2_XSTOP2_UNIT13 = 17;
-static const uint32_t XSTOP2_XSTOP2_UNIT14 = 18;
-static const uint32_t XSTOP2_XSTOP2_WAIT_CYCLES = 48;
-static const uint32_t XSTOP2_XSTOP2_WAIT_CYCLES_LEN = 12;
+static const uint32_t XSTOP2_WAIT_ALLWAYS = 3;
+static const uint32_t XSTOP2_PERV = 4;
+static const uint32_t XSTOP2_UNIT1 = 5;
+static const uint32_t XSTOP2_UNIT2 = 6;
+static const uint32_t XSTOP2_UNIT3 = 7;
+static const uint32_t XSTOP2_UNIT4 = 8;
+static const uint32_t XSTOP2_UNIT5 = 9;
+static const uint32_t XSTOP2_UNIT6 = 10;
+static const uint32_t XSTOP2_UNIT7 = 11;
+static const uint32_t XSTOP2_UNIT8 = 12;
+static const uint32_t XSTOP2_UNIT9 = 13;
+static const uint32_t XSTOP2_UNIT10 = 14;
+static const uint32_t XSTOP2_UNIT11 = 15;
+static const uint32_t XSTOP2_UNIT12 = 16;
+static const uint32_t XSTOP2_UNIT13 = 17;
+static const uint32_t XSTOP2_UNIT14 = 18;
+static const uint32_t XSTOP2_WAIT_CYCLES = 48;
+static const uint32_t XSTOP2_WAIT_CYCLES_LEN = 12;
 // eq/reg00014.H
 
 #ifndef __PPE_HCODE__

@@ -143,6 +143,25 @@ static const uint32_t L3TRA3_TR1_CONFIG_2_B_LEN = 24;
 // eq/reg00002.H
 
 static const uint64_t QME_DUCR = 0x200e0170ull;
+
+static const uint32_t QME_DUCR_FDCR_DELAY_C0 = 0;
+static const uint32_t QME_DUCR_FDCR_DELAY_C0_LEN = 8;
+static const uint32_t QME_DUCR_FDCR_DELAY_C1 = 8;
+static const uint32_t QME_DUCR_FDCR_DELAY_C1_LEN = 8;
+static const uint32_t QME_DUCR_FDCR_DELAY_C2 = 16;
+static const uint32_t QME_DUCR_FDCR_DELAY_C2_LEN = 8;
+static const uint32_t QME_DUCR_FDCR_DELAY_C3 = 24;
+static const uint32_t QME_DUCR_FDCR_DELAY_C3_LEN = 8;
+static const uint32_t QME_DUCR_FDCR_CAL_ADJUST_C0 = 32;
+static const uint32_t QME_DUCR_FDCR_CAL_ADJUST_C0_LEN = 2;
+static const uint32_t QME_DUCR_FDCR_CAL_ADJUST_C1 = 34;
+static const uint32_t QME_DUCR_FDCR_CAL_ADJUST_C1_LEN = 2;
+static const uint32_t QME_DUCR_FDCR_CAL_ADJUST_C2 = 36;
+static const uint32_t QME_DUCR_FDCR_CAL_ADJUST_C2_LEN = 2;
+static const uint32_t QME_DUCR_FDCR_CAL_ADJUST_C3 = 38;
+static const uint32_t QME_DUCR_FDCR_CAL_ADJUST_C3_LEN = 2;
+static const uint32_t QME_DUCR_CORE_UPDATE_ENABLE = 40;
+static const uint32_t QME_DUCR_CORE_UPDATE_ENABLE_LEN = 4;
 // eq/reg00002.H
 
 static const uint64_t QME_EISR_RW = 0x200e0260ull;
@@ -193,14 +212,19 @@ static const uint32_t QME_EISR_CPMS_INTERRUPT1_LEN = 4;
 
 static const uint64_t QME_LFIRACT1 = 0x200e000cull;
 
-static const uint32_t QME_LFIRACT1_QME_LFIRACT1_FIR_ACTION1 = 0;
-static const uint32_t QME_LFIRACT1_QME_LFIRACT1_FIR_ACTION1_LEN = 28;
+static const uint32_t QME_LFIRACT1_FIR_ACTION1 = 0;
+static const uint32_t QME_LFIRACT1_FIR_ACTION1_LEN = 28;
 // eq/reg00002.H
 
 static const uint64_t QME_SCOM_XIICAC = 0x200e0224ull;
 
-static const uint32_t QME_SCOM_XIICAC_SIB_PIB_IFETCH_PENDING = 34;
-static const uint32_t QME_SCOM_XIICAC_MEM_IFETCH_PENDING = 35;
+static const uint32_t QME_SCOM_XIICAC_ICACHE_TAG_ADDR = 0;
+static const uint32_t QME_SCOM_XIICAC_ICACHE_TAG_ADDR_LEN = 27;
+static const uint32_t QME_SCOM_XIICAC_ICACHE_ERR = 32;
+static const uint32_t QME_SCOM_XIICAC_QME_SCOM_XISIB_PIB_IFETCH_PENDING = 34;
+static const uint32_t QME_SCOM_XIICAC_QME_SCOM_XIMEM_MEM_IFETCH_PENDING = 35;
+static const uint32_t QME_SCOM_XIICAC_ICACHE_VALID = 36;
+static const uint32_t QME_SCOM_XIICAC_ICACHE_VALID_LEN = 4;
 // eq/reg00002.H
 
 static const uint64_t QME_SCOM_XISGB = 0x200e0220ull;
@@ -216,8 +240,8 @@ static const uint64_t QME_SCRB_RW = 0x200e0128ull;
 static const uint64_t QME_SCRB_WO_CLEAR = 0x200e012bull;
 static const uint64_t QME_SCRB_WO_OR = 0x200e012aull;
 
-static const uint32_t QME_SCRB_QME_SCRB_DATA = 0;
-static const uint32_t QME_SCRB_QME_SCRB_DATA_LEN = 32;
+static const uint32_t QME_SCRB_DATA = 0;
+static const uint32_t QME_SCRB_DATA_LEN = 32;
 // eq/reg00002.H
 
 static const uint64_t SPATTN = 0x20040002ull;
@@ -226,38 +250,38 @@ static const uint32_t SPATTN_ANY_SPATTN = 0;
 static const uint32_t SPATTN_RESERVED1S = 1;
 static const uint32_t SPATTN_RESERVED2S = 2;
 static const uint32_t SPATTN_RESERVED3S = 3;
-static const uint32_t SPATTN_SPATTN_PERV = 4;
-static const uint32_t SPATTN_SPATTN_IN05 = 5;
-static const uint32_t SPATTN_SPATTN_IN06 = 6;
-static const uint32_t SPATTN_SPATTN_IN07 = 7;
-static const uint32_t SPATTN_SPATTN_IN08 = 8;
-static const uint32_t SPATTN_SPATTN_IN09 = 9;
-static const uint32_t SPATTN_SPATTN_IN10 = 10;
-static const uint32_t SPATTN_SPATTN_IN11 = 11;
-static const uint32_t SPATTN_SPATTN_IN12 = 12;
-static const uint32_t SPATTN_SPATTN_IN13 = 13;
-static const uint32_t SPATTN_SPATTN_IN14 = 14;
-static const uint32_t SPATTN_SPATTN_IN15 = 15;
-static const uint32_t SPATTN_SPATTN_IN16 = 16;
-static const uint32_t SPATTN_SPATTN_IN17 = 17;
-static const uint32_t SPATTN_SPATTN_IN18 = 18;
-static const uint32_t SPATTN_SPATTN_IN19 = 19;
-static const uint32_t SPATTN_SPATTN_IN20 = 20;
-static const uint32_t SPATTN_SPATTN_IN21 = 21;
-static const uint32_t SPATTN_SPATTN_IN22 = 22;
-static const uint32_t SPATTN_SPATTN_IN23 = 23;
-static const uint32_t SPATTN_SPATTN_IN24 = 24;
-static const uint32_t SPATTN_SPATTN_IN25 = 25;
-static const uint32_t SPATTN_SPATTN_IN26 = 26;
-static const uint32_t SPATTN_SPATTN_IN27 = 27;
-static const uint32_t SPATTN_SPATTN_IN28 = 28;
-static const uint32_t SPATTN_SPATTN_IN29 = 29;
-static const uint32_t SPATTN_SPATTN_IN30 = 30;
-static const uint32_t SPATTN_SPATTN_IN31 = 31;
-static const uint32_t SPATTN_SPATTN_IN32 = 32;
-static const uint32_t SPATTN_SPATTN_IN33 = 33;
-static const uint32_t SPATTN_SPATTN_IN34 = 34;
-static const uint32_t SPATTN_SPATTN_IN35 = 35;
+static const uint32_t SPATTN_PERV = 4;
+static const uint32_t SPATTN_IN05 = 5;
+static const uint32_t SPATTN_IN06 = 6;
+static const uint32_t SPATTN_IN07 = 7;
+static const uint32_t SPATTN_IN08 = 8;
+static const uint32_t SPATTN_IN09 = 9;
+static const uint32_t SPATTN_IN10 = 10;
+static const uint32_t SPATTN_IN11 = 11;
+static const uint32_t SPATTN_IN12 = 12;
+static const uint32_t SPATTN_IN13 = 13;
+static const uint32_t SPATTN_IN14 = 14;
+static const uint32_t SPATTN_IN15 = 15;
+static const uint32_t SPATTN_IN16 = 16;
+static const uint32_t SPATTN_IN17 = 17;
+static const uint32_t SPATTN_IN18 = 18;
+static const uint32_t SPATTN_IN19 = 19;
+static const uint32_t SPATTN_IN20 = 20;
+static const uint32_t SPATTN_IN21 = 21;
+static const uint32_t SPATTN_IN22 = 22;
+static const uint32_t SPATTN_IN23 = 23;
+static const uint32_t SPATTN_IN24 = 24;
+static const uint32_t SPATTN_IN25 = 25;
+static const uint32_t SPATTN_IN26 = 26;
+static const uint32_t SPATTN_IN27 = 27;
+static const uint32_t SPATTN_IN28 = 28;
+static const uint32_t SPATTN_IN29 = 29;
+static const uint32_t SPATTN_IN30 = 30;
+static const uint32_t SPATTN_IN31 = 31;
+static const uint32_t SPATTN_IN32 = 32;
+static const uint32_t SPATTN_IN33 = 33;
+static const uint32_t SPATTN_IN34 = 34;
+static const uint32_t SPATTN_IN35 = 35;
 // eq/reg00002.H
 
 #ifndef __PPE_HCODE__

@@ -141,11 +141,29 @@ static const uint32_t OPCG_CAPT3_12ODD_LEN = 5;
 // pauc/reg00001.H
 
 static const uint64_t PB_PMU0_TLPM_COUNTER = 0x1001181bull;
+
+static const uint32_t PB_PMU0_TLPM_COUNTER_0 = 0;
+static const uint32_t PB_PMU0_TLPM_COUNTER_0_LEN = 16;
+static const uint32_t PB_PMU0_TLPM_COUNTER_1 = 16;
+static const uint32_t PB_PMU0_TLPM_COUNTER_1_LEN = 16;
+static const uint32_t PB_PMU0_TLPM_COUNTER_2 = 32;
+static const uint32_t PB_PMU0_TLPM_COUNTER_2_LEN = 16;
 // pauc/reg00001.H
 
 static const uint64_t PHY_PPE_WRAP_MIB_XIICAC = 0x10012c19ull;
 
+static const uint32_t PHY_PPE_WRAP_MIB_XIICAC_ICACHE_TAG_ADDR = 0;
+static const uint32_t PHY_PPE_WRAP_MIB_XIICAC_ICACHE_TAG_ADDR_LEN = 27;
+static const uint32_t PHY_PPE_WRAP_MIB_XIICAC_ICACHE_ERR = 32;
+static const uint32_t PHY_PPE_WRAP_MIB_XIICAC_PIB_IFETCH_PENDING = 34;
 static const uint32_t PHY_PPE_WRAP_MIB_XIICAC_MIB_XIMEM_MEM_IFETCH_PENDING = 35;
+static const uint32_t PHY_PPE_WRAP_MIB_XIICAC_ICACHE_VALID = 36;
+static const uint32_t PHY_PPE_WRAP_MIB_XIICAC_ICACHE_VALID_LEN = 4;
+static const uint32_t PHY_PPE_WRAP_MIB_XIICAC_ICACHE_LINE2_VALID = 40;
+static const uint32_t PHY_PPE_WRAP_MIB_XIICAC_ICACHE_LINE2_VALID_LEN = 4;
+static const uint32_t PHY_PPE_WRAP_MIB_XIICAC_ICACHE_LINE_PTR = 45;
+static const uint32_t PHY_PPE_WRAP_MIB_XIICAC_ICACHE_LINE2_ERR = 46;
+static const uint32_t PHY_PPE_WRAP_MIB_XIICAC_ICACHE_PREFETCH_PENDING = 47;
 // pauc/reg00001.H
 
 static const uint64_t PHY_PPE_WRAP_SCOM_FLAGS_RW = 0x10012c23ull;
@@ -169,6 +187,9 @@ static const uint64_t RECOV_INTERRUPT_REG = 0x100f001bull;
 // pauc/reg00001.H
 
 static const uint64_t SCAN32 = 0x10038000ull;
+
+static const uint32_t SCAN32_SCAN32_REG = 0;
+static const uint32_t SCAN32_SCAN32_REG_LEN = 32;
 // pauc/reg00001.H
 
 static const uint64_t SCAN64 = 0x1003e000ull;

@@ -74,7 +74,18 @@ static const uint32_t CTRL_PROTECT_MODE_REG_WRITE_PROTECT_ENABLE = 1;
 
 static const uint64_t DL_PPE_WRAP_MIB_XIICAC = 0x10012c59ull;
 
+static const uint32_t DL_PPE_WRAP_MIB_XIICAC_ICACHE_TAG_ADDR = 0;
+static const uint32_t DL_PPE_WRAP_MIB_XIICAC_ICACHE_TAG_ADDR_LEN = 27;
+static const uint32_t DL_PPE_WRAP_MIB_XIICAC_ICACHE_ERR = 32;
+static const uint32_t DL_PPE_WRAP_MIB_XIICAC_PIB_IFETCH_PENDING = 34;
 static const uint32_t DL_PPE_WRAP_MIB_XIICAC_MIB_XIMEM_MEM_IFETCH_PENDING = 35;
+static const uint32_t DL_PPE_WRAP_MIB_XIICAC_ICACHE_VALID = 36;
+static const uint32_t DL_PPE_WRAP_MIB_XIICAC_ICACHE_VALID_LEN = 4;
+static const uint32_t DL_PPE_WRAP_MIB_XIICAC_ICACHE_LINE2_VALID = 40;
+static const uint32_t DL_PPE_WRAP_MIB_XIICAC_ICACHE_LINE2_VALID_LEN = 4;
+static const uint32_t DL_PPE_WRAP_MIB_XIICAC_ICACHE_LINE_PTR = 45;
+static const uint32_t DL_PPE_WRAP_MIB_XIICAC_ICACHE_LINE2_ERR = 46;
+static const uint32_t DL_PPE_WRAP_MIB_XIICAC_ICACHE_PREFETCH_PENDING = 47;
 // pauc/reg00012.H
 
 static const uint64_t EPS_DBG_MODE_REG = 0x100107c0ull;
@@ -90,6 +101,7 @@ static const uint32_t EPS_DBG_MODE_REG_STOP_ON_RECOV_ERR_SELECTION = 9;
 static const uint32_t EPS_DBG_MODE_REG_STOP_ON_SPATTN_SELECTION = 10;
 static const uint32_t EPS_DBG_MODE_REG_STOP_ON_HOSTATTN_SELECTION = 11;
 static const uint32_t EPS_DBG_MODE_REG_FREEZE_SEL_MODE = 12;
+static const uint32_t EPS_DBG_MODE_REG_TRACE_RUN_ON = 16;
 static const uint32_t EPS_DBG_MODE_REG_TRACE_RUN_STATUS = 17;
 static const uint32_t EPS_DBG_MODE_REG_TRACE_RUN_STATUS_LEN = 2;
 static const uint32_t EPS_DBG_MODE_REG_IS_FROZEN_STATUS = 19;
@@ -97,6 +109,8 @@ static const uint32_t EPS_DBG_MODE_REG_INST1_CONDITION_HISTORY_STATUS = 20;
 static const uint32_t EPS_DBG_MODE_REG_INST1_CONDITION_HISTORY_STATUS_LEN = 3;
 static const uint32_t EPS_DBG_MODE_REG_INST2_CONDITION_HISTORY_STATUS = 23;
 static const uint32_t EPS_DBG_MODE_REG_INST2_CONDITION_HISTORY_STATUS_LEN = 3;
+static const uint32_t EPS_DBG_MODE_REG_UNUSED = 26;
+static const uint32_t EPS_DBG_MODE_REG_UNUSED_LEN = 6;
 // pauc/reg00012.H
 
 static const uint64_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK5 = 0x10040085ull;
@@ -134,8 +148,8 @@ static const uint32_t EPS_PSC_WRITE_PROTECT_ENABLE_REG_RESERVED_RING_LOCKING = 1
 
 static const uint64_t HOSTATTN_UNMASKED = 0x10040014ull;
 
-static const uint32_t HOSTATTN_UNMASKED_HOSTATTN_UNMASKED_IN = 1;
-static const uint32_t HOSTATTN_UNMASKED_HOSTATTN_UNMASKED_IN_LEN = 53;
+static const uint32_t HOSTATTN_UNMASKED_IN = 1;
+static const uint32_t HOSTATTN_UNMASKED_IN_LEN = 53;
 // pauc/reg00012.H
 
 static const uint64_t MULTICAST_GROUP_4 = 0x100f0004ull;
@@ -145,9 +159,73 @@ static const uint32_t MULTICAST_GROUP_4_MULTICAST4_GROUP_LEN = 3;
 // pauc/reg00012.H
 
 static const uint64_t PB_PMU2_TLPM_COUNTER = 0x1001181dull;
+
+static const uint32_t PB_PMU2_TLPM_COUNTER_0 = 0;
+static const uint32_t PB_PMU2_TLPM_COUNTER_0_LEN = 16;
+static const uint32_t PB_PMU2_TLPM_COUNTER_1 = 16;
+static const uint32_t PB_PMU2_TLPM_COUNTER_1_LEN = 16;
+static const uint32_t PB_PMU2_TLPM_COUNTER_2 = 32;
+static const uint32_t PB_PMU2_TLPM_COUNTER_2_LEN = 16;
 // pauc/reg00012.H
 
 static const uint64_t PB_PR0123_ERR = 0x10011829ull;
+
+static const uint32_t PB_PR0123_ERR_0_ADDRESS_PTY = 0;
+static const uint32_t PB_PR0123_ERR_0_ATAG_PTY = 1;
+static const uint32_t PB_PR0123_ERR_0_CC0_CREDITERR = 2;
+static const uint32_t PB_PR0123_ERR_0_CC1_CREDITERR = 3;
+static const uint32_t PB_PR0123_ERR_0_CC2_CREDITERR = 4;
+static const uint32_t PB_PR0123_ERR_0_CC3_CREDITERR = 5;
+static const uint32_t PB_PR0123_ERR_0_CONTROL_ERROR = 6;
+static const uint32_t PB_PR0123_ERR_0_DATA_PTY_ERR = 7;
+static const uint32_t PB_PR0123_ERR_0_RTAG_MISC_PTY = 8;
+static const uint32_t PB_PR0123_ERR_0_RTAG_PTY = 9;
+static const uint32_t PB_PR0123_ERR_0_TTAG_PTY = 10;
+static const uint32_t PB_PR0123_ERR_0_VC0_CREDITERR = 11;
+static const uint32_t PB_PR0123_ERR_0_VC1_CREDITERR = 12;
+static const uint32_t PB_PR0123_ERR_0_LINK_DOWN = 13;
+static const uint32_t PB_PR0123_ERR_1_ADDRESS_PTY = 16;
+static const uint32_t PB_PR0123_ERR_1_ATAG_PTY = 17;
+static const uint32_t PB_PR0123_ERR_1_CC0_CREDITERR = 18;
+static const uint32_t PB_PR0123_ERR_1_CC1_CREDITERR = 19;
+static const uint32_t PB_PR0123_ERR_1_CC2_CREDITERR = 20;
+static const uint32_t PB_PR0123_ERR_1_CC3_CREDITERR = 21;
+static const uint32_t PB_PR0123_ERR_1_CONTROL_ERROR = 22;
+static const uint32_t PB_PR0123_ERR_1_DATA_PTY_ERR = 23;
+static const uint32_t PB_PR0123_ERR_1_RTAG_MISC_PTY = 24;
+static const uint32_t PB_PR0123_ERR_1_RTAG_PTY = 25;
+static const uint32_t PB_PR0123_ERR_1_TTAG_PTY = 26;
+static const uint32_t PB_PR0123_ERR_1_VC0_CREDITERR = 27;
+static const uint32_t PB_PR0123_ERR_1_VC1_CREDITERR = 28;
+static const uint32_t PB_PR0123_ERR_1_LINK_DOWN = 29;
+static const uint32_t PB_PR0123_ERR_2_ADDRESS_PTY = 32;
+static const uint32_t PB_PR0123_ERR_2_ATAG_PTY = 33;
+static const uint32_t PB_PR0123_ERR_2_CC0_CREDITERR = 34;
+static const uint32_t PB_PR0123_ERR_2_CC1_CREDITERR = 35;
+static const uint32_t PB_PR0123_ERR_2_CC2_CREDITERR = 36;
+static const uint32_t PB_PR0123_ERR_2_CC3_CREDITERR = 37;
+static const uint32_t PB_PR0123_ERR_2_CONTROL_ERROR = 38;
+static const uint32_t PB_PR0123_ERR_2_DATA_PTY_ERR = 39;
+static const uint32_t PB_PR0123_ERR_2_RTAG_MISC_PTY = 40;
+static const uint32_t PB_PR0123_ERR_2_RTAG_PTY = 41;
+static const uint32_t PB_PR0123_ERR_2_TTAG_PTY = 42;
+static const uint32_t PB_PR0123_ERR_2_VC0_CREDITERR = 43;
+static const uint32_t PB_PR0123_ERR_2_VC1_CREDITERR = 44;
+static const uint32_t PB_PR0123_ERR_2_LINK_DOWN = 45;
+static const uint32_t PB_PR0123_ERR_3_ADDRESS_PTY = 48;
+static const uint32_t PB_PR0123_ERR_3_ATAG_PTY = 49;
+static const uint32_t PB_PR0123_ERR_3_CC0_CREDITERR = 50;
+static const uint32_t PB_PR0123_ERR_3_CC1_CREDITERR = 51;
+static const uint32_t PB_PR0123_ERR_3_CC2_CREDITERR = 52;
+static const uint32_t PB_PR0123_ERR_3_CC3_CREDITERR = 53;
+static const uint32_t PB_PR0123_ERR_3_CONTROL_ERROR = 54;
+static const uint32_t PB_PR0123_ERR_3_DATA_PTY_ERR = 55;
+static const uint32_t PB_PR0123_ERR_3_RTAG_MISC_PTY = 56;
+static const uint32_t PB_PR0123_ERR_3_RTAG_PTY = 57;
+static const uint32_t PB_PR0123_ERR_3_TTAG_PTY = 58;
+static const uint32_t PB_PR0123_ERR_3_VC0_CREDITERR = 59;
+static const uint32_t PB_PR0123_ERR_3_VC1_CREDITERR = 60;
+static const uint32_t PB_PR0123_ERR_3_LINK_DOWN = 61;
 // pauc/reg00012.H
 
 static const uint64_t PB_PSAVE23_MISC_CFG = 0x10011817ull;

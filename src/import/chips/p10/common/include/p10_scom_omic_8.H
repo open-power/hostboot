@@ -88,6 +88,8 @@ static const uint32_t DATASM_REGS_RX_CNT27_PG_RX_A_LANE_DONE_0_15_LEN = 16;
 // omic/reg00008.H
 
 static const uint64_t DATASM_REGS_RX_CNTL4_PG = 0x8009a04010012c3full;
+
+static const uint32_t DATASM_REGS_RX_CNTL4_PG_RX_CLEAR_SERVO_QUEUES_WO_PULSE_SLOW_SIGNAL = 48;
 // omic/reg00008.H
 
 static const uint64_t DATASM_REGS_RX_STAT4_PG = 0x800aa84010012c3full;
@@ -113,9 +115,10 @@ static const uint32_t TX_CTL_SM_REGS_CTLSM_SPARE_MODE_PG_7 = 55;
 
 static const uint64_t TX_CTL_SM_REGS_CTLSM_STAT6_PG = 0x800d6c4010012c3full;
 
-static const uint32_t TX_CTL_SM_REGS_CTLSM_STAT6_PG_DCC_FAIL = 48;
-static const uint32_t TX_CTL_SM_REGS_CTLSM_STAT6_PG_LS_FAIL = 49;
-static const uint32_t TX_CTL_SM_REGS_CTLSM_STAT6_PG_HS_FAIL = 50;
+static const uint32_t TX_CTL_SM_REGS_CTLSM_STAT6_PG_TX_BIST_DCC_FAIL = 48;
+static const uint32_t TX_CTL_SM_REGS_CTLSM_STAT6_PG_TX_BIST_LS_FAIL = 49;
+static const uint32_t TX_CTL_SM_REGS_CTLSM_STAT6_PG_TX_BIST_HS_FAIL = 50;
+static const uint32_t TX_CTL_SM_REGS_CTLSM_STAT6_PG_TX_IREF_PARITYCHK_CLOCK_RO_SIGNAL = 51;
 // omic/reg00008.H
 
 static const uint64_t TX_SYNC = 0x0c01174dull;

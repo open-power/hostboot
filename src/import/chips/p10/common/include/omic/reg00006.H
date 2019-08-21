@@ -2146,6 +2146,57 @@ fapi_try_exit:
 }
 
 
+static inline fapi2::buffer<uint64_t>& SET_TX_CTL_SM_REGS_CTLSM_STAT5_PG_TX_PSAVE_STS_PHY_16_23_RO_SIGNAL(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TX_CTL_SM_REGS_CTLSM_STAT5_PG));
+#endif
+    return o_data.insertFromRight<TX_CTL_SM_REGS_CTLSM_STAT5_PG_TX_PSAVE_STS_PHY_16_23_RO_SIGNAL,
+           TX_CTL_SM_REGS_CTLSM_STAT5_PG_TX_PSAVE_STS_PHY_16_23_RO_SIGNAL_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TX_CTL_SM_REGS_CTLSM_STAT5_PG_TX_PSAVE_STS_PHY_16_23_RO_SIGNAL chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TX_CTL_SM_REGS_CTLSM_STAT5_PG_TX_PSAVE_STS_PHY_16_23_RO_SIGNAL(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TX_CTL_SM_REGS_CTLSM_STAT5_PG));
+#endif
+    return o_data.insertFromRight<TX_CTL_SM_REGS_CTLSM_STAT5_PG_TX_PSAVE_STS_PHY_16_23_RO_SIGNAL,
+           TX_CTL_SM_REGS_CTLSM_STAT5_PG_TX_PSAVE_STS_PHY_16_23_RO_SIGNAL_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TX_CTL_SM_REGS_CTLSM_STAT5_PG_TX_PSAVE_STS_PHY_16_23_RO_SIGNAL chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TX_CTL_SM_REGS_CTLSM_STAT5_PG_TX_PSAVE_STS_PHY_16_23_RO_SIGNAL(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TX_CTL_SM_REGS_CTLSM_STAT5_PG));
+#endif
+    return i_data.extractToRight<TX_CTL_SM_REGS_CTLSM_STAT5_PG_TX_PSAVE_STS_PHY_16_23_RO_SIGNAL,
+           TX_CTL_SM_REGS_CTLSM_STAT5_PG_TX_PSAVE_STS_PHY_16_23_RO_SIGNAL_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TX_CTL_SM_REGS_CTLSM_STAT5_PG_TX_PSAVE_STS_PHY_16_23_RO_SIGNAL chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
 
 #ifndef __PPE_HCODE__
 }

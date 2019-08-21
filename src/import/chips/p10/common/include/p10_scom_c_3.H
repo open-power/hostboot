@@ -40,6 +40,22 @@ namespace c
 
 
 static const uint64_t CPMS_CCDR = 0x200e0e74ull;
+
+static const uint32_t CPMS_CCDR_A_SCALE = 0;
+static const uint32_t CPMS_CCDR_A_SCALE_LEN = 4;
+static const uint32_t CPMS_CCDR_A_VALUE = 4;
+static const uint32_t CPMS_CCDR_A_VALUE_LEN = 16;
+static const uint32_t CPMS_CCDR_B_SCALE = 20;
+static const uint32_t CPMS_CCDR_B_SCALE_LEN = 4;
+static const uint32_t CPMS_CCDR_B_VALUE = 24;
+static const uint32_t CPMS_CCDR_B_VALUE_LEN = 16;
+static const uint32_t CPMS_CCDR_C_SCALE = 40;
+static const uint32_t CPMS_CCDR_C_SCALE_LEN = 4;
+static const uint32_t CPMS_CCDR_C_VALUE = 44;
+static const uint32_t CPMS_CCDR_C_VALUE_LEN = 16;
+static const uint32_t CPMS_CCDR_A_MOD = 60;
+static const uint32_t CPMS_CCDR_B_MOD = 61;
+static const uint32_t CPMS_CCDR_C_MOD = 62;
 // c/reg00003.H
 
 static const uint64_t CPMS_CL2_PFETCNTL = 0x200e0e28ull;
@@ -119,23 +135,48 @@ static const uint32_t CPMS_FDCR_SLOPEB_CYCLES_LEN = 4;
 // c/reg00003.H
 
 static const uint64_t EC_LS_LSU_HOLD_OUT_REG9 = 0x200206c9ull;
+
+static const uint32_t EC_LS_LSU_HOLD_OUT_REG9_DALC_MP3_L1WK_MP_ACCESS_CONCURRENTLY_ERROR_HOLD_OUT = 0;
+static const uint32_t EC_LS_LSU_HOLD_OUT_REG9_RACP_MP4_RC5_RADIR_MULTIHIT_RECOV_HOLD_OUT = 1;
+static const uint32_t EC_LS_LSU_HOLD_OUT_REG9_RACP_MP4_RC5_RADIR_MULTIHIT_XSTOP_HOLD_OUT = 2;
+static const uint32_t EC_LS_LSU_HOLD_OUT_REG9_LMQ_RC4_SSP_DRAIN_AND_SNOOP_CONCURRENTLY_ERROR_HOLD_OUT = 3;
+static const uint32_t EC_LS_LSU_HOLD_OUT_REG9_LMQ_MP4_INVALID_ENTRY_LHR_ERROR_HOLD_OUT = 4;
+static const uint32_t EC_LS_LSU_HOLD_OUT_REG9_LLQ_ERROR_ENTRY_RELAUNCH_PENDING_INVALID_HOLD_OUT = 5;
+static const uint32_t EC_LS_LSU_HOLD_OUT_REG9_LLQ_ERROR_ENTRY_INVALID_WAIT_STATE_CHANGE_HOLD_OUT = 6;
+static const uint32_t EC_LS_LSU_HOLD_OUT_REG9_LLQ_ERROR_FINISH_WAIT_STATE_NON_ZERO_HOLD_OUT = 7;
+static const uint32_t EC_LS_LSU_HOLD_OUT_REG9_SCOM_PARITY_ERROR_HOLD_OUT = 8;
+static const uint32_t EC_LS_LSU_HOLD_OUT_REG9_RC5_STORE_DRAIN_PARITY_ERROR_HOLD_OUT = 9;
+static const uint32_t EC_LS_LSU_HOLD_OUT_REG9_DCACHE_DYNAM_SET_DELETED_HOLD_OUT = 10;
+static const uint32_t EC_LS_LSU_HOLD_OUT_REG9_SETP_DYNAM_SET_DELETED_HOLD_OUT = 11;
+static const uint32_t EC_LS_LSU_HOLD_OUT_REG9_EADIR_DYNAM_SET_DELETED_HOLD_OUT = 12;
 // c/reg00003.H
 
 static const uint64_t EC_PC_COMMON_SPR_V1_HMER_RW_WAND = 0x20020493ull;
 static const uint64_t EC_PC_COMMON_SPR_V1_HMER_WO_OR = 0x2002048full;
 
-static const uint32_t EC_PC_COMMON_SPR_V1_HMER_MALFUNCTION_ALERT = 0;
-static const uint32_t EC_PC_COMMON_SPR_V1_HMER_QME_REQUEST = 1;
-static const uint32_t EC_PC_COMMON_SPR_V1_HMER_PROC_RCVY_DONE = 2;
-static const uint32_t EC_PC_COMMON_SPR_V1_HMER_TFAC_ERR = 4;
-static const uint32_t EC_PC_COMMON_SPR_V1_HMER_XSCOM_FAIL = 8;
-static const uint32_t EC_PC_COMMON_SPR_V1_HMER_XSCOM_DONE = 9;
-static const uint32_t EC_PC_COMMON_SPR_V1_HMER_PROC_RCVY_AGAIN = 11;
-static const uint32_t EC_PC_COMMON_SPR_V1_HMER_SCOM_FIR_HMI = 16;
-static const uint32_t EC_PC_COMMON_SPR_V1_HMER_THD_WAKE_BLOCKED_TM_SUSPEND = 17;
-static const uint32_t EC_PC_COMMON_SPR_V1_HMER_TRIG_FIR_HMI = 18;
-static const uint32_t EC_PC_COMMON_SPR_V1_HMER_XSCOM_STATUS = 21;
-static const uint32_t EC_PC_COMMON_SPR_V1_HMER_XSCOM_STATUS_LEN = 3;
+static const uint32_t EC_PC_COMMON_SPR_V1_HMER_V1_HMER_MALFUNCTION_ALERT = 0;
+static const uint32_t EC_PC_COMMON_SPR_V1_HMER_V1_HMER_QME_REQUEST = 1;
+static const uint32_t EC_PC_COMMON_SPR_V1_HMER_V1_HMER_PROC_RCVY_DONE = 2;
+static const uint32_t EC_PC_COMMON_SPR_V1_HMER_SPARE_3 = 3;
+static const uint32_t EC_PC_COMMON_SPR_V1_HMER_V1_HMER_TFAC_ERR = 4;
+static const uint32_t EC_PC_COMMON_SPR_V1_HMER_TFMR_PARITY_ERR = 5;
+static const uint32_t EC_PC_COMMON_SPR_V1_HMER_SPARE_6 = 6;
+static const uint32_t EC_PC_COMMON_SPR_V1_HMER_SPARE_7 = 7;
+static const uint32_t EC_PC_COMMON_SPR_V1_HMER_V1_HMER_XSCOM_FAIL = 8;
+static const uint32_t EC_PC_COMMON_SPR_V1_HMER_V1_HMER_XSCOM_DONE = 9;
+static const uint32_t EC_PC_COMMON_SPR_V1_HMER_SPARE_10 = 10;
+static const uint32_t EC_PC_COMMON_SPR_V1_HMER_V1_HMER_PROC_RCVY_AGAIN = 11;
+static const uint32_t EC_PC_COMMON_SPR_V1_HMER_SPARE_12 = 12;
+static const uint32_t EC_PC_COMMON_SPR_V1_HMER_SPARE_13 = 13;
+static const uint32_t EC_PC_COMMON_SPR_V1_HMER_SPARE_14 = 14;
+static const uint32_t EC_PC_COMMON_SPR_V1_HMER_SPARE_15 = 15;
+static const uint32_t EC_PC_COMMON_SPR_V1_HMER_V1_HMER_SCOM_FIR_HMI = 16;
+static const uint32_t EC_PC_COMMON_SPR_V1_HMER_V1_HMER_THD_WAKE_BLOCKED_TM_SUSPEND = 17;
+static const uint32_t EC_PC_COMMON_SPR_V1_HMER_V1_HMER_TRIG_FIR_HMI = 18;
+static const uint32_t EC_PC_COMMON_SPR_V1_HMER_SPARE_19 = 19;
+static const uint32_t EC_PC_COMMON_SPR_V1_HMER_SPARE_20 = 20;
+static const uint32_t EC_PC_COMMON_SPR_V1_HMER_V1_HMER_XSCOM_STATUS = 21;
+static const uint32_t EC_PC_COMMON_SPR_V1_HMER_V1_HMER_XSCOM_STATUS_LEN = 3;
 // c/reg00003.H
 
 static const uint64_t EC_PC_FIR_RAM_CTRL = 0x2002044full;
@@ -144,15 +185,22 @@ static const uint32_t EC_PC_FIR_RAM_CTRL_RAM_VTID = 0;
 static const uint32_t EC_PC_FIR_RAM_CTRL_RAM_VTID_LEN = 2;
 static const uint32_t EC_PC_FIR_RAM_CTRL_PPC_PREDCD = 2;
 static const uint32_t EC_PC_FIR_RAM_CTRL_PPC_PREDCD_LEN = 4;
+static const uint32_t EC_PC_FIR_RAM_CTRL_SPARE = 6;
+static const uint32_t EC_PC_FIR_RAM_CTRL_SPARE_LEN = 2;
 static const uint32_t EC_PC_FIR_RAM_CTRL_PPC_INSTR = 8;
 static const uint32_t EC_PC_FIR_RAM_CTRL_PPC_INSTR_LEN = 32;
 // c/reg00003.H
 
 static const uint64_t EC_PC_FIR_RECOV_FWD_PROG_CTRL = 0x2002044bull;
+
+static const uint32_t EC_PC_FIR_RECOV_FWD_PROG_CTRL_RESET_FWD_PROG = 0;
+static const uint32_t EC_PC_FIR_RECOV_FWD_PROG_CTRL_FWD_PROG_THOLD = 1;
+static const uint32_t EC_PC_FIR_RECOV_FWD_PROG_CTRL_FWD_PROG_THOLD_LEN = 3;
 // c/reg00003.H
 
 static const uint64_t EC_PC_PMU_SPRCOR_HID = 0x20020415ull;
 
+static const uint32_t EC_PC_PMU_SPRCOR_HID_ONE_PPC = 0;
 static const uint32_t EC_PC_PMU_SPRCOR_HID_EN_INSTRUC_TRACE = 1;
 static const uint32_t EC_PC_PMU_SPRCOR_HID_FLUSH_IC = 2;
 static const uint32_t EC_PC_PMU_SPRCOR_HID_EN_ATTN = 3;
@@ -171,12 +219,16 @@ static const uint32_t EC_PC_PMU_SPRCOR_HID_HID_SPARE_14 = 14;
 
 static const uint64_t EC_PC_TOD_SYNC000 = 0x200204a3ull;
 
+static const uint32_t EC_PC_TOD_SYNC000_TOD = 0;
+static const uint32_t EC_PC_TOD_SYNC000_TOD_LEN = 55;
 static const uint32_t EC_PC_TOD_SYNC000_CHIP_TOD_STATUS = 60;
 static const uint32_t EC_PC_TOD_SYNC000_CHIP_TOD_STATUS_LEN = 4;
 // c/reg00003.H
 
 static const uint64_t EC_PC_TOD_SYNC111 = 0x200204a3ull;
 
+static const uint32_t EC_PC_TOD_SYNC111_TOD = 0;
+static const uint32_t EC_PC_TOD_SYNC111_TOD_LEN = 48;
 static const uint32_t EC_PC_TOD_SYNC111_CHIP_TOD_STATUS = 60;
 static const uint32_t EC_PC_TOD_SYNC111_CHIP_TOD_STATUS_LEN = 4;
 // c/reg00003.H
@@ -410,14 +462,14 @@ static const uint32_t PSCOM_ERROR_MASK_SATELLITE_ACKNOWLEDGE_INVALID_REGISTER = 
 
 static const uint64_t QME_CDBA = 0x200e0800ull;
 
-static const uint32_t QME_CDBA_QME_CDBA_MESSAGE_NUMBER = 0;
-static const uint32_t QME_CDBA_QME_CDBA_MESSAGE_NUMBER_LEN = 8;
+static const uint32_t QME_CDBA_MESSAGE_NUMBER = 0;
+static const uint32_t QME_CDBA_MESSAGE_NUMBER_LEN = 8;
 // c/reg00003.H
 
 static const uint64_t QME_CSIR = 0x200e087cull;
 
-static const uint32_t QME_CSIR_QME_CSIR_PMSR_INSTR_DATA = 36;
-static const uint32_t QME_CSIR_QME_CSIR_PMSR_INSTR_DATA_LEN = 22;
+static const uint32_t QME_CSIR_PMSR_INSTR_DATA = 36;
+static const uint32_t QME_CSIR_PMSR_INSTR_DATA_LEN = 22;
 // c/reg00003.H
 
 #ifndef __PPE_HCODE__

@@ -165,1262 +165,1262 @@ fapi_try_exit:
 }
 
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_DC_0H(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_DC_0H(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF1__AMUX_EQ_VSEL_DC_0H,
+    return o_data.insertFromRight<CPLT_CONF1_AMUX_EQ_VSEL_DC_0H,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_DC_0H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_DC_0H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_DC_0H(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_DC_0H(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF1__AMUX_EQ_VSEL_DC_0H,
+    return o_data.insertFromRight<CPLT_CONF1_AMUX_EQ_VSEL_DC_0H,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_DC_0H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_DC_0H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_DC_0H(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_DC_0H(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.setBit<CPLT_CONF1__AMUX_EQ_VSEL_DC_0H>();
+    return o_data.setBit<CPLT_CONF1_AMUX_EQ_VSEL_DC_0H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_DC_0H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_DC_0H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF1__AMUX_EQ_VSEL_DC_0H(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF1_AMUX_EQ_VSEL_DC_0H(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.clearBit<CPLT_CONF1__AMUX_EQ_VSEL_DC_0H>();
+    return o_data.clearBit<CPLT_CONF1_AMUX_EQ_VSEL_DC_0H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_DC_0H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_DC_0H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF1__AMUX_EQ_VSEL_DC_0H(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF1_AMUX_EQ_VSEL_DC_0H(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return i_data.extractToRight<CPLT_CONF1__AMUX_EQ_VSEL_DC_0H,
+    return i_data.extractToRight<CPLT_CONF1_AMUX_EQ_VSEL_DC_0H,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_DC_0H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_DC_0H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CPLT_CONF1__AMUX_EQ_VSEL_DC_0H(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CPLT_CONF1_AMUX_EQ_VSEL_DC_0H(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return i_data.getBit<CPLT_CONF1__AMUX_EQ_VSEL_DC_0H>();
+    return i_data.getBit<CPLT_CONF1_AMUX_EQ_VSEL_DC_0H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_DC_0H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_DC_0H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_DC_1H(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_DC_1H(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF1__AMUX_EQ_VSEL_DC_1H,
+    return o_data.insertFromRight<CPLT_CONF1_AMUX_EQ_VSEL_DC_1H,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_DC_1H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_DC_1H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_DC_1H(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_DC_1H(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF1__AMUX_EQ_VSEL_DC_1H,
+    return o_data.insertFromRight<CPLT_CONF1_AMUX_EQ_VSEL_DC_1H,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_DC_1H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_DC_1H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_DC_1H(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_DC_1H(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.setBit<CPLT_CONF1__AMUX_EQ_VSEL_DC_1H>();
+    return o_data.setBit<CPLT_CONF1_AMUX_EQ_VSEL_DC_1H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_DC_1H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_DC_1H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF1__AMUX_EQ_VSEL_DC_1H(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF1_AMUX_EQ_VSEL_DC_1H(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.clearBit<CPLT_CONF1__AMUX_EQ_VSEL_DC_1H>();
+    return o_data.clearBit<CPLT_CONF1_AMUX_EQ_VSEL_DC_1H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_DC_1H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_DC_1H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF1__AMUX_EQ_VSEL_DC_1H(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF1_AMUX_EQ_VSEL_DC_1H(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return i_data.extractToRight<CPLT_CONF1__AMUX_EQ_VSEL_DC_1H,
+    return i_data.extractToRight<CPLT_CONF1_AMUX_EQ_VSEL_DC_1H,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_DC_1H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_DC_1H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CPLT_CONF1__AMUX_EQ_VSEL_DC_1H(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CPLT_CONF1_AMUX_EQ_VSEL_DC_1H(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return i_data.getBit<CPLT_CONF1__AMUX_EQ_VSEL_DC_1H>();
+    return i_data.getBit<CPLT_CONF1_AMUX_EQ_VSEL_DC_1H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_DC_1H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_DC_1H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_DC_2H(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_DC_2H(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF1__AMUX_EQ_VSEL_DC_2H,
+    return o_data.insertFromRight<CPLT_CONF1_AMUX_EQ_VSEL_DC_2H,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_DC_2H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_DC_2H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_DC_2H(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_DC_2H(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF1__AMUX_EQ_VSEL_DC_2H,
+    return o_data.insertFromRight<CPLT_CONF1_AMUX_EQ_VSEL_DC_2H,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_DC_2H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_DC_2H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_DC_2H(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_DC_2H(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.setBit<CPLT_CONF1__AMUX_EQ_VSEL_DC_2H>();
+    return o_data.setBit<CPLT_CONF1_AMUX_EQ_VSEL_DC_2H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_DC_2H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_DC_2H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF1__AMUX_EQ_VSEL_DC_2H(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF1_AMUX_EQ_VSEL_DC_2H(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.clearBit<CPLT_CONF1__AMUX_EQ_VSEL_DC_2H>();
+    return o_data.clearBit<CPLT_CONF1_AMUX_EQ_VSEL_DC_2H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_DC_2H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_DC_2H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF1__AMUX_EQ_VSEL_DC_2H(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF1_AMUX_EQ_VSEL_DC_2H(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return i_data.extractToRight<CPLT_CONF1__AMUX_EQ_VSEL_DC_2H,
+    return i_data.extractToRight<CPLT_CONF1_AMUX_EQ_VSEL_DC_2H,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_DC_2H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_DC_2H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CPLT_CONF1__AMUX_EQ_VSEL_DC_2H(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CPLT_CONF1_AMUX_EQ_VSEL_DC_2H(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return i_data.getBit<CPLT_CONF1__AMUX_EQ_VSEL_DC_2H>();
+    return i_data.getBit<CPLT_CONF1_AMUX_EQ_VSEL_DC_2H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_DC_2H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_DC_2H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_3H(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_3H(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_3H,
+    return o_data.insertFromRight<CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_3H,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_3H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_3H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_3H(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_3H(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_3H,
+    return o_data.insertFromRight<CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_3H,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_3H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_3H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_3H(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_3H(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.setBit<CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_3H>();
+    return o_data.setBit<CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_3H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_3H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_3H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_3H(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_3H(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.clearBit<CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_3H>();
+    return o_data.clearBit<CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_3H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_3H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_3H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_3H(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_3H(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return i_data.extractToRight<CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_3H,
+    return i_data.extractToRight<CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_3H,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_3H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_3H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_3H(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_3H(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return i_data.getBit<CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_3H>();
+    return i_data.getBit<CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_3H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_3H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_3H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_4H(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_4H(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_4H,
+    return o_data.insertFromRight<CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_4H,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_4H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_4H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_4H(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_4H(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_4H,
+    return o_data.insertFromRight<CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_4H,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_4H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_4H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_4H(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_4H(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.setBit<CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_4H>();
+    return o_data.setBit<CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_4H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_4H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_4H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_4H(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_4H(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.clearBit<CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_4H>();
+    return o_data.clearBit<CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_4H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_4H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_4H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_4H(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_4H(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return i_data.extractToRight<CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_4H,
+    return i_data.extractToRight<CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_4H,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_4H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_4H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_4H(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_4H(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return i_data.getBit<CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_4H>();
+    return i_data.getBit<CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_4H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_4H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_4H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_5H(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_5H(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_5H,
+    return o_data.insertFromRight<CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_5H,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_5H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_5H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_5H(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_5H(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_5H,
+    return o_data.insertFromRight<CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_5H,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_5H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_5H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_5H(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_5H(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.setBit<CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_5H>();
+    return o_data.setBit<CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_5H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_5H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_5H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_5H(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_5H(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.clearBit<CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_5H>();
+    return o_data.clearBit<CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_5H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_5H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_5H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_5H(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_5H(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return i_data.extractToRight<CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_5H,
+    return i_data.extractToRight<CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_5H,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_5H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_5H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_5H(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_5H(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return i_data.getBit<CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_5H>();
+    return i_data.getBit<CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_5H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_5H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_5H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_6H(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_6H(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_6H,
+    return o_data.insertFromRight<CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_6H,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_6H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_6H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_6H(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_6H(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_6H,
+    return o_data.insertFromRight<CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_6H,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_6H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_6H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_6H(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_6H(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.setBit<CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_6H>();
+    return o_data.setBit<CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_6H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_6H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_6H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_6H(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_6H(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.clearBit<CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_6H>();
+    return o_data.clearBit<CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_6H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_6H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_6H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_6H(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_6H(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return i_data.extractToRight<CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_6H,
+    return i_data.extractToRight<CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_6H,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_6H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_6H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_6H(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_6H(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return i_data.getBit<CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_6H>();
+    return i_data.getBit<CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_6H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_6H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_6H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_7H(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_7H(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_7H,
+    return o_data.insertFromRight<CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_7H,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_7H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_7H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_7H(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_7H(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_7H,
+    return o_data.insertFromRight<CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_7H,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_7H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_7H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_7H(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_7H(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.setBit<CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_7H>();
+    return o_data.setBit<CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_7H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_7H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_7H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_7H(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_7H(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.clearBit<CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_7H>();
+    return o_data.clearBit<CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_7H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_7H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_7H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_7H(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_7H(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return i_data.extractToRight<CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_7H,
+    return i_data.extractToRight<CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_7H,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_7H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_7H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_7H(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_7H(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return i_data.getBit<CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_7H>();
+    return i_data.getBit<CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_7H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_7H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_7H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_8H(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_8H(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_8H,
+    return o_data.insertFromRight<CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_8H,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_8H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_8H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_8H(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_8H(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_8H,
+    return o_data.insertFromRight<CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_8H,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_8H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_8H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_8H(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_8H(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.setBit<CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_8H>();
+    return o_data.setBit<CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_8H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_8H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_8H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_8H(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_8H(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.clearBit<CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_8H>();
+    return o_data.clearBit<CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_8H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_8H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_8H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_8H(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_8H(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return i_data.extractToRight<CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_8H,
+    return i_data.extractToRight<CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_8H,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_8H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_8H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_8H(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_8H(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return i_data.getBit<CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_8H>();
+    return i_data.getBit<CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_8H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_8H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_8H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_9H(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_9H(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_9H,
+    return o_data.insertFromRight<CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_9H,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_9H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_9H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_9H(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_9H(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_9H,
+    return o_data.insertFromRight<CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_9H,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_9H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_9H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_9H(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_9H(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.setBit<CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_9H>();
+    return o_data.setBit<CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_9H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_9H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_9H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_9H(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_9H(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.clearBit<CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_9H>();
+    return o_data.clearBit<CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_9H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_9H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_9H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_9H(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_9H(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return i_data.extractToRight<CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_9H,
+    return i_data.extractToRight<CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_9H,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_9H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_9H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_9H(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_9H(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return i_data.getBit<CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_9H>();
+    return i_data.getBit<CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_9H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_9H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_9H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_10H(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_10H(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_10H,
+    return o_data.insertFromRight<CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_10H,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_10H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_10H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_10H(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_10H(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_10H,
+    return o_data.insertFromRight<CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_10H,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_10H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_10H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_10H(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_10H(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.setBit<CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_10H>();
+    return o_data.setBit<CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_10H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_10H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_10H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_10H(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_10H(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.clearBit<CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_10H>();
+    return o_data.clearBit<CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_10H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_10H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_10H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_10H(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_10H(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return i_data.extractToRight<CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_10H,
+    return i_data.extractToRight<CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_10H,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_10H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_10H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_10H(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_10H(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return i_data.getBit<CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_10H>();
+    return i_data.getBit<CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_10H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_10H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_10H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_11H(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_11H(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_11H,
+    return o_data.insertFromRight<CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_11H,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_11H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_11H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_11H(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_11H(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_11H,
+    return o_data.insertFromRight<CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_11H,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_11H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_11H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_11H(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_11H(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.setBit<CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_11H>();
+    return o_data.setBit<CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_11H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_11H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_11H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_11H(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_11H(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.clearBit<CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_11H>();
+    return o_data.clearBit<CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_11H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_11H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_11H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_11H(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_11H(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return i_data.extractToRight<CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_11H,
+    return i_data.extractToRight<CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_11H,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_11H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_11H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_11H(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_11H(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return i_data.getBit<CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_11H>();
+    return i_data.getBit<CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_11H>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_11H chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_11H chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_VMEAS_DC(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_VMEAS_DC(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF1__AMUX_EQ_VSEL_VMEAS_DC,
+    return o_data.insertFromRight<CPLT_CONF1_AMUX_EQ_VSEL_VMEAS_DC,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_VMEAS_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_VMEAS_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_VMEAS_DC(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_VMEAS_DC(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF1__AMUX_EQ_VSEL_VMEAS_DC,
+    return o_data.insertFromRight<CPLT_CONF1_AMUX_EQ_VSEL_VMEAS_DC,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_VMEAS_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_VMEAS_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__AMUX_EQ_VSEL_VMEAS_DC(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_AMUX_EQ_VSEL_VMEAS_DC(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.setBit<CPLT_CONF1__AMUX_EQ_VSEL_VMEAS_DC>();
+    return o_data.setBit<CPLT_CONF1_AMUX_EQ_VSEL_VMEAS_DC>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_VMEAS_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_VMEAS_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF1__AMUX_EQ_VSEL_VMEAS_DC(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF1_AMUX_EQ_VSEL_VMEAS_DC(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.clearBit<CPLT_CONF1__AMUX_EQ_VSEL_VMEAS_DC>();
+    return o_data.clearBit<CPLT_CONF1_AMUX_EQ_VSEL_VMEAS_DC>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_VMEAS_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_VMEAS_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF1__AMUX_EQ_VSEL_VMEAS_DC(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF1_AMUX_EQ_VSEL_VMEAS_DC(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return i_data.extractToRight<CPLT_CONF1__AMUX_EQ_VSEL_VMEAS_DC,
+    return i_data.extractToRight<CPLT_CONF1_AMUX_EQ_VSEL_VMEAS_DC,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_VMEAS_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_VMEAS_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CPLT_CONF1__AMUX_EQ_VSEL_VMEAS_DC(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CPLT_CONF1_AMUX_EQ_VSEL_VMEAS_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return i_data.getBit<CPLT_CONF1__AMUX_EQ_VSEL_VMEAS_DC>();
+    return i_data.getBit<CPLT_CONF1_AMUX_EQ_VSEL_VMEAS_DC>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__AMUX_EQ_VSEL_VMEAS_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_AMUX_EQ_VSEL_VMEAS_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__ANEQ_VMEAS_CALIBRATE_DC(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_ANEQ_VMEAS_CALIBRATE_DC(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF1__ANEQ_VMEAS_CALIBRATE_DC,
+    return o_data.insertFromRight<CPLT_CONF1_ANEQ_VMEAS_CALIBRATE_DC,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__ANEQ_VMEAS_CALIBRATE_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_ANEQ_VMEAS_CALIBRATE_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__ANEQ_VMEAS_CALIBRATE_DC(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_ANEQ_VMEAS_CALIBRATE_DC(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF1__ANEQ_VMEAS_CALIBRATE_DC,
+    return o_data.insertFromRight<CPLT_CONF1_ANEQ_VMEAS_CALIBRATE_DC,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__ANEQ_VMEAS_CALIBRATE_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_ANEQ_VMEAS_CALIBRATE_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__ANEQ_VMEAS_CALIBRATE_DC(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_ANEQ_VMEAS_CALIBRATE_DC(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.setBit<CPLT_CONF1__ANEQ_VMEAS_CALIBRATE_DC>();
+    return o_data.setBit<CPLT_CONF1_ANEQ_VMEAS_CALIBRATE_DC>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__ANEQ_VMEAS_CALIBRATE_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_ANEQ_VMEAS_CALIBRATE_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF1__ANEQ_VMEAS_CALIBRATE_DC(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF1_ANEQ_VMEAS_CALIBRATE_DC(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.clearBit<CPLT_CONF1__ANEQ_VMEAS_CALIBRATE_DC>();
+    return o_data.clearBit<CPLT_CONF1_ANEQ_VMEAS_CALIBRATE_DC>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__ANEQ_VMEAS_CALIBRATE_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_ANEQ_VMEAS_CALIBRATE_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF1__ANEQ_VMEAS_CALIBRATE_DC(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF1_ANEQ_VMEAS_CALIBRATE_DC(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return i_data.extractToRight<CPLT_CONF1__ANEQ_VMEAS_CALIBRATE_DC,
+    return i_data.extractToRight<CPLT_CONF1_ANEQ_VMEAS_CALIBRATE_DC,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__ANEQ_VMEAS_CALIBRATE_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_ANEQ_VMEAS_CALIBRATE_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CPLT_CONF1__ANEQ_VMEAS_CALIBRATE_DC(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CPLT_CONF1_ANEQ_VMEAS_CALIBRATE_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return i_data.getBit<CPLT_CONF1__ANEQ_VMEAS_CALIBRATE_DC>();
+    return i_data.getBit<CPLT_CONF1_ANEQ_VMEAS_CALIBRATE_DC>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__ANEQ_VMEAS_CALIBRATE_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_ANEQ_VMEAS_CALIBRATE_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__ANEQ_VMEAS_MEASURE_DC(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_ANEQ_VMEAS_MEASURE_DC(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF1__ANEQ_VMEAS_MEASURE_DC,
+    return o_data.insertFromRight<CPLT_CONF1_ANEQ_VMEAS_MEASURE_DC,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__ANEQ_VMEAS_MEASURE_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_ANEQ_VMEAS_MEASURE_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__ANEQ_VMEAS_MEASURE_DC(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_ANEQ_VMEAS_MEASURE_DC(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF1__ANEQ_VMEAS_MEASURE_DC,
+    return o_data.insertFromRight<CPLT_CONF1_ANEQ_VMEAS_MEASURE_DC,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__ANEQ_VMEAS_MEASURE_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_ANEQ_VMEAS_MEASURE_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1__ANEQ_VMEAS_MEASURE_DC(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF1_ANEQ_VMEAS_MEASURE_DC(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.setBit<CPLT_CONF1__ANEQ_VMEAS_MEASURE_DC>();
+    return o_data.setBit<CPLT_CONF1_ANEQ_VMEAS_MEASURE_DC>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__ANEQ_VMEAS_MEASURE_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_ANEQ_VMEAS_MEASURE_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF1__ANEQ_VMEAS_MEASURE_DC(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF1_ANEQ_VMEAS_MEASURE_DC(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return o_data.clearBit<CPLT_CONF1__ANEQ_VMEAS_MEASURE_DC>();
+    return o_data.clearBit<CPLT_CONF1_ANEQ_VMEAS_MEASURE_DC>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__ANEQ_VMEAS_MEASURE_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_ANEQ_VMEAS_MEASURE_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF1__ANEQ_VMEAS_MEASURE_DC(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF1_ANEQ_VMEAS_MEASURE_DC(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return i_data.extractToRight<CPLT_CONF1__ANEQ_VMEAS_MEASURE_DC,
+    return i_data.extractToRight<CPLT_CONF1_ANEQ_VMEAS_MEASURE_DC,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__ANEQ_VMEAS_MEASURE_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_ANEQ_VMEAS_MEASURE_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CPLT_CONF1__ANEQ_VMEAS_MEASURE_DC(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CPLT_CONF1_ANEQ_VMEAS_MEASURE_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF1_RW, CPLT_CONF1_WO_CLEAR, CPLT_CONF1_WO_OR));
 #endif
-    return i_data.getBit<CPLT_CONF1__ANEQ_VMEAS_MEASURE_DC>();
+    return i_data.getBit<CPLT_CONF1_ANEQ_VMEAS_MEASURE_DC>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF1__ANEQ_VMEAS_MEASURE_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF1_ANEQ_VMEAS_MEASURE_DC chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -5891,47 +5891,47 @@ fapi_try_exit:
 }
 
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_UNMASKED_LOCAL_XSTOP_UNMASKED_IN(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_UNMASKED_IN(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP_UNMASKED));
 #endif
-    return o_data.insertFromRight<LOCAL_XSTOP_UNMASKED_LOCAL_XSTOP_UNMASKED_IN,
-           LOCAL_XSTOP_UNMASKED_LOCAL_XSTOP_UNMASKED_IN_LEN>(i_data);
+    return o_data.insertFromRight<LOCAL_XSTOP_UNMASKED_IN,
+           LOCAL_XSTOP_UNMASKED_IN_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_UNMASKED_LOCAL_XSTOP_UNMASKED_IN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_UNMASKED_IN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_UNMASKED_LOCAL_XSTOP_UNMASKED_IN(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_LOCAL_XSTOP_UNMASKED_IN(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP_UNMASKED));
 #endif
-    return o_data.insertFromRight<LOCAL_XSTOP_UNMASKED_LOCAL_XSTOP_UNMASKED_IN,
-           LOCAL_XSTOP_UNMASKED_LOCAL_XSTOP_UNMASKED_IN_LEN>(i_data);
+    return o_data.insertFromRight<LOCAL_XSTOP_UNMASKED_IN,
+           LOCAL_XSTOP_UNMASKED_IN_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_UNMASKED_LOCAL_XSTOP_UNMASKED_IN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_UNMASKED_IN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_LOCAL_XSTOP_UNMASKED_LOCAL_XSTOP_UNMASKED_IN(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_LOCAL_XSTOP_UNMASKED_IN(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(LOCAL_XSTOP_UNMASKED));
 #endif
-    return i_data.extractToRight<LOCAL_XSTOP_UNMASKED_LOCAL_XSTOP_UNMASKED_IN,
-           LOCAL_XSTOP_UNMASKED_LOCAL_XSTOP_UNMASKED_IN_LEN>(o_data);
+    return i_data.extractToRight<LOCAL_XSTOP_UNMASKED_IN,
+           LOCAL_XSTOP_UNMASKED_IN_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access LOCAL_XSTOP_UNMASKED_LOCAL_XSTOP_UNMASKED_IN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access LOCAL_XSTOP_UNMASKED_IN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -6112,47 +6112,47 @@ fapi_try_exit:
 }
 
 
-static inline fapi2::buffer<uint64_t>& SET_QME_RCTAR2_QME_RCTAR2_DATA(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_QME_RCTAR2_DATA(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(QME_RCTAR2));
 #endif
-    return o_data.insertFromRight<QME_RCTAR2_QME_RCTAR2_DATA,
-           QME_RCTAR2_QME_RCTAR2_DATA_LEN>(i_data);
+    return o_data.insertFromRight<QME_RCTAR2_DATA,
+           QME_RCTAR2_DATA_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access QME_RCTAR2_QME_RCTAR2_DATA chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access QME_RCTAR2_DATA chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_QME_RCTAR2_QME_RCTAR2_DATA(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_QME_RCTAR2_DATA(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(QME_RCTAR2));
 #endif
-    return o_data.insertFromRight<QME_RCTAR2_QME_RCTAR2_DATA,
-           QME_RCTAR2_QME_RCTAR2_DATA_LEN>(i_data);
+    return o_data.insertFromRight<QME_RCTAR2_DATA,
+           QME_RCTAR2_DATA_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access QME_RCTAR2_QME_RCTAR2_DATA chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access QME_RCTAR2_DATA chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_QME_RCTAR2_QME_RCTAR2_DATA(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_QME_RCTAR2_DATA(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(QME_RCTAR2));
 #endif
-    return i_data.extractToRight<QME_RCTAR2_QME_RCTAR2_DATA,
-           QME_RCTAR2_QME_RCTAR2_DATA_LEN>(o_data);
+    return i_data.extractToRight<QME_RCTAR2_DATA,
+           QME_RCTAR2_DATA_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access QME_RCTAR2_QME_RCTAR2_DATA chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access QME_RCTAR2_DATA chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -6201,47 +6201,47 @@ fapi_try_exit:
 }
 
 
-static inline fapi2::buffer<uint64_t>& SET_QME_SCOM_PBTXTR3__VALID(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_QME_SCOM_PBTXTR3_VALID(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(QME_SCOM_PBTXTR3));
 #endif
-    return o_data.insertFromRight<QME_SCOM_PBTXTR3__VALID,
-           QME_SCOM_PBTXTR3__VALID_LEN>(i_data);
+    return o_data.insertFromRight<QME_SCOM_PBTXTR3_VALID,
+           QME_SCOM_PBTXTR3_VALID_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access QME_SCOM_PBTXTR3__VALID chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access QME_SCOM_PBTXTR3_VALID chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_QME_SCOM_PBTXTR3__VALID(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_QME_SCOM_PBTXTR3_VALID(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(QME_SCOM_PBTXTR3));
 #endif
-    return o_data.insertFromRight<QME_SCOM_PBTXTR3__VALID,
-           QME_SCOM_PBTXTR3__VALID_LEN>(i_data);
+    return o_data.insertFromRight<QME_SCOM_PBTXTR3_VALID,
+           QME_SCOM_PBTXTR3_VALID_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access QME_SCOM_PBTXTR3__VALID chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access QME_SCOM_PBTXTR3_VALID chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_QME_SCOM_PBTXTR3__VALID(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_QME_SCOM_PBTXTR3_VALID(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(QME_SCOM_PBTXTR3));
 #endif
-    return i_data.extractToRight<QME_SCOM_PBTXTR3__VALID,
-           QME_SCOM_PBTXTR3__VALID_LEN>(o_data);
+    return i_data.extractToRight<QME_SCOM_PBTXTR3_VALID,
+           QME_SCOM_PBTXTR3_VALID_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access QME_SCOM_PBTXTR3__VALID chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access QME_SCOM_PBTXTR3_VALID chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

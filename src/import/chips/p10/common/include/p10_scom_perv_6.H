@@ -73,52 +73,52 @@ static const uint64_t CPLT_CONF1_WO_OR = 0x00000019ull;
 
 static const uint32_t CPLT_CONF1_ANES_AMUX_VSEL_ES_EQ_DC_0H = 0;
 static const uint32_t CPLT_CONF1_LANE_CFG_DC_0H = 0;
-static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_DC_0H = 0;
+static const uint32_t CPLT_CONF1_AMUX_EQ_VSEL_DC_0H = 0;
 static const uint32_t CPLT_CONF1_OD_IOVALID_DC = 0;
 static const uint32_t CPLT_CONF1_EN_EQ_DC_0H = 0;
 static const uint32_t CPLT_CONF1_0_IOVALID_DC = 0;
 static const uint32_t CPLT_CONF1_ANES_AMUX_VSEL_ES_EQ_DC_1H = 1;
 static const uint32_t CPLT_CONF1_LANE_CFG_DC_1H = 1;
-static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_DC_1H = 1;
+static const uint32_t CPLT_CONF1_AMUX_EQ_VSEL_DC_1H = 1;
 static const uint32_t CPLT_CONF1_EV_IOVALID_DC = 1;
 static const uint32_t CPLT_CONF1_EN_EQ_DC_1H = 1;
 static const uint32_t CPLT_CONF1_1_IOVALID_DC = 1;
 static const uint32_t CPLT_CONF1_ANES_AMUX_VSEL_ES_EQALL_DC_2H = 2;
 static const uint32_t CPLT_CONF1_LANE_CFG_DC_2H = 2;
-static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_DC_2H = 2;
+static const uint32_t CPLT_CONF1_AMUX_EQ_VSEL_DC_2H = 2;
 static const uint32_t CPLT_CONF1_NORTH_DC_2H = 2;
 static const uint32_t CPLT_CONF1_2_IOVALID_DC = 2;
 static const uint32_t CPLT_CONF1_ANES_AMUX_VSEL_ES_EQALL_DC_3H = 3;
 static const uint32_t CPLT_CONF1_LANE_CFG_DC_3H = 3;
-static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_3H = 3;
+static const uint32_t CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_3H = 3;
 static const uint32_t CPLT_CONF1_NORTH_DC_3H = 3;
 static const uint32_t CPLT_CONF1_3_IOVALID_DC = 3;
 static const uint32_t CPLT_CONF1_ANES_AMUX_VSEL_ES_EQALL_DC_4H = 4;
 static const uint32_t CPLT_CONF1_LANE_CFG_DC_4H = 4;
-static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_4H = 4;
+static const uint32_t CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_4H = 4;
 static const uint32_t CPLT_CONF1_NORTH_DC_4H = 4;
 static const uint32_t CPLT_CONF1_ANES_AMUX_VSEL_ES_VDN_DC_5H = 5;
 static const uint32_t CPLT_CONF1_LANE_CFG_DC_5H = 5;
-static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_5H = 5;
+static const uint32_t CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_5H = 5;
 static const uint32_t CPLT_CONF1_ANES_AMUX_VSEL_ES_VDN_DC_6H = 6;
-static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_6H = 6;
+static const uint32_t CPLT_CONF1_AMUX_EQ_VSEL_OCB_MH_DC_6H = 6;
 static const uint32_t CPLT_CONF1_ANES_AMUX_VSEL_ES_VDN_DC_7H = 7;
-static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_7H = 7;
+static const uint32_t CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_7H = 7;
 static const uint32_t CPLT_CONF1_IOVALID_DC_8H = 8;
-static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_8H = 8;
+static const uint32_t CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_8H = 8;
 static const uint32_t CPLT_CONF1_IOVALID_DC_9H = 9;
-static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_9H = 9;
+static const uint32_t CPLT_CONF1_AMUX_EQ_VSEL_PWR_DC_9H = 9;
 static const uint32_t CPLT_CONF1_IOVALID_DC_10H = 10;
-static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_10H = 10;
+static const uint32_t CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_10H = 10;
 static const uint32_t CPLT_CONF1_RATIO_OVERRIDE_DC = 11;
-static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_11H = 11;
+static const uint32_t CPLT_CONF1_AMUX_EQ_VSEL_QUAD_DC_11H = 11;
 static const uint32_t CPLT_CONF1_LP_RESET = 12;
 static const uint32_t CPLT_CONF1_APP0_RATIO_DC_12H = 12;
-static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_VMEAS_DC = 12;
+static const uint32_t CPLT_CONF1_AMUX_EQ_VSEL_VMEAS_DC = 12;
 static const uint32_t CPLT_CONF1_APP0_RATIO_DC_13H = 13;
-static const uint32_t CPLT_CONF1__ANEQ_VMEAS_CALIBRATE_DC = 13;
+static const uint32_t CPLT_CONF1_ANEQ_VMEAS_CALIBRATE_DC = 13;
 static const uint32_t CPLT_CONF1_APP0_RATIO_DC_14H = 14;
-static const uint32_t CPLT_CONF1__ANEQ_VMEAS_MEASURE_DC = 14;
+static const uint32_t CPLT_CONF1_ANEQ_VMEAS_MEASURE_DC = 14;
 static const uint32_t CPLT_CONF1_APP0_RATIO_DC_15H = 15;
 static const uint32_t CPLT_CONF1_CPLT_ANEQ_VMEAS_RESET_CLK_STOPPED_DC = 15;
 static const uint32_t CPLT_CONF1_APP0_RATIO_DC_16H = 16;
@@ -223,8 +223,8 @@ static const uint32_t EPS_THERM_WSUB_TIMESTAMP_COUNTER_READ_OVERFLOW_ERR = 44;
 
 static const uint64_t FIRST_REPLY_REG = 0x000f0018ull;
 
-static const uint32_t FIRST_REPLY_REG_FIRST_REPLY_REGISTER = 0;
-static const uint32_t FIRST_REPLY_REG_FIRST_REPLY_REGISTER_LEN = 6;
+static const uint32_t FIRST_REPLY_REG_ISTER = 0;
+static const uint32_t FIRST_REPLY_REG_ISTER_LEN = 6;
 // perv/reg00009.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
@@ -371,8 +371,8 @@ static const uint32_t LOCAL_XSTOP_MASK_15 = 15;
 
 static const uint64_t LOCAL_XSTOP_UNMASKED = 0x00040013ull;
 
-static const uint32_t LOCAL_XSTOP_UNMASKED_LOCAL_XSTOP_UNMASKED_IN = 1;
-static const uint32_t LOCAL_XSTOP_UNMASKED_LOCAL_XSTOP_UNMASKED_IN_LEN = 15;
+static const uint32_t LOCAL_XSTOP_UNMASKED_IN = 1;
+static const uint32_t LOCAL_XSTOP_UNMASKED_IN_LEN = 15;
 // perv/reg00009.H
 
 static const uint64_t REC_ERR_MST14_REG2 = 0x000f007aull;

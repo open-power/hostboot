@@ -40,6 +40,19 @@ namespace perv
 
 
 static const uint64_t EPS_THERM_WSUB_CONTROL_REG = 0x00050012ull;
+
+static const uint32_t EPS_THERM_WSUB_CONTROL_REG_RESET_TRIP_HISTORY = 0;
+static const uint32_t EPS_THERM_WSUB_CONTROL_REG_RESET_SAMPLE_PULSE_CNT = 1;
+static const uint32_t EPS_THERM_WSUB_CONTROL_REG_F_RESET_CPM_RD = 2;
+static const uint32_t EPS_THERM_WSUB_CONTROL_REG_F_RESET_CPM_WR = 3;
+static const uint32_t EPS_THERM_WSUB_CONTROL_REG_RESET_SAMPLE_DTS = 4;
+static const uint32_t EPS_THERM_WSUB_CONTROL_REG_FORCE_SAMPLE_DTS = 5;
+static const uint32_t EPS_THERM_WSUB_CONTROL_REG_FORCE_SAMPLE_DTS_INTERRUPTIBLE = 6;
+static const uint32_t EPS_THERM_WSUB_CONTROL_REG_FORCE_RESET_THRES_L1RESULTS = 7;
+static const uint32_t EPS_THERM_WSUB_CONTROL_REG_FORCE_RESET_THRES_L2RESULTS = 8;
+static const uint32_t EPS_THERM_WSUB_CONTROL_REG_FORCE_RESET_THRES_L3RESULTS = 9;
+static const uint32_t EPS_THERM_WSUB_CONTROL_REG_FORCE_MEASURE_VOLT_INTERRUPTIBLE = 10;
+static const uint32_t EPS_THERM_WSUB_CONTROL_REG_FORCE_RESET_MEASURE_VOLT = 11;
 // perv/reg00011.H
 
 static const uint64_t EPS_THERM_WSUB_SKITTER_CLKSRC_REG = 0x00050016ull;
@@ -390,8 +403,8 @@ static const uint32_t OTPC_M_RESET_REGISTER_CHICKEN_SWITCH = 0;
 
 static const uint64_t RECOV_UNMASKED = 0x00040011ull;
 
-static const uint32_t RECOV_UNMASKED_RECOV_UNMASKED_IN = 1;
-static const uint32_t RECOV_UNMASKED_RECOV_UNMASKED_IN_LEN = 53;
+static const uint32_t RECOV_UNMASKED_IN = 1;
+static const uint32_t RECOV_UNMASKED_IN_LEN = 53;
 // perv/reg00011.H
 
 static const uint64_t REC_ERR_MST4_REG0 = 0x000f0050ull;
@@ -447,6 +460,9 @@ static const uint32_t REC_ERR_MST4_REG0_SLAVE15_MST4_ERROR_CODE_LEN = 3;
 // perv/reg00011.H
 
 static const uint64_t SCAN_UPDATEDR = 0x0003a000ull;
+
+static const uint32_t SCAN_UPDATEDR_SCAN_UPDATEDR_REG = 0;
+static const uint32_t SCAN_UPDATEDR_SCAN_UPDATEDR_REG_LEN = 32;
 // perv/reg00011.H
 
 static const uint64_t SINGLE_OTP_ROM_OTPROM_REG0 = 0x00008000ull;
@@ -505,8 +521,8 @@ static const uint32_t SINGLE_OTP_ROM_OTPROM_REG84_REGISTER84_LEN = 64;
 
 static const uint64_t SPATTN_UNMASKED = 0x00040012ull;
 
-static const uint32_t SPATTN_UNMASKED_SPATTN_UNMASKED_IN = 1;
-static const uint32_t SPATTN_UNMASKED_SPATTN_UNMASKED_IN_LEN = 35;
+static const uint32_t SPATTN_UNMASKED_IN = 1;
+static const uint32_t SPATTN_UNMASKED_IN_LEN = 35;
 // perv/reg00011.H
 
 static const uint64_t SYNC_CONFIG = 0x00030000ull;

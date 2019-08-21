@@ -44,22 +44,22 @@ static const uint64_t BIST = 0x0c03000bull;
 static const uint32_t BIST_TC_BIST_START_TEST_DC = 0;
 static const uint32_t BIST_TC_SRAM_ABIST_MODE_DC = 1;
 static const uint32_t BIST_TC_IOBIST_MODE_DC = 3;
-static const uint32_t BIST_BIST_PERV = 4;
-static const uint32_t BIST_BIST_UNIT1 = 5;
-static const uint32_t BIST_BIST_UNIT2 = 6;
-static const uint32_t BIST_BIST_UNIT3 = 7;
-static const uint32_t BIST_BIST_UNIT4 = 8;
-static const uint32_t BIST_BIST_UNIT5 = 9;
-static const uint32_t BIST_BIST_UNIT6 = 10;
-static const uint32_t BIST_BIST_UNIT7 = 11;
-static const uint32_t BIST_BIST_UNIT8 = 12;
-static const uint32_t BIST_BIST_UNIT9 = 13;
-static const uint32_t BIST_BIST_UNIT10 = 14;
-static const uint32_t BIST_BIST_UNIT11 = 15;
-static const uint32_t BIST_BIST_UNIT12 = 16;
-static const uint32_t BIST_BIST_UNIT13 = 17;
-static const uint32_t BIST_BIST_UNIT14 = 18;
-static const uint32_t BIST_BIST_STROBE_WINDOW_EN = 48;
+static const uint32_t BIST_PERV = 4;
+static const uint32_t BIST_UNIT1 = 5;
+static const uint32_t BIST_UNIT2 = 6;
+static const uint32_t BIST_UNIT3 = 7;
+static const uint32_t BIST_UNIT4 = 8;
+static const uint32_t BIST_UNIT5 = 9;
+static const uint32_t BIST_UNIT6 = 10;
+static const uint32_t BIST_UNIT7 = 11;
+static const uint32_t BIST_UNIT8 = 12;
+static const uint32_t BIST_UNIT9 = 13;
+static const uint32_t BIST_UNIT10 = 14;
+static const uint32_t BIST_UNIT11 = 15;
+static const uint32_t BIST_UNIT12 = 16;
+static const uint32_t BIST_UNIT13 = 17;
+static const uint32_t BIST_UNIT14 = 18;
+static const uint32_t BIST_STROBE_WINDOW_EN = 48;
 // mc/reg00015.H
 
 static const uint64_t CPLT_CTRL5_RW = 0x0c000005ull;
@@ -240,8 +240,8 @@ static const uint64_t VITAL_SCAN_OUT = 0x0c0f0017ull;
 
 static const uint64_t XSTOP_UNMASKED = 0x0c040010ull;
 
-static const uint32_t XSTOP_UNMASKED_XSTOP_UNMASKED_IN = 1;
-static const uint32_t XSTOP_UNMASKED_XSTOP_UNMASKED_IN_LEN = 53;
+static const uint32_t XSTOP_UNMASKED_IN = 1;
+static const uint32_t XSTOP_UNMASKED_IN_LEN = 53;
 // mc/reg00015.H
 
 #ifndef __PPE_HCODE__

@@ -71,9 +71,28 @@ static const uint32_t CPMS_L3_PFETCNTL_SRAM_ENABLE = 63;
 // c/reg00000.H
 
 static const uint64_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT2 = 0x20020602ull;
+
+static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT2_32 = 0;
+static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT2_33 = 1;
+static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT2_34 = 2;
+static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT2_35 = 3;
+static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT2_36 = 4;
+static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT2_37 = 5;
+static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT2_38 = 6;
+static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT2_39 = 7;
+static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT2_40 = 8;
+static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT2_41 = 9;
+static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT2_42 = 10;
+static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT2_43 = 11;
+static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT2_44 = 12;
+static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT2_45 = 13;
+static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT2_46 = 14;
 // c/reg00000.H
 
 static const uint64_t EC_PC_COMMON_SPR_HMEER = 0x20020496ull;
+
+static const uint32_t EC_PC_COMMON_SPR_HMEER_ENABLE = 0;
+static const uint32_t EC_PC_COMMON_SPR_HMEER_ENABLE_LEN = 24;
 // c/reg00000.H
 
 static const uint64_t EC_PC_PMU_SPRCOR_INV_ERATE = 0x2002040full;
@@ -119,6 +138,8 @@ static const uint32_t NC_NCMISC_NCSCOMS_NCU_MODE_REG3_TLBIE_PACING_PMU_THRESH = 
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_MODE_REG3_TLBIE_PACING_PMU_THRESH_LEN = 3;
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_MODE_REG3_SMF_ENABLE = 20;
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_MODE_REG3_TLBIE_OVERLAP_OP2_EN = 21;
+static const uint32_t NC_NCMISC_NCSCOMS_NCU_MODE_REG3_SPARE = 22;
+static const uint32_t NC_NCMISC_NCSCOMS_NCU_MODE_REG3_SPARE_LEN = 10;
 // c/reg00000.H
 
 static const uint64_t QME_SPWU_OTR = 0x200e0830ull;

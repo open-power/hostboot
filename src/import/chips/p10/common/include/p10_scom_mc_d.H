@@ -58,6 +58,9 @@ static const uint32_t CTRL_ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
 // mc/reg00013.H
 
 static const uint64_t EPS_DBG_DEBUG_TRACE_CONTROL = 0x0c0107d0ull;
+
+static const uint32_t EPS_DBG_DEBUG_TRACE_CONTROL_ART = 0;
+static const uint32_t EPS_DBG_DEBUG_TRACE_CONTROL_OP = 1;
 // mc/reg00013.H
 
 static const uint64_t MBA_SCOMFIR_DBG1_SCOM1Q = 0x0c010f97ull;
@@ -189,6 +192,9 @@ static const uint32_t RECOV_MASK_53 = 53;
 // mc/reg00013.H
 
 static const uint64_t SCAN_UPDATEDR_LONG = 0x0c03b000ull;
+
+static const uint32_t SCAN_UPDATEDR_LONG_SCAN_UPDATEDR_LONG_REG = 0;
+static const uint32_t SCAN_UPDATEDR_LONG_SCAN_UPDATEDR_LONG_REG_LEN = 32;
 // mc/reg00013.H
 
 static const uint64_t SCOMFIR_MCFGP1 = 0x0c010c0bull;
@@ -241,27 +247,27 @@ static const uint32_t TRA0_TR0_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
 
 static const uint64_t XSTOP5 = 0x0c030015ull;
 
-static const uint32_t XSTOP5_XSTOP5_MASK_B = 0;
+static const uint32_t XSTOP5_MASK_B = 0;
 static const uint32_t XSTOP5_ALIGNED_XSTOP5 = 1;
 static const uint32_t XSTOP5_TRIGGER_OPCG_ON_XSTOP5 = 2;
-static const uint32_t XSTOP5_XSTOP5_WAIT_ALLWAYS = 3;
-static const uint32_t XSTOP5_XSTOP5_PERV = 4;
-static const uint32_t XSTOP5_XSTOP5_UNIT1 = 5;
-static const uint32_t XSTOP5_XSTOP5_UNIT2 = 6;
-static const uint32_t XSTOP5_XSTOP5_UNIT3 = 7;
-static const uint32_t XSTOP5_XSTOP5_UNIT4 = 8;
-static const uint32_t XSTOP5_XSTOP5_UNIT5 = 9;
-static const uint32_t XSTOP5_XSTOP5_UNIT6 = 10;
-static const uint32_t XSTOP5_XSTOP5_UNIT7 = 11;
-static const uint32_t XSTOP5_XSTOP5_UNIT8 = 12;
-static const uint32_t XSTOP5_XSTOP5_UNIT9 = 13;
-static const uint32_t XSTOP5_XSTOP5_UNIT10 = 14;
-static const uint32_t XSTOP5_XSTOP5_UNIT11 = 15;
-static const uint32_t XSTOP5_XSTOP5_UNIT12 = 16;
-static const uint32_t XSTOP5_XSTOP5_UNIT13 = 17;
-static const uint32_t XSTOP5_XSTOP5_UNIT14 = 18;
-static const uint32_t XSTOP5_XSTOP5_WAIT_CYCLES = 48;
-static const uint32_t XSTOP5_XSTOP5_WAIT_CYCLES_LEN = 12;
+static const uint32_t XSTOP5_WAIT_ALLWAYS = 3;
+static const uint32_t XSTOP5_PERV = 4;
+static const uint32_t XSTOP5_UNIT1 = 5;
+static const uint32_t XSTOP5_UNIT2 = 6;
+static const uint32_t XSTOP5_UNIT3 = 7;
+static const uint32_t XSTOP5_UNIT4 = 8;
+static const uint32_t XSTOP5_UNIT5 = 9;
+static const uint32_t XSTOP5_UNIT6 = 10;
+static const uint32_t XSTOP5_UNIT7 = 11;
+static const uint32_t XSTOP5_UNIT8 = 12;
+static const uint32_t XSTOP5_UNIT9 = 13;
+static const uint32_t XSTOP5_UNIT10 = 14;
+static const uint32_t XSTOP5_UNIT11 = 15;
+static const uint32_t XSTOP5_UNIT12 = 16;
+static const uint32_t XSTOP5_UNIT13 = 17;
+static const uint32_t XSTOP5_UNIT14 = 18;
+static const uint32_t XSTOP5_WAIT_CYCLES = 48;
+static const uint32_t XSTOP5_WAIT_CYCLES_LEN = 12;
 // mc/reg00013.H
 
 #ifndef __PPE_HCODE__

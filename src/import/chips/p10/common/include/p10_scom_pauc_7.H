@@ -55,6 +55,19 @@ static const uint32_t DL_PPE_WRAP_SCOM_CNTL_SCOM_PPE_SPARES_LEN = 5;
 // pauc/reg00007.H
 
 static const uint64_t EPS_THERM_WSUB_CONTROL_REG = 0x10050012ull;
+
+static const uint32_t EPS_THERM_WSUB_CONTROL_REG_RESET_TRIP_HISTORY = 0;
+static const uint32_t EPS_THERM_WSUB_CONTROL_REG_RESET_SAMPLE_PULSE_CNT = 1;
+static const uint32_t EPS_THERM_WSUB_CONTROL_REG_F_RESET_CPM_RD = 2;
+static const uint32_t EPS_THERM_WSUB_CONTROL_REG_F_RESET_CPM_WR = 3;
+static const uint32_t EPS_THERM_WSUB_CONTROL_REG_RESET_SAMPLE_DTS = 4;
+static const uint32_t EPS_THERM_WSUB_CONTROL_REG_FORCE_SAMPLE_DTS = 5;
+static const uint32_t EPS_THERM_WSUB_CONTROL_REG_FORCE_SAMPLE_DTS_INTERRUPTIBLE = 6;
+static const uint32_t EPS_THERM_WSUB_CONTROL_REG_FORCE_RESET_THRES_L1RESULTS = 7;
+static const uint32_t EPS_THERM_WSUB_CONTROL_REG_FORCE_RESET_THRES_L2RESULTS = 8;
+static const uint32_t EPS_THERM_WSUB_CONTROL_REG_FORCE_RESET_THRES_L3RESULTS = 9;
+static const uint32_t EPS_THERM_WSUB_CONTROL_REG_FORCE_MEASURE_VOLT_INTERRUPTIBLE = 10;
+static const uint32_t EPS_THERM_WSUB_CONTROL_REG_FORCE_RESET_MEASURE_VOLT = 11;
 // pauc/reg00007.H
 
 static const uint64_t EPS_THERM_WSUB_SKITTER_CLKSRC_REG = 0x10050016ull;
@@ -146,21 +159,31 @@ static const uint32_t OPCG_CAPT2_24_06ODD_LEN = 5;
 // pauc/reg00007.H
 
 static const uint64_t PB_PMU1_TLPM_COUNTER = 0x1001181cull;
+
+static const uint32_t PB_PMU1_TLPM_COUNTER_0 = 0;
+static const uint32_t PB_PMU1_TLPM_COUNTER_0_LEN = 16;
+static const uint32_t PB_PMU1_TLPM_COUNTER_1 = 16;
+static const uint32_t PB_PMU1_TLPM_COUNTER_1_LEN = 16;
+static const uint32_t PB_PMU1_TLPM_COUNTER_2 = 32;
+static const uint32_t PB_PMU1_TLPM_COUNTER_2_LEN = 16;
 // pauc/reg00007.H
 
 static const uint64_t RECOV_UNMASKED = 0x10040011ull;
 
-static const uint32_t RECOV_UNMASKED_RECOV_UNMASKED_IN = 1;
-static const uint32_t RECOV_UNMASKED_RECOV_UNMASKED_IN_LEN = 53;
+static const uint32_t RECOV_UNMASKED_IN = 1;
+static const uint32_t RECOV_UNMASKED_IN_LEN = 53;
 // pauc/reg00007.H
 
 static const uint64_t SCAN_UPDATEDR = 0x1003a000ull;
+
+static const uint32_t SCAN_UPDATEDR_SCAN_UPDATEDR_REG = 0;
+static const uint32_t SCAN_UPDATEDR_SCAN_UPDATEDR_REG_LEN = 32;
 // pauc/reg00007.H
 
 static const uint64_t SPATTN_UNMASKED = 0x10040012ull;
 
-static const uint32_t SPATTN_UNMASKED_SPATTN_UNMASKED_IN = 1;
-static const uint32_t SPATTN_UNMASKED_SPATTN_UNMASKED_IN_LEN = 35;
+static const uint32_t SPATTN_UNMASKED_IN = 1;
+static const uint32_t SPATTN_UNMASKED_IN_LEN = 35;
 // pauc/reg00007.H
 
 static const uint64_t SYNC_CONFIG = 0x10030000ull;

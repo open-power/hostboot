@@ -2046,2630 +2046,2697 @@ fapi_try_exit:
 }
 
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_EN(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_EN(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_EN,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_EN,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_EN(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_EN(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_EN,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_EN,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_EN(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_EN(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.setBit<NMMU_DBG_MODE_EN>();
+    return o_data.setBit<NMMU_DBG_MODE_MM_DBG_MODE_EN>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_EN(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_MM_DBG_MODE_EN(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.clearBit<NMMU_DBG_MODE_EN>();
+    return o_data.clearBit<NMMU_DBG_MODE_MM_DBG_MODE_EN>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_EN(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MM_DBG_MODE_EN(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.extractToRight<NMMU_DBG_MODE_EN,
+    return i_data.extractToRight<NMMU_DBG_MODE_MM_DBG_MODE_EN,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_NMMU_DBG_MODE_EN(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_NMMU_DBG_MODE_MM_DBG_MODE_EN(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.getBit<NMMU_DBG_MODE_EN>();
+    return i_data.getBit<NMMU_DBG_MODE_MM_DBG_MODE_EN>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_PRV_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_PRV_BUS0_STG2_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS0_STG2_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_PRV_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_PRV_BUS0_STG2_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS0_STG2_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_PRV_BUS0_STG2_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS0_STG2_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_PRV_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_PRV_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.setBit<NMMU_DBG_MODE_PRV_BUS0_STG2_SEL>();
+    return o_data.setBit<NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS0_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_PRV_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_PRV_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS0_STG2_SEL(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.clearBit<NMMU_DBG_MODE_PRV_BUS0_STG2_SEL>();
+    return o_data.clearBit<NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS0_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_PRV_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_PRV_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.extractToRight<NMMU_DBG_MODE_PRV_BUS0_STG2_SEL,
+    return i_data.extractToRight<NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS0_STG2_SEL,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_PRV_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_NMMU_DBG_MODE_PRV_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.getBit<NMMU_DBG_MODE_PRV_BUS0_STG2_SEL>();
+    return i_data.getBit<NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS0_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_PRV_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_PRV_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_PRV_BUS1_STG2_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS1_STG2_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_PRV_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_PRV_BUS1_STG2_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS1_STG2_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_PRV_BUS1_STG2_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS1_STG2_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_PRV_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_PRV_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.setBit<NMMU_DBG_MODE_PRV_BUS1_STG2_SEL>();
+    return o_data.setBit<NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS1_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_PRV_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_PRV_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS1_STG2_SEL(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.clearBit<NMMU_DBG_MODE_PRV_BUS1_STG2_SEL>();
+    return o_data.clearBit<NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS1_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_PRV_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_PRV_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.extractToRight<NMMU_DBG_MODE_PRV_BUS1_STG2_SEL,
+    return i_data.extractToRight<NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS1_STG2_SEL,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_PRV_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_NMMU_DBG_MODE_PRV_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.getBit<NMMU_DBG_MODE_PRV_BUS1_STG2_SEL>();
+    return i_data.getBit<NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS1_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_PRV_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_PRV_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_FBC_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_FBC_BUS0_STG2_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG2_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_FBC_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_FBC_BUS0_STG2_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG2_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_FBC_BUS0_STG2_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG2_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_FBC_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_FBC_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.setBit<NMMU_DBG_MODE_FBC_BUS0_STG2_SEL>();
+    return o_data.setBit<NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_FBC_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_FBC_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG2_SEL(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.clearBit<NMMU_DBG_MODE_FBC_BUS0_STG2_SEL>();
+    return o_data.clearBit<NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_FBC_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_FBC_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.extractToRight<NMMU_DBG_MODE_FBC_BUS0_STG2_SEL,
+    return i_data.extractToRight<NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG2_SEL,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_FBC_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_NMMU_DBG_MODE_FBC_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.getBit<NMMU_DBG_MODE_FBC_BUS0_STG2_SEL>();
+    return i_data.getBit<NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_FBC_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_FBC_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_FBC_BUS1_STG2_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG2_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_FBC_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_FBC_BUS1_STG2_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG2_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_FBC_BUS1_STG2_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG2_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_FBC_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_FBC_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.setBit<NMMU_DBG_MODE_FBC_BUS1_STG2_SEL>();
+    return o_data.setBit<NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_FBC_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_FBC_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG2_SEL(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.clearBit<NMMU_DBG_MODE_FBC_BUS1_STG2_SEL>();
+    return o_data.clearBit<NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_FBC_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_FBC_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.extractToRight<NMMU_DBG_MODE_FBC_BUS1_STG2_SEL,
+    return i_data.extractToRight<NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG2_SEL,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_FBC_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_NMMU_DBG_MODE_FBC_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.getBit<NMMU_DBG_MODE_FBC_BUS1_STG2_SEL>();
+    return i_data.getBit<NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_FBC_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MSC_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_MSC_BUS0_STG2_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG2_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MSC_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MSC_BUS0_STG2_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG2_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_MSC_BUS0_STG2_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG2_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MSC_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MSC_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.setBit<NMMU_DBG_MODE_MSC_BUS0_STG2_SEL>();
+    return o_data.setBit<NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MSC_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_MSC_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG2_SEL(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.clearBit<NMMU_DBG_MODE_MSC_BUS0_STG2_SEL>();
+    return o_data.clearBit<NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MSC_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MSC_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.extractToRight<NMMU_DBG_MODE_MSC_BUS0_STG2_SEL,
+    return i_data.extractToRight<NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG2_SEL,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MSC_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_NMMU_DBG_MODE_MSC_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.getBit<NMMU_DBG_MODE_MSC_BUS0_STG2_SEL>();
+    return i_data.getBit<NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MSC_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MSC_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_MSC_BUS1_STG2_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG2_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MSC_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MSC_BUS1_STG2_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG2_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_MSC_BUS1_STG2_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG2_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MSC_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MSC_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.setBit<NMMU_DBG_MODE_MSC_BUS1_STG2_SEL>();
+    return o_data.setBit<NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MSC_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_MSC_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG2_SEL(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.clearBit<NMMU_DBG_MODE_MSC_BUS1_STG2_SEL>();
+    return o_data.clearBit<NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MSC_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MSC_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.extractToRight<NMMU_DBG_MODE_MSC_BUS1_STG2_SEL,
+    return i_data.extractToRight<NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG2_SEL,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MSC_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_NMMU_DBG_MODE_MSC_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.getBit<NMMU_DBG_MODE_MSC_BUS1_STG2_SEL>();
+    return i_data.getBit<NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MSC_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_SLB_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_SLB_BUS0_STG2_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG2_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_SLB_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_SLB_BUS0_STG2_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG2_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_SLB_BUS0_STG2_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG2_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_SLB_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_SLB_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.setBit<NMMU_DBG_MODE_SLB_BUS0_STG2_SEL>();
+    return o_data.setBit<NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_SLB_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_SLB_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG2_SEL(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.clearBit<NMMU_DBG_MODE_SLB_BUS0_STG2_SEL>();
+    return o_data.clearBit<NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_SLB_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_SLB_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.extractToRight<NMMU_DBG_MODE_SLB_BUS0_STG2_SEL,
+    return i_data.extractToRight<NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG2_SEL,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_SLB_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_NMMU_DBG_MODE_SLB_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.getBit<NMMU_DBG_MODE_SLB_BUS0_STG2_SEL>();
+    return i_data.getBit<NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_SLB_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_SLB_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_SLB_BUS1_STG2_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG2_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_SLB_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_SLB_BUS1_STG2_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG2_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_SLB_BUS1_STG2_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG2_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_SLB_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_SLB_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.setBit<NMMU_DBG_MODE_SLB_BUS1_STG2_SEL>();
+    return o_data.setBit<NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_SLB_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_SLB_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG2_SEL(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.clearBit<NMMU_DBG_MODE_SLB_BUS1_STG2_SEL>();
+    return o_data.clearBit<NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_SLB_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_SLB_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.extractToRight<NMMU_DBG_MODE_SLB_BUS1_STG2_SEL,
+    return i_data.extractToRight<NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG2_SEL,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_SLB_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_NMMU_DBG_MODE_SLB_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.getBit<NMMU_DBG_MODE_SLB_BUS1_STG2_SEL>();
+    return i_data.getBit<NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_SLB_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_TW_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_TW_BUS0_STG2_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG2_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TW_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_TW_BUS0_STG2_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG2_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_TW_BUS0_STG2_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG2_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TW_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_TW_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.setBit<NMMU_DBG_MODE_TW_BUS0_STG2_SEL>();
+    return o_data.setBit<NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TW_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_TW_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.clearBit<NMMU_DBG_MODE_TW_BUS0_STG2_SEL>();
+    return o_data.clearBit<NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TW_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_TW_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.extractToRight<NMMU_DBG_MODE_TW_BUS0_STG2_SEL,
+    return i_data.extractToRight<NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG2_SEL,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TW_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_NMMU_DBG_MODE_TW_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.getBit<NMMU_DBG_MODE_TW_BUS0_STG2_SEL>();
+    return i_data.getBit<NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TW_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_TW_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_TW_BUS1_STG2_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG2_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TW_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_TW_BUS1_STG2_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG2_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_TW_BUS1_STG2_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG2_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TW_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_TW_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.setBit<NMMU_DBG_MODE_TW_BUS1_STG2_SEL>();
+    return o_data.setBit<NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TW_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_TW_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.clearBit<NMMU_DBG_MODE_TW_BUS1_STG2_SEL>();
+    return o_data.clearBit<NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TW_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_TW_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.extractToRight<NMMU_DBG_MODE_TW_BUS1_STG2_SEL,
+    return i_data.extractToRight<NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG2_SEL,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TW_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_NMMU_DBG_MODE_TW_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.getBit<NMMU_DBG_MODE_TW_BUS1_STG2_SEL>();
+    return i_data.getBit<NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TW_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_RDX_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_RDX_BUS0_STG2_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG2_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_RDX_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_RDX_BUS0_STG2_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG2_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_RDX_BUS0_STG2_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG2_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_RDX_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_RDX_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.setBit<NMMU_DBG_MODE_RDX_BUS0_STG2_SEL>();
+    return o_data.setBit<NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_RDX_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_RDX_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG2_SEL(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.clearBit<NMMU_DBG_MODE_RDX_BUS0_STG2_SEL>();
+    return o_data.clearBit<NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_RDX_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_RDX_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.extractToRight<NMMU_DBG_MODE_RDX_BUS0_STG2_SEL,
+    return i_data.extractToRight<NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG2_SEL,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_RDX_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_NMMU_DBG_MODE_RDX_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.getBit<NMMU_DBG_MODE_RDX_BUS0_STG2_SEL>();
+    return i_data.getBit<NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_RDX_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_RDX_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_RDX_BUS1_STG2_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG2_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_RDX_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_RDX_BUS1_STG2_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG2_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_RDX_BUS1_STG2_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG2_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_RDX_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_RDX_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.setBit<NMMU_DBG_MODE_RDX_BUS1_STG2_SEL>();
+    return o_data.setBit<NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_RDX_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_RDX_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG2_SEL(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.clearBit<NMMU_DBG_MODE_RDX_BUS1_STG2_SEL>();
+    return o_data.clearBit<NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_RDX_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_RDX_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.extractToRight<NMMU_DBG_MODE_RDX_BUS1_STG2_SEL,
+    return i_data.extractToRight<NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG2_SEL,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_RDX_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_NMMU_DBG_MODE_RDX_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.getBit<NMMU_DBG_MODE_RDX_BUS1_STG2_SEL>();
+    return i_data.getBit<NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_RDX_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_TLB_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_TLB_BUS0_STG2_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG2_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TLB_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_TLB_BUS0_STG2_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG2_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_TLB_BUS0_STG2_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG2_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TLB_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_TLB_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.setBit<NMMU_DBG_MODE_TLB_BUS0_STG2_SEL>();
+    return o_data.setBit<NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TLB_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_TLB_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG2_SEL(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.clearBit<NMMU_DBG_MODE_TLB_BUS0_STG2_SEL>();
+    return o_data.clearBit<NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TLB_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_TLB_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.extractToRight<NMMU_DBG_MODE_TLB_BUS0_STG2_SEL,
+    return i_data.extractToRight<NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG2_SEL,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TLB_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_NMMU_DBG_MODE_TLB_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG2_SEL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.getBit<NMMU_DBG_MODE_TLB_BUS0_STG2_SEL>();
+    return i_data.getBit<NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TLB_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_TLB_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_TLB_BUS1_STG2_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG2_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TLB_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_TLB_BUS1_STG2_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG2_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_TLB_BUS1_STG2_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG2_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TLB_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_TLB_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.setBit<NMMU_DBG_MODE_TLB_BUS1_STG2_SEL>();
+    return o_data.setBit<NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TLB_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_TLB_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG2_SEL(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.clearBit<NMMU_DBG_MODE_TLB_BUS1_STG2_SEL>();
+    return o_data.clearBit<NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TLB_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_TLB_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.extractToRight<NMMU_DBG_MODE_TLB_BUS1_STG2_SEL,
+    return i_data.extractToRight<NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG2_SEL,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TLB_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_NMMU_DBG_MODE_TLB_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG2_SEL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.getBit<NMMU_DBG_MODE_TLB_BUS1_STG2_SEL>();
+    return i_data.getBit<NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG2_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TLB_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG2_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_FBC_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_FBC_BUS0_STG1_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG1_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_FBC_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_FBC_BUS0_STG1_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG1_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_FBC_BUS0_STG1_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG1_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_FBC_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_FBC_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.setBit<NMMU_DBG_MODE_FBC_BUS0_STG1_SEL>();
+    return o_data.setBit<NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_FBC_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_FBC_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG1_SEL(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.clearBit<NMMU_DBG_MODE_FBC_BUS0_STG1_SEL>();
+    return o_data.clearBit<NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_FBC_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_FBC_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.extractToRight<NMMU_DBG_MODE_FBC_BUS0_STG1_SEL,
+    return i_data.extractToRight<NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG1_SEL,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_FBC_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_NMMU_DBG_MODE_FBC_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.getBit<NMMU_DBG_MODE_FBC_BUS0_STG1_SEL>();
+    return i_data.getBit<NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_FBC_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_FBC_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_FBC_BUS1_STG1_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG1_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_FBC_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_FBC_BUS1_STG1_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG1_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_FBC_BUS1_STG1_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG1_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_FBC_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_FBC_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.setBit<NMMU_DBG_MODE_FBC_BUS1_STG1_SEL>();
+    return o_data.setBit<NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_FBC_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_FBC_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG1_SEL(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.clearBit<NMMU_DBG_MODE_FBC_BUS1_STG1_SEL>();
+    return o_data.clearBit<NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_FBC_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_FBC_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.extractToRight<NMMU_DBG_MODE_FBC_BUS1_STG1_SEL,
+    return i_data.extractToRight<NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG1_SEL,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_FBC_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_NMMU_DBG_MODE_FBC_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.getBit<NMMU_DBG_MODE_FBC_BUS1_STG1_SEL>();
+    return i_data.getBit<NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_FBC_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MSC_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_MSC_BUS0_STG1_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG1_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MSC_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MSC_BUS0_STG1_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG1_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_MSC_BUS0_STG1_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG1_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MSC_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MSC_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.setBit<NMMU_DBG_MODE_MSC_BUS0_STG1_SEL>();
+    return o_data.setBit<NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MSC_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_MSC_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG1_SEL(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.clearBit<NMMU_DBG_MODE_MSC_BUS0_STG1_SEL>();
+    return o_data.clearBit<NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MSC_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MSC_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.extractToRight<NMMU_DBG_MODE_MSC_BUS0_STG1_SEL,
+    return i_data.extractToRight<NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG1_SEL,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MSC_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_NMMU_DBG_MODE_MSC_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.getBit<NMMU_DBG_MODE_MSC_BUS0_STG1_SEL>();
+    return i_data.getBit<NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MSC_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MSC_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_MSC_BUS1_STG1_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG1_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MSC_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MSC_BUS1_STG1_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG1_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_MSC_BUS1_STG1_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG1_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MSC_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MSC_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.setBit<NMMU_DBG_MODE_MSC_BUS1_STG1_SEL>();
+    return o_data.setBit<NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MSC_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_MSC_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG1_SEL(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.clearBit<NMMU_DBG_MODE_MSC_BUS1_STG1_SEL>();
+    return o_data.clearBit<NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MSC_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MSC_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.extractToRight<NMMU_DBG_MODE_MSC_BUS1_STG1_SEL,
+    return i_data.extractToRight<NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG1_SEL,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MSC_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_NMMU_DBG_MODE_MSC_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.getBit<NMMU_DBG_MODE_MSC_BUS1_STG1_SEL>();
+    return i_data.getBit<NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MSC_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_SLB_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_SLB_BUS0_STG1_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG1_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_SLB_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_SLB_BUS0_STG1_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG1_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_SLB_BUS0_STG1_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG1_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_SLB_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_SLB_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.setBit<NMMU_DBG_MODE_SLB_BUS0_STG1_SEL>();
+    return o_data.setBit<NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_SLB_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_SLB_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG1_SEL(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.clearBit<NMMU_DBG_MODE_SLB_BUS0_STG1_SEL>();
+    return o_data.clearBit<NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_SLB_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_SLB_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.extractToRight<NMMU_DBG_MODE_SLB_BUS0_STG1_SEL,
+    return i_data.extractToRight<NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG1_SEL,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_SLB_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_NMMU_DBG_MODE_SLB_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.getBit<NMMU_DBG_MODE_SLB_BUS0_STG1_SEL>();
+    return i_data.getBit<NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_SLB_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_SLB_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_SLB_BUS1_STG1_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG1_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_SLB_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_SLB_BUS1_STG1_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG1_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_SLB_BUS1_STG1_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG1_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_SLB_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_SLB_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.setBit<NMMU_DBG_MODE_SLB_BUS1_STG1_SEL>();
+    return o_data.setBit<NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_SLB_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_SLB_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG1_SEL(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.clearBit<NMMU_DBG_MODE_SLB_BUS1_STG1_SEL>();
+    return o_data.clearBit<NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_SLB_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_SLB_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.extractToRight<NMMU_DBG_MODE_SLB_BUS1_STG1_SEL,
+    return i_data.extractToRight<NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG1_SEL,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_SLB_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_NMMU_DBG_MODE_SLB_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.getBit<NMMU_DBG_MODE_SLB_BUS1_STG1_SEL>();
+    return i_data.getBit<NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_SLB_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_SLB_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_TW_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_TW_BUS0_STG1_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG1_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TW_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_TW_BUS0_STG1_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG1_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_TW_BUS0_STG1_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG1_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TW_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_TW_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.setBit<NMMU_DBG_MODE_TW_BUS0_STG1_SEL>();
+    return o_data.setBit<NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TW_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_TW_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.clearBit<NMMU_DBG_MODE_TW_BUS0_STG1_SEL>();
+    return o_data.clearBit<NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TW_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_TW_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.extractToRight<NMMU_DBG_MODE_TW_BUS0_STG1_SEL,
+    return i_data.extractToRight<NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG1_SEL,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TW_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_NMMU_DBG_MODE_TW_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.getBit<NMMU_DBG_MODE_TW_BUS0_STG1_SEL>();
+    return i_data.getBit<NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TW_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_TW_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_TW_BUS1_STG1_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG1_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TW_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_TW_BUS1_STG1_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG1_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_TW_BUS1_STG1_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG1_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TW_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_TW_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.setBit<NMMU_DBG_MODE_TW_BUS1_STG1_SEL>();
+    return o_data.setBit<NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TW_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_TW_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.clearBit<NMMU_DBG_MODE_TW_BUS1_STG1_SEL>();
+    return o_data.clearBit<NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TW_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_TW_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.extractToRight<NMMU_DBG_MODE_TW_BUS1_STG1_SEL,
+    return i_data.extractToRight<NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG1_SEL,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TW_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_NMMU_DBG_MODE_TW_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.getBit<NMMU_DBG_MODE_TW_BUS1_STG1_SEL>();
+    return i_data.getBit<NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TW_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_RDX_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_RDX_BUS0_STG1_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG1_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_RDX_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_RDX_BUS0_STG1_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG1_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_RDX_BUS0_STG1_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG1_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_RDX_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_RDX_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.setBit<NMMU_DBG_MODE_RDX_BUS0_STG1_SEL>();
+    return o_data.setBit<NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_RDX_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_RDX_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG1_SEL(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.clearBit<NMMU_DBG_MODE_RDX_BUS0_STG1_SEL>();
+    return o_data.clearBit<NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_RDX_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_RDX_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.extractToRight<NMMU_DBG_MODE_RDX_BUS0_STG1_SEL,
+    return i_data.extractToRight<NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG1_SEL,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_RDX_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_NMMU_DBG_MODE_RDX_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.getBit<NMMU_DBG_MODE_RDX_BUS0_STG1_SEL>();
+    return i_data.getBit<NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_RDX_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_RDX_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_RDX_BUS1_STG1_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG1_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_RDX_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_RDX_BUS1_STG1_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG1_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_RDX_BUS1_STG1_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG1_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_RDX_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_RDX_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.setBit<NMMU_DBG_MODE_RDX_BUS1_STG1_SEL>();
+    return o_data.setBit<NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_RDX_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_RDX_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG1_SEL(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.clearBit<NMMU_DBG_MODE_RDX_BUS1_STG1_SEL>();
+    return o_data.clearBit<NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_RDX_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_RDX_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.extractToRight<NMMU_DBG_MODE_RDX_BUS1_STG1_SEL,
+    return i_data.extractToRight<NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG1_SEL,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_RDX_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_NMMU_DBG_MODE_RDX_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.getBit<NMMU_DBG_MODE_RDX_BUS1_STG1_SEL>();
+    return i_data.getBit<NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_RDX_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_TLB_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_TLB_BUS0_STG1_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG1_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TLB_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_TLB_BUS0_STG1_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG1_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_TLB_BUS0_STG1_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG1_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TLB_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_TLB_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.setBit<NMMU_DBG_MODE_TLB_BUS0_STG1_SEL>();
+    return o_data.setBit<NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TLB_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_TLB_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG1_SEL(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.clearBit<NMMU_DBG_MODE_TLB_BUS0_STG1_SEL>();
+    return o_data.clearBit<NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TLB_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_TLB_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.extractToRight<NMMU_DBG_MODE_TLB_BUS0_STG1_SEL,
+    return i_data.extractToRight<NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG1_SEL,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TLB_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_NMMU_DBG_MODE_TLB_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG1_SEL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.getBit<NMMU_DBG_MODE_TLB_BUS0_STG1_SEL>();
+    return i_data.getBit<NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TLB_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS0_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_TLB_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_TLB_BUS1_STG1_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG1_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TLB_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_TLB_BUS1_STG1_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG1_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_TLB_BUS1_STG1_SEL,
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG1_SEL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TLB_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_TLB_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.setBit<NMMU_DBG_MODE_TLB_BUS1_STG1_SEL>();
+    return o_data.setBit<NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TLB_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_TLB_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG1_SEL(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.clearBit<NMMU_DBG_MODE_TLB_BUS1_STG1_SEL>();
+    return o_data.clearBit<NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TLB_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_TLB_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.extractToRight<NMMU_DBG_MODE_TLB_BUS1_STG1_SEL,
+    return i_data.extractToRight<NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG1_SEL,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TLB_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_NMMU_DBG_MODE_TLB_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG1_SEL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.getBit<NMMU_DBG_MODE_TLB_BUS1_STG1_SEL>();
+    return i_data.getBit<NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG1_SEL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TLB_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TLB_BUS1_STG1_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_FBC_BUS0_STG0_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_RESERVED_27_31(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_FBC_BUS0_STG0_SEL,
-           NMMU_DBG_MODE_FBC_BUS0_STG0_SEL_LEN>(i_data);
+    return o_data.insertFromRight<NMMU_DBG_MODE_RESERVED_27_31,
+           NMMU_DBG_MODE_RESERVED_27_31_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_FBC_BUS0_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_RESERVED_27_31 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_FBC_BUS0_STG0_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_RESERVED_27_31(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_FBC_BUS0_STG0_SEL,
-           NMMU_DBG_MODE_FBC_BUS0_STG0_SEL_LEN>(i_data);
+    return o_data.insertFromRight<NMMU_DBG_MODE_RESERVED_27_31,
+           NMMU_DBG_MODE_RESERVED_27_31_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_FBC_BUS0_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_RESERVED_27_31 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_FBC_BUS0_STG0_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_RESERVED_27_31(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.extractToRight<NMMU_DBG_MODE_FBC_BUS0_STG0_SEL,
-           NMMU_DBG_MODE_FBC_BUS0_STG0_SEL_LEN>(o_data);
+    return i_data.extractToRight<NMMU_DBG_MODE_RESERVED_27_31,
+           NMMU_DBG_MODE_RESERVED_27_31_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_FBC_BUS0_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_RESERVED_27_31 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_FBC_BUS1_STG0_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG0_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_FBC_BUS1_STG0_SEL,
-           NMMU_DBG_MODE_FBC_BUS1_STG0_SEL_LEN>(i_data);
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG0_SEL,
+           NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG0_SEL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_FBC_BUS1_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_FBC_BUS1_STG0_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG0_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_FBC_BUS1_STG0_SEL,
-           NMMU_DBG_MODE_FBC_BUS1_STG0_SEL_LEN>(i_data);
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG0_SEL,
+           NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG0_SEL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_FBC_BUS1_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_FBC_BUS1_STG0_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG0_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.extractToRight<NMMU_DBG_MODE_FBC_BUS1_STG0_SEL,
-           NMMU_DBG_MODE_FBC_BUS1_STG0_SEL_LEN>(o_data);
+    return i_data.extractToRight<NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG0_SEL,
+           NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG0_SEL_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_FBC_BUS1_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS0_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MSC_BUS0_STG0_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG0_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_MSC_BUS0_STG0_SEL,
-           NMMU_DBG_MODE_MSC_BUS0_STG0_SEL_LEN>(i_data);
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG0_SEL,
+           NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG0_SEL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MSC_BUS0_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MSC_BUS0_STG0_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG0_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_MSC_BUS0_STG0_SEL,
-           NMMU_DBG_MODE_MSC_BUS0_STG0_SEL_LEN>(i_data);
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG0_SEL,
+           NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG0_SEL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MSC_BUS0_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MSC_BUS0_STG0_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG0_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.extractToRight<NMMU_DBG_MODE_MSC_BUS0_STG0_SEL,
-           NMMU_DBG_MODE_MSC_BUS0_STG0_SEL_LEN>(o_data);
+    return i_data.extractToRight<NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG0_SEL,
+           NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG0_SEL_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MSC_BUS0_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_FBC_BUS1_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MSC_BUS1_STG0_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG0_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_MSC_BUS1_STG0_SEL,
-           NMMU_DBG_MODE_MSC_BUS1_STG0_SEL_LEN>(i_data);
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG0_SEL,
+           NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG0_SEL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MSC_BUS1_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MSC_BUS1_STG0_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG0_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_MSC_BUS1_STG0_SEL,
-           NMMU_DBG_MODE_MSC_BUS1_STG0_SEL_LEN>(i_data);
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG0_SEL,
+           NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG0_SEL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MSC_BUS1_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MSC_BUS1_STG0_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG0_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.extractToRight<NMMU_DBG_MODE_MSC_BUS1_STG0_SEL,
-           NMMU_DBG_MODE_MSC_BUS1_STG0_SEL_LEN>(o_data);
+    return i_data.extractToRight<NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG0_SEL,
+           NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG0_SEL_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MSC_BUS1_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS0_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_TW_BUS0_STG0_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG0_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_TW_BUS0_STG0_SEL,
-           NMMU_DBG_MODE_TW_BUS0_STG0_SEL_LEN>(i_data);
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG0_SEL,
+           NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG0_SEL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TW_BUS0_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_TW_BUS0_STG0_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG0_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_TW_BUS0_STG0_SEL,
-           NMMU_DBG_MODE_TW_BUS0_STG0_SEL_LEN>(i_data);
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG0_SEL,
+           NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG0_SEL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TW_BUS0_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_TW_BUS0_STG0_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG0_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.extractToRight<NMMU_DBG_MODE_TW_BUS0_STG0_SEL,
-           NMMU_DBG_MODE_TW_BUS0_STG0_SEL_LEN>(o_data);
+    return i_data.extractToRight<NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG0_SEL,
+           NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG0_SEL_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TW_BUS0_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_MSC_BUS1_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_TW_BUS1_STG0_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG0_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_TW_BUS1_STG0_SEL,
-           NMMU_DBG_MODE_TW_BUS1_STG0_SEL_LEN>(i_data);
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG0_SEL,
+           NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG0_SEL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TW_BUS1_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_TW_BUS1_STG0_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG0_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_TW_BUS1_STG0_SEL,
-           NMMU_DBG_MODE_TW_BUS1_STG0_SEL_LEN>(i_data);
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG0_SEL,
+           NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG0_SEL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TW_BUS1_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_TW_BUS1_STG0_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG0_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.extractToRight<NMMU_DBG_MODE_TW_BUS1_STG0_SEL,
-           NMMU_DBG_MODE_TW_BUS1_STG0_SEL_LEN>(o_data);
+    return i_data.extractToRight<NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG0_SEL,
+           NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG0_SEL_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_TW_BUS1_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS0_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_RDX_BUS0_STG0_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG0_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_RDX_BUS0_STG0_SEL,
-           NMMU_DBG_MODE_RDX_BUS0_STG0_SEL_LEN>(i_data);
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG0_SEL,
+           NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG0_SEL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_RDX_BUS0_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_RDX_BUS0_STG0_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG0_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_RDX_BUS0_STG0_SEL,
-           NMMU_DBG_MODE_RDX_BUS0_STG0_SEL_LEN>(i_data);
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG0_SEL,
+           NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG0_SEL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_RDX_BUS0_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_RDX_BUS0_STG0_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG0_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.extractToRight<NMMU_DBG_MODE_RDX_BUS0_STG0_SEL,
-           NMMU_DBG_MODE_RDX_BUS0_STG0_SEL_LEN>(o_data);
+    return i_data.extractToRight<NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG0_SEL,
+           NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG0_SEL_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_RDX_BUS0_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_TW_BUS1_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_RDX_BUS1_STG0_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG0_SEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_RDX_BUS1_STG0_SEL,
-           NMMU_DBG_MODE_RDX_BUS1_STG0_SEL_LEN>(i_data);
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG0_SEL,
+           NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG0_SEL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_RDX_BUS1_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_RDX_BUS1_STG0_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG0_SEL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return o_data.insertFromRight<NMMU_DBG_MODE_RDX_BUS1_STG0_SEL,
-           NMMU_DBG_MODE_RDX_BUS1_STG0_SEL_LEN>(i_data);
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG0_SEL,
+           NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG0_SEL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_RDX_BUS1_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_RDX_BUS1_STG0_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG0_SEL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
 #endif
-    return i_data.extractToRight<NMMU_DBG_MODE_RDX_BUS1_STG0_SEL,
-           NMMU_DBG_MODE_RDX_BUS1_STG0_SEL_LEN>(o_data);
+    return i_data.extractToRight<NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG0_SEL,
+           NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG0_SEL_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_RDX_BUS1_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG0_SEL(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
+#endif
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG0_SEL,
+           NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG0_SEL_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG0_SEL(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
+#endif
+    return o_data.insertFromRight<NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG0_SEL,
+           NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG0_SEL_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG0_SEL(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NMMU_DBG_MODE));
+#endif
+    return i_data.extractToRight<NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG0_SEL,
+           NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG0_SEL_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG0_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

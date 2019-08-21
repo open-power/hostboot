@@ -40,6 +40,11 @@ namespace mc
 
 
 static const uint64_t ASSIST_INTERRUPT_REG = 0x0c0f0011ull;
+
+static const uint32_t ASSIST_INTERRUPT_REG_ATTN = 0;
+static const uint32_t ASSIST_INTERRUPT_REG_RECOV = 1;
+static const uint32_t ASSIST_INTERRUPT_REG_XSTOP = 2;
+static const uint32_t ASSIST_INTERRUPT_REG_LXSTOP = 3;
 // mc/reg00008.H
 
 static const uint64_t EDRAM_STATUS = 0x0c0f0029ull;
@@ -281,6 +286,9 @@ static const uint32_t OPCG_REG0_LOOP_COUNT_LEN = 43;
 // mc/reg00008.H
 
 static const uint64_t SCAN_CAPTUREDR_LONG = 0x0c03d000ull;
+
+static const uint32_t SCAN_CAPTUREDR_LONG_SCAN_CAPTUREDR_LONG_REG = 0;
+static const uint32_t SCAN_CAPTUREDR_LONG_SCAN_CAPTUREDR_LONG_REG_LEN = 32;
 // mc/reg00008.H
 
 static const uint64_t SCAN_REGION_TYPE = 0x0c030005ull;
@@ -364,27 +372,27 @@ static const uint32_t TRA1_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63_LEN = 64;
 
 static const uint64_t XSTOP3 = 0x0c03000eull;
 
-static const uint32_t XSTOP3_XSTOP3_MASK_B = 0;
+static const uint32_t XSTOP3_MASK_B = 0;
 static const uint32_t XSTOP3_ALIGNED_XSTOP3 = 1;
 static const uint32_t XSTOP3_TRIGGER_OPCG_ON_XSTOP3 = 2;
-static const uint32_t XSTOP3_XSTOP3_WAIT_ALLWAYS = 3;
-static const uint32_t XSTOP3_XSTOP3_PERV = 4;
-static const uint32_t XSTOP3_XSTOP3_UNIT1 = 5;
-static const uint32_t XSTOP3_XSTOP3_UNIT2 = 6;
-static const uint32_t XSTOP3_XSTOP3_UNIT3 = 7;
-static const uint32_t XSTOP3_XSTOP3_UNIT4 = 8;
-static const uint32_t XSTOP3_XSTOP3_UNIT5 = 9;
-static const uint32_t XSTOP3_XSTOP3_UNIT6 = 10;
-static const uint32_t XSTOP3_XSTOP3_UNIT7 = 11;
-static const uint32_t XSTOP3_XSTOP3_UNIT8 = 12;
-static const uint32_t XSTOP3_XSTOP3_UNIT9 = 13;
-static const uint32_t XSTOP3_XSTOP3_UNIT10 = 14;
-static const uint32_t XSTOP3_XSTOP3_UNIT11 = 15;
-static const uint32_t XSTOP3_XSTOP3_UNIT12 = 16;
-static const uint32_t XSTOP3_XSTOP3_UNIT13 = 17;
-static const uint32_t XSTOP3_XSTOP3_UNIT14 = 18;
-static const uint32_t XSTOP3_XSTOP3_WAIT_CYCLES = 48;
-static const uint32_t XSTOP3_XSTOP3_WAIT_CYCLES_LEN = 12;
+static const uint32_t XSTOP3_WAIT_ALLWAYS = 3;
+static const uint32_t XSTOP3_PERV = 4;
+static const uint32_t XSTOP3_UNIT1 = 5;
+static const uint32_t XSTOP3_UNIT2 = 6;
+static const uint32_t XSTOP3_UNIT3 = 7;
+static const uint32_t XSTOP3_UNIT4 = 8;
+static const uint32_t XSTOP3_UNIT5 = 9;
+static const uint32_t XSTOP3_UNIT6 = 10;
+static const uint32_t XSTOP3_UNIT7 = 11;
+static const uint32_t XSTOP3_UNIT8 = 12;
+static const uint32_t XSTOP3_UNIT9 = 13;
+static const uint32_t XSTOP3_UNIT10 = 14;
+static const uint32_t XSTOP3_UNIT11 = 15;
+static const uint32_t XSTOP3_UNIT12 = 16;
+static const uint32_t XSTOP3_UNIT13 = 17;
+static const uint32_t XSTOP3_UNIT14 = 18;
+static const uint32_t XSTOP3_WAIT_CYCLES = 48;
+static const uint32_t XSTOP3_WAIT_CYCLES_LEN = 12;
 // mc/reg00008.H
 
 #ifndef __PPE_HCODE__

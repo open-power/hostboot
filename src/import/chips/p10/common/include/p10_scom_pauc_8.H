@@ -40,6 +40,11 @@ namespace pauc
 
 
 static const uint64_t ASSIST_INTERRUPT_REG = 0x100f0011ull;
+
+static const uint32_t ASSIST_INTERRUPT_REG_ATTN = 0;
+static const uint32_t ASSIST_INTERRUPT_REG_RECOV = 1;
+static const uint32_t ASSIST_INTERRUPT_REG_XSTOP = 2;
+static const uint32_t ASSIST_INTERRUPT_REG_LXSTOP = 3;
 // pauc/reg00008.H
 
 static const uint64_t DL_PPE_WRAP_MIB_XIMEM = 0x10012c57ull;
@@ -60,10 +65,29 @@ static const uint32_t DL_PPE_WRAP_MIB_XIMEM_DATAOP_PENDING = 63;
 
 static const uint64_t DL_PPE_WRAP_XIRAMDBG = 0x10012c53ull;
 
+static const uint32_t DL_PPE_WRAP_XIRAMDBG_XSR_HS = 0;
+static const uint32_t DL_PPE_WRAP_XIRAMDBG_XSR_HC = 1;
+static const uint32_t DL_PPE_WRAP_XIRAMDBG_XSR_HC_LEN = 3;
+static const uint32_t DL_PPE_WRAP_XIRAMDBG_XSR_HCP = 4;
+static const uint32_t DL_PPE_WRAP_XIRAMDBG_XSR_RIP = 5;
+static const uint32_t DL_PPE_WRAP_XIRAMDBG_XSR_SIP = 6;
+static const uint32_t DL_PPE_WRAP_XIRAMDBG_XSR_TRAP = 7;
+static const uint32_t DL_PPE_WRAP_XIRAMDBG_XSR_IAC = 8;
 static const uint32_t DL_PPE_WRAP_XIRAMDBG_NULL_MSR_SIBRC = 9;
 static const uint32_t DL_PPE_WRAP_XIRAMDBG_NULL_MSR_SIBRC_LEN = 3;
+static const uint32_t DL_PPE_WRAP_XIRAMDBG_XSR_RDAC = 12;
+static const uint32_t DL_PPE_WRAP_XIRAMDBG_XSR_WDAC = 13;
 static const uint32_t DL_PPE_WRAP_XIRAMDBG_NULL_MSR_WE = 14;
+static const uint32_t DL_PPE_WRAP_XIRAMDBG_XSR_TRH = 15;
+static const uint32_t DL_PPE_WRAP_XIRAMDBG_XSR_SMS = 16;
+static const uint32_t DL_PPE_WRAP_XIRAMDBG_XSR_SMS_LEN = 4;
 static const uint32_t DL_PPE_WRAP_XIRAMDBG_NULL_MSR_LP = 20;
+static const uint32_t DL_PPE_WRAP_XIRAMDBG_XSR_EP = 21;
+static const uint32_t DL_PPE_WRAP_XIRAMDBG_XSR_PTR = 24;
+static const uint32_t DL_PPE_WRAP_XIRAMDBG_XSR_ST = 25;
+static const uint32_t DL_PPE_WRAP_XIRAMDBG_XSR_MFE = 28;
+static const uint32_t DL_PPE_WRAP_XIRAMDBG_XSR_MCS = 29;
+static const uint32_t DL_PPE_WRAP_XIRAMDBG_XSR_MCS_LEN = 3;
 static const uint32_t DL_PPE_WRAP_XIRAMDBG_PPE_XIRAMRA_SPRG0 = 32;
 static const uint32_t DL_PPE_WRAP_XIRAMDBG_PPE_XIRAMRA_SPRG0_LEN = 32;
 // pauc/reg00008.H
@@ -313,6 +337,13 @@ static const uint32_t PB_CFG_TLPM_REG_SPARE_LEN = 6;
 // pauc/reg00008.H
 
 static const uint64_t PB_PMU3_CNPM_COUNTER = 0x10011824ull;
+
+static const uint32_t PB_PMU3_CNPM_COUNTER_0 = 0;
+static const uint32_t PB_PMU3_CNPM_COUNTER_0_LEN = 16;
+static const uint32_t PB_PMU3_CNPM_COUNTER_1 = 16;
+static const uint32_t PB_PMU3_CNPM_COUNTER_1_LEN = 16;
+static const uint32_t PB_PMU3_CNPM_COUNTER_2 = 32;
+static const uint32_t PB_PMU3_CNPM_COUNTER_2_LEN = 16;
 // pauc/reg00008.H
 
 static const uint64_t PB_TL_LINK_DATA_23_CFG_REG = 0x10011811ull;
@@ -335,6 +366,13 @@ static const uint32_t PB_TL_LINK_DATA_23_CFG_REG_DIBDOB23_SP_2_LEN = 2;
 // pauc/reg00008.H
 
 static const uint64_t PB_TL_LINK_DLY_0123_REG = 0x1001180eull;
+
+static const uint32_t PB_TL_LINK_DLY_0123_REG_X0_LINK_DELAY = 4;
+static const uint32_t PB_TL_LINK_DLY_0123_REG_X0_LINK_DELAY_LEN = 12;
+static const uint32_t PB_TL_LINK_DLY_0123_REG_X1_LINK_DELAY = 20;
+static const uint32_t PB_TL_LINK_DLY_0123_REG_X1_LINK_DELAY_LEN = 12;
+static const uint32_t PB_TL_LINK_DLY_0123_REG_Y0_LINK_DELAY = 36;
+static const uint32_t PB_TL_LINK_DLY_0123_REG_Y0_LINK_DELAY_LEN = 12;
 // pauc/reg00008.H
 
 static const uint64_t PHY_PPE_WRAP_SCOM_CNTL = 0x10012c20ull;
@@ -353,6 +391,9 @@ static const uint32_t PHY_PPE_WRAP_SCOM_CNTL_SCOM_PPE_SPARES_LEN = 5;
 // pauc/reg00008.H
 
 static const uint64_t SCAN_CAPTUREDR_LONG = 0x1003d000ull;
+
+static const uint32_t SCAN_CAPTUREDR_LONG_SCAN_CAPTUREDR_LONG_REG = 0;
+static const uint32_t SCAN_CAPTUREDR_LONG_SCAN_CAPTUREDR_LONG_REG_LEN = 32;
 // pauc/reg00008.H
 
 static const uint64_t SCAN_REGION_TYPE = 0x10030005ull;
@@ -436,27 +477,27 @@ static const uint32_t TXIRLM_REGS_ZCAL_FIR_RESET_PB_FIR_RESET = 63;
 
 static const uint64_t XSTOP3 = 0x1003000eull;
 
-static const uint32_t XSTOP3_XSTOP3_MASK_B = 0;
+static const uint32_t XSTOP3_MASK_B = 0;
 static const uint32_t XSTOP3_ALIGNED_XSTOP3 = 1;
 static const uint32_t XSTOP3_TRIGGER_OPCG_ON_XSTOP3 = 2;
-static const uint32_t XSTOP3_XSTOP3_WAIT_ALLWAYS = 3;
-static const uint32_t XSTOP3_XSTOP3_PERV = 4;
-static const uint32_t XSTOP3_XSTOP3_UNIT1 = 5;
-static const uint32_t XSTOP3_XSTOP3_UNIT2 = 6;
-static const uint32_t XSTOP3_XSTOP3_UNIT3 = 7;
-static const uint32_t XSTOP3_XSTOP3_UNIT4 = 8;
-static const uint32_t XSTOP3_XSTOP3_UNIT5 = 9;
-static const uint32_t XSTOP3_XSTOP3_UNIT6 = 10;
-static const uint32_t XSTOP3_XSTOP3_UNIT7 = 11;
-static const uint32_t XSTOP3_XSTOP3_UNIT8 = 12;
-static const uint32_t XSTOP3_XSTOP3_UNIT9 = 13;
-static const uint32_t XSTOP3_XSTOP3_UNIT10 = 14;
-static const uint32_t XSTOP3_XSTOP3_UNIT11 = 15;
-static const uint32_t XSTOP3_XSTOP3_UNIT12 = 16;
-static const uint32_t XSTOP3_XSTOP3_UNIT13 = 17;
-static const uint32_t XSTOP3_XSTOP3_UNIT14 = 18;
-static const uint32_t XSTOP3_XSTOP3_WAIT_CYCLES = 48;
-static const uint32_t XSTOP3_XSTOP3_WAIT_CYCLES_LEN = 12;
+static const uint32_t XSTOP3_WAIT_ALLWAYS = 3;
+static const uint32_t XSTOP3_PERV = 4;
+static const uint32_t XSTOP3_UNIT1 = 5;
+static const uint32_t XSTOP3_UNIT2 = 6;
+static const uint32_t XSTOP3_UNIT3 = 7;
+static const uint32_t XSTOP3_UNIT4 = 8;
+static const uint32_t XSTOP3_UNIT5 = 9;
+static const uint32_t XSTOP3_UNIT6 = 10;
+static const uint32_t XSTOP3_UNIT7 = 11;
+static const uint32_t XSTOP3_UNIT8 = 12;
+static const uint32_t XSTOP3_UNIT9 = 13;
+static const uint32_t XSTOP3_UNIT10 = 14;
+static const uint32_t XSTOP3_UNIT11 = 15;
+static const uint32_t XSTOP3_UNIT12 = 16;
+static const uint32_t XSTOP3_UNIT13 = 17;
+static const uint32_t XSTOP3_UNIT14 = 18;
+static const uint32_t XSTOP3_WAIT_CYCLES = 48;
+static const uint32_t XSTOP3_WAIT_CYCLES_LEN = 12;
 // pauc/reg00008.H
 
 #ifndef __PPE_HCODE__

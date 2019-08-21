@@ -199,8 +199,8 @@ static const uint64_t QME_EITR_RW = 0x200e026cull;
 static const uint64_t QME_EITR_WO_CLEAR = 0x200e026full;
 static const uint64_t QME_EITR_WO_OR = 0x200e026eull;
 
-static const uint32_t QME_EITR_QME_EITR_INTERRUPT_TYPE = 0;
-static const uint32_t QME_EITR_QME_EITR_INTERRUPT_TYPE_LEN = 64;
+static const uint32_t QME_EITR_INTERRUPT_TYPE = 0;
+static const uint32_t QME_EITR_INTERRUPT_TYPE_LEN = 64;
 // eq/reg00005.H
 
 static const uint64_t SCAN_LONG_ROTATE = 0x20039000ull;

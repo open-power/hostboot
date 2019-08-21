@@ -93,11 +93,13 @@ static const uint32_t FIR1_REG_SPARE = 45;
 
 static const uint64_t NMMU_ERR_LOG = 0x02010c57ull;
 
-static const uint32_t NMMU_ERR_LOG_EN = 2;
-static const uint32_t NMMU_ERR_LOG_SNGL_SHOT_EN = 3;
-static const uint32_t NMMU_ERR_LOG_OVERLAP_EN = 4;
-static const uint32_t NMMU_ERR_LOG_MULT_SEL = 5;
-static const uint32_t NMMU_ERR_LOG_MULT_SEL_LEN = 3;
+static const uint32_t NMMU_ERR_LOG_RESERVED_0_1 = 0;
+static const uint32_t NMMU_ERR_LOG_RESERVED_0_1_LEN = 2;
+static const uint32_t NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_EN = 2;
+static const uint32_t NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_SNGL_SHOT_EN = 3;
+static const uint32_t NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_OVERLAP_EN = 4;
+static const uint32_t NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_MULT_SEL = 5;
+static const uint32_t NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_MULT_SEL_LEN = 3;
 // nmmu/reg00010.H
 
 #ifndef __PPE_HCODE__

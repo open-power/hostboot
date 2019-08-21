@@ -195,6 +195,13 @@ static const uint32_t EPS_PSC_ATOMIC_LOCK_MASK_LATCH_REG_ATOMIC_LOCK_MASK_LEN = 
 // pauc/reg00010.H
 
 static const uint64_t PB_PMU3_TLPM_COUNTER = 0x1001181eull;
+
+static const uint32_t PB_PMU3_TLPM_COUNTER_0 = 0;
+static const uint32_t PB_PMU3_TLPM_COUNTER_0_LEN = 16;
+static const uint32_t PB_PMU3_TLPM_COUNTER_1 = 16;
+static const uint32_t PB_PMU3_TLPM_COUNTER_1_LEN = 16;
+static const uint32_t PB_PMU3_TLPM_COUNTER_2 = 32;
+static const uint32_t PB_PMU3_TLPM_COUNTER_2_LEN = 16;
 // pauc/reg00010.H
 
 static const uint64_t PHY_PPE_WRAP_MIB_XIMEM = 0x10012c17ull;
@@ -222,9 +229,21 @@ static const uint32_t PHY_PPE_WRAP_XIRAMEDR_EDR_LEN = 32;
 // pauc/reg00010.H
 
 static const uint64_t PHY_SCOM_MAC_FIR_WOF_REG = 0x10012c08ull;
+
+static const uint32_t PHY_SCOM_MAC_FIR_WOF_REG_WOF = 0;
+static const uint32_t PHY_SCOM_MAC_FIR_WOF_REG_WOF_LEN = 26;
 // pauc/reg00010.H
 
 static const uint64_t TXIRLM_REGS_TX_IMPCAL2_PB = 0x800f0c0010012c3full;
+
+static const uint32_t TXIRLM_REGS_TX_IMPCAL2_PB_DONE_RO_SIGNAL = 48;
+static const uint32_t TXIRLM_REGS_TX_IMPCAL2_PB_BUSY_RO_SIGNAL = 49;
+static const uint32_t TXIRLM_REGS_TX_IMPCAL2_PB_ERROR_RO_SIGNAL = 50;
+static const uint32_t TXIRLM_REGS_TX_IMPCAL2_PB_ANS_NOT_FOUND_ERROR_RO_SIGNAL = 51;
+static const uint32_t TXIRLM_REGS_TX_IMPCAL2_PB_ANS_RANGE_ERROR_RO_SIGNAL = 52;
+static const uint32_t TXIRLM_REGS_TX_IMPCAL2_PB_TEST_DONE_RO_SIGNAL = 53;
+static const uint32_t TXIRLM_REGS_TX_IMPCAL2_PB_TEST_STATUS_RO_SIGNAL = 54;
+static const uint32_t TXIRLM_REGS_TX_IMPCAL2_PB_CMP_OUT_RO_SIGNAL = 55;
 // pauc/reg00010.H
 
 #ifndef __PPE_HCODE__

@@ -169,254 +169,342 @@ fapi_try_exit:
 }
 
 
-static inline fapi2::buffer<uint64_t>& SET_REGS_PBCQMODE_REG_PEER2PEER_MODDE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_REGS_PBCQMODE_REG_PE_PEER2PEER_MODDE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(REGS_PBCQMODE_REG));
 #endif
-    return o_data.insertFromRight<REGS_PBCQMODE_REG_PEER2PEER_MODDE,
+    return o_data.insertFromRight<REGS_PBCQMODE_REG_PE_PEER2PEER_MODDE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PEER2PEER_MODDE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PE_PEER2PEER_MODDE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_REGS_PBCQMODE_REG_PEER2PEER_MODDE(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_REGS_PBCQMODE_REG_PE_PEER2PEER_MODDE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(REGS_PBCQMODE_REG));
 #endif
-    return o_data.insertFromRight<REGS_PBCQMODE_REG_PEER2PEER_MODDE,
+    return o_data.insertFromRight<REGS_PBCQMODE_REG_PE_PEER2PEER_MODDE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PEER2PEER_MODDE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PE_PEER2PEER_MODDE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_REGS_PBCQMODE_REG_PEER2PEER_MODDE(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_REGS_PBCQMODE_REG_PE_PEER2PEER_MODDE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(REGS_PBCQMODE_REG));
 #endif
-    return o_data.setBit<REGS_PBCQMODE_REG_PEER2PEER_MODDE>();
+    return o_data.setBit<REGS_PBCQMODE_REG_PE_PEER2PEER_MODDE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PEER2PEER_MODDE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PE_PEER2PEER_MODDE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_REGS_PBCQMODE_REG_PEER2PEER_MODDE(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_REGS_PBCQMODE_REG_PE_PEER2PEER_MODDE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(REGS_PBCQMODE_REG));
 #endif
-    return o_data.clearBit<REGS_PBCQMODE_REG_PEER2PEER_MODDE>();
+    return o_data.clearBit<REGS_PBCQMODE_REG_PE_PEER2PEER_MODDE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PEER2PEER_MODDE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PE_PEER2PEER_MODDE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_REGS_PBCQMODE_REG_PEER2PEER_MODDE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_REGS_PBCQMODE_REG_PE_PEER2PEER_MODDE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(REGS_PBCQMODE_REG));
 #endif
-    return i_data.extractToRight<REGS_PBCQMODE_REG_PEER2PEER_MODDE,
+    return i_data.extractToRight<REGS_PBCQMODE_REG_PE_PEER2PEER_MODDE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PEER2PEER_MODDE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PE_PEER2PEER_MODDE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_REGS_PBCQMODE_REG_PEER2PEER_MODDE(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_REGS_PBCQMODE_REG_PE_PEER2PEER_MODDE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(REGS_PBCQMODE_REG));
 #endif
-    return i_data.getBit<REGS_PBCQMODE_REG_PEER2PEER_MODDE>();
+    return i_data.getBit<REGS_PBCQMODE_REG_PE_PEER2PEER_MODDE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PEER2PEER_MODDE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PE_PEER2PEER_MODDE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_REGS_PBCQMODE_REG_PB_CQ_REGS_CS_ENABLE_SMF(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_REGS_PBCQMODE_REG_PBCQMODE_UNUSED(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(REGS_PBCQMODE_REG));
 #endif
-    return o_data.insertFromRight<REGS_PBCQMODE_REG_PB_CQ_REGS_CS_ENABLE_SMF,
+    return o_data.insertFromRight<REGS_PBCQMODE_REG_PBCQMODE_UNUSED,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PB_CQ_REGS_CS_ENABLE_SMF chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PBCQMODE_UNUSED chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_REGS_PBCQMODE_REG_PB_CQ_REGS_CS_ENABLE_SMF(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_REGS_PBCQMODE_REG_PBCQMODE_UNUSED(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(REGS_PBCQMODE_REG));
 #endif
-    return o_data.insertFromRight<REGS_PBCQMODE_REG_PB_CQ_REGS_CS_ENABLE_SMF,
+    return o_data.insertFromRight<REGS_PBCQMODE_REG_PBCQMODE_UNUSED,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PB_CQ_REGS_CS_ENABLE_SMF chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PBCQMODE_UNUSED chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_REGS_PBCQMODE_REG_PB_CQ_REGS_CS_ENABLE_SMF(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_REGS_PBCQMODE_REG_PBCQMODE_UNUSED(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(REGS_PBCQMODE_REG));
 #endif
-    return o_data.setBit<REGS_PBCQMODE_REG_PB_CQ_REGS_CS_ENABLE_SMF>();
+    return o_data.setBit<REGS_PBCQMODE_REG_PBCQMODE_UNUSED>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PB_CQ_REGS_CS_ENABLE_SMF chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PBCQMODE_UNUSED chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_REGS_PBCQMODE_REG_PB_CQ_REGS_CS_ENABLE_SMF(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_REGS_PBCQMODE_REG_PBCQMODE_UNUSED(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(REGS_PBCQMODE_REG));
 #endif
-    return o_data.clearBit<REGS_PBCQMODE_REG_PB_CQ_REGS_CS_ENABLE_SMF>();
+    return o_data.clearBit<REGS_PBCQMODE_REG_PBCQMODE_UNUSED>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PB_CQ_REGS_CS_ENABLE_SMF chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PBCQMODE_UNUSED chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_REGS_PBCQMODE_REG_PB_CQ_REGS_CS_ENABLE_SMF(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_REGS_PBCQMODE_REG_PBCQMODE_UNUSED(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(REGS_PBCQMODE_REG));
 #endif
-    return i_data.extractToRight<REGS_PBCQMODE_REG_PB_CQ_REGS_CS_ENABLE_SMF,
+    return i_data.extractToRight<REGS_PBCQMODE_REG_PBCQMODE_UNUSED,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PB_CQ_REGS_CS_ENABLE_SMF chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PBCQMODE_UNUSED chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_REGS_PBCQMODE_REG_PB_CQ_REGS_CS_ENABLE_SMF(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_REGS_PBCQMODE_REG_PBCQMODE_UNUSED(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(REGS_PBCQMODE_REG));
 #endif
-    return i_data.getBit<REGS_PBCQMODE_REG_PB_CQ_REGS_CS_ENABLE_SMF>();
+    return i_data.getBit<REGS_PBCQMODE_REG_PBCQMODE_UNUSED>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PB_CQ_REGS_CS_ENABLE_SMF chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PBCQMODE_UNUSED chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_REGS_PBCQMODE_REG_ATOMIC_LITTLE_ENDIAN(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_REGS_PBCQMODE_REG_PE_PB_CQ_REGS_CS_ENABLE_SMF(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(REGS_PBCQMODE_REG));
+#endif
+    return o_data.insertFromRight<REGS_PBCQMODE_REG_PE_PB_CQ_REGS_CS_ENABLE_SMF,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PE_PB_CQ_REGS_CS_ENABLE_SMF chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_REGS_PBCQMODE_REG_PE_PB_CQ_REGS_CS_ENABLE_SMF(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(REGS_PBCQMODE_REG));
 #endif
-    return o_data.insertFromRight<REGS_PBCQMODE_REG_ATOMIC_LITTLE_ENDIAN,
+    return o_data.insertFromRight<REGS_PBCQMODE_REG_PE_PB_CQ_REGS_CS_ENABLE_SMF,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_ATOMIC_LITTLE_ENDIAN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PE_PB_CQ_REGS_CS_ENABLE_SMF chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_REGS_PBCQMODE_REG_ATOMIC_LITTLE_ENDIAN(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_REGS_PBCQMODE_REG_PE_PB_CQ_REGS_CS_ENABLE_SMF(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(REGS_PBCQMODE_REG));
+#endif
+    return o_data.setBit<REGS_PBCQMODE_REG_PE_PB_CQ_REGS_CS_ENABLE_SMF>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PE_PB_CQ_REGS_CS_ENABLE_SMF chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_REGS_PBCQMODE_REG_PE_PB_CQ_REGS_CS_ENABLE_SMF(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(REGS_PBCQMODE_REG));
+#endif
+    return o_data.clearBit<REGS_PBCQMODE_REG_PE_PB_CQ_REGS_CS_ENABLE_SMF>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PE_PB_CQ_REGS_CS_ENABLE_SMF chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_REGS_PBCQMODE_REG_PE_PB_CQ_REGS_CS_ENABLE_SMF(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(REGS_PBCQMODE_REG));
+#endif
+    return i_data.extractToRight<REGS_PBCQMODE_REG_PE_PB_CQ_REGS_CS_ENABLE_SMF,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PE_PB_CQ_REGS_CS_ENABLE_SMF chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_REGS_PBCQMODE_REG_PE_PB_CQ_REGS_CS_ENABLE_SMF(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(REGS_PBCQMODE_REG));
+#endif
+    return i_data.getBit<REGS_PBCQMODE_REG_PE_PB_CQ_REGS_CS_ENABLE_SMF>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PE_PB_CQ_REGS_CS_ENABLE_SMF chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_REGS_PBCQMODE_REG_PE_ATOMIC_LITTLE_ENDIAN(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(REGS_PBCQMODE_REG));
 #endif
-    return o_data.insertFromRight<REGS_PBCQMODE_REG_ATOMIC_LITTLE_ENDIAN,
+    return o_data.insertFromRight<REGS_PBCQMODE_REG_PE_ATOMIC_LITTLE_ENDIAN,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_ATOMIC_LITTLE_ENDIAN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PE_ATOMIC_LITTLE_ENDIAN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_REGS_PBCQMODE_REG_ATOMIC_LITTLE_ENDIAN(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_REGS_PBCQMODE_REG_PE_ATOMIC_LITTLE_ENDIAN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(REGS_PBCQMODE_REG));
 #endif
-    return o_data.setBit<REGS_PBCQMODE_REG_ATOMIC_LITTLE_ENDIAN>();
+    return o_data.insertFromRight<REGS_PBCQMODE_REG_PE_ATOMIC_LITTLE_ENDIAN,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_ATOMIC_LITTLE_ENDIAN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PE_ATOMIC_LITTLE_ENDIAN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_REGS_PBCQMODE_REG_ATOMIC_LITTLE_ENDIAN(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_REGS_PBCQMODE_REG_PE_ATOMIC_LITTLE_ENDIAN(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(REGS_PBCQMODE_REG));
 #endif
-    return o_data.clearBit<REGS_PBCQMODE_REG_ATOMIC_LITTLE_ENDIAN>();
+    return o_data.setBit<REGS_PBCQMODE_REG_PE_ATOMIC_LITTLE_ENDIAN>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_ATOMIC_LITTLE_ENDIAN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PE_ATOMIC_LITTLE_ENDIAN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_REGS_PBCQMODE_REG_ATOMIC_LITTLE_ENDIAN(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& CLEAR_REGS_PBCQMODE_REG_PE_ATOMIC_LITTLE_ENDIAN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(REGS_PBCQMODE_REG));
+#endif
+    return o_data.clearBit<REGS_PBCQMODE_REG_PE_ATOMIC_LITTLE_ENDIAN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PE_ATOMIC_LITTLE_ENDIAN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_REGS_PBCQMODE_REG_PE_ATOMIC_LITTLE_ENDIAN(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(REGS_PBCQMODE_REG));
 #endif
-    return i_data.extractToRight<REGS_PBCQMODE_REG_ATOMIC_LITTLE_ENDIAN,
+    return i_data.extractToRight<REGS_PBCQMODE_REG_PE_ATOMIC_LITTLE_ENDIAN,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_ATOMIC_LITTLE_ENDIAN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PE_ATOMIC_LITTLE_ENDIAN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_REGS_PBCQMODE_REG_ATOMIC_LITTLE_ENDIAN(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_REGS_PBCQMODE_REG_PE_ATOMIC_LITTLE_ENDIAN(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(REGS_PBCQMODE_REG));
 #endif
-    return i_data.getBit<REGS_PBCQMODE_REG_ATOMIC_LITTLE_ENDIAN>();
+    return i_data.getBit<REGS_PBCQMODE_REG_PE_ATOMIC_LITTLE_ENDIAN>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_ATOMIC_LITTLE_ENDIAN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access REGS_PBCQMODE_REG_PE_ATOMIC_LITTLE_ENDIAN chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

@@ -179,6 +179,21 @@ static const uint32_t PB_TL_LINK_RT_DELAY_CTL_REG_23_RT_DELAY_CTL_STAT_LEN = 2;
 // pauc/reg00004.H
 
 static const uint64_t PB_TL_LINK_SYN_23_REG = 0x10011813ull;
+
+static const uint32_t PB_TL_LINK_SYN_23_REG_2_SCOM_SYN0 = 0;
+static const uint32_t PB_TL_LINK_SYN_23_REG_2_SCOM_SYN0_LEN = 8;
+static const uint32_t PB_TL_LINK_SYN_23_REG_2_SCOM_SYN1 = 8;
+static const uint32_t PB_TL_LINK_SYN_23_REG_2_SCOM_SYN1_LEN = 8;
+static const uint32_t PB_TL_LINK_SYN_23_REG_2_SCOM_SYN2 = 16;
+static const uint32_t PB_TL_LINK_SYN_23_REG_2_SCOM_SYN2_LEN = 8;
+static const uint32_t PB_TL_LINK_SYN_23_REG_2_SCOM_SYN3 = 24;
+static const uint32_t PB_TL_LINK_SYN_23_REG_2_SCOM_SYN3_LEN = 8;
+static const uint32_t PB_TL_LINK_SYN_23_REG_3_SCOM_SYN0 = 32;
+static const uint32_t PB_TL_LINK_SYN_23_REG_3_SCOM_SYN0_LEN = 8;
+static const uint32_t PB_TL_LINK_SYN_23_REG_3_SCOM_SYN1 = 40;
+static const uint32_t PB_TL_LINK_SYN_23_REG_3_SCOM_SYN1_LEN = 8;
+static const uint32_t PB_TL_LINK_SYN_23_REG_3_SCOM_SYN2 = 48;
+static const uint32_t PB_TL_LINK_SYN_23_REG_3_SCOM_SYN2_LEN = 8;
 // pauc/reg00004.H
 
 static const uint64_t PCB_OPCG_GO = 0x10030020ull;
@@ -248,6 +263,10 @@ static const uint32_t TRA1_TR0_CONFIG_2_B_LEN = 24;
 // pauc/reg00004.H
 
 static const uint64_t TXIRLM_REGS_TX_IMPCAL1_PB = 0x800f040010012c3full;
+
+static const uint32_t TXIRLM_REGS_TX_IMPCAL1_PB_REQ_WO_PULSE_SLOW_SIGNAL = 48;
+static const uint32_t TXIRLM_REGS_TX_IMPCAL1_PB_FORCE_SAMPLE_WO_PULSE_SLOW_SIGNAL = 49;
+static const uint32_t TXIRLM_REGS_TX_IMPCAL1_PB_TEST_ENABLE_WO_PULSE_SLOW_SIGNAL = 50;
 // pauc/reg00004.H
 
 static const uint64_t TXIRLM_REGS_TX_IMPCAL_NVAL_PB = 0x800f1c0010012c3full;
@@ -263,31 +282,34 @@ static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO3_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XN_
 // pauc/reg00004.H
 
 static const uint64_t TXIRLM_REGS_ZCAL_FIR_PB = 0x800f880010012c3full;
+
+static const uint32_t TXIRLM_REGS_ZCAL_FIR_PB_ZCAL_FIR_ERRS_RO_SIGNAL = 48;
+static const uint32_t TXIRLM_REGS_ZCAL_FIR_PB_ZCAL_FIR_ERRS_RO_SIGNAL_LEN = 2;
 // pauc/reg00004.H
 
 static const uint64_t XSTOP1 = 0x1003000cull;
 
-static const uint32_t XSTOP1_XSTOP1_MASK_B = 0;
+static const uint32_t XSTOP1_MASK_B = 0;
 static const uint32_t XSTOP1_ALIGNED_XSTOP1 = 1;
 static const uint32_t XSTOP1_TRIGGER_OPCG_ON_XSTOP1 = 2;
-static const uint32_t XSTOP1_XSTOP1_WAIT_ALLWAYS = 3;
-static const uint32_t XSTOP1_XSTOP1_PERV = 4;
-static const uint32_t XSTOP1_XSTOP1_UNIT1 = 5;
-static const uint32_t XSTOP1_XSTOP1_UNIT2 = 6;
-static const uint32_t XSTOP1_XSTOP1_UNIT3 = 7;
-static const uint32_t XSTOP1_XSTOP1_UNIT4 = 8;
-static const uint32_t XSTOP1_XSTOP1_UNIT5 = 9;
-static const uint32_t XSTOP1_XSTOP1_UNIT6 = 10;
-static const uint32_t XSTOP1_XSTOP1_UNIT7 = 11;
-static const uint32_t XSTOP1_XSTOP1_UNIT8 = 12;
-static const uint32_t XSTOP1_XSTOP1_UNIT9 = 13;
-static const uint32_t XSTOP1_XSTOP1_UNIT10 = 14;
-static const uint32_t XSTOP1_XSTOP1_UNIT11 = 15;
-static const uint32_t XSTOP1_XSTOP1_UNIT12 = 16;
-static const uint32_t XSTOP1_XSTOP1_UNIT13 = 17;
-static const uint32_t XSTOP1_XSTOP1_UNIT14 = 18;
-static const uint32_t XSTOP1_XSTOP1_WAIT_CYCLES = 48;
-static const uint32_t XSTOP1_XSTOP1_WAIT_CYCLES_LEN = 12;
+static const uint32_t XSTOP1_WAIT_ALLWAYS = 3;
+static const uint32_t XSTOP1_PERV = 4;
+static const uint32_t XSTOP1_UNIT1 = 5;
+static const uint32_t XSTOP1_UNIT2 = 6;
+static const uint32_t XSTOP1_UNIT3 = 7;
+static const uint32_t XSTOP1_UNIT4 = 8;
+static const uint32_t XSTOP1_UNIT5 = 9;
+static const uint32_t XSTOP1_UNIT6 = 10;
+static const uint32_t XSTOP1_UNIT7 = 11;
+static const uint32_t XSTOP1_UNIT8 = 12;
+static const uint32_t XSTOP1_UNIT9 = 13;
+static const uint32_t XSTOP1_UNIT10 = 14;
+static const uint32_t XSTOP1_UNIT11 = 15;
+static const uint32_t XSTOP1_UNIT12 = 16;
+static const uint32_t XSTOP1_UNIT13 = 17;
+static const uint32_t XSTOP1_UNIT14 = 18;
+static const uint32_t XSTOP1_WAIT_CYCLES = 48;
+static const uint32_t XSTOP1_WAIT_CYCLES_LEN = 12;
 // pauc/reg00004.H
 
 #ifndef __PPE_HCODE__
