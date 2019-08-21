@@ -48,22 +48,22 @@ my $system_config   = "";
 my $output_filename = "";
 
 # Map the OMI instance to its corresponding OMIC parent
-my %omi_map         = (4  => "mc-0/omic-0",
-                       5  => "mc-0/omic-0",
-                       6  => "mc-0/omic-0",
-                       7  => "mc-0/omic-1",
-                       2  => "mc-0/omic-1",
-                       3  => "mc-0/omic-1",
-                       0  => "mc-0/omic-2",
-                       1  => "mc-0/omic-2",
-                       12 => "mc-1/omic-0",
-                       13 => "mc-1/omic-0",
-                       14 => "mc-1/omic-0",
-                       15 => "mc-1/omic-1",
-                       10 => "mc-1/omic-1",
-                       11 => "mc-1/omic-1",
-                       8  => "mc-1/omic-2",
-                       9  => "mc-1/omic-2");
+my %omi_map         = (4  => "omic-0",
+                       5  => "omic-0",
+                       6  => "omic-0",
+                       7  => "omic-1",
+                       2  => "omic-1",
+                       3  => "omic-1",
+                       0  => "omic-2",
+                       1  => "omic-2",
+                       12 => "omic-0",
+                       13 => "omic-0",
+                       14 => "omic-0",
+                       15 => "omic-1",
+                       10 => "omic-1",
+                       11 => "omic-1",
+                       8  => "omic-2",
+                       9  => "omic-2");
 
 # TODO RTC:170860 - Remove this after dimm connector defines VDDR_ID
 my $num_voltage_rails_per_proc = 1;
@@ -1662,9 +1662,9 @@ sub processMcbist
 ##
 sub processMc
 {
-    # NOTE: OMI_INBAND_BAR_BASE_ADDR_OFFSET will be set for the MC
-    # targets via a specific child OMI Target. View the
-    # processOmi function for further details.
+    # NOTE: OMI_INBAND_BAR_BASE_ADDR_OFFSET will be set for the MC                         
+    # targets via a specific child OMI Target. View the                                    
+    # processOmi function for further details.                                             
     my $targetObj    = shift;
     my $target       = shift;
 
@@ -1741,8 +1741,8 @@ sub processMcc
 ##
 sub processOmi
 {
-    my $targetObj   = shift;
-    my $target      = shift;
+    my $mrwObj   = shift;
+    my $omitarg      = shift;
 
     use integer;
     # There are a total of eight OMI units on an MC unit. So, to
@@ -1750,22 +1750,23 @@ sub processOmi
     # be divided by the number of units per MC to arrive at the correct
     # offset to add to the pervasive OMI parent offset.
     my $numberOfOmiPerMc = 8;
-    my $chip_unit = $targetObj->getAttribute($target, "CHIP_UNIT");
-    my $fapi_pos = $targetObj->getAttribute($target, "FAPI_POS");
+    my $chip_unit = $mrwObj->getAttribute($omitarg, "CHIP_UNIT");
+    my $fapi_pos = $mrwObj->getAttribute($omitarg, "FAPI_POS");
     my $value = sprintf("0x%x",
                         Targets::PERVASIVE_PARENT_MI_OFFSET
                         + ($chip_unit / $numberOfOmiPerMc));
 
-    $targetObj->setAttribute($target, "CHIPLET_ID", $value);
+    $mrwObj->setAttribute($omitarg, "CHIPLET_ID", $value);
 
-    my $numberOfOmiPerProc = 16;
-    my $proc_num = $fapi_pos / $numberOfOmiPerProc;
-    # Mod by numberOfOmiPerProc to get the relative position to the proc
-    my $num = $fapi_pos % $numberOfOmiPerProc;
-    $value = "physical:sys-0/node-0/proc-$proc_num/" . $omi_map{$num};
-    $targetObj->setAttribute($target, "OMIC_PARENT", $value);
+    # Start with our affinity path "sys-a/node-b/proc-c/mc-d/mi-e/mcc-f/omi-g"
+    #  then snip off everything before the mi
+    my $phys_path = $mrwObj->getAttribute($omitarg, "PHYS_PATH");
+    my $up_to_mi = index($phys_path,"mi-");
+    my $omic_parent = substr($phys_path,0,$up_to_mi);
+    $omic_parent = $omic_parent.$omi_map{$chip_unit};
+    $mrwObj->setAttribute($omitarg, "OMIC_PARENT", $omic_parent);
 
-    my $omi = Math::BigInt->new($targetObj->getAttribute($target,"CHIP_UNIT"));
+    my $omi = Math::BigInt->new($mrwObj->getAttribute($omitarg,"FAPI_POS"));
     # Base omi bar offset
     # We use this base address in simics_AXONE.system.xml and want our
     # addresses to match the ones in that xml
@@ -1784,16 +1785,16 @@ sub processOmi
     }
 
     $value = sprintf("0x%016s", substr(($value)->as_hex(),2));
-    $targetObj->setAttribute($target, "OMI_INBAND_BAR_BASE_ADDR_OFFSET",
+    $mrwObj->setAttribute($omitarg, "OMI_INBAND_BAR_BASE_ADDR_OFFSET",
         $value);
 
     # Set the parent MC BAR value to value of first OMI unit
     if ($omi % 8 eq 0)
     {
-        my $parent_mcc = $targetObj->getTargetParent($target);
-        my $parent_mi = $targetObj->getTargetParent($parent_mcc);
-        my $parent_mc = $targetObj->getTargetParent($parent_mi);
-        $targetObj->setAttribute($parent_mc, "OMI_INBAND_BAR_BASE_ADDR_OFFSET",
+        my $parent_mcc = $mrwObj->getTargetParent($omitarg);
+        my $parent_mi = $mrwObj->getTargetParent($parent_mcc);
+        my $parent_mc = $mrwObj->getTargetParent($parent_mi);
+        $mrwObj->setAttribute($parent_mc, "OMI_INBAND_BAR_BASE_ADDR_OFFSET",
             $value);
     }
 }
