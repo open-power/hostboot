@@ -89,6 +89,7 @@ my %maxInstance = (
     "NX"            => 1,
     "MEMBUF"        => 8,
     "SMPGROUP"      => 8,
+    "OMIC"          => 6,
 );
 sub new
 {
@@ -1625,6 +1626,11 @@ sub setCommonAttrForChiplet
         # messes up the HUID -NID mapping, hence adding the below line
         $self->setAttribute($target, "INSTANCE_PATH", $target);
         $unit_pos = $pos%2;
+    }
+    elsif ($tgt_type eq "OMIC")
+    {
+        # There are 3 OMICs per MC parent
+        $unit_pos = $pos % 3;
     }
 
     my $parent_affinity = $self->getAttribute(
