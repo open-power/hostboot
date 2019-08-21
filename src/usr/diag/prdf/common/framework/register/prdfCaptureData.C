@@ -31,7 +31,7 @@
 //  Includes
 //----------------------------------------------------------------------
 
-#include <iipbits.h>
+#include <prdfBitString.H>
 #include <prdfHomRegisterAccess.H>  // dg06a
 #include <prdfScomRegister.H>
 #include <iipchip.h>

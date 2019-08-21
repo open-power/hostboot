@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,7 +29,7 @@
 /** @file prdfRegisterCache.H */
 
 #include <map>
-#include <iipbits.h>
+#include <prdfBitString.H>
 #include <prdfGlobal.H>
 #include <prdfScanFacility.H>
 #include <prdfScomRegisterAccess.H>

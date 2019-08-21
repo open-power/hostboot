@@ -78,9 +78,7 @@
 
 #include <list>
 
-#ifndef IIPCONST_H
 #include <iipconst.h>
-#endif
 #include <prdfPlatServices.H>
 #include <functional>  // @jl04 a Needed for the unary function in new predicate.
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 1996,2018                        */
+/* Contributors Listed Below - COPYRIGHT 1996,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -87,9 +87,7 @@
 #include <vector>
 #include <map>
 
-#ifndef IIPCONST_H
 #include <iipconst.h>   //TARGETING::TargetHandle_t, DOMAIN_ID_TYPE
-#endif
 
 #include <iipsdbug.h>    // Include file for ATTENTION_TYPE
 

@@ -30,11 +30,10 @@
 //----------------------------------------------------------------------
 //  Includes
 //----------------------------------------------------------------------
-#define prdfHomRegisterAccess_C
 
 #include <prdfHomRegisterAccess.H>
 #include <prdf_service_codes.H>
-#include <iipbits.h>
+#include <prdfBitString.H>
 #include <prdfMain.H>
 #include <prdfPlatServices.H>
 #include <prdfGlobal.H>
@@ -45,9 +44,6 @@
 #include <pm_common_ext.H>
 #include <p9_stop_api.H>
 #endif
-
-#undef prdfHomRegisterAccess_C
-
 
 using namespace TARGETING;
 
