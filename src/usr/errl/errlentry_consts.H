@@ -166,6 +166,9 @@ const epubPartTypeToSub_t PART_TO_SUBSYS_TABLE[] =
     { HWAS::PROC_REF_CLOCK              , EPUB_CEC_HDW_CLK_CTL  },
     { HWAS::PCI_REF_CLOCK               , EPUB_CEC_HDW_CLK_CTL  },
     { HWAS::SMP_CABLE                   , EPUB_CEC_HDW_SUBSYS   },
+    { HWAS::BPM_CABLE_PART_TYPE         , EPUB_MEMORY_SUBSYS   },
+    { HWAS::NV_CONTROLLER_PART_TYPE     , EPUB_MEMORY_SUBSYS   },
+    { HWAS::BPM_PART_TYPE               , EPUB_MEMORY_SUBSYS   },
 };
 
 struct epubSensorTypeToSub_t

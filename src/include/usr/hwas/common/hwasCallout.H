@@ -180,6 +180,7 @@ enum callOutPriority
 
 enum busTypeEnum
 {
+    NO_BUS_TYPE     = 0,
     FSI_BUS_TYPE    = 1,
     DMI_BUS_TYPE    = 2,
     A_BUS_TYPE      = 3,
@@ -188,6 +189,8 @@ enum busTypeEnum
     PSI_BUS_TYPE    = 6,
     O_BUS_TYPE      = 7,
     OMI_BUS_TYPE    = 8,
+
+    LAST_BUS_TYPE, //for looping in testcases
 };
 
 // Used by Hostboot code where real clock targets do not exist
@@ -227,6 +230,8 @@ enum partTypeEnum
     BPM_CABLE_PART_TYPE             = 13, //Backup Power Module Cable for NVDIMM
     NV_CONTROLLER_PART_TYPE         = 14, //Controller for NVDIMM
     BPM_PART_TYPE                   = 15, //Backup Power Module for NVDIMM
+
+    LAST_PART_TYPE, //for looping in testcases
 };
 
 enum sensorTypeEnum
@@ -235,6 +240,8 @@ enum sensorTypeEnum
     GPU_FUNC_SENSOR                 = 1,
     GPU_TEMPERATURE_SENSOR          = 2,
     GPU_MEMORY_TEMP_SENSOR          = 3,
+
+    LAST_SENSOR_TYPE, //for looping in testcases
 };
 
 //-- Flags

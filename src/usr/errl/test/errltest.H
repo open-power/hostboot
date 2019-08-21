@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1214,6 +1214,57 @@ public:
         l_err = NULL;
     }
 
+    /**
+     * @brief Ensure all callouts have a SUBSYS mapping
+     *
+     */
+    void testErrl_ensureSubsystemMapping(void)
+    {
+        // dummy log to call non-static methods with
+        errlHndl_t l_err = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                ERRORLOG::ERRL_TEST_MOD_ID,
+                ERRORLOG::ERRL_TEST_REASON_CODE,
+                0x494E464F, //INFO
+                0);
+
+        // Walk through every BUS_TYPE
+        for( busTypeEnum bus = (busTypeEnum)(NO_BUS_TYPE+1);
+             bus < LAST_BUS_TYPE;
+             bus = (busTypeEnum)(bus+1) )
+        {
+            if( l_err->getSubSystem(bus) == EPUB_MISC_UNKNOWN )
+            {
+                TS_FAIL( "No subsystem returned for BUS_TYPE %d", bus );
+            }
+        }
+
+        // Walk through every PART_TYPE
+        for( partTypeEnum part = (partTypeEnum)(NO_PART_TYPE+1);
+             part < LAST_PART_TYPE;
+             part = (partTypeEnum)(part+1) )
+        {
+            if( l_err->getSubSystem(part) == EPUB_MISC_UNKNOWN )
+            {
+                TS_FAIL( "No subsystem returned for PART_TYPE %d", part );
+            }
+        }
+
+        // Walk through every SENSOR_TYPE
+        for( sensorTypeEnum sensor = (sensorTypeEnum)(UNKNOWN_SENSOR+1);
+             sensor < LAST_SENSOR_TYPE;
+             sensor = (sensorTypeEnum)(sensor+1) )
+        {
+            if( l_err->getSubSystem(sensor) == EPUB_MISC_UNKNOWN )
+            {
+                TS_FAIL( "No subsystem returned for SENSOR_TYPE %d", sensor );
+            }
+        }
+
+        // Note - Can't loop over epubProcedureID because the values are
+        //  sparsely populated
+
+    }
 
 
 };
