@@ -172,6 +172,22 @@ enum ecid_consts
 };
 
 ///
+/// @brief constants for getidec procedure
+///
+enum idec_consts
+{
+    EXPLR_CHIP_INFO_REG = 0x2134,
+    MAJOR_EC_BIT_START = 32,
+    MAJOR_EC_BIT_LENGTH = 4,
+    LOCATION_BIT_START = 44,
+    LOCATION_BIT_LENGTH = 4,
+    CHIPID_BIT_START = 56,
+    CHIPID_BIT_LENGTH = 8,
+};
+
+
+
+///
 /// @brief generic explorer constants
 ///
 enum generic_consts
