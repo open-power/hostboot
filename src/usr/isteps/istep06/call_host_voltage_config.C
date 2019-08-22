@@ -28,10 +28,9 @@
 #include <errl/errlmanager.H>
 #include <isteps/hwpisteperror.H>
 #include <initservice/isteps_trace.H>
-// FIXME RTC: 210975
 #include <devicefw/userif.H>
-//#include <fapi2.H>
-//#include <fapi2/plat_hwp_invoker.H>
+#include <fapi2.H>
+#include <fapi2/plat_hwp_invoker.H>
 #include <arch/pirformat.H>
 #include <sys/task.h>
 #include <sys/mmio.h>
@@ -44,11 +43,10 @@
 #include    <targeting/common/utilFilter.H>
 #include    <targeting/common/target.H>
 
-// FIXME RTC: 210975
-//#include    <p9_pm_get_poundv_bucket_attr.H>
-//#include    <p9_pm_get_poundv_bucket.H>
-//#include    <p9_setup_evid.H>
-//#include    <p9_frequency_buckets.H>
+#include    <p10_pm_get_poundv_bucket_attr.H>
+#include    <p10_pm_get_poundv_bucket.H>
+#include    <p10_frequency_buckets.H>
+#include    <p10_setup_evid.H>
 
 #include    <util/utilmbox_scratch.H>
 #include    <vpd/mvpdenums.H>
@@ -145,21 +143,21 @@ errlHndl_t get_first_valid_pdV_pbFreq(uint32_t& o_firstPBFreq)
                                                theKeyword ) );
         if( l_errl ) { break; }
 
-/* FIXME RTC: 210975
-        //Version 3:
+        //Version 1:
         //#V record is laid out as follows:
         //Name:     0x2 byte
         //Length:   0x2 byte
         //Version:  0x1 byte **buffer starts here
-        //PNP:      0x3 byte
         //bucket a: 0x3D byte
         //bucket b: 0x3D byte
         //bucket c: 0x3D byte
         //bucket d: 0x3D byte
         //bucket e: 0x3D byte
         //bucket f: 0x3D byte
-        if( *theData == POUNDV_VERSION_3 )
+        if(*theData == POUNDV_VERSION_1)
         {
+/* TODO RTC: 213024 the voltageBucketData_t struct in  POUNDV_VERSION_1 does not
+        have pbFreq member
             //cast the voltage data into an array of buckets
             fapi2::voltageBucketData_t* l_buckets = reinterpret_cast
                                               <fapi2::voltageBucketData_t*>
@@ -177,6 +175,7 @@ errlHndl_t get_first_valid_pdV_pbFreq(uint32_t& o_firstPBFreq)
                     break;
                 }
             }
+*/
         }
         else
         {
@@ -184,7 +183,7 @@ errlHndl_t get_first_valid_pdV_pbFreq(uint32_t& o_firstPBFreq)
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "Invalid #V version, default powerbus freq to boot freq");
         }
-*/
+
     } while(0);
 
     free(theData);
@@ -291,7 +290,7 @@ void* call_host_voltage_config( void *io_pArgs )
     Target * l_sys = nullptr;
     TargetHandleList l_procList;
     TargetHandleList l_eqList;
-    // FIXME RTC: 210975
+    // FIXME RTC: 213024
     //fapi2::voltageBucketData_t l_voltageData;
     //fapi2::ReturnCode l_rc;
 
@@ -304,7 +303,7 @@ void* call_host_voltage_config( void *io_pArgs )
     uint32_t l_powerModeNom = 0;    //ATTR_SOCKET_POWER_NOMINAL
     uint32_t l_powerModeTurbo = 0;  //ATTR_SOCKET_POWER_TURBO
 
-    // FIXME RTC:210975
+    // FIXME RTC:213024
     //bool l_firstPass = true;
 
     PredicateCTM l_eqFilter(CLASS_UNIT, TYPE_EQ);
@@ -338,47 +337,6 @@ void* call_host_voltage_config( void *io_pArgs )
         // for each proc target
         for( const auto & l_proc : l_procList )
         {
-/* FIXME RTC: 210975
-            //Nimbus DD1 only supports XBUS with freq 1800MHz
-            //DD2 supports 2000MHz freq
-            //ATTR_CHIP_EC_FEATURE_HW393297 is used to pick the lower
-            //freq for dd1 chips
-            fapi2::ATTR_CHIP_EC_FEATURE_HW393297_Type l_dd1_xbus_pll;
-            FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW393297, l_proc,
-                        l_dd1_xbus_pll);
-            if (l_dd1_xbus_pll)
-            {
-                l_sys->setAttr<ATTR_FREQ_X_MHZ>( 1800 );
-            }
-            else
-            {
-                l_sys->setAttr<ATTR_FREQ_X_MHZ>( 2000 );
-            }
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "call_host_voltage_config.C::"
-                    "ATTR_FREQ_X_MHZ = %d",
-                    l_sys->getAttr<ATTR_FREQ_X_MHZ>());
-*/
-            //Nimbus DD21 only supports OBUS PLL of 1563(versus product of 1611)
-            //Force it because of a chip bug instead of letting MRW control
-            PVR_t l_pvr( mmio_pvr_read() & 0xFFFFFFFF );
-            if( l_pvr.isNimbusDD21() )
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "call_host_voltage_config.C::"
-                          "Nimbus DD2.1 -- Forcing ATTR_FREQ_X_MHZ = %d",
-                          l_sys->getAttr<ATTR_FREQ_X_MHZ>());
-/* FIXME RTC: 210975
-                TARGETING::ATTR_FREQ_O_MHZ_type l_freq_array =
-                {OBUS_PLL_FREQ_LIST_P9N_21[0],OBUS_PLL_FREQ_LIST_P9N_21[0],
-                OBUS_PLL_FREQ_LIST_P9N_21[0], OBUS_PLL_FREQ_LIST_P9N_21[0]};
-                assert(l_proc->
-                       trySetAttr<TARGETING::ATTR_FREQ_O_MHZ>(l_freq_array),
-                       "call_host_voltage_config.C failed to set ATTR_FREQ_O_MHZ");
-*/
-            }
-
-
             // get the child EQ targets
             targetService().getAssociated(
                     l_eqList,

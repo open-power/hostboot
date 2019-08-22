@@ -26,13 +26,11 @@ ROOTPATH = ../../../../..
 
 MODULE = thread_activate
 
-# FIXME RTC: 210975 Uncomment the commented out EKB paths when the time is right
 ##      support for fapi2
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 
 ## pointer to common HWP files
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/isteps/
 

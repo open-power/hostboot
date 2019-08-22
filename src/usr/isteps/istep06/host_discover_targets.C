@@ -53,17 +53,16 @@
 #include <ipmi/ipmifruinv.H>
 #include <ipmi/ipmisensor.H>
 #endif
-// FIXME RTC: 210975
-//#include <fapi2/plat_hwp_invoker.H>
-//#include <fapi2/target.H>
+#include <fapi2/plat_hwp_invoker.H>
+#include <fapi2/target.H>
 
 //SBE interfacing
 #include <sbeio/sbeioif.H>
 #include <sys/misc.h>
 
-// FIXME RTC: 210975
+// FIXME RTC: 208841 MPIPL support
 //#include <p9_query_core_access_state.H>
-//#include <p9_setup_sbe_config.H>
+#include <p10_setup_sbe_config.H>
 //#include <p9_query_cache_access_state.H>
 //#include <p9_hcd_core_stopclocks.H>
 //#include <p9_hcd_cache_stopclocks.H>
@@ -76,9 +75,8 @@
 #include <attributetraits.H>
 #endif
 
-// FIXME RTC: 210975
 //  HWP call support
-//#include <nest/nestHwpHelperFuncs.H>   // fapiHWPCallWrapperHandler
+#include <nest/nestHwpHelperFuncs.H>   // fapiHWPCallWrapperHandler
 
 
 namespace ISTEP_06
@@ -227,7 +225,7 @@ errlHndl_t sendContinueMpiplChipOp()
 errlHndl_t updateSlaveSbeScratchRegs()
 {
     errlHndl_t l_err = nullptr;
-/* FIXME RTC: 210975
+/* FIXME RTC: 215162
     TARGETING::TargetHandleList l_procChips;
     TARGETING::getAllChips(l_procChips, TARGETING::TYPE_PROC, true);
     TARGETING::PROC_SBE_MASTER_CHIP_ATTR l_is_master_chip = 1;
@@ -268,7 +266,7 @@ errlHndl_t updateSlaveSbeScratchRegs()
 errlHndl_t powerDownSlaveQuads()
 {
     errlHndl_t l_err = NULL;
-/* FIXME RTC: 210975
+/* FIXME RTC: 208841
     TARGETING::Target* l_sys_target = nullptr;
     TARGETING::targetService().getTopLevelTarget(l_sys_target);
 

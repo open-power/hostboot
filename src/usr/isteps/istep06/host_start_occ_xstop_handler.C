@@ -50,7 +50,7 @@ void* host_start_occ_xstop_handler( void *io_pArgs )
 {
     ISTEP_ERROR::IStepError l_stepError;
 
-// FIXME RTC: 210975
+// FIXME RTC: 213026 Re-enable or remove OCC checkstop analysis
 #if 0
 
     errlHndl_t l_err = nullptr;

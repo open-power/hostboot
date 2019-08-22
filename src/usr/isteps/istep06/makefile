@@ -35,41 +35,43 @@ OBJS += call_host_voltage_config.o
 
 SUBDIRS	+= thread_activate.d
 
-# FIXME RTC: 210975 Uncomment the EKB paths when the time comes
-#PERV_HWP_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv
+# FIXME RTC: 208841 Uncomment/update during MPIPL development
+PERV_HWP_PATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/perv
 #NEST_HWP_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest
-#PM_HWP_PATH   += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm
+PM_HWP_PATH   += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/pm
 #CORE_HWP_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/core
 #CACHE_HWP_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/cache
-#LIB_HWP_PATH  += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib
+LIB_HWP_PATH  += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/lib
 
 #VPATH += ${NEST_HWP_PATH}
-#VPATH += ${PERV_HWP_PATH}
-#VPATH += ${PM_HWP_PATH}
-#VPATH += ${LIB_HWP_PATH}
+VPATH += ${PERV_HWP_PATH}
+VPATH += ${PM_HWP_PATH}
+VPATH += ${LIB_HWP_PATH}
 #VPATH += ${CORE_HWP_PATH}
 #VPATH += ${CACHE_HWP_PATH}
 
 #Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/src/usr/sbe
-#EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/secureboot
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include
 #EXTRAINCDIR += ${NEST_HWP_PATH}
-#EXTRAINCDIR += ${PERV_HWP_PATH}
+EXTRAINCDIR += ${PERV_HWP_PATH}
 #EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils
 #EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
-#EXTRAINCDIR += ${PM_HWP_PATH}
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
+EXTRAINCDIR += ${PM_HWP_PATH}
 #EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/include/registers
-#EXTRAINCDIR += ${LIB_HWP_PATH}
+EXTRAINCDIR += ${LIB_HWP_PATH}
 #EXTRAINCDIR += ${CORE_HWP_PATH}
 #EXTRAINCDIR += ${CACHE_HWP_PATH}
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt
 
 #Required include before all the procedure.mk are included
-#include ${ROOTPATH}/procedure.rules.mk
+include ${ROOTPATH}/procedure.rules.mk
 
 #Include all the procedure makefiles
 #include $(NEST_HWP_PATH)/p9_revert_sbe_mcs_setup.mk
@@ -77,7 +79,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps
 # Take another look at PM lib
 #include $(PM_HWP_PATH)/p9_pm_utils.mk
 
-#include $(PERV_HWP_PATH)/p9_setup_sbe_config.mk
+#TODO RTC: 208838
+#include $(PERV_HWP_PATH)/p10_setup_sbe_config.mk
 #include $(PM_HWP_PATH)/p9_query_core_access_state.mk
 #include $(PM_HWP_PATH)/p9_query_cache_access_state.mk
 #include $(PM_HWP_PATH)/p9_quad_power_off.mk
