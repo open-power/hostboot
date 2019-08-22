@@ -179,8 +179,18 @@ bool isRowRepairEnabled( ExtensibleChip * i_chip, const MemRank & i_rank );
  * @param i_target     Processor with NVDIMM
  * @param i_state      Protection state of NVDIMM
  */
-uint32_t nvdimmNotifyProtChange( TARGETING::Target * i_target,
+uint32_t nvdimmNotifyProtChange( TARGETING::TargetHandle_t i_target,
     const NVDIMM::nvdimm_protection_t i_state );
+
+/**
+ * @brief Add SMART-specific, page 4 NVDIMM registers to the FFDC
+ *
+ * @param i_nvdimm An nvdimm target
+ * @param io_errl  Error log to add the FFDC to
+ */
+void nvdimmAddPage4Ffdc( TARGETING::TargetHandle_t i_nvdimm,
+                         errlHndl_t & io_errl  );
+
 #endif
 
 //##############################################################################
