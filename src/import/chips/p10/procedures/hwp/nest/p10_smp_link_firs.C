@@ -341,8 +341,10 @@ fapi2::ReturnCode p10_smp_link_firs_clear(
 
     FAPI_DBG("Clearing FBC EXT FIR register");
 
-    FAPI_TRY(p10_fbc_utils_set_racetrack_regs(i_proc_target, PB_COM_SCOM_EQ0_EXTFIR_REG_RW, l_zeroes),
-             "Error from p10_fbc_utils_set_racetrack_regs (PB_COM_SCOM_EQ0_EXTFIR_REG_RW)");
+    FAPI_TRY(PREP_PB_COM_SCOM_ES3_EXTFIR_REG_RW(i_proc_target),
+             "Error from prepScom (PB_COM_SCOM_ES3_EXTFIR_REG_RWW)");
+    FAPI_TRY(PUT_PB_COM_SCOM_ES3_EXTFIR_REG_RW(i_proc_target, l_zeroes),
+             "Error from putScom (PB_COM_SCOM_ES3_EXTFIR_REG_RW)");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -425,14 +427,25 @@ fapi2::ReturnCode p10_smp_link_firs_ext(
 
     FAPI_DBG("Configuring FBC EXTFIR Registers");
 
-    FAPI_TRY(p10_fbc_utils_set_racetrack_regs(i_proc_target, PB_COM_SCOM_EQ0_EXTFIR_ACTION0_REG, l_fbc_ext_act0),
-             "Error from p10_fbc_utils_set_racetrack_regs (PB_COM_SCOM_EQ0_EXTFIR_ACTION0_REG)");
-    FAPI_TRY(p10_fbc_utils_set_racetrack_regs(i_proc_target, PB_COM_SCOM_EQ0_EXTFIR_ACTION1_REG, l_fbc_ext_act1),
-             "Error from p10_fbc_utils_set_racetrack_regs (PB_COM_SCOM_EQ0_EXTFIR_ACTION1_REG)");
-    FAPI_TRY(p10_fbc_utils_set_racetrack_regs(i_proc_target, PB_COM_SCOM_EQ0_EXTFIR_MASK_REG_WO_AND, l_fbc_ext_mask_and),
-             "Error from p10_fbc_utils_set_racetrack_regs (PB_COM_SCOM_EQ0_EXTFIR_MASK_REG_WO_AND)");
-    FAPI_TRY(p10_fbc_utils_set_racetrack_regs(i_proc_target, PB_COM_SCOM_EQ0_EXTFIR_MASK_REG_WO_OR, l_fbc_ext_mask_or),
-             "Error from p10_fbc_utils_set_racetrack_regs (PB_COM_SCOM_EQ0_EXTFIR_MASK_REG_WO_OR");
+    FAPI_TRY(PREP_PB_COM_SCOM_ES3_EXTFIR_ACTION0_REG(i_proc_target),
+             "Error from prepScom (PB_COM_SCOM_ES3_EXTFIR_ACTION0_REG)");
+    FAPI_TRY(PUT_PB_COM_SCOM_ES3_EXTFIR_ACTION0_REG(i_proc_target, l_fbc_ext_act0),
+             "Error from putScom (PB_COM_SCOM_ES3_EXTFIR_ACTION0_REG)");
+
+    FAPI_TRY(PREP_PB_COM_SCOM_ES3_EXTFIR_ACTION1_REG(i_proc_target),
+             "Error from prepScom (PB_COM_SCOM_ES3_EXTFIR_ACTION1_REG)");
+    FAPI_TRY(PUT_PB_COM_SCOM_ES3_EXTFIR_ACTION1_REG(i_proc_target, l_fbc_ext_act1),
+             "Error from putScom (PB_COM_SCOM_ES3_EXTFIR_ACTION1_REG)");
+
+    FAPI_TRY(PREP_PB_COM_SCOM_ES3_EXTFIR_MASK_REG_WO_AND(i_proc_target),
+             "Error from prepScom (PB_COM_SCOM_ES3_EXTFIR_MASK_REG_WO_AND)");
+    FAPI_TRY(PUT_PB_COM_SCOM_ES3_EXTFIR_MASK_REG_WO_AND(i_proc_target, l_fbc_ext_mask_and),
+             "Error from putScom (PB_COM_SCOM_ES3_EXTFIR_MASK_REG_WO_AND)");
+
+    FAPI_TRY(PREP_PB_COM_SCOM_ES3_EXTFIR_MASK_REG_WO_OR(i_proc_target),
+             "Error from prepScom (PB_COM_SCOM_ES3_EXTFIR_MASK_REG_WO_OR)");
+    FAPI_TRY(PUT_PB_COM_SCOM_ES3_EXTFIR_MASK_REG_WO_OR(i_proc_target, l_fbc_ext_mask_or),
+             "Error from putScom (PB_COM_SCOM_ES3_EXTFIR_MASK_REG_WO_OR)");
 
 fapi_try_exit:
     return fapi2::current_err;
