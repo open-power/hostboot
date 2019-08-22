@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/ocmb/explorer/common/include/explorer_scom_addresses_fld_fixes.H $ */
+/* $Source: src/import/chips/ocmb/explorer/procedures/hwp/memory/exp_getidec.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2019                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,12 +23,38 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef __EXPLR_SCOM_ADDRESSES_FLD_FIXES_H
-#define __EXPLR_SCOM_ADDRESSES_FLD_FIXES_H
+///
+/// @file exp_getidec.H
+/// @brief Contains function to lookup Chip ID and EC values of Explorer Chip
+///
+/// *HWP HWP Owner: Christian Geddes <crgeddes@us.ibm.com>
+/// *HWP HWP Backup: <none>
+/// *HWP Team: Hostboot
+/// *HWP Level: 2
+/// *HWP Consumed by: Hostboot / Cronus
 
-static const uint64_t EXPLR_MIPS_TO_OCMB_INTERRUPT_REGISTER1_DOORBELL           = 63;
-static const uint64_t EXPLR_EFUSE_IMAGE_OUT_3_ENTERPRISE_MODE_EC_MINOR          = 50;
-static const uint8_t  EXPLR_EFUSE_IMAGE_OUT_3_ENTERPRISE_MODE_EC_MINOR_LEN      = 4;
-static const uint64_t EXPLR_EFUSE_IMAGE_OUT_0_ENTERPRISE_MODE_DIS               = 53;
+#ifndef __EXP_GETIDEC_H_
+#define __EXP_GETIDEC_H_
+
+#include <fapi2.H>
+
+typedef fapi2::ReturnCode (*exp_getidec_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
+        uint16_t&, uint8_t&);
+
+extern "C"
+{
+
+///
+/// @brief Lookup the Chip ID and EC level values for this explorer chip
+/// @param[in]   i_target Explorer OCMB chip
+/// @param[out]  o_chipId Explorer Chip ID
+/// @param[out]  o_chipEc Explorer Chip EC
+/// @return fapi2:ReturnCode FAPI2_RC_SUCCESS if success, else error code.
+///
+    fapi2::ReturnCode exp_getidec(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                  uint16_t& o_chipId,
+                                  uint8_t& o_chipEc);
+
+} // extern "C"
 
 #endif
