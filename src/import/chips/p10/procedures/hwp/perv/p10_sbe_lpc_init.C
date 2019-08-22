@@ -58,14 +58,14 @@ static fapi2::ReturnCode reset_lpc_master(
     //Setting registers to do an LPC functional reset
     PREP_TP_TCN1_N1_CPLT_CONF1_WO_OR(i_target_chip);
 
-    SET_TP_TCN1_N1_CPLT_CONF1_LP_RESET(l_data64);
+    SET_TP_TCN1_N1_CPLT_CONF1_C_LP_RESET(l_data64);
     FAPI_TRY(PUT_TP_TCN1_N1_CPLT_CONF1_WO_OR(i_target_chip, l_data64));
 
     //Turn off the LPC functional reset
     l_data64 = 0;
     PREP_TP_TCN1_N1_CPLT_CONF1_WO_CLEAR(i_target_chip);
 
-    SET_TP_TCN1_N1_CPLT_CONF1_LP_RESET(l_data64);
+    SET_TP_TCN1_N1_CPLT_CONF1_C_LP_RESET(l_data64);
     FAPI_TRY(PUT_TP_TCN1_N1_CPLT_CONF1_WO_CLEAR(i_target_chip, l_data64));
 
 fapi_try_exit:
