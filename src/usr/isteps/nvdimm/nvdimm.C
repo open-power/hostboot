@@ -120,9 +120,10 @@ static constexpr uint8_t ENCRYPTION_STATUS_ENABLED = 0x1F;
 static constexpr uint8_t NV_STATUS_OR_MASK = 0xFB;
 static constexpr uint8_t NV_STATUS_AND_MASK = 0x04;
 static constexpr uint8_t NV_STATUS_UNPROTECTED_SET   = 0x01;
-static constexpr uint8_t NV_STATUS_UNPROTECTED_CLEAR = 0xFE;
-static constexpr uint8_t NV_STATUS_POSSIBLY_UNPROTECTED_SET   = 0x40;
-static constexpr uint8_t NV_STATUS_POSSIBLY_UNPROTECTED_CLEAR = 0xBF;
+static constexpr uint8_t NV_STATUS_UNPROTECTED_CLR   = 0xFE;
+static constexpr uint8_t NV_STATUS_ENCRYPTION_SET    = 0x10;
+static constexpr uint8_t NV_STATUS_ENCRYPTION_CLR    = 0xEF;
+static constexpr uint8_t NV_STATUS_POSSIBLY_UNPROTECTED_SET = 0x40;
 
 // NVDIMM key consts
 static constexpr size_t NUM_KEYS_IN_ATTR = 3;
@@ -3122,6 +3123,13 @@ bool nvdimm_encrypt_enable(TargetHandleList &i_nvdimmList)
             else
             {
                 TRACFCOMP(g_trac_nvdimm, "nvdimm_encrypt_enable() nvdimm[%X] encryption is enabled 0x%.02x",get_huid(l_nvdimm),l_encStatus.whole);
+
+                l_err = notifyNvdimmProtectionChange(l_nvdimm,
+                                                     ENCRYPTION_ENABLED);
+                if (l_err)
+                {
+                    errlCommit(l_err, NVDIMM_COMP_ID);
+                }
             }
         }
     }while(0);
@@ -3329,6 +3337,13 @@ bool nvdimm_crypto_erase(TargetHandleList &i_nvdimmList)
             else
             {
                 TRACFCOMP(g_trac_nvdimm,"nvdimm_crypto_erase() nvdimm[%X] erase complete 0x%.02x",get_huid(l_nvdimm),l_encStatus.whole);
+
+                l_err = notifyNvdimmProtectionChange(l_nvdimm,
+                                                     ENCRYPTION_DISABLED);
+                if (l_err)
+                {
+                    errlCommit(l_err, NVDIMM_COMP_ID);
+                }
             }
         }
     }while(0);
@@ -3403,6 +3418,8 @@ errlHndl_t notifyNvdimmProtectionChange(Target* i_target,
 
             // If we change the armed state, need to tell FSP
             bool l_armed_change = false;
+            bool l_set_encryption = false;
+            bool l_clr_encryption = false;
 
             switch (i_state)
             {
@@ -3429,6 +3446,11 @@ errlHndl_t notifyNvdimmProtectionChange(Target* i_target,
                 case NVDIMM_ENCRYPTION_ERROR:
                     l_armed_state.encryption_error_detected = 1;
                     break;
+                case ENCRYPTION_ENABLED:
+                    l_set_encryption = true;
+                    break;
+                case ENCRYPTION_DISABLED:
+                    l_clr_encryption = true;
             }
 
             // Set the attribute and send it to the FSP if needed
@@ -3447,13 +3469,25 @@ errlHndl_t notifyNvdimmProtectionChange(Target* i_target,
                 l_armed_state.occ_active &&
                 !l_armed_state.fatal_error_detected)
             {
-                l_nv_status &= NV_STATUS_UNPROTECTED_CLEAR;
+                l_nv_status &= NV_STATUS_UNPROTECTED_CLR;
             }
 
             // Set bit 0 if unprotected nv state
             else
             {
                 l_nv_status |= NV_STATUS_UNPROTECTED_SET;
+            }
+
+            // Set bit 4 if encryption enabled
+            if (l_set_encryption)
+            {
+                l_nv_status |= NV_STATUS_ENCRYPTION_SET;
+            }
+
+            // Clear bit 4 if encryption disabled
+            if (l_clr_encryption)
+            {
+                l_nv_status &= NV_STATUS_ENCRYPTION_CLR;
             }
 
             // Set bit 6 if risky error

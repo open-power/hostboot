@@ -252,6 +252,8 @@ bool nvDimmCheckHealthStatusOnSystem();
  *        NVDIMM_ENCRYPTION_ERROR - set encryption state
  *          Note: fatal error will stay with target preventing
  *                PROTECTED status until power is cycled again
+ *        ENCRYPTION_ENABLED - contents of nvdimm are encrypted
+ *        ENCRYPTION_DISABLED - contents of nvdimm are not encrypted
  */
 enum nvdimm_protection_t
 {
@@ -262,6 +264,8 @@ enum nvdimm_protection_t
     NVDIMM_FATAL_HW_ERROR     = 4,
     NVDIMM_RISKY_HW_ERROR     = 5,
     NVDIMM_ENCRYPTION_ERROR   = 6,
+    ENCRYPTION_ENABLED        = 7,
+    ENCRYPTION_DISABLED       = 8,
     /* deprecated, still used by PRD */
     UNPROTECTED_BECAUSE_ERROR = 4,
 };
