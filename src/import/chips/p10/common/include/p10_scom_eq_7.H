@@ -39,6 +39,45 @@ namespace eq
 #endif
 
 
+static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_ONE_SHOT_MODE = 0x20018323ull;
+// eq/reg00007.H
+
+static const uint64_t CLK_ADJ_01_DCADJ_WRAP_PHASE_MEASUREMENT = 0x20014318ull;
+
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_PHASE_MEASUREMENT_1_VAL = 0;
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_PHASE_MEASUREMENT_2_VAL = 1;
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_PHASE_MEASUREMENT_2_VAL_LEN = 7;
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_PHASE_MEASUREMENT_3_VAL = 8;
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_PHASE_MEASUREMENT_4_VAL = 9;
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_PHASE_MEASUREMENT_4_VAL_LEN = 7;
+// eq/reg00007.H
+
+static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_CACHE_OVERRIDE = 0x20014327ull;
+
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_CACHE_OVERRIDE_ENABLE = 0;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_CACHE_OVERRIDE_VALUE = 4;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_CACHE_OVERRIDE_VALUE_LEN = 4;
+// eq/reg00007.H
+
+static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_SWAP_CORE_INC_DEC = 0x2001432eull;
+
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_SWAP_CORE_INC_DEC_CORE_INC_DEC_INVERT = 0;
+// eq/reg00007.H
+
+static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_PDLYS = 0x2001232dull;
+
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_PDLYS_CACHE_PDLYS_INVERT = 0;
+// eq/reg00007.H
+
+static const uint64_t CLK_ADJ_03_DCADJ_WRAP_SET_DEC = 0x20011310ull;
+
+static const uint32_t CLK_ADJ_03_DCADJ_WRAP_SET_DEC_DCC_VALUE = 0;
+static const uint32_t CLK_ADJ_03_DCADJ_WRAP_SET_DEC_DCC_VALUE_LEN = 8;
+// eq/reg00007.H
+
+static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_ONE_SHOT_MODE = 0x20011323ull;
+// eq/reg00007.H
+
 static const uint64_t EPS_THERM_WSUB_CONTROL_REG = 0x20050012ull;
 
 static const uint32_t EPS_THERM_WSUB_CONTROL_REG_RESET_TRIP_HISTORY = 0;
@@ -266,10 +305,17 @@ static const uint32_t QME_QMCR_LOPRI_STOP_ENTRY_SEL_LEN = 4;
 static const uint32_t QME_QMCR_WRITE_PROTECT_ENABLE = 24;
 static const uint32_t QME_QMCR_TTSR_READ_ENABLE = 25;
 static const uint32_t QME_QMCR_PTSR_READ_ENABLE = 26;
-static const uint32_t QME_QMCR_QOSR_PCB_WRITE_DIS = 28;
-static const uint32_t QME_QMCR_QOS_AUTO_INDEX_UPDATE = 29;
+static const uint32_t QME_QMCR_RESET_QME_PCB_MASTER_INTERFACE = 27;
+static const uint32_t QME_QMCR_SPARE = 28;
+static const uint32_t QME_QMCR_SPARE_LEN = 2;
 static const uint32_t QME_QMCR_CPMS_PG_CLKOFF_DISABLE = 30;
 static const uint32_t QME_QMCR_CTFS_PG_CLKOFF_DISABLE = 31;
+static const uint32_t QME_QMCR_DTC_SEQUENCER_ENABLE = 32;
+static const uint32_t QME_QMCR_WOF_AUTO_SEQ_ENABLE = 33;
+static const uint32_t QME_QMCR_QOS_AUTO_SEQ_ENABLE = 34;
+static const uint32_t QME_QMCR_QOSR_SPR_UPDATE_ENABLE = 35;
+static const uint32_t QME_QMCR_SPARE2 = 36;
+static const uint32_t QME_QMCR_SPARE2_LEN = 4;
 static const uint32_t QME_QMCR_FUSED_CORE_MODE = 47;
 static const uint32_t QME_QMCR_CORE_PARTIAL_GOOD = 60;
 static const uint32_t QME_QMCR_CORE_PARTIAL_GOOD_LEN = 4;

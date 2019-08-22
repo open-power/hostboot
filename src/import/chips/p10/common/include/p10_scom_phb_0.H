@@ -39,6 +39,12 @@ namespace phb
 #endif
 
 
+static const uint64_t PHB5_SCOM_UV_SEC_INCL_MSK = 0x08010907ull;
+
+static const uint32_t PHB5_SCOM_UV_SEC_INCL_MSK_VALUE = 12;
+static const uint32_t PHB5_SCOM_UV_SEC_INCL_MSK_VALUE_LEN = 40;
+// phb/reg00000.H
+
 #ifndef __PPE_HCODE__
 }
 }

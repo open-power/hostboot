@@ -44,22 +44,88 @@ static const uint64_t BIST = 0x2003000bull;
 static const uint32_t BIST_TC_BIST_START_TEST_DC = 0;
 static const uint32_t BIST_TC_SRAM_ABIST_MODE_DC = 1;
 static const uint32_t BIST_TC_IOBIST_MODE_DC = 3;
-static const uint32_t BIST_PERV = 4;
-static const uint32_t BIST_UNIT1 = 5;
-static const uint32_t BIST_UNIT2 = 6;
-static const uint32_t BIST_UNIT3 = 7;
-static const uint32_t BIST_UNIT4 = 8;
-static const uint32_t BIST_UNIT5 = 9;
-static const uint32_t BIST_UNIT6 = 10;
-static const uint32_t BIST_UNIT7 = 11;
-static const uint32_t BIST_UNIT8 = 12;
-static const uint32_t BIST_UNIT9 = 13;
-static const uint32_t BIST_UNIT10 = 14;
-static const uint32_t BIST_UNIT11 = 15;
-static const uint32_t BIST_UNIT12 = 16;
-static const uint32_t BIST_UNIT13 = 17;
-static const uint32_t BIST_UNIT14 = 18;
+static const uint32_t BIST_REGION_PERV = 4;
+static const uint32_t BIST_REGION_UNIT1 = 5;
+static const uint32_t BIST_REGION_UNIT2 = 6;
+static const uint32_t BIST_REGION_UNIT3 = 7;
+static const uint32_t BIST_REGION_UNIT4 = 8;
+static const uint32_t BIST_REGION_UNIT5 = 9;
+static const uint32_t BIST_REGION_UNIT6 = 10;
+static const uint32_t BIST_REGION_UNIT7 = 11;
+static const uint32_t BIST_REGION_UNIT8 = 12;
+static const uint32_t BIST_REGION_UNIT9 = 13;
+static const uint32_t BIST_REGION_UNIT10 = 14;
+static const uint32_t BIST_REGION_UNIT11 = 15;
+static const uint32_t BIST_REGION_UNIT12 = 16;
+static const uint32_t BIST_REGION_UNIT13 = 17;
+static const uint32_t BIST_REGION_UNIT14 = 18;
 static const uint32_t BIST_STROBE_WINDOW_EN = 48;
+// eq/reg00015.H
+
+static const uint64_t CLK_ADJ_00_DCADJ_WRAP_SET_DCC_TARGET = 0x20018308ull;
+
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_SET_DCC_TARGET_TARGET_VALUE = 0;
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_SET_DCC_TARGET_TARGET_VALUE_LEN = 7;
+// eq/reg00015.H
+
+static const uint64_t CLK_ADJ_00_DCADJ_WRAP_SET_DEC = 0x20018310ull;
+
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_SET_DEC_DCC_VALUE = 0;
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_SET_DEC_DCC_VALUE_LEN = 8;
+// eq/reg00015.H
+
+static const uint64_t CLK_ADJ_00_DCADJ_WRAP_SET_SINGLE_STEP_MODE = 0x20018304ull;
+
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_SET_SINGLE_STEP_MODE_STEP_COUNT = 0;
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_SET_SINGLE_STEP_MODE_STEP_COUNT_LEN = 16;
+// eq/reg00015.H
+
+static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES = 0x20018337ull;
+
+static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES_INC_DEC_STATE = 28;
+static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES_INC_DEC_STATE_LEN = 4;
+// eq/reg00015.H
+
+static const uint64_t CLK_ADJ_01_DCADJ_WRAP_SET_INIT_MODE = 0x20014300ull;
+// eq/reg00015.H
+
+static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS = 0x2001432cull;
+
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS_CORE_PDLYS_INVERT = 0;
+// eq/reg00015.H
+
+static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_SYNC_ENABLE = 0x20014330ull;
+
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_SYNC_ENABLE_CORE_SYNC_ENABLE_INVERT = 0;
+// eq/reg00015.H
+
+static const uint64_t CLK_ADJ_02_DCADJ_WRAP_AVERAGE_MEASUREMENT = 0x20012319ull;
+
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_AVERAGE_MEASUREMENT_MEASURE_HIST_VAL1 = 0;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_AVERAGE_MEASUREMENT_MEASURE_HIST_VAL1_LEN = 8;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_AVERAGE_MEASUREMENT_INTERVAL_Q = 9;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_AVERAGE_MEASUREMENT_INTERVAL_Q_LEN = 7;
+// ERROR Duplicate Dial         static const uint32_t CLK_ADJ_02_DCADJ_WRAP_AVERAGE_MEASUREMENT_INTERVAL_Q = 9;
+// ERROR Duplicate Dial         static const uint32_t CLK_ADJ_02_DCADJ_WRAP_AVERAGE_MEASUREMENT_INTERVAL_Q_LEN = 7;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_AVERAGE_MEASUREMENT_DCADJ_DCS_SEL_INT = 17;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_AVERAGE_MEASUREMENT_DCADJ_DCS_SEL_INT_LEN = 7;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_AVERAGE_MEASUREMENT_TARGET_VALUE = 25;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_AVERAGE_MEASUREMENT_TARGET_VALUE_LEN = 7;
+// eq/reg00015.H
+
+static const uint64_t CLK_ADJ_02_DCADJ_WRAP_DCC_OVERRIDE = 0x20012306ull;
+
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_DCC_OVERRIDE_ENABLE = 0;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_DCC_OVERRIDE_VALUE = 4;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_DCC_OVERRIDE_VALUE_LEN = 8;
+// eq/reg00015.H
+
+static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_INIT_MODE = 0x20011320ull;
+// eq/reg00015.H
+
+static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_SWAP_CACHE_INC_DEC = 0x2001132full;
+
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_SWAP_CACHE_INC_DEC_CACHE_INC_DEC_INVERT = 0;
 // eq/reg00015.H
 
 static const uint64_t CPLT_CTRL5_RW = 0x20000005ull;

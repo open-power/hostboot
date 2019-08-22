@@ -9281,6 +9281,342 @@ fapi_try_exit:
 #endif
 }
 
+static inline fapi2::buffer<uint64_t>& SET_CS_CTL_MISC_CONFIG2_ENABLE_CP_2CRED(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_CONFIG2));
+#endif
+    return o_data.insertFromRight<CS_CTL_MISC_CONFIG2_ENABLE_CP_2CRED,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CS_CTL_MISC_CONFIG2_ENABLE_CP_2CRED chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CS_CTL_MISC_CONFIG2_ENABLE_CP_2CRED(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_CONFIG2));
+#endif
+    return o_data.insertFromRight<CS_CTL_MISC_CONFIG2_ENABLE_CP_2CRED,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CS_CTL_MISC_CONFIG2_ENABLE_CP_2CRED chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CS_CTL_MISC_CONFIG2_ENABLE_CP_2CRED(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_CONFIG2));
+#endif
+    return o_data.setBit<CS_CTL_MISC_CONFIG2_ENABLE_CP_2CRED>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CS_CTL_MISC_CONFIG2_ENABLE_CP_2CRED chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_CS_CTL_MISC_CONFIG2_ENABLE_CP_2CRED(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_CONFIG2));
+#endif
+    return o_data.clearBit<CS_CTL_MISC_CONFIG2_ENABLE_CP_2CRED>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CS_CTL_MISC_CONFIG2_ENABLE_CP_2CRED chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CS_CTL_MISC_CONFIG2_ENABLE_CP_2CRED(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_CONFIG2));
+#endif
+    return i_data.extractToRight<CS_CTL_MISC_CONFIG2_ENABLE_CP_2CRED,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CS_CTL_MISC_CONFIG2_ENABLE_CP_2CRED chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_CS_CTL_MISC_CONFIG2_ENABLE_CP_2CRED(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_CONFIG2));
+#endif
+    return i_data.getBit<CS_CTL_MISC_CONFIG2_ENABLE_CP_2CRED>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CS_CTL_MISC_CONFIG2_ENABLE_CP_2CRED chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CS_CTL_MISC_CONFIG2_ENABLE_GP_2CRED(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_CONFIG2));
+#endif
+    return o_data.insertFromRight<CS_CTL_MISC_CONFIG2_ENABLE_GP_2CRED,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CS_CTL_MISC_CONFIG2_ENABLE_GP_2CRED chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CS_CTL_MISC_CONFIG2_ENABLE_GP_2CRED(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_CONFIG2));
+#endif
+    return o_data.insertFromRight<CS_CTL_MISC_CONFIG2_ENABLE_GP_2CRED,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CS_CTL_MISC_CONFIG2_ENABLE_GP_2CRED chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CS_CTL_MISC_CONFIG2_ENABLE_GP_2CRED(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_CONFIG2));
+#endif
+    return o_data.setBit<CS_CTL_MISC_CONFIG2_ENABLE_GP_2CRED>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CS_CTL_MISC_CONFIG2_ENABLE_GP_2CRED chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_CS_CTL_MISC_CONFIG2_ENABLE_GP_2CRED(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_CONFIG2));
+#endif
+    return o_data.clearBit<CS_CTL_MISC_CONFIG2_ENABLE_GP_2CRED>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CS_CTL_MISC_CONFIG2_ENABLE_GP_2CRED chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CS_CTL_MISC_CONFIG2_ENABLE_GP_2CRED(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_CONFIG2));
+#endif
+    return i_data.extractToRight<CS_CTL_MISC_CONFIG2_ENABLE_GP_2CRED,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CS_CTL_MISC_CONFIG2_ENABLE_GP_2CRED chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_CS_CTL_MISC_CONFIG2_ENABLE_GP_2CRED(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_CONFIG2));
+#endif
+    return i_data.getBit<CS_CTL_MISC_CONFIG2_ENABLE_GP_2CRED>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CS_CTL_MISC_CONFIG2_ENABLE_GP_2CRED chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CS_CTL_MISC_CONFIG2_ENABLE_SP_2CRED(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_CONFIG2));
+#endif
+    return o_data.insertFromRight<CS_CTL_MISC_CONFIG2_ENABLE_SP_2CRED,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CS_CTL_MISC_CONFIG2_ENABLE_SP_2CRED chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CS_CTL_MISC_CONFIG2_ENABLE_SP_2CRED(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_CONFIG2));
+#endif
+    return o_data.insertFromRight<CS_CTL_MISC_CONFIG2_ENABLE_SP_2CRED,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CS_CTL_MISC_CONFIG2_ENABLE_SP_2CRED chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CS_CTL_MISC_CONFIG2_ENABLE_SP_2CRED(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_CONFIG2));
+#endif
+    return o_data.setBit<CS_CTL_MISC_CONFIG2_ENABLE_SP_2CRED>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CS_CTL_MISC_CONFIG2_ENABLE_SP_2CRED chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_CS_CTL_MISC_CONFIG2_ENABLE_SP_2CRED(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_CONFIG2));
+#endif
+    return o_data.clearBit<CS_CTL_MISC_CONFIG2_ENABLE_SP_2CRED>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CS_CTL_MISC_CONFIG2_ENABLE_SP_2CRED chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CS_CTL_MISC_CONFIG2_ENABLE_SP_2CRED(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_CONFIG2));
+#endif
+    return i_data.extractToRight<CS_CTL_MISC_CONFIG2_ENABLE_SP_2CRED,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CS_CTL_MISC_CONFIG2_ENABLE_SP_2CRED chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_CS_CTL_MISC_CONFIG2_ENABLE_SP_2CRED(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_CONFIG2));
+#endif
+    return i_data.getBit<CS_CTL_MISC_CONFIG2_ENABLE_SP_2CRED>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CS_CTL_MISC_CONFIG2_ENABLE_SP_2CRED chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CS_CTL_MISC_CONFIG2_ENABLE_PB_BACK2BACK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_CONFIG2));
+#endif
+    return o_data.insertFromRight<CS_CTL_MISC_CONFIG2_ENABLE_PB_BACK2BACK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CS_CTL_MISC_CONFIG2_ENABLE_PB_BACK2BACK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CS_CTL_MISC_CONFIG2_ENABLE_PB_BACK2BACK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_CONFIG2));
+#endif
+    return o_data.insertFromRight<CS_CTL_MISC_CONFIG2_ENABLE_PB_BACK2BACK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CS_CTL_MISC_CONFIG2_ENABLE_PB_BACK2BACK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CS_CTL_MISC_CONFIG2_ENABLE_PB_BACK2BACK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_CONFIG2));
+#endif
+    return o_data.setBit<CS_CTL_MISC_CONFIG2_ENABLE_PB_BACK2BACK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CS_CTL_MISC_CONFIG2_ENABLE_PB_BACK2BACK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_CS_CTL_MISC_CONFIG2_ENABLE_PB_BACK2BACK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_CONFIG2));
+#endif
+    return o_data.clearBit<CS_CTL_MISC_CONFIG2_ENABLE_PB_BACK2BACK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CS_CTL_MISC_CONFIG2_ENABLE_PB_BACK2BACK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CS_CTL_MISC_CONFIG2_ENABLE_PB_BACK2BACK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_CONFIG2));
+#endif
+    return i_data.extractToRight<CS_CTL_MISC_CONFIG2_ENABLE_PB_BACK2BACK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CS_CTL_MISC_CONFIG2_ENABLE_PB_BACK2BACK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_CS_CTL_MISC_CONFIG2_ENABLE_PB_BACK2BACK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_CONFIG2));
+#endif
+    return i_data.getBit<CS_CTL_MISC_CONFIG2_ENABLE_PB_BACK2BACK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CS_CTL_MISC_CONFIG2_ENABLE_PB_BACK2BACK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
 static inline fapi2::buffer<uint64_t>& SET_CS_CTL_MISC_CONFIG2_2_RESERVED1(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {

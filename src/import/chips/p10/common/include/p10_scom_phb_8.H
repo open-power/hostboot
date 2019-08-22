@@ -117,13 +117,6 @@ static const uint32_t RSB_REGS_ACTION1_REG_TCE_ECC_UNCORRECTABLE_ERROR = 61;
 static const uint32_t RSB_REGS_ACTION1_REG_TCE_RESERVED01 = 62;
 // phb/reg00008.H
 
-static const uint64_t RSB_REGS_UVI_PHB5_SCOM_UV_SEC_INCL_CMP = 0x08010906ull;
-
-static const uint32_t RSB_REGS_UVI_PHB5_SCOM_UV_SEC_INCL_CMP_ENABLE = 0;
-static const uint32_t RSB_REGS_UVI_PHB5_SCOM_UV_SEC_INCL_CMP_VALUE = 12;
-static const uint32_t RSB_REGS_UVI_PHB5_SCOM_UV_SEC_INCL_CMP_VALUE_LEN = 40;
-// phb/reg00008.H
-
 #ifndef __PPE_HCODE__
 }
 }

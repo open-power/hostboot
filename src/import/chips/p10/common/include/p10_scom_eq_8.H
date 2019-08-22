@@ -47,6 +47,132 @@ static const uint32_t ASSIST_INTERRUPT_REG_XSTOP = 2;
 static const uint32_t ASSIST_INTERRUPT_REG_LXSTOP = 3;
 // eq/reg00008.H
 
+static const uint64_t CLK_ADJ_00_DCADJ_WRAP_MEASURE_HISTORY = 0x20018316ull;
+
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_MEASURE_HISTORY_1 = 0;
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_MEASURE_HISTORY_1_LEN = 8;
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_MEASURE_HISTORY_2 = 8;
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_MEASURE_HISTORY_2_LEN = 8;
+// eq/reg00008.H
+
+static const uint64_t CLK_ADJ_00_DCADJ_WRAP_SET_ADJUST_MODE = 0x20018302ull;
+// eq/reg00008.H
+
+static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_STICK_CACHE_SYNC_DONE = 0x20018333ull;
+
+static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_STICK_CACHE_SYNC_DONE_CACHE_SYNC_DONE_STICK = 0;
+// eq/reg00008.H
+
+static const uint64_t CLK_ADJ_01_DCADJ_WRAP_AVERAGE_MEASUREMENT = 0x20014319ull;
+
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_AVERAGE_MEASUREMENT_MEASURE_HIST_VAL1 = 0;
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_AVERAGE_MEASUREMENT_MEASURE_HIST_VAL1_LEN = 8;
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_AVERAGE_MEASUREMENT_INTERVAL_Q = 9;
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_AVERAGE_MEASUREMENT_INTERVAL_Q_LEN = 7;
+// ERROR Duplicate Dial         static const uint32_t CLK_ADJ_01_DCADJ_WRAP_AVERAGE_MEASUREMENT_INTERVAL_Q = 9;
+// ERROR Duplicate Dial         static const uint32_t CLK_ADJ_01_DCADJ_WRAP_AVERAGE_MEASUREMENT_INTERVAL_Q_LEN = 7;
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_AVERAGE_MEASUREMENT_DCADJ_DCS_SEL_INT = 17;
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_AVERAGE_MEASUREMENT_DCADJ_DCS_SEL_INT_LEN = 7;
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_AVERAGE_MEASUREMENT_TARGET_VALUE = 25;
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_AVERAGE_MEASUREMENT_TARGET_VALUE_LEN = 7;
+// eq/reg00008.H
+
+static const uint64_t CLK_ADJ_01_DCADJ_WRAP_SET_DAC_DLY = 0x2001430aull;
+
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_SET_DAC_DLY_DAC_DELAY_VALUE = 0;
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_SET_DAC_DLY_DAC_DELAY_VALUE_LEN = 16;
+// eq/reg00008.H
+
+static const uint64_t CLK_ADJ_01_DCADJ_WRAP_SET_DEC = 0x20014310ull;
+
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_SET_DEC_DCC_VALUE = 0;
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_SET_DEC_DCC_VALUE_LEN = 8;
+// eq/reg00008.H
+
+static const uint64_t CLK_ADJ_01_DCADJ_WRAP_SET_INC_DCC = 0x2001430eull;
+// eq/reg00008.H
+
+static const uint64_t CLK_ADJ_01_DCADJ_WRAP_SET_ONE_SHOT_MODE = 0x20014303ull;
+// eq/reg00008.H
+
+static const uint64_t CLK_ADJ_01_DCADJ_WRAP_SINGLE_STEP_COUNT = 0x2001431aull;
+
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_SINGLE_STEP_COUNT_MODE_FSM_STATE = 0;
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_SINGLE_STEP_COUNT_MODE_FSM_STATE_LEN = 3;
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_SINGLE_STEP_COUNT_DCC_LOCK = 4;
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_SINGLE_STEP_COUNT_ADJUST_ERR = 5;
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_SINGLE_STEP_COUNT_DCSENSE_IN = 6;
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_SINGLE_STEP_COUNT_DCC_CHANGE = 7;
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_SINGLE_STEP_COUNT_DCC_CHANGE_LEN = 2;
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_SINGLE_STEP_COUNT_CHKSW_NO_OVR_PARATIY_ERROR = 9;
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_SINGLE_STEP_COUNT_CHKSW_NO_DCC_CONFIG_VISIBLE = 10;
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_SINGLE_STEP_COUNT_FSM_STATE = 11;
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_SINGLE_STEP_COUNT_FSM_STATE_LEN = 5;
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_SINGLE_STEP_COUNT_STEP_COUNT = 16;
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_SINGLE_STEP_COUNT_STEP_COUNT_LEN = 16;
+// eq/reg00008.H
+
+static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA = 0x20014339ull;
+
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_ORE_IS_LATE = 3;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_ACHE_IS_LATE = 7;
+// eq/reg00008.H
+
+static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE = 0x20014321ull;
+// eq/reg00008.H
+
+static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_ONE_SHOT_MODE = 0x20014323ull;
+// eq/reg00008.H
+
+static const uint64_t CLK_ADJ_02_DCADJ_WRAP_SET_COMP_DLY = 0x2001230bull;
+
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_SET_COMP_DLY_COMP_DELAY_VALUE = 0;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_SET_COMP_DLY_COMP_DELAY_VALUE_LEN = 16;
+// eq/reg00008.H
+
+static const uint64_t CLK_ADJ_02_DCADJ_WRAP_SET_MEAS_MODE_VEC = 0x2001230dull;
+
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_SET_MEAS_MODE_VEC_MEASURE_MODE_VECTOR = 0;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_SET_MEAS_MODE_VEC_MEASURE_MODE_VECTOR_LEN = 2;
+// eq/reg00008.H
+
+static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_PDLY_FSM_STATES = 0x20012336ull;
+
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_PDLY_FSM_STATES_ORE_PDLY_STATE = 10;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_PDLY_FSM_STATES_ORE_PDLY_STATE_LEN = 6;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_PDLY_FSM_STATES_ACHE_PDLY_STATE = 26;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_PDLY_FSM_STATES_ACHE_PDLY_STATE_LEN = 6;
+// eq/reg00008.H
+
+static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_ONE_SHOT_MODE = 0x20012323ull;
+// eq/reg00008.H
+
+static const uint64_t CLK_ADJ_03_DCADJ_WRAP_SET_DAC_DLY = 0x2001130aull;
+
+static const uint32_t CLK_ADJ_03_DCADJ_WRAP_SET_DAC_DLY_DAC_DELAY_VALUE = 0;
+static const uint32_t CLK_ADJ_03_DCADJ_WRAP_SET_DAC_DLY_DAC_DELAY_VALUE_LEN = 16;
+// eq/reg00008.H
+
+static const uint64_t CLK_ADJ_03_DCADJ_WRAP_SET_INC_DCC = 0x2001130eull;
+// eq/reg00008.H
+
+static const uint64_t CLK_ADJ_03_DCADJ_WRAP_SOFT_RESET = 0x20011305ull;
+// eq/reg00008.H
+
+static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES = 0x20011337ull;
+
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES_INC_DEC_STATE = 28;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES_INC_DEC_STATE_LEN = 4;
+// eq/reg00008.H
+
+static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_ADJUST_MODE = 0x20011322ull;
+// eq/reg00008.H
+
+static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE = 0x2001132aull;
+
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE_CORE_IS_LATE_INVERT = 0;
+// eq/reg00008.H
+
 static const uint64_t EDRAM_STATUS = 0x200f0029ull;
 
 static const uint32_t EDRAM_STATUS_EDRAM_STAT = 0;
@@ -250,6 +376,7 @@ static const uint32_t OPCG_REG0_RUN_OPCG_ON_UPDATE_DR = 11;
 static const uint32_t OPCG_REG0_RUN_OPCG_ON_CAPTURE_DR = 12;
 static const uint32_t OPCG_REG0_STOP_RUNN_ON_XSTOP = 13;
 static const uint32_t OPCG_REG0_OPCG_STARTS_BIST = 14;
+static const uint32_t OPCG_REG0_RUNN_HLD_DLY_EN = 15;
 static const uint32_t OPCG_REG0_LOOP_COUNT = 21;
 static const uint32_t OPCG_REG0_LOOP_COUNT_LEN = 43;
 // eq/reg00008.H
@@ -338,25 +465,25 @@ static const uint32_t SCAN_REGION_TYPE_SCAN_TYPE_INEX = 59;
 
 static const uint64_t XSTOP3 = 0x2003000eull;
 
-static const uint32_t XSTOP3_MASK_B = 0;
-static const uint32_t XSTOP3_ALIGNED_XSTOP3 = 1;
-static const uint32_t XSTOP3_TRIGGER_OPCG_ON_XSTOP3 = 2;
-static const uint32_t XSTOP3_WAIT_ALLWAYS = 3;
-static const uint32_t XSTOP3_PERV = 4;
-static const uint32_t XSTOP3_UNIT1 = 5;
-static const uint32_t XSTOP3_UNIT2 = 6;
-static const uint32_t XSTOP3_UNIT3 = 7;
-static const uint32_t XSTOP3_UNIT4 = 8;
-static const uint32_t XSTOP3_UNIT5 = 9;
-static const uint32_t XSTOP3_UNIT6 = 10;
-static const uint32_t XSTOP3_UNIT7 = 11;
-static const uint32_t XSTOP3_UNIT8 = 12;
-static const uint32_t XSTOP3_UNIT9 = 13;
-static const uint32_t XSTOP3_UNIT10 = 14;
-static const uint32_t XSTOP3_UNIT11 = 15;
-static const uint32_t XSTOP3_UNIT12 = 16;
-static const uint32_t XSTOP3_UNIT13 = 17;
-static const uint32_t XSTOP3_UNIT14 = 18;
+static const uint32_t XSTOP3_ENABLE = 0;
+static const uint32_t XSTOP3_WAIT_SNOPA = 1;
+static const uint32_t XSTOP3_TRIGGER_OPCG_GO = 2;
+static const uint32_t XSTOP3_WAIT_ALWAYS = 3;
+static const uint32_t XSTOP3_REGION_PERV = 4;
+static const uint32_t XSTOP3_REGION_UNIT1 = 5;
+static const uint32_t XSTOP3_REGION_UNIT2 = 6;
+static const uint32_t XSTOP3_REGION_UNIT3 = 7;
+static const uint32_t XSTOP3_REGION_UNIT4 = 8;
+static const uint32_t XSTOP3_REGION_UNIT5 = 9;
+static const uint32_t XSTOP3_REGION_UNIT6 = 10;
+static const uint32_t XSTOP3_REGION_UNIT7 = 11;
+static const uint32_t XSTOP3_REGION_UNIT8 = 12;
+static const uint32_t XSTOP3_REGION_UNIT9 = 13;
+static const uint32_t XSTOP3_REGION_UNIT10 = 14;
+static const uint32_t XSTOP3_REGION_UNIT11 = 15;
+static const uint32_t XSTOP3_REGION_UNIT12 = 16;
+static const uint32_t XSTOP3_REGION_UNIT13 = 17;
+static const uint32_t XSTOP3_REGION_UNIT14 = 18;
 static const uint32_t XSTOP3_WAIT_CYCLES = 48;
 static const uint32_t XSTOP3_WAIT_CYCLES_LEN = 12;
 // eq/reg00008.H

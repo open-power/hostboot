@@ -44,21 +44,21 @@ static const uint64_t BIST = 0x0c03000bull;
 static const uint32_t BIST_TC_BIST_START_TEST_DC = 0;
 static const uint32_t BIST_TC_SRAM_ABIST_MODE_DC = 1;
 static const uint32_t BIST_TC_IOBIST_MODE_DC = 3;
-static const uint32_t BIST_PERV = 4;
-static const uint32_t BIST_UNIT1 = 5;
-static const uint32_t BIST_UNIT2 = 6;
-static const uint32_t BIST_UNIT3 = 7;
-static const uint32_t BIST_UNIT4 = 8;
-static const uint32_t BIST_UNIT5 = 9;
-static const uint32_t BIST_UNIT6 = 10;
-static const uint32_t BIST_UNIT7 = 11;
-static const uint32_t BIST_UNIT8 = 12;
-static const uint32_t BIST_UNIT9 = 13;
-static const uint32_t BIST_UNIT10 = 14;
-static const uint32_t BIST_UNIT11 = 15;
-static const uint32_t BIST_UNIT12 = 16;
-static const uint32_t BIST_UNIT13 = 17;
-static const uint32_t BIST_UNIT14 = 18;
+static const uint32_t BIST_REGION_PERV = 4;
+static const uint32_t BIST_REGION_UNIT1 = 5;
+static const uint32_t BIST_REGION_UNIT2 = 6;
+static const uint32_t BIST_REGION_UNIT3 = 7;
+static const uint32_t BIST_REGION_UNIT4 = 8;
+static const uint32_t BIST_REGION_UNIT5 = 9;
+static const uint32_t BIST_REGION_UNIT6 = 10;
+static const uint32_t BIST_REGION_UNIT7 = 11;
+static const uint32_t BIST_REGION_UNIT8 = 12;
+static const uint32_t BIST_REGION_UNIT9 = 13;
+static const uint32_t BIST_REGION_UNIT10 = 14;
+static const uint32_t BIST_REGION_UNIT11 = 15;
+static const uint32_t BIST_REGION_UNIT12 = 16;
+static const uint32_t BIST_REGION_UNIT13 = 17;
+static const uint32_t BIST_REGION_UNIT14 = 18;
 static const uint32_t BIST_STROBE_WINDOW_EN = 48;
 // mc/reg00015.H
 
@@ -133,18 +133,10 @@ static const uint32_t MBA_SCOMFIR_MCDBG_SCOM_CFG_ACT_SCOM23 = 2;
 static const uint32_t MBA_SCOMFIR_MCDBG_SCOM_CFG_23_OR_ENABLE = 3;
 // mc/reg00015.H
 
-static const uint64_t MBA_SCOMFIR_WATCFG0BQ = 0x0c010f81ull;
+static const uint64_t MBA_SCOMFIR_WATCFG3 = 0x0c010f8bull;
 
-static const uint32_t MBA_SCOMFIR_WATCFG0BQ_MSKA = 0;
-static const uint32_t MBA_SCOMFIR_WATCFG0BQ_MSKA_LEN = 44;
-static const uint32_t MBA_SCOMFIR_WATCFG0BQ_CNTL = 44;
-static const uint32_t MBA_SCOMFIR_WATCFG0BQ_CNTL_LEN = 17;
-// mc/reg00015.H
-
-static const uint64_t MBA_SCOMFIR_WATCFG1EQ = 0x0c010f89ull;
-
-static const uint32_t MBA_SCOMFIR_WATCFG1EQ_WATCFG1EQ_CFG_WAT_PATB = 0;
-static const uint32_t MBA_SCOMFIR_WATCFG1EQ_WATCFG1EQ_CFG_WAT_PATB_LEN = 44;
+static const uint32_t MBA_SCOMFIR_WATCFG3_WAT_3_CFG = 0;
+static const uint32_t MBA_SCOMFIR_WATCFG3_WAT_3_CFG_LEN = 60;
 // mc/reg00015.H
 
 static const uint64_t MULTICAST_GROUP_3 = 0x0c0f0003ull;
@@ -191,6 +183,16 @@ static const uint32_t SCOMFIR_MCERPT2_POP_RCMD2_BADHIT = 25;
 static const uint32_t SCOMFIR_MCERPT2_POP_RCMD3_BADHIT = 26;
 static const uint32_t SCOMFIR_MCERPT2_MULTISYNC = 27;
 static const uint32_t SCOMFIR_MCERPT2_SYNC_WHILE_ACTIVE = 28;
+static const uint32_t SCOMFIR_MCERPT2_READ0_HOLD_OUT = 32;
+static const uint32_t SCOMFIR_MCERPT2_READ0_HOLD_OUT_LEN = 8;
+static const uint32_t SCOMFIR_MCERPT2_READ1_HOLD_OUT = 40;
+static const uint32_t SCOMFIR_MCERPT2_READ1_HOLD_OUT_LEN = 8;
+static const uint32_t SCOMFIR_MCERPT2_FP0_HIT_MULTIPLE_TID = 48;
+static const uint32_t SCOMFIR_MCERPT2_FP1_HIT_MULTIPLE_TID = 49;
+static const uint32_t SCOMFIR_MCERPT2_RCMD0_HIT_MULTIPLE_TID = 50;
+static const uint32_t SCOMFIR_MCERPT2_RCMD1_HIT_MULTIPLE_TID = 51;
+static const uint32_t SCOMFIR_MCERPT2_RCMD2_HIT_MULTIPLE_TID = 52;
+static const uint32_t SCOMFIR_MCERPT2_RCMD3_HIT_MULTIPLE_TID = 53;
 // mc/reg00015.H
 
 static const uint64_t SCOMFIR_MCFGP1E = 0x0c010c17ull;

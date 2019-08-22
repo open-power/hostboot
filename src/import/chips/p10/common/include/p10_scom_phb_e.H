@@ -50,15 +50,6 @@ static const uint64_t REGS_PHBRESET_REG = 0x0801084aull;
 static const uint32_t REGS_PHBRESET_REG_PE_ETU_RESET = 0;
 // phb/reg00014.H
 
-static const uint64_t RSB_REGS_UVI_PHB5_SCOM_UV_SEC_EXCL = 0x08010904ull;
-
-static const uint32_t RSB_REGS_UVI_PHB5_SCOM_UV_SEC_EXCL_ENABLE = 0;
-static const uint32_t RSB_REGS_UVI_PHB5_SCOM_UV_SEC_EXCL_CMP_VALUE = 12;
-static const uint32_t RSB_REGS_UVI_PHB5_SCOM_UV_SEC_EXCL_CMP_VALUE_LEN = 8;
-static const uint32_t RSB_REGS_UVI_PHB5_SCOM_UV_SEC_EXCL_MSK_VALUE = 44;
-static const uint32_t RSB_REGS_UVI_PHB5_SCOM_UV_SEC_EXCL_MSK_VALUE_LEN = 8;
-// phb/reg00014.H
-
 static const uint64_t RSB_SCOM_SSR_PHB5_UVIAR = 0x08010902ull;
 
 static const uint32_t RSB_SCOM_SSR_PHB5_UVIAR_REQ_ADDR_VLD = 0;

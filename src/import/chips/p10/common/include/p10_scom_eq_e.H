@@ -39,6 +39,54 @@ namespace eq
 #endif
 
 
+static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE = 0x20018331ull;
+
+static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE_CACHE_SYNC_ENABLE_INVERT = 0;
+// eq/reg00014.H
+
+static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS = 0x2001832cull;
+
+static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS_CORE_PDLYS_INVERT = 0;
+// eq/reg00014.H
+
+static const uint64_t CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY = 0x20014316ull;
+
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY_1 = 0;
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY_1_LEN = 8;
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY_2 = 8;
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY_2_LEN = 8;
+// eq/reg00014.H
+
+static const uint64_t CLK_ADJ_01_DCADJ_WRAP_SET_ADJUST_MODE = 0x20014302ull;
+// eq/reg00014.H
+
+static const uint64_t CLK_ADJ_01_DCADJ_WRAP_SET_HOLD_MODE = 0x20014301ull;
+// eq/reg00014.H
+
+static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE = 0x2001432aull;
+
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE_CORE_IS_LATE_INVERT = 0;
+// eq/reg00014.H
+
+static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT = 0x20014328ull;
+
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT_WAIT_CNT_VALUE = 0;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT_WAIT_CNT_VALUE_LEN = 6;
+// eq/reg00014.H
+
+static const uint64_t CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE = 0x20011306ull;
+
+static const uint32_t CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE_ENABLE = 0;
+static const uint32_t CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE_VALUE = 4;
+static const uint32_t CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE_VALUE_LEN = 8;
+// eq/reg00014.H
+
+static const uint64_t CLK_ADJ_03_DCADJ_WRAP_SET_MEASURE_ONLY_MODE = 0x20011311ull;
+// eq/reg00014.H
+
+static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE = 0x20011321ull;
+// eq/reg00014.H
+
 static const uint64_t EPS_DBG_TRACE_REG_1 = 0x200183eeull;
 
 static const uint32_t EPS_DBG_TRACE_REG_1_1_CONDITION1_ACTION_DO = 0;
@@ -256,6 +304,7 @@ static const uint32_t OPCG_REG1_MISR_B_VAL_LEN = 12;
 static const uint32_t OPCG_REG1_MISR_INIT_WAIT = 36;
 static const uint32_t OPCG_REG1_MISR_INIT_WAIT_LEN = 12;
 static const uint32_t OPCG_REG1_SCAN_CLK_USE_EVEN = 49;
+static const uint32_t OPCG_REG1_DISABLE_FCE_DURING_FILL = 50;
 static const uint32_t OPCG_REG1_RTIM_THOLD_FORCE = 52;
 static const uint32_t OPCG_REG1_DISABLE_ARY_CLK_DURING_FILL = 53;
 static const uint32_t OPCG_REG1_SG_HIGH_DURING_FILL = 54;
@@ -315,10 +364,13 @@ static const uint32_t QME_LFIR_DECONFIGURED_INTR = 20;
 static const uint32_t QME_LFIR_RS4_TIMEOUT = 21;
 static const uint32_t QME_LFIR_PB_DATA_HANG = 22;
 static const uint32_t QME_LFIR_WRITE_PROTECT_FAIL = 23;
-static const uint32_t QME_LFIR_SPARE24 = 24;
-static const uint32_t QME_LFIR_SPARE25 = 25;
-static const uint32_t QME_LFIR_SPARE26 = 26;
-static const uint32_t QME_LFIR_SPARE27 = 27;
+static const uint32_t QME_LFIR_DTC_ERROR = 24;
+static const uint32_t QME_LFIR_PB_CE = 25;
+static const uint32_t QME_LFIR_PB_UE = 26;
+static const uint32_t QME_LFIR_PB_SUE = 27;
+static const uint32_t QME_LFIR_PB_INVALID_TOPOTABLE_ENTRY = 28;
+static const uint32_t QME_LFIR_SPARE29 = 29;
+static const uint32_t QME_LFIR_SPARE30 = 30;
 // eq/reg00014.H
 
 static const uint64_t QME_PCBSII = 0x200e0038ull;
@@ -352,25 +404,25 @@ static const uint32_t SLAVE_CONFIG_REG_FORCE_0_QME = 21;
 
 static const uint64_t XSTOP2 = 0x2003000dull;
 
-static const uint32_t XSTOP2_MASK_B = 0;
-static const uint32_t XSTOP2_ALIGNED_XSTOP2 = 1;
-static const uint32_t XSTOP2_TRIGGER_OPCG_ON_XSTOP2 = 2;
-static const uint32_t XSTOP2_WAIT_ALLWAYS = 3;
-static const uint32_t XSTOP2_PERV = 4;
-static const uint32_t XSTOP2_UNIT1 = 5;
-static const uint32_t XSTOP2_UNIT2 = 6;
-static const uint32_t XSTOP2_UNIT3 = 7;
-static const uint32_t XSTOP2_UNIT4 = 8;
-static const uint32_t XSTOP2_UNIT5 = 9;
-static const uint32_t XSTOP2_UNIT6 = 10;
-static const uint32_t XSTOP2_UNIT7 = 11;
-static const uint32_t XSTOP2_UNIT8 = 12;
-static const uint32_t XSTOP2_UNIT9 = 13;
-static const uint32_t XSTOP2_UNIT10 = 14;
-static const uint32_t XSTOP2_UNIT11 = 15;
-static const uint32_t XSTOP2_UNIT12 = 16;
-static const uint32_t XSTOP2_UNIT13 = 17;
-static const uint32_t XSTOP2_UNIT14 = 18;
+static const uint32_t XSTOP2_ENABLE = 0;
+static const uint32_t XSTOP2_WAIT_SNOPA = 1;
+static const uint32_t XSTOP2_TRIGGER_OPCG_GO = 2;
+static const uint32_t XSTOP2_WAIT_ALWAYS = 3;
+static const uint32_t XSTOP2_REGION_PERV = 4;
+static const uint32_t XSTOP2_REGION_UNIT1 = 5;
+static const uint32_t XSTOP2_REGION_UNIT2 = 6;
+static const uint32_t XSTOP2_REGION_UNIT3 = 7;
+static const uint32_t XSTOP2_REGION_UNIT4 = 8;
+static const uint32_t XSTOP2_REGION_UNIT5 = 9;
+static const uint32_t XSTOP2_REGION_UNIT6 = 10;
+static const uint32_t XSTOP2_REGION_UNIT7 = 11;
+static const uint32_t XSTOP2_REGION_UNIT8 = 12;
+static const uint32_t XSTOP2_REGION_UNIT9 = 13;
+static const uint32_t XSTOP2_REGION_UNIT10 = 14;
+static const uint32_t XSTOP2_REGION_UNIT11 = 15;
+static const uint32_t XSTOP2_REGION_UNIT12 = 16;
+static const uint32_t XSTOP2_REGION_UNIT13 = 17;
+static const uint32_t XSTOP2_REGION_UNIT14 = 18;
 static const uint32_t XSTOP2_WAIT_CYCLES = 48;
 static const uint32_t XSTOP2_WAIT_CYCLES_LEN = 12;
 // eq/reg00014.H

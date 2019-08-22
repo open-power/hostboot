@@ -115,6 +115,12 @@ static const uint32_t ERROR_STATUS_PARITY_ON_SELFBOOT_CMD_STATE_ERR = 26;
 static const uint32_t ERROR_STATUS_OPCG_STOPPED_BY_PCB_ERR = 27;
 // mc/reg00005.H
 
+static const uint64_t MBA_SCOMFIR_WATCFG0 = 0x0c010f88ull;
+
+static const uint32_t MBA_SCOMFIR_WATCFG0_WAT_0_CFG = 0;
+static const uint32_t MBA_SCOMFIR_WATCFG0_WAT_0_CFG_LEN = 60;
+// mc/reg00005.H
+
 static const uint64_t NET_CTRL1_RW = 0x0c0f0044ull;
 static const uint64_t NET_CTRL1_RW_WAND = 0x0c0f0045ull;
 static const uint64_t NET_CTRL1_RW_WOR = 0x0c0f0046ull;

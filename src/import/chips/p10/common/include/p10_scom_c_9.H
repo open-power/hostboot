@@ -53,6 +53,7 @@ static const uint32_t CPMS_DDSR_DPLL_ENCODED_MIN = 37;
 static const uint32_t CPMS_DDSR_DPLL_ENCODED_MIN_LEN = 3;
 static const uint32_t CPMS_DDSR_DPLL_ENCODED_MAX = 41;
 static const uint32_t CPMS_DDSR_DPLL_ENCODED_MAX_LEN = 3;
+static const uint32_t CPMS_DDSR_PDSR_RESET_OCCURRED = 59;
 static const uint32_t CPMS_DDSR_STOP_STATE_ACTIVE = 60;
 static const uint32_t CPMS_DDSR_CORE_SAMPLE_DISABLED = 61;
 static const uint32_t CPMS_DDSR_STOP_STATE_OCCURRED = 62;

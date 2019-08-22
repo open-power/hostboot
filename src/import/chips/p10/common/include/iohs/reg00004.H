@@ -5902,6 +5902,90 @@ fapi_try_exit:
 #endif
 }
 
+static inline fapi2::buffer<uint64_t>& SET_AXON_OPCG_REG0_RUNN_HLD_DLY_EN(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_OPCG_REG0));
+#endif
+    return o_data.insertFromRight<AXON_OPCG_REG0_RUNN_HLD_DLY_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_OPCG_REG0_RUNN_HLD_DLY_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_OPCG_REG0_RUNN_HLD_DLY_EN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_OPCG_REG0));
+#endif
+    return o_data.insertFromRight<AXON_OPCG_REG0_RUNN_HLD_DLY_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_OPCG_REG0_RUNN_HLD_DLY_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_OPCG_REG0_RUNN_HLD_DLY_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_OPCG_REG0));
+#endif
+    return o_data.setBit<AXON_OPCG_REG0_RUNN_HLD_DLY_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_OPCG_REG0_RUNN_HLD_DLY_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_AXON_OPCG_REG0_RUNN_HLD_DLY_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_OPCG_REG0));
+#endif
+    return o_data.clearBit<AXON_OPCG_REG0_RUNN_HLD_DLY_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_OPCG_REG0_RUNN_HLD_DLY_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_AXON_OPCG_REG0_RUNN_HLD_DLY_EN(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_OPCG_REG0));
+#endif
+    return i_data.extractToRight<AXON_OPCG_REG0_RUNN_HLD_DLY_EN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_OPCG_REG0_RUNN_HLD_DLY_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_AXON_OPCG_REG0_RUNN_HLD_DLY_EN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_OPCG_REG0));
+#endif
+    return i_data.getBit<AXON_OPCG_REG0_RUNN_HLD_DLY_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_OPCG_REG0_RUNN_HLD_DLY_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
 static inline fapi2::buffer<uint64_t>& SET_AXON_OPCG_REG0_LOOP_COUNT(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {

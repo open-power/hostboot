@@ -405,6 +405,7 @@ static const uint64_t IOO_RX0_0_RD_1_RX_DAC_REGS_CNTL7_PL = 0x8000380110012c3ful
 static const uint32_t IOO_RX0_0_RD_1_RX_DAC_REGS_CNTL7_PL_EN_DC = 48;
 static const uint32_t IOO_RX0_0_RD_1_RX_DAC_REGS_CNTL7_PL_PR_POS = 49;
 static const uint32_t IOO_RX0_0_RD_1_RX_DAC_REGS_CNTL7_PL_PR_POS_LEN = 5;
+static const uint32_t IOO_RX0_0_RD_1_RX_DAC_REGS_CNTL7_PL_PR_GRAY_ENCODE_DIS = 54;
 // iohs/reg00024.H
 
 static const uint64_t IOO_RX0_0_RD_2_RX_BIT_REGS_MODE7_PL = 0x8003500210012c3full;
@@ -737,6 +738,7 @@ static const uint64_t IOO_RX0_1_RD_RX_DAC_REGS_CNTL7_PL = 0x8000380710012c3full;
 static const uint32_t IOO_RX0_1_RD_RX_DAC_REGS_CNTL7_PL_EN_DC = 48;
 static const uint32_t IOO_RX0_1_RD_RX_DAC_REGS_CNTL7_PL_PR_POS = 49;
 static const uint32_t IOO_RX0_1_RD_RX_DAC_REGS_CNTL7_PL_PR_POS_LEN = 5;
+static const uint32_t IOO_RX0_1_RD_RX_DAC_REGS_CNTL7_PL_PR_GRAY_ENCODE_DIS = 54;
 // iohs/reg00025.H
 
 static const uint64_t IOO_RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX67_PL = 0x8002180810012c3full;
@@ -1586,6 +1588,9 @@ static const uint64_t IOO_TX0_2_DD_0_TX_BIT_REGS_CNTL30_PL = 0x80051c0e10012c3fu
 static const uint32_t IOO_TX0_2_DD_0_TX_BIT_REGS_CNTL30_PL_TX_FORCE_HS_FFE = 48;
 // iohs/reg00027.H
 
+static const uint64_t IOO_TX0_2_DD_0_TX_BIT_REGS_STAT2_PL = 0x80052c0e10012c3full;
+// iohs/reg00027.H
+
 static const uint64_t IOO_TX0_2_DD_3_TX_BIT_REGS_CNTL16_PL = 0x8004ac0b10012c3full;
 
 static const uint32_t IOO_TX0_2_DD_3_TX_BIT_REGS_CNTL16_PL_I_TUNE = 48;
@@ -1643,7 +1648,7 @@ static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_CNTL5_PL_EN = 51;
 static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_CNTL5_PL_EN_LEN = 5;
 static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_CNTL5_PL_SEL = 56;
 static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_CNTL5_PL_SEL_LEN = 5;
-// iohs/reg00027.H
+// iohs/reg00028.H
 
 static const uint64_t IOO_TX0_2_DD_5_TX_BIT_REGS_MODE3_PL = 0x80042c0910012c3full;
 

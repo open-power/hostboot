@@ -1968,6 +1968,90 @@ fapi_try_exit:
 #endif
 }
 
+static inline fapi2::buffer<uint64_t>& SET_XTS_REG_ERR_HOLD_SNP_REG_ERR9(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(XTS_REG_ERR_HOLD));
+#endif
+    return o_data.insertFromRight<XTS_REG_ERR_HOLD_SNP_REG_ERR9,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access XTS_REG_ERR_HOLD_SNP_REG_ERR9 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_XTS_REG_ERR_HOLD_SNP_REG_ERR9(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(XTS_REG_ERR_HOLD));
+#endif
+    return o_data.insertFromRight<XTS_REG_ERR_HOLD_SNP_REG_ERR9,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access XTS_REG_ERR_HOLD_SNP_REG_ERR9 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_XTS_REG_ERR_HOLD_SNP_REG_ERR9(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(XTS_REG_ERR_HOLD));
+#endif
+    return o_data.setBit<XTS_REG_ERR_HOLD_SNP_REG_ERR9>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access XTS_REG_ERR_HOLD_SNP_REG_ERR9 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_XTS_REG_ERR_HOLD_SNP_REG_ERR9(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(XTS_REG_ERR_HOLD));
+#endif
+    return o_data.clearBit<XTS_REG_ERR_HOLD_SNP_REG_ERR9>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access XTS_REG_ERR_HOLD_SNP_REG_ERR9 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_XTS_REG_ERR_HOLD_SNP_REG_ERR9(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(XTS_REG_ERR_HOLD));
+#endif
+    return i_data.extractToRight<XTS_REG_ERR_HOLD_SNP_REG_ERR9,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access XTS_REG_ERR_HOLD_SNP_REG_ERR9 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_XTS_REG_ERR_HOLD_SNP_REG_ERR9(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(XTS_REG_ERR_HOLD));
+#endif
+    return i_data.getBit<XTS_REG_ERR_HOLD_SNP_REG_ERR9>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access XTS_REG_ERR_HOLD_SNP_REG_ERR9 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
 static inline fapi2::buffer<uint64_t>& SET_XTS_REG_ERR_HOLD_SNP_REG_ERR7(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {

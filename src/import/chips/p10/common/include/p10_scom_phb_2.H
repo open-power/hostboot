@@ -39,6 +39,15 @@ namespace phb
 #endif
 
 
+static const uint64_t PHB5_SCOM_UV_SEC_EXCL = 0x08010904ull;
+
+static const uint32_t PHB5_SCOM_UV_SEC_EXCL_ENABLE = 0;
+static const uint32_t PHB5_SCOM_UV_SEC_EXCL_CMP_VALUE = 12;
+static const uint32_t PHB5_SCOM_UV_SEC_EXCL_CMP_VALUE_LEN = 8;
+static const uint32_t PHB5_SCOM_UV_SEC_EXCL_MSK_VALUE = 44;
+static const uint32_t PHB5_SCOM_UV_SEC_EXCL_MSK_VALUE_LEN = 8;
+// phb/reg00002.H
+
 static const uint64_t REGS_CERR_RPT0_REG = 0x0301184aull;
 
 static const uint32_t REGS_CERR_RPT0_REG_CERR_RPT0 = 0;

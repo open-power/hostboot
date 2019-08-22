@@ -69,6 +69,7 @@ static const uint32_t CPLT_CTRL1_REGION11_FENCE_DC = 15;
 static const uint32_t CPLT_CTRL1_REGION12_FENCE_DC = 16;
 static const uint32_t CPLT_CTRL1_REGION13_FENCE_DC = 17;
 static const uint32_t CPLT_CTRL1_REGION14_FENCE_DC = 18;
+static const uint32_t CPLT_CTRL1_STG_ACT_EN_DC = 22;
 // pauc/reg00006.H
 
 static const uint64_t DL_PPE_WRAP_ARB_CSAR = 0x10012c4dull;

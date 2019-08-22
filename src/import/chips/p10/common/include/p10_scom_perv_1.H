@@ -39,6 +39,100 @@ namespace perv
 #endif
 
 
+static const uint64_t CLK_ADJ_00_DCADJ_WRAP_STATUS_BITS = 0x00018317ull;
+
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_STATUS_BITS_MODE_FSM_STATE = 0;
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_STATUS_BITS_MODE_FSM_STATE_LEN = 3;
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_STATUS_BITS_ONE_SHOT_STATE = 3;
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_STATUS_BITS_DCC_OVERFLOW = 4;
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_STATUS_BITS_DCC_UNDERFLOW = 5;
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_STATUS_BITS_DCC_LOCK = 6;
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_STATUS_BITS_ADJUST_ERR = 7;
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_STATUS_BITS_DCSENSE_IN = 8;
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_STATUS_BITS_PRELOAD1 = 9;
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_STATUS_BITS_PRELOAD2 = 10;
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_STATUS_BITS_PRELOAD3 = 11;
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_STATUS_BITS_WAIT_CNT_EN = 12;
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_STATUS_BITS_CHOP = 13;
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_STATUS_BITS_FSM_STATE = 14;
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_STATUS_BITS_FSM_STATE_LEN = 5;
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_STATUS_BITS_COMP_CYCLE = 19;
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_STATUS_BITS_COMP_CYCLE_LEN = 3;
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_STATUS_BITS_INVERT_SENSE = 22;
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_STATUS_BITS_ADJUSTMENT_DIR = 23;
+// perv/reg00002.H
+
+static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_CACHE_OVERRIDE = 0x00018327ull;
+
+static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_CACHE_OVERRIDE_ENABLE = 0;
+static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_CACHE_OVERRIDE_VALUE = 4;
+static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_CACHE_OVERRIDE_VALUE_LEN = 4;
+// perv/reg00002.H
+
+static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_ADJUST_MODE = 0x00018322ull;
+// perv/reg00002.H
+
+static const uint64_t CLK_ADJ_01_DCADJ_WRAP_SET_MEASURE_ONLY_MODE = 0x00014311ull;
+// perv/reg00002.H
+
+static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_PDLY_FSM_STATES = 0x00014336ull;
+
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_PDLY_FSM_STATES_ORE_PDLY_STATE = 10;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_PDLY_FSM_STATES_ORE_PDLY_STATE_LEN = 6;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_PDLY_FSM_STATES_ACHE_PDLY_STATE = 26;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_PDLY_FSM_STATES_ACHE_PDLY_STATE_LEN = 6;
+// perv/reg00002.H
+
+static const uint64_t CLK_ADJ_02_DCADJ_WRAP_SET_HOLD_MODE = 0x00012301ull;
+// perv/reg00002.H
+
+static const uint64_t CLK_ADJ_02_DCADJ_WRAP_STATUS_BITS = 0x00012317ull;
+
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_STATUS_BITS_MODE_FSM_STATE = 0;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_STATUS_BITS_MODE_FSM_STATE_LEN = 3;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_STATUS_BITS_ONE_SHOT_STATE = 3;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_STATUS_BITS_DCC_OVERFLOW = 4;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_STATUS_BITS_DCC_UNDERFLOW = 5;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_STATUS_BITS_DCC_LOCK = 6;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_STATUS_BITS_ADJUST_ERR = 7;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_STATUS_BITS_DCSENSE_IN = 8;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_STATUS_BITS_PRELOAD1 = 9;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_STATUS_BITS_PRELOAD2 = 10;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_STATUS_BITS_PRELOAD3 = 11;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_STATUS_BITS_WAIT_CNT_EN = 12;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_STATUS_BITS_CHOP = 13;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_STATUS_BITS_FSM_STATE = 14;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_STATUS_BITS_FSM_STATE_LEN = 5;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_STATUS_BITS_COMP_CYCLE = 19;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_STATUS_BITS_COMP_CYCLE_LEN = 3;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_STATUS_BITS_INVERT_SENSE = 22;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_STATUS_BITS_ADJUSTMENT_DIR = 23;
+// perv/reg00002.H
+
+static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_STICK_CACHE_SYNC_DONE = 0x00012333ull;
+
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_STICK_CACHE_SYNC_DONE_CACHE_SYNC_DONE_STICK = 0;
+// perv/reg00002.H
+
+static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_SWAP_CACHE_INC_DEC = 0x0001232full;
+
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_SWAP_CACHE_INC_DEC_CACHE_INC_DEC_INVERT = 0;
+// perv/reg00002.H
+
+static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT = 0x00012328ull;
+
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT_WAIT_CNT_VALUE = 0;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT_WAIT_CNT_VALUE_LEN = 6;
+// perv/reg00002.H
+
+static const uint64_t CLK_ADJ_03_DCADJ_WRAP_SET_CONFIG = 0x0001130cull;
+
+static const uint32_t CLK_ADJ_03_DCADJ_WRAP_SET_CONFIG_INVERT_SENSE = 0;
+static const uint32_t CLK_ADJ_03_DCADJ_WRAP_SET_CONFIG_ADJUSTMENT_DIR = 1;
+static const uint32_t CLK_ADJ_03_DCADJ_WRAP_SET_CONFIG_CHKSW_NO_OVR_PARATIY_ERROR = 2;
+static const uint32_t CLK_ADJ_03_DCADJ_WRAP_SET_CONFIG_CHKSW_NO_DCC_CONFIG_VISIBLE = 3;
+// perv/reg00002.H
+
 static const uint64_t COMP_P_0_LSTAT = 0x00030002ull;
 // perv/reg00002.H
 
@@ -387,55 +481,55 @@ static const uint32_t SCAN32_SCAN32_REG_LEN = 32;
 static const uint64_t SCAN64 = 0x0003e000ull;
 // perv/reg00002.H
 
-static const uint64_t SINGLE_OTP_ROM_OTPROM_REG1 = 0x00008001ull;
+static const uint64_t SINGLE_OTP_ROM_OTPROM_REG1 = 0x00018001ull;
 
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG1_REGISTER1 = 0;
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG1_REGISTER1_LEN = 64;
 // perv/reg00002.H
 
-static const uint64_t SINGLE_OTP_ROM_OTPROM_REG100 = 0x00008064ull;
+static const uint64_t SINGLE_OTP_ROM_OTPROM_REG100 = 0x00018064ull;
 
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG100_REGISTER100 = 0;
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG100_REGISTER100_LEN = 64;
 // perv/reg00002.H
 
-static const uint64_t SINGLE_OTP_ROM_OTPROM_REG11 = 0x0000800bull;
+static const uint64_t SINGLE_OTP_ROM_OTPROM_REG11 = 0x0001800bull;
 
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG11_REGISTER11 = 0;
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG11_REGISTER11_LEN = 64;
 // perv/reg00002.H
 
-static const uint64_t SINGLE_OTP_ROM_OTPROM_REG26 = 0x0000801aull;
+static const uint64_t SINGLE_OTP_ROM_OTPROM_REG26 = 0x0001801aull;
 
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG26_REGISTER26 = 0;
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG26_REGISTER26_LEN = 64;
 // perv/reg00002.H
 
-static const uint64_t SINGLE_OTP_ROM_OTPROM_REG39 = 0x00008027ull;
+static const uint64_t SINGLE_OTP_ROM_OTPROM_REG39 = 0x00018027ull;
 
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG39_REGISTER39 = 0;
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG39_REGISTER39_LEN = 64;
 // perv/reg00002.H
 
-static const uint64_t SINGLE_OTP_ROM_OTPROM_REG47 = 0x0000802full;
+static const uint64_t SINGLE_OTP_ROM_OTPROM_REG47 = 0x0001802full;
 
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG47_REGISTER47 = 0;
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG47_REGISTER47_LEN = 64;
 // perv/reg00002.H
 
-static const uint64_t SINGLE_OTP_ROM_OTPROM_REG58 = 0x0000803aull;
+static const uint64_t SINGLE_OTP_ROM_OTPROM_REG58 = 0x0001803aull;
 
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG58_REGISTER58 = 0;
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG58_REGISTER58_LEN = 64;
 // perv/reg00002.H
 
-static const uint64_t SINGLE_OTP_ROM_OTPROM_REG70 = 0x00008046ull;
+static const uint64_t SINGLE_OTP_ROM_OTPROM_REG70 = 0x00018046ull;
 
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG70_REGISTER70 = 0;
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG70_REGISTER70_LEN = 64;
 // perv/reg00002.H
 
-static const uint64_t SINGLE_OTP_ROM_OTPROM_REG85 = 0x00008055ull;
+static const uint64_t SINGLE_OTP_ROM_OTPROM_REG85 = 0x00018055ull;
 
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG85_REGISTER85 = 0;
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG85_REGISTER85_LEN = 64;
@@ -469,7 +563,7 @@ static const uint32_t TRA2_TR0_CONFIG_3_C = 0;
 static const uint32_t TRA2_TR0_CONFIG_3_C_LEN = 24;
 static const uint32_t TRA2_TR0_CONFIG_3_D = 24;
 static const uint32_t TRA2_TR0_CONFIG_3_D_LEN = 24;
-// perv/reg00002.H
+// perv/reg00003.H
 
 static const uint64_t TRA3_TR1_TRACE_LO_DATA_REG = 0x000105c1ull;
 
@@ -484,7 +578,7 @@ static const uint32_t TRA3_TR1_TRACE_LO_DATA_REG_WRITE_ON_RUN = 52;
 static const uint32_t TRA3_TR1_TRACE_LO_DATA_REG_RUNNING = 53;
 static const uint32_t TRA3_TR1_TRACE_LO_DATA_REG_HOLD_ADDRESS = 54;
 static const uint32_t TRA3_TR1_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
-// perv/reg00002.H
+// perv/reg00003.H
 
 static const uint64_t TRA3_TR1_CONFIG_5 = 0x000105c8ull;
 
@@ -492,7 +586,7 @@ static const uint32_t TRA3_TR1_CONFIG_5_C = 0;
 static const uint32_t TRA3_TR1_CONFIG_5_C_LEN = 24;
 static const uint32_t TRA3_TR1_CONFIG_5_D = 24;
 static const uint32_t TRA3_TR1_CONFIG_5_D_LEN = 24;
-// perv/reg00002.H
+// perv/reg00003.H
 
 static const uint64_t TRA4_TR1_CONFIG_4 = 0x00010647ull;
 
@@ -500,7 +594,7 @@ static const uint32_t TRA4_TR1_CONFIG_4_A = 0;
 static const uint32_t TRA4_TR1_CONFIG_4_A_LEN = 24;
 static const uint32_t TRA4_TR1_CONFIG_4_B = 24;
 static const uint32_t TRA4_TR1_CONFIG_4_B_LEN = 24;
-// perv/reg00002.H
+// perv/reg00003.H
 
 static const uint64_t TRA5_TR0_CONFIG_2 = 0x00010685ull;
 
@@ -508,7 +602,7 @@ static const uint32_t TRA5_TR0_CONFIG_2_A = 0;
 static const uint32_t TRA5_TR0_CONFIG_2_A_LEN = 24;
 static const uint32_t TRA5_TR0_CONFIG_2_B = 24;
 static const uint32_t TRA5_TR0_CONFIG_2_B_LEN = 24;
-// perv/reg00002.H
+// perv/reg00003.H
 
 static const uint64_t TRA6_TR0_CONFIG_5 = 0x00010708ull;
 
@@ -516,11 +610,12 @@ static const uint32_t TRA6_TR0_CONFIG_5_C = 0;
 static const uint32_t TRA6_TR0_CONFIG_5_C_LEN = 24;
 static const uint32_t TRA6_TR0_CONFIG_5_D = 24;
 static const uint32_t TRA6_TR0_CONFIG_5_D_LEN = 24;
-// perv/reg00002.H
+// perv/reg00003.H
 
 #ifndef __PPE_HCODE__
 }
 }
 #include "perv/reg00002.H"
+#include "perv/reg00003.H"
 #endif
 #endif

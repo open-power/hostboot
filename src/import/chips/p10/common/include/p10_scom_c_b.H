@@ -65,6 +65,10 @@ static const uint32_t CPMS_DHDR_DPLL_ENCODED_MAX = 48;
 static const uint32_t CPMS_DHDR_DPLL_ENCODED_MAX_LEN = 3;
 static const uint32_t CPMS_DHDR_MAX_DATA = 51;
 static const uint32_t CPMS_DHDR_MAX_DATA_LEN = 5;
+static const uint32_t CPMS_DHDR_DDP_EVENT_HISTORY = 56;
+static const uint32_t CPMS_DHDR_DDP_EVENT_HISTORY_LEN = 2;
+static const uint32_t CPMS_DHDR_DDP_ACTIVE = 58;
+static const uint32_t CPMS_DHDR_DDP_ACTIVE_LEN = 2;
 static const uint32_t CPMS_DHDR_CPMS_DDSR_STOP_STATE_ACTIVE = 60;
 static const uint32_t CPMS_DHDR_CPMS_DDSR_CORE_SAMPLE_DISABLED = 61;
 static const uint32_t CPMS_DHDR_STOP_STATE_OCCURRED = 62;
@@ -219,9 +223,12 @@ static const uint32_t EC_PC_PMU_SPRCOR_SCOMC_MMCRC = 6;
 static const uint32_t EC_PC_PMU_SPRCOR_SCOMC_MMCR0 = 7;
 static const uint32_t EC_PC_PMU_SPRCOR_SCOMC_MMCR1 = 8;
 static const uint32_t EC_PC_PMU_SPRCOR_SCOMC_MMCR2 = 9;
-static const uint32_t EC_PC_PMU_SPRCOR_SCOMC_MMCRA = 10;
-static const uint32_t EC_PC_PMU_SPRCOR_SCOMC_SIER = 11;
-static const uint32_t EC_PC_PMU_SPRCOR_SCOMC_THREAD_ID = 12;
+static const uint32_t EC_PC_PMU_SPRCOR_SCOMC_MMCR3 = 10;
+static const uint32_t EC_PC_PMU_SPRCOR_SCOMC_MMCRA = 11;
+static const uint32_t EC_PC_PMU_SPRCOR_SCOMC_SIER = 12;
+static const uint32_t EC_PC_PMU_SPRCOR_SCOMC_SIERA = 13;
+static const uint32_t EC_PC_PMU_SPRCOR_SCOMC_SIERB = 14;
+static const uint32_t EC_PC_PMU_SPRCOR_SCOMC_THREAD_ID = 15;
 static const uint32_t EC_PC_PMU_SPRCOR_SCOMC_THREAD_ID_LEN = 2;
 // c/reg00011.H
 

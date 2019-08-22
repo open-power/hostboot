@@ -2870,170 +2870,172 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_RESERVED_30G(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_30G(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF0_RESERVED_30G,
+    return o_data.insertFromRight<CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_30G,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_RESERVED_30G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_30G chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_RESERVED_30G(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_30G(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF0_RESERVED_30G,
+    return o_data.insertFromRight<CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_30G,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_RESERVED_30G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_30G chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_RESERVED_30G(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_30G(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return o_data.setBit<CPLT_CONF0_RESERVED_30G>();
+    return o_data.setBit<CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_30G>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_RESERVED_30G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_30G chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF0_RESERVED_30G(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_30G(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return o_data.clearBit<CPLT_CONF0_RESERVED_30G>();
+    return o_data.clearBit<CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_30G>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_RESERVED_30G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_30G chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF0_RESERVED_30G(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_30G(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return i_data.extractToRight<CPLT_CONF0_RESERVED_30G,
+    return i_data.extractToRight<CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_30G,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_RESERVED_30G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_30G chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CPLT_CONF0_RESERVED_30G(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_30G(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return i_data.getBit<CPLT_CONF0_RESERVED_30G>();
+    return i_data.getBit<CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_30G>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_RESERVED_30G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_30G chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_RESERVED_31G(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_31G(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF0_RESERVED_31G,
+    return o_data.insertFromRight<CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_31G,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_RESERVED_31G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_31G chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_RESERVED_31G(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_31G(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF0_RESERVED_31G,
+    return o_data.insertFromRight<CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_31G,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_RESERVED_31G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_31G chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_RESERVED_31G(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_31G(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return o_data.setBit<CPLT_CONF0_RESERVED_31G>();
+    return o_data.setBit<CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_31G>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_RESERVED_31G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_31G chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF0_RESERVED_31G(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_31G(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return o_data.clearBit<CPLT_CONF0_RESERVED_31G>();
+    return o_data.clearBit<CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_31G>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_RESERVED_31G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_31G chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF0_RESERVED_31G(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_31G(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return i_data.extractToRight<CPLT_CONF0_RESERVED_31G,
+    return i_data.extractToRight<CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_31G,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_RESERVED_31G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_31G chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CPLT_CONF0_RESERVED_31G(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_31G(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return i_data.getBit<CPLT_CONF0_RESERVED_31G>();
+    return i_data.getBit<CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_31G>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_RESERVED_31G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_31G chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -4302,86 +4304,86 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_FREE_USAGE_47G(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_FREE_USAGE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF0_FREE_USAGE_47G,
+    return o_data.insertFromRight<CPLT_CONF0_FREE_USAGE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_FREE_USAGE_47G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_FREE_USAGE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_FREE_USAGE_47G(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_FREE_USAGE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF0_FREE_USAGE_47G,
+    return o_data.insertFromRight<CPLT_CONF0_FREE_USAGE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_FREE_USAGE_47G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_FREE_USAGE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_FREE_USAGE_47G(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_FREE_USAGE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return o_data.setBit<CPLT_CONF0_FREE_USAGE_47G>();
+    return o_data.setBit<CPLT_CONF0_FREE_USAGE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_FREE_USAGE_47G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_FREE_USAGE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF0_FREE_USAGE_47G(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF0_FREE_USAGE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return o_data.clearBit<CPLT_CONF0_FREE_USAGE_47G>();
+    return o_data.clearBit<CPLT_CONF0_FREE_USAGE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_FREE_USAGE_47G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_FREE_USAGE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF0_FREE_USAGE_47G(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF0_FREE_USAGE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return i_data.extractToRight<CPLT_CONF0_FREE_USAGE_47G,
+    return i_data.extractToRight<CPLT_CONF0_FREE_USAGE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_FREE_USAGE_47G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_FREE_USAGE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CPLT_CONF0_FREE_USAGE_47G(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CPLT_CONF0_FREE_USAGE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return i_data.getBit<CPLT_CONF0_FREE_USAGE_47G>();
+    return i_data.getBit<CPLT_CONF0_FREE_USAGE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_FREE_USAGE_47G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_FREE_USAGE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -4515,422 +4517,472 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_FREE_USAGE_53G(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_53G(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
+#endif
+    return o_data.insertFromRight<CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_53G,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_53G chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_53G(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF0_FREE_USAGE_53G,
+    return o_data.insertFromRight<CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_53G,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_FREE_USAGE_53G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_53G chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_FREE_USAGE_53G(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_53G(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF0_FREE_USAGE_53G,
-           1>(i_data);
+    return o_data.setBit<CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_53G>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_FREE_USAGE_53G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_53G chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_FREE_USAGE_53G(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_53G(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return o_data.setBit<CPLT_CONF0_FREE_USAGE_53G>();
+    return o_data.clearBit<CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_53G>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_FREE_USAGE_53G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_53G chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF0_FREE_USAGE_53G(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_53G(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return o_data.clearBit<CPLT_CONF0_FREE_USAGE_53G>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_FREE_USAGE_53G chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF0_FREE_USAGE_53G(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
-#endif
-    return i_data.extractToRight<CPLT_CONF0_FREE_USAGE_53G,
+    return i_data.extractToRight<CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_53G,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_FREE_USAGE_53G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_53G chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CPLT_CONF0_FREE_USAGE_53G(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_53G(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return i_data.getBit<CPLT_CONF0_FREE_USAGE_53G>();
+    return i_data.getBit<CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_53G>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_FREE_USAGE_53G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_53G chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_54G(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_54G(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
+#endif
+    return o_data.insertFromRight<CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_54G,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_54G chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_54G(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_54G,
+    return o_data.insertFromRight<CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_54G,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_54G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_54G chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_54G(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_54G(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_54G,
-           1>(i_data);
+    return o_data.setBit<CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_54G>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_54G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_54G chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_54G(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_54G(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return o_data.setBit<CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_54G>();
+    return o_data.clearBit<CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_54G>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_54G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_54G chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_54G(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_54G(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return o_data.clearBit<CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_54G>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_54G chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_54G(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
-#endif
-    return i_data.extractToRight<CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_54G,
+    return i_data.extractToRight<CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_54G,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_54G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_54G chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_54G(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_54G(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return i_data.getBit<CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_54G>();
+    return i_data.getBit<CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_54G>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_54G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_54G chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_55G(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_55G(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
+#endif
+    return o_data.insertFromRight<CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_55G,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_55G chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_55G(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_55G,
+    return o_data.insertFromRight<CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_55G,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_55G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_55G chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_55G(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_55G(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_55G,
-           1>(i_data);
+    return o_data.setBit<CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_55G>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_55G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_55G chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_55G(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_55G(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return o_data.setBit<CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_55G>();
+    return o_data.clearBit<CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_55G>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_55G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_55G chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_55G(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_55G(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return o_data.clearBit<CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_55G>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_55G chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_55G(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
-#endif
-    return i_data.extractToRight<CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_55G,
+    return i_data.extractToRight<CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_55G,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_55G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_55G chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_55G(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_55G(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return i_data.getBit<CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_55G>();
+    return i_data.getBit<CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_55G>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_55G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_55G chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_56G(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_56G(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
+#endif
+    return o_data.insertFromRight<CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_56G,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_56G chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_56G(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_56G,
+    return o_data.insertFromRight<CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_56G,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_56G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_56G chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_56G(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_56G(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_56G,
-           1>(i_data);
+    return o_data.setBit<CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_56G>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_56G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_56G chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_56G(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_56G(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return o_data.setBit<CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_56G>();
+    return o_data.clearBit<CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_56G>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_56G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_56G chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_56G(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_56G(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return o_data.clearBit<CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_56G>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_56G chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_56G(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
-#endif
-    return i_data.extractToRight<CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_56G,
+    return i_data.extractToRight<CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_56G,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_56G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_56G chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_56G(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_56G(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return i_data.getBit<CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_56G>();
+    return i_data.getBit<CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_56G>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_56G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_56G chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_57G(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_57G(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
+#endif
+    return o_data.insertFromRight<CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_57G,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_57G chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_57G(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_57G,
+    return o_data.insertFromRight<CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_57G,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_57G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_57G chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_57G(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_57G(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return o_data.insertFromRight<CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_57G,
-           1>(i_data);
+    return o_data.setBit<CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_57G>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_57G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_57G chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_57G(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_57G(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return o_data.setBit<CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_57G>();
+    return o_data.clearBit<CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_57G>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_57G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_57G chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_57G(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_57G(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return o_data.clearBit<CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_57G>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_57G chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_57G(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
-#endif
-    return i_data.extractToRight<CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_57G,
+    return i_data.extractToRight<CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_57G,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_57G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_57G chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_57G(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_57G(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPLT_CONF0_RW, CPLT_CONF0_WO_CLEAR, CPLT_CONF0_WO_OR));
 #endif
-    return i_data.getBit<CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_57G>();
+    return i_data.getBit<CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_57G>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_57G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_57G chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }

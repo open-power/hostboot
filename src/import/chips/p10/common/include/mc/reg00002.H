@@ -2643,62 +2643,62 @@ fapi_try_exit:
 }
 
 
-static inline fapi2::buffer<uint64_t>& SET_MBA_SCOMFIR_DBG0_SCOM0Q_DBG0_SCOM0Q_DEBUG_BUS_0_63(
+static inline fapi2::buffer<uint64_t>& SET_MBA_SCOMFIR_DBG0_SCOM0Q_DBG0_SCOM0Q_DEBUG_BUS_0_43(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_DBG0_SCOM0Q));
 #endif
-    return o_data.insertFromRight<MBA_SCOMFIR_DBG0_SCOM0Q_DBG0_SCOM0Q_DEBUG_BUS_0_63,
-           MBA_SCOMFIR_DBG0_SCOM0Q_DBG0_SCOM0Q_DEBUG_BUS_0_63_LEN>(i_data);
+    return o_data.insertFromRight<MBA_SCOMFIR_DBG0_SCOM0Q_DBG0_SCOM0Q_DEBUG_BUS_0_43,
+           MBA_SCOMFIR_DBG0_SCOM0Q_DBG0_SCOM0Q_DEBUG_BUS_0_43_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access MBA_SCOMFIR_DBG0_SCOM0Q_DBG0_SCOM0Q_DEBUG_BUS_0_63 chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access MBA_SCOMFIR_DBG0_SCOM0Q_DBG0_SCOM0Q_DEBUG_BUS_0_43 chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_MBA_SCOMFIR_DBG0_SCOM0Q_DBG0_SCOM0Q_DEBUG_BUS_0_63(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_MBA_SCOMFIR_DBG0_SCOM0Q_DBG0_SCOM0Q_DEBUG_BUS_0_43(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_DBG0_SCOM0Q));
 #endif
-    return o_data.insertFromRight<MBA_SCOMFIR_DBG0_SCOM0Q_DBG0_SCOM0Q_DEBUG_BUS_0_63,
-           MBA_SCOMFIR_DBG0_SCOM0Q_DBG0_SCOM0Q_DEBUG_BUS_0_63_LEN>(i_data);
+    return o_data.insertFromRight<MBA_SCOMFIR_DBG0_SCOM0Q_DBG0_SCOM0Q_DEBUG_BUS_0_43,
+           MBA_SCOMFIR_DBG0_SCOM0Q_DBG0_SCOM0Q_DEBUG_BUS_0_43_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access MBA_SCOMFIR_DBG0_SCOM0Q_DBG0_SCOM0Q_DEBUG_BUS_0_63 chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access MBA_SCOMFIR_DBG0_SCOM0Q_DBG0_SCOM0Q_DEBUG_BUS_0_43 chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_MBA_SCOMFIR_DBG0_SCOM0Q_DBG0_SCOM0Q_DEBUG_BUS_0_63(
+static inline fapi2::buffer<uint64_t>& GET_MBA_SCOMFIR_DBG0_SCOM0Q_DBG0_SCOM0Q_DEBUG_BUS_0_43(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_DBG0_SCOM0Q));
 #endif
-    return i_data.extractToRight<MBA_SCOMFIR_DBG0_SCOM0Q_DBG0_SCOM0Q_DEBUG_BUS_0_63,
-           MBA_SCOMFIR_DBG0_SCOM0Q_DBG0_SCOM0Q_DEBUG_BUS_0_63_LEN>(o_data);
+    return i_data.extractToRight<MBA_SCOMFIR_DBG0_SCOM0Q_DBG0_SCOM0Q_DEBUG_BUS_0_43,
+           MBA_SCOMFIR_DBG0_SCOM0Q_DBG0_SCOM0Q_DEBUG_BUS_0_43_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access MBA_SCOMFIR_DBG0_SCOM0Q_DBG0_SCOM0Q_DEBUG_BUS_0_63 chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access MBA_SCOMFIR_DBG0_SCOM0Q_DBG0_SCOM0Q_DEBUG_BUS_0_43 chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_MBA_SCOMFIR_DBGCFG1Q(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_MBA_SCOMFIR_WATMSKA0(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = MBA_SCOMFIR_DBGCFG1Q;
+    scomt::last_scom = MBA_SCOMFIR_WATMSKA0;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -2708,14 +2708,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_MBA_SCOMFIR_DBGCFG1Q(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_MBA_SCOMFIR_WATMSKA0(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = MBA_SCOMFIR_DBGCFG1Q;
+    scomt::last_scom = MBA_SCOMFIR_WATMSKA0;
 #endif
-    return fapi2::getScom(i_target, MBA_SCOMFIR_DBGCFG1Q, o_data);
+    return fapi2::getScom(i_target, MBA_SCOMFIR_WATMSKA0, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -2723,13 +2723,13 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_MBA_SCOMFIR_DBGCFG1Q(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+static inline fapi2::ReturnCode PUT_MBA_SCOMFIR_WATMSKA0(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_DBGCFG1Q));
+    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_WATMSKA0));
 #endif
-    return fapi2::putScom(i_target, MBA_SCOMFIR_DBGCFG1Q, i_data);
+    return fapi2::putScom(i_target, MBA_SCOMFIR_WATMSKA0, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -2737,487 +2737,47 @@ fapi_try_exit:
 }
 
 
-static inline fapi2::buffer<uint64_t>& SET_MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_ENABLE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_MBA_SCOMFIR_WATMSKA0_WAT_MASK_A0(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_DBGCFG1Q));
+    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_WATMSKA0));
 #endif
-    return o_data.insertFromRight<MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_ENABLE,
-           1>(i_data);
+    return o_data.insertFromRight<MBA_SCOMFIR_WATMSKA0_WAT_MASK_A0,
+           MBA_SCOMFIR_WATMSKA0_WAT_MASK_A0_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access MBA_SCOMFIR_WATMSKA0_WAT_MASK_A0 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_ENABLE(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_MBA_SCOMFIR_WATMSKA0_WAT_MASK_A0(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_DBGCFG1Q));
+    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_WATMSKA0));
 #endif
-    return o_data.insertFromRight<MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_ENABLE,
-           1>(i_data);
+    return o_data.insertFromRight<MBA_SCOMFIR_WATMSKA0_WAT_MASK_A0,
+           MBA_SCOMFIR_WATMSKA0_WAT_MASK_A0_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access MBA_SCOMFIR_WATMSKA0_WAT_MASK_A0 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_ENABLE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_DBGCFG1Q));
-#endif
-    return o_data.setBit<MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_ENABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_ENABLE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_DBGCFG1Q));
-#endif
-    return o_data.clearBit<MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_ENABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_ENABLE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_MBA_SCOMFIR_WATMSKA0_WAT_MASK_A0(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_DBGCFG1Q));
+    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_WATMSKA0));
 #endif
-    return i_data.extractToRight<MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_ENABLE,
-           1>(o_data);
+    return i_data.extractToRight<MBA_SCOMFIR_WATMSKA0_WAT_MASK_A0,
+           MBA_SCOMFIR_WATMSKA0_WAT_MASK_A0_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_ENABLE(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_DBGCFG1Q));
-#endif
-    return i_data.getBit<MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_ENABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_EVENT_TO_INT(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_DBGCFG1Q));
-#endif
-    return o_data.insertFromRight<MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_EVENT_TO_INT,
-           MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_EVENT_TO_INT_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_EVENT_TO_INT chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_EVENT_TO_INT(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_DBGCFG1Q));
-#endif
-    return o_data.insertFromRight<MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_EVENT_TO_INT,
-           MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_EVENT_TO_INT_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_EVENT_TO_INT chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_EVENT_TO_INT(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_DBGCFG1Q));
-#endif
-    return i_data.extractToRight<MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_EVENT_TO_INT,
-           MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_EVENT_TO_INT_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_EVENT_TO_INT chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_TRIGGER_SEL(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_DBGCFG1Q));
-#endif
-    return o_data.insertFromRight<MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_TRIGGER_SEL,
-           MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_TRIGGER_SEL_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_TRIGGER_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_TRIGGER_SEL(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_DBGCFG1Q));
-#endif
-    return o_data.insertFromRight<MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_TRIGGER_SEL,
-           MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_TRIGGER_SEL_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_TRIGGER_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_TRIGGER_SEL(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_DBGCFG1Q));
-#endif
-    return i_data.extractToRight<MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_TRIGGER_SEL,
-           MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_TRIGGER_SEL_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_TRIGGER_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_RESET_SEL(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_DBGCFG1Q));
-#endif
-    return o_data.insertFromRight<MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_RESET_SEL,
-           MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_RESET_SEL_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_RESET_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_RESET_SEL(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_DBGCFG1Q));
-#endif
-    return o_data.insertFromRight<MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_RESET_SEL,
-           MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_RESET_SEL_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_RESET_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_RESET_SEL(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_DBGCFG1Q));
-#endif
-    return i_data.extractToRight<MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_RESET_SEL,
-           MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_RESET_SEL_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_RESET_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_ARM_SEL(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_DBGCFG1Q));
-#endif
-    return o_data.insertFromRight<MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_ARM_SEL,
-           MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_ARM_SEL_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_ARM_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_ARM_SEL(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_DBGCFG1Q));
-#endif
-    return o_data.insertFromRight<MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_ARM_SEL,
-           MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_ARM_SEL_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_ARM_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_ARM_SEL(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_DBGCFG1Q));
-#endif
-    return i_data.extractToRight<MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_ARM_SEL,
-           MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_ARM_SEL_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_ARM_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_MBA_SCOMFIR_DBGCFG1Q_RESERVED_63(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_DBGCFG1Q));
-#endif
-    return o_data.insertFromRight<MBA_SCOMFIR_DBGCFG1Q_RESERVED_63,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access MBA_SCOMFIR_DBGCFG1Q_RESERVED_63 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_MBA_SCOMFIR_DBGCFG1Q_RESERVED_63(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_DBGCFG1Q));
-#endif
-    return o_data.insertFromRight<MBA_SCOMFIR_DBGCFG1Q_RESERVED_63,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access MBA_SCOMFIR_DBGCFG1Q_RESERVED_63 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_MBA_SCOMFIR_DBGCFG1Q_RESERVED_63(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_DBGCFG1Q));
-#endif
-    return o_data.setBit<MBA_SCOMFIR_DBGCFG1Q_RESERVED_63>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access MBA_SCOMFIR_DBGCFG1Q_RESERVED_63 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_MBA_SCOMFIR_DBGCFG1Q_RESERVED_63(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_DBGCFG1Q));
-#endif
-    return o_data.clearBit<MBA_SCOMFIR_DBGCFG1Q_RESERVED_63>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access MBA_SCOMFIR_DBGCFG1Q_RESERVED_63 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_MBA_SCOMFIR_DBGCFG1Q_RESERVED_63(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_DBGCFG1Q));
-#endif
-    return i_data.extractToRight<MBA_SCOMFIR_DBGCFG1Q_RESERVED_63,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access MBA_SCOMFIR_DBGCFG1Q_RESERVED_63 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_MBA_SCOMFIR_DBGCFG1Q_RESERVED_63(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_DBGCFG1Q));
-#endif
-    return i_data.getBit<MBA_SCOMFIR_DBGCFG1Q_RESERVED_63>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access MBA_SCOMFIR_DBGCFG1Q_RESERVED_63 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_MBA_SCOMFIR_MCWATDATA2(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = MBA_SCOMFIR_MCWATDATA2;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_MBA_SCOMFIR_MCWATDATA2(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = MBA_SCOMFIR_MCWATDATA2;
-#endif
-    return fapi2::getScom(i_target, MBA_SCOMFIR_MCWATDATA2, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_MBA_SCOMFIR_MCWATDATA2(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_MCWATDATA2));
-#endif
-    return fapi2::putScom(i_target, MBA_SCOMFIR_MCWATDATA2, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-
-static inline fapi2::buffer<uint64_t>& SET_MBA_SCOMFIR_MCWATDATA2_PATTERN_B(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_MCWATDATA2));
-#endif
-    return o_data.insertFromRight<MBA_SCOMFIR_MCWATDATA2_PATTERN_B,
-           MBA_SCOMFIR_MCWATDATA2_PATTERN_B_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access MBA_SCOMFIR_MCWATDATA2_PATTERN_B chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_MBA_SCOMFIR_MCWATDATA2_PATTERN_B(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_MCWATDATA2));
-#endif
-    return o_data.insertFromRight<MBA_SCOMFIR_MCWATDATA2_PATTERN_B,
-           MBA_SCOMFIR_MCWATDATA2_PATTERN_B_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access MBA_SCOMFIR_MCWATDATA2_PATTERN_B chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_MBA_SCOMFIR_MCWATDATA2_PATTERN_B(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_MCWATDATA2));
-#endif
-    return i_data.extractToRight<MBA_SCOMFIR_MCWATDATA2_PATTERN_B,
-           MBA_SCOMFIR_MCWATDATA2_PATTERN_B_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access MBA_SCOMFIR_MCWATDATA2_PATTERN_B chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_MBA_SCOMFIR_MCWATDATA2_MASK_B(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_MCWATDATA2));
-#endif
-    return o_data.insertFromRight<MBA_SCOMFIR_MCWATDATA2_MASK_B,
-           MBA_SCOMFIR_MCWATDATA2_MASK_B_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access MBA_SCOMFIR_MCWATDATA2_MASK_B chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_MBA_SCOMFIR_MCWATDATA2_MASK_B(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_MCWATDATA2));
-#endif
-    return o_data.insertFromRight<MBA_SCOMFIR_MCWATDATA2_MASK_B,
-           MBA_SCOMFIR_MCWATDATA2_MASK_B_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access MBA_SCOMFIR_MCWATDATA2_MASK_B chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_MBA_SCOMFIR_MCWATDATA2_MASK_B(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_MCWATDATA2));
-#endif
-    return i_data.extractToRight<MBA_SCOMFIR_MCWATDATA2_MASK_B,
-           MBA_SCOMFIR_MCWATDATA2_MASK_B_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access MBA_SCOMFIR_MCWATDATA2_MASK_B chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access MBA_SCOMFIR_WATMSKA0_WAT_MASK_A0 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

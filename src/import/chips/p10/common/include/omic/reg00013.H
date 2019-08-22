@@ -2315,6 +2315,250 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_CTL_REGS_RX_MODE24_PG(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = CTL_REGS_RX_MODE24_PG;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_CTL_REGS_RX_MODE24_PG(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = CTL_REGS_RX_MODE24_PG;
+#endif
+    return fapi2::getScom(i_target, CTL_REGS_RX_MODE24_PG, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_CTL_REGS_RX_MODE24_PG(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(CTL_REGS_RX_MODE24_PG));
+#endif
+    return fapi2::putScom(i_target, CTL_REGS_RX_MODE24_PG, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+static inline fapi2::buffer<uint64_t>& SET_CTL_REGS_RX_MODE24_PG_1_INVALID_LOCK_THRESH_INC(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_RX_MODE24_PG));
+#endif
+    return o_data.insertFromRight<CTL_REGS_RX_MODE24_PG_1_INVALID_LOCK_THRESH_INC,
+           CTL_REGS_RX_MODE24_PG_1_INVALID_LOCK_THRESH_INC_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_MODE24_PG_1_INVALID_LOCK_THRESH_INC chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CTL_REGS_RX_MODE24_PG_1_INVALID_LOCK_THRESH_INC(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_RX_MODE24_PG));
+#endif
+    return o_data.insertFromRight<CTL_REGS_RX_MODE24_PG_1_INVALID_LOCK_THRESH_INC,
+           CTL_REGS_RX_MODE24_PG_1_INVALID_LOCK_THRESH_INC_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_MODE24_PG_1_INVALID_LOCK_THRESH_INC chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CTL_REGS_RX_MODE24_PG_1_INVALID_LOCK_THRESH_INC(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_RX_MODE24_PG));
+#endif
+    return i_data.extractToRight<CTL_REGS_RX_MODE24_PG_1_INVALID_LOCK_THRESH_INC,
+           CTL_REGS_RX_MODE24_PG_1_INVALID_LOCK_THRESH_INC_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_MODE24_PG_1_INVALID_LOCK_THRESH_INC chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CTL_REGS_RX_MODE24_PG_1_INVALID_LOCK_THRESH_DEC(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_RX_MODE24_PG));
+#endif
+    return o_data.insertFromRight<CTL_REGS_RX_MODE24_PG_1_INVALID_LOCK_THRESH_DEC,
+           CTL_REGS_RX_MODE24_PG_1_INVALID_LOCK_THRESH_DEC_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_MODE24_PG_1_INVALID_LOCK_THRESH_DEC chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CTL_REGS_RX_MODE24_PG_1_INVALID_LOCK_THRESH_DEC(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_RX_MODE24_PG));
+#endif
+    return o_data.insertFromRight<CTL_REGS_RX_MODE24_PG_1_INVALID_LOCK_THRESH_DEC,
+           CTL_REGS_RX_MODE24_PG_1_INVALID_LOCK_THRESH_DEC_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_MODE24_PG_1_INVALID_LOCK_THRESH_DEC chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CTL_REGS_RX_MODE24_PG_1_INVALID_LOCK_THRESH_DEC(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_RX_MODE24_PG));
+#endif
+    return i_data.extractToRight<CTL_REGS_RX_MODE24_PG_1_INVALID_LOCK_THRESH_DEC,
+           CTL_REGS_RX_MODE24_PG_1_INVALID_LOCK_THRESH_DEC_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_MODE24_PG_1_INVALID_LOCK_THRESH_DEC chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CTL_REGS_RX_MODE24_PG_2_INVALID_LOCK_THRESH_INC(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_RX_MODE24_PG));
+#endif
+    return o_data.insertFromRight<CTL_REGS_RX_MODE24_PG_2_INVALID_LOCK_THRESH_INC,
+           CTL_REGS_RX_MODE24_PG_2_INVALID_LOCK_THRESH_INC_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_MODE24_PG_2_INVALID_LOCK_THRESH_INC chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CTL_REGS_RX_MODE24_PG_2_INVALID_LOCK_THRESH_INC(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_RX_MODE24_PG));
+#endif
+    return o_data.insertFromRight<CTL_REGS_RX_MODE24_PG_2_INVALID_LOCK_THRESH_INC,
+           CTL_REGS_RX_MODE24_PG_2_INVALID_LOCK_THRESH_INC_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_MODE24_PG_2_INVALID_LOCK_THRESH_INC chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CTL_REGS_RX_MODE24_PG_2_INVALID_LOCK_THRESH_INC(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_RX_MODE24_PG));
+#endif
+    return i_data.extractToRight<CTL_REGS_RX_MODE24_PG_2_INVALID_LOCK_THRESH_INC,
+           CTL_REGS_RX_MODE24_PG_2_INVALID_LOCK_THRESH_INC_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_MODE24_PG_2_INVALID_LOCK_THRESH_INC chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CTL_REGS_RX_MODE24_PG_2_INVALID_LOCK_THRESH_DEC(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_RX_MODE24_PG));
+#endif
+    return o_data.insertFromRight<CTL_REGS_RX_MODE24_PG_2_INVALID_LOCK_THRESH_DEC,
+           CTL_REGS_RX_MODE24_PG_2_INVALID_LOCK_THRESH_DEC_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_MODE24_PG_2_INVALID_LOCK_THRESH_DEC chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CTL_REGS_RX_MODE24_PG_2_INVALID_LOCK_THRESH_DEC(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_RX_MODE24_PG));
+#endif
+    return o_data.insertFromRight<CTL_REGS_RX_MODE24_PG_2_INVALID_LOCK_THRESH_DEC,
+           CTL_REGS_RX_MODE24_PG_2_INVALID_LOCK_THRESH_DEC_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_MODE24_PG_2_INVALID_LOCK_THRESH_DEC chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CTL_REGS_RX_MODE24_PG_2_INVALID_LOCK_THRESH_DEC(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_RX_MODE24_PG));
+#endif
+    return i_data.extractToRight<CTL_REGS_RX_MODE24_PG_2_INVALID_LOCK_THRESH_DEC,
+           CTL_REGS_RX_MODE24_PG_2_INVALID_LOCK_THRESH_DEC_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_MODE24_PG_2_INVALID_LOCK_THRESH_DEC chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_CTL_REGS_TX_CNTL6_PG(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING

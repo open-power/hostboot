@@ -1158,8 +1158,7 @@ static const uint64_t IOO_RX0_2_RD_1_RX_DAC_REGS_CNTL1_PL = 0x8000080d10012c3ful
 
 static const uint32_t IOO_RX0_2_RD_1_RX_DAC_REGS_CNTL1_PL_A_BANK_CONTROLS = 48;
 static const uint32_t IOO_RX0_2_RD_1_RX_DAC_REGS_CNTL1_PL_A_BANK_CONTROLS_LEN = 6;
-static const uint32_t IOO_RX0_2_RD_1_RX_DAC_REGS_CNTL1_PL_LANE_ANA_PDWN = 54;
-static const uint32_t IOO_RX0_2_RD_1_RX_DAC_REGS_CNTL1_PL_B_BANK_CONTROLS = 55;
+static const uint32_t IOO_RX0_2_RD_1_RX_DAC_REGS_CNTL1_PL_B_BANK_CONTROLS = 54;
 static const uint32_t IOO_RX0_2_RD_1_RX_DAC_REGS_CNTL1_PL_B_BANK_CONTROLS_LEN = 6;
 // iohs/reg00048.H
 
@@ -1343,6 +1342,8 @@ static const uint64_t IOO_RX0_2_RD_5_RX_DAC_REGS_CNTL15_PL = 0x8000780910012c3fu
 
 static const uint32_t IOO_RX0_2_RD_5_RX_DAC_REGS_CNTL15_PL_A_FENCE_EN = 48;
 static const uint32_t IOO_RX0_2_RD_5_RX_DAC_REGS_CNTL15_PL_B_FENCE_EN = 49;
+static const uint32_t IOO_RX0_2_RD_5_RX_DAC_REGS_CNTL15_PL_MINI_PR_GRAY_ENCODE_DIS = 50;
+static const uint32_t IOO_RX0_2_RD_5_RX_DAC_REGS_CNTL15_PL_TINY_PR_GRAY_ENCODE_DIS = 51;
 // iohs/reg00049.H
 
 static const uint64_t IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL14_PG = 0x800d2c0010012c3full;
@@ -1589,6 +1590,9 @@ static const uint32_t IOO_TX0_2_DD_1_TX_BIT_REGS_CNTL2_PL_RESET = 48;
 static const uint32_t IOO_TX0_2_DD_1_TX_BIT_REGS_CNTL2_PL_DOM_IORESET = 49;
 // iohs/reg00049.H
 
+static const uint64_t IOO_TX0_2_DD_1_TX_BIT_REGS_STAT2_PL = 0x80052c0d10012c3full;
+// iohs/reg00049.H
+
 static const uint64_t IOO_TX0_2_DD_TX_BIT_REGS_CNTL11_PL = 0x8004840c10012c3full;
 
 static const uint32_t IOO_TX0_2_DD_TX_BIT_REGS_CNTL11_PL_TX_NSEG_MAIN_16_24_HS_EN = 48;
@@ -1632,7 +1636,7 @@ static const uint32_t IOO_TX0_2_DD_4_TX_BIT_REGS_CNTL16_PL_I_TUNE = 48;
 static const uint32_t IOO_TX0_2_DD_4_TX_BIT_REGS_CNTL16_PL_I_TUNE_LEN = 6;
 static const uint32_t IOO_TX0_2_DD_4_TX_BIT_REGS_CNTL16_PL_Q_TUNE = 54;
 static const uint32_t IOO_TX0_2_DD_4_TX_BIT_REGS_CNTL16_PL_Q_TUNE_LEN = 6;
-// iohs/reg00049.H
+// iohs/reg00050.H
 
 static const uint64_t IOO_TX0_2_DD_4_TX_BIT_REGS_CNTL26_PL = 0x8004fc0a10012c3full;
 

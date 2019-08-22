@@ -5214,6 +5214,95 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_MBA_SCOMFIR_WATCFG0(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = MBA_SCOMFIR_WATCFG0;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_MBA_SCOMFIR_WATCFG0(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = MBA_SCOMFIR_WATCFG0;
+#endif
+    return fapi2::getScom(i_target, MBA_SCOMFIR_WATCFG0, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_MBA_SCOMFIR_WATCFG0(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_WATCFG0));
+#endif
+    return fapi2::putScom(i_target, MBA_SCOMFIR_WATCFG0, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+static inline fapi2::buffer<uint64_t>& SET_MBA_SCOMFIR_WATCFG0_WAT_0_CFG(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_WATCFG0));
+#endif
+    return o_data.insertFromRight<MBA_SCOMFIR_WATCFG0_WAT_0_CFG,
+           MBA_SCOMFIR_WATCFG0_WAT_0_CFG_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access MBA_SCOMFIR_WATCFG0_WAT_0_CFG chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_MBA_SCOMFIR_WATCFG0_WAT_0_CFG(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_WATCFG0));
+#endif
+    return o_data.insertFromRight<MBA_SCOMFIR_WATCFG0_WAT_0_CFG,
+           MBA_SCOMFIR_WATCFG0_WAT_0_CFG_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access MBA_SCOMFIR_WATCFG0_WAT_0_CFG chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_MBA_SCOMFIR_WATCFG0_WAT_0_CFG(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(MBA_SCOMFIR_WATCFG0));
+#endif
+    return i_data.extractToRight<MBA_SCOMFIR_WATCFG0_WAT_0_CFG,
+           MBA_SCOMFIR_WATCFG0_WAT_0_CFG_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access MBA_SCOMFIR_WATCFG0_WAT_0_CFG chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_NET_CTRL1_RW(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING

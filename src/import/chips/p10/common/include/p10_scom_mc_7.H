@@ -121,12 +121,10 @@ static const uint32_t MBA_SCOMFIR_MCEBUSEN1_MCEBUSEN1_EVENT_BUS_SELECTS = 0;
 static const uint32_t MBA_SCOMFIR_MCEBUSEN1_MCEBUSEN1_EVENT_BUS_SELECTS_LEN = 64;
 // mc/reg00007.H
 
-static const uint64_t MBA_SCOMFIR_MCWATDATA4 = 0x0c010f9eull;
+static const uint64_t MBA_SCOMFIR_WATMSKB1 = 0x0c010f83ull;
 
-static const uint32_t MBA_SCOMFIR_MCWATDATA4_PATTERN_B = 0;
-static const uint32_t MBA_SCOMFIR_MCWATDATA4_PATTERN_B_LEN = 22;
-static const uint32_t MBA_SCOMFIR_MCWATDATA4_MASK_B = 22;
-static const uint32_t MBA_SCOMFIR_MCWATDATA4_MASK_B_LEN = 22;
+static const uint32_t MBA_SCOMFIR_WATMSKB1_WAT_MASK_B1 = 0;
+static const uint32_t MBA_SCOMFIR_WATMSKB1_WAT_MASK_B1_LEN = 44;
 // mc/reg00007.H
 
 static const uint64_t OPCG_CAPT2 = 0x0c030011ull;

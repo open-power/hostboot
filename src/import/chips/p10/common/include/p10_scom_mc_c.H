@@ -138,22 +138,16 @@ static const uint32_t HOSTATTN_UNMASKED_IN_LEN = 53;
 
 static const uint64_t MBA_SCOMFIR_DBG1_SCOM0Q = 0x0c010f96ull;
 
-static const uint32_t MBA_SCOMFIR_DBG1_SCOM0Q_DBG1_SCOM0Q_DEBUG_BUS_0_63 = 0;
-static const uint32_t MBA_SCOMFIR_DBG1_SCOM0Q_DBG1_SCOM0Q_DEBUG_BUS_0_63_LEN = 64;
+static const uint32_t MBA_SCOMFIR_DBG1_SCOM0Q_DBG1_SCOM0Q_DEBUG_BUS_0_43 = 0;
+static const uint32_t MBA_SCOMFIR_DBG1_SCOM0Q_DBG1_SCOM0Q_DEBUG_BUS_0_43_LEN = 44;
 // mc/reg00012.H
 
-static const uint64_t MBA_SCOMFIR_MCWATDATA8 = 0x0c010fa2ull;
+static const uint64_t MBA_SCOMFIR_WATFNB = 0x0c010f8dull;
 
-static const uint32_t MBA_SCOMFIR_MCWATDATA8_PATTERN_B = 0;
-static const uint32_t MBA_SCOMFIR_MCWATDATA8_PATTERN_B_LEN = 22;
-static const uint32_t MBA_SCOMFIR_MCWATDATA8_MASK_B = 22;
-static const uint32_t MBA_SCOMFIR_MCWATDATA8_MASK_B_LEN = 22;
-// mc/reg00012.H
-
-static const uint64_t MBA_SCOMFIR_WATCFG0AQ = 0x0c010f80ull;
-
-static const uint32_t MBA_SCOMFIR_WATCFG0AQ_WATCFG0AQ_CFG_WAT_EVENT_SEL = 0;
-static const uint32_t MBA_SCOMFIR_WATCFG0AQ_WATCFG0AQ_CFG_WAT_EVENT_SEL_LEN = 48;
+static const uint32_t MBA_SCOMFIR_WATFNB_3_CFG = 0;
+static const uint32_t MBA_SCOMFIR_WATFNB_3_CFG_LEN = 22;
+static const uint32_t MBA_SCOMFIR_WATFNB_4_CFG = 22;
+static const uint32_t MBA_SCOMFIR_WATFNB_4_CFG_LEN = 22;
 // mc/reg00012.H
 
 static const uint64_t MULTICAST_GROUP_4 = 0x0c0f0004ull;

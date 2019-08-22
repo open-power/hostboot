@@ -320,6 +320,22 @@ static const uint32_t PSCOM_STATUS_ERROR_REG_TRAPPED_SATELLITE_ACKNOWLEDGE_ACCES
 static const uint32_t PSCOM_STATUS_ERROR_REG_TRAPPED_SATELLITE_ACKNOWLEDGE_INVALID_REGISTER = 35;
 // c/reg00008.H
 
+static const uint64_t QME_QOSR = 0x200e08a0ull;
+
+static const uint32_t QME_QOSR_0_QOS_INDEX = 2;
+static const uint32_t QME_QOSR_0_QOS_INDEX_LEN = 6;
+static const uint32_t QME_QOSR_1_QOS_INDEX = 10;
+static const uint32_t QME_QOSR_1_QOS_INDEX_LEN = 6;
+static const uint32_t QME_QOSR_2_QOS_INDEX = 18;
+static const uint32_t QME_QOSR_2_QOS_INDEX_LEN = 6;
+static const uint32_t QME_QOSR_3_QOS_INDEX = 26;
+static const uint32_t QME_QOSR_3_QOS_INDEX_LEN = 6;
+static const uint32_t QME_QOSR_0_DTC_INDEX = 34;
+static const uint32_t QME_QOSR_0_DTC_INDEX_LEN = 4;
+static const uint32_t QME_QOSR_2_DTC_INDEX = 50;
+static const uint32_t QME_QOSR_2_DTC_INDEX_LEN = 6;
+// c/reg00008.H
+
 #ifndef __PPE_HCODE__
 }
 }

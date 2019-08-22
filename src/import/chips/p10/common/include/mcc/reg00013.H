@@ -5426,6 +5426,90 @@ fapi_try_exit:
 #endif
 }
 
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLCFG_FLIT_RATE_DETECT_SAFE_MODE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(USTL_USTLCFG));
+#endif
+    return o_data.insertFromRight<USTL_USTLCFG_FLIT_RATE_DETECT_SAFE_MODE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access USTL_USTLCFG_FLIT_RATE_DETECT_SAFE_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLCFG_FLIT_RATE_DETECT_SAFE_MODE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(USTL_USTLCFG));
+#endif
+    return o_data.insertFromRight<USTL_USTLCFG_FLIT_RATE_DETECT_SAFE_MODE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access USTL_USTLCFG_FLIT_RATE_DETECT_SAFE_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLCFG_FLIT_RATE_DETECT_SAFE_MODE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(USTL_USTLCFG));
+#endif
+    return o_data.setBit<USTL_USTLCFG_FLIT_RATE_DETECT_SAFE_MODE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access USTL_USTLCFG_FLIT_RATE_DETECT_SAFE_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLCFG_FLIT_RATE_DETECT_SAFE_MODE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(USTL_USTLCFG));
+#endif
+    return o_data.clearBit<USTL_USTLCFG_FLIT_RATE_DETECT_SAFE_MODE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access USTL_USTLCFG_FLIT_RATE_DETECT_SAFE_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_USTL_USTLCFG_FLIT_RATE_DETECT_SAFE_MODE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(USTL_USTLCFG));
+#endif
+    return i_data.extractToRight<USTL_USTLCFG_FLIT_RATE_DETECT_SAFE_MODE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access USTL_USTLCFG_FLIT_RATE_DETECT_SAFE_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_USTL_USTLCFG_FLIT_RATE_DETECT_SAFE_MODE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(USTL_USTLCFG));
+#endif
+    return i_data.getBit<USTL_USTLCFG_FLIT_RATE_DETECT_SAFE_MODE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access USTL_USTLCFG_FLIT_RATE_DETECT_SAFE_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLCFG_TMPL9_COLD_START_THRESHOLD(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {

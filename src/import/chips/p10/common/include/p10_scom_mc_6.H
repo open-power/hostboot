@@ -64,6 +64,7 @@ static const uint32_t CPLT_CTRL1_REGION11_FENCE_DC = 15;
 static const uint32_t CPLT_CTRL1_REGION12_FENCE_DC = 16;
 static const uint32_t CPLT_CTRL1_REGION13_FENCE_DC = 17;
 static const uint32_t CPLT_CTRL1_REGION14_FENCE_DC = 18;
+static const uint32_t CPLT_CTRL1_STG_ACT_EN_DC = 22;
 // mc/reg00006.H
 
 static const uint64_t EPS_DBG_INST1_COND_REG_3 = 0x0c0107c3ull;
@@ -152,6 +153,14 @@ static const uint32_t LOCAL_XSTOP_UNMASKED_IN = 1;
 static const uint32_t LOCAL_XSTOP_UNMASKED_IN_LEN = 15;
 // mc/reg00006.H
 
+static const uint64_t MBA_SCOMFIR_WATFNA = 0x0c010f8cull;
+
+static const uint32_t MBA_SCOMFIR_WATFNA_1_CFG = 0;
+static const uint32_t MBA_SCOMFIR_WATFNA_1_CFG_LEN = 22;
+static const uint32_t MBA_SCOMFIR_WATFNA_2_CFG = 22;
+static const uint32_t MBA_SCOMFIR_WATFNA_2_CFG_LEN = 22;
+// mc/reg00006.H
+
 static const uint64_t SCOMFIR_MCFGP1A = 0x0c010c0full;
 
 static const uint32_t SCOMFIR_MCFGP1A_HOLE_VALID = 0;
@@ -188,8 +197,20 @@ static const uint32_t SCOMFIR_MCFGPM0E_UPPER_ADDRESS_LEN = 19;
 
 static const uint64_t SCOMFIR_MCMODE3 = 0x0c010c2full;
 
-static const uint32_t SCOMFIR_MCMODE3_MCMODE3_RESERVED_0_10 = 0;
-static const uint32_t SCOMFIR_MCMODE3_MCMODE3_RESERVED_0_10_LEN = 11;
+static const uint32_t SCOMFIR_MCMODE3_MULTI_TID = 0;
+static const uint32_t SCOMFIR_MCMODE3_TID_4TB_MODE = 1;
+static const uint32_t SCOMFIR_MCMODE3_TID0_VALID = 2;
+static const uint32_t SCOMFIR_MCMODE3_TID1_VALID = 3;
+static const uint32_t SCOMFIR_MCMODE3_TID2_VALID = 4;
+static const uint32_t SCOMFIR_MCMODE3_TID3_VALID = 5;
+static const uint32_t SCOMFIR_MCMODE3_TID0 = 6;
+static const uint32_t SCOMFIR_MCMODE3_TID0_LEN = 5;
+static const uint32_t SCOMFIR_MCMODE3_TID1 = 11;
+static const uint32_t SCOMFIR_MCMODE3_TID1_LEN = 5;
+static const uint32_t SCOMFIR_MCMODE3_TID2 = 16;
+static const uint32_t SCOMFIR_MCMODE3_TID2_LEN = 5;
+static const uint32_t SCOMFIR_MCMODE3_TID3 = 21;
+static const uint32_t SCOMFIR_MCMODE3_TID3_LEN = 5;
 // mc/reg00006.H
 
 static const uint64_t TRA0_TR0_CONFIG_5 = 0x0c010408ull;

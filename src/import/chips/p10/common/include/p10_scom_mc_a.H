@@ -229,12 +229,18 @@ static const uint32_t MBA_SCOMFIR_MCWATCNTL_AND_22BIT_WAT_OUTPUTS = 62;
 static const uint32_t MBA_SCOMFIR_MCWATCNTL_RESERVED_63 = 63;
 // mc/reg00010.H
 
-static const uint64_t MBA_SCOMFIR_MCWATDATA9 = 0x0c010fa3ull;
+static const uint64_t MBA_SCOMFIR_WATFNC = 0x0c010f8eull;
 
-static const uint32_t MBA_SCOMFIR_MCWATDATA9_EVENT_SELECT = 0;
-static const uint32_t MBA_SCOMFIR_MCWATDATA9_EVENT_SELECT_LEN = 46;
-static const uint32_t MBA_SCOMFIR_MCWATDATA9_CONTROL = 47;
-static const uint32_t MBA_SCOMFIR_MCWATDATA9_CONTROL_LEN = 17;
+static const uint32_t MBA_SCOMFIR_WATFNC_5_CFG = 0;
+static const uint32_t MBA_SCOMFIR_WATFNC_5_CFG_LEN = 22;
+static const uint32_t MBA_SCOMFIR_WATFNC_6_CFG = 22;
+static const uint32_t MBA_SCOMFIR_WATFNC_6_CFG_LEN = 22;
+// mc/reg00010.H
+
+static const uint64_t MBA_SCOMFIR_WATFNSEL = 0x0c010f90ull;
+
+static const uint32_t MBA_SCOMFIR_WATFNSEL_WAT_FN_SELECT = 0;
+static const uint32_t MBA_SCOMFIR_WATFNSEL_WAT_FN_SELECT_LEN = 55;
 // mc/reg00010.H
 
 static const uint64_t SCOMFIR_MCFIR_RW = 0x0c010c00ull;
@@ -261,7 +267,7 @@ static const uint32_t SCOMFIR_MCFIR_POP_RCMD_BADHIT = 16;
 static const uint32_t SCOMFIR_MCFIR_MS_WAT_DEBUG_CONFIG_REG_ERROR = 17;
 static const uint32_t SCOMFIR_MCFIR_RESERVED_18 = 18;
 static const uint32_t SCOMFIR_MCFIR_RESERVED_19 = 19;
-static const uint32_t SCOMFIR_MCFIR_RESERVED_20 = 20;
+static const uint32_t SCOMFIR_MCFIR_MULTIPLE_TID_ERROR = 20;
 static const uint32_t SCOMFIR_MCFIR_RESERVED_21 = 21;
 static const uint32_t SCOMFIR_MCFIR_INVALID_SMF_ACCESS = 22;
 static const uint32_t SCOMFIR_MCFIR_SYNC_ERROR = 23;

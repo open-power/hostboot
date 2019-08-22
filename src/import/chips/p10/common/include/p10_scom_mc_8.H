@@ -238,32 +238,16 @@ static const uint32_t MBA_SCOMFIR_DBGSRC_3 = 48;
 static const uint32_t MBA_SCOMFIR_DBGSRC_3_LEN = 16;
 // mc/reg00008.H
 
-static const uint64_t MBA_SCOMFIR_MCWATDATA1 = 0x0c010f9bull;
-
-static const uint32_t MBA_SCOMFIR_MCWATDATA1_PATTERN_A = 0;
-static const uint32_t MBA_SCOMFIR_MCWATDATA1_PATTERN_A_LEN = 22;
-static const uint32_t MBA_SCOMFIR_MCWATDATA1_MASK_A = 22;
-static const uint32_t MBA_SCOMFIR_MCWATDATA1_MASK_A_LEN = 22;
-// mc/reg00008.H
-
 static const uint64_t MBA_SCOMFIR_MISCFIRACT0 = 0x0c010f06ull;
 
 static const uint32_t MBA_SCOMFIR_MISCFIRACT0_MISCFIRACT0_FIR_ACTION0 = 0;
 static const uint32_t MBA_SCOMFIR_MISCFIRACT0_MISCFIRACT0_FIR_ACTION0_LEN = 12;
 // mc/reg00008.H
 
-static const uint64_t MBA_SCOMFIR_WATCFG0EQ = 0x0c010f84ull;
+static const uint64_t MBA_SCOMFIR_WATPATA0 = 0x0c010f84ull;
 
-static const uint32_t MBA_SCOMFIR_WATCFG0EQ_WATCFG0EQ_CFG_WAT_PATB = 0;
-static const uint32_t MBA_SCOMFIR_WATCFG0EQ_WATCFG0EQ_CFG_WAT_PATB_LEN = 44;
-// mc/reg00008.H
-
-static const uint64_t MBA_SCOMFIR_WATCFG1BQ = 0x0c010f86ull;
-
-static const uint32_t MBA_SCOMFIR_WATCFG1BQ_MSKA = 0;
-static const uint32_t MBA_SCOMFIR_WATCFG1BQ_MSKA_LEN = 44;
-static const uint32_t MBA_SCOMFIR_WATCFG1BQ_CNTL = 44;
-static const uint32_t MBA_SCOMFIR_WATCFG1BQ_CNTL_LEN = 17;
+static const uint32_t MBA_SCOMFIR_WATPATA0_WAT_PATTERN_A0 = 0;
+static const uint32_t MBA_SCOMFIR_WATPATA0_WAT_PATTERN_A0_LEN = 44;
 // mc/reg00008.H
 
 static const uint64_t OPCG_REG0 = 0x0c030002ull;
@@ -281,6 +265,7 @@ static const uint32_t OPCG_REG0_RUN_OPCG_ON_UPDATE_DR = 11;
 static const uint32_t OPCG_REG0_RUN_OPCG_ON_CAPTURE_DR = 12;
 static const uint32_t OPCG_REG0_STOP_RUNN_ON_XSTOP = 13;
 static const uint32_t OPCG_REG0_OPCG_STARTS_BIST = 14;
+static const uint32_t OPCG_REG0_RUNN_HLD_DLY_EN = 15;
 static const uint32_t OPCG_REG0_LOOP_COUNT = 21;
 static const uint32_t OPCG_REG0_LOOP_COUNT_LEN = 43;
 // mc/reg00008.H
@@ -372,25 +357,25 @@ static const uint32_t TRA1_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63_LEN = 64;
 
 static const uint64_t XSTOP3 = 0x0c03000eull;
 
-static const uint32_t XSTOP3_MASK_B = 0;
-static const uint32_t XSTOP3_ALIGNED_XSTOP3 = 1;
-static const uint32_t XSTOP3_TRIGGER_OPCG_ON_XSTOP3 = 2;
-static const uint32_t XSTOP3_WAIT_ALLWAYS = 3;
-static const uint32_t XSTOP3_PERV = 4;
-static const uint32_t XSTOP3_UNIT1 = 5;
-static const uint32_t XSTOP3_UNIT2 = 6;
-static const uint32_t XSTOP3_UNIT3 = 7;
-static const uint32_t XSTOP3_UNIT4 = 8;
-static const uint32_t XSTOP3_UNIT5 = 9;
-static const uint32_t XSTOP3_UNIT6 = 10;
-static const uint32_t XSTOP3_UNIT7 = 11;
-static const uint32_t XSTOP3_UNIT8 = 12;
-static const uint32_t XSTOP3_UNIT9 = 13;
-static const uint32_t XSTOP3_UNIT10 = 14;
-static const uint32_t XSTOP3_UNIT11 = 15;
-static const uint32_t XSTOP3_UNIT12 = 16;
-static const uint32_t XSTOP3_UNIT13 = 17;
-static const uint32_t XSTOP3_UNIT14 = 18;
+static const uint32_t XSTOP3_ENABLE = 0;
+static const uint32_t XSTOP3_WAIT_SNOPA = 1;
+static const uint32_t XSTOP3_TRIGGER_OPCG_GO = 2;
+static const uint32_t XSTOP3_WAIT_ALWAYS = 3;
+static const uint32_t XSTOP3_REGION_PERV = 4;
+static const uint32_t XSTOP3_REGION_UNIT1 = 5;
+static const uint32_t XSTOP3_REGION_UNIT2 = 6;
+static const uint32_t XSTOP3_REGION_UNIT3 = 7;
+static const uint32_t XSTOP3_REGION_UNIT4 = 8;
+static const uint32_t XSTOP3_REGION_UNIT5 = 9;
+static const uint32_t XSTOP3_REGION_UNIT6 = 10;
+static const uint32_t XSTOP3_REGION_UNIT7 = 11;
+static const uint32_t XSTOP3_REGION_UNIT8 = 12;
+static const uint32_t XSTOP3_REGION_UNIT9 = 13;
+static const uint32_t XSTOP3_REGION_UNIT10 = 14;
+static const uint32_t XSTOP3_REGION_UNIT11 = 15;
+static const uint32_t XSTOP3_REGION_UNIT12 = 16;
+static const uint32_t XSTOP3_REGION_UNIT13 = 17;
+static const uint32_t XSTOP3_REGION_UNIT14 = 18;
 static const uint32_t XSTOP3_WAIT_CYCLES = 48;
 static const uint32_t XSTOP3_WAIT_CYCLES_LEN = 12;
 // mc/reg00008.H

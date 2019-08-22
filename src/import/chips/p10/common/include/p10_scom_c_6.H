@@ -84,9 +84,17 @@ static const uint32_t CPMS_CUCR_DPT_UPDATE_PENDING = 47;
 static const uint32_t CPMS_CUCR_DPT_UPDATE_PENDING_LEN = 3;
 static const uint32_t CPMS_CUCR_CORE_REFRESH_ACTIVE = 50;
 static const uint32_t CPMS_CUCR_CORE_REFRESH_ACTIVE_LEN = 3;
+static const uint32_t CPMS_CUCR_QME_DATA_TYPE1_PENDING = 53;
+static const uint32_t CPMS_CUCR_QME_DATA_TYPE2_PENDING = 54;
+static const uint32_t CPMS_CUCR_QME_DATA_TYPE3_PENDING = 55;
 static const uint32_t CPMS_CUCR_FDCR_UPDATE_INPROGRESS = 56;
-static const uint32_t CPMS_CUCR_QME_EVENTS_PENDING = 57;
-static const uint32_t CPMS_CUCR_QME_EVENTS_PENDING_LEN = 7;
+static const uint32_t CPMS_CUCR_QME_TYPE0_EVENTB1_PENDING = 57;
+static const uint32_t CPMS_CUCR_QME_TYPE0_EVENTB2_PENDING = 58;
+static const uint32_t CPMS_CUCR_QME_TYPE0_EVENTB3_PENDING = 59;
+static const uint32_t CPMS_CUCR_QME_TYPE0_EVENTC0_PENDING = 60;
+static const uint32_t CPMS_CUCR_QME_TYPE0_EVENTC1_PENDING = 61;
+static const uint32_t CPMS_CUCR_QME_TYPE0_EVENTC2_PENDING = 62;
+static const uint32_t CPMS_CUCR_QME_TYPE0_EVENTC3_PENDING = 63;
 // c/reg00006.H
 
 static const uint64_t CPMS_MMA_PFETCNTL = 0x200e0e30ull;

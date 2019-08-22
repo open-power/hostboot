@@ -39,6 +39,75 @@ namespace perv
 #endif
 
 
+static const uint64_t CLK_ADJ_00_DCADJ_WRAP_SET_DAC_DLY = 0x0001830aull;
+
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_SET_DAC_DLY_DAC_DELAY_VALUE = 0;
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_SET_DAC_DLY_DAC_DELAY_VALUE_LEN = 16;
+// perv/reg00000.H
+
+static const uint64_t CLK_ADJ_00_DCADJ_WRAP_SET_INC_DCC = 0x0001830eull;
+// perv/reg00000.H
+
+static const uint64_t CLK_ADJ_01_DCADJ_WRAP_SOFT_RESET = 0x00014305ull;
+// perv/reg00000.H
+
+static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_IGNORE_CNT = 0x00014329ull;
+
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_IGNORE_CNT_IGNORE_CNT_VALUE = 0;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_IGNORE_CNT_IGNORE_CNT_VALUE_LEN = 3;
+// perv/reg00000.H
+
+static const uint64_t CLK_ADJ_02_DCADJ_WRAP_SET_DAC_DLY = 0x0001230aull;
+
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_SET_DAC_DLY_DAC_DELAY_VALUE = 0;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_SET_DAC_DLY_DAC_DELAY_VALUE_LEN = 16;
+// perv/reg00000.H
+
+static const uint64_t CLK_ADJ_02_DCADJ_WRAP_SET_DEC = 0x00012310ull;
+
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_SET_DEC_DCC_VALUE = 0;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_SET_DEC_DCC_VALUE_LEN = 8;
+// perv/reg00000.H
+
+static const uint64_t CLK_ADJ_02_DCADJ_WRAP_SET_INC_DCC = 0x0001230eull;
+// perv/reg00000.H
+
+static const uint64_t CLK_ADJ_02_DCADJ_WRAP_SET_INIT_MODE = 0x00012300ull;
+// perv/reg00000.H
+
+static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_ADJUST_MODE = 0x00012322ull;
+// perv/reg00000.H
+
+static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_SYNC_ENABLE = 0x00012330ull;
+
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_SYNC_ENABLE_CORE_SYNC_ENABLE_INVERT = 0;
+// perv/reg00000.H
+
+static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_CORE_OVERRIDE = 0x00011326ull;
+
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_CORE_OVERRIDE_ENABLE = 0;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_CORE_OVERRIDE_VALUE = 4;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_CORE_OVERRIDE_VALUE_LEN = 4;
+// perv/reg00000.H
+
+static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_PDLY_FSM_STATES = 0x00011336ull;
+
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_PDLY_FSM_STATES_ORE_PDLY_STATE = 10;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_PDLY_FSM_STATES_ORE_PDLY_STATE_LEN = 6;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_PDLY_FSM_STATES_ACHE_PDLY_STATE = 26;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_PDLY_FSM_STATES_ACHE_PDLY_STATE_LEN = 6;
+// perv/reg00000.H
+
+static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_IS_LATE = 0x0001132bull;
+
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_IS_LATE_CACHE_IS_LATE_INVERT = 0;
+// perv/reg00000.H
+
+static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_STICK_CORE_SYNC_DONE = 0x00011332ull;
+
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_STICK_CORE_SYNC_DONE_CORE_SYNC_DONE_STICK = 0;
+// perv/reg00000.H
+
 static const uint64_t CLK_REGION = 0x00030006ull;
 
 static const uint32_t CLK_REGION_CLOCK_CMD = 0;
@@ -89,7 +158,9 @@ static const uint32_t CPLT_CONF0_RESERVED_22G = 22;
 static const uint32_t CPLT_CONF0_RESERVED_23G = 23;
 static const uint32_t CPLT_CONF0_CTRL_MISC_PROBE3_SEL_DC = 24;
 static const uint32_t CPLT_CONF0_CTRL_MISC_PROBE3_SEL_DC_LEN = 6;
+static const uint32_t CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_30G = 30;
 static const uint32_t CPLT_CONF0_RESERVED_30G = 30;
+static const uint32_t CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_31G = 31;
 static const uint32_t CPLT_CONF0_RESERVED_31G = 31;
 static const uint32_t CPLT_CONF0_CTRL_MISC_OFLOW_FEH_SEL_DC = 32;
 static const uint32_t CPLT_CONF0_CTRL_CC_SCAN_PROTECT_DC = 33;
@@ -106,38 +177,39 @@ static const uint32_t CPLT_CONF0_RESERVED_42G = 42;
 static const uint32_t CPLT_CONF0_RESERVED_43G = 43;
 static const uint32_t CPLT_CONF0_TC_PCB_DBG_GLB_BRCST_EN = 44;
 static const uint32_t CPLT_CONF0_RESERVED_45G = 45;
-static const uint32_t CPLT_CONF0_FREE_USAGE_45G = 45;
+static const uint32_t CPLT_CONF0_TC_IOO_EOL_TOGL_SRC = 45;
 static const uint32_t CPLT_CONF0_TC_SKIT_CANARY_MODE_DC = 46;
-static const uint32_t CPLT_CONF0_FREE_USAGE_47G = 47;
 static const uint32_t CPLT_CONF0_FREE_USAGE = 47;
+static const uint32_t CPLT_CONF0_FREE_USAGE_47G = 47;
 static const uint32_t CPLT_CONF0_TC_TOPOLOGY_ID_DC = 48;
 static const uint32_t CPLT_CONF0_TC_TOPOLOGY_ID_DC_LEN = 4;
 static const uint32_t CPLT_CONF0_TC_TOPOLOGY_MODE_DC = 52;
-static const uint32_t CPLT_CONF0_FREE_USAGE_53G = 53;
+static const uint32_t CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_53G = 53;
 static const uint32_t CPLT_CONF0_TP_AN_NEST_PROGDLY_SETTING_DC = 53;
 static const uint32_t CPLT_CONF0_TP_AN_NEST_PROGDLY_SETTING_DC_LEN = 3;
+static const uint32_t CPLT_CONF0_FREE_USAGE_53G = 53;
+static const uint32_t CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_54G = 54;
 static const uint32_t CPLT_CONF0_FREE_USAGE_54G = 54;
-static const uint32_t CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_54G = 54;
+static const uint32_t CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_55G = 55;
 static const uint32_t CPLT_CONF0_FREE_USAGE_55G = 55;
-static const uint32_t CPLT_CONF0_TC_PHYX_REFA_CLK_SEL_DC_55G = 55;
-static const uint32_t CPLT_CONF0_FREE_USAGE_56G = 56;
+static const uint32_t CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_56G = 56;
 static const uint32_t CPLT_CONF0_TP_AN_NEST_DCC_SETTING_DC = 56;
 static const uint32_t CPLT_CONF0_TP_AN_NEST_DCC_SETTING_DC_LEN = 8;
-static const uint32_t CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_56G = 56;
+static const uint32_t CPLT_CONF0_FREE_USAGE_56G = 56;
+static const uint32_t CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_57G = 57;
 static const uint32_t CPLT_CONF0_FREE_USAGE_57G = 57;
-static const uint32_t CPLT_CONF0_TC_PHYX_REFB_CLK_SEL_DC_57G = 57;
-static const uint32_t CPLT_CONF0_FREE_USAGE_58G = 58;
 static const uint32_t CPLT_CONF0_TC_PHY_LANEX_RX2TX_PAR_LB_EN_DC = 58;
-static const uint32_t CPLT_CONF0_FREE_USAGE_59G = 59;
+static const uint32_t CPLT_CONF0_FREE_USAGE_58G = 58;
 static const uint32_t CPLT_CONF0_TC_PIPE_LANEX_TX2RX_LOOPBK_DC = 59;
-static const uint32_t CPLT_CONF0_FREE_USAGE_60G = 60;
+static const uint32_t CPLT_CONF0_FREE_USAGE_59G = 59;
 static const uint32_t CPLT_CONF0_TC_PHYX_NOMINAL_VP_SEL_DC_60G = 60;
-static const uint32_t CPLT_CONF0_FREE_USAGE_61G = 61;
+static const uint32_t CPLT_CONF0_FREE_USAGE_60G = 60;
 static const uint32_t CPLT_CONF0_TC_PHYX_NOMINAL_VP_SEL_DC_61G = 61;
-static const uint32_t CPLT_CONF0_FREE_USAGE_62G = 62;
+static const uint32_t CPLT_CONF0_FREE_USAGE_61G = 61;
 static const uint32_t CPLT_CONF0_TC_PHYX_NOMINAL_VPH_SEL_DC_62G = 62;
-static const uint32_t CPLT_CONF0_FREE_USAGE_63G = 63;
+static const uint32_t CPLT_CONF0_FREE_USAGE_62G = 62;
 static const uint32_t CPLT_CONF0_TC_PHYX_NOMINAL_VPH_SEL_DC_63G = 63;
+static const uint32_t CPLT_CONF0_FREE_USAGE_63G = 63;
 // perv/reg00000.H
 
 static const uint64_t CPLT_CTRL0_RW = 0x00000000ull;
@@ -190,24 +262,24 @@ static const uint32_t CPLT_CTRL0_FREE_USAGE_51A = 51;
 static const uint32_t CPLT_CTRL0_FREE_USAGE_52A = 52;
 static const uint32_t CPLT_CTRL0_FREE_USAGE_53A = 53;
 static const uint32_t CPLT_CTRL0_FREE_USAGE_54A = 54;
-static const uint32_t CPLT_CTRL0_FREE_USAGE_55A = 55;
 static const uint32_t CPLT_CTRL0_TC_CCFG_FUNC_PHY_RESET_DC = 55;
-static const uint32_t CPLT_CTRL0_FREE_USAGE_56A = 56;
+static const uint32_t CPLT_CTRL0_RESERVED_55A = 55;
 static const uint32_t CPLT_CTRL0_TC_JTAG_TRST0_N_DC = 56;
-static const uint32_t CPLT_CTRL0_FREE_USAGE_57A = 57;
+static const uint32_t CPLT_CTRL0_FREE_USAGE_56A = 56;
 static const uint32_t CPLT_CTRL0_TC_JTAG_TRST1_N_DC = 57;
-static const uint32_t CPLT_CTRL0_FREE_USAGE_58A = 58;
+static const uint32_t CPLT_CTRL0_FREE_USAGE_57A = 57;
 static const uint32_t CPLT_CTRL0_TC_JTAG_TRST2_N_DC = 58;
-static const uint32_t CPLT_CTRL0_FREE_USAGE_59A = 59;
+static const uint32_t CPLT_CTRL0_FREE_USAGE_58A = 58;
 static const uint32_t CPLT_CTRL0_TC_JTAG_TRST3_N_DC = 59;
-static const uint32_t CPLT_CTRL0_FREE_USAGE_60A = 60;
+static const uint32_t CPLT_CTRL0_FREE_USAGE_59A = 59;
 static const uint32_t CPLT_CTRL0_TC_JTAG_MUX0_SEL_DC = 60;
-static const uint32_t CPLT_CTRL0_FREE_USAGE_61A = 61;
+static const uint32_t CPLT_CTRL0_FREE_USAGE_60A = 60;
 static const uint32_t CPLT_CTRL0_TC_JTAG_MUX1_SEL_DC = 61;
-static const uint32_t CPLT_CTRL0_FREE_USAGE_62A = 62;
+static const uint32_t CPLT_CTRL0_FREE_USAGE_61A = 61;
 static const uint32_t CPLT_CTRL0_TC_JTAG_MUX2_SEL_DC = 62;
-static const uint32_t CPLT_CTRL0_FREE_USAGE_63A = 63;
+static const uint32_t CPLT_CTRL0_FREE_USAGE_62A = 62;
 static const uint32_t CPLT_CTRL0_TC_JTAG_MUX3_SEL_DC = 63;
+static const uint32_t CPLT_CTRL0_FREE_USAGE_63A = 63;
 // perv/reg00000.H
 
 static const uint64_t EPS_DBG_INST1_COND_REG_2 = 0x000107c2ull;
@@ -883,53 +955,53 @@ static const uint32_t SCAN_CAPTUREDR_SCAN_CAPTUREDR_REG = 0;
 static const uint32_t SCAN_CAPTUREDR_SCAN_CAPTUREDR_REG_LEN = 32;
 // perv/reg00000.H
 
-static const uint64_t SINGLE_OTP_ROM_OTPROM_REG110 = 0x0000806eull;
+static const uint64_t SINGLE_OTP_ROM_OTPROM_REG110 = 0x0001806eull;
 
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG110_REGISTER110 = 0;
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG110_REGISTER110_LEN = 64;
-// perv/reg00000.H
+// perv/reg00001.H
 
-static const uint64_t SINGLE_OTP_ROM_OTPROM_REG127 = 0x0000807full;
+static const uint64_t SINGLE_OTP_ROM_OTPROM_REG127 = 0x0001807full;
 
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG127_REGISTER127 = 0;
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG127_REGISTER127_LEN = 64;
-// perv/reg00000.H
+// perv/reg00001.H
 
-static const uint64_t SINGLE_OTP_ROM_OTPROM_REG29 = 0x0000801dull;
+static const uint64_t SINGLE_OTP_ROM_OTPROM_REG29 = 0x0001801dull;
 
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG29_REGISTER29 = 0;
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG29_REGISTER29_LEN = 64;
-// perv/reg00000.H
+// perv/reg00001.H
 
-static const uint64_t SINGLE_OTP_ROM_OTPROM_REG36 = 0x00008024ull;
+static const uint64_t SINGLE_OTP_ROM_OTPROM_REG36 = 0x00018024ull;
 
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG36_REGISTER36 = 0;
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG36_REGISTER36_LEN = 64;
-// perv/reg00000.H
+// perv/reg00001.H
 
-static const uint64_t SINGLE_OTP_ROM_OTPROM_REG48 = 0x00008030ull;
+static const uint64_t SINGLE_OTP_ROM_OTPROM_REG48 = 0x00018030ull;
 
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG48_REGISTER48 = 0;
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG48_REGISTER48_LEN = 64;
-// perv/reg00000.H
+// perv/reg00001.H
 
-static const uint64_t SINGLE_OTP_ROM_OTPROM_REG57 = 0x00008039ull;
+static const uint64_t SINGLE_OTP_ROM_OTPROM_REG57 = 0x00018039ull;
 
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG57_REGISTER57 = 0;
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG57_REGISTER57_LEN = 64;
-// perv/reg00000.H
+// perv/reg00001.H
 
-static const uint64_t SINGLE_OTP_ROM_OTPROM_REG60 = 0x0000803cull;
+static const uint64_t SINGLE_OTP_ROM_OTPROM_REG60 = 0x0001803cull;
 
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG60_REGISTER60 = 0;
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG60_REGISTER60_LEN = 64;
-// perv/reg00000.H
+// perv/reg00001.H
 
-static const uint64_t SINGLE_OTP_ROM_OTPROM_REG95 = 0x0000805full;
+static const uint64_t SINGLE_OTP_ROM_OTPROM_REG95 = 0x0001805full;
 
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG95_REGISTER95 = 0;
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG95_REGISTER95_LEN = 64;
-// perv/reg00000.H
+// perv/reg00001.H
 
 static const uint64_t TOD_MISC_RESET_REG = 0x0004000bull;
 
@@ -961,7 +1033,7 @@ static const uint32_t TOD_MISC_RESET_REG_I_PATH_DELAY_TWOS_COMPL_LOAD_VALUE = 24
 static const uint32_t TOD_MISC_RESET_REG_I_PATH_DELAY_TWOS_COMPL_LOAD_VALUE_LEN = 9;
 static const uint32_t TOD_MISC_RESET_REG_REG_0X0B_SPARE_33_39 = 33;
 static const uint32_t TOD_MISC_RESET_REG_REG_0X0B_SPARE_33_39_LEN = 7;
-// perv/reg00000.H
+// perv/reg00001.H
 
 static const uint64_t TOD_SEC_PORT_0_CTRL_REG = 0x00040003ull;
 
@@ -996,7 +1068,7 @@ static const uint32_t TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_31 = 28;
 static const uint32_t TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_31_LEN = 4;
 static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE = 32;
 static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE_LEN = 8;
-// perv/reg00000.H
+// perv/reg00001.H
 
 static const uint64_t TRA0_TR0_CONFIG_4 = 0x00010407ull;
 
@@ -1004,7 +1076,7 @@ static const uint32_t TRA0_TR0_CONFIG_4_A = 0;
 static const uint32_t TRA0_TR0_CONFIG_4_A_LEN = 24;
 static const uint32_t TRA0_TR0_CONFIG_4_B = 24;
 static const uint32_t TRA0_TR0_CONFIG_4_B_LEN = 24;
-// perv/reg00000.H
+// perv/reg00001.H
 
 static const uint64_t TRA1_TR0_TRACE_LO_DATA_REG = 0x00010481ull;
 
@@ -1019,7 +1091,7 @@ static const uint32_t TRA1_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN = 52;
 static const uint32_t TRA1_TR0_TRACE_LO_DATA_REG_RUNNING = 53;
 static const uint32_t TRA1_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS = 54;
 static const uint32_t TRA1_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
-// perv/reg00000.H
+// perv/reg00001.H
 
 static const uint64_t TRA1_TR1_CONFIG_2 = 0x000104c5ull;
 
@@ -1027,13 +1099,13 @@ static const uint32_t TRA1_TR1_CONFIG_2_A = 0;
 static const uint32_t TRA1_TR1_CONFIG_2_A_LEN = 24;
 static const uint32_t TRA1_TR1_CONFIG_2_B = 24;
 static const uint32_t TRA1_TR1_CONFIG_2_B_LEN = 24;
-// perv/reg00000.H
+// perv/reg00001.H
 
 static const uint64_t TRA2_TR1_TRACE_HI_DATA_REG = 0x00010540ull;
 
 static const uint32_t TRA2_TR1_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
 static const uint32_t TRA2_TR1_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
-// perv/reg00000.H
+// perv/reg00001.H
 
 static const uint64_t TRA2_TR1_CONFIG_5 = 0x00010548ull;
 

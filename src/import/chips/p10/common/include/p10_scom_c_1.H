@@ -39,6 +39,17 @@ namespace c
 #endif
 
 
+static const uint64_t CPMS_PDSR = 0x200e0e68ull;
+
+static const uint32_t CPMS_PDSR_DDS_DATA = 0;
+static const uint32_t CPMS_PDSR_DDS_DATA_LEN = 5;
+static const uint32_t CPMS_PDSR_DDS_MIN = 5;
+static const uint32_t CPMS_PDSR_DDS_MIN_LEN = 5;
+static const uint32_t CPMS_PDSR_DDS_MAX = 10;
+static const uint32_t CPMS_PDSR_DDS_MAX_LEN = 5;
+static const uint32_t CPMS_PDSR_SAMPLE_DISABLE_OCCURRED = 15;
+// c/reg00001.H
+
 static const uint64_t EC_LS_LSU_HOLD_OUT_REG1 = 0x200206c1ull;
 
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG1_0 = 0;
@@ -156,7 +167,7 @@ static const uint64_t L3_MISC_L3CERRS_FIR_REG_WO_OR = 0x20010602ull;
 
 static const uint32_t L3_MISC_L3CERRS_FIR_REG_L3_RDDSP_SEGR_MODE_ALL_MEM_UNAVAIL_ERR = 0;
 static const uint32_t L3_MISC_L3CERRS_FIR_REG_L3_CHIP_CONTAINED_ERR = 1;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_L3_SN_TOPO_TABLE_ERR = 2;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_L3_TOPO_TABLE_ERR = 2;
 static const uint32_t L3_MISC_L3CERRS_FIR_REG_L3_DRAM_POS_WORDLINE_FAIL = 3;
 static const uint32_t L3_MISC_L3CERRS_FIR_REG_L3_RD_DF_CE_DET_NOT_LINDEL_REQ = 4;
 static const uint32_t L3_MISC_L3CERRS_FIR_REG_L3_RD_DF_UE_DET = 5;
@@ -182,7 +193,7 @@ static const uint32_t L3_MISC_L3CERRS_FIR_REG_L3_HW_CONTROL_ERR = 24;
 static const uint32_t L3_MISC_L3CERRS_FIR_REG_L3_SNP_CACHE_INHIBIT_ERR = 25;
 static const uint32_t L3_MISC_L3CERRS_FIR_REG_L3_LINE_DEL_CE_DONE = 26;
 static const uint32_t L3_MISC_L3CERRS_FIR_REG_L3_FIR27_SPARE27 = 27;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_L3_LRU_ERROR = 28;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_L3_LRU_VIC_SEL_ERROR = 28;
 static const uint32_t L3_MISC_L3CERRS_FIR_REG_L3_ALL_MEMBERS_DELETED_ERROR = 29;
 static const uint32_t L3_MISC_L3CERRS_FIR_REG_L3_FIR30_UNUSED = 30;
 static const uint32_t L3_MISC_L3CERRS_FIR_REG_L3_PB_MAST_WR_ACK_DEAD = 31;

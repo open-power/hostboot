@@ -1488,6 +1488,7 @@ static const uint32_t XTS_REG_ERR_HOLD_DEBUG1_CONFIG_P_ERR = 1;
 static const uint32_t XTS_REG_ERR_HOLD_XTS_CONFIG_P_ERR = 2;
 static const uint32_t XTS_REG_ERR_HOLD_XTS_CONFIG2_P_ERR = 3;
 static const uint32_t XTS_REG_ERR_HOLD_XTS_CONFIG3_P_ERR = 4;
+static const uint32_t XTS_REG_ERR_HOLD_SNP_REG_ERR9 = 5;
 static const uint32_t XTS_REG_ERR_HOLD_SNP_REG_ERR7 = 6;
 static const uint32_t XTS_REG_ERR_HOLD_SNP_REG_ERR8 = 7;
 static const uint32_t XTS_REG_ERR_HOLD_SNP_REG_ERR0 = 8;

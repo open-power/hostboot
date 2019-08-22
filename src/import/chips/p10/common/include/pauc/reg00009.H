@@ -5751,92 +5751,137 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_FP01_CFG_0_LL_CREDIT_LO_LIMIT(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_PB_FP01_CFG_0_LL_CREDIT_FW_LIMIT(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_FP01_CFG));
 #endif
-    return o_data.insertFromRight<PB_FP01_CFG_0_LL_CREDIT_LO_LIMIT,
-           PB_FP01_CFG_0_LL_CREDIT_LO_LIMIT_LEN>(i_data);
+    return o_data.insertFromRight<PB_FP01_CFG_0_LL_CREDIT_FW_LIMIT,
+           PB_FP01_CFG_0_LL_CREDIT_FW_LIMIT_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_FP01_CFG_0_LL_CREDIT_LO_LIMIT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access PB_FP01_CFG_0_LL_CREDIT_FW_LIMIT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_FP01_CFG_0_LL_CREDIT_LO_LIMIT(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_PB_FP01_CFG_0_LL_CREDIT_FW_LIMIT(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_FP01_CFG));
 #endif
-    return o_data.insertFromRight<PB_FP01_CFG_0_LL_CREDIT_LO_LIMIT,
-           PB_FP01_CFG_0_LL_CREDIT_LO_LIMIT_LEN>(i_data);
+    return o_data.insertFromRight<PB_FP01_CFG_0_LL_CREDIT_FW_LIMIT,
+           PB_FP01_CFG_0_LL_CREDIT_FW_LIMIT_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_FP01_CFG_0_LL_CREDIT_LO_LIMIT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access PB_FP01_CFG_0_LL_CREDIT_FW_LIMIT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_PB_FP01_CFG_0_LL_CREDIT_LO_LIMIT(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_PB_FP01_CFG_0_LL_CREDIT_FW_LIMIT(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_FP01_CFG));
 #endif
-    return i_data.extractToRight<PB_FP01_CFG_0_LL_CREDIT_LO_LIMIT,
-           PB_FP01_CFG_0_LL_CREDIT_LO_LIMIT_LEN>(o_data);
+    return i_data.extractToRight<PB_FP01_CFG_0_LL_CREDIT_FW_LIMIT,
+           PB_FP01_CFG_0_LL_CREDIT_FW_LIMIT_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_FP01_CFG_0_LL_CREDIT_LO_LIMIT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access PB_FP01_CFG_0_LL_CREDIT_FW_LIMIT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_FP01_CFG_0_LL_CREDIT_PS_LIMIT(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_PB_FP01_CFG_0_LL_CREDIT_HW_LIMIT(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_FP01_CFG));
 #endif
-    return o_data.insertFromRight<PB_FP01_CFG_0_LL_CREDIT_PS_LIMIT,
-           PB_FP01_CFG_0_LL_CREDIT_PS_LIMIT_LEN>(i_data);
+    return o_data.insertFromRight<PB_FP01_CFG_0_LL_CREDIT_HW_LIMIT,
+           PB_FP01_CFG_0_LL_CREDIT_HW_LIMIT_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_FP01_CFG_0_LL_CREDIT_PS_LIMIT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access PB_FP01_CFG_0_LL_CREDIT_HW_LIMIT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_FP01_CFG_0_LL_CREDIT_PS_LIMIT(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_PB_FP01_CFG_0_LL_CREDIT_HW_LIMIT(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_FP01_CFG));
 #endif
-    return o_data.insertFromRight<PB_FP01_CFG_0_LL_CREDIT_PS_LIMIT,
-           PB_FP01_CFG_0_LL_CREDIT_PS_LIMIT_LEN>(i_data);
+    return o_data.insertFromRight<PB_FP01_CFG_0_LL_CREDIT_HW_LIMIT,
+           PB_FP01_CFG_0_LL_CREDIT_HW_LIMIT_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_FP01_CFG_0_LL_CREDIT_PS_LIMIT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access PB_FP01_CFG_0_LL_CREDIT_HW_LIMIT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_PB_FP01_CFG_0_LL_CREDIT_PS_LIMIT(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_PB_FP01_CFG_0_LL_CREDIT_HW_LIMIT(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_FP01_CFG));
 #endif
-    return i_data.extractToRight<PB_FP01_CFG_0_LL_CREDIT_PS_LIMIT,
-           PB_FP01_CFG_0_LL_CREDIT_PS_LIMIT_LEN>(o_data);
+    return i_data.extractToRight<PB_FP01_CFG_0_LL_CREDIT_HW_LIMIT,
+           PB_FP01_CFG_0_LL_CREDIT_HW_LIMIT_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_FP01_CFG_0_LL_CREDIT_PS_LIMIT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access PB_FP01_CFG_0_LL_CREDIT_HW_LIMIT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_FP01_CFG_0_LL_CREDIT_QW_LIMIT(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_FP01_CFG));
+#endif
+    return o_data.insertFromRight<PB_FP01_CFG_0_LL_CREDIT_QW_LIMIT,
+           PB_FP01_CFG_0_LL_CREDIT_QW_LIMIT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_FP01_CFG_0_LL_CREDIT_QW_LIMIT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_FP01_CFG_0_LL_CREDIT_QW_LIMIT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_FP01_CFG));
+#endif
+    return o_data.insertFromRight<PB_FP01_CFG_0_LL_CREDIT_QW_LIMIT,
+           PB_FP01_CFG_0_LL_CREDIT_QW_LIMIT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_FP01_CFG_0_LL_CREDIT_QW_LIMIT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_FP01_CFG_0_LL_CREDIT_QW_LIMIT(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_FP01_CFG));
+#endif
+    return i_data.extractToRight<PB_FP01_CFG_0_LL_CREDIT_QW_LIMIT,
+           PB_FP01_CFG_0_LL_CREDIT_QW_LIMIT_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_FP01_CFG_0_LL_CREDIT_QW_LIMIT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -6519,92 +6564,137 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_FP01_CFG_1_LL_CREDIT_LO_LIMIT(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_PB_FP01_CFG_1_LL_CREDIT_FW_LIMIT(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_FP01_CFG));
 #endif
-    return o_data.insertFromRight<PB_FP01_CFG_1_LL_CREDIT_LO_LIMIT,
-           PB_FP01_CFG_1_LL_CREDIT_LO_LIMIT_LEN>(i_data);
+    return o_data.insertFromRight<PB_FP01_CFG_1_LL_CREDIT_FW_LIMIT,
+           PB_FP01_CFG_1_LL_CREDIT_FW_LIMIT_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_FP01_CFG_1_LL_CREDIT_LO_LIMIT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access PB_FP01_CFG_1_LL_CREDIT_FW_LIMIT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_FP01_CFG_1_LL_CREDIT_LO_LIMIT(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_PB_FP01_CFG_1_LL_CREDIT_FW_LIMIT(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_FP01_CFG));
 #endif
-    return o_data.insertFromRight<PB_FP01_CFG_1_LL_CREDIT_LO_LIMIT,
-           PB_FP01_CFG_1_LL_CREDIT_LO_LIMIT_LEN>(i_data);
+    return o_data.insertFromRight<PB_FP01_CFG_1_LL_CREDIT_FW_LIMIT,
+           PB_FP01_CFG_1_LL_CREDIT_FW_LIMIT_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_FP01_CFG_1_LL_CREDIT_LO_LIMIT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access PB_FP01_CFG_1_LL_CREDIT_FW_LIMIT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_PB_FP01_CFG_1_LL_CREDIT_LO_LIMIT(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_PB_FP01_CFG_1_LL_CREDIT_FW_LIMIT(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_FP01_CFG));
 #endif
-    return i_data.extractToRight<PB_FP01_CFG_1_LL_CREDIT_LO_LIMIT,
-           PB_FP01_CFG_1_LL_CREDIT_LO_LIMIT_LEN>(o_data);
+    return i_data.extractToRight<PB_FP01_CFG_1_LL_CREDIT_FW_LIMIT,
+           PB_FP01_CFG_1_LL_CREDIT_FW_LIMIT_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_FP01_CFG_1_LL_CREDIT_LO_LIMIT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access PB_FP01_CFG_1_LL_CREDIT_FW_LIMIT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_FP01_CFG_1_LL_CREDIT_PS_LIMIT(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_PB_FP01_CFG_1_LL_CREDIT_HW_LIMIT(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_FP01_CFG));
 #endif
-    return o_data.insertFromRight<PB_FP01_CFG_1_LL_CREDIT_PS_LIMIT,
-           PB_FP01_CFG_1_LL_CREDIT_PS_LIMIT_LEN>(i_data);
+    return o_data.insertFromRight<PB_FP01_CFG_1_LL_CREDIT_HW_LIMIT,
+           PB_FP01_CFG_1_LL_CREDIT_HW_LIMIT_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_FP01_CFG_1_LL_CREDIT_PS_LIMIT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access PB_FP01_CFG_1_LL_CREDIT_HW_LIMIT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_FP01_CFG_1_LL_CREDIT_PS_LIMIT(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_PB_FP01_CFG_1_LL_CREDIT_HW_LIMIT(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_FP01_CFG));
 #endif
-    return o_data.insertFromRight<PB_FP01_CFG_1_LL_CREDIT_PS_LIMIT,
-           PB_FP01_CFG_1_LL_CREDIT_PS_LIMIT_LEN>(i_data);
+    return o_data.insertFromRight<PB_FP01_CFG_1_LL_CREDIT_HW_LIMIT,
+           PB_FP01_CFG_1_LL_CREDIT_HW_LIMIT_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_FP01_CFG_1_LL_CREDIT_PS_LIMIT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access PB_FP01_CFG_1_LL_CREDIT_HW_LIMIT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_PB_FP01_CFG_1_LL_CREDIT_PS_LIMIT(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_PB_FP01_CFG_1_LL_CREDIT_HW_LIMIT(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_FP01_CFG));
 #endif
-    return i_data.extractToRight<PB_FP01_CFG_1_LL_CREDIT_PS_LIMIT,
-           PB_FP01_CFG_1_LL_CREDIT_PS_LIMIT_LEN>(o_data);
+    return i_data.extractToRight<PB_FP01_CFG_1_LL_CREDIT_HW_LIMIT,
+           PB_FP01_CFG_1_LL_CREDIT_HW_LIMIT_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_FP01_CFG_1_LL_CREDIT_PS_LIMIT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access PB_FP01_CFG_1_LL_CREDIT_HW_LIMIT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_FP01_CFG_1_LL_CREDIT_QW_LIMIT(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_FP01_CFG));
+#endif
+    return o_data.insertFromRight<PB_FP01_CFG_1_LL_CREDIT_QW_LIMIT,
+           PB_FP01_CFG_1_LL_CREDIT_QW_LIMIT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_FP01_CFG_1_LL_CREDIT_QW_LIMIT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_FP01_CFG_1_LL_CREDIT_QW_LIMIT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_FP01_CFG));
+#endif
+    return o_data.insertFromRight<PB_FP01_CFG_1_LL_CREDIT_QW_LIMIT,
+           PB_FP01_CFG_1_LL_CREDIT_QW_LIMIT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_FP01_CFG_1_LL_CREDIT_QW_LIMIT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_FP01_CFG_1_LL_CREDIT_QW_LIMIT(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_FP01_CFG));
+#endif
+    return i_data.extractToRight<PB_FP01_CFG_1_LL_CREDIT_QW_LIMIT,
+           PB_FP01_CFG_1_LL_CREDIT_QW_LIMIT_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_FP01_CFG_1_LL_CREDIT_QW_LIMIT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

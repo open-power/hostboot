@@ -27,18 +27,21 @@
 #ifndef __PERV_REG00028_H_
 #define __PERV_REG00028_H_
 
+#ifndef __PPE_HCODE__
 namespace scomt
 {
 namespace perv
 {
+#endif
 
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_CMFSI_INCLUDE_MFSI_A_PIB2OPB_COMP_P_0_CRSIS(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE(
+    const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = CMFSI_INCLUDE_MFSI_A_PIB2OPB_COMP_P_0_CRSIS;
+    scomt::last_scom = CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -48,14 +51,298 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_CMFSI_INCLUDE_MFSI_A_PIB2OPB_COMP_P_0_CRSIS(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE(
+    const fapi2::Target<K, M, V>& i_target, fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE;
+#endif
+    return fapi2::getScom(i_target, CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE(
+    const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE));
+#endif
+    return fapi2::putScom(i_target, CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+static inline fapi2::buffer<uint64_t>&
+SET_CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE_CACHE_SYNC_ENABLE_INVERT(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE));
+#endif
+    return o_data.insertFromRight<CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE_CACHE_SYNC_ENABLE_INVERT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE_CACHE_SYNC_ENABLE_INVERT chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>&
+SET_CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE_CACHE_SYNC_ENABLE_INVERT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE));
+#endif
+    return o_data.insertFromRight<CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE_CACHE_SYNC_ENABLE_INVERT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE_CACHE_SYNC_ENABLE_INVERT chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>&
+SET_CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE_CACHE_SYNC_ENABLE_INVERT(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE));
+#endif
+    return o_data.setBit<CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE_CACHE_SYNC_ENABLE_INVERT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE_CACHE_SYNC_ENABLE_INVERT chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>&
+CLEAR_CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE_CACHE_SYNC_ENABLE_INVERT(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE));
+#endif
+    return o_data.clearBit<CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE_CACHE_SYNC_ENABLE_INVERT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE_CACHE_SYNC_ENABLE_INVERT chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>&
+GET_CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE_CACHE_SYNC_ENABLE_INVERT(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE));
+#endif
+    return i_data.extractToRight<CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE_CACHE_SYNC_ENABLE_INVERT,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE_CACHE_SYNC_ENABLE_INVERT chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE_CACHE_SYNC_ENABLE_INVERT(
+    fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE));
+#endif
+    return i_data.getBit<CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE_CACHE_SYNC_ENABLE_INVERT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE_CACHE_SYNC_ENABLE_INVERT chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS(
+    const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS(
+    const fapi2::Target<K, M, V>& i_target, fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS;
+#endif
+    return fapi2::getScom(i_target, CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS(
+    const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS));
+#endif
+    return fapi2::putScom(i_target, CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+static inline fapi2::buffer<uint64_t>& SET_CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS_CORE_PDLYS_INVERT(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS));
+#endif
+    return o_data.insertFromRight<CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS_CORE_PDLYS_INVERT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS_CORE_PDLYS_INVERT chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS_CORE_PDLYS_INVERT(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS));
+#endif
+    return o_data.insertFromRight<CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS_CORE_PDLYS_INVERT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS_CORE_PDLYS_INVERT chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS_CORE_PDLYS_INVERT(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS));
+#endif
+    return o_data.setBit<CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS_CORE_PDLYS_INVERT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS_CORE_PDLYS_INVERT chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS_CORE_PDLYS_INVERT(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS));
+#endif
+    return o_data.clearBit<CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS_CORE_PDLYS_INVERT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS_CORE_PDLYS_INVERT chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS_CORE_PDLYS_INVERT(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS));
+#endif
+    return i_data.extractToRight<CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS_CORE_PDLYS_INVERT,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS_CORE_PDLYS_INVERT chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS_CORE_PDLYS_INVERT(
+    fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS));
+#endif
+    return i_data.getBit<CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS_CORE_PDLYS_INVERT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS_CORE_PDLYS_INVERT chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = CMFSI_INCLUDE_MFSI_A_PIB2OPB_COMP_P_0_CRSIS;
+    scomt::last_scom = CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY;
 #endif
-    return fapi2::getScom(i_target, CMFSI_INCLUDE_MFSI_A_PIB2OPB_COMP_P_0_CRSIS, o_data);
+    return fapi2::getScom(i_target, CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -63,14 +350,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_CMFSI_INCLUDE_MFSI_A_PIB2OPB_COMP_P_0_CRSIS(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(CMFSI_INCLUDE_MFSI_A_PIB2OPB_COMP_P_0_CRSIS));
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY));
 #endif
-    return fapi2::putScom(i_target, CMFSI_INCLUDE_MFSI_A_PIB2OPB_COMP_P_0_CRSIS, i_data);
+    return fapi2::putScom(i_target, CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -78,12 +365,102 @@ fapi_try_exit:
 }
 
 
+static inline fapi2::buffer<uint64_t>& SET_CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY_1(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY));
+#endif
+    return o_data.insertFromRight<CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY_1,
+           CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY_1_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY_1(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY));
+#endif
+    return o_data.insertFromRight<CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY_1,
+           CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY_1_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY_1(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY));
+#endif
+    return i_data.extractToRight<CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY_1,
+           CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY_1_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY_2(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY));
+#endif
+    return o_data.insertFromRight<CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY_2,
+           CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY_2_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY_2 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY_2(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY));
+#endif
+    return o_data.insertFromRight<CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY_2,
+           CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY_2_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY_2 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY_2(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY));
+#endif
+    return i_data.extractToRight<CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY_2,
+           CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY_2_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY_2 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_CMFSI_INCLUDE_MFSI_A_PIB2OPB_COMP_P_0_RSIS(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_CLK_ADJ_01_DCADJ_WRAP_SET_ADJUST_MODE(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = CMFSI_INCLUDE_MFSI_A_PIB2OPB_COMP_P_0_RSIS;
+    scomt::last_scom = CLK_ADJ_01_DCADJ_WRAP_SET_ADJUST_MODE;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -93,14 +470,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_CMFSI_INCLUDE_MFSI_A_PIB2OPB_COMP_P_0_RSIS(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_CLK_ADJ_01_DCADJ_WRAP_SET_ADJUST_MODE(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = CMFSI_INCLUDE_MFSI_A_PIB2OPB_COMP_P_0_RSIS;
+    scomt::last_scom = CLK_ADJ_01_DCADJ_WRAP_SET_ADJUST_MODE;
 #endif
-    return fapi2::getScom(i_target, CMFSI_INCLUDE_MFSI_A_PIB2OPB_COMP_P_0_RSIS, o_data);
+    return fapi2::getScom(i_target, CLK_ADJ_01_DCADJ_WRAP_SET_ADJUST_MODE, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -108,14 +485,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_CMFSI_INCLUDE_MFSI_A_PIB2OPB_COMP_P_0_RSIS(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_CLK_ADJ_01_DCADJ_WRAP_SET_ADJUST_MODE(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(CMFSI_INCLUDE_MFSI_A_PIB2OPB_COMP_P_0_RSIS));
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_01_DCADJ_WRAP_SET_ADJUST_MODE));
 #endif
-    return fapi2::putScom(i_target, CMFSI_INCLUDE_MFSI_A_PIB2OPB_COMP_P_0_RSIS, i_data);
+    return fapi2::putScom(i_target, CLK_ADJ_01_DCADJ_WRAP_SET_ADJUST_MODE, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -124,11 +501,11 @@ fapi_try_exit:
 
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_CMFSI_INCLUDE_MFSI_A_PIB2OPB_COMP_P_1_CRSIM(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_CLK_ADJ_01_DCADJ_WRAP_SET_HOLD_MODE(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = CMFSI_INCLUDE_MFSI_A_PIB2OPB_COMP_P_1_CRSIM;
+    scomt::last_scom = CLK_ADJ_01_DCADJ_WRAP_SET_HOLD_MODE;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -138,14 +515,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_CMFSI_INCLUDE_MFSI_A_PIB2OPB_COMP_P_1_CRSIM(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_CLK_ADJ_01_DCADJ_WRAP_SET_HOLD_MODE(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = CMFSI_INCLUDE_MFSI_A_PIB2OPB_COMP_P_1_CRSIM;
+    scomt::last_scom = CLK_ADJ_01_DCADJ_WRAP_SET_HOLD_MODE;
 #endif
-    return fapi2::getScom(i_target, CMFSI_INCLUDE_MFSI_A_PIB2OPB_COMP_P_1_CRSIM, o_data);
+    return fapi2::getScom(i_target, CLK_ADJ_01_DCADJ_WRAP_SET_HOLD_MODE, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -153,14 +530,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_CMFSI_INCLUDE_MFSI_A_PIB2OPB_COMP_P_1_CRSIM(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_CLK_ADJ_01_DCADJ_WRAP_SET_HOLD_MODE(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(CMFSI_INCLUDE_MFSI_A_PIB2OPB_COMP_P_1_CRSIM));
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_01_DCADJ_WRAP_SET_HOLD_MODE));
 #endif
-    return fapi2::putScom(i_target, CMFSI_INCLUDE_MFSI_A_PIB2OPB_COMP_P_1_CRSIM, i_data);
+    return fapi2::putScom(i_target, CLK_ADJ_01_DCADJ_WRAP_SET_HOLD_MODE, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -169,11 +546,12 @@ fapi_try_exit:
 
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_CMFSI_INCLUDE_MFSI_B_PIB2OPB_COMP_P_0_RSIM(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE(
+    const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = CMFSI_INCLUDE_MFSI_B_PIB2OPB_COMP_P_0_RSIM;
+    scomt::last_scom = CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -183,14 +561,155 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_CMFSI_INCLUDE_MFSI_B_PIB2OPB_COMP_P_0_RSIM(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE(
+    const fapi2::Target<K, M, V>& i_target, fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE;
+#endif
+    return fapi2::getScom(i_target, CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE(
+    const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE));
+#endif
+    return fapi2::putScom(i_target, CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+static inline fapi2::buffer<uint64_t>& SET_CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE_CORE_IS_LATE_INVERT(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE));
+#endif
+    return o_data.insertFromRight<CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE_CORE_IS_LATE_INVERT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE_CORE_IS_LATE_INVERT chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE_CORE_IS_LATE_INVERT(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE));
+#endif
+    return o_data.insertFromRight<CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE_CORE_IS_LATE_INVERT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE_CORE_IS_LATE_INVERT chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE_CORE_IS_LATE_INVERT(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE));
+#endif
+    return o_data.setBit<CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE_CORE_IS_LATE_INVERT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE_CORE_IS_LATE_INVERT chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE_CORE_IS_LATE_INVERT(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE));
+#endif
+    return o_data.clearBit<CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE_CORE_IS_LATE_INVERT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE_CORE_IS_LATE_INVERT chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE_CORE_IS_LATE_INVERT(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE));
+#endif
+    return i_data.extractToRight<CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE_CORE_IS_LATE_INVERT,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE_CORE_IS_LATE_INVERT chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE_CORE_IS_LATE_INVERT(
+    fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE));
+#endif
+    return i_data.getBit<CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE_CORE_IS_LATE_INVERT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE_CORE_IS_LATE_INVERT chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = CMFSI_INCLUDE_MFSI_B_PIB2OPB_COMP_P_0_RSIM;
+    scomt::last_scom = CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT;
 #endif
-    return fapi2::getScom(i_target, CMFSI_INCLUDE_MFSI_B_PIB2OPB_COMP_P_0_RSIM, o_data);
+    return fapi2::getScom(i_target, CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -198,14 +717,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_CMFSI_INCLUDE_MFSI_B_PIB2OPB_COMP_P_0_RSIM(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(CMFSI_INCLUDE_MFSI_B_PIB2OPB_COMP_P_0_RSIM));
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT));
 #endif
-    return fapi2::putScom(i_target, CMFSI_INCLUDE_MFSI_B_PIB2OPB_COMP_P_0_RSIM, i_data);
+    return fapi2::putScom(i_target, CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -213,12 +732,63 @@ fapi_try_exit:
 }
 
 
+static inline fapi2::buffer<uint64_t>& SET_CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT_WAIT_CNT_VALUE(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT));
+#endif
+    return o_data.insertFromRight<CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT_WAIT_CNT_VALUE,
+           CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT_WAIT_CNT_VALUE_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT_WAIT_CNT_VALUE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT_WAIT_CNT_VALUE(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT));
+#endif
+    return o_data.insertFromRight<CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT_WAIT_CNT_VALUE,
+           CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT_WAIT_CNT_VALUE_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT_WAIT_CNT_VALUE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT_WAIT_CNT_VALUE(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT));
+#endif
+    return i_data.extractToRight<CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT_WAIT_CNT_VALUE,
+           CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT_WAIT_CNT_VALUE_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT_WAIT_CNT_VALUE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_DPLL_CNTL_NEST_REGS_ICHAR(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = DPLL_CNTL_NEST_REGS_ICHAR;
+    scomt::last_scom = CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -228,14 +798,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_DPLL_CNTL_NEST_REGS_ICHAR(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = DPLL_CNTL_NEST_REGS_ICHAR;
+    scomt::last_scom = CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE;
 #endif
-    return fapi2::getScom(i_target, DPLL_CNTL_NEST_REGS_ICHAR, o_data);
+    return fapi2::getScom(i_target, CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -243,14 +813,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_DPLL_CNTL_NEST_REGS_ICHAR(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_ICHAR));
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE));
 #endif
-    return fapi2::putScom(i_target, DPLL_CNTL_NEST_REGS_ICHAR, i_data);
+    return fapi2::putScom(i_target, CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -258,282 +828,141 @@ fapi_try_exit:
 }
 
 
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_AVG(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE_ENABLE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_ICHAR));
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE));
 #endif
-    return o_data.insertFromRight<DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_AVG,
-           DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_AVG_LEN>(i_data);
+    return o_data.insertFromRight<CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE_ENABLE,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_AVG chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_AVG(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE_ENABLE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_ICHAR));
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE));
 #endif
-    return o_data.insertFromRight<DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_AVG,
-           DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_AVG_LEN>(i_data);
+    return o_data.insertFromRight<CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE_ENABLE,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_AVG chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_AVG(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE_ENABLE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE));
+#endif
+    return o_data.setBit<CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE_ENABLE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE));
+#endif
+    return o_data.clearBit<CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE_ENABLE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_ICHAR));
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE));
 #endif
-    return i_data.extractToRight<DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_AVG,
-           DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_AVG_LEN>(o_data);
+    return i_data.extractToRight<CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE_ENABLE,
+           1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_AVG chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_AVG(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
+static inline bool GET_CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE_ENABLE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_ICHAR));
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE));
 #endif
-    return o_data.insertFromRight<DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_AVG,
-           DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_AVG_LEN>(i_data);
+    return i_data.getBit<CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_AVG chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_AVG(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_ICHAR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_AVG,
-           DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_AVG_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_AVG chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_AVG(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_ICHAR));
-#endif
-    return i_data.extractToRight<DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_AVG,
-           DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_AVG_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_AVG chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_MAX(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE_VALUE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_ICHAR));
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE));
 #endif
-    return o_data.insertFromRight<DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_MAX,
-           DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_MAX_LEN>(i_data);
+    return o_data.insertFromRight<CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE_VALUE,
+           CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE_VALUE_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_MAX chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE_VALUE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_MAX(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE_VALUE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_ICHAR));
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE));
 #endif
-    return o_data.insertFromRight<DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_MAX,
-           DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_MAX_LEN>(i_data);
+    return o_data.insertFromRight<CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE_VALUE,
+           CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE_VALUE_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_MAX chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE_VALUE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_MAX(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE_VALUE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_ICHAR));
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE));
 #endif
-    return i_data.extractToRight<DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_MAX,
-           DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_MAX_LEN>(o_data);
+    return i_data.extractToRight<CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE_VALUE,
+           CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE_VALUE_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_MAX chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_MAX(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_ICHAR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_MAX,
-           DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_MAX_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_MAX chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_MAX(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_ICHAR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_MAX,
-           DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_MAX_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_MAX chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_MAX(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_ICHAR));
-#endif
-    return i_data.extractToRight<DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_MAX,
-           DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_MAX_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_MAX chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_MIN(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_ICHAR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_MIN,
-           DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_MIN_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_MIN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_MIN(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_ICHAR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_MIN,
-           DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_MIN_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_MIN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_MIN(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_ICHAR));
-#endif
-    return i_data.extractToRight<DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_MIN,
-           DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_MIN_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_ICHAR_FREQIN_MIN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_MIN(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_ICHAR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_MIN,
-           DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_MIN_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_MIN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_MIN(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_ICHAR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_MIN,
-           DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_MIN_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_MIN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_MIN(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_ICHAR));
-#endif
-    return i_data.extractToRight<DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_MIN,
-           DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_MIN_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_ICHAR_HIRES_FREQIN_MIN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE_VALUE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_DPLL_CNTL_NEST_REGS_OCHAR(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_CLK_ADJ_03_DCADJ_WRAP_SET_MEASURE_ONLY_MODE(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = DPLL_CNTL_NEST_REGS_OCHAR;
+    scomt::last_scom = CLK_ADJ_03_DCADJ_WRAP_SET_MEASURE_ONLY_MODE;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -543,14 +972,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_DPLL_CNTL_NEST_REGS_OCHAR(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_CLK_ADJ_03_DCADJ_WRAP_SET_MEASURE_ONLY_MODE(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = DPLL_CNTL_NEST_REGS_OCHAR;
+    scomt::last_scom = CLK_ADJ_03_DCADJ_WRAP_SET_MEASURE_ONLY_MODE;
 #endif
-    return fapi2::getScom(i_target, DPLL_CNTL_NEST_REGS_OCHAR, o_data);
+    return fapi2::getScom(i_target, CLK_ADJ_03_DCADJ_WRAP_SET_MEASURE_ONLY_MODE, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -558,14 +987,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_DPLL_CNTL_NEST_REGS_OCHAR(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_CLK_ADJ_03_DCADJ_WRAP_SET_MEASURE_ONLY_MODE(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_OCHAR));
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_03_DCADJ_WRAP_SET_MEASURE_ONLY_MODE));
 #endif
-    return fapi2::putScom(i_target, DPLL_CNTL_NEST_REGS_OCHAR, i_data);
+    return fapi2::putScom(i_target, CLK_ADJ_03_DCADJ_WRAP_SET_MEASURE_ONLY_MODE, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -573,275 +1002,94 @@ fapi_try_exit:
 }
 
 
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_MAX(fapi2::buffer<uint64_t>& i_data,
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_OCHAR));
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE;
 #endif
-    return o_data.insertFromRight<DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_MAX,
-           DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_MAX_LEN>(i_data);
+    return fapi2::getScom(i_target, CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_MAX chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
+    return fapi2::current_err;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_MAX(const uint64_t i_data,
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE));
+#endif
+    return fapi2::putScom(i_target, CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_COMP_P_0_RSIS(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = COMP_P_0_RSIS;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_COMP_P_0_RSIS(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_OCHAR));
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = COMP_P_0_RSIS;
 #endif
-    return o_data.insertFromRight<DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_MAX,
-           DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_MAX_LEN>(i_data);
+    return fapi2::getScom(i_target, COMP_P_0_RSIS, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_MAX chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
+    return fapi2::current_err;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_MAX(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_COMP_P_0_RSIS(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_OCHAR));
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(COMP_P_0_RSIS));
 #endif
-    return i_data.extractToRight<DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_MAX,
-           DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_MAX_LEN>(o_data);
+    return fapi2::putScom(i_target, COMP_P_0_RSIS, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_MAX chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
+    return fapi2::current_err;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_MAX(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_OCHAR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_MAX,
-           DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_MAX_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_MAX chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_MAX(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_OCHAR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_MAX,
-           DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_MAX_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_MAX chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_MAX(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_OCHAR));
-#endif
-    return i_data.extractToRight<DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_MAX,
-           DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_MAX_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_MAX chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_AVG(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_OCHAR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_AVG,
-           DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_AVG_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_AVG chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_AVG(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_OCHAR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_AVG,
-           DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_AVG_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_AVG chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_AVG(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_OCHAR));
-#endif
-    return i_data.extractToRight<DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_AVG,
-           DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_AVG_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_AVG chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_AVG(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_OCHAR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_AVG,
-           DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_AVG_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_AVG chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_AVG(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_OCHAR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_AVG,
-           DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_AVG_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_AVG chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_AVG(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_OCHAR));
-#endif
-    return i_data.extractToRight<DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_AVG,
-           DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_AVG_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_AVG chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_MIN(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_OCHAR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_MIN,
-           DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_MIN_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_MIN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_MIN(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_OCHAR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_MIN,
-           DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_MIN_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_MIN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_MIN(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_OCHAR));
-#endif
-    return i_data.extractToRight<DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_MIN,
-           DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_MIN_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_OCHAR_FREQOUT_MIN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_MIN(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_OCHAR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_MIN,
-           DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_MIN_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_MIN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_MIN(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_OCHAR));
-#endif
-    return o_data.insertFromRight<DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_MIN,
-           DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_MIN_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_MIN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_MIN(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(DPLL_CNTL_NEST_REGS_OCHAR));
-#endif
-    return i_data.extractToRight<DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_MIN,
-           DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_MIN_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access DPLL_CNTL_NEST_REGS_OCHAR_HIRES_FREQOUT_MIN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_EPS_DBG_TRACE_REG_1(const fapi2::Target<K, M, V>& i_target)
@@ -6621,582 +6869,1272 @@ fapi_try_exit:
 #endif
 }
 
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSI_A_MST_0_MRESP4_WOX(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSI_A_MST_0_MRESP4_WOX;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSI_A_MST_0_MRESP4_WOX(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_49(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSI_A_MST_0_MRESP4_WOX;
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
 #endif
-    return fapi2::getScom(i_target, FSI_A_MST_0_MRESP4_WOX, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSI_A_MST_0_MRESP4_WOX(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSI_A_MST_0_MRESP4_WOX));
-#endif
-    return fapi2::putScom(i_target, FSI_A_MST_0_MRESP4_WOX, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-
-static inline fapi2::buffer<uint64_t>& SET_FSI_A_MST_0_MRESP4_GENERAL_RESET_4(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSI_A_MST_0_MRESP4_WOX));
-#endif
-    return o_data.insertFromRight<FSI_A_MST_0_MRESP4_GENERAL_RESET_4,
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_49,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSI_A_MST_0_MRESP4_GENERAL_RESET_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_49 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSI_A_MST_0_MRESP4_GENERAL_RESET_4(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_49(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSI_A_MST_0_MRESP4_WOX));
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
 #endif
-    return o_data.insertFromRight<FSI_A_MST_0_MRESP4_GENERAL_RESET_4,
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_49,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSI_A_MST_0_MRESP4_GENERAL_RESET_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_49 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSI_A_MST_0_MRESP4_GENERAL_RESET_4(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_49(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSI_A_MST_0_MRESP4_WOX));
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
 #endif
-    return o_data.setBit<FSI_A_MST_0_MRESP4_GENERAL_RESET_4>();
+    return o_data.setBit<EPS_FIR_LOCAL_ACTION1_49>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSI_A_MST_0_MRESP4_GENERAL_RESET_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_49 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_FSI_A_MST_0_MRESP4_GENERAL_RESET_4(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_EPS_FIR_LOCAL_ACTION1_49(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSI_A_MST_0_MRESP4_WOX));
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
 #endif
-    return o_data.clearBit<FSI_A_MST_0_MRESP4_GENERAL_RESET_4>();
+    return o_data.clearBit<EPS_FIR_LOCAL_ACTION1_49>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSI_A_MST_0_MRESP4_GENERAL_RESET_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_49 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_FSI_A_MST_0_MRESP4_GENERAL_RESET_4(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_EPS_FIR_LOCAL_ACTION1_49(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSI_A_MST_0_MRESP4_WOX));
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
 #endif
-    return i_data.extractToRight<FSI_A_MST_0_MRESP4_GENERAL_RESET_4,
+    return i_data.extractToRight<EPS_FIR_LOCAL_ACTION1_49,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSI_A_MST_0_MRESP4_GENERAL_RESET_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_49 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_FSI_A_MST_0_MRESP4_GENERAL_RESET_4(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_EPS_FIR_LOCAL_ACTION1_49(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSI_A_MST_0_MRESP4_WOX));
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
 #endif
-    return i_data.getBit<FSI_A_MST_0_MRESP4_GENERAL_RESET_4>();
+    return i_data.getBit<EPS_FIR_LOCAL_ACTION1_49>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSI_A_MST_0_MRESP4_GENERAL_RESET_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_49 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSI_A_MST_0_MRESP4_ERROR_RESET_4(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_50(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSI_A_MST_0_MRESP4_WOX));
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
 #endif
-    return o_data.insertFromRight<FSI_A_MST_0_MRESP4_ERROR_RESET_4,
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_50,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSI_A_MST_0_MRESP4_ERROR_RESET_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_50 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSI_A_MST_0_MRESP4_ERROR_RESET_4(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_50(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSI_A_MST_0_MRESP4_WOX));
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
 #endif
-    return o_data.insertFromRight<FSI_A_MST_0_MRESP4_ERROR_RESET_4,
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_50,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSI_A_MST_0_MRESP4_ERROR_RESET_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_50 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSI_A_MST_0_MRESP4_ERROR_RESET_4(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_50(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSI_A_MST_0_MRESP4_WOX));
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
 #endif
-    return o_data.setBit<FSI_A_MST_0_MRESP4_ERROR_RESET_4>();
+    return o_data.setBit<EPS_FIR_LOCAL_ACTION1_50>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSI_A_MST_0_MRESP4_ERROR_RESET_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_50 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_FSI_A_MST_0_MRESP4_ERROR_RESET_4(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_EPS_FIR_LOCAL_ACTION1_50(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSI_A_MST_0_MRESP4_WOX));
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
 #endif
-    return o_data.clearBit<FSI_A_MST_0_MRESP4_ERROR_RESET_4>();
+    return o_data.clearBit<EPS_FIR_LOCAL_ACTION1_50>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSI_A_MST_0_MRESP4_ERROR_RESET_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_50 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_FSI_A_MST_0_MRESP4_ERROR_RESET_4(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_EPS_FIR_LOCAL_ACTION1_50(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSI_A_MST_0_MRESP4_WOX));
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
 #endif
-    return i_data.extractToRight<FSI_A_MST_0_MRESP4_ERROR_RESET_4,
+    return i_data.extractToRight<EPS_FIR_LOCAL_ACTION1_50,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSI_A_MST_0_MRESP4_ERROR_RESET_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_50 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_FSI_A_MST_0_MRESP4_ERROR_RESET_4(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_EPS_FIR_LOCAL_ACTION1_50(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSI_A_MST_0_MRESP4_WOX));
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
 #endif
-    return i_data.getBit<FSI_A_MST_0_MRESP4_ERROR_RESET_4>();
+    return i_data.getBit<EPS_FIR_LOCAL_ACTION1_50>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSI_A_MST_0_MRESP4_ERROR_RESET_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_50 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSI_A_MST_0_MSIEP7_FSI0(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSI_A_MST_0_MSIEP7_FSI0;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSI_A_MST_0_MSIEP7_FSI0(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_51(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSI_A_MST_0_MSIEP7_FSI0;
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
 #endif
-    return fapi2::getScom(i_target, FSI_A_MST_0_MSIEP7_FSI0, o_data);
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_51,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSI_A_MST_0_MSIEP7_FSI0(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSI_A_MST_0_MSIEP7_FSI0, FSI_A_MST_0_MSIEP7_SCOMFSI0));
-#endif
-    return fapi2::putScom(i_target, FSI_A_MST_0_MSIEP7_FSI0, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSI_A_MST_0_MSIEP7_SCOMFSI0(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSI_A_MST_0_MSIEP7_SCOMFSI0;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSI_A_MST_0_MSIEP7_SCOMFSI0(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSI_A_MST_0_MSIEP7_SCOMFSI0;
-#endif
-    return fapi2::getScom(i_target, FSI_A_MST_0_MSIEP7_SCOMFSI0, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSI_A_MST_0_MSIEP7_SCOMFSI0(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSI_A_MST_0_MSIEP7_FSI0, FSI_A_MST_0_MSIEP7_SCOMFSI0));
-#endif
-    return fapi2::putScom(i_target, FSI_A_MST_0_MSIEP7_SCOMFSI0, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSI_A_MST_1_MAESP6_FSI0(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSI_A_MST_1_MAESP6_FSI0;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSI_A_MST_1_MAESP6_FSI0(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSI_A_MST_1_MAESP6_FSI0;
-#endif
-    return fapi2::getScom(i_target, FSI_A_MST_1_MAESP6_FSI0, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSI_A_MST_1_MAESP6_FSI0(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSI_A_MST_1_MAESP6_FSI0, FSI_A_MST_1_MAESP6_SCOMFSI0));
-#endif
-    return fapi2::putScom(i_target, FSI_A_MST_1_MAESP6_FSI0, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSI_A_MST_1_MAESP6_SCOMFSI0(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSI_A_MST_1_MAESP6_SCOMFSI0;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSI_A_MST_1_MAESP6_SCOMFSI0(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSI_A_MST_1_MAESP6_SCOMFSI0;
-#endif
-    return fapi2::getScom(i_target, FSI_A_MST_1_MAESP6_SCOMFSI0, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSI_A_MST_1_MAESP6_SCOMFSI0(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSI_A_MST_1_MAESP6_FSI0, FSI_A_MST_1_MAESP6_SCOMFSI0));
-#endif
-    return fapi2::putScom(i_target, FSI_A_MST_1_MAESP6_SCOMFSI0, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSI_A_MST_1_MSTAP7_RO(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSI_A_MST_1_MSTAP7_RO;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSI_A_MST_1_MSTAP7_RO(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSI_A_MST_1_MSTAP7_RO;
-#endif
-    return fapi2::getScom(i_target, FSI_A_MST_1_MSTAP7_RO, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSI_A_MST_1_MSTAP7_RO(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSI_A_MST_1_MSTAP7_RO));
-#endif
-    return fapi2::putScom(i_target, FSI_A_MST_1_MSTAP7_RO, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-
-static inline fapi2::buffer<uint64_t>& SET_FSI_A_MST_1_MSTAP7_0(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSI_A_MST_1_MSTAP7_RO));
-#endif
-    return o_data.insertFromRight<FSI_A_MST_1_MSTAP7_0,
-           FSI_A_MST_1_MSTAP7_0_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSI_A_MST_1_MSTAP7_0 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_51 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSI_A_MST_1_MSTAP7_0(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_51(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSI_A_MST_1_MSTAP7_RO));
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
 #endif
-    return o_data.insertFromRight<FSI_A_MST_1_MSTAP7_0,
-           FSI_A_MST_1_MSTAP7_0_LEN>(i_data);
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_51,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSI_A_MST_1_MSTAP7_0 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_51 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_FSI_A_MST_1_MSTAP7_0(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_51(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.setBit<EPS_FIR_LOCAL_ACTION1_51>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_51 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EPS_FIR_LOCAL_ACTION1_51(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.clearBit<EPS_FIR_LOCAL_ACTION1_51>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_51 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EPS_FIR_LOCAL_ACTION1_51(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSI_A_MST_1_MSTAP7_RO));
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
 #endif
-    return i_data.extractToRight<FSI_A_MST_1_MSTAP7_0,
-           FSI_A_MST_1_MSTAP7_0_LEN>(o_data);
+    return i_data.extractToRight<EPS_FIR_LOCAL_ACTION1_51,
+           1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSI_A_MST_1_MSTAP7_0 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_51 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSI_A_MST_1_MSTAP7_1(fapi2::buffer<uint64_t>& i_data,
+static inline bool GET_EPS_FIR_LOCAL_ACTION1_51(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.getBit<EPS_FIR_LOCAL_ACTION1_51>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_51 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_52(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSI_A_MST_1_MSTAP7_RO));
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
 #endif
-    return o_data.insertFromRight<FSI_A_MST_1_MSTAP7_1,
-           FSI_A_MST_1_MSTAP7_1_LEN>(i_data);
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_52,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSI_A_MST_1_MSTAP7_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_52 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSI_A_MST_1_MSTAP7_1(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_52(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSI_A_MST_1_MSTAP7_RO));
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
 #endif
-    return o_data.insertFromRight<FSI_A_MST_1_MSTAP7_1,
-           FSI_A_MST_1_MSTAP7_1_LEN>(i_data);
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_52,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSI_A_MST_1_MSTAP7_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_52 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_FSI_A_MST_1_MSTAP7_1(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_52(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.setBit<EPS_FIR_LOCAL_ACTION1_52>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_52 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EPS_FIR_LOCAL_ACTION1_52(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.clearBit<EPS_FIR_LOCAL_ACTION1_52>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_52 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EPS_FIR_LOCAL_ACTION1_52(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSI_A_MST_1_MSTAP7_RO));
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
 #endif
-    return i_data.extractToRight<FSI_A_MST_1_MSTAP7_1,
-           FSI_A_MST_1_MSTAP7_1_LEN>(o_data);
+    return i_data.extractToRight<EPS_FIR_LOCAL_ACTION1_52,
+           1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSI_A_MST_1_MSTAP7_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_52 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSI_A_MST_1_MSTAP7_2(fapi2::buffer<uint64_t>& i_data,
+static inline bool GET_EPS_FIR_LOCAL_ACTION1_52(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.getBit<EPS_FIR_LOCAL_ACTION1_52>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_52 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_53(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSI_A_MST_1_MSTAP7_RO));
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
 #endif
-    return o_data.insertFromRight<FSI_A_MST_1_MSTAP7_2,
-           FSI_A_MST_1_MSTAP7_2_LEN>(i_data);
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_53,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSI_A_MST_1_MSTAP7_2 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_53 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSI_A_MST_1_MSTAP7_2(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_53(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSI_A_MST_1_MSTAP7_RO));
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
 #endif
-    return o_data.insertFromRight<FSI_A_MST_1_MSTAP7_2,
-           FSI_A_MST_1_MSTAP7_2_LEN>(i_data);
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_53,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSI_A_MST_1_MSTAP7_2 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_53 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_FSI_A_MST_1_MSTAP7_2(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_53(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.setBit<EPS_FIR_LOCAL_ACTION1_53>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_53 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EPS_FIR_LOCAL_ACTION1_53(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.clearBit<EPS_FIR_LOCAL_ACTION1_53>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_53 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EPS_FIR_LOCAL_ACTION1_53(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSI_A_MST_1_MSTAP7_RO));
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
 #endif
-    return i_data.extractToRight<FSI_A_MST_1_MSTAP7_2,
-           FSI_A_MST_1_MSTAP7_2_LEN>(o_data);
+    return i_data.extractToRight<EPS_FIR_LOCAL_ACTION1_53,
+           1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSI_A_MST_1_MSTAP7_2 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_53 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_EPS_FIR_LOCAL_ACTION1_53(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.getBit<EPS_FIR_LOCAL_ACTION1_53>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_53 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_54(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_54,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_54 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_54(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_54,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_54 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_54(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.setBit<EPS_FIR_LOCAL_ACTION1_54>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_54 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EPS_FIR_LOCAL_ACTION1_54(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.clearBit<EPS_FIR_LOCAL_ACTION1_54>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_54 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EPS_FIR_LOCAL_ACTION1_54(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.extractToRight<EPS_FIR_LOCAL_ACTION1_54,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_54 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_EPS_FIR_LOCAL_ACTION1_54(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.getBit<EPS_FIR_LOCAL_ACTION1_54>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_54 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_55(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_55,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_55 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_55(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_55,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_55 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_55(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.setBit<EPS_FIR_LOCAL_ACTION1_55>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_55 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EPS_FIR_LOCAL_ACTION1_55(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.clearBit<EPS_FIR_LOCAL_ACTION1_55>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_55 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EPS_FIR_LOCAL_ACTION1_55(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.extractToRight<EPS_FIR_LOCAL_ACTION1_55,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_55 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_EPS_FIR_LOCAL_ACTION1_55(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.getBit<EPS_FIR_LOCAL_ACTION1_55>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_55 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_56(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_56,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_56 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_56(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_56,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_56 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_56(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.setBit<EPS_FIR_LOCAL_ACTION1_56>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_56 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EPS_FIR_LOCAL_ACTION1_56(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.clearBit<EPS_FIR_LOCAL_ACTION1_56>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_56 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EPS_FIR_LOCAL_ACTION1_56(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.extractToRight<EPS_FIR_LOCAL_ACTION1_56,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_56 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_EPS_FIR_LOCAL_ACTION1_56(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.getBit<EPS_FIR_LOCAL_ACTION1_56>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_56 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_57(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_57,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_57 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_57(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_57,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_57 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_57(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.setBit<EPS_FIR_LOCAL_ACTION1_57>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_57 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EPS_FIR_LOCAL_ACTION1_57(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.clearBit<EPS_FIR_LOCAL_ACTION1_57>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_57 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EPS_FIR_LOCAL_ACTION1_57(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.extractToRight<EPS_FIR_LOCAL_ACTION1_57,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_57 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_EPS_FIR_LOCAL_ACTION1_57(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.getBit<EPS_FIR_LOCAL_ACTION1_57>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_57 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_58(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_58,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_58 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_58(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_58,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_58 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_58(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.setBit<EPS_FIR_LOCAL_ACTION1_58>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_58 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EPS_FIR_LOCAL_ACTION1_58(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.clearBit<EPS_FIR_LOCAL_ACTION1_58>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_58 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EPS_FIR_LOCAL_ACTION1_58(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.extractToRight<EPS_FIR_LOCAL_ACTION1_58,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_58 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_EPS_FIR_LOCAL_ACTION1_58(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.getBit<EPS_FIR_LOCAL_ACTION1_58>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_58 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_59(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_59,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_59 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_59(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_59,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_59 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_59(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.setBit<EPS_FIR_LOCAL_ACTION1_59>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_59 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EPS_FIR_LOCAL_ACTION1_59(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.clearBit<EPS_FIR_LOCAL_ACTION1_59>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_59 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EPS_FIR_LOCAL_ACTION1_59(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.extractToRight<EPS_FIR_LOCAL_ACTION1_59,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_59 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_EPS_FIR_LOCAL_ACTION1_59(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.getBit<EPS_FIR_LOCAL_ACTION1_59>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_59 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_60(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_60,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_60 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_60(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_60,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_60 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_60(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.setBit<EPS_FIR_LOCAL_ACTION1_60>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_60 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EPS_FIR_LOCAL_ACTION1_60(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.clearBit<EPS_FIR_LOCAL_ACTION1_60>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_60 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EPS_FIR_LOCAL_ACTION1_60(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.extractToRight<EPS_FIR_LOCAL_ACTION1_60,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_60 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_EPS_FIR_LOCAL_ACTION1_60(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.getBit<EPS_FIR_LOCAL_ACTION1_60>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_60 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_61(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_61,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_61 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_61(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_61,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_61 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_61(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.setBit<EPS_FIR_LOCAL_ACTION1_61>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_61 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EPS_FIR_LOCAL_ACTION1_61(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.clearBit<EPS_FIR_LOCAL_ACTION1_61>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_61 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EPS_FIR_LOCAL_ACTION1_61(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.extractToRight<EPS_FIR_LOCAL_ACTION1_61,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_61 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_EPS_FIR_LOCAL_ACTION1_61(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.getBit<EPS_FIR_LOCAL_ACTION1_61>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_61 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_62(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_62,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_62 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_62(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_62,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_62 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_62(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.setBit<EPS_FIR_LOCAL_ACTION1_62>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_62 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EPS_FIR_LOCAL_ACTION1_62(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.clearBit<EPS_FIR_LOCAL_ACTION1_62>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_62 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EPS_FIR_LOCAL_ACTION1_62(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.extractToRight<EPS_FIR_LOCAL_ACTION1_62,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_62 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_EPS_FIR_LOCAL_ACTION1_62(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.getBit<EPS_FIR_LOCAL_ACTION1_62>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_62 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_63(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_63,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_63 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_63(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.insertFromRight<EPS_FIR_LOCAL_ACTION1_63,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_63 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EPS_FIR_LOCAL_ACTION1_63(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.setBit<EPS_FIR_LOCAL_ACTION1_63>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_63 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EPS_FIR_LOCAL_ACTION1_63(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return o_data.clearBit<EPS_FIR_LOCAL_ACTION1_63>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_63 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EPS_FIR_LOCAL_ACTION1_63(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.extractToRight<EPS_FIR_LOCAL_ACTION1_63,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_63 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_EPS_FIR_LOCAL_ACTION1_63(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EPS_FIR_LOCAL_ACTION1));
+#endif
+    return i_data.getBit<EPS_FIR_LOCAL_ACTION1_63>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EPS_FIR_LOCAL_ACTION1_63 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSI_B_MST_0_MAESP0_FSI1(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_GPWRP_FSI(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSI_B_MST_0_MAESP0_FSI1;
+    scomt::last_scom = FSXCOMP_FSXLOG_GPWRP_FSI;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -7206,14 +8144,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSI_B_MST_0_MAESP0_FSI1(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_GPWRP_FSI(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSI_B_MST_0_MAESP0_FSI1;
+    scomt::last_scom = FSXCOMP_FSXLOG_GPWRP_FSI;
 #endif
-    return fapi2::getScom(i_target, FSI_B_MST_0_MAESP0_FSI1, o_data);
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_GPWRP_FSI, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -7221,14 +8159,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSI_B_MST_0_MAESP0_FSI1(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_GPWRP_FSI(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSI_B_MST_0_MAESP0_FSI1, FSI_B_MST_0_MAESP0_SCOMFSI1));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_GPWRP_FSI, FSXCOMP_FSXLOG_GPWRP_FSI_BYTE, FSXCOMP_FSXLOG_GPWRP_RW));
 #endif
-    return fapi2::putScom(i_target, FSI_B_MST_0_MAESP0_FSI1, i_data);
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_GPWRP_FSI, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -7236,11 +8174,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSI_B_MST_0_MAESP0_SCOMFSI1(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_GPWRP_FSI_BYTE(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSI_B_MST_0_MAESP0_SCOMFSI1;
+    scomt::last_scom = FSXCOMP_FSXLOG_GPWRP_FSI_BYTE;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -7250,14 +8188,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSI_B_MST_0_MAESP0_SCOMFSI1(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_GPWRP_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSI_B_MST_0_MAESP0_SCOMFSI1;
+    scomt::last_scom = FSXCOMP_FSXLOG_GPWRP_FSI_BYTE;
 #endif
-    return fapi2::getScom(i_target, FSI_B_MST_0_MAESP0_SCOMFSI1, o_data);
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_GPWRP_FSI_BYTE, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -7265,27 +8203,26 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSI_B_MST_0_MAESP0_SCOMFSI1(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_GPWRP_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSI_B_MST_0_MAESP0_FSI1, FSI_B_MST_0_MAESP0_SCOMFSI1));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_GPWRP_FSI, FSXCOMP_FSXLOG_GPWRP_FSI_BYTE, FSXCOMP_FSXLOG_GPWRP_RW));
 #endif
-    return fapi2::putScom(i_target, FSI_B_MST_0_MAESP0_SCOMFSI1, i_data);
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_GPWRP_FSI_BYTE, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
 
-
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSI_B_MST_0_MCRSP1_FSI1(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_GPWRP_RW(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSI_B_MST_0_MCRSP1_FSI1;
+    scomt::last_scom = FSXCOMP_FSXLOG_GPWRP_RW;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -7295,14 +8232,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSI_B_MST_0_MCRSP1_FSI1(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_GPWRP_RW(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSI_B_MST_0_MCRSP1_FSI1;
+    scomt::last_scom = FSXCOMP_FSXLOG_GPWRP_RW;
 #endif
-    return fapi2::getScom(i_target, FSI_B_MST_0_MCRSP1_FSI1, o_data);
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_GPWRP_RW, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -7310,369 +8247,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSI_B_MST_0_MCRSP1_FSI1(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_GPWRP_RW(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSI_B_MST_0_MCRSP1_FSI1, FSI_B_MST_0_MCRSP1_SCOMFSI1));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_GPWRP_FSI, FSXCOMP_FSXLOG_GPWRP_FSI_BYTE, FSXCOMP_FSXLOG_GPWRP_RW));
 #endif
-    return fapi2::putScom(i_target, FSI_B_MST_0_MCRSP1_FSI1, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSI_B_MST_0_MCRSP1_SCOMFSI1(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSI_B_MST_0_MCRSP1_SCOMFSI1;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSI_B_MST_0_MCRSP1_SCOMFSI1(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSI_B_MST_0_MCRSP1_SCOMFSI1;
-#endif
-    return fapi2::getScom(i_target, FSI_B_MST_0_MCRSP1_SCOMFSI1, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSI_B_MST_0_MCRSP1_SCOMFSI1(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSI_B_MST_0_MCRSP1_FSI1, FSI_B_MST_0_MCRSP1_SCOMFSI1));
-#endif
-    return fapi2::putScom(i_target, FSI_B_MST_0_MCRSP1_SCOMFSI1, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSI_B_MST_0_MSTAP1_RO(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSI_B_MST_0_MSTAP1_RO;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSI_B_MST_0_MSTAP1_RO(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSI_B_MST_0_MSTAP1_RO;
-#endif
-    return fapi2::getScom(i_target, FSI_B_MST_0_MSTAP1_RO, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSI_B_MST_0_MSTAP1_RO(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSI_B_MST_0_MSTAP1_RO));
-#endif
-    return fapi2::putScom(i_target, FSI_B_MST_0_MSTAP1_RO, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-
-static inline fapi2::buffer<uint64_t>& SET_FSI_B_MST_0_MSTAP1_0(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSI_B_MST_0_MSTAP1_RO));
-#endif
-    return o_data.insertFromRight<FSI_B_MST_0_MSTAP1_0,
-           FSI_B_MST_0_MSTAP1_0_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSI_B_MST_0_MSTAP1_0 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_FSI_B_MST_0_MSTAP1_0(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSI_B_MST_0_MSTAP1_RO));
-#endif
-    return o_data.insertFromRight<FSI_B_MST_0_MSTAP1_0,
-           FSI_B_MST_0_MSTAP1_0_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSI_B_MST_0_MSTAP1_0 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_FSI_B_MST_0_MSTAP1_0(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSI_B_MST_0_MSTAP1_RO));
-#endif
-    return i_data.extractToRight<FSI_B_MST_0_MSTAP1_0,
-           FSI_B_MST_0_MSTAP1_0_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSI_B_MST_0_MSTAP1_0 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_FSI_B_MST_0_MSTAP1_1(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSI_B_MST_0_MSTAP1_RO));
-#endif
-    return o_data.insertFromRight<FSI_B_MST_0_MSTAP1_1,
-           FSI_B_MST_0_MSTAP1_1_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSI_B_MST_0_MSTAP1_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_FSI_B_MST_0_MSTAP1_1(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSI_B_MST_0_MSTAP1_RO));
-#endif
-    return o_data.insertFromRight<FSI_B_MST_0_MSTAP1_1,
-           FSI_B_MST_0_MSTAP1_1_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSI_B_MST_0_MSTAP1_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_FSI_B_MST_0_MSTAP1_1(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSI_B_MST_0_MSTAP1_RO));
-#endif
-    return i_data.extractToRight<FSI_B_MST_0_MSTAP1_1,
-           FSI_B_MST_0_MSTAP1_1_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSI_B_MST_0_MSTAP1_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_FSI_B_MST_0_MSTAP1_2(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSI_B_MST_0_MSTAP1_RO));
-#endif
-    return o_data.insertFromRight<FSI_B_MST_0_MSTAP1_2,
-           FSI_B_MST_0_MSTAP1_2_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSI_B_MST_0_MSTAP1_2 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_FSI_B_MST_0_MSTAP1_2(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSI_B_MST_0_MSTAP1_RO));
-#endif
-    return o_data.insertFromRight<FSI_B_MST_0_MSTAP1_2,
-           FSI_B_MST_0_MSTAP1_2_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSI_B_MST_0_MSTAP1_2 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_FSI_B_MST_0_MSTAP1_2(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSI_B_MST_0_MSTAP1_RO));
-#endif
-    return i_data.extractToRight<FSI_B_MST_0_MSTAP1_2,
-           FSI_B_MST_0_MSTAP1_2_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSI_B_MST_0_MSTAP1_2 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSI_B_SCRSIS4(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSI_B_SCRSIS4;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSI_B_SCRSIS4(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSI_B_SCRSIS4;
-#endif
-    return fapi2::getScom(i_target, FSI_B_SCRSIS4, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSI_B_SCRSIS4(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSI_B_SCRSIS4));
-#endif
-    return fapi2::putScom(i_target, FSI_B_SCRSIS4, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSI_B_SISM(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSI_B_SISM;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSI_B_SISM(const fapi2::Target<K, M, V>& i_target, fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSI_B_SISM;
-#endif
-    return fapi2::getScom(i_target, FSI_B_SISM, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSI_B_SISM(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSI_B_SISM));
-#endif
-    return fapi2::putScom(i_target, FSI_B_SISM, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_GPWRP_RWX(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_GPWRP_RWX;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_GPWRP_RWX(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_GPWRP_RWX;
-#endif
-    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_GPWRP_RWX, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_GPWRP_RWX(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_GPWRP_RWX));
-#endif
-    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_GPWRP_RWX, i_data);
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_GPWRP_RW, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -7684,7 +8266,7 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_GPWRP_MAGIC_COOKIE(fap
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_GPWRP_RWX));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_GPWRP_FSI, FSXCOMP_FSXLOG_GPWRP_FSI_BYTE, FSXCOMP_FSXLOG_GPWRP_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_GPWRP_MAGIC_COOKIE,
            FSXCOMP_FSXLOG_GPWRP_MAGIC_COOKIE_LEN>(i_data);
@@ -7699,7 +8281,7 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_GPWRP_MAGIC_COOKIE(con
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_GPWRP_RWX));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_GPWRP_FSI, FSXCOMP_FSXLOG_GPWRP_FSI_BYTE, FSXCOMP_FSXLOG_GPWRP_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_GPWRP_MAGIC_COOKIE,
            FSXCOMP_FSXLOG_GPWRP_MAGIC_COOKIE_LEN>(i_data);
@@ -7714,7 +8296,7 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_GPWRP_MAGIC_COOKIE(fap
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_GPWRP_RWX));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_GPWRP_FSI, FSXCOMP_FSXLOG_GPWRP_FSI_BYTE, FSXCOMP_FSXLOG_GPWRP_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_GPWRP_MAGIC_COOKIE,
            FSXCOMP_FSXLOG_GPWRP_MAGIC_COOKIE_LEN>(o_data);
@@ -7730,7 +8312,7 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_GPWRP_EN_OR_DIS_WRITE_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_GPWRP_RWX));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_GPWRP_FSI, FSXCOMP_FSXLOG_GPWRP_FSI_BYTE, FSXCOMP_FSXLOG_GPWRP_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_GPWRP_EN_OR_DIS_WRITE_PROTECTION,
            FSXCOMP_FSXLOG_GPWRP_EN_OR_DIS_WRITE_PROTECTION_LEN>(i_data);
@@ -7746,7 +8328,7 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_GPWRP_EN_OR_DIS_WRITE_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_GPWRP_RWX));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_GPWRP_FSI, FSXCOMP_FSXLOG_GPWRP_FSI_BYTE, FSXCOMP_FSXLOG_GPWRP_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_GPWRP_EN_OR_DIS_WRITE_PROTECTION,
            FSXCOMP_FSXLOG_GPWRP_EN_OR_DIS_WRITE_PROTECTION_LEN>(i_data);
@@ -7763,7 +8345,7 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_GPWRP_EN_OR_DIS_WRITE_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_GPWRP_RWX));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_GPWRP_FSI, FSXCOMP_FSXLOG_GPWRP_FSI_BYTE, FSXCOMP_FSXLOG_GPWRP_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_GPWRP_EN_OR_DIS_WRITE_PROTECTION,
            FSXCOMP_FSXLOG_GPWRP_EN_OR_DIS_WRITE_PROTECTION_LEN>(o_data);
@@ -7776,11 +8358,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M1A_DATA_AREA_10_RWX(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M1A_DATA_AREA_10_FSI(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_M1A_DATA_AREA_10_RWX;
+    scomt::last_scom = FSXCOMP_FSXLOG_M1A_DATA_AREA_10_FSI;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -7790,14 +8372,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M1A_DATA_AREA_10_RWX(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M1A_DATA_AREA_10_FSI(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_M1A_DATA_AREA_10_RWX;
+    scomt::last_scom = FSXCOMP_FSXLOG_M1A_DATA_AREA_10_FSI;
 #endif
-    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M1A_DATA_AREA_10_RWX, o_data);
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M1A_DATA_AREA_10_FSI, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -7805,27 +8387,27 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M1A_DATA_AREA_10_RWX(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M1A_DATA_AREA_10_FSI(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M1A_DATA_AREA_10_RWX));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M1A_DATA_AREA_10_FSI, FSXCOMP_FSXLOG_M1A_DATA_AREA_10_FSI_BYTE,
+                           FSXCOMP_FSXLOG_M1A_DATA_AREA_10_RW));
 #endif
-    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M1A_DATA_AREA_10_RWX, i_data);
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M1A_DATA_AREA_10_FSI, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
 
-
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M1A_DATA_AREA_7_RWX(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M1A_DATA_AREA_10_FSI_BYTE(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_M1A_DATA_AREA_7_RWX;
+    scomt::last_scom = FSXCOMP_FSXLOG_M1A_DATA_AREA_10_FSI_BYTE;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -7835,14 +8417,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M1A_DATA_AREA_7_RWX(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M1A_DATA_AREA_10_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_M1A_DATA_AREA_7_RWX;
+    scomt::last_scom = FSXCOMP_FSXLOG_M1A_DATA_AREA_10_FSI_BYTE;
 #endif
-    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M1A_DATA_AREA_7_RWX, o_data);
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M1A_DATA_AREA_10_FSI_BYTE, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -7850,27 +8432,27 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M1A_DATA_AREA_7_RWX(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M1A_DATA_AREA_10_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M1A_DATA_AREA_7_RWX));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M1A_DATA_AREA_10_FSI, FSXCOMP_FSXLOG_M1A_DATA_AREA_10_FSI_BYTE,
+                           FSXCOMP_FSXLOG_M1A_DATA_AREA_10_RW));
 #endif
-    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M1A_DATA_AREA_7_RWX, i_data);
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M1A_DATA_AREA_10_FSI_BYTE, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
 
-
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M2A_DATA_AREA_14_RWX(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M1A_DATA_AREA_10_RW(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_M2A_DATA_AREA_14_RWX;
+    scomt::last_scom = FSXCOMP_FSXLOG_M1A_DATA_AREA_10_RW;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -7880,14 +8462,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M2A_DATA_AREA_14_RWX(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M1A_DATA_AREA_10_RW(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_M2A_DATA_AREA_14_RWX;
+    scomt::last_scom = FSXCOMP_FSXLOG_M1A_DATA_AREA_10_RW;
 #endif
-    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M2A_DATA_AREA_14_RWX, o_data);
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M1A_DATA_AREA_10_RW, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -7895,14 +8477,15 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M2A_DATA_AREA_14_RWX(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M1A_DATA_AREA_10_RW(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M2A_DATA_AREA_14_RWX));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M1A_DATA_AREA_10_FSI, FSXCOMP_FSXLOG_M1A_DATA_AREA_10_FSI_BYTE,
+                           FSXCOMP_FSXLOG_M1A_DATA_AREA_10_RW));
 #endif
-    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M2A_DATA_AREA_14_RWX, i_data);
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M1A_DATA_AREA_10_RW, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -7911,11 +8494,11 @@ fapi_try_exit:
 
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M2B_DATA_AREA_1_RWX(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M1A_DATA_AREA_7_FSI(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_M2B_DATA_AREA_1_RWX;
+    scomt::last_scom = FSXCOMP_FSXLOG_M1A_DATA_AREA_7_FSI;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -7925,14 +8508,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M2B_DATA_AREA_1_RWX(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M1A_DATA_AREA_7_FSI(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_M2B_DATA_AREA_1_RWX;
+    scomt::last_scom = FSXCOMP_FSXLOG_M1A_DATA_AREA_7_FSI;
 #endif
-    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M2B_DATA_AREA_1_RWX, o_data);
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M1A_DATA_AREA_7_FSI, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -7940,20 +8523,473 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M2B_DATA_AREA_1_RWX(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M1A_DATA_AREA_7_FSI(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M2B_DATA_AREA_1_RWX));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M1A_DATA_AREA_7_FSI, FSXCOMP_FSXLOG_M1A_DATA_AREA_7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_M1A_DATA_AREA_7_RW));
 #endif
-    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M2B_DATA_AREA_1_RWX, i_data);
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M1A_DATA_AREA_7_FSI, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
 
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M1A_DATA_AREA_7_FSI_BYTE(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M1A_DATA_AREA_7_FSI_BYTE;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M1A_DATA_AREA_7_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M1A_DATA_AREA_7_FSI_BYTE;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M1A_DATA_AREA_7_FSI_BYTE, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M1A_DATA_AREA_7_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M1A_DATA_AREA_7_FSI, FSXCOMP_FSXLOG_M1A_DATA_AREA_7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_M1A_DATA_AREA_7_RW));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M1A_DATA_AREA_7_FSI_BYTE, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M1A_DATA_AREA_7_RW(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M1A_DATA_AREA_7_RW;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M1A_DATA_AREA_7_RW(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M1A_DATA_AREA_7_RW;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M1A_DATA_AREA_7_RW, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M1A_DATA_AREA_7_RW(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M1A_DATA_AREA_7_FSI, FSXCOMP_FSXLOG_M1A_DATA_AREA_7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_M1A_DATA_AREA_7_RW));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M1A_DATA_AREA_7_RW, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M2A_DATA_AREA_14_FSI(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M2A_DATA_AREA_14_FSI;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M2A_DATA_AREA_14_FSI(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M2A_DATA_AREA_14_FSI;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M2A_DATA_AREA_14_FSI, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M2A_DATA_AREA_14_FSI(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M2A_DATA_AREA_14_FSI, FSXCOMP_FSXLOG_M2A_DATA_AREA_14_FSI_BYTE,
+                           FSXCOMP_FSXLOG_M2A_DATA_AREA_14_RW));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M2A_DATA_AREA_14_FSI, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M2A_DATA_AREA_14_FSI_BYTE(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M2A_DATA_AREA_14_FSI_BYTE;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M2A_DATA_AREA_14_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M2A_DATA_AREA_14_FSI_BYTE;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M2A_DATA_AREA_14_FSI_BYTE, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M2A_DATA_AREA_14_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M2A_DATA_AREA_14_FSI, FSXCOMP_FSXLOG_M2A_DATA_AREA_14_FSI_BYTE,
+                           FSXCOMP_FSXLOG_M2A_DATA_AREA_14_RW));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M2A_DATA_AREA_14_FSI_BYTE, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M2A_DATA_AREA_14_RW(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M2A_DATA_AREA_14_RW;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M2A_DATA_AREA_14_RW(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M2A_DATA_AREA_14_RW;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M2A_DATA_AREA_14_RW, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M2A_DATA_AREA_14_RW(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M2A_DATA_AREA_14_FSI, FSXCOMP_FSXLOG_M2A_DATA_AREA_14_FSI_BYTE,
+                           FSXCOMP_FSXLOG_M2A_DATA_AREA_14_RW));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M2A_DATA_AREA_14_RW, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M2B_DATA_AREA_1_FSI(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M2B_DATA_AREA_1_FSI;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M2B_DATA_AREA_1_FSI(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M2B_DATA_AREA_1_FSI;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M2B_DATA_AREA_1_FSI, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M2B_DATA_AREA_1_FSI(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M2B_DATA_AREA_1_FSI, FSXCOMP_FSXLOG_M2B_DATA_AREA_1_FSI_BYTE,
+                           FSXCOMP_FSXLOG_M2B_DATA_AREA_1_RW));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M2B_DATA_AREA_1_FSI, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M2B_DATA_AREA_1_FSI_BYTE(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M2B_DATA_AREA_1_FSI_BYTE;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M2B_DATA_AREA_1_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M2B_DATA_AREA_1_FSI_BYTE;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M2B_DATA_AREA_1_FSI_BYTE, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M2B_DATA_AREA_1_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M2B_DATA_AREA_1_FSI, FSXCOMP_FSXLOG_M2B_DATA_AREA_1_FSI_BYTE,
+                           FSXCOMP_FSXLOG_M2B_DATA_AREA_1_RW));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M2B_DATA_AREA_1_FSI_BYTE, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M2B_DATA_AREA_1_RW(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M2B_DATA_AREA_1_RW;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M2B_DATA_AREA_1_RW(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M2B_DATA_AREA_1_RW;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M2B_DATA_AREA_1_RW, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M2B_DATA_AREA_1_RW(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M2B_DATA_AREA_1_FSI, FSXCOMP_FSXLOG_M2B_DATA_AREA_1_FSI_BYTE,
+                           FSXCOMP_FSXLOG_M2B_DATA_AREA_1_RW));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M2B_DATA_AREA_1_RW, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR(const fapi2::Target<K, M, V>& i_target)
@@ -7990,7 +9026,8 @@ static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR(con
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return fapi2::putScom(i_target, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR, i_data);
 #ifdef SCOM_CHECKING
@@ -8000,284 +9037,306 @@ fapi_try_exit:
 }
 
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CHIPLET_EN_DC(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_CHIPLET_EN_DC(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CHIPLET_EN_DC,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_CHIPLET_EN_DC,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CHIPLET_EN_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_CHIPLET_EN_DC chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CHIPLET_EN_DC(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_CHIPLET_EN_DC(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CHIPLET_EN_DC,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_CHIPLET_EN_DC,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CHIPLET_EN_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_CHIPLET_EN_DC chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CHIPLET_EN_DC(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_CHIPLET_EN_DC(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CHIPLET_EN_DC>();
+    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_CHIPLET_EN_DC>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CHIPLET_EN_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_CHIPLET_EN_DC chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CHIPLET_EN_DC(
+static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_CHIPLET_EN_DC(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CHIPLET_EN_DC>();
+    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_CHIPLET_EN_DC>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CHIPLET_EN_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_CHIPLET_EN_DC chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CHIPLET_EN_DC(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
-#endif
-    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CHIPLET_EN_DC,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CHIPLET_EN_DC chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CHIPLET_EN_DC(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
-#endif
-    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CHIPLET_EN_DC>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CHIPLET_EN_DC chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_PCB_EP_RESET_DC(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
-#endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_PCB_EP_RESET_DC,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_PCB_EP_RESET_DC chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_PCB_EP_RESET_DC(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
-#endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_PCB_EP_RESET_DC,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_PCB_EP_RESET_DC chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_PCB_EP_RESET_DC(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
-#endif
-    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_PCB_EP_RESET_DC>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_PCB_EP_RESET_DC chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_PCB_EP_RESET_DC(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
-#endif
-    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_PCB_EP_RESET_DC>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_PCB_EP_RESET_DC chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_PCB_EP_RESET_DC(
+static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_CHIPLET_EN_DC(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_PCB_EP_RESET_DC,
+    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_CHIPLET_EN_DC,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_PCB_EP_RESET_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_CHIPLET_EN_DC chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_PCB_EP_RESET_DC(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_CHIPLET_EN_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_PCB_EP_RESET_DC>();
+    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_CHIPLET_EN_DC>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_PCB_EP_RESET_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_CHIPLET_EN_DC chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CLK_ASYNC_RESET_DC(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_PCB_EP_RESET_DC(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CLK_ASYNC_RESET_DC,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_PCB_EP_RESET_DC,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CLK_ASYNC_RESET_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_PCB_EP_RESET_DC chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CLK_ASYNC_RESET_DC(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_PCB_EP_RESET_DC(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CLK_ASYNC_RESET_DC,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_PCB_EP_RESET_DC,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CLK_ASYNC_RESET_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_PCB_EP_RESET_DC chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CLK_ASYNC_RESET_DC(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_PCB_EP_RESET_DC(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CLK_ASYNC_RESET_DC>();
+    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_PCB_EP_RESET_DC>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CLK_ASYNC_RESET_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_PCB_EP_RESET_DC chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CLK_ASYNC_RESET_DC(
+static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_PCB_EP_RESET_DC(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CLK_ASYNC_RESET_DC>();
+    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_PCB_EP_RESET_DC>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CLK_ASYNC_RESET_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_PCB_EP_RESET_DC chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CLK_ASYNC_RESET_DC(
+static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_PCB_EP_RESET_DC(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CLK_ASYNC_RESET_DC,
+    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_PCB_EP_RESET_DC,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CLK_ASYNC_RESET_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_PCB_EP_RESET_DC chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CLK_ASYNC_RESET_DC(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_PCB_EP_RESET_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CLK_ASYNC_RESET_DC>();
+    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_PCB_EP_RESET_DC>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_CLK_ASYNC_RESET_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_PCB_EP_RESET_DC chip: %x, ec: %x", scomt::chip,
              scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_AN_CLKGLM_TEST_TCK_ASYNC_RESET(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+#endif
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_AN_CLKGLM_TEST_TCK_ASYNC_RESET,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_AN_CLKGLM_TEST_TCK_ASYNC_RESET chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_AN_CLKGLM_TEST_TCK_ASYNC_RESET(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+#endif
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_AN_CLKGLM_TEST_TCK_ASYNC_RESET,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_AN_CLKGLM_TEST_TCK_ASYNC_RESET chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_AN_CLKGLM_TEST_TCK_ASYNC_RESET(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+#endif
+    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_AN_CLKGLM_TEST_TCK_ASYNC_RESET>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_AN_CLKGLM_TEST_TCK_ASYNC_RESET chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_AN_CLKGLM_TEST_TCK_ASYNC_RESET(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+#endif
+    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_AN_CLKGLM_TEST_TCK_ASYNC_RESET>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_AN_CLKGLM_TEST_TCK_ASYNC_RESET chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_AN_CLKGLM_TEST_TCK_ASYNC_RESET(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+#endif
+    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_AN_CLKGLM_TEST_TCK_ASYNC_RESET,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_AN_CLKGLM_TEST_TCK_ASYNC_RESET chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_AN_CLKGLM_TEST_TCK_ASYNC_RESET(
+    fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+#endif
+    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_AN_CLKGLM_TEST_TCK_ASYNC_RESET>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_AN_CLKGLM_TEST_TCK_ASYNC_RESET chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -8287,7 +9346,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_3_RESERVED,
            1>(i_data);
@@ -8303,7 +9363,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_3_RESERVED,
            1>(i_data);
@@ -8319,7 +9380,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_3_RESERVED>();
 #ifdef SCOM_CHECKING
@@ -8334,7 +9396,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PER
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_3_RESERVED>();
 #ifdef SCOM_CHECKING
@@ -8350,7 +9413,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_3_RESERVED,
            1>(o_data);
@@ -8365,7 +9429,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_3_RESERVED(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_3_RESERVED>();
 #ifdef SCOM_CHECKING
@@ -8381,7 +9446,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_4_RESERVED,
            1>(i_data);
@@ -8397,7 +9463,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_4_RESERVED,
            1>(i_data);
@@ -8413,7 +9480,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_4_RESERVED>();
 #ifdef SCOM_CHECKING
@@ -8428,7 +9496,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PER
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_4_RESERVED>();
 #ifdef SCOM_CHECKING
@@ -8444,7 +9513,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_4_RESERVED,
            1>(o_data);
@@ -8459,7 +9529,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_4_RESERVED(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_4_RESERVED>();
 #ifdef SCOM_CHECKING
@@ -8475,7 +9546,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_5_RESERVED,
            1>(i_data);
@@ -8491,7 +9563,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_5_RESERVED,
            1>(i_data);
@@ -8507,7 +9580,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_5_RESERVED>();
 #ifdef SCOM_CHECKING
@@ -8522,7 +9596,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PER
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_5_RESERVED>();
 #ifdef SCOM_CHECKING
@@ -8538,7 +9613,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_5_RESERVED,
            1>(o_data);
@@ -8553,7 +9629,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_5_RESERVED(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_5_RESERVED>();
 #ifdef SCOM_CHECKING
@@ -8569,7 +9646,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_6_RESERVED,
            1>(i_data);
@@ -8585,7 +9663,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_6_RESERVED,
            1>(i_data);
@@ -8601,7 +9680,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_6_RESERVED>();
 #ifdef SCOM_CHECKING
@@ -8616,7 +9696,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PER
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_6_RESERVED>();
 #ifdef SCOM_CHECKING
@@ -8632,7 +9713,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_6_RESERVED,
            1>(o_data);
@@ -8647,7 +9729,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_6_RESERVED(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_6_RESERVED>();
 #ifdef SCOM_CHECKING
@@ -8658,95 +9741,101 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_SCIN_DC(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_SCIN_DC(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_SCIN_DC,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_SCIN_DC,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_SCIN_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_SCIN_DC chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_SCIN_DC(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_SCIN_DC(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_SCIN_DC,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_SCIN_DC,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_SCIN_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_SCIN_DC chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_SCIN_DC(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_SCIN_DC(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_SCIN_DC>();
+    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_SCIN_DC>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_SCIN_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_SCIN_DC chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_SCIN_DC(
+static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_SCIN_DC(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_SCIN_DC>();
+    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_SCIN_DC>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_SCIN_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_SCIN_DC chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_SCIN_DC(
+static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_SCIN_DC(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_SCIN_DC,
+    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_SCIN_DC,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_SCIN_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_SCIN_DC chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_SCIN_DC(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_SCIN_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_SCIN_DC>();
+    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_SCIN_DC>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_SCIN_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_SCIN_DC chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
@@ -8757,7 +9846,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_8_RESERVED,
            1>(i_data);
@@ -8773,7 +9863,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_8_RESERVED,
            1>(i_data);
@@ -8789,7 +9880,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_8_RESERVED>();
 #ifdef SCOM_CHECKING
@@ -8804,7 +9896,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PER
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_8_RESERVED>();
 #ifdef SCOM_CHECKING
@@ -8820,7 +9913,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_8_RESERVED,
            1>(o_data);
@@ -8835,7 +9929,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_8_RESERVED(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_8_RESERVED>();
 #ifdef SCOM_CHECKING
@@ -8846,97 +9941,103 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FLUSH_ALIGN_OVERWRITE(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_FLUSH_ALIGN_OVERWRITE(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FLUSH_ALIGN_OVERWRITE,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_FLUSH_ALIGN_OVERWRITE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FLUSH_ALIGN_OVERWRITE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_FLUSH_ALIGN_OVERWRITE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FLUSH_ALIGN_OVERWRITE(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_FLUSH_ALIGN_OVERWRITE(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FLUSH_ALIGN_OVERWRITE,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_FLUSH_ALIGN_OVERWRITE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FLUSH_ALIGN_OVERWRITE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_FLUSH_ALIGN_OVERWRITE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FLUSH_ALIGN_OVERWRITE(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_FLUSH_ALIGN_OVERWRITE(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FLUSH_ALIGN_OVERWRITE>();
+    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_FLUSH_ALIGN_OVERWRITE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FLUSH_ALIGN_OVERWRITE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_FLUSH_ALIGN_OVERWRITE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FLUSH_ALIGN_OVERWRITE(
+static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_FLUSH_ALIGN_OVERWRITE(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FLUSH_ALIGN_OVERWRITE>();
+    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_FLUSH_ALIGN_OVERWRITE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FLUSH_ALIGN_OVERWRITE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_FLUSH_ALIGN_OVERWRITE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FLUSH_ALIGN_OVERWRITE(
+static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_FLUSH_ALIGN_OVERWRITE(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FLUSH_ALIGN_OVERWRITE,
+    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_FLUSH_ALIGN_OVERWRITE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FLUSH_ALIGN_OVERWRITE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_FLUSH_ALIGN_OVERWRITE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FLUSH_ALIGN_OVERWRITE(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_FLUSH_ALIGN_OVERWRITE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FLUSH_ALIGN_OVERWRITE>();
+    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_FLUSH_ALIGN_OVERWRITE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FLUSH_ALIGN_OVERWRITE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_FLUSH_ALIGN_OVERWRITE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -8946,7 +10047,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_10_RESERVED,
            1>(i_data);
@@ -8962,7 +10064,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_10_RESERVED,
            1>(i_data);
@@ -8978,7 +10081,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_10_RESERVED>();
 #ifdef SCOM_CHECKING
@@ -8993,7 +10097,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PER
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_10_RESERVED>();
 #ifdef SCOM_CHECKING
@@ -9009,7 +10114,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_10_RESERVED,
            1>(o_data);
@@ -9024,7 +10130,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_10_RESERVED(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_10_RESERVED>();
 #ifdef SCOM_CHECKING
@@ -9035,471 +10142,502 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_EDIS_DC(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_11_RESERVED(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_EDIS_DC,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_11_RESERVED,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_EDIS_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_11_RESERVED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_EDIS_DC(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_11_RESERVED(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_EDIS_DC,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_11_RESERVED,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_EDIS_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_11_RESERVED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_EDIS_DC(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_11_RESERVED(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_EDIS_DC>();
+    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_11_RESERVED>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_EDIS_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_11_RESERVED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_EDIS_DC(
+static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_11_RESERVED(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_EDIS_DC>();
+    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_11_RESERVED>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_EDIS_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_11_RESERVED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_EDIS_DC(
+static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_11_RESERVED(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_EDIS_DC,
+    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_11_RESERVED,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_EDIS_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_11_RESERVED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_EDIS_DC(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_11_RESERVED(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_EDIS_DC>();
+    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_11_RESERVED>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_EDIS_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_11_RESERVED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW1_DC_N(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_12_RESERVED(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW1_DC_N,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_12_RESERVED,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW1_DC_N chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_12_RESERVED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW1_DC_N(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_12_RESERVED(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW1_DC_N,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_12_RESERVED,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW1_DC_N chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_12_RESERVED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW1_DC_N(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_12_RESERVED(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW1_DC_N>();
+    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_12_RESERVED>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW1_DC_N chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_12_RESERVED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW1_DC_N(
+static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_12_RESERVED(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW1_DC_N>();
+    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_12_RESERVED>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW1_DC_N chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_12_RESERVED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW1_DC_N(
+static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_12_RESERVED(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW1_DC_N,
+    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_12_RESERVED,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW1_DC_N chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_12_RESERVED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW1_DC_N(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_12_RESERVED(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW1_DC_N>();
+    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_12_RESERVED>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW1_DC_N chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_12_RESERVED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW2_DC_N(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_13_RESERVED(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW2_DC_N,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_13_RESERVED,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW2_DC_N chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_13_RESERVED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW2_DC_N(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_13_RESERVED(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW2_DC_N,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_13_RESERVED,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW2_DC_N chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_13_RESERVED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW2_DC_N(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_13_RESERVED(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW2_DC_N>();
+    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_13_RESERVED>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW2_DC_N chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_13_RESERVED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW2_DC_N(
+static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_13_RESERVED(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW2_DC_N>();
+    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_13_RESERVED>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW2_DC_N chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_13_RESERVED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW2_DC_N(
+static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_13_RESERVED(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW2_DC_N,
+    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_13_RESERVED,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW2_DC_N chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_13_RESERVED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW2_DC_N(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_13_RESERVED(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW2_DC_N>();
+    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_13_RESERVED>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW2_DC_N chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_13_RESERVED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW3_DC_N(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_CG_DIS(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW3_DC_N,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_CG_DIS,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW3_DC_N chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_CG_DIS chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW3_DC_N(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_CG_DIS(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW3_DC_N,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_CG_DIS,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW3_DC_N chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_CG_DIS chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW3_DC_N(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_CG_DIS(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW3_DC_N>();
+    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_CG_DIS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW3_DC_N chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_CG_DIS chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW3_DC_N(
+static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_CG_DIS(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW3_DC_N>();
+    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_CG_DIS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW3_DC_N chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_CG_DIS chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW3_DC_N(
+static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_CG_DIS(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW3_DC_N,
+    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_CG_DIS,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW3_DC_N chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_CG_DIS chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW3_DC_N(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_CG_DIS(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW3_DC_N>();
+    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_CG_DIS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_MPW3_DC_N chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_CG_DIS chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_DELAY_LCLKR_DC(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_FFDLYLCK_DC(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_DELAY_LCLKR_DC,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_FFDLYLCK_DC,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_DELAY_LCLKR_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_FFDLYLCK_DC chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_DELAY_LCLKR_DC(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_FFDLYLCK_DC(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_DELAY_LCLKR_DC,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_FFDLYLCK_DC,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_DELAY_LCLKR_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_FFDLYLCK_DC chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_DELAY_LCLKR_DC(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_FFDLYLCK_DC(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_DELAY_LCLKR_DC>();
+    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_FFDLYLCK_DC>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_DELAY_LCLKR_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_FFDLYLCK_DC chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_DELAY_LCLKR_DC(
+static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_FFDLYLCK_DC(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_DELAY_LCLKR_DC>();
+    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_FFDLYLCK_DC>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_DELAY_LCLKR_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_FFDLYLCK_DC chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_DELAY_LCLKR_DC(
+static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_FFDLYLCK_DC(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_DELAY_LCLKR_DC,
+    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_FFDLYLCK_DC,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_DELAY_LCLKR_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_FFDLYLCK_DC chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_DELAY_LCLKR_DC(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_FFDLYLCK_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_DELAY_LCLKR_DC>();
+    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_FFDLYLCK_DC>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_DELAY_LCLKR_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_FFDLYLCK_DC chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
@@ -9510,7 +10648,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VI
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_CLKOFF_DC,
            1>(i_data);
@@ -9526,7 +10665,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VI
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_CLKOFF_DC,
            1>(i_data);
@@ -9542,7 +10682,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VI
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_CLKOFF_DC>();
 #ifdef SCOM_CHECKING
@@ -9557,7 +10698,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_CLKOFF_DC>();
 #ifdef SCOM_CHECKING
@@ -9573,7 +10715,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VI
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_CLKOFF_DC,
            1>(o_data);
@@ -9588,7 +10731,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_CLKOFF_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_CLKOFF_DC>();
 #ifdef SCOM_CHECKING
@@ -9604,7 +10748,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_17_RESERVED,
            1>(i_data);
@@ -9620,7 +10765,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_17_RESERVED,
            1>(i_data);
@@ -9636,7 +10782,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_17_RESERVED>();
 #ifdef SCOM_CHECKING
@@ -9651,7 +10798,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PER
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_17_RESERVED>();
 #ifdef SCOM_CHECKING
@@ -9667,7 +10815,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_17_RESERVED,
            1>(o_data);
@@ -9682,7 +10831,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_17_RESERVED(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_17_RESERVED>();
 #ifdef SCOM_CHECKING
@@ -9698,7 +10848,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FE
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FENCE_EN_DC,
            1>(i_data);
@@ -9713,7 +10864,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FE
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FENCE_EN_DC,
            1>(i_data);
@@ -9728,7 +10880,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FE
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FENCE_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -9742,7 +10895,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FENCE_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -9757,7 +10911,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FE
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FENCE_EN_DC,
            1>(o_data);
@@ -9771,7 +10926,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FENCE_EN_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FENCE_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -9781,349 +10937,301 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_RI_DC_N(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
-#endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_RI_DC_N,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_RI_DC_N chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_RI_DC_N(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
-#endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_RI_DC_N,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_RI_DC_N chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_RI_DC_N(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
-#endif
-    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_RI_DC_N>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_RI_DC_N chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_RI_DC_N(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
-#endif
-    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_RI_DC_N>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_RI_DC_N chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_RI_DC_N(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
-#endif
-    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_RI_DC_N,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_RI_DC_N chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_RI_DC_N(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
-#endif
-    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_RI_DC_N>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_RI_DC_N chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI1_DC_N(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
-#endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI1_DC_N,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI1_DC_N chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI1_DC_N(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
-#endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI1_DC_N,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI1_DC_N chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI1_DC_N(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
-#endif
-    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI1_DC_N>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI1_DC_N chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI1_DC_N(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
-#endif
-    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI1_DC_N>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI1_DC_N chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI1_DC_N(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
-#endif
-    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI1_DC_N,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI1_DC_N chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI1_DC_N(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
-#endif
-    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI1_DC_N>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI1_DC_N chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI2_DC_N(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
-#endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI2_DC_N,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI2_DC_N chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI2_DC_N(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
-#endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI2_DC_N,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI2_DC_N chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI2_DC_N(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
-#endif
-    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI2_DC_N>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI2_DC_N chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI2_DC_N(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
-#endif
-    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI2_DC_N>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI2_DC_N chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI2_DC_N(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
-#endif
-    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI2_DC_N,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI2_DC_N chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI2_DC_N(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
-#endif
-    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI2_DC_N>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_DI2_DC_N chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_22_RESERVED(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_19_RESERVED(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_22_RESERVED,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_19_RESERVED,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_22_RESERVED chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_19_RESERVED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_22_RESERVED(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_19_RESERVED(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_22_RESERVED,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_19_RESERVED,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_22_RESERVED chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_19_RESERVED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_22_RESERVED(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_19_RESERVED(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_22_RESERVED>();
+    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_19_RESERVED>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_22_RESERVED chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_19_RESERVED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_22_RESERVED(
+static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_19_RESERVED(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_22_RESERVED>();
+    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_19_RESERVED>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_22_RESERVED chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_19_RESERVED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_22_RESERVED(
+static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_19_RESERVED(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_22_RESERVED,
+    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_19_RESERVED,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_22_RESERVED chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_19_RESERVED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_22_RESERVED(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_19_RESERVED(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_22_RESERVED>();
+    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_19_RESERVED>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_22_RESERVED chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_19_RESERVED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_20_RESERVED(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+#endif
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_20_RESERVED,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_20_RESERVED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_20_RESERVED(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+#endif
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_20_RESERVED,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_20_RESERVED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_20_RESERVED(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+#endif
+    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_20_RESERVED>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_20_RESERVED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_20_RESERVED(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+#endif
+    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_20_RESERVED>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_20_RESERVED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_20_RESERVED(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+#endif
+    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_20_RESERVED,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_20_RESERVED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_20_RESERVED(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+#endif
+    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_20_RESERVED>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_20_RESERVED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_21_RESERVED(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+#endif
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_21_RESERVED,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_21_RESERVED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_21_RESERVED(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+#endif
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_21_RESERVED,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_21_RESERVED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_21_RESERVED(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+#endif
+    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_21_RESERVED>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_21_RESERVED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_21_RESERVED(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+#endif
+    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_21_RESERVED>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_21_RESERVED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_21_RESERVED(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+#endif
+    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_21_RESERVED,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_21_RESERVED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_21_RESERVED(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+#endif
+    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_21_RESERVED>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_21_RESERVED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
@@ -10134,7 +11242,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_OT
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_OTP_SCOM_FUSED_CORE_MODE,
            1>(i_data);
@@ -10151,7 +11260,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_OT
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_OTP_SCOM_FUSED_CORE_MODE,
            1>(i_data);
@@ -10167,7 +11277,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_OT
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_OTP_SCOM_FUSED_CORE_MODE>();
 #ifdef SCOM_CHECKING
@@ -10182,7 +11293,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_OTP_SCOM_FUSED_CORE_MODE>();
 #ifdef SCOM_CHECKING
@@ -10198,7 +11310,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_OT
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_OTP_SCOM_FUSED_CORE_MODE,
            1>(o_data);
@@ -10213,7 +11326,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_OTP_SCOM_FUSED_CORE_MODE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_OTP_SCOM_FUSED_CORE_MODE>();
 #ifdef SCOM_CHECKING
@@ -10224,96 +11338,204 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_24_RESERVED(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_23_RESERVED(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_24_RESERVED,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_23_RESERVED,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_24_RESERVED chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_23_RESERVED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_24_RESERVED(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_23_RESERVED(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_24_RESERVED,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_23_RESERVED,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_24_RESERVED chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_23_RESERVED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_24_RESERVED(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_23_RESERVED(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_24_RESERVED>();
+    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_23_RESERVED>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_24_RESERVED chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_23_RESERVED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_24_RESERVED(
+static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_23_RESERVED(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_24_RESERVED>();
+    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_23_RESERVED>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_24_RESERVED chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_23_RESERVED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_24_RESERVED(
+static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_23_RESERVED(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_24_RESERVED,
+    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_23_RESERVED,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_24_RESERVED chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_23_RESERVED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_24_RESERVED(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_23_RESERVED(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_24_RESERVED>();
+    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_23_RESERVED>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_24_RESERVED chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_23_RESERVED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TCPERV_UNIT_FUNC_CLK_GATE_LCB_TEST_EDIS_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+#endif
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TCPERV_UNIT_FUNC_CLK_GATE_LCB_TEST_EDIS_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TCPERV_UNIT_FUNC_CLK_GATE_LCB_TEST_EDIS_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TCPERV_UNIT_FUNC_CLK_GATE_LCB_TEST_EDIS_DC(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+#endif
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TCPERV_UNIT_FUNC_CLK_GATE_LCB_TEST_EDIS_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TCPERV_UNIT_FUNC_CLK_GATE_LCB_TEST_EDIS_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TCPERV_UNIT_FUNC_CLK_GATE_LCB_TEST_EDIS_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+#endif
+    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TCPERV_UNIT_FUNC_CLK_GATE_LCB_TEST_EDIS_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TCPERV_UNIT_FUNC_CLK_GATE_LCB_TEST_EDIS_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TCPERV_UNIT_FUNC_CLK_GATE_LCB_TEST_EDIS_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+#endif
+    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TCPERV_UNIT_FUNC_CLK_GATE_LCB_TEST_EDIS_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TCPERV_UNIT_FUNC_CLK_GATE_LCB_TEST_EDIS_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TCPERV_UNIT_FUNC_CLK_GATE_LCB_TEST_EDIS_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+#endif
+    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TCPERV_UNIT_FUNC_CLK_GATE_LCB_TEST_EDIS_DC,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TCPERV_UNIT_FUNC_CLK_GATE_LCB_TEST_EDIS_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TCPERV_UNIT_FUNC_CLK_GATE_LCB_TEST_EDIS_DC(
+    fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+#endif
+    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TCPERV_UNIT_FUNC_CLK_GATE_LCB_TEST_EDIS_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TCPERV_UNIT_FUNC_CLK_GATE_LCB_TEST_EDIS_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -10323,7 +11545,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FE
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FENCE_PCB_DC,
            1>(i_data);
@@ -10339,7 +11562,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FE
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FENCE_PCB_DC,
            1>(i_data);
@@ -10355,7 +11579,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FE
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FENCE_PCB_DC>();
 #ifdef SCOM_CHECKING
@@ -10370,7 +11595,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FENCE_PCB_DC>();
 #ifdef SCOM_CHECKING
@@ -10386,7 +11612,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FE
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FENCE_PCB_DC,
            1>(o_data);
@@ -10401,7 +11628,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FENCE_PCB_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_FENCE_PCB_DC>();
 #ifdef SCOM_CHECKING
@@ -10417,7 +11645,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_26_RESERVED,
            1>(i_data);
@@ -10433,7 +11662,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_26_RESERVED,
            1>(i_data);
@@ -10449,7 +11679,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_26_RESERVED>();
 #ifdef SCOM_CHECKING
@@ -10464,7 +11695,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PER
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_26_RESERVED>();
 #ifdef SCOM_CHECKING
@@ -10480,7 +11712,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_26_RESERVED,
            1>(o_data);
@@ -10495,7 +11728,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_26_RESERVED(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_26_RESERVED>();
 #ifdef SCOM_CHECKING
@@ -10506,190 +11740,201 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_ARRAY_WRITE_ASSIST_EN_DC(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_27_RESERVED(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_ARRAY_WRITE_ASSIST_EN_DC,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_27_RESERVED,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_ARRAY_WRITE_ASSIST_EN_DC chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_ARRAY_WRITE_ASSIST_EN_DC(
-    const uint64_t i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
-#endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_ARRAY_WRITE_ASSIST_EN_DC,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_ARRAY_WRITE_ASSIST_EN_DC chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_ARRAY_WRITE_ASSIST_EN_DC(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
-#endif
-    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_ARRAY_WRITE_ASSIST_EN_DC>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_ARRAY_WRITE_ASSIST_EN_DC chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_ARRAY_WRITE_ASSIST_EN_DC(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
-#endif
-    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_ARRAY_WRITE_ASSIST_EN_DC>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_ARRAY_WRITE_ASSIST_EN_DC chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_ARRAY_WRITE_ASSIST_EN_DC(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
-#endif
-    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_ARRAY_WRITE_ASSIST_EN_DC,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_ARRAY_WRITE_ASSIST_EN_DC chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_ARRAY_WRITE_ASSIST_EN_DC(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
-#endif
-    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_ARRAY_WRITE_ASSIST_EN_DC>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_ARRAY_WRITE_ASSIST_EN_DC chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_28_RESERVED(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
-#endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_28_RESERVED,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_28_RESERVED chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_27_RESERVED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_28_RESERVED(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_27_RESERVED(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_28_RESERVED,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_27_RESERVED,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_28_RESERVED chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_27_RESERVED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_28_RESERVED(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_27_RESERVED(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_28_RESERVED>();
+    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_27_RESERVED>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_28_RESERVED chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_27_RESERVED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_28_RESERVED(
+static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_27_RESERVED(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_28_RESERVED>();
+    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_27_RESERVED>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_28_RESERVED chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_27_RESERVED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_28_RESERVED(
+static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_27_RESERVED(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_28_RESERVED,
+    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_27_RESERVED,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_28_RESERVED chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_27_RESERVED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_28_RESERVED(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_27_RESERVED(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_28_RESERVED>();
+    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_27_RESERVED>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_28_RESERVED chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_27_RESERVED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_SPI_MVPD0_PROTECT(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+#endif
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_SPI_MVPD0_PROTECT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_SPI_MVPD0_PROTECT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_SPI_MVPD0_PROTECT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+#endif
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_SPI_MVPD0_PROTECT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_SPI_MVPD0_PROTECT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_SPI_MVPD0_PROTECT(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+#endif
+    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_SPI_MVPD0_PROTECT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_SPI_MVPD0_PROTECT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_SPI_MVPD0_PROTECT(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+#endif
+    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_SPI_MVPD0_PROTECT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_SPI_MVPD0_PROTECT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_SPI_MVPD0_PROTECT(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+#endif
+    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_SPI_MVPD0_PROTECT,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_SPI_MVPD0_PROTECT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_SPI_MVPD0_PROTECT(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+#endif
+    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_SPI_MVPD0_PROTECT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_SPI_MVPD0_PROTECT chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
@@ -10700,7 +11945,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_29_RESERVED,
            1>(i_data);
@@ -10716,7 +11962,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_29_RESERVED,
            1>(i_data);
@@ -10732,7 +11979,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_29_RESERVED>();
 #ifdef SCOM_CHECKING
@@ -10747,7 +11995,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PER
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_29_RESERVED>();
 #ifdef SCOM_CHECKING
@@ -10763,7 +12012,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_29_RESERVED,
            1>(o_data);
@@ -10778,7 +12028,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_29_RESERVED(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_29_RESERVED>();
 #ifdef SCOM_CHECKING
@@ -10789,95 +12040,102 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_30_RESERVED(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_EX_SINGLE_LPAR_EN_DC(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_30_RESERVED,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_EX_SINGLE_LPAR_EN_DC,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_30_RESERVED chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_EX_SINGLE_LPAR_EN_DC chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_30_RESERVED(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_EX_SINGLE_LPAR_EN_DC(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_30_RESERVED,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_EX_SINGLE_LPAR_EN_DC,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_30_RESERVED chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_EX_SINGLE_LPAR_EN_DC chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_30_RESERVED(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_EX_SINGLE_LPAR_EN_DC(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_30_RESERVED>();
+    return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_EX_SINGLE_LPAR_EN_DC>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_30_RESERVED chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_EX_SINGLE_LPAR_EN_DC chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_30_RESERVED(
+static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_EX_SINGLE_LPAR_EN_DC(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_30_RESERVED>();
+    return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_EX_SINGLE_LPAR_EN_DC>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_30_RESERVED chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_EX_SINGLE_LPAR_EN_DC chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_30_RESERVED(
+static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_EX_SINGLE_LPAR_EN_DC(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_30_RESERVED,
+    return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_EX_SINGLE_LPAR_EN_DC,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_30_RESERVED chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_EX_SINGLE_LPAR_EN_DC chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_30_RESERVED(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_EX_SINGLE_LPAR_EN_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
-    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_30_RESERVED>();
+    return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_EX_SINGLE_LPAR_EN_DC>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_30_RESERVED chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_EX_SINGLE_LPAR_EN_DC chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
@@ -10888,7 +12146,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_31_SPARE,
            1>(i_data);
@@ -10904,7 +12163,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_31_SPARE,
            1>(i_data);
@@ -10920,7 +12180,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_31_SPARE>();
 #ifdef SCOM_CHECKING
@@ -10935,7 +12196,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PER
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_31_SPARE>();
 #ifdef SCOM_CHECKING
@@ -10951,7 +12213,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_31_SPARE,
            1>(o_data);
@@ -10966,7 +12229,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_31_SPARE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_31_SPARE>();
 #ifdef SCOM_CHECKING
@@ -10974,6 +12238,96 @@ fapi_try_exit:
     FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_31_SPARE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_ROOT_CTRL2_FSI(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_ROOT_CTRL2_FSI;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_ROOT_CTRL2_FSI(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_ROOT_CTRL2_FSI;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_ROOT_CTRL2_FSI(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
 #endif
 }
 
@@ -11012,7 +12366,8 @@ static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_ROOT_CTRL2_RW(const fapi2::Ta
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return fapi2::putScom(i_target, FSXCOMP_FSXLOG_ROOT_CTRL2_RW, i_data);
 #ifdef SCOM_CHECKING
@@ -11026,7 +12381,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_0_SPARE,
            1>(i_data);
@@ -11041,7 +12397,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_0_SPARE,
            1>(i_data);
@@ -11055,7 +12412,8 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_0_SPARE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_0_SPARE>();
 #ifdef SCOM_CHECKING
@@ -11069,7 +12427,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_0_SPARE>();
 #ifdef SCOM_CHECKING
@@ -11083,7 +12442,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_0_SPARE,
            1>(o_data);
@@ -11097,7 +12457,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_0_SPARE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_0_SPARE>();
 #ifdef SCOM_CHECKING
@@ -11112,7 +12473,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TP_DB
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TP_DBG_PCB_DATA_PAR_DIS_DC,
            1>(i_data);
@@ -11129,7 +12491,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TP_DB
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TP_DBG_PCB_DATA_PAR_DIS_DC,
            1>(i_data);
@@ -11145,7 +12508,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TP_DB
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TP_DBG_PCB_DATA_PAR_DIS_DC>();
 #ifdef SCOM_CHECKING
@@ -11160,7 +12524,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TP_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TP_DBG_PCB_DATA_PAR_DIS_DC>();
 #ifdef SCOM_CHECKING
@@ -11176,7 +12541,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TP_DB
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TP_DBG_PCB_DATA_PAR_DIS_DC,
            1>(o_data);
@@ -11191,7 +12557,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TP_DBG_PCB_DATA_PAR_DIS_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TP_DBG_PCB_DATA_PAR_DIS_DC>();
 #ifdef SCOM_CHECKING
@@ -11207,7 +12574,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TP_DB
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TP_DBG_PCB_TYPE_PAR_DIS_DC,
            1>(i_data);
@@ -11224,7 +12592,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TP_DB
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TP_DBG_PCB_TYPE_PAR_DIS_DC,
            1>(i_data);
@@ -11240,7 +12609,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TP_DB
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TP_DBG_PCB_TYPE_PAR_DIS_DC>();
 #ifdef SCOM_CHECKING
@@ -11255,7 +12625,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TP_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TP_DBG_PCB_TYPE_PAR_DIS_DC>();
 #ifdef SCOM_CHECKING
@@ -11271,7 +12642,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TP_DB
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TP_DBG_PCB_TYPE_PAR_DIS_DC,
            1>(o_data);
@@ -11286,7 +12658,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TP_DBG_PCB_TYPE_PAR_DIS_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TP_DBG_PCB_TYPE_PAR_DIS_DC>();
 #ifdef SCOM_CHECKING
@@ -11301,7 +12674,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_3_SPARE,
            1>(i_data);
@@ -11316,7 +12690,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_3_SPARE,
            1>(i_data);
@@ -11330,7 +12705,8 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_3_SPARE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_3_SPARE>();
 #ifdef SCOM_CHECKING
@@ -11344,7 +12720,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_3_SPARE>();
 #ifdef SCOM_CHECKING
@@ -11358,7 +12735,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_3_SPARE,
            1>(o_data);
@@ -11372,7 +12750,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_3_SPARE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_3_SPARE>();
 #ifdef SCOM_CHECKING
@@ -11387,7 +12766,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_DISA
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_DISABLE_PARITY_DC,
            1>(i_data);
@@ -11403,7 +12783,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_DISA
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_DISABLE_PARITY_DC,
            1>(i_data);
@@ -11419,7 +12800,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_DISA
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_DISABLE_PARITY_DC>();
 #ifdef SCOM_CHECKING
@@ -11434,7 +12816,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_DI
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_DISABLE_PARITY_DC>();
 #ifdef SCOM_CHECKING
@@ -11450,7 +12833,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_DISA
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_DISABLE_PARITY_DC,
            1>(o_data);
@@ -11465,7 +12849,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_DISABLE_PARITY_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_DISABLE_PARITY_DC>();
 #ifdef SCOM_CHECKING
@@ -11481,7 +12866,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_TRAC
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_TRACE_MODE_DATA_DC,
            1>(i_data);
@@ -11497,7 +12883,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_TRAC
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_TRACE_MODE_DATA_DC,
            1>(i_data);
@@ -11513,7 +12900,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_TRAC
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_TRACE_MODE_DATA_DC>();
 #ifdef SCOM_CHECKING
@@ -11528,7 +12916,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_TR
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_TRACE_MODE_DATA_DC>();
 #ifdef SCOM_CHECKING
@@ -11544,7 +12933,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_TRAC
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_TRACE_MODE_DATA_DC,
            1>(o_data);
@@ -11559,7 +12949,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_TRACE_MODE_DATA_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_TRACE_MODE_DATA_DC>();
 #ifdef SCOM_CHECKING
@@ -11575,7 +12966,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_VSB_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_VSB_SBE_TRACE_MODE,
            1>(i_data);
@@ -11591,7 +12983,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_VSB_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_VSB_SBE_TRACE_MODE,
            1>(i_data);
@@ -11607,7 +13000,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_VSB_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_VSB_SBE_TRACE_MODE>();
 #ifdef SCOM_CHECKING
@@ -11622,7 +13016,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_VS
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_VSB_SBE_TRACE_MODE>();
 #ifdef SCOM_CHECKING
@@ -11638,7 +13033,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_VSB_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_VSB_SBE_TRACE_MODE,
            1>(o_data);
@@ -11653,7 +13049,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_VSB_SBE_TRACE_MODE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_PIB_VSB_SBE_TRACE_MODE>();
 #ifdef SCOM_CHECKING
@@ -11669,7 +13066,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_TPCPERV_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_TPCPERV_VSB_TRACE_STOP,
            1>(i_data);
@@ -11685,7 +13083,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_TPCPERV_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_TPCPERV_VSB_TRACE_STOP,
            1>(i_data);
@@ -11701,7 +13100,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_TPCPERV_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_TPCPERV_VSB_TRACE_STOP>();
 #ifdef SCOM_CHECKING
@@ -11716,7 +13116,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_TPCPER
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_TPCPERV_VSB_TRACE_STOP>();
 #ifdef SCOM_CHECKING
@@ -11732,7 +13133,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_TPCPERV_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_TPCPERV_VSB_TRACE_STOP,
            1>(o_data);
@@ -11747,7 +13149,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_TPCPERV_VSB_TRACE_STOP(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_TPCPERV_VSB_TRACE_STOP>();
 #ifdef SCOM_CHECKING
@@ -11763,7 +13166,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_GPIO_PIB
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_GPIO_PIB_TIMEOUT,
            FSXCOMP_FSXLOG_ROOT_CTRL2_TP_GPIO_PIB_TIMEOUT_LEN>(i_data);
@@ -11778,7 +13182,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_GPIO_PIB
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_GPIO_PIB_TIMEOUT,
            FSXCOMP_FSXLOG_ROOT_CTRL2_TP_GPIO_PIB_TIMEOUT_LEN>(i_data);
@@ -11794,7 +13199,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_GPIO_PIB
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_GPIO_PIB_TIMEOUT,
            FSXCOMP_FSXLOG_ROOT_CTRL2_TP_GPIO_PIB_TIMEOUT_LEN>(o_data);
@@ -11809,7 +13215,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_SPARE_PIB_C
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_SPARE_PIB_CONTROL,
            1>(i_data);
@@ -11824,7 +13231,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_SPARE_PIB_C
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_SPARE_PIB_CONTROL,
            1>(i_data);
@@ -11838,7 +13246,8 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_SPARE_PIB_CONTROL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_SPARE_PIB_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -11852,7 +13261,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_SPARE_PIB
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_SPARE_PIB_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -11866,7 +13276,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_SPARE_PIB_C
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_SPARE_PIB_CONTROL,
            1>(o_data);
@@ -11880,7 +13291,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_SPARE_PIB_CONTROL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_SPARE_PIB_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -11895,7 +13307,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TPCFSI_OPB_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TPCFSI_OPB_SW_RESET_DC,
            1>(i_data);
@@ -11911,7 +13324,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TPCFSI_OPB_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TPCFSI_OPB_SW_RESET_DC,
            1>(i_data);
@@ -11927,7 +13341,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TPCFSI_OPB_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TPCFSI_OPB_SW_RESET_DC>();
 #ifdef SCOM_CHECKING
@@ -11942,7 +13357,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_TPCFSI_OP
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TPCFSI_OPB_SW_RESET_DC>();
 #ifdef SCOM_CHECKING
@@ -11958,7 +13374,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_TPCFSI_OPB_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TPCFSI_OPB_SW_RESET_DC,
            1>(o_data);
@@ -11973,7 +13390,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_TPCFSI_OPB_SW_RESET_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TPCFSI_OPB_SW_RESET_DC>();
 #ifdef SCOM_CHECKING
@@ -11989,7 +13407,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_13_SPARE_OPB_CONTROL,
            1>(i_data);
@@ -12006,7 +13425,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_13_SPARE_OPB_CONTROL,
            1>(i_data);
@@ -12022,7 +13442,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_13_SPARE_OPB_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -12037,7 +13458,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_13_SPARE_OPB_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -12053,7 +13475,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_13_SPARE_OPB_CONTROL,
            1>(o_data);
@@ -12068,7 +13491,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_13_SPARE_OPB_CONTROL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_13_SPARE_OPB_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -12084,7 +13508,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_14_SPARE_OPB_CONTROL,
            1>(i_data);
@@ -12101,7 +13526,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_14_SPARE_OPB_CONTROL,
            1>(i_data);
@@ -12117,7 +13543,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_14_SPARE_OPB_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -12132,7 +13559,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_14_SPARE_OPB_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -12148,7 +13576,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_14_SPARE_OPB_CONTROL,
            1>(o_data);
@@ -12163,7 +13592,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_14_SPARE_OPB_CONTROL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_14_SPARE_OPB_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -12179,7 +13609,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_15_SPARE_OPB_CONTROL,
            1>(i_data);
@@ -12196,7 +13627,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_15_SPARE_OPB_CONTROL,
            1>(i_data);
@@ -12212,7 +13644,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_15_SPARE_OPB_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -12227,7 +13660,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_15_SPARE_OPB_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -12243,7 +13677,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_15_SPARE_OPB_CONTROL,
            1>(o_data);
@@ -12258,7 +13693,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_15_SPARE_OPB_CONTROL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_15_SPARE_OPB_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -12274,7 +13710,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_16_SPARE,
            1>(i_data);
@@ -12289,7 +13726,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_16_SPARE,
            1>(i_data);
@@ -12304,7 +13742,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_16_SPARE>();
 #ifdef SCOM_CHECKING
@@ -12318,7 +13757,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_16_SPARE>();
 #ifdef SCOM_CHECKING
@@ -12333,7 +13773,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_16_SPARE,
            1>(o_data);
@@ -12347,7 +13788,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_16_SPARE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_16_SPARE>();
 #ifdef SCOM_CHECKING
@@ -12357,96 +13799,96 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_VREGDLY_SHUTOFF_DC(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_17_SPARE(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_VREGDLY_SHUTOFF_DC,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_17_SPARE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TP_VREGDLY_SHUTOFF_DC chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_17_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_VREGDLY_SHUTOFF_DC(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_17_SPARE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_VREGDLY_SHUTOFF_DC,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_17_SPARE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TP_VREGDLY_SHUTOFF_DC chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_17_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_VREGDLY_SHUTOFF_DC(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_17_SPARE(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_VREGDLY_SHUTOFF_DC>();
+    return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_17_SPARE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TP_VREGDLY_SHUTOFF_DC chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_17_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_VREGDLY_SHUTOFF_DC(
+static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_17_SPARE(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_VREGDLY_SHUTOFF_DC>();
+    return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_17_SPARE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TP_VREGDLY_SHUTOFF_DC chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_17_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_VREGDLY_SHUTOFF_DC(
+static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_17_SPARE(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_VREGDLY_SHUTOFF_DC,
+    return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_17_SPARE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TP_VREGDLY_SHUTOFF_DC chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_17_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_VREGDLY_SHUTOFF_DC(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_17_SPARE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_VREGDLY_SHUTOFF_DC>();
+    return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_17_SPARE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TP_VREGDLY_SHUTOFF_DC chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_17_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -12456,7 +13898,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_18_SPARE,
            1>(i_data);
@@ -12471,7 +13914,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_18_SPARE,
            1>(i_data);
@@ -12486,7 +13930,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_18_SPARE>();
 #ifdef SCOM_CHECKING
@@ -12500,7 +13945,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_18_SPARE>();
 #ifdef SCOM_CHECKING
@@ -12515,7 +13961,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_18_SPARE,
            1>(o_data);
@@ -12529,7 +13976,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_18_SPARE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_18_SPARE>();
 #ifdef SCOM_CHECKING
@@ -12544,7 +13992,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_19_SPARE,
            1>(i_data);
@@ -12559,7 +14008,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_19_SPARE,
            1>(i_data);
@@ -12574,7 +14024,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_19_SPARE>();
 #ifdef SCOM_CHECKING
@@ -12588,7 +14039,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_19_SPARE>();
 #ifdef SCOM_CHECKING
@@ -12603,7 +14055,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_19_SPARE,
            1>(o_data);
@@ -12617,7 +14070,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_19_SPARE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_19_SPARE>();
 #ifdef SCOM_CHECKING
@@ -12627,96 +14081,96 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TC_HSSPORWREN_ALLOW(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_20_SPARE(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TC_HSSPORWREN_ALLOW,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_20_SPARE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TC_HSSPORWREN_ALLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_20_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TC_HSSPORWREN_ALLOW(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_20_SPARE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TC_HSSPORWREN_ALLOW,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_20_SPARE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TC_HSSPORWREN_ALLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_20_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TC_HSSPORWREN_ALLOW(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_20_SPARE(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TC_HSSPORWREN_ALLOW>();
+    return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_20_SPARE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TC_HSSPORWREN_ALLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_20_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TC_HSSPORWREN_ALLOW(
+static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_20_SPARE(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TC_HSSPORWREN_ALLOW>();
+    return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_20_SPARE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TC_HSSPORWREN_ALLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_20_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TC_HSSPORWREN_ALLOW(
+static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_20_SPARE(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TC_HSSPORWREN_ALLOW,
+    return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_20_SPARE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TC_HSSPORWREN_ALLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_20_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TC_HSSPORWREN_ALLOW(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_20_SPARE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TC_HSSPORWREN_ALLOW>();
+    return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_20_SPARE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TPFSI_TC_HSSPORWREN_ALLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_20_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -12726,7 +14180,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_21_FREE_USAGE,
            1>(i_data);
@@ -12742,7 +14197,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_21_FREE_USAGE,
            1>(i_data);
@@ -12758,7 +14214,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_21_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -12773,7 +14230,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_21_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -12789,7 +14247,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_21_FREE_USAGE,
            1>(o_data);
@@ -12804,7 +14263,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_21_FREE_USAGE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_21_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -12820,7 +14280,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_22_FREE_USAGE,
            1>(i_data);
@@ -12836,7 +14297,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_22_FREE_USAGE,
            1>(i_data);
@@ -12852,7 +14314,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_22_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -12867,7 +14330,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_22_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -12883,7 +14347,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_22_FREE_USAGE,
            1>(o_data);
@@ -12898,7 +14363,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_22_FREE_USAGE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_22_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -12914,7 +14380,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_23_FREE_USAGE,
            1>(i_data);
@@ -12930,7 +14397,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_23_FREE_USAGE,
            1>(i_data);
@@ -12946,7 +14414,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_23_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -12961,7 +14430,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_23_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -12977,7 +14447,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_23_FREE_USAGE,
            1>(o_data);
@@ -12992,7 +14463,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_23_FREE_USAGE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_23_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -13003,189 +14475,201 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0A_V1P8_EN(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_24_FREE_USAGE(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0A_V1P8_EN,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_24_FREE_USAGE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0A_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_24_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0A_V1P8_EN(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_24_FREE_USAGE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0A_V1P8_EN,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_24_FREE_USAGE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0A_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_24_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0A_V1P8_EN(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_24_FREE_USAGE(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0A_V1P8_EN>();
+    return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_24_FREE_USAGE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0A_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_24_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0A_V1P8_EN(
+static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_24_FREE_USAGE(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0A_V1P8_EN>();
+    return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_24_FREE_USAGE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0A_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_24_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0A_V1P8_EN(
+static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_24_FREE_USAGE(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0A_V1P8_EN,
+    return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_24_FREE_USAGE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0A_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_24_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0A_V1P8_EN(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_24_FREE_USAGE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0A_V1P8_EN>();
+    return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_24_FREE_USAGE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0A_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_24_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0B_V1P8_EN(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_25_FREE_USAGE(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0B_V1P8_EN,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_25_FREE_USAGE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0B_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_25_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0B_V1P8_EN(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_25_FREE_USAGE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0B_V1P8_EN,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_25_FREE_USAGE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0B_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_25_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0B_V1P8_EN(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_25_FREE_USAGE(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0B_V1P8_EN>();
+    return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_25_FREE_USAGE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0B_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_25_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0B_V1P8_EN(
+static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_25_FREE_USAGE(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0B_V1P8_EN>();
+    return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_25_FREE_USAGE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0B_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_25_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0B_V1P8_EN(
+static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_25_FREE_USAGE(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0B_V1P8_EN,
+    return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_25_FREE_USAGE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0B_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_25_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0B_V1P8_EN(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_25_FREE_USAGE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0B_V1P8_EN>();
+    return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_25_FREE_USAGE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP0B_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_25_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
@@ -13196,7 +14680,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_26_FREE_USAGE,
            1>(i_data);
@@ -13212,7 +14697,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_26_FREE_USAGE,
            1>(i_data);
@@ -13228,7 +14714,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_26_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -13243,7 +14730,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_26_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -13259,7 +14747,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_26_FREE_USAGE,
            1>(o_data);
@@ -13274,7 +14763,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_26_FREE_USAGE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_26_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -13290,7 +14780,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_27_FREE_USAGE,
            1>(i_data);
@@ -13306,7 +14797,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_27_FREE_USAGE,
            1>(i_data);
@@ -13322,7 +14814,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_27_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -13337,7 +14830,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_27_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -13353,7 +14847,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_27_FREE_USAGE,
            1>(o_data);
@@ -13368,7 +14863,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_27_FREE_USAGE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_27_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -13384,7 +14880,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_28_FREE_USAGE,
            1>(i_data);
@@ -13400,7 +14897,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_28_FREE_USAGE,
            1>(i_data);
@@ -13416,7 +14914,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_28_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -13431,7 +14930,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_28_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -13447,7 +14947,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_28_FREE_USAGE,
            1>(o_data);
@@ -13462,7 +14963,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_28_FREE_USAGE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_28_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -13478,7 +14980,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_29_FREE_USAGE,
            1>(i_data);
@@ -13494,7 +14997,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_29_FREE_USAGE,
            1>(i_data);
@@ -13510,7 +15014,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_29_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -13525,7 +15030,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_29_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -13541,7 +15047,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_29_FREE_USAGE,
            1>(o_data);
@@ -13556,7 +15063,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_29_FREE_USAGE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_29_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -13567,191 +15075,293 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3A_V1P8_EN(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_30_FREE_USAGE(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3A_V1P8_EN,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_30_FREE_USAGE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3A_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_30_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3A_V1P8_EN(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_30_FREE_USAGE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3A_V1P8_EN,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_30_FREE_USAGE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3A_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_30_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3A_V1P8_EN(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_30_FREE_USAGE(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3A_V1P8_EN>();
+    return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_30_FREE_USAGE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3A_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_30_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3A_V1P8_EN(
+static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_30_FREE_USAGE(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3A_V1P8_EN>();
+    return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_30_FREE_USAGE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3A_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_30_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3A_V1P8_EN(
+static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_30_FREE_USAGE(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3A_V1P8_EN,
+    return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_30_FREE_USAGE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3A_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_30_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3A_V1P8_EN(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_30_FREE_USAGE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3A_V1P8_EN>();
+    return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_30_FREE_USAGE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3A_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_30_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3B_V1P8_EN(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_31_FREE_USAGE(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3B_V1P8_EN,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_31_FREE_USAGE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3B_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_31_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3B_V1P8_EN(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_31_FREE_USAGE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3B_V1P8_EN,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_31_FREE_USAGE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3B_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_31_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3B_V1P8_EN(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_31_FREE_USAGE(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3B_V1P8_EN>();
+    return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_31_FREE_USAGE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3B_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_31_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3B_V1P8_EN(
+static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_31_FREE_USAGE(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3B_V1P8_EN>();
+    return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_31_FREE_USAGE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3B_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_31_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3B_V1P8_EN(
+static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_31_FREE_USAGE(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3B_V1P8_EN,
+    return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_31_FREE_USAGE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3B_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_31_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3B_V1P8_EN(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_31_FREE_USAGE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_RW));
 #endif
-    return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3B_V1P8_EN>();
+    return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_31_FREE_USAGE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_TP_IO_VSB_OP3B_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_ROOT_CTRL2_31_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
 #endif
 }
 
@@ -13790,7 +15400,8 @@ static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR(con
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return fapi2::putScom(i_target, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR, i_data);
 #ifdef SCOM_CHECKING
@@ -13805,7 +15416,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_0_SPARE,
            1>(i_data);
@@ -13821,7 +15433,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_0_SPARE,
            1>(i_data);
@@ -13837,7 +15450,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_0_SPARE>();
 #ifdef SCOM_CHECKING
@@ -13852,7 +15466,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROO
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_0_SPARE>();
 #ifdef SCOM_CHECKING
@@ -13868,7 +15483,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_0_SPARE,
            1>(o_data);
@@ -13883,7 +15499,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_0_SPARE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_0_SPARE>();
 #ifdef SCOM_CHECKING
@@ -13899,7 +15516,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI_TP_DBG_PCB_DATA_PAR_DIS_DC,
            1>(i_data);
@@ -13916,7 +15534,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI_TP_DBG_PCB_DATA_PAR_DIS_DC,
            1>(i_data);
@@ -13932,7 +15551,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI_TP_DBG_PCB_DATA_PAR_DIS_DC>();
 #ifdef SCOM_CHECKING
@@ -13947,7 +15567,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI_TP_DBG_PCB_DATA_PAR_DIS_DC>();
 #ifdef SCOM_CHECKING
@@ -13963,7 +15584,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI_TP_DBG_PCB_DATA_PAR_DIS_DC,
            1>(o_data);
@@ -13978,7 +15600,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI_TP_DBG_PCB_DATA_PAR_DIS_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI_TP_DBG_PCB_DATA_PAR_DIS_DC>();
 #ifdef SCOM_CHECKING
@@ -13994,7 +15617,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI_TP_DBG_PCB_TYPE_PAR_DIS_DC,
            1>(i_data);
@@ -14011,7 +15635,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI_TP_DBG_PCB_TYPE_PAR_DIS_DC,
            1>(i_data);
@@ -14027,7 +15652,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI_TP_DBG_PCB_TYPE_PAR_DIS_DC>();
 #ifdef SCOM_CHECKING
@@ -14042,7 +15668,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI_TP_DBG_PCB_TYPE_PAR_DIS_DC>();
 #ifdef SCOM_CHECKING
@@ -14058,7 +15685,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI_TP_DBG_PCB_TYPE_PAR_DIS_DC,
            1>(o_data);
@@ -14073,7 +15701,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI_TP_DBG_PCB_TYPE_PAR_DIS_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI_TP_DBG_PCB_TYPE_PAR_DIS_DC>();
 #ifdef SCOM_CHECKING
@@ -14089,7 +15718,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_3_SPARE,
            1>(i_data);
@@ -14105,7 +15735,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_3_SPARE,
            1>(i_data);
@@ -14121,7 +15752,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_3_SPARE>();
 #ifdef SCOM_CHECKING
@@ -14136,7 +15768,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROO
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_3_SPARE>();
 #ifdef SCOM_CHECKING
@@ -14152,7 +15785,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_3_SPARE,
            1>(o_data);
@@ -14167,7 +15801,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_3_SPARE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_3_SPARE>();
 #ifdef SCOM_CHECKING
@@ -14183,7 +15818,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_PI
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_PIB_DISABLE_PARITY_DC,
            1>(i_data);
@@ -14200,7 +15836,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_PI
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_PIB_DISABLE_PARITY_DC,
            1>(i_data);
@@ -14216,7 +15853,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_PI
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_PIB_DISABLE_PARITY_DC>();
 #ifdef SCOM_CHECKING
@@ -14231,7 +15869,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_PIB_DISABLE_PARITY_DC>();
 #ifdef SCOM_CHECKING
@@ -14247,7 +15886,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_PI
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_PIB_DISABLE_PARITY_DC,
            1>(o_data);
@@ -14262,7 +15902,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_PIB_DISABLE_PARITY_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_PIB_DISABLE_PARITY_DC>();
 #ifdef SCOM_CHECKING
@@ -14278,7 +15919,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_PI
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_PIB_TRACE_MODE_DATA_DC,
            1>(i_data);
@@ -14295,7 +15937,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_PI
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_PIB_TRACE_MODE_DATA_DC,
            1>(i_data);
@@ -14311,7 +15954,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_PI
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_PIB_TRACE_MODE_DATA_DC>();
 #ifdef SCOM_CHECKING
@@ -14326,7 +15970,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_PIB_TRACE_MODE_DATA_DC>();
 #ifdef SCOM_CHECKING
@@ -14342,7 +15987,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_PI
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_PIB_TRACE_MODE_DATA_DC,
            1>(o_data);
@@ -14357,7 +16003,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_PIB_TRACE_MODE_DATA_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_PIB_TRACE_MODE_DATA_DC>();
 #ifdef SCOM_CHECKING
@@ -14373,7 +16020,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_PI
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_PIB_VSB_SBE_TRACE_MODE,
            1>(i_data);
@@ -14390,7 +16038,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_PI
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_PIB_VSB_SBE_TRACE_MODE,
            1>(i_data);
@@ -14406,7 +16055,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_PI
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_PIB_VSB_SBE_TRACE_MODE>();
 #ifdef SCOM_CHECKING
@@ -14421,7 +16071,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_PIB_VSB_SBE_TRACE_MODE>();
 #ifdef SCOM_CHECKING
@@ -14437,7 +16088,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_PI
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_PIB_VSB_SBE_TRACE_MODE,
            1>(o_data);
@@ -14452,7 +16104,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_PIB_VSB_SBE_TRACE_MODE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_PIB_VSB_SBE_TRACE_MODE>();
 #ifdef SCOM_CHECKING
@@ -14468,7 +16121,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_TP
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_TPCPERV_VSB_TRACE_STOP,
            1>(i_data);
@@ -14485,7 +16139,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_TP
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_TPCPERV_VSB_TRACE_STOP,
            1>(i_data);
@@ -14501,7 +16156,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_TP
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_TPCPERV_VSB_TRACE_STOP>();
 #ifdef SCOM_CHECKING
@@ -14516,7 +16172,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_TPCPERV_VSB_TRACE_STOP>();
 #ifdef SCOM_CHECKING
@@ -14532,7 +16189,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_TP
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_TPCPERV_VSB_TRACE_STOP,
            1>(o_data);
@@ -14547,7 +16205,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_TPCPERV_VSB_TRACE_STOP(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_TPCPERV_VSB_TRACE_STOP>();
 #ifdef SCOM_CHECKING
@@ -14563,7 +16222,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_GP
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_GPIO_PIB_TIMEOUT,
            FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_GPIO_PIB_TIMEOUT_LEN>(i_data);
@@ -14579,7 +16239,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_GP
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_GPIO_PIB_TIMEOUT,
            FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_GPIO_PIB_TIMEOUT_LEN>(i_data);
@@ -14596,7 +16257,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_GP
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_GPIO_PIB_TIMEOUT,
            FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_GPIO_PIB_TIMEOUT_LEN>(o_data);
@@ -14613,7 +16275,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_SPARE
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_SPARE_PIB_CONTROL,
            1>(i_data);
@@ -14629,7 +16292,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_SPARE
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_SPARE_PIB_CONTROL,
            1>(i_data);
@@ -14645,7 +16309,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_SPARE
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_SPARE_PIB_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -14660,7 +16325,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_SPA
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_SPARE_PIB_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -14676,7 +16342,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_SPARE
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_SPARE_PIB_CONTROL,
            1>(o_data);
@@ -14691,7 +16358,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_SPARE_PIB_CONTROL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_SPARE_PIB_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -14707,7 +16375,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPCFS
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPCFSI_OPB_SW_RESET_DC,
            1>(i_data);
@@ -14723,7 +16392,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPCFS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPCFSI_OPB_SW_RESET_DC,
            1>(i_data);
@@ -14739,7 +16409,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPCFS
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPCFSI_OPB_SW_RESET_DC>();
 #ifdef SCOM_CHECKING
@@ -14754,7 +16425,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPC
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPCFSI_OPB_SW_RESET_DC>();
 #ifdef SCOM_CHECKING
@@ -14770,7 +16442,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPCFS
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPCFSI_OPB_SW_RESET_DC,
            1>(o_data);
@@ -14785,7 +16458,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPCFSI_OPB_SW_RESET_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPCFSI_OPB_SW_RESET_DC>();
 #ifdef SCOM_CHECKING
@@ -14801,7 +16475,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_13_SPARE_OPB_CONTROL,
            1>(i_data);
@@ -14818,7 +16493,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_13_SPARE_OPB_CONTROL,
            1>(i_data);
@@ -14834,7 +16510,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_13_SPARE_OPB_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -14849,7 +16526,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROO
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_13_SPARE_OPB_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -14865,7 +16543,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_13_SPARE_OPB_CONTROL,
            1>(o_data);
@@ -14880,7 +16559,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_13_SPARE_OPB_CONTROL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_13_SPARE_OPB_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -14896,7 +16576,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_14_SPARE_OPB_CONTROL,
            1>(i_data);
@@ -14913,7 +16594,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_14_SPARE_OPB_CONTROL,
            1>(i_data);
@@ -14929,7 +16611,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_14_SPARE_OPB_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -14944,7 +16627,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROO
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_14_SPARE_OPB_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -14960,7 +16644,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_14_SPARE_OPB_CONTROL,
            1>(o_data);
@@ -14975,7 +16660,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_14_SPARE_OPB_CONTROL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_14_SPARE_OPB_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -14991,7 +16677,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_15_SPARE_OPB_CONTROL,
            1>(i_data);
@@ -15008,7 +16695,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_15_SPARE_OPB_CONTROL,
            1>(i_data);
@@ -15024,7 +16712,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_15_SPARE_OPB_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -15039,7 +16728,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROO
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_15_SPARE_OPB_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -15055,7 +16745,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_15_SPARE_OPB_CONTROL,
            1>(o_data);
@@ -15070,7 +16761,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_15_SPARE_OPB_CONTROL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_15_SPARE_OPB_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -15086,7 +16778,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_16_SPARE,
            1>(i_data);
@@ -15102,7 +16795,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_16_SPARE,
            1>(i_data);
@@ -15118,7 +16812,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_16_SPARE>();
 #ifdef SCOM_CHECKING
@@ -15133,7 +16828,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROO
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_16_SPARE>();
 #ifdef SCOM_CHECKING
@@ -15149,7 +16845,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_16_SPARE,
            1>(o_data);
@@ -15164,7 +16861,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_16_SPARE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_16_SPARE>();
 #ifdef SCOM_CHECKING
@@ -15175,95 +16873,101 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_VREGDLY_SHUTOFF_DC(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_17_SPARE(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_VREGDLY_SHUTOFF_DC,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_17_SPARE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_VREGDLY_SHUTOFF_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_17_SPARE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_VREGDLY_SHUTOFF_DC(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_17_SPARE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_VREGDLY_SHUTOFF_DC,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_17_SPARE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_VREGDLY_SHUTOFF_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_17_SPARE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_VREGDLY_SHUTOFF_DC(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_17_SPARE(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
-    return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_VREGDLY_SHUTOFF_DC>();
+    return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_17_SPARE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_VREGDLY_SHUTOFF_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_17_SPARE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_VREGDLY_SHUTOFF_DC(
+static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_17_SPARE(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
-    return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_VREGDLY_SHUTOFF_DC>();
+    return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_17_SPARE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_VREGDLY_SHUTOFF_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_17_SPARE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_VREGDLY_SHUTOFF_DC(
+static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_17_SPARE(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
-    return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_VREGDLY_SHUTOFF_DC,
+    return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_17_SPARE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_VREGDLY_SHUTOFF_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_17_SPARE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_VREGDLY_SHUTOFF_DC(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_17_SPARE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
-    return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_VREGDLY_SHUTOFF_DC>();
+    return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_17_SPARE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_VREGDLY_SHUTOFF_DC chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_17_SPARE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
@@ -15274,7 +16978,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_18_SPARE,
            1>(i_data);
@@ -15290,7 +16995,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_18_SPARE,
            1>(i_data);
@@ -15306,7 +17012,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_18_SPARE>();
 #ifdef SCOM_CHECKING
@@ -15321,7 +17028,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROO
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_18_SPARE>();
 #ifdef SCOM_CHECKING
@@ -15337,7 +17045,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_18_SPARE,
            1>(o_data);
@@ -15352,7 +17061,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_18_SPARE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_18_SPARE>();
 #ifdef SCOM_CHECKING
@@ -15368,7 +17078,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_19_SPARE,
            1>(i_data);
@@ -15384,7 +17095,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_19_SPARE,
            1>(i_data);
@@ -15400,7 +17112,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_19_SPARE>();
 #ifdef SCOM_CHECKING
@@ -15415,7 +17128,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROO
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_19_SPARE>();
 #ifdef SCOM_CHECKING
@@ -15431,7 +17145,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_19_SPARE,
            1>(o_data);
@@ -15446,7 +17161,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_19_SPARE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_19_SPARE>();
 #ifdef SCOM_CHECKING
@@ -15457,96 +17173,101 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI_TC_HSSPORWREN_ALLOW(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_20_SPARE(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI_TC_HSSPORWREN_ALLOW,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_20_SPARE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI_TC_HSSPORWREN_ALLOW chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_20_SPARE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI_TC_HSSPORWREN_ALLOW(
-    const uint64_t i_data,
-    fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_20_SPARE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI_TC_HSSPORWREN_ALLOW,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_20_SPARE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI_TC_HSSPORWREN_ALLOW chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_20_SPARE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI_TC_HSSPORWREN_ALLOW(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_20_SPARE(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
-    return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI_TC_HSSPORWREN_ALLOW>();
+    return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_20_SPARE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI_TC_HSSPORWREN_ALLOW chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_20_SPARE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI_TC_HSSPORWREN_ALLOW(
+static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_20_SPARE(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
-    return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI_TC_HSSPORWREN_ALLOW>();
+    return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_20_SPARE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI_TC_HSSPORWREN_ALLOW chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_20_SPARE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI_TC_HSSPORWREN_ALLOW(
+static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_20_SPARE(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
-    return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI_TC_HSSPORWREN_ALLOW,
+    return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_20_SPARE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI_TC_HSSPORWREN_ALLOW chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_20_SPARE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI_TC_HSSPORWREN_ALLOW(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_20_SPARE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
-    return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI_TC_HSSPORWREN_ALLOW>();
+    return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_20_SPARE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TPFSI_TC_HSSPORWREN_ALLOW chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_20_SPARE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
@@ -15557,7 +17278,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_21_FREE_USAGE,
            1>(i_data);
@@ -15574,7 +17296,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_21_FREE_USAGE,
            1>(i_data);
@@ -15590,7 +17313,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_21_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -15605,7 +17329,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROO
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_21_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -15621,7 +17346,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_21_FREE_USAGE,
            1>(o_data);
@@ -15636,7 +17362,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_21_FREE_USAGE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_21_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -15652,7 +17379,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_22_FREE_USAGE,
            1>(i_data);
@@ -15669,7 +17397,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_22_FREE_USAGE,
            1>(i_data);
@@ -15685,7 +17414,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_22_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -15700,7 +17430,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROO
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_22_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -15716,7 +17447,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_22_FREE_USAGE,
            1>(o_data);
@@ -15731,7 +17463,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_22_FREE_USAGE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_22_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -15747,7 +17480,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_23_FREE_USAGE,
            1>(i_data);
@@ -15764,7 +17498,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_23_FREE_USAGE,
            1>(i_data);
@@ -15780,7 +17515,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_23_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -15795,7 +17531,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROO
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_23_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -15811,7 +17548,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_23_FREE_USAGE,
            1>(o_data);
@@ -15826,7 +17564,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_23_FREE_USAGE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_23_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -15837,189 +17576,203 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0A_V1P8_EN(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_24_FREE_USAGE(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0A_V1P8_EN,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_24_FREE_USAGE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0A_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_24_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0A_V1P8_EN(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_24_FREE_USAGE(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0A_V1P8_EN,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_24_FREE_USAGE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0A_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_24_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0A_V1P8_EN(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_24_FREE_USAGE(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
-    return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0A_V1P8_EN>();
+    return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_24_FREE_USAGE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0A_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_24_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0A_V1P8_EN(
+static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_24_FREE_USAGE(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
-    return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0A_V1P8_EN>();
+    return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_24_FREE_USAGE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0A_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_24_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0A_V1P8_EN(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
-#endif
-    return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0A_V1P8_EN,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0A_V1P8_EN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0A_V1P8_EN(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
-#endif
-    return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0A_V1P8_EN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0A_V1P8_EN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0B_V1P8_EN(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
-#endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0B_V1P8_EN,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0B_V1P8_EN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0B_V1P8_EN(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
-#endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0B_V1P8_EN,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0B_V1P8_EN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0B_V1P8_EN(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
-#endif
-    return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0B_V1P8_EN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0B_V1P8_EN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0B_V1P8_EN(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
-#endif
-    return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0B_V1P8_EN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0B_V1P8_EN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0B_V1P8_EN(
+static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_24_FREE_USAGE(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
-    return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0B_V1P8_EN,
+    return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_24_FREE_USAGE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0B_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_24_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0B_V1P8_EN(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_24_FREE_USAGE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
-    return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0B_V1P8_EN>();
+    return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_24_FREE_USAGE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP0B_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_24_FREE_USAGE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_25_FREE_USAGE(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+#endif
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_25_FREE_USAGE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_25_FREE_USAGE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_25_FREE_USAGE(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+#endif
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_25_FREE_USAGE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_25_FREE_USAGE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_25_FREE_USAGE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+#endif
+    return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_25_FREE_USAGE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_25_FREE_USAGE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_25_FREE_USAGE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+#endif
+    return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_25_FREE_USAGE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_25_FREE_USAGE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_25_FREE_USAGE(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+#endif
+    return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_25_FREE_USAGE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_25_FREE_USAGE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_25_FREE_USAGE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+#endif
+    return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_25_FREE_USAGE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_25_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
@@ -16030,7 +17783,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_26_FREE_USAGE,
            1>(i_data);
@@ -16047,7 +17801,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_26_FREE_USAGE,
            1>(i_data);
@@ -16063,7 +17818,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_26_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -16078,7 +17834,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROO
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_26_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -16094,7 +17851,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_26_FREE_USAGE,
            1>(o_data);
@@ -16109,7 +17867,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_26_FREE_USAGE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_26_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -16125,7 +17884,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_27_FREE_USAGE,
            1>(i_data);
@@ -16142,7 +17902,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_27_FREE_USAGE,
            1>(i_data);
@@ -16158,7 +17919,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_27_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -16173,7 +17935,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROO
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_27_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -16189,7 +17952,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_27_FREE_USAGE,
            1>(o_data);
@@ -16204,7 +17968,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_27_FREE_USAGE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_27_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -16220,7 +17985,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_28_FREE_USAGE,
            1>(i_data);
@@ -16237,7 +18003,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_28_FREE_USAGE,
            1>(i_data);
@@ -16253,7 +18020,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_28_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -16268,7 +18036,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROO
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_28_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -16284,7 +18053,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_28_FREE_USAGE,
            1>(o_data);
@@ -16299,7 +18069,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_28_FREE_USAGE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_28_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -16315,7 +18086,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_29_FREE_USAGE,
            1>(i_data);
@@ -16332,7 +18104,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_29_FREE_USAGE,
            1>(i_data);
@@ -16348,7 +18121,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_29_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -16363,7 +18137,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROO
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_29_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -16379,7 +18154,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_29_FREE_USAGE,
            1>(o_data);
@@ -16394,7 +18170,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_29_FREE_USAGE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_29_FREE_USAGE>();
 #ifdef SCOM_CHECKING
@@ -16405,191 +18182,295 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3A_V1P8_EN(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_30_FREE_USAGE(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3A_V1P8_EN,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_30_FREE_USAGE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3A_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_30_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3A_V1P8_EN(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_30_FREE_USAGE(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3A_V1P8_EN,
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_30_FREE_USAGE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3A_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_30_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3A_V1P8_EN(
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_30_FREE_USAGE(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
-    return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3A_V1P8_EN>();
+    return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_30_FREE_USAGE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3A_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_30_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3A_V1P8_EN(
+static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_30_FREE_USAGE(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
-    return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3A_V1P8_EN>();
+    return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_30_FREE_USAGE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3A_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_30_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3A_V1P8_EN(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
-#endif
-    return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3A_V1P8_EN,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3A_V1P8_EN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3A_V1P8_EN(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
-#endif
-    return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3A_V1P8_EN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3A_V1P8_EN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3B_V1P8_EN(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
-#endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3B_V1P8_EN,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3B_V1P8_EN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3B_V1P8_EN(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
-#endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3B_V1P8_EN,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3B_V1P8_EN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3B_V1P8_EN(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
-#endif
-    return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3B_V1P8_EN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3B_V1P8_EN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3B_V1P8_EN(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
-#endif
-    return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3B_V1P8_EN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3B_V1P8_EN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3B_V1P8_EN(
+static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_30_FREE_USAGE(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
-    return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3B_V1P8_EN,
+    return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_30_FREE_USAGE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3B_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_30_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3B_V1P8_EN(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_30_FREE_USAGE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
 #endif
-    return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3B_V1P8_EN>();
+    return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_30_FREE_USAGE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_TP_IO_VSB_OP3B_V1P8_EN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_30_FREE_USAGE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_31_FREE_USAGE(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+#endif
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_31_FREE_USAGE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_31_FREE_USAGE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_31_FREE_USAGE(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+#endif
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_31_FREE_USAGE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_31_FREE_USAGE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_31_FREE_USAGE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+#endif
+    return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_31_FREE_USAGE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_31_FREE_USAGE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_31_FREE_USAGE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+#endif
+    return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_31_FREE_USAGE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_31_FREE_USAGE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_31_FREE_USAGE(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+#endif
+    return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_31_FREE_USAGE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_31_FREE_USAGE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_31_FREE_USAGE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_WO_CLEAR));
+#endif
+    return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_31_FREE_USAGE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_31_FREE_USAGE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_ROOT_CTRL5_COPY_FSI(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_ROOT_CTRL5_COPY_FSI;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_ROOT_CTRL5_COPY_FSI(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_ROOT_CTRL5_COPY_FSI;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_ROOT_CTRL5_COPY_FSI, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_ROOT_CTRL5_COPY_FSI(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL5_COPY_FSI, FSXCOMP_FSXLOG_ROOT_CTRL5_COPY_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL5_COPY_RW));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_ROOT_CTRL5_COPY_FSI, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_ROOT_CTRL5_COPY_FSI_BYTE(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_ROOT_CTRL5_COPY_FSI_BYTE;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_ROOT_CTRL5_COPY_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_ROOT_CTRL5_COPY_FSI_BYTE;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_ROOT_CTRL5_COPY_FSI_BYTE, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_ROOT_CTRL5_COPY_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL5_COPY_FSI, FSXCOMP_FSXLOG_ROOT_CTRL5_COPY_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL5_COPY_RW));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_ROOT_CTRL5_COPY_FSI_BYTE, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
 #endif
 }
 
@@ -16628,7 +18509,8 @@ static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_ROOT_CTRL5_COPY_RW(const fapi
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL5_COPY_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL5_COPY_FSI, FSXCOMP_FSXLOG_ROOT_CTRL5_COPY_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL5_COPY_RW));
 #endif
     return fapi2::putScom(i_target, FSXCOMP_FSXLOG_ROOT_CTRL5_COPY_RW, i_data);
 #ifdef SCOM_CHECKING
@@ -16637,6 +18519,96 @@ fapi_try_exit:
 #endif
 }
 
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR(const fapi2::Target<K, M, V>& i_target)
@@ -16673,7 +18645,8 @@ static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR(const fa
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return fapi2::putScom(i_target, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR, i_data);
 #ifdef SCOM_CHECKING
@@ -16688,7 +18661,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_S
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST0_PORT_MUX_SEL_DC,
            1>(i_data);
@@ -16705,7 +18679,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_S
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST0_PORT_MUX_SEL_DC,
            1>(i_data);
@@ -16721,7 +18696,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_S
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST0_PORT_MUX_SEL_DC>();
 #ifdef SCOM_CHECKING
@@ -16736,7 +18712,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST0_PORT_MUX_SEL_DC>();
 #ifdef SCOM_CHECKING
@@ -16752,7 +18729,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_S
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST0_PORT_MUX_SEL_DC,
            1>(o_data);
@@ -16767,7 +18745,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST0_PORT_MUX_SEL_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST0_PORT_MUX_SEL_DC>();
 #ifdef SCOM_CHECKING
@@ -16783,7 +18762,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_S
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST1_PORT_MUX_SEL_DC,
            1>(i_data);
@@ -16800,7 +18780,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_S
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST1_PORT_MUX_SEL_DC,
            1>(i_data);
@@ -16816,7 +18797,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_S
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST1_PORT_MUX_SEL_DC>();
 #ifdef SCOM_CHECKING
@@ -16831,7 +18813,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST1_PORT_MUX_SEL_DC>();
 #ifdef SCOM_CHECKING
@@ -16847,7 +18830,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_S
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST1_PORT_MUX_SEL_DC,
            1>(o_data);
@@ -16862,7 +18846,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST1_PORT_MUX_SEL_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST1_PORT_MUX_SEL_DC>();
 #ifdef SCOM_CHECKING
@@ -16878,7 +18863,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_S
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST2_PORT_MUX_SEL_DC,
            1>(i_data);
@@ -16895,7 +18881,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_S
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST2_PORT_MUX_SEL_DC,
            1>(i_data);
@@ -16911,7 +18898,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_S
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST2_PORT_MUX_SEL_DC>();
 #ifdef SCOM_CHECKING
@@ -16926,7 +18914,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST2_PORT_MUX_SEL_DC>();
 #ifdef SCOM_CHECKING
@@ -16942,7 +18931,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_S
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST2_PORT_MUX_SEL_DC,
            1>(o_data);
@@ -16957,7 +18947,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST2_PORT_MUX_SEL_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST2_PORT_MUX_SEL_DC>();
 #ifdef SCOM_CHECKING
@@ -16973,7 +18964,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_S
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST3_PORT_MUX_SEL_DC,
            1>(i_data);
@@ -16990,7 +18982,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_S
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST3_PORT_MUX_SEL_DC,
            1>(i_data);
@@ -17006,7 +18999,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_S
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST3_PORT_MUX_SEL_DC>();
 #ifdef SCOM_CHECKING
@@ -17021,7 +19015,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST3_PORT_MUX_SEL_DC>();
 #ifdef SCOM_CHECKING
@@ -17037,7 +19032,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_S
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST3_PORT_MUX_SEL_DC,
            1>(o_data);
@@ -17052,7 +19048,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST3_PORT_MUX_SEL_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST3_PORT_MUX_SEL_DC>();
 #ifdef SCOM_CHECKING
@@ -17068,7 +19065,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_ROOT_CT
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_ROOT_CTRL8_4_15,
            FSXCOMP_FSXLOG_ROOT_CTRL8_SET_ROOT_CTRL8_4_15_LEN>(i_data);
@@ -17083,7 +19081,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_ROOT_CT
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_ROOT_CTRL8_4_15,
            FSXCOMP_FSXLOG_ROOT_CTRL8_SET_ROOT_CTRL8_4_15_LEN>(i_data);
@@ -17099,7 +19098,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_ROOT_CT
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_ROOT_CTRL8_4_15,
            FSXCOMP_FSXLOG_ROOT_CTRL8_SET_ROOT_CTRL8_4_15_LEN>(o_data);
@@ -17115,7 +19115,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TP_FSI_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TP_FSI_FENCE_DC,
            1>(i_data);
@@ -17130,7 +19131,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TP_FSI_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TP_FSI_FENCE_DC,
            1>(i_data);
@@ -17145,7 +19147,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TP_FSI_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TP_FSI_FENCE_DC>();
 #ifdef SCOM_CHECKING
@@ -17159,7 +19162,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TP_FS
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TP_FSI_FENCE_DC>();
 #ifdef SCOM_CHECKING
@@ -17174,7 +19178,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TP_FSI_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TP_FSI_FENCE_DC,
            1>(o_data);
@@ -17188,7 +19193,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TP_FSI_FENCE_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TP_FSI_FENCE_DC>();
 #ifdef SCOM_CHECKING
@@ -17203,7 +19209,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_V
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_VITL_FENCE_DC,
            1>(i_data);
@@ -17219,7 +19226,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_V
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_VITL_FENCE_DC,
            1>(i_data);
@@ -17235,7 +19243,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_V
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_VITL_FENCE_DC>();
 #ifdef SCOM_CHECKING
@@ -17250,7 +19259,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_VITL_FENCE_DC>();
 #ifdef SCOM_CHECKING
@@ -17266,7 +19276,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_V
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_VITL_FENCE_DC,
            1>(o_data);
@@ -17281,7 +19292,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_VITL_FENCE_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_VITL_FENCE_DC>();
 #ifdef SCOM_CHECKING
@@ -17297,7 +19309,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_F
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI0_FENCE_DC,
            1>(i_data);
@@ -17313,7 +19326,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_F
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI0_FENCE_DC,
            1>(i_data);
@@ -17329,7 +19343,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_F
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI0_FENCE_DC>();
 #ifdef SCOM_CHECKING
@@ -17344,7 +19359,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI0_FENCE_DC>();
 #ifdef SCOM_CHECKING
@@ -17360,7 +19376,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_F
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI0_FENCE_DC,
            1>(o_data);
@@ -17375,7 +19392,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI0_FENCE_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI0_FENCE_DC>();
 #ifdef SCOM_CHECKING
@@ -17391,7 +19409,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_F
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI0LL_FENCE_DC,
            1>(i_data);
@@ -17407,7 +19426,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_F
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI0LL_FENCE_DC,
            1>(i_data);
@@ -17423,7 +19443,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_F
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI0LL_FENCE_DC>();
 #ifdef SCOM_CHECKING
@@ -17438,7 +19459,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI0LL_FENCE_DC>();
 #ifdef SCOM_CHECKING
@@ -17454,7 +19476,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_F
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI0LL_FENCE_DC,
            1>(o_data);
@@ -17469,7 +19492,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI0LL_FENCE_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI0LL_FENCE_DC>();
 #ifdef SCOM_CHECKING
@@ -17485,7 +19509,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_F
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI0INV_FENCE_DC,
            1>(i_data);
@@ -17501,7 +19526,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_F
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI0INV_FENCE_DC,
            1>(i_data);
@@ -17517,7 +19543,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_F
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI0INV_FENCE_DC>();
 #ifdef SCOM_CHECKING
@@ -17532,7 +19559,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI0INV_FENCE_DC>();
 #ifdef SCOM_CHECKING
@@ -17548,7 +19576,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_F
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI0INV_FENCE_DC,
            1>(o_data);
@@ -17563,7 +19592,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI0INV_FENCE_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI0INV_FENCE_DC>();
 #ifdef SCOM_CHECKING
@@ -17579,7 +19609,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_F
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI1_FENCE_DC,
            1>(i_data);
@@ -17595,7 +19626,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_F
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI1_FENCE_DC,
            1>(i_data);
@@ -17611,7 +19643,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_F
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI1_FENCE_DC>();
 #ifdef SCOM_CHECKING
@@ -17626,7 +19659,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI1_FENCE_DC>();
 #ifdef SCOM_CHECKING
@@ -17642,7 +19676,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_F
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI1_FENCE_DC,
            1>(o_data);
@@ -17657,7 +19692,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI1_FENCE_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI1_FENCE_DC>();
 #ifdef SCOM_CHECKING
@@ -17673,7 +19709,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_F
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI1LL_FENCE_DC,
            1>(i_data);
@@ -17689,7 +19726,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_F
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI1LL_FENCE_DC,
            1>(i_data);
@@ -17705,7 +19743,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_F
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI1LL_FENCE_DC>();
 #ifdef SCOM_CHECKING
@@ -17720,7 +19759,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI1LL_FENCE_DC>();
 #ifdef SCOM_CHECKING
@@ -17736,7 +19776,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_F
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI1LL_FENCE_DC,
            1>(o_data);
@@ -17751,7 +19792,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI1LL_FENCE_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI1LL_FENCE_DC>();
 #ifdef SCOM_CHECKING
@@ -17767,7 +19809,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_F
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSIA_FENCE_DC,
            1>(i_data);
@@ -17783,7 +19826,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_F
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSIA_FENCE_DC,
            1>(i_data);
@@ -17799,7 +19843,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_F
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSIA_FENCE_DC>();
 #ifdef SCOM_CHECKING
@@ -17814,7 +19859,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSIA_FENCE_DC>();
 #ifdef SCOM_CHECKING
@@ -17830,7 +19876,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_F
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSIA_FENCE_DC,
            1>(o_data);
@@ -17845,7 +19892,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSIA_FENCE_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSIA_FENCE_DC>();
 #ifdef SCOM_CHECKING
@@ -17861,7 +19909,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_ROOT_CT
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_ROOT_CTRL8_24_31,
            FSXCOMP_FSXLOG_ROOT_CTRL8_SET_ROOT_CTRL8_24_31_LEN>(i_data);
@@ -17876,7 +19925,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_ROOT_CT
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_ROOT_CTRL8_24_31,
            FSXCOMP_FSXLOG_ROOT_CTRL8_SET_ROOT_CTRL8_24_31_LEN>(i_data);
@@ -17892,7 +19942,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_ROOT_CT
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_SET_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL8_SET_ROOT_CTRL8_24_31,
            FSXCOMP_FSXLOG_ROOT_CTRL8_SET_ROOT_CTRL8_24_31_LEN>(o_data);
@@ -17904,11 +19955,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_RWX(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_RWX;
+    scomt::last_scom = FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -17918,14 +19969,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_RWX(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_RWX;
+    scomt::last_scom = FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI;
 #endif
-    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_RWX, o_data);
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -17933,14 +19984,105 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_RWX(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_RWX));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI, FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI_BYTE,
+                           FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_RW));
 #endif
-    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_RWX, i_data);
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI_BYTE(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI_BYTE;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI_BYTE;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI_BYTE, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI, FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI_BYTE,
+                           FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_RW));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI_BYTE, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_RW(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_RW;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_RW(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_RW;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_RW, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_RW(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI, FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI_BYTE,
+                           FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_RW));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_RW, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -17953,7 +20095,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_SR_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_RWX));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI, FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI_BYTE,
+                           FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_SR_SCRATCH_REGISTER_6,
            FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_SR_SCRATCH_REGISTER_6_LEN>(i_data);
@@ -17970,7 +20113,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_SR_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_RWX));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI, FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI_BYTE,
+                           FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_SR_SCRATCH_REGISTER_6,
            FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_SR_SCRATCH_REGISTER_6_LEN>(i_data);
@@ -17987,7 +20131,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_SR_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_RWX));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI, FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI_BYTE,
+                           FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_SR_SCRATCH_REGISTER_6,
            FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_SR_SCRATCH_REGISTER_6_LEN>(o_data);
@@ -18846,6 +20991,184 @@ static inline bool GET_L3TRA0_TR0_CONFIG_DISABLE_BANK_EDGE_DETECT(fapi2::buffer<
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     FAPI_ERR("Invalid dial access L3TRA0_TR0_CONFIG_DISABLE_BANK_EDGE_DETECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_L3TRA0_TR0_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(L3TRA0_TR0_CONFIG));
+#endif
+    return o_data.insertFromRight<L3TRA0_TR0_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access L3TRA0_TR0_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_L3TRA0_TR0_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(L3TRA0_TR0_CONFIG));
+#endif
+    return o_data.insertFromRight<L3TRA0_TR0_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access L3TRA0_TR0_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_L3TRA0_TR0_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(L3TRA0_TR0_CONFIG));
+#endif
+    return o_data.setBit<L3TRA0_TR0_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access L3TRA0_TR0_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_L3TRA0_TR0_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(L3TRA0_TR0_CONFIG));
+#endif
+    return o_data.clearBit<L3TRA0_TR0_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access L3TRA0_TR0_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_L3TRA0_TR0_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(L3TRA0_TR0_CONFIG));
+#endif
+    return i_data.extractToRight<L3TRA0_TR0_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access L3TRA0_TR0_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_L3TRA0_TR0_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(L3TRA0_TR0_CONFIG));
+#endif
+    return i_data.getBit<L3TRA0_TR0_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access L3TRA0_TR0_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_L3TRA0_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(L3TRA0_TR0_CONFIG));
+#endif
+    return o_data.insertFromRight<L3TRA0_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access L3TRA0_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_L3TRA0_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(L3TRA0_TR0_CONFIG));
+#endif
+    return o_data.insertFromRight<L3TRA0_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access L3TRA0_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_L3TRA0_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(L3TRA0_TR0_CONFIG));
+#endif
+    return o_data.setBit<L3TRA0_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access L3TRA0_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_L3TRA0_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(L3TRA0_TR0_CONFIG));
+#endif
+    return o_data.clearBit<L3TRA0_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access L3TRA0_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_L3TRA0_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(L3TRA0_TR0_CONFIG));
+#endif
+    return i_data.extractToRight<L3TRA0_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access L3TRA0_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_L3TRA0_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(L3TRA0_TR0_CONFIG));
+#endif
+    return i_data.getBit<L3TRA0_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access L3TRA0_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -19876,6 +22199,184 @@ static inline bool GET_L3TRA1_TR1_CONFIG_DISABLE_BANK_EDGE_DETECT(fapi2::buffer<
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     FAPI_ERR("Invalid dial access L3TRA1_TR1_CONFIG_DISABLE_BANK_EDGE_DETECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_L3TRA1_TR1_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(L3TRA1_TR1_CONFIG));
+#endif
+    return o_data.insertFromRight<L3TRA1_TR1_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access L3TRA1_TR1_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_L3TRA1_TR1_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(L3TRA1_TR1_CONFIG));
+#endif
+    return o_data.insertFromRight<L3TRA1_TR1_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access L3TRA1_TR1_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_L3TRA1_TR1_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(L3TRA1_TR1_CONFIG));
+#endif
+    return o_data.setBit<L3TRA1_TR1_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access L3TRA1_TR1_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_L3TRA1_TR1_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(L3TRA1_TR1_CONFIG));
+#endif
+    return o_data.clearBit<L3TRA1_TR1_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access L3TRA1_TR1_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_L3TRA1_TR1_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(L3TRA1_TR1_CONFIG));
+#endif
+    return i_data.extractToRight<L3TRA1_TR1_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access L3TRA1_TR1_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_L3TRA1_TR1_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(L3TRA1_TR1_CONFIG));
+#endif
+    return i_data.getBit<L3TRA1_TR1_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access L3TRA1_TR1_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_L3TRA1_TR1_CONFIG_MASTER_CLOCK_ENABLE_INT(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(L3TRA1_TR1_CONFIG));
+#endif
+    return o_data.insertFromRight<L3TRA1_TR1_CONFIG_MASTER_CLOCK_ENABLE_INT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access L3TRA1_TR1_CONFIG_MASTER_CLOCK_ENABLE_INT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_L3TRA1_TR1_CONFIG_MASTER_CLOCK_ENABLE_INT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(L3TRA1_TR1_CONFIG));
+#endif
+    return o_data.insertFromRight<L3TRA1_TR1_CONFIG_MASTER_CLOCK_ENABLE_INT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access L3TRA1_TR1_CONFIG_MASTER_CLOCK_ENABLE_INT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_L3TRA1_TR1_CONFIG_MASTER_CLOCK_ENABLE_INT(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(L3TRA1_TR1_CONFIG));
+#endif
+    return o_data.setBit<L3TRA1_TR1_CONFIG_MASTER_CLOCK_ENABLE_INT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access L3TRA1_TR1_CONFIG_MASTER_CLOCK_ENABLE_INT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_L3TRA1_TR1_CONFIG_MASTER_CLOCK_ENABLE_INT(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(L3TRA1_TR1_CONFIG));
+#endif
+    return o_data.clearBit<L3TRA1_TR1_CONFIG_MASTER_CLOCK_ENABLE_INT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access L3TRA1_TR1_CONFIG_MASTER_CLOCK_ENABLE_INT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_L3TRA1_TR1_CONFIG_MASTER_CLOCK_ENABLE_INT(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(L3TRA1_TR1_CONFIG));
+#endif
+    return i_data.extractToRight<L3TRA1_TR1_CONFIG_MASTER_CLOCK_ENABLE_INT,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access L3TRA1_TR1_CONFIG_MASTER_CLOCK_ENABLE_INT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_L3TRA1_TR1_CONFIG_MASTER_CLOCK_ENABLE_INT(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(L3TRA1_TR1_CONFIG));
+#endif
+    return i_data.getBit<L3TRA1_TR1_CONFIG_MASTER_CLOCK_ENABLE_INT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access L3TRA1_TR1_CONFIG_MASTER_CLOCK_ENABLE_INT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -21973,6 +24474,90 @@ fapi_try_exit:
 #endif
 }
 
+static inline fapi2::buffer<uint64_t>& SET_OPCG_REG1_DISABLE_FCE_DURING_FILL(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(OPCG_REG1));
+#endif
+    return o_data.insertFromRight<OPCG_REG1_DISABLE_FCE_DURING_FILL,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access OPCG_REG1_DISABLE_FCE_DURING_FILL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_OPCG_REG1_DISABLE_FCE_DURING_FILL(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(OPCG_REG1));
+#endif
+    return o_data.insertFromRight<OPCG_REG1_DISABLE_FCE_DURING_FILL,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access OPCG_REG1_DISABLE_FCE_DURING_FILL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_OPCG_REG1_DISABLE_FCE_DURING_FILL(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(OPCG_REG1));
+#endif
+    return o_data.setBit<OPCG_REG1_DISABLE_FCE_DURING_FILL>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access OPCG_REG1_DISABLE_FCE_DURING_FILL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_OPCG_REG1_DISABLE_FCE_DURING_FILL(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(OPCG_REG1));
+#endif
+    return o_data.clearBit<OPCG_REG1_DISABLE_FCE_DURING_FILL>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access OPCG_REG1_DISABLE_FCE_DURING_FILL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_OPCG_REG1_DISABLE_FCE_DURING_FILL(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(OPCG_REG1));
+#endif
+    return i_data.extractToRight<OPCG_REG1_DISABLE_FCE_DURING_FILL,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access OPCG_REG1_DISABLE_FCE_DURING_FILL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_OPCG_REG1_DISABLE_FCE_DURING_FILL(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(OPCG_REG1));
+#endif
+    return i_data.getBit<OPCG_REG1_DISABLE_FCE_DURING_FILL>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access OPCG_REG1_DISABLE_FCE_DURING_FILL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
 static inline fapi2::buffer<uint64_t>& SET_OPCG_REG1_RTIM_THOLD_FORCE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -22866,682 +25451,6 @@ static inline bool GET_OTPC_M_MODE_REGISTER_ECC_CHK_DISABLE(fapi2::buffer<uint64
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     FAPI_ERR("Invalid dial access OTPC_M_MODE_REGISTER_ECC_CHK_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_PEEK4A4(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = PEEK4A4;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_PEEK4A4(const fapi2::Target<K, M, V>& i_target, fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = PEEK4A4;
-#endif
-    return fapi2::getScom(i_target, PEEK4A4, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_PEEK4A4(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return fapi2::putScom(i_target, PEEK4A4, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-
-static inline fapi2::buffer<uint64_t>& SET_PEEK4A4_0_PORT_6_ENABLE(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return o_data.insertFromRight<PEEK4A4_0_PORT_6_ENABLE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_0_PORT_6_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PEEK4A4_0_PORT_6_ENABLE(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return o_data.insertFromRight<PEEK4A4_0_PORT_6_ENABLE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_0_PORT_6_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PEEK4A4_0_PORT_6_ENABLE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return o_data.setBit<PEEK4A4_0_PORT_6_ENABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_0_PORT_6_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_PEEK4A4_0_PORT_6_ENABLE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return o_data.clearBit<PEEK4A4_0_PORT_6_ENABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_0_PORT_6_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_PEEK4A4_0_PORT_6_ENABLE(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return i_data.extractToRight<PEEK4A4_0_PORT_6_ENABLE,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_0_PORT_6_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_PEEK4A4_0_PORT_6_ENABLE(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return i_data.getBit<PEEK4A4_0_PORT_6_ENABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_0_PORT_6_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PEEK4A4_0_PORT_7_ENABLE(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return o_data.insertFromRight<PEEK4A4_0_PORT_7_ENABLE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_0_PORT_7_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PEEK4A4_0_PORT_7_ENABLE(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return o_data.insertFromRight<PEEK4A4_0_PORT_7_ENABLE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_0_PORT_7_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PEEK4A4_0_PORT_7_ENABLE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return o_data.setBit<PEEK4A4_0_PORT_7_ENABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_0_PORT_7_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_PEEK4A4_0_PORT_7_ENABLE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return o_data.clearBit<PEEK4A4_0_PORT_7_ENABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_0_PORT_7_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_PEEK4A4_0_PORT_7_ENABLE(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return i_data.extractToRight<PEEK4A4_0_PORT_7_ENABLE,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_0_PORT_7_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_PEEK4A4_0_PORT_7_ENABLE(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return i_data.getBit<PEEK4A4_0_PORT_7_ENABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_0_PORT_7_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PEEK4A4_1_ACTUAL_ERROR(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return o_data.insertFromRight<PEEK4A4_1_ACTUAL_ERROR,
-           PEEK4A4_1_ACTUAL_ERROR_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_1_ACTUAL_ERROR chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PEEK4A4_1_ACTUAL_ERROR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return o_data.insertFromRight<PEEK4A4_1_ACTUAL_ERROR,
-           PEEK4A4_1_ACTUAL_ERROR_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_1_ACTUAL_ERROR chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_PEEK4A4_1_ACTUAL_ERROR(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return i_data.extractToRight<PEEK4A4_1_ACTUAL_ERROR,
-           PEEK4A4_1_ACTUAL_ERROR_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_1_ACTUAL_ERROR chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PEEK4A4_1_PORT_0_ENABLE(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return o_data.insertFromRight<PEEK4A4_1_PORT_0_ENABLE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_1_PORT_0_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PEEK4A4_1_PORT_0_ENABLE(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return o_data.insertFromRight<PEEK4A4_1_PORT_0_ENABLE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_1_PORT_0_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PEEK4A4_1_PORT_0_ENABLE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return o_data.setBit<PEEK4A4_1_PORT_0_ENABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_1_PORT_0_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_PEEK4A4_1_PORT_0_ENABLE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return o_data.clearBit<PEEK4A4_1_PORT_0_ENABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_1_PORT_0_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_PEEK4A4_1_PORT_0_ENABLE(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return i_data.extractToRight<PEEK4A4_1_PORT_0_ENABLE,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_1_PORT_0_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_PEEK4A4_1_PORT_0_ENABLE(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return i_data.getBit<PEEK4A4_1_PORT_0_ENABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_1_PORT_0_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PEEK4A4_1_PORT_ENABLE(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return o_data.insertFromRight<PEEK4A4_1_PORT_ENABLE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_1_PORT_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PEEK4A4_1_PORT_ENABLE(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return o_data.insertFromRight<PEEK4A4_1_PORT_ENABLE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_1_PORT_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PEEK4A4_1_PORT_ENABLE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return o_data.setBit<PEEK4A4_1_PORT_ENABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_1_PORT_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_PEEK4A4_1_PORT_ENABLE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return o_data.clearBit<PEEK4A4_1_PORT_ENABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_1_PORT_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_PEEK4A4_1_PORT_ENABLE(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return i_data.extractToRight<PEEK4A4_1_PORT_ENABLE,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_1_PORT_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_PEEK4A4_1_PORT_ENABLE(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return i_data.getBit<PEEK4A4_1_PORT_ENABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_1_PORT_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PEEK4A4_1_PORT_2_ENABLE(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return o_data.insertFromRight<PEEK4A4_1_PORT_2_ENABLE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_1_PORT_2_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PEEK4A4_1_PORT_2_ENABLE(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return o_data.insertFromRight<PEEK4A4_1_PORT_2_ENABLE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_1_PORT_2_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PEEK4A4_1_PORT_2_ENABLE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return o_data.setBit<PEEK4A4_1_PORT_2_ENABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_1_PORT_2_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_PEEK4A4_1_PORT_2_ENABLE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return o_data.clearBit<PEEK4A4_1_PORT_2_ENABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_1_PORT_2_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_PEEK4A4_1_PORT_2_ENABLE(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return i_data.extractToRight<PEEK4A4_1_PORT_2_ENABLE,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_1_PORT_2_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_PEEK4A4_1_PORT_2_ENABLE(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return i_data.getBit<PEEK4A4_1_PORT_2_ENABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_1_PORT_2_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PEEK4A4_1_PORT_3_ENABLE(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return o_data.insertFromRight<PEEK4A4_1_PORT_3_ENABLE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_1_PORT_3_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PEEK4A4_1_PORT_3_ENABLE(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return o_data.insertFromRight<PEEK4A4_1_PORT_3_ENABLE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_1_PORT_3_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PEEK4A4_1_PORT_3_ENABLE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return o_data.setBit<PEEK4A4_1_PORT_3_ENABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_1_PORT_3_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_PEEK4A4_1_PORT_3_ENABLE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return o_data.clearBit<PEEK4A4_1_PORT_3_ENABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_1_PORT_3_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_PEEK4A4_1_PORT_3_ENABLE(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return i_data.extractToRight<PEEK4A4_1_PORT_3_ENABLE,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_1_PORT_3_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_PEEK4A4_1_PORT_3_ENABLE(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return i_data.getBit<PEEK4A4_1_PORT_3_ENABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_1_PORT_3_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PEEK4A4_1_PORT_4_ENABLE(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return o_data.insertFromRight<PEEK4A4_1_PORT_4_ENABLE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_1_PORT_4_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PEEK4A4_1_PORT_4_ENABLE(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return o_data.insertFromRight<PEEK4A4_1_PORT_4_ENABLE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_1_PORT_4_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PEEK4A4_1_PORT_4_ENABLE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return o_data.setBit<PEEK4A4_1_PORT_4_ENABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_1_PORT_4_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_PEEK4A4_1_PORT_4_ENABLE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return o_data.clearBit<PEEK4A4_1_PORT_4_ENABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_1_PORT_4_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_PEEK4A4_1_PORT_4_ENABLE(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return i_data.extractToRight<PEEK4A4_1_PORT_4_ENABLE,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_1_PORT_4_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_PEEK4A4_1_PORT_4_ENABLE(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PEEK4A4));
-#endif
-    return i_data.getBit<PEEK4A4_1_PORT_4_ENABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PEEK4A4_1_PORT_4_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -31597,8 +33506,3728 @@ fapi_try_exit:
 #endif
 }
 
+static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_QME_PAR_DIS(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return o_data.insertFromRight<SLAVE_CONFIG_REG_QME_PAR_DIS,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SLAVE_CONFIG_REG_QME_PAR_DIS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
 
+static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_QME_PAR_DIS(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return o_data.insertFromRight<SLAVE_CONFIG_REG_QME_PAR_DIS,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SLAVE_CONFIG_REG_QME_PAR_DIS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_QME_PAR_DIS(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return o_data.setBit<SLAVE_CONFIG_REG_QME_PAR_DIS>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SLAVE_CONFIG_REG_QME_PAR_DIS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_SLAVE_CONFIG_REG_QME_PAR_DIS(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return o_data.clearBit<SLAVE_CONFIG_REG_QME_PAR_DIS>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SLAVE_CONFIG_REG_QME_PAR_DIS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_SLAVE_CONFIG_REG_QME_PAR_DIS(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return i_data.extractToRight<SLAVE_CONFIG_REG_QME_PAR_DIS,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SLAVE_CONFIG_REG_QME_PAR_DIS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_SLAVE_CONFIG_REG_QME_PAR_DIS(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return i_data.getBit<SLAVE_CONFIG_REG_QME_PAR_DIS>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SLAVE_CONFIG_REG_QME_PAR_DIS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_FORCE_0_QME(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return o_data.insertFromRight<SLAVE_CONFIG_REG_FORCE_0_QME,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SLAVE_CONFIG_REG_FORCE_0_QME chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_FORCE_0_QME(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return o_data.insertFromRight<SLAVE_CONFIG_REG_FORCE_0_QME,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SLAVE_CONFIG_REG_FORCE_0_QME chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_FORCE_0_QME(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return o_data.setBit<SLAVE_CONFIG_REG_FORCE_0_QME>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SLAVE_CONFIG_REG_FORCE_0_QME chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_SLAVE_CONFIG_REG_FORCE_0_QME(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return o_data.clearBit<SLAVE_CONFIG_REG_FORCE_0_QME>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SLAVE_CONFIG_REG_FORCE_0_QME chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_SLAVE_CONFIG_REG_FORCE_0_QME(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return i_data.extractToRight<SLAVE_CONFIG_REG_FORCE_0_QME,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SLAVE_CONFIG_REG_FORCE_0_QME chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_SLAVE_CONFIG_REG_FORCE_0_QME(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return i_data.getBit<SLAVE_CONFIG_REG_FORCE_0_QME>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SLAVE_CONFIG_REG_FORCE_0_QME chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_TOD_LOW_ORDER_STEP_REG(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = TOD_LOW_ORDER_STEP_REG;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_TOD_LOW_ORDER_STEP_REG(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = TOD_LOW_ORDER_STEP_REG;
+#endif
+    return fapi2::getScom(i_target, TOD_LOW_ORDER_STEP_REG, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_TOD_LOW_ORDER_STEP_REG(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(TOD_LOW_ORDER_STEP_REG));
+#endif
+    return fapi2::putScom(i_target, TOD_LOW_ORDER_STEP_REG, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_LOW_ORDER_STEP_REG_LOW_ORDER_STEP_COUNTER_VALUE(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_LOW_ORDER_STEP_REG));
+#endif
+    return o_data.insertFromRight<TOD_LOW_ORDER_STEP_REG_LOW_ORDER_STEP_COUNTER_VALUE,
+           TOD_LOW_ORDER_STEP_REG_LOW_ORDER_STEP_COUNTER_VALUE_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_LOW_ORDER_STEP_REG_LOW_ORDER_STEP_COUNTER_VALUE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_LOW_ORDER_STEP_REG_LOW_ORDER_STEP_COUNTER_VALUE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_LOW_ORDER_STEP_REG));
+#endif
+    return o_data.insertFromRight<TOD_LOW_ORDER_STEP_REG_LOW_ORDER_STEP_COUNTER_VALUE,
+           TOD_LOW_ORDER_STEP_REG_LOW_ORDER_STEP_COUNTER_VALUE_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_LOW_ORDER_STEP_REG_LOW_ORDER_STEP_COUNTER_VALUE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_LOW_ORDER_STEP_REG_LOW_ORDER_STEP_COUNTER_VALUE(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_LOW_ORDER_STEP_REG));
+#endif
+    return i_data.extractToRight<TOD_LOW_ORDER_STEP_REG_LOW_ORDER_STEP_COUNTER_VALUE,
+           TOD_LOW_ORDER_STEP_REG_LOW_ORDER_STEP_COUNTER_VALUE_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_LOW_ORDER_STEP_REG_LOW_ORDER_STEP_COUNTER_VALUE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_LOW_ORDER_STEP_REG_REG_0X23_SPARE_06_07(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_LOW_ORDER_STEP_REG));
+#endif
+    return o_data.insertFromRight<TOD_LOW_ORDER_STEP_REG_REG_0X23_SPARE_06_07,
+           TOD_LOW_ORDER_STEP_REG_REG_0X23_SPARE_06_07_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_LOW_ORDER_STEP_REG_REG_0X23_SPARE_06_07 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_LOW_ORDER_STEP_REG_REG_0X23_SPARE_06_07(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_LOW_ORDER_STEP_REG));
+#endif
+    return o_data.insertFromRight<TOD_LOW_ORDER_STEP_REG_REG_0X23_SPARE_06_07,
+           TOD_LOW_ORDER_STEP_REG_REG_0X23_SPARE_06_07_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_LOW_ORDER_STEP_REG_REG_0X23_SPARE_06_07 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_LOW_ORDER_STEP_REG_REG_0X23_SPARE_06_07(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_LOW_ORDER_STEP_REG));
+#endif
+    return i_data.extractToRight<TOD_LOW_ORDER_STEP_REG_REG_0X23_SPARE_06_07,
+           TOD_LOW_ORDER_STEP_REG_REG_0X23_SPARE_06_07_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_LOW_ORDER_STEP_REG_REG_0X23_SPARE_06_07 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_TOD_SEC_PORT_1_CTRL_REG(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = TOD_SEC_PORT_1_CTRL_REG;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_TOD_SEC_PORT_1_CTRL_REG(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = TOD_SEC_PORT_1_CTRL_REG;
+#endif
+    return fapi2::getScom(i_target, TOD_SEC_PORT_1_CTRL_REG, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_TOD_SEC_PORT_1_CTRL_REG(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return fapi2::putScom(i_target, TOD_SEC_PORT_1_CTRL_REG, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_PORT_1_RX_SELECT(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_SEC_PORT_1_RX_SELECT,
+           TOD_SEC_PORT_1_CTRL_REG_SEC_PORT_1_RX_SELECT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_PORT_1_RX_SELECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_PORT_1_RX_SELECT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_SEC_PORT_1_RX_SELECT,
+           TOD_SEC_PORT_1_CTRL_REG_SEC_PORT_1_RX_SELECT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_PORT_1_RX_SELECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_SEC_PORT_1_CTRL_REG_SEC_PORT_1_RX_SELECT(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_SEC_PORT_1_CTRL_REG_SEC_PORT_1_RX_SELECT,
+           TOD_SEC_PORT_1_CTRL_REG_SEC_PORT_1_RX_SELECT_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_PORT_1_RX_SELECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_REG_0X04_SPARE_03(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_REG_0X04_SPARE_03,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_REG_0X04_SPARE_03 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_REG_0X04_SPARE_03(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_REG_0X04_SPARE_03,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_REG_0X04_SPARE_03 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_REG_0X04_SPARE_03(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.setBit<TOD_SEC_PORT_1_CTRL_REG_REG_0X04_SPARE_03>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_REG_0X04_SPARE_03 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TOD_SEC_PORT_1_CTRL_REG_REG_0X04_SPARE_03(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.clearBit<TOD_SEC_PORT_1_CTRL_REG_REG_0X04_SPARE_03>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_REG_0X04_SPARE_03 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_SEC_PORT_1_CTRL_REG_REG_0X04_SPARE_03(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_SEC_PORT_1_CTRL_REG_REG_0X04_SPARE_03,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_REG_0X04_SPARE_03 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TOD_SEC_PORT_1_CTRL_REG_REG_0X04_SPARE_03(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return i_data.getBit<TOD_SEC_PORT_1_CTRL_REG_REG_0X04_SPARE_03>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_REG_0X04_SPARE_03 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X0_PORT_1_TX_SELECT(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X0_PORT_1_TX_SELECT,
+           TOD_SEC_PORT_1_CTRL_REG_SEC_X0_PORT_1_TX_SELECT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X0_PORT_1_TX_SELECT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X0_PORT_1_TX_SELECT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X0_PORT_1_TX_SELECT,
+           TOD_SEC_PORT_1_CTRL_REG_SEC_X0_PORT_1_TX_SELECT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X0_PORT_1_TX_SELECT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_SEC_PORT_1_CTRL_REG_SEC_X0_PORT_1_TX_SELECT(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X0_PORT_1_TX_SELECT,
+           TOD_SEC_PORT_1_CTRL_REG_SEC_X0_PORT_1_TX_SELECT_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X0_PORT_1_TX_SELECT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X1_PORT_1_TX_SELECT(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X1_PORT_1_TX_SELECT,
+           TOD_SEC_PORT_1_CTRL_REG_SEC_X1_PORT_1_TX_SELECT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X1_PORT_1_TX_SELECT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X1_PORT_1_TX_SELECT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X1_PORT_1_TX_SELECT,
+           TOD_SEC_PORT_1_CTRL_REG_SEC_X1_PORT_1_TX_SELECT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X1_PORT_1_TX_SELECT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_SEC_PORT_1_CTRL_REG_SEC_X1_PORT_1_TX_SELECT(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X1_PORT_1_TX_SELECT,
+           TOD_SEC_PORT_1_CTRL_REG_SEC_X1_PORT_1_TX_SELECT_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X1_PORT_1_TX_SELECT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X2_PORT_1_TX_SELECT(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X2_PORT_1_TX_SELECT,
+           TOD_SEC_PORT_1_CTRL_REG_SEC_X2_PORT_1_TX_SELECT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X2_PORT_1_TX_SELECT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X2_PORT_1_TX_SELECT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X2_PORT_1_TX_SELECT,
+           TOD_SEC_PORT_1_CTRL_REG_SEC_X2_PORT_1_TX_SELECT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X2_PORT_1_TX_SELECT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_SEC_PORT_1_CTRL_REG_SEC_X2_PORT_1_TX_SELECT(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X2_PORT_1_TX_SELECT,
+           TOD_SEC_PORT_1_CTRL_REG_SEC_X2_PORT_1_TX_SELECT_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X2_PORT_1_TX_SELECT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X3_PORT_1_TX_SELECT(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X3_PORT_1_TX_SELECT,
+           TOD_SEC_PORT_1_CTRL_REG_SEC_X3_PORT_1_TX_SELECT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X3_PORT_1_TX_SELECT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X3_PORT_1_TX_SELECT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X3_PORT_1_TX_SELECT,
+           TOD_SEC_PORT_1_CTRL_REG_SEC_X3_PORT_1_TX_SELECT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X3_PORT_1_TX_SELECT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_SEC_PORT_1_CTRL_REG_SEC_X3_PORT_1_TX_SELECT(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X3_PORT_1_TX_SELECT,
+           TOD_SEC_PORT_1_CTRL_REG_SEC_X3_PORT_1_TX_SELECT_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X3_PORT_1_TX_SELECT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X4_PORT_1_TX_SELECT(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X4_PORT_1_TX_SELECT,
+           TOD_SEC_PORT_1_CTRL_REG_SEC_X4_PORT_1_TX_SELECT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X4_PORT_1_TX_SELECT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X4_PORT_1_TX_SELECT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X4_PORT_1_TX_SELECT,
+           TOD_SEC_PORT_1_CTRL_REG_SEC_X4_PORT_1_TX_SELECT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X4_PORT_1_TX_SELECT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_SEC_PORT_1_CTRL_REG_SEC_X4_PORT_1_TX_SELECT(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X4_PORT_1_TX_SELECT,
+           TOD_SEC_PORT_1_CTRL_REG_SEC_X4_PORT_1_TX_SELECT_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X4_PORT_1_TX_SELECT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X5_PORT_1_TX_SELECT(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X5_PORT_1_TX_SELECT,
+           TOD_SEC_PORT_1_CTRL_REG_SEC_X5_PORT_1_TX_SELECT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X5_PORT_1_TX_SELECT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X5_PORT_1_TX_SELECT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X5_PORT_1_TX_SELECT,
+           TOD_SEC_PORT_1_CTRL_REG_SEC_X5_PORT_1_TX_SELECT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X5_PORT_1_TX_SELECT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_SEC_PORT_1_CTRL_REG_SEC_X5_PORT_1_TX_SELECT(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X5_PORT_1_TX_SELECT,
+           TOD_SEC_PORT_1_CTRL_REG_SEC_X5_PORT_1_TX_SELECT_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X5_PORT_1_TX_SELECT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X6_PORT_1_TX_SELECT(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X6_PORT_1_TX_SELECT,
+           TOD_SEC_PORT_1_CTRL_REG_SEC_X6_PORT_1_TX_SELECT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X6_PORT_1_TX_SELECT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X6_PORT_1_TX_SELECT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X6_PORT_1_TX_SELECT,
+           TOD_SEC_PORT_1_CTRL_REG_SEC_X6_PORT_1_TX_SELECT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X6_PORT_1_TX_SELECT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_SEC_PORT_1_CTRL_REG_SEC_X6_PORT_1_TX_SELECT(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X6_PORT_1_TX_SELECT,
+           TOD_SEC_PORT_1_CTRL_REG_SEC_X6_PORT_1_TX_SELECT_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X6_PORT_1_TX_SELECT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X7_PORT_1_TX_SELECT(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X7_PORT_1_TX_SELECT,
+           TOD_SEC_PORT_1_CTRL_REG_SEC_X7_PORT_1_TX_SELECT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X7_PORT_1_TX_SELECT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X7_PORT_1_TX_SELECT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X7_PORT_1_TX_SELECT,
+           TOD_SEC_PORT_1_CTRL_REG_SEC_X7_PORT_1_TX_SELECT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X7_PORT_1_TX_SELECT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_SEC_PORT_1_CTRL_REG_SEC_X7_PORT_1_TX_SELECT(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X7_PORT_1_TX_SELECT,
+           TOD_SEC_PORT_1_CTRL_REG_SEC_X7_PORT_1_TX_SELECT_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X7_PORT_1_TX_SELECT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X0_PORT_1_TX_ENABLE(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X0_PORT_1_TX_ENABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X0_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X0_PORT_1_TX_ENABLE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X0_PORT_1_TX_ENABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X0_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X0_PORT_1_TX_ENABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.setBit<TOD_SEC_PORT_1_CTRL_REG_SEC_X0_PORT_1_TX_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X0_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TOD_SEC_PORT_1_CTRL_REG_SEC_X0_PORT_1_TX_ENABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.clearBit<TOD_SEC_PORT_1_CTRL_REG_SEC_X0_PORT_1_TX_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X0_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_SEC_PORT_1_CTRL_REG_SEC_X0_PORT_1_TX_ENABLE(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X0_PORT_1_TX_ENABLE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X0_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TOD_SEC_PORT_1_CTRL_REG_SEC_X0_PORT_1_TX_ENABLE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return i_data.getBit<TOD_SEC_PORT_1_CTRL_REG_SEC_X0_PORT_1_TX_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X0_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X1_PORT_1_TX_ENABLE(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X1_PORT_1_TX_ENABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X1_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X1_PORT_1_TX_ENABLE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X1_PORT_1_TX_ENABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X1_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X1_PORT_1_TX_ENABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.setBit<TOD_SEC_PORT_1_CTRL_REG_SEC_X1_PORT_1_TX_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X1_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TOD_SEC_PORT_1_CTRL_REG_SEC_X1_PORT_1_TX_ENABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.clearBit<TOD_SEC_PORT_1_CTRL_REG_SEC_X1_PORT_1_TX_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X1_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_SEC_PORT_1_CTRL_REG_SEC_X1_PORT_1_TX_ENABLE(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X1_PORT_1_TX_ENABLE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X1_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TOD_SEC_PORT_1_CTRL_REG_SEC_X1_PORT_1_TX_ENABLE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return i_data.getBit<TOD_SEC_PORT_1_CTRL_REG_SEC_X1_PORT_1_TX_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X1_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X2_PORT_1_TX_ENABLE(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X2_PORT_1_TX_ENABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X2_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X2_PORT_1_TX_ENABLE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X2_PORT_1_TX_ENABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X2_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X2_PORT_1_TX_ENABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.setBit<TOD_SEC_PORT_1_CTRL_REG_SEC_X2_PORT_1_TX_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X2_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TOD_SEC_PORT_1_CTRL_REG_SEC_X2_PORT_1_TX_ENABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.clearBit<TOD_SEC_PORT_1_CTRL_REG_SEC_X2_PORT_1_TX_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X2_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_SEC_PORT_1_CTRL_REG_SEC_X2_PORT_1_TX_ENABLE(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X2_PORT_1_TX_ENABLE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X2_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TOD_SEC_PORT_1_CTRL_REG_SEC_X2_PORT_1_TX_ENABLE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return i_data.getBit<TOD_SEC_PORT_1_CTRL_REG_SEC_X2_PORT_1_TX_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X2_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X3_PORT_1_TX_ENABLE(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X3_PORT_1_TX_ENABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X3_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X3_PORT_1_TX_ENABLE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X3_PORT_1_TX_ENABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X3_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X3_PORT_1_TX_ENABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.setBit<TOD_SEC_PORT_1_CTRL_REG_SEC_X3_PORT_1_TX_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X3_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TOD_SEC_PORT_1_CTRL_REG_SEC_X3_PORT_1_TX_ENABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.clearBit<TOD_SEC_PORT_1_CTRL_REG_SEC_X3_PORT_1_TX_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X3_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_SEC_PORT_1_CTRL_REG_SEC_X3_PORT_1_TX_ENABLE(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X3_PORT_1_TX_ENABLE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X3_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TOD_SEC_PORT_1_CTRL_REG_SEC_X3_PORT_1_TX_ENABLE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return i_data.getBit<TOD_SEC_PORT_1_CTRL_REG_SEC_X3_PORT_1_TX_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X3_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X4_PORT_1_TX_ENABLE(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X4_PORT_1_TX_ENABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X4_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X4_PORT_1_TX_ENABLE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X4_PORT_1_TX_ENABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X4_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X4_PORT_1_TX_ENABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.setBit<TOD_SEC_PORT_1_CTRL_REG_SEC_X4_PORT_1_TX_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X4_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TOD_SEC_PORT_1_CTRL_REG_SEC_X4_PORT_1_TX_ENABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.clearBit<TOD_SEC_PORT_1_CTRL_REG_SEC_X4_PORT_1_TX_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X4_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_SEC_PORT_1_CTRL_REG_SEC_X4_PORT_1_TX_ENABLE(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X4_PORT_1_TX_ENABLE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X4_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TOD_SEC_PORT_1_CTRL_REG_SEC_X4_PORT_1_TX_ENABLE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return i_data.getBit<TOD_SEC_PORT_1_CTRL_REG_SEC_X4_PORT_1_TX_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X4_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X5_PORT_1_TX_ENABLE(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X5_PORT_1_TX_ENABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X5_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X5_PORT_1_TX_ENABLE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X5_PORT_1_TX_ENABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X5_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X5_PORT_1_TX_ENABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.setBit<TOD_SEC_PORT_1_CTRL_REG_SEC_X5_PORT_1_TX_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X5_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TOD_SEC_PORT_1_CTRL_REG_SEC_X5_PORT_1_TX_ENABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.clearBit<TOD_SEC_PORT_1_CTRL_REG_SEC_X5_PORT_1_TX_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X5_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_SEC_PORT_1_CTRL_REG_SEC_X5_PORT_1_TX_ENABLE(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X5_PORT_1_TX_ENABLE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X5_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TOD_SEC_PORT_1_CTRL_REG_SEC_X5_PORT_1_TX_ENABLE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return i_data.getBit<TOD_SEC_PORT_1_CTRL_REG_SEC_X5_PORT_1_TX_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X5_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X6_PORT_1_TX_ENABLE(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X6_PORT_1_TX_ENABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X6_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X6_PORT_1_TX_ENABLE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X6_PORT_1_TX_ENABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X6_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X6_PORT_1_TX_ENABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.setBit<TOD_SEC_PORT_1_CTRL_REG_SEC_X6_PORT_1_TX_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X6_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TOD_SEC_PORT_1_CTRL_REG_SEC_X6_PORT_1_TX_ENABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.clearBit<TOD_SEC_PORT_1_CTRL_REG_SEC_X6_PORT_1_TX_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X6_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_SEC_PORT_1_CTRL_REG_SEC_X6_PORT_1_TX_ENABLE(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X6_PORT_1_TX_ENABLE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X6_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TOD_SEC_PORT_1_CTRL_REG_SEC_X6_PORT_1_TX_ENABLE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return i_data.getBit<TOD_SEC_PORT_1_CTRL_REG_SEC_X6_PORT_1_TX_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X6_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X7_PORT_1_TX_ENABLE(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X7_PORT_1_TX_ENABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X7_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X7_PORT_1_TX_ENABLE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X7_PORT_1_TX_ENABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X7_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_SEC_X7_PORT_1_TX_ENABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.setBit<TOD_SEC_PORT_1_CTRL_REG_SEC_X7_PORT_1_TX_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X7_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TOD_SEC_PORT_1_CTRL_REG_SEC_X7_PORT_1_TX_ENABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.clearBit<TOD_SEC_PORT_1_CTRL_REG_SEC_X7_PORT_1_TX_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X7_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_SEC_PORT_1_CTRL_REG_SEC_X7_PORT_1_TX_ENABLE(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_SEC_PORT_1_CTRL_REG_SEC_X7_PORT_1_TX_ENABLE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X7_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TOD_SEC_PORT_1_CTRL_REG_SEC_X7_PORT_1_TX_ENABLE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return i_data.getBit<TOD_SEC_PORT_1_CTRL_REG_SEC_X7_PORT_1_TX_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_SEC_X7_PORT_1_TX_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_REG_0X04_SPARE_28_31(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_REG_0X04_SPARE_28_31,
+           TOD_SEC_PORT_1_CTRL_REG_REG_0X04_SPARE_28_31_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_REG_0X04_SPARE_28_31 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_1_CTRL_REG_REG_0X04_SPARE_28_31(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_SEC_PORT_1_CTRL_REG_REG_0X04_SPARE_28_31,
+           TOD_SEC_PORT_1_CTRL_REG_REG_0X04_SPARE_28_31_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_REG_0X04_SPARE_28_31 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_SEC_PORT_1_CTRL_REG_REG_0X04_SPARE_28_31(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_1_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_SEC_PORT_1_CTRL_REG_REG_0X04_SPARE_28_31,
+           TOD_SEC_PORT_1_CTRL_REG_REG_0X04_SPARE_28_31_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_SEC_PORT_1_CTRL_REG_REG_0X04_SPARE_28_31 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_TOD_S_PATH_CTRL_REG(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = TOD_S_PATH_CTRL_REG;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_TOD_S_PATH_CTRL_REG(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = TOD_S_PATH_CTRL_REG;
+#endif
+    return fapi2::getScom(i_target, TOD_S_PATH_CTRL_REG, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_TOD_S_PATH_CTRL_REG(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return fapi2::putScom(i_target, TOD_S_PATH_CTRL_REG, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_PRI_S_PATH_SELECT(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_PRI_S_PATH_SELECT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_PRI_S_PATH_SELECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_PRI_S_PATH_SELECT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_PRI_S_PATH_SELECT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_PRI_S_PATH_SELECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_PRI_S_PATH_SELECT(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.setBit<TOD_S_PATH_CTRL_REG_PRI_S_PATH_SELECT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_PRI_S_PATH_SELECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TOD_S_PATH_CTRL_REG_PRI_S_PATH_SELECT(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.clearBit<TOD_S_PATH_CTRL_REG_PRI_S_PATH_SELECT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_PRI_S_PATH_SELECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_S_PATH_CTRL_REG_PRI_S_PATH_SELECT(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_S_PATH_CTRL_REG_PRI_S_PATH_SELECT,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_PRI_S_PATH_SELECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TOD_S_PATH_CTRL_REG_PRI_S_PATH_SELECT(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return i_data.getBit<TOD_S_PATH_CTRL_REG_PRI_S_PATH_SELECT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_PRI_S_PATH_SELECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_01(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_01,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_01 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_01(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_01,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_01 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_01(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.setBit<TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_01>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_01 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_01(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.clearBit<TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_01>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_01 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_01(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_01,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_01 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_01(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return i_data.getBit<TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_01>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_01 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_S_PATH_M_CPS_ENABLE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_S_PATH_M_CPS_ENABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_M_CPS_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_S_PATH_M_CPS_ENABLE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_S_PATH_M_CPS_ENABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_M_CPS_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_S_PATH_M_CPS_ENABLE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.setBit<TOD_S_PATH_CTRL_REG_S_PATH_M_CPS_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_M_CPS_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TOD_S_PATH_CTRL_REG_S_PATH_M_CPS_ENABLE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.clearBit<TOD_S_PATH_CTRL_REG_S_PATH_M_CPS_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_M_CPS_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_S_PATH_CTRL_REG_S_PATH_M_CPS_ENABLE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_S_PATH_CTRL_REG_S_PATH_M_CPS_ENABLE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_M_CPS_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TOD_S_PATH_CTRL_REG_S_PATH_M_CPS_ENABLE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return i_data.getBit<TOD_S_PATH_CTRL_REG_S_PATH_M_CPS_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_M_CPS_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_DISABLE(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_DISABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_DISABLE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_DISABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_DISABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.setBit<TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_DISABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_DISABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.clearBit<TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_DISABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_DISABLE(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_DISABLE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_DISABLE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return i_data.getBit<TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_DISABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_SEC_S_PATH_SELECT(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_SEC_S_PATH_SELECT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_SEC_S_PATH_SELECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_SEC_S_PATH_SELECT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_SEC_S_PATH_SELECT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_SEC_S_PATH_SELECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_SEC_S_PATH_SELECT(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.setBit<TOD_S_PATH_CTRL_REG_SEC_S_PATH_SELECT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_SEC_S_PATH_SELECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TOD_S_PATH_CTRL_REG_SEC_S_PATH_SELECT(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.clearBit<TOD_S_PATH_CTRL_REG_SEC_S_PATH_SELECT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_SEC_S_PATH_SELECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_S_PATH_CTRL_REG_SEC_S_PATH_SELECT(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_S_PATH_CTRL_REG_SEC_S_PATH_SELECT,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_SEC_S_PATH_SELECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TOD_S_PATH_CTRL_REG_SEC_S_PATH_SELECT(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return i_data.getBit<TOD_S_PATH_CTRL_REG_SEC_S_PATH_SELECT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_SEC_S_PATH_SELECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_05(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_05,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_05 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_05(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_05,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_05 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_05(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.setBit<TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_05>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_05 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_05(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.clearBit<TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_05>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_05 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_05(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_05,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_05 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_05(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return i_data.getBit<TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_05>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_REG_0X05_SPARE_05 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_S_PATH_STEP_CHECK_CPS_DEVIATION_FACTOR(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_S_PATH_STEP_CHECK_CPS_DEVIATION_FACTOR,
+           TOD_S_PATH_CTRL_REG_S_PATH_STEP_CHECK_CPS_DEVIATION_FACTOR_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_STEP_CHECK_CPS_DEVIATION_FACTOR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_S_PATH_STEP_CHECK_CPS_DEVIATION_FACTOR(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_S_PATH_STEP_CHECK_CPS_DEVIATION_FACTOR,
+           TOD_S_PATH_CTRL_REG_S_PATH_STEP_CHECK_CPS_DEVIATION_FACTOR_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_STEP_CHECK_CPS_DEVIATION_FACTOR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_S_PATH_CTRL_REG_S_PATH_STEP_CHECK_CPS_DEVIATION_FACTOR(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_S_PATH_CTRL_REG_S_PATH_STEP_CHECK_CPS_DEVIATION_FACTOR,
+           TOD_S_PATH_CTRL_REG_S_PATH_STEP_CHECK_CPS_DEVIATION_FACTOR_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_STEP_CHECK_CPS_DEVIATION_FACTOR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_CPS_DEVIATION(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_CPS_DEVIATION,
+           TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_CPS_DEVIATION_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_CPS_DEVIATION chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_CPS_DEVIATION(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_CPS_DEVIATION,
+           TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_CPS_DEVIATION_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_CPS_DEVIATION chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_CPS_DEVIATION(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_CPS_DEVIATION,
+           TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_CPS_DEVIATION_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_CPS_DEVIATION chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_CONSTANT_CPS_ENABLE(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_CONSTANT_CPS_ENABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_CONSTANT_CPS_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_CONSTANT_CPS_ENABLE(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_CONSTANT_CPS_ENABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_CONSTANT_CPS_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_CONSTANT_CPS_ENABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.setBit<TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_CONSTANT_CPS_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_CONSTANT_CPS_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_CONSTANT_CPS_ENABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.clearBit<TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_CONSTANT_CPS_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_CONSTANT_CPS_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_CONSTANT_CPS_ENABLE(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_CONSTANT_CPS_ENABLE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_CONSTANT_CPS_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_CONSTANT_CPS_ENABLE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return i_data.getBit<TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_CONSTANT_CPS_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_CONSTANT_CPS_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_VALIDITY_COUNT(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_VALIDITY_COUNT,
+           TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_VALIDITY_COUNT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_VALIDITY_COUNT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_VALIDITY_COUNT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_VALIDITY_COUNT,
+           TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_VALIDITY_COUNT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_VALIDITY_COUNT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_VALIDITY_COUNT(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_VALIDITY_COUNT,
+           TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_VALIDITY_COUNT_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_VALIDITY_COUNT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_CPS_DEVIATION(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_CPS_DEVIATION,
+           TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_CPS_DEVIATION_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_CPS_DEVIATION chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_CPS_DEVIATION(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_CPS_DEVIATION,
+           TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_CPS_DEVIATION_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_CPS_DEVIATION chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_CPS_DEVIATION(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_CPS_DEVIATION,
+           TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_CPS_DEVIATION_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_CPS_DEVIATION chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_CONSTANT_CPS_ENABLE(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_CONSTANT_CPS_ENABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_CONSTANT_CPS_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_CONSTANT_CPS_ENABLE(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_CONSTANT_CPS_ENABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_CONSTANT_CPS_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_CONSTANT_CPS_ENABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.setBit<TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_CONSTANT_CPS_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_CONSTANT_CPS_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_CONSTANT_CPS_ENABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.clearBit<TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_CONSTANT_CPS_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_CONSTANT_CPS_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_CONSTANT_CPS_ENABLE(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_CONSTANT_CPS_ENABLE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_CONSTANT_CPS_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_CONSTANT_CPS_ENABLE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return i_data.getBit<TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_CONSTANT_CPS_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_CONSTANT_CPS_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_VALIDITY_COUNT(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_VALIDITY_COUNT,
+           TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_VALIDITY_COUNT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_VALIDITY_COUNT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_VALIDITY_COUNT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_VALIDITY_COUNT,
+           TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_VALIDITY_COUNT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_VALIDITY_COUNT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_VALIDITY_COUNT(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_VALIDITY_COUNT,
+           TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_VALIDITY_COUNT_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_VALIDITY_COUNT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_ERROR_DISABLE(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_ERROR_DISABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_ERROR_DISABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_ERROR_DISABLE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_ERROR_DISABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_ERROR_DISABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_ERROR_DISABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.setBit<TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_ERROR_DISABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_ERROR_DISABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_ERROR_DISABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.clearBit<TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_ERROR_DISABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_ERROR_DISABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_ERROR_DISABLE(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_ERROR_DISABLE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_ERROR_DISABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_ERROR_DISABLE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return i_data.getBit<TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_ERROR_DISABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_ERROR_DISABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_M_CPS_DISABLE(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_M_CPS_DISABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_M_CPS_DISABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_M_CPS_DISABLE(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_M_CPS_DISABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_M_CPS_DISABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_M_CPS_DISABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.setBit<TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_M_CPS_DISABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_M_CPS_DISABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_M_CPS_DISABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.clearBit<TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_M_CPS_DISABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_M_CPS_DISABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_M_CPS_DISABLE(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_M_CPS_DISABLE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_M_CPS_DISABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_M_CPS_DISABLE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return i_data.getBit<TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_M_CPS_DISABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_M_CPS_DISABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_CPS_DEVIATION_FACTOR(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_CPS_DEVIATION_FACTOR,
+           TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_CPS_DEVIATION_FACTOR_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_CPS_DEVIATION_FACTOR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_CPS_DEVIATION_FACTOR(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_CPS_DEVIATION_FACTOR,
+           TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_CPS_DEVIATION_FACTOR_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_CPS_DEVIATION_FACTOR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_CPS_DEVIATION_FACTOR(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_CPS_DEVIATION_FACTOR,
+           TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_CPS_DEVIATION_FACTOR_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_CPS_DEVIATION_FACTOR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_CPS_DEVIATION(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_CPS_DEVIATION,
+           TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_CPS_DEVIATION_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_CPS_DEVIATION chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_CPS_DEVIATION(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_CPS_DEVIATION,
+           TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_CPS_DEVIATION_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_CPS_DEVIATION chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_CPS_DEVIATION(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_CPS_DEVIATION,
+           TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_CPS_DEVIATION_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_CPS_DEVIATION chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_MISS_COUNT_MAX(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_MISS_COUNT_MAX,
+           TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_MISS_COUNT_MAX_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_MISS_COUNT_MAX chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_MISS_COUNT_MAX(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_MISS_COUNT_MAX,
+           TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_MISS_COUNT_MAX_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_MISS_COUNT_MAX chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_MISS_COUNT_MAX(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_S_PATH_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_MISS_COUNT_MAX,
+           TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_MISS_COUNT_MAX_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_MISS_COUNT_MAX chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_TOD_TX_TTYPE_CTRL_REG(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = TOD_TX_TTYPE_CTRL_REG;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_TOD_TX_TTYPE_CTRL_REG(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = TOD_TX_TTYPE_CTRL_REG;
+#endif
+    return fapi2::getScom(i_target, TOD_TX_TTYPE_CTRL_REG, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_TOD_TX_TTYPE_CTRL_REG(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return fapi2::putScom(i_target, TOD_TX_TTYPE_CTRL_REG, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ADDRESS(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ADDRESS,
+           TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ADDRESS_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ADDRESS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ADDRESS(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ADDRESS,
+           TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ADDRESS_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ADDRESS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ADDRESS(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ADDRESS,
+           TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ADDRESS_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ADDRESS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ID(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ID,
+           TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ID_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ID chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ID(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ID,
+           TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ID_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ID chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ID(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ID,
+           TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ID_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ID chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_MODE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_MODE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_MODE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_MODE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_MODE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return o_data.setBit<TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_MODE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_MODE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return o_data.clearBit<TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_MODE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_MODE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_MODE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_MODE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return i_data.getBit<TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_MODE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_ENABLE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_ENABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_ENABLE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_ENABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_ENABLE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return o_data.setBit<TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_ENABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return o_data.clearBit<TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_ENABLE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_ENABLE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_ENABLE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return i_data.getBit<TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_4_SEND_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_34(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_34,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_34 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_34(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_34,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_34 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_34(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return o_data.setBit<TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_34>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_34 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_34(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return o_data.clearBit<TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_34>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_34 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_34(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_34,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_34 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_34(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return i_data.getBit<TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_34>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_34 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ADDRESS_ENABLE(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ADDRESS_ENABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ADDRESS_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ADDRESS_ENABLE(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ADDRESS_ENABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ADDRESS_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ADDRESS_ENABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return o_data.setBit<TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ADDRESS_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ADDRESS_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ADDRESS_ENABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return o_data.clearBit<TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ADDRESS_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ADDRESS_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ADDRESS_ENABLE(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ADDRESS_ENABLE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ADDRESS_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ADDRESS_ENABLE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return i_data.getBit<TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ADDRESS_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_MOVE_TOD_TO_TB_CORE_ADDRESS_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_36(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_36,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_36 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_36(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_36,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_36 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_36(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return o_data.setBit<TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_36>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_36 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_36(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return o_data.clearBit<TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_36>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_36 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_36(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_36,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_36 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_36(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return i_data.getBit<TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_36>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_REG_0X27_SPARE_36 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_PIB_FSM_STATE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_PIB_FSM_STATE,
+           TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_PIB_FSM_STATE_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_PIB_FSM_STATE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_PIB_FSM_STATE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_PIB_FSM_STATE,
+           TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_PIB_FSM_STATE_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_PIB_FSM_STATE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_PIB_FSM_STATE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TOD_TX_TTYPE_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_PIB_FSM_STATE,
+           TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_PIB_FSM_STATE_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_PIB_FSM_STATE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_TRA1_TR0_CONFIG_1(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = TRA1_TR0_CONFIG_1;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_TRA1_TR0_CONFIG_1(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = TRA1_TR0_CONFIG_1;
+#endif
+    return fapi2::getScom(i_target, TRA1_TR0_CONFIG_1, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_TRA1_TR0_CONFIG_1(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(TRA1_TR0_CONFIG_1));
+#endif
+    return fapi2::putScom(i_target, TRA1_TR0_CONFIG_1, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+static inline fapi2::buffer<uint64_t>& SET_TRA1_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TRA1_TR0_CONFIG_1));
+#endif
+    return o_data.insertFromRight<TRA1_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87,
+           TRA1_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TRA1_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TRA1_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TRA1_TR0_CONFIG_1));
+#endif
+    return o_data.insertFromRight<TRA1_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87,
+           TRA1_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TRA1_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TRA1_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TRA1_TR0_CONFIG_1));
+#endif
+    return i_data.extractToRight<TRA1_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87,
+           TRA1_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TRA1_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+
+#ifndef __PPE_HCODE__
 }
 }
 
+#endif
 #endif

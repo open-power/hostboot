@@ -39,14 +39,6 @@ namespace mc
 #endif
 
 
-static const uint64_t CLKMON_MONM_CLKRATIO = 0x0c010ff0ull;
-
-static const uint32_t CLKMON_MONM_CLKRATIO_RATIO = 0;
-static const uint32_t CLKMON_MONM_CLKRATIO_RATIO_LEN = 12;
-static const uint32_t CLKMON_MONM_CLKRATIO_CFG0_SYNC_MODE = 12;
-static const uint32_t CLKMON_MONM_CLKRATIO_CFG1_SYNC_MODE = 13;
-// mc/reg00004.H
-
 static const uint64_t CLOCK_STAT_ARY = 0x0c03000aull;
 
 static const uint32_t CLOCK_STAT_ARY_PERV_ARY = 4;
@@ -142,23 +134,16 @@ static const uint32_t EPS_THERM_WSUB_INJECT_REG_MODE = 2;
 static const uint32_t EPS_THERM_WSUB_INJECT_REG_MODE_LEN = 2;
 // mc/reg00004.H
 
-static const uint64_t MBA_SCOMFIR_MCBPARMQ = 0x0c010fafull;
-
-static const uint32_t MBA_SCOMFIR_MCBPARMQ_MCBPARMQ_CFG_CLOCK_MONITOR_EN = 59;
-// mc/reg00004.H
-
-static const uint64_t MBA_SCOMFIR_MCWATDATA3 = 0x0c010f9dull;
-
-static const uint32_t MBA_SCOMFIR_MCWATDATA3_PATTERN_A = 0;
-static const uint32_t MBA_SCOMFIR_MCWATDATA3_PATTERN_A_LEN = 22;
-static const uint32_t MBA_SCOMFIR_MCWATDATA3_MASK_A = 22;
-static const uint32_t MBA_SCOMFIR_MCWATDATA3_MASK_A_LEN = 22;
-// mc/reg00004.H
-
 static const uint64_t MBA_SCOMFIR_MISCFIRACT2 = 0x0c010f09ull;
 
 static const uint32_t MBA_SCOMFIR_MISCFIRACT2_MISCFIRACT2_FIR_ACTION2 = 0;
 static const uint32_t MBA_SCOMFIR_MISCFIRACT2_MISCFIRACT2_FIR_ACTION2_LEN = 12;
+// mc/reg00004.H
+
+static const uint64_t MBA_SCOMFIR_WATMSKA1 = 0x0c010f81ull;
+
+static const uint32_t MBA_SCOMFIR_WATMSKA1_WAT_MASK_A1 = 0;
+static const uint32_t MBA_SCOMFIR_WATMSKA1_WAT_MASK_A1_LEN = 44;
 // mc/reg00004.H
 
 static const uint64_t OPCG_REG2 = 0x0c030004ull;
@@ -213,25 +198,25 @@ static const uint32_t TRA1_TR0_CONFIG_2_B_LEN = 24;
 
 static const uint64_t XSTOP1 = 0x0c03000cull;
 
-static const uint32_t XSTOP1_MASK_B = 0;
-static const uint32_t XSTOP1_ALIGNED_XSTOP1 = 1;
-static const uint32_t XSTOP1_TRIGGER_OPCG_ON_XSTOP1 = 2;
-static const uint32_t XSTOP1_WAIT_ALLWAYS = 3;
-static const uint32_t XSTOP1_PERV = 4;
-static const uint32_t XSTOP1_UNIT1 = 5;
-static const uint32_t XSTOP1_UNIT2 = 6;
-static const uint32_t XSTOP1_UNIT3 = 7;
-static const uint32_t XSTOP1_UNIT4 = 8;
-static const uint32_t XSTOP1_UNIT5 = 9;
-static const uint32_t XSTOP1_UNIT6 = 10;
-static const uint32_t XSTOP1_UNIT7 = 11;
-static const uint32_t XSTOP1_UNIT8 = 12;
-static const uint32_t XSTOP1_UNIT9 = 13;
-static const uint32_t XSTOP1_UNIT10 = 14;
-static const uint32_t XSTOP1_UNIT11 = 15;
-static const uint32_t XSTOP1_UNIT12 = 16;
-static const uint32_t XSTOP1_UNIT13 = 17;
-static const uint32_t XSTOP1_UNIT14 = 18;
+static const uint32_t XSTOP1_ENABLE = 0;
+static const uint32_t XSTOP1_WAIT_SNOPA = 1;
+static const uint32_t XSTOP1_TRIGGER_OPCG_GO = 2;
+static const uint32_t XSTOP1_WAIT_ALWAYS = 3;
+static const uint32_t XSTOP1_REGION_PERV = 4;
+static const uint32_t XSTOP1_REGION_UNIT1 = 5;
+static const uint32_t XSTOP1_REGION_UNIT2 = 6;
+static const uint32_t XSTOP1_REGION_UNIT3 = 7;
+static const uint32_t XSTOP1_REGION_UNIT4 = 8;
+static const uint32_t XSTOP1_REGION_UNIT5 = 9;
+static const uint32_t XSTOP1_REGION_UNIT6 = 10;
+static const uint32_t XSTOP1_REGION_UNIT7 = 11;
+static const uint32_t XSTOP1_REGION_UNIT8 = 12;
+static const uint32_t XSTOP1_REGION_UNIT9 = 13;
+static const uint32_t XSTOP1_REGION_UNIT10 = 14;
+static const uint32_t XSTOP1_REGION_UNIT11 = 15;
+static const uint32_t XSTOP1_REGION_UNIT12 = 16;
+static const uint32_t XSTOP1_REGION_UNIT13 = 17;
+static const uint32_t XSTOP1_REGION_UNIT14 = 18;
 static const uint32_t XSTOP1_WAIT_CYCLES = 48;
 static const uint32_t XSTOP1_WAIT_CYCLES_LEN = 12;
 // mc/reg00004.H

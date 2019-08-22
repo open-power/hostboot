@@ -111,16 +111,16 @@ static const uint32_t MBA_SCOMFIR_AADR_AADR_DATA = 0;
 static const uint32_t MBA_SCOMFIR_AADR_AADR_DATA_LEN = 64;
 // mc/reg00009.H
 
-static const uint64_t MBA_SCOMFIR_WATCFG0DQ = 0x0c010f83ull;
+static const uint64_t MBA_SCOMFIR_WATCFG2 = 0x0c010f8aull;
 
-static const uint32_t MBA_SCOMFIR_WATCFG0DQ_WATCFG0DQ_CFG_WAT_PATA = 0;
-static const uint32_t MBA_SCOMFIR_WATCFG0DQ_WATCFG0DQ_CFG_WAT_PATA_LEN = 44;
+static const uint32_t MBA_SCOMFIR_WATCFG2_WAT_2_CFG = 0;
+static const uint32_t MBA_SCOMFIR_WATCFG2_WAT_2_CFG_LEN = 60;
 // mc/reg00009.H
 
-static const uint64_t MBA_SCOMFIR_WATCFG1CQ = 0x0c010f87ull;
+static const uint64_t MBA_SCOMFIR_WATFND = 0x0c010f8full;
 
-static const uint32_t MBA_SCOMFIR_WATCFG1CQ_WATCFG1CQ_CFG_WAT_MSKB = 0;
-static const uint32_t MBA_SCOMFIR_WATCFG1CQ_WATCFG1CQ_CFG_WAT_MSKB_LEN = 44;
+static const uint32_t MBA_SCOMFIR_WATFND_WAT_FN7_CFG = 0;
+static const uint32_t MBA_SCOMFIR_WATFND_WAT_FN7_CFG_LEN = 22;
 // mc/reg00009.H
 
 static const uint64_t MULTICAST_GROUP_2 = 0x0c0f0002ull;

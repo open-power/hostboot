@@ -57,6 +57,8 @@ static const uint32_t CTL_REGS_RX_MODE23_PG_1_H_SEL = 48;
 static const uint32_t CTL_REGS_RX_MODE23_PG_1_H_SEL_LEN = 2;
 static const uint32_t CTL_REGS_RX_MODE23_PG_2_H_SEL = 50;
 static const uint32_t CTL_REGS_RX_MODE23_PG_2_H_SEL_LEN = 2;
+static const uint32_t CTL_REGS_RX_MODE23_PG_1_INVALID_LOCK_EN = 52;
+static const uint32_t CTL_REGS_RX_MODE23_PG_2_INVALID_LOCK_EN = 53;
 // omic/reg00004.H
 
 static const uint64_t CTL_REGS_RX_MODE6_PG = 0x8008304010012c3full;

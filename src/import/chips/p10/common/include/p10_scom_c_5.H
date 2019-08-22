@@ -86,8 +86,13 @@ static const uint32_t CPMS_FLMR_PHASE2_RECOVERY_VECTOR = 41;
 static const uint32_t CPMS_FLMR_PHASE2_RECOVERY_VECTOR_LEN = 3;
 static const uint32_t CPMS_FLMR_PHASE2_RECOVERY_CYCLES = 44;
 static const uint32_t CPMS_FLMR_PHASE2_RECOVERY_CYCLES_LEN = 8;
-static const uint32_t CPMS_FLMR_SPARE2 = 52;
-static const uint32_t CPMS_FLMR_SPARE2_LEN = 2;
+static const uint32_t CPMS_FLMR_MMA_DROOP_PROTECT_ENABLE = 52;
+static const uint32_t CPMS_FLMR_MMA_DROOP_PREDICT_SELECT = 53;
+static const uint32_t CPMS_FLMR_MMA_DROOP_PREDICT_SELECT_LEN = 3;
+static const uint32_t CPMS_FLMR_CORE_QUIESCE_DROOP_IGNORE = 56;
+static const uint32_t CPMS_FLMR_CORE_UCODE_GRANT_SUPPRESS = 57;
+static const uint32_t CPMS_FLMR_CORE_UCODE_GRANT_INJECT = 58;
+static const uint32_t CPMS_FLMR_FTC_RESET = 59;
 // c/reg00005.H
 
 static const uint64_t EC_LS_LSU_HOLD_OUT_REG8 = 0x200206c8ull;

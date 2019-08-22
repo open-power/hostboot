@@ -51,6 +51,60 @@ static const uint32_t ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
 static const uint64_t ATTN_INTERRUPT_REG = 0x200f001aull;
 // eq/reg00011.H
 
+static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE = 0x20018321ull;
+// eq/reg00011.H
+
+static const uint64_t CLK_ADJ_01_DCADJ_WRAP_SET_COMP_DLY = 0x2001430bull;
+
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_SET_COMP_DLY_COMP_DELAY_VALUE = 0;
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_SET_COMP_DLY_COMP_DELAY_VALUE_LEN = 16;
+// eq/reg00011.H
+
+static const uint64_t CLK_ADJ_01_DCADJ_WRAP_SET_DEC_DCC = 0x2001430full;
+// eq/reg00011.H
+
+static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SENSOR_DATA = 0x20012339ull;
+
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SENSOR_DATA_ORE_IS_LATE = 3;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SENSOR_DATA_ACHE_IS_LATE = 7;
+// eq/reg00011.H
+
+static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_CHICKEN_SWITCHES = 0x20012335ull;
+
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_CHICKEN_SWITCHES_STOP_ON_ERROR = 0;
+// eq/reg00011.H
+
+static const uint64_t CLK_ADJ_03_DCADJ_WRAP_SET_DEC_DCC = 0x2001130full;
+// eq/reg00011.H
+
+static const uint64_t CLK_ADJ_03_DCADJ_WRAP_SET_HOLD_MODE = 0x20011301ull;
+// eq/reg00011.H
+
+static const uint64_t CLK_ADJ_03_DCADJ_WRAP_SET_LOW_PASS_DLY = 0x20011309ull;
+
+static const uint32_t CLK_ADJ_03_DCADJ_WRAP_SET_LOW_PASS_DLY_LOW_PASS_DELAY_VALUE = 0;
+static const uint32_t CLK_ADJ_03_DCADJ_WRAP_SET_LOW_PASS_DLY_LOW_PASS_DELAY_VALUE_LEN = 16;
+// eq/reg00011.H
+
+static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_CACHE_OVERRIDE = 0x20011327ull;
+
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_CACHE_OVERRIDE_ENABLE = 0;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_CACHE_OVERRIDE_VALUE = 4;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_CACHE_OVERRIDE_VALUE_LEN = 4;
+// eq/reg00011.H
+
+static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE = 0x20011324ull;
+
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE_STEP_COUNT = 0;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE_STEP_COUNT_LEN = 32;
+// eq/reg00011.H
+
+static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT = 0x20011328ull;
+
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT_WAIT_CNT_VALUE = 0;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT_WAIT_CNT_VALUE_LEN = 6;
+// eq/reg00011.H
+
 static const uint64_t EPS_DBG_TRACE_MODE_REG_2 = 0x200183efull;
 
 static const uint32_t EPS_DBG_TRACE_MODE_REG_2_RUNN_COUNT_COMPARE_VALUE = 0;
@@ -304,7 +358,7 @@ static const uint64_t QME_RCPTR = 0x200e0188ull;
 
 static const uint32_t QME_RCPTR_TARGET_PSTATE = 0;
 static const uint32_t QME_RCPTR_TARGET_PSTATE_LEN = 8;
-static const uint32_t QME_RCPTR_PSTATE_ACK_PENDING = 8;
+static const uint32_t QME_RCPTR_PSTATE_CHANGE_PENDING = 8;
 static const uint32_t QME_RCPTR_TARGET_INDEX = 59;
 static const uint32_t QME_RCPTR_TARGET_INDEX_LEN = 5;
 // eq/reg00011.H
@@ -411,25 +465,25 @@ static const uint32_t RECOV_IN53 = 53;
 
 static const uint64_t XSTOP4 = 0x20030014ull;
 
-static const uint32_t XSTOP4_MASK_B = 0;
-static const uint32_t XSTOP4_ALIGNED_XSTOP4 = 1;
-static const uint32_t XSTOP4_TRIGGER_OPCG_ON_XSTOP4 = 2;
-static const uint32_t XSTOP4_WAIT_ALLWAYS = 3;
-static const uint32_t XSTOP4_PERV = 4;
-static const uint32_t XSTOP4_UNIT1 = 5;
-static const uint32_t XSTOP4_UNIT2 = 6;
-static const uint32_t XSTOP4_UNIT3 = 7;
-static const uint32_t XSTOP4_UNIT4 = 8;
-static const uint32_t XSTOP4_UNIT5 = 9;
-static const uint32_t XSTOP4_UNIT6 = 10;
-static const uint32_t XSTOP4_UNIT7 = 11;
-static const uint32_t XSTOP4_UNIT8 = 12;
-static const uint32_t XSTOP4_UNIT9 = 13;
-static const uint32_t XSTOP4_UNIT10 = 14;
-static const uint32_t XSTOP4_UNIT11 = 15;
-static const uint32_t XSTOP4_UNIT12 = 16;
-static const uint32_t XSTOP4_UNIT13 = 17;
-static const uint32_t XSTOP4_UNIT14 = 18;
+static const uint32_t XSTOP4_ENABLE = 0;
+static const uint32_t XSTOP4_WAIT_SNOPA = 1;
+static const uint32_t XSTOP4_TRIGGER_OPCG_GO = 2;
+static const uint32_t XSTOP4_WAIT_ALWAYS = 3;
+static const uint32_t XSTOP4_REGION_PERV = 4;
+static const uint32_t XSTOP4_REGION_UNIT1 = 5;
+static const uint32_t XSTOP4_REGION_UNIT2 = 6;
+static const uint32_t XSTOP4_REGION_UNIT3 = 7;
+static const uint32_t XSTOP4_REGION_UNIT4 = 8;
+static const uint32_t XSTOP4_REGION_UNIT5 = 9;
+static const uint32_t XSTOP4_REGION_UNIT6 = 10;
+static const uint32_t XSTOP4_REGION_UNIT7 = 11;
+static const uint32_t XSTOP4_REGION_UNIT8 = 12;
+static const uint32_t XSTOP4_REGION_UNIT9 = 13;
+static const uint32_t XSTOP4_REGION_UNIT10 = 14;
+static const uint32_t XSTOP4_REGION_UNIT11 = 15;
+static const uint32_t XSTOP4_REGION_UNIT12 = 16;
+static const uint32_t XSTOP4_REGION_UNIT13 = 17;
+static const uint32_t XSTOP4_REGION_UNIT14 = 18;
 static const uint32_t XSTOP4_WAIT_CYCLES = 48;
 static const uint32_t XSTOP4_WAIT_CYCLES_LEN = 12;
 // eq/reg00011.H

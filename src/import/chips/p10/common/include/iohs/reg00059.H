@@ -4075,86 +4075,86 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_AXON_CPLT_CONF0_FREE_USAGE_45G(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_AXON_CPLT_CONF0_TC_IOO_EOL_TOGL_SRC(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(AXON_CPLT_CONF0_RW, AXON_CPLT_CONF0_WO_CLEAR, AXON_CPLT_CONF0_WO_OR));
 #endif
-    return o_data.insertFromRight<AXON_CPLT_CONF0_FREE_USAGE_45G,
+    return o_data.insertFromRight<AXON_CPLT_CONF0_TC_IOO_EOL_TOGL_SRC,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_CPLT_CONF0_FREE_USAGE_45G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access AXON_CPLT_CONF0_TC_IOO_EOL_TOGL_SRC chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_AXON_CPLT_CONF0_FREE_USAGE_45G(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_AXON_CPLT_CONF0_TC_IOO_EOL_TOGL_SRC(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(AXON_CPLT_CONF0_RW, AXON_CPLT_CONF0_WO_CLEAR, AXON_CPLT_CONF0_WO_OR));
 #endif
-    return o_data.insertFromRight<AXON_CPLT_CONF0_FREE_USAGE_45G,
+    return o_data.insertFromRight<AXON_CPLT_CONF0_TC_IOO_EOL_TOGL_SRC,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_CPLT_CONF0_FREE_USAGE_45G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access AXON_CPLT_CONF0_TC_IOO_EOL_TOGL_SRC chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_AXON_CPLT_CONF0_FREE_USAGE_45G(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_AXON_CPLT_CONF0_TC_IOO_EOL_TOGL_SRC(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(AXON_CPLT_CONF0_RW, AXON_CPLT_CONF0_WO_CLEAR, AXON_CPLT_CONF0_WO_OR));
 #endif
-    return o_data.setBit<AXON_CPLT_CONF0_FREE_USAGE_45G>();
+    return o_data.setBit<AXON_CPLT_CONF0_TC_IOO_EOL_TOGL_SRC>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_CPLT_CONF0_FREE_USAGE_45G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access AXON_CPLT_CONF0_TC_IOO_EOL_TOGL_SRC chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_AXON_CPLT_CONF0_FREE_USAGE_45G(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_AXON_CPLT_CONF0_TC_IOO_EOL_TOGL_SRC(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(AXON_CPLT_CONF0_RW, AXON_CPLT_CONF0_WO_CLEAR, AXON_CPLT_CONF0_WO_OR));
 #endif
-    return o_data.clearBit<AXON_CPLT_CONF0_FREE_USAGE_45G>();
+    return o_data.clearBit<AXON_CPLT_CONF0_TC_IOO_EOL_TOGL_SRC>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_CPLT_CONF0_FREE_USAGE_45G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access AXON_CPLT_CONF0_TC_IOO_EOL_TOGL_SRC chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_AXON_CPLT_CONF0_FREE_USAGE_45G(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_AXON_CPLT_CONF0_TC_IOO_EOL_TOGL_SRC(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(AXON_CPLT_CONF0_RW, AXON_CPLT_CONF0_WO_CLEAR, AXON_CPLT_CONF0_WO_OR));
 #endif
-    return i_data.extractToRight<AXON_CPLT_CONF0_FREE_USAGE_45G,
+    return i_data.extractToRight<AXON_CPLT_CONF0_TC_IOO_EOL_TOGL_SRC,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_CPLT_CONF0_FREE_USAGE_45G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access AXON_CPLT_CONF0_TC_IOO_EOL_TOGL_SRC chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_AXON_CPLT_CONF0_FREE_USAGE_45G(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_AXON_CPLT_CONF0_TC_IOO_EOL_TOGL_SRC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(AXON_CPLT_CONF0_RW, AXON_CPLT_CONF0_WO_CLEAR, AXON_CPLT_CONF0_WO_OR));
 #endif
-    return i_data.getBit<AXON_CPLT_CONF0_FREE_USAGE_45G>();
+    return i_data.getBit<AXON_CPLT_CONF0_TC_IOO_EOL_TOGL_SRC>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_CPLT_CONF0_FREE_USAGE_45G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access AXON_CPLT_CONF0_TC_IOO_EOL_TOGL_SRC chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -8639,86 +8639,86 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_AXON_CPLT_CTRL0_FREE_USAGE_55A(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_AXON_CPLT_CTRL0_RESERVED_55A(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(AXON_CPLT_CTRL0_RW, AXON_CPLT_CTRL0_WO_CLEAR, AXON_CPLT_CTRL0_WO_OR));
 #endif
-    return o_data.insertFromRight<AXON_CPLT_CTRL0_FREE_USAGE_55A,
+    return o_data.insertFromRight<AXON_CPLT_CTRL0_RESERVED_55A,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_CPLT_CTRL0_FREE_USAGE_55A chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access AXON_CPLT_CTRL0_RESERVED_55A chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_AXON_CPLT_CTRL0_FREE_USAGE_55A(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_AXON_CPLT_CTRL0_RESERVED_55A(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(AXON_CPLT_CTRL0_RW, AXON_CPLT_CTRL0_WO_CLEAR, AXON_CPLT_CTRL0_WO_OR));
 #endif
-    return o_data.insertFromRight<AXON_CPLT_CTRL0_FREE_USAGE_55A,
+    return o_data.insertFromRight<AXON_CPLT_CTRL0_RESERVED_55A,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_CPLT_CTRL0_FREE_USAGE_55A chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access AXON_CPLT_CTRL0_RESERVED_55A chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_AXON_CPLT_CTRL0_FREE_USAGE_55A(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_AXON_CPLT_CTRL0_RESERVED_55A(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(AXON_CPLT_CTRL0_RW, AXON_CPLT_CTRL0_WO_CLEAR, AXON_CPLT_CTRL0_WO_OR));
 #endif
-    return o_data.setBit<AXON_CPLT_CTRL0_FREE_USAGE_55A>();
+    return o_data.setBit<AXON_CPLT_CTRL0_RESERVED_55A>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_CPLT_CTRL0_FREE_USAGE_55A chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access AXON_CPLT_CTRL0_RESERVED_55A chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_AXON_CPLT_CTRL0_FREE_USAGE_55A(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_AXON_CPLT_CTRL0_RESERVED_55A(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(AXON_CPLT_CTRL0_RW, AXON_CPLT_CTRL0_WO_CLEAR, AXON_CPLT_CTRL0_WO_OR));
 #endif
-    return o_data.clearBit<AXON_CPLT_CTRL0_FREE_USAGE_55A>();
+    return o_data.clearBit<AXON_CPLT_CTRL0_RESERVED_55A>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_CPLT_CTRL0_FREE_USAGE_55A chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access AXON_CPLT_CTRL0_RESERVED_55A chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_AXON_CPLT_CTRL0_FREE_USAGE_55A(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_AXON_CPLT_CTRL0_RESERVED_55A(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(AXON_CPLT_CTRL0_RW, AXON_CPLT_CTRL0_WO_CLEAR, AXON_CPLT_CTRL0_WO_OR));
 #endif
-    return i_data.extractToRight<AXON_CPLT_CTRL0_FREE_USAGE_55A,
+    return i_data.extractToRight<AXON_CPLT_CTRL0_RESERVED_55A,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_CPLT_CTRL0_FREE_USAGE_55A chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access AXON_CPLT_CTRL0_RESERVED_55A chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_AXON_CPLT_CTRL0_FREE_USAGE_55A(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_AXON_CPLT_CTRL0_RESERVED_55A(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(AXON_CPLT_CTRL0_RW, AXON_CPLT_CTRL0_WO_CLEAR, AXON_CPLT_CTRL0_WO_OR));
 #endif
-    return i_data.getBit<AXON_CPLT_CTRL0_FREE_USAGE_55A>();
+    return i_data.getBit<AXON_CPLT_CTRL0_RESERVED_55A>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_CPLT_CTRL0_FREE_USAGE_55A chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access AXON_CPLT_CTRL0_RESERVED_55A chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
