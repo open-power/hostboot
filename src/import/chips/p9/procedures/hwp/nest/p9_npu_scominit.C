@@ -42,6 +42,7 @@
 #include <p9_misc_scom_addresses_fld.H>
 #include <p9a_misc_scom_addresses.H>
 #include <p9a_misc_scom_addresses_fld.H>
+#include <p9_fbc_ioo_dl_npu_scom.H>
 
 //------------------------------------------------------------------------------
 // Constant definitions
@@ -97,6 +98,30 @@ fapi2::ReturnCode p9_npu_scominit(
             FAPI_ERR("Error from p9.npu.scom.initfile");
             fapi2::current_err = l_rc;
             goto fapi_try_exit;
+        }
+
+        // Enable obus for NPU for Axone
+        if (l_axone)
+        {
+            auto l_obus_targets = i_target.getChildren<fapi2::TARGET_TYPE_OBUS>();
+
+            for (auto l_obus_target : l_obus_targets)
+            {
+                FAPI_DBG("Invoking p9.fbc.ioo_dl.npu.scom.initfile...");
+                FAPI_EXEC_HWP(l_rc,
+                              p9_fbc_ioo_dl_npu_scom,
+                              l_obus_target,
+                              i_target,
+                              fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>());
+
+                if (l_rc)
+                {
+                    FAPI_ERR("Error from p9.fbc.ioo_dl.npu.scom.initfile");
+                    fapi2::current_err = l_rc;
+                    goto fapi_try_exit;
+                }
+
+            }
         }
 
         // apply additional SCOM inits
