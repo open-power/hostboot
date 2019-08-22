@@ -32,6 +32,7 @@ HWP_PATH_CEN += ${ROOTPATH}/src/import/chips/centaur/procedures/hwp/memory
 # Axone
 HWP_PATH_P9A += ${ROOTPATH}/src/import/chips/p9a/procedures/hwp/memory
 HWP_PATH_P9A += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic
+
 # Explorer
 HWP_PATH_EXP += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory
 
@@ -119,7 +120,7 @@ OBJS += $(if $(CONFIG_AXONE),p9a_mss_volt.o,)
 OBJS += $(if $(CONFIG_AXONE),p9a_mss_freq.o,)
 OBJS += $(if $(CONFIG_AXONE),p9a_mss_freq_system.o,)
 OBJS += $(if $(CONFIG_AXONE),p9a_mss_eff_config.o,)
-OBJS += $(if $(CONFIG_AXONE),p9a_mss_eff_config_thermal.o,)
+OBJS += $(if $(CONFIG_AXONE),exp_mss_eff_config_thermal.o,)
 OBJS += $(if $(CONFIG_AXONE),pmic_efd_processing.o,)
 
 #host_mss_attr_cleanup : MSS ATTR Cleanup
