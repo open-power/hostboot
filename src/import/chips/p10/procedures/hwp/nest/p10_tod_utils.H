@@ -44,12 +44,12 @@
 //------------------------------------------------------------------------------
 // Constant definitions
 //------------------------------------------------------------------------------
-// FIXME @RTC 213485 port to P10 as part of link delays
-// TOD-grid-cycles added to MDMT delay to account for slave staging
-const uint32_t MDMT_TOD_GRID_CYCLE_STAGING_DELAY = 6;
 
-// Duration of TOD GRID cycle in picoseconds
-const uint32_t TOD_GRID_PS = 400;
+// See P10 FBC Workbook:
+// "The total latency in optic clock cycles is the TOD Latency value
+// (from the latency measure register) plus half the round-trip time
+// plus 5 cycles."
+const uint32_t P10_TOD_SETUP_LATENCY_FIXED_OPTIC_CYCLES = 5;
 
 // Minimum/Maximum allowable delay for any node
 const uint32_t MIN_TOD_DELAY = 0;
@@ -162,8 +162,6 @@ const uint32_t TOD_CHIP_CTRL_REG_LOW_ORDER_STEP_VAL_4  = 0x4;
 const uint32_t TOD_CHIP_CTRL_REG_LOW_ORDER_STEP_VAL_3F = 0x3F;
 
 // TOD_LOAD_REG register field definitions
-// FIXME @RTC 213485 -- double-check this setting, See Table 1.4.1 in P10_perv workbook
-// const uint64_t P10_TOD_LOAD_REG_LOAD_VALUE = 0x0000000000003FFCULL;
 const uint64_t P10_TOD_LOAD_REG_LOAD_VALUE    = 0x00000000000003FFULL;
 // Bit which causes TOD FSM to transition out of the Not Set state to the Stopped state
 const uint64_t P10_TOD_LOAD_REG_START_TOD     = 0x0000000000000001ULL;
@@ -221,6 +219,22 @@ const uint32_t TOD_PORT_CTRL_REG_M_PATH_1 = 0x3;
 
 const uint32_t NUM_THREADS_PER_CORE = 4;
 
+// bus number, unit positions, corresponding to ATTR_CHIP_UNIT_POS of IOHS target
+const uint32_t TOD_SETUP_BUS_UNIT_POS_0 = 0;
+const uint32_t TOD_SETUP_BUS_UNIT_POS_1 = 1;
+const uint32_t TOD_SETUP_BUS_UNIT_POS_2 = 2;
+const uint32_t TOD_SETUP_BUS_UNIT_POS_3 = 3;
+const uint32_t TOD_SETUP_BUS_UNIT_POS_4 = 4;
+const uint32_t TOD_SETUP_BUS_UNIT_POS_5 = 5;
+const uint32_t TOD_SETUP_BUS_UNIT_POS_6 = 6;
+const uint32_t TOD_SETUP_BUS_UNIT_POS_7 = 7;
+
+//------------------------------------------------------------------------------
+// Type definitions
+//------------------------------------------------------------------------------
+typedef uint64_t iohs_latency_t;
+typedef uint64_t tod_latency_t;
+
 //------------------------------------------------------------------------------
 // Structure definitions
 //------------------------------------------------------------------------------
@@ -232,6 +246,7 @@ extern "C" {
         TOD_SECONDARY // configure secondary TOD
     };
 
+    // FIXME @RTC 213485 -- should these enum names, values, and comments be updated for P10?
     enum p10_tod_setup_bus
     {
         // for MDMT
@@ -338,9 +353,9 @@ extern "C" {
         //   is transmitted ("Drive Port" in eiinfo)
         std::list<tod_topology_node*> i_children;  // Children of current node
         tod_topology_node* i_parent;              // Parent of current node (or Upstream node),
-        // TOD SYNCs are received from parent.
+        // TOD SYNCs are received from parent.  This is initialized by the p10_tod_setup HWP.
         p10_tod_setup_conf_regs o_todRegs;
-        uint32_t o_int_path_delay;
+        tod_latency_t o_int_path_delay;
     };
 
 } //extern "C"

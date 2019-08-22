@@ -73,8 +73,22 @@
     <ffdc>TARGET</ffdc>
     <ffdc>PATH_DELAY</ffdc>
     <ffdc>LONGEST_DELAY</ffdc>
-    <ffdc>XBUS_FREQ</ffdc>
-    <ffdc>OBUS_FREQ</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P10_TOD_SETUP_INVALID_LATENCY</rc>
+    <description>
+      Procedure: p10_tod_setup
+      FBC Latency measurement register has invalid results.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>IOHS_LATENCY</ffdc>
+    <ffdc>ROUND_TRIP_TIME</ffdc>
+    <ffdc>LATENCY_MEASURE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -118,6 +132,21 @@
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>TX</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P10_TOD_SETUP_INVALID_CLOCK_ATTRIBUTES</rc>
+    <description>
+      Procedure: p10_tod_setup
+      Invalid clock attributes.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>IOHS_CLOCK</ffdc>
+    <ffdc>PAU_CLOCK</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>

@@ -58,8 +58,9 @@ const uint64_t  C_SSCG_NS_PER_TOD_COUNT = 32;
 const uint32_t  C_SSCG_START_POLL_DELAY = C_SSCG_START_DELAY * C_SSCG_NS_PER_TOD_COUNT;
 const uint32_t  C_SSCG_START_POLL_COUNT = 10;
 
-// FIXME @RTC 213485 -- temporary, if defined, then implement workaround for defect HW500611
-#define P10_TOD_HW500611_IMPLEMENT_WORKAROUND
+// FIXME @RTC 213485 -- temporary, if defined, then implement workaround for defect HW500611.
+// Left available for older builds.
+// #define P10_TOD_HW500611_IMPLEMENT_WORKAROUND
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -203,37 +204,6 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-/// FIXME @RTC 213485 -- temporary, inserted for debug of HW500611.
-//     Remove once fixed, since the entire TOD error register is checked
-//     in the init_tod_node() routine.
-/// @brief Check for the master request error in the TOD error register.
-/// @param[in] i_target Chip target
-/// @return FAPI2_RC_SUCCESS if no errors, else error
-fapi2::ReturnCode p10_tod_check_error_reg_mreq(
-    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> i_target )
-{
-    fapi2::buffer<uint64_t> l_tod_err_reg = 0;
-    fapi2::ReturnCode l_rc_fapi(fapi2::FAPI2_RC_SUCCESS);
-
-    FAPI_TRY(GET_TOD_ERROR_REG(i_target, l_tod_err_reg),
-             "Error from GET_TOD_ERROR_REG");
-
-    if (GET_TOD_ERROR_REG_PIB_MASTER_REQUEST_ERROR(l_tod_err_reg))
-    {
-        l_rc_fapi = fapi2::FAPI2_RC_FALSE;
-    }
-
-fapi_try_exit:
-
-    if (l_rc_fapi != fapi2::FAPI2_RC_SUCCESS)
-    {
-        fapi2::current_err = l_rc_fapi;
-    }
-
-    return fapi2::current_err;
-}
-
-
 /// @brief Helper function for p10_tod_init
 /// @param[in] i_tod_node Pointer to TOD topology (including FAPI targets)
 /// @param[out] o_failingTodProc Pointer to the fapi target, will be populated
@@ -281,9 +251,7 @@ fapi2::ReturnCode init_tod_node(
         // [00:59] = desired TOD value
         FAPI_DBG("Master: Chip TOD load value (move TB to TOD)");
         FAPI_TRY(PREP_TOD_LOAD_REG(l_target));
-        // FIXME @RTC 213485 -- double-check this setting, See Table 1.4.1 in P10_perv workbook.
         SET_TOD_LOAD_REG_LOAD_TOD_VALUE( P10_TOD_LOAD_REG_LOAD_VALUE , l_data);
-        // FIXME @RTC 213485 -- double-check this setting, See Table 1.4.1 in P10_perv workbook.
         SET_TOD_LOAD_REG_WOF( P10_TOD_LOAD_REG_START_TOD, l_data);
         FAPI_TRY(PUT_TOD_LOAD_REG(l_target, l_data),
                  "Master: Error from PUT_TOD_LOAD_REG");
@@ -292,6 +260,7 @@ fapi2::ReturnCode init_tod_node(
         // FIXME @RTC 213485 -- temporary, workaround for defect HW500611
         FAPI_INF("Implementing workaround for defect HW500611");
 #else
+
         // STEP checking enable:
         // TOD_TX_TTYPE_2_REG(@0x13)[00] = 0b1: TX-TTYPE-2
         FAPI_DBG("Master: Chip TOD step checkers enable");
@@ -300,10 +269,6 @@ fapi2::ReturnCode init_tod_node(
         SET_TOD_TX_TTYPE_2_REG_TX_TTYPE_2_TRIGGER(l_data);
         FAPI_TRY(PUT_TOD_TX_TTYPE_2_REG(l_target, l_data),
                  "Master: Error from PUT_TOD_TX_TTYPE_2_REG");
-
-        // FIXME @RTC 213485 -- temporary, inserted for debug of HW500611
-        FAPI_TRY(p10_tod_check_error_reg_mreq(l_target),
-                 "Error from p10_tod_check_error_reg_mreq");
 
         // Load-TOD-mod:
         // Initiate a TX-TTYPE-5 from the TOD master:
@@ -315,10 +280,6 @@ fapi2::ReturnCode init_tod_node(
         FAPI_TRY(PUT_TOD_TX_TTYPE_5_REG(l_target, l_data),
                  "Master: Error from PUT_TOD_TX_TTYPE_5_REG");
 
-        // FIXME @RTC 213485 -- temporary, inserted for debug of HW500611
-        FAPI_TRY(p10_tod_check_error_reg_mreq(l_target),
-                 "Error from p10_tod_check_error_reg_mreq");
-
         // Load-TOD:
         // Initiate a TTYPE-4 from the TOD master:
         // TOD_TX_TTYPE_4_REG(@0x15)[00] = 0b1
@@ -328,10 +289,6 @@ fapi2::ReturnCode init_tod_node(
         SET_TOD_TX_TTYPE_4_REG_TX_TTYPE_4_TRIGGER(l_data);
         FAPI_TRY(PUT_TOD_TX_TTYPE_4_REG(l_target, l_data),
                  "Master: Error from PUT_TOD_TX_TTYPE_4_REG");
-
-        // FIXME @RTC 213485 -- temporary, inserted for debug of HW500611
-        FAPI_TRY(p10_tod_check_error_reg_mreq(l_target),
-                 "Error from p10_tod_check_error_reg_mreq");
 
         // STEP checking enable:
         // Initiate a TTYPE-2 from the TOD master:
@@ -344,16 +301,8 @@ fapi2::ReturnCode init_tod_node(
         FAPI_TRY(PUT_TOD_TX_TTYPE_2_REG(l_target, l_data),
                  "Master: Error from PUT_TOD_TX_TTYPE_2_REG");
 
-        // FIXME @RTC 213485 -- temporary, inserted for debug of HW500611
-        FAPI_TRY(p10_tod_check_error_reg_mreq(l_target),
-                 "Error from p10_tod_check_error_reg_mreq");
 #endif
 
-        // FIXME @RTC 213485 -- this config write was in the P9 code,
-        // but I can't find the requirement for this config write in
-        // the design specification.  But it seems to be required
-        // to get the TOD FSM into the Running State.
-        // See P10_perv workbook, Figure 1.4.17
         FAPI_DBG("Master: Chip TOD start_tod (switch local Chip TOD to 'Running' state)");
         FAPI_TRY(PREP_TOD_START_REG(l_target));
         l_data.flush<0>();
