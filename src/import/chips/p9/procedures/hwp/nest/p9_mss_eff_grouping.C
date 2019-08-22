@@ -1568,7 +1568,8 @@ fapi2::ReturnCode EffGroupingBaseSizeData::set_HTM_OCC_base_addr(
     // Verify NHTM base addresses aligned with allocated size.
     // The OCC sandbox base is just a FW scratch area and no HW
     // functions mapped to it so we don't need to check its base alignment.
-    if (iv_nhtm_bar_base & (l_nhtmSize + l_chtmSize - 1) )
+    if ( ((l_nhtmSize + l_chtmSize) > 0) &&
+         (iv_nhtm_bar_base & ((l_nhtmSize + l_chtmSize) - 1)) )
     {
         FAPI_ASSERT(false,
                     fapi2::MSS_EFF_GROUPING_ADDRESS_NOT_ALIGNED()
