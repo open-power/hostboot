@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -782,5 +782,35 @@ class STLTest : public CxxTest::TestSuite
             }
         }
 
+        /// Test std::begin() and std::end() on base-type array
+        void testBaseTypeBeginEnd()
+        {
+            const int MAX_ENTRIES = 1025;
+            int baseA[MAX_ENTRIES] = {0}; // base-type array
+
+            // Initialize base array to known values
+            for (int i = 0; i < MAX_ENTRIES; i++)
+            {
+                baseA[i] = i;
+            }
+
+            // use std::begin() and std::end() to copy base-type array to vector
+            std::vector<int> baseV ( std::begin(baseA), std::end(baseA));
+
+            if (baseV.size() != MAX_ENTRIES)
+            {
+                TS_FAIL("testBaseTypeBeginEnd: expected %d elements, found %d in vector",
+                  MAX_ENTRIES, baseV.size());
+            }
+
+            for (int i = 0; i < MAX_ENTRIES; i++)
+            {
+                if (baseA[i] != baseV[i])
+                {
+                    TS_FAIL("testBaseTypeBeginEnd: No match at index %d (base %d vs vector %d)",
+                      i, baseA[i], baseV[i]);
+                }
+            }
+        }
 };
 #endif

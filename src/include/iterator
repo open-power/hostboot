@@ -206,6 +206,34 @@ back_insert_iterator<BackInsertionSequence>
     return back_insert_iterator<BackInsertionSequence>(s);
 }
 
+/**
+ * begin(array)
+ * Returns pointer to beginning of array
+ *
+ * Example:
+ *    int c_array[] = {0, 1, 2};
+ *    vector<int> l_cpp_array (begin(c_array), end(c_array));
+ */
+template <typename T, size_t size>
+T* begin(T (&c_array)[size])
+{
+    return &c_array[0];
+}
+
+/**
+ * end(array)
+ * Returns pointer to end of array (i.e. the element after the last element)
+ *
+ * Example:
+ *    int c_array[] = {0, 1, 2};
+ *    vector<int> l_cpp_array (begin(c_array), end(c_array));
+ */
+template <typename T, size_t size>
+T* end(T (&c_array)[size])
+{
+    return &c_array[0] + size;
+}
+
 }; // namespace std.
 #endif
 
