@@ -223,6 +223,7 @@ void ErrlUserDetailsLogRegister::copyRegisterData(
         case DeviceFW::SCOM:        // userif.H
         case DeviceFW::FSI:         // userif.H
         case DeviceFW::SPD:         // userif.H
+        case DeviceFW::NVDIMM:      // userif.H
         case DeviceFW::XSCOM:       // driverif.H
         case DeviceFW::FSISCOM:     // driverif.H
         case DeviceFW::IBSCOM:     // driverif.H

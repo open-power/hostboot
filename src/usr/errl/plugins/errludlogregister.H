@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -121,6 +121,11 @@ public:
                         i_parser.PrintString("AccessType", "DeviceFW::SPD");
                         numArgs = 1;
                         addrParams.push_back("  SPD keyword enumaration");
+                        break;
+                    case DeviceFW::NVDIMM:      // userif.H
+                        i_parser.PrintString("AccessType", "DeviceFW::NVDIMM");
+                        numArgs = 1;
+                        addrParams.push_back("  NVDIMM address");
                         break;
                     case DeviceFW::XSCOM:       // driverif.H
                         i_parser.PrintString("AccessType", "DeviceFW::XSCOM");

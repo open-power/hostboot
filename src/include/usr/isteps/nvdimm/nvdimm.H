@@ -331,6 +331,7 @@ errlHndl_t notifyNvdimmProtectionChange(TARGETING::Target* i_target,
 errlHndl_t getOperOpsTimeout(TARGETING::Target* i_nvdimm,
                              uint16_t& o_timeout);
 
+
 /**
  * @brief Wait for operational unit operation to complete
  *
@@ -409,6 +410,19 @@ errlHndl_t compareCksum(TARGETING::Target* i_nvdimm,
  *
  */
 void nvdimmAddVendorLog(TARGETING::Target *i_nvdimm, errlHndl_t& io_err);
+
+
+/**
+ * @brief Add NVDIMM Update regs to FFDC for errors encountered
+ *          during NVDIMM firmware update process
+ *        Regs specified in NVDIMM IPL Error Handling Document
+ *
+ * @param[in] i_nvdimm - nvdimm target
+ *
+ * @param[in] io_err - error log to add FFDC data
+ *
+ */
+void nvdimmAddUpdateRegs(TARGETING::Target *i_nvdimm, errlHndl_t& io_err);
 
 
 /**
