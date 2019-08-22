@@ -763,6 +763,13 @@ uint32_t nvdimmNotifyProtChange( TARGETING::TargetHandle_t i_target,
     #undef PRDF_FUNC
 
 }
+
+void nvdimmAddPage4Ffdc( TARGETING::TargetHandle_t i_nvdimm,
+                         errlHndl_t & io_errl  )
+{
+    NVDIMM::nvdimmAddPage4Regs( i_nvdimm, io_errl );
+}
+
 #endif
 
 //##############################################################################
