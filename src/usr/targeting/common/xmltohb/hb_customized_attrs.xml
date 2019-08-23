@@ -295,6 +295,7 @@
     <attribute>
           <id>ATTR_SYSTEM_IPL_PHASE</id>
           <default>HB_IPL</default>
+          <persistency>volatile-zeroed</persistency>
      </attribute>
 
     <attribute>
@@ -805,6 +806,10 @@
     <attribute>
         <id>ATTR_XGPE_PM_SUSPEND_DISABLE</id>
         <persistency>volatile-zeroed</persistency>
+    </attribute>
+    <attribute>
+        <id>ATTR_FUSED_CORE_MODE</id>
+        <writeable/>
     </attribute>
     <!-- =====================================================================
      End of customizations definitions
