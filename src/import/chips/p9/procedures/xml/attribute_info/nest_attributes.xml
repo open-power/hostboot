@@ -349,6 +349,7 @@
     1 = CAPI 2.0
     2 = NV 2.0
     3 = OPENCAPI
+    4 = Not Wired
     Provided by the MRW.
   </description>
   <valueType>uint8</valueType>
@@ -356,7 +357,8 @@
     SMP = 0x0,
     CAPI = 0x1,
     NV = 0x2,
-    OCAPI = 0x3
+    OCAPI = 0x3,
+    NOT_WIRED=0x4
   </enum>
   <platInit/>
 </attribute>
@@ -386,12 +388,16 @@
     0 = default = SMP
     1 = CAPI 2.0
     2 = NV 2.0
+    3 = OPENCAPI
+    4 = Not Wired
   </description>
   <valueType>uint8</valueType>
   <enum>
     SMP = 0x0,
     CAPI = 0x1,
-    NV = 0x2
+    NV = 0x2,
+    OCAPI = 0x3,
+    NOT_WIRED=0x4
   </enum>
   <array>4</array>
   <writeable/>
