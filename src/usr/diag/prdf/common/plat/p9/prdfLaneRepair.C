@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -75,26 +75,6 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
     TargetHandle_t rxBusTgt = i_chip->getTrgt();
 //    TargetHandle_t txBusTgt = nullptr;
     TYPE busType = getTargetType(rxBusTgt);
-
-    // RTC 174485
-    // Need HWPs for this. Just callout bus interface for now.
-    if (busType == TYPE_OBUS)
-    {
-        if ( obusInSmpMode(rxBusTgt) )
-        {
-            calloutBusInterface( i_chip, i_sc, MRU_LOW );
-            i_sc.service_data->setServiceCall();
-        }
-        else
-        {
-            PRDF_ERR( PRDF_FUNC "Lane repair only supported in SMP mode "
-                      "obus: 0x%08x", getHuid(rxBusTgt) );
-            i_sc.service_data->SetCallout( LEVEL2_SUPPORT, MRU_MED, NO_GARD );
-            i_sc.service_data->SetCallout( SP_CODE, MRU_MED, NO_GARD );
-            i_sc.service_data->setServiceCall(); 
-        }
-        return SUCCESS;
-    }
 
 //    bool thrExceeded;
     // Number of clock groups on this interface. (2 for xbus, 1 for all others)
@@ -371,7 +351,6 @@ int32_t spareDeployed( ExtensibleChip * i_chip,
         return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE_NS( p9_xbus, LaneRepair, spareDeployed );
-PRDF_PLUGIN_DEFINE_NS( p9_obus, LaneRepair, spareDeployed );
 
 /**
  * @brief  Handles Max Spares Exceeded Event
@@ -388,7 +367,6 @@ int32_t maxSparesExceeded( ExtensibleChip * i_chip,
         return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE_NS( p9_xbus, LaneRepair, maxSparesExceeded );
-PRDF_PLUGIN_DEFINE_NS( p9_obus, LaneRepair, maxSparesExceeded );
 
 /**
  * @brief  Handles Too Many Bus Errors Event
@@ -405,7 +383,6 @@ int32_t tooManyBusErrors( ExtensibleChip * i_chip,
         return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE_NS( p9_xbus, LaneRepair, tooManyBusErrors );
-PRDF_PLUGIN_DEFINE_NS( p9_obus, LaneRepair, tooManyBusErrors );
 
 /**
  * @brief Add callouts for a BUS interface
@@ -420,7 +397,6 @@ int32_t calloutBusInterfacePlugin( ExtensibleChip * i_chip,
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE_NS( p9_xbus, LaneRepair, calloutBusInterfacePlugin );
-PRDF_PLUGIN_DEFINE_NS( p9_obus, LaneRepair, calloutBusInterfacePlugin );
 
 } // end namespace LaneRepair
 

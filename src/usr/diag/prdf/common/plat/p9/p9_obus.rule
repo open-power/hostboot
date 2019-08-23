@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2018
+# Contributors Listed Below - COPYRIGHT 2016,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -459,12 +459,12 @@ group gIOOLFIR filter singlebit, cs_root_cause( 54, 55, 56, 57, 58, 59 )
     /** IOOLFIR[8]
      *  link0 nak received
      */
-    (rIOOLFIR, bit(8)) ? defaultMaskedError;
+    (rIOOLFIR, bit(8)) ? threshold_and_mask_self;
 
     /** IOOLFIR[9]
      *  link1 nak received
      */
-    (rIOOLFIR, bit(9)) ? defaultMaskedError;
+    (rIOOLFIR, bit(9)) ? threshold_and_mask_self;
 
     /** IOOLFIR[10]
      *  link0 replay buffer full
@@ -489,22 +489,22 @@ group gIOOLFIR filter singlebit, cs_root_cause( 54, 55, 56, 57, 58, 59 )
     /** IOOLFIR[14]
      *  link0 sl ecc correctable
      */
-    (rIOOLFIR, bit(14)) ? threshold_and_mask_self;
+    (rIOOLFIR, bit(14)) ? defaultMaskedError;
 
     /** IOOLFIR[15]
      *  link1 sl ecc correctable
      */
-    (rIOOLFIR, bit(15)) ? threshold_and_mask_self;
+    (rIOOLFIR, bit(15)) ? defaultMaskedError;
 
     /** IOOLFIR[16]
      *  link0 sl ecc ue
      */
-    (rIOOLFIR, bit(16)) ? threshold_and_mask_self;
+    (rIOOLFIR, bit(16)) ? defaultMaskedError;
 
     /** IOOLFIR[17]
      *  link1 sl ecc ue
      */
-    (rIOOLFIR, bit(17)) ? threshold_and_mask_self;
+    (rIOOLFIR, bit(17)) ? defaultMaskedError;
 
     /** IOOLFIR[18]
      *  link0 retrain threshold
@@ -587,12 +587,12 @@ group gIOOLFIR filter singlebit, cs_root_cause( 54, 55, 56, 57, 58, 59 )
     (rIOOLFIR, bit(33)) ? defaultMaskedError;
 
     /** IOOLFIR[34]
-     *  link0 num replay
+     *  link0 no forward progress
      */
     (rIOOLFIR, bit(34)) ? defaultMaskedError;
 
     /** IOOLFIR[35]
-     *  link1 num replay
+     *  link1 no forward progress
      */
     (rIOOLFIR, bit(35)) ? defaultMaskedError;
 
@@ -609,12 +609,12 @@ group gIOOLFIR filter singlebit, cs_root_cause( 54, 55, 56, 57, 58, 59 )
     /** IOOLFIR[38]
      *  link0 prbs select error
      */
-    (rIOOLFIR, bit(38)) ? threshold_and_mask_self;
+    (rIOOLFIR, bit(38)) ? defaultMaskedError;
 
     /** IOOLFIR[39]
      *  link1 prbs select error
      */
-    (rIOOLFIR, bit(39)) ? threshold_and_mask_self;
+    (rIOOLFIR, bit(39)) ? defaultMaskedError;
 
     /** IOOLFIR[40]
      *  link0 tcomplete bad
@@ -629,92 +629,92 @@ group gIOOLFIR filter singlebit, cs_root_cause( 54, 55, 56, 57, 58, 59 )
     /** IOOLFIR[42]
      *  link0 no spare lane available
      */
-    (rIOOLFIR, bit(42)) ? maxSparesExceeded_obus_clkgrp0;
+    (rIOOLFIR, bit(42)) ? defaultMaskedError;
 
     /** IOOLFIR[43]
      *  link1 no spare lane available
      */
-    (rIOOLFIR, bit(43)) ? maxSparesExceeded_obus_clkgrp1;
+    (rIOOLFIR, bit(43)) ? defaultMaskedError;
 
     /** IOOLFIR[44]
-     *  link0 spare done
+     *  link0 degraded mode
      */
-    (rIOOLFIR, bit(44)) ? spareDeployed_obus_clkgrp0;
+    (rIOOLFIR, bit(44)) ? non_smp_callout_bus_th_1;
 
     /** IOOLFIR[45]
-     *  link1 spare done
+     *  link1 degraded mode
      */
-    (rIOOLFIR, bit(45)) ? spareDeployed_obus_clkgrp1;
+    (rIOOLFIR, bit(45)) ? non_smp_callout_bus_th_1;
 
     /** IOOLFIR[46]
      *  link0 too many crc errors
      */
-    (rIOOLFIR, bit(46)) ? tooManyBusErrors_obus_clkgrp0;
+    (rIOOLFIR, bit(46)) ? defaultMaskedError;
 
     /** IOOLFIR[47]
      *  link1 too many crc errors
      */
-    (rIOOLFIR, bit(47)) ? tooManyBusErrors_obus_clkgrp1;
+    (rIOOLFIR, bit(47)) ? defaultMaskedError;
 
     /** IOOLFIR[48]
-     *  link0 npu error
+     *  link0 orx otx dlx errors
      */
     (rIOOLFIR, bit(48)) ? threshold_and_mask_self;
 
     /** IOOLFIR[49]
-     *  link1 npu error
+     *  link1 orx otx dlx errors
      */
     (rIOOLFIR, bit(49)) ? threshold_and_mask_self;
 
     /** IOOLFIR[50]
      *  linkx npu error
      */
-    (rIOOLFIR, bit(50)) ? threshold_and_mask_self;
+    (rIOOLFIR, bit(50)) ? defaultMaskedError;
 
     /** IOOLFIR[51]
      *  osc switch
      */
-    (rIOOLFIR, bit(51)) ? threshold_and_mask_self;
+    (rIOOLFIR, bit(51)) ? defaultMaskedError;
 
     /** IOOLFIR[52]
      *  link0 correctable array error
      */
-    (rIOOLFIR, bit(52)) ? calloutBusInterface_th_32perDay;
+    (rIOOLFIR, bit(52)) ? self_th_32perDay;
 
     /** IOOLFIR[53]
      *  link1 correctable array error
      */
-    (rIOOLFIR, bit(53)) ? calloutBusInterface_th_32perDay;
+    (rIOOLFIR, bit(53)) ? self_th_32perDay;
 
     /** IOOLFIR[54]
      *  link0 uncorrectable array error
      */
-    (rIOOLFIR, bit(54)) ? calloutBusInterface_th_32perDay;
+    (rIOOLFIR, bit(54)) ? self_th_1;
 
     /** IOOLFIR[55]
      *  link1 uncorrectable array error
      */
-    (rIOOLFIR, bit(55)) ? calloutBusInterface_th_32perDay;
+    (rIOOLFIR, bit(55)) ? self_th_1;
 
     /** IOOLFIR[56]
      *  link0 training failed
      */
-    (rIOOLFIR, bit(56)) ? calloutBusInterface_th_32perDay;
+    (rIOOLFIR, bit(56)) ? level2_th_1;
 
     /** IOOLFIR[57]
      *  link1 training failed
      */
-    (rIOOLFIR, bit(57)) ? calloutBusInterface_th_32perDay;
+    (rIOOLFIR, bit(57)) ? level2_th_1;
 
     /** IOOLFIR[58]
      *  link0 unrecoverable error
      */
-    (rIOOLFIR, bit(58)) ? calloutBusInterface_th_32perDay;
+    (rIOOLFIR, bit(58)) ? non_smp_callout_bus_th_1;
 
     /** IOOLFIR[59]
      *  link1 unrecoverable error
      */
-    (rIOOLFIR, bit(59)) ? calloutBusInterface_th_32perDay;
+    (rIOOLFIR, bit(59)) ? non_smp_callout_bus_th_1;
 
     /** IOOLFIR[60]
      *  link0 internal error

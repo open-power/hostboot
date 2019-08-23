@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018
+# Contributors Listed Below - COPYRIGHT 2018,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -23,48 +23,19 @@
 #
 # IBM_PROLOG_END_TAG
 
-/** Callout the OBUS interface */
-actionclass calloutObusInterface
+actionclass non_smp_callout_bus_th_1
 {
-    funccall("calloutBusInterfacePlugin");
-};
-
-/** Callout the OBUS interface, threshold 32 per day */
-actionclass calloutBusInterface_th_32perDay
-{
-    calloutObusInterface;
-    threshold32pday;
-};
-
-/** Lane Repair: spare deployed */
-actionclass spareDeployed
-{
-    calloutObusInterface;
-    funccall("spareDeployed");
-};
-
-/** Lane Repair: max spares exceeded */
-actionclass maxSparesExceeded
-{
-    calloutObusInterface;
+    # Non-SMP mode:
+    # Callout this bus. Note that Hostboot does not know what is on the other
+    # side of this bus and does not have any control over garding/deconfiguring.
+    # Therefore, we cannot gard since we will never know if the other side of
+    # the bus has been replaced. Also, there is a small probability that the
+    # fault could be between the two endpoints. Usually, we would do a procedure
+    # callout or call some HWP that would take care of the "everything in
+    # between" scenario. However, there is no existing mechanism. For now
+    # callout level 2 support at low priority.
+    calloutSelfMedNoGard;
+    callout2ndLvlLow;
     threshold1;
-    funccall("maxSparesExceeded");
 };
-
-/** Lane Repair: too many bus errors */
-actionclass tooManyBusErrors
-{
-    calloutObusInterface;
-    threshold1;
-    funccall("tooManyBusErrors");
-};
-
-# Currently handling each OBUS clock group with the same plugins. May optimize
-# this later when we add in the DMI Lane Repair support.
-actionclass spareDeployed_obus_clkgrp0 { spareDeployed; };
-actionclass spareDeployed_obus_clkgrp1 { spareDeployed; };
-actionclass maxSparesExceeded_obus_clkgrp0 { maxSparesExceeded; };
-actionclass maxSparesExceeded_obus_clkgrp1 { maxSparesExceeded; };
-actionclass tooManyBusErrors_obus_clkgrp0 { tooManyBusErrors; };
-actionclass tooManyBusErrors_obus_clkgrp1 { tooManyBusErrors; };
 
