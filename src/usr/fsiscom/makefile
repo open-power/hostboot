@@ -25,9 +25,7 @@
 ROOTPATH = ../../..
 MODULE = fsiscom
 
-# FIXME RTC: 210975
-
-#OBJS += fsiscom.o
+OBJS += fsiscom.o
 
 SUBDIRS += test.d
 SUBDIRS += runtime.d

@@ -25,12 +25,10 @@
 ROOTPATH = ../../..
 MODULE = scan
 
-EXTRAINCDIR +=${ROOTPATH}/src/import/chips/p9/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR +=${ROOTPATH}/src/import/hwpf/fapi2/include
 
-# FIXME RTC: 210975
-#OBJS += scandd.o
+OBJS += scandd.o
 
 SUBDIRS += test.d
 

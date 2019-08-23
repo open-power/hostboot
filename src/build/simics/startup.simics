@@ -175,8 +175,13 @@ system_cmp0.phys_mem.set address = 0x8200020 size = 8 0x00060300
 # Now force the HBBL image into the L3 cache (again, since SBE isn't there to do this).
 # Note that we need to skip over the exception vectors (to arrive at the 0x3000 offset).
 $sb_base = (env SANDBOXBASE)
-backplane0.proc0.l3_img.load-file (lookup-file $sb_base+"/obj/ppc/hbfw/img/hbbl.bin") 0x203000
+(get-master-procs)[0].l3_img.load-file (lookup-file $sb_base+"/obj/ppc/hbfw/img/hbbl.bin") 0x203000
+
+# TODO: Remove these lines and let SBE set the registers
+#echo "SETTING HRMOR/IAR"
+system_cmp0.cpu0_0_01_0.write-reg HRMOR 0x8000000
+($hb_cpu).write-reg HRMOR 0x8200000
+($hb_cpu).write-reg IAR 0
 
 # Enable mambo core to run instructions (previously done in entry.simics)
 (get-master-cpus)[0].enable
-

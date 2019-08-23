@@ -27,8 +27,6 @@
 ROOTPATH = ../../..
 MODULE = errldisplay
 
-# FIXME RTC: 210975
-
 OBJS += errldisplay.o
 OBJS += errldisplaydata.o
 

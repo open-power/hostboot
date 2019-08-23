@@ -28,33 +28,29 @@ MODULE = thread_activate
 
 # FIXME RTC: 210975 Uncomment the commented out EKB paths when the time is right
 ##      support for fapi2
-#EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
-#EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 
 ## pointer to common HWP files
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 #EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/isteps/
 
 ##  Include sub dirs
 ##  NOTE: add a new EXTRAINCDIR when you add a new HWP
-#HWP_PATH_1 += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/core
-#HWP_PATH_2 += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm
-#HWP_PATH += ${HWP_PATH_1}/ ${HWP_PATH_2}/
-#EXTRAINCDIR += ${HWP_PATH}
+HWP_PATH_1 += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/core
+HWP_PATH_2 += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/pm
+HWP_PATH += ${HWP_PATH_1}/ ${HWP_PATH_2}/
+EXTRAINCDIR += ${HWP_PATH}
 
 ##  NOTE: add new object files when you add a new HWP
 OBJS += thread_activate.o
 
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
-#VPATH += ${HWP_PATH}
+VPATH += ${HWP_PATH}
 
-#include ${ROOTPATH}/procedure.rules.mk
-# p9_thread_control.o brought in by p9_thread_control.mk
-#include $(HWP_PATH_1)/p9_thread_control.mk
+include ${ROOTPATH}/procedure.rules.mk
+# p10_thread_control.o brought in by p10_thread_control.mk
+include $(HWP_PATH_1)/p10_thread_control.mk
 include ${ROOTPATH}/config.mk
-

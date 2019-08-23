@@ -120,7 +120,7 @@ inline ReturnCode putScom(const Target<K>& i_target,
                           const uint64_t i_address,
                           const buffer<uint64_t> i_data)
 {
-    return false; /* FIXME RTC: 210975 platPutScom(i_target, i_address, i_data); */
+    return platPutScom(i_target, i_address, i_data);
 }
 
 /// @brief Platform-level implementation of putScomUnderMask()
@@ -136,7 +136,7 @@ inline ReturnCode putScomUnderMask(const Target<K>& i_target,
                                    const buffer<uint64_t> i_data,
                                    const buffer<uint64_t> i_mask)
 {
-    return false; /* FIXME RTC: 210975 platPutScomUnderMask(i_target, i_address, i_data, i_mask); */
+    return platPutScomUnderMask(i_target, i_address, i_data, i_mask);
 }
 
 ///
