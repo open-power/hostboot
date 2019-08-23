@@ -459,26 +459,22 @@ group gIOOLFIR
     /** IOOLFIR[6]
      *  link0 crc error
      */
-    # DL0 - orx_otx_crc_error
     (rIOOLFIR, bit(6)) ? threshold_and_mask_self;
 
     /** IOOLFIR[7]
      *  link1 crc error
      */
-    # DL1 - orx_otx_crc_error
     (rIOOLFIR, bit(7)) ? threshold_and_mask_self;
 
     /** IOOLFIR[8]
      *  link0 nak received
      */
-    # DL0 - orx_otx_nack
-    (rIOOLFIR, bit(8)) ? defaultMaskedError;
+    (rIOOLFIR, bit(8)) ? threshold_and_mask_self_non_smp_only;
 
     /** IOOLFIR[9]
      *  link1 nak received
      */
-    # DL1 - orx_otx_nack
-    (rIOOLFIR, bit(9)) ? defaultMaskedError;
+    (rIOOLFIR, bit(9)) ? threshold_and_mask_self_non_smp_only;
 
     /** IOOLFIR[10]
      *  link0 replay buffer full
@@ -503,22 +499,22 @@ group gIOOLFIR
     /** IOOLFIR[14]
      *  link0 sl ecc correctable
      */
-    (rIOOLFIR, bit(14)) ? threshold_and_mask_self;
+    (rIOOLFIR, bit(14)) ? threshold_and_mask_self_smp_only;
 
     /** IOOLFIR[15]
      *  link1 sl ecc correctable
      */
-    (rIOOLFIR, bit(15)) ? threshold_and_mask_self;
+    (rIOOLFIR, bit(15)) ? threshold_and_mask_self_smp_only;
 
     /** IOOLFIR[16]
      *  link0 sl ecc ue
      */
-    (rIOOLFIR, bit(16)) ? threshold_and_mask_self;
+    (rIOOLFIR, bit(16)) ? threshold_and_mask_self_smp_only;
 
     /** IOOLFIR[17]
      *  link1 sl ecc ue
      */
-    (rIOOLFIR, bit(17)) ? threshold_and_mask_self;
+    (rIOOLFIR, bit(17)) ? threshold_and_mask_self_smp_only;
 
     /** IOOLFIR[18]
      *  link0 retrain threshold
@@ -533,25 +529,21 @@ group gIOOLFIR
     /** IOOLFIR[20]
      *  link0 loss block align
      */
-    # DL0 - lost_block_lock
     (rIOOLFIR, bit(20)) ? defaultMaskedError;
 
     /** IOOLFIR[21]
      *  link1 loss block align
      */
-    # DL1 - lost_block_lock
     (rIOOLFIR, bit(21)) ? defaultMaskedError;
 
     /** IOOLFIR[22]
      *  link0 invalid block
      */
-    # DL0 - lost_data_sh
     (rIOOLFIR, bit(22)) ? defaultMaskedError;
 
     /** IOOLFIR[23]
      *  link1 invalid block
      */
-    # DL1 - lost_data_sh
     (rIOOLFIR, bit(23)) ? defaultMaskedError;
 
     /** IOOLFIR[24]
@@ -567,25 +559,21 @@ group gIOOLFIR
     /** IOOLFIR[26]
      *  link0 deskew overflow
      */
-    # DL0 - deskew_overflow
     (rIOOLFIR, bit(26)) ? defaultMaskedError;
 
     /** IOOLFIR[27]
      *  link1 deskew overflow
      */
-    # DL1 - deskew_overflow
     (rIOOLFIR, bit(27)) ? defaultMaskedError;
 
     /** IOOLFIR[28]
      *  link0 sw retrain
      */
-    # DL0 - software_retrain
     (rIOOLFIR, bit(28)) ? defaultMaskedError;
 
     /** IOOLFIR[29]
      *  link1 sw retrain
      */
-    # DL1 - software_retrain
     (rIOOLFIR, bit(29)) ? defaultMaskedError;
 
     /** IOOLFIR[30]
@@ -609,38 +597,34 @@ group gIOOLFIR
     (rIOOLFIR, bit(33)) ? defaultMaskedError;
 
     /** IOOLFIR[34]
-     *  link0 num replay
+     *  link0 num replay or no forward progress
      */
-    # DL0 - no_fwd_progress
     (rIOOLFIR, bit(34)) ? defaultMaskedError;
 
     /** IOOLFIR[35]
-     *  link1 num replay
+     *  link1 num replay or no forward progress
      */
-    # DL1 - no_fwd_progress
     (rIOOLFIR, bit(35)) ? defaultMaskedError;
 
     /** IOOLFIR[36]
      *  link0 training set received
      */
-    # DL0 - training_sh
     (rIOOLFIR, bit(36)) ? defaultMaskedError;
 
     /** IOOLFIR[37]
      *  link1 training set received
      */
-    # DL1 - training_sh
     (rIOOLFIR, bit(37)) ? defaultMaskedError;
 
     /** IOOLFIR[38]
      *  link0 prbs select error
      */
-    (rIOOLFIR, bit(38)) ? threshold_and_mask_self;
+    (rIOOLFIR, bit(38)) ? threshold_and_mask_self_smp_only;
 
     /** IOOLFIR[39]
      *  link1 prbs select error
      */
-    (rIOOLFIR, bit(39)) ? threshold_and_mask_self;
+    (rIOOLFIR, bit(39)) ? threshold_and_mask_self_smp_only;
 
     /** IOOLFIR[40]
      *  link0 tcomplete bad
@@ -655,130 +639,102 @@ group gIOOLFIR
     /** IOOLFIR[42]
      *  link0 no spare lane available
      */
-    (rIOOLFIR, bit(42)) ? obusSmpCallout_L0;
+    (rIOOLFIR, bit(42)) ? obusSmpCallout_L0_smp_only;
 
     /** IOOLFIR[43]
      *  link1 no spare lane available
      */
-    (rIOOLFIR, bit(43)) ? obusSmpCallout_L1;
+    (rIOOLFIR, bit(43)) ? obusSmpCallout_L1_smp_only;
 
     /** IOOLFIR[44]
-     *  link0 spare done
+     *  link0 spare done or degraded mode
      */
-    # DL0 - degraded_mode
-    (rIOOLFIR, bit(44)) ? obusSmpCallout_th32_L0;
+    (rIOOLFIR, bit(44)) ? spare_lane_degraded_mode_L0;
 
     /** IOOLFIR[45]
-     *  link1 spare done
+     *  link1 spare done or degraded mode
      */
-    # DL1 - degraded_mode
-    (rIOOLFIR, bit(45)) ? obusSmpCallout_th32_L1;
+    (rIOOLFIR, bit(45)) ? spare_lane_degraded_mode_L1;
 
     /** IOOLFIR[46]
      *  link0 too many crc errors
      */
-    (rIOOLFIR, bit(46)) ? obusSmpCallout_L0;
+    (rIOOLFIR, bit(46)) ? obusSmpCallout_L0_smp_only;
 
     /** IOOLFIR[47]
      *  link1 too many crc errors
      */
-    (rIOOLFIR, bit(47)) ? obusSmpCallout_L1;
+    (rIOOLFIR, bit(47)) ? obusSmpCallout_L1_smp_only;
 
     /** IOOLFIR[48]
-     *  link0 npu error
+     *  link0 npu error or orx otx dlx errors
      */
-    # DL0 - orx_otx_dlx_errors
     (rIOOLFIR, bit(48)) ? threshold_and_mask_self;
 
     /** IOOLFIR[49]
-     *  link1 npu error
+     *  link1 npu error or orx otx dlx errors
      */
-    # DL1 - orx_otx_dlx_errors
     (rIOOLFIR, bit(49)) ? threshold_and_mask_self;
 
     /** IOOLFIR[50]
      *  linkx npu error
      */
-    (rIOOLFIR, bit(50)) ? threshold_and_mask_self;
+    (rIOOLFIR, bit(50)) ? threshold_and_mask_self_smp_only;
 
     /** IOOLFIR[51]
      *  osc switch
      */
-    (rIOOLFIR, bit(51)) ? threshold_and_mask_self;
+    (rIOOLFIR, bit(51)) ? threshold_and_mask_self_smp_only;
 
     /** IOOLFIR[52]
      *  link0 correctable array error
      */
-    # DL0 - oflt_octl_frb_df_ue
-    # DL0 - oflt_octl_rpb_df_ue
-    # DL0 - ebit_10
-    # DL0 - ebit_11
-    (rIOOLFIR, bit(52)) ? obusSmpCallout_th32_L0;
+    (rIOOLFIR, bit(52)) ? self_th_32perDay;
 
     /** IOOLFIR[53]
      *  link1 correctable array error
      */
-    # DL1 - oflt_octl_frb_df_ue
-    # DL1 - oflt_octl_rpb_df_ue
-    # DL1 - ebit_10
-    # DL1 - ebit_11
-    (rIOOLFIR, bit(53)) ? obusSmpCallout_th32_L1;
+    (rIOOLFIR, bit(53)) ? self_th_32perDay;
 
     /** IOOLFIR[54]
      *  link0 uncorrectable array error
      */
-    # DL0 - oflt_octl_frb_cf_ue
-    # DL0 - oflt_octl_rpb_cf_ue
-    (rIOOLFIR, bit(54)) ? obusSmpFailure_L0;
+    (rIOOLFIR, bit(54)) ? self_th_1;
 
     /** IOOLFIR[55]
      *  link1 uncorrectable array error
      */
-    # DL1 - oflt_octl_frb_cf_ue
-    # DL1 - oflt_octl_rpb_cf_ue
-    (rIOOLFIR, bit(55)) ? obusSmpFailure_L1;
+    (rIOOLFIR, bit(55)) ? self_th_1;
 
     /** IOOLFIR[56]
      *  link0 training failed
      */
-    # DL0 - slower_rx_clk
-    (rIOOLFIR, bit(56)) ? obusSmpFailure_L0;
+    (rIOOLFIR, bit(56)) ? training_failure_L0;
 
     /** IOOLFIR[57]
      *  link1 training failed
      */
-    # DL1 - slower_rx_clk
-    (rIOOLFIR, bit(57)) ? obusSmpFailure_L1;
+    (rIOOLFIR, bit(57)) ? training_failure_L1;
 
     /** IOOLFIR[58]
      *  link0 unrecoverable error
      */
-    # DL0 - ACK_ptr_error
-    # DL0 - run_length_error
-    # DL0 - orx_otx_rx_ill_rl
-    (rIOOLFIR, bit(58)) ? obusSmpFailure_L0;
+    (rIOOLFIR, bit(58)) ? unrecoverable_error_L0;
 
     /** IOOLFIR[59]
      *  link1 unrecoverable error
      */
-    # DL1 - ACK_ptr_error
-    # DL1 - run_length_error
-    # DL1 - orx_otx_rx_ill_rl
-    (rIOOLFIR, bit(59)) ? obusSmpFailure_L1;
+    (rIOOLFIR, bit(59)) ? unrecoverable_error_L1;
 
     /** IOOLFIR[60]
      *  link0 internal error
      */
-    # DL0 - oflt_octl_data_pty_error
-    # DL0 - ctl_parity_error
-    (rIOOLFIR, bit(60)) ? obusSmpFailure_L0;
+    (rIOOLFIR, bit(60)) ? internal_error_L0;
 
     /** IOOLFIR[61]
      *  link1 internal error
      */
-    # DL1 - oflt_octl_data_pty_error
-    # DL1 - ctl_parity_error
-    (rIOOLFIR, bit(61)) ? obusSmpFailure_L1;
+    (rIOOLFIR, bit(61)) ? internal_error_L1;
 
     /** IOOLFIR[62]
      *  fir scom err dup
