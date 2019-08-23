@@ -167,10 +167,10 @@ extern "C"
             else if ( (getChipletId() >= PCI0_CHIPLET_ID) &&  // 0x8
                       (getChipletId() <= PCI1_CHIPLET_ID) )   // 0x9
             {
-                // Ring IDs must be 0x3-0x4 (iopci rings) or
+                // Ring IDs must be 0x4-0x5 (iopci rings) or
                 // Ring ID is 0x2 (pci ring) and sat Id = 0x0
-                if ( (getRingId() == IO_PCI0_RING_ID) ||   // 0x3
-                     (getRingId() == IO_PCI1_RING_ID) ||   // 0x4
+                if ( (getRingId() == IO_PCI0_RING_ID) ||   // 0x4
+                     (getRingId() == IO_PCI1_RING_ID) ||   // 0x5
                      ((getRingId() == PCI_RING_ID) &&      // 0x2
                       (getSatId() == PEC_SAT_ID)) )        // 0x0
                 {
