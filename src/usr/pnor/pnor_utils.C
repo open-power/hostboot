@@ -299,7 +299,7 @@ PNOR::parseEntries (ffs_hdr* i_ffs_hdr,
 
         // isEnforcedSecureSection should always handle SB compiled in or not,
         // but if that ever changes, force flag to false in PNOR TOC.
-#ifdef CONFIG_SECUREBOOT
+#if defined CONFIG_SECUREBOOT || defined BOOTLOADER
         io_TOC[secId].secure = PNOR::isEnforcedSecureSection(secId);
 #else
         io_TOC[secId].secure = false;
@@ -336,7 +336,7 @@ PNOR::parseEntries (ffs_hdr* i_ffs_hdr,
 
 bool PNOR::isEnforcedSecureSection(const uint32_t i_section)
 {
-#ifdef CONFIG_SECUREBOOT
+#if defined CONFIG_SECUREBOOT || defined BOOTLOADER
     #ifdef BOOTLOADER
         return i_section == HB_BASE_CODE;
     #else
@@ -362,7 +362,7 @@ bool PNOR::isEnforcedSecureSection(const uint32_t i_section)
 
 bool PNOR::isCoreRootOfTrustSection(const PNOR::SectionId i_section)
 {
-#ifdef CONFIG_SECUREBOOT
+#if defined CONFIG_SECUREBOOT || defined BOOTLOADER
     #ifdef BOOTLOADER
         return i_section == HB_BASE_CODE;
     #else

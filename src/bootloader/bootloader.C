@@ -267,7 +267,6 @@ namespace Bootloader{
      */
     void verifyContainer(const void * i_pContainer)
     {
-#ifdef CONFIG_SECUREBOOT
         BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_START);
 
         uint64_t l_rc = 0;
@@ -370,7 +369,6 @@ namespace Bootloader{
             verifyComponentId(i_pContainer,
                             PNOR::SectionIdToString(PNOR::HB_BASE_CODE));
         }
-#endif
     }
 
     /** Bootloader main function to work with and start HBB.
