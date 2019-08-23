@@ -290,8 +290,8 @@ bool nvdimmCalloutDimm(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
             // Checkout image validity and set dimm status accordingly
             if(l_continue)
             {
-                // Set ATTR_NV_STATUS_FLAG to restored as data may still persist
-                nvdimmSetStatusFlag(i_nvdimm, NSTD_VAL_ERROR);
+                // Set ATTR_NV_STATUS_FLAG to partially working as data may still persist
+                nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
 
                 // Callout dimm but do not deconfig or gard
                 o_err->addPartCallout( i_nvdimm,
@@ -328,8 +328,8 @@ bool nvdimmCalloutDimm(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
             // Check restore status and set dimm status accordingly
             if(l_continue)
             {
-                // Set ATTR_NV_STATUS_FLAG to restored as data may still persist
-                nvdimmSetStatusFlag(i_nvdimm, NSTD_VAL_ERROR);
+                // Set ATTR_NV_STATUS_FLAG to partially working as data may still persist
+                nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
 
                 // Callout dimm but do not deconfig or gard
                 o_err->addPartCallout( i_nvdimm,
@@ -368,8 +368,8 @@ bool nvdimmCalloutDimm(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
             // Check arm status and set dimm status accordingly
             if(!l_continue)
             {
-                // Set ATTR_NV_STATUS_FLAG to restored as data may still persist
-                nvdimmSetStatusFlag(i_nvdimm, NSTD_VAL_ERROR);
+                // Set ATTR_NV_STATUS_FLAG to partially working as data may still persist
+                nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
 
                 // Callout dimm but do not deconfig or gard
                 o_err->addPartCallout( i_nvdimm,
@@ -404,8 +404,8 @@ bool nvdimmCalloutDimm(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
                                    HWAS::NV_CONTROLLER_PART_TYPE,
                                    HWAS::SRCI_PRIORITY_LOW);
 
-            // Set ATTR_NV_STATUS_FLAG to restored as data may persist despite errors
-            nvdimmSetStatusFlag(i_nvdimm, NSTD_VAL_ERROR);
+            // Set ATTR_NV_STATUS_FLAG to partially working as data may persist despite errors
+            nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
 
             break;
        }
@@ -457,8 +457,8 @@ bool nvdimmBPMCableCallout(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
             // Check image validity and set dimm status accordingly
             if(l_continue)
             {
-                // Set ATTR_NV_STATUS_FLAG to restored as data may still persist
-                nvdimmSetStatusFlag(i_nvdimm, NSTD_VAL_ERROR);
+                // Set ATTR_NV_STATUS_FLAG to partially working as data may still persist
+                nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
 
                 // Callout dimm but do not deconfig or gard
                 o_err->addPartCallout( i_nvdimm,
@@ -503,8 +503,8 @@ bool nvdimmBPMCableCallout(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
             // Check restore status and set dimm status accordingly
             if(l_continue)
             {
-                // Set ATTR_NV_STATUS_FLAG to restored as data may still persist
-                nvdimmSetStatusFlag(i_nvdimm, NSTD_VAL_ERROR);
+                // Set ATTR_NV_STATUS_FLAG to partially working as data may still persist
+                nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
 
                 // Callout dimm but do not deconfig or gard
                 o_err->addPartCallout( i_nvdimm,
@@ -549,8 +549,8 @@ bool nvdimmBPMCableCallout(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
             // Check arm status and set dimm status accordingly
             if(!l_continue)
             {
-                // Set ATTR_NV_STATUS_FLAG to restored as data may still persist
-                nvdimmSetStatusFlag(i_nvdimm, NSTD_VAL_ERROR);
+                // Set ATTR_NV_STATUS_FLAG to partially working as data may still persist
+                nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
 
                 // Callout dimm but do not deconfig or gard
                 o_err->addPartCallout( i_nvdimm,
@@ -590,8 +590,8 @@ bool nvdimmBPMCableCallout(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
                                    HWAS::NV_CONTROLLER_PART_TYPE,
                                    HWAS::SRCI_PRIORITY_LOW);
 
-            // Set ATTR_NV_STATUS_FLAG to restored as data may still persist
-            nvdimmSetStatusFlag(i_nvdimm, NSTD_VAL_ERROR);
+            // Set ATTR_NV_STATUS_FLAG to partially working as data may still persist
+            nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
 
             break;
         }
@@ -635,8 +635,8 @@ bool nvdimmBPMCallout(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
                                    HWAS::NV_CONTROLLER_PART_TYPE,
                                    HWAS::SRCI_PRIORITY_LOW);
 
-            // Set ATTR_NV_STATUS_FLAG to restored as data may still persist
-            nvdimmSetStatusFlag(i_nvdimm, NSTD_VAL_ERROR);
+            // Set ATTR_NV_STATUS_FLAG to partially working as data may still persist
+            nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
 
             break;
         }
@@ -654,8 +654,8 @@ bool nvdimmBPMCallout(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
                                    HWAS::NV_CONTROLLER_PART_TYPE,
                                    HWAS::SRCI_PRIORITY_LOW);
 
-            // Set ATTR_NV_STATUS_FLAG to restored as data may still persist
-            nvdimmSetStatusFlag(i_nvdimm, NSTD_VAL_ERROR);
+            // Set ATTR_NV_STATUS_FLAG to partially working as data may still persist
+            nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
 
             break;
         }
@@ -687,8 +687,8 @@ bool nvdimmBPMCallout(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
             // Check arm status and set dimm status accordingly
             if(!l_continue)
             {
-                // Set ATTR_NV_STATUS_FLAG to restored as data may still persist
-                nvdimmSetStatusFlag(i_nvdimm, NSTD_VAL_ERROR);
+                // Set ATTR_NV_STATUS_FLAG to partially working as data may still persist
+                nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
             }
             else
             {
@@ -716,8 +716,8 @@ bool nvdimmBPMCallout(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
                                    HWAS::NV_CONTROLLER_PART_TYPE,
                                    HWAS::SRCI_PRIORITY_LOW);
 
-            // Set ATTR_NV_STATUS_FLAG to restored as data may still persist
-            nvdimmSetStatusFlag(i_nvdimm, NSTD_VAL_ERROR);
+            // Set ATTR_NV_STATUS_FLAG to partially working as data may still persist
+            nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
 
             break;
         }

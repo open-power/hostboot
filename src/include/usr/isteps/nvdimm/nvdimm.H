@@ -34,12 +34,14 @@ enum nvdimm_err_status
 {
     NSTD_VAL_ERASED          = 0x08, // Image erased, SCM device contents not persisted
     NSTD_VAL_ERASED_MASK     = 0xF7,
-    NSTD_VAL_ERROR           = 0x04, // Valid image successfully restored, SCM persisted
-    NSTD_VAL_ERROR_MASK      = 0xFB,
+    NSTD_VAL_RESTORED        = 0x04, // Valid image successfully restored, SCM persisted
+    NSTD_VAL_RESTORED_MASK   = 0xFB,
     NSTD_VAL_SR_FAILED       = 0x02, // Save/Restore failed to persist memory contents
     NSTD_VAL_SR_FAILED_MASK  = 0xFD,
     NSTD_VAL_DISARMED        = 0x01, // memory unable to preserve future content
     NSTD_VAL_DISARMED_MASK   = 0xFE,
+    NSTD_ERR_VAL_SR          = 0x40, // Partially working. Error detected but save/restore (SR) may still work
+    NSTD_ERR_VAL_SR_MASK     = 0xBF,
     NSTD_ERR                 = 0x03, // NSTD_ERR_NOPRSV+NSTD_ERR_NOBKUP
 };
 

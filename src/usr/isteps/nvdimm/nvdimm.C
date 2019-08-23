@@ -381,24 +381,29 @@ void nvdimmSetStatusFlag(Target *i_nvdimm, const uint8_t i_status_flag)
 
     switch(i_status_flag)
     {
-        // Make sure NSTD_VAL_ERROR (content preserved) is unset before setting NSTD_VAL_ERASED
+        // Make sure NSTD_VAL_RESTORED (content preserved) is unset before setting NSTD_VAL_ERASED
         // (data not preserved) or NSTD_VAL_SR_FAILED (error preserving data)
         case NSTD_ERR:
         case NSTD_VAL_ERASED:
         case NSTD_VAL_SR_FAILED:
-            l_statusFlag &= NSTD_VAL_ERROR_MASK;
+            l_statusFlag &= NSTD_VAL_RESTORED_MASK;
             l_statusFlag |= i_status_flag;
             break;
 
         // If the content preserved(restore sucessfully), make sure
         // NSTD_VAL_ERASED (not preserved) and NSTD_VAL_SR_FAILED (error preserving)
         // are unset before setting this flag.
-        case NSTD_VAL_ERROR:
+        case NSTD_VAL_RESTORED:
             l_statusFlag &= (NSTD_VAL_ERASED_MASK & NSTD_VAL_SR_FAILED_MASK);
             l_statusFlag |= i_status_flag;
             break;
 
         case NSTD_VAL_DISARMED:
+            l_statusFlag |= i_status_flag;
+            break;
+
+        // Error detected but save/restore might work. May coexsit with other bits.
+        case NSTD_ERR_VAL_SR:
             l_statusFlag |= i_status_flag;
             break;
 
@@ -1165,12 +1170,6 @@ errlHndl_t nvdimmRestore(TargetHandleList& i_nvdimmList, uint8_t &i_mpipl)
             break;
         }
 
-        // Nothing to do. Move on.
-        if (i_nvdimmList.empty())
-        {
-            break;
-        }
-
         // Kick off the restore on each nvdimm in the nvdimm list
         for (const auto & l_nvdimm : i_nvdimmList)
         {
@@ -1647,36 +1646,12 @@ errlHndl_t nvdimm_restore(TargetHandleList &i_nvdimmList)
     assert(l_sys, "nvdimm_restore: no TopLevelTarget");
     uint8_t l_mpipl = l_sys->getAttr<ATTR_IS_MPIPL_HB>();
     nvdimm_reg_t l_RegInfo = nvdimm_reg_t();
-    TargetHandleList l_nvdimmList = i_nvdimmList;
+    TargetHandleList l_nvdimm_restore_list = i_nvdimmList;
     uint8_t l_rstrValid;
 
     do
     {
-        for (const auto & l_nvdimm : i_nvdimmList)
-        {
-            // Check for a valid image
-            l_err  = nvdimmValidImage( l_nvdimm, l_valid );
-            if (l_err)
-            {
-                TRACFCOMP(g_trac_nvdimm, "nvdimmRestore() nvdimm[%X] restore failed to read the image", get_huid(l_nvdimm));
-                errlCommit(l_err, NVDIMM_COMP_ID);
-            }
-
-            if (!l_valid)
-            {
-                TRACFCOMP(g_trac_nvdimm, "nvdimmRestore() nvdimm[%X] restore failed due to invalid image", get_huid(l_nvdimm));
-                // Set ATTR NV STATUS FLAG to Erased
-                nvdimmSetStatusFlag(l_nvdimm, NSTD_VAL_ERASED);
-                break;
-            }
-
-        }
-
-        if (!l_valid)
-        {
-            break;
-        }
-
+        // Check MPIPL case first to make sure any on-going backup is complete
         if (l_mpipl)
         {
             // During MPIPL, make sure any in-progress save is completed before proceeding
@@ -1697,15 +1672,50 @@ errlHndl_t nvdimm_restore(TargetHandleList &i_nvdimmList)
             }
         }
 
+        // Compile a list of nvdimms with valid image
+        // TODO: Reach out to RAS on how to handle odd number of nvdimms
+        // since we always operate in pairs
+        for (TargetHandleList::iterator it = l_nvdimm_restore_list.begin();
+             it != l_nvdimm_restore_list.end();)
+        {
+            // Check for a valid image
+            l_err  = nvdimmValidImage( *it, l_valid );
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_restore() nvdimm[%X] Failed to detect valid image", get_huid(*it));
+                errlCommit(l_err, NVDIMM_COMP_ID);
+            }
+
+            // Remove it from the restore list if there is no valid image
+            if (!l_valid)
+            {
+                TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_restore() nvdimm[%X] No valid image discovered", get_huid(*it));
+                // Set ATTR NV STATUS FLAG to Erased
+                nvdimmSetStatusFlag(*it, NSTD_VAL_ERASED);
+                it = l_nvdimm_restore_list.erase(it);
+
+            }
+            else
+            {
+                it++;
+            }
+        }
+
+        // Exit if there is nothing to restore
+        if (l_nvdimm_restore_list.empty())
+        {
+            break;
+        }
+
         // Start the restore
-        l_err = nvdimmRestore(l_nvdimmList, l_mpipl);
+        l_err = nvdimmRestore(l_nvdimm_restore_list, l_mpipl);
 
         // Check if restore completed successfully
         if (l_err)
         {
-            const auto l_nvdimm = l_nvdimmList.front();
+            const auto l_nvdimm = l_nvdimm_restore_list.front();
 
-            TRACFCOMP(g_trac_nvdimm, "nvdimm_restore() - Failing nvdimmRestore()");
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_restore() - Failing nvdimmRestore()");
             nvdimmSetStatusFlag(l_nvdimm, NSTD_VAL_SR_FAILED);
 
             // Invalid restore could be due to dram not in self-refresh
@@ -1731,7 +1741,7 @@ errlHndl_t nvdimm_restore(TargetHandleList &i_nvdimmList)
 
             if (l_err)
             {
-                TRACFCOMP(g_trac_nvdimm, "nvdimmRestore() nvdimm[%X] failed during health status check", get_huid(l_nvdimm));
+                TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_restore() nvdimm[%X] failed during health status check", get_huid(l_nvdimm));
                 if (l_exit)
                 {
                     errlCommit( l_err, NVDIMM_COMP_ID );
@@ -1748,7 +1758,7 @@ errlHndl_t nvdimm_restore(TargetHandleList &i_nvdimmList)
             l_err = nvdimmGetRestoreValid(l_nvdimm, l_rstrValid);
             if (l_err)
             {
-                TRACFCOMP(g_trac_nvdimm, "nvdimmRestore Target[%X] error validating restore status!",
+                TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_restore Target[%X] error validating restore status!",
                           get_huid(l_nvdimm));
                 break;
             }
@@ -1756,7 +1766,7 @@ errlHndl_t nvdimm_restore(TargetHandleList &i_nvdimmList)
             if ((l_rstrValid & RSTR_SUCCESS) == RSTR_SUCCESS)
             {
                 // Restore success!
-                nvdimmSetStatusFlag(l_nvdimm, NSTD_VAL_ERROR);
+                nvdimmSetStatusFlag(l_nvdimm, NSTD_VAL_RESTORED);
             }
 
         }
@@ -1956,8 +1966,8 @@ errlHndl_t nvdimm_init(Target *i_nvdimm)
         }
         else if ((l_data & NO_RESET_N) == NO_RESET_N)
         {
-            // Set ATTR_NV_STATUS_FLAG to restored, as data may persist
-            nvdimmSetStatusFlag(i_nvdimm, NSTD_VAL_ERROR);
+            // Set ATTR_NV_STATUS_FLAG to partial working as data may persist
+            nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
             TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmInit() nvdimm[%X]"
                                  "failed to save due to power loss!",get_huid(i_nvdimm));
             /*@
@@ -2063,8 +2073,8 @@ errlHndl_t nvdimm_init(Target *i_nvdimm)
             }
             else
             {
-                // Set ATTR_NV_STATUS_FLAG to Restored as data might persist
-                nvdimmSetStatusFlag(i_nvdimm, NSTD_VAL_ERROR);
+                // Set ATTR_NV_STATUS_FLAG to partial working as data may persist
+                nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
                 errlCommit(l_err, NVDIMM_COMP_ID);
             }
             break;

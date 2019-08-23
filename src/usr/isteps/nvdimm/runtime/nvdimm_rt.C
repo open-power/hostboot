@@ -384,8 +384,8 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
         {
             TRACFCOMP(g_trac_nvdimm, "nvdimmArm() nvdimm[%X] failed to set event notification", get_huid(l_nvdimm));
 
-            // Set NVDIMM Status flag to Restored, as error detected but data might persist
-            nvdimmSetStatusFlag(l_nvdimm, NSTD_VAL_ERROR);
+            // Set NVDIMM Status flag to partial working, as error detected but data might persist
+            nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR_VAL_SR);
 
            /*@
             *@errortype

@@ -206,6 +206,8 @@ public:
         // 1 byte   : CSAVE_INFO
         // 1 byte   : CSAVE_FAIL_INFO0
         // 1 byte   : CSAVE_FAIL_INFO1
+        // 1 byte   : CSAVE_TIMEOUT_INFO0
+        // 1 byte   : CSAVE_TIMEOUT_INFO1
         // 1 byte   : ERROR_THRESHOLD_STATUS
         // 1 byte   : NVDIMM_READY
         // 1 byte   : NVDIMM_CMD_STATUS0
@@ -237,6 +239,10 @@ public:
         i_parser.PrintNumber("CSave Fail Info0 Register: ","%.2lX",TO_UINT8(l_databuf));
         ++l_databuf;
         i_parser.PrintNumber("CSave Fail Info1 Register: ","%.2lX",TO_UINT8(l_databuf));
+        ++l_databuf;
+        i_parser.PrintNumber("CSave Timeout Info0 Register: ","%.2lX",TO_UINT8(l_databuf));
+        ++l_databuf;
+        i_parser.PrintNumber("CSave Timeout Info1 Register: ","%.2lX",TO_UINT8(l_databuf));
         ++l_databuf;
         i_parser.PrintNumber("Error Threshold Status Register: ","%.2lX",TO_UINT8(l_databuf));
         ++l_databuf;
