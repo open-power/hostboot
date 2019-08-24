@@ -593,17 +593,19 @@ typedef struct hostInterfaces
         // Arm the NV logic
         HBRT_FW_NVDIMM_ARM                = 0x0010,
 
-        /// The following operation pertains to the Health of the NVDIMM
+        /// The following operations pertain to the Health of the NVDIMM
         /// This operation can be performed with the arming/disarming
         /// operation, these operation types are orthogonal to each other
-        // Manufacturing energy source(ES) health check request
+        // Manufacturing(MNFG) energy source(ES) health check request
         HBRT_FW_MNFG_ES_HEALTH_CHECK      = 0x0020,
+        // Manufacturing(MNFG) non-volatile memory(NVM) health check request
+        HBRT_FW_MNFG_NVM_HEALTH_CHECK     = 0x0040
     };
 
     // NVDIMM (PHYP -> HBRT) message to request NVDIMM operation(s)
     struct nvdimm_operation_t
     {
-        uint64_t    procId;  // Retrieve all NVDIMMs under the processor ID, all
+        uint64_t    procId;  // Retrieve all NVDIMMs under the processor ID; all
                              // FFs (HBRT_NVDIMM_OPERATION_APPLY_TO_ALL_NVDIMMS)
                              // means operate on all NVDIMMs in the system
         uint32_t    rsvd1;   // reserved

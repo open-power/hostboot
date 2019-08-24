@@ -275,6 +275,11 @@ enum i2cReg : uint16_t
     TYPED_BLOCK_DATA_BYTE30 = 0x39E,
     TYPED_BLOCK_DATA_BYTE31 = 0x39F,
     TYPED_BLOCK_DATA_OFFSET = 0x3E0,
+    FLASH_BAD_BLK_PCT       = 0x41D,  // Read only; Percentage of flash blocks
+                                      // in the flash array marked as bad blocks
+    FLASH_ERROR_COUNT0      = 0x428,  // Read only; LSB[7:0]  Flash error count
+    FLASH_ERROR_COUNT1      = 0x429,  // Read only;    [15:8]
+    FLASH_ERROR_COUNT2      = 0x42A,  // Read only; MSB[23:16]
     BPM_MAGIC_REG1          = 0x430,
     BPM_MAGIC_REG2          = 0x431,
     SCAP_STATUS             = 0x432,

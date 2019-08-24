@@ -1179,25 +1179,59 @@ void cmd_nvdimm_protection_msg( char* &o_output, uint32_t i_huid,
     }
 }
 
-void cmd_nvdimmCheckHealthStatus( char* &o_output)
+/**
+ * @brief Check the ES (energy source) health status of all NVDIMMs in the
+ *         system. If check fails, see HBRT traces for further details.
+ * @param[out] o_output  Output display buffer, memory allocated here.
+ *                       Will inform caller if ES health check passes or fails.
+ */
+void cmd_nvDimmEsCheckHealthStatus( char* &o_output)
 {
     o_output = new char[500];
-    if (NVDIMM::nvDimmCheckHealthStatusOnSystem())
+    if (NVDIMM::nvDimmEsCheckHealthStatusOnSystem())
     {
-        sprintf( o_output, "cmd_doNvDimmCheckHealthStatus: "
-                           "health status check passed.");
+        sprintf( o_output, "cmd_nvDimmEsCheckHealthStatus: "
+                           "ES (energy source) health status check passed.");
 
     }
     else
     {
-        sprintf( o_output, "cmd_doNvDimmCheckHealthStatus: "
-                           "health status check failed. Inspect HBRT traces "
-                           "for further details.");
+        sprintf( o_output, "cmd_nvDimmEsCheckHealthStatus: "
+                           "ES (energy source) health status check failed. "
+                           "Inspect HBRT traces for further details.");
 
     }
 
     return;
-}  // end cmd_nvdimmCheckHealthStatus
+}  // end cmd_nvDimmEsCheckHealthStatus
+
+/**
+ * @brief Check the NVM (non-volatile memory) health status of all NVDIMMs in
+ *         the system. If check fails, see HBRT traces for further details.
+ * @param[out] o_output  Output display buffer, memory allocated here.
+ *                       Will inform caller if NVM health check passes or fails.
+ */
+
+void cmd_nvdDmmNvmCheckHealthStatus( char* &o_output)
+{
+    o_output = new char[500];
+    if (NVDIMM::nvDimmNvmCheckHealthStatusOnSystem())
+    {
+        sprintf( o_output, "cmd_nvdDmmNvmCheckHealthStatus: "
+                       "NVM (non-volatile memory) health status check passed.");
+
+    }
+    else
+    {
+        sprintf( o_output, "cmd_nvdDmmNvmCheckHealthStatus: "
+                       "NVM (non-volatile memory) health status check failed. "
+                       "Inspect HBRT traces for further details.");
+
+    }
+
+    return;
+}  // end cmd_nvdDmmNvmCheckHealthStatus
+
 
 #endif
 
@@ -1535,18 +1569,31 @@ int hbrtCommand( int argc,
             sprintf(*l_output, "ERROR: nvdimm_protection <huid> <0 or 1>");
         }
     }
-    else if( !strcmp( argv[0], "nvdimm_check_status" ) )
+    else if( !strcmp( argv[0], "nvdimm_es_check_status" ) )
     {
         if (argc == 1)
         {
-            cmd_nvdimmCheckHealthStatus( *l_output );
+            cmd_nvDimmEsCheckHealthStatus( *l_output );
         }
         else
         {
             *l_output = new char[100];
-            sprintf(*l_output, "Usage: nvdimm_check_status");
+            sprintf(*l_output, "Usage: nvdimm_es_check_status");
         }
     }
+    else if( !strcmp( argv[0], "nvdimm_nvm_check_status" ) )
+    {
+        if (argc == 1)
+        {
+            cmd_nvdDmmNvmCheckHealthStatus( *l_output );
+        }
+        else
+        {
+            *l_output = new char[100];
+            sprintf(*l_output, "Usage: nvdimm_nvm_check_status");
+        }
+    }
+
 #endif
     else
     {
@@ -1587,8 +1634,11 @@ int hbrtCommand( int argc,
 #ifdef CONFIG_NVDIMM
         sprintf( l_tmpstr, "nvdimm_protection <huid> <0 or 1>\n");
         strcat( *l_output, l_tmpstr );
-        sprintf( l_tmpstr, "nvdimm_check_status\n");
+        sprintf( l_tmpstr, "nvdimm_es_check_status\n");
         strcat( *l_output, l_tmpstr );
+        sprintf( l_tmpstr, "nvdimm_nvm_check_status\n");
+        strcat( *l_output, l_tmpstr );
+
 #endif
 
     }

@@ -206,7 +206,8 @@ bool nvdimmArm(TARGETING::TargetHandleList &i_nvdimmTargetList);
 bool nvdimmDisarm(TARGETING::TargetHandleList &i_nvdimmTargetList);
 
 /**
- * @brief Check the health status of the individual NVDIMMs supplied in list
+ * @brief Check the ES (enery source)/backup power module(BPM) health status of
+ *        the individual NVDIMMs supplied in list
  *
  * @details The BPM will trigger the health check when power is applied at the
  *          beginning of the IPL, with results ready to check about 20 mins
@@ -219,24 +220,56 @@ bool nvdimmDisarm(TARGETING::TargetHandleList &i_nvdimmTargetList);
  *              Bit 1 : Health Check Succeeded
  *              Bit 2 : Health Check Failed
  *
- * @param[in] i_nvdimmTargetList - list of NVDIMMs to check the health of
+ * @param[in] i_nvdimmTargetList - list of NVDIMMs to check the ES health of
  *
- * @return false if one or more NVDIMMs fail health check, else true
+ * @return false if one or more NVDIMMs fail ES health check, else true
  */
-bool nvDimmCheckHealthStatus(TARGETING::TargetHandleList &i_nvdimmTargetList);
+bool nvDimmEsCheckHealthStatus(const TARGETING::TargetHandleList
+                                                        &i_nvdimmTargetList);
 
 /**
- * @brief A wrapper around the call to nvDimmCheckHealthStatus
+ * @brief A wrapper around the call to nvDimmEsCheckHealthStatus
  *
  * @details This will aggregate all the NVDIMMs of the system and pass
- *          them to the call nvDimmCheckHealthStatus
+ *          them to the call nvDimmEsCheckHealthStatus
  *
- * @see nvDimmCheckHealthStatus for more details
+ * @see nvDimmEsCheckHealthStatus for more details
  *
- * @return false if one or more NVDIMMs fail health check, else true
+ * @return false if one or more NVDIMMs fail an ES health check, else true
  */
-bool nvDimmCheckHealthStatusOnSystem();
+bool nvDimmEsCheckHealthStatusOnSystem();
 
+
+/*
+ * @brief Check the NVM (non-volatile memory)/flash health status of the
+ *        individual NVDIMMs supplied in list.
+ *
+ * @details This method will check the flash error count registers
+ *          (FLASH_ERROR_COUNT0 to FLASH_ERROR_COUNT2) to determine if the
+ *          number of flash error exceeds the maximum allowed.  Will also check
+ *          the flash bad block percentage register (FLASH_BAD_BLK_PCT) to
+ *          determine if the percentage exceeds the maximum allowed.
+ *          If any one of these or both of these fail their perspective
+ *          maximums then a callout will be made with either or both failures.
+ *
+ * @param[in] i_nvdimmTargetList - list of NVDIMMs to check the NVM health of
+ *
+ * @return false if one or more NVDIMMs fail NVM health check, else true
+ */
+bool nvDimmNvmCheckHealthStatus(const TARGETING::TargetHandleList
+                                                           &i_nvdimmTargetList);
+
+/**
+ * @brief A wrapper around the call to nvDimmNvmCheckHealthStatus
+ *
+ * @details This will aggregate all the NVDIMMs of the system and pass
+ *          them to the call nvDimmNvmCheckHealthStatus
+ *
+ * @see nvDimmNvmCheckHealthStatus for more details
+ *
+ * @return false if one or more NVDIMMs fail an NVM health check, else true
+ */
+bool nvDimmNvmCheckHealthStatusOnSystem();
 
 #endif
 

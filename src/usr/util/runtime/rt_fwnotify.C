@@ -622,22 +622,40 @@ int doNvDimmOperation(const hostInterfaces::nvdimm_operation_t& i_nvDimmOp)
             }  // end if (nvDimmOp.opType & hostInterfaces::HBRT_FW_NVDIMM_ARM)
         }  while (0); // end Perform the arming/disarming operations.
 
-        // Perform the health check operation
+        // Perform the ES (energy source) health check operation
         if (i_nvDimmOp.opType & hostInterfaces::HBRT_FW_MNFG_ES_HEALTH_CHECK)
         {
-            if (!nvDimmCheckHealthStatus(l_nvDimmTargetList))
+            if (!nvDimmEsCheckHealthStatus(l_nvDimmTargetList))
             {
                 TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
-                                          "Call to do a health check failed.");
+                       "Call to do an ES (energy source) health check failed.");
                 rc = -1;
                 break;
             }
             else
             {
                 TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
-                                        "Call to do a health check succeeded.");
+                    "Call to do an ES (energy source) health check succeeded.");
             }
         }
+
+        // Perform the NVM (non-volatile memory) health check operation
+        if (i_nvDimmOp.opType & hostInterfaces::HBRT_FW_MNFG_NVM_HEALTH_CHECK)
+        {
+            if (!nvDimmNvmCheckHealthStatus(l_nvDimmTargetList))
+            {
+                TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
+                 "Call to do a NVM (non-volatile memory) health check failed.");
+                rc = -1;
+                break;
+            }
+            else
+            {
+                TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
+              "Call to do a NVM (non-volatile memory) health check succeeded.");
+            }
+        }
+
     } while(0); // end Perform the operations requested
 
     if (l_err)
