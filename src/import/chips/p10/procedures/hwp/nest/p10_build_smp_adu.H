@@ -40,19 +40,16 @@
 //------------------------------------------------------------------------------
 #include <p10_build_smp.H>
 
-
 //------------------------------------------------------------------------------
 // Constant definitions
 //------------------------------------------------------------------------------
 
 enum p10_build_smp_adu_action
 {
-    SWITCH_AB = 1,
-    SWITCH_CD = 2,
-    QUIESCE   = 4,
-    RESET_SWITCH = 8
+    SWITCH_AB    = 1,
+    QUIESCE      = 2,
+    RESET_SWITCH = 4
 };
-
 
 //------------------------------------------------------------------------------
 // Function prototypes
@@ -67,7 +64,7 @@ extern "C" {
 /// @param[in] i_op        Enumerated type representing SMP build phase (HB or FSP)
 /// @param[in] i_action    Enumerated type representing fabric operation
 ///
-/// @return FAPI2_RC_SUCCESS if success, else error code.
+/// @return fapi2::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
 ///
     fapi2::ReturnCode p10_build_smp_sequence_adu(p10_build_smp_system& i_smp,
             const p10_build_smp_operation i_op,

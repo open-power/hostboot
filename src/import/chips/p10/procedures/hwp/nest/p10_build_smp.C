@@ -34,30 +34,23 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-//#include <p10_fbc_smp_utils.H>
 #include <p10_build_smp.H>
 #include <p10_build_smp_fbc_ab.H>
-//#include <p10_build_smp_fbc_cd.H>
-//#include <p10_misc_scom_addresses.H>
-#include <p10_build_smp_TEMP_DEFINES.H>
+#include <p10_fbc_utils.H>
 
-//------------------------------------------------------------------------------
-// Constant definitions
-//------------------------------------------------------------------------------
-
-// DL FIR register field constants
-const uint8_t DL_FIR_LINK0_TRAINED_BIT = 0;
-const uint8_t DL_FIR_LINK1_TRAINED_BIT = 1;
+#include <p10_scom_proc.H>
+#include <p10_scom_pauc_d.H>
+#include <p10_scom_iohs_6.H>
+#include <p10_scom_iohs_8.H>
 
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
 
-/*
 ///
 /// @brief Process single chip target into SMP chip data structure
 ///
-/// @param[in] i_target                     Processor chip target
+/// @param[in] i_target                     Reference to processor chip target
 /// @param[in] i_group_id                   Fabric group ID for this chip target
 /// @param[in] i_chip_id                    Fabric chip ID for this chip target
 /// @param[in] i_master_chip_sys_next       True if this chip should be designated
@@ -67,22 +60,27 @@ const uint8_t DL_FIR_LINK1_TRAINED_BIT = 1;
 /// @param[in] i_op                         Enumerated type representing SMP build phase
 /// @param[in/out] io_smp_chip              Structure encapsulating single chip in SMP topology
 ///
-/// @return FAPI2_RC_SUCCESS if success, else error code.
+/// @return fapi2::ReturnCode               FAPI2_RC_SUCCESS if success, else error code.
 ///
-fapi2::ReturnCode
-p10_build_smp_process_chip(fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                          const uint8_t i_group_id,
-                          const uint8_t i_chip_id,
-                          const bool i_master_chip_sys_next,
-                          const bool i_first_chip_found_in_group,
-                          const p10_build_smp_operation i_op,
-                          p10_build_smp_chip& io_smp_chip)
+fapi2::ReturnCode p10_build_smp_process_chip(
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const uint8_t i_group_id,
+    const uint8_t i_chip_id,
+    const bool i_master_chip_sys_next,
+    const bool i_first_chip_found_in_group,
+    const p10_build_smp_operation i_op,
+    p10_build_smp_chip& io_smp_chip)
 {
-    fapi2::buffer<uint64_t> l_hp_mode_curr;
-    bool l_err = false;
+    using namespace scomt::proc;
+
+    FAPI_DBG("Start");
+
     char l_target_str[fapi2::MAX_ECMD_STRING_LEN];
+    bool l_err = false;
+
     fapi2::ATTR_PROC_FABRIC_SYSTEM_MASTER_CHIP_Type l_sys_master_chip_attr;
     fapi2::ATTR_PROC_FABRIC_GROUP_MASTER_CHIP_Type l_group_master_chip_attr;
+    fapi2::buffer<uint64_t> l_hp_mode1_curr;
 
     // display target information for this chip
     fapi2::toString(i_target, l_target_str, sizeof(l_target_str));
@@ -96,21 +94,20 @@ p10_build_smp_process_chip(fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
     io_smp_chip.chip_id = i_chip_id;
 
     // set group/system master CURR data structure fields from HW
-    FAPI_TRY(fapi2::getScom(i_target, PU_PB_CENT_SM0_PB_CENT_HP_MODE_CURR, l_hp_mode_curr),
-             "Error from getScom (PU_PB_CENT_SM0_PB_CENT_HP_MODE_CURR)");
+    FAPI_TRY(GET_PB_COM_SCOM_ES3_STATION_HP_MODE1_CURR(i_target, l_hp_mode1_curr),
+             "Error from getScom (PB_COM_SCOM_ES3_STATION_HP_MODE1_CURR)");
+
     io_smp_chip.master_chip_group_curr =
-        l_hp_mode_curr.getBit<PU_PB_CENT_SM0_PB_CENT_HP_MODE_CURR_CFG_CHG_RATE_GP_MASTER>();
+        GET_PB_COM_SCOM_ES3_STATION_HP_MODE1_CURR_PB_CFG_CHG_RATE_GP_MASTER_CURR_ES3(l_hp_mode1_curr);
     io_smp_chip.master_chip_sys_curr =
-        l_hp_mode_curr.getBit<PU_PB_CENT_SM0_PB_CENT_HP_MODE_CURR_CFG_MASTER_CHIP>();
-    FAPI_DBG("   Master chip GROUP CURR = %d",
-             io_smp_chip.master_chip_group_curr);
-    FAPI_DBG("   Master chip SYS CURR = %d",
-             io_smp_chip.master_chip_sys_curr);
+        GET_PB_COM_SCOM_ES3_STATION_HP_MODE1_CURR_PB_CFG_MASTER_CHIP_CURR_ES3(l_hp_mode1_curr);
+
+    FAPI_DBG("   Master chip GRP CURR = %d", io_smp_chip.master_chip_group_curr);
+    FAPI_DBG("   Master chip SYS CURR = %d", io_smp_chip.master_chip_sys_curr);
 
     // set system master NEXT designation from HWP platform input
     io_smp_chip.master_chip_sys_next = i_master_chip_sys_next;
-    FAPI_DBG("   Master chip SYS NEXT = %d",
-             io_smp_chip.master_chip_sys_next);
+    FAPI_DBG("   Master chip SYS NEXT = %d", io_smp_chip.master_chip_sys_next);
 
     // set group master NEXT designation based on phase
     if (i_op == SMP_ACTIVATE_PHASE1)
@@ -119,7 +116,7 @@ p10_build_smp_process_chip(fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
         if (!io_smp_chip.master_chip_sys_curr ||
             io_smp_chip.master_chip_group_curr)
         {
-            FAPI_DBG("Error: chip does not match flash state of fabric: sys_curr: %d, group_curr: %d",
+            FAPI_DBG("Error: chip does not match flush state of fabric: sys_curr: %d, grp_curr: %d",
                      io_smp_chip.master_chip_sys_curr ? 1 : 0, io_smp_chip.master_chip_group_curr ? 1 : 0);
             l_err = true;
         }
@@ -164,13 +161,11 @@ p10_build_smp_process_chip(fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
         }
     }
 
-    FAPI_DBG("   Issue quiesce NEXT = %d",
-             io_smp_chip.issue_quiesce_next);
+    FAPI_DBG("   Issue quiesce NEXT = %d", io_smp_chip.issue_quiesce_next);
 
     // default remaining NEXT state data structure fields
     io_smp_chip.quiesced_next = false;
-    FAPI_DBG("   Quiesced NEXT = %d",
-             io_smp_chip.quiesced_next);
+    FAPI_DBG("   Quiesced NEXT = %d", io_smp_chip.quiesced_next);
 
     // assert if local error is set
     FAPI_ASSERT(l_err == false,
@@ -199,48 +194,45 @@ p10_build_smp_process_chip(fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
              "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_GROUP_MASTER_CHIP)");
 
 fapi_try_exit:
-    FAPI_INF("End");
+    FAPI_DBG("End");
     return fapi2::current_err;
 }
-
 
 ///
 /// @brief Insert chip structure into proper position within SMP strucure based
 ///        on its fabric group/chip IDs
 ///
-/// @param[in] i_target                 Processor chip target
+/// @param[in] i_target                 Reference to processor chip target
 /// @param[in] i_master_chip_sys_next   Flag designating this chip should be designated fabric
-///                                     system master post-reconfiguration
-///                                     NOTE: this chip must currently be designated a
-///                                           master in its enclosing fabric
-///                                           PHASE1/HB: any chip
-///                                           PHASE2/FSP: any current drawer master
+///                                     system master post-reconfiguration. Note: This chip must
+///                                     currently be designated a master in its enclosing fabric
+///                                         - PHASE1/HB: any chip
+///                                         - PHASE2/FSP: any current drawer master
 /// @param[in] i_op                     Enumerated type representing SMP build phase (HB or FSP)
 /// @param[in/out] io_smp               Fully specified structure encapsulating SMP
 /// @param[out] o_group_id              Group which chip belongs to
 ///
-/// @return FAPI2_RC_SUCCESS if success, else error code.
+/// @return fapi2::ReturnCode           FAPI2_RC_SUCCESS if success, else error code.
 ///
-fapi2::ReturnCode
-p10_build_smp_insert_chip(fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                         const bool i_master_chip_sys_next,
-                         const p10_build_smp_operation i_op,
-                         p10_build_smp_system& io_smp,
-                         uint8_t& o_group_id)
+fapi2::ReturnCode p10_build_smp_insert_chip(
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const bool i_master_chip_sys_next,
+    const p10_build_smp_operation i_op,
+    p10_build_smp_system& io_smp,
+    uint8_t& o_group_id)
 {
     FAPI_DBG("Start");
-    uint8_t l_group_id;
-    uint8_t l_chip_id;
+
     p10_build_smp_chip l_smp_chip;
     bool l_first_chip_found_in_group = false;
     std::map<uint8_t, p10_build_smp_group>::iterator g_iter;
     std::map<uint8_t, p10_build_smp_chip>::iterator p_iter;
+    uint8_t l_group_id;
+    uint8_t l_chip_id;
 
-    // get chip/group ID attributes
-    FAPI_TRY(p10_fbc_utils_get_group_id_attr(i_target, l_group_id),
-             "Error from p10_fbc_utils_get_group_id_attr");
-    FAPI_TRY(p10_fbc_utils_get_chip_id_attr(i_target, l_chip_id),
-             "Error from p10_fbc_utils_get_chip_id_attr");
+    // get fabric group/chip ID
+    FAPI_TRY(p10_fbc_utils_get_topology_id(i_target, l_group_id, l_chip_id),
+             "Error from p10_fbc_utils_get_topology_id");
 
     // search to see if group structure already exists for the group this chip resides in
     g_iter = io_smp.groups.find(l_group_id);
@@ -249,16 +241,19 @@ p10_build_smp_insert_chip(fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     if (g_iter == io_smp.groups.end())
     {
         FAPI_DBG("No matching group found, inserting new group structure");
+
         // insert new group into SMP structure
         p10_build_smp_group l_smp_group;
         l_smp_group.group_id = l_group_id;
         auto l_ret = io_smp.groups.insert(std::pair<uint8_t, p10_build_smp_group>(l_group_id, l_smp_group));
         g_iter = l_ret.first;
+
         FAPI_ASSERT(l_ret.second,
                     fapi2::P10_BUILD_SMP_GROUP_ADD_INTERNAL_ERR()
                     .set_TARGET(i_target)
                     .set_GROUP_ID(l_group_id),
                     "Error encountered adding group to SMP");
+
         // mark as first chip found in its group
         l_first_chip_found_in_group = true;
     }
@@ -266,6 +261,7 @@ p10_build_smp_insert_chip(fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     // ensure that no chip has already been inserted into this group
     // with the same chip ID as this chip
     p_iter = io_smp.groups[l_group_id].chips.find(l_chip_id);
+
     // matching chip ID & group ID already found, flag an error
     FAPI_ASSERT(p_iter == io_smp.groups[l_group_id].chips.end(),
                 fapi2::P10_BUILD_SMP_DUPLICATE_FABRIC_ID_ERR()
@@ -276,17 +272,18 @@ p10_build_smp_insert_chip(fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                 "Multiple chips found with the same fabric group ID / chip ID attribute values");
 
     // process/fill chip data structure
-    FAPI_TRY(p10_build_smp_process_chip(i_target,
-                                       l_group_id,
-                                       l_chip_id,
-                                       i_master_chip_sys_next,
-                                       l_first_chip_found_in_group,
-                                       i_op,
-                                       l_smp_chip),
+    FAPI_TRY(p10_build_smp_process_chip(
+                 i_target,
+                 l_group_id,
+                 l_chip_id,
+                 i_master_chip_sys_next,
+                 l_first_chip_found_in_group,
+                 i_op,
+                 l_smp_chip),
              "Error from p10_build_smp_process_chip");
 
     // insert chip into SMP structure
-    FAPI_INF("Inserting g%d p%d", l_group_id, l_chip_id);
+    FAPI_INF("Inserting g%d:p%d", l_group_id, l_chip_id);
     io_smp.groups[l_group_id].chips[l_chip_id] = l_smp_chip;
 
     // return group ID
@@ -297,21 +294,19 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-
 ///
 /// @brief Insert HWP inputs and build SMP data structure
 ///
-/// @param[in] i_chips                 Vector of processor chip targets to be included in SMP
-/// @param[in] i_master_chip_sys_next  Target designating chip which should be designated fabric
-///                                    system master post-reconfiguration
-///                                    NOTE: this chip must currently be designated a
-///                                          master in its enclosing fabric
-///                                          PHASE1/HB: any chip
-///                                          PHASE2/FSP: any current drawer master
-/// @param[in] i_op                    Enumerated type representing SMP build phase (HB or FSP)
-/// @param[in] io_smp                  Fully specified structure encapsulating SMP
+/// @param[in] i_chips                  Vector of processor chip targets to be included in SMP
+/// @param[in] i_master_chip_sys_next   Target designating chip which should be designated fabric
+///                                     system master post-reconfiguration. Note: This chip must
+///                                     currently be designated a master in its enclosing fabric
+///                                          - PHASE1/HB: any chip
+///                                          - PHASE2/FSP: any current drawer master
+/// @param[in] i_op                     Enumerated type representing SMP build phase (HB or FSP)
+/// @param[in] io_smp                   Fully specified structure encapsulating SMP
 ///
-/// @return FAPI2_RC_SUCCESS if success, else error code.
+/// @return fapi2::ReturnCode           FAPI2_RC_SUCCESS if success, else error code.
 ///
 fapi2::ReturnCode p10_build_smp_insert_chips(
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>>& i_chips,
@@ -341,11 +336,12 @@ fapi2::ReturnCode p10_build_smp_insert_chips(
             l_master_chip_sys_next_found = true;
         }
 
-        FAPI_TRY(p10_build_smp_insert_chip(*l_iter,
-                                          l_master_chip_sys_next,
-                                          i_op,
-                                          io_smp,
-                                          l_group_id),
+        FAPI_TRY(p10_build_smp_insert_chip(
+                     *l_iter,
+                     l_master_chip_sys_next,
+                     i_op,
+                     io_smp,
+                     l_group_id),
                  "Error from p10_build_smp_insert_chip");
 
         if (l_master_chip_sys_next)
@@ -369,21 +365,14 @@ fapi2::ReturnCode p10_build_smp_insert_chips(
                 .set_OP(i_op),
                 "Number of chips found in input vector exceeds supported SMP size");
 
-    // based on master designation, and operation phase,
-    // determine whether each chip will be quiesced as a result
-    // of hotplug switch activity
-    for (auto g_iter = io_smp.groups.begin();
-         g_iter != io_smp.groups.end();
-         g_iter++)
+    // based on master designation and operation phase, determine whether
+    // each chip will be quiesced as a result of hotplug switch activity
+    for (auto g_iter = io_smp.groups.begin(); g_iter != io_smp.groups.end(); g_iter++)
     {
-        for (auto p_iter = g_iter->second.chips.begin();
-             p_iter != g_iter->second.chips.end();
-             p_iter++)
+        for (auto p_iter = g_iter->second.chips.begin(); p_iter != g_iter->second.chips.end(); p_iter++)
         {
-            if (((i_op == SMP_ACTIVATE_PHASE1) &&
-                 (p_iter->second.issue_quiesce_next)) ||
-                ((i_op == SMP_ACTIVATE_PHASE2) &&
-                 (g_iter->first != l_master_chip_next_group_id)))
+            if (((i_op == SMP_ACTIVATE_PHASE1) && (p_iter->second.issue_quiesce_next)) ||
+                ((i_op == SMP_ACTIVATE_PHASE2) && (g_iter->first != l_master_chip_next_group_id)))
             {
                 p_iter->second.quiesced_next = true;
             }
@@ -402,18 +391,21 @@ fapi_try_exit:
 ///
 /// @brief Check validity of link DL/TL logic
 ///
-/// @param[in] i_target   Processor chip target
-/// @param[in] i_link_ctl p10_fbc_link_ctl_t struct, defines link to check
-/// @param[in] i_link_en  ATTACHED_CHIP_CNFG attribute value, defines
-///                       active half-links
+/// @param[in] i_iohs_target    Reference to IOHS target
+/// @param[in] i_link_id        Chiplet number for given IOHS target
+/// @param[in] i_link_en        Attribute value that defines active half-links for given IOHS
 ///
-/// @return FAPI2_RC_SUCCESS if success, else error code.
+/// @return fapi2::ReturnCode   FAPI2_RC_SUCCESS if success, else error code.
 ///
-fapi2::ReturnCode
-p10_build_smp_validate_link(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                           const p10_fbc_link_ctl_t& i_link_ctl,
-                           const uint8_t i_link_en)
+fapi2::ReturnCode p10_build_smp_validate_link(
+    const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_iohs_target,
+    const fapi2::ATTR_CHIP_UNIT_POS_Type i_link_id,
+    const uint8_t i_link_en)
 {
+    using namespace scomt::proc;
+    using namespace scomt::pauc;
+    using namespace scomt::iohs;
+
     FAPI_DBG("Start");
 
     fapi2::buffer<uint64_t> l_dl_fir_reg;
@@ -423,46 +415,49 @@ p10_build_smp_validate_link(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
     bool l_tl_trained = false;
     bool l_iovalid_set = false;
 
+    auto l_pauc_target = i_iohs_target.getParent<fapi2::TARGET_TYPE_PAUC>();
+
     // read DL training state
-    FAPI_TRY(fapi2::getScom(i_target, i_link_ctl.dl_fir_addr, l_dl_fir_reg),
-             "Error from getScom (0x%.16llX)", i_link_ctl.dl_fir_addr);
+    FAPI_TRY(GET_DLP_FIR_REG_RW(i_iohs_target, l_dl_fir_reg),
+             "Error from getScom (DLP_FIR_REG_RW)");
     // read TL training state
-    FAPI_TRY(fapi2::getScom(i_target, i_link_ctl.tl_fir_addr, l_tl_fir_reg),
-             "Error from getScom (0x%.16llX)", i_link_ctl.tl_fir_addr);
+    FAPI_TRY(GET_PB_PTL_FIR_REG_RW(l_pauc_target, l_tl_fir_reg),
+             "Error from getScom (PB_PTL_FIR_REG_RW)");
     // read iovalid state
-    FAPI_TRY(fapi2::getScom(i_target, i_link_ctl.iovalid_or_addr & 0xFFFFFF0F, l_cplt_conf1_reg),
-             "Error from getScom (0x%.16llX)", i_link_ctl.iovalid_or_addr & 0xFFFFFF0F);
+    FAPI_TRY(GET_AXON_CPLT_CONF1_RW(i_iohs_target, l_cplt_conf1_reg),
+             "Error from getScom (AXON_CPLT_CONF1_RW)");
 
     if (i_link_en == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_TRUE)
     {
-        l_dl_trained  = l_dl_fir_reg.getBit<DL_FIR_LINK0_TRAINED_BIT>() &&
-                        l_dl_fir_reg.getBit<DL_FIR_LINK1_TRAINED_BIT>();
-        l_tl_trained  = l_tl_fir_reg.getBit(i_link_ctl.tl_fir_trained_field_start_bit) &&
-                        l_tl_fir_reg.getBit(i_link_ctl.tl_fir_trained_field_start_bit + 1);
-        l_iovalid_set = l_cplt_conf1_reg.getBit(i_link_ctl.iovalid_field_start_bit) &&
-                        l_cplt_conf1_reg.getBit(i_link_ctl.iovalid_field_start_bit + 1);
+        l_dl_trained  = GET_DLP_FIR_REG_LINK0_TRAINED(l_dl_fir_reg) &&
+                        GET_DLP_FIR_REG_LINK1_TRAINED(l_dl_fir_reg);
+        l_tl_trained  = (i_link_id % 2) ?
+                        (GET_PB_PTL_FIR_REG_FMR02_TRAINED(l_tl_fir_reg) && GET_PB_PTL_FIR_REG_FMR03_TRAINED(l_tl_fir_reg)) :
+                        (GET_PB_PTL_FIR_REG_FMR00_TRAINED(l_tl_fir_reg) && GET_PB_PTL_FIR_REG_FMR01_TRAINED(l_tl_fir_reg));
+        l_iovalid_set = GET_AXON_CPLT_CONF1_EV_IOVALID_DC(l_cplt_conf1_reg) &&
+                        GET_AXON_CPLT_CONF1_OD_IOVALID_DC(l_cplt_conf1_reg);
     }
     else if (i_link_en == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_EVEN_ONLY)
     {
-        l_dl_trained  = l_dl_fir_reg.getBit<DL_FIR_LINK0_TRAINED_BIT>();
-        l_tl_trained  = l_tl_fir_reg.getBit(i_link_ctl.tl_fir_trained_field_start_bit);
-        l_iovalid_set = l_cplt_conf1_reg.getBit(i_link_ctl.iovalid_field_start_bit);
+        l_dl_trained  = GET_DLP_FIR_REG_LINK0_TRAINED(l_dl_fir_reg);
+        l_tl_trained  = (i_link_id % 2) ?
+                        (GET_PB_PTL_FIR_REG_FMR02_TRAINED(l_tl_fir_reg)) :
+                        (GET_PB_PTL_FIR_REG_FMR00_TRAINED(l_tl_fir_reg));
+        l_iovalid_set = GET_AXON_CPLT_CONF1_EV_IOVALID_DC(l_cplt_conf1_reg);
     }
     else if (i_link_en == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_ODD_ONLY)
     {
-        l_dl_trained  = l_dl_fir_reg.getBit<DL_FIR_LINK1_TRAINED_BIT>();
-        l_tl_trained  = l_tl_fir_reg.getBit(i_link_ctl.tl_fir_trained_field_start_bit + 1);
-        l_iovalid_set = l_cplt_conf1_reg.getBit(i_link_ctl.iovalid_field_start_bit + 1);
+        l_dl_trained  = GET_DLP_FIR_REG_LINK1_TRAINED(l_dl_fir_reg);
+        l_tl_trained  = (i_link_id % 2) ?
+                        (GET_PB_PTL_FIR_REG_FMR03_TRAINED(l_tl_fir_reg)) :
+                        (GET_PB_PTL_FIR_REG_FMR01_TRAINED(l_tl_fir_reg));
+        l_iovalid_set = GET_AXON_CPLT_CONF1_OD_IOVALID_DC(l_cplt_conf1_reg);
     }
 
-    // assert if expected state is not present
-    FAPI_ASSERT(l_dl_trained &&
-                l_tl_trained &&
-                l_iovalid_set,
+    // assert if not in expected state
+    FAPI_ASSERT(l_dl_trained && l_tl_trained && l_iovalid_set,
                 fapi2::P10_BUILD_SMP_INVALID_LINK_STATE()
-                .set_TARGET(i_target)
-                .set_ENDP_TYPE(i_link_ctl.endp_type)
-                .set_ENDP_UNIT_ID(i_link_ctl.endp_unit_id)
+                .set_TARGET(i_iohs_target)
                 .set_LINK_EN(i_link_en)
                 .set_DL_FIR_REG(l_dl_fir_reg)
                 .set_TL_FIR_REG(l_tl_fir_reg)
@@ -474,135 +469,111 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-
 ///
-/// @brief Check validity of SMP topology
+/// @brief Verify that fabric topology is logically valid
+///        - In a given group, all chips are connected to every other
+///          chip in the group by an X bus (if pump mode = chip_is_node)
+///        - Each chip is connected to its partner chip (with same chip id)
+///          in every other group by an A bus or X bus (if pump mode = chip_is_group)
 ///
-/// @param[in] i_op    Enumerated type representing SMP build phase (HB or FSP)
-/// @param[in] i_smp   Fully specified structure encapsulating SMP
+/// @param[in] i_op             Enumerated type representing SMP build phase (HB or FSP)
+/// @param[in] i_smp            Fully specified structure encapsulating SMP
 ///
-/// @return FAPI2_RC_SUCCESS if success, else error code.
+/// @return fapi2::ReturnCode   FAPI2_RC_SUCCESS if success, else error code.
 ///
-fapi2::ReturnCode
-p10_build_smp_check_topology(const p10_build_smp_operation i_op,
-                            p10_build_smp_system& i_smp)
+fapi2::ReturnCode p10_build_smp_check_topology(
+    const p10_build_smp_operation i_op,
+    p10_build_smp_system& i_smp)
 {
-    // check that fabric topology is logically valid
-    // 1) in a given group, all chips are connected to every other
-    //    chip in the group, by an X bus (if pump mode = chip_is_node)
-    // 2) each chip is connected to its partner chip (with same chip id)
-    //    in every other group, by an A bus or X bus (if pump mode = chip_is_group)
+    FAPI_DBG("Start");
 
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-    fapi2::ATTR_PROC_FABRIC_PUMP_MODE_Type l_pump_mode;
+    fapi2::ATTR_PROC_FABRIC_BROADCAST_MODE_Type l_broadcast_mode;
     fapi2::buffer<uint8_t> l_group_ids_in_system;
     fapi2::buffer<uint8_t> l_chip_ids_in_groups;
 
-    // determine pump mode
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_PUMP_MODE, FAPI_SYSTEM, l_pump_mode),
-             "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_PUMP_MODE");
+    // determine broadcast mode
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_BROADCAST_MODE, FAPI_SYSTEM, l_broadcast_mode),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_BROADCAST_MODE");
 
     // build set of all valid group IDs in system
-    for (auto g_iter = i_smp.groups.begin();
-         g_iter != i_smp.groups.end();
-         g_iter++)
+    for (auto g_iter = i_smp.groups.begin(); g_iter != i_smp.groups.end(); g_iter++)
     {
         FAPI_INF("Adding g%d", g_iter->first);
-        FAPI_TRY(l_group_ids_in_system.setBit(g_iter->first),
-                 "Error from setBit (l_group_ids_in_system)");
+        l_group_ids_in_system.setBit(g_iter->first);
 
         // build set of all valid chip IDs in group
-        for (auto p_iter = g_iter->second.chips.begin();
-             p_iter != g_iter->second.chips.end();
-             p_iter++)
+        for (auto p_iter = g_iter->second.chips.begin(); p_iter != g_iter->second.chips.end(); p_iter++)
         {
             FAPI_INF("Adding g%d:p%d", g_iter->first, p_iter->first);
-            FAPI_TRY(l_chip_ids_in_groups.setBit(p_iter->first),
-                     "Error from setBit (l_chip_ids_in_groups)");
+            l_chip_ids_in_groups.setBit(p_iter->first);
         }
     }
 
     // iterate over all groups
-    for (auto g_iter = i_smp.groups.begin();
-         g_iter != i_smp.groups.end();
-         g_iter++)
+    for (auto g_iter = i_smp.groups.begin(); g_iter != i_smp.groups.end(); g_iter++)
     {
         // iterate over all chips in current group
-        for (auto p_iter = g_iter->second.chips.begin();
-             p_iter != g_iter->second.chips.end();
-             p_iter++)
+        for (auto p_iter = g_iter->second.chips.begin(); p_iter != g_iter->second.chips.end(); p_iter++)
         {
             FAPI_DBG("Checking connectivity for g%d:p%d", g_iter->first, p_iter->first);
-            bool intergroup_set_match = false;
-            fapi2::buffer<uint8_t> l_connected_group_ids;
-            bool intragroup_set_match = false;
-            fapi2::buffer<uint8_t> l_connected_chip_ids;
 
-            uint8_t l_x_en[P10_FBC_UTILS_MAX_X_LINKS] = { 0 };
-            uint8_t l_a_en[P10_FBC_UTILS_MAX_A_LINKS] = { 0 };
-            uint8_t l_x_rem_chip_id[P10_FBC_UTILS_MAX_X_LINKS] = { 0 };
-            uint8_t l_a_rem_group_id[P10_FBC_UTILS_MAX_A_LINKS] = { 0 };
+            fapi2::buffer<uint8_t> l_connected_group_ids;
+            fapi2::buffer<uint8_t> l_connected_chip_ids;
+            bool intergroup_set_match = false;
+            bool intragroup_set_match = false;
+
+            fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_Type l_x_en;
+            fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_Type l_a_en;
+            fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_ID_Type l_x_rem_chip_id;
+            fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID_Type l_a_rem_group_id;
 
             // add IDs associated with current chip, to make direct set comparison easy
-            FAPI_TRY(l_connected_group_ids.setBit(p_iter->second.group_id),
-                     "Error from setBit (l_connected_group_ids)");
+            l_connected_group_ids.setBit(p_iter->second.group_id);
+            l_connected_chip_ids.setBit(p_iter->second.chip_id);
 
-            FAPI_TRY(l_connected_chip_ids.setBit(p_iter->second.chip_id),
-                     "Error from setBit (l_connected_chip_ids)");
-
-            // process X links, mark reachable group/chip IDs
-            FAPI_INF("Processing X links for g%d:p%d", g_iter->first, p_iter->first);
+            // process X/A links, mark reachable group/chip IDs
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG, *(p_iter->second.target), l_x_en),
                      "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG)");
-
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_ID, *(p_iter->second.target), l_x_rem_chip_id),
-                     "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_ATTACHED_CHIP_ID)");
-
-            for (uint8_t l_link_id = 0; l_link_id < P10_FBC_UTILS_MAX_X_LINKS; l_link_id++)
-            {
-                if (l_x_en[l_link_id])
-                {
-                    FAPI_TRY(p10_build_smp_validate_link(*(p_iter->second.target),
-                                                        P10_FBC_XBUS_LINK_CTL_ARR[l_link_id],
-                                                        l_x_en[l_link_id]),
-                             "Error from p10_build_smp_validate_link (g%d:p%d X%d)",
-                             g_iter->first, p_iter->first, l_link_id);
-
-                    if (l_pump_mode == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_NODE)
-                    {
-                        FAPI_TRY(l_connected_chip_ids.setBit(l_x_rem_chip_id[l_link_id]),
-                                 "Error from setBit (l_connected_chip_ids, X)");
-                    }
-                    else
-                    {
-                        FAPI_TRY(l_connected_group_ids.setBit(l_x_rem_chip_id[l_link_id]),
-                                 "Error from setBit (l_connected_group_ids, X)");
-                    }
-                }
-            }
-
-            // process A links, mark reachable group/chip IDs
-            FAPI_INF("Processing A links for g%d:p%d", g_iter->first, p_iter->first);
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG, *(p_iter->second.target), l_a_en),
                      "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG)");
-
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_ID, *(p_iter->second.target), l_x_rem_chip_id),
+                     "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_ATTACHED_CHIP_ID)");
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID, *(p_iter->second.target), l_a_rem_group_id),
                      "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID)");
 
-            for (uint8_t l_link_id = 0; l_link_id < P10_FBC_UTILS_MAX_A_LINKS; l_link_id++)
+            for(auto l_iohs : (*(p_iter->second.target)).getChildren<fapi2::TARGET_TYPE_IOHS>())
             {
-                if (l_a_en[l_link_id])
-                {
-                    FAPI_TRY(p10_build_smp_validate_link(*(p_iter->second.target),
-                                                        P10_FBC_ABUS_LINK_CTL_ARR[l_link_id],
-                                                        l_a_en[l_link_id]),
-                             "Error from p10_build_smp_validate_link (g%d:p%d A%d)",
-                             g_iter->first, p_iter->first, l_link_id);
+                fapi2::ATTR_CHIP_UNIT_POS_Type l_link_id;
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_iohs, l_link_id),
+                         "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
 
-                    FAPI_TRY(l_connected_group_ids.setBit(l_a_rem_group_id[l_link_id]),
-                             "Error from setBit (l_connected_group_ids, A)");
+                if (l_x_en[l_link_id])
+                {
+                    FAPI_INF("Processing X link g%d:p%d:c%d", g_iter->first, p_iter->first, l_link_id);
+
+                    FAPI_TRY(p10_build_smp_validate_link(l_iohs, l_link_id, l_x_en[l_link_id]),
+                             "Error from p10_build_smp_validate_link (g%d:p%dc:%d)", g_iter->first, p_iter->first, l_link_id);
+
+                    if (l_broadcast_mode == fapi2::ENUM_ATTR_PROC_FABRIC_BROADCAST_MODE_1HOP_CHIP_IS_GROUP)
+                    {
+                        l_connected_group_ids.setBit(l_x_rem_chip_id[l_link_id]);
+                    }
+                    else
+                    {
+                        l_connected_chip_ids.setBit(l_x_rem_chip_id[l_link_id]);
+                    }
                 }
 
+                if (l_a_en[l_link_id])
+                {
+                    FAPI_INF("Processing A link g%d:p%d:c%d", g_iter->first, p_iter->first, l_link_id);
+
+                    FAPI_TRY(p10_build_smp_validate_link(l_iohs, l_link_id, l_a_en[l_link_id]),
+                             "Error from p10_build_smp_validate_link (g%d:p%dc:%d)", g_iter->first, p_iter->first, l_link_id);
+
+                    l_connected_group_ids.setBit(l_a_rem_group_id[l_link_id]);
+                }
             }
 
             // compare ID sets, emit error if they don't match
@@ -617,14 +588,12 @@ p10_build_smp_check_topology(const p10_build_smp_operation i_op,
 
                 if (!intragroup_set_match)
                 {
-                    FAPI_ERR("Target %s is not fully connected (X) to all other chips in its group",
-                             l_target_str);
+                    FAPI_ERR("Target %s is not fully connected (X) to all other chips in its group", l_target_str);
                 }
 
                 if (!intergroup_set_match)
                 {
-                    FAPI_ERR("Target %s is not fully connected (X/A) to all other groups in the system",
-                             l_target_str);
+                    FAPI_ERR("Target %s is not fully connected (X/A) to all other groups in the system", l_target_str);
                 }
 
                 FAPI_ASSERT(false,
@@ -639,7 +608,7 @@ p10_build_smp_check_topology(const p10_build_smp_operation i_op,
                             .set_INTRAGROUP_CONNECTIONS_OK(intragroup_set_match)
                             .set_CONNECTED_CHIP_IDS(l_connected_chip_ids)
                             .set_CHIP_IDS_IN_GROUPS(l_chip_ids_in_groups)
-                            .set_FBC_PUMP_MODE(l_pump_mode),
+                            .set_FBC_BROADCAST_MODE(l_broadcast_mode),
                             "Invalid fabric topology detected");
             }
         }
@@ -649,41 +618,26 @@ fapi_try_exit:
     FAPI_DBG("End");
     return fapi2::current_err;
 }
-*/
 
-
-///
-/// @brief p10_build_smp procedure entry point
-/// See doxygen in p10_build_smp.H
-///
-fapi2::ReturnCode p10_build_smp(std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>>& i_chips,
-                                const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_master_chip_sys_next,
-                                const p10_build_smp_operation i_op)
+/// See doxygen comments in header file
+fapi2::ReturnCode p10_build_smp(
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>>& i_chips,
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_master_chip_sys_next,
+    const p10_build_smp_operation i_op)
 {
     FAPI_DBG("Start");
 
-    // process HWP input vector of chips
     p10_build_smp_system l_smp;
-    //FAPI_TRY(p10_build_smp_insert_chips(i_chips,
-    //                                   i_master_chip_sys_next,
-    //                                   i_op,
-    //                                   l_smp),
-    //         "Error from p10_build_smp_insert_chips");
 
-    //// check topology before continuing
-    //FAPI_TRY(p10_build_smp_check_topology(i_op,
-    //                                     l_smp),
-    //         "Error from p10_build_smp_check_topology");
+    // process HWP input vector of chips
+    FAPI_TRY(p10_build_smp_insert_chips(i_chips, i_master_chip_sys_next, i_op, l_smp),
+             "Error from p10_build_smp_insert_chips");
 
-    //// activate new SMP configuration
-    //if (i_op == SMP_ACTIVATE_PHASE1)
-    //{
-    //    // set fabric configuration registers (hotplug, switch CD set)
-    //    FAPI_TRY(p10_build_smp_set_fbc_cd(l_smp),
-    //             "Error from p10_build_smp_set_fbc_cd");
-    //}
+    // check topology before continuing
+    FAPI_TRY(p10_build_smp_check_topology(i_op, l_smp),
+             "Error from p10_build_smp_check_topology");
 
-    // set fabric configuration registers (hotplug, switch AB set)
+    // set fabric hotplug registers to active new SMP configuration
     FAPI_TRY(p10_build_smp_set_fbc_ab(l_smp, i_op),
              "Error from p10_build_smp_set_fbc_ab");
 

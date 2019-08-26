@@ -37,60 +37,54 @@
 //------------------------------------------------------------------------------
 #include <p10_build_smp_adu.H>
 #include <p10_putmemproc.H>
-//#include <p10_perv_scom_addresses.H>
-//#include <p10_misc_scom_addresses.H>
-//#include <p10_misc_scom_addresses_fld.H>
-#include <p10_build_smp_TEMP_DEFINES.H>
 #include <fapi2_subroutine_executor.H>
 #include <fapi2_mem_access.H>
+
+#include <p10_scom_proc.H>
+#include <p10_scom_iohs.H>
 
 //------------------------------------------------------------------------------
 // Constants
 //------------------------------------------------------------------------------
 
-// poll threshold
-const uint32_t P10_BUILD_SMP_MAX_STATUS_POLLS = 100;
-
 // ADU lock
 const uint32_t P10_BUILD_SMP_PHASE1_ADU_LOCK_ATTEMPTS = 1;
-const bool P10_BUILD_SMP_PHASE1_ADU_PICK_LOCK = false;
+const bool     P10_BUILD_SMP_PHASE1_ADU_PICK_LOCK = false;
 const uint32_t P10_BUILD_SMP_PHASE2_ADU_LOCK_ATTEMPTS = 5;
-const bool P10_BUILD_SMP_PHASE2_ADU_PICK_LOCK = true;
+const bool     P10_BUILD_SMP_PHASE2_ADU_PICK_LOCK = true;
 
 // FFDC logging on ADU switch fails
-const uint8_t P10_BUILD_SMP_FFDC_NUM_REGS = 15;
+const uint8_t  P10_BUILD_SMP_FFDC_NUM_REGS = 15;
 const uint32_t P10_BUILD_SMP_FFDC_REGS[P10_BUILD_SMP_FFDC_NUM_REGS] =
 {
-    PU_PB_CENT_SM0_PB_CENT_MODE,          // 0  (FBC Mode)
-    PU_PB_CENT_SM0_PB_CENT_HP_MODE_CURR,  // 1  (FBC HP Mode)
-    PU_PB_CENT_SM0_PB_CENT_HP_MODE_NEXT,  // 2
-    PU_PB_CENT_SM0_PB_CENT_HPX_MODE_CURR, // 3  (FBC HPx Mode)
-    PU_PB_CENT_SM0_PB_CENT_HPX_MODE_NEXT, // 4
-    PU_PB_CENT_SM0_PB_CENT_HPA_MODE_CURR, // 5  (FBC HPa Mode)
-    PU_PB_CENT_SM0_PB_CENT_HPA_MODE_NEXT, // 6
-    PERV_XB_CPLT_CONF1,                   // 7  (Electrical IOvalids)
-    PU_PB_IOE_FIR_REG,                    // 8  (Electrical TL train states)
-    PERV_OB0_CPLT_CONF1,                  // 9  (Optical IOValids)
-    PERV_OB1_CPLT_CONF1,                  // 10
-    PERV_OB2_CPLT_CONF1,                  // 11
-    PERV_OB3_CPLT_CONF1,                  // 12
-    PU_IOE_PB_IOO_FIR_REG,                // 13 (Optical TL train states)
-    PU_SND_MODE_REG                       // 14
+    scomt::proc::PB_COM_SCOM_ES3_STATION_MODE,           // 0  (FBC Mode)
+    scomt::proc::PB_COM_SCOM_ES3_STATION_HP_MODE1_CURR,  // 1  (FBC HP Mode1)
+    scomt::proc::PB_COM_SCOM_ES3_STATION_HP_MODE1_NEXT,  // 2
+    scomt::proc::PB_COM_SCOM_ES3_STATION_HP_MODE2_CURR,  // 3  (FBC HP Mode2)
+    scomt::proc::PB_COM_SCOM_ES3_STATION_HP_MODE2_NEXT,  // 4
+    scomt::proc::PB_COM_SCOM_ES3_STATION_HP_MODE3_CURR,  // 5  (FBC HP Mode3)
+    scomt::proc::PB_COM_SCOM_ES3_STATION_HP_MODE3_NEXT,  // 6
+    scomt::proc::PB_COM_SCOM_ES3_STATION_HP_MODE4_CURR,  // 7  (FBC HP Mode4)
+    scomt::proc::PB_COM_SCOM_ES3_STATION_HP_MODE4_NEXT,  // 8
+    scomt::iohs::AXON_CPLT_CONF1_RW,                     // 9  (IOHS IOvalids)
+    scomt::proc::PB_PTLSCOM10_PTL_FIR_REG_RW,            // 10 (IOHS TL train states)
+    scomt::proc::PB_PTLSCOM23_PTL_FIR_REG_RW,            // 11
+    scomt::proc::PB_PTLSCOM45_PTL_FIR_REG_RW,            // 12
+    scomt::proc::PB_PTLSCOM67_PTL_FIR_REG_RW,            // 13
+    scomt::proc::TP_TPBR_AD_SND_MODE_REG                 // 14 (Switch AB)
 };
-
 
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
 
-
 ///
 /// @brief Check ADU status matches expected state/value
-///        NOTE: intended to be run while holding ADU lock
+///        Note: Intended to be run while holding ADU lock
 ///
-/// @param[in] i_smp   Structure encapsulating SMP topology
-/// @param[inout] o_rc FAPI error code to be appended with FFDC
-/// @return void
+/// @param[in] i_smp        Structure encapsulating SMP topology
+/// @param[inout] o_rc      FAPI error code to be appended with FFDC
+/// @return void.
 ///
 void p10_build_smp_append_ffdc(
     p10_build_smp_system& i_smp,
@@ -128,6 +122,7 @@ void p10_build_smp_append_ffdc(
         {
             // mark valid
             (void) l_chip_data_valid.set<uint8_t>(l_idx, 0x1);
+
             // log group/chip ID
             (void) l_group_ids.set<uint8_t>(l_idx, n_iter->first);
             (void) l_chip_ids.set<uint8_t>(l_idx, p_iter->first);
@@ -137,8 +132,8 @@ void p10_build_smp_append_ffdc(
             {
                 fapi2::buffer<uint64_t> l_scom_data;
                 fapi2::ReturnCode l_scom_rc;
-                // discard bad SCOM return codes, mark data as all ones
-                // and keep collecting
+
+                // discard bad SCOM return codes, mark data as all ones and keep collecting
                 l_scom_rc = fapi2::getScom(*(p_iter->second.target),
                                            P10_BUILD_SMP_FFDC_REGS[jj],
                                            l_scom_data);
@@ -180,10 +175,10 @@ void p10_build_smp_append_ffdc(
 ///
 /// @brief Set action which will occur on fabric pmisc switch command
 ///
-/// @param[in] i_target    Processor chip target
-/// @param[in] i_action    Enumerated type representing fabric operation
+/// @param[in] i_target     Processor chip target
+/// @param[in] i_action     Enumerated type representing fabric operation
 ///
-/// @return fapi2:ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+/// @return fapi2:ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
 ///
 fapi2::ReturnCode p10_build_smp_adu_set_switch_action(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
@@ -191,19 +186,15 @@ fapi2::ReturnCode p10_build_smp_adu_set_switch_action(
 {
     FAPI_DBG("Start");
 
-    fapi2::ReturnCode l_rc;
     uint64_t l_addr = 0x0ULL;
     uint32_t l_bytes = 1;
     uint32_t l_flags = fapi2::SBE_MEM_ACCESS_FLAGS_TARGET_PROC;
     uint8_t l_data_unused[1];
+    fapi2::ReturnCode l_rc;
 
     if (i_action == SWITCH_AB)
     {
         l_flags |= fapi2::SBE_MEM_ACCESS_FLAGS_PRE_SWITCH_AB_MODE;
-    }
-    else if (i_action == SWITCH_CD)
-    {
-        l_flags |= fapi2::SBE_MEM_ACCESS_FLAGS_PRE_SWITCH_CD_MODE;
     }
     else
     {
@@ -228,24 +219,24 @@ fapi_try_exit:
 }
 
 
-// NOTE: see comments above function prototype in header
-fapi2::ReturnCode p10_build_smp_sequence_adu(p10_build_smp_system& i_smp,
-        const p10_build_smp_operation i_op,
-        const p10_build_smp_adu_action i_action)
+/// See doxygen comments in header file
+fapi2::ReturnCode p10_build_smp_sequence_adu(
+    p10_build_smp_system& i_smp,
+    const p10_build_smp_operation i_op,
+    const p10_build_smp_adu_action i_action)
 {
     FAPI_DBG("Start");
-    fapi2::ReturnCode l_rc;
 
     // validate input action, set ADU operation parameters
     uint32_t l_flags = fapi2::SBE_MEM_ACCESS_FLAGS_TARGET_PROC;
     uint32_t l_bytes = 1;
     uint64_t l_addr = 0x0ULL;
     uint8_t l_data_unused[1];
+    fapi2::ReturnCode l_rc;
 
     switch (i_action)
     {
         case SWITCH_AB:
-        case SWITCH_CD:
             l_flags |= fapi2::SBE_MEM_ACCESS_FLAGS_SWITCH_MODE;
             break;
 
@@ -296,15 +287,12 @@ fapi2::ReturnCode p10_build_smp_sequence_adu(p10_build_smp_system& i_smp,
              p_iter != g_iter->second.chips.end();
              ++p_iter)
         {
-            if (((i_action == QUIESCE) &&
-                 (p_iter->second.issue_quiesce_next)) ||
-                ((i_action == SWITCH_AB) &&
-                 p_iter->second.master_chip_sys_next) ||
-                (i_action == SWITCH_CD))
+            if (((i_action == QUIESCE) && (p_iter->second.issue_quiesce_next)) ||
+                ((i_action == SWITCH_AB) && (p_iter->second.master_chip_sys_next)))
             {
                 char l_target_str[fapi2::MAX_ECMD_STRING_LEN];
-                fapi2::toString(*(p_iter->second.target), l_target_str,
-                                sizeof(l_target_str));
+                fapi2::toString(*(p_iter->second.target), l_target_str, sizeof(l_target_str));
+
                 FAPI_INF("Issuing ADU op for %s", l_target_str);
 
                 // issue operation
