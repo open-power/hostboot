@@ -65,7 +65,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>RCS PLL input for TOD Filter PLL</description>
   <valueType>uint8</valueType>
-  <enum>RCS_MAIN_OUT = 0x0, RCS_ASYNC_OUT = 0x1</enum>
+  <enum>SYS_REFCLOCK0 = 0x0, RCS_ASYNC_OUT = 0x1, RCS_SYNC_OUT = 0x2</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -75,7 +75,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>RCS PLL input for Nest Filter PLL</description>
   <valueType>uint8</valueType>
-  <enum>RCS_MAIN_OUT = 0x0, RCS_ASYNC_OUT = 0x1</enum>
+  <enum>SYS_REFCLOCK0 = 0x0, RCS_ASYNC_OUT = 0x1, RCS_SYNC_OUT = 0x2</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -85,7 +85,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>RCS PLL input for IO Filter PLL</description>
   <valueType>uint8</valueType>
-  <enum>RCS_MAIN_OUT = 0x0, RCS_ASYNC_OUT = 0x1, PCI_REFCLOCK0 = 0x2</enum>
+  <enum>SYS_REFCLOCK0 = 0x0, RCS_ASYNC_OUT = 0x1, RCS_SYNC_OUT = 0x2</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -95,7 +95,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>RCS PLL input for IO Spread Spectrum Filter PLL</description>
   <valueType>uint8</valueType>
-  <enum>RCS_MAIN_OUT = 0x0, RCS_ASYNC_OUT = 0x1</enum>
+  <enum>SYS_REFCLOCK0 = 0x0, RCS_ASYNC_OUT = 0x1, RCS_SYNC_OUT = 0x2</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -251,11 +251,11 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
     setup clock mux settings for TOD Refclock input
-    0b0 = 16 MHz I/O Filter PLL Output
-    0b1 = 32 MHz LPC reference clock
+    0b0 = 32 MHz LPC reference clock
+    0b1 = 16 MHz I/O Filter PLL Output
   </description>
   <valueType>uint8</valueType>
-  <enum>PLLTODFLT = 0, LPC_REFCLOCK = 1</enum>
+  <enum>LPC_REFCLOCK = 0, PLLTODFLT = 1</enum>
   <platInit/>
   <initToZero/>
 </attribute>
