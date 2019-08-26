@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -107,6 +107,8 @@ enum p10_sbe_scratch_regs
     // Scratch_reg_6
     SCRATCH6_REG_VALID_BIT                          = 5,
 
+    ATTR_SKEWADJ_BYPASS_BIT                         = 6,
+    ATTR_DCADJ_BYPASS_BIT                           = 7,
     ATTR_CP_PLLTODFLT_BYPASS_BIT                    = 8,
     ATTR_CP_PLLNESTFLT_BYPASS_BIT                   = 9,
     ATTR_CP_PLLIOFLT_BYPASS_BIT                     = 10,
