@@ -134,12 +134,13 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_PMIC_DIMM_SPD_4U</rc>
+    <rc>RC_PMIC_DIMM_SPD_UNSUPPORTED_MODULE_HEIGHT</rc>
     <description>
-       The module_height attribute SPD of this DIMM was read as 4U.
-       4U is not supported yet for pmic_enable().
+       The module_height attribute SPD of this DIMM was not identified as 1U or 2U.
+       Other heights (4U) are not supported at this time.
     </description>
     <ffdc>TARGET</ffdc>
+    <ffdc>VALUE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>

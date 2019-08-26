@@ -597,6 +597,32 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MEM_EFF_PMIC0_SEQUENCE</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          Sequence order to enable PMIC0
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic0_sequence</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_SEQUENCE</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          Sequence order to enable PMIC1
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>pmic1_sequence</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MEM_EFF_EFD_PMIC0_SWA_VOLTAGE_OFFSET</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>

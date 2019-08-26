@@ -39,10 +39,12 @@
 #include <fapi2.H>
 #include <vector>
 #include <generic/memory/lib/utils/c_str.H>
+#include <generic/memory/lib/utils/index.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 namespace mss
 {
+
 ///
 /// @brief Helper to find a set of elements based on a fapi2 target
 /// @tparam M the target type to be returned
@@ -255,6 +257,24 @@ find_targets( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     }
 
     return l_ports;
+}
+
+///
+/// @brief Helper to find a set of elements based on a fapi2 target, then sort them
+/// @tparam M the target type to be returned
+/// @tparam T the fapi2 target type of the argument
+/// @param[in] i_target the fapi2 target T
+/// @param[in] i_state [optional] fapi2 target state (defaults to TARGET_STATE_FUNCTIONAL)
+/// @return a vector of M targets sorted by mss::index.
+/// @note this uses mss::index so the targets will be sorted via ATTR_REL_POS of their immediate parent
+///
+template< fapi2::TargetType M, fapi2::TargetType T >
+static inline std::vector< fapi2::Target<M> > find_targets_sorted_by_index( const fapi2::Target<T>& i_target,
+        fapi2::TargetState i_state = fapi2::TARGET_STATE_FUNCTIONAL )
+{
+    std::vector<fapi2::Target<M>> l_targets = find_targets<M, T>(i_target, i_state);
+    sort_targets_by_index(l_targets);
+    return l_targets;
 }
 
 ///

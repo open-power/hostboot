@@ -156,9 +156,11 @@ enum class attr_eff_engine_fields
 
     PMIC0_MFG_ID                        = 43,
     PMIC1_MFG_ID                        = 44,
+    PMIC0_SEQUENCE                      = 45,
+    PMIC1_SEQUENCE                      = 46,
 
     // Dispatcher set to last enum value
-    DISPATCHER = PMIC1_MFG_ID,
+    DISPATCHER = PMIC1_SEQUENCE,
 };
 
 ///
@@ -220,7 +222,8 @@ enum ffdc_codes
     SET_PMIC0_MFG_ID                        = 0x107C,
     SET_PMIC1_MFG_ID                        = 0x107D,
 
-    SET_DRAM_MODULE_HEIGHT                  = 0x107E,
+    SET_PMIC0_SEQUENCE                      = 0x107E,
+    SET_PMIC1_SEQUENCE                      = 0x107F,
 };
 
 ///
@@ -290,41 +293,6 @@ struct consts<mss::pmic::product::JEDEC_COMPLIANT>
     static constexpr uint32_t SWD_VOLT_RANGE1_MAX          = 2835;
 
     static constexpr uint32_t VOLT_STEP                    = 5;
-};
-
-///
-/// @brief PMIC traits that change depending on DIMM module height
-///
-/// @tparam H module_height enum
-///
-template<mss::pmic::module_height H>
-struct pmic_traits;
-
-///
-/// @brief pmic traits for 1U dimms
-///
-template <>
-struct pmic_traits<mss::pmic::module_height::HEIGHT_1U>
-{
-    static constexpr uint8_t PMICS_PER_DIMM = 2;
-};
-
-///
-/// @brief pmic traits for 2U dimms
-///
-template <>
-struct pmic_traits<mss::pmic::module_height::HEIGHT_2U>
-{
-    static constexpr uint8_t PMICS_PER_DIMM = 2;
-};
-
-///
-/// @brief pmic traits for 4U dimms
-///
-template <>
-struct pmic_traits<mss::pmic::module_height::HEIGHT_4U>
-{
-    static constexpr uint8_t PMICS_PER_DIMM = 4;
 };
 
 namespace i2c

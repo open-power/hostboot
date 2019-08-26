@@ -57,6 +57,13 @@ typedef fapi2::ReturnCode (*pmic_attr_ptr_signed)(const fapi2::Target<fapi2::TAR
         int8_t& o_value);
 // Pointers below allow for run-time attribute getter selection by PMIC ID (0,1)
 
+// PMIC0/1 sequence order
+static constexpr pmic_attr_ptr get_sequence[] =
+{
+    mss::attr::get_pmic0_sequence,
+    mss::attr::get_pmic1_sequence
+};
+
 // Voltage Setting
 static constexpr pmic_attr_ptr get_swa_voltage_setting[] =
 {
@@ -504,6 +511,21 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Order PMICs by sequence defined in the SPD
+///
+/// @param[in] i_dimm DIMM target to pull SPD fields from
+/// @param[in] i_dimm_index index of the DIMM target
+/// @param[in] i_pmics_per_dimm number of PMICs per dimm
+/// @param[in,out] io_pmics vector of PMICs that will be re-ordered in place
+/// @return fapi2::ReturnCode
+///
+fapi2::ReturnCode order_pmics_by_sequence(
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM> i_dimm,
+    const uint8_t i_dimm_index,
+    const uint8_t i_pmics_per_dimm,
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& io_pmics);
+
+///
 /// @brief Bias with spd voltages for IDT pmic
 ///
 /// @param[in] i_pmic_target PMIC target
@@ -725,69 +747,22 @@ fapi_try_exit:
 //------------------- ENABLE FUNCTIONS-----------------//
 
 ///
-/// @brief template function for the chip-specific enable functions
+/// @brief Enable pmics using manual mode (direct VR enable, no SPD fields)
+/// @param[in] i_pmics vector of PMICs to enable
 ///
-/// @tparam H module_height
+fapi2::ReturnCode enable_manual(const std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>> i_pmics);
+
+///
+/// @brief Function to enable 1U and 2U pmics
+///
 /// @param[in] i_pmic_target - the pmic target
 /// @param[in] i_dimm_target - the dimm target that the PMIC resides on
 /// @param[in] i_vendor_id - the vendor ID of the PMIC to bias
-/// @param[in] i_mode enable mode operation
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS if successful
 ///
-template <mss::pmic::module_height H>
-fapi2::ReturnCode enable_chip(const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
-                              const fapi2::Target<fapi2::TargetType::TARGET_TYPE_DIMM>& i_dimm_target,
-                              const uint16_t i_vendor_id);
-
-///
-/// @brief enable procedure for IDT PMIC and 1U or 2U DIMM
-///
-/// @param[in] i_pmic_target - the pmic_target
-/// @param[in] i_dimm_target - the dimm target that the PMIC resides on
-/// @param[in] i_vendor_id - the vendor ID of the PMIC to bias
-/// @param[in] i_mode enable mode operation
-/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS if successful
-///
-template <>
-inline fapi2::ReturnCode enable_chip<mss::pmic::module_height::HEIGHT_1U>(
-    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_DIMM>& i_dimm_target,
-    const uint16_t i_vendor_id)
-{
-    FAPI_INF("Setting PMIC %s settings from SPD", mss::c_str(i_pmic_target));
-
-    // Make sure it is TI or IDT
-    FAPI_ASSERT((i_vendor_id == mss::pmic::vendor::IDT ||
-                 i_vendor_id == mss::pmic::vendor::TI),
-                fapi2::PMIC_CHIP_NOT_RECOGNIZED()
-                .set_TARGET(i_pmic_target)
-                .set_VENDOR_ID(i_vendor_id),
-                "Unknown PMIC: %s with vendor ID 0x%04hhX",
-                mss::c_str(i_pmic_target),
-                uint8_t(i_vendor_id) );
-
-    if (i_vendor_id == mss::pmic::vendor::IDT)
-    {
-        FAPI_TRY(mss::pmic::bias_with_spd_settings<mss::pmic::vendor::IDT>(i_pmic_target, i_dimm_target),
-                 "enable_chip<IDT, 1U/2U>: Error biasing PMIC %s with SPD settings",
-                 mss::c_str(i_pmic_target));
-    }
-    else // assert done in pmic_enable.C that vendor is IDT or TI
-    {
-        FAPI_TRY(mss::pmic::bias_with_spd_settings<mss::pmic::vendor::TI>(i_pmic_target, i_dimm_target),
-                 "enable_chip<TI, 1U/2U>: Error biasing PMIC %s with SPD settings",
-                 mss::c_str(i_pmic_target));
-    }
-
-    // Start VR Enable
-    FAPI_TRY(mss::pmic::start_vr_enable(i_pmic_target),
-             "Error starting VR_ENABLE on PMIC %s", mss::c_str(i_pmic_target));
-
-    return fapi2::FAPI2_RC_SUCCESS;
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
+fapi2::ReturnCode enable_chip_1U_2U(const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
+                                    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_DIMM>& i_dimm_target,
+                                    const uint16_t i_vendor_id);
 
 }
 } // mss

@@ -54,8 +54,8 @@ extern "C"
     fapi2::ReturnCode pmic_enable(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
                                   const mss::pmic::enable_mode i_mode)
     {
-        auto l_dimms = mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_ocmb_target);
-        auto l_pmics = mss::find_targets<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target);
+        auto l_dimms = mss::find_targets_sorted_by_index<fapi2::TARGET_TYPE_DIMM>(i_ocmb_target);
+        auto l_pmics = mss::find_targets_sorted_by_index<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target);
 
         // Check that we have PMICs (we wouldn't on gemini, for example)
         if (l_pmics.empty())
@@ -64,114 +64,59 @@ extern "C"
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
-        // Sort by index (low to high) since find_targets may not return the correct order
-        std::sort(l_dimms.begin(), l_dimms.end(),
-                  [] (const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& l_first_dimm,
-                      const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& l_second_dimm) -> bool
-        {
-            return mss::index(l_first_dimm) < mss::index(l_second_dimm);
-        });
-
-        std::sort(l_pmics.begin(), l_pmics.end(),
-                  [] (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& l_first_pmic,
-                      const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& l_second_pmic) -> bool
-        {
-            return mss::index(l_first_pmic) < mss::index(l_second_pmic);
-        });
-
-        uint8_t l_pmic_index = 0;
-
-        // If we're enabling via internal settings, we can just run VR ENABLE down the line
+        // // If we're enabling via internal settings, we can just run VR ENABLE down the line
         if (i_mode == mss::pmic::enable_mode::MANUAL)
         {
-            using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
-            using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
-            using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
-
-            for (const auto& l_pmic : l_pmics)
-            {
-                fapi2::buffer<uint8_t> l_programmable_mode;
-                l_programmable_mode.writeBit<FIELDS::R2F_SECURE_MODE>(CONSTS::PROGRAMMABLE_MODE);
-
-                FAPI_INF("Enabling PMIC %s with default settings", mss::c_str(l_pmic));
-
-                // Make sure power is applied and we can read the PMIC
-                FAPI_TRY(mss::pmic::poll_for_pbulk_good(l_pmic),
-                         "pmic_enable: poll for pbulk good either failed, or returned not good status on PMIC %s",
-                         mss::c_str(l_pmic));
-
-                // Enable programmable mode
-                FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(l_pmic, REGS::R2F, l_programmable_mode));
-
-                // Start VR Enable
-                FAPI_TRY(mss::pmic::start_vr_enable(l_pmic),
-                         "Error starting VR_ENABLE on PMIC %s", mss::c_str(l_pmic));
-            }
-
+            FAPI_TRY(mss::pmic::enable_manual(l_pmics));
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
-        // Start at PMIC0. If there was ever a weird case where there is a 4U dimm
-        // on the same OCMB as a 2U dimm (is this possible?),
-        // we would have 6 total PMICs. So, we need to keep
-        // track of where we left off for the last pmic we enabled
-
-        // Not asserting vectors non-empty because there could be OCMBs without DIMMs on them
-        for (const auto& l_dimm : l_dimms)
+        if (!l_dimms.empty())
         {
-            // Get module height for DIMM to determine the number of PMICs we should be using
             uint8_t l_module_height = 0;
-            FAPI_TRY(mss::attr::get_dram_module_height(l_dimm, l_module_height));
+            FAPI_TRY(mss::attr::get_dram_module_height(l_dimms[0], l_module_height));
 
-            if (l_module_height == mss::pmic::module_height::HEIGHT_1U ||
-                l_module_height == mss::pmic::module_height::HEIGHT_2U)
+            FAPI_ASSERT(l_module_height == fapi2::ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_1U ||
+                        l_module_height == fapi2::ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_2U,
+                        fapi2::PMIC_DIMM_SPD_UNSUPPORTED_MODULE_HEIGHT()
+                        .set_TARGET(l_dimms[0])
+                        .set_VALUE(l_module_height),
+                        "DIMM %s module height attribute not identified as 1U or 2U. "
+                        "ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT of %u . Not supported yet.",
+                        mss::c_str(l_dimms[0]), l_module_height);
+
+            // Else, 1 or 2
             {
-                // 1U and 2U are the same sequence, use 1U traits
-                using PMIC_TRAITS = mss::pmic::pmic_traits<mss::pmic::module_height::HEIGHT_1U>;
+                static constexpr uint8_t PMICS_PER_DIMM = 2;
 
-                uint16_t l_vendor_id = 0;
-
-                // PMIC0 and PMIC1 of each DIMM
-                for (uint8_t l_current_pmic = 0; l_current_pmic < PMIC_TRAITS::PMICS_PER_DIMM; ++l_current_pmic)
+                for (uint8_t l_dimm_index = 0; l_dimm_index < l_dimms.size(); ++l_dimm_index)
                 {
-                    const auto l_current_pmic_target = l_pmics[l_pmic_index + l_current_pmic];
-                    // Get vendor ID
-                    FAPI_TRY(mss::pmic::get_mfg_id[l_current_pmic](l_dimm, l_vendor_id));
+                    // The PMICs are in sorted order
+                    const auto& l_dimm = l_dimms[l_dimm_index];
+                    FAPI_TRY(mss::pmic::order_pmics_by_sequence(l_dimm, l_dimm_index, PMICS_PER_DIMM, l_pmics));
 
-                    // Poll to make sure PBULK reports good, then we can enable the chip and write/read registers
-                    FAPI_TRY(mss::pmic::poll_for_pbulk_good(l_current_pmic_target),
-                             "pmic_enable: poll for pbulk good either failed, or returned not good status on PMIC %s",
-                             mss::c_str(l_current_pmic_target));
+                    // Now the PMICs are in the right order of DIMM and the right order by their defined SPD sequence within each dimm
+                    // Let's kick off the enables
+                    for (const auto& l_pmic : l_pmics)
+                    {
+                        // Get the corresponding DIMM target to feed to the helpers
+                        const auto& l_dimm = l_dimms[mss::index(l_pmic) / PMICS_PER_DIMM];
+                        uint16_t l_vendor_id = 0;
 
-                    // Call the enable procedure
-                    FAPI_TRY((mss::pmic::enable_chip
-                              <mss::pmic::module_height::HEIGHT_1U>
-                              (l_current_pmic_target, l_dimm, l_vendor_id)),
-                             "pmic_enable: Error enabling PMIC %s", mss::c_str(l_current_pmic_target));
+                        // Get vendor ID
+                        FAPI_TRY(mss::pmic::get_mfg_id[mss::index(l_pmic)](l_dimm, l_vendor_id));
+
+                        // Poll to make sure PBULK reports good, then we can enable the chip and write/read registers
+                        FAPI_TRY(mss::pmic::poll_for_pbulk_good(l_pmic),
+                                 "pmic_enable: poll for pbulk good either failed, or returned not good status on PMIC %s",
+                                 mss::c_str(l_pmic));
+
+                        // Call the enable procedure
+                        FAPI_TRY((mss::pmic::enable_chip_1U_2U
+                                  (l_pmic, l_dimm, l_vendor_id)),
+                                 "pmic_enable: Error enabling PMIC %s", mss::c_str(l_pmic));
+                    }
                 }
-
-                // Increment by the number of PMICs that were enabled and move on to the next dimm
-                l_pmic_index += PMIC_TRAITS::PMICS_PER_DIMM;
-            }
-            else // 4U DIMM:
-            {
-                // Asserting out here as if we see a 4U at this point we shouldn't be able to proceed
-                // Ugly assert false, but we need the above else later so we will use this for now
-                FAPI_ASSERT(false,
-                            fapi2::PMIC_DIMM_SPD_4U()
-                            .set_TARGET(l_dimm),
-                            "DIMM %s module height attribute identified as 4U. Not supported yet.",
-                            mss::c_str(l_dimm));
-
-                // The enable algorithm will be:
-                // Load SPD for PMIC0 and PMIC1
-                // Broadcast enable both together
-
-                // Load SPD for PMIC2 and PMIC3 (which should be the same data as for PMIC0 and PMIC1)
-                // Broadcast and enable both together
-
-                // using PMIC_TRAITS = mss::pmic::pmic_traits<mss::pmic::module_height::HEIGHT_4U>;
-                // l_pmic_index += PMIC_TRAITS::PMICS_PER_DIMM;
             }
         }
 

@@ -2418,6 +2418,19 @@ class facade final
         }
 
         ///
+        /// @brief Decodes PMIC0 Sequence -> PMIC0_SEQUENCE
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode sequence_pmic0(uint8_t& o_output) const
+        {
+            FAPI_TRY( iv_dimm_module_decoder->sequence_pmic0(o_output) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
         /// @brief Decodes PMIC1 SWA Voltage Setting -> PMIC1_SWA_VOLT_SET
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
@@ -2737,6 +2750,19 @@ class facade final
         fapi2::ReturnCode phase_combination_pmic1(uint8_t& o_output) const
         {
             FAPI_TRY( iv_dimm_module_decoder->phase_combination_pmic1(o_output) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes PMIC0 Sequence -> PMIC0_SEQUENCE
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode sequence_pmic1(uint8_t& o_output) const
+        {
+            FAPI_TRY( iv_dimm_module_decoder->sequence_pmic1(o_output) );
 
         fapi_try_exit:
             return fapi2::current_err;
