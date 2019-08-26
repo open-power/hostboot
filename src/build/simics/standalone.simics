@@ -121,8 +121,9 @@ if ($hb_mode == 1) {
 if ($hb_mode == 0) { #Only do this on Axone and later models that have Explorer chip
 
     # IDEC register consumed by Hostboot
-    # UCHIP(0x2134)=0x100600D2
-    set-class-attr ocmb  mscc_regs_xcbi_chip_info 0x100600D2
+    # UCHIP(0x2134)=0x110600D2
+    # TODO RTC: 215621 Remove workarounds after simics gets updated
+    set-class-attr ocmb mscc_regs_xcbi_chip_info 0x110600D2
 
     # Loop over all explorer chips
     foreach $obj in (get-object-list ocmb -all){
