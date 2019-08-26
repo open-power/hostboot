@@ -485,6 +485,8 @@ fapi2::ReturnCode p10_setup_sbe_config(
     // set_scratch6_reg -- Master/slave, node/chip selection, PLL bypass controls
     {
         fapi2::buffer<uint32_t> l_scratch6_reg = 0;
+        fapi2::ATTR_SKEWADJ_BYPASS_Type l_attr_skewadj_bypass;
+        fapi2::ATTR_DCADJ_BYPASS_Type l_attr_dcadj_bypass;
         fapi2::ATTR_CP_PLLTODFLT_BYPASS_Type l_attr_cp_plltodflt_bypass;
         fapi2::ATTR_CP_PLLNESTFLT_BYPASS_Type l_attr_cp_pllnestflt_bypass;
         fapi2::ATTR_CP_PLLIOFLT_BYPASS_Type l_attr_cp_pllioflt_bypass;
@@ -497,6 +499,17 @@ fapi2::ReturnCode p10_setup_sbe_config(
         fapi2::ATTR_PROC_FABRIC_BROADCAST_MODE_Type l_attr_proc_fabric_broadcast_mode;
         fapi2::ATTR_PROC_SBE_MASTER_CHIP_Type l_attr_proc_sbe_master_chip;
         fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID_Type l_attr_proc_fabric_topology_id;
+
+        FAPI_DBG("Reading skew adjust/duty cycle adjust bypass attributes");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SKEWADJ_BYPASS, i_target_chip, l_attr_skewadj_bypass),
+                 "Error from FAPI_ATTR_GET (ATTR_SKEWADJ_BYPASS)");
+        l_scratch6_reg.writeBit<ATTR_SKEWADJ_BYPASS_BIT>(l_attr_skewadj_bypass ==
+                fapi2::ENUM_ATTR_SKEWADJ_BYPASS_BYPASS);
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_DCADJ_BYPASS, i_target_chip, l_attr_dcadj_bypass),
+                 "Error from FAPI_ATTR_GET (ATTR_DCADJ_BYPASS)");
+        l_scratch6_reg.writeBit<ATTR_DCADJ_BYPASS_BIT>(l_attr_dcadj_bypass ==
+                fapi2::ENUM_ATTR_DCADJ_BYPASS_BYPASS);
 
         FAPI_DBG("Reading filter PLL bypass attributes");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CP_PLLTODFLT_BYPASS, i_target_chip, l_attr_cp_plltodflt_bypass),

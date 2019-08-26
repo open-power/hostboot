@@ -217,6 +217,7 @@
   <enum>BYPASS = 0x1, NO_BYPASS = 0x0</enum>
   <platInit/>
   <initToZero/>
+  <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -257,6 +258,7 @@
   <enum>BYPASS = 0x1, NO_BYPASS = 0x0</enum>
   <platInit/>
   <initToZero/>
+  <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
