@@ -3489,9 +3489,9 @@ errlHndl_t Bpm::runFirmwareUpdates(BpmFirmwareLidImage i_image)
         handleMultipleErrors(errl, exitErrl);
     }
 
-    exitErrl = nvdimmWriteReg(iv_nvdimm,
-                              NVDIMM_MGT_CMD0,
-                              0x01);
+    // Reset controller and unlock encryption if necessary
+    exitErrl = nvdimmResetController(iv_nvdimm);
+
     if (exitErrl != nullptr)
     {
         TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runFirmwareUpdates() "
