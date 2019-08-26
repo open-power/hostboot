@@ -63,41 +63,34 @@ enum p10_fbc_utils_addr_mode
 //------------------------------------------------------------------------------
 
 #ifndef __PPE_QME
-// address range definitions
-const uint64_t P10_FBC_UTILS_FBC_MAX_ADDRESS = ((1ULL << 56) - 1ULL);
-const uint64_t P10_FBC_UTILS_CACHELINE_MASK = 0x7FULL;
-const uint64_t P10_FBC_UTILS_LAST_ADDR_IN_CACHELINE = 0x78ULL;
+    // address range definitions
+    const uint64_t P10_FBC_UTILS_FBC_MAX_ADDRESS = ((1ULL << 56) - 1ULL);
+    const uint64_t P10_FBC_UTILS_CACHELINE_MASK = 0x7FULL;
+    const uint64_t P10_FBC_UTILS_LAST_ADDR_IN_CACHELINE = 0x78ULL;
 
-// cacheline size = 128B
-const uint64_t FABRIC_CACHELINE_SIZE = 0x80;
+    // cacheline size = 128B
+    const uint64_t FABRIC_CACHELINE_SIZE = 0x80;
 
-// fbc racetrack stations
-const uint8_t FABRIC_NUM_STATIONS = 16;
+    // fbc racetrack stations
+    const uint8_t FABRIC_NUM_STATIONS = 16;
 
-// fbc max number of iohs links
-const uint8_t FABRIC_NUM_IOHS_LINKS = 8;
+    // fbc max number of iohs links
+    const uint8_t FABRIC_NUM_IOHS_LINKS = 8;
 
-// max memory interleave = 16TB
-const uint64_t MAX_INTERLEAVE_GROUP_SIZE = 0x0000100000000000ULL;
+    // max memory interleave = 16TB
+    const uint64_t MAX_INTERLEAVE_GROUP_SIZE = 0x0000100000000000ULL;
 
-// fbc base address determination constants
-const uint8_t FABRIC_ADDR_SMF_BIT = 12;
-const uint8_t FABRIC_ADDR_MSEL_START_BIT = 13;
-const uint8_t FABRIC_ADDR_MSEL_END_BIT = 14;
-const uint8_t FABRIC_ADDR_TOPO_ID_INDEX_START_BIT = 15;
-const uint8_t FABRIC_ADDR_TOPO_ID_INDEX_END_BIT = 19;
+    // fbc base address determination constants
+    const uint8_t FABRIC_ADDR_SMF_BIT = 12;
+    const uint8_t FABRIC_ADDR_MSEL_START_BIT = 13;
+    const uint8_t FABRIC_ADDR_MSEL_END_BIT = 14;
+    const uint8_t FABRIC_ADDR_TOPO_ID_INDEX_START_BIT = 15;
+    const uint8_t FABRIC_ADDR_TOPO_ID_INDEX_END_BIT = 19;
 
-// smp configuration definitions
-const uint8_t P10_FBC_UTILS_MAX_LINKS = 8;
-const uint8_t P10_FBC_UTILS_MAX_CHIPS = 8;
+    // smp configuration definitions
+    const uint8_t P10_FBC_UTILS_MAX_LINKS = 8;
+    const uint8_t P10_FBC_UTILS_MAX_CHIPS = 8;
 
-// phase1 used to init scope of hbi drawer, call from hb
-// phase2 used to stitch drawers, call from fsp
-enum p10_build_smp_operation
-{
-    SMP_ACTIVATE_PHASE1 = 1,
-    SMP_ACTIVATE_PHASE2 = 2
-};
 #endif // !__PPE_QME
 
 //------------------------------------------------------------------------------
