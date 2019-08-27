@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,7 @@
 #include    <trace/interface.H>
 #include    <sys/sync.h>
 #include    <usr/cxxtest/cxxtest_data.H>
+#include    <vector>
 
 extern  trace_desc_t   *g_trac_test;
 
@@ -76,6 +77,9 @@ public:
 
 class AbortTest {};
 
+void sortTests(std::vector<const char *> & i_list,
+               std::vector<const char *> & o_serial_list,
+               std::vector<const char *> & o_parallel_list);
 void doTrace( );
 void doWarn( );
 void doFailTest( );

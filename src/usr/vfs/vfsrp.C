@@ -754,7 +754,7 @@ void VfsRp::get_test_modules(std::vector<const char *> & o_list) const
     VfsSystemModule * vfsItr =
         (VfsSystemModule *) (iv_pnor_vaddr + VFS_EXTENDED_MODULE_TABLE_OFFSET);
 
-    //TRACDCOMP(g_trac_vfs,"finding test modules...");
+    TRACFCOMP(g_trac_vfs,"finding test modules...");
 
     while(vfsItr->module[0] != '\0')
     {
@@ -762,7 +762,7 @@ void VfsRp::get_test_modules(std::vector<const char *> & o_list) const
         {
             if (NULL != vfsItr->start)
             {
-                //TRACDCOMP( g_trac_vfs, "%s",vfsItr->module);
+                TRACDCOMP( g_trac_vfs, "%s",vfsItr->module);
                 o_list.push_back(vfsItr->module);
             }
         }
