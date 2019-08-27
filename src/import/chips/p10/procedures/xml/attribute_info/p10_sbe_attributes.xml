@@ -475,6 +475,10 @@
     <value>0x0</value>
   </entry>
   <entry>
+    <name>ATTR_LPC_CONSOLE_CNFG</name>
+    <value>0x1</value>
+  </entry>
+  <entry>
     <name>ATTR_SBE_ADDR_KEY_STASH_ADDR</name>
     <value>0x0</value>
   </entry>
