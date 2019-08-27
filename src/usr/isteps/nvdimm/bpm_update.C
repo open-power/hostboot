@@ -36,6 +36,8 @@
 #include <initservice/istepdispatcherif.H>
 #include <isteps/nvdimm/bpmreasoncodes.H>
 
+#include <hwas/common/hwasCallout.H>
+
 #include <targeting/common/targetservice.H>
 #include <attributeenums.H>
 
@@ -57,6 +59,10 @@ TRAC_INIT(&g_trac_bpm, BPM_COMP_NAME, 4*KILOBYTE);
 // outside of this file.
 const uint16_t BPM_ADDRESS_ZERO = 0;
 const uint16_t BPM_CONFIG_START_ADDRESS = 0x1800;
+// There are two potential start addresses for the firmware section.
+// They are:
+const uint16_t MAIN_PROGRAM_ADDRESS     = 0x8000;
+const uint16_t MAIN_PROGRAM_ADDRESS_ALT = 0xA000;
 
 // In order to disable write protection on the BPM to perform updates a sequence
 // of characters must be written. The hex represenation of those characters are
@@ -628,6 +634,7 @@ errlHndl_t Bpm::getFwVersion(uint16_t & o_fwVersion) const
         {
             TRACFCOMP(g_trac_bpm, "Bpm::getFwVersion(): "
                       "Failed to read BPM major version byte");
+            errl->collectTrace(BPM_COMP_NAME);
             break;
         }
 
@@ -638,6 +645,7 @@ errlHndl_t Bpm::getFwVersion(uint16_t & o_fwVersion) const
         {
             TRACFCOMP(g_trac_bpm, "Bpm::getFwVersion(): "
                       "Failed to read BPM minor version byte");
+            errl->collectTrace(BPM_COMP_NAME);
             break;
         }
 
@@ -725,6 +733,9 @@ errlHndl_t Bpm::issueCommand(const uint8_t i_command,
                                                payloadHeaderDataSize,
                                                TARGETING::get_huid(iv_nvdimm))
                                            );
+            errl->addPartCallout(iv_nvdimm,
+                                 HWAS::BPM_PART_TYPE,
+                                 HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(BPM_COMP_NAME);
             break;
         }
@@ -740,6 +751,7 @@ errlHndl_t Bpm::issueCommand(const uint8_t i_command,
             {
                 TRACFCOMP(g_trac_bpm, "Bpm::issueCommand(): "
                           "Failed to write payload to BPM_REG_PAYLOAD_START");
+                errl->collectTrace(BPM_COMP_NAME);
                 break;
             }
 
@@ -758,6 +770,7 @@ errlHndl_t Bpm::issueCommand(const uint8_t i_command,
         {
             TRACFCOMP(g_trac_bpm, "Bpm::issueCommand(): "
                       "Failed to clear error status register");
+            errl->collectTrace(BPM_COMP_NAME);
             break;
         }
 
@@ -772,6 +785,7 @@ errlHndl_t Bpm::issueCommand(const uint8_t i_command,
         {
             TRACFCOMP(g_trac_bpm, "Bpm::issueCommand(): "
                       "Failed to set payload length");
+            errl->collectTrace(BPM_COMP_NAME);
             break;
         }
 
@@ -786,6 +800,7 @@ errlHndl_t Bpm::issueCommand(const uint8_t i_command,
         {
             TRACFCOMP(g_trac_bpm, "Bpm::issueCommand(): "
                       "Failed to setup the command status register");
+            errl->collectTrace(BPM_COMP_NAME);
             break;
         }
 
@@ -798,6 +813,7 @@ errlHndl_t Bpm::issueCommand(const uint8_t i_command,
             TRACFCOMP(g_trac_bpm, "Bpm::issueCommand(): "
                       "Failed to set the command type. "
                       "The command was not issued to the BPM");
+            errl->collectTrace(BPM_COMP_NAME);
             break;
         }
 
@@ -844,6 +860,9 @@ errlHndl_t Bpm::issueCommand(const uint8_t i_command,
                                          BPM_RC::BPM_BAD_RESPONSE,
                                          i_payload[PAYLOAD_COMMAND_INDEX],
                                          TARGETING::get_huid(iv_nvdimm));
+                errl->addPartCallout(iv_nvdimm,
+                                     HWAS::BPM_PART_TYPE,
+                                     HWAS::SRCI_PRIORITY_HIGH);
                 errl->collectTrace(BPM_COMP_NAME);
                 break;
             }
@@ -993,6 +1012,26 @@ errlHndl_t Bpm::runUpdate(BpmFirmwareLidImage i_fwImage,
     // update attempts.
     iv_updateAttempted = true;
 
+    if (errl == nullptr)
+    {
+        /*@
+        * @errortype
+        * @severity         ERRORLOG::ERRL_SEV_INFORMATIONAL
+        * @moduleid         BPM_RC::BPM_RUN_UPDATE
+        * @reasoncode       BPM_RC::BPM_UPDATE_SUCCESSFUL
+        * @userdata1        NVDIMM Target HUID associated with this BPM
+        * @devdesc          BPM Update finished without errors.
+        * @custdesc         Informational log associated with DIMM updates.
+        */
+        errlHndl_t infoErrl = new ERRORLOG::ErrlEntry(
+                                            ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                            BPM_RC::BPM_RUN_UPDATE,
+                                            BPM_RC::BPM_UPDATE_SUCCESSFUL,
+                                            TARGETING::get_huid(iv_nvdimm));
+        infoErrl->collectTrace(BPM_COMP_NAME);
+        ERRORLOG::errlCommit(infoErrl, BPM_COMP_ID);
+    }
+
     return errl;
 }
 
@@ -1020,6 +1059,7 @@ errlHndl_t Bpm::inUpdateMode()
         {
             TRACFCOMP(g_trac_bpm, "Bpm::inUpdateMode(): "
                       "Failed to read error status register");
+            errl->collectTrace(BPM_COMP_NAME);
             break;
         }
 
@@ -1041,6 +1081,9 @@ errlHndl_t Bpm::inUpdateMode()
                                      BPM_RC::BPM_IN_UPDATE_MODE,
                                      BPM_RC::BPM_UPDATE_MODE_VERIFICATION_FAIL,
                                      TARGETING::get_huid(iv_nvdimm));
+            errl->addPartCallout(iv_nvdimm,
+                                 HWAS::BPM_PART_TYPE,
+                                 HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(BPM_COMP_NAME);
             break;
         }
@@ -1145,6 +1188,7 @@ errlHndl_t Bpm::exitUpdateMode()
             TRACFCOMP(g_trac_bpm, "Bpm::exitUpdateMode(): "
                       "Failed to read BPM_REG_ERR_STATUS register to determine "
                       "if BPM is in update mode.");
+            errl->collectTrace(BPM_COMP_NAME);
             break;
         }
 
@@ -1190,7 +1234,11 @@ errlHndl_t Bpm::exitUpdateMode()
         errlHndl_t infoErrl = new ERRORLOG::ErrlEntry(
                                             ERRORLOG::ERRL_SEV_INFORMATIONAL,
                                             BPM_RC::BPM_END_UPDATE,
-                                            BPM_RC::BPM_EXIT_UPDATE_MODE);
+                                            BPM_RC::BPM_EXIT_UPDATE_MODE,
+                                            TARGETING::get_huid(iv_nvdimm));
+        infoErrl->addPartCallout(iv_nvdimm,
+                             HWAS::BPM_PART_TYPE,
+                             HWAS::SRCI_PRIORITY_HIGH);
         infoErrl->collectTrace(BPM_COMP_NAME);
         ERRORLOG::errlCommit(infoErrl, BPM_COMP_ID);
 
@@ -1203,11 +1251,6 @@ errlHndl_t Bpm::updateFirmware(BpmFirmwareLidImage i_image)
 {
     TRACFCOMP(g_trac_bpm, ENTER_MRK"Bpm::updateFirmware()");
     errlHndl_t errl = nullptr;
-
-    // There are two potential start addresses for the firmware section.
-    // They are:
-    const uint16_t MAIN_PROGRAM_ADDRESS     = 0x8000;
-    const uint16_t MAIN_PROGRAM_ADDRESS_ALT = 0xA000;
 
     // The reset vector address is near the end of the firmware section.
     // We must do a special operation on it when it shows up during the update.
@@ -1354,6 +1397,9 @@ errlHndl_t Bpm::updateFirmware(BpmFirmwareLidImage i_image)
                                         BPM_RC::BPM_UPDATE_FIRMWARE,
                                         BPM_RC::BPM_RESET_VECTOR_NEVER_RECEIVED,
                                         TARGETING::get_huid(iv_nvdimm));
+                        errl->addPartCallout(iv_nvdimm,
+                                             HWAS::BPM_PART_TYPE,
+                                             HWAS::SRCI_PRIORITY_HIGH);
                         errl->collectTrace(BPM_COMP_NAME);
 
                         // Change the state of iv_attemptAnotherUpdate to signal
@@ -1487,6 +1533,7 @@ errlHndl_t Bpm::enterBootstrapLoaderMode()
                 TRACFCOMP(g_trac_bpm, "Bpm::enterBootstrapLoaderMode(): "
                           "Failed to read BPM_REG_ERR_STATUS to verify that "
                           "BSL mode was enabled.");
+                errl->collectTrace(BPM_COMP_NAME);
                 break;
             }
             // data will be 1 if the BPM successfully entered BSL mode.
@@ -1541,6 +1588,9 @@ errlHndl_t Bpm::enterBootstrapLoaderMode()
                                            BPM_RC::BPM_ENTER_BSL_MODE,
                                            BPM_RC::BPM_FAILED_TO_ENTER_BSL_MODE,
                                            TARGETING::get_huid(iv_nvdimm));
+            errl->addPartCallout(iv_nvdimm,
+                                 HWAS::BPM_PART_TYPE,
+                                 HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(BPM_COMP_NAME);
             break;
         }
@@ -1786,6 +1836,7 @@ errlHndl_t Bpm::resetDevice()
                              status.full);
         if (errl != nullptr)
         {
+            errl->collectTrace(BPM_COMP_NAME);
             break;
         }
 
@@ -1853,6 +1904,7 @@ errlHndl_t Bpm::readViaScapRegister(uint8_t const i_reg, uint8_t & io_data)
             TRACFCOMP(g_trac_bpm, "Bpm::readViaScapRegister(): "
                       "Failed to set SCAP_REG to register 0x%.2X",
                       i_reg);
+            errl->collectTrace(BPM_COMP_NAME);
             break;
         }
 
@@ -1872,6 +1924,7 @@ errlHndl_t Bpm::readViaScapRegister(uint8_t const i_reg, uint8_t & io_data)
             TRACFCOMP(g_trac_bpm, "BPM::readViaScapRegister(): "
                      "Failed to read data from SCAP_DATA for register 0x%.2X.",
                      i_reg);
+            errl->collectTrace(BPM_COMP_NAME);
             break;
         }
 
@@ -1910,6 +1963,7 @@ errlHndl_t Bpm::writeViaScapRegister(uint8_t const i_reg, uint8_t const i_data)
                 TRACFCOMP(g_trac_bpm, "Bpm::writeViaScapRegister(): "
                           "Failed to set SCAP_REG to register 0x%.2X",
                           i_reg);
+                errl->collectTrace(BPM_COMP_NAME);
                 break;
             }
 
@@ -1932,6 +1986,7 @@ errlHndl_t Bpm::writeViaScapRegister(uint8_t const i_reg, uint8_t const i_data)
                          "Failed to read from SCAP_REG to verify that "
                          "requested register 0x%.2X was written successfully.",
                          i_reg);
+                errl->collectTrace(BPM_COMP_NAME);
                 break;
             }
 
@@ -1970,6 +2025,9 @@ errlHndl_t Bpm::writeViaScapRegister(uint8_t const i_reg, uint8_t const i_data)
                                            TWO_UINT32_TO_UINT64(i_reg,
                                                data),
                                            TARGETING::get_huid(iv_nvdimm));
+            errl->addPartCallout(iv_nvdimm,
+                                 HWAS::BPM_PART_TYPE,
+                                 HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(BPM_COMP_NAME);
             break;
         }
@@ -1999,6 +2057,7 @@ errlHndl_t Bpm::writeViaScapRegister(uint8_t const i_reg, uint8_t const i_data)
                          "register 0x%.2X.",
                          i_data,
                          i_reg);
+                errl->collectTrace(BPM_COMP_NAME);
                 break;
             }
 
@@ -2021,6 +2080,7 @@ errlHndl_t Bpm::writeViaScapRegister(uint8_t const i_reg, uint8_t const i_data)
                          "Failed to read from SCAP_DATA to verify "
                          "that requested data 0x%.2X was written successfully.",
                          i_data);
+                errl->collectTrace(BPM_COMP_NAME);
                 break;
             }
 
@@ -2059,6 +2119,9 @@ errlHndl_t Bpm::writeViaScapRegister(uint8_t const i_reg, uint8_t const i_data)
                                           TWO_UINT32_TO_UINT64(i_data,
                                               data),
                                           TARGETING::get_huid(iv_nvdimm));
+            errl->addPartCallout(iv_nvdimm,
+                                 HWAS::BPM_PART_TYPE,
+                                 HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(BPM_COMP_NAME);
             break;
         }
@@ -2088,6 +2151,7 @@ errlHndl_t Bpm::disableWriteProtection()
                 TRACFCOMP(g_trac_bpm, "Bpm::disableWriteProtection(): "
                           "Failed to write the unlock sequence to "
                           "I2C_REG_PROTECT");
+                errl->collectTrace(BPM_COMP_NAME);
                 break;
             }
         }
@@ -2105,6 +2169,7 @@ errlHndl_t Bpm::disableWriteProtection()
         {
             TRACFCOMP(g_trac_bpm, "Bpm::disableWriteProtection(): "
                       "Failed to verify that write protection was removed");
+            errl->collectTrace(BPM_COMP_NAME);
             break;
         }
         const uint8_t WRITE_PROTECT_DISABLED = 0x80;
@@ -2125,6 +2190,9 @@ errlHndl_t Bpm::disableWriteProtection()
                                  BPM_RC::BPM_DISABLE_WRITE_PROTECTION,
                                  BPM_RC::BPM_DISABLE_WRITE_PROTECTION_FAILED,
                                  TARGETING::get_huid(iv_nvdimm));
+            errl->addPartCallout(iv_nvdimm,
+                                 HWAS::BPM_PART_TYPE,
+                                 HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(BPM_COMP_NAME);
             break;
         }
@@ -2230,6 +2298,7 @@ errlHndl_t Bpm::writeToMagicRegisters(
                 TRACFCOMP(g_trac_bpm, "Bpm::writeToMagicRegisters(): "
                           "Failed to write the magic values to the magic "
                           "registers");
+                errl->collectTrace(BPM_COMP_NAME);
                 break;
             }
         }
@@ -2250,6 +2319,7 @@ errlHndl_t Bpm::writeToMagicRegisters(
                 TRACFCOMP(g_trac_bpm, "Bpm::writeToMagicRegisters(): "
                           "Failed to read back magic values to verify that "
                           "they were written.");
+                errl->collectTrace(BPM_COMP_NAME);
                 break;
             }
         }
@@ -2293,6 +2363,9 @@ errlHndl_t Bpm::writeToMagicRegisters(
                                         TWO_UINT8_TO_UINT16(i_magicValues[1],
                                             magic_data[1])),
                                      TARGETING::get_huid(iv_nvdimm));
+            errl->addPartCallout(iv_nvdimm,
+                                 HWAS::BPM_PART_TYPE,
+                                 HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(BPM_COMP_NAME);
             break;
         }
@@ -2334,6 +2407,7 @@ errlHndl_t Bpm::dumpSegment(uint16_t const i_segmentCode,
                              status.full);
         if (errl != nullptr)
         {
+            errl->collectTrace(BPM_COMP_NAME);
             break;
         }
 
@@ -2361,6 +2435,7 @@ errlHndl_t Bpm::dumpSegment(uint16_t const i_segmentCode,
                                  status.full);
             if (errl != nullptr)
             {
+                errl->collectTrace(BPM_COMP_NAME);
                 break;
             }
             if (status.bit.Bpm_Bsl_Mode)
@@ -2383,6 +2458,9 @@ errlHndl_t Bpm::dumpSegment(uint16_t const i_segmentCode,
                                                BPM_RC::BPM_DUMP_SEGMENT,
                                                BPM_RC::BPM_BSL_MODE_ENABLED,
                                                TARGETING::get_huid(iv_nvdimm));
+                errl->addPartCallout(iv_nvdimm,
+                                     HWAS::BPM_PART_TYPE,
+                                     HWAS::SRCI_PRIORITY_HIGH);
                 errl->collectTrace(BPM_COMP_NAME);
 
                 break;
@@ -2503,6 +2581,9 @@ errlHndl_t Bpm::dumpSegment(uint16_t const i_segmentCode,
                                            BPM_RC::BPM_EXCEEDED_RETRY_LIMIT,
                                            i_segmentCode,
                                            TARGETING::get_huid(iv_nvdimm));
+            errl->addPartCallout(iv_nvdimm,
+                                 HWAS::BPM_PART_TYPE,
+                                 HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(BPM_COMP_NAME);
             setAttemptAnotherUpdate();
             break;
@@ -2855,6 +2936,7 @@ errlHndl_t Bpm::getResponse(uint8_t * const o_responseData,
         {
             TRACFCOMP(g_trac_bpm, "Bpm::getResponse(): "
                       "Failed to clear error status register");
+            errl->collectTrace(BPM_COMP_NAME);
             break;
         }
 
@@ -2872,6 +2954,7 @@ errlHndl_t Bpm::getResponse(uint8_t * const o_responseData,
         {
             TRACFCOMP(g_trac_bpm, "Bpm::getResponse(): "
                       "Failed to set payload length");
+            errl->collectTrace(BPM_COMP_NAME);
             break;
         }
 
@@ -2886,6 +2969,7 @@ errlHndl_t Bpm::getResponse(uint8_t * const o_responseData,
         {
             TRACFCOMP(g_trac_bpm, "Bpm::getResponse(): "
                       "Failed to setup command status register");
+            errl->collectTrace(BPM_COMP_NAME);
             break;
         }
 
@@ -2897,6 +2981,7 @@ errlHndl_t Bpm::getResponse(uint8_t * const o_responseData,
         {
             TRACFCOMP(g_trac_bpm, "Bpm::getResponse(): "
                       "Failed to setup command type.");
+            errl->collectTrace(BPM_COMP_NAME);
             break;
         }
 
@@ -2919,6 +3004,7 @@ errlHndl_t Bpm::getResponse(uint8_t * const o_responseData,
             {
                 TRACFCOMP(g_trac_bpm, "Bpm::getResponse(): "
                           "Failed to read response payload");
+                errl->collectTrace(BPM_COMP_NAME);
                 break;
             }
 
@@ -2961,6 +3047,9 @@ errlHndl_t Bpm::getResponse(uint8_t * const o_responseData,
                                            TWO_UINT32_TO_UINT64(expectedCrc,
                                                responseCrc),
                                            TARGETING::get_huid(iv_nvdimm));
+            errl->addPartCallout(iv_nvdimm,
+                                 HWAS::BPM_PART_TYPE,
+                                 HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(BPM_COMP_NAME);
             break;
         }
@@ -3137,6 +3226,9 @@ errlHndl_t Bpm::blockWrite(payload_t i_payload)
                                        BPM_RC::BPM_BLOCK_WRITE,
                                        BPM_RC::BPM_EXCEEDED_RETRY_LIMIT,
                                        TARGETING::get_huid(iv_nvdimm));
+        errl->addPartCallout(iv_nvdimm,
+                             HWAS::BPM_PART_TYPE,
+                             HWAS::SRCI_PRIORITY_HIGH);
         errl->collectTrace(BPM_COMP_NAME);
 
     }
@@ -3217,6 +3309,9 @@ errlHndl_t Bpm::blockWriteRetry(payload_t i_payload)
                                        BPM_RC::BPM_RETRY_BLOCK_WRITE,
                                        BPM_RC::BPM_EXCEEDED_RETRY_LIMIT,
                                        TARGETING::get_huid(iv_nvdimm));
+        errl->addPartCallout(iv_nvdimm,
+                             HWAS::BPM_PART_TYPE,
+                             HWAS::SRCI_PRIORITY_HIGH);
         errl->collectTrace(BPM_COMP_NAME);
 
     }
@@ -3243,6 +3338,7 @@ errlHndl_t Bpm::waitForCommandStatusBitReset(
                              i_commandStatus.value);
         if (errl != nullptr)
         {
+            errl->collectTrace(BPM_COMP_NAME);
             break;
         }
 
@@ -3260,6 +3356,7 @@ errlHndl_t Bpm::waitForCommandStatusBitReset(
             {
                 TRACFCOMP(g_trac_bpm, "Bpm::waitForCommandStatusBitReset(): "
                           "Failed to read BPM_CMD_STATUS register");
+                errl->collectTrace(BPM_COMP_NAME);
                 break;
             }
 
@@ -3283,6 +3380,9 @@ errlHndl_t Bpm::waitForCommandStatusBitReset(
                                            BPM_RC::BPM_WAIT_FOR_CMD_BIT_RESET,
                                            BPM_RC::BPM_EXCEEDED_RETRY_LIMIT,
                                            TARGETING::get_huid(iv_nvdimm));
+                errl->addPartCallout(iv_nvdimm,
+                                     HWAS::BPM_PART_TYPE,
+                                     HWAS::SRCI_PRIORITY_HIGH);
                 errl->collectTrace(BPM_COMP_NAME);
                 break;
             }
@@ -3304,6 +3404,7 @@ errlHndl_t Bpm::waitForCommandStatusBitReset(
             {
                 TRACFCOMP(g_trac_bpm, "Bpm::waitForCommandStatusBitReset(): "
                           "Failed to read BPM_REG_ERR_STATUS");
+                errl->collectTrace(BPM_COMP_NAME);
                 break;
             }
 
@@ -3352,6 +3453,7 @@ errlHndl_t Bpm::verifyGoodBpmState()
             TRACFCOMP(g_trac_bpm, "Bpm::verifyGoodBpmState(): "
                       "Failed to read SCAP_STATUS to determine "
                       "state of BPM.");
+            errl->collectTrace(BPM_COMP_NAME);
             break;
         }
 
@@ -3409,6 +3511,7 @@ errlHndl_t Bpm::waitForBusyBit()
             TRACFCOMP(g_trac_bpm, "Bpm::waitForBusyBit(): "
                       "Failed to read from SCAP_STATUS to determine "
                       "state of Busy bit.");
+            errl->collectTrace(BPM_COMP_NAME);
             break;
         }
 
@@ -3501,6 +3604,38 @@ errlHndl_t Bpm::runConfigUpdates(BpmConfigLidImage i_configImage)
         errl = updateConfig();
         if (errl != nullptr)
         {
+            // If the config update fails for any reason we should erase the
+            // firmware section so that subsequent IPLs/attempts will not think
+            // that we have a fully valid image when we do not.
+            if (  (iv_firmwareStartAddress == MAIN_PROGRAM_ADDRESS)
+               || (iv_firmwareStartAddress == MAIN_PROGRAM_ADDRESS_ALT))
+            {
+                payload_t payload;
+                errlHndl_t fwEraseErrl = setupPayload(payload,
+                                                      BSL_MASS_ERASE,
+                                                      iv_firmwareStartAddress);
+                if (fwEraseErrl != nullptr)
+                {
+                    handleMultipleErrors(errl, fwEraseErrl);
+                    break;
+                }
+
+                fwEraseErrl = issueCommand(BPM_PASSTHROUGH,
+                                    payload,
+                                    WRITE,
+                                    ERASE_FIRMWARE_DELAY);
+                if (fwEraseErrl != nullptr)
+                {
+                    handleMultipleErrors(errl, fwEraseErrl);
+                    break;
+                }
+
+                TRACFCOMP(g_trac_bpm, "Bpm::updateFirmware(): "
+                          "Performing BSL_MASS_ERASE on BPM to force full "
+                          "update on any subsequent attempt. Sleep for 5 "
+                          "seconds.");
+                longSleep(5);
+            }
             break;
         }
 
@@ -3833,6 +3968,9 @@ void Bpm::handleMultipleErrors(errlHndl_t& io_returnErrl,
                  io_secondErrl->eid(),
                  io_returnErrl->plid());
         io_secondErrl->collectTrace(BPM_COMP_NAME);
+        io_secondErrl->addPartCallout(iv_nvdimm,
+                                      HWAS::BPM_PART_TYPE,
+                                      HWAS::SRCI_PRIORITY_HIGH);
         ERRORLOG::errlCommit(io_secondErrl, BPM_COMP_ID);
     }
     else if (io_returnErrl == nullptr)
