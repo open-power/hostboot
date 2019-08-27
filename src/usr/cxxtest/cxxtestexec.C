@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,7 +32,6 @@
 #include <sys/sync.h>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
-#
 #include <initservice/taskargs.H>
 #include <cxxtest/TestSuite.H>
 
@@ -45,7 +44,6 @@ namespace CxxTest
 
 // prototype
 void    cxxinit( errlHndl_t    &io_taskRetErrl );
-
 
 trace_desc_t *g_trac_cxxtest = NULL;
 TRAC_INIT(&g_trac_cxxtest, CXXTEST_COMP_NAME, KILOBYTE );
@@ -75,6 +73,8 @@ void    cxxinit( errlHndl_t    &io_taskRetErrl )
     } cxxtask;
     errlHndl_t  l_errl  =   NULL;
     std::vector<const char *> module_list;
+    std::vector<const char *> parallel_module_list;
+    std::vector<const char *> serial_module_list;
     std::vector<cxxtask_t> tasks;
     tid_t       tidrc           =   0;
 
@@ -94,12 +94,16 @@ void    cxxinit( errlHndl_t    &io_taskRetErrl )
     // count up the number of viable modules ahead of time
     TRACDCOMP( g_trac_cxxtest, "Counting CxxTestExec modules:" );
 
+    //Get all modules, then sort into parallel and serial lists
     VFS::find_test_modules(module_list);
 
-    //  start executing the CxxTest modules
+    CxxTest::sortTests(module_list, serial_module_list, parallel_module_list);
 
-    TRACFCOMP( g_trac_cxxtest, ENTER_MRK "Execute CxxTestExec, totalmodules=%d.",
-            module_list.size());
+    //  start executing the CxxTest modules
+    TRACFCOMP( g_trac_cxxtest, ENTER_MRK "Execute CxxTestExec, totalparallelmodules=%d, totalserialmodules=%d (overall total:%d)",
+            parallel_module_list.size(),
+            serial_module_list.size(),
+            parallel_module_list.size()+serial_module_list.size());
     printkd( "\n Begin CxxTest...\n");
 
     __sync_add_and_fetch(&CxxTest::g_ModulesStarted, 1);
@@ -111,8 +115,58 @@ void    cxxinit( errlHndl_t    &io_taskRetErrl )
         TS_FAIL("Error logs committed previously during IPL.");
     }
 
-    for(std::vector<const char *>::const_iterator i = module_list.begin();
-        i != module_list.end(); ++i)
+    for(std::vector<const char *>::const_iterator i = serial_module_list.begin();
+        i != serial_module_list.end(); ++i)
+    {
+        __sync_add_and_fetch(&CxxTest::g_ModulesStarted, 1);
+
+        TRACFCOMP( g_trac_cxxtest,
+                   "Now executing Serial Test Cases!");
+
+        // load module and call _init()
+        l_errl = VFS::module_load( *i );
+        if ( l_errl )
+        {
+            // vfs could not load a module and returned an errorlog.
+            //  commit the errorlog, mark the test failed, and
+            //  move on.
+            TS_FAIL( "ERROR: Task %s could not be loaded, committing errorlog",
+                    *i );
+            errlCommit( l_errl, CXXTEST_COMP_ID );
+            continue;
+        }
+
+        //First run all serial testcases
+        tidrc = task_exec( *i, NULL );
+        TRACFCOMP( g_trac_cxxtest, "Launched serial task: %s tidrc=%d",
+                   *i, tidrc );
+        int status = 0;
+        task_wait_tid(tidrc, &status, NULL);
+
+        if (status != TASK_STATUS_EXITED_CLEAN)
+        {
+            TRACFCOMP( g_trac_cxxtest, "Task %d crashed with status %d.",
+                       tidrc, status );
+            if(CxxTest::g_FailedTests < CxxTest::CXXTEST_FAIL_LIST_SIZE)
+            {
+                CxxTest::CxxTestFailedEntry *l_failedEntry =
+                    &CxxTest::g_FailedTestList[CxxTest::g_FailedTests];
+                sprintf(l_failedEntry->failTestFile,
+                        "%s crashed",
+                        *i);
+                l_failedEntry->failTestData = tidrc;
+            }
+            __sync_add_and_fetch(&CxxTest::g_FailedTests, 1);
+        }
+        else
+        {
+            TRACFCOMP( g_trac_cxxtest, "Task %d finished.", tidrc );
+        }
+    }
+
+    //Then run all parallel testcases
+    for(std::vector<const char *>::const_iterator i = parallel_module_list.begin();
+        i != parallel_module_list.end(); ++i)
     {
         __sync_add_and_fetch(&CxxTest::g_ModulesStarted, 1);
 

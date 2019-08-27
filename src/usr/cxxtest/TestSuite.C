@@ -32,7 +32,6 @@
 #include <stdarg.h>
 #include <arch/ppc.H>
 #include <string.h>
-
 #include <cxxtest/TestSuite.H>
 
 trace_desc_t *g_trac_test = NULL;
@@ -43,6 +42,9 @@ namespace CxxTest
 /******************************************************************************/
 // Globals/Constants
 /******************************************************************************/
+//This is a list of testcases that are expected to run in a serial manner
+//   example: std::vector<const char *> CxxSerialTests{"libtestrtloader.so"};
+std::vector<const char *> CxxSerialTests{"libtesthwas.so"};
 
 //
 // TestSuite members
@@ -102,6 +104,43 @@ void doFailTest( )
     }
     __sync_add_and_fetch( &g_FailedTests, 1 );
 
+}
+
+void sortTests(std::vector<const char *> & i_list,
+               std::vector<const char *> & o_serial_list,
+               std::vector<const char *> & o_parallel_list)
+{
+    o_serial_list.clear();
+    o_serial_list.reserve(32);
+    o_parallel_list.clear();
+    o_parallel_list.reserve(32);
+
+    //Loop through list of all tests
+    for(std::vector<const char *>::const_iterator i = i_list.begin();
+        i != i_list.end(); ++i)
+    {
+        bool is_serial = false;
+
+        for(std::vector<const char *>::const_iterator j = CxxSerialTests.begin();
+            j !=  CxxSerialTests.end(); ++j)
+        {
+            if (0 == strcmp(*i, *j))
+            {
+                is_serial = true;
+            }
+        }
+
+        if (is_serial)
+        {
+            TRACFCOMP( g_trac_test, "%s is a serial test",*i);
+            o_serial_list.push_back(*i);
+        }
+        else
+        {
+            TRACFCOMP( g_trac_test, "%s is a parallel test",*i);
+            o_parallel_list.push_back(*i);
+        }
+    }
 }
 
 /**
