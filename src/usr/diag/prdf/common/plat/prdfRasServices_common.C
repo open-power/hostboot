@@ -891,14 +891,6 @@ void ErrDataService::deallocateDimms( const SDC_MRU_LIST & i_mruList )
         for ( SDC_MRU_LIST::const_iterator it = i_mruList.begin();
               it != i_mruList.end(); ++it )
         {
-            #ifdef CONFIG_NVDIMM
-            // If the MRU's gard policy is set to NO_GARD, skip it.
-            if ( NO_GARD == it->gardState &&
-                 isNVDIMM(it->callout.getTarget()) )
-            {
-                continue;
-            }
-            #endif
 
             PRDcallout thiscallout = it->callout;
             if ( PRDcalloutData::TYPE_TARGET == thiscallout.getType() )
@@ -906,6 +898,15 @@ void ErrDataService::deallocateDimms( const SDC_MRU_LIST & i_mruList )
                 TargetHandle_t calloutTgt = thiscallout.getTarget();
                 TYPE tgtType = getTargetType( calloutTgt );
 
+                #ifdef CONFIG_NVDIMM
+                // If the MRU's gard policy is set to NO_GARD, skip it.
+                if ( NO_GARD == it->gardState && isNVDIMM(calloutTgt) )
+                {
+                    continue;
+                }
+                #endif
+
+>>>>>>> ad5d7d612... PRD: Skip callouts without trgts when clearing NVDIMM gard
                 switch ( tgtType )
                 {
                     case TYPE_MCBIST: case TYPE_MCS: case TYPE_MCA: // Nimbus
@@ -934,7 +935,17 @@ void ErrDataService::deallocateDimms( const SDC_MRU_LIST & i_mruList )
                       dimm != dimms.end(); ++dimm )
                 {
                     if ( TYPE_DIMM == getTargetType(*dimm) )
+                    {
+                        #ifdef CONFIG_NVDIMM
+                        // If the MRU's gard policy is set to NO_GARD, skip it.
+                        if ( NO_GARD == it->gardState && isNVDIMM(*dimm) )
+                        {
+                            continue;
+                        }
+                        #endif
+
                         dimmList.push_back(*dimm);
+                    }
                 }
             }
         }

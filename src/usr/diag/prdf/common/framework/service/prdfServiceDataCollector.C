@@ -187,13 +187,17 @@ void ServiceDataCollector::clearNvdimmMruListGard()
     for ( auto & mru : xMruList )
     {
         PRDcallout callout = mru.callout;
-        TargetHandle_t trgt = callout.getTarget();
-        if ( TYPE_DIMM == PlatServices::getTargetType(trgt) )
+        PRDcalloutData::MruType mruType = callout.getType();
+
+        if ( mruType == PRDcalloutData::TYPE_TARGET )
         {
+            TargetHandle_t trgt = callout.getTarget();
+
             // If the callout target is an NVDIMM send a message to
             // PHYP/Hostboot that a save/restore may work, and if we are at
             // IPL, clear Gard on the NVDIMM.
-            if ( isNVDIMM(trgt) )
+            if ( TYPE_DIMM == PlatServices::getTargetType(trgt) &&
+                 isNVDIMM(trgt) )
             {
                 // Send the message to PHYP/Hostboot
                 uint32_t l_rc = PlatServices::nvdimmNotifyProtChange( trgt,
@@ -208,6 +212,35 @@ void ServiceDataCollector::clearNvdimmMruListGard()
                 // IPL, clear Gard
                 mru.gardState = NO_GARD;
                 #endif
+            }
+        }
+        else if ( mruType == PRDcalloutData::TYPE_MEMMRU )
+        {
+            MemoryMru memMru( callout.flatten() );
+            TargetHandleList dimmList = memMru.getCalloutList();
+
+            for ( auto & dimm : dimmList )
+            {
+                // If the callout target is an NVDIMM send a message to
+                // PHYP/Hostboot that a save/restore may work, and if we are at
+                // IPL, clear Gard on the NVDIMM.
+                if ( TYPE_DIMM == PlatServices::getTargetType(dimm) &&
+                     isNVDIMM(dimm) )
+                {
+                    // Send the message to PHYP/Hostboot
+                    uint32_t l_rc = PlatServices::nvdimmNotifyProtChange( dimm,
+                        NVDIMM::NVDIMM_RISKY_HW_ERROR );
+                    if ( SUCCESS != l_rc )
+                    {
+                        PRDF_TRAC( PRDF_FUNC "nvdimmNotifyProtChange(0x%08x) "
+                                   "failed.", PlatServices::getHuid(dimm) );
+                        continue;
+                    }
+                    #ifndef __HOSTBOOT_RUNTIME
+                    // IPL, clear Gard
+                    mru.gardState = NO_GARD;
+                    #endif
+                }
             }
         }
     }
