@@ -63,19 +63,19 @@ fapi2::ReturnCode p10_putsram_io_ppe(
 
     FAPI_DBG("p10_putsram_io_ppe: i_offset %p, i_bytes %lu.", i_offset, i_bytes);
 
-    // Set PPE SRAM write address
-    FAPI_DBG("p10_putsram_io_ppe: Setup write address in PPE_WRAP_ARB_CSAR reg.");
-    FAPI_TRY(PREP_PHY_PPE_WRAP_ARB_CSAR(i_target),
-             "p10_putsram_io_ppe: PREP_PHY_PPE_WRAP_ARB_CSAR returns an error.");
-    FAPI_TRY(PUT_PHY_PPE_WRAP_ARB_CSAR(i_target, i_offset),
-             "p10_putsram_io_ppe: PUT_PHY_PPE_WRAP_ARB_CSAR returns an error.");
-
     // Turn on Auto Increment if write more than 8 bytes
     if (i_bytes > 8)
     {
         FAPI_TRY(enableDisableIoPpeAutoInc(i_target, true),
                  "p10_putsram_io_ppe: enableDisableIoPpeAutoInc returns an error.");
     }
+
+    // Set PPE SRAM write address
+    FAPI_DBG("p10_putsram_io_ppe: Setup write address in PPE_WRAP_ARB_CSAR reg.");
+    FAPI_TRY(PREP_PHY_PPE_WRAP_ARB_CSAR(i_target),
+             "p10_putsram_io_ppe: PREP_PHY_PPE_WRAP_ARB_CSAR returns an error.");
+    FAPI_TRY(PUT_PHY_PPE_WRAP_ARB_CSAR(i_target, i_offset),
+             "p10_putsram_io_ppe: PUT_PHY_PPE_WRAP_ARB_CSAR returns an error.");
 
     // Write data
     FAPI_DBG("p10_putsram_io_ppe: Write data to PHY_PPE_WRAP_ARB_CSDR reg.");
