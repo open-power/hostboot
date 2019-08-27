@@ -431,7 +431,7 @@ sub checkSpaceConstraints
         {
             # If this is a test run increase HBI size by PAGE_SIZE until all test
             # cases fit
-            if ($eyeCatch eq "HBI")
+            if ( $testRun && ($eyeCatch eq "HBI") )
             {
                 print "Adjusting HBI size - ran out of space for test cases\n";
                 adjustSecPhysSize(\%sectionHash, $layoutKey, $filesize);
