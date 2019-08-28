@@ -220,6 +220,7 @@ EXTENDED_MODULES += mmio
 EXTENDED_MODULES += smf
 EXTENDED_MODULES += expaccess
 EXTENDED_MODULES += expupd
+EXTENDED_MODULES += fapiwrap
 
 #***************************************
 # Working test modules

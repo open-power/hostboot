@@ -276,7 +276,17 @@ const TaskInfo g_exttaskinfolist[]   =   {
                     EXT_IMAGE,                              // Extended Module
             }
         },
-
+        /**
+         * @brief   fapiwrap task, handles fapi wrapper for platform libraries
+         */
+        {
+            "libfapiwrap.so" ,                              // taskname
+            NULL,                                           // no pointer to fn
+            {
+                    INIT_TASK,                              // task type
+                    EXT_IMAGE,                              // Extended Module
+            }
+        },
 
         // @todo RTC:145354 Restore testprdf and testattn in p9 branch
         /**
