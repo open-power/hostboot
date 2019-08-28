@@ -1,0 +1,172 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p10/procedures/xml/error_info/p10_fabric_iovalid_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<hwpErrors>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_FAB_IOVALID_DL_FFDC_ERR</rc>
+  <description>
+    FFDC collected for DL layer training failure.
+  </description>
+  <ffdc>FIR_REG</ffdc>
+  <ffdc>CONFIG_REG</ffdc>
+  <ffdc>CONTROL_REG</ffdc>
+  <ffdc>CONFIG_PHY_REG</ffdc>
+  <ffdc>SECONDARY_CONFIG_REG</ffdc>
+  <ffdc>LATENCY_REG</ffdc>
+  <ffdc>OPTICAL_CONFIG_REG</ffdc>
+  <ffdc>TX0_LANE_CONTROL_REG</ffdc>
+  <ffdc>TX1_LANE_CONTROL_REG</ffdc>
+  <ffdc>RX0_LANE_CONTROL_REG</ffdc>
+  <ffdc>RX1_LANE_CONTROL_REG</ffdc>
+  <ffdc>ERR0_STATUS_REG</ffdc>
+  <ffdc>ERR1_STATUS_REG</ffdc>
+  <ffdc>STATUS_REG</ffdc>
+  <ffdc>ERR_MISC_REG</ffdc>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_FAB_IOVALID_TL_FFDC_ERR</rc>
+  <description>
+    FFDC collected for TL layer training failure.
+  </description>
+  <ffdc>FIR_REG</ffdc>
+  <ffdc>CONFIG01_REG</ffdc>
+  <ffdc>CONFIG23_REG</ffdc>
+  <ffdc>MISC_CONFIG_REG</ffdc>
+  <ffdc>FRAMER0123_ERR_REG</ffdc>
+  <ffdc>PARSER0123_ERR_REG</ffdc>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_FAB_IOVALID_REM_ENDP_TARGET_ERR</rc>
+  <description>
+    No matching remote endpoint target found for link
+    which should be enabled.
+  </description>
+  <ffdc>LOC_ENDP_TARGET</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_FAB_IOVALID_DL_NOT_TRAINED_RETRAIN_NONE_ERR</rc>
+  <description>
+    Link DL training did not complete successfully,
+    both halves of link pair are incapable of training.
+  </description>
+  <ffdc>LOC_ENDP_TARGET</ffdc>
+  <ffdc>LOC_LINK_TRAIN</ffdc>
+  <ffdc>LOC_LINK_TRAIN_NEXT</ffdc>
+  <ffdc>LOC_LINK_FAILED0</ffdc>
+  <ffdc>LOC_LINK_FAILED1</ffdc>
+  <ffdc>REM_ENDP_TARGET</ffdc>
+  <callout>
+    <target>LOC_ENDP_TARGET</target>
+    <priority>MEDIUM</priority>
+  </callout>
+  <callout>
+    <target>REM_ENDP_TARGET</target>
+    <priority>MEDIUM</priority>
+  </callout>
+  <callout>
+    <bus>LOC_ENDP_TARGET,REM_ENDP_TARGET</bus>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>LOC_ENDP_TARGET</target>
+  </deconfigure>
+  <deconfigure>
+    <target>REM_ENDP_TARGET</target>
+  </deconfigure>
+  <gard>
+    <target>LOC_ENDP_TARGET</target>
+  </gard>
+  <gard>
+    <target>REM_ENDP_TARGET</target>
+  </gard>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_FAB_IOVALID_DL_NOT_TRAINED_RETRAIN_HALF_ERR</rc>
+  <description>
+    Link DL training did not complete successfully,
+    attempt retraining on half link basis.
+  </description>
+  <ffdc>LOC_ENDP_TARGET</ffdc>
+  <ffdc>LOC_LINK_TRAIN</ffdc>
+  <ffdc>LOC_LINK_TRAIN_NEXT</ffdc>
+  <ffdc>LOC_LINK_FAILED0</ffdc>
+  <ffdc>LOC_LINK_FAILED1</ffdc>
+  <ffdc>REM_ENDP_TARGET</ffdc>
+  <callout>
+    <target>LOC_ENDP_TARGET</target>
+    <priority>MEDIUM</priority>
+  </callout>
+  <callout>
+    <target>REM_ENDP_TARGET</target>
+    <priority>MEDIUM</priority>
+  </callout>
+  <callout>
+    <bus>LOC_ENDP_TARGET,REM_ENDP_TARGET</bus>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_FAB_IOVALID_TL_NOT_TRAINED_ERR</rc>
+  <description>
+    Link TL training did not complete successfully.
+  </description>
+  <ffdc>LOC_LINK_TRAIN</ffdc>
+  <ffdc>REM_ENDP_TARGET</ffdc>
+  <callout>
+    <target>LOC_ENDP_TARGET</target>
+    <priority>MEDIUM</priority>
+  </callout>
+  <callout>
+    <target>REM_ENDP_TARGET</target>
+    <priority>MEDIUM</priority>
+  </callout>
+  <callout>
+    <bus>LOC_ENDP_TARGET,REM_ENDP_TARGET</bus>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>LOC_ENDP_TARGET</target>
+  </deconfigure>
+  <deconfigure>
+    <target>REM_ENDP_TARGET</target>
+  </deconfigure>
+  <gard>
+    <target>LOC_ENDP_TARGET</target>
+  </gard>
+  <gard>
+    <target>REM_ENDP_TARGET</target>
+  </gard>
+</hwpError>
+<!-- ******************************************************************** -->
+</hwpErrors>
