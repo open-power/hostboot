@@ -245,10 +245,6 @@ public:
         ++l_databuf;
         i_parser.PrintNumber("CSave Timeout Info1 Register: ","%.2lX",TO_UINT8(l_databuf));
         ++l_databuf;
-        i_parser.PrintNumber("CSave Timeout Info0 Register: ","%.2lX",TO_UINT8(l_databuf));
-        ++l_databuf;
-        i_parser.PrintNumber("CSave Timeout Info1 Register: ","%.2lX",TO_UINT8(l_databuf));
-        ++l_databuf;
         i_parser.PrintNumber("Error Threshold Status Register: ","%.2lX",TO_UINT8(l_databuf));
         ++l_databuf;
         i_parser.PrintNumber("NVDIMM Ready Register: ","%.2lX",TO_UINT8(l_databuf));
