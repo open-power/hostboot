@@ -41,7 +41,6 @@
 #include <sys/task.h>
 #include <sys/misc.h>
 #include <util/utilmbox_scratch.H>
-#include <p10_frequency_buckets.H>
 #include <targeting/common/attributes.H>
 
 #include "utilbase.H"
@@ -119,31 +118,29 @@ namespace Util
         mutex_unlock(&g_mutex);
     }
 
-    uint32_t getBootNestFreq()
+    uint32_t getBootNestFreqMhz()
     {
-/* FIXME RTC: 210975 NEST_PLL_FREQ_LIST DNE in P10 yet
+        uint32_t l_bootNestFreqMhz = 0;;
+        INITSERVICE::SPLESS::MboxScratch4_t l_scratch4;
+        l_scratch4.data32 = 0;
+
         TARGETING::Target * l_sys = nullptr;
         (void) TARGETING::targetService().getTopLevelTarget( l_sys );
-        assert( l_sys, "getBootNestFreq() system target is NULL");
+        assert( l_sys, "getBootNestFreqMhz() system target is NULL");
 
-        const uint32_t l_nestPllBucket = l_sys->getAttr<TARGETING::ATTR_NEST_PLL_BUCKET>();
+        // Read what frequency SBE used for initializing the nest clock
+        // from the scratch4 register
+        //
+        // NOTE: We are reading the core boot freq because nest freq = core freq at
+        //       boot time (not true during runtime).
+        const auto l_scratchRegs = l_sys->getAttrAsStdArr<TARGETING::ATTR_MASTER_MBOX_SCRATCH>();
+        l_scratch4.data32 = l_scratchRegs[INITSERVICE::SPLESS::MboxScratch4_t::REG_IDX];
+        l_bootNestFreqMhz = l_scratch4.nestBootFreq.coreBootFreqMhz;
 
-        size_t sizeOfPll = sizeof(NEST_PLL_FREQ_LIST)/
-          sizeof(NEST_PLL_FREQ_LIST[0]);
+        UTIL_FT("getBootNestFreqMhz::The boot frequency was %d MHz",
+                l_bootNestFreqMhz);
 
-        assert((uint8_t)(l_nestPllBucket-1) < (uint8_t) sizeOfPll );
-
-        // The nest PLL bucket IDs are numbered 1 - 5. Subtract 1 to
-        // take zero-based indexing into account.
-        const uint32_t l_bootNestFreq = NEST_PLL_FREQ_LIST[l_nestPllBucket-1];
-
-        UTIL_FT("getBootNestFreq::The boot frequency was %d: Bucket Id = %d",
-                l_bootNestFreq,
-                l_nestPllBucket );
-
-        return l_bootNestFreq;
-*/
-        return 0;
+        return l_bootNestFreqMhz;
     }
 
 

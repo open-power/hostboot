@@ -73,6 +73,7 @@ namespace fapi2
         MOD_FAPI2_PLAT_GET_FREQ_MCA_MHZ             = 0x1E,
         MOD_GET_OMI_FREQ_AND_VCO                    = 0x1F,
         MOD_FAPI2_SPD_ACCESS                        = 0x20,
+        MOD_GET_OMI_FREQ                            = 0x21,
     };
 
     /**

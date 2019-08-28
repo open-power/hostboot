@@ -39,7 +39,7 @@ HWP_PATH += ${HWP_PATH_P10}/ ${HWP_PATH_EXP}/
 
 #Add all the object files required for istep07 module
 OBJS += call_mss_volt.o
-#OBJS += call_mss_freq.o
+OBJS += call_mss_freq.o
 #OBJS += call_mss_eff_config.o
 #OBJS += call_mss_attr_update.o
 OBJS += host_mss_attr_cleanup.o
@@ -48,9 +48,9 @@ OBJS += host_mss_attr_cleanup.o
 
 #Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
-#EXTRAINCDIR += ${ROOTPATH}/src/include/usr/sbe/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/sbe/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/lib/
+EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/lib/
 #EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 #EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
@@ -91,8 +91,8 @@ include ${ROOTPATH}/procedure.rules.mk
 include $(HWP_PATH_P10)/p10_mss_volt.mk
 
 #mss_freq : Calc dimm frequency
-#include $(HWP_PATH_P10)/p10_mss_freq.mk
-#include $(HWP_PATH_P10)/p10_mss_freq_system.mk
+include $(HWP_PATH_P10)/p10_mss_freq.mk
+include $(HWP_PATH_P10)/p10_mss_freq_system.mk
 #include $(HWP_PATH_P10)/p10_mss_eff_config.mk
 #include $(HWP_PATH_P10)/p10_mss_eff_config_thermal.mk
 #include $(HWP_PATH_P10)/p10_mss_bulk_pwr_throttles.mk

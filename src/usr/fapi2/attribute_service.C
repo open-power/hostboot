@@ -2051,45 +2051,16 @@ ReturnCode platGetMBvpdSlopeInterceptData(
     return rc;
 }
 
-#ifndef CONFIG_AXONE
-//******************************************************************************
-// fapi::platAttrSvc::platGetFreqMcaMhz function
-//******************************************************************************
-ReturnCode platGetFreqMcaMhz(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
-                             ATTR_FREQ_MCA_MHZ_Type & o_val)
-{
-    // The POR config for Cumulus is to run the MC/DMI clocks directly
-    // off of the NEST PLL in 'sync' mode.  To support 'sync' mode FW
-    // can pin ATTR_FREQ_MCA_MHZ == ATTR_FREQ_PB_MHZ.
-
-    fapi2::ReturnCode l_rc;
-    errlHndl_t l_errl = nullptr;
-
-    TARGETING::Target * l_chipTarget = nullptr;
-    l_errl = getTargetingTarget(i_fapiTarget, l_chipTarget);
-    if(l_errl)
-    {
-        FAPI_ERR("platGetFreqMcaMhz: Error from getTargetingTarget");
-        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
-    }
-    else
-    {
-        o_val = l_chipTarget->getAttr<TARGETING::ATTR_FREQ_PB_MHZ>();
-    }
-    return l_rc;
-}
-
-#else
-#if 0 //TODO RTC 215209
-/// @brief This function is called by the FAPI_ATTR_GET functions that lookup
-/// values in the MEM_PLL_FREQ_BUCKETS tree. The key's used to lookup values in that
-/// tree are the ATTR_FREQ_OMI_MHZ and ATTR_OMI_PLL_VCO attributes. These are on the
-/// processor target but it is expected that all of the values match.
-///  @param[out] o_omiFreq  OMI Frequency of the system
-///  @param[out] o_omiVco   OMI VCO of the system
-///  @return ReturnCode Zero on success, else platform specified error.
-errlHndl_t getOmiFreqAndVco(TARGETING::ATTR_FREQ_OMI_MHZ_type & o_omiFreq,
-                            TARGETING::ATTR_OMI_PLL_VCO_type & o_omiVco)
+/// @brief Retrieves the OMI frequency of the system in Mhz
+///
+/// The OMI frequency attribute is on the processor target but
+/// it is expected that all of the values match.  If all values
+/// do not match then an error will be returned.
+///
+/// @param[out] o_omiFreqMhz  OMI Frequency of the system in Mhz
+/// @return ReturnCode Zero on success, else platform specified error.
+///
+errlHndl_t getOmiFreq(TARGETING::ATTR_FREQ_OMI_MHZ_type & o_omiFreqMhz)
 {
     errlHndl_t l_errl = nullptr;
 
@@ -2117,45 +2088,47 @@ errlHndl_t getOmiFreqAndVco(TARGETING::ATTR_FREQ_OMI_MHZ_type & o_omiFreq,
         // First valid processor's values will be used to compare against all other processors
         if(!l_outValueSet)
         {
-            o_omiFreq = l_procsList[i]->getAttr<TARGETING::ATTR_FREQ_OMI_MHZ>();
-            o_omiVco = l_procsList[i]->getAttr<TARGETING::ATTR_OMI_PLL_VCO>();
+            o_omiFreqMhz = l_procsList[i]->getAttr<TARGETING::ATTR_FREQ_OMI_MHZ>();
             l_outValueSet = true;
             l_firstValidProc = i;
             continue;
         }
 
         TARGETING::ATTR_FREQ_OMI_MHZ_type l_omiFreqToCmp = l_procsList[i]->getAttr<TARGETING::ATTR_FREQ_OMI_MHZ>();
-        TARGETING::ATTR_OMI_PLL_VCO_type  l_omiVcoToCmp  = l_procsList[i]->getAttr<TARGETING::ATTR_OMI_PLL_VCO>();
 
-        // If we found that this processor's OMI freq / vco values do not match the first processor's values then
+        // If we found that this processor's OMI freq value does not match the first processor's value then
         // return an error
-        if (l_omiFreqToCmp != o_omiFreq ||
-            l_omiVcoToCmp  != o_omiVco )
+        if (l_omiFreqToCmp != o_omiFreqMhz)
         {
-            FAPI_ERR("platGetMcPllBucket: Detected two processors with difference OMI VCO / FREQ combinations."
-                      " Proc 0x%.08X has OMI freq = %d and OMI vco = %d. "
-                      " Proc 0x%.08X has OMI freq = %d and OMI vco = %d. " ,
-                    get_huid(l_procsList[l_firstValidProc]), o_omiFreq, o_omiVco,
-                    get_huid(l_procsList[i]), l_omiFreqToCmp, l_omiVcoToCmp );
+            FAPI_ERR("platGetMcPllBucket: Detected two processors with different OMI frequencies."
+                      " Proc 0x%.08X has OMI freq = %d. "
+                      " Proc 0x%.08X has OMI freq = %d." ,
+                    get_huid(l_procsList[l_firstValidProc]), o_omiFreqMhz,
+                    get_huid(l_procsList[i]), l_omiFreqToCmp);
 
             /*@
-              * @errortype
-              * @moduleid     fapi2::MOD_GET_OMI_FREQ_AND_VCO
-              * @reasoncode   fapi2::RC_PROC_FREQ_MISMATCH
-              * @userdata1[0:31]  first ATTR_FREQ_OMI_MHZ found
-              * @userdata1[32:63] first ATTR_FREQ_PLL_VCO found
-              * @userdata2[0:31]  ATTR_FREQ_OMI_MHZ mismatch found
-              * @userdata2[32:63] ATTR_FREQ_PLL_VCO mismatch found
-              * @devdesc      Found mismatching processor attribute settings
-              *               when we expect them to all be in sync
-              */
+             * @errortype
+             * @moduleid         fapi2::MOD_GET_OMI_FREQ
+             * @reasoncode       fapi2::RC_PROC_FREQ_MISMATCH
+             * @userdata1[0:31]  first ATTR_FREQ_OMI_MHZ found
+             * @userdata1[32:63] first proc HUID
+             * @userdata2[0:31]  ATTR_FREQ_OMI_MHZ mismatch found
+             * @userdata2[32:63] mismatched proc HUID
+             * @devdesc          Found mismatching processor attribute settings
+             *                   when we expect them to all be in sync
+             * @custdesc         An error occurred during the IPL of the system
+             */
             l_errl = new ERRORLOG::ErrlEntry(
                               ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                              fapi2::MOD_GET_OMI_FREQ_AND_VCO,
+                              fapi2::MOD_GET_OMI_FREQ,
                               fapi2::RC_NO_MATCHING_FREQ,
-                              TWO_UINT32_TO_UINT64(o_omiFreq, o_omiVco),
-                              TWO_UINT32_TO_UINT64(l_omiFreqToCmp, l_omiVcoToCmp),
-                              ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
+                              TWO_UINT32_TO_UINT64(
+                                  o_omiFreqMhz,
+                                  get_huid(l_procsList[l_firstValidProc])),
+                              TWO_UINT32_TO_UINT64(
+                                  l_omiFreqToCmp,
+                                  get_huid(l_procsList[i])),
+                              ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             l_errl->collectTrace(FAPI_IMP_TRACE_NAME, 256);
             break;
         }
@@ -2164,6 +2137,7 @@ errlHndl_t getOmiFreqAndVco(TARGETING::ATTR_FREQ_OMI_MHZ_type & o_omiFreq,
     return l_errl;
 }
 
+#if 0 // TODO RTC 215209
 // OMI bucket descriptor
 struct OmiFreqVcoBucketSelect_t
 {
@@ -2381,7 +2355,6 @@ ReturnCode platGetFreqMcaMhz(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
 }
 
 
-#endif
 #endif
 
 

@@ -112,7 +112,7 @@
     </attribute>
     <attribute>
         <id>EARLY_TESTCASES_ISTEP</id>
-        <default>0x0702</default>
+        <default>0x0703</default>
     </attribute>
     <attribute>
         <id>PAYLOAD_BASE</id>
@@ -127,6 +127,10 @@
     <attribute>
       <default>0</default>
       <id>TPM_REQUIRED</id>
+    </attribute>
+    <attribute>
+        <id>MAX_ALLOWED_DIMM_FREQ</id>
+        <default>3200,3200,3200,3200,3200</default>
     </attribute>
 </targetInstance>
 

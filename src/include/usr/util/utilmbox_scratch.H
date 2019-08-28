@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -108,9 +108,9 @@ namespace Util
      *         determine the frequency the SBE booted the nest
      *         at
      *
-     * @return uint32_t -- Nest freq SBE booted with
+     * @return uint32_t -- Nest freq SBE booted with in Mhz
      */
-    uint32_t getBootNestFreq( void);
+    uint32_t getBootNestFreqMhz( void);
 
 };
 

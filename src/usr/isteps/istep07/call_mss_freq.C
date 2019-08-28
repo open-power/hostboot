@@ -46,25 +46,17 @@
 #include    <targeting/common/utilFilter.H>
 
 #include    <config.h>
-// FIXME RTC: 210975
-//#include    <fapi2.H>
-//#include    <fapi2/plat_hwp_invoker.H>
-#include    <util/utilmbox_scratch.H>
+#include    <fapi2.H>
+#include    <fapi2/plat_hwp_invoker.H>
 
 
 // SBE
 #include    <sbeif.H>
 
-/* FIXME RTC: 210975
 // HWP
-#include    <p9_mss_freq.H>
-#include    <p9_mss_freq_system.H>
+#include    <p10_mss_freq.H>
+#include    <p10_mss_freq_system.H>
 
-#ifdef CONFIG_AXONE
-#include    <p9a_mss_freq.H>
-#include    <p9a_mss_freq_system.H>
-#endif
-*/
 
 namespace   ISTEP_07
 {
@@ -82,324 +74,184 @@ void*    call_mss_freq( void *io_pArgs )
     IStepError l_StepError;
     errlHndl_t l_err = nullptr;
 
-    #if (defined CONFIG_SECUREBOOT && ! defined CONFIG_AXONE)
-    bool l_isMemdLoaded = false;
-    #endif
-
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_freq entry" );
 
     do
     {
-        #if (defined CONFIG_SECUREBOOT && ! defined CONFIG_AXONE)
-        // Load MEMD so that vpd_supported_freqs can use it.
-        l_err = loadSecureSection(PNOR::MEMD);
-        if (l_err)
+        TargetHandleList l_memportTargetList;
+        getAllChiplets(l_memportTargetList, TYPE_MEM_PORT);
+
+        for (const auto & l_memport_target : l_memportTargetList)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                ERR_MRK "Failed in call to loadSecureSection for section "
-                "PNOR:MEMD");
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "call_mss_freq: p10_mss_freq HWP target HUID %.8x",
+                get_huid(l_memport_target));
 
-            // Create istep error and link it to PLID of original error
-            l_StepError.addErrorDetails(l_err);
-            errlCommit(l_err, ISTEP_COMP_ID);
-            break;
-        }
-        else
-        {
-            l_isMemdLoaded = true;
-        }
-        #endif
+            //  call the HWP on each memory port
+            fapi2::Target <fapi2::TARGET_TYPE_MEM_PORT> l_fapi_memport_target
+                (l_memport_target);
 
-/* FIXME RTC: 210975
-        ATTR_MODEL_type l_procModel = TARGETING::targetService().getProcessorModel();
+            FAPI_INVOKE_HWP(l_err, p10_mss_freq, l_fapi_memport_target);
 
-        if (l_procModel == TARGETING::MODEL_NIMBUS)
-        {
-            TARGETING::TargetHandleList l_mcsTargetList;
-            getAllChiplets(l_mcsTargetList, TYPE_MCS);
-
-            for (const auto & l_mcs_target : l_mcsTargetList)
+            //  process return code.
+            if (l_err)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "p9_mss_freq HWP target HUID %.8x",
-                    TARGETING::get_huid(l_mcs_target));
+                    "call_mss_freq: ERROR in p10_mss_freq HWP on target 0x%.08x. "
+                    TRACE_ERR_FMT,
+                    get_huid(l_memport_target),
+                    TRACE_ERR_ARGS(l_err));
 
-                //  call the HWP with each target   ( if parallel, spin off a task )
-                fapi2::Target <fapi2::TARGET_TYPE_MCS> l_fapi_mcs_target
-                    (l_mcs_target);
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_memport_target).addToLog( l_err );
 
-                FAPI_INVOKE_HWP(l_err, p9_mss_freq, l_fapi_mcs_target);
+                // Create IStep error log and cross reference to error that occurred
+                l_StepError.addErrorDetails( l_err );
 
-                //  process return code.
-                if ( l_err )
-                {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR 0x%.8X:  p9_mss_freq HWP on target HUID %.8x",
-                    l_err->reasonCode(), TARGETING::get_huid(l_mcs_target) );
+                // Commit Error, but continue to next mem_port
+                l_err->collectTrace("ISTEPS_TRACE");
+                errlCommit( l_err, ISTEP_COMP_ID );
 
-                    // capture the target data in the elog
-                    ErrlUserDetailsTarget(l_mcs_target).addToLog( l_err );
-
-                    // Create IStep error log and cross reference to error that occurred
-                    l_StepError.addErrorDetails( l_err );
-
-                    // Commit Error
-                    errlCommit( l_err, ISTEP_COMP_ID );
-
-                }
-                else
-                {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                          "SUCCESS :  p9_mss_freq HWP");
-                }
-            } // End mcs loop
-        }
-#ifdef CONFIG_AXONE
-        else if(l_procModel == TARGETING::MODEL_AXONE)
-        {
-            TARGETING::TargetHandleList l_memportTargetList;
-            getAllChiplets(l_memportTargetList, TYPE_MEM_PORT);
-
-            for (const auto & l_memport_target : l_memportTargetList)
+            }
+            else
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "p9a_mss_freq HWP target HUID %.8x",
-                    TARGETING::get_huid(l_memport_target));
-
-                //  call the HWP with each target   ( if parallel, spin off a task )
-                fapi2::Target <fapi2::TARGET_TYPE_MEM_PORT> l_fapi_memport_target
-                    (l_memport_target);
-
-                FAPI_INVOKE_HWP(l_err, p9a_mss_freq, l_fapi_memport_target);
-
-                //  process return code.
-                if ( l_err )
-                {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR 0x%.8X:  p9a_mss_freq HWP on target HUID %.8x",
-                    l_err->reasonCode(), TARGETING::get_huid(l_memport_target) );
-
-                    // capture the target data in the elog
-                    ErrlUserDetailsTarget(l_memport_target).addToLog( l_err );
-
-                    // Create IStep error log and cross reference to error that occurred
-                    l_StepError.addErrorDetails( l_err );
-
-                    // Commit Error, but continue to next mem_port
-                    errlCommit( l_err, ISTEP_COMP_ID );
-
-                }
-                else
-                {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                          "SUCCESS :  p9a_mss_freq HWP");
-                }
-            }
-
-            if(l_StepError.getErrorHandle() != NULL)
-            {
-                // If we have encountered an error, bail out now
-                break;
+                      "call_mss_freq: p10_mss_freq HWP succeeded");
             }
         }
-#endif
 
-*/
-
-        // PB frequency was set in istep 6 for non MC SYNC mode
-        // allow it to change here
-        TARGETING::Target * l_sys = nullptr;
-        TARGETING::targetService().getTopLevelTarget( l_sys );
-
-        TARGETING::ATTR_FREQ_PB_MHZ_type l_originalNestFreq = Util::getBootNestFreq();
-
-        // Omi Freq is only used in P9a and beyond, to limit #ifdef
-        // craziness below just leave it at 0 so it never changes
-        TARGETING::ATTR_FREQ_OMI_MHZ_type l_originalOmiFreq = 0;
-#ifdef CONFIG_AXONE
-        TARGETING::ATTR_OMI_PLL_VCO_type l_originalOmiVco = 0; // unused but needed for func call
-        l_err = fapi2::platAttrSvc::getOmiFreqAndVco(l_originalOmiFreq, l_originalOmiVco);
-        if(l_err)
-        {
-            l_StepError.addErrorDetails( l_err );
-            errlCommit( l_err, ISTEP_COMP_ID );
-            break;
-        }
-#endif
-
-/* FIXME RTC: 210975
-        // Read MC_SYNC_MODE from SBE itself and set the attribute
-        TARGETING::ATTR_MC_SYNC_MODE_type l_bootSyncMode = 0;
-        l_err = SBE::getBootMcSyncMode( l_bootSyncMode );
-        if( l_err )
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "Failed getting the boot mc sync mode from the SBE");
-
-            // Create IStep error log and cross reference to error that occurred
-            l_StepError.addErrorDetails( l_err );
-
-            // Commit Error
-            errlCommit( l_err, ISTEP_COMP_ID );
-            break;
-        }
-
-        TARGETING::Target * l_masterProc = nullptr;
-        TARGETING::targetService()
-            .masterProcChipTargetHandle( l_masterProc );
-
-        if (l_procModel == TARGETING::MODEL_NIMBUS)
-        {
-            TARGETING::TargetHandleList l_mcbistTargetList;
-            getAllChiplets(l_mcbistTargetList, TYPE_MCBIST);
-            std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCBIST> > l_fapi2_mcbistTargetList;
-
-            for (const auto & l_mcbist_target : l_mcbistTargetList)
-            {
-                //  call the HWP with each target   ( if parallel, spin off a task )
-                fapi2::Target <fapi2::TARGET_TYPE_MCBIST> l_fapi_mcbist_target(l_mcbist_target);
-                l_fapi2_mcbistTargetList.push_back(l_fapi_mcbist_target);
-            }
-
-            if(l_fapi2_mcbistTargetList.size() > 0)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                        "START : running mss_freq_system HWP");
-
-                FAPI_INVOKE_HWP(l_err, p9_mss_freq_system, l_fapi2_mcbistTargetList);
-
-                //  process return code.
-                if ( l_err )
-                {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR : p9_mss_freq_system HWP while running on mcbist targets");
-
-                    // Create IStep error log and cross reference to error that occurred
-                    l_StepError.addErrorDetails( l_err );
-
-                    // Commit Error
-                    errlCommit( l_err, ISTEP_COMP_ID );
-                    break;
-
-                }
-                else
-                {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                        "SUCCESS :  mss_freq_system HWP");
-                }
-            }
-        }
-#ifdef CONFIG_AXONE
-        else if(l_procModel == TARGETING::MODEL_AXONE)
-        {
-            TARGETING::TargetHandleList l_procTargetList;
-            getAllChips(l_procTargetList, TYPE_PROC);
-            for (const auto & l_proc_target : l_procTargetList)
-            {
-                //  call the HWP with each target ( if parallel, spin off a task )
-                fapi2::Target <fapi2::TARGET_TYPE_PROC_CHIP> l_fapi_proc_target(l_proc_target);
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                        "START : running p9a_mss_freq_system HWP on target 0x%.08X", TARGETING::get_huid(l_proc_target));;
-
-                FAPI_INVOKE_HWP(l_err, p9a_mss_freq_system, l_proc_target);
-                //  process return code.
-                if ( l_err )
-                {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR:  p9a_mss_freq_system HWP while running on mc target 0x%.08X", TARGETING::get_huid(l_proc_target));;
-
-                    ERRORLOG::ErrlUserDetailsTarget(l_proc_target).addToLog(l_err);
-
-                    // Create IStep error log and cross reference to error that occurred
-                    l_StepError.addErrorDetails( l_err );
-
-                    // Commit Error, but continue to next MC target
-                    errlCommit( l_err, ISTEP_COMP_ID );
-                }
-                else
-                {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                        "SUCCESS :  p9a_mss_freq_system HWP on target 0x%.08X", TARGETING::get_huid(l_proc_target));;
-                }
-            }
-        }
-#endif
-
-*/
-
-        if(l_StepError.getErrorHandle() != NULL)
+        if(l_StepError.getErrorHandle() != nullptr)
         {
             // If we have encountered an error, bail out now
             break;
         }
 
-        // Get latest MC_SYNC_MODE and FREQ_PB_MHZ
-        TARGETING::ATTR_MC_SYNC_MODE_type l_mcSyncMode = l_masterProc->getAttr<TARGETING::ATTR_MC_SYNC_MODE>();
-        TARGETING::ATTR_FREQ_OMI_MHZ_type l_newOmiFreq = 0;
-        TARGETING::ATTR_FREQ_PB_MHZ_type l_newNestFreq = l_sys->getAttr<TARGETING::ATTR_FREQ_PB_MHZ>();
-#ifdef CONFIG_AXONE
-        TARGETING::ATTR_OMI_PLL_VCO_type l_newOmiVco = 0;  // unused but needed for func call
-        l_err = fapi2::platAttrSvc::getOmiFreqAndVco(l_newOmiFreq, l_newOmiVco);
+        Target * l_sys = nullptr;
+        targetService().getTopLevelTarget( l_sys );
+        assert(l_sys != nullptr, "call_mss_freq: l_sys == nullptr!!!");
+
+        // Save off current settings for OMI frequency
+        ATTR_FREQ_OMI_MHZ_type l_originalOmiFreq = 0;
+        l_err = fapi2::platAttrSvc::getOmiFreq(l_originalOmiFreq);
         if(l_err)
         {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                     "call_mss_freq: 1st call to getOmiFreq failed. "
+                     TRACE_ERR_FMT,
+                     TRACE_ERR_ARGS(l_err));
             l_StepError.addErrorDetails( l_err );
+            l_err->collectTrace("ISTEPS_TRACE");
             errlCommit( l_err, ISTEP_COMP_ID );
             break;
         }
-#endif
 
-        //Trigger sbe update if the nest frequency changed.
-        if(    (l_newNestFreq != l_originalNestFreq)
-            || (l_mcSyncMode  != l_bootSyncMode)
-            || (l_newOmiFreq  != l_originalOmiFreq)
-          )
+        Target * l_masterProc = nullptr;
+
+        l_err = targetService().queryMasterProcChipTargetHandle(l_masterProc);
+        if(l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "The nest frequency or sync mode changed!"
-                  " Original Nest: %d New Nest: %d"
-                  " Original syncMode: %d New syncMode: %d"
-                  " Original Omi : %d New Omi : %d"
-                  , l_originalNestFreq, l_newNestFreq, l_bootSyncMode, l_mcSyncMode
-                  , l_originalOmiFreq, l_newOmiFreq
-                  );
-            if(l_sys->getAttr<TARGETING::ATTR_IS_MPIPL_HB>() == true)
+                     "call_mss_freq: call to queryMasterProcChipTargetHandle failed. "
+                     TRACE_ERR_FMT,
+                     TRACE_ERR_ARGS(l_err));
+            l_StepError.addErrorDetails( l_err );
+            l_err->collectTrace("ISTEPS_TRACE");
+            errlCommit( l_err, ISTEP_COMP_ID );
+            break;
+        }
+
+        TargetHandleList l_procTargetList;
+        getAllChips(l_procTargetList, TYPE_PROC);
+        for (const auto & l_proc_target : l_procTargetList)
+        {
+            //  call the HWP on each processor
+            fapi2::Target <fapi2::TARGET_TYPE_PROC_CHIP> l_fapi_proc_target(l_proc_target);
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "call_mss_freq: running p10_mss_freq_system HWP on target 0x%.08X",
+                    get_huid(l_proc_target));
+
+            FAPI_INVOKE_HWP(l_err, p10_mss_freq_system, l_proc_target);
+            if (l_err)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "call_mss_freq: p10_mss_freq_system failed "
+                    "on proc target 0x%.08X. "
+                    TRACE_ERR_FMT,
+                    get_huid(l_proc_target),
+                    TRACE_ERR_ARGS(l_err));
+
+                ERRORLOG::ErrlUserDetailsTarget(l_proc_target).addToLog(l_err);
+
+                // Create IStep error log and cross reference to error that occurred
+                l_StepError.addErrorDetails(l_err);
+
+                // Commit Error, but continue to next processor target
+                l_err->collectTrace("ISTEPS_TRACE");
+                errlCommit(l_err, ISTEP_COMP_ID);
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "call_mss_freq: p10_mss_freq_system succeeded on target 0x%.08X",
+                    get_huid(l_proc_target));
+            }
+        }
+
+        if(l_StepError.getErrorHandle() != nullptr)
+        {
+            // If we have encountered an error, bail out now
+            break;
+        }
+
+        // Check if desired OMI frequency setting changed
+        ATTR_FREQ_OMI_MHZ_type l_newOmiFreq = 0;
+        l_err = fapi2::platAttrSvc::getOmiFreq(l_newOmiFreq);
+        if(l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                     "call_mss_freq: 2nd call to getOmiFreq failed. "
+                     TRACE_ERR_FMT,
+                     TRACE_ERR_ARGS(l_err));
+            l_StepError.addErrorDetails( l_err );
+            l_err->collectTrace("ISTEPS_TRACE");
+            errlCommit( l_err, ISTEP_COMP_ID );
+            break;
+        }
+
+        // FW examines the master SBE boot scratch registers versus
+        // system MRW ATTR and will customize the master SBE and reboot
+        // if necessary(slaves get data via mbox scratch registers)
+        //
+        // TODO RTC 208838 -- Which attributes need to be looked at???
+        if(l_newOmiFreq  != l_originalOmiFreq)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "call_mss_freq: The OMI frequency changed!"
+                  " Original Omi : %d New Omi : %d",
+                  l_originalOmiFreq, l_newOmiFreq);
+            if(l_sys->getAttr<ATTR_IS_MPIPL_HB>() == true)
             {
 
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "Error: SBE update detected in MPIPL");
-
-                // It is highly unlikely nest frequency will change
-                // in Axone systems but OMI freq might. Its is impossible
-                // for OMI freq to change in Nimbus/Cumulus systems. So
-                // we will display Nest freq in error for Nimbus/Cumulus and
-                // display OMI freq for Axone.
+                    "call_mss_freq: SBE update not allowed during MPIPL!");
 
                 /*@
                 * @errortype
                 * @moduleid          MOD_SBE_PERFORM_UPDATE_CHECK
                 * @reasoncode        RC_SBE_UPDATE_IN_MPIPL
-                * @userdata1[0:31]   original mc sync mode
-                * @userdata1[32:63]  new mc sync mode
-                * @userdata2[0:31]   original (nest p9 | omi p9a+) frequency
-                * @userdata2[32:63]  new (nest p9 | omi p9a+) frequency
+                * @userdata1         0
+                * @userdata2[0:31]   original OMI frequency
+                * @userdata2[32:63]  new OMI frequency
                 * @devdesc           SBE cannot be reset during MPIPL
                 * @custdesc          Illegal action during boot
                 */
                 l_err = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
                               MOD_SBE_PERFORM_UPDATE_CHECK,
                               RC_SBE_UPDATE_IN_MPIPL,
-                              TWO_UINT32_TO_UINT64(
-                                  TO_UINT32(l_bootSyncMode),
-                                  TO_UINT32(l_mcSyncMode)),
-#ifndef CONFIG_AXONE
-                              TWO_UINT32_TO_UINT64(
-                                  l_originalNestFreq,
-                                  l_newNestFreq));
-#else
+                              0,
                               TWO_UINT32_TO_UINT64(
                                   l_originalOmiFreq,
                                   l_newOmiFreq));
-#endif
                l_err->collectTrace("ISTEPS_TRACE");
 
                 l_StepError.addErrorDetails( l_err );
@@ -407,49 +259,30 @@ void*    call_mss_freq( void *io_pArgs )
             }
             else
             {
-                TARGETING::setFrequencyAttributes(l_sys,
-                                                  l_newNestFreq);
-                l_err = SBE::updateProcessorSbeSeeproms();
+                //TODO RTC 208838
+                //l_err = SBE::updateProcessorSbeSeeproms();
 
-                if( l_err )
+                if(l_err)
                 {
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "call_mss_freq.C - Error calling updateProcessorSbeSeeproms");
+                        "call_mss_freq: updateProcessorSbeSeeproms Failed "
+                        TRACE_ERR_FMT, TRACE_ERR_ARGS(l_err));
+
+                    l_err->collectTrace("ISTEPS_TRACE");
 
                     // Create IStep error log and cross reference to error
                     // that occurred
-                    l_StepError.addErrorDetails( l_err );
+                    l_StepError.addErrorDetails(l_err);
 
                     // Commit Error
-                    errlCommit( l_err, ISTEP_COMP_ID );
+                    errlCommit(l_err, ISTEP_COMP_ID);
                 }
             }
         }
 
     } while(0);
 
-    #if (defined CONFIG_SECUREBOOT && ! defined CONFIG_AXONE)
-    if(l_isMemdLoaded)
-    {
-        // Should not have any uncommitted errors at this point.
-        assert(l_err == NULL, "call_mss_freq - unexpected uncommitted"
-                                                                 "error found");
-
-        l_err = unloadSecureSection(PNOR::MEMD);
-        if (l_err)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                ERR_MRK "Failed in call to unloadSecureSection for section "
-                "PNOR:MEMD");
-
-            // Create istep error and link it to PLID of original error
-            l_StepError.addErrorDetails(l_err);
-            errlCommit(l_err, ISTEP_COMP_ID);
-        }
-    }
-    #endif
-
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_freq exit" );
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_freq exit");
 
 
     return l_StepError.getErrorHandle();

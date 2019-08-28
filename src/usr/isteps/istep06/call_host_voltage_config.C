@@ -218,7 +218,7 @@ errlHndl_t determineNestFreq( uint32_t& o_nestFreq )
         //
 
         //Default to the boot freq
-        o_nestFreq = Util::getBootNestFreq();
+        o_nestFreq = Util::getBootNestFreqMhz();
         PVR_t l_pvr( mmio_pvr_read() & 0xFFFFFFFF );
 
         if(l_sys->getAttr<ATTR_REQUIRED_SYNCH_MODE>() == 0x1) //ALWAYS
