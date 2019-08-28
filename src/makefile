@@ -220,6 +220,7 @@ EXTENDED_MODULES += $(if $(CONFIG_FSP_BUILD),,nvram)
 EXTENDED_MODULES += mmio
 EXTENDED_MODULES += smf
 EXTENDED_MODULES += expaccess
+EXTENDED_MODULES += fapiwrap
 
 #***************************************
 # Working test modules

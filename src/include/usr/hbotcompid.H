@@ -484,6 +484,18 @@ const compId_t UCD_COMP_ID = 0x4100;
 const char UCD_COMP_NAME[] = "ucd";
 
 //@}
+
+//
+/** @name FAPIWRAP
+ *  Wrapper around fapi2 HWP for hb platform to use
+ */
+//@{
+const compId_t FAPIWRAP_COMP_ID = 0x4400;
+const char FAPIWRAP_COMP_NAME[] = "fapiwrap";
+
+//@}
+
+//
 //
 /** @name HDAT
  *  HDAT component

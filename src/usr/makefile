@@ -38,6 +38,7 @@ SUBDIRS += errl.d
 SUBDIRS += errldisplay.d
 SUBDIRS += expaccess.d
 SUBDIRS += fapi2.d
+SUBDIRS += fapiwrap.d
 SUBDIRS += fsi.d
 SUBDIRS += fsiscom.d
 SUBDIRS += gpio.d
