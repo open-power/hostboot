@@ -109,17 +109,6 @@
 </attribute>
 
 <attribute>
-  <id>ATTR_LPC_CONSOLE_CNFG</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Indicates if LPC console is enabled on system</description>
-  <valueType>uint8</valueType>
-  <enum>ENABLE = 0x1,DISABLE = 0x0</enum>
-  <default>DISABLE</default>
-  <platInit/>
-  <mrwHide/>
-</attribute>
-
-<attribute>
   <id>ATTR_PM_RESET_FFDC_ENABLE</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
