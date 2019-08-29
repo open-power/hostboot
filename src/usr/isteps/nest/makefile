@@ -41,6 +41,7 @@ EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/initfiles
 
 OBJS += nestHwpHelperFuncs.o
 OBJS += p9_io_obus_firmask_save_restore.o
+OBJS += p9_fbc_ioo_dl_npu_scom.o
 
 VPATH += ${PROCEDURES_PATH}/hwp/initfiles
 VPATH += ${PROCEDURES_PATH}/hwp/io
