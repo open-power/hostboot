@@ -257,8 +257,7 @@ public:
           bool     isFail;
           TARGETING::ATTR_MODEL_type model;
       } test_data[] = {
-          // @TODO RTC 214308: Update this testcase
-          //{ scom_targets[myPROC0], 0x800C940010012C3F, 0x1234432112344321, false, TARGETING::MODEL_POWER10 },
+          { scom_targets[myPROC0], 0x800C940010012C3F, 0x1234432112344328, false, TARGETING::MODEL_POWER10 },
           { scom_targets[myPROC0], 0x8FFFFFFFFFFFFFFF, 0x123443211234ABAB, true,  TARGETING::MODEL_POWER10 },
       };
       const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
