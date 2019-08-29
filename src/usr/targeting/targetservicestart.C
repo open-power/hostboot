@@ -847,6 +847,10 @@ static void adjustMemoryMap( TargetService& i_targetService )
     ATTR_LPC_BUS_ADDR_type l_lpcBase =
       l_pTopLevel->getAttr<ATTR_LPC_BUS_ADDR>();
 
+    // Whether to update the SYS's ATTR_XSCOM_BASE_ADDRESS with a new
+    // BAR before returning from this function
+    bool l_updateSysXscomBar = false;
+
     // Loop through all the procs to recompute all the BARs
     //  also find the victim to swap with
     Target* l_swapVictim = nullptr;
@@ -874,10 +878,12 @@ static void adjustMemoryMap( TargetService& i_targetService )
         if(l_curXscomBAR & IS_SMF_ADDR_BIT)
         {
             l_xscomBAR |= IS_SMF_ADDR_BIT;
+            l_updateSysXscomBar = true;
         }
 
         TARG_INF( " XSCOM=%.16llX", l_xscomBAR );
         l_procChip->setAttr<ATTR_XSCOM_BASE_ADDRESS>(l_xscomBAR);
+
 
         // See if this chip's space now belongs to the master
         if( l_xscomBAR == l_curXscomBAR )
@@ -1072,6 +1078,14 @@ static void adjustMemoryMap( TargetService& i_targetService )
            l_pMasterProcChip->getAttr<ATTR_XSCOM_BASE_ADDRESS>(),
            XSCOM::get_master_bar() );
         TARG_ASSERT( false, "XSCOM BARs are inconsistent" );
+    }
+
+    if(l_updateSysXscomBar)
+    {
+        l_pTopLevel->setAttr<ATTR_XSCOM_BASE_ADDRESS>(
+            l_xscomBase |= IS_SMF_ADDR_BIT);
+        TARG_INF("Updating the SYS XSCOM BAR to 0x%.16llX",
+            l_xscomBase |= IS_SMF_ADDR_BIT);
     }
 }
 

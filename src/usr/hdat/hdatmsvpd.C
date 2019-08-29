@@ -926,6 +926,8 @@ void HdatMsVpd::prt()
          iv_mover.hdatMoverAddr.lo);
     HDAT_INF("      hdatBSRAddr = 0X %08X %08X ", iv_mover.hdatBSRAddr.hi,
          iv_mover.hdatBSRAddr.lo);
+    HDAT_INF("      hdatXSCOMAddr = 0X %08X %08X", iv_mover.hdatXSCOMAddr.hi,
+        iv_mover.hdatXSCOMAddr.lo);
 
     HDAT_INF("  **hdatMsVpdImtAddrRange_t**");
     hdatPrintHdrs(NULL, NULL, &iv_IMTaddrRngArrayHdr, NULL);
