@@ -39,7 +39,14 @@ mkdir -p $sb/simu/configs/
 grep -v PROC_EC $BACKING_BUILD/src/simu/configs/P9_NIMBUS.config > $sb/simu/configs/P9_NIMBUS.config
 echo "SETENV PROC_EC                22" >> $sb/simu/configs/P9_NIMBUS.config
 
-# TODO 215621 remove when simics gets dimmspd.dat updated
+# TODO RTC:215621
+# remove when simics gets dimmspd.dat updated
 mkdir -p $sb/../simics/import/vpd/
 cp /gsa/ausgsa/projects/h/hostboot/.binary_cache/data/09e225d24bd942a0011ca520311d7cbf289e672e $sb/../simics/import/vpd/dimmspd.dat
+
+# TODO RTC:244050
+# update the por value of the EFUSE_OUT_IMAGE_3 register 
+if [[ -f "$sb/../simics/import/cec-chip/uchip_default.por" ]]; then
+   sed -i 's/UCHIP(0x0020b08c)=0x0/UCHIP(0x0020b08c)=0x00000400/' $sb/../simics/import/cec-chip/uchip_default.por
+fi
 ##########################################################################
