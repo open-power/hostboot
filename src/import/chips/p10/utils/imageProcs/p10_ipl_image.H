@@ -42,7 +42,7 @@
 /// If any changes are made to this file,  please update the header version
 /// below and follow-up on all of the error messages.
 ///
-/// V1:  Introduces .sbe nested image and moves .rings into the PPE's 
+/// V1:  Introduces .sbe nested image and moves .rings into the PPE's
 ///      nested images (as compared to P9's last XIP V9 header)
 #define IPL_IMAGE_HEADER_VERSION 1
 
@@ -60,16 +60,16 @@
     #define ULL(x) x##ull
 #endif
 
-#define P9_XIP_MAGIC             0x58495020           // "XIP "
-#define P9_XIP_MAGIC_SEEPROM ULL(0x584950205345504d)  // "XIP SEPM" also called SBE image
-#define P9_XIP_MAGIC_HW      ULL(0x5849502020204857)  // "XIP   HW"
-#define P9_XIP_MAGIC_SBE     ULL(0x5849502020534245)  // "XIP  SBE"
-#define P9_XIP_MAGIC_QME     ULL(0x5849502020514d45)  // "XIP  QME"
-#define P9_XIP_MAGIC_XGPE    ULL(0x5849502057475045)  // "XIP XGPE"
-#define P9_XIP_MAGIC_PGPE    ULL(0x5849502050475045)  // "XIP PGPE"
-#define P9_XIP_MAGIC_RESTORE ULL(0x5849502052455354)  // "XIP REST"
-#define P9_XIP_MAGIC_IOPPE   ULL(0x5849502049505045)  // "XIP IPPE"
-
+#define P9_XIP_MAGIC              0x58495020           // "XIP "
+#define P9_XIP_MAGIC_SEEPROM  ULL(0x584950205345504d)  // "XIP SEPM" also called SBE image
+#define P9_XIP_MAGIC_HW       ULL(0x5849502020204857)  // "XIP   HW"
+#define P9_XIP_MAGIC_SBE      ULL(0x5849502020534245)  // "XIP  SBE"
+#define P9_XIP_MAGIC_QME      ULL(0x5849502020514d45)  // "XIP  QME"
+#define P9_XIP_MAGIC_XGPE     ULL(0x5849502057475045)  // "XIP XGPE"
+#define P9_XIP_MAGIC_PGPE     ULL(0x5849502050475045)  // "XIP PGPE"
+#define P9_XIP_MAGIC_RESTORE  ULL(0x5849502052455354)  // "XIP REST"
+#define P9_XIP_MAGIC_IOPPE    ULL(0x5849502049505045)  // "XIP IPPE"
+#define P9_XIP_MAGIC_IOPXRAM  ULL(0x584950205852414d)  // "XIP XRAM"
 /// @}
 
 
@@ -320,7 +320,7 @@ typedef struct
     /// address. Alignment specifications are required to be a power-of-2.
     uint8_t iv_alignment;
 
-    /// Indicate if section has DD-level support. This value must be set 
+    /// Indicate if section has DD-level support. This value must be set
     /// to either 1 for true or 0 for false (default).
     uint8_t iv_ddSupport;
 
@@ -725,11 +725,11 @@ p9_xip_get_section(const void* i_image,
 
 
 /// Retrieve an embedded DD block of a sub IPL image section within a nested
-/// IPL image and return the DD block's P9XipSection table entry (i.e., as if it 
-/// was a true IPL image section).  This API may also be [misused] as a 
+/// IPL image and return the DD block's P9XipSection table entry (i.e., as if it
+/// was a true IPL image section).  This API may also be [misused] as a
 /// replacement for xip_get_section to retrieve any main IPL image section.
-/// Note that it is an assumption of this API that a nested image is DD 
-/// unspecific and that it is only the sub-section that has DD support.  Also 
+/// Note that it is an assumption of this API that a nested image is DD
+/// unspecific and that it is only the sub-section that has DD support.  Also
 /// see the comments to the p9_xip_get_section API.
 ///
 /// \param[in] i_image  A pointer to an IPL image (formerly XIP).
@@ -738,15 +738,15 @@ p9_xip_get_section(const void* i_image,
 /// of the main image section to access.  It typically identifies another IPL
 /// image within i_image. This other image is sometimes referred to as a "nested"
 /// image.  However, if the next parameter in this API, i.e. i_subSectionID, is
-/// subSectionID==UNDEFINED, then mainSectionID is allowed to be any IPL image 
-/// section of i_image.  In such as case, this call is no different than calling 
+/// subSectionID==UNDEFINED, then mainSectionID is allowed to be any IPL image
+/// section of i_image.  In such as case, this call is no different than calling
 /// xip_get_section w/sectionId=mainSectionID.
 ///
 /// \param[in] i_subSectionID  Identifies the section ID of a section within
 /// the nested image.  Note that if nestLevelSID==UNDEFINED, then this call
 /// is no different than calling xip_get_section w/sectionId=topLevelSID.
 ///
-/// \param[out] o_hostSection  Contains the embedded DD level block's 
+/// \param[out] o_hostSection  Contains the embedded DD level block's
 /// P9XipSection table entry as if it was a true IPL image section (but which it
 /// is NOT). We are merely using the P9XipSection's iv_offset, and iv_size, to
 /// represent the offset, and size, of the embedded block from the beginning of
@@ -1880,9 +1880,10 @@ typedef enum
     P9_XIP_SECTION_HW_PGPE      = P9_XIP_SECTIONS_PLUS(3),
     P9_XIP_SECTION_HW_RESTORE   = P9_XIP_SECTIONS_PLUS(4),
     P9_XIP_SECTION_HW_IOPPE     = P9_XIP_SECTIONS_PLUS(5),
-    P9_XIP_SECTION_HW_OVERLAYS  = P9_XIP_SECTIONS_PLUS(6),
-    P9_XIP_SECTION_HW_DYNAMIC   = P9_XIP_SECTIONS_PLUS(7),
-    P9_XIP_SECTIONS_HW          = P9_XIP_SECTIONS_PLUS(8) // # sections
+    P9_XIP_SECTION_HW_IOPXRAM   = P9_XIP_SECTIONS_PLUS(6),
+    P9_XIP_SECTION_HW_OVERLAYS  = P9_XIP_SECTIONS_PLUS(7),
+    P9_XIP_SECTION_HW_DYNAMIC   = P9_XIP_SECTIONS_PLUS(8),
+    P9_XIP_SECTIONS_HW          = P9_XIP_SECTIONS_PLUS(9) // # sections
 } p9_xip_section_hw_t;
 
 #define P9_XIP_SECTION_NAMES_HW(var)      \
@@ -1893,6 +1894,7 @@ typedef enum
                          ".pgpe",         \
                          ".core_restore", \
                          ".ioppe",        \
+                         ".iopxram",      \
                          ".overlays",     \
                          ".dynamic")
 
@@ -2014,6 +2016,19 @@ typedef enum
                          ".ioo",               \
                          ".memregs",           \
                          ".nv")
+
+/**************************************************************************/
+/* IOPXRAM Image                                                          */
+/**************************************************************************/
+typedef enum
+{
+    P9_XIP_SECTION_IOPXRAM_IOP_FW  = P9_XIP_SECTIONS_PLUS(0),
+    P9_XIP_SECTIONS_IOPXRAM        = P9_XIP_SECTIONS_PLUS(1) // # sections
+} p9_xip_section_iopxram_t;
+
+#define P9_XIP_SECTION_NAMES_IOPXRAM(var)        \
+    P9_XIP_SECTION_NAMES(var,                  \
+                         ".iop_fw")
 
 #endif  // ifndef __ASSEMBLER__
 
