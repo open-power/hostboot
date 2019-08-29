@@ -43,6 +43,7 @@
 #include <sys/misc.h>
 
 #include <pnor/pnorif.H>
+#include <fapiwrap/fapiWrapif.H>
 
 #include <hwas/common/hwas_reasoncodes.H>
 #include <targeting/common/utilFilter.H>
@@ -245,28 +246,6 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WRITE,
                       DeviceFW::IDEC,
                       TARGETING::TYPE_MEMBUF,
                       cfamIDEC);
-
-/* @brief A helper function used to convert the contents of the IDEC register
- *        to the CFAM ID format.
- *
- * @param[in]  i_idec       The contents of the IDEC register
- *
- * @return     uint64_t     The converted result.
- */
-uint64_t formatOcmbIdecToCfamStandard(const uint64_t i_idec)
-{
-    uint64_t convertedIdec = 0;
-
-    // Need to convert register contents from Mm0L00CC to MLmCC000
-    uint32_t idec = static_cast<uint32_t>(i_idec);
-    uint32_t major = 0xF0000000 & idec;
-    uint32_t minor = 0x0F000000 & idec;
-    uint32_t location = 0x000F0000 & idec;
-    convertedIdec = (major | (location << 8) | (minor >> 4)
-                    | ((idec & 0x000000FF) << 12));
-
-    return convertedIdec;
-}
 
 /**
  * @brief During early IPL the OCMB isn't able to be read from so this function,
@@ -638,59 +617,77 @@ errlHndl_t ocmbIdecPhase1(const TARGETING::TargetHandle_t& i_target)
 
 errlHndl_t ocmbIdecPhase2(const TARGETING::TargetHandle_t& i_target)
 {
-    //@TODO RTC-209353: Read IDEC for Gemini.
-    const uint16_t OCMB_IDEC_REGISTER = 0x2134;
+    const uint32_t GEM_IDEC_SCOM_REGISTER = 0x0801240e;
+    const TARGETING::ATTR_CHIP_ID_type l_chipIdFromSpd =
+                              i_target->getAttr<TARGETING::ATTR_CHIP_ID>();
 
-    errlHndl_t error = nullptr;
-    uint64_t idec = 0;
-    size_t op_size = sizeof(idec);
+    errlHndl_t l_errl  = nullptr;
+    uint64_t l_idec    = 0;
+    size_t   l_op_size = sizeof(l_idec);
+    uint8_t  l_ec      = 0;
+    uint16_t l_id      = 0;
 
     do {
-        // Read the ID/EC
-        // @TODO RTC-209353: Make this work for both Gemini and Explorer cards
-        //                   when more information is known about which
-        //                   registers to read from.
-        error = DeviceFW::deviceRead(i_target,
-                                     &idec,
-                                     op_size,
-                                     DEVICE_SCOM_ADDRESS(OCMB_IDEC_REGISTER));
-
-        if (error != nullptr)
+        if(l_chipIdFromSpd == POWER_CHIPID::EXPLORER_16)
         {
-            HWAS_ERR("ocmbIdecPhase2> OCMB 0x%.8X - failed to read ID/EC",
-                     TARGETING::get_huid(i_target));
+            // Call platform independent lookup for Explorer OCMBs
+            l_errl = FAPIWRAP::explorer_getidec(i_target, l_id, l_ec);
 
-            break;
+                        if (l_errl != nullptr)
+            {
+                HWAS_ERR("ocmbIdecPhase2> explorer OCMB 0x%.8X - failed to read ID/EC",
+                        TARGETING::get_huid(i_target));
+
+                break;
+            }
         }
+        else
+        {
+            // read the register containing IDEC info on Gemini OCMBs
+            l_errl = DeviceFW::deviceRead(i_target,
+                                        &l_idec,
+                                        l_op_size,
+                                        DEVICE_SCOM_ADDRESS(GEM_IDEC_SCOM_REGISTER));
 
-        idec = formatOcmbIdecToCfamStandard(idec);
+            if (l_errl != nullptr)
+            {
+                HWAS_ERR("ocmbIdecPhase2> gemini OCMB 0x%.8X - failed to read ID/EC",
+                        TARGETING::get_huid(i_target));
 
-        uint8_t ec = POWER_CHIPID::extract_ddlevel(idec);
-        uint32_t id = POWER_CHIPID::extract_chipid16(idec);
+                break;
+            }
+
+            // Need to convert Gemini's IDEC register from MmL000CC
+            // to cfam standard format MLmCC000
+            uint32_t l_major = 0xF0000000 & static_cast<uint32_t>(l_idec);
+            uint32_t l_minor = 0x0F000000 & static_cast<uint32_t>(l_idec);
+            uint32_t l_location = 0x00F00000 & static_cast<uint32_t>(l_idec);
+            l_idec = (l_major | (l_location << 4) | (l_minor >> 4)
+                            | ((l_idec & 0x000000FF) << 12));
+            // Parse out the information we need
+            l_ec = POWER_CHIPID::extract_ddlevel(l_idec);
+            l_id = POWER_CHIPID::extract_chipid16(l_idec);
+        }
 
         HWAS_INF("ocmbIdecPhase2> OCMB 0x%.8X - read ID/EC successful. "
                  "ID = 0x%.4X, EC = 0x%.2X, Full IDEC 0x%x",
                  TARGETING::get_huid(i_target),
-                 id,
-                 ec,
-                 idec);
+                 l_id,
+                 l_ec,
+                 l_idec);
 
-        // Get the id that was translated from the SPD read during phase 1.
-        const uint16_t translatedId =
-            i_target->getAttr<TARGETING::ATTR_CHIP_ID>();
-
-        if (id != translatedId)
+        if (l_id != l_chipIdFromSpd)
         {
             HWAS_ERR("ocmbIdecPhase2> OCMB Chip Id and associated SPD Chip Id "
-                     "don't match: OCMB ID=0x%.4X; Translated SPD ID=0x%.4X;",
-                     id,
-                     translatedId);
+                     "don't match: OCMB ID=0x%.4X; SPD ID=0x%.4X;",
+                     l_id,
+                     l_chipIdFromSpd);
 
             HWAS_ERR("ocmbIdecPhase2> Previous CHIP_ID 0x%.4X translated from "
                      "SPD read will be overwritten with OCMB IDEC register "
                      "ID=0x%.4X",
-                     translatedId,
-                     id);
+                     l_chipIdFromSpd,
+                     l_id);
             /*@
             * @errortype
             * @severity          ERRL_SEV_PREDICTIVE
@@ -703,36 +700,36 @@ errlHndl_t ocmbIdecPhase2(const TARGETING::TargetHandle_t& i_target)
             *                    did not match the expected values.
             * @custdesc          Firmware Error
             */
-            error = hwasError(ERRORLOG::ERRL_SEV_PREDICTIVE,
+            l_errl = hwasError(ERRORLOG::ERRL_SEV_PREDICTIVE,
                               MOD_OCMB_IDEC,
                               RC_OCMB_CHIP_ID_MISMATCH,
-                              TWO_UINT32_TO_UINT64(id, translatedId),
+                              TWO_UINT32_TO_UINT64(l_id, l_chipIdFromSpd),
                               TARGETING::get_huid(i_target));
 
             // Add callouts and commit
-            ocmbErrlCommit(i_target, error);
+            ocmbErrlCommit(i_target, l_errl);
 
             // Since there was an error then the ID values don't agree between
             // the OCMB read and the SPD read. Since the OCMB has the correct
             // answer, set the attributes to the values read from that instead
             // of the SPD.
-            i_target->setAttr<TARGETING::ATTR_CHIP_ID>(id);
+            i_target->setAttr<TARGETING::ATTR_CHIP_ID>(l_id);
         }
 
-        const uint8_t translatedEc = i_target->getAttr<TARGETING::ATTR_EC>();
+        const uint8_t l_ecFromSpd = i_target->getAttr<TARGETING::ATTR_EC>();
 
-        if (ec != translatedEc)
+        if (l_ec != l_ecFromSpd)
         {
             HWAS_ERR("ocmbIdecPhase2> OCMB Revision and associated SPD "
                      "Revision don't match: OCMB EC=0x%.2X; "
-                     "Translated SPD EC=0x%.2X; ",
-                     ec, translatedEc);
+                     "SPD EC=0x%.2X; ",
+                     l_ec, l_ecFromSpd);
 
-            HWAS_ERR("ocmbIdecPhase2> Previous EC and HDAT_EC 0x%.2X "
-                     "translated from SPD read will be overwritten with OCMB "
-                     "IDEC register ID=0x%.2X",
-                     translatedEc,
-                     ec);
+            HWAS_ERR("ocmbIdecPhase2> Previous EC and HDAT_EC attributes 0x%.2X,"
+                     " which were set with values found in SPD will be overwritten"
+                     "  with value from OCMB IDEC register ID=0x%.2X",
+                     l_ecFromSpd,
+                     l_ec);
 
             /*@
             * @errortype
@@ -747,28 +744,28 @@ errlHndl_t ocmbIdecPhase2(const TARGETING::TargetHandle_t& i_target)
             *                    SPD did not match the expected values.
             * @custdesc          Firmware Error
             */
-            error = hwasError(ERRORLOG::ERRL_SEV_PREDICTIVE,
+            l_errl = hwasError(ERRORLOG::ERRL_SEV_PREDICTIVE,
                               MOD_OCMB_IDEC,
                               RC_OCMB_SPD_REVISION_MISMATCH,
-                              TWO_UINT32_TO_UINT64(ec, translatedEc),
+                              TWO_UINT32_TO_UINT64(l_ec, l_ecFromSpd),
                               TWO_UINT32_TO_UINT64(
                                   i_target->getAttr<TARGETING::ATTR_CHIP_ID>(),
                                   TARGETING::get_huid(i_target)));
 
             // Add callouts and commit
-            ocmbErrlCommit(i_target, error);
+            ocmbErrlCommit(i_target, l_errl);
 
             // Since there was an error then the EC values don't agree between
             // the OCMB read and the SPD read. Since the OCMB has the correct
             // answer, set the attributes to the values read from that instead
             // of the SPD.
-            i_target->setAttr<TARGETING::ATTR_EC>(ec);
-            i_target->setAttr<TARGETING::ATTR_HDAT_EC>(ec);
+            i_target->setAttr<TARGETING::ATTR_EC>(l_ec);
+            i_target->setAttr<TARGETING::ATTR_HDAT_EC>(l_ec);
         }
 
     } while(0);
 
-    return error;
+    return l_errl;
 
 }
 

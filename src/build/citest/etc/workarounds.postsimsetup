@@ -40,4 +40,9 @@ grep -v PROC_EC $BACKING_BUILD/src/simu/configs/P9_NIMBUS.config > $sb/simu/conf
 echo "SETENV PROC_EC                22" >> $sb/simu/configs/P9_NIMBUS.config
 
 
+# TODO RTC:244050
+# update the por value of the EFUSE_OUT_IMAGE_3 register 
+if [[ -f "$sb/../simics/import/cec-chip/uchip_default.por" ]]; then
+   sed -i 's/UCHIP(0x0020b08c)=0x0/UCHIP(0x0020b08c)=0x00000400/' $sb/../simics/import/cec-chip/uchip_default.por
+fi
 ##########################################################################
