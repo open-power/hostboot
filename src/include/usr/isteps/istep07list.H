@@ -146,12 +146,12 @@ namespace   INITSERVICE
                 ISTEP_07::call_mss_freq,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
-/*
         {
                 ISTEPNAME(07,04,"mss_eff_config"),
                 ISTEP_07::call_mss_eff_config,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
+/*
         {
                 ISTEPNAME(07,05,"mss_attr_update"),
                 ISTEP_07::call_mss_attr_update,
