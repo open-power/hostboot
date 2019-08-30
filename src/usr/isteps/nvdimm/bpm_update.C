@@ -969,9 +969,18 @@ errlHndl_t Bpm::runUpdate(BpmFirmwareLidImage i_fwImage,
         }
         else
         {
-            TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::runUpdate(): "
-                     "ATTR_BPM_UPDATE_OVERRIDE set to skip firmware "
-                     "portion of BPM updates. Skipping Firmware Update...");
+            if (firmwareOverrideFlag == TARGETING::BPM_UPDATE_BEHAVIOR_SKIP_FW)
+            {
+                TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::runUpdate(): "
+                         "ATTR_BPM_UPDATE_OVERRIDE set to skip firmware "
+                         "portion of BPM updates. Skipping Firmware Update...");
+            }
+            else
+            {
+                TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::runUpdate(): "
+                         "Firmware Data on BPM already up-to-date. "
+                         "Skipping Firmware Update...");
+            }
         }
 
         uint16_t configOverrideFlag = (updateOverride & 0x00FF);
@@ -993,9 +1002,18 @@ errlHndl_t Bpm::runUpdate(BpmFirmwareLidImage i_fwImage,
         }
         else
         {
-            TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::runUpdate(): "
-                     "ATTR_BPM_UPDATE_OVERRIDE set to skip config "
-                     "portion of BPM updates. Skipping Config Update...");
+            if (configOverrideFlag == TARGETING::BPM_UPDATE_BEHAVIOR_SKIP_CONFIG)
+            {
+                TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::runUpdate(): "
+                         "ATTR_BPM_UPDATE_OVERRIDE set to skip config "
+                         "portion of BPM updates. Skipping Config Update...");
+            }
+            else
+            {
+                TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::runUpdate(): "
+                         "Configuration Data on BPM already up-to-date. "
+                         "Skipping Config Update...");
+            }
         }
 
 
