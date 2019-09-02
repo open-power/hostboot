@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -998,7 +998,7 @@ fapi2::ReturnCode p9_fab_iovalid_get_link_delay(
 {
     FAPI_DBG("Start");
     fapi2::buffer<uint64_t> l_link_delay_reg;
-    uint32_t l_sublink_delay[2];
+    uint32_t l_sublink_delay[2] = {};
 
     // read link delay register, extract hi/lo delay values & return their average
     FAPI_TRY(fapi2::getScom(i_target, i_link_ctl.tl_link_delay_addr, l_link_delay_reg),
