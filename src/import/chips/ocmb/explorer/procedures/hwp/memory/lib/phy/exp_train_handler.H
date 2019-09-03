@@ -38,6 +38,8 @@
 
 #include <fapi2.H>
 #include <lib/shared/exp_consts.H>
+#include <lib/shared/exp_defaults.H>
+#include <lib/dimm/exp_rank.H>
 #include <exp_data_structs.H>
 #include <generic/memory/lib/utils/mss_bad_bits.H>
 #include <generic/memory/lib/mss_generic_attribute_setters.H>
@@ -154,28 +156,12 @@ class bad_bit_interface
         fapi2::ReturnCode record_bad_bits_interface( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 uint8_t (&o_bad_dq)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT]) const
         {
-            // Gets the rank offset for this DIMM
-            const uint64_t DIMM_OFFSET = mss::index(i_target) == 0 ? 0 : 2;
+            std::vector<mss::rank::info<>> l_ranks;
+            FAPI_TRY(mss::rank::ranks_on_dimm(i_target, l_ranks));
 
-            // Loops through all of the ranks on this DIMM
-            uint8_t l_num_ranks = 0;
-            FAPI_TRY(mss::attr::get_num_master_ranks_per_dimm(i_target, l_num_ranks));
-
-            // TK Add in num ranks check here
-            // TK update for the ranks API
-
-            for(uint64_t l_rank = 0; l_rank < l_num_ranks; ++l_rank)
+            for(const auto& l_rank : l_ranks)
             {
-                const uint64_t RANK = DIMM_OFFSET + l_rank;
-                FAPI_ASSERT(RANK < mss::exp::MAX_RANK_PER_DIMM,
-                            fapi2::MSS_EXP_DRAMINIT_BAD_NUM_RANKS()
-                            .set_NUM_RANKS(RANK)
-                            .set_MAX_RANKS(mss::exp::MAX_RANK_PER_DIMM)
-                            .set_TARGET(i_target),
-                            "%s bad number of ranks passed num:%u, max:%u",
-                            mss::c_str(i_target), RANK, mss::exp::MAX_RANK_PER_DIMM);
-
-                memcpy(&o_bad_dq[RANK], &iv_bad_bits[RANK], sizeof(uint8_t[BAD_DQ_BYTE_COUNT]));
+                memcpy(&o_bad_dq[l_rank.get_phy_rank()], &iv_bad_bits[l_rank.get_phy_rank()], sizeof(uint8_t[BAD_DQ_BYTE_COUNT]));
             }
 
             return fapi2::FAPI2_RC_SUCCESS;

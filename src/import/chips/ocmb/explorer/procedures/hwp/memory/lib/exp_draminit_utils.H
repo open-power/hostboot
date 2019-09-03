@@ -37,6 +37,8 @@
 #define __MSS_EXP_DRAMINIT_UTILS__
 
 #include <fapi2.H>
+#include <lib/shared/exp_defaults.H>
+#include <lib/dimm/exp_rank.H>
 #include <lib/shared/exp_consts.H>
 #include <exp_data_structs.H>
 #include <mss_generic_attribute_getters.H>
@@ -240,6 +242,7 @@ class phy_params
 
         fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> iv_target;
         phy_params_t iv_params;
+        std::vector<mss::rank::info<>> iv_rank_info;
 
     public:
 
@@ -323,6 +326,8 @@ class phy_params
                 iv_params.iv_encoded_quadcs = (l_has_rcd && l_4r) ? MSDG_QUAD_ENCODE_MODE : MSDG_DUAL_DIRECT_MODE;
             }
 
+            FAPI_TRY(mss::rank::ranks_on_port(i_target, iv_rank_info));
+
         fapi_try_exit:
             o_rc = fapi2::current_err;
         }
@@ -333,17 +338,84 @@ class phy_params
         /// @brief Set params as per the value initialized (useful for testing)
         /// @param[in] i_target the fapi2 target
         /// @param[in] i_phy_params explorer specific data structure
+        /// @param[out] o_rc Return code from rank API initialization
         ///
         phy_params(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-                   const phy_params_t& i_phy_params):
+                   const phy_params_t& i_phy_params,
+                   const std::vector<mss::rank::info<>> i_rank_info):
             iv_target(i_target),
-            iv_params(i_phy_params)
+            iv_params(i_phy_params),
+            iv_rank_info(i_rank_info)
         {}
 
         ///
         /// @brief Destructor
         ///
         ~phy_params() = default;
+
+        ///
+        /// @brief Set the rank-based phy field from the attribute
+        ///
+        /// @param[in] i_phy_param_ranks array of pointers to the rank fields to be filled in
+        /// @param[in] i_phy_param_attr pointer to the iv array indexed by dimm & rank
+        /// @note this function assumes i_phy_param_ranks is properly populated with 4 fields (1 per phy rank)
+        ///
+        void set_phy_field_by_rank(const std::vector<uint16_t*>& i_phy_param_ranks,
+                                   const uint8_t (&i_phy_param_attr)[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM]) const
+        {
+            // First, zero everything out
+            for (uint8_t l_rank = 0; l_rank < i_phy_param_ranks.size(); ++l_rank)
+            {
+                *i_phy_param_ranks[l_rank] = 0;
+            }
+
+            // For each rank, the phy rank value (0-4) is what needs to be filled in for draminit
+            // This maps to the field corresponding to the ATTR index value
+            // indexed by the rank's dimm index and dimm rank
+            for (const auto& l_rank : iv_rank_info)
+            {
+                const uint8_t l_dimm_index = mss::index(l_rank.get_dimm_target());
+                const uint8_t l_dimm_rank = l_rank.get_dimm_rank();
+                *i_phy_param_ranks[l_rank.get_phy_rank()] = i_phy_param_attr[l_dimm_index][l_dimm_rank];
+            }
+        }
+
+        ///
+        /// @brief Maps the ODT RD/WR attributes to the form needed for exp_draminit
+        ///
+        /// @param[in] i_odt_rd_wr_attr iv array indexed by dimm & rank
+        /// @param[out] o_odt_buffer buffer to populate
+        ///
+        fapi2::ReturnCode populate_odt_buffer(const uint8_t (&i_odt_rd_wr_attr)[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM],
+                                              fapi2::buffer<uint16_t>& o_odt_buffer) const
+        {
+            // Const vector to map phy ranks to their buffer offset position
+            const std::vector<uint8_t> l_buffer_rank_offset =
+            {
+                odt_fields::RANK0,
+                odt_fields::RANK1,
+                odt_fields::RANK2,
+                odt_fields::RANK3,
+            };
+
+            for (const auto& l_rank : iv_rank_info)
+            {
+                const auto OFFSET = l_buffer_rank_offset[l_rank.get_phy_rank()];
+                const auto DIMM_RANK = l_rank.get_dimm_rank();
+                const auto DIMM_INDEX = mss::index(l_rank.get_dimm_target());
+                FAPI_TRY(o_odt_buffer.insert(i_odt_rd_wr_attr[DIMM_INDEX][DIMM_RANK], OFFSET, odt_fields::FLD_LENGTH));
+            }
+
+            // Rest of the buffer should already be zeroed from declaration
+            // Our attribute values come in left aligned (LSB left), our buffers are left aligned, but MCHP wants things right aligned:
+            // (rank0 == [1:0], rank1 == [5:4])
+            // So we can set it up from the buffer perspective, but then flip the whole buffer, getting the values back to their
+            // correct form (MSB right aligned) in addition to flipping the rank positions to their expected locations
+            o_odt_buffer.reverse();
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
 
         ///
         /// @brief user_input_msdg structure setup for parameter DimmType
@@ -738,10 +810,15 @@ class phy_params
         ///
         fapi2::ReturnCode set_RttNom(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.DramRttNomR0[0] = iv_params.iv_dram_rtt_nom[0][0];
-            io_phy_params.DramRttNomR1[0] = iv_params.iv_dram_rtt_nom[0][1];
-            io_phy_params.DramRttNomR2[0] = iv_params.iv_dram_rtt_nom[0][2];
-            io_phy_params.DramRttNomR3[0] = iv_params.iv_dram_rtt_nom[0][3];
+            const std::vector<uint16_t*> l_rtt_noms =
+            {
+                &io_phy_params.DramRttNomR0[0],
+                &io_phy_params.DramRttNomR1[0],
+                &io_phy_params.DramRttNomR2[0],
+                &io_phy_params.DramRttNomR3[0],
+            };
+
+            set_phy_field_by_rank(l_rtt_noms, iv_params.iv_dram_rtt_nom);
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -752,10 +829,15 @@ class phy_params
         ///
         fapi2::ReturnCode set_RttWr(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.DramRttWrR0[0] = iv_params.iv_dram_rtt_wr[0][0];
-            io_phy_params.DramRttWrR1[0] = iv_params.iv_dram_rtt_wr[0][1];
-            io_phy_params.DramRttWrR2[0] = iv_params.iv_dram_rtt_wr[0][2];
-            io_phy_params.DramRttWrR3[0] = iv_params.iv_dram_rtt_wr[0][3];
+            const std::vector<uint16_t*> l_rtt_wrs =
+            {
+                &io_phy_params.DramRttWrR0[0],
+                &io_phy_params.DramRttWrR1[0],
+                &io_phy_params.DramRttWrR2[0],
+                &io_phy_params.DramRttWrR3[0],
+            };
+
+            set_phy_field_by_rank(l_rtt_wrs, iv_params.iv_dram_rtt_wr);
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -766,10 +848,15 @@ class phy_params
         ///
         fapi2::ReturnCode set_RttPark(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.DramRttParkR0[0] = iv_params.iv_dram_rtt_park[0][0];
-            io_phy_params.DramRttParkR1[0] = iv_params.iv_dram_rtt_park[0][1];
-            io_phy_params.DramRttParkR2[0] = iv_params.iv_dram_rtt_park[0][2];
-            io_phy_params.DramRttParkR3[0] = iv_params.iv_dram_rtt_park[0][3];
+            const std::vector<uint16_t*> l_rtt_parks =
+            {
+                &io_phy_params.DramRttParkR0[0],
+                &io_phy_params.DramRttParkR1[0],
+                &io_phy_params.DramRttParkR2[0],
+                &io_phy_params.DramRttParkR3[0],
+            };
+
+            set_phy_field_by_rank(l_rtt_parks, iv_params.iv_dram_rtt_park);
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -852,16 +939,11 @@ class phy_params
         {
             fapi2::buffer<uint16_t> odt_wr_map_cs_buff;
 
-            // TK - Changes needed for Dual Drop / 4U in the future.
-            // Will likely require ODT RD/WR attribute changes
-            odt_wr_map_cs_buff.insert<odt_fields::RANK3, odt_fields::FLD_LENGTH>(iv_params.iv_odt_wr_map_cs[0][3]);
-            odt_wr_map_cs_buff.insert<odt_fields::RANK2, odt_fields::FLD_LENGTH>(iv_params.iv_odt_wr_map_cs[0][2]);
-            odt_wr_map_cs_buff.insert<odt_fields::RANK1, odt_fields::FLD_LENGTH>(iv_params.iv_odt_wr_map_cs[0][1]);
-            odt_wr_map_cs_buff.insert<odt_fields::RANK0, odt_fields::FLD_LENGTH>(iv_params.iv_odt_wr_map_cs[0][0]);
-
-            odt_wr_map_cs_buff.reverse();
+            FAPI_TRY(populate_odt_buffer(iv_params.iv_odt_wr_map_cs, odt_wr_map_cs_buff));
             io_phy_params.OdtWrMapCs[0] = odt_wr_map_cs_buff;
-            return fapi2::FAPI2_RC_SUCCESS;
+
+        fapi_try_exit:
+            return fapi2::current_err;
         }
 
         ///
@@ -873,16 +955,11 @@ class phy_params
         {
             fapi2::buffer<uint16_t> odt_rd_map_cs_buff;
 
-            // TK - Changes needed for Dual Drop / 4U in the future.
-            // Will likely require ODT RD/WR attribute changes
-            odt_rd_map_cs_buff.insert<odt_fields::RANK3, odt_fields::FLD_LENGTH>(iv_params.iv_odt_rd_map_cs[0][3]);
-            odt_rd_map_cs_buff.insert<odt_fields::RANK2, odt_fields::FLD_LENGTH>(iv_params.iv_odt_rd_map_cs[0][2]);
-            odt_rd_map_cs_buff.insert<odt_fields::RANK1, odt_fields::FLD_LENGTH>(iv_params.iv_odt_rd_map_cs[0][1]);
-            odt_rd_map_cs_buff.insert<odt_fields::RANK0, odt_fields::FLD_LENGTH>(iv_params.iv_odt_rd_map_cs[0][0]);
-
-            odt_rd_map_cs_buff.reverse();
+            FAPI_TRY(populate_odt_buffer(iv_params.iv_odt_rd_map_cs, odt_rd_map_cs_buff));
             io_phy_params.OdtRdMapCs[0] = odt_rd_map_cs_buff;
-            return fapi2::FAPI2_RC_SUCCESS;
+
+        fapi_try_exit:
+            return fapi2::current_err;
         }
 
         ///

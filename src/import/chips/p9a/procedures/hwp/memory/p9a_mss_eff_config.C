@@ -33,9 +33,11 @@
 // *HWP Level: 1
 // *HWP Consumed by: FSP:HB
 
-// fapi2
 #include <fapi2.H>
 #include <p9a_mss_eff_config.H>
+#include <lib/shared/exp_defaults.H>
+#include <lib/dimm/exp_rank.H>
+#include <generic/memory/lib/utils/mss_rank.H>
 #include <generic/memory/lib/data_engine/data_engine.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/spd/ddimm/efd_factory.H>
@@ -57,25 +59,22 @@
 ///
 fapi2::ReturnCode p9a_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target )
 {
+    using mss::DEFAULT_MC_TYPE;
+
     mss::display_git_commit_info("p9a_mss_eff_config");
-
-    // Workaround until DIMM level attrs work
-    uint8_t l_ranks[mss::exp::MAX_DIMM_PER_PORT] = {};
-
-    FAPI_TRY( mss::attr::get_num_master_ranks_per_dimm(i_target, l_ranks) );
 
     for(const auto& dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
     {
-        uint8_t l_dimm_index = 0;
         uint64_t l_freq = 0;
         uint32_t l_omi_freq = 0;
-        FAPI_TRY( mss::attr::get_freq(mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(dimm), l_freq) );
-        FAPI_TRY( mss::convert_ddr_freq_to_omi_freq(mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(dimm), l_freq, l_omi_freq));
+        FAPI_TRY( mss::attr::get_freq(i_target, l_freq) );
+        FAPI_TRY( mss::convert_ddr_freq_to_omi_freq(i_target, l_freq, l_omi_freq));
 
-        // Quick hack to get the index until DIMM level attrs work
-        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_REL_POS, dimm, l_dimm_index) );
+        // Get ranks via rank API
+        std::vector<mss::rank::info<>> l_ranks;
+        mss::rank::ranks_on_dimm(dimm, l_ranks);
 
-        for( auto rank = 0; rank < l_ranks[l_dimm_index]; ++rank )
+        for (const auto& l_rank : l_ranks)
         {
             std::shared_ptr<mss::efd::base_decoder> l_efd_data;
 
@@ -83,7 +82,7 @@ fapi2::ReturnCode p9a_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
             const auto l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
             fapi2::MemVpdData_t l_vpd_type(fapi2::MemVpdData::EFD);
             fapi2::VPDInfo<fapi2::TARGET_TYPE_OCMB_CHIP> l_vpd_info(l_vpd_type);
-            l_vpd_info.iv_rank = rank;
+            l_vpd_info.iv_rank = l_rank.get_dimm_rank();
             l_vpd_info.iv_omi_freq_mhz = l_omi_freq;
             FAPI_TRY( fapi2::getVPD(l_ocmb, l_vpd_info, nullptr), "failed getting VPD size from getVPD" );
 

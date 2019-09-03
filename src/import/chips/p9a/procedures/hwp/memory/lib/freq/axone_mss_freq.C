@@ -286,9 +286,9 @@ fapi2::ReturnCode check_freq_support_vpd<mss::proc_type::AXONE>( const fapi2::Ta
             continue;
         }
 
-        l_vpd_info.iv_rank = l_rank.get_port_rank();
+        l_vpd_info.iv_rank = l_rank.get_dimm_rank();
         FAPI_INF("%s. VPD info - checking rank: %d",
-                 mss::c_str(i_target), l_rank.get_port_rank());
+                 mss::c_str(i_target), l_rank.get_dimm_rank());
 
         // Check if this VPD configuration is supported
         FAPI_TRY(is_vpd_config_supported<mss::proc_type::AXONE>(l_vpd_target, i_proposed_freq, l_vpd_info, o_supported),
