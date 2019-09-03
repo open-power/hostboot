@@ -773,11 +773,11 @@ sub manipulateImages
                 # If section will passed through ecc, include this in size calculation
                 if( ($sectionHash{$layoutKey}{ecc} eq "yes") )
                 {
-                    $partitionUtilHash{$eyeCatch}{logicalFileSize} = %callerHwHdrFields->{totalContainerSize} * (9/8);
+                    $partitionUtilHash{$eyeCatch}{logicalFileSize} = $callerHwHdrFields{totalContainerSize} * (9/8);
                 }
                 else
                 {
-                    $partitionUtilHash{$eyeCatch}{logicalFileSize} = %callerHwHdrFields->{totalContainerSize};
+                    $partitionUtilHash{$eyeCatch}{logicalFileSize} = $callerHwHdrFields{totalContainerSize};
                 }
                 $partitionUtilHash{$eyeCatch}{pctUtilized} = sprintf("%.2f", $partitionUtilHash{$eyeCatch}{logicalFileSize} / $physicalRegionSize * 100);
                 $partitionUtilHash{$eyeCatch}{freeBytes} = $physicalRegionSize - $partitionUtilHash{$eyeCatch}{logicalFileSize};
