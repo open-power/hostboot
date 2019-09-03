@@ -55,14 +55,6 @@ void* call_mss_scrub (void *io_pArgs)
 
     do
     {
-        // TODO: 213933 Remove workaround skipping mss_scrub for swift bringup
-        #if CONFIG_AXONE_BRING_UP
-            // There are performance issues and some functional deficiencies
-            // that make background scrub problematic in SIMICs.
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ISTEP_FUNC
-                       "Background scrubbing not currently working with Swift systems so it is disabled for now" );
-        break;
-        #endif
 
         if ( Util::isSimicsRunning() )
         {
