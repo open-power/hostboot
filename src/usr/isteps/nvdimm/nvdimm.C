@@ -155,6 +155,9 @@ static constexpr uint8_t MSBIT_SET_MASK = 0x80;
 static constexpr uint8_t MSBIT_CLR_MASK = 0x7F;
 static constexpr uint8_t OPERATION_SLEEP_SECONDS = 0x1;
 
+// Bit mask for checking the fw slot running
+static constexpr uint8_t RUNNING_FW_SLOT = 0xF0;
+
 #ifndef __HOSTBOOT_RUNTIME
 // Warning thresholds
 static constexpr uint8_t THRESHOLD_ES_LIFETIME = 0x07;    // 7%
@@ -1675,7 +1678,7 @@ errlHndl_t nvdimmEpowSetup(TargetHandleList &i_nvdimmList)
  * @param[in] i_nvdimmList - list of nvdimm targets
  *
  */
-errlHndl_t nvdimm_restore(TargetHandleList &i_nvdimmList)
+void nvdimm_restore(TargetHandleList &i_nvdimmList)
 {
     TRACUCOMP(g_trac_nvdimm, ENTER_MRK"nvdimm_restore()");
 
@@ -1783,15 +1786,10 @@ errlHndl_t nvdimm_restore(TargetHandleList &i_nvdimmList)
             if (l_err)
             {
                 TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_restore() nvdimm[%X] failed during health status check", get_huid(l_nvdimm));
-                if (l_exit)
+                errlCommit( l_err, NVDIMM_COMP_ID );
+                if (!l_exit)
                 {
-                    errlCommit( l_err, NVDIMM_COMP_ID );
-                }
-                else
-                {
-                    // Redundant check with external err bugged
-                    errlCommit( l_err, NVDIMM_COMP_ID );
-                    return l_err;
+                    break;
                 }
             }
 
@@ -1814,7 +1812,6 @@ errlHndl_t nvdimm_restore(TargetHandleList &i_nvdimmList)
 
     }while(0);
 
-    // Return err not being handled, temp commit:
     if (l_err)
     {
         errlCommit(l_err, NVDIMM_COMP_ID);
@@ -1832,7 +1829,6 @@ errlHndl_t nvdimm_restore(TargetHandleList &i_nvdimmList)
     }
 
     TRACUCOMP(g_trac_nvdimm, EXIT_MRK"nvdimm_restore()");
-    return l_err;
 }
 
 /**
@@ -1935,7 +1931,7 @@ errlHndl_t nvdimm_factory_reset(Target *i_nvdimm)
  * @param[in] i_nvdimm - nvdimm target
  *
  */
-errlHndl_t nvdimm_init(Target *i_nvdimm)
+void nvdimm_init(Target *i_nvdimm)
 {
     TRACUCOMP(g_trac_nvdimm, ENTER_MRK"nvdimm_init() nvdimm[%X]",
               get_huid(i_nvdimm));
@@ -1986,6 +1982,52 @@ errlHndl_t nvdimm_init(Target *i_nvdimm)
             break;
         }
 
+        // Check if the firmware slot is 0
+        l_err = nvdimmReadReg ( i_nvdimm, FW_SLOT_INFO, l_data);
+
+        if (l_err)
+        {
+            nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR);
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_init() nvdimm[%X], failed to read slot info",
+                      get_huid(i_nvdimm));
+            break;
+        }
+
+        if (!(l_data & RUNNING_FW_SLOT))
+        {
+            nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_init() nvdimm[%X], running on fw slot 0",
+                      get_huid(i_nvdimm));
+            /*@
+             *@errortype
+             *@reasoncode       NVDIMM_INVALID_FW_SLOT
+             *@severity         ERRORLOG_SEV_PREDICTIVE
+             *@moduleid         NVDIMM_CHECK_FW_SLOT
+             *@userdata1[0:31]  Related ops (0xff = NA)
+             *@userdata1[32:63] Target Huid
+             *@userdata2        <UNUSED>
+             *@devdesc          Encountered error when checking the firmware slot running
+             *                   on NVDIMM. Firmware is running on slot 0 instead of 1
+             *@custdesc         NVDIMM incorrect firmware slot
+             */
+            l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                             NVDIMM_CHECK_FW_SLOT,
+                                             NVDIMM_INVALID_FW_SLOT,
+                                             NVDIMM_SET_USER_DATA_1(l_data, get_huid(i_nvdimm)),
+                                             0x0,
+                                             ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
+
+            l_err->collectTrace( NVDIMM_COMP_NAME );
+
+            // Add callout of nvdimm with no deconfig/gard
+            l_err->addHwCallout( i_nvdimm,
+                                 HWAS::SRCI_PRIORITY_LOW,
+                                 HWAS::NO_DECONFIG,
+                                 HWAS::GARD_NULL);
+
+            errlCommit(l_err, NVDIMM_COMP_ID);
+        }
+
         // Get the timeout values for the major ops at init
         l_err = nvdimmGetTimeoutVal(i_nvdimm);
         if (l_err)
@@ -2023,8 +2065,12 @@ errlHndl_t nvdimm_init(Target *i_nvdimm)
              *@userdata1[0:31]  Related ops (0xff = NA)
              *@userdata1[32:63] Target Huid
              *@userdata2        <UNUSED>
-             *@devdesc          Encountered error erasing previously stored data image
-             *                   on NVDIMM. Likely due to timeout and/or controller error
+             *@devdesc          NO_RESET_N: The NVDIMM experienced a power loss, but no CSAVE
+             *                  was triggered since the NVDIMM did not detect an asserted
+             *                  RESET_N. If there is a prior predicitve log for OCC in safe
+             *                  mode, than this would be the reason for NO_RESET_N. Otherwise
+             *                  there could be a problem with the RESET_N signal between proc
+             *                  and NVDIMM.
              *@custdesc         NVDIMM error erasing data image
              */
             l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE,
@@ -2040,9 +2086,10 @@ errlHndl_t nvdimm_init(Target *i_nvdimm)
             // Failure to erase could mean internal NV controller error and/or
             // HW error on nand flash. NVDIMM will lose persistency if failed to
             // erase nand flash
-            l_err->addPartCallout( i_nvdimm,
-                                   HWAS::NV_CONTROLLER_PART_TYPE,
-                                   HWAS::SRCI_PRIORITY_LOW);
+            l_err->addHwCallout( i_nvdimm,
+                                 HWAS::SRCI_PRIORITY_LOW,
+                                 HWAS::NO_DECONFIG,
+                                 HWAS::GARD_NULL);
 
             // Collect register data for FFDC Traces
             nvdimmTraceRegs ( i_nvdimm, l_RegInfo );
@@ -2131,14 +2178,20 @@ errlHndl_t nvdimm_init(Target *i_nvdimm)
                                        HWAS::SRCI_PRIORITY_HIGH,
                                        HWAS::DECONFIG,
                                        HWAS::GARD_Fatal);
+                break;
             }
             else
             {
+                // Callout dimm without gard if image is valid
+                l_err->addHwCallout( i_nvdimm,
+                                       HWAS::SRCI_PRIORITY_LOW,
+                                       HWAS::NO_DECONFIG,
+                                       HWAS::GARD_NULL);
+
                 // Set ATTR_NV_STATUS_FLAG to partial working as data may persist
                 nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
                 errlCommit(l_err, NVDIMM_COMP_ID);
             }
-            break;
         }
 
         // Check Health Status Registers
@@ -2158,14 +2211,10 @@ errlHndl_t nvdimm_init(Target *i_nvdimm)
     TRACUCOMP(g_trac_nvdimm, EXIT_MRK"nvdimm_init() nvdimm[%X]",
               get_huid(i_nvdimm));
 
-    // Return err not being handled, temp commit:
     if (l_err)
     {
         errlCommit(l_err, NVDIMM_COMP_ID);
     }
-
-
-    return l_err;
 }
 
 

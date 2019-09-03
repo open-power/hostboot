@@ -239,11 +239,11 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
             break;
         }
 
-        // Clear ARM status register
-        l_err = nvdimmWriteReg(l_nvdimm, NVDIMM_MGT_CMD0, ARM_CLEAR);
+        // Clear all CMD error status registers
+        l_err = nvdimmWriteReg(l_nvdimm, NVDIMM_MGT_CMD0, ARM_CLEAR_ALL);
         if (l_err)
         {
-            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmArm() nvdimm[%X] - error clearing ARM status register",
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmArm() nvdimm[%X] - error clearing all status registers",
                       get_huid(l_nvdimm));
             break;
         }
@@ -423,7 +423,7 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
                       get_huid(l_nvdimm));
 
             // Set NVDIMM Status flag to partial working, as error detected but data might persist
-            nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR_VAL_SR);
+            notifyNvdimmProtectionChange(l_nvdimm, NVDIMM_RISKY_HW_ERROR);
 
            /*@
             *@errortype
@@ -487,72 +487,77 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
         return false;
     }
 
-    // Unmask MBACALFIR EventN and set to recoverable
-    for (TargetHandleList::iterator it = i_nvdimmTargetList.begin();
-         it != i_nvdimmTargetList.end();)
+    // Unmask firs if the arm completed successfully
+    if (o_arm_successful)
     {
-        TargetHandleList l_mcaList;
-        getParentAffinityTargets(l_mcaList, *it, CLASS_UNIT, TYPE_MCA);
-        assert(l_mcaList.size(), "nvdimmArm() failed to find parent MCA.");
-
-        // Set MBACALFIR_ACTION0 to recoverable
-        l_writeAddress = MBACALFIR_ACTION0_REG;
-        l_writeData = 0;
-        l_err = deviceRead(l_mcaList[0], &l_writeData, l_writeSize,
-                           DEVICE_SCOM_ADDRESS(l_writeAddress));
-        if(l_err)
+        // Unmask MBACALFIR EventN and set to recoverable
+        for (TargetHandleList::iterator it = i_nvdimmTargetList.begin();
+            it != i_nvdimmTargetList.end();)
         {
-              TRACFCOMP(g_trac_nvdimm, "SCOM to address 0x%08x failed",
-                        l_writeAddress);
-             errlCommit( l_err, NVDIMM_COMP_ID );
-        }
+            TargetHandleList l_mcaList;
+            getParentAffinityTargets(l_mcaList, *it, CLASS_UNIT, TYPE_MCA);
+            assert(l_mcaList.size(), "nvdimmArm() failed to find parent MCA.");
 
-
-        l_writeData &= MBACALFIR_EVENTN_AND_BIT;
-        l_err = deviceWrite(l_mcaList[0], &l_writeData, l_writeSize,
+            // Set MBACALFIR_ACTION0 to recoverable
+            l_writeAddress = MBACALFIR_ACTION0_REG;
+            l_writeData = 0;
+            l_err = deviceRead(l_mcaList[0], &l_writeData, l_writeSize,
                                DEVICE_SCOM_ADDRESS(l_writeAddress));
-        if(l_err)
-        {
-              TRACFCOMP(g_trac_nvdimm, "SCOM to address 0x%08x failed",
-                        l_writeAddress);
-             errlCommit( l_err, NVDIMM_COMP_ID );
+            if(l_err)
+            {
+                TRACFCOMP(g_trac_nvdimm, "SCOM to address 0x%08x failed",
+                          l_writeAddress);
+                errlCommit( l_err, NVDIMM_COMP_ID );
+            }
+
+
+            l_writeData &= MBACALFIR_EVENTN_AND_BIT;
+            l_err = deviceWrite(l_mcaList[0], &l_writeData, l_writeSize,
+                                   DEVICE_SCOM_ADDRESS(l_writeAddress));
+            if(l_err)
+            {
+                TRACFCOMP(g_trac_nvdimm, "SCOM to address 0x%08x failed",
+                          l_writeAddress);
+                errlCommit( l_err, NVDIMM_COMP_ID );
+            }
+
+            // Set MBACALFIR_ACTION1 to recoverable
+            l_writeAddress = MBACALFIR_ACTION1_REG;
+            l_writeData = 0;
+            l_err = deviceRead(l_mcaList[0], &l_writeData, l_writeSize,
+                               DEVICE_SCOM_ADDRESS(l_writeAddress));
+            if(l_err)
+            {
+                TRACFCOMP(g_trac_nvdimm, "SCOM to address 0x%08x failed",
+                          l_writeAddress);
+                errlCommit( l_err, NVDIMM_COMP_ID );
+            }
+
+            l_writeData |= MBACALFIR_EVENTN_OR_BIT;
+            l_err = deviceWrite(l_mcaList[0], &l_writeData, l_writeSize,
+                                DEVICE_SCOM_ADDRESS(l_writeAddress));
+            if(l_err)
+            {
+                TRACFCOMP(g_trac_nvdimm, "SCOM to address 0x%08x failed",
+                          l_writeAddress);
+                errlCommit( l_err, NVDIMM_COMP_ID );
+            }
+
+            // Unmask MBACALFIR[8]
+            l_writeAddress = MBACALFIR_AND_MASK_REG;
+            l_writeData = MBACALFIR_UNMASK_BIT;
+            l_err = deviceWrite(l_mcaList[0], &l_writeData, l_writeSize,
+                                DEVICE_SCOM_ADDRESS(l_writeAddress));
+            if(l_err)
+            {
+                TRACFCOMP(g_trac_nvdimm, "SCOM to address 0x%08x failed",
+                          l_writeAddress);
+                errlCommit( l_err, NVDIMM_COMP_ID );
+            }
+
+            it++;
         }
 
-        // Set MBACALFIR_ACTION1 to recoverable
-        l_writeAddress = MBACALFIR_ACTION1_REG;
-        l_writeData = 0;
-        l_err = deviceRead(l_mcaList[0], &l_writeData, l_writeSize,
-                           DEVICE_SCOM_ADDRESS(l_writeAddress));
-        if(l_err)
-        {
-              TRACFCOMP(g_trac_nvdimm, "SCOM to address 0x%08x failed",
-                        l_writeAddress);
-             errlCommit( l_err, NVDIMM_COMP_ID );
-        }
-
-        l_writeData |= MBACALFIR_EVENTN_OR_BIT;
-        l_err = deviceWrite(l_mcaList[0], &l_writeData, l_writeSize,
-                            DEVICE_SCOM_ADDRESS(l_writeAddress));
-        if(l_err)
-        {
-              TRACFCOMP(g_trac_nvdimm, "SCOM to address 0x%08x failed",
-                        l_writeAddress);
-             errlCommit( l_err, NVDIMM_COMP_ID );
-        }
-
-        // Unmask MBACALFIR[8]
-        l_writeAddress = MBACALFIR_AND_MASK_REG;
-        l_writeData = MBACALFIR_UNMASK_BIT;
-        l_err = deviceWrite(l_mcaList[0], &l_writeData, l_writeSize,
-                            DEVICE_SCOM_ADDRESS(l_writeAddress));
-        if(l_err)
-        {
-              TRACFCOMP(g_trac_nvdimm, "SCOM to address 0x%08x failed",
-                        l_writeAddress);
-             errlCommit( l_err, NVDIMM_COMP_ID );
-        }
-
-        it++;
     }
 
     TRACFCOMP(g_trac_nvdimm, EXIT_MRK"nvdimmArm() returning %d",

@@ -106,6 +106,7 @@ enum nvdimmModuleId
     NVDIMM_NVM_HEALTH_CHECK                 = 0x38, // Health check on the NVM (non-volatile memory)/flash
     NVDIMM_WAIT_OPER_OPS_COMPLETE           = 0x39,
     NVDIMM_COMPARE_CKSUM                    = 0x3A,
+    NVDIMM_CHECK_FW_SLOT                    = 0x3B,
 };
 
 /**
@@ -196,6 +197,7 @@ enum nvdimmReasonCode
     NVDIMM_NVM_HEALTH_CHECK_FAILED             = NVDIMM_COMP_ID | 0x4D,   // !< An NVM health check on the NVDIMM failed
     NVDIMM_VENDOR_LOG_TIMEOUT                  = NVDIMM_COMP_ID | 0x4E,   // Vendor log for FFDC timeout
     NVDIMM_VENDOR_LOG_CKSUM_FAILED             = NVDIMM_COMP_ID | 0x4F,   // Vendor log for FFDC checksum fail
+    NVDIMM_INVALID_FW_SLOT                     = NVDIMM_COMP_ID | 0x50,
 };
 
 enum UserDetailsTypes

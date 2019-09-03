@@ -366,7 +366,7 @@ enum i2c_out_values : uint8_t
     ARM_ERROR                   = 0X02,
     RSTR_ERROR                  = 0x02,
     SAVE_ERROR                  = 0x02,
-    ARM_CLEAR                   = 0x20,
+    ARM_CLEAR_ALL               = 0x3C,
 };
 
 // Timeout-related enum

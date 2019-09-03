@@ -375,13 +375,13 @@ bool nvdimmCalloutDimm(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
             if(!l_continue)
             {
                 // Set ATTR_NV_STATUS_FLAG to partially working as data may still persist
-                nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
+                notifyNvdimmProtectionChange(i_nvdimm,NVDIMM_RISKY_HW_ERROR);
 
-                // Callout dimm and gard
+                // Callout dimm without deconfig or gard
                 o_err->addHwCallout( i_nvdimm,
                                        HWAS::SRCI_PRIORITY_LOW,
                                        HWAS::NO_DECONFIG,
-                                       HWAS::GARD_Fatal);
+                                       HWAS::GARD_NULL);
             }
             else
             {
@@ -392,11 +392,11 @@ bool nvdimmCalloutDimm(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
                     errlCommit( l_err, NVDIMM_COMP_ID );
                 }
 
-                // Callout the dimm but do not deconfig or gard
+                // Callout and gard the dimm
                 o_err->addHwCallout( i_nvdimm,
-                                       HWAS::SRCI_PRIORITY_LOW,
+                                       HWAS::SRCI_PRIORITY_HIGH,
                                        HWAS::NO_DECONFIG,
-                                       HWAS::GARD_NULL);
+                                       HWAS::GARD_Fatal);
             }
 
             break;
@@ -412,7 +412,7 @@ bool nvdimmCalloutDimm(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
                                    HWAS::GARD_NULL);
 
             // Set ATTR_NV_STATUS_FLAG to partially working as data may persist despite errors
-            nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
+            notifyNvdimmProtectionChange(i_nvdimm,NVDIMM_RISKY_HW_ERROR);
 
             break;
        }
@@ -557,7 +557,7 @@ bool nvdimmBPMCableCallout(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
             if(!l_continue)
             {
                 // Set ATTR_NV_STATUS_FLAG to partially working as data may still persist
-                nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
+                notifyNvdimmProtectionChange(i_nvdimm,NVDIMM_RISKY_HW_ERROR);
 
                 // Callout dimm but do not deconfig or gard
                 o_err->addHwCallout( i_nvdimm,
@@ -579,7 +579,6 @@ bool nvdimmBPMCableCallout(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
                                        HWAS::DECONFIG,
                                        HWAS::GARD_Fatal);
             }
-
             break;
         }
 
@@ -599,7 +598,7 @@ bool nvdimmBPMCableCallout(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
                                        HWAS::GARD_NULL);
 
             // Set ATTR_NV_STATUS_FLAG to partially working as data may still persist
-            nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
+            notifyNvdimmProtectionChange(i_nvdimm,NVDIMM_RISKY_HW_ERROR);
 
             break;
         }
@@ -699,7 +698,7 @@ bool nvdimmBPMCallout(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
             if(!l_continue)
             {
                 // Set ATTR_NV_STATUS_FLAG to partially working as data may still persist
-                nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
+                notifyNvdimmProtectionChange(i_nvdimm,NVDIMM_RISKY_HW_ERROR);
             }
             else
             {
@@ -729,7 +728,7 @@ bool nvdimmBPMCallout(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
                                    HWAS::GARD_NULL);
 
             // Set ATTR_NV_STATUS_FLAG to partially working as data may still persist
-            nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
+            notifyNvdimmProtectionChange(i_nvdimm,NVDIMM_RISKY_HW_ERROR);
 
             break;
         }

@@ -57,7 +57,7 @@ enum nvdimm_err_status
  * @param[in] i_nvdimmList - list of nvdimm targets
  *
  **/
-errlHndl_t nvdimm_restore(TARGETING::TargetHandleList &i_nvdimmList);
+void nvdimm_restore(TARGETING::TargetHandleList &i_nvdimmList);
 
 
 /**
@@ -456,7 +456,7 @@ void nvdimmAddPage4Regs(TARGETING::Target *i_nvdimm, errlHndl_t& io_err);
  * @return errlHndl_t - nullptr if successful, otherwise a pointer to
  *      the error log.
  */
-errlHndl_t nvdimm_init(TARGETING::Target *i_nvdimm);
+void nvdimm_init(TARGETING::Target *i_nvdimm);
 
 }
 
