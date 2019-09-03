@@ -1707,7 +1707,7 @@
     Consumer:  p10_pstate_parameter_build -> PGPE Hcode
 
     </description>
-    <valueType>uint8</valueType>
+    <valueType>uint16</valueType>
     <platInit/>
     <default>800</default>
     <overrideOnly/>
@@ -1732,7 +1732,7 @@
     <group>wof</group>
   </attribute>
 
-     <!-- ********************************************************************* -->
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_WOF_VRATIO_VDD_L3ON_OVERRIDE_10THPCT</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -1743,7 +1743,7 @@
     Consumer:  p10_pstate_parameter_build -> PGPE Hcode
 
     </description>
-    <valueType>uint8</valueType>
+    <valueType>uint16</valueType>
     <platInit/>
     <default>800</default>
     <overrideOnly/>
