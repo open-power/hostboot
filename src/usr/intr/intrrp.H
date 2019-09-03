@@ -153,12 +153,9 @@ namespace INTR
                 NX_IRSN_COMP_SHIFT      = 44,
                 NX_IRSN_MASK_SHIFT      = 31,
 
-
-
                 PE0_IRSN_COMP_SCOM_ADDR = 0x0201201A, //INTR IRSN compare
                 PE0_IRSN_MASK_SCOM_ADDR = 0x0201201B, //INTR IRSN mask
                 PE0_BAREN_SCOM_ADDR     = 0x02012045, //INTR enable/disable
-
 
                 PE1_IRSN_COMP_SCOM_ADDR = 0x0201241A, //INTR IRSN compare
                 PE1_IRSN_MASK_SCOM_ADDR = 0x0201241B, //INTR IRSN mask
@@ -184,61 +181,59 @@ namespace INTR
                 LSI_INTERRUPT   = 0xC000,
 
                 //PSI Host Bridge Constants
-                PSI_BRIDGE_BAR_SCOM_ADDR =               0x0501290A,
-                PSI_BRIDGE_BAR_ENABLE =                  0x0000000000000001ULL,
-                PSI_BRIDGE_ENABLE_CEC_INTERRUPT =        0x1000000000000000ULL,
-                PSI_BRIDGE_ESB_BAR_SCOM_ADDR =           0x05012916,
-                PSI_BRIDGE_ENABLE_LSI_INTR_REMOTE =      0x0000000000000000ULL,
+                PSI_BRIDGE_BAR_SCOM_ADDR =          0x03011D0A,
+                PSI_BRIDGE_BAR_ENABLE =             0x0000000000000001ULL,
+                PSI_BRIDGE_ENABLE_CEC_INTERRUPT =   0x1000000000000000ULL,
+                PSI_BRIDGE_ENABLE_LSI_INTR_REMOTE = 0x0000000000000000ULL,
+                PSI_BRIDGE_FSP_BAR_SCOM_ADDR =      0x03011D0B,
 
                 //PSI Host Bridge ESB Constants
-                PSI_BRIDGE_ESB_BAR_VALID =     0x0000000000000001ULL,
-                PSI_BRIDGE_ESB_NOTIFY_VALID =  0x0000000000000001ULL,
-                PSI_BRIDGE_ESB_QUERY_OFFSET = 0x800,
-                PSI_BRIDGE_ESB_OFF_OFFSET =    0xD00,
-                PSI_BRIDGE_ESB_RESET_OFFSET =  0XC00,
+                PSI_BRIDGE_ESB_BAR_SCOM_ADDR =      0x03011D16,
+                PSI_BRIDGE_ESB_BAR_VALID =          0x0000000000000001ULL,
+                PSI_BRIDGE_ESB_NOTIFY_VALID =       0x0000000000000001ULL,
 
                 //XIVE Interrupt Controller Constants
-                XIVE_IC_BAR_SCOM_ADDR = 0x05013010,
-                XIVE_IC_BAR_VALID = 0x8000000000000000ULL,
-                XIVE_IC_PHYSICAL_THREAD_ENABLE_OFFSET = 0x400,
+                XIVE_IC_BAR_SCOM_ADDR =                 0x02010808,
+                XIVE_IC_BAR_VALID =                     0x8000000000000000ULL,
+                XIVE_IC_PHYSICAL_THREAD_ENABLE_OFFSET = 0x3000,
                 XIVE_IC_BAR_INT_PC_MMIO_REG_OFFSET =
                          XIVE_IC_PHYSICAL_THREAD_ENABLE_OFFSET/sizeof(uint64_t),
-                XIVE_IC_THREAD0_ENABLE = 0x8000000000000000ULL,
-                XIVE_IC_ESB_LSI_TRIGGER_PAGE_OFFSET = 0x2000,
-                XIVE_IC_ESB_EOI_OFFSET = 0x3000,
+                XIVE_IC_THREAD0_ENABLE =                0x8000000000000000ULL,
+                XIVE_IC_ESB_LSI_TRIGGER_PAGE_OFFSET =   0x8000,
+                XIVE_IC_ESB_EOI_OFFSET =                0x9000,
                 XIVE_IC_LSI_EOI_OFFSET =
                                         XIVE_IC_ESB_EOI_OFFSET/sizeof(uint64_t),
-                XIVE_IC_VPC_PULL_ERR = 0x0000000200000000,
-                XIVE_IC_PC_VSD_TABLE_ADDR_OFFSET = 0x488 / sizeof(uint64_t),
-                XIVE_IC_PC_VSD_TABLE_DATA_OFFSET = 0x490 / sizeof(uint64_t),
-                XIVE_IC_PC_VPD_BLOCK_MODE_OFFSET = 0x4A8 / sizeof(uint64_t),
+                XIVE_IC_VPC_PULL_ERR =                  0x0000000200000000,
+                XIVE_IC_PC_VSD_TABLE_ADDR_OFFSET =      0x488 / sizeof(uint64_t),
+                XIVE_IC_PC_VSD_TABLE_DATA_OFFSET =      0x490 / sizeof(uint64_t),
+                XIVE_IC_PC_VPD_BLOCK_MODE_OFFSET =      0x4A8 / sizeof(uint64_t),
 
                 //XIVE IVPE (Presentation Engine) Constants
-                XIVE_IVPE_TM_BAR1_SCOM_ADDR = 0x05013012,
-                XIVE_IVPE_TM_BAR1_MMIO_OFFSET = 0x0006020000000000ULL,
-                XIVE_IVPE_TM_BAR1_VALIDATE = 0x8000000000000000ULL,
+                INT_CQ_TM_BAR_SCOM_ADDR =  0x02010809,
+                INT_CQ_TM_BAR_VALIDATE =   0x8000000000000000ULL,
                 XIVE_IVPE_QW3_NSR_OFFSET = 0x30,
-                XIVE_IVPE_QW3_VT_OFFSET = 0x38,
+                XIVE_IVPE_QW3_VT_OFFSET =  0x38,
                 XIVE_IVPE_QW3_LSI_ENABLE = 0x81,  //bit 0 is VT, bit 7 is le
 
-                PSI_BRIDGE_INTP_STATUS_CTL_SCOM_ADDR =    0x0501290E,
-                PSI_BRIDGE_INTP_STATUS_CTL_CLR_SCOM_ADDR =0x05012913,
-                PSI_BRIDGE_INTP_STATUS_CTL_ENABLE =       0x8000000000000000ULL,
-                PSI_BRIDGE_INTP_STATUS_CTL_RESET =        0x4000000000000000ULL,
-                PSI_BRIDGE_INTP_STATUS_CTL_DISABLE_PSI =  0x1000000000000000ULL,
-
+                INT_TCTXT_CFG_SCOM_ADDR =    0x02010B28,
                 INT_TCTXT_CFG_FUSE_CORE_EN = 0x0800000000000000,
+                INT_TCTXT_CFG_HB_MODE      = 0x0000080000000000,
 
-                XIVE_RESET_INT_CQ_RST_CTL_SCOM_ADDR = 0x05013023,
-                XIVE_RESET_POWERBUS_QUIESCE_ENABLE = 0x4000000000000000,
+                PSI_BRIDGE_INTP_STATUS_CTL_CLR_SCOM_ADDR = 0x03011D13,
+                PSI_BRIDGE_INTP_STATUS_CTL_ENABLE =        0x8000000000000000ULL,
+                PSI_BRIDGE_INTP_STATUS_CTL_RESET =         0x4000000000000000ULL,
+                PSI_BRIDGE_INTP_STATUS_CTL_DISABLE_PSI =   0x1000000000000000ULL,
+
+                XIVE_RESET_INT_CQ_RST_CTL_SCOM_ADDR = 0x02010812,
+                XIVE_RESET_POWERBUS_QUIESCE_ENABLE =  0x4000000000000000,
                 XIVE_RESET_POWERBUS_QUIESCE_TIMEOUT = 1000000, //1 millisecond
-                XIVE_RESET_UNIT_ENABLE = 0x8000000000000000,
+                XIVE_RESET_UNIT_ENABLE =              0x8000000000000000,
 
                 //For SMF use Hype offset as common between non SMF/SMF
                 ACK_HYPERVISOR_INT_REG_OFFSET = 0x1830/sizeof(uint16_t),
-                PULL_THREAD_CONTEXT_OFFSET = 0x1838/sizeof(uint8_t),
+                PULL_THREAD_CONTEXT_OFFSET =    0x1838/sizeof(uint8_t),
 
-                POWERBUS_STATE_QUIESCE = 0xC000000000000000,
+                POWERBUS_STATE_QUIESCE =   0xC000000000000000,
                 MAX_PSU_LONG_TIMEOUT_NS  = 5000*NS_PER_MSEC, //5 seconds
 
                 // ESB Page offsets -- This page format is used both in the
@@ -246,6 +241,28 @@ namespace INTR
                 ESB_QUERY_OFFSET = 0x800,
                 ESB_OFF_OFFSET   = 0xD00,
                 ESB_RESET_OFFSET = 0XC00,
+
+                //FIR REG Addrs
+                INT_PC_ERR0_WOF   = 0x02010AC2,
+                INT_PC_ERR0_FATAL = 0x02010AC4,
+                INT_PC_ERR0_RECOV = 0x02010AC5,
+                INT_PC_ERR0_INFO  = 0x02010AC6,
+                INT_PC_ERR1_WOF   = 0x02010ACA,
+                INT_PC_ERR1_FATAL = 0x02010ACC,
+                INT_PC_ERR1_RECOV = 0x02010ACD,
+                INT_PC_ERR1_INFO  = 0x02010ACE,
+
+                INT_VC_WOF_ERR_G0   = 0x020109C2,
+                INT_VC_WOF_ERR_G1   = 0x020109CA,
+                INT_VC_FATAL_ERR_G0 = 0x020109C4,
+                INT_VC_FATAL_ERR_G1 = 0x020109CC,
+                INT_VC_RECOV_ERR_G0 = 0x020109C5,
+                INT_VC_RECOV_ERR_G1 = 0x020109CD,
+                INT_VC_INFO_ERR_G0  = 0x020109C6,
+                INT_VC_INFO_ERR_G1  = 0x020109CE,
+
+                INT_CQ_WOF          = 0x02010838,
+                INT_CQ_FIR          = 0x02010832,
             };
 
             enum INTR_ROUTING_t
@@ -287,21 +304,14 @@ namespace INTR
             //Found in the PC Register Specification Document
             struct XIVE_IC_THREAD_CONTEXT_t
             {
-                uint64_t tctxt_cfg;   // 0x00
-                uint64_t tctxt_track; // 0x08
-                uint64_t unused0;     // 0x10
-                uint64_t unused1;     // 0x18
-                uint64_t ind_thread_context_access0; //0x20
-                uint64_t ind_thread_context_access1; //0x28
-                uint64_t ind_thread_context_access2; //0x30
-                uint64_t ind_thread_context_access3; //0x38
-                uint64_t phys_thread_enable0; //0x40
-                uint64_t phys_thread_enable0_set; //0x48
-                uint64_t phys_thread_enable0_reset; //0x50
-                uint64_t unused3;    //0x58
-                uint64_t phys_thread_enable1; //0x60
-                uint64_t phys_thread_enable1_set; //0x68
-                uint64_t phys_thread_enable1_reset; //0x70
+                uint64_t phys_thread_enable0;       //0x000
+                uint64_t unused0;                   //0x008
+                uint64_t phys_thread_enable0_set;   //0x010
+                uint64_t phys_thread_enable0_reset; //0x018
+                uint64_t phys_thread_enable1;       //0x020
+                uint64_t unused1;                   //0x028
+                uint64_t phys_thread_enable1_set;   //0x030
+                uint64_t phys_thread_enable1_reset; //0x038
             };
 
             //Found in External Interrupt Virtualization Engine (XIVE) Document
@@ -390,7 +400,7 @@ namespace INTR
 
             intr_hdlr_t *iv_masterHdlr; //!< Master cpu interrupt handler
             uint64_t    *iv_xiveIcBarAddress; //XIVE Controller regs base addr
-            uint64_t    *iv_xiveTmBar1Address; //Xive Thread mgmt bar reg 1 addr
+            uint64_t    *iv_intCqTmBarAddress; //Xive Thread mgmt bar reg 1 addr
             CpuList_t   iv_cpuList;     //!< Other CPU chips
             ChipList_t  iv_chipList;    //!< Proc chips with PSI intr enabled
             ISNList_t   iv_isnList;     //!< List of ISN's to clear on shutdown
@@ -574,6 +584,13 @@ namespace INTR
                                               bool i_enable=true);
 
             /**
+             * Perform HW Functions to set Hostboot (HB) mode
+             * on the INT_TCTXT Register for all functional procs
+             * @return Errorlog from DeviceWrite
+             */
+            errlHndl_t setHbModeOnTctxtCfgReg();
+
+            /**
              * Perform HW Functions to acknowledge Interrupt which will
              * stop the interrupt from being re-presented by HW
              */
@@ -687,12 +704,12 @@ namespace INTR
                                                 bool i_enable);
 
             /**
-             * Set the XIVE Thread Management (TM) BAR1 scom register
+             * Set the INT CQ TM BAR scom register
              * @param[in] i_target, the Target
              * @param[in] i_enable, indicator to enable/disable the BAR
              * @return Errorlog from DeviceWrite
              */
-            errlHndl_t setXiveIvpeTmBAR1(TARGETING::Target * i_target,
+            errlHndl_t setIntCqTmBAR(TARGETING::Target * i_target,
                                          bool i_enable);
 
             /**
@@ -703,24 +720,6 @@ namespace INTR
              */
             errlHndl_t setXiveIcBAR(intr_hdlr_t* i_proc,
                                     bool i_enable);
-
-            /**
-             * When in LSI mode the IC VPC flags and error, thus we
-             * need to disable while we use, and enable after we clean
-             * up
-             * @param[in] i_proc, the proc intrp handler
-             * @return Errorlog from DeviceWrite
-             */
-            errlHndl_t disableVPCPullErr(intr_hdlr_t* i_proc);
-
-            /**
-             * When in LSI mode the IC VPC flags and error, thus we
-             * need to disable while we use, and enable after we clean
-             * up
-             * @param[in] i_target, the Target.
-             * @return Errorlog from DeviceWrite
-             */
-            errlHndl_t enableVPCPullErr(TARGETING::Target * i_target);
 
             /**
              * Reset Interrupt Unit (both the XIVE and PSIHB Interrupt Units)

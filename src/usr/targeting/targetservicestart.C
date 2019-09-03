@@ -941,14 +941,14 @@ static void adjustMemoryMap( TargetService& i_targetService )
             l_swapAttrs[ATTR_XIVE_CONTROLLER_BAR_ADDR] = l_xiveCtrlBAR;
         }
 
-        ATTR_XIVE_THREAD_MGMT1_BAR_ADDR_type l_xiveThreadMgmtBAR =
-            computeMemoryMapOffset(MMIO_GROUP0_CHIP0_XIVE_THREAD_MGMT1_BASE_ADDR,
+        ATTR_INT_CQ_TM_BAR_ADDR_type l_intCqTmBAR =
+            computeMemoryMapOffset(MMIO_GROUP0_CHIP0_INT_CQ_TM_BASE_ADDR,
                                    l_topologyMode, l_topologyId);
-        TARG_INF( " XIVE_THREAD_MGMT1_BAR =%.16llX", l_xiveThreadMgmtBAR );
-        l_procChip->setAttr<ATTR_XIVE_THREAD_MGMT1_BAR_ADDR>(l_xiveThreadMgmtBAR);
+        TARG_INF( " INT_CQ_TM_BAR =%.16llX", l_intCqTmBAR );
+        l_procChip->setAttr<ATTR_INT_CQ_TM_BAR_ADDR>(l_intCqTmBAR);
         if( l_swapVictim == l_procChip)
         {
-            l_swapAttrs[ATTR_XIVE_THREAD_MGMT1_BAR_ADDR] = l_xiveThreadMgmtBAR;
+            l_swapAttrs[ATTR_INT_CQ_TM_BAR_ADDR] = l_intCqTmBAR;
         }
 
         ATTR_PSI_HB_ESB_ADDR_type l_psiHbEsbBAR =
@@ -984,7 +984,7 @@ static void adjustMemoryMap( TargetService& i_targetService )
                         l_swapVictim, l_swapAttrs );
         SWAP_ATTRIBUTE( ATTR_XIVE_CONTROLLER_BAR_ADDR, l_pMasterProcChip,
                         l_swapVictim, l_swapAttrs );
-        SWAP_ATTRIBUTE( ATTR_XIVE_THREAD_MGMT1_BAR_ADDR, l_pMasterProcChip,
+        SWAP_ATTRIBUTE( ATTR_INT_CQ_TM_BAR_ADDR, l_pMasterProcChip,
                         l_swapVictim, l_swapAttrs );
         SWAP_ATTRIBUTE( ATTR_PSI_HB_ESB_ADDR, l_pMasterProcChip,
                         l_swapVictim, l_swapAttrs );

@@ -53,10 +53,10 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
         pnor_img=${STANDALONE}/pnor/P10.pnor \
         sbe_seeprom_img=${SBE_SEEPROM_IMG} \
         sbe_boot_mem=seeprom \
-        enable_lpc_console=TRUE"
+        enable_lpc_console=TRUE\
+        xive_gen=2"
 
 else
-
     # do not set this for FSP build
     if [ "$MACHINE" != "FSPBUILD" ];then
         echo "autocitest setup for non-FSP and non-P10 Standalone"
@@ -71,9 +71,9 @@ else
             pnor_img=$SANDBOXBASE/obj/ppc/hbfw/img/p10.pnor \
             sbe_seeprom_img=${SBE_SEEPROM_IMG} \
             sbe_boot_mem=seeprom \
-            enable_lpc_console=TRUE"
+            enable_lpc_console=TRUE\
+            xive_gen=2"
     fi
-
 fi
 
 #   Front end to autocitest - script to execute unit tests under simics.

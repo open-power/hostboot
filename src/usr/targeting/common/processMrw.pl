@@ -1445,9 +1445,7 @@ sub setupBars
     #P10 has a defined memory map for all configurations,
     #these are the base addresses for topology ID 0 (group0-chip0).
     my %bars=(  "FSP_BASE_ADDR"             => 0x0006030100000000,
-                "PSI_BRIDGE_BASE_ADDR"      => 0x0006030203000000,
-                "PSI_HB_ESB_ADDR"           => 0x0006030202000000,
-                "XIVE_CONTROLLER_BAR_ADDR"  => 0x0006030200000000);
+                "PSI_BRIDGE_BASE_ADDR"      => 0x0006030203000000);
     #Note - Not including XSCOM_BASE_ADDRESS and LPC_BUS_ADDR in here
     # because Hostboot code itself writes those on every boot
     if (!$targetObj->isBadAttribute($target,"XSCOM_BASE_ADDRESS") )

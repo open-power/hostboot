@@ -211,11 +211,6 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
         en_threads = en_threads_master =
                     sys->getAttr<TARGETING::ATTR_ENABLED_THREADS>();
 
-        // TODO RTC 210643: ATTR_ENABLED_THREADS is set in the intr module which
-        // is disabled for now
-        en_threads = en_threads_master
-            = 0xF000000000000000ULL;
-
         // Core0_thread:  0 1 2 3  Core1_thread: 0 1 2 3
         //   NORMAL(SMT4) - E E E                - - - -
         //   FUSED (SMT8) - E - -                E E - -

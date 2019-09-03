@@ -821,6 +821,9 @@
       <id>I2C_BUS_SPEED_ARRAY</id>
     </attribute>
     <attribute>
+      <id>INT_CQ_TM_BAR_ADDR</id>
+    </attribute>
+    <attribute>
       <id>ISTEP_MODE</id>
     </attribute>
     <attribute>
@@ -837,9 +840,6 @@
     </attribute>
     <attribute>
       <id>XIVE_CONTROLLER_BAR_ADDR</id>
-    </attribute>
-    <attribute>
-      <id>XIVE_THREAD_MGMT1_BAR_ADDR</id>
     </attribute>
     <attribute>
       <id>XSCOM_BASE_ADDRESS</id>

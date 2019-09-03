@@ -2778,6 +2778,19 @@
   </attribute>
 
   <attribute>
+    <description>INT - Thread Management Bar address
+         MMIO consumed by HB/PHYP
+    </description>
+    <id>INT_CQ_TM_BAR_ADDR</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+  </attribute>
+
+  <attribute>
     <id>ISTEP_MODE</id>
     <description>If True, puts HostBoot into SPLess SingleStep mode.</description>
     <simpleType>
@@ -8433,19 +8446,6 @@
         MMIO consumed by PHYP
     </description>
     <id>XIVE_CONTROLLER_BAR_ADDR</id>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <simpleType>
-      <uint64_t/>
-    </simpleType>
-  </attribute>
-
-  <attribute>
-    <description>XIVE - Thread Management Bar address register 1
-         MMIO consumed by HB/PHYP
-    </description>
-    <id>XIVE_THREAD_MGMT1_BAR_ADDR</id>
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>

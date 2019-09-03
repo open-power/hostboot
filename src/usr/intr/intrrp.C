@@ -54,8 +54,6 @@
 #include <arch/pirformat.H>
 #include <arch/pvrformat.H>
 #include <config.h>
-//#include <p9_misc_scom_addresses.H>
-//#include <p9n2_misc_scom_addresses_fld.H>
 #include <util/utilmbox_scratch.H>
 #include <util/align.H>
 #include <errl/errludprintk.H>
@@ -187,6 +185,8 @@ errlHndl_t IntrRp::resetIntpForMpipl()
                 PSIHB_SW_INTERFACES_t * this_psihb_ptr = (*targ_itr)->psiHbBaseAddr;
                 this_psihb_ptr->icr = PSI_BRIDGE_INTP_STATUS_CTL_RESET;
 
+                // TODO RTC: 215215 Revisit INTRP Reset for for MPIPL
+                //    previous description is:
                 // TODO RTC: 172905 due to a DD1 workaround we have to do a SW reset
                 // The SW is causing a recoverable fir when we attemp to pull
                 // the thread context. The workaround earlier in the SBE's
@@ -197,14 +197,6 @@ errlHndl_t IntrRp::resetIntpForMpipl()
                 // Still need to determine if we can skip this in DD2
 
                 //resetIntUnit(*targ_itr);
-
-                //Turn off VPC error when in LSI mode
-                err = disableVPCPullErr(*targ_itr);
-                if (err)
-                {
-                    TRACFCOMP(g_trac_intr, "Error masking VPC Pull Lsi Err");
-                    break;
-                }
             }
         }
 
@@ -213,18 +205,12 @@ errlHndl_t IntrRp::resetIntpForMpipl()
         this_psihb_ptr->icr = PSI_BRIDGE_INTP_STATUS_CTL_RESET;
         TRACFCOMP(g_trac_intr, "Reset PSIHB INTR Complete");
 
+        // TODO RTC: 215215 Revisit INTRP Reset for for MPIPL
+        //    previous description is:
         // TODO RTC: 172905 Still need to determine if we can skip this in DD2
         // (same as above)
         //Reset XIVE Interrupt unit
         //resetIntUnit(iv_masterHdlr);
-
-        //Turn off VPC error when in LSI mode
-        err = disableVPCPullErr(iv_masterHdlr);
-        if (err)
-        {
-            TRACFCOMP(g_trac_intr, "Error masking VPC Pull Lsi Err");
-            break;
-        }
 
         //Hostboot routes all interrupts to the master proc. This gets set up during istep 8
         //of a normal IPL but later the Hypervisor will reset the routing. During an mpipl,
@@ -250,21 +236,18 @@ errlHndl_t IntrRp::resetIntpForMpipl()
 
 errlHndl_t IntrRp::clearAllIntFirs()
 {
-    errlHndl_t l_err = nullptr;
-/* FIXME RTC: 210975 the constants used in this function aren't defined in P10 yet
     // Per scom definition all of these register will be cleared on any read
+    // TODO RTC 215215 -- Validate list with PRD Team
     const uint64_t l_fir_reg_addrs_to_read_to_clear[] =
     {
-        PU_INT_PC_ERR0_WOF, PU_INT_PC_ERR0_FATAL,
-        PU_INT_PC_ERR0_RECOV, PU_INT_PC_ERR0_INFO,
-        PU_INT_PC_ERR1_WOF, PU_INT_PC_ERR1_FATAL,
-        PU_INT_PC_ERR1_RECOV, PU_INT_PC_ERR1_INFO,
-        PU_INT_PC_VPC_WOF_ERR, PU_INT_PC_VPC_FATAL_ERR,
-        PU_INT_PC_VPC_RECOV_ERR, PU_INT_PC_VPC_INFO_ERR,
-        PU_INT_VC_WOF_ERR_G0, PU_INT_VC_WOF_ERR_G1,
-        PU_INT_VC_FATAL_ERR_G1, PU_INT_VC_FATAL_ERR_G0,
-        PU_INT_VC_RECOV_ERR_G0, PU_INT_VC_RECOV_ERR_G1,
-        PU_INT_VC_INFO_ERR_G0, PU_INT_VC_INFO_ERR_G1
+        INT_PC_ERR0_WOF,     INT_PC_ERR0_FATAL,
+        INT_PC_ERR0_RECOV,   INT_PC_ERR0_INFO,
+        INT_PC_ERR1_WOF,     INT_PC_ERR1_FATAL,
+        INT_PC_ERR1_RECOV,   INT_PC_ERR1_INFO,
+        INT_VC_WOF_ERR_G0,   INT_VC_WOF_ERR_G1,
+        INT_VC_FATAL_ERR_G0, INT_VC_FATAL_ERR_G1,
+        INT_VC_RECOV_ERR_G0, INT_VC_RECOV_ERR_G1,
+        INT_VC_INFO_ERR_G0,  INT_VC_INFO_ERR_G1,
     };
 
     // tmp var used to perform reads/writes
@@ -307,7 +290,7 @@ errlHndl_t IntrRp::clearAllIntFirs()
             l_err = deviceWrite(l_procChip,
                                   &l_tmp64,
                                   l_opSize,
-                                  DEVICE_SCOM_ADDRESS(PU_INT_CQ_WOF) );
+                                  DEVICE_SCOM_ADDRESS(INT_CQ_WOF) );
 
             // If get a scom error it is likely no other scoms will work so bail out
             if(l_err)
@@ -318,7 +301,7 @@ errlHndl_t IntrRp::clearAllIntFirs()
             l_err = deviceWrite(l_procChip,
                                   &l_tmp64,
                                   l_opSize,
-                                  DEVICE_SCOM_ADDRESS(PU_INT_CQ_FIR) );
+                                  DEVICE_SCOM_ADDRESS(INT_CQ_FIR) );
 
             // If get a scom error it is likely no other scoms will work so bail out
             if(l_err)
@@ -328,45 +311,40 @@ errlHndl_t IntrRp::clearAllIntFirs()
         }
     } while(0);
 
-*/
     return l_err;
-
 }
 
-errlHndl_t setHbModeOnP3PCReg()
+errlHndl_t  IntrRp::setHbModeOnTctxtCfgReg()
 {
     errlHndl_t l_err = nullptr;
-/* FIXME RTC: 210975 the constants used in this function aren't defined in P10 yet
     do{
         TARGETING::TargetHandleList l_funcProcs;
         getAllChips(l_funcProcs, TYPE_PROC);
-        uint64_t  HOSTBOOT_MODE_MASK = 0x8000000000000000ull >> P9N2_PU_INT_PC_GLOBAL_CFG_HOSTBOOT_MODE;
         uint64_t scom_data = 0;
-        size_t    DATA_SIZE          = sizeof(scom_data);
+        size_t    DATA_SIZE = sizeof(scom_data);
         //Need to set this bit on all functional processors
         for(const auto & l_procChip : l_funcProcs)
         {
             l_err = deviceRead(l_procChip,
                                 &scom_data,
                                 DATA_SIZE,
-                                DEVICE_SCOM_ADDRESS(PU_INT_PC_GLOBAL_CFG));
+                                DEVICE_SCOM_ADDRESS(INT_TCTXT_CFG_SCOM_ADDR));
             if( l_err)
             {
                 break;
             }
 
-            scom_data |= HOSTBOOT_MODE_MASK;
+            scom_data |= INT_TCTXT_CFG_HB_MODE;
             l_err = deviceWrite(l_procChip,
                                 &scom_data,
                                 DATA_SIZE,
-                                DEVICE_SCOM_ADDRESS(PU_INT_PC_GLOBAL_CFG));
+                                DEVICE_SCOM_ADDRESS(INT_TCTXT_CFG_SCOM_ADDR));
             if( l_err)
             {
                 break;
             }
         }
     }while(0);
-*/
 
     return l_err;
 }
@@ -430,12 +408,12 @@ errlHndl_t IntrRp::_init()
             break;
         }
 
-        l_err = setHbModeOnP3PCReg();
+        l_err = setHbModeOnTctxtCfgReg();
 
         if (l_err)
         {
             TRACFCOMP(g_trac_intr,
-                      "IntrRp::_init() Error setting Hostboot Mode bit on in P3PC registers");
+                      "IntrRp::_init() Error setting Hostboot Mode bit on in TCTXT_CFG register");
             break;
         }
 
@@ -580,7 +558,7 @@ errlHndl_t IntrRp::_init()
         // Create the kernel msg queue for external interrupts
         iv_msgQ = msg_q_create();
         msg_intr_q_register(iv_msgQ,
-             procTarget->getAttr<TARGETING::ATTR_XIVE_THREAD_MGMT1_BAR_ADDR>());
+             procTarget->getAttr<TARGETING::ATTR_INT_CQ_TM_BAR_ADDR>());
 
         // Create a task to handle the messages
         task_create(IntrRp::msg_handler, NULL);
@@ -680,7 +658,7 @@ void IntrRp::acknowledgeInterrupt()
     //A uint16 store from the Acknowledge Hypervisor Interrupt
     //  offset in the Thread Management BAR space signals
     //  the interrupt is acknowledged
-    volatile uint16_t * l_ack_int_ptr = (uint16_t *)iv_xiveTmBar1Address;
+    volatile uint16_t * l_ack_int_ptr = (uint16_t *)iv_intCqTmBarAddress;
     l_ack_int_ptr += ACK_HYPERVISOR_INT_REG_OFFSET;
     eieio();
     uint16_t l_ackRead = *l_ack_int_ptr;
@@ -711,162 +689,136 @@ errlHndl_t IntrRp::resetIntUnit(intr_hdlr_t* i_proc)
     TARGETING::Target* procTarget = i_proc->proc;
 
     do {
-        //Anything greater than DD10 should do the HW-based reset
-        bool l_doHwReset = true;
-        PVR_t l_pvr( mmio_pvr_read() & 0xFFFFFFFF );
-        if( l_pvr.isNimbusDD1() )
-        {
-            l_doHwReset = false;
-        }
+        //Disable the PSI CEC interrupts
+        disablePsiInterrupts(i_proc);
 
-        if (l_doHwReset)
-        {
-            //Disable the PSI CEC interrupts
-            disablePsiInterrupts(i_proc);
-
-            //Use HW-based XIVE Reset
-            //First quiesce the power bus
-            TRACDCOMP(g_trac_intr, "IntrRp::resetIntUnit() - "
+        //Use HW-based XIVE Reset
+        //First quiesce the power bus
+        TRACDCOMP(g_trac_intr, "IntrRp::resetIntUnit() - "
                                "Quiesce the PowerBus Interface");
-            l_err = deviceWrite(procTarget,
-                                &l_barValue,
-                                size,
-                                DEVICE_SCOM_ADDRESS(l_addr));
+        l_err = deviceWrite(procTarget,
+                            &l_barValue,
+                            size,
+                            DEVICE_SCOM_ADDRESS(l_addr));
 
-            if (l_err)
-            {
-                TRACFCOMP(g_trac_intr, "IntrRp::resetIntUnit() - "
-                                        "Error Quiescing the PowerBus");
-                break;
-            }
-
-            //A short amount of time is needed to let the powerbus quiesce
-            // before the next step in the reset can occur, so do a short
-            // polling loop for the indicator the power bus has been quiesced
-            uint64_t l_quiesceTimeout = XIVE_RESET_POWERBUS_QUIESCE_TIMEOUT;
-            uint64_t l_timeWaited = 0;
-            uint64_t reg = 0x0;
-
-            do
-            {
-                if (l_timeWaited >= l_quiesceTimeout)
-                {
-                    TRACFCOMP(g_trac_intr, "IntrRp::resetIntUnit() - Timeout "
-                              "waiting for PowerBus to quiesce");
-                    // @errorlog tag
-                    // @errortype       ERRL_SEV_UNRECOVERABLE
-                    // @moduleid        INTR::MOD_INTRRP_RESETINTUNIT
-                    // @reasoncode      INTR::RC_XIVE_PBUS_QUIESCE_TIMEOUT
-                    // @userdata1       XIVE Powerbus Scom Register Address
-                    // @userdata2       XIVE Powerbus Scom Register Data
-                    //
-                    // @devdesc         Timeout waiting for Powerbus to Quiesce
-                    //
-                    l_err = new ERRORLOG::ErrlEntry
-                            (
-                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,    // severity
-                             INTR::MOD_INTRRP_RESETINTUNIT,       // moduleid
-                             INTR::RC_XIVE_PBUS_QUIESCE_TIMEOUT,  // reason code
-                             l_addr,
-                             reg
-                            );
-
-                    break;
-                }
-
-                uint64_t scom_len = sizeof(reg);
-
-                //Read the powerbus state
-                l_err = deviceRead( procTarget,
-                                    &reg,
-                                    scom_len,
-                                    DEVICE_SCOM_ADDRESS(l_addr));
-
-
-                if (l_err)
-                {
-                    //Logging below this loop
-                    break;
-                }
-
-
-                if (reg & POWERBUS_STATE_QUIESCE)
-                {
-                    //Powerbus Quiesced
-                    break;
-                }
-                else
-                {
-                    nanosleep(0,XIVE_RESET_POWERBUS_QUIESCE_TIMEOUT / 10);
-                    l_timeWaited += XIVE_RESET_POWERBUS_QUIESCE_TIMEOUT / 10;
-                }
-            } while(1);
-
-            if (l_err)
-            {
-                TRACFCOMP(g_trac_intr, "Error getting Powerbus state");
-                break;
-             }
-
-            TRACDCOMP(g_trac_intr, "Reset XIVE INT unit");
-            l_barValue = XIVE_RESET_UNIT_ENABLE;
-            l_err = deviceWrite(procTarget,
-                                &l_barValue,
-                                size,
-                                DEVICE_SCOM_ADDRESS(l_addr));
-
-            if (l_err)
-            {
-                TRACFCOMP(g_trac_intr, "Error resetting XIVE INT unit");
-                break;
-            }
-
-            //Additional settings for fused mode
-            //Needed because the HW XIVE reset clears too much HW state
-            if (is_fused_mode())
-            {
-/* FIXME RTC: 210975 the constants don't exist in P10 yet
-                //Do a Read-Modify-Write on INT Thread Context Register
-                //setting the FUSED_CORE_EN bit as the 'modify' part
-                uint64_t l_int_tctxt_reg = 0x0;
-                l_err = deviceRead(procTarget,
-                                    &l_int_tctxt_reg,
-                                    size,
-                                    DEVICE_SCOM_ADDRESS(PU_INT_TCTXT_CFG));
-
-                if (l_err)
-                {
-                    TRACFCOMP(g_trac_intr, "Error reading the INT_TCTXT_CFG(%lx) scom register",
-                              PU_INT_TCTXT_CFG);
-                    break;
-                }
-
-                l_int_tctxt_reg |= INT_TCTXT_CFG_FUSE_CORE_EN;
-
-                l_err = deviceWrite(procTarget,
-                                    &l_int_tctxt_reg,
-                                    size,
-                                    DEVICE_SCOM_ADDRESS(PU_INT_TCTXT_CFG));
-                if (l_err)
-                {
-                    TRACFCOMP(g_trac_intr, "Error writing %lx  the INT_TCTXT_CFG(%lx) scom register",
-                              l_int_tctxt_reg, PU_INT_TCTXT_CFG );
-                    break;
-                }
-*/
-            }
-        }
-        else
+        if (l_err)
         {
-            //Do SW Based XIVE Reset
-            if (i_proc == iv_masterHdlr)
+            TRACFCOMP(g_trac_intr, "IntrRp::resetIntUnit() - "
+                                    "Error Quiescing the PowerBus");
+            break;
+        }
+
+        //A short amount of time is needed to let the powerbus quiesce
+        // before the next step in the reset can occur, so do a short
+        // polling loop for the indicator the power bus has been quiesced
+        uint64_t l_quiesceTimeout = XIVE_RESET_POWERBUS_QUIESCE_TIMEOUT;
+        uint64_t l_timeWaited = 0;
+        uint64_t reg = 0x0;
+
+        do
+        {
+            if (l_timeWaited >= l_quiesceTimeout)
             {
-                l_err = disableInterrupts(i_proc);
-                if (l_err)
-                {
-                    TRACFCOMP(g_trac_intr, "IntrRp::resetIntUnit() Error disabling interrupts");
-                    break;
-                }
+                TRACFCOMP(g_trac_intr, "IntrRp::resetIntUnit() - Timeout "
+                              "waiting for PowerBus to quiesce");
+                // @errorlog tag
+                // @errortype       ERRL_SEV_UNRECOVERABLE
+                // @moduleid        INTR::MOD_INTRRP_RESETINTUNIT
+                // @reasoncode      INTR::RC_XIVE_PBUS_QUIESCE_TIMEOUT
+                // @userdata1       XIVE Powerbus Scom Register Address
+                // @userdata2       XIVE Powerbus Scom Register Data
+                //
+                // @devdesc         Timeout waiting for Powerbus to Quiesce
+                //
+                l_err = new ERRORLOG::ErrlEntry
+                        (
+                         ERRORLOG::ERRL_SEV_UNRECOVERABLE,    // severity
+                         INTR::MOD_INTRRP_RESETINTUNIT,       // moduleid
+                         INTR::RC_XIVE_PBUS_QUIESCE_TIMEOUT,  // reason code
+                         l_addr,
+                         reg
+                        );
+
+                break;
+            }
+
+            uint64_t scom_len = sizeof(reg);
+
+            //Read the powerbus state
+            l_err = deviceRead( procTarget,
+                                &reg,
+                                scom_len,
+                                DEVICE_SCOM_ADDRESS(l_addr));
+
+
+            if (l_err)
+            {
+                //Logging below this loop
+                break;
+            }
+
+
+            if (reg & POWERBUS_STATE_QUIESCE)
+            {
+                //Powerbus Quiesced
+                break;
+            }
+            else
+            {
+                nanosleep(0,XIVE_RESET_POWERBUS_QUIESCE_TIMEOUT / 10);
+                l_timeWaited += XIVE_RESET_POWERBUS_QUIESCE_TIMEOUT / 10;
+            }
+        } while(1);
+
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_intr, "Error getting Powerbus state");
+            break;
+        }
+
+        TRACDCOMP(g_trac_intr, "Reset XIVE INT unit");
+        l_barValue = XIVE_RESET_UNIT_ENABLE;
+        l_err = deviceWrite(procTarget,
+                            &l_barValue,
+                            size,
+                            DEVICE_SCOM_ADDRESS(l_addr));
+
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_intr, "Error resetting XIVE INT unit");
+            break;
+        }
+
+        //Additional settings for fused mode
+        //Needed because the HW XIVE reset clears too much HW state
+        if (is_fused_mode())
+        {
+            //Do a Read-Modify-Write on INT Thread Context Register
+            //setting the FUSED_CORE_EN bit as the 'modify' part
+            uint64_t l_int_tctxt_reg = 0x0;
+            l_err = deviceRead(procTarget,
+                                &l_int_tctxt_reg,
+                                size,
+                                DEVICE_SCOM_ADDRESS(INT_TCTXT_CFG_SCOM_ADDR));
+
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_intr, "Error reading the INT_TCTXT_CFG(%lx) scom register",
+                          INT_TCTXT_CFG_SCOM_ADDR);
+                break;
+            }
+
+            l_int_tctxt_reg |= INT_TCTXT_CFG_FUSE_CORE_EN;
+
+            l_err = deviceWrite(procTarget,
+                                &l_int_tctxt_reg,
+                                size,
+                                DEVICE_SCOM_ADDRESS(INT_TCTXT_CFG_SCOM_ADDR));
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_intr, "Error writing %lx  the INT_TCTXT_CFG(%lx) scom register",
+                          l_int_tctxt_reg, INT_TCTXT_CFG_SCOM_ADDR );
+                break;
             }
         }
 
@@ -897,7 +849,7 @@ errlHndl_t IntrRp::disableInterrupts(intr_hdlr_t *i_proc)
 
         //Pull thread context to register - View Section 4.4.4.15 of the
         // XIVE spec. Doing a 1b MMIO read will clear the cams VT bit.
-        volatile uint8_t * l_pull_thread_ptr = (uint8_t *)iv_xiveTmBar1Address;
+        volatile uint8_t * l_pull_thread_ptr = (uint8_t *)iv_intCqTmBarAddress;
         l_pull_thread_ptr += PULL_THREAD_CONTEXT_OFFSET;
         eieio();
 
@@ -992,7 +944,7 @@ errlHndl_t IntrRp::enableInterrupts(intr_hdlr_t *i_proc)
 
         //Set bit to configure LSI mode for HB cec interrupts
         volatile XIVE_IVPE_THREAD_CONTEXT_t * this_ivpe_ptr =
-          reinterpret_cast<XIVE_IVPE_THREAD_CONTEXT_t *> (iv_xiveTmBar1Address);
+          reinterpret_cast<XIVE_IVPE_THREAD_CONTEXT_t *> (iv_intCqTmBarAddress);
         this_ivpe_ptr->cams_vt = XIVE_IVPE_QW3_LSI_ENABLE;
         eieio();
 
@@ -1065,8 +1017,7 @@ void IntrRp::msgHandler()
                     //Check if LSI-Based Interrupt
                     if ((ackResponse & LSI_INTERRUPT) == LSI_INTERRUPT)
                     {
-                        TRACFCOMP(g_trac_intr, "IntrRp::msgHandler() "
-                                                 "- LSI Interrupt Detected");
+                        TRACFCOMP(g_trac_intr, "IntrRp::msgHandler(): LSI Interrupt Detected");
 
                         //An external interrupt comes from two paths
                         //  1) kernel space - synchronous - response needed
@@ -1941,7 +1892,7 @@ errlHndl_t IntrRp::setMasterInterruptBARs(TARGETING::Target * i_target,
 
     do {
 
-        l_err = setXiveIvpeTmBAR1(i_target, i_enable);
+        l_err = setIntCqTmBAR(i_target, i_enable);
         if (l_err)
         {
             TRACFCOMP(g_trac_intr, "Error setting XIVE TM BAR1");
@@ -1970,14 +1921,6 @@ errlHndl_t IntrRp::setCommonInterruptBARs(intr_hdlr_t * i_proc,
         if (l_err)
         {
             TRACFCOMP(g_trac_intr, "Error setting PSIHB BAR");
-            break;
-        }
-
-        //Turn off VPC error when in LSI mode
-        l_err = disableVPCPullErr(i_proc);
-        if (l_err)
-        {
-            TRACFCOMP(g_trac_intr, "Error masking VPC Pull Lsi Err");
             break;
         }
 
@@ -2259,14 +2202,6 @@ void IntrRp::shutDown(uint64_t i_status)
             PSIHB_SW_INTERFACES_t * this_psihb_ptr = (*targ_itr)->psiHbBaseAddr;
             this_psihb_ptr->icr = PSI_BRIDGE_INTP_STATUS_CTL_RESET;
             resetIntUnit(*targ_itr);
-            //Enable VPC Pull Err regardles of XIVE HW Reset settings
-            l_err = enableVPCPullErr((*targ_itr)->proc);
-            if (l_err)
-            {
-                delete l_err;
-                l_err = nullptr;
-                TRACFCOMP(g_trac_intr, "IntrRp::shutDown() Error re-enabling VPC Pull Err");
-            }
             //Disable common interrupt BARs
             l_err = setCommonInterruptBARs(*targ_itr, false);
 
@@ -2286,15 +2221,6 @@ void IntrRp::shutDown(uint64_t i_status)
 
     //Reset XIVE Interrupt unit
     resetIntUnit(iv_masterHdlr);
-
-    //Enable VPC Pull Err regardles of XIVE HW Reset settings
-    l_err = enableVPCPullErr(iv_masterHdlr->proc);
-    if (l_err)
-    {
-        delete l_err;
-        l_err = nullptr;
-        TRACFCOMP(g_trac_intr, "IntrRp::shutDown() Error re-enabling VPC Pull Err");
-    }
 
     //Disable common interrupt BARs for master proc
     l_err = setCommonInterruptBARs(iv_masterHdlr, false);
@@ -2697,7 +2623,6 @@ errlHndl_t IntrRp::syncNodes(intr_mpipl_sync_t i_sync_type)
             break;
         }
 
-
         // This node has hit the sync point
         this_node_info->mpipl_intr_sync = i_sync_type;
         lwsync();
@@ -3053,39 +2978,37 @@ errlHndl_t IntrRp::setFspBAR(
     do
     {
 
-    if (!i_enable)
-    {
-        // Noop on disable
-        break;
-    }
+        if (!i_enable)
+        {
+            // Noop on disable
+            break;
+        }
 
-    assert(i_pProcIntrHdlr != nullptr,"BUG! Input interrupt handler pointer "
-        "was nullptr");
-    auto * const pProc = i_pProcIntrHdlr->proc;
-    assert(pProc != nullptr,"BUG! proc target was nullptr");
+        assert(i_pProcIntrHdlr != nullptr,"BUG! Input interrupt handler pointer "
+            "was nullptr");
+        auto * const pProc = i_pProcIntrHdlr->proc;
+        assert(pProc != nullptr,"BUG! proc target was nullptr");
 
-    uint64_t fspBAR =
-        pProc->getAttr<TARGETING::ATTR_FSP_BASE_ADDR>();
+        uint64_t fspBAR =
+            pProc->getAttr<TARGETING::ATTR_FSP_BASE_ADDR>();
 
-    const size_t expSize = sizeof(fspBAR);
-/* FIXME RTC: 210975 PU_PSI_BRIDGE_FSP_BAR_REG DNE in P10 yet
-    auto size = expSize;
-    pError = deviceWrite(
-                 pProc,
-                 &fspBAR,
-                 size,
-                 DEVICE_SCOM_ADDRESS(PU_PSI_BRIDGE_FSP_BAR_REG));
-*/
-    if(pError)
-    {
-        TRACFCOMP(g_trac_intr,ERR_MRK "Failed writing %d bytes of FSP BAR "
-            "address value (0x%016llX) to FSP BAR register for proc 0x%08X",
-            expSize,fspBAR,get_huid(pProc));
-        break;
-    }
+        const size_t expSize = sizeof(fspBAR);
+        auto size = expSize;
+        pError = deviceWrite(
+                     pProc,
+                     &fspBAR,
+                     size,
+                     DEVICE_SCOM_ADDRESS(PSI_BRIDGE_FSP_BAR_SCOM_ADDR));
+        if(pError)
+        {
+            TRACFCOMP(g_trac_intr,ERR_MRK "Failed writing %d bytes of FSP BAR "
+                "address value (0x%016llX) to FSP BAR register for proc 0x%08X",
+                expSize,fspBAR,get_huid(pProc));
+            break;
+        }
 
-    //assert(size == expSize,"Actual SCOM write size (%d) does not match "
-    //    "expected SCOM write size (%d)",size,expSize);
+        assert(size == expSize,"Actual SCOM write size (%d) does not match "
+            "expected SCOM write size (%d)",size,expSize);
 
     } while(0);
 
@@ -3163,7 +3086,7 @@ errlHndl_t IntrRp::setPsiHbEsbBAR(intr_hdlr_t *i_proc,
 
         uint64_t l_barValue = l_baseBarValue;
         TRACFCOMP(g_trac_intr,"INTR: Target %.8x. "
-                              "PSI BRIDGE ESB BASE BAR value: 0x%016lx",
+                              "PSI BRIDGE ESB BAR value: 0x%016lx",
                   TARGETING::get_huid(l_target),l_barValue);
 
         uint64_t size = sizeof(l_barValue);
@@ -3210,44 +3133,44 @@ errlHndl_t IntrRp::setPsiHbEsbBAR(intr_hdlr_t *i_proc,
     return l_err;
 }
 
-errlHndl_t IntrRp::setXiveIvpeTmBAR1(TARGETING::Target * i_target,
+errlHndl_t IntrRp::setIntCqTmBAR(TARGETING::Target * i_target,
                                      bool i_enable)
 {
     errlHndl_t l_err = NULL;
     uint64_t l_baseBarValue =
-                i_target->getAttr<TARGETING::ATTR_XIVE_THREAD_MGMT1_BAR_ADDR>();
+                i_target->getAttr<TARGETING::ATTR_INT_CQ_TM_BAR_ADDR>();
 
     do
     {
         uint64_t l_barValue = l_baseBarValue;
         if (i_enable)
         {
-            l_barValue += XIVE_IVPE_TM_BAR1_VALIDATE;
+            l_barValue += INT_CQ_TM_BAR_VALIDATE;
         }
 
-        TRACDCOMP(g_trac_intr,"INTR: Target %.8x. XIVE IVPE TM BAR1 value: 0x%016lx",
+        TRACDCOMP(g_trac_intr,"INTR: Target %.8x. INT CQ TM BAR value: 0x%016lx",
                   TARGETING::get_huid(i_target),l_barValue);
 
         uint64_t size = sizeof(l_barValue);
         l_err = deviceWrite(i_target,
                           &l_barValue,
                           size,
-                          DEVICE_SCOM_ADDRESS(XIVE_IVPE_TM_BAR1_SCOM_ADDR));
+                          DEVICE_SCOM_ADDRESS(INT_CQ_TM_BAR_SCOM_ADDR));
 
         if(l_err)
         {
-            TRACFCOMP(g_trac_intr,ERR_MRK"Unable to set XIVE IVPE TM BAR1");
+            TRACFCOMP(g_trac_intr,ERR_MRK"Unable to set INT CQ TM BAR");
             break;
         }
 
         //Map Memory Internally for HB and store in member variable
-        void *l_xiveTmBar1Address =
+        void *l_intCqTmBarAddress =
                 reinterpret_cast<void *>(l_baseBarValue);
         // SMF doesn't allow the user space to touch Ultravisor page (page 0),
         // so we have to use page 1. Map 2 page sizes to be able to access page1
-        iv_xiveTmBar1Address =
+        iv_intCqTmBarAddress =
                reinterpret_cast<uint64_t *>
-               (mmio_dev_map(l_xiveTmBar1Address, PAGE_SIZE*2));
+               (mmio_dev_map(l_intCqTmBarAddress, PAGE_SIZE*2));
 
     } while(0);
 
@@ -3294,83 +3217,6 @@ errlHndl_t IntrRp::setXiveIcBAR(intr_hdlr_t *i_proc, bool i_enable)
                (mmio_dev_map(l_xiveIcBarAddress, 40*PAGE_SIZE));
     } while(0);
 
-    return l_err;
-}
-
-errlHndl_t IntrRp::disableVPCPullErr(intr_hdlr_t * i_proc)
-{
-    errlHndl_t l_err = NULL;
-/* FIXME RTC: 210975 PU_INT_PC_VPC_ERR_CFG1 DNE yet
-    TARGETING::Target *l_target = i_proc->proc;
-    size_t size;
-
-    do {
-        uint64_t l_vpcErrCnfg;
-        size = sizeof(l_vpcErrCnfg);
-        l_err = deviceRead(l_target,
-                            &l_vpcErrCnfg,
-                            size,
-                            DEVICE_SCOM_ADDRESS(PU_INT_PC_VPC_ERR_CFG1));
-
-        if(l_err)
-        {
-            TRACFCOMP(g_trac_intr,ERR_MRK"Unable to read VPC Err Cnfg");
-            break;
-        }
-
-        l_vpcErrCnfg &= ~XIVE_IC_VPC_PULL_ERR;
-        l_err = deviceWrite(l_target,
-                            &l_vpcErrCnfg,
-                            size,
-                            DEVICE_SCOM_ADDRESS(PU_INT_PC_VPC_ERR_CFG1));
-
-        if(l_err)
-        {
-            TRACFCOMP(g_trac_intr,ERR_MRK"Unable to write VPC Err Cnfg");
-            break;
-        }
-
-
-    } while(0);
-*/
-
-    return l_err;
-}
-
-errlHndl_t IntrRp::enableVPCPullErr(TARGETING::Target * i_target)
-{
-    errlHndl_t l_err = NULL;
-/* FIXME RTC: 210975 PU_INT_PC_VPC_ERR_CFG1 DNE yet
-    size_t size;
-
-    do {
-        uint64_t l_vpcErrCnfg;
-        size = sizeof(l_vpcErrCnfg);
-        l_err = deviceRead(i_target,
-                            &l_vpcErrCnfg,
-                            size,
-                            DEVICE_SCOM_ADDRESS(PU_INT_PC_VPC_ERR_CFG1));
-
-        if(l_err)
-        {
-            TRACFCOMP(g_trac_intr,ERR_MRK"Unable to read VPC Err Cnfg");
-            break;
-        }
-
-        l_vpcErrCnfg |= XIVE_IC_VPC_PULL_ERR;
-        l_err = deviceWrite(i_target,
-                            &l_vpcErrCnfg,
-                            size,
-                            DEVICE_SCOM_ADDRESS(PU_INT_PC_VPC_ERR_CFG1));
-
-        if(l_err)
-        {
-            TRACFCOMP(g_trac_intr,ERR_MRK"Unable to write VPC Err Cnfg");
-            break;
-        }
-    } while(0);
-
-*/
     return l_err;
 }
 

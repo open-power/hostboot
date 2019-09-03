@@ -142,11 +142,9 @@ SbePsu::SbePsu()
         //   of type LSI_PSU. The INTRP will route messages
         //   to this queue when interrupts of that type are
         //   detected
-        /* @TODO RTC 210643: Re-enable this when interrupts work again
         l_err = INTR::registerMsgQ(iv_msgQ,
                                    MSG_INTR,
                                    INTR::ISN_PSU);
-        */
     }
 
     if (l_err)
@@ -279,6 +277,7 @@ errlHndl_t SbePsu::performPsuChipOp(TARGETING::Target * i_target,
             // not deemed fatal.
             SBE_TRACF(ERR_MRK "performPsuChipOp Previous PSU response never completed.");
         }
+
         iv_psuResponse = o_pPsuResponse;
         iv_responseReady = false;
 
@@ -407,9 +406,7 @@ errlHndl_t SbePsu::writeRequest(TARGETING::Target * i_target,
         errl = readScom(i_target,PSU_SBE_DOORBELL_REG_RW,&l_data);
         if (errl) break;
 
-        // @TODO RTC 213023: Re-enable this if-condition when the SBE is
-        // implemented
-        if (l_data & SBE_DOORBELL && false)
+        if (l_data & SBE_DOORBELL)
         {
             SBE_TRACF(ERR_MRK "writeRequest: SBE not ready to accept cmd");
             SBE_TRACF(ERR_MRK " Control Flags,SeqID,Cmd,SubCmd=0x%016lx",
@@ -536,7 +533,6 @@ errlHndl_t SbePsu::handleInterrupt(PIR_t i_pir)
         if (errl)
         { break; }
 
-
         if ( l_simicsRunning &&
              HOST_RESPONSE_WAITING != (l_doorbellVal & HOST_RESPONSE_WAITING) )
         {
@@ -568,6 +564,7 @@ errlHndl_t SbePsu::handleInterrupt(PIR_t i_pir)
                 l_addr++;
                 l_pMessage++;
             }
+
             if (errl)
             { break; }
 
@@ -621,18 +618,9 @@ errlHndl_t SbePsu::checkResponse(TARGETING::Target  * i_target,
     do
     {
         //wait for request to be completed
-
-        // @TODO RTC 213023: Remove the line below when the SBE is implemented
-        // (it causes the completion poll to immediately succeed)
-        iv_responseReady = true;
         errl = pollForPsuComplete(i_target,i_timeout,i_pPsuRequest);
         if (errl)
         { break; }  // return with error
-
-        // @TODO RTC 213023: Remove these lines when SBE is implemented
-        o_pPsuResponse->primaryStatus = SBE_PRI_OPERATION_SUCCESSFUL;
-        o_pPsuResponse->secondaryStatus = SBE_SEC_OPERATION_SUCCESSFUL;
-        o_pPsuResponse->seqID = i_pPsuRequest->seqID;
 
         //At this point we will have valid data in iv_psuResponse
         //If the command is not supported, then print a statement and break out

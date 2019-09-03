@@ -132,9 +132,7 @@ const TaskInfo g_exttaskinfolist[]   =   {
             "libintr.so",                               // taskname
             NULL,                                       // no ptr to fnct
             {
-                // @TODO RTC 210643: Change this back to START_TASK when we
-                // are fixing interrupts
-                INIT_TASK,                              // task type
+                START_TASK,                             // task type
                 EXT_IMAGE,                              // Extended Module
             }
         },
