@@ -804,7 +804,7 @@ uint32_t __analyzeErrorThrStatusReg( STEP_CODE_DATA_STRUCT & io_sc,
 
             // Check to see if the ES_TEMP is negative (bit 12)
             bool esTempNeg = false;
-            if ( esTemp | 0x1000 ) esTempNeg = true;
+            if ( esTemp & 0x1000 ) esTempNeg = true;
 
             // If ES_TEMP is equal or above ES_TEMP_ERROR_HIGH_THRESHOLD
             // Just in case ES_TEMP has moved before we read it out, we'll add
@@ -1021,7 +1021,7 @@ uint32_t __analyzeWarningThrStatusReg(STEP_CODE_DATA_STRUCT & io_sc,
 
             // Check to see if the ES_TEMP is negative (bit 12)
             bool esTempNeg = false;
-            if ( esTemp | 0x1000 ) esTempNeg = true;
+            if ( esTemp & 0x1000 ) esTempNeg = true;
 
             // If ES_TEMP is equal or above ES_TEMP_WARNING_HIGH_THRESHOLD
             // Just in case ES_TEMP has moved before we read it out, we'll add
