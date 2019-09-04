@@ -426,6 +426,9 @@ uint32_t __analyzeHealthStatus0Reg(STEP_CODE_DATA_STRUCT & io_sc,
     uint32_t o_rc = SUCCESS;
     uint8_t data = 0;
 
+    // Get MCA, for signatures
+    TargetHandle_t mca = getConnectedParent( i_dimm, TYPE_MCA );
+
     do
     {
         // NVDIMM health status registers size = 1 byte
@@ -447,7 +450,7 @@ uint32_t __analyzeHealthStatus0Reg(STEP_CODE_DATA_STRUCT & io_sc,
         // BIT 0: Voltage Regulator Fail
         if ( bitList.count(0) )
         {
-            __addSignature( io_sc, i_dimm, io_errFound, PRDFSIG_VoltRegFail );
+            __addSignature( io_sc, mca, io_errFound, PRDFSIG_VoltRegFail );
             // Callout NVDIMM on 1st, no gard
             io_sc.service_data->SetCallout( i_dimm, MRU_MED, NO_GARD );
             io_errFound = true;
@@ -455,7 +458,7 @@ uint32_t __analyzeHealthStatus0Reg(STEP_CODE_DATA_STRUCT & io_sc,
         // BIT 1: VDD Lost
         if ( bitList.count(1) )
         {
-            __addSignature( io_sc, i_dimm, io_errFound, PRDFSIG_VddLost );
+            __addSignature( io_sc, mca, io_errFound, PRDFSIG_VddLost );
             // Callout NVDIMM on 1st, no gard
             io_sc.service_data->SetCallout( i_dimm, MRU_MED, NO_GARD );
             io_errFound = true;
@@ -463,7 +466,7 @@ uint32_t __analyzeHealthStatus0Reg(STEP_CODE_DATA_STRUCT & io_sc,
         // BIT 2: VPP Lost
         if ( bitList.count(2) )
         {
-            __addSignature( io_sc, i_dimm, io_errFound, PRDFSIG_VppLost );
+            __addSignature( io_sc, mca, io_errFound, PRDFSIG_VppLost );
             // Callout NVDIMM on 1st, no gard
             io_sc.service_data->SetCallout( i_dimm, MRU_MED, NO_GARD );
             io_errFound = true;
@@ -471,7 +474,7 @@ uint32_t __analyzeHealthStatus0Reg(STEP_CODE_DATA_STRUCT & io_sc,
         // BIT 3: VTT Lost
         if ( bitList.count(3) )
         {
-            __addSignature( io_sc, i_dimm, io_errFound, PRDFSIG_VttLost );
+            __addSignature( io_sc, mca, io_errFound, PRDFSIG_VttLost );
             // Callout NVDIMM on 1st, no gard
             io_sc.service_data->SetCallout( i_dimm, MRU_MED, NO_GARD );
             io_errFound = true;
@@ -479,7 +482,7 @@ uint32_t __analyzeHealthStatus0Reg(STEP_CODE_DATA_STRUCT & io_sc,
         // BIT 4: DRAM not Self Refresh
         if ( bitList.count(4) )
         {
-            __addSignature( io_sc, i_dimm, io_errFound, PRDFSIG_NotSelfRefr );
+            __addSignature( io_sc, mca, io_errFound, PRDFSIG_NotSelfRefr );
             // Callout NVDIMM on 1st, no gard
             io_sc.service_data->SetCallout( i_dimm, MRU_MED, NO_GARD );
             io_errFound = true;
@@ -487,7 +490,7 @@ uint32_t __analyzeHealthStatus0Reg(STEP_CODE_DATA_STRUCT & io_sc,
         // BIT 5: Controller HW Error
         if ( bitList.count(5) )
         {
-            __addSignature( io_sc, i_dimm, io_errFound, PRDFSIG_CtrlHwErr );
+            __addSignature( io_sc, mca, io_errFound, PRDFSIG_CtrlHwErr );
             // Callout NVDIMM on 1st, no gard
             io_sc.service_data->SetCallout( i_dimm, MRU_MED, NO_GARD );
             io_errFound = true;
@@ -495,7 +498,7 @@ uint32_t __analyzeHealthStatus0Reg(STEP_CODE_DATA_STRUCT & io_sc,
         // BIT 6: NVM Controller Error
         if ( bitList.count(6) )
         {
-            __addSignature( io_sc, i_dimm, io_errFound, PRDFSIG_NvmCtrlErr );
+            __addSignature( io_sc, mca, io_errFound, PRDFSIG_NvmCtrlErr );
             // Callout NVDIMM on 1st, no gard
             io_sc.service_data->SetCallout( i_dimm, MRU_MED, NO_GARD );
             io_errFound = true;
@@ -503,7 +506,7 @@ uint32_t __analyzeHealthStatus0Reg(STEP_CODE_DATA_STRUCT & io_sc,
         // BIT 7: NVM Lifetime Error
         if ( bitList.count(7) )
         {
-            __addSignature( io_sc, i_dimm, io_errFound, PRDFSIG_NvmLifeErr );
+            __addSignature( io_sc, mca, io_errFound, PRDFSIG_NvmLifeErr );
             // Callout NVDIMM on 1st, no gard
             io_sc.service_data->SetCallout( i_dimm, MRU_MED, NO_GARD );
             io_errFound = true;
@@ -532,6 +535,9 @@ uint32_t __analyzeHealthStatus1Reg( STEP_CODE_DATA_STRUCT & io_sc,
     uint32_t o_rc = SUCCESS;
     uint8_t data = 0;
 
+    // Get MCA, for signatures
+    TargetHandle_t mca = getConnectedParent( i_dimm, TYPE_MCA );
+
     do
     {
         // NVDIMM health status registers size = 1 byte
@@ -553,7 +559,7 @@ uint32_t __analyzeHealthStatus1Reg( STEP_CODE_DATA_STRUCT & io_sc,
         // BIT 0: Insufficient Energy
         if ( bitList.count(0) )
         {
-            __addSignature( io_sc, i_dimm, io_errFound, PRDFSIG_InsuffEnergy );
+            __addSignature( io_sc, mca, io_errFound, PRDFSIG_InsuffEnergy );
 
             // Callout BPM (backup power module) high, cable high
             o_rc = __addBpmCallout( i_dimm, HWAS::SRCI_PRIORITY_HIGH );
@@ -568,7 +574,7 @@ uint32_t __analyzeHealthStatus1Reg( STEP_CODE_DATA_STRUCT & io_sc,
         // BIT 1: Invalid Firmware
         if ( bitList.count(1) )
         {
-            __addSignature( io_sc, i_dimm, io_errFound, PRDFSIG_InvFwErr );
+            __addSignature( io_sc, mca, io_errFound, PRDFSIG_InvFwErr );
             // Callout NVDIMM on 1st, no gard
             io_sc.service_data->SetCallout( i_dimm, MRU_MED, NO_GARD );
             io_errFound = true;
@@ -576,7 +582,7 @@ uint32_t __analyzeHealthStatus1Reg( STEP_CODE_DATA_STRUCT & io_sc,
         // BIT 2: Configuration Data Error
         if ( bitList.count(2) )
         {
-            __addSignature( io_sc, i_dimm, io_errFound, PRDFSIG_CnfgDataErr );
+            __addSignature( io_sc, mca, io_errFound, PRDFSIG_CnfgDataErr );
             // Callout NVDIMM on 1st, no gard
             io_sc.service_data->SetCallout( i_dimm, MRU_MED, NO_GARD );
             io_errFound = true;
@@ -584,7 +590,7 @@ uint32_t __analyzeHealthStatus1Reg( STEP_CODE_DATA_STRUCT & io_sc,
         // BIT 3: No Energy Source
         if ( bitList.count(3) )
         {
-            __addSignature( io_sc, i_dimm, io_errFound, PRDFSIG_NoEsPres );
+            __addSignature( io_sc, mca, io_errFound, PRDFSIG_NoEsPres );
 
             // Callout BPM (backup power module) high, cable high
             o_rc = __addBpmCallout( i_dimm, HWAS::SRCI_PRIORITY_HIGH );
@@ -599,7 +605,7 @@ uint32_t __analyzeHealthStatus1Reg( STEP_CODE_DATA_STRUCT & io_sc,
         // BIT 4: Energy Policy Not Set
         if ( bitList.count(4) )
         {
-            __addSignature( io_sc, i_dimm, io_errFound, PRDFSIG_EsPolNotSet );
+            __addSignature( io_sc, mca, io_errFound, PRDFSIG_EsPolNotSet );
 
             // Callout FW (Level2 Support) High
             io_sc.service_data->SetCallout( LEVEL2_SUPPORT, MRU_HIGH, NO_GARD );
@@ -611,7 +617,7 @@ uint32_t __analyzeHealthStatus1Reg( STEP_CODE_DATA_STRUCT & io_sc,
         // BIT 5: Energy Source HW Error
         if ( bitList.count(5) )
         {
-            __addSignature( io_sc, i_dimm, io_errFound, PRDFSIG_EsHwFail );
+            __addSignature( io_sc, mca, io_errFound, PRDFSIG_EsHwFail );
 
             // Callout BPM (backup power module) high, cable high
             o_rc = __addBpmCallout( i_dimm, HWAS::SRCI_PRIORITY_HIGH );
@@ -626,7 +632,7 @@ uint32_t __analyzeHealthStatus1Reg( STEP_CODE_DATA_STRUCT & io_sc,
         // BIT 6: Energy Source Health Assessment Error
         if ( bitList.count(6) )
         {
-            __addSignature( io_sc, i_dimm, io_errFound, PRDFSIG_EsHlthAssess);
+            __addSignature( io_sc, mca, io_errFound, PRDFSIG_EsHlthAssess);
 
             // Callout BPM (backup power module) high, cable high
             o_rc = __addBpmCallout( i_dimm, HWAS::SRCI_PRIORITY_HIGH );
@@ -743,6 +749,9 @@ uint32_t __analyzeErrorThrStatusReg( STEP_CODE_DATA_STRUCT & io_sc,
     uint32_t o_rc = SUCCESS;
     uint8_t data = 0;
 
+    // Get MCA, for signatures
+    TargetHandle_t mca = getConnectedParent( i_dimm, TYPE_MCA );
+
     do
     {
         // NVDIMM health status registers size = 1 byte
@@ -765,7 +774,7 @@ uint32_t __analyzeErrorThrStatusReg( STEP_CODE_DATA_STRUCT & io_sc,
         // BIT 1: ES Lifetime Error
         if ( bitList.count(1) )
         {
-            __addSignature( io_sc, i_dimm, io_errFound, PRDFSIG_EsLifeErr );
+            __addSignature( io_sc, mca, io_errFound, PRDFSIG_EsLifeErr );
 
             // Callout BPM (backup power module) high
             o_rc = __addBpmCallout( i_dimm, HWAS::SRCI_PRIORITY_HIGH );
@@ -802,13 +811,13 @@ uint32_t __analyzeErrorThrStatusReg( STEP_CODE_DATA_STRUCT & io_sc,
             // a 2°C margin when comparing to the threshold.
             if ( (esTemp >= (esTempHighTh - 0x0020)) && !esTempNeg )
             {
-                __addSignature( io_sc, i_dimm, io_errFound,
+                __addSignature( io_sc, mca, io_errFound,
                                 PRDFSIG_EsTmpErrHigh );
             }
             // Else assume the warning is because of a low threshold.
             else
             {
-                __addSignature( io_sc, i_dimm, io_errFound,
+                __addSignature( io_sc, mca, io_errFound,
                                 PRDFSIG_EsTmpErrLow );
             }
 
@@ -967,6 +976,9 @@ uint32_t __analyzeWarningThrStatusReg(STEP_CODE_DATA_STRUCT & io_sc,
     uint32_t o_rc = SUCCESS;
     uint8_t data = 0;
 
+    // Get MCA, for signatures
+    TargetHandle_t mca = getConnectedParent( i_dimm, TYPE_MCA );
+
     do
     {
         // NVDIMM health status registers size = 1 byte
@@ -1016,13 +1028,13 @@ uint32_t __analyzeWarningThrStatusReg(STEP_CODE_DATA_STRUCT & io_sc,
             // a 2°C margin when comparing to the threshold.
             if ( (esTemp >= (esTempHighTh - 0x0020)) && !esTempNeg )
             {
-                __addSignature( io_sc, i_dimm, io_errFound,
+                __addSignature( io_sc, mca, io_errFound,
                                 PRDFSIG_EsTmpWarnHigh );
             }
             // Else assume the warning is because of a low threshold.
             else
             {
-                __addSignature( io_sc, i_dimm, io_errFound,
+                __addSignature( io_sc, mca, io_errFound,
                                 PRDFSIG_EsTmpWarnLow );
             }
 
@@ -1060,12 +1072,12 @@ uint32_t __analyzeWarningThrStatusReg(STEP_CODE_DATA_STRUCT & io_sc,
             // warning of this type.
             if ( firstWarn )
             {
-                __addSignature( io_sc, i_dimm, io_errFound,
+                __addSignature( io_sc, mca, io_errFound,
                                 PRDFSIG_NvmLifeWarn1 );
             }
             else
             {
-                __addSignature( io_sc, i_dimm, io_errFound,
+                __addSignature( io_sc, mca, io_errFound,
                                 PRDFSIG_NvmLifeWarn2 );
             }
 
@@ -1095,11 +1107,11 @@ uint32_t __analyzeWarningThrStatusReg(STEP_CODE_DATA_STRUCT & io_sc,
             // warning of this type.
             if ( firstWarn )
             {
-                __addSignature(io_sc, i_dimm, io_errFound, PRDFSIG_EsLifeWarn1);
+                __addSignature(io_sc, mca, io_errFound, PRDFSIG_EsLifeWarn1);
             }
             else
             {
-                __addSignature(io_sc, i_dimm, io_errFound, PRDFSIG_EsLifeWarn2);
+                __addSignature(io_sc, mca, io_errFound, PRDFSIG_EsLifeWarn2);
             }
 
             io_errFound = true;
@@ -1249,7 +1261,8 @@ int32_t AnalyzeNvdimmHealthStatRegs( ExtensibleChip * i_chip,
             // PERSISTENCY_LOST_ERROR. Set predictive on threshold of 32
             // per day (rule code handles the thresholding), else just keep
             // as a hidden log.
-            __addSignature( io_sc, dimm, errFound, PRDFSIG_NvdimmPersRes );
+            __addSignature( io_sc, i_chip->getTrgt(), errFound,
+                            PRDFSIG_NvdimmPersRes );
 
             // Callout NVDIMM
             io_sc.service_data->SetCallout( dimm, MRU_MED, NO_GARD );
@@ -1259,7 +1272,8 @@ int32_t AnalyzeNvdimmHealthStatRegs( ExtensibleChip * i_chip,
         {
             // Much like the persistency restored bit above, we don't expect
             // to see this, so just make a hidden log.
-            __addSignature( io_sc, dimm, errFound, PRDFSIG_BelowWarnTh );
+            __addSignature( io_sc, i_chip->getTrgt(), errFound,
+                            PRDFSIG_BelowWarnTh );
 
             // Callout NVDIMM
             io_sc.service_data->SetCallout( dimm, MRU_MED, NO_GARD );
@@ -1274,7 +1288,7 @@ int32_t AnalyzeNvdimmHealthStatRegs( ExtensibleChip * i_chip,
         // handles the actual thresholding here.
         if ( io_sc.service_data->IsAtThreshold() && !errFound )
         {
-            io_sc.service_data->setSignature( getHuid(dimm),
+            io_sc.service_data->setSignature( i_chip->getHuid(),
                                               PRDFSIG_IntNvdimmErr );
 
             // callout NVDIMM high, cable high, BPM high, no gard
