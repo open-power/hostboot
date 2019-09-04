@@ -148,9 +148,13 @@ enum odt_fields
 ///
 /// @brief host_fw_command_struct structure setup
 /// @param[in] i_cmd_data_crc the command data CRC
+/// @param[in] i_cmd_length the length of the command present in the data buffer (if any)
 /// @param[out] o_cmd the command parameters to set
 ///
-void setup_cmd_params(const uint32_t i_cmd_data_crc, host_fw_command_struct& o_cmd);
+void setup_cmd_params(
+    const uint32_t i_cmd_data_crc,
+    const uint8_t i_cmd_length,
+    host_fw_command_struct& o_cmd);
 
 ///
 /// @brief user_input_msdg structure setup

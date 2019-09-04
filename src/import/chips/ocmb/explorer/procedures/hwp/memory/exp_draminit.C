@@ -67,7 +67,7 @@ extern "C"
         // Issue full boot mode cmd though EXP-FW REQ buffer
         {
             host_fw_command_struct l_cmd;
-            mss::exp::setup_cmd_params(l_crc, l_cmd);
+            mss::exp::setup_cmd_params(l_crc, sizeof(l_phy_params), l_cmd);
             FAPI_TRY( mss::exp::ib::putCMD(i_target, l_cmd),
                       "Failed putCMD() for  %s", mss::c_str(i_target) );
         }
