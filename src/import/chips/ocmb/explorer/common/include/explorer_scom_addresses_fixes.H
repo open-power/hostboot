@@ -28,7 +28,6 @@
 #define __EXPLR_SCOM_ADDRESSES_FIXES_H
 
 static const uint64_t EXPLR_MIPS_TO_OCMB_INTERRUPT_REGISTER1 = 0x2058ull;
-static const uint64_t EXPLR_MCBIST_MBSSYMEC9Q = 0x08011861ull;
 
 static const uint64_t EXP_DDR4_PHY_DBYTE0_TXDQSDLYTG0_U0_P0 = 0x04040340ull;
 static const uint64_t EXP_DDR4_PHY_DBYTE0_RXCLKDLYTG0_U0_P0 = 0x04040230ull;
@@ -3146,8 +3145,61 @@ static const uint64_t EXP_DDR4_PHY_DBYTE9_RXPBDLYTG3_R5 = 0x040655acull;
 static const uint64_t EXP_DDR4_PHY_DBYTE9_RXPBDLYTG3_R6 = 0x040659acull;
 static const uint64_t EXP_DDR4_PHY_DBYTE9_RXPBDLYTG3_R7 = 0x04065dacull;
 static const uint64_t EXP_DDR4_PHY_DBYTE9_RXPBDLYTG3_R8 = 0x040661acull;
-static const uint64_t EXPLR_RDF_MCBCM2                  = 0x08011c35ull;
 static const uint64_t EXPLR_TP_MB_UNIT_TOP_TR1_TRACE_TRCTRL_CONFIG = 0x08010442ull;
 static const uint64_t EXP_APBONLY0_MICROCONTMUXSEL      = 0x04340000ull;
+
+
+static const uint32_t EXPLR_EFUSE_IMAGE_OUT_0                                   = 0x20B080ull;
+
+
+static const uint32_t EXPLR_EFUSE_IMAGE_OUT_1                                   = 0x20B084ull;
+
+
+static const uint32_t EXPLR_EFUSE_IMAGE_OUT_2                                   = 0x20B088ull;
+
+
+static const uint32_t EXPLR_EFUSE_IMAGE_OUT_3                                   = 0x20B08Cull;
+
+
+static const uint32_t EXPLR_EFUSE_PE_DATA_0                                     = 0x20B090ull;
+
+
+static const uint32_t EXPLR_EFUSE_PE_DATA_1                                     = 0x20B094ull;
+
+
+static const uint32_t EXPLR_EFUSE_PE_DATA_2                                     = 0x20B098ull;
+
+
+static const uint32_t EXPLR_EFUSE_PE_DATA_3                                     = 0x20B09Cull;
+
+
+static const uint32_t EXPLR_EFUSE_PE_DATA_4                                     = 0x20B0A0ull;
+
+
+static const uint32_t EXPLR_EFUSE_PE_DATA_5                                     = 0x20B0A4ull;
+
+
+static const uint32_t EXPLR_EFUSE_PE_DATA_6                                     = 0x20B0A8ull;
+
+
+static const uint32_t EXPLR_EFUSE_PE_DATA_8                                     = 0x20B0ACull;
+
+
+static const uint32_t EXPLR_EFUSE_PE_DATA_9                                     = 0x20B0B0ull;
+
+
+static const uint32_t EXPLR_EFUSE_PE_DATA_10                                    = 0x20B0B4ull;
+
+
+static const uint32_t EXPLR_EFUSE_PE_DATA_11                                    = 0x20B0B8ull;
+
+
+static const uint32_t EXPLR_EFUSE_PE_DATA_12                                    = 0x20B0BCull;
+
+
+static const uint32_t EXPLR_EFUSE_PE_DATA_13                                    = 0x20B0C0ull;
+
+
+static const uint32_t EXPLR_EFUSE_PE_DATA_14                                    = 0x20B0C4ull;
 
 #endif

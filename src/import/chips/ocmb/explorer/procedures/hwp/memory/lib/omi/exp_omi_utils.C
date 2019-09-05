@@ -69,7 +69,7 @@ fapi2::ReturnCode setup_omi_dl0_config0(
              "Error reading EXPLR_DLX_DL0_CONFIG0 on %s", mss::c_str(i_target));
 
     // CFG_DL0_HALF_WIDTH_BACKOFF_ENABLE: dl0 x4 backoff enabled
-    l_config0.writeBit<EXPLR_DLX_DL0_CONFIG0_CFG_X4_BACKOFF_ENABLE>(i_dl_x4_backoff_en);
+    l_config0.writeBit<EXPLR_DLX_DL0_CONFIG0_CFG_HALF_WIDTH_BACKOFF_ENABLE>(i_dl_x4_backoff_en);
 
     // CFG_DL0_TRAIN_MODE: dl0 train mode
     l_config0.insertFromRight<EXPLR_DLX_DL0_CONFIG0_CFG_TRAIN_MODE,

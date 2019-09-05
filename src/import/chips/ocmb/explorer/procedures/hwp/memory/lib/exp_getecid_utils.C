@@ -36,6 +36,7 @@
 #include <lib/i2c/exp_i2c.H>
 #include <lib/shared/exp_consts.H>
 #include <explorer_scom_addresses.H>
+#include <explorer_scom_addresses_fixes.H>
 #include <explorer_scom_addresses_fld_fixes.H>
 #include <mss_explorer_attribute_setters.H>
 #include <generic/memory/lib/utils/mss_buffer_utils.H>
