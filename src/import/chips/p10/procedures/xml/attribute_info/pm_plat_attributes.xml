@@ -518,6 +518,30 @@
     <overrideOnly/>
     <group>enablement</group>
   </attribute>
+ <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SYSTEM_AUXILLARY_MODE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Control XGPE boot: ON : enable xgpe to boot
+                       OFF: disable xgpe boot
+
+    Producer:Override
+
+    Consumers: p10_pstate_parameter_build and p10_pm_xgpe_init
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <enum>
+        ON = 0x00,
+        OFF = 0x01
+    </enum>
+    <default>ON</default>
+    <initToZero/>
+    <overrideOnly/>
+    <group>enablement</group>
+  </attribute>
+
 
   <!-- ********************************************************************* -->
   <attribute>
