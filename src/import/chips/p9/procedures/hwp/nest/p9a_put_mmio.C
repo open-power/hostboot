@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,8 +55,8 @@ fapi2::ReturnCode p9a_put_mmio(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
                                const std::vector<uint8_t>& i_data)
 {
     uint8_t data[8];
-    uint8_t l_idx;
-    uint8_t l_data_idx;
+    uint32_t l_idx;
+    uint32_t l_data_idx;
     uint32_t l_max_grans;
     uint32_t l_grans;
     p9_ADU_oper_flag l_myAduFlag;
