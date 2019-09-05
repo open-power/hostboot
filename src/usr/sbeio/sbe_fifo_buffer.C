@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,8 @@ constexpr size_t STATUS_WORD_SIZE =
 
 namespace SBEIO
 {
+
+const size_t SbeFifoRespBuffer::MSG_BUFFER_SIZE;
 
 //------------------------------------------------------------------------
 const char* SbeFifoRespBuffer::cv_stateStrings[] = {
