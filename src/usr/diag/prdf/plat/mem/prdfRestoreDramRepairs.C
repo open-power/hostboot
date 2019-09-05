@@ -142,16 +142,20 @@ void __calloutDimm( errlHndl_t & io_errl, TargetHandle_t i_portTrgt,
     // customer takes the risk of ungarding the DIMM (that they should replace),
     // the repairs will need to be rediscovered.
 
-    std::vector<MemRank> ranks;
-    getMasterRanks<T>( i_portTrgt, ranks, getDimmSlct(i_dimmTrgt) );
-
-    for ( auto & rank : ranks )
+    // Do not clear the VPD if we had an NVDIMM that we avoided garding.
+    if ( !i_nvdimmNoGard )
     {
-        if ( SUCCESS != clearBadDqBitmap(i_portTrgt, rank) )
+        std::vector<MemRank> ranks;
+        getMasterRanks<T>( i_portTrgt, ranks, getDimmSlct(i_dimmTrgt) );
+
+        for ( auto & rank : ranks )
         {
-            PRDF_ERR( PRDF_FUNC "clearBadDqBitmap(0x%08x,0x%02x) failed",
-                      getHuid(i_portTrgt), rank.getKey() );
-            continue;
+            if ( SUCCESS != clearBadDqBitmap(i_portTrgt, rank) )
+            {
+                PRDF_ERR( PRDF_FUNC "clearBadDqBitmap(0x%08x,0x%02x) failed",
+                          getHuid(i_portTrgt), rank.getKey() );
+                continue;
+            }
         }
     }
 
