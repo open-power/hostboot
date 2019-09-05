@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,7 +34,7 @@
 
 //Targeting includes
 #include <targeting/common/target.H>
-#include <p9_tod_setup.H>
+#include <p10_tod_setup.H>
 #include <string.h>
 #include "TodUtils.H"
 
@@ -154,7 +154,7 @@ namespace TodSvcUtil{
      */
 
      char const * topologyTypeToString (
-            const p9_tod_setup_tod_sel i_topologyType);
+            const p10_tod_setup_tod_sel i_topologyType);
 
     errlHndl_t getFuncNodeTargetsOnSystem(
             TARGETING::ConstTargetHandle_t i_nodeOrSysTarget,

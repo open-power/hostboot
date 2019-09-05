@@ -41,10 +41,8 @@
 #include <initservice/initserviceif.H>
 #include <isteps/hwpisteperror.H>
 
-/* FIXME RTC: 210975
 #include <tod/TodTrace.H>
 #include <tod/TodSvc.H>
-*/
 
 using namespace ISTEP_ERROR;
 
@@ -54,23 +52,28 @@ namespace   ISTEP_18
 void * call_tod_setup(void *dummy)
 {
     IStepError l_stepError;
-/* FIXME RTC: 210975
-    errlHndl_t l_errl = NULL;
-
+    errlHndl_t l_errl = nullptr;
     TOD_ENTER("call_tod_setup");
 
+    // TODO RTC: 213110 TOD procedures need to be run for eBMC + OP and
+    // not run for FSP
     if (!INITSERVICE::spBaseServicesEnabled())
     {
         l_errl = TOD::todSetup();
 
         if (l_errl)
         {
+            TOD_ERR("todSetup() return errl handle ",
+                    TRACE_ERR_FMT,
+                    TRACE_ERR_ARGS(l_errl));
+            l_errl->collectTrace("ISTEPS_TRACE");
             l_stepError.addErrorDetails( l_errl );
-            TOD_ERR("todSetup() return errl handle %p", l_errl);
             errlCommit( l_errl, TOD_COMP_ID );
         }
     }
-*/
+
+    TOD_EXIT("call_tod_setup");
+
     return l_stepError.getErrorHandle();
 }
 

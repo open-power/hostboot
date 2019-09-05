@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,7 +38,7 @@
 //Includes
 //------------------------------------------------------------------------------
 #include "TodProc.H"
-#include <p9_tod_utils.H>
+#include <p10_tod_utils.H>
 #include <errl/errlentry.H>
 namespace TOD
 {
@@ -70,7 +70,7 @@ class TodControls;
  *      any returned error created by this function will be a non-reported
  *      tracing event error log.
  */
-errlHndl_t todSetupHwp(const p9_tod_setup_tod_sel i_topologyType);
+errlHndl_t todSetupHwp(const p10_tod_setup_tod_sel i_topologyType);
 
 /**
  *  @brief Invokes the TOD registry read HWP.
@@ -98,7 +98,7 @@ errlHndl_t todSetupHwp(const p9_tod_setup_tod_sel i_topologyType);
  *      any returned error created by this function will be a non-reported
  *      tracing event error log.
  */
-errlHndl_t todSaveRegsHwp(const p9_tod_setup_tod_sel i_topologyType);
+errlHndl_t todSaveRegsHwp(const p10_tod_setup_tod_sel i_topologyType);
 
 /**
  *  @brief Invokes the TOD Initialization hardware procedure

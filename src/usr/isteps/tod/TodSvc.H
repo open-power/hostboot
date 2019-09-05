@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,7 +42,7 @@
 #include <util/singleton.H>
 #include <targeting/common/targetservice.H>
 
-#include <p9_tod_utils.H>
+#include <p10_tod_utils.H>
 #include <sys/time.h>
 
 namespace TOD
@@ -220,7 +220,7 @@ private:
      *
      */
     errlHndl_t setActiveMdmtForResetBackup(
-        const p9_tod_setup_tod_sel i_activeConfig);
+        const p10_tod_setup_tod_sel i_activeConfig);
 
     //Disabled copy constructor and assignment operator
     TodSvc(const TodSvc& rhs);

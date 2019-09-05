@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,7 +47,7 @@ bool isFunctional(const TARGETING::Target* i_pTarget)
     // Local Variables
     //--------------------------------------------------------------------------
 
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = nullptr;
     bool l_isFunctional = false;
 
     //--------------------------------------------------------------------------
@@ -69,16 +69,16 @@ bool isFunctional(const TARGETING::Target* i_pTarget)
     }
     else
     {
-        // If i_pTarget is NULL then create an error log
-        TOD_ERR("Input Target handle is null");
+        // If i_pTarget is nullptr then create an error log
+        TOD_ERR("Input Target handle is nullptr");
 
         //Create error
         /*@
          * @errortype
          * @moduleid     TOD_FUNCTIONAL_TARGET
          * @reasoncode   TOD_INVALID_TARGET
-         * @devdesc      NULL Target is supplied as an input
-         * @custdesc     Service Processor Firmware encountered an internal
+         * @devdesc      nullptr Target is supplied as an input
+         * @custdesc     Hostboot Firmware encountered an internal
          *               error
          */
         l_errl = new ERRORLOG::ErrlEntry(
@@ -101,7 +101,7 @@ errlHndl_t todGetScom(const TARGETING::Target * i_target,
                       const uint64_t i_address,
                       fapi2::variable_buffer & o_data)
 {
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
 
     // Perform SCOM read
     uint64_t l_data = 0;
@@ -123,16 +123,16 @@ errlHndl_t getMaxConfigParams(
                  maxConfigParamsContainer& o_maxConfigParams)
 {
     TOD_ENTER("getMaxConfigParams");
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
 
     do
     {
         //Get the top level (system) target  handle
-        TARGETING::Target* l_pTopLevel = NULL;
+        TARGETING::Target* l_pTopLevel = nullptr;
         (void)TARGETING::targetService().getTopLevelTarget(l_pTopLevel);
 
         // Assert on failure getting system target
-        if(NULL == l_pTopLevel)
+        if(nullptr == l_pTopLevel)
         {
             TOD_ERR_ASSERT("NULL top level target found");
             break;
@@ -142,24 +142,6 @@ errlHndl_t getMaxConfigParams(
 
         o_maxConfigParams.max_procchips_per_node = l_pTopLevel->getAttr
                         < TARGETING::ATTR_MAX_PROC_CHIPS_PER_NODE > ();
-
-        o_maxConfigParams.max_exs_per_procchip = l_pTopLevel->getAttr
-                        < TARGETING::ATTR_MAX_EXS_PER_PROC_CHIP > ();
-
-        o_maxConfigParams.max_dimms_per_mbaport = l_pTopLevel->getAttr
-                        < TARGETING::ATTR_MAX_DIMMS_PER_MBA_PORT > ();
-
-        o_maxConfigParams.max_mbaports_per_mba = l_pTopLevel->getAttr
-                        < TARGETING::ATTR_MAX_MBA_PORTS_PER_MBA > ();
-
-        o_maxConfigParams.max_mbas_per_membuf = l_pTopLevel->getAttr
-                        < TARGETING::ATTR_MAX_MBAS_PER_MEMBUF_CHIP > ();
-
-        o_maxConfigParams.max_chiplets_per_proc = l_pTopLevel->getAttr
-                        < TARGETING::ATTR_MAX_CHIPLETS_PER_PROC > ();
-
-        o_maxConfigParams.max_mcs_per_sys = l_pTopLevel->getAttr
-                        < TARGETING::ATTR_MAX_MCS_PER_SYSTEM > ();
 
         o_maxConfigParams.max_compute_nodes_per_sys = l_pTopLevel->getAttr
                         < TARGETING::ATTR_MAX_COMPUTE_NODES_PER_SYSTEM > ();

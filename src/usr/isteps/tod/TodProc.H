@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,7 +37,7 @@
 //Includes
 //------------------------------------------------------------------------------
 //HWPF - For TOD constants
-#include <p9_tod_utils.H>
+#include <p10_tod_utils.H>
 #include "TodSvcUtil.H"
 #include "TodAssert.H"
 
@@ -157,14 +157,14 @@ class TodProc
 
         /**
          * @brief This is a helper method for connect, that will pick a value
-         *  from p9_tod_setup_bus enum corresponding to the bus type and
+         *  from p10_tod_setup_bus enum corresponding to the bus type and
          *  the  port specified as argument
          *
          * @param[in] i_busChipUnitType , This will indicate   A/X bus type
          *
          * @param[in] i_busPort , The port of the bus
          *
-         * @param[out] o_busId , p9_tod_setup_bus enum member corresponding to
+         * @param[out] o_busId , p10_tod_setup_bus enum member corresponding to
          *  the bus type and bus port specified as parameter. Before looking for
          *  o_busId caller should look for returned error handle and only if it
          *  is NULL, o_busId should be considered.
@@ -186,7 +186,7 @@ class TodProc
         errlHndl_t getBusPort(
                 const   TARGETING::TYPE  i_busChipUnitType,
                 const uint32_t  i_busPort,
-                p9_tod_setup_bus& o_busId) const;
+                p10_tod_setup_bus& o_busId) const;
 
         /**
          * @brief Method to create an errlHndl_t object for
@@ -266,7 +266,7 @@ class TodProc
 
         /**
          * @brief Getter for TOD registers for this proc
-         *  Check proc_tod_utils.H : p9_tod_setup_conf_regs for the list of
+         *  Check proc_tod_utils.H : p10_tod_setup_conf_regs for the list of
          *  registers. The registers are updated by the TOD HWP.
          *
          * @param[out] o_todRegs
@@ -274,7 +274,7 @@ class TodProc
          *
          * @return N/A
          */
-        void getTodRegs(p9_tod_setup_conf_regs& o_todRegs) const;
+        void getTodRegs(p10_tod_setup_conf_regs& o_todRegs) const;
 
         /**
          * @brief This method will populate the TodChipData object passed as
@@ -315,9 +315,9 @@ class TodProc
          *  i_bus_rx is the fabric bus over which current processor receives
          *  signals from its parent
          *
-         * @return p9_tod_setup_bus bus type and port
+         * @return p10_tod_setup_bus bus type and port
          */
-        p9_tod_setup_bus getBusIn() const
+        p10_tod_setup_bus getBusIn() const
         {
             return iv_tod_node_data->i_bus_rx;
         }
@@ -327,9 +327,9 @@ class TodProc
          *  i_bus_tx is the bus over which signal is transmitted by the
          *  parent of this processor
          *
-         * @return p9_tod_setup_bus bus type and port
+         * @return p10_tod_setup_bus bus type and port
          */
-        p9_tod_setup_bus getBusOut() const
+        p10_tod_setup_bus getBusOut() const
         {
             return iv_tod_node_data->i_bus_tx;
         }
@@ -363,8 +363,8 @@ class TodProc
          *
          * @return N/A
          */
-        void setConnections(const p9_tod_setup_bus i_parentBusOut,
-                const p9_tod_setup_bus i_thisBusIn)
+        void setConnections(const p10_tod_setup_bus i_parentBusOut,
+                const p10_tod_setup_bus i_thisBusIn)
         {
             iv_tod_node_data->i_bus_tx = i_parentBusOut;
             iv_tod_node_data->i_bus_rx = i_thisBusIn;

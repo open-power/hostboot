@@ -73,14 +73,6 @@ typedef std::vector<TARGETING::ATTR_HUID_type>
 //------------------------------------------------------------------------------
 //2 configs - primary/secondary
 const static uint8_t TOD_NUM_CONFIGS = 2;
-const static uint8_t TOD_PSS_MSS_STATUS_REG_00040008_ACTIVE_BIT = 0;
-const static uint8_t TOD_PSS_MSS_CTRL_REG_00040007_PRIMARY_MDMT_BIT = 1;
-const static uint8_t TOD_PSS_MSS_CTRL_REG_00040007_SECONDARY_MDMT_BIT = 9;
-const static uint8_t TOD_PSS_MSS_STATUS_REG_00040008_PRI_M_S_TOD_SEL = 13;
-const static uint8_t TOD_PSS_MSS_STATUS_REG_00040008_PRI_M_S_DRAWER_SEL = 14;
-const static uint8_t TOD_PSS_MSS_STATUS_REG_00040008_SEC_M_S_TOD_SEL = 17;
-const static uint8_t TOD_PSS_MSS_STATUS_REG_00040008_SEC_M_S_DRAWER_SEL = 18;
-const static uint8_t TOD_FSM_REG_TOD_IS_RUNNING = 4;
 const uint32_t TOD_HUID_INVALID = 0xFFFFFFFF;
 const uint32_t FSP_INVALID_RID = 0x0;
 
@@ -162,9 +154,7 @@ public:
      *     any returned error created by this function will be a non-reported
      *     tracing event error log.
      */
-/* FIXME RTC: 210975
-    errlHndl_t buildTodDrawers(const p9_tod_setup_tod_sel i_config);
-*/
+    errlHndl_t buildTodDrawers(const p10_tod_setup_tod_sel i_config);
 
     /**
      * @brief This method will pick MDMT chip for the configuration
@@ -208,7 +198,7 @@ public:
      *     any returned error created by this function will be a non-reported
      *     tracing event error log.
      */
-    errlHndl_t pickMdmt(const p9_tod_setup_tod_sel i_config);
+     errlHndl_t pickMdmt(const p10_tod_setup_tod_sel i_config);
 
     /**
      * @brief Destroy information pertaining to topology type
@@ -219,7 +209,7 @@ public:
      *
      * @return N/A
      */
-    void destroy(const p9_tod_setup_tod_sel i_config);
+     void destroy(const p10_tod_setup_tod_sel i_config);
 
     /**
      * @brief Gets a list of TOD drawers for a specific
@@ -233,7 +223,7 @@ public:
      *
      * @return N/A
      */
-    void getDrawers(const p9_tod_setup_tod_sel i_config,
+    void getDrawers(const p10_tod_setup_tod_sel i_config,
                     TodDrawerContainer& o_drawerList) const
     {
         o_drawerList = iv_todConfig[i_config].iv_todDrawerList;
@@ -250,7 +240,7 @@ public:
      *
      * @return Pointer to the data member iv_todConfig[i_config].iv_mdmt
      */
-    TodProc* getMDMT(const p9_tod_setup_tod_sel i_config) const
+    TodProc* getMDMT(const p10_tod_setup_tod_sel i_config) const
     {
         return iv_todConfig[i_config].iv_mdmt;
     }
@@ -268,7 +258,7 @@ public:
      *
      * @return NA
      */
-    void setConfigStatus(const p9_tod_setup_tod_sel i_config,
+    void setConfigStatus(const p10_tod_setup_tod_sel i_config,
                         const bool i_isConfigured )
     {
         iv_todConfig[i_config].iv_isConfigured = i_isConfigured;
@@ -284,7 +274,7 @@ public:
      *
      * @return bool, indicating iv_isConfigured's value
      */
-    bool getConfigStatus(const p9_tod_setup_tod_sel i_config) const
+    bool getConfigStatus(const p10_tod_setup_tod_sel i_config) const
     {
         return iv_todConfig[i_config].iv_isConfigured;
     }
@@ -356,13 +346,7 @@ public:
       *     returned error created by this function will be a non-reported
       *     tracing event error log.
       */
-     errlHndl_t writeTodProcData(const p9_tod_setup_tod_sel i_config);
-
-     //Temporary method for bringup
-     //Issue 132460 -- This method  is temporarily provided for bringup
-
-     //errlHndl_t writeTodProcDataFromBuffer(std::vector<TodChipData>&
-     //                       i_todChipDataVector );
+     errlHndl_t writeTodProcData(const p10_tod_setup_tod_sel i_config);
 
      /**
       *
@@ -440,8 +424,7 @@ public:
       *     any returned error created by this function will be a non-reported
       *     tracing event error log.
       */
-
-     errlHndl_t queryActiveConfig( p9_tod_setup_tod_sel& o_activeConfig,
+     errlHndl_t queryActiveConfig( p10_tod_setup_tod_sel& o_activeConfig,
              bool& o_isTodRunning,
              TARGETING::Target*& o_mdmtOnActiveTopology,
              bool i_determineTodRunningState=true) const;
@@ -512,7 +495,7 @@ public:
        *     any returned error created by this function will be a non-reported
        *     tracing event error log.
        */
-      errlHndl_t setMdmt(const p9_tod_setup_tod_sel i_config,
+      errlHndl_t setMdmt(const p10_tod_setup_tod_sel i_config,
               TodProc* i_proc,
               TodDrawer* i_drawer);
 
@@ -540,7 +523,7 @@ public:
        * @return NA
        *
        */
-      void setMdmtOfActiveConfig( const p9_tod_setup_tod_sel i_config,
+      void setMdmtOfActiveConfig(const p10_tod_setup_tod_sel i_config,
               TodProc* i_proc,
               TodDrawer* i_drawer);
 
@@ -695,9 +678,8 @@ public:
        *
        * @return TodProc pointer to new MDMT, NULL if couldn't be chosen
        */
-
       TodProc* pickMdmt(const TodProc* i_otherConfigMdmt,
-              const p9_tod_setup_tod_sel& i_config,
+              const p10_tod_setup_tod_sel& i_config,
               const bool i_setMdmt = true);
 
 private:
@@ -710,7 +692,7 @@ private:
           TodProc* iv_mdmt;
           bool iv_isConfigured;
           TodConfig() :
-              iv_mdmt(NULL),
+              iv_mdmt(nullptr),
               iv_isConfigured(false)
           {
           }
@@ -876,17 +858,17 @@ private:
 };
 
 // Wrapper function for TodControls::getDrawers instance
-void getDrawers(const p9_tod_setup_tod_sel i_config,
+void getDrawers(const p10_tod_setup_tod_sel i_config,
              TodDrawerContainer& o_drawerList);
 
 // Wrapper function for TodControls::isProcBlackListed instance
 bool isProcBlackListed(TARGETING::ConstTargetHandle_t i_procTarget);
 
 // Wrapper function for TodControls::getMDMT instance
-TodProc* getMDMT(const p9_tod_setup_tod_sel i_config);
+TodProc* getMDMT(const p10_tod_setup_tod_sel i_config);
 
 // Wrapper function for TodControls::pickMdmt instance
-errlHndl_t pickMdmt(const p9_tod_setup_tod_sel i_config);
+errlHndl_t pickMdmt(const p10_tod_setup_tod_sel i_config);
 
 // Wrapper function for TodControls::isTodRunning instance
 errlHndl_t isTodRunning(bool& o_isTodRunning);
@@ -897,18 +879,16 @@ errlHndl_t checkGardStatusOfTarget(
               bool&  o_isTargetGarded);
 
 // Wrapper function for TodControls::destroy instance
-void destroy(const p9_tod_setup_tod_sel i_config);
+void destroy(const p10_tod_setup_tod_sel i_config);
 
-/* FIXME RTC: 210975
 // Wrapper function for TodControls::buildTodDrawers instance
-errlHndl_t buildTodDrawers(const p9_tod_setup_tod_sel i_config);
-*/
+errlHndl_t buildTodDrawers(const p10_tod_setup_tod_sel i_config);
 
 // Wrapper function for TodControls::buildGardedTargetsList instance
 errlHndl_t buildGardedTargetsList();
 
 // Wrapper function for TodControls::setConfigStatus instance
-void setConfigStatus(const p9_tod_setup_tod_sel i_config,
+void setConfigStatus(const p10_tod_setup_tod_sel i_config,
               const bool i_isConfigured );
 
 // Wrapper function for TodControls::getConfiguredMdmt instance
@@ -916,24 +896,24 @@ errlHndl_t getConfiguredMdmt(TARGETING::Target*& o_primaryMdmt,
               TARGETING::Target*& o_secondaryMdmt);
 
 // Wrapper function for TodControls::writeTodProcData instance
-errlHndl_t writeTodProcData(const p9_tod_setup_tod_sel i_config);
+errlHndl_t writeTodProcData(const p10_tod_setup_tod_sel i_config);
 
 // Wrapper function for TodControls::clearGardedTargetsList instance
 void  clearGardedTargetsList();
 
 // Wrapper function for TodControls::queryActiveConfig instance
-errlHndl_t queryActiveConfig(p9_tod_setup_tod_sel& o_activeConfig,
+errlHndl_t queryActiveConfig(p10_tod_setup_tod_sel& o_activeConfig,
              bool& o_isTodRunning,
              TARGETING::Target*& o_mdmtOnActiveTopology,
              bool i_determineTodRunningState);
 
 // Wrapper function for TodControls::setMdmtOfActiveConfig instance
-void setMdmtOfActiveConfig(const p9_tod_setup_tod_sel i_config,
+void setMdmtOfActiveConfig(const p10_tod_setup_tod_sel i_config,
              TodProc* i_proc,
              TodDrawer* i_drawer);
 
 // Wrapper function for TodControls::getConfigStatus instance
-bool getConfigStatus(const p9_tod_setup_tod_sel i_config);
+bool getConfigStatus(const p10_tod_setup_tod_sel i_config);
 
 } //end of namespace
 

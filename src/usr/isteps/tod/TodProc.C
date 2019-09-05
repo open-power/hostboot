@@ -67,7 +67,7 @@ TodProc::TodProc(
            const TodDrawer* i_parentDrawer):
            iv_procTarget(i_procTarget),
            iv_parentDrawer(i_parentDrawer),
-           iv_tod_node_data(NULL),
+           iv_tod_node_data(nullptr),
            iv_masterType(NOT_MASTER)
 {
     TOD_ENTER();
@@ -76,12 +76,12 @@ TodProc::TodProc(
     {
       if(!iv_procTarget)
       {
-          TOD_ERR_ASSERT("Target input i_procTarget is NULL ");
+          TOD_ERR_ASSERT("Target input i_procTarget is nullptr ");
           break;
       }
       if(!iv_parentDrawer)
       {
-          TOD_ERR_ASSERT("TOD drawer input iv_parentDrawer is NULL ");
+          TOD_ERR_ASSERT("TOD drawer input iv_parentDrawer is nullptr ");
           break;
       }
 
@@ -104,9 +104,9 @@ TodProc::~TodProc()
     if(iv_tod_node_data)
     {
         delete iv_tod_node_data->i_target;
-        iv_tod_node_data->i_target = NULL;
+        iv_tod_node_data->i_target = nullptr;
         delete iv_tod_node_data;
-        iv_tod_node_data = NULL;
+        iv_tod_node_data = nullptr;
     }
 
     iv_xbusTargetList.clear();
@@ -167,8 +167,8 @@ void TodProc::init()
         (const_cast<TARGETING::Target*>(iv_procTarget));
     iv_tod_node_data->i_tod_master = false;
     iv_tod_node_data->i_drawer_master = false;
-    iv_tod_node_data->i_bus_rx = NONE;
-    iv_tod_node_data->i_bus_tx = NONE;
+    iv_tod_node_data->i_bus_rx = TOD_SETUP_BUS_NONE;
+    iv_tod_node_data->i_bus_tx = TOD_SETUP_BUS_NONE;
 
     TodTopologyNodeContainer::iterator l_childItr;
 
@@ -243,7 +243,7 @@ errlHndl_t TodProc::connect(
         i_destination->getTarget()->getAttr<TARGETING::ATTR_HUID>(),
         static_cast<uint32_t>(i_busChipUnitType));
 
-    errlHndl_t l_errHndl = NULL;
+    errlHndl_t l_errHndl = nullptr;
     o_isConnected = false;
 
     do
@@ -256,7 +256,7 @@ errlHndl_t TodProc::connect(
             break;
         }
 
-        TARGETING::TargetHandleList* l_pBusList = NULL;
+        TARGETING::TargetHandleList* l_pBusList = nullptr;
 
         //Check whether we've to connect over X or A bus
         if(TARGETING::TYPE_XBUS == i_busChipUnitType)
@@ -316,14 +316,14 @@ errlHndl_t TodProc::connect(
             TARGETING::getPeerTargets(
                  l_busList,
                  *l_busIter,
-                 NULL,
-                 NULL);
+                 nullptr,
+                 nullptr);
 
             //The call below is to determine the connected proc
             TARGETING::getPeerTargets(
                  l_procList,
                  *l_busIter,
-                 NULL,
+                 nullptr,
                  //result filter to get the connected proc
                  &l_resFilter);
 
@@ -359,13 +359,13 @@ errlHndl_t TodProc::connect(
                 //For instance a processor has two A buses
                 //then the one with ATTR_CHIP_UNIT 0 will be A0
                 //and the one with ATTR_CHIP_UNIT 1 will be A1
-                p9_tod_setup_bus l_busOut = NONE;
-                p9_tod_setup_bus l_busIn = NONE;
+                p10_tod_setup_bus l_busOut = TOD_SETUP_BUS_NONE;
+                p10_tod_setup_bus l_busIn = TOD_SETUP_BUS_NONE;
                 l_errHndl = getBusPort(i_busChipUnitType,
                                 (*l_busIter)->
                                     getAttr<TARGETING::ATTR_CHIP_UNIT>(),
                                 l_busOut);
-                if(NULL == l_errHndl)
+                if(nullptr == l_errHndl)
                 {
                     l_errHndl = getBusPort(i_busChipUnitType,
                         l_busList[0]->
@@ -376,7 +376,7 @@ errlHndl_t TodProc::connect(
                 {
                     //Should not be hitting this path if HW procedure is
                     //correctly defining all the bus types and ports
-                    TOD_ERR("p9_tod_setup_bus type not found for "
+                    TOD_ERR("p10_tod_setup_bus type not found for "
                         "port 0x%.2X of bus type 0x%.8X. Source processor "
                         "0x%.8X, destination processor 0x%.8X",
                         (*l_busIter)->
@@ -414,27 +414,27 @@ errlHndl_t TodProc::connect(
 errlHndl_t TodProc::getBusPort(
         const TARGETING::TYPE  i_busChipUnitType,
         const uint32_t  i_busPort,
-        p9_tod_setup_bus& o_busPort) const
+        p10_tod_setup_bus& o_busPort) const
 {
     TOD_ENTER("getBusPort");
 
-    errlHndl_t l_errHndl = NULL;
+    errlHndl_t l_errHndl = nullptr;
 
     if(TARGETING::TYPE_XBUS == i_busChipUnitType)
     {
         switch(i_busPort)
         {
             case 0:
-                o_busPort = XBUS0;
+                o_busPort = TOD_SETUP_BUS_XBUS0;
                 break;
             case 1:
-                o_busPort = XBUS1;
+                o_busPort = TOD_SETUP_BUS_XBUS1;
                 break;
             case 2:
-                o_busPort = XBUS2;
+                o_busPort = TOD_SETUP_BUS_XBUS2;
                 break;
             case 7:
-                o_busPort = XBUS7;
+                o_busPort = TOD_SETUP_BUS_XBUS7;
                 break;
             default:
                 TOD_ERR("Port 0x%.8X not supported for X bus",
@@ -544,7 +544,7 @@ void TodProc::addChild(TodProc* i_child)
 //******************************************************************************
 // TodProc::getTodRegs
 //******************************************************************************
-void TodProc::getTodRegs(p9_tod_setup_conf_regs& o_todRegs) const
+void TodProc::getTodRegs(p10_tod_setup_conf_regs& o_todRegs) const
 {
     o_todRegs.tod_m_path_ctrl_reg =
         iv_tod_node_data->o_todRegs.tod_m_path_ctrl_reg;
@@ -571,7 +571,7 @@ void TodProc::getTodRegs(p9_tod_setup_conf_regs& o_todRegs) const
 //******************************************************************************
 void TodProc::setTodChipData(TodChipData& o_todChipData) const
 {
-    p9_tod_setup_conf_regs& l_todRegs = iv_tod_node_data->o_todRegs;
+    p10_tod_setup_conf_regs& l_todRegs = iv_tod_node_data->o_todRegs;
 
     o_todChipData.header.chipID = iv_procTarget->
         getAttr<TARGETING::ATTR_ORDINAL_ID>();

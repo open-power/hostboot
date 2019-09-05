@@ -32,9 +32,8 @@ MODULE = tod_rt
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/tod
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/isteps
 EXTRAINCDIR += ${ROOTPATH}/src/usr/errl
-#EXTRAINCDIR += ${ROOTPATH}/src/include/usr/util
 
-# FIXME RTC: 210975 Re-enable this module when EKB is mirrorred
+# FIXME RTC: 215628 Runtime TOD support
 # OBJS += rt_todintf.o
 
 include ../tod.mk

@@ -112,7 +112,7 @@
     </attribute>
     <attribute>
         <id>EARLY_TESTCASES_ISTEP</id>
-        <default>0x0E01</default> <!-- Istep 14, Substep 1 (proc_exit_cache_contained) -->
+        <default>0x120A</default> <!-- Istep 18, Substep 10 (proc_tod_init) -->
     </attribute>
     <attribute>
         <id>PAYLOAD_BASE</id>
@@ -131,6 +131,14 @@
     <attribute>
         <id>MAX_ALLOWED_DIMM_FREQ</id>
         <default>3200,3200,3200,3200,3200</default>
+    </attribute>
+    <attribute>
+      <default>4</default>
+      <id>MAX_PROC_CHIPS_PER_NODE</id>
+    </attribute>
+    <attribute>
+      <default>1</default>
+      <id>MAX_COMPUTE_NODES_PER_SYSTEM</id>
     </attribute>
 </targetInstance>
 

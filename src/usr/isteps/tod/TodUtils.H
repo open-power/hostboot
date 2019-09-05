@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,8 +32,6 @@
 #include "TodTrace.H"
 #include <util/utilmem.H>
 
-//FIX_ME_BEFORE_PRODUCTION_Q12 Update these
-
 //moved from mboxclientlib.H
 /** @enum mboxTodTopologyAction
  *        Values used to determine whether to enable, disable or switch TOD
@@ -59,13 +57,13 @@ enum mboxTopologyValue
 /**
  * Retrieve the CLASS of the target, or return NA if the target is NULL
  */
-#define GETCLASS(pTarget) (((pTarget) == NULL) ? (TARGETING::CLASS_NA) : \
+#define GETCLASS(pTarget) (((pTarget) == nullptr) ? (TARGETING::CLASS_NA) : \
         ((pTarget)->getAttr<TARGETING::ATTR_CLASS>()))
 
 /**
  *  * Retrieve the TYPE of the target, or return NA if the target is NULL
  *   */
-#define GETTYPE(pTarget) (((pTarget) == NULL) ? (TARGETING::TYPE_NA) : \
+#define GETTYPE(pTarget) (((pTarget) == nullptr) ? (TARGETING::TYPE_NA) : \
         ((pTarget)->getAttr<TARGETING::ATTR_TYPE>()))
 
 
@@ -76,27 +74,8 @@ struct maxConfigParams
 {
     uint8_t max_procchips_per_node; // This will contain the maximum proc
                                     // chips per Node available on the system
-    uint8_t max_exs_per_procchip;   // This will contain the maximum cores per
-                                    // proc chip on the system
-    uint8_t max_dimms_per_mbaport;  // This will contain the maximum dimms per
-                                    // MBA Port available on the system
-    uint8_t max_mbaports_per_mba;   // This will contain the maximum MBA Ports
-                                    // per MBA available on the system
-    uint8_t max_mbas_per_membuf;    // This will contain the maximum MBA per
-                                    // Memory Buffer available on the system
-    uint8_t max_psilinks_per_fsp;   // This will contain the maximum psi links
-                                    // per fsp which is same on all Systems
-    uint8_t min_psilinks_per_fsp;   // This will contain minimum number of psi
-                                    // links per fsp present in the system
-    uint8_t max_chiplets_per_proc;  // This will contain the maximum chiplets
-                                    // per proc available on the System
-    uint8_t max_mcs_per_sys;        // This will contain max mcs
-                                    // present in the system
     uint8_t max_compute_nodes_per_sys; // This will contain max compute
                                        // nodes present in the system
-    uint8_t max_exs_per_procchip_archlimit; // This will contain max
-                                            // Architecture limit of max exs
-                                            // per proc chip
 
     /**
     * @brief Copies the data from maxConfigParams structure into the buffer
@@ -184,14 +163,8 @@ typedef maxConfigParams maxConfigParamsContainer;
 
 errlHndl_t getMaxConfigParams(maxConfigParamsContainer& o_maxConfigParams);
 
-#define GETHUID(pTarget) (((pTarget) == NULL) ? (0) : \
+#define GETHUID(pTarget) (((pTarget) == nullptr) ? (0) : \
         ((pTarget)->getAttr<TARGETING::ATTR_HUID>()))
-
-//moved from fapi_sbe_common.H
-#define CONST_UINT64_T(name, expr) const uint64_t name = (expr);
-#define ULL(x) x##ull
-//moved from p8_scom_addresses.H
-CONST_UINT64_T( TOD_PSS_MSS_STATUS_REG_00040008       , ULL(0x00040008) );
 
 //******************************************************************************
 // isFunctional

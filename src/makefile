@@ -168,7 +168,7 @@ EXTENDED_MODULES += istep07
 EXTENDED_MODULES += istep14
 #EXTENDED_MODULES += istep15
 #EXTENDED_MODULES += istep16
-#EXTENDED_MODULES += istep18
+EXTENDED_MODULES += istep18
 #EXTENDED_MODULES += istep20
 #EXTENDED_MODULES += istep21
 EXTENDED_MODULES += isteps
@@ -208,7 +208,7 @@ EXTENDED_MODULES += p9_cpuWkup
 #EXTENDED_MODULES += p9_phbPerst
 #EXTENDED_MODULES += $(if $(CONFIG_ENABLE_HDAT_IN_HOSTBOOT),hdat)
 #EXTENDED_MODULES += $(if $(CONFIG_SECUREBOOT),secureboot_ext)
-#EXTENDED_MODULES += tod
+EXTENDED_MODULES += tod
 EXTENDED_MODULES += nestmemutils
 #EXTENDED_MODULES += fab_iovalid
 EXTENDED_MODULES += isteps_nest
@@ -424,13 +424,13 @@ $(IMGDIR)/hbotStringFile : $(IMAGES)
 # if last word is 904k.  If not, the base image is too big.
 #NOTE: HBB size is 1MB in pnor layout. 908K is the size without ECC rounded down
 #      to the nearest 4K page.
-#make sure bootloader image isn't over 32k (32K = 12K for exception vectors +
-#20K for bootloader code and data)
-#PROCESS: get size of hbibl.bin, sort with respect to 32k (32768),
-#then see if last word is 32k.  If not, the bootloader image is too big.
+#make sure bootloader image isn't over 36k (36K = 12K for exception vectors +
+#24K for bootloader code and data)
+#PROCESS: get size of hbibl.bin, sort with respect to 36k (36864),
+#then see if last word is 36k.  If not, the bootloader image is too big.
 
 MAX_BASE_SIZE = 925696
-MAX_BTLDR_SIZE = 32768
+MAX_BTLDR_SIZE = 36864
 
 imgsizecheck: ${IMGDIR}/hbicore.bin ${IMGDIR}/hbibl.bin
 	$(if $(findstring $(shell (stat -c%s ${IMGDIR}/hbicore.bin; echo $(MAX_BASE_SIZE)) | sort -n | tail -n1), $(MAX_BASE_SIZE)),true, @echo ERROR: ${IMGDIR}/hbicore.bin too large.  Max allowed size is $(MAX_BASE_SIZE); false)

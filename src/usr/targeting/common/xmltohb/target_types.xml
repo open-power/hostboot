@@ -2002,6 +2002,12 @@
       <id>LPC_BUS_ADDR</id>
     </attribute>
     <attribute>
+      <id>MAX_COMPUTE_NODES_PER_SYSTEM</id>
+    </attribute>
+    <attribute>
+      <id>MAX_PROC_CHIPS_PER_NODE</id>
+    </attribute>
+    <attribute>
       <id>MC_PLL_BUCKET</id>
     </attribute>
     <attribute>

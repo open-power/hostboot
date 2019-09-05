@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,7 +63,7 @@ TodDrawer::TodDrawer(const uint8_t i_drawerId,
       if (!iv_parentNodeTarget)
       {
           TOD_ERR_ASSERT(0, "Error creating TOD drawer with id 0x%.2X,"
-          "parent node pointer passed as NULL",
+          "parent node pointer passed as nullptr",
           i_drawerId);
           break;
       }
@@ -101,7 +101,7 @@ void TodDrawer::getProcWithMaxCores(
                 TodProcContainer* i_pProcList) const
 {
     TOD_ENTER("getProcWithMaxCores");
-    o_pTodProc =  NULL;
+    o_pTodProc =  nullptr;
     o_coreCount = 0;
 
     do{
@@ -115,7 +115,7 @@ void TodDrawer::getProcWithMaxCores(
         TARGETING::PredicatePostfixExpr l_funcCorePostfixExpr;
         l_funcCorePostfixExpr.push(&l_coreCTM).push(&l_funcPred).And();
 
-        TodProc* l_pSelectedTarget = NULL;
+        TodProc* l_pSelectedTarget = nullptr;
         uint32_t l_maxCores = 0;
 
         const TodProcContainer &l_procList =
@@ -125,7 +125,7 @@ void TodDrawer::getProcWithMaxCores(
             l_procIter != l_procList.end();
             ++l_procIter)
         {
-            if((NULL != i_procToIgnore) &&
+            if((nullptr != i_procToIgnore) &&
                (i_procToIgnore->getTarget()->getAttr<TARGETING::ATTR_HUID>() ==
                (*l_procIter)->getTarget()->getAttr<TARGETING::ATTR_HUID>()))
             {
@@ -169,9 +169,9 @@ errlHndl_t TodDrawer::findMasterProc(TodProc*& o_drawerMaster) const
 {
     TOD_ENTER();
 
-    errlHndl_t l_errHdl = NULL;
+    errlHndl_t l_errHdl = nullptr;
 
-    TodProc* l_pMasterProc = NULL;
+    TodProc* l_pMasterProc = nullptr;
 
     do{
         TodProcContainer::const_iterator l_procIter = iv_todProcList.begin();
@@ -239,9 +239,9 @@ void TodDrawer::getPotentialMdmts(
 {
     TOD_ENTER("TodDrawer::getPotentialMdmts");
     bool l_isGARDed = false;
-    errlHndl_t l_errHdl = NULL;
+    errlHndl_t l_errHdl = nullptr;
 
-    const TARGETING::Target* l_procTarget = NULL;
+    const TARGETING::Target* l_procTarget = nullptr;
 
     for(const auto & l_procItr : iv_todProcList)
     {

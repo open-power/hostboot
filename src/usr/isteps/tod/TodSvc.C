@@ -45,12 +45,10 @@
 #include "TodHwpIntf.H"
 #include "TodSvcUtil.H"
 
-#include <p9_tod_utils.H>
+#include <p10_tod_utils.H>
+#include <p10_scom_perv_a.H>
 #include <isteps/tod_init_reasoncodes.H>
 #include "TodUtils.H"
-
-//HWP
-#include <p9_perv_scom_addresses.H>
 
 namespace TOD
 {
@@ -67,7 +65,7 @@ errlHndl_t TodSvc::todSetup()
 {
     TOD_ENTER("TodSvc::todSetup");
 
-    errlHndl_t l_errHdl = NULL;
+    errlHndl_t l_errHdl = nullptr;
     bool l_isTodRunning = false;
     TodTopologyManager l_primary(TOD_PRIMARY);
 
@@ -82,15 +80,14 @@ errlHndl_t TodSvc::todSetup()
         }
         if (false == l_inMPIPLPath)
         {
-            l_errHdl =
-              TOD::isTodRunning(l_isTodRunning);
-            if ( l_errHdl )
+            l_errHdl = TOD::isTodRunning(l_isTodRunning);
+            if (l_errHdl)
             {
                 TOD_INF("Call to isTodRunning failed, cannot create topology");
                 break;
             }
 
-            if ( l_isTodRunning )
+            if (l_isTodRunning)
             {
                 TOD_ERR("Cannot create TOD topology while the Chip TOD logic"
                         "is running ");
@@ -121,13 +118,12 @@ errlHndl_t TodSvc::todSetup()
 
         //Build the list of garded TOD targets
         l_errHdl = TOD::buildGardedTargetsList();
-        if ( l_errHdl )
+        if (l_errHdl)
         {
             TOD_ERR("Call to buildGardedTargetsList failed");
             break;
         }
 
-/* FIXME RTC: 210975
         //Build a set of datastructures to setup creation of the TOD topology
 
         //We're going to setup TOD for this IPL
@@ -140,7 +136,6 @@ errlHndl_t TodSvc::todSetup()
                     "for primary topology.");
             break;
         }
-*/
 
         //2) Ask the topology manager to setup the primary topology
         l_errHdl = l_primary.create();
@@ -171,7 +166,6 @@ errlHndl_t TodSvc::todSetup()
         //Primary successfully configured
         TOD::setConfigStatus(TOD_PRIMARY,true);
 
-/* FIXME RTC: 210975
         //Build datastructures for secondary topology
         l_errHdl = TOD::buildTodDrawers(TOD_SECONDARY);
         if(l_errHdl)
@@ -183,7 +177,6 @@ errlHndl_t TodSvc::todSetup()
             errlCommit(l_errHdl, TOD_COMP_ID);
             break;
         }
-*/
 
         //4) Ask the topology manager to setup the secondary topology
         TodTopologyManager l_secondary(TOD_SECONDARY);
@@ -222,11 +215,10 @@ errlHndl_t TodSvc::todSetup()
             TOD_ERR("TOD setup failure: primary topology register save HWP.");
             break;
         }
-
         //Done with TOD setup
     }while(0);
 
-    if((NULL == l_errHdl) &&
+    if((nullptr == l_errHdl) &&
        (false ==  l_isTodRunning ))
     {
         l_primary.dumpTodRegs();
@@ -245,6 +237,7 @@ errlHndl_t TodSvc::todSetup()
     }
 
     TOD::clearGardedTargetsList();
+
     TOD_EXIT();
 
     return l_errHdl;
@@ -258,13 +251,13 @@ errlHndl_t TodSvc::readTod(uint64_t& o_todValue) const
 {
     TOD_ENTER("readTod");
 
-    errlHndl_t l_errHdl = NULL;
+    errlHndl_t l_errHdl = nullptr;
     do
     {
-        TARGETING::Target*  l_mdmtOnActiveTopology = NULL;
+        TARGETING::Target*  l_mdmtOnActiveTopology = nullptr;
         bool l_isTodRunning = false;
         bool l_getTodRunningStatus =  false;
-        p9_tod_setup_tod_sel l_activeConfig = TOD_PRIMARY;
+        p10_tod_setup_tod_sel l_activeConfig = TOD_PRIMARY;
 
         //Get the currently active TOD configuration
         //Don't bother about the TOD runing state, caller should have asked for
@@ -287,14 +280,14 @@ errlHndl_t TodSvc::readTod(uint64_t& o_todValue) const
         //SCOM the TOD value reg
         fapi2::variable_buffer o_todValueBuf(64);
         l_errHdl = todGetScom(l_mdmtOnActiveTopology,
-                 PERV_TOD_VALUE_REG,
-                 o_todValueBuf);
+                              scomt::perv::TOD_VALUE_REG,
+                              o_todValueBuf);
 
         if(l_errHdl)
         {
             TOD_ERR("TOD read error: failed to SCOM TOD value register "
                     "address 0x%.16llX on MDMT 0x%.8X.",
-                    PERV_TOD_VALUE_REG,
+                    scomt::perv::TOD_VALUE_REG,
                     GETHUID(l_mdmtOnActiveTopology));
             break;
         }
@@ -336,7 +329,7 @@ TodSvc::~TodSvc()
 errlHndl_t TodSvc::todInit()
 {
     TOD_ENTER();
-    errlHndl_t l_errHdl = NULL;
+    errlHndl_t l_errHdl = nullptr;
     bool l_isTodRunning = false;
     do
     {
@@ -396,10 +389,10 @@ errlHndl_t TodSvc::todInit()
 //TodSvc::setActiveMdmtForResetBackup
 //******************************************************************************
 errlHndl_t TodSvc::setActiveMdmtForResetBackup(
-        const p9_tod_setup_tod_sel i_activeConfig)
+        const p10_tod_setup_tod_sel i_activeConfig)
 {
     TOD_ENTER("setActiveMdmtForResetBackup");
-    errlHndl_t  l_errHdl = NULL;
+    errlHndl_t  l_errHdl = nullptr;
 
     //While doing a resetBackup it was found that in memory copy of active
     //topology is not present, (system has done a RR )
@@ -412,7 +405,6 @@ errlHndl_t TodSvc::setActiveMdmtForResetBackup(
 
     do{
 
-/* FIXME RTC: 210975
         l_errHdl = TOD::buildTodDrawers(i_activeConfig);
         if ( l_errHdl )
         {
@@ -421,21 +413,20 @@ errlHndl_t TodSvc::setActiveMdmtForResetBackup(
                      topologyTypeToString(i_activeConfig)));
             break;
         }
-*/
 
-        TARGETING::Target* l_primaryMdmt = NULL;
-        TARGETING::Target* l_secondaryMdmt = NULL;
+        TARGETING::Target* l_primaryMdmt = nullptr;
+        TARGETING::Target* l_secondaryMdmt = nullptr;
 
         //Read the HW to get the configured MDMT's
         l_errHdl = TOD::getConfiguredMdmt(l_primaryMdmt,
-                    l_secondaryMdmt);
+                                          l_secondaryMdmt);
         if ( l_errHdl )
         {
             TOD_ERR("Failed to get the configured MDMTs ");
             break;
         }
 
-        TARGETING::Target* l_mdmtOnActiveTopology = NULL;
+        TARGETING::Target* l_mdmtOnActiveTopology = nullptr;
         l_mdmtOnActiveTopology = ( i_activeConfig ==  TOD_PRIMARY )?
             l_primaryMdmt : l_secondaryMdmt;
 
@@ -475,8 +466,8 @@ errlHndl_t TodSvc::setActiveMdmtForResetBackup(
         //To do so get the TodProc object whose HUID matches with the HUID
         //of the active topology's MDMT, and also get the TOD drawer to which
         //this TodProc object belongs
-        TodDrawer* l_masterDrawer = NULL;
-        TodProc* l_masterProc = NULL;
+        TodDrawer* l_masterDrawer = nullptr;
+        TodProc* l_masterProc = nullptr;
         std::list<TodDrawer*> l_drawerList;
         TOD::getDrawers(i_activeConfig, l_drawerList);
 
@@ -567,14 +558,14 @@ errlHndl_t TodSvc::isMPIPL( bool& o_mpIPL )
 {
     TOD_ENTER("isMPIPL");
 
-    errlHndl_t l_errHdl = NULL;
+    errlHndl_t l_errHdl = nullptr;
     o_mpIPL = false;
 
     do{
         // Get the top level (system) target handle to check if MPIPL
-        TARGETING::Target* l_pTopLevelTarget = NULL;
+        TARGETING::Target* l_pTopLevelTarget = nullptr;
         (void)TARGETING::targetService().getTopLevelTarget(l_pTopLevelTarget);
-        if(NULL == l_pTopLevelTarget)
+        if(nullptr == l_pTopLevelTarget)
         {
             /*@
              * @errortype

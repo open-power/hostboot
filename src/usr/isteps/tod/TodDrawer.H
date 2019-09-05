@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -174,7 +174,7 @@ public:
            const TodProc * i_procToIgnore,
            TodProc *& o_pTodProc,
            uint32_t& o_coreCount,
-           TodProcContainer* i_pProcList = NULL) const;
+           TodProcContainer* i_pProcList = nullptr) const;
 
     /**
      * @brief Getter method for iv_todProcList

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,7 +44,7 @@
 #include "TodDrawer.H"
 #include "TodProc.H"
 #include "TodTrace.H"
-#include <p9_tod_utils.H>
+#include <p10_tod_utils.H>
 #include <isteps/tod_init_reasoncodes.H>
 
 extern "C" {
@@ -69,7 +69,7 @@ static const char* X_BUS_2 = "XBUS2";
 //TodTopologyManager::TodTopologyManager
 //******************************************************************************
 TodTopologyManager::TodTopologyManager(
-                        const p9_tod_setup_tod_sel i_topologyType) :
+                        const p10_tod_setup_tod_sel i_topologyType) :
     iv_topologyType(i_topologyType)
 {
     TOD_ENTER("Topology type 0X%.8X", i_topologyType);
@@ -93,7 +93,7 @@ errlHndl_t TodTopologyManager::create()
 {
     TOD_ENTER("TodTopologyManager::create");
 
-    errlHndl_t l_errHdl = NULL;
+    errlHndl_t l_errHdl = nullptr;
 
     //The topology creation algorithm goes as follows :
     //1)Pick the MDMT.
@@ -105,8 +105,7 @@ errlHndl_t TodTopologyManager::create()
     do
     {
         //1) Pick the MDMT.
-        l_errHdl =
-            TOD::pickMdmt(iv_topologyType);
+        l_errHdl = TOD::pickMdmt(iv_topologyType);
         if(l_errHdl)
         {
             TOD_ERR("Couldn't pick MDMT.");
@@ -117,7 +116,7 @@ errlHndl_t TodTopologyManager::create()
         TodDrawerContainer l_todDrwList;
         TOD::getDrawers(iv_topologyType, l_todDrwList);
         //Find the TOD system master drawer (the one in which the MDMT lies)
-        TodDrawer* l_pMasterDrawer = NULL;
+        TodDrawer* l_pMasterDrawer = nullptr;
         for(TodDrawerContainer::const_iterator l_itr = l_todDrwList.begin();
             l_itr != l_todDrwList.end();
             ++l_itr)
@@ -130,7 +129,7 @@ errlHndl_t TodTopologyManager::create()
                 break;
             }
         }
-        if(NULL == l_pMasterDrawer)
+        if(nullptr == l_pMasterDrawer)
         {
             TOD_ERR("TOD master drawer not found");
             /*@
@@ -224,11 +223,11 @@ errlHndl_t TodTopologyManager::wireProcs(const TodDrawer* i_pTodDrawer)
 {
     TOD_ENTER();
 
-    errlHndl_t l_errHdl = NULL;
+    errlHndl_t l_errHdl = nullptr;
 
     do
     {
-        if(NULL == i_pTodDrawer)
+        if(nullptr == i_pTodDrawer)
         {
             TOD_ERR("TOD drawer not specified");
             /*@
@@ -274,7 +273,7 @@ errlHndl_t TodTopologyManager::wireProcs(const TodDrawer* i_pTodDrawer)
         }
 
         //Push the drawer master onto the sources list
-        TodProc* l_pDrawerMaster = NULL;
+        TodProc* l_pDrawerMaster = nullptr;
         l_errHdl = i_pTodDrawer->findMasterProc(l_pDrawerMaster);
         if(l_errHdl)
         {
@@ -289,7 +288,7 @@ errlHndl_t TodTopologyManager::wireProcs(const TodDrawer* i_pTodDrawer)
         TodProcContainer::iterator l_sourceItr = l_sourcesList.begin();
         TodProcContainer::iterator l_targetItr;
         bool l_connected = false;
-        while((NULL == l_errHdl) && (l_sourcesList.end() != l_sourceItr))
+        while((nullptr == l_errHdl) && (l_sourcesList.end() != l_sourceItr))
         {
             for(l_targetItr = l_targetsList.begin();
                 l_targetItr != l_targetsList.end();)
@@ -373,11 +372,11 @@ errlHndl_t TodTopologyManager::wireTodDrawer(TodDrawer* i_pTodDrawer)
 {
     TOD_ENTER("wireTodDawer");
 
-    errlHndl_t l_errHdl = NULL;
+    errlHndl_t l_errHdl = nullptr;
 
     do
     {
-        if(NULL == i_pTodDrawer)
+        if(nullptr == i_pTodDrawer)
         {
             TOD_ERR("TOD drawer not specified");
             /*@
@@ -410,7 +409,7 @@ errlHndl_t TodTopologyManager::wireTodDrawer(TodDrawer* i_pTodDrawer)
 
         //Get the MDMT
         TodProc* l_pMDMT = TOD::getMDMT(iv_topologyType);
-        if(NULL == l_pMDMT)
+        if(nullptr == l_pMDMT)
         {
             TOD_ERR("MDMT not found for topology type 0X%.8X",
                      iv_topologyType);
@@ -509,11 +508,11 @@ void TodTopologyManager::dumpTopology() const
 {
     TOD_ENTER("dumpTopology");
 
-    static const char* busnames[BUS_MAX+1] = {0};
-    busnames[NONE] = NO_BUS;
-    busnames[XBUS0] = X_BUS_0;
-    busnames[XBUS1] = X_BUS_1;
-    busnames[XBUS2] = X_BUS_2;
+    static const char* busnames[TOD_SETUP_BUS_BUS_MAX+1] = {0};
+    busnames[TOD_SETUP_BUS_NONE] = NO_BUS;
+    busnames[TOD_SETUP_BUS_XBUS0] = X_BUS_0;
+    busnames[TOD_SETUP_BUS_XBUS1] = X_BUS_1;
+    busnames[TOD_SETUP_BUS_XBUS2] = X_BUS_2;
 
     static const char* topologynames[2] = {0};
     topologynames[TOD_PRIMARY] = TOD_PRIMARY_TOPOLOGY;
@@ -527,8 +526,7 @@ void TodTopologyManager::dumpTopology() const
         //Get the TOD drawers
         TodDrawerContainer l_todDrwList;
         TOD::getDrawers(iv_topologyType, l_todDrwList);
-        TodDrawerContainer::const_iterator l_drwItr =
-                                                       l_todDrwList.begin();
+        TodDrawerContainer::const_iterator l_drwItr = l_todDrwList.begin();
         while(l_todDrwList.end() != l_drwItr)
         {
             TOD_INF("TOPOLOGY DUMP> TOD Drawer(0x%.2X)",(*l_drwItr)->getId());
@@ -536,10 +534,8 @@ void TodTopologyManager::dumpTopology() const
             TodProcContainer l_procList = (*l_drwItr)->getProcs();
 
             TOD_INF("TOPOLOGY DUMP> parent---bus out---bus in---child");
-            TodProcContainer::const_iterator l_procItr =
-                                                           l_procList.begin();
-            //FIX_ME_BEFORE_PRODUCTION_TASK32
-            //bool l_ecmdTargetFound = false;
+            TodProcContainer::const_iterator l_procItr = l_procList.begin();
+
             while(l_procList.end() != l_procItr)
             {
                 if(TodProc::TOD_MASTER == (*l_procItr)->getMasterType())
@@ -551,7 +547,7 @@ void TodTopologyManager::dumpTopology() const
                 TodProcContainer l_childList;
                 (*l_procItr)->getChildren(l_childList);
                 TodProcContainer::const_iterator l_childItr =
-                                                            l_childList.begin();
+                    l_childList.begin();
                 while(l_childList.end() != l_childItr)
                 {
                     TOD_INF("TOPOLOGY DUMP> 0x%08X---%s---%s---0x%08X",
@@ -597,8 +593,7 @@ void TodTopologyManager::dumpTodRegs() const
             TOD_INF("TOD REGDUMP> TOD Drawer(0x%.2X)",(*l_drwItr)->getId());
             //Get the procs on this drawer
             TodProcContainer l_procList = (*l_drwItr)->getProcs();
-            TodProcContainer::const_iterator l_procItr =
-                                                           l_procList.begin();
+            TodProcContainer::const_iterator l_procItr = l_procList.begin();
             while(l_procList.end() != l_procItr)
             {
                 TOD_INF("TOD REGDUMP> Proc HUID 0x%.8X",
@@ -613,7 +608,7 @@ void TodTopologyManager::dumpTodRegs() const
                     TOD_INF("TOD REGDUMP> This proc is the SDMT "
                              " for this drawer");
                 }
-                p9_tod_setup_conf_regs l_todRegs;
+                p10_tod_setup_conf_regs l_todRegs;
                 (*l_procItr)->getTodRegs(l_todRegs);
                 l_regData.set(l_todRegs.tod_m_path_ctrl_reg(), 0);
                 TOD_INF("TOD REGDUMP> MASTER PATH CONTROL REG 0x%.16llX",
@@ -662,14 +657,14 @@ errlHndl_t TodTopologyManager::wireProcsInSmpWrapMode(
 {
     TOD_ENTER();
 
-    errlHndl_t l_errHdl = NULL;
+    errlHndl_t l_errHdl = nullptr;
 
     do
     {
         TodProcContainer::iterator l_sourceItr = io_sourcesList.begin();
         TodProcContainer::iterator l_targetItr;
         bool l_connected = false;
-        while((NULL == l_errHdl) && (io_sourcesList.end() != l_sourceItr))
+        while((nullptr == l_errHdl) && (io_sourcesList.end() != l_sourceItr))
         {
             for(l_targetItr = io_targetsList.begin();
                 l_targetItr != io_targetsList.end();)

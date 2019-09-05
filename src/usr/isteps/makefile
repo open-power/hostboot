@@ -25,10 +25,6 @@
 ROOTPATH=../../..
 MODULE = isteps
 
-# FIXME RTC: 210975
-
-#PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
-
 SUBDIRS+=istep06.d
 SUBDIRS+=istep07.d
 SUBDIRS+=istep08.d
@@ -60,20 +56,18 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/perv/
 EXTRAINCDIR += ${PROCEDURES_PATH}/utils/stopreg/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/isteps/pm/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/initservice/istepdispatcher
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
 
 OBJS += mem_utils.o
 OBJS += hwpisteperror.o
 OBJS += hwpistepud.o
 OBJS += istepHelperFuncs.o
+# FIXME RTC: 216029 Istep 18 support for multinode stitching
 #OBJS += pbusLinkSvc.o
 
 #OBJS += $(if $(CONFIG_OPENPOWER_VOLTMSG),openpower_vddr.o,hbToHwsvVoltageMsg.o)

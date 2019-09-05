@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -104,7 +104,7 @@ void calloutTodEndPoint( const TARGETING::Target* const i_pTodEndPoint,
 
     TARGETING::getPeerTargets(l_todEndPointList,//output list
             i_pTodEndPoint, //Peer for this TOD end point
-            NULL,
+            nullptr,
             &l_funcTodEndPointPred);//Destination predicate
 
 
@@ -184,7 +184,7 @@ void logUnsupportedOrdinalId(
 uint32_t getMaxProcsOnSystem()
 {
     TOD_ENTER("getMaxProcsOnSystem");
-    errlHndl_t l_errHdl = NULL;
+    errlHndl_t l_errHdl = nullptr;
     // Get the max attribute values in this structure;
     maxConfigParamsContainer l_maxCfgParams;
 
@@ -210,7 +210,7 @@ uint32_t getMaxProcsOnSystem()
 //topologyTypeToString
 //******************************************************************************
 
-char const * topologyTypeToString ( const p9_tod_setup_tod_sel i_topologyType )
+char const * topologyTypeToString ( const p10_tod_setup_tod_sel i_topologyType )
 {
     switch ( i_topologyType )
     {
@@ -235,7 +235,7 @@ errlHndl_t getFuncNodeTargetsOnSystem(
 
     TOD_ENTER("Function Node Target On System");
 
-    errlHndl_t l_errHdl = NULL;
+    errlHndl_t l_errHdl = nullptr;
 
     o_nodeList.clear();
 
@@ -243,12 +243,19 @@ errlHndl_t getFuncNodeTargetsOnSystem(
     TARGETING::ATTR_TYPE_type l_type = GETTYPE(i_nodeOrSysTarget);
 
     do{
-        if(NULL == i_nodeOrSysTarget)
+        if(nullptr == i_nodeOrSysTarget)
         {
-            TOD_ERR("NULL target node passed in");
+            TOD_ERR("nullptr target node passed in");
+           /*@
+            * @errortype
+            * @moduleid     TOD_GETFUNCNODETARGETSONSYSTEM
+            * @reasoncode   TOD_NULL_INPUT_TARGET
+            * @devdesc      nullptr is passed in for node target
+            * @custdesc     Error encountered during IPL of the system
+            */
             l_errHdl = new ERRORLOG::ErrlEntry(
                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                           TOD_BUILD_TOD_DRAWERS,
+                           TOD_GETFUNCNODETARGETSONSYSTEM,
                            TOD_NULL_INPUT_TARGET,
                            0);
             break;
@@ -266,9 +273,17 @@ errlHndl_t getFuncNodeTargetsOnSystem(
                      GETHUID(i_nodeOrSysTarget),
                      TARGETING::attrToString<TARGETING::ATTR_CLASS>(l_class),
                      TARGETING::attrToString<TARGETING::ATTR_TYPE>(l_type));
+           /*@
+            * @errortype
+            * @moduleid     TOD_GETFUNCNODETARGETSONSYSTEM
+            * @reasoncode   TOD_INVALID_TARGET
+            * @devdesc      Input target is not a node or sys target
+            * @userdata1    Target HUID
+            * @custdesc     Error encountered during IPL of the system
+            */
             l_errHdl = new ERRORLOG::ErrlEntry(
                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                           TOD_BUILD_TOD_DRAWERS,
+                           TOD_GETFUNCNODETARGETSONSYSTEM,
                            TOD_INVALID_TARGET,
                            GETHUID(i_nodeOrSysTarget));
             break;

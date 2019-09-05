@@ -52,91 +52,65 @@ namespace   INITSERVICE
     const   TaskInfo    g_istep18[]  =   {
         {
                 "",         // dummy, index 0
-                NULL,
+                nullptr,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
                 ISTEPNAME(18,01,""),
-                NULL,
+                nullptr,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
                 ISTEPNAME(18,02,""),
-                NULL,
+                nullptr,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
                 ISTEPNAME(18,03,""),
-                NULL,
+                nullptr,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
 
                 ISTEPNAME(18,04,""),
-                NULL,
+                nullptr,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
                 ISTEPNAME(18,05,""),
-                NULL,
+                nullptr,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
                 ISTEPNAME(18,06,""),
-                NULL,
+                nullptr,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
                 ISTEPNAME(18,07,""),
-                NULL,
+                nullptr,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
                 ISTEPNAME(18,08,""),
-                NULL,
+                nullptr,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
-        {
-                ISTEPNAME(18,09,""),
-                NULL,
-                { NONE, EXT_IMAGE, IPL_NOOP, false }
-        },
-
-        {
-                ISTEPNAME(18,10,""),
-                NULL,
-                { NONE, EXT_IMAGE, IPL_NOOP, false }
-        },
-
 // To reduce extended image size for VPO, don't run these isteps in VPO
 #ifndef CONFIG_VPO_COMPILE
         {
-                ISTEPNAME(18,11,"proc_tod_setup"),
+                ISTEPNAME(18,09,"proc_tod_setup"),
                 ISTEP_18::call_tod_setup,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP|MPIPL_OP, false,
                         STARTING_OS }
         },
+
         {
-                ISTEPNAME(18,12,"proc_tod_init"),
+                ISTEPNAME(18,10,"proc_tod_init"),
                 ISTEP_18::call_tod_init,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP|MPIPL_OP, false }
         },
 #endif
-        {
-                ISTEPNAME(18,13,""),
-                NULL,
-                { NONE, EXT_IMAGE, IPL_NOOP, false }
-        },
-        {
-                ISTEPNAME(18,14,""),
-                NULL,
-                { NONE, EXT_IMAGE, IPL_NOOP, false }
-        },
-        {
-                ISTEPNAME(18,15,""),
-                NULL,
-                { NONE, EXT_IMAGE, IPL_NOOP, false }
-        },
 };
 
 const DepModInfo g_istep18Dependancies = {
@@ -145,9 +119,10 @@ const DepModInfo g_istep18Dependancies = {
             DEP_LIB(libtod.so),
             DEP_LIB(libistep18.so),
             DEP_LIB(libp9_cpuWkup.so),
-            DEP_LIB(libfab_iovalid.so),
+            // TODO RTC: 216029
+            //DEP_LIB(libfab_iovalid.so), used in smp_unfencing_inter_enclosure_abus_links.C
 #endif
-            NULL
+            nullptr
         }
 };
 

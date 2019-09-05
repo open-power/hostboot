@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,7 +39,7 @@
 #include "TodProc.H"
 
 //HWPF - For TOD constants
-#include <p9_tod_utils.H>
+#include <p10_tod_utils.H>
 
 namespace TOD
 {
@@ -71,7 +71,7 @@ public:
      * @param[in] i_type
      *     Primary(TOD_PRIMARY) or Secondary(TOD_SECONDARY)
      */
-    TodTopologyManager(const p9_tod_setup_tod_sel i_type);
+    TodTopologyManager(const p10_tod_setup_tod_sel i_type);
 
     /**
      * @brief Destructor.
@@ -203,7 +203,7 @@ private:
 
     //Holds the type of the topology this manager is working on :
     //primary/secondary
-    p9_tod_setup_tod_sel iv_topologyType;
+    p10_tod_setup_tod_sel iv_topologyType;
 
 };
 

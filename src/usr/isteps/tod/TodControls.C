@@ -42,21 +42,17 @@
 #include "TodUtils.H"
 #include <devicefw/userif.H>
 #include <hwas/common/deconfigGard.H>
-
-/* FIXME RTC: 210975
 //HWPF
 #include <plat_hwp_invoker.H>
-#include <p9_perv_scom_addresses.H>
-#include <p9_tod_setup.H>
-*/
+#include <p10_scom_perv_d.H>
+#include <p10_tod_utils.H>
 #include <errl/errlentry.H>
 #include <errl/errludtarget.H>
-/* FIXME RTC: 210975
-#include <p9_tod_utils.H>
-*/
 #include <isteps/tod_init_reasoncodes.H>
 
 using namespace TARGETING;
+using namespace scomt;
+using namespace perv;
 
 namespace TOD
 {
@@ -73,7 +69,7 @@ TodControls & TodControls::getTheInstance()
 //******************************************************************************
 //TodControls::TodControls
 //******************************************************************************
-TodControls::TodControls ()
+TodControls::TodControls()
 {
     TOD_ENTER("TodControls constructor");
     TOD_EXIT("TodControls constructor");
@@ -82,7 +78,7 @@ TodControls::TodControls ()
 //******************************************************************************
 //TodControls::~TodControls
 //******************************************************************************
-TodControls ::~TodControls ()
+TodControls::~TodControls()
 {
     TOD_ENTER("TodControls destructor");
 
@@ -95,14 +91,12 @@ TodControls ::~TodControls ()
 //******************************************************************************
 //TodControls::pickMdmt
 //******************************************************************************
-errlHndl_t TodControls ::pickMdmt(const p9_tod_setup_tod_sel i_config)
+errlHndl_t TodControls::pickMdmt(const p10_tod_setup_tod_sel i_config)
 {
 
    TOD_ENTER("Input config is 0x%.2X", i_config);
 
-   errlHndl_t l_errHdl = NULL;
-// FIXME RTC: 210975
-#if 0
+   errlHndl_t l_errHdl = nullptr;
 
    //MDMT is the master processor that drives TOD signals to all the remaining
    //processors on the system, as such wherever possible algorithm will try to
@@ -111,7 +105,7 @@ errlHndl_t TodControls ::pickMdmt(const p9_tod_setup_tod_sel i_config)
     do{
 
 
-        p9_tod_setup_tod_sel l_oppConfig =
+        p10_tod_setup_tod_sel l_oppConfig =
             (i_config == TOD_PRIMARY) ? TOD_SECONDARY : TOD_PRIMARY;
         TodProc* l_otherConfigMdmt = iv_todConfig[l_oppConfig].iv_mdmt;
         TodDrawerContainer l_todDrawerList =
@@ -124,7 +118,7 @@ errlHndl_t TodControls ::pickMdmt(const p9_tod_setup_tod_sel i_config)
                     "opposite config(0x%.2X)",
                     GETHUID(l_otherConfigMdmt->getTarget()),
                     l_oppConfig);
-            if(NULL == pickMdmt(l_otherConfigMdmt, i_config))
+            if(nullptr == pickMdmt(l_otherConfigMdmt, i_config))
             {
                 TOD_INF("For config 0x%.2X, the only option for the MDMT "
                         "is the MDMT(0x%.8X) chosen for "
@@ -148,8 +142,8 @@ errlHndl_t TodControls ::pickMdmt(const p9_tod_setup_tod_sel i_config)
                         {
                             //Found l_otherConfigMdmt pointer
                             l_errHdl = setMdmt(i_config,
-                                    l_procItr,
-                                    l_drwItr);
+                                               l_procItr,
+                                               l_drwItr);
                             if(l_errHdl)
                             {
                                 TOD_ERR("Error setting proc 0x%.8X on "
@@ -177,16 +171,16 @@ errlHndl_t TodControls ::pickMdmt(const p9_tod_setup_tod_sel i_config)
 
             uint32_t l_coreCount = 0;
             uint32_t l_maxCoreCount = 0;
-            TodProc* l_newMdmt = NULL;
-            TodProc* l_pTodProc = NULL;
-            TodDrawer* l_pTodDrw = NULL;
+            TodProc* l_newMdmt = nullptr;
+            TodProc* l_pTodProc = nullptr;
+            TodDrawer* l_pTodDrw = nullptr;
 
             //No MDMT configured yet. Our criteria to pick one is to
             //look at TOD drawers and pick the one with max no of cores
 
             for (const auto & l_drwItr: l_todDrawerList)
             {
-                l_pTodProc = NULL;
+                l_pTodProc = nullptr;
                 l_coreCount = 0;
                 //Get the list of procs on this TOD drawer that have oscillator
                 //input. Each of them is a potential MDMT, choose the one with
@@ -194,10 +188,10 @@ errlHndl_t TodControls ::pickMdmt(const p9_tod_setup_tod_sel i_config)
                 l_drwItr->
                     getPotentialMdmts(l_procList);
                 l_drwItr->
-                    getProcWithMaxCores(NULL,
-                            l_pTodProc,
-                            l_coreCount,
-                            &l_procList);
+                    getProcWithMaxCores(nullptr,
+                                        l_pTodProc,
+                                        l_coreCount,
+                                        &l_procList);
                 if(l_coreCount > l_maxCoreCount)
                 {
                     l_maxCoreCount = l_coreCount;
@@ -210,8 +204,8 @@ errlHndl_t TodControls ::pickMdmt(const p9_tod_setup_tod_sel i_config)
             {
                 // If new MDMT, we set the todConfig
                 l_errHdl = setMdmt(i_config,
-                        l_newMdmt,
-                        l_pTodDrw);
+                                   l_newMdmt,
+                                   l_pTodDrw);
                 if(l_errHdl)
                 {
                     TOD_ERR("Error setting proc 0x%.8X on "
@@ -284,33 +278,30 @@ errlHndl_t TodControls ::pickMdmt(const p9_tod_setup_tod_sel i_config)
 
     TOD_EXIT();
 
-#endif
     return l_errHdl;
 }
 
-// FIXME RTC: 210975
-#if 0
 //******************************************************************************
 //TodControls::buildTodDrawers
 //******************************************************************************
 errlHndl_t  TodControls::buildTodDrawers(
-        const p9_tod_setup_tod_sel i_config)
+        const p10_tod_setup_tod_sel i_config)
 {
     TOD_ENTER("buildTodDrawers");
-    errlHndl_t l_errHdl = NULL;
+    errlHndl_t l_errHdl = nullptr;
 
     do{
 
         TARGETING::TargetHandleList l_funcNodeTargetList;
 
         //Get the system pointer
-        TARGETING::Target* l_pSysTarget = NULL;
+        TARGETING::Target* l_pSysTarget = nullptr;
         (void)TARGETING::targetService().getTopLevelTarget(l_pSysTarget);
 
-        if (NULL == l_pSysTarget)
+        if (nullptr == l_pSysTarget)
         {
             //We should not be reaching here without a valid system target
-            TOD_ERR_ASSERT("buildTodDrawers: NULL system target ");
+            TOD_ERR_ASSERT("buildTodDrawers: nullptr system target ");
             break;
         }
 
@@ -336,6 +327,7 @@ errlHndl_t  TodControls::buildTodDrawers(
               * @reasoncode   TOD_NO_FUNC_NODE_AVAILABLE
               * @userdata1    system target's HUID
               * @devdesc      MDMT could not find a functional node
+              * @custdesc     Error encountered during IPL of the system
               */
             const bool hbSwError = true;
             l_errHdl = new ERRORLOG::ErrlEntry(
@@ -402,7 +394,7 @@ errlHndl_t  TodControls::buildTodDrawers(
                             (l_funcProcTargetList[l_procIndex],
                              (*l_todDrawerIter));
                         (*l_todDrawerIter)->addProc(l_procPtr);
-                        l_procPtr = NULL; //Nullifying the pointer after
+                        l_procPtr = nullptr; //Nullifying the pointer after
                         //transferring ownership
 
                         b_foundDrawer = true;
@@ -435,8 +427,8 @@ errlHndl_t  TodControls::buildTodDrawers(
                     //TodControls
                     l_todDrawerList.push_back(l_pTodDrawer);
                     //Delete the pointers after transfering the ownership
-                    l_pTodDrawer = NULL;
-                    l_pTodProc = NULL;
+                    l_pTodDrawer = nullptr;
+                    l_pTodProc = nullptr;
 
                 }
 
@@ -476,7 +468,6 @@ errlHndl_t  TodControls::buildTodDrawers(
     TOD_EXIT("buildTodDrawers");
     return l_errHdl;
 }
-#endif
 
 //******************************************************************************
 //TodControls::isTodRunning
@@ -484,15 +475,15 @@ errlHndl_t  TodControls::buildTodDrawers(
 errlHndl_t TodControls ::isTodRunning(bool& o_isTodRunning)const
 {
     TOD_ENTER("isTodRunning");
-    errlHndl_t l_errHdl = NULL;
-    TARGETING::Target* l_primaryMdmt=NULL;
-    TARGETING::Target* l_secondaryMdmt=NULL;
+    errlHndl_t l_errHdl = nullptr;
+    TARGETING::Target* l_primaryMdmt = nullptr;
+    TARGETING::Target* l_secondaryMdmt = nullptr;
     o_isTodRunning = false;
 
     do{
         //Read the TOD HW to get the configured MDMT
         l_errHdl = getConfiguredMdmt(l_primaryMdmt,l_secondaryMdmt);
-        if ( l_errHdl )
+        if(l_errHdl)
         {
             TOD_ERR("Failed getting configured MDMTs" );
             break;
@@ -513,12 +504,12 @@ errlHndl_t TodControls ::isTodRunning(bool& o_isTodRunning)const
         fapi2::variable_buffer l_secondaryMdmtBuf(64);
         l_secondaryMdmtBuf.flush<0>();
 
-        if ( l_primaryMdmt )
+        if(l_primaryMdmt)
         {
             l_errHdl = todGetScom(l_primaryMdmt,
-                    PERV_TOD_FSM_REG,
-                    l_primaryMdmtBuf);
-            if ( l_errHdl )
+                                  TOD_FSM_REG,
+                                  l_primaryMdmtBuf);
+            if(l_errHdl)
             {
                 TOD_ERR("Scom failed for TOD FSM register "
                         "PERV_TOD_FSM_REG on primary MDMT");
@@ -527,12 +518,12 @@ errlHndl_t TodControls ::isTodRunning(bool& o_isTodRunning)const
 
         }
 
-        if ( l_secondaryMdmt )
+        if(l_secondaryMdmt)
         {
             l_errHdl = todGetScom(l_secondaryMdmt,
-                    PERV_TOD_FSM_REG,
-                    l_secondaryMdmtBuf);
-            if ( l_errHdl )
+                                  TOD_FSM_REG,
+                                  l_secondaryMdmtBuf);
+            if(l_errHdl)
             {
                 TOD_ERR("Scom failed for TOD FSM register "
                        "PERV_TOD_FSM_REG on secondary MDMT");
@@ -549,7 +540,7 @@ errlHndl_t TodControls ::isTodRunning(bool& o_isTodRunning)const
             TOD_INF("TOD logic is in the running state considering primary"
                      "topology as active topology");
         }
-        else if( l_secondaryMdmtBuf.isBitSet(TOD_FSM_REG_TOD_IS_RUNNING) )
+        else if(l_secondaryMdmtBuf.isBitSet(TOD_FSM_REG_TOD_IS_RUNNING))
         {
              o_isTodRunning = true;
              TOD_INF("TOD logic is in the running state considering"
@@ -565,15 +556,15 @@ errlHndl_t TodControls ::isTodRunning(bool& o_isTodRunning)const
 //TodControls::queryActiveConfig
 //******************************************************************************
 errlHndl_t TodControls ::queryActiveConfig(
-        p9_tod_setup_tod_sel& o_activeConfig,
+        p10_tod_setup_tod_sel& o_activeConfig,
         bool& o_isTodRunning,
         TARGETING::Target*& o_mdmtOnActiveTopology,
         bool i_determineTodRunningState)const
 {
     TOD_ENTER();
-    errlHndl_t l_errHdl = NULL;
-    TARGETING::Target* l_primaryMdmt=NULL;
-    TARGETING::Target* l_secondaryMdmt=NULL;
+    errlHndl_t l_errHdl = nullptr;
+    TARGETING::Target* l_primaryMdmt = nullptr;
+    TARGETING::Target* l_secondaryMdmt = nullptr;
     o_isTodRunning = false;
 
     do
@@ -638,8 +629,8 @@ errlHndl_t TodControls ::queryActiveConfig(
         //configuration.
         if (o_isTodRunning)
         {
-            o_mdmtOnActiveTopology = NULL;
-            //Make it NULL again, since TOD is running we cannot return
+            o_mdmtOnActiveTopology = nullptr;
+            //Make it nullptr again, since TOD is running we cannot return
             //l_primaryMdmt as the MDMT on the active topology
 
             fapi2::variable_buffer l_primaryMdmtBuf(64);
@@ -650,22 +641,22 @@ errlHndl_t TodControls ::queryActiveConfig(
             if ( l_primaryMdmt )
             {
                 l_errHdl = todGetScom(l_primaryMdmt,
-                        TOD_PSS_MSS_STATUS_REG_00040008,
-                        l_primaryMdmtBuf);
+                                      TOD_PSS_MSS_STATUS_REG,
+                                      l_primaryMdmtBuf);
                 if ( l_errHdl )
                 {
                     TOD_ERR("Scom failed for status register "
-                            "TOD_PSS_MSS_STATUS_REG_00040008 on primary "
+                            "TOD_PSS_MSS_STATUS_REG on primary "
                             " MDMT");
                     break;
                 }
 
-                //Check First 3 bits of TOD_PSS_MSS_STATUS_REG_00040008
+                //Check First 3 bits of TOD_PSS_MSS_STATUS_REG
                 //indicates active TOD topology
                 //[0:2] == '111' secondary, '000' is primary
                 //just check bit 0
                 if( l_primaryMdmtBuf.isBitSet
-                        (TOD_PSS_MSS_STATUS_REG_00040008_ACTIVE_BIT))
+                        (TOD_PSS_MSS_STATUS_REG_PRI_SEC_SELECT))
                 {
                     TOD_INF("Primary MDMT  0x%08X is indicating active "
                             " configuration as TOD_PRIMARY ",
@@ -683,22 +674,22 @@ errlHndl_t TodControls ::queryActiveConfig(
             else if ( l_secondaryMdmt )
             {
                 l_errHdl = todGetScom(l_secondaryMdmt,
-                        PERV_TOD_PSS_MSS_STATUS_REG,
-                        l_secondaryMdmtBuf);
+                                      TOD_PSS_MSS_STATUS_REG,
+                                      l_secondaryMdmtBuf);
                 if ( l_errHdl )
                 {
                     TOD_ERR("Scom failed for status register "
-                            "TOD_PSS_MSS_STATUS_REG_00040008 on secondary "
-                            "  MDMT");
+                            "TOD_PSS_MSS_STATUS_REG on secondary "
+                            "MDMT");
                     break;
                 }
 
-                //Check First 3 bits of TOD_PSS_MSS_STATUS_REG_00040008
+                //Check First 3 bits of TOD_PSS_MSS_STATUS_REG
                 //indicates active TOD topology
                 // [0:2] == '111' secondary, '000' is primary -
                 //just check bit 0
                 if ( l_secondaryMdmtBuf.isBitSet
-                        (TOD_PSS_MSS_STATUS_REG_00040008_ACTIVE_BIT))
+                        (TOD_PSS_MSS_STATUS_REG_PRI_SEC_SELECT))
                 {
                     TOD_INF("Secondary MDMT  0x%08X is indicating active "
                             " configuration as TOD_SECONDARY ",
@@ -742,7 +733,7 @@ errlHndl_t TodControls ::queryActiveConfig(
     }while(0);
 
     //If TOD logic is running and no failure is hit in the code above.
-    if( l_errHdl == NULL )
+    if( l_errHdl == nullptr )
     {
         if (o_isTodRunning)
         {
@@ -770,6 +761,7 @@ errlHndl_t TodControls ::queryActiveConfig(
     }
 
     TOD_EXIT();
+
     return l_errHdl;
 }
 
@@ -781,9 +773,9 @@ errlHndl_t TodControls ::getConfiguredMdmt(
         TARGETING::Target*& o_secondaryMdmt) const
 {
     TOD_ENTER("getConfiguredMdmt");
-    errlHndl_t l_errHdl = NULL;
-    o_primaryMdmt = NULL;
-    o_secondaryMdmt = NULL;
+    errlHndl_t l_errHdl = nullptr;
+    o_primaryMdmt = nullptr;
+    o_secondaryMdmt = nullptr;
 
     do
     {
@@ -805,7 +797,8 @@ errlHndl_t TodControls ::getConfiguredMdmt(
         //fapi2 data buffer for TOD register
         fapi2::variable_buffer l_todStatusReg(64);
 
-        /* TOD_PSS_MSS_STATUS_REG_00040008 has the following interpretation
+        /* TOD_PSS_MSS_STATUS_REG (defined in p10_scom_perv_d.H) has the
+         * following interpretation:
          * Primary configuration
          * TOD_STATUS[13]   TOD_STATUS[14]  Inference
          *      1               1          Master TOD Master Drawer
@@ -823,40 +816,38 @@ errlHndl_t TodControls ::getConfiguredMdmt(
                 TARGETING::targetService().end(),
                 &l_stateAndProcChipFilter);
 
-        //Read the TOD status register TOD_PSS_MSS_STATUS_REG_00040008 for each
+        //Read the TOD status register TOD_PSS_MSS_STATUS_REG for each
         //processor and check the TOD and Drawer bits
         for (   ; l_filter; ++l_filter  )
         {
             l_errHdl = todGetScom(*l_filter,
-                    PERV_TOD_PSS_MSS_STATUS_REG,
-                    l_todStatusReg);
+                                  TOD_PSS_MSS_STATUS_REG,
+                                  l_todStatusReg);
 
             if ( l_errHdl )
             {
                 TOD_ERR("Scom failed for target 0x%08X on register"
-                        " TOD_PSS_MSS_STATUS_REG_00040008 ",
+                        " TOD_PSS_MSS_STATUS_REG",
                         (*l_filter)->getAttr<TARGETING::ATTR_HUID>());
                 break;
             }
 
-            if (
-                    l_todStatusReg.isBitSet(
-                        TOD_PSS_MSS_STATUS_REG_00040008_PRI_M_S_TOD_SEL)
-                    &&
-                    l_todStatusReg.isBitSet(
-                        TOD_PSS_MSS_STATUS_REG_00040008_PRI_M_S_DRAWER_SEL ) )
+            if (l_todStatusReg.isBitSet(
+                    TOD_PSS_MSS_STATUS_REG_PRI_M_S_TOD_SELECT_STATUS)
+                &&
+                l_todStatusReg.isBitSet(
+                        TOD_PSS_MSS_STATUS_REG_PRI_M_S_DRAWER_SELECT_STATUS))
             {
                 o_primaryMdmt = *l_filter;
                 TOD_INF("found primary MDMT HUID = 0x%08X",
                         o_primaryMdmt->getAttr<TARGETING::ATTR_HUID>());
             }
 
-            if (
-                l_todStatusReg.isBitSet(
-                        TOD_PSS_MSS_STATUS_REG_00040008_SEC_M_S_TOD_SEL )
+            if (l_todStatusReg.isBitSet(
+                    TOD_PSS_MSS_STATUS_REG_SEC_M_S_TOD_SELECT_STATUS)
                 &&
                 l_todStatusReg.isBitSet(
-                       TOD_PSS_MSS_STATUS_REG_00040008_SEC_M_S_DRAWER_SEL ) )
+                    TOD_PSS_MSS_STATUS_REG_SEC_M_S_DRAWER_SELECT_STATUS))
             {
                 o_secondaryMdmt = *l_filter;
                 TOD_INF("found secondary MDMT HUID = 0x%08X",
@@ -879,7 +870,7 @@ errlHndl_t TodControls ::getConfiguredMdmt(
 //******************************************************************************
 //TodControls::destroy
 //******************************************************************************
-void TodControls ::destroy(const p9_tod_setup_tod_sel i_config)
+void TodControls::destroy(const p10_tod_setup_tod_sel i_config)
 {
     TOD_ENTER("TodControls::destroy");
 
@@ -894,12 +885,11 @@ void TodControls ::destroy(const p9_tod_setup_tod_sel i_config)
         }
     }
     iv_todConfig[i_config].iv_todDrawerList.clear();
-    iv_todConfig[i_config].iv_mdmt = NULL;
+    iv_todConfig[i_config].iv_mdmt = nullptr;
     iv_todConfig[i_config].iv_isConfigured = false;
     iv_todChipDataVector.clear();
     iv_BlackListedProcs.clear();
     iv_gardedTargets.clear();
-
     TOD_EXIT();
 }
 
@@ -907,10 +897,10 @@ void TodControls ::destroy(const p9_tod_setup_tod_sel i_config)
 //TodControls::writeTodProcData
 //******************************************************************************
 errlHndl_t TodControls :: writeTodProcData(
-        const p9_tod_setup_tod_sel i_config)
+        const p10_tod_setup_tod_sel i_config)
 {
     TOD_ENTER("TodControls::writeTodProcData");
-    errlHndl_t l_errHdl = NULL;
+    errlHndl_t l_errHdl = nullptr;
 
     do{
 
@@ -924,7 +914,7 @@ errlHndl_t TodControls :: writeTodProcData(
 
         TodChipData blank;
         uint32_t l_maxProcCount = TOD::TodSvcUtil::getMaxProcsOnSystem();
-        Target* l_target = NULL;
+        Target* l_target = nullptr;
 
         TOD_INF("Max possible processor chips for this system when configured "
                 "completely is %d",l_maxProcCount);
@@ -1024,7 +1014,6 @@ errlHndl_t TodControls :: writeTodProcData(
 
 }//end of writeTodProcData
 
-
 //******************************************************************************
 //TodControls::hasNoValidData()
 //******************************************************************************
@@ -1052,7 +1041,7 @@ bool TodControls ::hasNoValidData(const std::vector<TodChipData>&
 //******************************************************************************
 TodProc* TodControls ::pickMdmt(
                                   const TodProc* i_otherConfigMdmt,
-                                  const p9_tod_setup_tod_sel& i_config,
+                                  const p10_tod_setup_tod_sel& i_config,
                                   const bool i_setMdmt)
 {
     TOD_ENTER("Other MDMT : 0x%.8X, "
@@ -1060,15 +1049,15 @@ TodProc* TodControls ::pickMdmt(
                GETHUID(i_otherConfigMdmt->getTarget()),
                i_config);
 
-    TodProc* l_newMdmt = NULL;
-    TodProc *l_pTodProc = NULL;
-    TodDrawer* l_pMasterDrw = NULL;
+    TodProc* l_newMdmt = nullptr;
+    TodProc *l_pTodProc = nullptr;
+    TodDrawer* l_pMasterDrw = nullptr;
     TodDrawerContainer l_todDrawerList =
         iv_todConfig[i_config].iv_todDrawerList;
     TodProcContainer l_procList;
     uint32_t l_coreCount = 0;
     uint32_t l_maxCoreCount = 0;
-    errlHndl_t l_errHdl = NULL;
+    errlHndl_t l_errHdl = nullptr;
 
     do
     {
@@ -1089,7 +1078,7 @@ TodProc* TodControls ::pickMdmt(
                (*l_todDrawerIter)->getParentNodeTarget()->
                    getAttr<TARGETING::ATTR_HUID>())
             {
-                l_pTodProc = NULL;
+                l_pTodProc = nullptr;
                 l_coreCount = 0;
                 l_procList.clear();
                 //Get the list of procs on this TOD drawer that have oscillator
@@ -1098,7 +1087,7 @@ TodProc* TodControls ::pickMdmt(
                 (*l_todDrawerIter)->
                     getPotentialMdmts(l_procList);
                 (*l_todDrawerIter)->
-                    getProcWithMaxCores(NULL,
+                    getProcWithMaxCores(nullptr,
                                         l_pTodProc,
                                         l_coreCount,
                                         &l_procList);
@@ -1125,7 +1114,7 @@ TodProc* TodControls ::pickMdmt(
                          l_pMasterDrw->getId(),
                          i_config);
                 errlCommit(l_errHdl, TOD_COMP_ID);
-                l_newMdmt = NULL;
+                l_newMdmt = nullptr;
             }
             else
             {
@@ -1133,7 +1122,7 @@ TodProc* TodControls ::pickMdmt(
                     l_newMdmt->getTarget()->getAttr<TARGETING::ATTR_HUID>(),
                     l_pMasterDrw->getParentNodeTarget()->
                         getAttr<TARGETING::ATTR_HUID>());
-                l_pMasterDrw = NULL;
+                l_pMasterDrw = nullptr;
                 break;
             }
         }
@@ -1151,7 +1140,7 @@ TodProc* TodControls ::pickMdmt(
                (i_otherConfigMdmt->getParentDrawer()->getId() !=
                     l_todDrawerIter->getId()))//Different TOD Drawer
             {
-                l_pTodProc = NULL;
+                l_pTodProc = nullptr;
                 l_coreCount = 0;
                 l_procList.clear();
                 //Get the list of procs on this TOD drawer that have oscillator
@@ -1160,7 +1149,7 @@ TodProc* TodControls ::pickMdmt(
                 l_todDrawerIter->
                     getPotentialMdmts(l_procList);
                 l_todDrawerIter->
-                    getProcWithMaxCores(NULL,
+                    getProcWithMaxCores(nullptr,
                                         l_pTodProc,
                                         l_coreCount,
                                         &l_procList);
@@ -1187,14 +1176,14 @@ TodProc* TodControls ::pickMdmt(
                          l_pMasterDrw->getId(),
                          i_config);
                 errlCommit(l_errHdl, TOD_COMP_ID);
-                l_newMdmt = NULL;
+                l_newMdmt = nullptr;
             }
             else
             {
                 TOD_INF("Found MDMT 0x%.8X on different TOD drawer 0x%.2X",
                     l_newMdmt->getTarget()->getAttr<TARGETING::ATTR_HUID>(),
                     l_pMasterDrw->getId());
-                l_pMasterDrw = NULL;
+                l_pMasterDrw = nullptr;
                 break;
             }
         }
@@ -1204,7 +1193,7 @@ TodProc* TodControls ::pickMdmt(
         l_maxCoreCount = 0;
         for (const auto l_todDrawerIter : l_todDrawerList)
         {
-            l_pTodProc = NULL;
+            l_pTodProc = nullptr;
             l_coreCount = 0;
             l_procList.clear();
             if(i_otherConfigMdmt->getParentDrawer()->getId() ==
@@ -1243,7 +1232,7 @@ TodProc* TodControls ::pickMdmt(
                          l_pMasterDrw->getId(),
                          i_config);
                 errlCommit(l_errHdl, TOD_COMP_ID);
-                l_newMdmt = NULL;
+                l_newMdmt = nullptr;
             }
             else
             {
@@ -1253,7 +1242,7 @@ TodProc* TodControls ::pickMdmt(
                     GETHUID(l_newMdmt->getTarget()),
                     l_pMasterDrw->getId(),
                     GETHUID(i_otherConfigMdmt->getTarget()));
-                l_pMasterDrw = NULL;
+                l_pMasterDrw = nullptr;
                 break;
             }
         }
@@ -1268,7 +1257,7 @@ TodProc* TodControls ::pickMdmt(
 //TodControls::setMdmtOfActiveConfig
 //******************************************************************************
 void  TodControls ::setMdmtOfActiveConfig(
-            const p9_tod_setup_tod_sel i_config,
+            const p10_tod_setup_tod_sel i_config,
             TodProc* i_mdmt,
             TodDrawer* i_masterDrawer)
 {
@@ -1278,14 +1267,14 @@ void  TodControls ::setMdmtOfActiveConfig(
     {
       if ( !i_mdmt )
       {
-          TOD_ERR_ASSERT("Software error input MDMT must not be NULL");
+          TOD_ERR_ASSERT("Software error input MDMT must not be nullptr");
           break;
       }
 
       if ( !i_masterDrawer )
       {
           TOD_ERR_ASSERT("Software error input master drawer must not be "
-          " NULL");
+          " nullptr");
           break;
       }
 
@@ -1303,26 +1292,26 @@ void  TodControls ::setMdmtOfActiveConfig(
 //******************************************************************************
 //TodControls::setMdmt
 //******************************************************************************
-errlHndl_t TodControls ::setMdmt(const p9_tod_setup_tod_sel i_config,
-        TodProc* i_mdmt,
-        TodDrawer* i_masterDrawer)
+errlHndl_t TodControls::setMdmt(const p10_tod_setup_tod_sel i_config,
+                                 TodProc* i_mdmt,
+                                 TodDrawer* i_masterDrawer)
 {
     TOD_ENTER("setMdmt");
 
-    errlHndl_t l_errHdl = NULL;
+    errlHndl_t l_errHdl = nullptr;
 
     do
     {
-      if ( !i_mdmt )
+      if (!i_mdmt)
       {
-          TOD_ERR_ASSERT("Software error input MDMT must not be NULL");
+          TOD_ERR_ASSERT("Software error input MDMT must not be nullptr");
           break;
       }
 
-      if ( !i_masterDrawer )
+      if (!i_masterDrawer)
       {
           TOD_ERR_ASSERT("Software error input master drawer must not be "
-          " NULL");
+          " nullptr");
           break;
       }
 
@@ -1356,7 +1345,7 @@ bool  TodControls::isProcBlackListed (
     {
       if(!i_procTarget)
       {
-          TOD_ERR_ASSERT("Input target cannot be NULL for "
+          TOD_ERR_ASSERT("Input target cannot be nullptr for "
                   "isProcBlackListed");
           break;
       }
@@ -1391,15 +1380,15 @@ bool  TodControls::isProcBlackListed (
 errlHndl_t TodControls::buildGardedTargetsList()
 {
     TOD_ENTER("buildGardedTargetsList");
-    errlHndl_t l_errHdl = NULL;
+    errlHndl_t l_errHdl = nullptr;
     iv_gardListInitialized = false;
     clearGardedTargetsList();
 
     do
     {
-        TARGETING::Target* l_pSystemTarget = NULL;
+        TARGETING::Target* l_pSystemTarget = nullptr;
         TARGETING::targetService().getTopLevelTarget(l_pSystemTarget);
-        if ( !l_pSystemTarget )
+        if (!l_pSystemTarget)
         {
             TOD_ERR_ASSERT("System target could not be found");
             break;
@@ -1432,6 +1421,7 @@ errlHndl_t TodControls::buildGardedTargetsList()
         iv_gardListInitialized = true;
     }
     TOD_EXIT();
+
     return l_errHdl;
 
 }
@@ -1445,7 +1435,7 @@ errlHndl_t TodControls::checkGardStatusOfTarget(
         bool&  o_isTargetGarded )
 {
     TOD_ENTER("checkGardStatusOfTarget");
-    errlHndl_t l_errHdl = NULL;
+    errlHndl_t l_errHdl = nullptr;
     o_isTargetGarded  = false;
 
     do{
@@ -1489,14 +1479,15 @@ errlHndl_t TodControls::gardGetGardedUnits(
         GardedUnitList_t &o_gardedUnitList)
 {
     TOD_ENTER("gardGetGardedUnits");
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
+
     o_gardedUnitList.clear();
     do
     {
         HWAS::DeconfigGard::GardRecords_t l_gardRecords;
         l_err = HWAS::theDeconfigGard().getGardRecords(i_pTarget,
                 l_gardRecords);
-        if(l_err != NULL)
+        if(l_err != nullptr)
         {
             TOD_ERR("Error getting gard records for HUID :[0x%08X]",
                     GETHUID(i_pTarget));
@@ -1506,7 +1497,7 @@ errlHndl_t TodControls::gardGetGardedUnits(
 
         for(const auto & l_iter : l_gardRecords)
         {
-            TARGETING::Target * l_pTarget = NULL;
+            TARGETING::Target * l_pTarget = nullptr;
 
             // getTargetFromPhysicalPath will either succeed or assert
             getTargetFromPhysicalPath(l_iter.iv_targetId, l_pTarget);
@@ -1515,7 +1506,7 @@ errlHndl_t TodControls::gardGetGardedUnits(
             memset(&l_gardedUnit,0,sizeof(GardedUnit_t));
             l_gardedUnit.iv_huid =
                     l_pTarget->getAttr<TARGETING::ATTR_HUID>();
-            TARGETING::Target *l_pNodeTarget = NULL;
+            TARGETING::Target *l_pNodeTarget = nullptr;
             if((l_pTarget->getAttr<TARGETING::ATTR_CLASS>() ==
                                     TARGETING::CLASS_ENC)&&
                (l_pTarget->getAttr<TARGETING::ATTR_TYPE>() ==
@@ -1526,9 +1517,9 @@ errlHndl_t TodControls::gardGetGardedUnits(
             else
             {
                 l_err = getParent(l_pTarget,
-                    TARGETING::CLASS_ENC,
-                    l_pNodeTarget);
-                if(l_err != NULL)
+                                  TARGETING::CLASS_ENC,
+                                  l_pNodeTarget);
+                if(l_err != nullptr)
                 {
                     TOD_ERR("Error getting parent node, HUID:[0x%08X]",
                                 l_pTarget->getAttr<TARGETING::ATTR_HUID>());
@@ -1552,17 +1543,18 @@ errlHndl_t TodControls::gardGetGardedUnits(
 
             o_gardedUnitList.push_back(l_gardedUnit);
         }
-        if(l_err != NULL)
+        if(l_err != nullptr)
         {
             break;
         }
     }
     while(0);
-    if(l_err != NULL)
+    if(l_err != nullptr)
     {
         o_gardedUnitList.clear();
     }
     TOD_EXIT();
+
     return l_err;
 }
 
@@ -1580,7 +1572,7 @@ void TodControls::getTargetFromPhysicalPath(
     {
         o_pTarget =
                 TARGETING::targetService().toTarget(i_path);
-        TOD_ERR_ASSERT(o_pTarget != NULL,
+        TOD_ERR_ASSERT(o_pTarget != nullptr,
                 "Error in getting target from entity path[%s]",
                 getPhysicalPathString(i_path));
     }
@@ -1601,7 +1593,7 @@ errlHndl_t TodControls::getParent(const TARGETING::Target *i_pTarget,
     // Local Variables
     //--------------------------------------------------------------------------
     bool l_parent_found = false;
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = nullptr;
     TARGETING::TargetHandleList l_list;
     // Initializing l_parentTarget here in-order to eliminate goto compilation
     // error below
@@ -1616,7 +1608,7 @@ errlHndl_t TodControls::getParent(const TARGETING::Target *i_pTarget,
 
     do
     {
-        TOD_ERR_ASSERT(i_pTarget != NULL, "Input Target handle is null");
+        TOD_ERR_ASSERT(i_pTarget != nullptr, "Input Target handle is null");
 
         // If we have a valid target, check if it is system
         l_type = i_pTarget->getAttr<TARGETING::ATTR_TYPE>();
@@ -1719,8 +1711,8 @@ errlHndl_t TodControls::getParent(const TARGETING::Target *i_pTarget,
 }
 
 // Wrapper function for TodControls::getDrawers instance
-void getDrawers(const p9_tod_setup_tod_sel i_config,
-     TodDrawerContainer& o_drawerList)
+void getDrawers(const p10_tod_setup_tod_sel i_config,
+                TodDrawerContainer& o_drawerList)
 {
     Singleton<TodControls>::instance().getDrawers(i_config, o_drawerList);
 }
@@ -1733,13 +1725,13 @@ bool isProcBlackListed (TARGETING::ConstTargetHandle_t i_procTarget)
 }
 
 // Wrapper function for TodControls::getMDMT instance
-TodProc* getMDMT(const p9_tod_setup_tod_sel i_config)
+TodProc* getMDMT(const p10_tod_setup_tod_sel i_config)
 {
     return Singleton<TodControls>::instance().getMDMT(i_config);
 }
 
 // Wrapper function for TodControls::pickMdmt instance
-errlHndl_t pickMdmt(const p9_tod_setup_tod_sel i_config)
+errlHndl_t pickMdmt(const p10_tod_setup_tod_sel i_config)
 {
     return Singleton<TodControls>::instance().pickMdmt(i_config);
 }
@@ -1752,25 +1744,23 @@ errlHndl_t isTodRunning ( bool& o_isTodRunning)
 
 // Wrapper function for TodControls::checkGardStatusOfTarget instance
 errlHndl_t checkGardStatusOfTarget(TARGETING::ConstTargetHandle_t i_target,
-    bool&  o_isTargetGarded)
+                                   bool&  o_isTargetGarded)
 {
     return Singleton<TodControls>::instance().checkGardStatusOfTarget(
         i_target, o_isTargetGarded);
 }
 
 // Wrapper function for TodControls::destroy instance
-void destroy(const p9_tod_setup_tod_sel i_config)
+void destroy(const p10_tod_setup_tod_sel i_config)
 {
     Singleton<TodControls>::instance().destroy(i_config);
 }
 
-/* FIXME RTC: 210975
 // Wrapper function for TodControls::buildTodDrawers instance
-errlHndl_t buildTodDrawers(const p9_tod_setup_tod_sel i_config)
+errlHndl_t buildTodDrawers(const p10_tod_setup_tod_sel i_config)
 {
     return Singleton<TodControls>::instance().buildTodDrawers(i_config);
 }
-*/
 
 // Wrapper function for TodControls::buildGardedTargetsList instance
 errlHndl_t buildGardedTargetsList()
@@ -1779,8 +1769,8 @@ errlHndl_t buildGardedTargetsList()
 }
 
 // Wrapper function for TodControls::setConfigStatus instance
-void setConfigStatus(const p9_tod_setup_tod_sel i_config,
-                        const bool i_isConfigured )
+void setConfigStatus(const p10_tod_setup_tod_sel i_config,
+                     const bool i_isConfigured )
 {
     Singleton<TodControls>::instance().setConfigStatus(i_config,
                                                        i_isConfigured);
@@ -1788,14 +1778,14 @@ void setConfigStatus(const p9_tod_setup_tod_sel i_config,
 
 // Wrapper function for TodControls::getConfiguredMdmt instance
 errlHndl_t getConfiguredMdmt(TARGETING::Target*& o_primaryMdmt,
-              TARGETING::Target*& o_secondaryMdmt)
+                             TARGETING::Target*& o_secondaryMdmt)
 {
     return Singleton<TodControls>::instance().getConfiguredMdmt(o_primaryMdmt,
         o_secondaryMdmt);
 }
 
 // Wrapper function for TodControls::writeTodProcData instance
-errlHndl_t writeTodProcData(const p9_tod_setup_tod_sel i_config)
+errlHndl_t writeTodProcData(const p10_tod_setup_tod_sel i_config)
 {
     return Singleton<TodControls>::instance().writeTodProcData(i_config);
 }
@@ -1806,26 +1796,26 @@ void  clearGardedTargetsList()
 }
 
 // Wrapper function for TodControls::queryActiveConfig instance
-errlHndl_t queryActiveConfig(p9_tod_setup_tod_sel& o_activeConfig,
-    bool& o_isTodRunning,
-    TARGETING::Target*& o_mdmtOnActiveTopology,
-    bool i_determineTodRunningState)
+errlHndl_t queryActiveConfig(p10_tod_setup_tod_sel& o_activeConfig,
+                             bool& o_isTodRunning,
+                             TARGETING::Target*& o_mdmtOnActiveTopology,
+                             bool i_determineTodRunningState)
 {
     return Singleton<TodControls>::instance().queryActiveConfig(o_activeConfig,
         o_isTodRunning, o_mdmtOnActiveTopology, i_determineTodRunningState);
 }
 
 // Wrapper function for TodControls::setMdmtOfActiveConfig instance
-void setMdmtOfActiveConfig(const p9_tod_setup_tod_sel i_config,
-             TodProc* i_proc,
-             TodDrawer* i_drawer)
+void setMdmtOfActiveConfig(const p10_tod_setup_tod_sel i_config,
+                           TodProc* i_proc,
+                           TodDrawer* i_drawer)
 {
     return Singleton<TodControls>::instance().setMdmtOfActiveConfig(i_config,
     i_proc, i_drawer);
 }
 
 // Wrapper function for TodControls::getConfigStatus instance
-bool getConfigStatus(const p9_tod_setup_tod_sel i_config)
+bool getConfigStatus(const p10_tod_setup_tod_sel i_config)
 {
     return Singleton<TodControls>::instance().getConfigStatus(i_config);
 }

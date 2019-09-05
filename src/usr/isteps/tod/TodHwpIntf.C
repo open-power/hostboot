@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,40 +42,38 @@
 
 //HWPF
 #include <plat_hwp_invoker.H>
-#include <p9_tod_setup.H>
-#include <p9_tod_save_config.H>
-#include <p9_tod_init.H>
 #include <isteps/tod_init_reasoncodes.H>
+#include <p10_tod_init.H>
+#include <p10_tod_save_config.H>
 
 namespace TOD
 
 {
 
-errlHndl_t todSetupHwp(const p9_tod_setup_tod_sel i_topologyType)
+errlHndl_t todSetupHwp(const p10_tod_setup_tod_sel i_topologyType)
 {
     TOD_ENTER();
 
-    errlHndl_t l_errHdl = NULL;
+    errlHndl_t l_errHdl = nullptr;
 
     do
     {
         //Get the MDMT
-        TodProc* l_pMDMT =
-             TOD::getMDMT(i_topologyType);
+        TodProc* l_pMDMT = TOD::getMDMT(i_topologyType);
 
-        p9_tod_setup_osc_sel l_selectedOsc = TOD_OSC_0;
+        p10_tod_setup_osc_sel l_selectedOsc = TOD_OSC_0;
         TOD_INF("For topology 0x%08X  Passing OSC 0x%08X  to "
-             " p9_tod_setup ",i_topologyType,l_selectedOsc);
+             " p10_tod_setup ", i_topologyType, l_selectedOsc);
 
         //Invoke the HWP by passing the topology tree (rooted at MDMT)
         FAPI_INVOKE_HWP(l_errHdl,
-                p9_tod_setup,
-                l_pMDMT->getTopologyNode(),
-                i_topologyType,
-                l_selectedOsc);
+                        p10_tod_setup,
+                        l_pMDMT->getTopologyNode(),
+                        i_topologyType,
+                        l_selectedOsc);
         if(l_errHdl)
         {
-            TOD_ERR("Error in call to p9_tod_setup. "
+            TOD_ERR("Error in call to p10_tod_setup. "
                     "Topology type 0x%.8X. "
                     "MDMT's HUID is 0x%.8X. "
                     "MDMT Master type : 0x%.8X. "
@@ -95,17 +93,17 @@ errlHndl_t todSetupHwp(const p9_tod_setup_tod_sel i_topologyType)
 }
 
 
-errlHndl_t todSaveRegsHwp(const p9_tod_setup_tod_sel i_topologyType)
+errlHndl_t todSaveRegsHwp(const p10_tod_setup_tod_sel i_topologyType)
 {
     TOD_ENTER();
 
-    errlHndl_t l_errHdl = NULL;
+    errlHndl_t l_errHdl = nullptr;
+
     do
     {
         //Get the MDMT
-        TodProc* l_pMDMT =
-            TOD::getMDMT(i_topologyType);
-        if(NULL == l_pMDMT)
+        TodProc* l_pMDMT = TOD::getMDMT(i_topologyType);
+        if(nullptr == l_pMDMT)
         {
             TOD_ERR("MDMT not found for topology type 0x%.8X",
                      i_topologyType);
@@ -130,8 +128,8 @@ errlHndl_t todSaveRegsHwp(const p9_tod_setup_tod_sel i_topologyType)
 
         //Invoke the HWP by passing the topology tree (rooted at MDMT)
         FAPI_INVOKE_HWP(l_errHdl,
-                p9_tod_save_config,
-                l_pMDMT->getTopologyNode());
+                        p10_tod_save_config,
+                        l_pMDMT->getTopologyNode());
         if(l_errHdl)
         {
             TOD_ERR("Error in call to p9_tod_save_config. "
@@ -158,15 +156,14 @@ errlHndl_t todSaveRegsHwp(const p9_tod_setup_tod_sel i_topologyType)
 errlHndl_t todInitHwp()
 {
     TOD_ENTER();
-    errlHndl_t l_errHdl = NULL;
+    errlHndl_t l_errHdl = nullptr;
     do
     {
 
         //Get the MDMT
-        TodProc* l_pMDMT =
-            TOD::getMDMT(TOD_PRIMARY);
+        TodProc* l_pMDMT = TOD::getMDMT(TOD_PRIMARY);
 
-        if( NULL == l_pMDMT )
+        if(nullptr == l_pMDMT)
         {
             TOD_ERR("Valid MDMT not found in the primary TOD topology");
             /*@
@@ -190,19 +187,19 @@ errlHndl_t todInitHwp()
             break;
         }
 
-        TARGETING::Target* l_failingTodProc = NULL;
+        TARGETING::Target* l_failingTodProc = nullptr;
         fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
             l_fapiFailingProcTarget(l_failingTodProc);
 
         //Invoke the HWP by passing the reference to the topology
         FAPI_INVOKE_HWP(l_errHdl,
-                p9_tod_init,
-                l_pMDMT->getTopologyNode(),
-                &l_fapiFailingProcTarget);
+                        p10_tod_init,
+                        l_pMDMT->getTopologyNode(),
+                        &l_fapiFailingProcTarget);
 
         if(l_errHdl)
         {
-            TOD_ERR("Error in call to p9_tod_init. "
+            TOD_ERR("Error in call to p10_tod_init. "
                     "MDMT's HUID is 0x%.8X. "
                     "MDMT Master type : 0x%.8X. ",
                     GETHUID(l_pMDMT->getTarget()),
@@ -215,7 +212,7 @@ errlHndl_t todInitHwp()
         }
         else
         {
-            TOD_INF("Successfully completed  p9_tod_init. "
+            TOD_INF("Successfully completed  p10_tod_init. "
                     "MDMT's HUID is 0x%.8X. "
                     "MDMT Master type : 0x%.8X. ",
                     GETHUID(l_pMDMT->getTarget()),

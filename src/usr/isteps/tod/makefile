@@ -27,13 +27,12 @@ ROOTPATH = ../../../..
 
 MODULE = tod
 
-# FIXME RTC: 210975 Re-enable this module when EKB is mirrorred
-#OBJS += TodControls.o
-#OBJS += TodDrawer.o
-#OBJS += TodProc.o
-#OBJS += TodSvc.o
-#OBJS += TodHwpIntf.o
-#OBJS += TodTopologyManager.o
+OBJS += TodControls.o
+OBJS += TodDrawer.o
+OBJS += TodProc.o
+OBJS += TodSvc.o
+OBJS += TodHwpIntf.o
+OBJS += TodTopologyManager.o
 
 SUBDIRS += runtime.d
 
