@@ -1,0 +1,161 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p10/procedures/xml/error_info/p10_pm_xgpe_init_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- Error definitions for p10_pm_xgpe_init procedure -->
+<!--
+     *HWP HWP Owner     :   Prasad Bg Ranganath <prasadbgr@in.ibm.com>
+     *HWP Backup Owner  :   Rahul Batra <rbatra@us.ibm.com>
+     *HWP FW Owner      :   Prem S Jha  <premjha2@in.ibm.com>
+     *HWP Team          :   PM
+     *HWP Level         :   3
+     *HWP Consumed by   :   HS
+-->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_XGPE_BAD_MODE</rc>
+    <description>Unknown mode passed to p10_pm_xgpe_init.
+    </description>
+    <ffdc>BADMODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_XGPE_INIT_TIMEOUT</rc>
+    <description> XGPE init timed out while waiting for XGPE Active in OCC
+    SCRATCH2.
+    </description>
+    <ffdc>CHIP</ffdc>
+    <ffdc>XGPE_BASE_ADDRESS</ffdc>
+    <ffdc>XGPE_STATE_MODE</ffdc>
+
+    <collectRegisterFfdc>
+      <id>XGPE_FFDC_REGISTERS</id>
+      <target>CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
+
+    <collectRegisterFfdc>
+      <id>PBA_FFDC_BASIC_REGISTERS</id>
+      <target>CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
+
+<!--  RTC: 214555
+     <collectFfdc>p10_collect_ppe_state, CHIP, XGPE_STATE_MODE, XGPE_BASE_ADDRESS</collectFfdc> 
+-->
+    <callout>
+      <target>CHIP</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_XGPE_INIT_DEBUG_HALT</rc>
+    <description> XGPE init detected a Debug Halt condition.  This should only
+    assert in a development debug environment.
+    </description>
+    <ffdc>CHIP</ffdc>
+    <ffdc>XGPE_BASE_ADDRESS</ffdc>
+    <ffdc>XGPE_STATE_MODE</ffdc>
+
+    <collectRegisterFfdc>
+      <id>XGPE_FFDC_REGISTERS</id>
+      <target>CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
+
+<!--  RTC: 214555
+     <collectFfdc>p10_collect_ppe_state, CHIP, XGPE_STATE_MODE, XGPE_BASE_ADDRESS</collectFfdc> 
+-->
+
+    <callout>
+      <target>CHIP</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_XGPE_RESET_TIMEOUT</rc>
+    <description> XGPE init timed out while waiting for HALT status in XSR register.
+    </description>
+    <ffdc>CHIP</ffdc>
+    <ffdc>XGPE_BASE_ADDRESS</ffdc>
+    <ffdc>XGPE_STATE_MODE</ffdc>
+
+    <collectRegisterFfdc>
+      <id>XGPE_FFDC_REGISTERS</id>
+      <target>CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
+
+<!--  RTC: 214555
+     <collectFfdc>p10_collect_ppe_state, CHIP, XGPE_STATE_MODE, XGPE_BASE_ADDRESS</collectFfdc> 
+-->
+
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_XGPE_PBA_INIT_FAILED</rc>
+    <description>p10_pm_pba_init failed in PM_INIT mode.
+    </description>
+    <ffdc>MODE</ffdc>
+    <ffdc>CHIP</ffdc>
+
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <collectRegisterFfdc>
+      <id>PBA_FFDC_REGISTERS</id>
+      <target>CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
+
+  </hwpError>
+  <!-- ******************************************************************** -->
+</hwpErrors>

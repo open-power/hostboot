@@ -410,10 +410,25 @@ pba_slave_setup(
     SET_TP_TPBR_PBA_PBAO_PBASLVCTL0_BUF_ALLOC_B(                                            l_data);
     SET_TP_TPBR_PBA_PBAO_PBASLVCTL0_BUF_ALLOC_C(                                            l_data);
     SET_TP_TPBR_PBA_PBAO_PBASLVCTL0_BUF_ALLOC_W(                                            l_data);
+    fapi2::ATTR_HOMER_LOCATION_Type l_homerloc;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HOMER_LOCATION,
+                           i_target,
+                           l_homerloc));
+
 
     if (i_phase == PBA_RUNTIME)
     {
-        SET_TP_TPBR_PBA_PBAO_PBASLVCTL0_WRITE_TTYPE(      PBA_WRITE_TTYPE_DMA_PR_WR,        l_data);
+        if (l_homerloc == fapi2::ENUM_ATTR_HOMER_LOCATION_CACHE)
+        {
+            FAPI_DBG("PBA Slave 0 setup for booting from CACHE");
+            SET_TP_TPBR_PBA_PBAO_PBASLVCTL0_WRITE_TTYPE(PBA_WRITE_TTYPE_LCO_M, l_data);
+        }
+        else
+        {
+            FAPI_DBG("PBA Slave 0 setup for booting from MEMORY");
+            SET_TP_TPBR_PBA_PBAO_PBASLVCTL0_WRITE_TTYPE(      PBA_WRITE_TTYPE_DMA_PR_WR,        l_data);
+        }
+
         SET_TP_TPBR_PBA_PBAO_PBASLVCTL0_WR_GATHER_TIMEOUT(PBA_WRITE_GATHER_TIMEOUT_2_PULSES, l_data);
     }
 
@@ -447,11 +462,6 @@ pba_slave_setup(
     //
     // Run-Time: PGPE to memory.  This is a read/write slave.  Write gethering is
     // allowed, but with the shortest possible timeout.
-
-    fapi2::ATTR_HOMER_LOCATION_Type l_homerloc;
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HOMER_LOCATION,
-                           i_target,
-                           l_homerloc));
 
     l_data.flush<0>();
     PREP_TP_TPBR_PBA_PBAO_PBASLVCTL2(i_target);
