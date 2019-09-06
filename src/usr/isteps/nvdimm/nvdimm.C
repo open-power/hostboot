@@ -29,6 +29,7 @@
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
 #include <errl/errludlogregister.H>
+#include <errl/errludstring.H>
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/util.H>
 #include <targeting/common/utilFilter.H>
@@ -135,6 +136,24 @@ static constexpr uint8_t KEY_ABORT_BYTE = 0xFF;
 // NVDIMM CSAVE_FAIL_INFO1 Bit mask
 // Currently only bits 1:6 need to be checked during init
 static constexpr uint8_t CSAVE_FAIL_BITS_MASK = 0x7E;
+
+// LOG PAGE INFO
+static constexpr size_t VENDOR_LOG_UNIT_SIZE = 256;
+static constexpr size_t VENDOR_LOG_BLOCK_SIZE = 32;
+static constexpr size_t VENDOR_BLOCK_DATA_BYTES = 32;
+
+// TYPED_BLOCK_DATA
+static constexpr uint8_t VENDOR_DATA_TYPE = 0x04;
+static constexpr uint8_t VENDOR_DEFAULT = 0x00;
+static constexpr uint8_t FIRMWARE_IMAGE_DATA = 0x02;
+
+// Commands to OPERATIONAL_UNIT_OPS_CMD
+static constexpr uint8_t GET_OPERATIONAL_UNIT = 0x01;
+static constexpr uint8_t GENERATE_OPERATIONAL_UNIT_CKSUM = 0x08;
+
+static constexpr uint8_t MSBIT_SET_MASK = 0x80;
+static constexpr uint8_t MSBIT_CLR_MASK = 0x7F;
+static constexpr uint8_t OPERATION_SLEEP_SECONDS = 0x1;
 
 #ifndef __HOSTBOOT_RUNTIME
 // Warning thresholds
@@ -575,6 +594,7 @@ errlHndl_t nvdimmReady(Target *i_nvdimm)
             // Add Register Traces to error log
             NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
             nvdimmAddPage4Regs(i_nvdimm,l_err);
+            nvdimmAddVendorLog(i_nvdimm, l_err);
         }
 
     }while(0);
@@ -707,6 +727,7 @@ errlHndl_t nvdimmPollStatus ( Target *i_nvdimm,
 
         l_err->collectTrace(NVDIMM_COMP_NAME);
         nvdimmAddPage4Regs(i_nvdimm,l_err);
+        nvdimmAddVendorLog(i_nvdimm, l_err);
     }
 
     return l_err;
@@ -756,6 +777,7 @@ errlHndl_t nvdimmPollBackupDone(Target* i_nvdimm,
                                          ERRORLOG::ErrlEntry::NO_SW_CALLOUT  );
 
         l_err->collectTrace( NVDIMM_COMP_NAME );
+        nvdimmAddVendorLog(i_nvdimm, l_err);
 
         // Collect register data for FFDC Traces
         nvdimmTraceRegs ( i_nvdimm, l_RegInfo );
@@ -824,6 +846,7 @@ errlHndl_t nvdimmPollRestoreDone(Target* i_nvdimm,
         // Collect register data for FFDC Traces
         nvdimmTraceRegs ( i_nvdimm, l_RegInfo );
         nvdimmAddPage4Regs(i_nvdimm,l_err);
+        nvdimmAddVendorLog(i_nvdimm, l_err);
 
         // Add reg traces to the error log
         NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
@@ -879,6 +902,7 @@ errlHndl_t nvdimmPollEraseDone(Target* i_nvdimm,
 
         l_err->collectTrace( NVDIMM_COMP_NAME );
         nvdimmAddPage4Regs(i_nvdimm,l_err);
+        nvdimmAddVendorLog(i_nvdimm, l_err);
     }
 
     TRACUCOMP(g_trac_nvdimm, EXIT_MRK"nvdimmPollEraseDone() nvdimm[%X]",
@@ -1023,6 +1047,7 @@ errlHndl_t nvdimmSetESPolicy(Target* i_nvdimm)
             // Read relevant regs for trace data
             nvdimmTraceRegs(i_nvdimm, l_RegInfo);
             nvdimmAddPage4Regs(i_nvdimm,l_err);
+            nvdimmAddVendorLog(i_nvdimm, l_err);
 
             // Add reg traces to the error log
             NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
@@ -1263,6 +1288,7 @@ errlHndl_t nvdimmRestore(TargetHandleList& i_nvdimmList, uint8_t &i_mpipl)
                             0x0,
                             ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
                 nvdimmAddPage4Regs(l_nvdimm,l_err);
+                nvdimmAddVendorLog(l_nvdimm, l_err);
                 break;
             }
 
@@ -1500,6 +1526,7 @@ errlHndl_t nvdimmOpenPage(Target *i_nvdimm,
                         ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
 
             l_err->collectTrace(NVDIMM_COMP_NAME, 256 );
+            nvdimmAddVendorLog(i_nvdimm, l_err);
 
             // Failure to open page most likely means problem with
             // the NV controller.
@@ -1883,6 +1910,7 @@ errlHndl_t nvdimm_factory_reset(Target *i_nvdimm)
                         ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
 
             l_err->collectTrace(NVDIMM_COMP_NAME);
+            nvdimmAddVendorLog(i_nvdimm, l_err);
 
             // If nvdimm is not ready for access by now, this is
             // a failing indication on the NV controller
@@ -2007,6 +2035,7 @@ errlHndl_t nvdimm_init(Target *i_nvdimm)
                                              ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
 
             l_err->collectTrace( NVDIMM_COMP_NAME );
+            nvdimmAddVendorLog(i_nvdimm, l_err);
 
             // Failure to erase could mean internal NV controller error and/or
             // HW error on nand flash. NVDIMM will lose persistency if failed to
@@ -2089,6 +2118,7 @@ errlHndl_t nvdimm_init(Target *i_nvdimm)
             // Collect register data for FFDC Traces
             nvdimmTraceRegs ( i_nvdimm, l_RegInfo );
             nvdimmAddPage4Regs(i_nvdimm,l_err);
+            nvdimmAddVendorLog(i_nvdimm, l_err);
 
             // Add reg traces to the error log
             NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
@@ -2452,6 +2482,7 @@ bool nvdimm_encrypt_unlock(TargetHandleList &i_nvdimmList)
                                 ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
 
                 l_err->collectTrace(NVDIMM_COMP_NAME);
+                nvdimmAddVendorLog(l_nvdimm, l_err);
                 l_err->addPartCallout( l_nvdimm,
                                        HWAS::NV_CONTROLLER_PART_TYPE,
                                        HWAS::SRCI_PRIORITY_HIGH);
@@ -2968,6 +2999,7 @@ errlHndl_t nvdimm_setKeyReg(Target* i_nvdimm,
                                 ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
 
                     l_err->collectTrace(NVDIMM_COMP_NAME);
+                    nvdimmAddVendorLog(i_nvdimm, l_err);
                     l_err->addPartCallout( i_nvdimm,
                                            HWAS::NV_CONTROLLER_PART_TYPE,
                                            HWAS::SRCI_PRIORITY_HIGH);
@@ -3144,6 +3176,7 @@ bool nvdimm_encrypt_enable(TargetHandleList &i_nvdimmList)
                                 ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
 
                 l_err->collectTrace(NVDIMM_COMP_NAME);
+                nvdimmAddVendorLog(l_nvdimm, l_err);
                 l_err->addPartCallout( l_nvdimm,
                                     HWAS::NV_CONTROLLER_PART_TYPE,
                                     HWAS::SRCI_PRIORITY_HIGH);
@@ -3284,6 +3317,7 @@ bool nvdimm_crypto_erase(TargetHandleList &i_nvdimmList)
                                 ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
 
                 l_err->collectTrace(NVDIMM_COMP_NAME);
+                nvdimmAddVendorLog(l_nvdimm, l_err);
                 l_err->addPartCallout( l_nvdimm,
                                     HWAS::NV_CONTROLLER_PART_TYPE,
                                     HWAS::SRCI_PRIORITY_HIGH);
@@ -3359,6 +3393,7 @@ bool nvdimm_crypto_erase(TargetHandleList &i_nvdimmList)
                                 ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
 
                 l_err->collectTrace(NVDIMM_COMP_NAME);
+                nvdimmAddVendorLog(l_nvdimm, l_err);
                 l_err->addPartCallout( l_nvdimm,
                                     HWAS::NV_CONTROLLER_PART_TYPE,
                                     HWAS::SRCI_PRIORITY_HIGH);
@@ -3651,6 +3686,629 @@ errlHndl_t notifyNvdimmProtectionChange(Target* i_target,
         ERRL_GETEID_SAFE(l_err), ERRL_GETRC_SAFE(l_err) );
 
     return l_err;
+}
+
+
+/*
+ * @brief Get operational unit operation timeout
+ */
+errlHndl_t getOperOpsTimeout(TARGETING::Target* i_nvdimm,
+                             uint16_t& o_timeout)
+{
+    errlHndl_t l_err = nullptr;
+
+    do
+    {
+        // Get timeout lsb
+        uint8_t l_lsb = 0;
+        l_err = nvdimmReadReg(i_nvdimm,
+                              OPERATIONAL_UNIT_OPS_TIMEOUT0,
+                              l_lsb);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK
+                "getOperOpsTimeout() nvdimm[%X] error reading 0x%X",
+                get_huid(i_nvdimm), OPERATIONAL_UNIT_OPS_TIMEOUT0);
+            break;
+        }
+
+        // Get timeout msb
+        uint8_t l_msb = 0;
+        l_err = nvdimmReadReg(i_nvdimm,
+                              OPERATIONAL_UNIT_OPS_TIMEOUT1,
+                              l_msb);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK
+                "getOperOpsTimeout() nvdimm[%X] error reading 0x%X",
+                get_huid(i_nvdimm), OPERATIONAL_UNIT_OPS_TIMEOUT1);
+            break;
+        }
+
+        // Bit 7 of the MSB indicates whether the time should
+        //   be interpreted in seconds or milliseconds
+        //   0 = millisecond
+        //   1 = second
+        if (l_msb < MSBIT_SET_MASK)
+        {
+            o_timeout = l_msb;
+            o_timeout <<= 8;
+            o_timeout += l_lsb;
+            o_timeout = o_timeout / MS_PER_SEC;
+        }
+        else
+        {
+            l_msb = l_msb & MSBIT_CLR_MASK;
+            o_timeout = l_msb;
+            o_timeout <<= 8;
+            o_timeout += l_lsb;
+        }
+
+    } while(0);
+
+    return l_err;
+}
+
+
+/*
+ * @brief Wait for operational unit operation to complete
+ */
+errlHndl_t waitOperOpsComplete(TARGETING::Target* i_nvdimm, uint8_t i_cmd)
+{
+    errlHndl_t l_err = nullptr;
+    bool l_complete = false;
+    uint16_t l_timeout = 0;
+    uint8_t l_status = 0;
+
+    // Get the timeout
+    l_err = getOperOpsTimeout(i_nvdimm, l_timeout);
+
+    do
+    {
+        // Exit if l_timeout invalid
+        if (l_err)
+        {
+            break;
+        }
+
+        // Delay before reading status
+        nanosleep( OPERATION_SLEEP_SECONDS, 0 );
+        if (OPERATION_SLEEP_SECONDS > l_timeout)
+        {
+            l_timeout = 0;
+        }
+        else
+        {
+            l_timeout = l_timeout - OPERATION_SLEEP_SECONDS;
+        }
+
+        // Get timeout cmd status 1
+        l_err = nvdimmReadReg(i_nvdimm,
+                              NVDIMM_CMD_STATUS1,
+                              l_status);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK
+                "waitOperOpsComplete() nvdimm[%X] error reading 0x%X",
+                get_huid(i_nvdimm), NVDIMM_CMD_STATUS1);
+            break;
+        }
+
+        if (l_status >= 0x01)
+        {
+            // If bit 1 is set that means the command is in progress
+            // Wait for it to become 0
+        }
+        else
+        {
+            l_complete = true;
+            break;
+        }
+
+    } while(l_timeout > 0);
+
+    // Timed out
+    if (!l_err && (l_complete == false) )
+    {
+        TRACFCOMP(g_trac_nvdimm, ERR_MRK
+            "waitOperOpsComplete() nvdimm[%X] "
+            "Timeout waiting for operation 0x%X to complete, "
+            "NVDIMM_CMD_STATUS1 0x%X",
+            get_huid(i_nvdimm), i_cmd, l_status);
+
+        // Get the timeout value again
+        getOperOpsTimeout(i_nvdimm, l_timeout);
+
+        /*@
+         *@errortype
+         *@reasoncode    NVDIMM_VENDOR_LOG_TIMEOUT
+         *@severity      ERRORLOG_SEV_PREDICTIVE
+         *@moduleid      NVDIMM_WAIT_OPER_OPS_COMPLETE
+         *@userdata1[0:31]    NVDIMM HUID
+         *@userdata1[32:63]   OPERATIONAL_UNIT_OPS_CMD
+         *@userdata2[0:31]    NVDIMM_CMD_STATUS1
+         *@userdata2[32:63]   OPERATIONAL_UNIT_OPS_TIMEOUT
+         *@devdesc       NVDIMM timeout reading vendor log
+         *@custdesc      NVDIMM logging error
+         */
+        l_err = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_PREDICTIVE,
+                        NVDIMM_WAIT_OPER_OPS_COMPLETE,
+                        NVDIMM_VENDOR_LOG_TIMEOUT,
+                        TWO_UINT32_TO_UINT64(
+                            get_huid(i_nvdimm),
+                            i_cmd
+                        ),
+                        TWO_UINT32_TO_UINT64(
+                           l_status,
+                           l_timeout
+                        ),
+                        ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
+
+        l_err->collectTrace(NVDIMM_COMP_NAME);
+        l_err->addPartCallout( i_nvdimm,
+                               HWAS::NV_CONTROLLER_PART_TYPE,
+                               HWAS::SRCI_PRIORITY_HIGH);
+    }
+
+    return l_err;
+}
+
+
+/*
+ * @brief Get the vendor log unit
+ */
+errlHndl_t getLogPerUnit(TARGETING::Target* i_nvdimm,
+                         uint16_t i_unitId,
+                         std::vector<uint8_t>& o_unitData)
+{
+    // 3a)  write OPERATIONAL_UNIT_ID0 and OPERATIONAL_UNIT_ID1 with unit_id
+    // 3b)  set OPERATIONAL_UNIT_OPS_CMD to GET_OPERATIONAL_UNIT
+    // 3c)  wait for NVDIMM_CMD_STATUS1 to return 0
+    // 3d)  for (block_id = 0;
+    //           block_id < VENDOR_LOG_UNIT_SIZE/BLOCKSIZE;
+    //           block_id++)
+    // 3da)     Write block_id to BLOCK_ID
+    // 3db)     Read TYPED_BLOCK_DATA_BYTE0 to TYPED_BLOCK_DATA_BYTE31
+    // 3dc)     Save data to buffer
+
+    errlHndl_t l_err = nullptr;
+
+    do
+    {
+        // 3a)
+        // Write the unit LSB
+        l_err = nvdimmWriteReg(i_nvdimm,
+                               OPERATIONAL_UNIT_ID0,
+                               i_unitId & 0x00FF);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK
+                "getLogPerUnit() nvdimm[%X] error writing reg 0x%X to 0x%X",
+                get_huid(i_nvdimm), OPERATIONAL_UNIT_ID0, (i_unitId & 0x00FF));
+            break;
+        }
+
+        // Write the unit MSB
+        l_err = nvdimmWriteReg(i_nvdimm,
+                               OPERATIONAL_UNIT_ID1,
+                               i_unitId >> 8);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK
+                "getLogPerUnit() nvdimm[%X] error writing reg 0x%X to 0x%X",
+                get_huid(i_nvdimm), OPERATIONAL_UNIT_ID0, (i_unitId >> 8) );
+            break;
+        }
+
+        // 3b)
+        // Write the cmd
+        l_err = nvdimmWriteReg(i_nvdimm,
+                               OPERATIONAL_UNIT_OPS_CMD,
+                               GET_OPERATIONAL_UNIT);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK
+                "getLogPerUnit() nvdimm[%X] error writing reg 0x%X to 0x%X",
+                get_huid(i_nvdimm), OPERATIONAL_UNIT_OPS_CMD,
+                GET_OPERATIONAL_UNIT );
+            break;
+        }
+
+        // 3c
+        l_err = waitOperOpsComplete(i_nvdimm, GET_OPERATIONAL_UNIT);
+        if (l_err)
+        {
+            break;
+        }
+
+        // 3d
+        for (uint8_t l_blockId = 0;
+             l_blockId < (VENDOR_LOG_UNIT_SIZE / VENDOR_LOG_BLOCK_SIZE);
+             l_blockId++)
+        {
+            // 3da
+            // Write the block id
+            l_err = nvdimmWriteReg(i_nvdimm,
+                                   BLOCK_ID,
+                                   l_blockId);
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_nvdimm, ERR_MRK
+                    "getLogPerUnit() nvdimm[%X] error writing reg 0x%X to 0x%X",
+                    get_huid(i_nvdimm), BLOCK_ID, l_blockId );
+                break;
+            }
+
+            // 3db
+            // Read all the block data
+            for (uint16_t l_byteId = TYPED_BLOCK_DATA_BYTE0;
+                 l_byteId < (TYPED_BLOCK_DATA_BYTE0 + VENDOR_BLOCK_DATA_BYTES);
+                 l_byteId++)
+            {
+                uint8_t l_data = 0;
+                l_err = nvdimmReadReg(i_nvdimm,
+                                      l_byteId,
+                                      l_data);
+                if (l_err)
+                {
+                    TRACFCOMP(g_trac_nvdimm, ERR_MRK
+                        "getLogPerUnit() nvdimm[%X] error reading 0x%X",
+                        get_huid(i_nvdimm), l_byteId);
+                    break;
+                }
+
+                // 3dc
+                o_unitData.push_back(l_data);
+            } // for byteId
+
+            if (l_err)
+            {
+                break;
+            }
+        } // for blockId
+
+    } while(0);
+
+    return l_err;
+}
+
+
+/*
+ * @brief Calculate CRC
+ */
+uint16_t crc16(const uint8_t * i_data, int i_size)
+{
+    // From JEDEC JESD245B.01 document
+    // https://www.jedec.org/standards-documents/docs/jesd245a
+    int i, crc;
+    crc = 0;
+    while (--i_size >= 0)
+    {
+        crc = crc ^ (int)*i_data++ << 8;
+        for (i = 0; i < 8; ++i)
+        {
+           if (crc & 0x8000)
+           {
+               crc = crc << 1 ^ 0x1021;
+           }
+           else
+           {
+               crc = crc << 1;
+           }
+        }
+    }
+    return (crc & 0xFFFF);
+}
+
+
+/*
+ * @brief Get operational unit crc
+ */
+errlHndl_t getOperUnitCrc(TARGETING::Target* i_nvdimm, uint16_t& o_crc)
+{
+    errlHndl_t l_err = nullptr;
+
+    do
+    {
+        // Get crc lsb
+        uint8_t l_lsb = 0;
+        l_err = nvdimmReadReg(i_nvdimm,
+                              OPERATIONAL_UNIT_CRC0,
+                              l_lsb);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK
+                "getOperUnitCrc() nvdimm[%X] error reading 0x%X",
+                get_huid(i_nvdimm), OPERATIONAL_UNIT_CRC0);
+            break;
+        }
+
+        // Get crc msb
+        uint8_t l_msb = 0;
+        l_err = nvdimmReadReg(i_nvdimm,
+                              OPERATIONAL_UNIT_CRC1,
+                              l_msb);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK
+                "getOperUnitCrc() nvdimm[%X] error reading 0x%X",
+                get_huid(i_nvdimm), OPERATIONAL_UNIT_CRC1);
+            break;
+        }
+
+        o_crc = l_msb;
+        o_crc <<= 8;
+        o_crc += l_lsb;
+
+    } while(0);
+
+    return l_err;
+}
+
+
+/*
+ * @brief Compare host and nvdimm checksum
+ */
+errlHndl_t compareCksum(TARGETING::Target* i_nvdimm,
+                        std::vector<uint8_t>& i_unitData)
+{
+    // 3e) Compare checksum for unit retrieved
+    // 3ea)     Write GENERATE_OPERATIONAL_UNIT_CKSUM
+    //            to OPERATIONAL_UNIT_OPS_CMD
+    // 3eb)     wait for NVDIMM_CMD_STATUS1 to return 0
+    // 3ec)     Read OPERATIONAL_UNIT_CRC1(MSB) and OPERATIONAL_UNIT_CRC0(LSB)
+    // 3ed)     Calculate host checksum
+    // 3ee)     return true if 3ec) == 3ed)
+
+    errlHndl_t l_err = nullptr;
+
+    do
+    {
+        // 3ea)
+        // Command the nvdimm to calculate the CRC on the unit
+        l_err = nvdimmWriteReg(i_nvdimm,
+                               OPERATIONAL_UNIT_OPS_CMD,
+                               GENERATE_OPERATIONAL_UNIT_CKSUM);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK
+                "compareCksum() nvdimm[%X] error writing reg 0x%X to 0x%X",
+                get_huid(i_nvdimm), OPERATIONAL_UNIT_OPS_CMD,
+                GENERATE_OPERATIONAL_UNIT_CKSUM );
+            break;
+        }
+
+        // 3eb)
+        // Wait for the command to finish
+        l_err = waitOperOpsComplete(i_nvdimm,
+                                    GENERATE_OPERATIONAL_UNIT_CKSUM);
+        if (l_err)
+        {
+            break;
+        }
+
+        // 3ec)
+        // Read the HW CRC MSB + LSB
+        uint16_t l_nvdimmCrc = 0;
+        l_err = getOperUnitCrc(i_nvdimm, l_nvdimmCrc);
+        if (l_err)
+        {
+            break;
+        }
+
+        // 3ed)
+        // Calculate the host checksum
+        uint8_t* l_hostData = reinterpret_cast<uint8_t*>(i_unitData.data());
+        uint16_t l_hostCrc = crc16(l_hostData, i_unitData.size());
+
+        // 3ee)
+        if (l_hostCrc != l_nvdimmCrc)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK
+                "compareCksum() nvdimm[%X] compare cksum failed "
+                "hostCrc 0x%X nvdimmCrc 0x%X",
+                get_huid(i_nvdimm), l_hostCrc, l_nvdimmCrc);
+            /*@
+            *@errortype
+            *@reasoncode    NVDIMM_VENDOR_LOG_CKSUM_FAILED
+            *@severity      ERRORLOG_SEV_PREDICTIVE
+            *@moduleid      NVDIMM_COMPARE_CKSUM
+            *@userdata1     NVDIMM HUID
+            *@userdata2[0:31]    HOST CRC
+            *@userdata2[32:63]   NVDIMM CRC
+            *@devdesc       NVDIMM vendor log checksum failed
+            *@custdesc      NVDIMM logging error
+            */
+            l_err = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_PREDICTIVE,
+                            NVDIMM_COMPARE_CKSUM,
+                            NVDIMM_VENDOR_LOG_CKSUM_FAILED,
+                            get_huid(i_nvdimm),
+                            TWO_UINT32_TO_UINT64(
+                                l_hostCrc,
+                                l_nvdimmCrc),
+                            ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
+
+            l_err->collectTrace(NVDIMM_COMP_NAME);
+            l_err->addPartCallout( i_nvdimm,
+                                   HWAS::NV_CONTROLLER_PART_TYPE,
+                                   HWAS::SRCI_PRIORITY_HIGH);
+        }
+
+    } while(0);
+
+    return l_err;
+}
+
+
+/*
+ * @brief Add vendor log data to FFDC
+ *        Added to all NVDIMM HW errors
+ */
+void nvdimmAddVendorLog( TARGETING::Target* i_nvdimm, errlHndl_t& io_err )
+{
+    TRACFCOMP( g_trac_nvdimm, ENTER_MRK
+        "nvdimmAddVendorLog: Target huid 0x%.8X",
+        get_huid(i_nvdimm));
+
+    /*
+       1) Read VENDOR_LOG_PAGE_SIZE. Multiply the return value with BLOCKSIZE
+          to get the total page size (LOG_PAGE_SIZE)
+       2) Set TYPED_BLOCK_DATA to VENDOR_DATA_TYPE
+       3) for (unit_id = 0;
+               unit_id < LOG_PAGE_LENGTH/VENDOR_LOG_UNIT_SIZE;
+               unit_id++)
+       3a)  write OPERATIONAL_UNIT_ID0 and OPERATIONAL_UNIT_ID1 with unit_id
+       3b)  set OPERATIONAL_UNIT_OPS_CMD to GET_OPERATIONAL_UNIT
+       3c)  wait for NVDIMM_CMD_STATUS1 to return 0
+       3d)  for (block_id = 0;
+                 block_id < VENDOR_LOG_UNIT_SIZE/BLOCKSIZE;
+                 block_id++)
+       3da)     Write block_id to BLOCK_ID
+       3db)     Read TYPED_BLOCK_DATA_BYTE0 to TYPED_BLOCK_DATA_BYTE31
+       3dc)     Save data to buffer
+       3e) Compare checksum for unit retrieved
+       3ea)     Write GENERATE_OPERATIONAL_UNIT_CKSUM
+                to OPERATIONAL_UNIT_OPS_CMD
+       3eb)     wait for NVDIMM_CMD_STATUS1 to return 0
+       3ec)     Read OPERATIONAL_UNIT_CRC1(MSB) and OPERATIONAL_UNIT_CRC0(LSB)
+       3ed)     Calculate host checksum
+       3ee)     return true if 3ec) == 3ed)
+    */
+
+    errlHndl_t l_err = nullptr;
+
+    // Get the vendor log attribute
+    auto l_vendorLog = i_nvdimm->getAttr<ATTR_NVDIMM_READING_VENDOR_LOG>();
+
+    do
+    {
+        // If attr is set we are already in the process of
+        // reading the vendor log, exit
+        if (l_vendorLog)
+        {
+            break;
+        }
+
+        // Set the vendor log attribute so we don't recursively
+        // execute the nvdimmAddVendorLog function
+        l_vendorLog = 0x1;
+        i_nvdimm->setAttr<ATTR_NVDIMM_READING_VENDOR_LOG>(l_vendorLog);
+
+        uint8_t l_readData = 0;
+        std::vector<uint8_t> l_fullData;
+
+        // Step 1
+        l_err = nvdimmReadReg(i_nvdimm,
+                              VENDOR_LOG_PAGE_SIZE,
+                              l_readData);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK
+                "nvdimmAddVendorLog() nvdimm[%X] error reading 0x%X",
+                get_huid(i_nvdimm), VENDOR_LOG_PAGE_SIZE);
+            break;
+        }
+
+        size_t l_logPgeLength = l_readData * VENDOR_LOG_BLOCK_SIZE;
+
+        // Step 2
+        // Some weird bug here - switching directly to VENDOR_DATA_TYPE
+        // would not work. Need to switch to something else first
+        l_err = nvdimmWriteReg(i_nvdimm,
+                               TYPED_BLOCK_DATA,
+                               FIRMWARE_IMAGE_DATA);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK
+                "nvdimmAddVendorLog() nvdimm[%X] error writing 0x%X to 0x%X",
+                get_huid(i_nvdimm),TYPED_BLOCK_DATA, FIRMWARE_IMAGE_DATA );
+            break;
+        }
+
+        l_err = nvdimmWriteReg(i_nvdimm,
+                               TYPED_BLOCK_DATA,
+                               VENDOR_DATA_TYPE);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK
+                "nvdimmAddVendorLog() nvdimm[%X] error writing 0x%X to 0x%X",
+                get_huid(i_nvdimm),TYPED_BLOCK_DATA, VENDOR_DATA_TYPE );
+            break;
+        }
+
+        // Step 3
+        // Loop through all the log units.
+        for (uint16_t l_unitId = 0;
+             l_unitId < (l_logPgeLength / VENDOR_LOG_UNIT_SIZE);
+             l_unitId++)
+        {
+            // Step 3a) - 3dc)
+            // Get one log unit
+            std::vector<uint8_t> l_unitData;
+            l_err = getLogPerUnit(i_nvdimm, l_unitId, l_unitData);
+            if (l_err)
+            {
+                break;
+            }
+
+            // Step 3e) - 3ee)
+            // Check the checksum for the entire log unit
+            l_err = compareCksum(i_nvdimm, l_unitData);
+            if (l_err)
+            {
+                break;
+            }
+
+            // Append to full data
+            l_fullData.insert(l_fullData.end(),
+                              l_unitData.begin(),
+                              l_unitData.end());
+        }
+
+        if (l_err)
+        {
+            break;
+        }
+
+        // Add NUL terminator to ascii data
+        l_fullData.push_back(0x00);
+
+        // Add vendor data to error log as string
+        const char* l_fullChar = reinterpret_cast<char*>(l_fullData.data());
+        ERRORLOG::ErrlUserDetailsStringSet l_stringSet;
+        l_stringSet.add("Vendor Log", l_fullChar);
+        l_stringSet.addToLog(io_err);
+
+        // Change back to default
+        l_err = nvdimmWriteReg(i_nvdimm,
+                               TYPED_BLOCK_DATA,
+                               VENDOR_DEFAULT);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK
+                "nvdimmAddVendorLog() nvdimm[%X] error writing 0x%X to 0x%X",
+                get_huid(i_nvdimm),TYPED_BLOCK_DATA, VENDOR_DEFAULT );
+            break;
+        }
+
+    } while(0);
+
+    if (l_err)
+    {
+        // FFDC error, set as informational
+        l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+        errlCommit( l_err, NVDIMM_COMP_ID );
+    }
+
+    // Clear the vendor log attribute before exiting
+    l_vendorLog = 0x0;
+    i_nvdimm->setAttr<ATTR_NVDIMM_READING_VENDOR_LOG>(l_vendorLog);
+
+    TRACFCOMP( g_trac_nvdimm, EXIT_MRK
+        "nvdimmAddVendorLog: Target huid 0x%.8X",
+        get_huid(i_nvdimm));
 }
 
 

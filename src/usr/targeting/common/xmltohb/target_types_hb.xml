@@ -249,6 +249,9 @@
       <id>NVDIMM_READING_PAGE4</id>
     </attribute>
     <attribute>
+      <id>NVDIMM_READING_VENDOR_LOG</id>
+    </attribute>
+    <attribute>
       <id>PART_NUMBER</id>
     </attribute>
     <attribute>

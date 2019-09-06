@@ -400,6 +400,7 @@ errlHndl_t NvdimmInstalledImage::updateImage(NvdimmLidImage * i_lidImage)
                                    l_status.whole,
                                    ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
             l_err->collectTrace( NVDIMM_COMP_NAME, 256 );
+            nvdimmAddVendorLog(iv_dimm, l_err);
             l_err->addPartCallout( iv_dimm,
                                    HWAS::NV_CONTROLLER_PART_TYPE,
                                    HWAS::SRCI_PRIORITY_HIGH );
@@ -574,6 +575,7 @@ errlHndl_t NvdimmInstalledImage::updateImage(NvdimmLidImage * i_lidImage)
                                       0x0000),
                                    ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
             l_err->collectTrace( NVDIMM_COMP_NAME, 256 );
+            nvdimmAddVendorLog(iv_dimm, l_err);
 
             // maybe some data was altered on the NV controller
             l_err->addPartCallout( iv_dimm,
@@ -948,6 +950,7 @@ errlHndl_t NvdimmInstalledImage::updateImageData(NvdimmLidImage * i_lidImage)
                                           region, data_len),
                                        ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
                 l_err->collectTrace( NVDIMM_COMP_NAME, 256 );
+                nvdimmAddVendorLog(iv_dimm, l_err);
                 l_err->addPartCallout( iv_dimm,
                                        HWAS::NV_CONTROLLER_PART_TYPE,
                                        HWAS::SRCI_PRIORITY_HIGH );
@@ -1018,6 +1021,7 @@ errlHndl_t NvdimmInstalledImage::changeFwUpdateMode(fw_update_mode i_mode)
                                               0x00, 0x00),
                                            ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
                     l_err->collectTrace( NVDIMM_COMP_NAME, 256 );
+                    nvdimmAddVendorLog(iv_dimm, l_err);
                     l_err->addPartCallout( iv_dimm,
                                            HWAS::NV_CONTROLLER_PART_TYPE,
                                            HWAS::SRCI_PRIORITY_HIGH );
@@ -1101,6 +1105,7 @@ errlHndl_t NvdimmInstalledImage::waitFwOpsBlockReceived()
                                ),
                                ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
         l_err->collectTrace(NVDIMM_COMP_NAME, 512 );
+        nvdimmAddVendorLog(iv_dimm, l_err);
         l_err->addPartCallout( iv_dimm,
                                HWAS::NV_CONTROLLER_PART_TYPE,
                                HWAS::SRCI_PRIORITY_HIGH );
@@ -1180,6 +1185,7 @@ errlHndl_t NvdimmInstalledImage::waitFwOpsComplete()
                                    ),
                                    ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
             l_err->collectTrace(NVDIMM_COMP_NAME, 256 );
+            nvdimmAddVendorLog(iv_dimm, l_err);
             l_err->addPartCallout( iv_dimm,
                                    HWAS::NV_CONTROLLER_PART_TYPE,
                                    HWAS::SRCI_PRIORITY_HIGH );
@@ -1547,6 +1553,7 @@ errlHndl_t NvdimmInstalledImage::validateFwHeader()
                                            opsCmd.whole,
                                            ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
                     l_err->collectTrace(NVDIMM_COMP_NAME, 256 );
+                    nvdimmAddVendorLog(iv_dimm, l_err);
                     l_err->addPartCallout( iv_dimm,
                                            HWAS::NV_CONTROLLER_PART_TYPE,
                                            HWAS::SRCI_PRIORITY_HIGH );
@@ -1597,6 +1604,7 @@ errlHndl_t NvdimmInstalledImage::commitFwRegion()
                                            opsCmd.whole,
                                            ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
                     l_err->collectTrace(NVDIMM_COMP_NAME, 256 );
+                    nvdimmAddVendorLog(iv_dimm, l_err);
                     l_err->addPartCallout( iv_dimm,
                                            HWAS::NV_CONTROLLER_PART_TYPE,
                                            HWAS::SRCI_PRIORITY_HIGH );
@@ -1648,6 +1656,7 @@ errlHndl_t NvdimmInstalledImage::clearFwDataBlock()
                                        opsCmd.whole,
                                        ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
                 l_err->collectTrace(NVDIMM_COMP_NAME, 256 );
+                nvdimmAddVendorLog(iv_dimm, l_err);
                 l_err->addPartCallout( iv_dimm,
                                        HWAS::NV_CONTROLLER_PART_TYPE,
                                        HWAS::SRCI_PRIORITY_HIGH );
@@ -1698,6 +1707,7 @@ errlHndl_t NvdimmInstalledImage::validateFwImage()
                                            opsCmd.whole,
                                            ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
                     l_err->collectTrace(NVDIMM_COMP_NAME, 256 );
+                    nvdimmAddVendorLog(iv_dimm, l_err);
                     l_err->addPartCallout( iv_dimm,
                                            HWAS::NV_CONTROLLER_PART_TYPE,
                                            HWAS::SRCI_PRIORITY_HIGH );
@@ -1984,6 +1994,7 @@ bool NvdimmsUpdate::runUpdate(void)
                                            ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
             l_err->collectTrace(NVDIMM_COMP_NAME, 256 );
             l_err->collectTrace(NVDIMM_UPD, 256);
+            nvdimmAddVendorLog(l_nvdimm, l_err);
             l_err->addPartCallout( l_nvdimm,
                                    HWAS::NV_CONTROLLER_PART_TYPE,
                                    HWAS::SRCI_PRIORITY_HIGH );
@@ -2203,6 +2214,8 @@ errlHndl_t NvdimmsUpdate::isUpdateNeeded(bool & o_update_needed,
                                            curType,
                                            ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
                 l_err->collectTrace( NVDIMM_UPD, 256 );
+                nvdimmAddVendorLog(const_cast<TARGETING::Target*>(l_dimm),
+                                   l_err);
                 l_err->addPartCallout( l_dimm,
                                        HWAS::NV_CONTROLLER_PART_TYPE,
                                        HWAS::SRCI_PRIORITY_HIGH );

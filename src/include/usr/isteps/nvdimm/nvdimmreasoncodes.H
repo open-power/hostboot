@@ -104,6 +104,8 @@ enum nvdimmModuleId
     NVDIMM_MODULE_HEALTH_STATUS_CHECK       = 0x36,
     NVDIMM_SET_EVENT_NOTIFICATION           = 0x37,
     NVDIMM_NVM_HEALTH_CHECK                 = 0x38, // Health check on the NVM (non-volatile memory)/flash
+    NVDIMM_WAIT_OPER_OPS_COMPLETE           = 0x39,
+    NVDIMM_COMPARE_CKSUM                    = 0x3A,
 };
 
 /**
@@ -192,6 +194,8 @@ enum nvdimmReasonCode
     NVDIMM_ES_LIFETIME_MIN_REQ_NOT_MET         = NVDIMM_COMP_ID | 0x4B,   // !< pertains to ES_LIFETIME; BPM does not meet minimum requirement for a new BPM
     NVDIMM_ES_HEALTH_CHECK_NEVER_INITIATED     = NVDIMM_COMP_ID | 0x4C,   // !< An ES health check was never initiated at start of IPL
     NVDIMM_NVM_HEALTH_CHECK_FAILED             = NVDIMM_COMP_ID | 0x4D,   // !< An NVM health check on the NVDIMM failed
+    NVDIMM_VENDOR_LOG_TIMEOUT                  = NVDIMM_COMP_ID | 0x4E,   // Vendor log for FFDC timeout
+    NVDIMM_VENDOR_LOG_CKSUM_FAILED             = NVDIMM_COMP_ID | 0x4F,   // Vendor log for FFDC checksum fail
 };
 
 enum UserDetailsTypes

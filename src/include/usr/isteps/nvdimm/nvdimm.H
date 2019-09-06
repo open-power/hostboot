@@ -144,7 +144,7 @@ void nvdimm_getNvdimmList(TARGETING::TargetHandleList &o_nvdimmList);
  *
  * @param[in] i_nvdimm - nvdimm target with NV controller
  *
- * @return errlHndl_t - Null if successful, otherwise a pointer to
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer to
  *      the error log.
  */
 errlHndl_t nvdimmEraseNF(TARGETING::Target *i_nvdimm);
@@ -177,7 +177,7 @@ bool nvdimmInErrorState(TARGETING::Target *i_nvdimm);
  *
  * @param[in] i_state - true to arm, false to disarm
  *
- * @return errlHndl_t - Null if successful, otherwise a pointer to
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer to
  *      the error log.
  */
 errlHndl_t nvdimmChangeArmState(TARGETING::Target *i_nvdimm, bool i_state);
@@ -240,7 +240,7 @@ bool nvDimmEsCheckHealthStatus(const TARGETING::TargetHandleList
 bool nvDimmEsCheckHealthStatusOnSystem();
 
 
-/*
+/**
  * @brief Check the NVM (non-volatile memory)/flash health status of the
  *        individual NVDIMMs supplied in list.
  *
@@ -311,9 +311,105 @@ enum nvdimm_protection_t
  *                      - ERROR states updated per NVDIMM
  *                      - OCC state updated per PROC
  * @param i_state      Protection state of NVDIMM
+ *
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer to
+ *      the error log.
  */
 errlHndl_t notifyNvdimmProtectionChange(TARGETING::Target* i_target,
                                   const nvdimm_protection_t i_state);
+
+/**
+ * @brief Get operational unit operation timeout
+ *
+ * @param[in] i_nvdimm - nvdimm target
+ *
+ * @param[out] o_timeout - operation timeout
+ *
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer to
+ *      the error log.
+ */
+errlHndl_t getOperOpsTimeout(TARGETING::Target* i_nvdimm,
+                             uint16_t& o_timeout);
+
+/**
+ * @brief Wait for operational unit operation to complete
+ *
+ * @param[in] i_nvdimm - nvdimm target
+ *
+ * @param[in] i_cmd - operational unit ops command
+ *
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer to
+ *      the error log.
+ */
+errlHndl_t waitOperOpsComplete(TARGETING::Target* i_nvdimm,
+                               uint8_t i_cmd);
+
+
+/**
+ * @brief Get the vendor log unit
+ *
+ * @param[in] i_nvdimm - nvdimm target
+ *
+ * @param[in] i_unitId - vendor log unit id
+ *
+ * @param[out] o_unitData - vendor log unit data
+ *
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer to
+ *      the error log.
+ */
+errlHndl_t getLogPerUnit(TARGETING::Target* i_nvdimm,
+                   uint16_t i_unitId,
+                   std::vector<uint8_t>& o_unitData);
+
+/**
+ * @brief Calculate host CRC
+ *
+ * @param[in] i_data - host data
+ *
+ * @param[in] i_data_size - data size
+ *
+ * @return crc
+ */
+uint16_t crc16(const uint8_t * i_data, int i_size);
+
+
+/**
+ * @brief Get operational unit crc
+ *
+ * @param[in] i_nvdimm - nvdimm target
+ *
+ * @param[out] o_crc - nvdimm hw crc
+ *
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer to
+ *      the error log.
+ */
+errlHndl_t getOperUnitCrc(TARGETING::Target* i_nvdimm, uint16_t& o_crc);
+
+
+/**
+ * @brief Compare host and nvdimm checksum
+ *
+ * @param[in] i_nvdimm - nvdimm target
+ *
+ * @param[in] i_unitData - data sent to the nvdimm by the host
+ *
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer to
+ *      the error log.
+ */
+errlHndl_t compareCksum(TARGETING::Target* i_nvdimm,
+                        std::vector<uint8_t>& i_unitData);
+
+
+/**
+ * @brief Function to add NVDIMM vendor log data to errorlog FFDC
+ *
+ * @param[in] i_nvdimm - nvdimm target
+ *
+ * @param[inout] io_err - error log to add FFDC data
+ *
+ */
+void nvdimmAddVendorLog(TARGETING::Target *i_nvdimm, errlHndl_t& io_err);
+
 
 /**
  * @brief Function to add some NVDIMM Page 4 status regs to errorlog FFDC
@@ -342,6 +438,9 @@ void nvdimmAddPage4Regs(TARGETING::Target *i_nvdimm, errlHndl_t& io_err);
  *        - Waits for the ongoing backup to complete
  *        - Disarms the trigger for draminit
  * @param i_target     nvdimm target
+ *
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer to
+ *      the error log.
  */
 errlHndl_t nvdimm_init(TARGETING::Target *i_nvdimm);
 

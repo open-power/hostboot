@@ -739,6 +739,7 @@ errlHndl_t Bpm::issueCommand(const uint8_t i_command,
                                  HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(BPM_COMP_NAME);
             nvdimmAddPage4Regs(iv_nvdimm,errl);
+            nvdimmAddVendorLog(iv_nvdimm, errl);
             break;
         }
 
@@ -867,6 +868,7 @@ errlHndl_t Bpm::issueCommand(const uint8_t i_command,
                                      HWAS::SRCI_PRIORITY_HIGH);
                 errl->collectTrace(BPM_COMP_NAME);
                 nvdimmAddPage4Regs(iv_nvdimm,errl);
+                nvdimmAddVendorLog(iv_nvdimm, errl);
                 break;
             }
         }
@@ -1163,6 +1165,7 @@ errlHndl_t Bpm::inUpdateMode()
             TRACFCOMP(g_trac_bpm, "Bpm::inUpdateMode(): "
                       "Failed to read error status register");
             errl->collectTrace(BPM_COMP_NAME);
+            nvdimmAddVendorLog(iv_nvdimm, errl);
             break;
         }
 
@@ -1189,6 +1192,7 @@ errlHndl_t Bpm::inUpdateMode()
                                  HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(BPM_COMP_NAME);
             nvdimmAddPage4Regs(iv_nvdimm,errl);
+            nvdimmAddVendorLog(iv_nvdimm, errl);
             break;
         }
 
@@ -1252,6 +1256,7 @@ errlHndl_t Bpm::enterUpdateMode()
                                             TARGETING::get_huid(iv_nvdimm));
         infoErrl->collectTrace(BPM_COMP_NAME);
         nvdimmAddPage4Regs(iv_nvdimm,errl);
+        nvdimmAddVendorLog(iv_nvdimm, errl);
         ERRORLOG::errlCommit(infoErrl, BPM_COMP_ID);
 
     } while(0);
@@ -1346,6 +1351,7 @@ errlHndl_t Bpm::exitUpdateMode()
                              HWAS::SRCI_PRIORITY_HIGH);
         infoErrl->collectTrace(BPM_COMP_NAME);
         nvdimmAddPage4Regs(iv_nvdimm,errl);
+        nvdimmAddVendorLog(iv_nvdimm, errl);
         ERRORLOG::errlCommit(infoErrl, BPM_COMP_ID);
 
     } while(0);
@@ -1508,6 +1514,7 @@ errlHndl_t Bpm::updateFirmware(BpmFirmwareLidImage i_image)
                                              HWAS::SRCI_PRIORITY_HIGH);
                         errl->collectTrace(BPM_COMP_NAME);
                         nvdimmAddPage4Regs(iv_nvdimm,errl);
+                        nvdimmAddVendorLog(iv_nvdimm, errl);
 
                         // Change the state of iv_attemptAnotherUpdate to signal
                         // if another update attempt should occur.
@@ -1698,6 +1705,7 @@ errlHndl_t Bpm::enterBootstrapLoaderMode()
             errl->addPartCallout(iv_nvdimm,
                                  HWAS::BPM_PART_TYPE,
                                  HWAS::SRCI_PRIORITY_HIGH);
+            nvdimmAddVendorLog(iv_nvdimm, errl);
             errl->collectTrace(BPM_COMP_NAME);
             nvdimmAddPage4Regs(iv_nvdimm,errl);
             break;
@@ -1795,6 +1803,7 @@ errlHndl_t Bpm::setupPayload(payload_t                    & o_payload,
                                        TARGETING::get_huid(iv_nvdimm));
         errl->collectTrace(BPM_COMP_NAME);
         nvdimmAddPage4Regs(iv_nvdimm,errl);
+        nvdimmAddVendorLog(iv_nvdimm, errl);
         break;
     }
 
@@ -2141,6 +2150,7 @@ errlHndl_t Bpm::writeViaScapRegister(uint8_t const i_reg, uint8_t const i_data)
                                  HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(BPM_COMP_NAME);
             nvdimmAddPage4Regs(iv_nvdimm,errl);
+            nvdimmAddVendorLog(iv_nvdimm, errl);
             break;
         }
 
@@ -2236,6 +2246,7 @@ errlHndl_t Bpm::writeViaScapRegister(uint8_t const i_reg, uint8_t const i_data)
                                  HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(BPM_COMP_NAME);
             nvdimmAddPage4Regs(iv_nvdimm,errl);
+            nvdimmAddVendorLog(iv_nvdimm, errl);
             break;
         }
 
@@ -2308,6 +2319,7 @@ errlHndl_t Bpm::disableWriteProtection()
                                  HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(BPM_COMP_NAME);
             nvdimmAddPage4Regs(iv_nvdimm,errl);
+            nvdimmAddVendorLog(iv_nvdimm, errl);
             break;
         }
 
@@ -2482,6 +2494,7 @@ errlHndl_t Bpm::writeToMagicRegisters(
                                  HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(BPM_COMP_NAME);
             nvdimmAddPage4Regs(iv_nvdimm,errl);
+            nvdimmAddVendorLog(iv_nvdimm, errl);
             break;
         }
 
@@ -2578,6 +2591,7 @@ errlHndl_t Bpm::dumpSegment(uint16_t const i_segmentCode,
                                      HWAS::SRCI_PRIORITY_HIGH);
                 errl->collectTrace(BPM_COMP_NAME);
                 nvdimmAddPage4Regs(iv_nvdimm,errl);
+                nvdimmAddVendorLog(iv_nvdimm, errl);
 
                 break;
             }
@@ -2702,6 +2716,7 @@ errlHndl_t Bpm::dumpSegment(uint16_t const i_segmentCode,
                                  HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(BPM_COMP_NAME);
             nvdimmAddPage4Regs(iv_nvdimm,errl);
+            nvdimmAddVendorLog(iv_nvdimm, errl);
             setAttemptAnotherUpdate();
             break;
         }
@@ -3169,6 +3184,7 @@ errlHndl_t Bpm::getResponse(uint8_t * const o_responseData,
                                  HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(BPM_COMP_NAME);
             nvdimmAddPage4Regs(iv_nvdimm,errl);
+            nvdimmAddVendorLog(iv_nvdimm, errl);
             break;
         }
 
@@ -3348,6 +3364,7 @@ errlHndl_t Bpm::blockWrite(payload_t i_payload)
                              HWAS::BPM_PART_TYPE,
                              HWAS::SRCI_PRIORITY_HIGH);
         errl->collectTrace(BPM_COMP_NAME);
+        nvdimmAddVendorLog(iv_nvdimm, errl);
 
     }
 
@@ -3432,6 +3449,7 @@ errlHndl_t Bpm::blockWriteRetry(payload_t i_payload)
                              HWAS::SRCI_PRIORITY_HIGH);
         errl->collectTrace(BPM_COMP_NAME);
         nvdimmAddPage4Regs(iv_nvdimm,errl);
+        nvdimmAddVendorLog(iv_nvdimm, errl);
 
     }
 
@@ -3504,6 +3522,7 @@ errlHndl_t Bpm::waitForCommandStatusBitReset(
                                      HWAS::SRCI_PRIORITY_HIGH);
                 errl->collectTrace(BPM_COMP_NAME);
                 nvdimmAddPage4Regs(iv_nvdimm,errl);
+                nvdimmAddVendorLog(iv_nvdimm, errl);
                 break;
             }
 
@@ -3547,6 +3566,7 @@ errlHndl_t Bpm::waitForCommandStatusBitReset(
                                        TARGETING::get_huid(iv_nvdimm));
             errl->collectTrace(BPM_COMP_NAME);
             nvdimmAddPage4Regs(iv_nvdimm,errl);
+            nvdimmAddVendorLog(iv_nvdimm, errl);
             break;
 
         }
@@ -3611,6 +3631,7 @@ errlHndl_t Bpm::verifyGoodBpmState()
                                    status.full);
         errl->collectTrace(BPM_COMP_NAME);
         nvdimmAddPage4Regs(iv_nvdimm,errl);
+        nvdimmAddVendorLog(iv_nvdimm, errl);
     }
 
     return errl;
@@ -3664,6 +3685,7 @@ errlHndl_t Bpm::waitForBusyBit()
                                        TARGETING::get_huid(iv_nvdimm));
             errl->collectTrace(BPM_COMP_NAME);
             nvdimmAddPage4Regs(iv_nvdimm,errl);
+            nvdimmAddVendorLog(iv_nvdimm, errl);
             break;
         }
 
@@ -3972,6 +3994,7 @@ errlHndl_t Bpm::checkFirmwareCrc()
                                                              0),
                                        TARGETING::get_huid(iv_nvdimm));
             nvdimmAddPage4Regs(iv_nvdimm,errl);
+            nvdimmAddVendorLog(iv_nvdimm, errl);
             break;
         }
 

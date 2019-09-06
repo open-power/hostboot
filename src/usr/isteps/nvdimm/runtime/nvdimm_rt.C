@@ -141,6 +141,7 @@ errlHndl_t nvdimmCheckArmSuccess(Target *i_nvdimm, bool i_arm_timeout)
                                        ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
 
         l_err->collectTrace(NVDIMM_COMP_NAME, 256 );
+        nvdimmAddVendorLog(i_nvdimm, l_err);
 
         // Failure to arm could mean internal NV controller error or
         // even error on the battery pack. NVDIMM will lose persistency
@@ -453,6 +454,7 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
             // Read relevant regs for trace data
             nvdimmTraceRegs(l_nvdimm, l_RegInfo);
             nvdimmAddPage4Regs(l_nvdimm,l_err);
+            nvdimmAddVendorLog(l_nvdimm, l_err);
 
             // Add reg traces to the error log
             NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
@@ -849,6 +851,7 @@ bool nvDimmEsCheckHealthStatus(const TargetHandleList &i_nvdimmTargetList)
                                    l_esHealthCheck,
                                    ErrlEntry::NO_SW_CALLOUT );
             l_err->collectTrace(NVDIMM_COMP_NAME);
+            nvdimmAddVendorLog(l_nvdimm, l_err);
 
             // Add a BPM callout
             l_err->addPartCallout( l_nvdimm,
@@ -888,6 +891,7 @@ bool nvDimmEsCheckHealthStatus(const TargetHandleList &i_nvdimmTargetList)
                                    l_esHealthCheck,
                                    ErrlEntry::NO_SW_CALLOUT );
             l_err->collectTrace(NVDIMM_COMP_NAME);
+            nvdimmAddVendorLog(l_nvdimm, l_err);
 
             // Add a BPM callout
             l_err->addPartCallout( l_nvdimm,
@@ -964,6 +968,7 @@ bool nvDimmEsCheckHealthStatus(const TargetHandleList &i_nvdimmTargetList)
                                            ES_LIFETIME_MINIMUM_REQUIREMENT),
                                        ErrlEntry::NO_SW_CALLOUT );
                 l_err->collectTrace(NVDIMM_COMP_NAME);
+                nvdimmAddVendorLog(l_nvdimm, l_err);
 
                 // Add a BPM callout
                 l_err->addPartCallout( l_nvdimm,
@@ -1016,6 +1021,7 @@ bool nvDimmEsCheckHealthStatus(const TargetHandleList &i_nvdimmTargetList)
                                    l_esHealthCheck,
                                    ErrlEntry::NO_SW_CALLOUT );
             l_err->collectTrace(NVDIMM_COMP_NAME);
+            nvdimmAddVendorLog(l_nvdimm, l_err);
 
             // Add a BPM callout
             l_err->addPartCallout( l_nvdimm,
@@ -1480,6 +1486,7 @@ bool nvDimmNvmCheckHealthStatus(const TargetHandleList &i_nvDimmTargetList)
                                    ErrlEntry::NO_SW_CALLOUT );
 
             l_err->collectTrace(NVDIMM_COMP_NAME);
+            nvdimmAddVendorLog(l_nvDimm, l_err);
 
             // Collect the error
             errlCommit(l_err, NVDIMM_COMP_ID);

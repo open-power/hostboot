@@ -1017,6 +1017,23 @@
   </attribute>
 
   <attribute>
+    <id>NVDIMM_READING_VENDOR_LOG</id>
+    <description>
+       0 - Not reading vendor log
+       1 - Reading of vendor log in progress
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
     <id>OCC_COMMON_AREA_PHYS_ADDR</id>
     <description>
         Physical address where OCC Common Area is placed in mainstore.
