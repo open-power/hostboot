@@ -666,7 +666,7 @@ uint32_t __analyzeHealthStatus1Reg( STEP_CODE_DATA_STRUCT & io_sc,
  * @return FAIL if unable to read register, else SUCCESS
  */
 uint32_t __readTemp( TargetHandle_t i_dimm, uint16_t i_tempMsbReg,
-                     uint16_t i_tempLsbReg, uint16_t o_tempData )
+                     uint16_t i_tempLsbReg, uint16_t & o_tempData )
 {
     #define PRDF_FUNC "[__readTemp] "
 
@@ -725,7 +725,7 @@ uint32_t __readTemp( TargetHandle_t i_dimm, uint16_t i_tempMsbReg,
             break;
         }
 
-        o_tempData = (msbData << 8) | lsbData;
+        o_tempData = ((uint16_t)msbData << 8) | lsbData;
 
     }while(0);
 
