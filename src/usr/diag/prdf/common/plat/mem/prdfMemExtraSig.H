@@ -110,6 +110,7 @@ PRDR_ERROR_SIGNATURE(EsTmpWarnHigh, 0xffff0097, "", "NVDIMM Energy Source Temper
 PRDR_ERROR_SIGNATURE(EsTmpWarnLow,  0xffff0098, "", "NVDIMM Energy Source Temperature Warning - Low Temp Threshold");
 PRDR_ERROR_SIGNATURE(BelowWarnTh,   0xffff0099, "", "NVDIMM Below Warning Threshold");
 PRDR_ERROR_SIGNATURE(IntNvdimmErr,  0xffff009A, "", "NVDIMM Intermittent error");
+PRDR_ERROR_SIGNATURE(NotifStatErr,  0xffff009B, "", "NVDIMM Set Event Notification Status Error");
 
 #endif // __prdfMemExtraSig_H
 

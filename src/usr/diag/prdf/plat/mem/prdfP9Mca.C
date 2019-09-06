@@ -842,20 +842,27 @@ uint32_t __analyzeErrorThrStatusReg( STEP_CODE_DATA_STRUCT & io_sc,
 /**
  * @brief  Adjusts the warning threshold so that future warnings are allowed
  *         to report.
+ * @param  io_sc       The step code data struct.
  * @param  i_dimm      The target nvdimm.
  * @param  i_warnThReg The address of the relevant warning threshold register.
  * @param  i_errThReg  The address of the relevant error threshold register.
  * @param  o_firstWarn Flag if this is the first warning of this type.
+ * @param  o_statusErr Flag to tell if we found an error from checking the
+ *                     notification status register.
  * @return FAIL if unable to read register, else SUCCESS
  */
-uint32_t __adjustThreshold( TargetHandle_t i_dimm, uint16_t i_warnThReg,
-                            uint16_t i_errThReg, bool & o_firstWarn )
+uint32_t __adjustThreshold( STEP_CODE_DATA_STRUCT & io_sc,
+                            TargetHandle_t i_dimm, uint16_t i_warnThReg,
+                            uint16_t i_errThReg, bool & o_firstWarn,
+                            bool & o_statusErr )
 {
     #define PRDF_FUNC "[__adjustThreshold] "
 
     uint32_t o_rc = SUCCESS;
-    uint16_t notifReg = NVDIMM::i2cReg::SET_EVENT_NOTIFICATION_CMD;
+    uint16_t notifCmdReg    = NVDIMM::i2cReg::SET_EVENT_NOTIFICATION_CMD;
+    uint16_t notifStatusReg = NVDIMM::i2cReg::SET_EVENT_NOTIFICATION_STATUS;
     o_firstWarn = false;
+    o_statusErr = false;
 
     do
     {
@@ -894,25 +901,20 @@ uint32_t __adjustThreshold( TargetHandle_t i_dimm, uint16_t i_warnThReg,
         {
             o_firstWarn = true;
 
-            // Set SET_EVENT_NOTIFICATION_CMD[1]: Warning Threshold
-            //                                    Notification = 0
-            // First read the register.
-            uint8_t warnThNotif = 0;
-            errl = deviceRead( i_dimm, &warnThNotif, NVDIMM_SIZE,
-                               DEVICE_NVDIMM_ADDRESS(notifReg) );
-            if ( errl )
-            {
-                PRDF_ERR( PRDF_FUNC "Failed to read Set Event Notification "
-                          "Cmd Reg. HUID: 0x%08x", getHuid(i_dimm) );
-                PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-                o_rc = FAIL;
-                break;
-            }
+            // SET_EVENT_NOTIFICATION_CMD is a write only register that is
+            // used to change the SET_EVENT_NOTIFICATION_STATUS register.
+            // The only bits within it that are used are bits 0 and 1, as such
+            // we can safely set the rest to 0. It is defined as:
+            // [0]:   Persistency Notification
+            // [1]:   Warning Threshold Notification
+            // [2]:   Obsolete
+            // [3]:   Firmware Activation Notification (Not Used)
+            // [4:7]: Reserved
 
-            // Clear bit 1
-            warnThNotif &= 0xfd;
-            errl = deviceWrite( i_dimm, &warnThNotif, NVDIMM_SIZE,
-                                DEVICE_NVDIMM_ADDRESS(notifReg) );
+            // Clear SET_EVENT_NOTIFICATION_CMD bit 1 and keep bit 0 set
+            uint8_t notifCmd = 0x01;
+            errl = deviceWrite( i_dimm, &notifCmd, NVDIMM_SIZE,
+                                DEVICE_NVDIMM_ADDRESS(notifCmdReg) );
             if ( errl )
             {
                 PRDF_ERR( PRDF_FUNC "Failed to clear Set Event Notification "
@@ -921,6 +923,43 @@ uint32_t __adjustThreshold( TargetHandle_t i_dimm, uint16_t i_warnThReg,
                 o_rc = FAIL;
                 break;
             }
+
+            // Check SET_EVENT_NOTIFICATION_STATUS to ensure everything is set
+            // as we expect and we don't see any errors.
+            uint8_t notifStat = 0;
+            errl = deviceRead( i_dimm, &notifStat, NVDIMM_SIZE,
+                               DEVICE_NVDIMM_ADDRESS(notifStatusReg) );
+            if ( errl )
+            {
+                PRDF_ERR( PRDF_FUNC "Failed to read Set Event Notification "
+                          "Status Reg. HUID: 0x%08x", getHuid(i_dimm) );
+                PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+                o_rc = FAIL;
+                break;
+            }
+            std::map<uint8_t,bool> bitList = __nvdimmGetActiveBits( notifStat );
+
+            // if Bit [1]: SET_EVENT_NOTIFICATION_ERROR = 1
+            // or Bit [2]: PERSISTENCY_ENABLED = 0
+            // or Bit [3]: WARNING_THRESHOLD_ENABLED = 1
+            if ( bitList.count(1)  || !bitList.count(2) || bitList.count(3) )
+            {
+                o_statusErr = true;
+
+                // Make the log predictive and mask the fir
+                io_sc.service_data->SetThresholdMaskId(0);
+
+                // Callout the NVDIMM, no gard
+                io_sc.service_data->SetCallout( i_dimm, MRU_MED, NO_GARD );
+
+                // Send message to PHYP that save/restore may work
+                o_rc = PlatServices::nvdimmNotifyProtChange( i_dimm,
+                    NVDIMM::NVDIMM_RISKY_HW_ERROR );
+                if ( SUCCESS != o_rc ) break;
+
+                break;
+            }
+
 
             // Set the warning threshold to error threshold + 1
             warnTh = errTh+1;
@@ -935,12 +974,10 @@ uint32_t __adjustThreshold( TargetHandle_t i_dimm, uint16_t i_warnThReg,
                 break;
             }
 
-            // Set SET_EVENT_NOTIFICATION_CMD[1]: Warning Threshold
-            //                                    Notification = 1
-            // Set bit 1
-            warnThNotif |= 0x02;
-            errl = deviceWrite( i_dimm, &warnThNotif, NVDIMM_SIZE,
-                                DEVICE_NVDIMM_ADDRESS(notifReg) );
+            // Set SET_EVENT_NOTIFICATION_CMD bit 1 and keep bit 0 set
+            notifCmd = 0x03;
+            errl = deviceWrite( i_dimm, &notifCmd, NVDIMM_SIZE,
+                                DEVICE_NVDIMM_ADDRESS(notifCmdReg) );
             if ( errl )
             {
                 PRDF_ERR( PRDF_FUNC "Failed to write Set Event Notification "
@@ -950,6 +987,40 @@ uint32_t __adjustThreshold( TargetHandle_t i_dimm, uint16_t i_warnThReg,
                 break;
             }
 
+            // Recheck SET_EVENT_NOTIFICATION_STATUS to ensure everything is set
+            // as we expect and we don't see any errors.
+            errl = deviceRead( i_dimm, &notifStat, NVDIMM_SIZE,
+                               DEVICE_NVDIMM_ADDRESS(notifStatusReg) );
+            if ( errl )
+            {
+                PRDF_ERR( PRDF_FUNC "Failed to read Set Event Notification "
+                          "Status Reg. HUID: 0x%08x", getHuid(i_dimm) );
+                PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+                o_rc = FAIL;
+                break;
+            }
+            bitList = __nvdimmGetActiveBits( notifStat );
+
+            // if Bit [1]: SET_EVENT_NOTIFICATION_ERROR = 1
+            // or Bit [2]: PERSISTENCY_ENABLED = 0
+            // or Bit [3]: WARNING_THRESHOLD_ENABLED = 0
+            if ( bitList.count(1)  || !bitList.count(2) || !bitList.count(3) )
+            {
+                o_statusErr = true;
+
+                // Make the log predictive and mask the fir
+                io_sc.service_data->SetThresholdMaskId(0);
+
+                // Callout the NVDIMM, no gard
+                io_sc.service_data->SetCallout( i_dimm, MRU_MED, NO_GARD );
+
+                // Send message to PHYP that save/restore may work
+                o_rc = PlatServices::nvdimmNotifyProtChange( i_dimm,
+                    NVDIMM::NVDIMM_RISKY_HW_ERROR );
+                if ( SUCCESS != o_rc ) break;
+
+                break;
+            }
         }
         // Note: moving the threshold should clear the warning from
         // WARNING_THRESHOLD_STATUS, which allows future warnings to report.
@@ -1058,28 +1129,45 @@ uint32_t __analyzeWarningThrStatusReg(STEP_CODE_DATA_STRUCT & io_sc,
             // Make the log predictive, but do not mask the FIR
             io_sc.service_data->setServiceCall();
 
-            // Callout NVDIMM on 1st, no gard
-            io_sc.service_data->SetCallout( i_dimm, MRU_MED, NO_GARD );
-
             // Adjust warning threshold.
             uint16_t warnThReg = NVDIMM::i2cReg::NVM_LIFETIME_WARNING_THRESHOLD;
             uint16_t errThReg  = NVDIMM::i2cReg::NVM_LIFETIME_ERROR_THRESHOLD;
             bool firstWarn = false;
-            o_rc = __adjustThreshold( i_dimm, warnThReg, errThReg, firstWarn );
+            bool statusErr = false;
+            o_rc = __adjustThreshold( io_sc, i_dimm, warnThReg, errThReg,
+                                      firstWarn, statusErr );
             if ( SUCCESS != o_rc ) break;
+
+            // If we got a set event notification status error, add the
+            // signature for that before adding the signature for the warning.
+            // Also do not take our normal callout action since we already will
+            // have called out the NVDIMM because of the status error.
+            if ( statusErr )
+            {
+                __addSignature( io_sc, mca, io_errFound, PRDFSIG_NotifStatErr );
+
+                // Need to set io_errFound here so the warning signature is
+                // added to the multi-signature list instead of as the primary
+                // signature.
+                io_errFound = true;
+            }
+            else
+            {
+                // Callout NVDIMM on 1st, no gard
+                io_sc.service_data->SetCallout( i_dimm, MRU_MED, NO_GARD );
+            }
 
             // Update signature depending on whether this is the first or second
             // warning of this type.
             if ( firstWarn )
             {
-                __addSignature( io_sc, mca, io_errFound,
-                                PRDFSIG_NvmLifeWarn1 );
+                __addSignature( io_sc, mca, io_errFound, PRDFSIG_NvmLifeWarn1 );
             }
             else
             {
-                __addSignature( io_sc, mca, io_errFound,
-                                PRDFSIG_NvmLifeWarn2 );
+                __addSignature( io_sc, mca, io_errFound, PRDFSIG_NvmLifeWarn2 );
             }
+
 
             io_errFound = true;
         }
@@ -1089,19 +1177,37 @@ uint32_t __analyzeWarningThrStatusReg(STEP_CODE_DATA_STRUCT & io_sc,
             // Make the log predictive, but do not mask the FIR
             io_sc.service_data->setServiceCall();
 
-            // Callout BPM (backup power module) high
-            o_rc = __addBpmCallout( i_dimm, HWAS::SRCI_PRIORITY_HIGH );
-            if ( SUCCESS != o_rc ) break;
-
-            // Callout NVDIMM low, no gard
-            io_sc.service_data->SetCallout( i_dimm, MRU_LOW, NO_GARD );
-
             // Adjust warning threshold.
             uint16_t warnThReg = NVDIMM::i2cReg::ES_LIFETIME_WARNING_THRESHOLD;
             uint16_t errThReg  = NVDIMM::i2cReg::ES_LIFETIME_ERROR_THRESHOLD;
             bool firstWarn = false;
-            o_rc = __adjustThreshold( i_dimm, warnThReg, errThReg, firstWarn );
+            bool statusErr = false;
+            o_rc = __adjustThreshold( io_sc, i_dimm, warnThReg, errThReg,
+                                      firstWarn, statusErr );
             if ( SUCCESS != o_rc ) break;
+
+            // If we got a set event notification status error, add the
+            // signature for that before adding the signature for the warning.
+            // Also do not take our normal callout action since we already will
+            // have called out the NVDIMM because of the status error.
+            if ( statusErr )
+            {
+                __addSignature( io_sc, mca, io_errFound, PRDFSIG_NotifStatErr );
+
+                // Need to set io_errFound here so the warning signature is
+                // added to the multi-signature list instead of as the primary
+                // signature.
+                io_errFound = true;
+            }
+            else
+            {
+                // Callout BPM (backup power module) high
+                o_rc = __addBpmCallout( i_dimm, HWAS::SRCI_PRIORITY_HIGH );
+                if ( SUCCESS != o_rc ) break;
+
+                // Callout NVDIMM low, no gard
+                io_sc.service_data->SetCallout( i_dimm, MRU_LOW, NO_GARD );
+            }
 
             // Update signature depending on whether this is the first or second
             // warning of this type.
