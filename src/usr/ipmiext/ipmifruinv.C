@@ -7,8 +7,8 @@
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
-/* [+] Jim Yuan                                                           */
-/* [+] Maxim Polyakov                                                     */
+/* [+] Super Micro Computer, Inc.                                         */
+/* [+] YADRO                                                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -2406,6 +2406,8 @@ void IPMIFRUINV::gatherSetData(const TARGETING::Target* i_pSys,
     TARGETING::PredicateCTM predChip(TARGETING::CLASS_CHIP);
     TARGETING::PredicateCTM predDimm(TARGETING::CLASS_LOGICAL_CARD,
                                      TARGETING::TYPE_DIMM);
+    TARGETING::PredicateCTM predOcmb(TARGETING::CLASS_CHIP,
+                                     TARGETING::TYPE_OCMB_CHIP);
     TARGETING::PredicatePostfixExpr checkExpr;
     TARGETING::PredicateHwas l_present;
     // @todo-RTC:124553 - Additional logic for deconfigured Frus
@@ -2426,6 +2428,9 @@ void IPMIFRUINV::gatherSetData(const TARGETING::Target* i_pSys,
     {
         checkExpr.push(&predDimm).Or().push(&l_present).And();
     }
+
+    // We do NOT want to process fruInv for OCMB_CHIP targets
+    checkExpr.push(&predOcmb).Not().And();
 
     TARGETING::TargetHandleList pCheckPres;
     TARGETING::targetService().getAssociated( pCheckPres, i_pSys,
