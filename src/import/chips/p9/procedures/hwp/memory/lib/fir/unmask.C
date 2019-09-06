@@ -82,8 +82,6 @@ fapi2::ReturnCode after_draminit_mc<mss::mc_type::NIMBUS>( const fapi2::Target<T
     // Broadcast mode workaround for UEs causing out of sync
     FAPI_TRY(mss::workarounds::mcbist::broadcast_out_of_sync(i_target, mss::OFF));
 
-    FAPI_TRY(mss::workarounds::mcbist::wat_debug_attention(i_target));
-
     for (const auto& p : mss::find_targets<TARGET_TYPE_MCA>(i_target))
     {
         fir::reg<MCA_FIR> l_mca_fir_reg(p, l_rc);

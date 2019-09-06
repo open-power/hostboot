@@ -147,26 +147,6 @@ fapi2::ReturnCode end_of_rank( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
 }
 
 ///
-/// @brief WAT debug attention
-/// For Nimbus DD1 the MCBIST engine uses the WAT debug bit as a workaround
-/// For Nimbus DD2 the WAT debug bit is used for a different workaround
-/// @param[in] i_target the fapi2 target of the mcbist
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-///
-fapi2::ReturnCode wat_debug_attention( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target )
-{
-    // MCBIST attentions are already special attention
-    fapi2::ReturnCode l_rc;
-    fir::reg<MCBIST_MCBISTFIRQ> mcbist_fir_register(i_target, l_rc);
-    FAPI_TRY(l_rc, "unable to create fir::reg for %d", MCBIST_MCBISTFIRQ);
-
-    FAPI_TRY(mcbist_fir_register.attention<MCBIST_MCBISTFIRQ_WAT_DEBUG_ATTN>().write());
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
 /// @brief BROADCAST OUT OF SYNC workaround
 /// A UE noise window is triggered by UE/AUEs causing an out of sync error
 /// @param[in] i_target the fapi2 target of the mcbist

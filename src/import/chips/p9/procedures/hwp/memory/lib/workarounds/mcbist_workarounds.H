@@ -72,14 +72,6 @@ fapi2::ReturnCode end_of_rank( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i
                                mss::mcbist::program<>& i_program );
 
 ///
-/// @brief WAT debug attention
-/// For Nimbus DD1 the MCBIST engine uses the WAT debug bit as a workaround
-/// @param[in] i_target the fapi2 target of the mcbist
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-///
-fapi2::ReturnCode wat_debug_attention( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
-
-///
 /// @brief BROADCAST OUT OF SYNC workaround
 /// A UE noise window is triggered by UE/AUEs causing an out of sync error
 /// @param[in] i_target the fapi2 target of the mcbist
