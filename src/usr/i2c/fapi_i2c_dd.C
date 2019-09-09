@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -67,6 +67,11 @@ static bool errorIsRetryable(uint16_t reasonCode)
 DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,
                        DeviceFW::FAPI_I2C,
                        TARGETING::TYPE_OCMB_CHIP,
+                       fapiI2cPerformOp );
+
+DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,
+                       DeviceFW::FAPI_I2C,
+                       TARGETING::TYPE_PMIC,
                        fapiI2cPerformOp );
 
 errlHndl_t fapiI2cPerformOp(DeviceFW::OperationType i_opType,
