@@ -96,15 +96,13 @@
 </hwpError>
 
 <hwpError>
-    <rc>RC_MSS_EFF_GROUPING_NO_SPACE_FOR_HTM_OCC_BAR</rc>
+    <rc>RC_MSS_EFF_GROUPING_NOT_ENOUGH_MEMORY</rc>
     <description>
-        There is not enough memory available for the requested HTM and OCC
-        Sandbox bar sizes.
+        There is not enough memory available for reservations.
     </description>
-    <ffdc>TOTAL_SIZE</ffdc>
-    <ffdc>NHTM_TOTAL_BAR_SIZE</ffdc>
-    <ffdc>CHTM_TOTAL_BAR_SIZE</ffdc>
-    <ffdc>OCC_SANDBOX_BAR_SIZE</ffdc>
+    <ffdc>REQ_MEMORY_TYPE</ffdc>
+    <ffdc>AVAIL_MEM_SIZE</ffdc>
+    <ffdc>REQUESTED_MEM_SIZE</ffdc>
     <ffdc>MIRROR_PLACEMENT_POLICY</ffdc>
     <callout>
       <procedure>CODE</procedure>
@@ -113,15 +111,30 @@
 </hwpError>
 
 <hwpError>
-    <rc>RC_MSS_EFF_GROUPING_HTM_OCC_BAR_NOT_POSSIBLE</rc>
+    <rc>RC_MSS_EFF_GROUPING_MEMORY_BAR_NOT_POSSIBLE</rc>
     <description>
-        HTM and OCC Sandbox bars are not possible.
+        Unable to assign BAR address for requested memory.
     </description>
-    <ffdc>ADJUSTED_SIZE</ffdc>
-    <ffdc>NHTM_TOTAL_BAR_SIZE</ffdc>
-    <ffdc>CHTM_TOTAL_BAR_SIZE</ffdc>
-    <ffdc>OCC_SANDBOX_BAR_SIZE</ffdc>
     <ffdc>MIRROR_PLACEMENT_POLICY</ffdc>
+    <ffdc>MEMSIZE_INDEX</ffdc>
+    <ffdc>ADJUSTED_SIZE</ffdc>
+    <ffdc>REQ_MEMORY_TYPE</ffdc>
+    <ffdc>REQUESTED_MEM_SIZE</ffdc>
+    <ffdc>AVAIL_MEM_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+<hwpError>
+    <rc>RC_MSS_EFF_GROUPING_ADDRESS_NOT_ALIGNED</rc>
+    <description>
+        BAR address is not aligned with requested size.
+    </description>
+    <ffdc>REQ_MEMORY_TYPE</ffdc>
+    <ffdc>BAR_BASE</ffdc>
+    <ffdc>BAR_SIZE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -131,10 +144,23 @@
 <hwpError>
     <rc>RC_MSS_EFF_GROUPING_SMF_NOT_ENABLED</rc>
     <description>
-        Secure memory is not enabled.
+        Requirements to enable a secure memory space not met:
+        ATTR_PROC_SMF_BAR_SIZE is set but ATTR_SMF_CONFIG is not enabled.
     </description>
     <ffdc>SMF_CONFIG</ffdc>
     <ffdc>SMF_TOTAL_BAR_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+<hwpError>
+    <rc>RC_MSS_EFF_GROUPING_INVALID_BAR_TYPE</rc>
+    <description>
+        The specified BAR type value is invalid.
+    </description>
+    <ffdc>BAR_TYPE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -159,34 +185,6 @@
         Secure memory must be allocated in offsets of 256MB by design.
     </description>
     <ffdc>SMF_BASE_ADDR</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-</hwpError>
-
-<hwpError>
-    <rc>RC_MSS_EFF_GROUPING_NO_SPACE_FOR_SMF_BAR</rc>
-    <description>
-        There is not enough memory available for the requested SMF bar sizes.
-    </description>
-    <ffdc>TOTAL_SIZE</ffdc>
-    <ffdc>SMF_TOTAL_BAR_SIZE</ffdc>
-    <ffdc>MIRROR_PLACEMENT_POLICY</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-</hwpError>
-
-<hwpError>
-    <rc>RC_MSS_EFF_GROUPING_SMF_BAR_NOT_POSSIBLE</rc>
-    <description>
-        SMF bars are not possible.
-    </description>
-    <ffdc>ADJUSTED_SIZE</ffdc>
-    <ffdc>SMF_TOTAL_BAR_SIZE</ffdc>
-    <ffdc>MIRROR_PLACEMENT_POLICY</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>

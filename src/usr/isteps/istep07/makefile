@@ -67,7 +67,7 @@ EXTRAINCDIR += ${EXP_COMMON_PATH}/include/
 EXTRAINCDIR += ${EXP_COMMON_PATH}/procedures/hwp/pmic/
 EXTRAINCDIR += ${EXP_COMMON_PATH}/procedures/hwp/pmic/lib/
 EXTRAINCDIR += $(ROOTPATH)/src/import/chips/ocmb/explorer/common/include/
-
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/inband/
 VPATH += ${HWP_PATH}
 VPATH += $(PROCEDURES_PATH)/hwp/nest
 VPATH += ${HWP_PATH_PMIC}/lib/eff_config
