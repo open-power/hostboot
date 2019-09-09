@@ -1863,10 +1863,12 @@ errlHndl_t Bpm::resetDevice()
                 break;
             }
 
+            // If we wait less than 15 seconds for the reset to occur it is
+            // possible that BPM won't be ready for more commands via the NVDIMM
             TRACFCOMP(g_trac_bpm, "Bpm::resetDevice(): "
-                      "Resetting BPM for NVDIMM 0x%.8X, sleep for 10 seconds.",
+                      "Resetting BPM for NVDIMM 0x%.8X, sleep for 15 seconds.",
                       TARGETING::get_huid(iv_nvdimm));
-            longSleep(10);
+            longSleep(15);
         }
         else
         {
