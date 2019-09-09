@@ -62,7 +62,7 @@ namespace NVDIMM
 
 static constexpr uint64_t DARN_ERROR_CODE = 0xFFFFFFFFFFFFFFFFull;
 static constexpr uint32_t MAX_DARN_ERRORS = 10;
-
+static constexpr uint8_t FW_OPS_UPDATE = 0x04;
 /**
  * @brief This function polls the command status register for arm completion
  *        (does not indicate success or fail)
@@ -164,6 +164,8 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
     bool l_continue = true;
     bool l_arm_timeout = false;
     uint8_t l_data;
+    uint8_t l_ready;
+    uint8_t l_fwupdate;
     auto l_RegInfo = nvdimm_reg_t();
     uint64_t l_writeData;
     uint32_t l_writeAddress;
@@ -174,6 +176,64 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
 
     errlHndl_t l_err = nullptr;
     errlHndl_t l_err_t = nullptr;
+
+    // Prerequisite Arm Checks
+    for (auto const l_nvdimm : i_nvdimmTargetList)
+    {
+        do
+        {
+            // Read out the Module Health status register
+            l_err = nvdimmReadReg(l_nvdimm, MODULE_HEALTH_STATUS0, l_data);
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmArm() nvdimm[%X] - failed to read Module Health Status",
+                          get_huid(l_nvdimm));
+                errlCommit( l_err, NVDIMM_COMP_ID );
+                l_continue = false;
+                break;
+            }
+            // Read out the NVDimm Ready register
+            l_err = nvdimmReadReg(l_nvdimm, NVDIMM_READY, l_ready);
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmArm() nvdimm[%X] - failed to read NVDimm Ready register",
+                          get_huid(l_nvdimm));
+                errlCommit( l_err, NVDIMM_COMP_ID );
+                l_continue = false;
+                break;
+            }
+            // Read out the FW OPs Status register
+            l_err = nvdimmReadReg(l_nvdimm, FIRMWARE_OPS_STATUS, l_fwupdate);
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmArm() nvdimm[%X] - failed to read Firmware OPs Status register",
+                          get_huid(l_nvdimm));
+                errlCommit( l_err, NVDIMM_COMP_ID );
+                l_continue = false;
+            }
+
+        }while(0);
+
+        // Check ARM pre-requisites
+        if ((!l_continue) || (l_data & NVM_LIFETIME_ERROR)
+                          || (l_ready != NV_READY)
+                          || (l_fwupdate & FW_OPS_UPDATE))
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmArm() nvdimm[%X] - failed NVDimm Arm prechecks",
+                      get_huid(l_nvdimm));
+
+            // Disarming all dimms due to error
+            nvdimmDisarm(i_nvdimmTargetList);
+
+            l_err = notifyNvdimmProtectionChange(l_nvdimm, NVDIMM_DISARMED);
+            if (l_err)
+            {
+                errlCommit( l_err, NVDIMM_COMP_ID );
+            }
+
+            return false;
+        }
+    }
 
     // Mask MBACALFIR EventN to separate ARM handling
     for (TargetHandleList::iterator it = i_nvdimmTargetList.begin();
