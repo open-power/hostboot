@@ -6,6 +6,7 @@
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
 <!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
+<!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
@@ -51,6 +52,21 @@
       larger than the physical SEEPROM size.
     </description>
     <valueType>uint32</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************** -->
+  <attribute>
+    <id>ATTR_DYNAMIC_INIT_FEATURE_VEC</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+     Bit vector of dynamic init features which are applied when customizing the
+     IPL image. Individual features are selected/deselected by setting/clearing
+     the corresponding bit in this vector.
+     Note: multiple features can be selected at once.
+    </description>
+    <valueType>uint64</valueType>
+    <initToZero/>
     <platInit/>
     <persistRuntime/>
   </attribute>
