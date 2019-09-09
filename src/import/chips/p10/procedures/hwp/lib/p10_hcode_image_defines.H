@@ -222,6 +222,88 @@ HCD_HDR_PAD(IMG_HDR_ALIGN_SIZE);
 } __attribute__((packed, aligned(32))) XgpeHeader_t;
 #endif
 
+#ifdef __ASSEMBLER__
+.macro  .ppmr_header
+.section ".ppmr" , "aw"
+.balign    8
+#else
+typedef struct
+{
+#endif
+HCD_HDR_UINT64( iv_ppmrMagicWord,       PPMR_MAGIC_NUMBER);
+HCD_HDR_UINT32( iv_bootCopierOffset,    0);
+HCD_HDR_UINT32( iv_reserved1,           0);
+HCD_HDR_UINT32( iv_bootLoaderOffset,    0);
+HCD_HDR_UINT32( iv_bootLoaderLength,    0);
+HCD_HDR_UINT32( iv_buildDate,           0);
+HCD_HDR_UINT32( iv_buildVer,            0);
+HCD_HDR_UINT64( iv_reserved2,           0);
+HCD_HDR_UINT32( iv_hcodeOffset,         0);
+HCD_HDR_UINT32( iv_hcodeLength,         0);
+HCD_HDR_UINT32( iv_gpspbOffset,         0);
+HCD_HDR_UINT32( iv_gpspbLength,         0);
+HCD_HDR_UINT32( iv_opspbOffset,         0);
+HCD_HDR_UINT32( iv_opspbLength,         0);
+HCD_HDR_UINT32( iv_pstateOffset,        0);
+HCD_HDR_UINT32( iv_pstateLength,        0);
+HCD_HDR_UINT32( iv_sramSize,            0);
+HCD_HDR_UINT32( iv_progCode,            0);
+HCD_HDR_UINT32( iv_wofTableOffset,      0);
+HCD_HDR_UINT32( iv_wofTableLength,      0);
+HCD_HDR_UINT32( iv_auxTaskOffset,       0);
+HCD_HDR_UINT32( iv_auxTaskLength,       0);
+HCD_HDR_UINT32( iv_deepOptraceOffset,   0);
+HCD_HDR_UINT32( iv_deepOptraceLength,   0);
+
+#ifdef __ASSEMBLER__
+.endm
+#else
+} __attribute__((packed, aligned(32))) PpmrHeader_t;
+#endif
+
+#ifdef __ASSEMBLER__
+.macro  .pgpe_header
+.section ".pgpe_hdr" , "aw"
+.balign    8
+#else
+typedef struct
+{
+#endif
+HCD_HDR_UINT64( g_pgpe_magicWord,           PGPE_MAGIC_NUMBER);
+HCD_HDR_UINT32( g_pgpe_sysResetAddress,     0);
+HCD_HDR_UINT32( g_pgpe_sharedSramAddress,   0);
+HCD_HDR_UINT32( g_pgpe_ivprAddress,         0);
+HCD_HDR_UINT32( g_pgpe_sharedLength,        0);
+HCD_HDR_UINT32( g_pgpe_buildDate,           0);
+HCD_HDR_UINT32( g_pgpe_buildVer,            0);
+HCD_HDR_UINT32( g_pgpe_pgpeFlags,           0);
+HCD_HDR_UINT32( g_pgpe_timeBaseHz,          0);
+HCD_HDR_UINT32( g_pgpe_gpspbSramAddress,    0);
+HCD_HDR_UINT32( g_pgpe_hcodeLength,         0);
+HCD_HDR_UINT32( g_pgpe_gpspbMemOffset,      0);
+HCD_HDR_UINT32( g_pgpe_gpspbMemLength,      0);
+HCD_HDR_UINT32( g_pgpe_opspbTableAddress,   0);
+HCD_HDR_UINT32( g_pgpe_opspbTableLength,    0);
+HCD_HDR_UINT32( g_pgpe_beaconAddress,       0);
+HCD_HDR_UINT32( g_pgpe_reserved1,           0);
+HCD_HDR_UINT32( g_pgpe_pgpeWofStateAddress, 0);
+HCD_HDR_UINT32( g_pgpe_reserved2,           0);
+HCD_HDR_UINT32( g_pgpe_wofTableAddress,     0);
+HCD_HDR_UINT32( g_pgpe_wofTableLength,      0);
+HCD_HDR_UINT32( g_pgpe_reserved3,           0);
+HCD_HDR_UINT32( g_pgpe_reserved4,           0);
+HCD_HDR_UINT32( g_pgpe_reserved5,           0);
+HCD_HDR_UINT32( g_pgpe_opTracePtr,          0);
+HCD_HDR_UINT32( g_pgpe_deepOpTraceMemAddress, 0);
+HCD_HDR_UINT32( g_pgpe_deepOpTraceLength,     0);
+
+#ifdef __ASSEMBLER__
+.endm
+#else
+} __attribute__((packed, aligned(32))) PgpeHeader_t;
+#endif
+
+
 #ifndef __ASSEMBLER__
 
 /**
