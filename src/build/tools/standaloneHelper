@@ -26,7 +26,7 @@
 
 #
 # This script aids in various tasks needed to assemble and simulate a P10
-# standalone chip
+# standalone build in Simics
 #
 
 # Export artifacts IDs and variables that will be used in
@@ -34,7 +34,13 @@
 assemble_setup()
 {
 
+    STANDALONE_DIR=${PROJECT_ROOT}/standalone
+
     build-ffs-tools
+
+    # Clode PPE repo to ${PROJECT_ROOT}/src/build/tools/extern/ppe
+    # PPE is tracked as a git module
+    (cd ${PROJECT_ROOT} && make ppe $1)
 
     source ${PROJECT_ROOT}/src/build/citest/etc/sbe
     source ${PROJECT_ROOT}/src/build/citest/etc/hcode
@@ -50,17 +56,17 @@ assemble_setup()
         export CONFIG_SECUREBOOT="1"
     fi
 
-    if [[ ! -d ${PROJECT_ROOT}/standalone/pnor ]];then
-        mkdir -p ${PROJECT_ROOT}/standalone/pnor
+    if [[ ! -d ${STANDALONE_DIR}/pnor ]];then
+        mkdir -p ${STANDALONE_DIR}/pnor
     fi
 
-    if [[ ! -d ${PROJECT_ROOT}/standalone/staging ]];then
-        mkdir -p ${PROJECT_ROOT}/standalone/staging
+    if [[ ! -d ${STANDALONE_DIR}/staging ]];then
+        mkdir -p ${STANDALONE_DIR}/staging
     fi
 
     # Removing previously assembled items
-    rm -rf ${PROJECT_ROOT}/standalone/pnor/*
-    rm -rf ${PROJECT_ROOT}/standalone/staging/*
+    rm -rf ${STANDALONE_DIR}/pnor/*
+    rm -rf ${STANDALONE_DIR}/staging/*
 
 }
 
@@ -73,7 +79,7 @@ simics_setup()
     if [[ ! -d ${hbfw_dir} ]];then
         echo "Could not find " ${hbfw_dir}
         echo "Please run \"hb simsetup\" to create it and other Simics artifacts."
-        exit -1
+        exit 1
     fi
 
     # Emptying out .../hbfw directory and repopulating it
@@ -119,11 +125,53 @@ simics_setup()
 
 }
 
-case $1 in
+# Function that will take HB's bootloader image (hbbl.bin), copy it to the PPE
+# repo, and build repo to generate ECC enable SBE image
+generate_sbe_image()
+{
+
+    PPE_DIR=${PROJECT_ROOT}/src/build/tools/extern/ppe
+
+    if [[ ! -f ${PPE_DIR}/Makefile ]];then
+        echo "Could not find PPE's Makefile."
+        echo "Please run \"hb prime\" to clone PPE repo."
+        exit 1
+    fi
+
+    cp ${PROJECT_ROOT}/standalone/pnor/hbbl.bin ${PPE_DIR}/src/tools/debug/hbbl.bin
+    cd ${PPE_DIR}
+    ./sb workon<<<'make install $1 && ./sb prime && exit'
+    cp ${PPE_DIR}/simics/import/boot_roms/sbe_seeprom_p10.bin.ecc \
+    ${PROJECT_ROOT}/standalone/simics/sbe_seeprom_p10.bin.ecc
+    cd ${PROJECT_ROOT}
+
+}
+
+FIRST_PARAM=$1
+shift
+
+BUILD_PARAMS=""
+
+# Parse out arguments. Only looking for parallel jobs argument "-jN"
+while [[ $# -gt 0 ]]
+do
+    case $1 in
+        -j*)
+            BUILD_PARAMS=$1
+            shift
+        ;;
+    esac
+done
+
+# Calling script functions with BUILD_PARAMS
+case ${FIRST_PARAM} in
     "--assembleSetup")
-        assemble_setup
+        assemble_setup $BUILD_PARAMS
     ;;
     "--simicsSetup")
         simics_setup
+    ;;
+    "--generateSbeImage")
+        generate_sbe_image $BUILD_PARAMS
     ;;
 esac

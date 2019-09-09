@@ -26,6 +26,17 @@
 
 # This script will download and build ffs for standalone hostboot
 
+# Parse out arguments. Only looking for parallel jobs argument "-jN"
+while [[ $# -gt 0 ]]
+do
+    case $1 in
+        -j*)
+            BUILD_PARAMS=$1
+            shift
+        ;;
+    esac
+done
+
 source $PROJECT_ROOT/src/build/citest/etc/ffs
 
 update_toolconfig(){
@@ -73,5 +84,5 @@ if ! grep -q AM_PROG_CC_C_O configure.ac; then
     echo "AM_PROG_CC_C_O" >> configure.ac
 fi
 
-make -f $PROJECT_ROOT/src/build/mkrules/hostboot-ffs.mk all-ffs-tools
+make -f $PROJECT_ROOT/src/build/mkrules/hostboot-ffs.mk all-ffs-tools $BUILD_PARAMS
 cd $PROJECT_ROOT

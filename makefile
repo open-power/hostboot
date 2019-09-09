@@ -95,6 +95,14 @@ cppcheck:
 	export DOCPPCHECK=1 && \
 	${MAKE}
 
+PPE_PATH := $(ROOTPATH)/src/build/tools/extern/ppe
+
+.PHONY: ppe
+ppe: $(PPE_PATH)/Makefile
+
+$(PPE_PATH)/Makefile:
+	git submodule update --init --checkout -- $(PPE_PATH)
+
 .PHONY: gcda_clean
 gcda_clean:
 	find -name '*.gcda' -exec rm -f {} \;

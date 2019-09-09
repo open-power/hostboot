@@ -141,6 +141,11 @@ do
             exit -1
         ;;
 
+        -j*)
+            BUILD_PARAMS=$1
+            shift
+        ;;
+
         *)
             TARGET_DIR=$1
             shift
@@ -266,12 +271,16 @@ if [[ $HB_STANDALONE -eq 1 ]] && [ $PNOR_LAYOUT_SELECTED != "FSP" ];then
     fi
 
     # Setup for makefile and Simics
-    source standaloneHelper --assembleSetup
+    source standaloneHelper --assembleSetup $BUILD_PARAMS
     source standaloneHelper --simicsSetup
 
     # Run makefile
     cd ${PROJECT_ROOT}/standalone/pnor
     make -rR ${DEBUG:=} -f ${PROJECT_ROOT}/src/build/mkrules/assemble.standalone.mk
+
+    # Send bootloader image to the cloned PPE repo to generate
+    # an ECC enabled SBE image
+    source standaloneHelper --generateSbeImage $BUILD_PARAMS
 
     exit 0
 

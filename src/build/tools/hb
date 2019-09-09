@@ -483,7 +483,15 @@ hb_startsimics()
 
         if [[ ! -d ${STANDALONE_SIMICS} ]] || [[ ! -d ${STANDALONE_SIMICS}/hbfw ]]; then
             echo "Missing Simics files, please run \"hb simsetup\"."
-            exit -1
+            exit 1
+        fi
+
+        SBE_STANDALONE_IMG=${PROJECT_ROOT}/standalone/simics/sbe_seeprom_p10.bin.ecc
+
+        if [[ ! -f ${SBE_STANDALONE_IMG} ]]; then
+            echo "File does not exist: " ${SBE_STANDALONE_IMG}
+            echo "Please make sure to run \"hb prime\" to create it."
+            exit 1
         fi
 
         # Run Simics
@@ -495,7 +503,7 @@ hb_startsimics()
         # We don't want to run SBE in VPO mode; pass the SBE image to
         # simics in non-VPO mode
         if [ -z "${VPO_COMPILE}" ]; then
-            STARTSIMCMD+=(sbe_seeprom_img=/gsa/ausgsa/projects/h/hostboot/simbuild/SBE_19b2530_HB_c391a8a_sbe_seeprom_p10.bin.ecc)
+            STARTSIMCMD+=(sbe_seeprom_img=${SBE_STANDALONE_IMG})
             STARTSIMCMD+=(sbe_boot_mem=seeprom)
             STARTSIMCMD+=(enable_lpc_console=TRUE)
         else
