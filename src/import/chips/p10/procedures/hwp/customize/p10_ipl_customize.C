@@ -2709,18 +2709,17 @@ ReturnCode p10_ipl_customize (
     //            ring becomes the de facto Base ring.
     //////////////////////////////////////////////////////////////////////////
 
-#if 0
-    l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_DYN_OVLY, FAPI_SYSTEM, l_dynamicVector);
+    // TODO / FIXME: The mapping from bit position in the vector to features
+    //               should be encapsulated in an enum constructed at ekb build
+    //               time.
+    l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_DYNAMIC_INIT_FEATURE_VEC, FAPI_SYSTEM,
+                              dynamicVector);
 
     FAPI_ASSERT( l_fapiRc2 == fapi2::FAPI2_RC_SUCCESS,
-                 fapi2::XIPC_XIP_API_MISC_ERROR.
+                 fapi2::XIPC_XIP_API_MISC_ERROR().
                  set_CHIP_TARGET(i_procTarget).
                  set_OCCURRENCE(2),
-                 "Failed to get dynamic section");
-#endif
-    //l_dynamicVector is hardcoded as the FAPI attribute is not ready
-    dynamicVector = 0b01101000;
-    dynamicVector = dynamicVector << 56;
+                 "Failed to retrieve the dynamic init feature vector attribute" );
 
     l_rc = p9_xip_get_section(i_hwImage, P9_XIP_SECTION_HW_DYNAMIC, &iplImgSection, attrDdLevel);
 
