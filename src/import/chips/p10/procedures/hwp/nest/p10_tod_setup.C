@@ -782,6 +782,7 @@ fapi2::ReturnCode configure_m_path_ctrl_reg_mdmt(
     fapi2::buffer<uint64_t>& io_m_path_ctrl_reg)
 {
     FAPI_DBG("Start");
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
     if (i_osc_sel == TOD_OSC_0             ||
         i_osc_sel == TOD_OSC_0_AND_1       ||
@@ -846,7 +847,6 @@ fapi2::ReturnCode configure_m_path_ctrl_reg_mdmt(
     // CPS deviation factor configures both path-0 and path-1
     SET_TOD_M_PATH_CTRL_REG_STEP_CHECK_CPS_DEVIATION_FACTOR(STEP_CHECK_CPS_DEVIATION_FACTOR_1, io_m_path_ctrl_reg);
 
-fapi_try_exit:
     FAPI_DBG("End");
     return fapi2::current_err;
 }
@@ -871,10 +871,6 @@ fapi2::ReturnCode configure_m_path_ctrl_reg(
     fapi2::buffer<uint64_t> l_perv_ctrl4 = 0;
 
     FAPI_DBG("Start");
-
-    // Read TOD_M_PATH_CTRL_REG to preserve any prior configuration
-    FAPI_TRY(GET_TOD_M_PATH_CTRL_REG(l_target, l_m_path_ctrl_reg),
-             "Error from GET_TOD_M_PATH_CTRL_REG");
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CLOCK_PLL_MUX_TOD, l_target, l_attr_clock_pll_mux_tod),
              "Error from FAPI_ATTR_GET (ATTR_CLOCK_PLL_MUX_TOD)");
@@ -919,6 +915,13 @@ fapi2::ReturnCode configure_m_path_ctrl_reg(
         PUT_FSXCOMP_FSXLOG_ROOT_CTRL4_RW(l_target, l_perv_ctrl4);
     }
 
+    // Configure Master Path Control Register
+    FAPI_DBG("Configuring TOD_M_PATH_CTRL_REG");
+
+    // Read TOD_M_PATH_CTRL_REG to preserve any prior configuration
+    FAPI_TRY(GET_TOD_M_PATH_CTRL_REG(l_target, l_m_path_ctrl_reg),
+             "Error from GET_TOD_M_PATH_CTRL_REG");
+
     // Disable clock doubling when running off LPC clock, otherwise enable it.
     if (l_attr_clock_pll_mux_tod == fapi2::ENUM_ATTR_CLOCK_PLL_MUX_TOD_LPC_REFCLOCK)
     {
@@ -930,9 +933,6 @@ fapi2::ReturnCode configure_m_path_ctrl_reg(
         // OFF: sample both edges of the oscillator
         CLEAR_TOD_M_PATH_CTRL_REG_STEP_CREATE_DUAL_EDGE_DISABLE(l_m_path_ctrl_reg);
     }
-
-    // Configure Master Path Control Register
-    FAPI_DBG("Configuring TOD_M_PATH_CTRL_REG");
 
     if (i_mdmt)
     {
@@ -1190,7 +1190,7 @@ fapi2::ReturnCode p10_tod_lookup_iohs_target(
 
     for (const auto& l_iohs_target : i_target.getChildren<fapi2::TARGET_TYPE_IOHS>())
     {
-        uint8_t l_bus_num;
+        uint8_t l_bus_num = 0;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_iohs_target, l_bus_num),
                  "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
 
