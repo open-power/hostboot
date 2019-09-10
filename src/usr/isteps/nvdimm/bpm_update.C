@@ -734,9 +734,8 @@ errlHndl_t Bpm::issueCommand(const uint8_t i_command,
                                                payloadHeaderDataSize,
                                                TARGETING::get_huid(iv_nvdimm))
                                            );
-            errl->addPartCallout(iv_nvdimm,
-                                 HWAS::BPM_PART_TYPE,
-                                 HWAS::SRCI_PRIORITY_HIGH);
+            errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                      HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(BPM_COMP_NAME);
             nvdimmAddPage4Regs(iv_nvdimm,errl);
             nvdimmAddVendorLog(iv_nvdimm, errl);
@@ -1254,6 +1253,9 @@ errlHndl_t Bpm::enterUpdateMode()
                                             BPM_RC::BPM_START_UPDATE,
                                             BPM_RC::BPM_ENTER_UPDATE_MODE,
                                             TARGETING::get_huid(iv_nvdimm));
+        infoErrl->addPartCallout(iv_nvdimm,
+                             HWAS::BPM_PART_TYPE,
+                             HWAS::SRCI_PRIORITY_HIGH);
         infoErrl->collectTrace(BPM_COMP_NAME);
         nvdimmAddVendorLog(iv_nvdimm, infoErrl);
         nvdimmAddPage4Regs(iv_nvdimm, infoErrl);
@@ -3749,9 +3751,16 @@ errlHndl_t Bpm::runConfigUpdates(BpmConfigLidImage i_configImage)
         errl = updateConfig();
         if (errl != nullptr)
         {
-            // If the config update fails for any reason we should erase the
-            // firmware section so that subsequent IPLs/attempts will not think
-            // that we have a fully valid image when we do not.
+            // We are returning with an error. Since the error is from the
+            // config part of the updates it's best to erase the firmware on the
+            // BPM so that updates will be attempted on it in the future.
+            // Because there isn't a way to determine the validity of the config
+            // section on the BPM we're completely reliant on what the firmware
+            // version reports to decide if we need to update or not. If we see
+            // that the firmware version matches the image but for some reason
+            // the config data wasn't updated properly we could believe we
+            // updated successfully when, in fact, we just left the BPM in a bad
+            // state.
             if (  (iv_firmwareStartAddress == MAIN_PROGRAM_ADDRESS)
                || (iv_firmwareStartAddress == MAIN_PROGRAM_ADDRESS_ALT))
             {
@@ -3884,15 +3893,6 @@ errlHndl_t Bpm::runFirmwareUpdates(BpmFirmwareLidImage i_image)
     {
         TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runFirmwareUpdates(): "
                   "Failed to exit update mode");
-        handleMultipleErrors(errl, exitErrl);
-    }
-
-    // Reset controller and unlock encryption if necessary
-    exitErrl = nvdimmResetController(iv_nvdimm);
-    if (exitErrl != nullptr)
-    {
-        TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runFirmwareUpdates() "
-                 "Couldn't reset NVDIMM controller.");
         handleMultipleErrors(errl, exitErrl);
     }
 
