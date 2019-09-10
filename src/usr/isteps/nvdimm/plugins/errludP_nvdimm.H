@@ -212,6 +212,7 @@ public:
         // 1 byte   : NVDIMM_READY
         // 1 byte   : NVDIMM_CMD_STATUS0
         // 1 byte   : ERASE_STATUS
+        // 1 byte   : ERASE_FAIL_INFO
         // 1 byte   : ERASE_TIMEOUT0
         // 1 byte   : ERASE_TIMEOUT1
         // 1 byte   : ABORT_CMD_TIMEOUT
@@ -221,6 +222,7 @@ public:
         // 1 byte   : RESTORE_TIMEOUT0
         // 1 byte   : RESTORE_TIMEOUT1
         // 1 byte   : ARM_STATUS
+        // 1 byte   : ARM_FAIL_INFO
         // 1 byte   : ARM_TIMEOUT0
         // 1 byte   : ARM_TIMEOUT1
         // 1 byte   : SET_EVENT_NOTIFICATION_STATUS
@@ -253,6 +255,8 @@ public:
         ++l_databuf;
         i_parser.PrintNumber("Erase Status Register: ","%.2lX",TO_UINT8(l_databuf));
         ++l_databuf;
+        i_parser.PrintNumber("Erase Fail Info Register: ","%.2lX",TO_UINT8(l_databuf));
+        ++l_databuf;
         i_parser.PrintNumber("Erase Timeout0 Register: ","%.2lX",TO_UINT8(l_databuf));
         ++l_databuf;
         i_parser.PrintNumber("Erase Timeout1 Register: ","%.2lX",TO_UINT8(l_databuf));
@@ -270,6 +274,8 @@ public:
         i_parser.PrintNumber("Restore Timeout1 Register: ","%.2lX",TO_UINT8(l_databuf));
         ++l_databuf;
         i_parser.PrintNumber("Arm Status Register: ","%.2lX",TO_UINT8(l_databuf));
+        ++l_databuf;
+        i_parser.PrintNumber("Arm Fail Info Register: ","%.2lX",TO_UINT8(l_databuf));
         ++l_databuf;
         i_parser.PrintNumber("Arm Timeout0 Register: ","%.2lX",TO_UINT8(l_databuf));
         ++l_databuf;

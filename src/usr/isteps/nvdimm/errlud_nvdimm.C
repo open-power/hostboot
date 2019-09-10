@@ -185,6 +185,7 @@ UdNvdimmOPParms::UdNvdimmOPParms( const nvdimm_reg_t &i_RegInfo )
    // 1 byte   : NVDIMM_CMD_STATUS0
    // 1 byte   : ABORT_CMD_TIMEOUT
    // 1 byte   : ERASE_STATUS
+   // 1 byte   : ERASE_FAIL_INFO
    // 1 byte   : ERASE_TIMEOUT0
    // 1 byte   : ERASE_TIMEOUT1
    // 1 byte   : SET_ES_POLICY_STATUS
@@ -193,6 +194,9 @@ UdNvdimmOPParms::UdNvdimmOPParms( const nvdimm_reg_t &i_RegInfo )
    // 1 byte   : RESTORE_TIMEOUT0
    // 1 byte   : RESTORE_TIMEOUT1
    // 1 byte   : ARM_STATUS
+   // 1 byte   : ARM_FAIL_INFO
+   // 1 byte   : ARM_TIMEOUT0
+   // 1 byte   : ARM_TIMEOUT1
    // 1 byte   : SET_EVENT_NOTIFICATION_STATUS
    // 1 byte   : ENCRYPTION_CONFIG_STATUS
 

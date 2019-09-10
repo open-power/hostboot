@@ -158,6 +158,14 @@ void nvdimmTraceRegs(Target *i_nvdimm, nvdimm_reg_t& o_RegInfo)
     }
     o_RegInfo.Erase_Status = l_data;
 
+    // Read ERASE FAIL INFO register
+    l_err = nvdimmReadReg(i_nvdimm, ERASE_FAIL_INFO, l_data);
+    if(l_err)
+    {
+        errlCommit( l_err, NVDIMM_COMP_ID );
+    }
+    o_RegInfo.Erase_Fail_Info = l_data;
+
     // Read ERASE TIMEOUT0 register
     l_err = nvdimmReadReg(i_nvdimm, ERASE_TIMEOUT0, l_data);
     if(l_err)
@@ -229,6 +237,14 @@ void nvdimmTraceRegs(Target *i_nvdimm, nvdimm_reg_t& o_RegInfo)
         errlCommit( l_err, NVDIMM_COMP_ID );
     }
     o_RegInfo.Arm_Status = l_data;
+
+    // Read ARM FAIL INFO register
+    l_err = nvdimmReadReg(i_nvdimm, ARM_FAIL_INFO, l_data);
+    if(l_err)
+    {
+        errlCommit( l_err, NVDIMM_COMP_ID );
+    }
+    o_RegInfo.Arm_Fail_Info = l_data;
 
     // Read ARM TIMEOUT0 register
     l_err = nvdimmReadReg(i_nvdimm, ARM_TIMEOUT0, l_data);
@@ -506,26 +522,17 @@ bool nvdimmBPMCableCallout(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
             o_err->addPartCallout( i_nvdimm,
                                    HWAS::BPM_CABLE_PART_TYPE,
                                    HWAS::SRCI_PRIORITY_HIGH);
+            // Callout dimm but do not deconfig or gard
+            o_err->addHwCallout( i_nvdimm,
+                                 HWAS::SRCI_PRIORITY_LOW,
+                                 HWAS::NO_DECONFIG,
+                                 HWAS::GARD_NULL);
 
             // Check restore status and set dimm status accordingly
             if(l_continue)
             {
                 // Set ATTR_NV_STATUS_FLAG to partially working as data may still persist
                 nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
-
-                // Callout dimm but do not deconfig or gard
-                o_err->addHwCallout( i_nvdimm,
-                                       HWAS::SRCI_PRIORITY_LOW,
-                                       HWAS::NO_DECONFIG,
-                                       HWAS::GARD_NULL);
-            }
-            else
-            {
-                // Callout dimm, deconfig and gard
-                o_err->addHwCallout( i_nvdimm,
-                                       HWAS::SRCI_PRIORITY_HIGH,
-                                       HWAS::DECONFIG,
-                                       HWAS::GARD_Fatal);
             }
 
             break;

@@ -304,7 +304,12 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
         if (l_err)
         {
             TRACFCOMP(g_trac_nvdimm, "nvdimmArm() nvdimm[%X] failed first health status check", get_huid(l_nvdimm));
-            if (!l_continue)
+          
+            // The arm timeout variable is used here as the continue variable for the
+            // health status check. This was done to include the timeout for use in the check
+            // If true either the arm timed out with a health status fail or the
+            // health status check failed with another disarm and exit condition
+            if (l_arm_timeout)
             {
                 errlCommit( l_err, NVDIMM_COMP_ID );
 
