@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,6 +29,7 @@
 #include <errl/errlmanager.H>
 #include <targeting/common/target.H>
 #include <targeting/common/targetservice.H>
+#include <targeting/common/utilFilter.H>
 #include <hbotcompid.H>
 #include <secureboot/smf.H>
 #include <secureboot/secure_reasoncodes.H>
@@ -346,9 +347,14 @@ public:
             break;
         }
 
-        if(l_smfBarSize != DISTRIBUTE_EXACT_SMF_AMT)
+        // Memory is distributed across processors so need to divide the
+        //  expected results by the number of processors
+        TARGETING::TargetHandleList l_procList;
+        TARGETING::getAllChips(l_procList, TARGETING::TYPE_PROC, true);
+
+        if(l_smfBarSize != (DISTRIBUTE_EXACT_SMF_AMT/l_procList.size()))
         {
-            TS_FAIL("testDistributeExactAmt: Unexpected amount of memory allocated. Expected: 0x%x, actual 0x%x", DISTRIBUTE_EXACT_SMF_AMT, l_smfBarSize);
+            TS_FAIL("testDistributeExactAmt: Unexpected amount of memory allocated. Expected: 0x%x, actual 0x%x", (DISTRIBUTE_EXACT_SMF_AMT/l_procList.size()), l_smfBarSize);
         }
         } while(0);
 
@@ -400,9 +406,14 @@ public:
             break;
         }
 
-        if(l_smfBarSize != DISTRIBUTE_EXACT_SMF_AMT)
+        // Memory is distributed across processors so need to divide the
+        //  expected results by the number of processors
+        TARGETING::TargetHandleList l_procList;
+        TARGETING::getAllChips(l_procList, TARGETING::TYPE_PROC, true);
+
+        if(l_smfBarSize != (DISTRIBUTE_EXACT_SMF_AMT/l_procList.size()))
         {
-            TS_FAIL("testDistributeNotExactAmt: Unexpected amount of memory allocated. Expected: 0x%x, actual 0x%x", DISTRIBUTE_EXACT_SMF_AMT, l_smfBarSize);
+            TS_FAIL("testDistributeNotExactAmt: Unexpected amount of memory allocated. Expected: 0x%x, actual 0x%x", (DISTRIBUTE_EXACT_SMF_AMT/l_procList.size()), l_smfBarSize);
         }
         } while(0);
 
