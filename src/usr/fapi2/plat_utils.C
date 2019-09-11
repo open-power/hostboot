@@ -942,6 +942,13 @@ void processEIBusCallouts(const ErrorInfo & i_errInfo,
         {
             l_busType = HWAS::DMI_BUS_TYPE;
         }
+        else if ( ((l_type1 == TARGETING::TYPE_DMI) &&
+                   (l_type2 == TARGETING::TYPE_MEMBUF)) ||
+                  ((l_type1 == TARGETING::TYPE_MEMBUF) &&
+                   (l_type2 == TARGETING::TYPE_DMI)) )
+        {
+            l_busType = HWAS::DMI_BUS_TYPE;
+        }
         else if ((l_type1 == TARGETING::TYPE_ABUS) &&
                  (l_type2 == TARGETING::TYPE_ABUS))
         {
