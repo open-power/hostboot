@@ -35,15 +35,11 @@
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/util.H>
 #include <targeting/common/utilFilter.H>
-/* FIXME RTC: 210975
 #include <fapi2/target.H>
-
 
 //HWP Invoker
 #include    <fapi2/plat_hwp_invoker.H>
-#include    <p9_misc_scom_addresses.H>
-#include    <p9_exit_cache_contained.H>
-*/
+#include    <p10_exit_cache_contained.H>
 
 #include <sys/mm.h>
 #include <arch/pirformat.H>
@@ -88,11 +84,12 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
     //For sapphire with mirrored location flipped and at zero,
     //this also insures there is memory available to 'exit_cache' to.
     //Also set ATTR_PAYLOAD_BASE here.
-    TARGETING::Target* l_sys = NULL;
+    TARGETING::Target* l_sys = nullptr;
     targetService().getTopLevelTarget(l_sys);
-    assert( l_sys != NULL );
+    assert( l_sys != nullptr,
+           "call_proc_exit_cache_contained: No Top Level Target" );
 
-    //Check that minimum hardware requirement is meet.
+    //Check that minimum hardware requirement is met.
     //If not, log error and do not proceed
     bool l_bootable;
     l_errl = HWAS::checkMinimumHardware(l_sys, &l_bootable);
@@ -166,20 +163,16 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
     {
         ATTR_PAYLOAD_IN_MIRROR_MEM_type l_mirrored = false;
 
-        // In Sapphire mode disable mirroring for now - @todo-RTC:108314
-        // and force payload to zero
+        // In Sapphire mode disable mirroring and force
+        // payload to zero
         if(!is_sapphire_load())
         {
             payloadBase = l_sys->getAttr<ATTR_PAYLOAD_BASE>();
             l_mirrored = l_sys->getAttr<ATTR_PAYLOAD_IN_MIRROR_MEM>();
         }
 
-        // In Simics mode disable mirroring for now - @todo-CQ:SW427497
-        // need action file changes for P9 to enable MM
-        // SW427497 addresses these changes
-        // also force payload to zero
-        // @todo-RTC:192854 to enable it back once the defect SW427497
-        // is integrated.
+        // In Simics mode disable memory mirroring for now
+        // TODO RTC: 215700 to enable it back for P10 Sim
         if(Util::isSimicsRunning())
         {
             l_mirrored = false;
@@ -192,6 +185,7 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
 
         if(l_mirrored)
         {
+//TODO RTC: 215700 Enable Memory Mirroring
 #if 0
             ATTR_MIRROR_BASE_ADDRESS_type l_mirrorBaseAddr = 0;
             if(!is_sapphire_load())
@@ -340,7 +334,9 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
         // for sapphire as a single (working) node will return 0 for
         // bottom_mem_addr.
         else {
-            payloadBase += get_bottom_mem_addr()/MEGABYTE;
+            //TODO RTC:215806 re-enable this function call:
+            //payloadBase += get_bottom_mem_addr()/MEGABYTE;
+            payloadBase = 0;
         }
     }
 
@@ -356,9 +352,13 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
         }
 
         // Make sure we actually have memory before we try to use it
-        uint64_t l_bottom = get_bottom_mem_addr();
-        uint64_t l_top = get_top_mem_addr();
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Memory range : %.llX-%.llX", l_bottom, l_top );
+        //TODO RTC:215806 re-enable this function call:
+        //uint64_t l_bottom = get_bottom_mem_addr();
+        uint64_t l_bottom = 0x000000000;
+        //TODO RTC:215806 re-enable this function call:
+        //uint64_t l_top = get_top_mem_addr();
+        uint64_t l_top = 0x800000000;
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Memory range : %.lX-%.lx", l_bottom, l_top );
         if( (l_top == 0) || (l_top == l_bottom) )
         {
             /*@
@@ -386,94 +386,100 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
         }
         else
         {
-/* FIXME RTC: 210975
+            /*TODO RTC:211082 Need some semblance of the following:
+            // 1) Reclaim all DMA buffers from the FSP
+            // 2) Suspend the mailbox with interrupt disable
+            // 3) Tell the SBE to start the deadman timer
+            // 4) Ensure that interrupt presenter is drained
+            // 5) call p10_exit_cache_contained which routes a chipop to the SBE
+
+            l_errl = MBOX::reclaimDmaBfrsFromFsp();
+            if (l_errl)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "call_proc_exit_cache_contained ERROR : "
+                           "MBOX::reclaimDmaBfrsFromFsp");
+
+                //  if it not complete then thats okay, but we want to store the
+                //   log away somewhere. Since we didn't get all the DMA buffers
+                //   back its not a big deal to commit a log, even if we lose a
+                //   DMA buffer because of it it doesn't matter that much.
+                //  this will generate more traffic to the FSP
+                l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                errlCommit( l_errl, HWPF_COMP_ID );
+
+                // (do not break.   keep going to suspend)
+            }
+
+            l_errl = MBOX::suspend(true, true);
+            if (l_errl)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "call_proc_exit_cache_contained ERROR : MBOX::suspend");
+                break;
+            }
+
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                  "call_proc_exit_cache_contained: About to start deadman loop... "
+                       "Target HUID %.8X",
+                       TARGETING::get_huid(l_proc_target));
+
+            //In the future possibly move default "waitTime" value to SBEIO code
+            uint64_t waitTime = 1000000; // bump the wait time to 1 sec
+            l_errl = SBEIO::startDeadmanLoop(waitTime);
+
+            if ( l_errl )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "startDeadmanLoop ERROR : Returning errorlog, reason=0x%x",
+                   l_errl->reasonCode() );
+
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_proc_target).addToLog( l_errl );
+
+                break;
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "startDeadManLoop SUCCESS"  );
+            }
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "draining interrupt Q");
+                INTR::drainQueue();
+*/
+
+            //The HWP takes a list of processors, first build the list
+            std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>> l_fapiProcList;
             for (const auto & l_procChip: l_procList)
             {
-                const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-                  l_fapi_cpu_target(l_procChip);
-                // call p9_proc_exit_cache_contained.C HWP
-                FAPI_INVOKE_HWP( l_errl,
-                                 p9_exit_cache_contained,
-                                 l_procChip);
-
-                if(l_errl)
-                {
-                    ErrlUserDetailsTarget(l_procChip).addToLog(l_errl);
-                    l_stepError.addErrorDetails( l_errl );
-                    errlCommit( l_errl, HWPF_COMP_ID );
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_exit_cache_contained:: failed on proc with HUID : %d", TARGETING::get_huid(l_procChip)  );
-                }
+                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                             l_fapi_cpu_target(l_procChip);
+                l_fapiProcList.push_back(l_fapi_cpu_target);
             }
-*/
+
+            // call p10_proc_exit_cache_contained.C HWP
+            FAPI_INVOKE_HWP( l_errl,
+                             p10_exit_cache_contained,
+                             l_fapiProcList,
+                             p10_sbe_exit_cache_contained_step_t::RUN_ALL );
+
+            if(l_errl)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_exit_cache_contained:: failed");
+            }
         }
 
         // no errors so extend Virtual Memory Map
         if(!l_errl)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "SUCCESS : call_proc_exit_cache_contained on all procs" );
+                       "SUCCESS : call_proc_exit_cache_contained" );
 
             if(Util::isSimicsRunning())
             {
-                TARGETING::ATTR_MODEL_type l_procModel = TARGETING::targetService().getProcessorModel();
-                if (l_procModel == TARGETING::MODEL_AXONE)
-                {
-                    // notify simics exiting cache contained mode
-                    MAGIC_INSTRUCTION(MAGIC_SIMICS_EXIT_CACHE_CONTAINED);
-                }
-                else
-                {
-                    // used for each processor with memory
-                    size_t scom_size = sizeof(uint64_t);
-
-                    //Value to indicate memory is valid
-                    uint64_t l_memory_valid = 1;
-
-                    //Predicate(s) to get functional dimm for each proc
-                    PredicateHwas l_functional;
-                    l_functional.functional(true);
-                    TargetHandleList l_dimms;
-                    PredicateCTM l_dimm(CLASS_LOGICAL_CARD, TYPE_DIMM);
-                    PredicatePostfixExpr l_checkExprFunctional;
-                    l_checkExprFunctional.push(&l_dimm).push(&l_functional).And();
-
-                    // Loop through all procs to find ones with valid memory
-                    for (const auto & l_procChip: l_procList)
-                    {
-                        // Get the functional DIMMs for this proc
-                        targetService().getAssociated(l_dimms,
-                                              l_procChip,
-                                              TargetService::CHILD_BY_AFFINITY,
-                                              TargetService::ALL,
-                                              &l_checkExprFunctional);
-
-                        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                           "%d functional dimms behind proc: %.8X",
-                           l_dimms.size(), get_huid(l_procChip) );
-
-                        // Check if this proc has memory
-                        if(l_dimms.size())
-                        {
-                            // exit cache contained mode
-                            l_errl = deviceWrite( l_procChip,
-                                            &l_memory_valid,  //Memory is valid
-                                            scom_size,        //Size of Scom
-                                            DEVICE_SCOM_ADDRESS(
-                                              EXIT_CACHE_CONTAINED_SCOM_ADDR) );
-                        }
-
-                        if ( l_errl )
-                        {
-                            // Create IStep error log and cross reference to error
-                            // that occurred
-                            l_stepError.addErrorDetails( l_errl );
-
-                            // Commit Error
-                            errlCommit( l_errl, HWPF_COMP_ID );
-                       }
-                    } // end processor for loop
-                } // end non-Axone model
-            } // end simics running
+                // notify simics exiting cache contained mode
+                MAGIC_INSTRUCTION(MAGIC_SIMICS_EXIT_CACHE_CONTAINED);
+            }
 
             // Call the function to extend VMM to mainstore
             int rc = mm_extend();
@@ -520,17 +526,6 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
         // Commit Error
         errlCommit( l_errl, HWPF_COMP_ID );
     }
-
-#if (defined CONFIG_SECUREBOOT && ! defined CONFIG_AXONE)
-    // Unload the MEMD section that was loaded at the beginning of step11
-    l_errl = unloadSecureSection(PNOR::MEMD);
-    if (l_errl)
-    {
-        l_stepError.addErrorDetails(l_errl);
-        errlCommit(l_errl, HWPF_COMP_ID);
-    }
-#endif
-
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_exit_cache_contained exit" );

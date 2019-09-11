@@ -26,9 +26,8 @@ ROOTPATH = ../../../..
 
 MODULE = smf
 
-# FIXME RTC: 210975
-#OBJS += smf_utils.o
-#OBJS += smf.o
+OBJS += smf_utils.o
+OBJS += smf.o
 
 SUBDIRS += test.d
 

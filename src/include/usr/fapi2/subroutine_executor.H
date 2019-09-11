@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -112,43 +112,33 @@ errlHndl_t requestHwpViaSbe(const char * i_hwpName, TARGETING::Target * i_target
         /*Read the target argument, which is the first argument in the list */ \
         TARGETING::Target* l_target = \
         reinterpret_cast<TARGETING::Target*>(_GET_1ST_ARG(_args).get()); \
-        /*Check if secureboot is enabled and if the target exists on the master proc*/ \
-        bool isSecure = SECUREBOOT::enabled(); \
-        bool isMaster = false; \
-        l_errl = fapi2::isOnMasterProc(l_target, isMaster); \
-        if(l_errl) \
+        do  \
         { \
-            FAPI_INF("subroutine_executor: Failed trying to determine is target was on master chip"); \
-            RC.setPlatDataPtr(reinterpret_cast<void *> (l_errl)); \
-            break; \
-        } \
-        /*Run hwp on host if targ is on master, we are not in securemode*/ \
-        if(isMaster || !isSecure) \
-        { \
-            FAPI_INF("subroutine_executor: isSecure = %d   isMaster = %d .. executing hwp %s on host", \
-                      isSecure, isMaster, l_function); \
-            RC = FUNC(_args); \
-        } \
-        /*Otherwise request the HWP via chipop to the SBE*/ \
-        else \
-        { \
-            FAPI_INF("subroutine_executor: isSecure = %d   isMaster = %d .. executing hwp %s via SBE chip-op", \
-                    isSecure, isMaster, l_function); \
-            l_errl =  requestHwpViaSbe(l_function, l_target, _args); \
-            /*For now until SBE support comes fallback to running on host if chipop fails*/ \
-            if(l_errl) \
+            /*TODO RTC:211082 Remove hook to bypass calling SBE */\
+            if (0 == memcmp(l_function, "p10_sbe_exit_cache_contained", 29)) \
             { \
-                FAPI_INF("subroutine_executor: SBE HWP invoking returns error. " \
-                "Commit error and retry locally"); \
-                /*Commit the error as informational and attempt hwp */ \
-                l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL); \
-                errlCommit(l_errl, SBEIO_COMP_ID); \
-                RC = FUNC(_args);\
+                FAPI_INF("Skip running p10_sbe_exit_cache_contained until SBE code ready"); \
+                break; \
             } \
             else \
             { \
-                FAPI_INF("subroutine_executor: SBE HWP invoking successful."); \
+                FAPI_INF("subroutine_executor: executing hwp %s via SBE chip-op", \
+                          l_function); \
+                l_errl =  requestHwpViaSbe(l_function, l_target, _args); \
+                break; \
             } \
+        } while (0); \
+        if(l_errl) \
+        { \
+            FAPI_INF("subroutine_executor: SBE HWP invoking returns error. " \
+            "Commit error"); \
+            /*Commit the error as unrecoverable */ \
+            l_errl->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE); \
+            errlCommit(l_errl, SBEIO_COMP_ID); \
+        } \
+        else \
+        { \
+            FAPI_INF("subroutine_executor: SBE HWP invoking successful."); \
         } \
     } while(0); \
 }

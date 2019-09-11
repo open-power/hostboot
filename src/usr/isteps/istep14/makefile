@@ -27,18 +27,20 @@ MODULE = istep14
 
 # FIXME RTC: 210975
 
-#PROCEDURE_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
+PROCEDURE_PATH = ${ROOTPATH}/src/import/chips/p10/procedures
 #EXP_COMMON_PATH = ${ROOTPATH}/src/import/chips/ocmb/explorer/common
 
 #Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
-#EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
-#EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/nest
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/core/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/scominfo/
+EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/nest
 #EXTRAINCDIR += ${ROOTPATH}/src/import/
 #EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory
 #EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
@@ -48,8 +50,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 #EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/lib/dimm/
 #EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/lib/dimm/ddr4/
 #EXTRAINCDIR += ${EXP_COMMON_PATH}/include/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/nest/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
 #EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory
 
 #OBJS += call_mss_memdiag.o
@@ -58,26 +60,37 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 #OBJS += call_mss_power_cleanup.o
 #OBJS += call_proc_setup_bars.o
 #OBJS += call_proc_htm_setup.o
-#OBJS += call_proc_exit_cache_contained.o
+OBJS += call_proc_exit_cache_contained.o
 #OBJS += call_host_mpipl_service.o
 
-#include ${ROOTPATH}/procedure.rules.mk
-#include ${PROCEDURE_PATH}/hwp/nest/p9_exit_cache_contained.mk
+include ${ROOTPATH}/procedure.rules.mk
+include ${PROCEDURE_PATH}/hwp/nest/p10_exit_cache_contained.mk
+include ${PROCEDURE_PATH}/hwp/nest/p10_sbe_exit_cache_contained.mk
+include ${PROCEDURE_PATH}/hwp/nest/p10_sbe_stop_hb.mk
+include ${PROCEDURE_PATH}/hwp/nest/p10_sbe_purge_hb.mk
+include ${PROCEDURE_PATH}/hwp/nest/p10_sbe_apply_xscom_inits.mk
+include ${PROCEDURE_PATH}/hwp/nest/p10_revert_sbe_mcs_setup.mk
+include ${PROCEDURE_PATH}/hwp/nest/p10_l2_flush.mk
+include ${PROCEDURE_PATH}/hwp/nest/p10_l3_flush.mk
+#include ${PROCEDURE_PATH}/hwp/nest/p10_adu_setup.mk
+include ${PROCEDURE_PATH}/hwp/nest/p10_adu_access.mk
+include ${PROCEDURE_PATH}/hwp/core/p10_sbe_instruct_start.mk
+
+
 #include ${PROCEDURE_PATH}/hwp/nest/p9_mss_setup_bars.mk
 
 # TODO: RTC 159164: Multiple definition linker errors on HWPs that include the
 # same *.o file in their *.mk files
 # ---- Workaround: Compile the HWP directly below
+OBJS += p10_adu_setup.o
 #OBJS += p9_htm_setup.o
 #OBJS += p9_htm_start.o
 #OBJS += p9_htm_reset.o
 #OBJS += p9_htm_adu_ctrl.o
 #OBJS += p9_pcie_config.o
 #OBJS += p9_setup_bars.o
-#OBJS += p9_fbc_smp_utils.o
 #OBJS += p9_mpipl_chip_cleanup.o
 #OBJS += p9_mss_thermal_init.o
-#OBJS += p9_revert_sbe_mcs_setup.o
 
 #include ${PROCEDURE_PATH}/hwp/nest/p9_htm_setup.mk
 #include ${PROCEDURE_PATH}/hwp/nest/p9_pcie_config.mk
@@ -88,9 +101,13 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 # include ${PROCEDURE_PATH}/hwp/memory/p9_mss_thermal_init.mk
 #include ${PROCEDURE_PATH}/hwp/nest/p9_throttle_sync.mk
 #include ${PROCEDURE_PATH}/hwp/memory/p9_mss_power_cleanup.mk
-include ${ROOTPATH}/config.mk
 
-#VPATH    += ${PROCEDURE_PATH}/hwp/nest/ ${PROCEDURE_PATH}/hwp/memory/
+VPATH    += ${PROCEDURE_PATH}/hwp/nest/
+VPATH    += ${PROCEDURE_PATH}/hwp/core/
+VPATH    += ${PROCEDURE_PATH}/hwp/memory/
+VPATH    += ${ROOTPATH}/src/import/chips/p10/common/scominfo/
+
+include ${ROOTPATH}/config.mk
 #VPATH    += ${PROCEDURE_PATH}/hwp/memory/lib/eff_config/
 #VPATH    += ${PROCEDURE_PATH}/hwp/memory/lib/utils/
 #VPATH    += ${PROCEDURE_PATH}/hwp/memory/lib/mcbist/

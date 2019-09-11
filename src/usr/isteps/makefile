@@ -70,7 +70,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 #EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
 
-#OBJS += mem_utils.o
+OBJS += mem_utils.o
 OBJS += hwpisteperror.o
 OBJS += hwpistepud.o
 OBJS += istepHelperFuncs.o

@@ -34,19 +34,19 @@
  * 14.1  mss_memdiag
  *       :  Mainstore Pattern Testing
  * 14.2  mss_thermal_init
- *       : Initialize the thermal sensor
+ *       :  Initialize the thermal sensor
  * 14.3  proc_pcie_config
  *       :  Configure the PHBs
  * 14.4  mss_power_cleanup
  *       :  Clean up any MCS/Centaurs
  * 14.5  proc_setup_bars
- *          : Setup Memory BARs
- * 14.6  proc_htm_setup
- *       : Setup HTM allocations
- * 14.7  proc_exit_cache_contained
- *       : Execution from memory
+ *       :  Setup Memory BARs
+ * 14.6  proc_exit_cache_contained
+ *       :  Execution from memory
+ * 14.7  proc_htm_setup
+ *       :  Setup HTM allocations
  * 14.8  host_mpipl_service
- *       : Perform MPIPL tasks 
+ *       :  Perform MPIPL tasks
  *
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
@@ -151,6 +151,7 @@ namespace   INITSERVICE
                 NULL,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
+/*
         {
                 ISTEPNAME(14,01,"mss_memdiag"),
                 ISTEP_14::call_mss_memdiag,
@@ -180,14 +181,16 @@ namespace   INITSERVICE
                 ISTEP_14::call_proc_setup_bars,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
+**/
         {
-                ISTEPNAME(14,06,"proc_htm_setup"),
-                ISTEP_14::call_proc_htm_setup,
+                ISTEPNAME(14,06,"proc_exit_cache_contained"),
+                ISTEP_14::call_proc_exit_cache_contained,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
+/*
         {
-                ISTEPNAME(14,07,"proc_exit_cache_contained"),
-                ISTEP_14::call_proc_exit_cache_contained,
+                ISTEPNAME(14,07,"proc_htm_setup"),
+                ISTEP_14::call_proc_htm_setup,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
@@ -195,11 +198,13 @@ namespace   INITSERVICE
                 ISTEP_14::call_host_mpipl_service,
                 { START_FN, EXT_IMAGE, MPIPL_OP, true }
         },
+**/
     };
 
 const DepModInfo g_istep14Dependancies = {
     {
         DEP_LIB(libistep14.so),
+/*
         DEP_LIB(libdump.so),
         DEP_LIB(libruntime.so),
         DEP_LIB(libisteps_mss.so),
@@ -207,6 +212,7 @@ const DepModInfo g_istep14Dependancies = {
         DEP_LIB(libimageprocs.so),
         DEP_LIB(libcen.so),
         DEP_LIB(libnestmemutils.so),
+**/
         NULL
     }
 };

@@ -76,7 +76,9 @@
 #include    "istep11list.H"
 #include    "istep12list.H"
 #include    "istep13list.H"
+*/
 #include    "istep14list.H"
+/*
 #include    "istep15list.H"
 #include    "istep16list.H"
 // istep 17, FSP only
@@ -107,7 +109,7 @@ const  ExtTaskInfo  g_isteps[]    =   {
         { NULL, 0, NULL },                              //  dummy IStep 11
         { NULL, 0, NULL },                              //  dummy IStep 12
         { NULL, 0, NULL },                              //  dummy IStep 13
-        { NULL, 0, NULL },                              //  dummy IStep 14
+        INITSERVICE::g_istep14TaskList,                 //        Istep 14
         { NULL, 0, NULL },                              //  dummy IStep 15
         { NULL, 0, NULL },                              //  dummy IStep 16
 
@@ -118,7 +120,6 @@ const  ExtTaskInfo  g_isteps[]    =   {
         INITSERVICE::g_istep11TaskList,                 //        IStep 11
         INITSERVICE::g_istep12TaskList,                 //        IStep 12
         INITSERVICE::g_istep13TaskList,                 //        IStep 13
-        INITSERVICE::g_istep14TaskList,                 //        IStep 14
         INITSERVICE::g_istep15TaskList,                 //        IStep 15
         INITSERVICE::g_istep16TaskList,                 //        IStep 16
 */

@@ -2054,6 +2054,9 @@
       <id>PAYLOAD_ENTRY</id>
     </attribute>
     <attribute>
+      <id>PAYLOAD_IN_MIRROR_MEM</id>
+    </attribute>
+    <attribute>
       <id>PAYLOAD_KIND</id>
     </attribute>
     <attribute>

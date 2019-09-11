@@ -112,7 +112,7 @@
     </attribute>
     <attribute>
         <id>EARLY_TESTCASES_ISTEP</id>
-        <default>0x0703</default>
+        <default>0x0E01</default> <!-- Istep 14, Substep 1 (proc_exit_cache_contained) -->
     </attribute>
     <attribute>
         <id>PAYLOAD_BASE</id>
