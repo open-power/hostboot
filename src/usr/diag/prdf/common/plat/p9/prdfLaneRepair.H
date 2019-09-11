@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,12 +56,12 @@ int32_t handleLaneRepairEvent (ExtensibleChip * i_chip,
 /**
  * @brief  Will add target bus interface endpoints and all parts in between the
  *         endpoints to the global error log in RasServices.
- * @param  i_chip    RX-side chip of bus interface
- * @param  i_sc      The step code data struct.
+ * @param  i_rxTrgt   RX-side target of bus interface
+ * @param  i_sc       The step code data struct.
  * @param  i_priority Callout priority (default MRU_LOW).
  * @return Non-SUCCESS if an internal function fails. SUCCESS otherwise.
  */
-int32_t calloutBusInterface( ExtensibleChip * i_chip,
+int32_t calloutBusInterface( TARGETING::TargetHandle_t i_rxTrgt,
                              STEP_CODE_DATA_STRUCT & i_sc,
                              PRDpriority i_priority = MRU_LOW );
 
