@@ -86,7 +86,7 @@ include ${HWP_PATH_1}/hwp/accessors/ddimm_get_efd.mk
 #EKB Objects (mirrored in src/import)
 OBJS += error_info.o
 OBJS += ffdc.o
-#OBJS += fapi2_utils.o
+OBJS += fapi2_utils.o
 #OBJS += p9_collect_some_ffdc.o
 #OBJS += p9_pib2pcb_mux_seq.o
 #OBJS += p9_collect_ppe_state.o
