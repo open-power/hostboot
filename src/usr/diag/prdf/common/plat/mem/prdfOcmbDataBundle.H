@@ -173,6 +173,15 @@ class OcmbDataBundle : public DataBundle
     MemCeTable<TARGETING::TYPE_OCMB_CHIP> iv_ceTable; ///< CE table for FFDC
     MemUeTable iv_ueTable;                           ///< UE table for FFDC
 
+    /** If there is a channel failure detected on this bus, there will be some
+     *  required cleanup after analysis to mask off all further attentions from
+     *  the bus. A channel failure could occur on either side of the bus and it
+     *  is possible the cleanup function could be called in multiple
+     *  PostAnalysis plugins depending on where the channel failure occurred.
+     *  Since we only want to do one cleanup, we will use this variable to
+     *  indicate if a cleanup is still required or has already been done. */
+    bool iv_doChnlFailCleanup = false;
+
     #ifdef __HOSTBOOT_MODULE
 
     /** Threshold table for RCD parity errors. */

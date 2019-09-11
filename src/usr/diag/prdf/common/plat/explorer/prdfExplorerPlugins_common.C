@@ -31,6 +31,7 @@
 // Platform includes
 #include <prdfMemDbUtils.H>
 #include <prdfMemEccAnalysis.H>
+#include <prdfMemUtils.H>
 #include <prdfPlatServices.H>
 
 using namespace TARGETING;
@@ -60,6 +61,47 @@ int32_t Initialize( ExtensibleChip * i_chip )
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE( explorer_ocmb, Initialize );
+
+/**
+ * @brief  Plugin function called after analysis is complete but before PRD
+ *         exits.
+ * @param  i_chip An OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @note   This is especially useful for any analysis that still needs to be
+ *         done after the framework clears the FIR bits that were at attention.
+ * @return SUCCESS.
+ */
+int32_t PostAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[explorer_ocmb::PostAnalysis] "
+
+    #ifdef __HOSTBOOT_RUNTIME
+
+    // If the IUE threshold in our data bundle has been reached, we trigger
+    // a port fail. Once we trigger the port fail, the system may crash
+    // right away. Since PRD is running in the hypervisor, it is possible we
+    // may not get the error log. To better our chances, we trigger the port
+    // fail here after the error log has been committed.
+    if ( MemEcc::queryIueTh<TYPE_OCMB_CHIP>(i_chip, io_sc) )
+    {
+        if ( SUCCESS != MemEcc::triggerPortFail<TYPE_OCMB_CHIP>(i_chip) )
+        {
+            PRDF_ERR( PRDF_FUNC "triggerPortFail(0x%08x) failed",
+            i_chip->getHuid() );
+        }
+    }
+
+    #endif // __HOSTBOOT_RUNTIME
+
+    // Cleanup processor FIR bits on the other side of the channel.
+    MemUtils::cleanupChnlAttns<TYPE_OCMB_CHIP>( i_chip, io_sc );
+
+    return SUCCESS;
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( explorer_ocmb, PostAnalysis );
+
 
 //##############################################################################
 //

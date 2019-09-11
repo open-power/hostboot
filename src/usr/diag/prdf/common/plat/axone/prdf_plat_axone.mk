@@ -38,5 +38,6 @@ prd_incpath += ${PRD_SRC_PATH}/common/plat/axone
 ################################################################################
 
 # plat/axone/ (rule plugin related)
+prd_rule_plugin += prdfMccPlugins.o
 prd_rule_plugin += prdfOmicPlugins.o
 

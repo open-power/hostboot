@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/axone/prdfOmicPlugins.C $       */
+/* $Source: src/usr/diag/prdf/common/plat/axone/prdfMccPlugins.C $        */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -39,7 +39,7 @@ namespace PRDF
 
 using namespace PlatServices;
 
-namespace axone_omic
+namespace axone_mcc
 {
 
 //##############################################################################
@@ -50,7 +50,7 @@ namespace axone_omic
 
 /**
  * @brief  Analysis code that is called before the main analyze() function.
- * @param  i_chip     An OMIC chip.
+ * @param  i_chip     A MCC chip.
  * @param  io_sc      The step code data struct.
  * @param  o_analyzed True if analysis is done on this chip, false otherwise.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
@@ -59,16 +59,16 @@ int32_t PreAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
                      bool & o_analyzed )
 {
     // Check for a channel failure before analyzing this chip.
-    o_analyzed = MemUtils::analyzeChnlFail<TYPE_OMIC>( i_chip, io_sc );
+    o_analyzed = MemUtils::analyzeChnlFail<TYPE_MCC>( i_chip, io_sc );
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE( axone_omic, PreAnalysis );
+PRDF_PLUGIN_DEFINE( axone_mcc, PreAnalysis );
 
 /**
  * @brief  Plugin function called after analysis is complete but before PRD
  *         exits.
- * @param  i_chip An OMIC chip.
+ * @param  i_chip A MCC chip.
  * @param  io_sc  The step code data struct.
  * @note   This is especially useful for any analysis that still needs to be
  *         done after the framework clears the FIR bits that were at attention.
@@ -78,90 +78,13 @@ int32_t PostAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 {
     // If there was a channel failure some cleanup is required to ensure
     // there are no more attentions from this channel.
-    MemUtils::cleanupChnlFail<TYPE_OMIC>( i_chip, io_sc );
+    MemUtils::cleanupChnlFail<TYPE_MCC>( i_chip, io_sc );
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE( axone_omic, PostAnalysis );
+PRDF_PLUGIN_DEFINE( axone_mcc, PostAnalysis );
 
-//##############################################################################
-//
-//                               OMIDLFIR
-//
-//##############################################################################
-
-/**
- * @brief  OMIDLFIR[0|20|40] - OMI-DL Fatal Error
- * @param  i_chip An OMIC chip.
- * @param  io_sc  The step code data struct.
- * @param  i_dl   The DL relative to the OMIC.
- * @return PRD_SCAN_COMM_REGISTER_ZERO for the bus callout, else SUCCESS
- */
-int32_t DlFatalError( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
-                      uint8_t i_dl )
-{
-    #define PRDF_FUNC "[axone_omic::DlFatalError] "
-
-    int32_t rc = SUCCESS;
-
-    do
-    {
-        char reg[64];
-        sprintf( reg, "DL%d_ERROR_HOLD", i_dl );
-
-        // Check DL#_ERROR_HOLD[52:63] to determine callout
-        SCAN_COMM_REGISTER_CLASS * dl_error_hold = i_chip->getRegister( reg );
-
-        if ( SUCCESS != dl_error_hold->Read() )
-        {
-            PRDF_ERR( PRDF_FUNC "Read() Failed on DL%d_ERROR_HOLD: "
-                      "i_chip=0x%08x", i_dl, i_chip->getHuid() );
-            break;
-        }
-
-        if ( dl_error_hold->IsBitSet(53) ||
-             dl_error_hold->IsBitSet(55) ||
-             dl_error_hold->IsBitSet(57) ||
-             dl_error_hold->IsBitSet(58) ||
-             dl_error_hold->IsBitSet(59) ||
-             dl_error_hold->IsBitSet(60) ||
-             dl_error_hold->IsBitSet(62) ||
-             dl_error_hold->IsBitSet(63) )
-        {
-            // Get and callout the OMI target
-            TargetHandle_t omi = getConnectedChild( i_chip->getTrgt(), TYPE_OMI,
-                                                    i_dl );
-            io_sc.service_data->SetCallout( omi );
-        }
-        else if ( dl_error_hold->IsBitSet(54) ||
-                  dl_error_hold->IsBitSet(56) ||
-                  dl_error_hold->IsBitSet(61) )
-        {
-            // callout the OMI target, the OMI bus, and the OCMB
-            // Return PRD_SCAN_COMM_REGISTER_ZERO so the rule code makes
-            // the appropriate callout.
-            rc = PRD_SCAN_COMM_REGISTER_ZERO;
-        }
-
-    }while(0);
-
-    return rc;
-
-    #undef PRDF_FUNC
-}
-
-#define DL_FATAL_ERROR_PLUGIN( POS ) \
-int32_t DlFatalError_##POS( ExtensibleChip * i_chip, \
-                            STEP_CODE_DATA_STRUCT & io_sc ) \
-{ \
-    return DlFatalError( i_chip, io_sc, POS ); \
-} \
-PRDF_PLUGIN_DEFINE( axone_omic, DlFatalError_##POS );
-
-DL_FATAL_ERROR_PLUGIN( 0 );
-DL_FATAL_ERROR_PLUGIN( 1 );
-DL_FATAL_ERROR_PLUGIN( 2 );
-
-} // end namespace axone_omic
+} // end namespace axone_mcc
 
 } // end namespace PRDF
+

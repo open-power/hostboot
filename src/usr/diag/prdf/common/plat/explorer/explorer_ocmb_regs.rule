@@ -448,4 +448,13 @@
         capture     group default;
     };
 
+    ############################################################################
+    # Interrupt status register
+    ############################################################################
 
+    register INTER_STATUS_REG
+    {
+        name        "TPTOP.PIB.PCBMS.INTERRUPT_TYPE_REG";
+        scomaddr    0x000F001A;
+        capture     group default;
+    };
