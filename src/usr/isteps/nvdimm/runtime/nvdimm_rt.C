@@ -1096,17 +1096,22 @@ bool nvDimmCheckBadFlashBlockPercentage(TargetHandle_t i_nvDimm,
                                         const uint8_t  i_maxPercentageAllowed,
                                         uint8_t  &o_badFlashBlockPercentage)
 {
+    // Cache the HUID of the NVDIMM
+    uint32_t l_nvDimmHuid = get_huid( i_nvDimm );
+
+    TRACFCOMP(g_trac_nvdimm, ENTER_MRK"nvDimmCheckBadFlashBlockPercentage(): "
+              "NVDIMM(0x%.4X), max bad flash blocks allowed(%d)",
+              l_nvDimmHuid,
+              i_maxPercentageAllowed);
+
     // The status of the check on the bad block percentage
-    bool l_didBadFlashBlockPercentageCheckPass(false);
+    bool l_didBadFlashBlockPercentageCheckPass(true);
 
     // The retrieved flash block percentage from register, initialize to zero
     o_badFlashBlockPercentage = 0;
 
     // Handle to catch any errors
     errlHndl_t l_err(nullptr);
-
-    // Cache the HUID of the NVDIMM
-    uint32_t l_nvDimmHuid = get_huid( i_nvDimm );
 
     // Retrieve the percentage of bad blocks and validate
     TRACDCOMP(g_trac_nvdimm, INFO_MRK"nvDimmCheckBadFlashBlockPercentage(): "
@@ -1152,11 +1157,13 @@ bool nvDimmCheckBadFlashBlockPercentage(TargetHandle_t i_nvDimm,
         {
             TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvDimmCheckBadFlashBlockPercentage(): "
                       "FAIL: For NVDIMM (0x%.8X), the percentage of bad "
-                      "flash blocks (%d) exceeds the maximum percentage "
-                      "of bad flash blocks allowed (%d), marking this "
-                      "as a fail",
+                      "flash blocks (%d), read from register "
+                      "FLASH_BAD_BLK_PCT(0x%.4X), exceeds the maximum "
+                      "percentage of bad flash blocks allowed (%d), marking "
+                      "this as a fail",
                       l_nvDimmHuid,
                       o_badFlashBlockPercentage,
+                      FLASH_BAD_BLK_PCT,
                       i_maxPercentageAllowed);
 
             // Set up the fail state, so caller can determine that the fail was
@@ -1182,6 +1189,10 @@ bool nvDimmCheckBadFlashBlockPercentage(TargetHandle_t i_nvDimm,
             l_didBadFlashBlockPercentageCheckPass = true;
         }  // end if (l_badFlashBlockPercentage > i_maxPercentageAllowed)
     }  // end if (l_err) ... else
+
+    TRACFCOMP(g_trac_nvdimm, EXIT_MRK"nvDimmCheckBadFlashBlockPercentage(): "
+             "Returning %s",
+             l_didBadFlashBlockPercentageCheckPass == true ? "true" : "false" );
 
     return l_didBadFlashBlockPercentageCheckPass;
 }
@@ -1212,17 +1223,22 @@ bool nvDimmCheckFlashErrorCount(TargetHandle_t  i_nvDimm,
                                 const uint32_t  i_maxFlashErrorsAllowed,
                                 uint32_t       &o_readFlashErrorCount)
 {
+    // Cache the HUID of the NVDIMM
+    uint32_t l_nvDimmHuid = get_huid( i_nvDimm );
+
+    TRACFCOMP(g_trac_nvdimm, ENTER_MRK"nvDimmCheckFlashErrorCount(): "
+              "NVDIMM(0x%.4X), max flash errors allowed(%d)",
+              l_nvDimmHuid,
+              i_maxFlashErrorsAllowed);
+
     // The status of the check on the flash error count
-    bool l_didFlashErrorCountCheckPass(false);
+    bool l_didFlashErrorCountCheckPass(true);
 
     // The retrieved flash error count from register, initialize to zero
     o_readFlashErrorCount = 0;
 
     // Handle to catch any errors
     errlHndl_t l_err(nullptr);
-
-    // Cache the HUID of the NVDIMM
-    uint32_t l_nvDimmHuid = get_huid( i_nvDimm );
 
     // The retrieved flash error count from a register
     uint8_t l_readFlashErrorCountByte(0);
@@ -1291,12 +1307,17 @@ bool nvDimmCheckFlashErrorCount(TargetHandle_t  i_nvDimm,
         if (o_readFlashErrorCount > i_maxFlashErrorsAllowed)
         {
             TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvDimmCheckFlashErrorCount(): "
-                      "FAIL: For NVDIMM (0x%.8X), the flash error "
-                      "count (%d) exceeds the maximum number of flash "
-                      "errors allowed (%d), marking this as a fail",
-                      l_nvDimmHuid,
-                      o_readFlashErrorCount,
-                      i_maxFlashErrorsAllowed);
+                   "FAIL: For NVDIMM (0x%.8X), the flash error count (%d), "
+                   "read from registers FLASH_ERROR_COUNT0(0x%.4X), "
+                   "FLASH_ERROR_COUNT1(0x%.4X) and FLASH_ERROR_COUNT2(0x%.4X), "
+                   "exceeds the maximum number of flash "
+                   "errors allowed (%d), marking this as a fail",
+                   l_nvDimmHuid,
+                   o_readFlashErrorCount,
+                   FLASH_ERROR_COUNT0,
+                   FLASH_ERROR_COUNT1,
+                   FLASH_ERROR_COUNT2,
+                   i_maxFlashErrorsAllowed);
 
             // Set up the fail state, so caller can determine that the fail was
             // due to error count exceeding the max errors allowed.
@@ -1320,6 +1341,10 @@ bool nvDimmCheckFlashErrorCount(TargetHandle_t  i_nvDimm,
             l_didFlashErrorCountCheckPass = true;
         }
     } // end if (o_readFlashErrorCount)
+
+    TRACFCOMP(g_trac_nvdimm, EXIT_MRK"nvDimmCheckFlashErrorCount(): "
+              "Returning %s",
+              l_didFlashErrorCountCheckPass == true ? "true" : "false" );
 
     return l_didFlashErrorCountCheckPass;
 }
@@ -1487,6 +1512,12 @@ bool nvDimmNvmCheckHealthStatus(const TargetHandleList &i_nvDimmTargetList)
 
             l_err->collectTrace(NVDIMM_COMP_NAME);
             nvdimmAddVendorLog(l_nvDimm, l_err);
+
+            // Add a DIMM callout
+            l_err->addHwCallout( l_nvDimm,
+                                 HWAS::SRCI_PRIORITY_HIGH,
+                                 HWAS::NO_DECONFIG,
+                                 HWAS::GARD_NULL );
 
             // Collect the error
             errlCommit(l_err, NVDIMM_COMP_ID);
