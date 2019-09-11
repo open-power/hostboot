@@ -23,6 +23,12 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
+/**
+ * @file bl_pnorAccess.C
+ *
+ * @brief Bootloader PNOR access functions to find/read PNOR TOC and HBB
+ */
+
 #include <bootloader/bl_pnorAccess.H>
 #include <bootloader/bootloader_trace.H>
 #include <bootloader/hbblreasoncodes.H>
@@ -30,6 +36,7 @@
 #include <util/align.H>
 #include <bootloader/bootloader.H>
 #include <lpc_const.H>
+#include <config.h>
 #ifdef PNORUTILSTEST_H
 #define BOOTLOADER_TRACE(args) TRACFCOMP(g_trac_pnor,"##args")
 #define BOOTLOADER_TRACE_W_BRK(args) TRACFCOMP(g_trac_pnor,"##args")
@@ -177,6 +184,12 @@ void bl_pnorAccess::findTOC(uint64_t i_lpcBar, PNOR::SectionData_t * o_TOC,
 
     //The first TOC is 1 TOC size + 1 page back from the end of the flash (+ 1)
     uint64_t l_mmioAddr = i_pnorEnd - PNOR::TOC_OFFSET_FROM_TOP_OF_FLASH;
+#ifdef CONFIG_VPO_COMPILE
+    l_mmioAddr -= 0x3C00000; // In VPO, the size of the PNOR is smaller (4MB),
+                             // so we need to make an adjustment to find the
+                             // TOC at the end of the smaller PNOR correctly.
+                             // 0x3C00000 is the difference in PNOR sizes
+#endif
     l_mmioAddr = ALIGN_PAGE_DOWN(l_mmioAddr);
 
     do

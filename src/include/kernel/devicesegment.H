@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,6 +22,14 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+/**
+ * @file devicesegment.H
+ *
+ * @brief DeviceSegment class and APIs; this class allows to map certain devices
+ *        to virtual memory
+*/
+
 #ifndef __KERNEL_DEVICESEGMENT_H
 #define __KERNEL_DEVICESEGMENT_H
 
@@ -115,7 +123,7 @@ class DeviceSegment : public Segment
             MMIO_MAP_DEVICES = 32
         };
 
-        devSegData iv_mmioMap[MMIO_MAP_DEVICES];
+        devSegData iv_mmioMap[MMIO_MAP_DEVICES] {};
 
         /**
          * @brief Add the device segment

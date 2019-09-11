@@ -198,6 +198,8 @@ GENFILES = ${XMLTOHB_TARGETS}
 XMLTOHB_SYSTEM_BINARIES += simics_P10_targeting.bin.protected
 XMLTOHB_SYSTEM_BINARIES += simics_P10_targeting.bin.unprotected
 
+XMLTOHB_SYSTEM_BINARIES += vbu_P10_targeting.bin.protected
+XMLTOHB_SYSTEM_BINARIES += vbu_P10_targeting.bin.unprotected
 #debug :
 #	@echo COMMON_TARGETING_PATH_PREFIX = ${COMMON_TARGETING_PATH_PREFIX}
 #	@echo COMMON_TARGETING_REL_PATH = ${COMMON_TARGETING_REL_PATH}

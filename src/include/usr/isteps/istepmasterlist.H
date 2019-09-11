@@ -102,6 +102,7 @@ const  ExtTaskInfo  g_isteps[]    =   {
         { NULL, 0, NULL },                              //  dummy IStep 4
         { NULL, 0, NULL },                              //  dummy IStep 5
         INITSERVICE::g_istep06TaskList,                 //  HWAS  IStep 6
+#ifndef CONFIG_VPO_COMPILE // Only run istep 6 in VPO mode
         INITSERVICE::g_istep07TaskList,                 //        IStep 7
         { NULL, 0, NULL },                              //  dummy IStep 8
         { NULL, 0, NULL },                              //  dummy IStep 9
@@ -139,6 +140,7 @@ const  ExtTaskInfo  g_isteps[]    =   {
 //        INITSERVICE::g_istep21TaskList                  //        IStep 21
         //
         // add further istep lists at the end.
+#endif
 };
 
 const   uint64_t    MAX_SUBSTEPS =  25;

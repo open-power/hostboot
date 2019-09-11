@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -23,6 +23,14 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+/**
+ * @file sfc_fake.C
+ *
+ * @brief Implementations of the fake SFC driver used to read PNOR directly
+ *        from memory instead of through LPC operations
+ */
+
 /*****************************************************************************/
 // I n c l u d e s
 /*****************************************************************************/
@@ -47,9 +55,9 @@
 // C o n s t a n t s
 /*****************************************************************************/
 
-// By default we will use the top of the cache 4MB-10MB
+// By default we will use the top of the cache 4MB-8B
 #define FAKE_PNOR_START (4*MEGABYTE)
-#define FAKE_PNOR_END   (10*MEGABYTE)
+#define FAKE_PNOR_END   (8*MEGABYTE)
 #define FAKE_PNOR_SIZE  (FAKE_PNOR_END-FAKE_PNOR_START)
 
 

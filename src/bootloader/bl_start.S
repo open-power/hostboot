@@ -25,6 +25,7 @@
 # IBM_PROLOG_END_TAG
 
 .include "kernel/ppcconsts.S"
+#include <config.h>
 
 # .set SBE_HB_VERSION,      sbe_hb_structures    ;// uint32_t
 # .set SBE_HB_SBEBOOTSIDE,  sbe_hb_structures+4  ;// uint8_t
@@ -114,11 +115,15 @@ _dcbz_after_bl:
     lis r6, 0
     addis r6, r6, 32   ;// 2M (32 * 0x10000)
     addi r6, r6, -1    ;// end before 2M
+;// Do not erase the memory in VPO, since the PNOR/HBB is placed there
+;// prior to starting
+#ifndef CONFIG_VPO_COMPILE
 _dcbz_after_bl_loop:
     dcbz 0,r5
     addi r5, r5, 128
     cmpld cr7, r5, r6
     blt cr7, _dcbz_after_bl_loop
+#endif
 
     ;// Do dcbz from start of HBB running space to start of Bootloader load
 _dcbz_before_bl:
@@ -131,11 +136,15 @@ _dcbz_before_bl:
 
     addi r6, r11, -1   ;// use HRMOR as Bootloader start, end before Bootloader
     or r6, r6, r7      ;// ignore HRMOR
+;// Do not erase the memory in VPO, since the PNOR/HBB is placed there
+;// prior to starting
+#ifndef CONFIG_VPO_COMPILE
 _dcbz_before_bl_loop:
     dcbz 0,r5
     addi r5, r5, 128
     cmpld cr7, r5, r6
     blt cr7, _dcbz_before_bl_loop
+#endif
 
 
 _updates_and_setup:

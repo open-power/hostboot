@@ -13,6 +13,10 @@ $hb_machine = "P10"
 # Simics relies on hb_mode; hb_mode is 0 for Axone and beyond
 $hb_mode = 0
 
+# Whether we're trying to run in VPO mode or not
+$vpo_compile = "0"
+@if 'VPO_COMPILE' in os.environ: simenv.vpo_compile = "1"
+
 python "os.environ['HB_MACHINE'] = \""+$hb_machine+"\""
 echo "HB_MACHINE is: "+$hb_machine
 
@@ -43,6 +47,11 @@ echo "Master PNOR is: "+$hb_pnor
 
 # Choose a default core to start with
 $hb_cpu = "system_cmp0.cpu0_0_00_0"
+
+if($vpo_compile == "1") {
+    $hb_cpu = "system_cmp0.cpu0_0_01_0"
+}
+
 echo "Defaulting to CPU "+$hb_cpu+" for Hostboot tools"
 
 # Prevent SBE Updates from happening on an IPL
@@ -85,17 +94,53 @@ if($hw_security == "1") {
     $jumperApplied=FALSE
 }
 
-# Set logical jumper state in SIMICS based on HW policy
-#     "TRUE"=jumper applied(security disabled, default)
-#     "FALSE"=jumper removed(security enabled)
+if($vpo_compile == "0") { # no secureboot in VPO
+    # Set logical jumper state in SIMICS based on HW policy
+    #     "TRUE"=jumper applied(security disabled, default)
+    #     "FALSE"=jumper removed(security enabled)
 
-# Load jumper state to the master processor
-$hb_masterproc.set-secure-jumper value = $jumperApplied
+    # Load jumper state to the master processor
+    $hb_masterproc.set-secure-jumper value = $jumperApplied
 
-# Load jumper state to all slave processors
-foreach $procS in ($hb_masterproc.get-slave-procs) {
-    $procS.set-secure-jumper value = $jumperApplied
+    # Load jumper state to all slave processors
+    foreach $procS in ($hb_masterproc.get-slave-procs) {
+        $procS.set-secure-jumper value = $jumperApplied
+    }
+
 }
 
 run-command-file (lookup-file hbfw/standalone.simics)
+
+if($vpo_compile == "1") {
+    echo "Setting up for VPO mode"
+    # Manually populate the SBE to HBBL communication area since SBE isn't running in VPO
+    #
+    # The "Jump forward x3000 instruction"
+    system_cmp0.phys_mem.set address = 0x8200000 size = 4 0x48003000
+    # The version of SBE
+    system_cmp0.phys_mem.set address = 0x8200004 size = 4 0x00100001
+    # 0th byte: sbeBootSide 1 byte:lpcConsoleEnable 3-4 byte: cacheSizeMB (4MB)
+    system_cmp0.phys_mem.set address = 0x8200008 size = 4 0x00000004
+    # The size of the HBBL + 0x3000 offset
+    system_cmp0.phys_mem.set address = 0x820000c size = 8 0x9000
+    system_cmp0.phys_mem.set address = 0x8200014 size = 2 0x0900
+    # 0th byte: numKeyAddrPair; 1-7 byte: start of the XSCOM BAR
+    system_cmp0.phys_mem.set address = 0x8200016 size = 8 0x080006
+    system_cmp0.phys_mem.set address = 0x820001e size = 2 0x03fc
+    system_cmp0.phys_mem.set address = 0x8200020 size = 8 0x00060300
+
+    # Now force the HBBL, HBB, and PNOR images at their respective offsets into the L3 cache.
+    $root = (env PROJECT_ROOT)
+
+    (get-master-procs)[0].l3_img.load-file (lookup-file $root+"/standalone/pnor/hbbl.bin") 0x203000
+    (get-master-procs)[0].l3_img.load-file (lookup-file $root+"/standalone/staging/hbicore.bin") 0x300000
+    (get-master-procs)[0].l3_img.load-file (lookup-file $root+"/standalone/pnor/VPO.pnor") 0x400000
+
+    # Set up to run on core 1 (for testing purposes)
+    system_cmp0.cpu0_0_01_0->hrmor = 0x8200000
+    system_cmp0.cpu0_0_01_0->iar = 0
+    system_cmp0.cpu0_0_01_0.enable
+    system_cmp0.cpu0_0_00_0.disable
+    sim->frontend_current_processor = "system_cmp0.cpu0_0_01_0"
+}
 

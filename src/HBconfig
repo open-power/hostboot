@@ -4,6 +4,13 @@ config VPO_COMPILE
     help
         Compile and build image for VPO environment
 
+config SBE_PRESENT
+    default y
+    help
+        Indicates whether or not SBE will be present
+        and whether to compile the code that interacts
+        with SBE.
+
 config P9_VPO_COMPILE
     default n
     help

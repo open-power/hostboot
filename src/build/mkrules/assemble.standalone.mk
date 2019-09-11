@@ -94,10 +94,8 @@ HBB_ECC_IMG := hostboot.bin.ecc
 OCMBFW_IMG = fwhdr.ocmbfw.bin
 
 # # Input fake images
-VPO_FAKE_MVPD := ${BASEIMAGESDIR}/vpo_sysmvpd.dat
-VPO_FAKE_DJVPD := ${BASEIMAGESDIR}/vpo_djvpd.dat
-VPO_FAKE_DVPD := ${BASEIMAGESDIR}/dvpd.dat
-FAKE_PNOR := fake6m.pnor
+HBD_FAKE = ${BASEIMAGESDIR}/vbu_P10_targeting.bin
+EECACHE_IMG = ${SANDBOXBASE}/simics/eecache_prebuilt.bin.ecc
 
 # Output final images
 HBBL_FINAL_IMG := HBBL.bin
@@ -182,26 +180,21 @@ ifeq (${FAKEPNOR},)
 else
 # Parameters passed to GEN_PNOR_IMAGE_SCRIPT.
     PNOR_LAYOUT = ${BUILDPNOR}/pnorLayoutFake.xml
-    _GEN_DEFAULT_BIN_FILES := HBI=${HBI_IMG},HBEL=EMPTY,MVPD=${VPO_FAKE_MVPD},\
-    	DJVPD=${VPO_FAKE_DJVPD},FIRDATA=EMPTY
+    _GEN_DEFAULT_BIN_FILES := HBI=${HBI_IMG},HBEL=EMPTY,EECACHE=${EECACHE_IMG},HBD=${HBD_FAKE}
     GEN_DEFAULT_BIN_FILES := $(shell echo ${_GEN_DEFAULT_BIN_FILES} | sed 's/ //g')
     DEFAULT_PARAMS := --systemBinFiles ${GEN_DEFAULT_BIN_FILES}\
     	--pnorLayout ${PNOR_LAYOUT}
 
 # Parameters passed to GEN_PNOR_IMAGE_SCRIPT.
-    _GEN_BIN_FILES := HCODE=${HCODE_IMG},HBD=${HBD_IMG},CENHWIMG=EMPTY
+    _GEN_BIN_FILES := HBD=${HBD_FAKE}
     GEN_BIN_FILES := $(shell echo ${_GEN_BIN_FILES} | sed 's/ //g')
-    SYSTEM_SPECIFIC_PARAMS := --pnorLayout ${PNOR_LAYOUT} \
-        --systemBinFiles ${GEN_BIN_FILES}
+    SYSTEM_SPECIFIC_PARAMS := --install-all --emit-eccless \
+		--pnorLayout ${PNOR_LAYOUT} --systemBinFiles ${GEN_BIN_FILES}
 
 # For standalone PNOR layout
-    HOSTBOOT_DEFAULT_SECTIONS := HBI=${HBI_FINAL_IMG} HBEL=${HBEL_FINAL_IMG} \
-    	MVPD=${MVPD_FINAL_IMG} DJVPD=${DJVPD_FINAL_IMG} \
-        FIRDATA=${FIRDATA_FINAL_IMG}
-    SECT := HBD=${HBD_FINAL_IMG} HCODE=${HCODE_FINAL_IMG}
+    HOSTBOOT_DEFAULT_SECTIONS := HBI=${HBI_FINAL_IMG} HBEL=${HBEL_FINAL_IMG}
+    SECT := HBD=${HBD_FINAL_IMG} EECACHE=${EECACHE_FINAL_IMG}
 
-#Truncate fake pnor image down to 6MB and copy to flash dir
-    UPDATERULE_FAKEPNOR_ADDON := dd if=${OUTPUTPNOR} of=${FAKE_PNOR} bs=6M count=1; cp -f ${FAKE_PNOR} ${FLASH_DEST}/${FAKE_PNOR}
 endif
 
 # Parameter passed to GEN_PNOR_IMAGE_SCRIPT.
@@ -279,7 +272,6 @@ OUTPUTPNOR: gen_system_specific_image
         ${IMAGE_BIN_OPTION} \
         --pnorOutBin ${OUTPUTPNOR} $(if ${TARGET_TEST}, "--test", ) \
         --fpartCmd fpart --fcpCmd fcp
-	${UPDATERULE_FAKEPNOR_ADDON}
 
 gen_system_specific_image: ${GEN_BUILD}
     # Call script to generate final bin file for chip/system specific images

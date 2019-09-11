@@ -22,7 +22,16 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+/**
+ * @file pagemgr.C
+ *
+ * @brief Implementations of PageManagerCore class and functions;
+ *        PageManagerCore manipulates memory pages.
+ */
+
 #include <limits.h>
+#include <config.h>
 #include <kernel/pagemgr.H>
 #include <util/singleton.H>
 #include <kernel/console.H>
@@ -276,6 +285,9 @@ void PageManager::_initialize()
     iv_heap.addMemory(l_endPageTable, pages);
     totalPages += pages;
 
+#ifndef CONFIG_VPO_COMPILE // In VPO, the size of the cache is 4MB; trying to
+                           // execute this code (that attempts to zero out 0
+                           // amount of memory) causes crashes
     KernelMisc::populate_cache_lines(
         reinterpret_cast<uint64_t*>(l_endInitCache),
         reinterpret_cast<uint64_t*>(g_BlToHbDataManager.getHbCacheSizeBytes()));
@@ -287,6 +299,7 @@ void PageManager::_initialize()
             PAGESIZE;
     iv_heap.addMemory(l_endInitCache, pages);
     totalPages += pages;
+#endif
 
     printk("%ld pages.\n", totalPages);
 
@@ -299,6 +312,7 @@ void PageManager::_initialize()
     iv_heapKernel.addMemory(reinterpret_cast<uint64_t>(
                               iv_heap.allocatePage(KERNEL_HEAP_RESERVED_PAGES)),
                             KERNEL_HEAP_RESERVED_PAGES);
+
     KernelMemState::setMemScratchReg(KernelMemState::MEM_CONTAINED_L3,
                                      g_BlToHbDataManager.getHbCacheSizeMb());
 }

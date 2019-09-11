@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2018
+# Contributors Listed Below - COPYRIGHT 2012,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -30,7 +30,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 OBJS += mboxdd.o
 OBJS += mailboxsp.o
 OBJS += mbox_dma_buffer.o
-OBJS += $(if $(CONFIG_VPO_COMPILE),,ipcSp.o)
+OBJS += ipcSp.o
 
 SUBDIRS += test.d
 

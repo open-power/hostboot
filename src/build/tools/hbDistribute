@@ -158,6 +158,9 @@ if [[ -f ${PROJECT_ROOT}/obj/genfiles/hb_fsp_release ]]; then
 elif [[ -f ${PROJECT_ROOT}/obj/genfiles/hb_simics_p10_release ]]; then
     echo "P10 build, using P10 PNOR XML layout"
     export PNOR_LAYOUT_SELECTED=P10
+elif [ ! -z "${VPO_COMPILE}" ]; then
+    echo "VPO build, using VPO PNOR XML layout"
+    export PNOR_LAYOUT_SELECTED=VPO
 else
     echo "Non FSP build, using standalone (default) pnor xml layout"
     export PNOR_LAYOUT_SELECTED=STANDALONE

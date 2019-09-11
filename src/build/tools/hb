@@ -70,6 +70,10 @@ export_key_variables()
         echo "P10 build, using P10 PNOR XML layout"
         export PNOR_LAYOUT_SELECTED=P10
         export HB_STANDALONE=1
+    elif [ ! -z "${VPO_COMPILE}" ]; then
+        echo "VPO build, using VPO PNOR XML layout"
+        export PNOR_LAYOUT_SELECTED=VPO
+        export HB_STANDALONE=1
     else
         echo "Non FSP build, using standalone (default) pnor xml layout"
         export PNOR_LAYOUT_SELECTED=STANDALONE
@@ -483,17 +487,24 @@ hb_startsimics()
         fi
 
         # Run Simics
-        echo "cd ${STANDALONE_SIMICS} && ./runsim -m ${MACHINE} \
-            hb_script_to_run=${STANDALONE_SIMICS}/hbfw/startup.simics \
-            pnor_img=${PROJECT_ROOT}/standalone/pnor/${PNOR_LAYOUT_SELECTED}.pnor \
-            sbe_seeprom_img=/gsa/ausgsa/projects/h/hostboot/simbuild/SBE_19b2530_HB_c391a8a_sbe_seeprom_p10.bin.ecc \
-            sbe_boot_mem='seeprom' enable_lpc_console=TRUE xive_gen=2"
+        STARTSIMCMD=(./runsim -m ${MACHINE})
+        STARTSIMCMD+=(hb_script_to_run=${STANDALONE_SIMICS}/hbfw/startup.simics)
+        STARTSIMCMD+=(pnor_img=${PROJECT_ROOT}/standalone/pnor/${PNOR_LAYOUT_SELECTED}.pnor)
+        STARTSIMCMD+=(xive_gen=2)
 
-        cd ${STANDALONE_SIMICS} && ./runsim -m ${MACHINE} \
-            hb_script_to_run=${STANDALONE_SIMICS}/hbfw/startup.simics \
-            pnor_img=${PROJECT_ROOT}/standalone/pnor/${PNOR_LAYOUT_SELECTED}.pnor \
-            sbe_seeprom_img=/gsa/ausgsa/projects/h/hostboot/simbuild/SBE_19b2530_HB_c391a8a_sbe_seeprom_p10.bin.ecc \
-            sbe_boot_mem='seeprom' enable_lpc_console=TRUE xive_gen=2
+        # We don't want to run SBE in VPO mode; pass the SBE image to
+        # simics in non-VPO mode
+        if [ -z "${VPO_COMPILE}" ]; then
+            STARTSIMCMD+=(sbe_seeprom_img=/gsa/ausgsa/projects/h/hostboot/simbuild/SBE_19b2530_HB_c391a8a_sbe_seeprom_p10.bin.ecc)
+            STARTSIMCMD+=(sbe_boot_mem=seeprom)
+            STARTSIMCMD+=(enable_lpc_console=TRUE)
+        else
+            # This allows to not run SBE automatically
+            STARTSIMCMD+=(sbe_boot_mem=pibmem)
+        fi
+
+        echo "cd ${STANDALONE_SIMICS} $$ ${STARTSIMCMD[@]}"
+        cd ${STANDALONE_SIMICS} && "${STARTSIMCMD[@]}"
 
         exit 0
     fi

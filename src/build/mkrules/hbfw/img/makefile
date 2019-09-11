@@ -65,6 +65,8 @@ SBEI_OBJPATH  = ${HBFW_OBJPATH:S/hbfw\/img/sbei\/sbfw\/img/g}
 ENGD_WOFPATH  = ${HBFW_OBJPATH:S/hbfw\/img/engd\/wofdata/g}
 ENGD_MEMDPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/memd/g}
 HBFW_SIMPATH  = ${HBFW_OBJPATH:S/img/simics/g}
+SIMPATH       = ${HBFW_OBJPATH:S/hbfw\/img/..\/..\/simics/g}
+
 #################################################
 # Copy Hostboot binary images to obj dir to be grabbed
 # during build flash pass and consumption by HWSV.
@@ -97,10 +99,12 @@ BASE_IMAGES = ${BOOTLDR_IMG} ${HB_SECROM_IMG} ${HBB_IMG} ${HBI_IMG} ${HBRT_IMG}
 
 # Input fake images
 HBI_FAKE_IMG = hostboot_extended.bin.fake
+HBD_FAKE_IMG = vbu_P10_targeting.bin
 VPO_FAKE_MVPD = vpo_sysmvpd.dat
 VPO_FAKE_DJVPD = vpo_djvpd.dat
 VPO_FAKE_DVPD = dvpd.dat
-FAKE_IMAGES = ${HBI_FAKE_IMG} ${VPO_FAKE_MVPD} ${VPO_FAKE_DJVPD} ${VPO_FAKE_DVPD}
+EECACHE_FAKE_IMG = ${SIMPATH:Feecache_prebuilt.bin.ecc}
+FAKE_IMAGES = ${HBI_FAKE_IMG} ${VPO_FAKE_MVPD} ${VPO_FAKE_DJVPD} ${VPO_FAKE_DVPD} ${HBD_FAKE_IMG}
 DEFAULT_INPUT_IMAGES = ${BASE_IMAGES} ${HBB_ECC_IMG} ${HBBL_IMG} ${FAKE_IMAGES} ${OCMBFW_IMG}
 
 # Output final images
@@ -231,7 +235,7 @@ GEN_STANDALONE_BIN_FILES = ${GEN_COMMON_BIN_FILES},TEST=EMPTY,TESTRO=EMPTY,TESTL
 .else
     PNOR_LAYOUT = ${pnorLayoutFake.xml:P}
     # Parameters passed into GEN_PNOR_IMAGE_SCRIPT.
-    GEN_DEFAULT_BIN_FILES = HBI=${HBI_IMG},HBEL=EMPTY,MVPD=${${VPO_FAKE_MVPD}:P},DJVPD=${${VPO_FAKE_DJVPD}:P},FIRDATA=EMPTY,MEMD=EMPTY
+    GEN_DEFAULT_BIN_FILES = HBI=${HBI_IMG},HBEL=EMPTY,EECACHE=${${EECACHE_FAKE_IMG}:P}
     DEFAULT_PARAMS = --systemBinFiles ${GEN_DEFAULT_BIN_FILES} --pnorLayout ${PNOR_LAYOUT}
 .endif
 
@@ -404,7 +408,7 @@ ZEPPELIN_WOFDATA_FINAL_IMG = ZEPPELIN.WOFDATA.bin
                              --hwKeyHashFile ${IMPRINT_HW_KEY_HASH}
 .else
     # Parameters passed into GEN_PNOR_IMAGE_SCRIPT.
-    GEN_P10_BIN_FILES = P10:HCODE=${${P10_HCODE_IMG}:P},HBD=${${P10_HBD_IMG}:P}
+    GEN_P10_BIN_FILES = P10:HBD=${${HBD_FAKE_IMG}:P}
     SYSTEM_SPECIFIC_PARAMS = --pnorLayout ${PNOR_LAYOUT} \
                              --systemBinFiles ${GEN_P10_BIN_FILES}
 .endif
@@ -445,8 +449,8 @@ PNOR_IMG_INFO = \
 # Note: If FAKEPNOR defined, ONLY a FAKEPNOR will be generated, this is due to
 #    some limitations of GEN_PNOR_IMAGE_SCRIPT at the time of porting to p9
 .if (${FAKEPNOR} != "")
-    HOSTBOOT_DEFAULT_SECTIONS = HBI=${HBI_FINAL_IMG},HBEL=${HBEL_FINAL_IMG},MVPD=${MVPD_FINAL_IMG},DJVPD=${DJVPD_FINAL_IMG},CVPD=${VPO_FAKE_DVPD},FIRDATA=${FIRDATA_FINAL_IMG}
-    P10_SECT = HBD=${P10_HBD_FINAL_IMG},HCODE=${P10_HCODE_FINAL_IMG}
+    HOSTBOOT_DEFAULT_SECTIONS = HBI=${HBI_FINAL_IMG},HBEL=${HBEL_FINAL_IMG},EECACHE=${EECACHE_FINAL_IMG}
+    P10_SECT = HBD=${P10_HBD_FINAL_IMG}
     PNOR_IMG_INFO = \
         ${FAKEPNOR}:${PNOR_LAYOUT}:${HOSTBOOT_DEFAULT_SECTIONS},${P10_SECT} \
         ${FIPS_PNOR_INFO}

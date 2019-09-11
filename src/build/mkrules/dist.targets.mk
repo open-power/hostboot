@@ -95,6 +95,7 @@ COPY_FILES = \
     src/usr/targeting/common/xmltohb/attribute_types_hb.xml:openpower \
     src/usr/targeting/common/xmltohb/target_types_hb.xml:openpower \
     src/usr/targeting/common/xmltohb/simics_P10.system.xml:openpower \
+    src/usr/targeting/common/xmltohb/vbu_P10.system.xml:vpo \
     src/usr/targeting/common/xmltohb/xmltohb.pl:openpower \
     src/usr/hdat/hdatBinLayout.xml:openpower \
     src/usr/targeting/xmltohb/updatetempsxml.pl:openpower \
@@ -312,6 +313,9 @@ fsp.tar_CONTENTS = \
     img/simics_P10_targeting.bin \
     img/simics_P10_targeting.bin.protected \
     img/simics_P10_targeting.bin.unprotected \
+    img/vbu_P10_targeting.bin \
+    img/vbu_P10_targeting.bin.protected \
+    img/vbu_P10_targeting.bin.unprotected \
     obj/genfiles/fapiattrs.xml \
     obj/genfiles/attribute_types_sp.xml \
     obj/genfiles/target_types_sp.xml \

@@ -23,6 +23,12 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
+/**
+ * @file bootloader.C
+ *
+ * @brief Bootloader main() function and various helper functions
+ */
+
 #define __BOOT_LOADER_C
 
 #include <stdint.h>
@@ -412,9 +418,12 @@ namespace Bootloader{
             ? l_blConfigData->lpcBAR
             : MMIO_GROUP0_CHIP0_LPC_BASE_ADDR;
 
+#ifndef CONFIG_VPO_COMPILE
         g_blData->blToHbData.cacheSizeMb = l_blConfigData->cacheSizeMB;
+#else  //The cache size is fixed to 4MB in VPO
+        g_blData->blToHbData.cacheSizeMb = 4;
+#endif
 
-        l_memstate.size = g_blData->blToHbData.cacheSizeMb;
         writeScratchReg(MMIO_SCRATCH_MEMORY_STATE, l_memstate.fullData);
 
         bl_console::init();
@@ -422,7 +431,8 @@ namespace Bootloader{
         // start of istep 6.1
         bl_console::putString("istep6.1\r\n");
 
-
+#ifndef CONFIG_VPO_COMPILE // We don't want to make any LPC PNOR accesses in VPO
+                           // HBB will be manually pre-loaded into the memory
         //We dont know what the start of pnor is because we dont know the size
         uint64_t l_pnorStart = 0;
 
@@ -490,7 +500,7 @@ namespace Bootloader{
             PNOR::ECC::eccStatus rc = PNOR::ECC::CLEAN;
             if(l_hbbEcc)
             {
-                // Remove ECC from HB base code at in working location and
+                // Remove ECC from HB base code at working location and
                 // store result in new working location
                 rc = PNOR::ECC::removeECC(
                     reinterpret_cast<uint8_t*>(HBB_ECC_WORKING_ADDR |
@@ -510,6 +520,11 @@ namespace Bootloader{
 
             if (rc != PNOR::ECC::UNCORRECTABLE)
             {
+#else //VPO_COMPILE
+                // Since we're not reading HBB from PNOR, and can't get the real
+                // size of HBB, hardcode the size to the maximum it can be
+                uint32_t l_hbbLength = 904 * KILOBYTE;
+#endif
                 uint64_t *l_src_addr =
                    reinterpret_cast<uint64_t*>(HBB_WORKING_ADDR |
                                                IGNORE_HRMOR_MASK);
@@ -526,15 +541,16 @@ namespace Bootloader{
 
                 copyBlToHbtoHbLocation();
 
+#ifndef CONFIG_VPO_COMPILE // No secureboot in VPO - no need to verify
                 // ROM verification of HBB image
                 verifyContainer(l_src_addr);
-
                 // Increment past secure header
                 if (isEnforcedSecureSection(PNOR::HB_BASE_CODE))
                 {
                     l_src_addr += PAGE_SIZE/sizeof(uint64_t);
                     l_hbbLength -= PAGE_SIZE;
                 }
+#endif
 
                 // Copy HBB image into address where it executes
                 for(uint32_t i = 0;
@@ -554,6 +570,7 @@ namespace Bootloader{
                 // Start executing HBB
                 bl_console::putString("Invoking boot firmware\r\n");
                 enterHBB(HBB_HRMOR, HBB_RUNNING_OFFSET);
+#ifndef CONFIG_VPO_COMPILE
             }
             else
             {
@@ -580,6 +597,7 @@ namespace Bootloader{
             // Note getHBBSection should have TI'd so won't get here
             BOOTLOADER_TRACE_W_BRK(BTLDR_TRC_MAIN_GETHBBSECTION_FAIL);
         }
+#endif
 
         return 0;
     }

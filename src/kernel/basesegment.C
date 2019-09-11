@@ -22,7 +22,16 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+/**
+ * @file basesegment.C
+ *
+ * @brief BaseSegment class implementations; BaseSegment sets up, maps, and
+ *        manipulates virtual memory.
+ */
+
 #include <limits.h>
+#include <config.h>
 #include <errno.h>
 #include <util/singleton.H>
 #include <util/align.H>
@@ -52,6 +61,13 @@ void BaseSegment::_init()
     // Assign segment to segment manager.
     SegmentManager::addSegment(this, SegmentManager::BASE_SEGMENT_ID);
     size_t l_hbCacheSizeBytes = g_BlToHbDataManager.getHbCacheSizeBytes();
+#ifdef CONFIG_VPO_COMPILE
+    l_hbCacheSizeBytes += 4 * MEGABYTE; // Even though we get only 4 MB of cache
+                                        // for hostboot to run in in VPO, we
+                                        // need to initialize the other 4 MB
+                                        // occupied by PNOR, or the read/writes
+                                        // to/from PNOR will cause crashes.
+#endif
 
     // Create initial block of memory according to the information from SBE.
     switch (CpuID::getCpuType())
@@ -248,12 +264,12 @@ int BaseSegment::_mmExtend(void)
     // pages is for the SPTE.. The remaining pages from the end of cache + SPTE
     // is added to the HEAP.
 
+    uint64_t l_cacheSizeBytes = g_BlToHbDataManager.getHbCacheSizeBytes();
+
     // The end of cache
-    uint64_t l_vaddr = VMM_ADDR_BASE_BLOCK +
-                       g_BlToHbDataManager.getHbCacheSizeBytes();
+    uint64_t l_vaddr = VMM_ADDR_BASE_BLOCK + l_cacheSizeBytes;
     // VMM - the size of the cache (how much the memory needs to be extended by)
-    uint64_t l_size = VMM_MEMORY_SIZE -
-                      g_BlToHbDataManager.getHbCacheSizeBytes();
+    uint64_t l_size = VMM_MEMORY_SIZE - l_cacheSizeBytes;
 
     // Call to allocate a block passing in the requested address of where the
     // SPTEs should be created
@@ -293,8 +309,7 @@ int BaseSegment::_mmExtend(void)
 
     // Update the physical Memory size to now include some mainstore by adding
     // the extended block size to the physical mem size.
-    iv_physMemSize += VMM_MEMORY_SIZE -
-                      g_BlToHbDataManager.getHbCacheSizeBytes();
+    iv_physMemSize += VMM_MEMORY_SIZE - l_cacheSizeBytes;
 
 
     // Call to set the Hostboot MemSize and location needed for DUMP.

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -126,6 +126,8 @@ errlHndl_t MailboxSp::_init()
     errlHndl_t err = NULL;
     size_t rc = 0;
 
+    do {
+
     iv_msgQ = msg_q_create();
     rc = msg_q_register(iv_msgQ, VFS_ROOT_MSG_MBOX);
 
@@ -150,8 +152,7 @@ errlHndl_t MailboxSp::_init()
              0,
              true //Add HB Software Callout
             );
-
-        return err;
+        break;
     }
 
     bool mbxComm = mailbox_enabled();
@@ -161,11 +162,13 @@ errlHndl_t MailboxSp::_init()
     // provider
     task_create(MailboxSp::msg_handler, NULL);
 
+#ifdef CONFIG_SBE_PRESENT
     // Tell SBE to create Read-Write Memory Region for the DMA Buffer
     err = SBEIO::openUnsecureMemRegion(
         iv_dmaBuffer.toPhysAddr(iv_dmaBuffer.getDmaBufferHead()),
         VmmManager::MBOX_DMA_SIZE,
         true); //true=Read-Write
+#endif
     if (err)
     {
         errlCommit(err,MBOX_COMP_ID);
@@ -181,7 +184,7 @@ errlHndl_t MailboxSp::_init()
 
         if (err)
         {
-            return err;
+            break;
         }
 
         // Initialize the mailbox hardware
@@ -189,7 +192,7 @@ errlHndl_t MailboxSp::_init()
 
         if (err)
         {
-            return err;
+            break;
         }
     }
 
@@ -197,6 +200,10 @@ errlHndl_t MailboxSp::_init()
     err = INTR::registerMsgQ(iv_msgQ,
                              MSG_IPC,
                              INTR::ISN_INTERPROC);
+    if(err)
+    {
+        break;
+    }
 
     if(mbxComm)
     {
@@ -241,10 +248,12 @@ errlHndl_t MailboxSp::_init()
             TRACFCOMP(g_trac_mbox, ERR_MRK
                       "MailboxSp::_init: Failed in call to "
                       "TARGETING::AttrRP::notifyResourceReady.");
+            break;
         }
     }
 
 #endif
+    } while(0);
 
     return err;
 }

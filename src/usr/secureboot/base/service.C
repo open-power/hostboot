@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,6 +22,14 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+/**
+ * @file service.C
+ *
+ * @brief Provides implementations for secureboot init code and the basic
+ *        secureboot functions
+ */
+
 #include <secureboot/service.H>
 #include <stdint.h>
 #include <sys/mm.h>
@@ -330,7 +338,6 @@ void* initializeBase(void* unused)
         // SecureROM manager verifies if the content necessary for secureboot in
         // the BltoHbData is valid or not. So initialize before anything else.
         // Don't enable SecureRomManager in VPO
-#ifndef CONFIG_P9_VPO_COMPILE
 
         // Initialize the Secure ROM
         l_errl = initializeSecureRomManager();
@@ -338,7 +345,6 @@ void* initializeBase(void* unused)
         {
             break;
         }
-#endif
 
         // Load original header.
         l_errl = Singleton<Header>::instance().loadHeader();

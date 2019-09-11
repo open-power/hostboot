@@ -64,66 +64,45 @@ Layout Description
 
 <pnor>
     <metadata>
-        <!-- NOTE: buildpnor expects power of 2 size, go to 8M for 6M image -->
-        <!-- @FIXME RTC 132396                                              -->
-        <imageSize>0x800000</imageSize>
-        <chipSize>0x800000</chipSize>
+        <imageSize>0x400000</imageSize>
+        <chipSize>0x400000</chipSize>
         <blockSize>0x1000</blockSize>
-        <tocSize>0x1000</tocSize>
-        <sideAOffset>0x0</sideAOffset>
-        <sideBOffset>0x1000</sideBOffset>
-        <arrangement>A-B-D</arrangement>
+        <tocSize>0x8000</tocSize>
+        <sideAOffset>0x3F7000</sideAOffset>
+        <sideBOffset>0x0</sideBOffset>
+        <arrangement>A-D-B</arrangement>
         <side>
-            <id>A</id>
+            <id>B</id>
         </side>
     </metadata>
     <section>
         <!-- NOTE: smaller than official layout  for fake-PNOR  -->
-        <description>Module VPD (128K) -only supports 2 processors</description>
-        <eyeCatch>MVPD</eyeCatch>
-        <physicalOffset>0x2000</physicalOffset>
-        <physicalRegionSize>0x20000</physicalRegionSize>
+        <description>Eeprom Cache(128K)</description>
+        <eyeCatch>EECACHE</eyeCatch>
+        <physicalOffset>0x8000</physicalOffset>
+        <physicalRegionSize>0x9E000</physicalRegionSize>
         <side>sideless</side>
-    </section>
-    <section>
-        <!-- NOTE: smaller than official layout  for fake-PNOR  -->
-        <description>DIMM JEDEC (32K) supports 2 * 16 *512 bytes</description>
-        <eyeCatch>DJVPD</eyeCatch>
-        <physicalOffset>0x22000</physicalOffset>
-        <physicalRegionSize>0x8000</physicalRegionSize>
-        <side>sideless</side>
+        <ecc/>
     </section>
     <section>
         <!-- NOTE: smaller than official layout  for fake-PNOR  -->
         <description>Hostboot Error Logs (64K)</description>
         <eyeCatch>HBEL</eyeCatch>
-        <physicalOffset>0x3A000</physicalOffset>
         <physicalRegionSize>0x10000</physicalRegionSize>
-        <side>sideless</side>
-    </section>
-    <section>
-        <!-- NOTE: smaller than official layout  for fake-PNOR  -->
-        <description>HCODE (512K) </description>
-        <eyeCatch>HCODE</eyeCatch>
-        <physicalOffset>0x4A000</physicalOffset>
-        <physicalRegionSize>0x80000</physicalRegionSize>
-        <sha512Version/>
         <side>sideless</side>
     </section>
     <section>
         <!-- NOTE: smaller than official layout  for fake-PNOR  -->
         <description>Attribute Data (256K)</description>
         <eyeCatch>HBD</eyeCatch>
-        <physicalOffset>0xCA000</physicalOffset>
         <physicalRegionSize>0x40000</physicalRegionSize>
         <side>sideless</side>
     </section>
     <section>
         <!-- NOTE: smaller than official layout  for fake-PNOR  -->
-        <description>Hostboot Extended image (7.11MB w/o ECC)</description>
+        <description>Hostboot Extended image (3.32MB w/o ECC)</description>
         <eyeCatch>HBI</eyeCatch>
-        <physicalOffset>0x10A000</physicalOffset>
-        <physicalRegionSize>0x800000</physicalRegionSize>
+        <physicalRegionSize>0x301000</physicalRegionSize>
         <side>sideless</side>
     </section>
 

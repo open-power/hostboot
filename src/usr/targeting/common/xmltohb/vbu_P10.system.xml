@@ -1,0 +1,996 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/targeting/common/xmltohb/vbu_P10.system.xml $         -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<attributes>
+<version>1.0.0</version>
+
+<targetInstance>
+    <id>sys-0</id>
+    <type>sys-sys-power10</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0</default>
+    </attribute>
+    <!-- @TODO RTC 213022: Adjust ASYNC_NEST_FREQ_MHZ to the correct P10 value -->
+    <attribute>
+        <id>ASYNC_NEST_FREQ_MHZ</id>
+        <default>0x7D0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>k0</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00010000</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0</default>
+    </attribute>
+    <attribute>
+        <id>EARLY_TESTCASES_ISTEP</id>
+        <default>0x0703</default>
+    </attribute>
+    <attribute>
+        <id>PAYLOAD_BASE</id>
+                     <!-- Value of 0x0 for standalone systems, no payload to start -->
+        <default>0x0</default>
+    </attribute>
+    <attribute>
+        <id>PAYLOAD_ENTRY</id>
+                    <!-- Value of 0x0 for standalone systems, no payload to start -->
+        <default>0x0</default>
+    </attribute>
+    <attribute>
+      <default>0</default>
+      <id>TPM_REQUIRED</id>
+    </attribute>
+    <attribute>
+        <id>MAX_ALLOWED_DIMM_FREQ</id>
+        <default>3200,3200,3200,3200,3200</default>
+    </attribute>
+</targetInstance>
+
+
+<targetInstance>
+    <id>sys0node0</id>
+    <type>enc-node-power10</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>NA</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00020000</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0</id>
+    <type>chip-processor-power10</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pu:k0:n0:s0:p00</default>
+    </attribute>
+    <attribute>
+        <id>PROC_MASTER_TYPE</id>
+        <default>ACTING_MASTER</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00050000</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>0x00010000</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>0</default>
+    </attribute>
+    <attribute><id>FSP_BASE_ADDR</id>
+        <default>0x0006030100000000</default>
+    </attribute>
+    <attribute><id>PSI_BRIDGE_BASE_ADDR</id>
+        <default>0x0006030203000000</default>
+    </attribute>
+    <!-- TODO RTC 213604: Remove i2c based module vpd once SPI support is added -->
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <!-- Note: that there are actually two 64KB chips associated with the MVPD SEEPROM
+                 but Hostboot should never access the second chip -->
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>1</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+            <field><id>port</id><value>2</value></field>
+            <field><id>writeCycleTime</id><value>0x0A</value></field>
+            <field><id>writePageSize</id><value>0x80</value></field>
+        </default>
+    </attribute>
+    <!-- TODO RTC 213604: Remove i2c based module vpd once SPI support is added -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <!-- Note: that there are actually two 64KB chips associated with the MVPD SEEPROM
+                 but Hostboot should never access the second chip -->
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>1</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>writeCycleTime</id><value>0x0A</value></field>
+            <field><id>writePageSize</id><value>0x80</value></field>
+        </default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
+    <attribute>
+        <id>FREQ_OMI_MHZ</id>
+        <default>25600</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq0</id>
+    <type>unit-eq-power10</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x20</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pu.eq:k0:n0:s0:p00:c0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00230000</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-32</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq0fc0</id>
+    <type>unit-fc-power10</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-0/fc-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x20</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pu.fc:k0:n0:s0:p00:c0</default>
+    </attribute>
+<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
+<!--
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>0</default>
+    </attribute>
+-->
+    <attribute>
+        <id>HUID</id>
+        <default>0x00520000</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-0/fc-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq0fc1</id>
+    <type>unit-fc-power10</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-0/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x20</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pu.fc:k0:n0:s0:p00:c1</default>
+    </attribute>
+<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
+<!--
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>1</default>
+    </attribute>
+-->
+    <attribute>
+        <id>HUID</id>
+        <default>0x00520001</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-0/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq0fc0core0</id>
+    <type>unit-core-power10</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-0/fc-0/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x20</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pu.core:k0:n0:s0:p00:c0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00070000</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-32</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-0/fc-0/core-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq0fc0core1</id>
+    <type>unit-core-power10</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-0/fc-0/core-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x20</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pu.core:k0:n0:s0:p00:c1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00070001</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-32</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-0/fc-0/core-1</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq0fc1core0</id>
+    <type>unit-core-power10</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-0/fc-1/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x20</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pu.core:k0:n0:s0:p00:c2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00070002</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-32</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-0/fc-1/core-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq0fc1core1</id>
+    <type>unit-core-power10</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-0/fc-1/core-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x20</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pu.core:k0:n0:s0:p00:c3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00070003</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-32</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-0/fc-1/core-1</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>TYPE</id>
+        <default>CORE</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0nx0</id>
+    <type>unit-nx-power10</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x001E0000</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>NA</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0mc0</id>
+    <type>unit-mc-power10</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x0C</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pu.mc:k0:n0:s0:p00:c0</default>
+    </attribute>
+<!-- TODO: RTC 208936 Creating a common parent between P9 and P10 didn't work in this case -->
+<!--
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>0</default>
+    </attribute>
+-->
+    <attribute>
+        <id>HUID</id>
+        <default>0x00440000</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-12</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mc-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0mc0mi0</id>
+    <type>unit-mi-power10</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x0C</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pu.mi:k0:n0:s0:p00:c0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00260000</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-12</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mc-0/mi-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0mc0mi0mcc0</id>
+    <type>unit-mcc-power10</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x0C</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pu.mcc:k0:n0:s0:p00:c0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00490000</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-12</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0mc0omic0</id>
+    <type>unit-omic-power10</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/omic-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x0C</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pu.omic:k0:n0:s0:p00:c0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x004A0000</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-12</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mc-0/omic-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0mc0mi0mcc0omi0</id>
+    <type>unit-omi-power10</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x0C</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pu.omi:k0:n0:s0:p00:c0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00480000</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>OMIC_PARENT</id>
+        <default>physical:sys-0/node-0/proc-0/mc-0/omic-0</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-12</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb0</id>
+    <type>chip-ocmb</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>ocmb:k0:n0:s0:p00</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0004B0000</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/ocmb_chip-0</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>devAddr</id><value>0x40</value></field>
+        </default>
+    </attribute>
+    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
+         that we preload in standalone simics. No cache updates should be needed -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb0memport0</id>
+    <type>unit-mem_port</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x004C0000</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/ocmb_chip-0/mem_port-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/mem_port-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>ocmb.mp:k0:n0:s0:p00:c00</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm0</id>
+    <type>lcard-dimm-ddimm</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00030000</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>dimm:k0:n0:s0:p00</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/mem_port-0/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>0</default>
+    </attribute>
+    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
+         that we preload in standalone simics. No cache updates should be needed -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0perv12</id>
+    <type>unit-perv-power10</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/perv-12</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>12</default>
+    </attribute>
+    <attribute>
+        <id>CLASS</id>
+        <default>UNIT</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pu.perv:k0:n0:s0:p00:c12</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>12</default>
+    </attribute>
+    <attribute>
+        <id>TYPE</id>
+        <default>PERV</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x002C000C</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>12</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/perv-12</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0perv32</id>
+    <type>unit-perv-power10</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/perv-32</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>32</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pu.perv:k0:n0:s0:p00:c32</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>32</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>32</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x002C0020</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>32</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/perv-32</default>
+    </attribute>
+</targetInstance>
+
+</attributes>
