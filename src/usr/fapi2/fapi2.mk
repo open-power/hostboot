@@ -129,9 +129,12 @@ FAPI2_ATTR_XML += $(wildcard \
 FAPI2_ATTR_XML += $(wildcard \
   $(ROOTPATH)/src/import/chips/ocmb/explorer/procedures/xml/attribute_info/*.xml)
 FAPI2_ATTR_XML += $(wildcard \
+  $(ROOTPATH)/src/import/chips/ocmb/common/procedures/xml/attribute_info/*.xml)
+FAPI2_ATTR_XML += $(wildcard \
   $(ROOTPATH)/src/import/chips/p10/procedures/xml/attribute_info/*.xml)
 FAPI2_ATTR_XML += $(wildcard \
   $(ROOTPATH)/src/usr/targeting/common/xmltohb/deleteme_temp_hb_attrs.xml)
+
 
 # Filter out Temp defaults XML file from Attribute XML files.
 # NOTE: The hb_temp_defaults.xml file is not a normal attribute file with the
