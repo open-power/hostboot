@@ -65,6 +65,16 @@ TargetHandle_t getTxBusEndPt( TargetHandle_t i_rxTrgt)
     {
         o_txTrgt = getConnectedPeerTarget( i_rxTrgt );
     }
+    else if ( TYPE_OMI == busType )
+    {
+        // Get connected child OCMB (one OCMB per OMI)
+        o_txTrgt = getConnectedChild( i_rxTrgt, TYPE_OCMB_CHIP, 0 );
+    }
+    else if ( TYPE_OCMB_CHIP == busType )
+    {
+        // Get connected parent OMI
+        o_txTrgt = getConnectedParent( i_rxTrgt, TYPE_OMI );
+    }
 
     PRDF_ASSERT(nullptr != o_txTrgt);
     return o_txTrgt;
@@ -868,7 +878,7 @@ PRDF_PLUGIN_DEFINE_NS( cumulus_proc, LaneRepair, captureSmpObus3 );
 PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  LaneRepair, captureSmpObus3 );
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   LaneRepair, captureSmpObus3 );
 
-int32_t calloutBusInterface( ExtensibleChip * i_chip,
+int32_t calloutBusInterface( TargetHandle_t i_rxTrgt,
                              STEP_CODE_DATA_STRUCT & i_sc,
                              PRDpriority i_priority )
 {
@@ -878,10 +888,9 @@ int32_t calloutBusInterface( ExtensibleChip * i_chip,
 
     do {
         // Get both endpoints
-        TargetHandle_t rxTrgt = i_chip->getTrgt();
-        TYPE rxType = getTargetType(rxTrgt);
+        TYPE rxType = getTargetType(i_rxTrgt);
 
-        if ( rxType == TYPE_OBUS && !obusInSmpMode( rxTrgt ) )
+        if ( rxType == TYPE_OBUS && !obusInSmpMode( i_rxTrgt ) )
         {
             // There is no support in hostboot for calling out the other end of
             // an NV or openCAPI bus. By design, any FIR bits associated with
@@ -889,7 +898,7 @@ int32_t calloutBusInterface( ExtensibleChip * i_chip,
             // action. So if we hit this case, just make a default callout.
 
             PRDF_ERR( PRDF_FUNC "Lane repair only supported in SMP mode "
-                      "obus: 0x%08x", getHuid(rxTrgt) );
+                      "obus: 0x%08x", getHuid(i_rxTrgt) );
 
             i_sc.service_data->SetCallout( LEVEL2_SUPPORT, MRU_MED, NO_GARD );
             i_sc.service_data->SetCallout( SP_CODE, MRU_MED, NO_GARD );
@@ -897,11 +906,11 @@ int32_t calloutBusInterface( ExtensibleChip * i_chip,
             break;
         }
 
-        TargetHandle_t txTrgt = getTxBusEndPt(rxTrgt);
+        TargetHandle_t txTrgt = getTxBusEndPt(i_rxTrgt);
         TYPE txType = getTargetType(txTrgt);
 
         // Add the endpoint target callouts
-        i_sc.service_data->SetCallout( rxTrgt, MRU_MEDA );
+        i_sc.service_data->SetCallout( i_rxTrgt, MRU_MEDA );
         i_sc.service_data->SetCallout( txTrgt, MRU_MEDA);
 
         // Get the HWAS bus type.
@@ -934,7 +943,7 @@ int32_t calloutBusInterface( ExtensibleChip * i_chip,
         }
 
         // Callout this bus interface.
-        PRDF_ADD_BUS_CALLOUT( errl, rxTrgt, txTrgt, hwasType, i_priority );
+        PRDF_ADD_BUS_CALLOUT( errl, i_rxTrgt, txTrgt, hwasType, i_priority );
 
     } while(0);
 
@@ -1010,7 +1019,7 @@ PRDF_PLUGIN_DEFINE_NS( axone_xbus,     LaneRepair, tooManyBusErrors );
 int32_t calloutBusInterfacePlugin( ExtensibleChip * i_chip,
                                    STEP_CODE_DATA_STRUCT & io_sc )
 {
-    calloutBusInterface(i_chip, io_sc, MRU_LOW);
+    calloutBusInterface(i_chip->getTrgt(), io_sc, MRU_LOW);
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE_NS( nimbus_xbus,    LaneRepair, calloutBusInterfacePlugin );
@@ -1031,12 +1040,12 @@ int32_t omiParentCalloutBusInterfacePlugin( ExtensibleChip * i_chip,
                                             STEP_CODE_DATA_STRUCT & io_sc,
                                             uint8_t i_pos )
 {
-    ExtensibleChip * omi  = getConnectedChild( i_chip, TYPE_OMI, i_pos );
-    ExtensibleChip * ocmb = getConnectedChild( omi, TYPE_OCMB_CHIP, 0 );
+    TargetHandle_t omi  = getConnectedChild(i_chip->getTrgt(), TYPE_OMI, i_pos);
+    TargetHandle_t ocmb = getConnectedChild( omi, TYPE_OCMB_CHIP, 0 );
 
     // Callout both ends of the bus as well (OMI and OCMB)
-    io_sc.service_data->SetCallout( omi->getTrgt(),  MRU_MEDA );
-    io_sc.service_data->SetCallout( ocmb->getTrgt(), MRU_MEDA );
+    io_sc.service_data->SetCallout( omi,  MRU_MEDA );
+    io_sc.service_data->SetCallout( ocmb, MRU_MEDA );
 
     calloutBusInterface(omi, io_sc, MRU_LOW);
     return SUCCESS;
