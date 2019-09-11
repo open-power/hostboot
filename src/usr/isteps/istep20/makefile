@@ -25,8 +25,6 @@
 ROOTPATH = ../../../..
 MODULE = istep20
 
-# FIXME RTC: 210975
-
-#OBJS += call_host_load_payload.o
+OBJS += call_host_load_payload.o
 
 include ${ROOTPATH}/config.mk

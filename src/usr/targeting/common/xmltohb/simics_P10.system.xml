@@ -112,7 +112,7 @@
     </attribute>
     <attribute>
         <id>EARLY_TESTCASES_ISTEP</id>
-        <default>0x120A</default> <!-- Istep 18, Substep 10 (proc_tod_init) -->
+        <default>0x1401</default> <!-- Istep 20, Substep 1 (host_load_payload) -->
     </attribute>
     <attribute>
         <id>PAYLOAD_BASE</id>

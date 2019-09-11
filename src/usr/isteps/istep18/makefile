@@ -38,7 +38,6 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/nest
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt
 
 ## pointer to common HWP files
-
 OBJS += call_tod_init.o
 OBJS += call_tod_setup.o
 #FIXME RTC: 216029 Istep 18 support for multinode stitching
@@ -49,8 +48,6 @@ include ${ROOTPATH}/procedure.rules.mk
 include ${PROCEDURES_PATH}/nest/p10_tod_init.mk
 include ${PROCEDURES_PATH}/nest/p10_tod_setup.mk
 include ${PROCEDURES_PATH}/nest/p10_tod_save_config.mk
-#FIXME RTC: 210975
-#include ${PROCEDURES_PATH}/nest/p9_obus_extfir_setup.mk
 include ${ROOTPATH}/config.mk
 
 VPATH += ${PROCEDURES_PATH}

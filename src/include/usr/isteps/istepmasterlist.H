@@ -85,10 +85,8 @@
 // istep 17, FSP only
 #include    "istep18list.H"
 // istep 19, FSP only
-/*
 #include    "istep20list.H"
-#include    "istep21list.H"
-*/
+//#include    "istep21list.H"
 
 #include    "config.h"
 
@@ -135,8 +133,7 @@ const  ExtTaskInfo  g_isteps[]    =   {
 #ifdef CONFIG_FSP_BUILD
         { NULL, 0, NULL},                               //  FSP   IStep 20
 #else
-        { NULL, 0, NULL },                              //  dummy IStep 20
-//        INITSERVICE::g_istep20TaskList,                 //        IStep 20
+        INITSERVICE::g_istep20TaskList,                 //        IStep 20
 #endif
         { NULL, 0, NULL },                              //  dummy IStep 21
 //        INITSERVICE::g_istep21TaskList                  //        IStep 21
