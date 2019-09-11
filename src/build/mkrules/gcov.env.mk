@@ -30,6 +30,14 @@
 GCOVDIR = $(ROOTPATH)/obj/gcov
 vpath %.C $(ROOTPATH)/src/sys/prof
 
+LCOV_DIR := $(ROOTPATH)/src/build/tools/extern/lcov
+
+LCOV_TOOL := $(LCOV_DIR)/bin/lcov
+GENHTML_TOOL := $(LCOV_DIR)/bin/genhtml
+
+$(LCOV_TOOL) $(GENHTML_TOOL):
+	git submodule update --init --checkout -- $(LCOV_DIR)
+
 ifdef MODULE
 
 # Don't profile HBRT modules to keep size down

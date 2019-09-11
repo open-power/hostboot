@@ -78,11 +78,11 @@ gcov:
 	@echo Then you can "make lcov" to generate the coverage report.
 
 .PHONY: lcov
-lcov:
+lcov: $(LCOV_TOOL) $(GENHTML_TOOL)
 	rm -f obj/lcov_data
-	lcov -c --dir . -o obj/lcov_data --gcov-tool $(GCOV)
+	$(LCOV_TOOL) -c --dir . -o obj/lcov_data --gcov-tool $(GCOV)
 	rm -rf obj/gcov_report
-	genhtml obj/lcov_data -o obj/gcov_report --ignore-errors source
+	$(GENHTML_TOOL) obj/lcov_data -o obj/gcov_report --ignore-errors source
 	@echo Coverage report now available in obj/gcov_report
 
 .PHONY: cppcheck

@@ -1,0 +1,9 @@
+[submodule "lcov"]
+	path = src/build/tools/extern/lcov
+	url = https://github.com/linux-test-project/lcov.git
+
+	# We do not want this submodule to be cloned automatically when
+	# the Hostboot repo is recursively cloned, because not everyone
+	# will need to run with code coverage.
+	# This is pulled on-demand when users build an lcov report.
+	update = none
