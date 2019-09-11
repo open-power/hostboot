@@ -38,6 +38,7 @@
 
 // Platform includes
 #include <prdfCenMbaDataBundle.H>
+#include <prdfOcmbDataBundle.H>
 #include <prdfCenMembufDataBundle.H>
 #include <prdfCenMembufExtraSig.H>
 #include <prdfMemSymbol.H>
@@ -656,6 +657,34 @@ void cleanupChnlAttns<TYPE_MEMBUF>( ExtensibleChip * i_chip,
     reg->ClearBit(20); // SPA
     reg->ClearBit(21); // maintenance command complete
 
+    reg->Write();
+
+    #endif // Hostboot only
+
+    #undef PRDF_FUNC
+}
+
+template<>
+void cleanupChnlAttns<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                       STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[MemUtils::cleanupChnlAttns] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
+
+    // No cleanup if this is a checkstop attention.
+    if ( CHECK_STOP == io_sc.service_data->getPrimaryAttnType() ) return;
+
+    #ifdef __HOSTBOOT_MODULE // only do cleanup in Hostboot, no-op in FSP
+
+    // Clear the associated FIR bits for all attention types. DSTLFIR[0:7]
+    ExtensibleChip * mcc = getConnectedParent( i_chip, TYPE_MCC );
+
+    SCAN_COMM_REGISTER_CLASS * reg = mcc->getRegister( "DSTLFIR_AND" );
+
+    reg->setAllBits();
+    reg->SetBitFieldJustified( 0, 8, 0 );
     reg->Write();
 
     #endif // Hostboot only
@@ -1312,6 +1341,353 @@ bool analyzeChnlFail<TYPE_MC>( ExtensibleChip * i_chip,
 
 //------------------------------------------------------------------------------
 
+bool __queryUcsOmic( ExtensibleChip * i_omic, ExtensibleChip * i_mcc,
+                     TargetHandle_t i_omi )
+{
+    PRDF_ASSERT( nullptr != i_omic );
+    PRDF_ASSERT( nullptr != i_mcc );
+    PRDF_ASSERT( nullptr != i_omi );
+    PRDF_ASSERT( TYPE_OMIC == i_omic->getType() );
+    PRDF_ASSERT( TYPE_MCC  == i_mcc->getType() );
+    PRDF_ASSERT( TYPE_OMI  == getTargetType(i_omi) );
+
+    bool o_activeAttn = false;
+
+    do
+    {
+        // Get the DSTLCFG2 register to check whether channel fail is enabled
+        // NOTE: DSTLCFG2[22] = 0b0 to enable chnl fail for subchannel A
+        // NOTE: DSTLCFG2[23] = 0b0 to enable chnl fail for subchannel B
+        SCAN_COMM_REGISTER_CLASS * cnfg = i_mcc->getRegister( "DSTLCFG2" );
+
+        // Get the position of the inputted OMI relative to the parent MCC (0-1)
+        // to determine which channel we need to check.
+        uint8_t omiPosRelMcc = getTargetPosition(i_omi) % MAX_OMI_PER_MCC;
+
+        // If channel fail isn't configured, no need to continue.
+        if ( cnfg->IsBitSet(22 + omiPosRelMcc) ) break;
+
+        // Check the OMIDLFIR for UCS (relevant bits: 0,20,40)
+        SCAN_COMM_REGISTER_CLASS * fir  = i_omic->getRegister("OMIDLFIR");
+        SCAN_COMM_REGISTER_CLASS * mask = i_omic->getRegister("OMIDLFIR_MASK");
+        SCAN_COMM_REGISTER_CLASS * act0 = i_omic->getRegister("OMIDLFIR_ACT0");
+        SCAN_COMM_REGISTER_CLASS * act1 = i_omic->getRegister("OMIDLFIR_ACT1");
+
+        if ( SUCCESS == ( fir->Read() | mask->Read() |
+                         act0->Read() | act1->Read() ) )
+        {
+            // Get the position of the inputted OMI relative to the parent
+            // OMIC (0-2). We'll need to use ATTR_OMI_DL_GROUP_POS for this.
+            uint8_t omiPosRelOmic = i_omi->getAttr<ATTR_OMI_DL_GROUP_POS>();
+
+            // Get the bit offset for the bit relevant to the inputted OMI.
+            // 0 : OMI-DL 0
+            // 20: OMI-DL 1
+            // 40: OMI-DL 2
+            uint8_t bitOff = omiPosRelOmic * 20;
+
+            // Check if there is a UNIT_CS for the relevant bits in the OMIDLFIR
+            if ( fir->IsBitSet(bitOff)  && ~mask->IsBitSet(bitOff) &&
+                 act0->IsBitSet(bitOff) &&  act1->IsBitSet(bitOff) )
+            {
+                o_activeAttn = true;
+            }
+        }
+    }while(0);
+
+    return o_activeAttn;
+}
+
+bool __queryUcsMcc( ExtensibleChip * i_mcc, TargetHandle_t i_omi )
+{
+    PRDF_ASSERT( nullptr != i_mcc );
+    PRDF_ASSERT( nullptr != i_omi );
+    PRDF_ASSERT( TYPE_MCC == i_mcc->getType() );
+    PRDF_ASSERT( TYPE_OMI == getTargetType(i_omi) );
+
+    bool o_activeAttn = false;
+
+    // Get the position of the inputted OMI relative to the parent MCC (0-1)
+    // to determine which channel we need to check.
+    uint8_t omiPos = getTargetPosition(i_omi) % MAX_OMI_PER_MCC;
+
+    // Maps of the DSTLFIR UCS bits to their relevant channel fail
+    // configuration bit in DSTLCFG2. Ex: {12,28} = DSTLFIR[12], DSTLCFG2[28]
+    // NOTE: there is a separate map for each subchannel.
+    const std::map<uint8_t,uint8_t> dstlfirMapChanA =
+        { {12,28}, {16,30}, {22,24} };
+
+    const std::map<uint8_t,uint8_t> dstlfirMapChanB =
+        { {13,29}, {17,31}, {23,25} };
+
+    // Check the DSTLFIR for UCS
+    SCAN_COMM_REGISTER_CLASS * fir  = i_mcc->getRegister( "DSTLFIR" );
+    SCAN_COMM_REGISTER_CLASS * mask = i_mcc->getRegister( "DSTLFIR_MASK" );
+    SCAN_COMM_REGISTER_CLASS * act0 = i_mcc->getRegister( "DSTLFIR_ACT0" );
+    SCAN_COMM_REGISTER_CLASS * act1 = i_mcc->getRegister( "DSTLFIR_ACT1" );
+    SCAN_COMM_REGISTER_CLASS * cnfg = i_mcc->getRegister( "DSTLCFG2" );
+
+    if ( SUCCESS == (fir->Read() | mask->Read() | act0->Read() | act1->Read() |
+                     cnfg->Read()) )
+    {
+        // Get which relevant channel we need to check.
+        std::map<uint8_t,uint8_t> dstlfirMap;
+        dstlfirMap = (0 == omiPos) ? dstlfirMapChanA : dstlfirMapChanB;
+
+        for ( auto const & bits : dstlfirMap )
+        {
+            uint8_t firBit  = bits.first;
+            uint8_t cnfgBit = bits.second;
+
+            // NOTE: Channel fail is enabled if the config bit is set to 0b0
+            if ( !cnfg->IsBitSet(cnfgBit) &&  fir->IsBitSet(firBit) &&
+                 !mask->IsBitSet(firBit)  && act0->IsBitSet(firBit) &&
+                  act1->IsBitSet(firBit) )
+            {
+                o_activeAttn = true;
+            }
+        }
+    }
+
+    // Maps of the USTLFIR UCS bits to their relevant channel fail
+    // config bit in USTLFAILMASK. Ex: {0,54} = USTLFIR[0], USTLFAILMASK[54]
+    // NOTE: there is a separate map for each subchannel.
+    const std::map<uint8_t,uint8_t> ustlfirMapChanA =
+    { { 0,54}, { 2,48}, {27,56}, {35,49}, {37,50}, {39,51}, {41,52}, {43,53},
+      {49,55}, {51,50}, {53,50}, {55,48}, {59,56} };
+    const std::map<uint8_t,uint8_t> ustlfirMapChanB =
+    { { 1,54}, { 3,48}, {28,56}, {36,49}, {38,50}, {40,51}, {42,52}, {44,53},
+      {50,55}, {52,50}, {54,50}, {56,48}, {60,56} };
+
+    // Check the USTLFIR for UCS
+    fir  = i_mcc->getRegister( "USTLFIR" );
+    mask = i_mcc->getRegister( "USTLFIR_MASK" );
+    act0 = i_mcc->getRegister( "USTLFIR_ACT0" );
+    act1 = i_mcc->getRegister( "USTLFIR_ACT1" );
+    cnfg = i_mcc->getRegister( "USTLFAILMASK" );
+
+    if ( SUCCESS == (fir->Read() | mask->Read() | act0->Read() | act1->Read() |
+                     cnfg->Read()) )
+    {
+        // Get which relevant channel we need to check.
+        std::map<uint8_t,uint8_t> ustlfirMap;
+        ustlfirMap = (0 == omiPos) ? ustlfirMapChanA : ustlfirMapChanB;
+
+        for ( auto const & bits : ustlfirMap )
+        {
+            uint8_t firBit  = bits.first;
+            uint8_t cnfgBit = bits.second;
+
+            // NOTE: Channel fail is enabled if the config bit is set to 0b0
+            if ( !cnfg->IsBitSet(cnfgBit) &&  fir->IsBitSet(firBit) &&
+                 !mask->IsBitSet(firBit)  && act0->IsBitSet(firBit) &&
+                  act1->IsBitSet(firBit) )
+            {
+                o_activeAttn = true;
+            }
+        }
+    }
+
+    return o_activeAttn;
+}
+
+bool __queryUcsOcmb( ExtensibleChip * i_ocmb )
+{
+    PRDF_ASSERT( nullptr != i_ocmb );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_ocmb->getType() );
+
+    bool o_activeAttn = false;
+
+    // We can't use the GLOBAL_CS_FIR. It will not clear automatically when a
+    // channel has failed because the hardware clocks have stopped. Also, since
+    // it is a virtual register there really is no way to clear it. Fortunately
+    // we have the INTER_STATUS_REG that will tell us if there is an active
+    // attention. Note that we clear this register as part of the channel
+    // failure cleanup. So we can rely on this register to determine if there is
+    // a new channel failure.
+
+    SCAN_COMM_REGISTER_CLASS * fir = i_ocmb->getRegister("INTER_STATUS_REG");
+
+    if ( SUCCESS == fir->Read() )
+    {
+        o_activeAttn = fir->IsBitSet(2); // Checkstop bit.
+    }
+
+    return o_activeAttn;
+}
+
+//------------------------------------------------------------------------------
+
+template<TARGETING::TYPE T>
+bool __analyzeChnlFail( TargetHandle_t i_trgt,
+                        STEP_CODE_DATA_STRUCT & io_sc );
+
+template<>
+bool __analyzeChnlFail<TYPE_OMI>( TargetHandle_t i_omi,
+                                  STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[MemUtils::__analyzeChnlFail<TYPE_OMI>] "
+
+    PRDF_ASSERT( nullptr != i_omi );
+    PRDF_ASSERT( TYPE_OMI == getTargetType(i_omi) );
+
+    uint32_t o_analyzed = false;
+
+    do
+    {
+        // Skip if currently analyzing a host attention. This is a required for
+        // a rare scenario when a channel failure occurs after PRD is called to
+        // handle the host attention.
+        if ( HOST_ATTN == io_sc.service_data->getPrimaryAttnType() ) break;
+
+        // Get the needed ExtensibleChips for analysis
+        TargetHandle_t ocmb = getConnectedChild( i_omi, TYPE_OCMB_CHIP, 0 );
+        ExtensibleChip * ocmbChip = (ExtensibleChip *)systemPtr->GetChip(ocmb);
+
+        TargetHandle_t omic = getConnectedParent( i_omi, TYPE_OMIC );
+        ExtensibleChip * omicChip = (ExtensibleChip *)systemPtr->GetChip(omic);
+
+        TargetHandle_t mcc = getConnectedParent( i_omi, TYPE_MCC );
+        ExtensibleChip * mccChip = (ExtensibleChip *)systemPtr->GetChip(mcc);
+
+        // Do an initial query for channel fail attentions from the targets.
+        // This is to check whether we actually have an active channel fail
+        // attention before checking whether it is a side effect of some
+        // recoverable attention or not.
+        if ( !__queryUcsOmic(omicChip, mccChip, i_omi) &&
+             !__queryUcsMcc(mccChip, i_omi) &&
+             !__queryUcsOcmb(ocmbChip) )
+        {
+            // If no channel fail attentions found, just break out.
+            break;
+        }
+
+        // There was a channel fail found, so take the following actions.
+
+        // Set the MEM_CHNL_FAIL flag in the SDC to indicate a channel failure
+        // has been detected and there is no need to check again.
+        io_sc.service_data->setMemChnlFail();
+
+        // Make the error log predictive and set threshold.
+        io_sc.service_data->setFlag( ServiceDataCollector::SERVICE_CALL );
+        io_sc.service_data->setFlag( ServiceDataCollector::AT_THRESHOLD );
+
+        // Channel failures will always send SUEs.
+        io_sc.service_data->setFlag( ServiceDataCollector::UERE );
+
+        // Indicate cleanup is required on this channel.
+        getOcmbDataBundle(ocmbChip)->iv_doChnlFailCleanup = true;
+
+        // Check for recoverable attentions that could have a channel failure
+        // as a side effect. These include: N/A
+        // TODO RTC 243518 -requires more input from the test team to determine
+
+        // Check OMIC for unit checkstops
+        if ( __queryUcsOmic( omicChip, mccChip, i_omi ) )
+        {
+            // Analyze UNIT_CS on the OMIC chip
+            if ( SUCCESS == omicChip->Analyze(io_sc, UNIT_CS) )
+            {
+                o_analyzed = true;
+                break;
+            }
+        }
+
+        // Check MCC for unit checkstops
+        if ( __queryUcsMcc( mccChip, i_omi ) )
+        {
+            // Analyze UNIT_CS on the MCC chip
+            if ( SUCCESS == mccChip->Analyze(io_sc, UNIT_CS) )
+            {
+                o_analyzed = true;
+                break;
+            }
+        }
+
+        // Check OCMB for unit checkstops
+        if ( __queryUcsOcmb( ocmbChip ) )
+        {
+            // Analyze UNIT_CS on the OCMB chip
+            if ( SUCCESS == ocmbChip->Analyze(io_sc, UNIT_CS) )
+            {
+                o_analyzed = true;
+                break;
+            }
+
+        }
+        PRDF_INF( PRDF_FUNC "Failed channel detected on 0x%08x, but no active "
+                  "attentions found", getHuid(i_omi) );
+    }while(0);
+
+    return o_analyzed;
+
+    #undef PRDF_FUNC
+}
+
+template<>
+bool analyzeChnlFail<TYPE_MCC>( ExtensibleChip * i_mcc,
+                                STEP_CODE_DATA_STRUCT & io_sc )
+{
+    PRDF_ASSERT( nullptr != i_mcc );
+    PRDF_ASSERT( TYPE_MCC == i_mcc->getType() );
+
+    uint32_t o_analyzed = false;
+
+    if ( !io_sc.service_data->isMemChnlFail() )
+    {
+        // Loop through all the connected OMIs
+        for ( auto & omi : getConnected(i_mcc->getTrgt(), TYPE_OMI) )
+        {
+            o_analyzed = __analyzeChnlFail<TYPE_OMI>( omi, io_sc );
+            if ( o_analyzed ) break;
+        }
+    }
+
+    return o_analyzed;
+}
+
+template<>
+bool analyzeChnlFail<TYPE_OMIC>( ExtensibleChip * i_omic,
+                                 STEP_CODE_DATA_STRUCT & io_sc )
+{
+    PRDF_ASSERT( nullptr != i_omic );
+    PRDF_ASSERT( TYPE_OMIC == i_omic->getType() );
+
+    uint32_t o_analyzed = false;
+
+    if ( !io_sc.service_data->isMemChnlFail() )
+    {
+        // Loop through all the connected OMIs
+        for ( auto & omi : getConnected(i_omic->getTrgt(), TYPE_OMI) )
+        {
+            o_analyzed = __analyzeChnlFail<TYPE_OMI>( omi, io_sc );
+            if ( o_analyzed ) break;
+        }
+    }
+
+    return o_analyzed;
+}
+
+template<>
+bool analyzeChnlFail<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
+                                      STEP_CODE_DATA_STRUCT & io_sc )
+{
+    PRDF_ASSERT( nullptr != i_ocmb );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_ocmb->getType() );
+
+    uint32_t o_analyzed = false;
+
+    if ( !io_sc.service_data->isMemChnlFail() )
+    {
+        TargetHandle_t omi = getConnectedParent( i_ocmb->getTrgt(), TYPE_OMI );
+        o_analyzed = __analyzeChnlFail<TYPE_OMI>( omi, io_sc );
+    }
+
+    return o_analyzed;
+}
+
+//------------------------------------------------------------------------------
+
 template<TARGETING::TYPE T1, TARGETING::TYPE T2, TARGETING::TYPE T3>
 void __cleanupChnlFail( ExtensibleChip * i_chip1, ExtensibleChip * i_chip2,
                         ExtensibleChip * i_chip3,
@@ -1437,6 +1813,158 @@ void cleanupChnlFail<TYPE_MEMBUF>( ExtensibleChip * i_chip,
     ExtensibleChip * dmiChip = getConnectedParent( i_chip, TYPE_DMI );
 
     cleanupChnlFail<TYPE_DMI>( dmiChip, io_sc );
+}
+
+template<TARGETING::TYPE T>
+void __cleanupChnlFail( TargetHandle_t i_trgt, STEP_CODE_DATA_STRUCT & io_sc );
+
+template<>
+void __cleanupChnlFail<TYPE_OMI>( TargetHandle_t i_omi,
+                                  STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[MemUtils::__cleanupChnlFail] "
+
+    PRDF_ASSERT( nullptr != i_omi );
+    PRDF_ASSERT( TYPE_OMI == getTargetType(i_omi) );
+
+    do
+    {
+        // No cleanup if this is a checkstop attention.
+        if ( CHECK_STOP == io_sc.service_data->getPrimaryAttnType() ) break;
+
+        TargetHandle_t ocmb = getConnectedChild(i_omi, TYPE_OCMB_CHIP, 0);
+        ExtensibleChip * ocmbChip = (ExtensibleChip *)systemPtr->GetChip(ocmb);
+
+        // Check if cleanup is still required or has already been done.
+        if ( !getOcmbDataBundle(ocmbChip)->iv_doChnlFailCleanup ) break;
+
+        // Cleanup is complete and no longer required on this channel.
+        getOcmbDataBundle(ocmbChip)->iv_doChnlFailCleanup = false;
+
+        #ifdef __HOSTBOOT_MODULE // only do cleanup in Hostboot, no-op in FSP
+
+        TargetHandle_t omic = getConnectedParent( i_omi, TYPE_OMIC );
+        ExtensibleChip * omicChip = (ExtensibleChip *)systemPtr->GetChip(omic);
+
+        TargetHandle_t mcc  = getConnectedParent( i_omi, TYPE_MCC );
+        ExtensibleChip * mccChip = (ExtensibleChip *)systemPtr->GetChip(mcc);
+
+        // Get the OMI position relative to the OMIC (0,1,2) and the MCC (0,1)
+        uint8_t omiPosRelOmic = i_omi->getAttr<ATTR_OMI_DL_GROUP_POS>();
+        uint8_t omiPosRelMcc = getTargetPosition(i_omi) % MAX_OMI_PER_MCC;
+
+        // Note that this is a clean up function. If there are any SCOM errors
+        // we will just move on and try the rest.
+        SCAN_COMM_REGISTER_CLASS * reg = nullptr;
+
+        // Mask off attentions from the OMIDLFIR in the OMIC based on the
+        // OMI position. 0-19, 20-39, 40-59
+        reg = omicChip->getRegister( "OMIDLFIR_MASK_OR" );
+        reg->SetBitFieldJustified( (omiPosRelOmic * 20), 20, 0xfffff );
+        reg->Write();
+
+        // Mask off attentions from the DSTLFIR and USTLFIR in the MCC based on
+        // the OMI position.
+        // DSTLFIR Generic Bits: 8,9,10,11,24,25,26,27
+        uint64_t mask = 0x00f000f000000000ull;
+        if ( 0 == omiPosRelMcc )
+        {
+            // DSTLFIR Subchannel A Bits: 0,1,2,3,12,14,16,18,20,22
+            mask |= 0xf00aaa0000000000ull;
+        }
+        else
+        {
+            // DSTLFIR Subchannel B Bits: 4,5,6,7,13,15,17,19,21,23
+            mask |= 0x0f05550000000000ull;
+        }
+        reg = mccChip->getRegister( "DSTLFIR_MASK_OR" );
+        reg->SetBitFieldJustified( 0, 64, mask );
+        reg->Write();
+
+        // USTLFIR Generic Bits: 6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,
+        //                       22,23,24,25,26,57,58,61,62,63
+        mask = 0x03ffffe000000067ull;
+        if ( 0 == omiPosRelMcc )
+        {
+            // USTLFIR Subchannel A Bits: 0,2,4,27,29,31,33,35,37,39,41,43,45,
+            //                            47,49,51,53,55,59
+            mask |= 0xa800001555555510ull;
+        }
+        else
+        {
+            // USTLFIR Subchannel B Bits: 1,3,5,28,30,32,34,36,38,40,42,44,46,
+            //                            48,50,52,54,56,60
+            mask |= 0x5400000aaaaaaa88ull;
+        }
+        reg = mccChip->getRegister( "USTLFIR_MASK_OR" );
+        reg->SetBitFieldJustified( 0, 64, mask );
+        reg->Write();
+
+        // Mask off all attentions from the chiplet FIRs in the OCMB
+        reg = ocmbChip->getRegister( "OCMB_CHIPLET_FIR_MASK" );
+        reg->setAllBits(); // Blindly mask everything
+        reg->Write();
+
+
+        // To ensure FSP ATTN doesn't think there is an active attention on this
+        // OCMB, manually clear the interrupt status register.
+        reg = ocmbChip->getRegister( "INTER_STATUS_REG" );
+        reg->clearAllBits(); // Blindly clear everything
+        reg->Write();
+
+        //   During runtime, send a dynamic memory deallocation message.
+        //   During Memory Diagnostics, tell MDIA to stop pattern tests.
+        #ifdef __HOSTBOOT_RUNTIME
+        MemDealloc::port<TYPE_OCMB_CHIP>( ocmbChip );
+        #else
+        if ( isInMdiaMode() )
+        {
+            mdiaSendEventMsg( ocmb, MDIA::STOP_TESTING );
+        }
+        #endif
+
+        #endif // Hostboot only
+
+    }while(0);
+
+    #undef PRDF_FUNC
+}
+
+template<>
+void cleanupChnlFail<TYPE_MCC>( ExtensibleChip * i_chip,
+                                STEP_CODE_DATA_STRUCT & io_sc )
+{
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MCC == i_chip->getType() );
+
+    for ( auto & omi : getConnected(i_chip->getTrgt(), TYPE_OMI) )
+    {
+        __cleanupChnlFail<TYPE_OMI>( omi, io_sc );
+    }
+}
+
+template<>
+void cleanupChnlFail<TYPE_OMIC>( ExtensibleChip * i_chip,
+                                 STEP_CODE_DATA_STRUCT & io_sc )
+{
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_OMIC == i_chip->getType() );
+
+    for ( auto & omi : getConnected(i_chip->getTrgt(), TYPE_OMI) )
+    {
+        __cleanupChnlFail<TYPE_OMI>( omi, io_sc );
+    }
+}
+
+template<>
+void cleanupChnlFail<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                      STEP_CODE_DATA_STRUCT & io_sc )
+{
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
+
+    TargetHandle_t omi = getConnectedParent( i_chip->getTrgt(), TYPE_OMI );
+    __cleanupChnlFail<TYPE_OMI>( omi, io_sc );
 }
 
 //------------------------------------------------------------------------------

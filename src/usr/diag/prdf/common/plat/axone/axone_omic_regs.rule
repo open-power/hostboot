@@ -32,6 +32,14 @@
     # P9 Axone target OMIDLFIR
     ###########################################################################
 
+    register OMIDLFIR_MASK_OR
+    {
+        name        "P9 OMIC target OMIDLFIR MASK atomic OR";
+        scomaddr    0x07013345;
+        capture     group never;
+        access      write_only;
+    };
+
     register DL0_ERROR_HOLD
     {
         name        "P9 Axone target DL0 Error Hold Register";
