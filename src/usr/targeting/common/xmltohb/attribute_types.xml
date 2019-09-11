@@ -8226,7 +8226,7 @@
     </description>
     <simpleType>
       <uint16_t>
-        <default>1</default>
+        <default>0</default>
       </uint16_t>
     </simpleType>
     <persistency>volatile</persistency>
