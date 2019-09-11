@@ -370,7 +370,7 @@ rule rOCMB_CHIPLET_FIR
 #       OCMB_LFIR must be analyzed first for correct handling. If changes are
 #       made so the RDFFIR is analyzed first, additional changes to the handling
 #       of those bits will be required.
-group gOCMB_CHIPLET_FIR attntype CHECK_STOP, RECOVERABLE
+group gOCMB_CHIPLET_FIR attntype UNIT_CS, RECOVERABLE
     filter singlebit
 {
     /** OCMB_CHIPLET_FIR[3]
