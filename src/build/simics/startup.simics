@@ -99,9 +99,9 @@ if ($hb_mode == 1) {
         ($cc).seeprom3.seeprom3_image.set 0x3FED9 0x5A5A5A5A 8 -l
     }
 } else {
-    foreach $cc in (get-all-procs) {
-        ($cc).seeprom1_image.set 0x3FED9 0x5A5A5A5A 8 -l
-        ($cc).seeprom3_image.set 0x3FED9 0x5A5A5A5A 8 -l
+    foreach $proc in (get-all-procs) {
+        ($proc.get-seeprom 1).set 0x3FED9 0x5A5A5A5A 8 -l
+        ($proc.get-seeprom 3).set 0x3FED9 0x5A5A5A5A 8 -l
     }
 }
 
