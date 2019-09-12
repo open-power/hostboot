@@ -369,11 +369,11 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { "perv_pll_func"           , 0x01030010, PERV::perv_pll_func         , PERV_TYPE, RCLS_ROOT_RING | RCLS_EKB_FLUSH_RING }, // 12
     { "perv_pll_bndy"           , 0x01030018, PERV::perv_pll_bndy         , PERV_TYPE, RCLS_ROOT_RING | RCLS_EKB_FLUSH_RING }, // 13
     { "perv_pll_gptr"           , 0x01030012, PERV::perv_pll_gptr         , PERV_TYPE, RCLS_ROOT_RING | RCLS_EKB_OVLY_RING  }, // 14
-    { "n0_fure"                 , 0x0203600F, N0::n0_fure                 , N0_TYPE  , RCLS_ROOT_RING | RCLS_EKB_FLUSH_RING }, // 15
+    { "n0_fure"                 , 0x0203640F, N0::n0_fure                 , N0_TYPE  , RCLS_ROOT_RING | RCLS_EKB_FLUSH_RING }, // 15
     { "n0_gptr"                 , 0x02036402, N0::n0_gptr                 , N0_TYPE  , RCLS_ROOT_RING | RCLS_EKB_OVLY_RING  }, // 16
     { "n0_repr"                 , 0x02036406, N0::n0_repr                 , N0_TYPE  , RCLS_ROOT_RING | RCLS_MVPD_PDR_RING  }, // 17
     { "n0_time"                 , 0x02036407, N0::n0_time                 , N0_TYPE  , RCLS_ROOT_RING | RCLS_MVPD_PDG_RING  }, // 18
-    { "n1_fure"                 , 0x0303700F, N1::n1_fure                 , N1_TYPE  , RCLS_ROOT_RING | RCLS_EKB_FLUSH_RING }, // 19
+    { "n1_fure"                 , 0x0303550F, N1::n1_fure                 , N1_TYPE  , RCLS_ROOT_RING | RCLS_EKB_FLUSH_RING }, // 19
     { "n1_gptr"                 , 0x03035502, N1::n1_gptr                 , N1_TYPE  , RCLS_ROOT_RING | RCLS_EKB_OVLY_RING  }, // 20
     { "n1_repr"                 , 0x03035506, N1::n1_repr                 , N1_TYPE  , RCLS_ROOT_RING | RCLS_MVPD_PDR_RING  }, // 21
     { "n1_time"                 , 0x03035507, N1::n1_time                 , N1_TYPE  , RCLS_ROOT_RING | RCLS_MVPD_PDG_RING  }, // 22
@@ -381,7 +381,7 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { "n1_nmmu1_gptr"           , 0x03030202, N1::n1_nmmu1_gptr           , N1_TYPE  , RCLS_ROOT_RING | RCLS_EKB_OVLY_RING  }, // 24
     { "n1_nmmu1_repr"           , 0x03030206, N1::n1_nmmu1_repr           , N1_TYPE  , RCLS_ROOT_RING | RCLS_MVPD_PDR_RING  }, // 25
     { "n1_nmmu1_time"           , 0x03030207, N1::n1_nmmu1_time           , N1_TYPE  , RCLS_ROOT_RING | RCLS_MVPD_PDG_RING  }, // 26
-    { "pci_fure"                , 0x0803500F, PCI::pci_fure               , PCI_TYPE , RCLS_ROOT_RING | RCLS_EKB_FLUSH_RING }, // 27
+    { "pci_fure"                , 0x08F37F8F, PCI::pci_fure               , PCI_TYPE , RCLS_ROOT_RING | RCLS_EKB_FLUSH_RING }, // 27
     { "pci_gptr"                , 0x08035FE2, PCI::pci_gptr               , PCI_TYPE , RCLS_ROOT_RING | RCLS_EKB_OVLY_RING  }, // 28
     { "pci_repr"                , 0x08035FE6, PCI::pci_repr               , PCI_TYPE , RCLS_ROOT_RING | RCLS_MVPD_PDR_RING  }, // 29
     { "pci_time"                , 0x08035FE7, PCI::pci_time               , PCI_TYPE , RCLS_ROOT_RING | RCLS_MVPD_PDG_RING  }, // 30
@@ -392,7 +392,7 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { "pci_pll_func"            , 0x08030018, PCI::pci_pll_func           , PCI_TYPE , RCLS_ROOT_RING | RCLS_EKB_FLUSH_RING }, // 35
     { "pci_pll_bndy"            , 0x08030012, PCI::pci_pll_bndy           , PCI_TYPE , RCLS_ROOT_RING | RCLS_EKB_FLUSH_RING }, // 36
     { "pci_pll_gptr"            , 0x0803001B, PCI::pci_pll_gptr           , PCI_TYPE , RCLS_ROOT_RING | RCLS_EKB_OVLY_RING  }, // 37
-    { "mc_fure"                 , 0x0C03500F, MC::mc_fure                 , MC_TYPE  , RCLS_ROOT_RING | RCLS_EKB_FLUSH_RING }, // 38
+    { "mc_fure"                 , 0x0C036F0F, MC::mc_fure                 , MC_TYPE  , RCLS_ROOT_RING | RCLS_EKB_FLUSH_RING }, // 38
     { "mc_gptr"                 , 0x0C034F02, MC::mc_gptr                 , MC_TYPE  , RCLS_ROOT_RING | RCLS_EKB_OVLY_RING  }, // 39
     { "mc_repr"                 , 0x0C034F06, MC::mc_repr                 , MC_TYPE  , RCLS_ROOT_RING | RCLS_MVPD_PDR_RING  }, // 40
     { "mc_time"                 , 0x0C034F07, MC::mc_time                 , MC_TYPE  , RCLS_ROOT_RING | RCLS_MVPD_PDG_RING  }, // 41
@@ -468,7 +468,7 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { "iohs_pll_bndy_bucket_3"  , 0x18030012, AXON::iohs_pll_bndy_bucket_3, AXON_TYPE, RCLS_EKB_FLUSH_RING                  }, // 111
     { "iohs_pll_bndy_bucket_4"  , 0x18030012, AXON::iohs_pll_bndy_bucket_4, AXON_TYPE, RCLS_EKB_FLUSH_RING                  }, // 112
     { "iohs_pll_gptr"           , 0x1803001B, AXON::iohs_pll_gptr         , AXON_TYPE, RCLS_ROOT_RING | RCLS_EKB_OVLY_RING  }, // 113
-    { "eq_fure"                 , 0x2003400F, EQ::eq_fure                 , EQ_TYPE  , RCLS_ROOT_RING | RCLS_EKB_FLUSH_RING }, // 114
+    { "eq_fure"                 , 0x2003403F, EQ::eq_fure                 , EQ_TYPE  , RCLS_ROOT_RING | RCLS_EKB_FLUSH_RING }, // 114
     { "eq_gptr"                 , 0x20034032, EQ::eq_gptr                 , EQ_TYPE  , RCLS_ROOT_RING | RCLS_EKB_OVLY_RING  }, // 115
     { "eq_repr"                 , 0x20034036, EQ::eq_repr                 , EQ_TYPE  , RCLS_ROOT_RING | RCLS_MVPD_PDR_RING  }, // 116
     { "eq_time"                 , 0x20034037, EQ::eq_time                 , EQ_TYPE  , RCLS_ROOT_RING | RCLS_MVPD_PDG_RING  }, // 117
