@@ -33,8 +33,12 @@ constexpr uint64_t literal_0 = 0;
 constexpr uint64_t literal_1 = 1;
 constexpr uint64_t literal_0x5 = 0x5;
 constexpr uint64_t literal_0x6 = 0x6;
-constexpr uint64_t literal_0x0B = 0x0B;
-constexpr uint64_t literal_0x06 = 0x06;
+constexpr uint64_t literal_10 = 10;
+constexpr uint64_t literal_82 = 82;
+constexpr uint64_t literal_0x15 = 0x15;
+constexpr uint64_t literal_51 = 51;
+constexpr uint64_t literal_0xC = 0xC;
+constexpr uint64_t literal_0x4 = 0x4;
 constexpr uint64_t literal_0b10 = 0b10;
 constexpr uint64_t literal_2063 = 2063;
 constexpr uint64_t literal_1611 = 1611;
@@ -73,8 +77,12 @@ fapi2::ReturnCode p10_fbc_ptl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PAUC>&
                                           fapi2::ENUM_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_FALSE));
         fapi2::ATTR_FREQ_IOHS_MHZ_Type l_TGT3_ATTR_FREQ_IOHS_MHZ;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_IOHS_MHZ, TGT3, l_TGT3_ATTR_FREQ_IOHS_MHZ));
+        uint64_t l_def_FW_LIMIT_D = (l_TGT3_ATTR_FREQ_IOHS_MHZ * literal_10);
         fapi2::ATTR_FREQ_PAU_MHZ_Type l_TGT2_ATTR_FREQ_PAU_MHZ;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PAU_MHZ, TGT2, l_TGT2_ATTR_FREQ_PAU_MHZ));
+        uint64_t l_def_FW_LIMIT_N = (l_TGT2_ATTR_FREQ_PAU_MHZ * literal_82);
+        uint64_t l_def_HW_LIMIT_D = (l_TGT3_ATTR_FREQ_IOHS_MHZ * literal_10);
+        uint64_t l_def_HW_LIMIT_N = (l_TGT2_ATTR_FREQ_PAU_MHZ * literal_51);
         uint64_t l_def_AX_CMD_RATE_2B_R = (((literal_7 * l_TGT2_ATTR_FREQ_PAU_MHZ) * literal_1611) %
                                            (l_TGT3_ATTR_FREQ_IOHS_MHZ * literal_2063));
         fapi2::ATTR_IOHS_BUS_WIDTH_Type l_TGT3_ATTR_IOHS_BUS_WIDTH;
@@ -109,8 +117,17 @@ fapi2::ReturnCode p10_fbc_ptl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PAUC>&
                 l_scom_buffer.insert<20, 1, 63, uint64_t>(l_PB_PTLSCOM10_FP0_FMR_ENABLE_1PER4_PRESP_ON );
             }
 
-            l_scom_buffer.insert<4, 8, 56, uint64_t>(literal_0x0B );
-            l_scom_buffer.insert<12, 8, 56, uint64_t>(literal_0x06 );
+            if ((l_def_AX0_ENABLED == literal_1))
+            {
+                l_scom_buffer.insert<4, 6, 58, uint64_t>((literal_0x15 - (l_def_FW_LIMIT_N / l_def_FW_LIMIT_D)) );
+            }
+
+            if ((l_def_AX0_ENABLED == literal_1))
+            {
+                l_scom_buffer.insert<10, 6, 58, uint64_t>((literal_0xC - (l_def_HW_LIMIT_N / l_def_HW_LIMIT_D)) );
+            }
+
+            l_scom_buffer.insert<16, 4, 60, uint64_t>(literal_0x4 );
 
             if ((l_def_AX0_ENABLED == literal_1))
             {
@@ -118,8 +135,17 @@ fapi2::ReturnCode p10_fbc_ptl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PAUC>&
                 l_scom_buffer.insert<52, 1, 63, uint64_t>(l_PB_PTLSCOM10_FP1_FMR_ENABLE_1PER4_PRESP_ON );
             }
 
-            l_scom_buffer.insert<36, 8, 56, uint64_t>(literal_0x0B );
-            l_scom_buffer.insert<44, 8, 56, uint64_t>(literal_0x06 );
+            if ((l_def_AX0_ENABLED == literal_1))
+            {
+                l_scom_buffer.insert<36, 6, 58, uint64_t>((literal_0x15 - (l_def_FW_LIMIT_N / l_def_FW_LIMIT_D)) );
+            }
+
+            if ((l_def_AX0_ENABLED == literal_1))
+            {
+                l_scom_buffer.insert<42, 6, 58, uint64_t>((literal_0xC - (l_def_HW_LIMIT_N / l_def_HW_LIMIT_D)) );
+            }
+
+            l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0x4 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x1001180aull, l_scom_buffer));
         }
         {
@@ -127,7 +153,7 @@ fapi2::ReturnCode p10_fbc_ptl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PAUC>&
 
             if ((l_def_AX0_ENABLED == literal_1))
             {
-                l_scom_buffer.insert<25, 2, 62, uint64_t>(literal_0b10 );
+                l_scom_buffer.insert<29, 3, 61, uint64_t>(literal_0b10 );
             }
 
             if (((l_TGT3_ATTR_IOHS_BUS_WIDTH == fapi2::ENUM_ATTR_IOHS_BUS_WIDTH_2_BYTE) && (l_def_AX_CMD_RATE_2B_R != literal_0)))
