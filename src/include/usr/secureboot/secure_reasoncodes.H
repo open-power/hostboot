@@ -53,7 +53,7 @@ namespace SECUREBOOT
         MOD_CHECK_RISK_LEVEL_FOR_SMF        = 0x13,
         MOD_SMF_SPLIT_SMF_MEM               = 0x14,
 
-        // Use 0x20-0x2F range for Node Communications
+        // Use 0x20-0x3F range for Node Communications
         MOD_NCDD_CHECK_FOR_ERRORS           = 0x20,
         MOD_NCDD_WAIT_FOR_CMD_COMP          = 0x21,
         MOD_NC_XBUS_TEST                    = 0x22,
@@ -70,7 +70,12 @@ namespace SECUREBOOT
         MOD_NC_PROCESS_SLAVE_QUOTE          = 0x2D,
         MOD_NCT_SEND                        = 0x2E,
         MOD_NCT_RECEIVE                     = 0x2F,
-   };
+
+        // Use 0x40-0x4F range for Physical Presence Detection
+        MOD_PHYS_PRES_DETECT                = 0x40,
+        MOD_PHYS_PRES_OPEN_WINDOW           = 0x41,
+
+    };
 
     enum SECUREReasonCode
     {
@@ -122,6 +127,16 @@ namespace SECUREBOOT
         RC_NCT_ACK_MISMATCH                = SECURE_COMP_ID | 0x32,
         RC_NCT_INITIATION_MISMATCH         = SECURE_COMP_ID | 0x33,
         RC_NCEX_NO_FUNCTIONAL_PRIMARY_TPM  = SECURE_COMP_ID | 0x34,
+
+        // Use 0x20-0x3F range for Node Communications
+
+        // RC_PHYS_PRES_WINDOW_OPENED_SHUTDOWN Must have one unique use
+        //  for Shutdown path since FSP relies on it.
+        // termination_rc
+        RC_PHYS_PRES_WINDOW_OPENED_SHUTDOWN = SECURE_COMP_ID | 0x40,
+        RC_PHYS_PRES_ATTR_NOT_FOUND         = SECURE_COMP_ID | 0x41,
+        RC_PHYS_PRES_WINDOW_NOT_CLOSED      = SECURE_COMP_ID | 0x42,
+        RC_PHYS_PRES_WINDOW_NOT_OPENED      = SECURE_COMP_ID | 0x43,
 
         // Reason codes 0xA0 - 0xEF reserved for trustedboot_reasoncodes.H
     };

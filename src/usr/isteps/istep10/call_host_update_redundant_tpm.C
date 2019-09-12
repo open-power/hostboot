@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,7 @@
 #include <util/algorithm.H>
 #include <istepHelperFuncs.H>
 #include <secureboot/trustedbootif.H>
+#include <secureboot/phys_presence_if.H>
 
 namespace ISTEP_10
 {
@@ -50,6 +51,7 @@ void* call_host_update_redundant_tpm (void *io_pArgs)
                 ENTER_MRK"call_host_update_redundant_tpm");
 
     ISTEP_ERROR::IStepError l_istepError;
+
 #ifdef CONFIG_TPMDD
     TARGETING::Target* l_backupTpm = nullptr;
 
@@ -65,6 +67,26 @@ void* call_host_update_redundant_tpm (void *io_pArgs)
     TRUSTEDBOOT::initBackupTpm();
 
     } while(0);
+#endif
+
+#ifdef CONFIG_PHYS_PRES_PWR_BUTTON
+    // Check to see if a Physical Presence Window should be opened,
+    // and if so, open it.  This could result in the system being shutdown
+    // to allow the system administrator to assert physical presence
+    errlHndl_t l_err = nullptr;
+    l_err = SECUREBOOT::handlePhysPresenceWindow();
+    if (l_err)
+    {
+        // @TODO RTC 210301 - Handle Error Log Correctly, but for now
+        // just delete it
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "call_host_update_redundant_tpm: Error back from "
+                   "SECUREBOOT::handlePhysPresence: rc=0x%X, plid=0x%X. "
+                   "Deleting error for now",
+                   ERRL_GETRC_SAFE(l_err), ERRL_GETPLID_SAFE(l_err));
+        delete l_err;
+        l_err = nullptr;
+    }
 #endif
 
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,

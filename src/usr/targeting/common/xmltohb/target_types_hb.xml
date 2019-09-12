@@ -360,6 +360,15 @@
     <attribute>
       <id>PDA_THREAD_REG_STATE_ENTRY_FORMAT</id>
     </attribute>
+    <attribute>
+      <id>PHYS_PRES_ASSERTED</id>
+    </attribute>
+    <attribute>
+      <id>PHYS_PRES_FAKE_ASSERT</id>
+    </attribute>
+    <attribute>
+      <id>PHYS_PRES_REQUEST_OPEN_WINDOW</id>
+    </attribute>
   </targetTypeExtension>
 
   <targetTypeExtension>
