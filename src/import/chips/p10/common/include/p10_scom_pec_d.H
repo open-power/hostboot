@@ -59,8 +59,9 @@ static const uint32_t CTRL_ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
 
 static const uint64_t EPS_DBG_DEBUG_TRACE_CONTROL = 0x080107d0ull;
 
-static const uint32_t EPS_DBG_DEBUG_TRACE_CONTROL_ART = 0;
-static const uint32_t EPS_DBG_DEBUG_TRACE_CONTROL_OP = 1;
+static const uint32_t EPS_DBG_DEBUG_TRACE_CONTROL_START = 0;
+static const uint32_t EPS_DBG_DEBUG_TRACE_CONTROL_STOP = 1;
+static const uint32_t EPS_DBG_DEBUG_TRACE_CONTROL_RESET = 2;
 // pec/reg00013.H
 
 static const uint64_t OPCG_CAPT1 = 0x08030010ull;
@@ -108,6 +109,9 @@ static const uint32_t PB_PBCQ_PEPBREGS_DRPPRICTL_REG_RTYDROPDIVIDER_LEN = 3;
 // pec/reg00013.H
 
 static const uint64_t PRIMARY_ADDRESS_REG = 0x080f0000ull;
+
+static const uint32_t PRIMARY_ADDRESS_REG_PRIMARY_ADDRESS = 0;
+static const uint32_t PRIMARY_ADDRESS_REG_PRIMARY_ADDRESS_LEN = 6;
 // pec/reg00013.H
 
 static const uint64_t RECOV_MASK_RW = 0x08040041ull;
@@ -204,6 +208,7 @@ static const uint32_t TRA0_TR0_CONFIG_9_ERROR_CMP_PATTERN = 33;
 static const uint32_t TRA0_TR0_CONFIG_9_TRIG0_ERR_CMP = 34;
 static const uint32_t TRA0_TR0_CONFIG_9_TRIG1_ERR_CMP = 35;
 static const uint32_t TRA0_TR0_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
+static const uint32_t TRA0_TR0_CONFIG_9_SPARE_LT = 37;
 // pec/reg00013.H
 
 static const uint64_t TRA0_TR1_CONFIG_0 = 0x08010443ull;

@@ -261,6 +261,9 @@ static const uint32_t PCB_OPCG_GO_PCB_OPCGGO = 0;
 // eq/reg00004.H
 
 static const uint64_t QME_EISTR = 0x200e0270ull;
+
+static const uint32_t QME_EISTR_INTERRUPT_STATUS = 0;
+static const uint32_t QME_EISTR_INTERRUPT_STATUS_LEN = 64;
 // eq/reg00004.H
 
 static const uint64_t QME_FTXR = 0x200e0178ull;
@@ -317,6 +320,8 @@ static const uint32_t QME_PLSR_3_T1 = 52;
 static const uint32_t QME_PLSR_3_T1_LEN = 4;
 static const uint32_t QME_PLSR_3_T2 = 56;
 static const uint32_t QME_PLSR_3_T2_LEN = 4;
+static const uint32_t QME_PLSR_3_T3 = 60;
+static const uint32_t QME_PLSR_3_T3_LEN = 4;
 // eq/reg00004.H
 
 static const uint64_t QME_QHB = 0x200e0080ull;

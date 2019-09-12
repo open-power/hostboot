@@ -226,6 +226,7 @@ static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_IB23_VC1_OVERFLOW = 47;
 static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_DIBF0VC0_OVER_UNDERFLOW = 48;
 static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_DIBF0VC1_OVER_UNDERFLOW = 49;
 static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_DIBF1VC0_OVER_UNDERFLOW = 50;
+static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_DIBF1VC1_OVER_UNDERFLOW = 51;
 // pauc/reg00014.H
 
 static const uint64_t PB_MAILBOX_10_REG = 0x10011832ull;
@@ -242,6 +243,8 @@ static const uint32_t PB_PMU2_CNPM_COUNTER_1 = 16;
 static const uint32_t PB_PMU2_CNPM_COUNTER_1_LEN = 16;
 static const uint32_t PB_PMU2_CNPM_COUNTER_2 = 32;
 static const uint32_t PB_PMU2_CNPM_COUNTER_2_LEN = 16;
+static const uint32_t PB_PMU2_CNPM_COUNTER_3 = 48;
+static const uint32_t PB_PMU2_CNPM_COUNTER_3_LEN = 16;
 // pauc/reg00014.H
 
 static const uint64_t PB_PTL_FIR_MASK_REG_RW = 0x10011803ull;

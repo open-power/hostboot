@@ -7381,6 +7381,51 @@ fapi_try_exit:
 #endif
 }
 
+static inline fapi2::buffer<uint64_t>& SET_PB_TL_LINK_SYN_01_REG_1_SCOM_SYN3(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_TL_LINK_SYN_01_REG));
+#endif
+    return o_data.insertFromRight<PB_TL_LINK_SYN_01_REG_1_SCOM_SYN3,
+           PB_TL_LINK_SYN_01_REG_1_SCOM_SYN3_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_TL_LINK_SYN_01_REG_1_SCOM_SYN3 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PB_TL_LINK_SYN_01_REG_1_SCOM_SYN3(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_TL_LINK_SYN_01_REG));
+#endif
+    return o_data.insertFromRight<PB_TL_LINK_SYN_01_REG_1_SCOM_SYN3,
+           PB_TL_LINK_SYN_01_REG_1_SCOM_SYN3_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_TL_LINK_SYN_01_REG_1_SCOM_SYN3 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PB_TL_LINK_SYN_01_REG_1_SCOM_SYN3(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_TL_LINK_SYN_01_REG));
+#endif
+    return i_data.extractToRight<PB_TL_LINK_SYN_01_REG_1_SCOM_SYN3,
+           PB_TL_LINK_SYN_01_REG_1_SCOM_SYN3_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PB_TL_LINK_SYN_01_REG_1_SCOM_SYN3 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_PROTECT_MODE_REG(const fapi2::Target<K, M, V>& i_target)
 {
@@ -7635,6 +7680,51 @@ fapi_try_exit:
 #endif
 }
 
+
+static inline fapi2::buffer<uint64_t>& SET_TIMEOUT_REG_INT_TIMEOUT(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TIMEOUT_REG));
+#endif
+    return o_data.insertFromRight<TIMEOUT_REG_INT_TIMEOUT,
+           TIMEOUT_REG_INT_TIMEOUT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TIMEOUT_REG_INT_TIMEOUT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TIMEOUT_REG_INT_TIMEOUT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TIMEOUT_REG));
+#endif
+    return o_data.insertFromRight<TIMEOUT_REG_INT_TIMEOUT,
+           TIMEOUT_REG_INT_TIMEOUT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TIMEOUT_REG_INT_TIMEOUT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TIMEOUT_REG_INT_TIMEOUT(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TIMEOUT_REG));
+#endif
+    return i_data.extractToRight<TIMEOUT_REG_INT_TIMEOUT,
+           TIMEOUT_REG_INT_TIMEOUT_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TIMEOUT_REG_INT_TIMEOUT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_TRA0_TR0_CONFIG_1(const fapi2::Target<K, M, V>& i_target)

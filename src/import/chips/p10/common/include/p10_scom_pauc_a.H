@@ -202,6 +202,8 @@ static const uint32_t PB_PMU3_TLPM_COUNTER_1 = 16;
 static const uint32_t PB_PMU3_TLPM_COUNTER_1_LEN = 16;
 static const uint32_t PB_PMU3_TLPM_COUNTER_2 = 32;
 static const uint32_t PB_PMU3_TLPM_COUNTER_2_LEN = 16;
+static const uint32_t PB_PMU3_TLPM_COUNTER_3 = 48;
+static const uint32_t PB_PMU3_TLPM_COUNTER_3_LEN = 16;
 // pauc/reg00010.H
 
 static const uint64_t PHY_PPE_WRAP_MIB_XIMEM = 0x10012c17ull;

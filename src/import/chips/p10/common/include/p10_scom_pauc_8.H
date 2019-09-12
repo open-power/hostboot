@@ -45,6 +45,7 @@ static const uint32_t ASSIST_INTERRUPT_REG_ATTN = 0;
 static const uint32_t ASSIST_INTERRUPT_REG_RECOV = 1;
 static const uint32_t ASSIST_INTERRUPT_REG_XSTOP = 2;
 static const uint32_t ASSIST_INTERRUPT_REG_LXSTOP = 3;
+static const uint32_t ASSIST_INTERRUPT_REG_TYPE4 = 4;
 // pauc/reg00008.H
 
 static const uint64_t DL_PPE_WRAP_MIB_XIMEM = 0x10012c57ull;
@@ -345,6 +346,8 @@ static const uint32_t PB_PMU3_CNPM_COUNTER_1 = 16;
 static const uint32_t PB_PMU3_CNPM_COUNTER_1_LEN = 16;
 static const uint32_t PB_PMU3_CNPM_COUNTER_2 = 32;
 static const uint32_t PB_PMU3_CNPM_COUNTER_2_LEN = 16;
+static const uint32_t PB_PMU3_CNPM_COUNTER_3 = 48;
+static const uint32_t PB_PMU3_CNPM_COUNTER_3_LEN = 16;
 // pauc/reg00008.H
 
 static const uint64_t PB_TL_LINK_DATA_23_CFG_REG = 0x10011811ull;
@@ -374,6 +377,8 @@ static const uint32_t PB_TL_LINK_DLY_0123_REG_X1_LINK_DELAY = 20;
 static const uint32_t PB_TL_LINK_DLY_0123_REG_X1_LINK_DELAY_LEN = 12;
 static const uint32_t PB_TL_LINK_DLY_0123_REG_Y0_LINK_DELAY = 36;
 static const uint32_t PB_TL_LINK_DLY_0123_REG_Y0_LINK_DELAY_LEN = 12;
+static const uint32_t PB_TL_LINK_DLY_0123_REG_Y1_LINK_DELAY = 52;
+static const uint32_t PB_TL_LINK_DLY_0123_REG_Y1_LINK_DELAY_LEN = 12;
 // pauc/reg00008.H
 
 static const uint64_t PHY_PPE_WRAP_SCOM_CNTL = 0x10012c20ull;

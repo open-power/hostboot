@@ -168,6 +168,9 @@ static const uint32_t PRE_COUNTER_REG_PRE_COUNTER_LEN = 8;
 // mc/reg00012.H
 
 static const uint64_t SCAN64CONTSCAN = 0x0c03f000ull;
+
+static const uint32_t SCAN64CONTSCAN_SCAN64CONTSCAN_REG = 0;
+static const uint32_t SCAN64CONTSCAN_SCAN64CONTSCAN_REG_LEN = 64;
 // mc/reg00012.H
 
 static const uint64_t SCOMFIR_MCFIRACT0 = 0x0c010c06ull;
@@ -299,9 +302,12 @@ static const uint32_t TRA1_TR0_CONFIG_9_ERROR_CMP_PATTERN = 33;
 static const uint32_t TRA1_TR0_CONFIG_9_TRIG0_ERR_CMP = 34;
 static const uint32_t TRA1_TR0_CONFIG_9_TRIG1_ERR_CMP = 35;
 static const uint32_t TRA1_TR0_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
+static const uint32_t TRA1_TR0_CONFIG_9_SPARE_LT = 37;
 // mc/reg00012.H
 
 static const uint64_t XSTOP_INTERRUPT_REG = 0x0c0f001cull;
+
+static const uint32_t XSTOP_INTERRUPT_REG_XSTOP = 0;
 // mc/reg00012.H
 
 #ifndef __PPE_HCODE__

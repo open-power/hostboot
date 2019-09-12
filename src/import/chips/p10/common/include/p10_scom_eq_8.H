@@ -45,6 +45,7 @@ static const uint32_t ASSIST_INTERRUPT_REG_ATTN = 0;
 static const uint32_t ASSIST_INTERRUPT_REG_RECOV = 1;
 static const uint32_t ASSIST_INTERRUPT_REG_XSTOP = 2;
 static const uint32_t ASSIST_INTERRUPT_REG_LXSTOP = 3;
+static const uint32_t ASSIST_INTERRUPT_REG_TYPE4 = 4;
 // eq/reg00008.H
 
 static const uint64_t CLK_ADJ_00_DCADJ_WRAP_MEASURE_HISTORY = 0x20018316ull;
@@ -353,6 +354,7 @@ static const uint32_t L3TRA1_TR1_CONFIG_9_ERROR_CMP_PATTERN = 33;
 static const uint32_t L3TRA1_TR1_CONFIG_9_TRIG0_ERR_CMP = 34;
 static const uint32_t L3TRA1_TR1_CONFIG_9_TRIG1_ERR_CMP = 35;
 static const uint32_t L3TRA1_TR1_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
+static const uint32_t L3TRA1_TR1_CONFIG_9_SPARE_LT = 37;
 // eq/reg00008.H
 
 static const uint64_t L3TRA3_TR1_CONFIG_1 = 0x200182e4ull;
@@ -396,6 +398,9 @@ static const uint32_t QME_RVCR_RVID_VALUE_LEN = 7;
 // eq/reg00008.H
 
 static const uint64_t QME_SCOM_XIRAMRA = 0x200e0204ull;
+
+static const uint32_t QME_SCOM_XIRAMRA_SPRG0 = 32;
+static const uint32_t QME_SCOM_XIRAMRA_SPRG0_LEN = 32;
 // eq/reg00008.H
 
 static const uint64_t QME_SCOM_XIVDR28 = 0x200e0298ull;

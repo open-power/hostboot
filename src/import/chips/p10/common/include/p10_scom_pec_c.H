@@ -154,6 +154,9 @@ static const uint32_t PRE_COUNTER_REG_PRE_COUNTER_LEN = 8;
 // pec/reg00012.H
 
 static const uint64_t SCAN64CONTSCAN = 0x0803f000ull;
+
+static const uint32_t SCAN64CONTSCAN_SCAN64CONTSCAN_REG = 0;
+static const uint32_t SCAN64CONTSCAN_SCAN64CONTSCAN_REG_LEN = 64;
 // pec/reg00012.H
 
 static const uint64_t TRA0_TR1_TRACE_LO_DATA_REG = 0x08010441ull;
@@ -172,6 +175,8 @@ static const uint32_t TRA0_TR1_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
 // pec/reg00012.H
 
 static const uint64_t XSTOP_INTERRUPT_REG = 0x080f001cull;
+
+static const uint32_t XSTOP_INTERRUPT_REG_XSTOP = 0;
 // pec/reg00012.H
 
 #ifndef __PPE_HCODE__

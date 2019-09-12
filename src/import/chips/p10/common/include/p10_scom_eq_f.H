@@ -243,6 +243,7 @@ static const uint32_t L3TRA2_TR0_CONFIG_9_ERROR_CMP_PATTERN = 33;
 static const uint32_t L3TRA2_TR0_CONFIG_9_TRIG0_ERR_CMP = 34;
 static const uint32_t L3TRA2_TR0_CONFIG_9_TRIG1_ERR_CMP = 35;
 static const uint32_t L3TRA2_TR0_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
+static const uint32_t L3TRA2_TR0_CONFIG_9_SPARE_LT = 37;
 // eq/reg00015.H
 
 static const uint64_t L3TRA2_TR1_CONFIG_0 = 0x200182a3ull;
@@ -299,6 +300,7 @@ static const uint64_t QME_QSAR = 0x200e0074ull;
 
 static const uint32_t QME_QSAR_SRAM_ADDRESS = 16;
 static const uint32_t QME_QSAR_SRAM_ADDRESS_LEN = 13;
+static const uint32_t QME_QSAR_AUTO_INCR_MODE = 63;
 // eq/reg00015.H
 
 static const uint64_t QME_SCOM_XIVDR6 = 0x200e028cull;
@@ -310,6 +312,9 @@ static const uint32_t QME_SCOM_XIVDR6_7_LEN = 32;
 // eq/reg00015.H
 
 static const uint64_t TIMEOUT_REG = 0x200f0010ull;
+
+static const uint32_t TIMEOUT_REG_INT_TIMEOUT = 0;
+static const uint32_t TIMEOUT_REG_INT_TIMEOUT_LEN = 2;
 // eq/reg00015.H
 
 static const uint64_t VITAL_SCAN_OUT = 0x200f0017ull;

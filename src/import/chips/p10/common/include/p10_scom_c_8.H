@@ -41,21 +41,22 @@ namespace c
 
 static const uint64_t CPMS_ACDR = 0x200e0e7cull;
 
-static const uint32_t CPMS_ACDR_A_SCALE = 0;
-static const uint32_t CPMS_ACDR_A_SCALE_LEN = 4;
-static const uint32_t CPMS_ACDR_A_VALUE = 4;
-static const uint32_t CPMS_ACDR_A_VALUE_LEN = 16;
-static const uint32_t CPMS_ACDR_B_SCALE = 20;
-static const uint32_t CPMS_ACDR_B_SCALE_LEN = 4;
-static const uint32_t CPMS_ACDR_B_VALUE = 24;
-static const uint32_t CPMS_ACDR_B_VALUE_LEN = 16;
-static const uint32_t CPMS_ACDR_C_SCALE = 40;
-static const uint32_t CPMS_ACDR_C_SCALE_LEN = 4;
-static const uint32_t CPMS_ACDR_C_VALUE = 44;
-static const uint32_t CPMS_ACDR_C_VALUE_LEN = 16;
-static const uint32_t CPMS_ACDR_A_MOD = 60;
-static const uint32_t CPMS_ACDR_B_MOD = 61;
-static const uint32_t CPMS_ACDR_C_MOD = 62;
+static const uint32_t CPMS_ACDR_CHAR_COUNTA_SCALE = 0;
+static const uint32_t CPMS_ACDR_CHAR_COUNTA_SCALE_LEN = 4;
+static const uint32_t CPMS_ACDR_CHAR_COUNTA_VALUE = 4;
+static const uint32_t CPMS_ACDR_CHAR_COUNTA_VALUE_LEN = 16;
+static const uint32_t CPMS_ACDR_CHAR_COUNTB_SCALE = 20;
+static const uint32_t CPMS_ACDR_CHAR_COUNTB_SCALE_LEN = 4;
+static const uint32_t CPMS_ACDR_CHAR_COUNTB_VALUE = 24;
+static const uint32_t CPMS_ACDR_CHAR_COUNTB_VALUE_LEN = 16;
+static const uint32_t CPMS_ACDR_CHAR_COUNTC_SCALE = 40;
+static const uint32_t CPMS_ACDR_CHAR_COUNTC_SCALE_LEN = 4;
+static const uint32_t CPMS_ACDR_CHAR_COUNTC_VALUE = 44;
+static const uint32_t CPMS_ACDR_CHAR_COUNTC_VALUE_LEN = 16;
+static const uint32_t CPMS_ACDR_CHAR_COUNTA_MOD = 60;
+static const uint32_t CPMS_ACDR_CHAR_COUNTB_MOD = 61;
+static const uint32_t CPMS_ACDR_CHAR_COUNTC_MOD = 62;
+static const uint32_t CPMS_ACDR_SAMPLE_DISABLE_INDICATOR = 63;
 // c/reg00008.H
 
 static const uint64_t CPMS_CL2_PFETSTAT = 0x200e0e2cull;
@@ -145,6 +146,7 @@ static const uint32_t EC_LS_LSU_HOLD_OUT_REG13_P_LS_L2_ST_G_SHOULD_NOT_BE_SET_ER
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG13_P_LS_L2_ST_ORD_G_SHOULD_NOT_BE_SET_ERR_HOLD_OUT = 9;
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG13_P_MU_LS_ST_RC_RA60_EQUALS_0_ERR_HOLD_OUT = 10;
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG13_P_NCU_STORE_32B_ERR_HOLD_OUT = 11;
+static const uint32_t EC_LS_LSU_HOLD_OUT_REG13_P_STORE_0B_ERR_HOLD_OUT = 12;
 // c/reg00008.H
 
 static const uint64_t EC_LS_LSU_HOLD_OUT_REG5 = 0x200206c5ull;
@@ -161,6 +163,7 @@ static const uint32_t EC_LS_LSU_HOLD_OUT_REG5_ERTO_MP3_ERRPT_FMISS_ERR_HOLD_OUT_
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG5_ERTO_MP3_ERRPT_FMISS_ERR_HOLD_OUT_1 = 9;
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG5_ERTO_MP3_ERRPT_FMISS_ERR_HOLD_OUT_2 = 10;
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG5_ERTO_MP3_ERRPT_FMISS_ERR_HOLD_OUT_3 = 11;
+static const uint32_t EC_LS_LSU_HOLD_OUT_REG5_LMQ_MP5_BAD_RESPONSE_HOLD_OUT = 12;
 // c/reg00008.H
 
 static const uint64_t EC_PC_COMMON_SPR_V3_HMER_RW_WAND = 0x20020495ull;
@@ -200,6 +203,7 @@ static const uint32_t EC_PC_PMU_SPRCOR_HV_STATE_3_MSR_HV = 59;
 static const uint32_t EC_PC_PMU_SPRCOR_HV_STATE_0_MSR_PR = 60;
 static const uint32_t EC_PC_PMU_SPRCOR_HV_STATE_1_MSR_PR = 61;
 static const uint32_t EC_PC_PMU_SPRCOR_HV_STATE_2_MSR_PR = 62;
+static const uint32_t EC_PC_PMU_SPRCOR_HV_STATE_3_MSR_PR = 63;
 // c/reg00008.H
 
 static const uint64_t EC_PC_PMU_SPRCOR_SCOMC_EN = 0x2002040aull;
@@ -334,6 +338,8 @@ static const uint32_t QME_QOSR_0_DTC_INDEX = 34;
 static const uint32_t QME_QOSR_0_DTC_INDEX_LEN = 4;
 static const uint32_t QME_QOSR_2_DTC_INDEX = 50;
 static const uint32_t QME_QOSR_2_DTC_INDEX_LEN = 6;
+static const uint32_t QME_QOSR_3_DTC_INDEX = 58;
+static const uint32_t QME_QOSR_3_DTC_INDEX_LEN = 6;
 // c/reg00008.H
 
 #ifndef __PPE_HCODE__

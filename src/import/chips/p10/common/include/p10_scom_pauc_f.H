@@ -178,6 +178,8 @@ static const uint32_t PB_TL_LINK_SYN_01_REG_1_SCOM_SYN1 = 40;
 static const uint32_t PB_TL_LINK_SYN_01_REG_1_SCOM_SYN1_LEN = 8;
 static const uint32_t PB_TL_LINK_SYN_01_REG_1_SCOM_SYN2 = 48;
 static const uint32_t PB_TL_LINK_SYN_01_REG_1_SCOM_SYN2_LEN = 8;
+static const uint32_t PB_TL_LINK_SYN_01_REG_1_SCOM_SYN3 = 56;
+static const uint32_t PB_TL_LINK_SYN_01_REG_1_SCOM_SYN3_LEN = 8;
 // pauc/reg00015.H
 
 static const uint64_t PROTECT_MODE_REG = 0x100f03feull;
@@ -187,6 +189,9 @@ static const uint32_t PROTECT_MODE_REG_WRITE_PROTECT_ENABLE = 1;
 // pauc/reg00015.H
 
 static const uint64_t TIMEOUT_REG = 0x100f0010ull;
+
+static const uint32_t TIMEOUT_REG_INT_TIMEOUT = 0;
+static const uint32_t TIMEOUT_REG_INT_TIMEOUT_LEN = 2;
 // pauc/reg00015.H
 
 static const uint64_t TRA0_TR0_CONFIG_1 = 0x10010404ull;

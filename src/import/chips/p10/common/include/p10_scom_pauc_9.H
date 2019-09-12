@@ -172,6 +172,8 @@ static const uint32_t PB_EN_DOB_ECC_ERR_REG_23_UE = 12;
 static const uint32_t PB_EN_DOB_ECC_ERR_REG_23_UE_LEN = 4;
 static const uint32_t PB_EN_DOB_ECC_ERR_REG_23_CE = 16;
 static const uint32_t PB_EN_DOB_ECC_ERR_REG_23_CE_LEN = 4;
+static const uint32_t PB_EN_DOB_ECC_ERR_REG_23_SUE = 20;
+static const uint32_t PB_EN_DOB_ECC_ERR_REG_23_SUE_LEN = 4;
 // pauc/reg00009.H
 
 static const uint64_t PB_FP01_CFG = 0x1001180aull;
@@ -332,6 +334,7 @@ static const uint32_t TRA0_TR1_CONFIG_9_ERROR_CMP_PATTERN = 33;
 static const uint32_t TRA0_TR1_CONFIG_9_TRIG0_ERR_CMP = 34;
 static const uint32_t TRA0_TR1_CONFIG_9_TRIG1_ERR_CMP = 35;
 static const uint32_t TRA0_TR1_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
+static const uint32_t TRA0_TR1_CONFIG_9_SPARE_LT = 37;
 // pauc/reg00009.H
 
 static const uint64_t XSTOP = 0x10040000ull;

@@ -1692,6 +1692,90 @@ fapi_try_exit:
 #endif
 }
 
+static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_LLSTAT_ASYNC_MODE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPVSB_FSI_W_SLAVE_A_LLSTAT));
+#endif
+    return o_data.insertFromRight<TP_TPVSB_FSI_W_SLAVE_A_LLSTAT_ASYNC_MODE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_LLSTAT_ASYNC_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_LLSTAT_ASYNC_MODE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPVSB_FSI_W_SLAVE_A_LLSTAT));
+#endif
+    return o_data.insertFromRight<TP_TPVSB_FSI_W_SLAVE_A_LLSTAT_ASYNC_MODE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_LLSTAT_ASYNC_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_LLSTAT_ASYNC_MODE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPVSB_FSI_W_SLAVE_A_LLSTAT));
+#endif
+    return o_data.setBit<TP_TPVSB_FSI_W_SLAVE_A_LLSTAT_ASYNC_MODE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_LLSTAT_ASYNC_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SLAVE_A_LLSTAT_ASYNC_MODE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPVSB_FSI_W_SLAVE_A_LLSTAT));
+#endif
+    return o_data.clearBit<TP_TPVSB_FSI_W_SLAVE_A_LLSTAT_ASYNC_MODE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_LLSTAT_ASYNC_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SLAVE_A_LLSTAT_ASYNC_MODE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPVSB_FSI_W_SLAVE_A_LLSTAT));
+#endif
+    return i_data.extractToRight<TP_TPVSB_FSI_W_SLAVE_A_LLSTAT_ASYNC_MODE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_LLSTAT_ASYNC_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TP_TPVSB_FSI_W_SLAVE_A_LLSTAT_ASYNC_MODE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPVSB_FSI_W_SLAVE_A_LLSTAT));
+#endif
+    return i_data.getBit<TP_TPVSB_FSI_W_SLAVE_A_LLSTAT_ASYNC_MODE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_LLSTAT_ASYNC_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MMODE_FSI0(const fapi2::Target<K, M, V>& i_target)
 {
@@ -5270,6 +5354,51 @@ static inline bool GET_TP_TPVSB_FSI_W_SLAVE_A_SSTAT_AUX_DI_REFERENCE(fapi2::buff
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_SSTAT_AUX_DI_REFERENCE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_SSTAT_CRC_ERR_CTR(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPVSB_FSI_W_SLAVE_A_SSTAT));
+#endif
+    return o_data.insertFromRight<TP_TPVSB_FSI_W_SLAVE_A_SSTAT_CRC_ERR_CTR,
+           TP_TPVSB_FSI_W_SLAVE_A_SSTAT_CRC_ERR_CTR_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_SSTAT_CRC_ERR_CTR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_SSTAT_CRC_ERR_CTR(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPVSB_FSI_W_SLAVE_A_SSTAT));
+#endif
+    return o_data.insertFromRight<TP_TPVSB_FSI_W_SLAVE_A_SSTAT_CRC_ERR_CTR,
+           TP_TPVSB_FSI_W_SLAVE_A_SSTAT_CRC_ERR_CTR_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_SSTAT_CRC_ERR_CTR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SLAVE_A_SSTAT_CRC_ERR_CTR(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPVSB_FSI_W_SLAVE_A_SSTAT));
+#endif
+    return i_data.extractToRight<TP_TPVSB_FSI_W_SLAVE_A_SSTAT_CRC_ERR_CTR,
+           TP_TPVSB_FSI_W_SLAVE_A_SSTAT_CRC_ERR_CTR_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_SSTAT_CRC_ERR_CTR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -9587,6 +9716,60 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST3_PORT_CONTROL_LOOPBAC
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST3_PORT_CONTROL_LOOPBACK chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST3_PORT_CONTROL_UNUSED(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST3_PORT_CONTROL_RW,
+                           TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST3_PORT_CONTROL_RW_WAND, TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST3_PORT_CONTROL_RW_WOR));
+#endif
+    return o_data.insertFromRight<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST3_PORT_CONTROL_UNUSED,
+           TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST3_PORT_CONTROL_UNUSED_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST3_PORT_CONTROL_UNUSED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST3_PORT_CONTROL_UNUSED(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST3_PORT_CONTROL_RW,
+                           TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST3_PORT_CONTROL_RW_WAND, TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST3_PORT_CONTROL_RW_WOR));
+#endif
+    return o_data.insertFromRight<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST3_PORT_CONTROL_UNUSED,
+           TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST3_PORT_CONTROL_UNUSED_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST3_PORT_CONTROL_UNUSED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST3_PORT_CONTROL_UNUSED(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST3_PORT_CONTROL_RW,
+                           TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST3_PORT_CONTROL_RW_WAND, TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST3_PORT_CONTROL_RW_WOR));
+#endif
+    return i_data.extractToRight<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST3_PORT_CONTROL_UNUSED,
+           TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST3_PORT_CONTROL_UNUSED_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST3_PORT_CONTROL_UNUSED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif

@@ -49,6 +49,8 @@ static const uint32_t ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
 // eq/reg00011.H
 
 static const uint64_t ATTN_INTERRUPT_REG = 0x200f001aull;
+
+static const uint32_t ATTN_INTERRUPT_REG_ATTN = 0;
 // eq/reg00011.H
 
 static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE = 0x20018321ull;
@@ -203,6 +205,7 @@ static const uint32_t EPS_THERM_WSUB2_CONTROL_REG_FORCE_RESET_THRES_L2RESULTS = 
 static const uint32_t EPS_THERM_WSUB2_CONTROL_REG_FORCE_RESET_THRES_L3RESULTS = 9;
 static const uint32_t EPS_THERM_WSUB2_CONTROL_REG_FORCE_MEASURE_VOLT_INTERRUPTIBLE = 10;
 static const uint32_t EPS_THERM_WSUB2_CONTROL_REG_FORCE_RESET_MEASURE_VOLT = 11;
+static const uint32_t EPS_THERM_WSUB2_CONTROL_REG_FORCE_SHIFT_SENSOR = 12;
 // eq/reg00011.H
 
 static const uint64_t EPS_THERM_WSUB2_SKITTER_DATA2 = 0x2005003bull;
@@ -270,6 +273,7 @@ static const uint32_t L3TRA2_TR1_CONFIG_9_ERROR_CMP_PATTERN = 33;
 static const uint32_t L3TRA2_TR1_CONFIG_9_TRIG0_ERR_CMP = 34;
 static const uint32_t L3TRA2_TR1_CONFIG_9_TRIG1_ERR_CMP = 35;
 static const uint32_t L3TRA2_TR1_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
+static const uint32_t L3TRA2_TR1_CONFIG_9_SPARE_LT = 37;
 // eq/reg00011.H
 
 static const uint64_t LOCAL_FIR_RW = 0x20040100ull;
@@ -403,6 +407,8 @@ static const uint32_t QME_TTSR_5_DATA = 40;
 static const uint32_t QME_TTSR_5_DATA_LEN = 8;
 static const uint32_t QME_TTSR_6_DATA = 48;
 static const uint32_t QME_TTSR_6_DATA_LEN = 8;
+static const uint32_t QME_TTSR_7_DATA = 56;
+static const uint32_t QME_TTSR_7_DATA_LEN = 8;
 // eq/reg00011.H
 
 static const uint64_t RECOV = 0x20040001ull;

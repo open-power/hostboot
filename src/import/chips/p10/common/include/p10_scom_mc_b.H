@@ -49,6 +49,8 @@ static const uint32_t ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
 // mc/reg00011.H
 
 static const uint64_t ATTN_INTERRUPT_REG = 0x0c0f001aull;
+
+static const uint32_t ATTN_INTERRUPT_REG_ATTN = 0;
 // mc/reg00011.H
 
 static const uint64_t EPS_DBG_TRACE_MODE_REG_2 = 0x0c0107cfull;

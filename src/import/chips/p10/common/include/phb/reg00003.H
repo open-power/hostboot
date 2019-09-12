@@ -5693,6 +5693,94 @@ fapi_try_exit:
 #endif
 }
 
+static inline fapi2::buffer<uint64_t>& SET_RSB_REGS_WOF_REG_LEM_FIR_INTERNAL_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RSB_REGS_WOF_REG));
+#endif
+    return o_data.insertFromRight<RSB_REGS_WOF_REG_LEM_FIR_INTERNAL_PARITY_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RSB_REGS_WOF_REG_LEM_FIR_INTERNAL_PARITY_ERROR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RSB_REGS_WOF_REG_LEM_FIR_INTERNAL_PARITY_ERROR(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RSB_REGS_WOF_REG));
+#endif
+    return o_data.insertFromRight<RSB_REGS_WOF_REG_LEM_FIR_INTERNAL_PARITY_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RSB_REGS_WOF_REG_LEM_FIR_INTERNAL_PARITY_ERROR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RSB_REGS_WOF_REG_LEM_FIR_INTERNAL_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RSB_REGS_WOF_REG));
+#endif
+    return o_data.setBit<RSB_REGS_WOF_REG_LEM_FIR_INTERNAL_PARITY_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RSB_REGS_WOF_REG_LEM_FIR_INTERNAL_PARITY_ERROR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_RSB_REGS_WOF_REG_LEM_FIR_INTERNAL_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RSB_REGS_WOF_REG));
+#endif
+    return o_data.clearBit<RSB_REGS_WOF_REG_LEM_FIR_INTERNAL_PARITY_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RSB_REGS_WOF_REG_LEM_FIR_INTERNAL_PARITY_ERROR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_RSB_REGS_WOF_REG_LEM_FIR_INTERNAL_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RSB_REGS_WOF_REG));
+#endif
+    return i_data.extractToRight<RSB_REGS_WOF_REG_LEM_FIR_INTERNAL_PARITY_ERROR,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RSB_REGS_WOF_REG_LEM_FIR_INTERNAL_PARITY_ERROR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_RSB_REGS_WOF_REG_LEM_FIR_INTERNAL_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RSB_REGS_WOF_REG));
+#endif
+    return i_data.getBit<RSB_REGS_WOF_REG_LEM_FIR_INTERNAL_PARITY_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RSB_REGS_WOF_REG_LEM_FIR_INTERNAL_PARITY_ERROR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PASR(const fapi2::Target<K, M, V>& i_target)
 {

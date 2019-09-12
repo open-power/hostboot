@@ -2271,674 +2271,758 @@ fapi_try_exit:
 }
 
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_0_RUN_Q(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_CTRL_T0_RUN_Q(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return o_data.insertFromRight<EC_PC_COMMON_SPR_CTRL_0_RUN_Q,
+    return o_data.insertFromRight<EC_PC_COMMON_SPR_CTRL_CTRL_T0_RUN_Q,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_0_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T0_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_0_RUN_Q(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_CTRL_T0_RUN_Q(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return o_data.insertFromRight<EC_PC_COMMON_SPR_CTRL_0_RUN_Q,
+    return o_data.insertFromRight<EC_PC_COMMON_SPR_CTRL_CTRL_T0_RUN_Q,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_0_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T0_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_0_RUN_Q(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_CTRL_T0_RUN_Q(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return o_data.setBit<EC_PC_COMMON_SPR_CTRL_0_RUN_Q>();
+    return o_data.setBit<EC_PC_COMMON_SPR_CTRL_CTRL_T0_RUN_Q>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_0_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T0_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_COMMON_SPR_CTRL_0_RUN_Q(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_COMMON_SPR_CTRL_CTRL_T0_RUN_Q(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return o_data.clearBit<EC_PC_COMMON_SPR_CTRL_0_RUN_Q>();
+    return o_data.clearBit<EC_PC_COMMON_SPR_CTRL_CTRL_T0_RUN_Q>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_0_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T0_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_EC_PC_COMMON_SPR_CTRL_0_RUN_Q(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_EC_PC_COMMON_SPR_CTRL_CTRL_T0_RUN_Q(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return i_data.extractToRight<EC_PC_COMMON_SPR_CTRL_0_RUN_Q,
+    return i_data.extractToRight<EC_PC_COMMON_SPR_CTRL_CTRL_T0_RUN_Q,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_0_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T0_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_EC_PC_COMMON_SPR_CTRL_0_RUN_Q(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_EC_PC_COMMON_SPR_CTRL_CTRL_T0_RUN_Q(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return i_data.getBit<EC_PC_COMMON_SPR_CTRL_0_RUN_Q>();
+    return i_data.getBit<EC_PC_COMMON_SPR_CTRL_CTRL_T0_RUN_Q>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_0_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T0_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_1_RUN_Q(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_CTRL_T1_RUN_Q(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return o_data.insertFromRight<EC_PC_COMMON_SPR_CTRL_1_RUN_Q,
+    return o_data.insertFromRight<EC_PC_COMMON_SPR_CTRL_CTRL_T1_RUN_Q,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_1_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T1_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_1_RUN_Q(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_CTRL_T1_RUN_Q(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return o_data.insertFromRight<EC_PC_COMMON_SPR_CTRL_1_RUN_Q,
+    return o_data.insertFromRight<EC_PC_COMMON_SPR_CTRL_CTRL_T1_RUN_Q,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_1_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T1_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_1_RUN_Q(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_CTRL_T1_RUN_Q(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return o_data.setBit<EC_PC_COMMON_SPR_CTRL_1_RUN_Q>();
+    return o_data.setBit<EC_PC_COMMON_SPR_CTRL_CTRL_T1_RUN_Q>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_1_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T1_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_COMMON_SPR_CTRL_1_RUN_Q(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_COMMON_SPR_CTRL_CTRL_T1_RUN_Q(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return o_data.clearBit<EC_PC_COMMON_SPR_CTRL_1_RUN_Q>();
+    return o_data.clearBit<EC_PC_COMMON_SPR_CTRL_CTRL_T1_RUN_Q>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_1_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T1_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_EC_PC_COMMON_SPR_CTRL_1_RUN_Q(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_EC_PC_COMMON_SPR_CTRL_CTRL_T1_RUN_Q(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return i_data.extractToRight<EC_PC_COMMON_SPR_CTRL_1_RUN_Q,
+    return i_data.extractToRight<EC_PC_COMMON_SPR_CTRL_CTRL_T1_RUN_Q,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_1_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T1_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_EC_PC_COMMON_SPR_CTRL_1_RUN_Q(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_EC_PC_COMMON_SPR_CTRL_CTRL_T1_RUN_Q(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return i_data.getBit<EC_PC_COMMON_SPR_CTRL_1_RUN_Q>();
+    return i_data.getBit<EC_PC_COMMON_SPR_CTRL_CTRL_T1_RUN_Q>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_1_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T1_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_2_RUN_Q(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_CTRL_T2_RUN_Q(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return o_data.insertFromRight<EC_PC_COMMON_SPR_CTRL_2_RUN_Q,
+    return o_data.insertFromRight<EC_PC_COMMON_SPR_CTRL_CTRL_T2_RUN_Q,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_2_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T2_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_2_RUN_Q(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_CTRL_T2_RUN_Q(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return o_data.insertFromRight<EC_PC_COMMON_SPR_CTRL_2_RUN_Q,
+    return o_data.insertFromRight<EC_PC_COMMON_SPR_CTRL_CTRL_T2_RUN_Q,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_2_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T2_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_2_RUN_Q(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_CTRL_T2_RUN_Q(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return o_data.setBit<EC_PC_COMMON_SPR_CTRL_2_RUN_Q>();
+    return o_data.setBit<EC_PC_COMMON_SPR_CTRL_CTRL_T2_RUN_Q>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_2_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T2_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_COMMON_SPR_CTRL_2_RUN_Q(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_COMMON_SPR_CTRL_CTRL_T2_RUN_Q(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return o_data.clearBit<EC_PC_COMMON_SPR_CTRL_2_RUN_Q>();
+    return o_data.clearBit<EC_PC_COMMON_SPR_CTRL_CTRL_T2_RUN_Q>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_2_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T2_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_EC_PC_COMMON_SPR_CTRL_2_RUN_Q(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_EC_PC_COMMON_SPR_CTRL_CTRL_T2_RUN_Q(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return i_data.extractToRight<EC_PC_COMMON_SPR_CTRL_2_RUN_Q,
+    return i_data.extractToRight<EC_PC_COMMON_SPR_CTRL_CTRL_T2_RUN_Q,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_2_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T2_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_EC_PC_COMMON_SPR_CTRL_2_RUN_Q(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_EC_PC_COMMON_SPR_CTRL_CTRL_T2_RUN_Q(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return i_data.getBit<EC_PC_COMMON_SPR_CTRL_2_RUN_Q>();
+    return i_data.getBit<EC_PC_COMMON_SPR_CTRL_CTRL_T2_RUN_Q>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_2_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T2_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_3_RUN_Q(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_CTRL_T3_RUN_Q(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return o_data.insertFromRight<EC_PC_COMMON_SPR_CTRL_3_RUN_Q,
+    return o_data.insertFromRight<EC_PC_COMMON_SPR_CTRL_CTRL_T3_RUN_Q,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_3_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T3_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_3_RUN_Q(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_CTRL_T3_RUN_Q(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return o_data.insertFromRight<EC_PC_COMMON_SPR_CTRL_3_RUN_Q,
+    return o_data.insertFromRight<EC_PC_COMMON_SPR_CTRL_CTRL_T3_RUN_Q,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_3_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T3_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_3_RUN_Q(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_CTRL_T3_RUN_Q(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return o_data.setBit<EC_PC_COMMON_SPR_CTRL_3_RUN_Q>();
+    return o_data.setBit<EC_PC_COMMON_SPR_CTRL_CTRL_T3_RUN_Q>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_3_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T3_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_COMMON_SPR_CTRL_3_RUN_Q(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_COMMON_SPR_CTRL_CTRL_T3_RUN_Q(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return o_data.clearBit<EC_PC_COMMON_SPR_CTRL_3_RUN_Q>();
+    return o_data.clearBit<EC_PC_COMMON_SPR_CTRL_CTRL_T3_RUN_Q>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_3_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T3_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_EC_PC_COMMON_SPR_CTRL_3_RUN_Q(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_EC_PC_COMMON_SPR_CTRL_CTRL_T3_RUN_Q(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return i_data.extractToRight<EC_PC_COMMON_SPR_CTRL_3_RUN_Q,
+    return i_data.extractToRight<EC_PC_COMMON_SPR_CTRL_CTRL_T3_RUN_Q,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_3_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T3_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_EC_PC_COMMON_SPR_CTRL_3_RUN_Q(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_EC_PC_COMMON_SPR_CTRL_CTRL_T3_RUN_Q(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return i_data.getBit<EC_PC_COMMON_SPR_CTRL_3_RUN_Q>();
+    return i_data.getBit<EC_PC_COMMON_SPR_CTRL_CTRL_T3_RUN_Q>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_3_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T3_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_4_RUN_Q(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_CTRL_T4_RUN_Q(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return o_data.insertFromRight<EC_PC_COMMON_SPR_CTRL_4_RUN_Q,
+    return o_data.insertFromRight<EC_PC_COMMON_SPR_CTRL_CTRL_T4_RUN_Q,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_4_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T4_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_4_RUN_Q(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_CTRL_T4_RUN_Q(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return o_data.insertFromRight<EC_PC_COMMON_SPR_CTRL_4_RUN_Q,
+    return o_data.insertFromRight<EC_PC_COMMON_SPR_CTRL_CTRL_T4_RUN_Q,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_4_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T4_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_4_RUN_Q(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_CTRL_T4_RUN_Q(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return o_data.setBit<EC_PC_COMMON_SPR_CTRL_4_RUN_Q>();
+    return o_data.setBit<EC_PC_COMMON_SPR_CTRL_CTRL_T4_RUN_Q>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_4_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T4_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_COMMON_SPR_CTRL_4_RUN_Q(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_COMMON_SPR_CTRL_CTRL_T4_RUN_Q(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return o_data.clearBit<EC_PC_COMMON_SPR_CTRL_4_RUN_Q>();
+    return o_data.clearBit<EC_PC_COMMON_SPR_CTRL_CTRL_T4_RUN_Q>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_4_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T4_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_EC_PC_COMMON_SPR_CTRL_4_RUN_Q(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_EC_PC_COMMON_SPR_CTRL_CTRL_T4_RUN_Q(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return i_data.extractToRight<EC_PC_COMMON_SPR_CTRL_4_RUN_Q,
+    return i_data.extractToRight<EC_PC_COMMON_SPR_CTRL_CTRL_T4_RUN_Q,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_4_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T4_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_EC_PC_COMMON_SPR_CTRL_4_RUN_Q(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_EC_PC_COMMON_SPR_CTRL_CTRL_T4_RUN_Q(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return i_data.getBit<EC_PC_COMMON_SPR_CTRL_4_RUN_Q>();
+    return i_data.getBit<EC_PC_COMMON_SPR_CTRL_CTRL_T4_RUN_Q>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_4_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T4_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_5_RUN_Q(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_CTRL_T5_RUN_Q(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return o_data.insertFromRight<EC_PC_COMMON_SPR_CTRL_5_RUN_Q,
+    return o_data.insertFromRight<EC_PC_COMMON_SPR_CTRL_CTRL_T5_RUN_Q,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_5_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T5_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_5_RUN_Q(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_CTRL_T5_RUN_Q(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return o_data.insertFromRight<EC_PC_COMMON_SPR_CTRL_5_RUN_Q,
+    return o_data.insertFromRight<EC_PC_COMMON_SPR_CTRL_CTRL_T5_RUN_Q,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_5_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T5_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_5_RUN_Q(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_CTRL_T5_RUN_Q(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return o_data.setBit<EC_PC_COMMON_SPR_CTRL_5_RUN_Q>();
+    return o_data.setBit<EC_PC_COMMON_SPR_CTRL_CTRL_T5_RUN_Q>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_5_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T5_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_COMMON_SPR_CTRL_5_RUN_Q(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_COMMON_SPR_CTRL_CTRL_T5_RUN_Q(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return o_data.clearBit<EC_PC_COMMON_SPR_CTRL_5_RUN_Q>();
+    return o_data.clearBit<EC_PC_COMMON_SPR_CTRL_CTRL_T5_RUN_Q>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_5_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T5_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_EC_PC_COMMON_SPR_CTRL_5_RUN_Q(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_EC_PC_COMMON_SPR_CTRL_CTRL_T5_RUN_Q(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return i_data.extractToRight<EC_PC_COMMON_SPR_CTRL_5_RUN_Q,
+    return i_data.extractToRight<EC_PC_COMMON_SPR_CTRL_CTRL_T5_RUN_Q,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_5_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T5_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_EC_PC_COMMON_SPR_CTRL_5_RUN_Q(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_EC_PC_COMMON_SPR_CTRL_CTRL_T5_RUN_Q(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return i_data.getBit<EC_PC_COMMON_SPR_CTRL_5_RUN_Q>();
+    return i_data.getBit<EC_PC_COMMON_SPR_CTRL_CTRL_T5_RUN_Q>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_5_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T5_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_6_RUN_Q(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_CTRL_T6_RUN_Q(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return o_data.insertFromRight<EC_PC_COMMON_SPR_CTRL_6_RUN_Q,
+    return o_data.insertFromRight<EC_PC_COMMON_SPR_CTRL_CTRL_T6_RUN_Q,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_6_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T6_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_6_RUN_Q(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_CTRL_T6_RUN_Q(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return o_data.insertFromRight<EC_PC_COMMON_SPR_CTRL_6_RUN_Q,
+    return o_data.insertFromRight<EC_PC_COMMON_SPR_CTRL_CTRL_T6_RUN_Q,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_6_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T6_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_6_RUN_Q(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_CTRL_T6_RUN_Q(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return o_data.setBit<EC_PC_COMMON_SPR_CTRL_6_RUN_Q>();
+    return o_data.setBit<EC_PC_COMMON_SPR_CTRL_CTRL_T6_RUN_Q>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_6_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T6_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_COMMON_SPR_CTRL_6_RUN_Q(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_COMMON_SPR_CTRL_CTRL_T6_RUN_Q(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return o_data.clearBit<EC_PC_COMMON_SPR_CTRL_6_RUN_Q>();
+    return o_data.clearBit<EC_PC_COMMON_SPR_CTRL_CTRL_T6_RUN_Q>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_6_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T6_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_EC_PC_COMMON_SPR_CTRL_6_RUN_Q(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_EC_PC_COMMON_SPR_CTRL_CTRL_T6_RUN_Q(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return i_data.extractToRight<EC_PC_COMMON_SPR_CTRL_6_RUN_Q,
+    return i_data.extractToRight<EC_PC_COMMON_SPR_CTRL_CTRL_T6_RUN_Q,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_6_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T6_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_EC_PC_COMMON_SPR_CTRL_6_RUN_Q(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_EC_PC_COMMON_SPR_CTRL_CTRL_T6_RUN_Q(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return i_data.getBit<EC_PC_COMMON_SPR_CTRL_6_RUN_Q>();
+    return i_data.getBit<EC_PC_COMMON_SPR_CTRL_CTRL_T6_RUN_Q>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_6_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T6_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_7_RUN_Q(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_CTRL_T7_RUN_Q(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return o_data.insertFromRight<EC_PC_COMMON_SPR_CTRL_7_RUN_Q,
+    return o_data.insertFromRight<EC_PC_COMMON_SPR_CTRL_CTRL_T7_RUN_Q,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_7_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T7_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_7_RUN_Q(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_CTRL_T7_RUN_Q(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return o_data.insertFromRight<EC_PC_COMMON_SPR_CTRL_7_RUN_Q,
+    return o_data.insertFromRight<EC_PC_COMMON_SPR_CTRL_CTRL_T7_RUN_Q,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_7_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T7_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_7_RUN_Q(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_CTRL_T7_RUN_Q(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return o_data.setBit<EC_PC_COMMON_SPR_CTRL_7_RUN_Q>();
+    return o_data.setBit<EC_PC_COMMON_SPR_CTRL_CTRL_T7_RUN_Q>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_7_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T7_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_COMMON_SPR_CTRL_7_RUN_Q(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_COMMON_SPR_CTRL_CTRL_T7_RUN_Q(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return o_data.clearBit<EC_PC_COMMON_SPR_CTRL_7_RUN_Q>();
+    return o_data.clearBit<EC_PC_COMMON_SPR_CTRL_CTRL_T7_RUN_Q>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_7_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T7_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_EC_PC_COMMON_SPR_CTRL_7_RUN_Q(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_EC_PC_COMMON_SPR_CTRL_CTRL_T7_RUN_Q(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return i_data.extractToRight<EC_PC_COMMON_SPR_CTRL_7_RUN_Q,
+    return i_data.extractToRight<EC_PC_COMMON_SPR_CTRL_CTRL_T7_RUN_Q,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_7_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T7_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_EC_PC_COMMON_SPR_CTRL_7_RUN_Q(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_EC_PC_COMMON_SPR_CTRL_CTRL_T7_RUN_Q(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
 #endif
-    return i_data.getBit<EC_PC_COMMON_SPR_CTRL_7_RUN_Q>();
+    return i_data.getBit<EC_PC_COMMON_SPR_CTRL_CTRL_T7_RUN_Q>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_7_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_CTRL_T7_RUN_Q chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_RUN_LATCH(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
+#endif
+    return o_data.insertFromRight<EC_PC_COMMON_SPR_CTRL_RUN_LATCH,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_RUN_LATCH chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_RUN_LATCH(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
+#endif
+    return o_data.insertFromRight<EC_PC_COMMON_SPR_CTRL_RUN_LATCH,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_RUN_LATCH chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_CTRL_RUN_LATCH(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
+#endif
+    return o_data.setBit<EC_PC_COMMON_SPR_CTRL_RUN_LATCH>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_RUN_LATCH chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_COMMON_SPR_CTRL_RUN_LATCH(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
+#endif
+    return o_data.clearBit<EC_PC_COMMON_SPR_CTRL_RUN_LATCH>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_RUN_LATCH chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EC_PC_COMMON_SPR_CTRL_RUN_LATCH(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
+#endif
+    return i_data.extractToRight<EC_PC_COMMON_SPR_CTRL_RUN_LATCH,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_RUN_LATCH chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_EC_PC_COMMON_SPR_CTRL_RUN_LATCH(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_CTRL));
+#endif
+    return i_data.getBit<EC_PC_COMMON_SPR_CTRL_RUN_LATCH>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_CTRL_RUN_LATCH chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

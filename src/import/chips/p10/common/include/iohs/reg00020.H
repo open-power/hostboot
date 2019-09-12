@@ -5575,6 +5575,100 @@ fapi_try_exit:
 #endif
 }
 
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_THERM_WSUB_CONTROL_REG_FORCE_SHIFT_SENSOR(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_THERM_WSUB_CONTROL_REG));
+#endif
+    return o_data.insertFromRight<AXON_EPS_THERM_WSUB_CONTROL_REG_FORCE_SHIFT_SENSOR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_THERM_WSUB_CONTROL_REG_FORCE_SHIFT_SENSOR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_THERM_WSUB_CONTROL_REG_FORCE_SHIFT_SENSOR(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_THERM_WSUB_CONTROL_REG));
+#endif
+    return o_data.insertFromRight<AXON_EPS_THERM_WSUB_CONTROL_REG_FORCE_SHIFT_SENSOR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_THERM_WSUB_CONTROL_REG_FORCE_SHIFT_SENSOR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_THERM_WSUB_CONTROL_REG_FORCE_SHIFT_SENSOR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_THERM_WSUB_CONTROL_REG));
+#endif
+    return o_data.setBit<AXON_EPS_THERM_WSUB_CONTROL_REG_FORCE_SHIFT_SENSOR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_THERM_WSUB_CONTROL_REG_FORCE_SHIFT_SENSOR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_AXON_EPS_THERM_WSUB_CONTROL_REG_FORCE_SHIFT_SENSOR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_THERM_WSUB_CONTROL_REG));
+#endif
+    return o_data.clearBit<AXON_EPS_THERM_WSUB_CONTROL_REG_FORCE_SHIFT_SENSOR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_THERM_WSUB_CONTROL_REG_FORCE_SHIFT_SENSOR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_AXON_EPS_THERM_WSUB_CONTROL_REG_FORCE_SHIFT_SENSOR(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_THERM_WSUB_CONTROL_REG));
+#endif
+    return i_data.extractToRight<AXON_EPS_THERM_WSUB_CONTROL_REG_FORCE_SHIFT_SENSOR,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_THERM_WSUB_CONTROL_REG_FORCE_SHIFT_SENSOR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_AXON_EPS_THERM_WSUB_CONTROL_REG_FORCE_SHIFT_SENSOR(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_THERM_WSUB_CONTROL_REG));
+#endif
+    return i_data.getBit<AXON_EPS_THERM_WSUB_CONTROL_REG_FORCE_SHIFT_SENSOR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_THERM_WSUB_CONTROL_REG_FORCE_SHIFT_SENSOR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_AXON_LOCAL_XSTOP_MASK_RW(const fapi2::Target<K, M, V>& i_target)
 {
@@ -7226,6 +7320,51 @@ fapi_try_exit:
 #endif
 }
 
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_SCAN64_SCAN64_REG(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_SCAN64));
+#endif
+    return o_data.insertFromRight<AXON_SCAN64_SCAN64_REG,
+           AXON_SCAN64_SCAN64_REG_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_SCAN64_SCAN64_REG chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_SCAN64_SCAN64_REG(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_SCAN64));
+#endif
+    return o_data.insertFromRight<AXON_SCAN64_SCAN64_REG,
+           AXON_SCAN64_SCAN64_REG_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_SCAN64_SCAN64_REG chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_AXON_SCAN64_SCAN64_REG(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_SCAN64));
+#endif
+    return i_data.extractToRight<AXON_SCAN64_SCAN64_REG,
+           AXON_SCAN64_SCAN64_REG_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_SCAN64_SCAN64_REG chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_AXON_SCAN_CAPTUREDR_LONG(const fapi2::Target<K, M, V>& i_target)
@@ -9560,6 +9699,57 @@ fapi_try_exit:
 }
 
 
+static inline fapi2::buffer<uint64_t>& SET_IOO_RX0_RXCTL_DATASM_REGS_RX_STAT11_PG_RX_SERVO_RESULT_QUEUE_RO_SIGNAL(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_RX0_RXCTL_DATASM_REGS_RX_STAT11_PG));
+#endif
+    return o_data.insertFromRight<IOO_RX0_RXCTL_DATASM_REGS_RX_STAT11_PG_RX_SERVO_RESULT_QUEUE_RO_SIGNAL,
+           IOO_RX0_RXCTL_DATASM_REGS_RX_STAT11_PG_RX_SERVO_RESULT_QUEUE_RO_SIGNAL_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_RX0_RXCTL_DATASM_REGS_RX_STAT11_PG_RX_SERVO_RESULT_QUEUE_RO_SIGNAL chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IOO_RX0_RXCTL_DATASM_REGS_RX_STAT11_PG_RX_SERVO_RESULT_QUEUE_RO_SIGNAL(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_RX0_RXCTL_DATASM_REGS_RX_STAT11_PG));
+#endif
+    return o_data.insertFromRight<IOO_RX0_RXCTL_DATASM_REGS_RX_STAT11_PG_RX_SERVO_RESULT_QUEUE_RO_SIGNAL,
+           IOO_RX0_RXCTL_DATASM_REGS_RX_STAT11_PG_RX_SERVO_RESULT_QUEUE_RO_SIGNAL_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_RX0_RXCTL_DATASM_REGS_RX_STAT11_PG_RX_SERVO_RESULT_QUEUE_RO_SIGNAL chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_IOO_RX0_RXCTL_DATASM_REGS_RX_STAT11_PG_RX_SERVO_RESULT_QUEUE_RO_SIGNAL(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_RX0_RXCTL_DATASM_REGS_RX_STAT11_PG));
+#endif
+    return i_data.extractToRight<IOO_RX0_RXCTL_DATASM_REGS_RX_STAT11_PG_RX_SERVO_RESULT_QUEUE_RO_SIGNAL,
+           IOO_RX0_RXCTL_DATASM_REGS_RX_STAT11_PG_RX_SERVO_RESULT_QUEUE_RO_SIGNAL_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_RX0_RXCTL_DATASM_REGS_RX_STAT11_PG_RX_SERVO_RESULT_QUEUE_RO_SIGNAL chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_IOO_RX0_RXCTL_DATASM_REGS_RX_STAT21_PG(const fapi2::Target<K, M, V>& i_target)
 {
@@ -9605,6 +9795,57 @@ fapi_try_exit:
 }
 
 
+static inline fapi2::buffer<uint64_t>& SET_IOO_RX0_RXCTL_DATASM_REGS_RX_STAT21_PG_RX_DL_PHY_RECAL_REQ_0_15_RO_SIGNAL(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_RX0_RXCTL_DATASM_REGS_RX_STAT21_PG));
+#endif
+    return o_data.insertFromRight<IOO_RX0_RXCTL_DATASM_REGS_RX_STAT21_PG_RX_DL_PHY_RECAL_REQ_0_15_RO_SIGNAL,
+           IOO_RX0_RXCTL_DATASM_REGS_RX_STAT21_PG_RX_DL_PHY_RECAL_REQ_0_15_RO_SIGNAL_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_RX0_RXCTL_DATASM_REGS_RX_STAT21_PG_RX_DL_PHY_RECAL_REQ_0_15_RO_SIGNAL chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IOO_RX0_RXCTL_DATASM_REGS_RX_STAT21_PG_RX_DL_PHY_RECAL_REQ_0_15_RO_SIGNAL(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_RX0_RXCTL_DATASM_REGS_RX_STAT21_PG));
+#endif
+    return o_data.insertFromRight<IOO_RX0_RXCTL_DATASM_REGS_RX_STAT21_PG_RX_DL_PHY_RECAL_REQ_0_15_RO_SIGNAL,
+           IOO_RX0_RXCTL_DATASM_REGS_RX_STAT21_PG_RX_DL_PHY_RECAL_REQ_0_15_RO_SIGNAL_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_RX0_RXCTL_DATASM_REGS_RX_STAT21_PG_RX_DL_PHY_RECAL_REQ_0_15_RO_SIGNAL chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_IOO_RX0_RXCTL_DATASM_REGS_RX_STAT21_PG_RX_DL_PHY_RECAL_REQ_0_15_RO_SIGNAL(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_RX0_RXCTL_DATASM_REGS_RX_STAT21_PG));
+#endif
+    return i_data.extractToRight<IOO_RX0_RXCTL_DATASM_REGS_RX_STAT21_PG_RX_DL_PHY_RECAL_REQ_0_15_RO_SIGNAL,
+           IOO_RX0_RXCTL_DATASM_REGS_RX_STAT21_PG_RX_DL_PHY_RECAL_REQ_0_15_RO_SIGNAL_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_RX0_RXCTL_DATASM_REGS_RX_STAT21_PG_RX_DL_PHY_RECAL_REQ_0_15_RO_SIGNAL chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_IOO_RX0_RXCTL_DATASM_REGS_RX_STAT4_PG(const fapi2::Target<K, M, V>& i_target)
 {
@@ -9649,6 +9890,57 @@ fapi_try_exit:
 #endif
 }
 
+
+static inline fapi2::buffer<uint64_t>& SET_IOO_RX0_RXCTL_DATASM_REGS_RX_STAT4_PG_RX_DATA_PIPE_MAIN_0_15_RO_SIGNAL(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_RX0_RXCTL_DATASM_REGS_RX_STAT4_PG));
+#endif
+    return o_data.insertFromRight<IOO_RX0_RXCTL_DATASM_REGS_RX_STAT4_PG_RX_DATA_PIPE_MAIN_0_15_RO_SIGNAL,
+           IOO_RX0_RXCTL_DATASM_REGS_RX_STAT4_PG_RX_DATA_PIPE_MAIN_0_15_RO_SIGNAL_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_RX0_RXCTL_DATASM_REGS_RX_STAT4_PG_RX_DATA_PIPE_MAIN_0_15_RO_SIGNAL chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IOO_RX0_RXCTL_DATASM_REGS_RX_STAT4_PG_RX_DATA_PIPE_MAIN_0_15_RO_SIGNAL(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_RX0_RXCTL_DATASM_REGS_RX_STAT4_PG));
+#endif
+    return o_data.insertFromRight<IOO_RX0_RXCTL_DATASM_REGS_RX_STAT4_PG_RX_DATA_PIPE_MAIN_0_15_RO_SIGNAL,
+           IOO_RX0_RXCTL_DATASM_REGS_RX_STAT4_PG_RX_DATA_PIPE_MAIN_0_15_RO_SIGNAL_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_RX0_RXCTL_DATASM_REGS_RX_STAT4_PG_RX_DATA_PIPE_MAIN_0_15_RO_SIGNAL chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_IOO_RX0_RXCTL_DATASM_REGS_RX_STAT4_PG_RX_DATA_PIPE_MAIN_0_15_RO_SIGNAL(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_RX0_RXCTL_DATASM_REGS_RX_STAT4_PG));
+#endif
+    return i_data.extractToRight<IOO_RX0_RXCTL_DATASM_REGS_RX_STAT4_PG_RX_DATA_PIPE_MAIN_0_15_RO_SIGNAL,
+           IOO_RX0_RXCTL_DATASM_REGS_RX_STAT4_PG_RX_DATA_PIPE_MAIN_0_15_RO_SIGNAL_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_RX0_RXCTL_DATASM_REGS_RX_STAT4_PG_RX_DATA_PIPE_MAIN_0_15_RO_SIGNAL chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_IOO_RX0_RXCTL_DATASM_1_PLREGS_RX_CNTL2_PL(const fapi2::Target<K, M, V>& i_target)

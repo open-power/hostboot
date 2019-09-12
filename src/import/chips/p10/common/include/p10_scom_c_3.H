@@ -41,21 +41,22 @@ namespace c
 
 static const uint64_t CPMS_CCDR = 0x200e0e74ull;
 
-static const uint32_t CPMS_CCDR_A_SCALE = 0;
-static const uint32_t CPMS_CCDR_A_SCALE_LEN = 4;
-static const uint32_t CPMS_CCDR_A_VALUE = 4;
-static const uint32_t CPMS_CCDR_A_VALUE_LEN = 16;
-static const uint32_t CPMS_CCDR_B_SCALE = 20;
-static const uint32_t CPMS_CCDR_B_SCALE_LEN = 4;
-static const uint32_t CPMS_CCDR_B_VALUE = 24;
-static const uint32_t CPMS_CCDR_B_VALUE_LEN = 16;
-static const uint32_t CPMS_CCDR_C_SCALE = 40;
-static const uint32_t CPMS_CCDR_C_SCALE_LEN = 4;
-static const uint32_t CPMS_CCDR_C_VALUE = 44;
-static const uint32_t CPMS_CCDR_C_VALUE_LEN = 16;
-static const uint32_t CPMS_CCDR_A_MOD = 60;
-static const uint32_t CPMS_CCDR_B_MOD = 61;
-static const uint32_t CPMS_CCDR_C_MOD = 62;
+static const uint32_t CPMS_CCDR_CHAR_COUNTA_SCALE = 0;
+static const uint32_t CPMS_CCDR_CHAR_COUNTA_SCALE_LEN = 4;
+static const uint32_t CPMS_CCDR_CHAR_COUNTA_VALUE = 4;
+static const uint32_t CPMS_CCDR_CHAR_COUNTA_VALUE_LEN = 16;
+static const uint32_t CPMS_CCDR_CHAR_COUNTB_SCALE = 20;
+static const uint32_t CPMS_CCDR_CHAR_COUNTB_SCALE_LEN = 4;
+static const uint32_t CPMS_CCDR_CHAR_COUNTB_VALUE = 24;
+static const uint32_t CPMS_CCDR_CHAR_COUNTB_VALUE_LEN = 16;
+static const uint32_t CPMS_CCDR_CHAR_COUNTC_SCALE = 40;
+static const uint32_t CPMS_CCDR_CHAR_COUNTC_SCALE_LEN = 4;
+static const uint32_t CPMS_CCDR_CHAR_COUNTC_VALUE = 44;
+static const uint32_t CPMS_CCDR_CHAR_COUNTC_VALUE_LEN = 16;
+static const uint32_t CPMS_CCDR_CHAR_COUNTA_MOD = 60;
+static const uint32_t CPMS_CCDR_CHAR_COUNTB_MOD = 61;
+static const uint32_t CPMS_CCDR_CHAR_COUNTC_MOD = 62;
+static const uint32_t CPMS_CCDR_SAMPLE_DISABLE_INDICATOR = 63;
 // c/reg00003.H
 
 static const uint64_t CPMS_CL2_PFETCNTL = 0x200e0e28ull;
@@ -149,6 +150,7 @@ static const uint32_t EC_LS_LSU_HOLD_OUT_REG9_RC5_STORE_DRAIN_PARITY_ERROR_HOLD_
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG9_DCACHE_DYNAM_SET_DELETED_HOLD_OUT = 10;
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG9_SETP_DYNAM_SET_DELETED_HOLD_OUT = 11;
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG9_EADIR_DYNAM_SET_DELETED_HOLD_OUT = 12;
+static const uint32_t EC_LS_LSU_HOLD_OUT_REG9_RADA_DYNAM_SET_DELETED_HOLD_OUT = 13;
 // c/reg00003.H
 
 static const uint64_t EC_PC_COMMON_SPR_V1_HMER_RW_WAND = 0x20020493ull;
@@ -270,6 +272,7 @@ static const uint32_t EC_PC_TRACE2_TR0_CONFIG_9_ERROR_CMP_PATTERN = 33;
 static const uint32_t EC_PC_TRACE2_TR0_CONFIG_9_TRIG0_ERR_CMP = 34;
 static const uint32_t EC_PC_TRACE2_TR0_CONFIG_9_TRIG1_ERR_CMP = 35;
 static const uint32_t EC_PC_TRACE2_TR0_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
+static const uint32_t EC_PC_TRACE2_TR0_CONFIG_9_SPARE_LT = 37;
 // c/reg00003.H
 
 static const uint64_t L2_L2MISC_L2CERRS_PRD_PURGE_CMD_REG = 0x2002000eull;

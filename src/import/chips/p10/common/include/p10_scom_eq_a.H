@@ -327,6 +327,7 @@ static const uint32_t L3TRA3_TR1_CONFIG_9_ERROR_CMP_PATTERN = 33;
 static const uint32_t L3TRA3_TR1_CONFIG_9_TRIG0_ERR_CMP = 34;
 static const uint32_t L3TRA3_TR1_CONFIG_9_TRIG1_ERR_CMP = 35;
 static const uint32_t L3TRA3_TR1_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
+static const uint32_t L3TRA3_TR1_CONFIG_9_SPARE_LT = 37;
 // eq/reg00010.H
 
 static const uint64_t QME_BCEBAR0 = 0x200e0060ull;

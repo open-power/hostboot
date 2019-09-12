@@ -72,6 +72,7 @@ static const uint32_t CPMS_DHDR_DDP_ACTIVE_LEN = 2;
 static const uint32_t CPMS_DHDR_CPMS_DDSR_STOP_STATE_ACTIVE = 60;
 static const uint32_t CPMS_DHDR_CPMS_DDSR_CORE_SAMPLE_DISABLED = 61;
 static const uint32_t CPMS_DHDR_STOP_STATE_OCCURRED = 62;
+static const uint32_t CPMS_DHDR_SAMPLE_DISABLE_OCCURRED = 63;
 // c/reg00011.H
 
 static const uint64_t CPMS_L3_PFETSTAT = 0x200e0e24ull;
@@ -104,6 +105,7 @@ static const uint32_t EC_LS_LSU_HOLD_OUT_REG2_1_SETP_PERR_HOLD_OUT_SET3 = 11;
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG2_1_SETP_PERR_HOLD_OUT_SET4 = 12;
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG2_1_SETP_PERR_HOLD_OUT_SET5 = 13;
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG2_1_SETP_PERR_HOLD_OUT_SET6 = 14;
+static const uint32_t EC_LS_LSU_HOLD_OUT_REG2_1_SETP_PERR_HOLD_OUT_SET7 = 15;
 // c/reg00011.H
 
 static const uint64_t EC_PC_COMMON_SPR_SPATTN_RW = 0x20020499ull;
@@ -209,6 +211,7 @@ static const uint32_t EC_PC_FIR_CORE_ACTION0_PC_SCOM_ERROR = 59;
 static const uint32_t EC_PC_FIR_CORE_ACTION0_PC_XSTOP_ON_DBG_TRIGGER_ERROR = 60;
 static const uint32_t EC_PC_FIR_CORE_ACTION0_PC_FW_INJ_REC_ERROR = 61;
 static const uint32_t EC_PC_FIR_CORE_ACTION0_PC_FW_INJ_XSTOP_ERROR = 62;
+static const uint32_t EC_PC_FIR_CORE_ACTION0_PC_PHYP_XSTOP_ERROR = 63;
 // c/reg00011.H
 
 static const uint64_t EC_PC_PMU_SPRCOR_SCOMC = 0x20020408ull;
@@ -270,6 +273,7 @@ static const uint32_t EC_PC_TRACE1_TR0_CONFIG_9_ERROR_CMP_PATTERN = 33;
 static const uint32_t EC_PC_TRACE1_TR0_CONFIG_9_TRIG0_ERR_CMP = 34;
 static const uint32_t EC_PC_TRACE1_TR0_CONFIG_9_TRIG1_ERR_CMP = 35;
 static const uint32_t EC_PC_TRACE1_TR0_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
+static const uint32_t EC_PC_TRACE1_TR0_CONFIG_9_SPARE_LT = 37;
 // c/reg00011.H
 
 static const uint64_t EC_PC_TRACE2_TR0_CONFIG_2 = 0x20020a85ull;
@@ -297,6 +301,7 @@ static const uint32_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT3_11 = 11;
 static const uint32_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT3_12 = 12;
 static const uint32_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT3_13 = 13;
 static const uint32_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT3_14 = 14;
+static const uint32_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT3_15 = 15;
 // c/reg00011.H
 
 static const uint64_t L2_L2MISC_L2CERRS_LINEDEL_TRIG_REG = 0x2002000dull;

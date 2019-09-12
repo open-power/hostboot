@@ -1175,6 +1175,56 @@ fapi_try_exit:
 }
 
 
+static inline fapi2::buffer<uint64_t>& SET_DATASM_REGS_RX_STAT6_PG_RX_SERVO_STATUS0_RO_SIGNAL(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DATASM_REGS_RX_STAT6_PG));
+#endif
+    return o_data.insertFromRight<DATASM_REGS_RX_STAT6_PG_RX_SERVO_STATUS0_RO_SIGNAL,
+           DATASM_REGS_RX_STAT6_PG_RX_SERVO_STATUS0_RO_SIGNAL_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DATASM_REGS_RX_STAT6_PG_RX_SERVO_STATUS0_RO_SIGNAL chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_DATASM_REGS_RX_STAT6_PG_RX_SERVO_STATUS0_RO_SIGNAL(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DATASM_REGS_RX_STAT6_PG));
+#endif
+    return o_data.insertFromRight<DATASM_REGS_RX_STAT6_PG_RX_SERVO_STATUS0_RO_SIGNAL,
+           DATASM_REGS_RX_STAT6_PG_RX_SERVO_STATUS0_RO_SIGNAL_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DATASM_REGS_RX_STAT6_PG_RX_SERVO_STATUS0_RO_SIGNAL chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_DATASM_REGS_RX_STAT6_PG_RX_SERVO_STATUS0_RO_SIGNAL(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DATASM_REGS_RX_STAT6_PG));
+#endif
+    return i_data.extractToRight<DATASM_REGS_RX_STAT6_PG_RX_SERVO_STATUS0_RO_SIGNAL,
+           DATASM_REGS_RX_STAT6_PG_RX_SERVO_STATUS0_RO_SIGNAL_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access DATASM_REGS_RX_STAT6_PG_RX_SERVO_STATUS0_RO_SIGNAL chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_MC_OMI_FIR_MASK_REG_RW(const fapi2::Target<K, M, V>& i_target)
 {
@@ -1763,6 +1813,57 @@ fapi_try_exit:
 #endif
 }
 
+
+static inline fapi2::buffer<uint64_t>& SET_TX_CTL_SM_REGS_CTLSM_STAT4_PG_TX_PSAVE_STS_PHY_0_15_RO_SIGNAL(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TX_CTL_SM_REGS_CTLSM_STAT4_PG));
+#endif
+    return o_data.insertFromRight<TX_CTL_SM_REGS_CTLSM_STAT4_PG_TX_PSAVE_STS_PHY_0_15_RO_SIGNAL,
+           TX_CTL_SM_REGS_CTLSM_STAT4_PG_TX_PSAVE_STS_PHY_0_15_RO_SIGNAL_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TX_CTL_SM_REGS_CTLSM_STAT4_PG_TX_PSAVE_STS_PHY_0_15_RO_SIGNAL chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TX_CTL_SM_REGS_CTLSM_STAT4_PG_TX_PSAVE_STS_PHY_0_15_RO_SIGNAL(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TX_CTL_SM_REGS_CTLSM_STAT4_PG));
+#endif
+    return o_data.insertFromRight<TX_CTL_SM_REGS_CTLSM_STAT4_PG_TX_PSAVE_STS_PHY_0_15_RO_SIGNAL,
+           TX_CTL_SM_REGS_CTLSM_STAT4_PG_TX_PSAVE_STS_PHY_0_15_RO_SIGNAL_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TX_CTL_SM_REGS_CTLSM_STAT4_PG_TX_PSAVE_STS_PHY_0_15_RO_SIGNAL chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TX_CTL_SM_REGS_CTLSM_STAT4_PG_TX_PSAVE_STS_PHY_0_15_RO_SIGNAL(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TX_CTL_SM_REGS_CTLSM_STAT4_PG));
+#endif
+    return i_data.extractToRight<TX_CTL_SM_REGS_CTLSM_STAT4_PG_TX_PSAVE_STS_PHY_0_15_RO_SIGNAL,
+           TX_CTL_SM_REGS_CTLSM_STAT4_PG_TX_PSAVE_STS_PHY_0_15_RO_SIGNAL_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TX_CTL_SM_REGS_CTLSM_STAT4_PG_TX_PSAVE_STS_PHY_0_15_RO_SIGNAL chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
 
 
 #ifndef __PPE_HCODE__

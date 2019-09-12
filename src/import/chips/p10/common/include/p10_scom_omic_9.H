@@ -40,9 +40,15 @@ namespace omic
 
 
 static const uint64_t DATASM_REGS_RX_STAT11_PG = 0x800ae04010012c3full;
+
+static const uint32_t DATASM_REGS_RX_STAT11_PG_RX_SERVO_RESULT_QUEUE_RO_SIGNAL = 48;
+static const uint32_t DATASM_REGS_RX_STAT11_PG_RX_SERVO_RESULT_QUEUE_RO_SIGNAL_LEN = 16;
 // omic/reg00009.H
 
 static const uint64_t DATASM_REGS_RX_STAT21_PG = 0x800b304010012c3full;
+
+static const uint32_t DATASM_REGS_RX_STAT21_PG_RX_DL_PHY_RECAL_REQ_0_15_RO_SIGNAL = 48;
+static const uint32_t DATASM_REGS_RX_STAT21_PG_RX_DL_PHY_RECAL_REQ_0_15_RO_SIGNAL_LEN = 16;
 // omic/reg00009.H
 
 static const uint64_t PMU_CNTR = 0x0c01174full;

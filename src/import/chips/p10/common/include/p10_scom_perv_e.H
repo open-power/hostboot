@@ -209,6 +209,9 @@ static const uint32_t FSXCOMP_FSXLOG_GPWRP_EN_OR_DIS_WRITE_PROTECTION_LEN = 16;
 static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_10_FSI = 0x0000284aull;
 static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_10_FSI_BYTE = 0x00002928ull;
 static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_10_RW = 0x0005004aull;
+
+static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_10_MDA_M1A_DATA_AREA_10 = 0;
+static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_10_MDA_M1A_DATA_AREA_10_LEN = 32;
 // perv/reg00028.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
@@ -216,6 +219,9 @@ static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_10_RW = 0x0005004aull;
 static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_7_FSI = 0x00002847ull;
 static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_7_FSI_BYTE = 0x0000291cull;
 static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_7_RW = 0x00050047ull;
+
+static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_7_MDA_M1A_DATA_AREA_7 = 0;
+static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_7_MDA_M1A_DATA_AREA_7_LEN = 32;
 // perv/reg00028.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
@@ -223,6 +229,9 @@ static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_7_RW = 0x00050047ull;
 static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_14_FSI = 0x000028ceull;
 static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_14_FSI_BYTE = 0x00002b38ull;
 static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_14_RW = 0x000500ceull;
+
+static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_14_MDA_M2A_DATA_AREA_14 = 0;
+static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_14_MDA_M2A_DATA_AREA_14_LEN = 32;
 // perv/reg00028.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
@@ -230,6 +239,9 @@ static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_14_RW = 0x000500ceull;
 static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_1_FSI = 0x00002901ull;
 static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_1_FSI_BYTE = 0x00002c04ull;
 static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_1_RW = 0x00050101ull;
+
+static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_1_MDA_M2B_DATA_AREA_1 = 0;
+static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_1_MDA_M2B_DATA_AREA_1_LEN = 32;
 // perv/reg00028.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
@@ -355,6 +367,9 @@ static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL2_CLEAR_ROOT_CTRL2_31_FREE_USAGE =
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_COPY_FSI = 0x00002915ull;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_COPY_FSI_BYTE = 0x00002c54ull;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_COPY_RW = 0x00050115ull;
+
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_COPY_ROOT_CTRL5_COPY_REG = 0;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_COPY_ROOT_CTRL5_COPY_REG_LEN = 32;
 // perv/reg00028.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
@@ -487,6 +502,7 @@ static const uint32_t L3TRA3_TR0_CONFIG_9_ERROR_CMP_PATTERN = 33;
 static const uint32_t L3TRA3_TR0_CONFIG_9_TRIG0_ERR_CMP = 34;
 static const uint32_t L3TRA3_TR0_CONFIG_9_TRIG1_ERR_CMP = 35;
 static const uint32_t L3TRA3_TR0_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
+static const uint32_t L3TRA3_TR0_CONFIG_9_SPARE_LT = 37;
 // perv/reg00028.H
 
 static const uint64_t L3TRA3_TR1_CONFIG_0 = 0x000182e3ull;
@@ -870,6 +886,7 @@ static const uint32_t TRA3_TR0_CONFIG_9_ERROR_CMP_PATTERN = 33;
 static const uint32_t TRA3_TR0_CONFIG_9_TRIG0_ERR_CMP = 34;
 static const uint32_t TRA3_TR0_CONFIG_9_TRIG1_ERR_CMP = 35;
 static const uint32_t TRA3_TR0_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
+static const uint32_t TRA3_TR0_CONFIG_9_SPARE_LT = 37;
 // perv/reg00029.H
 
 static const uint64_t TRA3_TR1_CONFIG_0 = 0x000105c3ull;
@@ -960,6 +977,7 @@ static const uint32_t TRA6_TR1_CONFIG_9_ERROR_CMP_PATTERN = 33;
 static const uint32_t TRA6_TR1_CONFIG_9_TRIG0_ERR_CMP = 34;
 static const uint32_t TRA6_TR1_CONFIG_9_TRIG1_ERR_CMP = 35;
 static const uint32_t TRA6_TR1_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
+static const uint32_t TRA6_TR1_CONFIG_9_SPARE_LT = 37;
 // perv/reg00029.H
 
 static const uint64_t XSTOP2 = 0x0003000dull;

@@ -148,6 +148,8 @@ static const uint32_t PB_PMU0_TLPM_COUNTER_1 = 16;
 static const uint32_t PB_PMU0_TLPM_COUNTER_1_LEN = 16;
 static const uint32_t PB_PMU0_TLPM_COUNTER_2 = 32;
 static const uint32_t PB_PMU0_TLPM_COUNTER_2_LEN = 16;
+static const uint32_t PB_PMU0_TLPM_COUNTER_3 = 48;
+static const uint32_t PB_PMU0_TLPM_COUNTER_3_LEN = 16;
 // pauc/reg00001.H
 
 static const uint64_t PHY_PPE_WRAP_MIB_XIICAC = 0x10012c19ull;
@@ -184,6 +186,8 @@ static const uint32_t PHY_PPE_WRAP_SCOM_FUNC_PPE_FUNC_SPARES_LEN = 13;
 // pauc/reg00001.H
 
 static const uint64_t RECOV_INTERRUPT_REG = 0x100f001bull;
+
+static const uint32_t RECOV_INTERRUPT_REG_RECOV = 0;
 // pauc/reg00001.H
 
 static const uint64_t SCAN32 = 0x10038000ull;
@@ -193,6 +197,9 @@ static const uint32_t SCAN32_SCAN32_REG_LEN = 32;
 // pauc/reg00001.H
 
 static const uint64_t SCAN64 = 0x1003e000ull;
+
+static const uint32_t SCAN64_SCAN64_REG = 0;
+static const uint32_t SCAN64_SCAN64_REG_LEN = 64;
 // pauc/reg00001.H
 
 static const uint64_t TRA0_TR0_TRACE_HI_DATA_REG = 0x10010400ull;

@@ -133,6 +133,7 @@ static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT3_59 = 11;
 static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT3_60 = 12;
 static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT3_61 = 13;
 static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT3_62 = 14;
+static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT3_63 = 15;
 // c/reg00006.H
 
 static const uint64_t EC_PC_COMMON_SPR_V0_HMER_RW_WAND = 0x20020492ull;

@@ -49,6 +49,8 @@ static const uint32_t ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
 // pauc/reg00011.H
 
 static const uint64_t ATTN_INTERRUPT_REG = 0x100f001aull;
+
+static const uint32_t ATTN_INTERRUPT_REG_ATTN = 0;
 // pauc/reg00011.H
 
 static const uint64_t DL_PPE_WRAP_XIRAMGA = 0x10012c52ull;

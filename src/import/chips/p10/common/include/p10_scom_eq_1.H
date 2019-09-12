@@ -60,6 +60,8 @@ static const uint32_t CLK_ADJ_00_DCADJ_WRAP_STATUS_BITS_COMP_CYCLE = 19;
 static const uint32_t CLK_ADJ_00_DCADJ_WRAP_STATUS_BITS_COMP_CYCLE_LEN = 3;
 static const uint32_t CLK_ADJ_00_DCADJ_WRAP_STATUS_BITS_INVERT_SENSE = 22;
 static const uint32_t CLK_ADJ_00_DCADJ_WRAP_STATUS_BITS_ADJUSTMENT_DIR = 23;
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_STATUS_BITS_DCC_CONFIG = 24;
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_STATUS_BITS_DCC_CONFIG_LEN = 8;
 // eq/reg00001.H
 
 static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_CACHE_OVERRIDE = 0x20018327ull;
@@ -107,6 +109,8 @@ static const uint32_t CLK_ADJ_02_DCADJ_WRAP_STATUS_BITS_COMP_CYCLE = 19;
 static const uint32_t CLK_ADJ_02_DCADJ_WRAP_STATUS_BITS_COMP_CYCLE_LEN = 3;
 static const uint32_t CLK_ADJ_02_DCADJ_WRAP_STATUS_BITS_INVERT_SENSE = 22;
 static const uint32_t CLK_ADJ_02_DCADJ_WRAP_STATUS_BITS_ADJUSTMENT_DIR = 23;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_STATUS_BITS_DCC_CONFIG = 24;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_STATUS_BITS_DCC_CONFIG_LEN = 8;
 // eq/reg00001.H
 
 static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_STICK_CACHE_SYNC_DONE = 0x20012333ull;
@@ -325,6 +329,8 @@ static const uint32_t QME_SCDR_ACT_STOP_LEVEL_C1 = 52;
 static const uint32_t QME_SCDR_ACT_STOP_LEVEL_C1_LEN = 4;
 static const uint32_t QME_SCDR_ACT_STOP_LEVEL_C2 = 56;
 static const uint32_t QME_SCDR_ACT_STOP_LEVEL_C2_LEN = 4;
+static const uint32_t QME_SCDR_ACT_STOP_LEVEL_C3 = 60;
+static const uint32_t QME_SCDR_ACT_STOP_LEVEL_C3_LEN = 4;
 // eq/reg00001.H
 
 static const uint64_t QME_SCOM_XIDBGPRO = 0x200e0214ull;
@@ -477,6 +483,8 @@ static const uint32_t QME_TBR_CYCLES_LEN = 32;
 // eq/reg00001.H
 
 static const uint64_t RECOV_INTERRUPT_REG = 0x200f001bull;
+
+static const uint32_t RECOV_INTERRUPT_REG_RECOV = 0;
 // eq/reg00001.H
 
 static const uint64_t SCAN32 = 0x20038000ull;
@@ -486,6 +494,9 @@ static const uint32_t SCAN32_SCAN32_REG_LEN = 32;
 // eq/reg00001.H
 
 static const uint64_t SCAN64 = 0x2003e000ull;
+
+static const uint32_t SCAN64_SCAN64_REG = 0;
+static const uint32_t SCAN64_SCAN64_REG_LEN = 64;
 // eq/reg00001.H
 
 #ifndef __PPE_HCODE__

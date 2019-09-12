@@ -292,6 +292,8 @@ static const uint32_t LOCAL_XSTOP_IN15 = 15;
 // eq/reg00003.H
 
 static const uint64_t LXSTOP_INTERRUPT_REG = 0x200f002aull;
+
+static const uint32_t LXSTOP_INTERRUPT_REG_LXSTOP = 0;
 // eq/reg00003.H
 
 static const uint64_t MULTICAST_GROUP_1 = 0x200f0001ull;
@@ -344,6 +346,9 @@ static const uint32_t PHASE_COUNTER_RESET_PHASECOUNTER_RESET = 0;
 // eq/reg00003.H
 
 static const uint64_t PLL_LOCK_REG = 0x200f0019ull;
+
+static const uint32_t PLL_LOCK_REG_LOCK = 0;
+static const uint32_t PLL_LOCK_REG_LOCK_LEN = 8;
 // eq/reg00003.H
 
 static const uint64_t QME_DB1 = 0x200e0104ull;

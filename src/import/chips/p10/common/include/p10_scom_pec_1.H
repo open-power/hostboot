@@ -131,6 +131,8 @@ static const uint32_t OPCG_CAPT3_12ODD_LEN = 5;
 // pec/reg00001.H
 
 static const uint64_t RECOV_INTERRUPT_REG = 0x080f001bull;
+
+static const uint32_t RECOV_INTERRUPT_REG_RECOV = 0;
 // pec/reg00001.H
 
 static const uint64_t SCAN32 = 0x08038000ull;
@@ -140,6 +142,9 @@ static const uint32_t SCAN32_SCAN32_REG_LEN = 32;
 // pec/reg00001.H
 
 static const uint64_t SCAN64 = 0x0803e000ull;
+
+static const uint32_t SCAN64_SCAN64_REG = 0;
+static const uint32_t SCAN64_SCAN64_REG_LEN = 64;
 // pec/reg00001.H
 
 static const uint64_t TRA0_TR0_TRACE_HI_DATA_REG = 0x08010400ull;

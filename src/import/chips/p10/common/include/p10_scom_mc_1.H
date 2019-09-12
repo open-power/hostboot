@@ -127,6 +127,7 @@ static const uint32_t MBA_SCOMFIR_MCBERRPTQ_WATMSKB1_PE_HOLD_OUT = 24;
 static const uint32_t MBA_SCOMFIR_MCBERRPTQ_WATPATA0_PE_HOLD_OUT = 25;
 static const uint32_t MBA_SCOMFIR_MCBERRPTQ_WATPATA1_PE_HOLD_OUT = 26;
 static const uint32_t MBA_SCOMFIR_MCBERRPTQ_WATPATB0_PE_HOLD_OUT = 27;
+static const uint32_t MBA_SCOMFIR_MCBERRPTQ_WATPATB1_PE_HOLD_OUT = 28;
 // mc/reg00001.H
 
 static const uint64_t MBA_SCOMFIR_MCEBUSEN0 = 0x0c010fa4ull;
@@ -170,6 +171,8 @@ static const uint32_t OPCG_CAPT3_12ODD_LEN = 5;
 // mc/reg00001.H
 
 static const uint64_t RECOV_INTERRUPT_REG = 0x0c0f001bull;
+
+static const uint32_t RECOV_INTERRUPT_REG_RECOV = 0;
 // mc/reg00001.H
 
 static const uint64_t SCAN32 = 0x0c038000ull;
@@ -179,6 +182,9 @@ static const uint32_t SCAN32_SCAN32_REG_LEN = 32;
 // mc/reg00001.H
 
 static const uint64_t SCAN64 = 0x0c03e000ull;
+
+static const uint32_t SCAN64_SCAN64_REG = 0;
+static const uint32_t SCAN64_SCAN64_REG_LEN = 64;
 // mc/reg00001.H
 
 static const uint64_t SCOMFIR_MCTO = 0x0c010c1bull;

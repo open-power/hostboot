@@ -127,6 +127,8 @@ static const uint64_t COMP_INTR_ERROR_STATUS_REG = 0x000f0034ull;
 
 static const uint32_t COMP_INTR_ERROR_STATUS_REG_IPOLL_ERR_MASKED = 0;
 static const uint32_t COMP_INTR_ERROR_STATUS_REG_IPOLL_ERR_MASKED_LEN = 6;
+static const uint32_t COMP_INTR_ERROR_STATUS_REG_FSI_ERR_MASKED = 6;
+static const uint32_t COMP_INTR_ERROR_STATUS_REG_FSI_ERR_MASKED_LEN = 6;
 // perv/reg00008.H
 
 static const uint64_t EPS_FIR_LOCAL_ACTION2 = 0x00040109ull;
@@ -218,6 +220,9 @@ static const uint32_t EPS_THERM_WSUB2_SKITTER_CLKSRC_REG_DELAY_SELECT_LEN = 2;
 static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_13_FSI = 0x0000284dull;
 static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_13_FSI_BYTE = 0x00002934ull;
 static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_13_RW = 0x0005004dull;
+
+static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_13_MDA_M1A_DATA_AREA_13 = 0;
+static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_13_MDA_M1A_DATA_AREA_13_LEN = 32;
 // perv/reg00008.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
@@ -225,6 +230,9 @@ static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_13_RW = 0x0005004dull;
 static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_4_FSI = 0x00002844ull;
 static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_4_FSI_BYTE = 0x00002910ull;
 static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_4_RW = 0x00050044ull;
+
+static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_4_MDA_M1A_DATA_AREA_4 = 0;
+static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_4_MDA_M1A_DATA_AREA_4_LEN = 32;
 // perv/reg00008.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
@@ -232,6 +240,9 @@ static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_4_RW = 0x00050044ull;
 static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_8_FSI = 0x000028c8ull;
 static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_8_FSI_BYTE = 0x00002b20ull;
 static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_8_RW = 0x000500c8ull;
+
+static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_8_MDA_M2A_DATA_AREA_8 = 0;
+static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_8_MDA_M2A_DATA_AREA_8_LEN = 32;
 // perv/reg00008.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
@@ -239,6 +250,9 @@ static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_8_RW = 0x000500c8ull;
 static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_2_FSI = 0x00002902ull;
 static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_2_FSI_BYTE = 0x00002c08ull;
 static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_2_RW = 0x00050102ull;
+
+static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_2_MDA_M2B_DATA_AREA_2 = 0;
+static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_2_MDA_M2B_DATA_AREA_2_LEN = 32;
 // perv/reg00008.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.

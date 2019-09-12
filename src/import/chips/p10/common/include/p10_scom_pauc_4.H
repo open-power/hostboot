@@ -194,6 +194,8 @@ static const uint32_t PB_TL_LINK_SYN_23_REG_3_SCOM_SYN1 = 40;
 static const uint32_t PB_TL_LINK_SYN_23_REG_3_SCOM_SYN1_LEN = 8;
 static const uint32_t PB_TL_LINK_SYN_23_REG_3_SCOM_SYN2 = 48;
 static const uint32_t PB_TL_LINK_SYN_23_REG_3_SCOM_SYN2_LEN = 8;
+static const uint32_t PB_TL_LINK_SYN_23_REG_3_SCOM_SYN3 = 56;
+static const uint32_t PB_TL_LINK_SYN_23_REG_3_SCOM_SYN3_LEN = 8;
 // pauc/reg00004.H
 
 static const uint64_t PCB_OPCG_GO = 0x10030020ull;

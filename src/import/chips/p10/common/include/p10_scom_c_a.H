@@ -56,6 +56,7 @@ static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT1_27 = 11;
 static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT1_28 = 12;
 static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT1_29 = 13;
 static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT1_30 = 14;
+static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT1_31 = 15;
 // c/reg00010.H
 
 static const uint64_t EC_PC_FIR_CORE_SYS = 0x2002044aull;
@@ -128,6 +129,7 @@ static const uint32_t EC_PC_FIR_CORE_WOF_PC_SCOM_ERROR = 59;
 static const uint32_t EC_PC_FIR_CORE_WOF_PC_XSTOP_ON_DBG_TRIGGER_ERROR = 60;
 static const uint32_t EC_PC_FIR_CORE_WOF_PC_FW_INJ_REC_ERROR = 61;
 static const uint32_t EC_PC_FIR_CORE_WOF_PC_FW_INJ_XSTOP_ERROR = 62;
+static const uint32_t EC_PC_FIR_CORE_WOF_PC_PHYP_XSTOP_ERROR = 63;
 // c/reg00010.H
 
 static const uint64_t EC_PC_FIR_RAM_STATUS = 0x20020450ull;
@@ -161,6 +163,8 @@ static const uint32_t EC_PC_PMC_UPDATE_PSSCR_VT2_SRR1_LEN = 3;
 static const uint32_t EC_PC_PMC_UPDATE_WRITE_VT3_PM_STATE = 56;
 static const uint32_t EC_PC_PMC_UPDATE_PSSCR_VT3_PLS = 57;
 static const uint32_t EC_PC_PMC_UPDATE_PSSCR_VT3_PLS_LEN = 4;
+static const uint32_t EC_PC_PMC_UPDATE_PSSCR_VT3_SRR1 = 61;
+static const uint32_t EC_PC_PMC_UPDATE_PSSCR_VT3_SRR1_LEN = 3;
 // c/reg00010.H
 
 static const uint64_t EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG = 0x20020a81ull;
@@ -231,6 +235,7 @@ static const uint32_t L2TRA_TR1_CONFIG_9_ERROR_CMP_PATTERN = 33;
 static const uint32_t L2TRA_TR1_CONFIG_9_TRIG0_ERR_CMP = 34;
 static const uint32_t L2TRA_TR1_CONFIG_9_TRIG1_ERR_CMP = 35;
 static const uint32_t L2TRA_TR1_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
+static const uint32_t L2TRA_TR1_CONFIG_9_SPARE_LT = 37;
 // c/reg00010.H
 
 static const uint64_t L3_MISC_L3CERRS_LRU_VIC_ALLOC_REG = 0x20010611ull;

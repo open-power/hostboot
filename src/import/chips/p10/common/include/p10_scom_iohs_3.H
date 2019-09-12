@@ -813,6 +813,9 @@ static const uint32_t IOO_RX0_1_RD_4_RX_BIT_REGS_MODE3_PL_TERM_LEN = 9;
 // iohs/reg00013.H
 
 static const uint64_t IOO_RX0_1_RD_4_RX_BIT_REGS_STAT5_PL = 0x8003b01010012c3full;
+
+static const uint32_t IOO_RX0_1_RD_4_RX_BIT_REGS_STAT5_PL_RX_ERROR_VEC_0_15_RO_SIGNAL = 48;
+static const uint32_t IOO_RX0_1_RD_4_RX_BIT_REGS_STAT5_PL_RX_ERROR_VEC_0_15_RO_SIGNAL_LEN = 16;
 // iohs/reg00013.H
 
 static const uint64_t IOO_RX0_1_RD_4_RX_DAC_REGS_LOFF_B_CNTLX62_PL = 0x8001f01010012c3full;
@@ -1069,6 +1072,9 @@ static const uint32_t IOO_RX0_2_RD_RX_BIT_REGS_MODE3_PL_TERM_LEN = 9;
 // iohs/reg00014.H
 
 static const uint64_t IOO_RX0_2_RD_RX_BIT_REGS_STAT5_PL = 0x8003b00c10012c3full;
+
+static const uint32_t IOO_RX0_2_RD_RX_BIT_REGS_STAT5_PL_RX_ERROR_VEC_0_15_RO_SIGNAL = 48;
+static const uint32_t IOO_RX0_2_RD_RX_BIT_REGS_STAT5_PL_RX_ERROR_VEC_0_15_RO_SIGNAL_LEN = 16;
 // iohs/reg00014.H
 
 static const uint64_t IOO_RX0_2_RD_RX_DAC_REGS_LOFF_B_CNTLX61_PL = 0x8001e80c10012c3full;
@@ -1336,6 +1342,7 @@ static const uint32_t IOO_TX0_0_DD_1_TX_BIT_REGS_STAT1_PL_TX_BIST_PRBS_ERR_DET_R
 static const uint32_t IOO_TX0_0_DD_1_TX_BIT_REGS_STAT1_PL_TX_BIST_PRBS_ACTIVITY_DET_RO_SIGNAL = 49;
 static const uint32_t IOO_TX0_0_DD_1_TX_BIT_REGS_STAT1_PL_TX_SEG_TEST_STATUS = 50;
 static const uint32_t IOO_TX0_0_DD_1_TX_BIT_REGS_STAT1_PL_TX_SEG_TEST_STATUS_LEN = 2;
+static const uint32_t IOO_TX0_0_DD_1_TX_BIT_REGS_STAT1_PL_TX_TDR_CAPT_VAL_RO_SIGNAL = 63;
 // iohs/reg00015.H
 
 static const uint64_t IOO_TX0_0_DD_2_TX_BIT_REGS_CNTL14_PL = 0x80049c0210012c3full;
@@ -1438,6 +1445,9 @@ static const uint32_t IOO_TX0_1_DD_0_TX_BIT_REGS_FIR_PL_TX_PL_FIR_ERRS_RO_SIGNAL
 // iohs/reg00015.H
 
 static const uint64_t IOO_TX0_1_DD_0_TX_BIT_REGS_STAT2_PL = 0x80052c0610012c3full;
+
+static const uint32_t IOO_TX0_1_DD_0_TX_BIT_REGS_STAT2_PL_TX_DCC_OUT_VEC_RO_SIGNAL = 48;
+static const uint32_t IOO_TX0_1_DD_0_TX_BIT_REGS_STAT2_PL_TX_DCC_OUT_VEC_RO_SIGNAL_LEN = 16;
 // iohs/reg00015.H
 
 static const uint64_t IOO_TX0_1_DD_TX_BIT_REGS_CNTL23_PL = 0x8004e40710012c3full;
@@ -1621,6 +1631,8 @@ static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_MODE2_PL_FIFO_HOLD = 61;
 // iohs/reg00015.H
 
 static const uint64_t LXSTOP_INTERRUPT_REG = 0x180f002aull;
+
+static const uint32_t LXSTOP_INTERRUPT_REG_LXSTOP = 0;
 // iohs/reg00015.H
 
 static const uint64_t MULTICAST_GROUP_1 = 0x180f0001ull;
@@ -1668,6 +1680,9 @@ static const uint32_t NET_CTRL0_PLLFORCE_OUT_EN = 31;
 // iohs/reg00015.H
 
 static const uint64_t PLL_LOCK_REG = 0x180f0019ull;
+
+static const uint32_t PLL_LOCK_REG_LOCK = 0;
+static const uint32_t PLL_LOCK_REG_LOCK_LEN = 8;
 // iohs/reg00015.H
 
 static const uint64_t REGS_PRX0_DLR_APSR = 0x18011039ull;

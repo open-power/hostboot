@@ -229,6 +229,9 @@ static const uint32_t SCOMFIR_MCLFSR_SERVED_2_4_LEN = 3;
 // mc/reg00015.H
 
 static const uint64_t TIMEOUT_REG = 0x0c0f0010ull;
+
+static const uint32_t TIMEOUT_REG_INT_TIMEOUT = 0;
+static const uint32_t TIMEOUT_REG_INT_TIMEOUT_LEN = 2;
 // mc/reg00015.H
 
 static const uint64_t TRA0_TR0_CONFIG_1 = 0x0c010404ull;

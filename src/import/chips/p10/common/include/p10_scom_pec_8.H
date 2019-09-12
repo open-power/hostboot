@@ -45,6 +45,7 @@ static const uint32_t ASSIST_INTERRUPT_REG_ATTN = 0;
 static const uint32_t ASSIST_INTERRUPT_REG_RECOV = 1;
 static const uint32_t ASSIST_INTERRUPT_REG_XSTOP = 2;
 static const uint32_t ASSIST_INTERRUPT_REG_LXSTOP = 3;
+static const uint32_t ASSIST_INTERRUPT_REG_TYPE4 = 4;
 // pec/reg00008.H
 
 static const uint64_t EDRAM_STATUS = 0x080f0029ull;

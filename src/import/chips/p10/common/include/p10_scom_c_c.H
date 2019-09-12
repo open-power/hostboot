@@ -95,6 +95,7 @@ static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT0_11 = 11;
 static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT0_12 = 12;
 static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT0_13 = 13;
 static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT0_14 = 14;
+static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT0_15 = 15;
 // c/reg00012.H
 
 static const uint64_t EC_PC_COMMON_SPR_SCOMC = 0x20020480ull;

@@ -154,30 +154,32 @@ static const uint64_t NET_CTRL1_RW = 0x100f0044ull;
 static const uint64_t NET_CTRL1_RW_WAND = 0x100f0045ull;
 static const uint64_t NET_CTRL1_RW_WOR = 0x100f0046ull;
 
-static const uint32_t NET_CTRL1_ACHE0_CLK_DCC_BYPASS = 0;
-static const uint32_t NET_CTRL1_ACHE1_CLK_DCC_BYPASS = 1;
-static const uint32_t NET_CTRL1_ACHE2_CLK_DCC_BYPASS = 2;
-static const uint32_t NET_CTRL1_ACHE3_CLK_DCC_BYPASS = 3;
-static const uint32_t NET_CTRL1_ORE0_CLK_DCC_BYPASS = 4;
-static const uint32_t NET_CTRL1_ORE1_CLK_DCC_BYPASS = 5;
-static const uint32_t NET_CTRL1_ORE2_CLK_DCC_BYPASS = 6;
-static const uint32_t NET_CTRL1_ORE3_CLK_DCC_BYPASS = 7;
-static const uint32_t NET_CTRL1_ACHE0_CLK_PDLY_BYPASS = 8;
-static const uint32_t NET_CTRL1_ACHE1_CLK_PDLY_BYPASS = 9;
-static const uint32_t NET_CTRL1_ACHE2_CLK_PDLY_BYPASS = 10;
-static const uint32_t NET_CTRL1_ACHE3_CLK_PDLY_BYPASS = 11;
-static const uint32_t NET_CTRL1_ORE0_CLK_PDLY_BYPASS = 12;
-static const uint32_t NET_CTRL1_ORE1_CLK_PDLY_BYPASS = 13;
-static const uint32_t NET_CTRL1_ORE2_CLK_PDLY_BYPASS = 14;
-static const uint32_t NET_CTRL1_ORE3_CLK_PDLY_BYPASS = 15;
-static const uint32_t NET_CTRL1_ACHE0_CLK_SKEWADJUST_RESET_DC = 16;
-static const uint32_t NET_CTRL1_ACHE1_CLK_SKEWADJUST_RESET_DC = 17;
-static const uint32_t NET_CTRL1_ACHE2_CLK_SKEWADJUST_RESET_DC = 18;
-static const uint32_t NET_CTRL1_ACHE3_CLK_SKEWADJUST_RESET_DC = 19;
-static const uint32_t NET_CTRL1_ORE0_CLK_DCADJUST_RESET_DC = 20;
-static const uint32_t NET_CTRL1_ORE1_CLK_DCADJUST_RESET_DC = 21;
-static const uint32_t NET_CTRL1_ORE2_CLK_DCADJUST_RESET_DC = 22;
-static const uint32_t NET_CTRL1_ORE3_CLK_DCADJUST_RESET_DC = 23;
+static const uint32_t NET_CTRL1_CACHE0_CLK_DCC_BYPASS = 0;
+static const uint32_t NET_CTRL1_CACHE1_CLK_DCC_BYPASS = 1;
+static const uint32_t NET_CTRL1_CACHE2_CLK_DCC_BYPASS = 2;
+static const uint32_t NET_CTRL1_CACHE3_CLK_DCC_BYPASS = 3;
+static const uint32_t NET_CTRL1_CORE0_CLK_DCC_BYPASS = 4;
+static const uint32_t NET_CTRL1_CORE1_CLK_DCC_BYPASS = 5;
+static const uint32_t NET_CTRL1_CORE2_CLK_DCC_BYPASS = 6;
+static const uint32_t NET_CTRL1_CORE3_CLK_DCC_BYPASS = 7;
+static const uint32_t NET_CTRL1_CACHE0_CLK_PDLY_BYPASS = 8;
+static const uint32_t NET_CTRL1_CACHE1_CLK_PDLY_BYPASS = 9;
+static const uint32_t NET_CTRL1_CACHE2_CLK_PDLY_BYPASS = 10;
+static const uint32_t NET_CTRL1_CACHE3_CLK_PDLY_BYPASS = 11;
+static const uint32_t NET_CTRL1_CORE0_CLK_PDLY_BYPASS = 12;
+static const uint32_t NET_CTRL1_CORE1_CLK_PDLY_BYPASS = 13;
+static const uint32_t NET_CTRL1_CORE2_CLK_PDLY_BYPASS = 14;
+static const uint32_t NET_CTRL1_CORE3_CLK_PDLY_BYPASS = 15;
+static const uint32_t NET_CTRL1_CACHE0_CLK_SKEWADJUST_RESET_DC = 16;
+static const uint32_t NET_CTRL1_CACHE1_CLK_SKEWADJUST_RESET_DC = 17;
+static const uint32_t NET_CTRL1_CACHE2_CLK_SKEWADJUST_RESET_DC = 18;
+static const uint32_t NET_CTRL1_CACHE3_CLK_SKEWADJUST_RESET_DC = 19;
+static const uint32_t NET_CTRL1_CORE0_CLK_DCADJUST_RESET_DC = 20;
+static const uint32_t NET_CTRL1_CORE1_CLK_DCADJUST_RESET_DC = 21;
+static const uint32_t NET_CTRL1_CORE2_CLK_DCADJUST_RESET_DC = 22;
+static const uint32_t NET_CTRL1_CORE3_CLK_DCADJUST_RESET_DC = 23;
+static const uint32_t NET_CTRL1_PCB_ACCESS = 24;
+static const uint32_t NET_CTRL1_PCB_ACCESS_LEN = 8;
 // pauc/reg00005.H
 
 static const uint64_t PB_CNPM_PMU_PRESCALER = 0x10011820ull;
@@ -301,6 +303,7 @@ static const uint32_t PB_DOB01_DIB01_INT_ERR_REG_IB01_VC1_OVERFLOW = 47;
 static const uint32_t PB_DOB01_DIB01_INT_ERR_REG_OB01_F0VC0_OVER_UNDERFLOW = 48;
 static const uint32_t PB_DOB01_DIB01_INT_ERR_REG_OB01_F0VC1_OVER_UNDERFLOW = 49;
 static const uint32_t PB_DOB01_DIB01_INT_ERR_REG_OB01_F1VC0_OVER_UNDERFLOW = 50;
+static const uint32_t PB_DOB01_DIB01_INT_ERR_REG_OB01_F1VC1_OVER_UNDERFLOW = 51;
 // pauc/reg00005.H
 
 static const uint64_t PB_MAILBOX_30_REG = 0x10011836ull;
@@ -317,6 +320,8 @@ static const uint32_t PB_PMU1_CNPM_COUNTER_1 = 16;
 static const uint32_t PB_PMU1_CNPM_COUNTER_1_LEN = 16;
 static const uint32_t PB_PMU1_CNPM_COUNTER_2 = 32;
 static const uint32_t PB_PMU1_CNPM_COUNTER_2_LEN = 16;
+static const uint32_t PB_PMU1_CNPM_COUNTER_3 = 48;
+static const uint32_t PB_PMU1_CNPM_COUNTER_3_LEN = 16;
 // pauc/reg00005.H
 
 static const uint64_t PB_PSAVE23_MODE_CFG = 0x10011816ull;
@@ -352,6 +357,7 @@ static const uint32_t PB_TL_LINK_ERR_INJECT_REG_BIT_23 = 3;
 static const uint32_t PB_TL_LINK_ERR_INJECT_REG_LINK_0_EVN = 4;
 static const uint32_t PB_TL_LINK_ERR_INJECT_REG_LINK_0_ODD = 5;
 static const uint32_t PB_TL_LINK_ERR_INJECT_REG_LINK_1_EVN = 6;
+static const uint32_t PB_TL_LINK_ERR_INJECT_REG_LINK_1_ODD = 7;
 // pauc/reg00005.H
 
 static const uint64_t SCAN_LONG_ROTATE = 0x10039000ull;

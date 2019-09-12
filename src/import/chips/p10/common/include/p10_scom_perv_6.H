@@ -319,6 +319,9 @@ static const uint32_t FIRST_REPLY_REG_ISTER_LEN = 6;
 static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_6_FSI = 0x00002886ull;
 static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_6_FSI_BYTE = 0x00002a18ull;
 static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_6_RW = 0x00050086ull;
+
+static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_6_MDA_M1B_DATA_AREA_6 = 0;
+static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_6_MDA_M1B_DATA_AREA_6_LEN = 32;
 // perv/reg00012.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
@@ -326,6 +329,9 @@ static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_6_RW = 0x00050086ull;
 static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_0_FSI = 0x000028c0ull;
 static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_0_FSI_BYTE = 0x00002b00ull;
 static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_0_RW = 0x000500c0ull;
+
+static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_0_MDA_M2A_DATA_AREA_0 = 0;
+static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_0_MDA_M2A_DATA_AREA_0_LEN = 32;
 // perv/reg00012.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
@@ -333,6 +339,9 @@ static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_0_RW = 0x000500c0ull;
 static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_13_FSI = 0x0000290dull;
 static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_13_FSI_BYTE = 0x00002c34ull;
 static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_13_RW = 0x0005010dull;
+
+static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_13_MDA_M2B_DATA_AREA_13 = 0;
+static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_13_MDA_M2B_DATA_AREA_13_LEN = 32;
 // perv/reg00012.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
@@ -370,6 +379,9 @@ static const uint32_t FSXCOMP_FSXLOG_RCS_EL1_RCS_EVENTLOG_1_LEN = 32;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL2_COPY_FSI = 0x00002912ull;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL2_COPY_FSI_BYTE = 0x00002c48ull;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL2_COPY_RW = 0x00050112ull;
+
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL2_COPY_ROOT_CTRL2_COPY_REG = 0;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL2_COPY_ROOT_CTRL2_COPY_REG_LEN = 32;
 // perv/reg00012.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.

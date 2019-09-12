@@ -215,6 +215,7 @@ static const uint32_t L3TRA1_TR0_CONFIG_9_ERROR_CMP_PATTERN = 33;
 static const uint32_t L3TRA1_TR0_CONFIG_9_TRIG0_ERR_CMP = 34;
 static const uint32_t L3TRA1_TR0_CONFIG_9_TRIG1_ERR_CMP = 35;
 static const uint32_t L3TRA1_TR0_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
+static const uint32_t L3TRA1_TR0_CONFIG_9_SPARE_LT = 37;
 // eq/reg00012.H
 
 static const uint64_t L3TRA1_TR1_CONFIG_0 = 0x20018263ull;
@@ -305,6 +306,8 @@ static const uint32_t QME_PTSR_5_DATA = 40;
 static const uint32_t QME_PTSR_5_DATA_LEN = 8;
 static const uint32_t QME_PTSR_6_DATA = 48;
 static const uint32_t QME_PTSR_6_DATA_LEN = 8;
+static const uint32_t QME_PTSR_7_DATA = 56;
+static const uint32_t QME_PTSR_7_DATA_LEN = 8;
 // eq/reg00012.H
 
 static const uint64_t QME_RCIMR = 0x200e018cull;
@@ -357,35 +360,39 @@ static const uint32_t QME_SCOM_PBTXTR0_7_LEN = 4;
 
 static const uint64_t QME_SCOM_XIRAMDBG = 0x200e020cull;
 
-static const uint32_t QME_SCOM_XIRAMDBG_HS = 0;
-static const uint32_t QME_SCOM_XIRAMDBG_HC = 1;
-static const uint32_t QME_SCOM_XIRAMDBG_HC_LEN = 3;
-static const uint32_t QME_SCOM_XIRAMDBG_HCP = 4;
-static const uint32_t QME_SCOM_XIRAMDBG_RIP = 5;
-static const uint32_t QME_SCOM_XIRAMDBG_SIP = 6;
-static const uint32_t QME_SCOM_XIRAMDBG_TRAP = 7;
-static const uint32_t QME_SCOM_XIRAMDBG_IAC = 8;
-static const uint32_t QME_SCOM_XIRAMDBG_SIB = 9;
-static const uint32_t QME_SCOM_XIRAMDBG_SIB_LEN = 3;
-static const uint32_t QME_SCOM_XIRAMDBG_RDAC = 12;
-static const uint32_t QME_SCOM_XIRAMDBG_WDAC = 13;
-static const uint32_t QME_SCOM_XIRAMDBG_WS = 14;
-static const uint32_t QME_SCOM_XIRAMDBG_TRH = 15;
-static const uint32_t QME_SCOM_XIRAMDBG_SMS = 16;
-static const uint32_t QME_SCOM_XIRAMDBG_SMS_LEN = 4;
-static const uint32_t QME_SCOM_XIRAMDBG_LP = 20;
-static const uint32_t QME_SCOM_XIRAMDBG_EP = 21;
-static const uint32_t QME_SCOM_XIRAMDBG_PTR = 24;
-static const uint32_t QME_SCOM_XIRAMDBG_ST = 25;
-static const uint32_t QME_SCOM_XIRAMDBG_MFE = 28;
-static const uint32_t QME_SCOM_XIRAMDBG_MCS = 29;
-static const uint32_t QME_SCOM_XIRAMDBG_MCS_LEN = 3;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_HS = 0;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_HC = 1;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_HC_LEN = 3;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_HCP = 4;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_RIP = 5;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_SIP = 6;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_TRAP = 7;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_IAC = 8;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_SIB = 9;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_SIB_LEN = 3;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_RDAC = 12;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_WDAC = 13;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_WS = 14;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_TRH = 15;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_SMS = 16;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_SMS_LEN = 4;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_LP = 20;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_EP = 21;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_PTR = 24;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_ST = 25;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_MFE = 28;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_MCS = 29;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_MCS_LEN = 3;
+static const uint32_t QME_SCOM_XIRAMDBG_SPRG0 = 32;
+static const uint32_t QME_SCOM_XIRAMDBG_SPRG0_LEN = 32;
 // eq/reg00012.H
 
 static const uint64_t QME_SCOM_XIRAMGA = 0x200e0208ull;
 
 static const uint32_t QME_SCOM_XIRAMGA_QME_SCOM_XIRAMEDR_IR = 0;
 static const uint32_t QME_SCOM_XIRAMGA_QME_SCOM_XIRAMEDR_IR_LEN = 32;
+static const uint32_t QME_SCOM_XIRAMGA_SPRG0 = 32;
+static const uint32_t QME_SCOM_XIRAMGA_SPRG0_LEN = 32;
 // eq/reg00012.H
 
 static const uint64_t QME_SCOM_XISIB = 0x200e0218ull;
@@ -403,9 +410,14 @@ static const uint32_t QME_SCOM_XISIB_DATAOP_PENDING = 63;
 // eq/reg00012.H
 
 static const uint64_t SCAN64CONTSCAN = 0x2003f000ull;
+
+static const uint32_t SCAN64CONTSCAN_SCAN64CONTSCAN_REG = 0;
+static const uint32_t SCAN64CONTSCAN_SCAN64CONTSCAN_REG_LEN = 64;
 // eq/reg00012.H
 
 static const uint64_t XSTOP_INTERRUPT_REG = 0x200f001cull;
+
+static const uint32_t XSTOP_INTERRUPT_REG_XSTOP = 0;
 // eq/reg00012.H
 
 #ifndef __PPE_HCODE__

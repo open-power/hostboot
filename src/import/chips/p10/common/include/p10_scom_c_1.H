@@ -67,6 +67,7 @@ static const uint32_t EC_LS_LSU_HOLD_OUT_REG1_11 = 11;
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG1_12 = 12;
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG1_13 = 13;
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG1_14 = 14;
+static const uint32_t EC_LS_LSU_HOLD_OUT_REG1_15 = 15;
 // c/reg00001.H
 
 static const uint64_t EC_PC_COMMON_SPR_SPATTN_MASK = 0x2002049aull;
@@ -133,6 +134,7 @@ static const uint32_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT0_SDCA_RCOV_HOLD_OUT = 11;
 static const uint32_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT0_SDCU_RAM_XSTOP_HOLD_OUT = 12;
 static const uint32_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT0_SDCU_XSTOP_HOLD_OUT = 13;
 static const uint32_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT0_SDQ_DISP_HOLD_OUT = 14;
+static const uint32_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT0_SDQ_ISSMUX_HOLD_OUT = 15;
 // c/reg00001.H
 
 static const uint64_t L2TRA_TR1_CONFIG = 0x20020082ull;

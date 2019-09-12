@@ -227,6 +227,8 @@ static const uint32_t QME_DUCR_FDCR_CAL_ADJUST_C3 = 38;
 static const uint32_t QME_DUCR_FDCR_CAL_ADJUST_C3_LEN = 2;
 static const uint32_t QME_DUCR_CORE_UPDATE_ENABLE = 40;
 static const uint32_t QME_DUCR_CORE_UPDATE_ENABLE_LEN = 4;
+static const uint32_t QME_DUCR_RESERVED_44_63 = 44;
+static const uint32_t QME_DUCR_RESERVED_44_63_LEN = 20;
 // eq/reg00002.H
 
 static const uint64_t QME_EISR_RW = 0x200e0260ull;

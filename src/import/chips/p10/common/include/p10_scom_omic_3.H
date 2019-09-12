@@ -98,6 +98,9 @@ static const uint32_t DATASM_REGS_RX_STAT28_PG_RX_QPA_VOTE_DIFF_RO_SIGNAL_LEN = 
 // omic/reg00003.H
 
 static const uint64_t DATASM_REGS_RX_STAT6_PG = 0x800ab84010012c3full;
+
+static const uint32_t DATASM_REGS_RX_STAT6_PG_RX_SERVO_STATUS0_RO_SIGNAL = 48;
+static const uint32_t DATASM_REGS_RX_STAT6_PG_RX_SERVO_STATUS0_RO_SIGNAL_LEN = 16;
 // omic/reg00003.H
 
 static const uint64_t MC_OMI_FIR_MASK_REG_RW = 0x0c011743ull;
@@ -126,6 +129,9 @@ static const uint32_t TX_CTL_SM_REGS_CTLSM_CNTL4_PG_TX_PSAVE_FENCE_STS_IO_DL_16_
 // omic/reg00003.H
 
 static const uint64_t TX_CTL_SM_REGS_CTLSM_STAT4_PG = 0x800d5c4010012c3full;
+
+static const uint32_t TX_CTL_SM_REGS_CTLSM_STAT4_PG_TX_PSAVE_STS_PHY_0_15_RO_SIGNAL = 48;
+static const uint32_t TX_CTL_SM_REGS_CTLSM_STAT4_PG_TX_PSAVE_STS_PHY_0_15_RO_SIGNAL_LEN = 16;
 // omic/reg00003.H
 
 #ifndef __PPE_HCODE__

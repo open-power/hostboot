@@ -60,6 +60,8 @@ static const uint32_t CLK_ADJ_00_DCADJ_WRAP_STATUS_BITS_COMP_CYCLE = 19;
 static const uint32_t CLK_ADJ_00_DCADJ_WRAP_STATUS_BITS_COMP_CYCLE_LEN = 3;
 static const uint32_t CLK_ADJ_00_DCADJ_WRAP_STATUS_BITS_INVERT_SENSE = 22;
 static const uint32_t CLK_ADJ_00_DCADJ_WRAP_STATUS_BITS_ADJUSTMENT_DIR = 23;
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_STATUS_BITS_DCC_CONFIG = 24;
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_STATUS_BITS_DCC_CONFIG_LEN = 8;
 // perv/reg00002.H
 
 static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_CACHE_OVERRIDE = 0x00018327ull;
@@ -107,6 +109,8 @@ static const uint32_t CLK_ADJ_02_DCADJ_WRAP_STATUS_BITS_COMP_CYCLE = 19;
 static const uint32_t CLK_ADJ_02_DCADJ_WRAP_STATUS_BITS_COMP_CYCLE_LEN = 3;
 static const uint32_t CLK_ADJ_02_DCADJ_WRAP_STATUS_BITS_INVERT_SENSE = 22;
 static const uint32_t CLK_ADJ_02_DCADJ_WRAP_STATUS_BITS_ADJUSTMENT_DIR = 23;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_STATUS_BITS_DCC_CONFIG = 24;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_STATUS_BITS_DCC_CONFIG_LEN = 8;
 // perv/reg00002.H
 
 static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_STICK_CACHE_SYNC_DONE = 0x00012333ull;
@@ -246,6 +250,9 @@ static const uint64_t EPS_THERM_WSUB2_SKITTER_DATA1 = 0x0005003aull;
 static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI = 0x0000284full;
 static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI_BYTE = 0x0000293cull;
 static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_15_RW = 0x0005004full;
+
+static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_15_MDA_M1A_DATA_AREA_15 = 0;
+static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_15_MDA_M1A_DATA_AREA_15_LEN = 32;
 // perv/reg00002.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
@@ -253,6 +260,9 @@ static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_15_RW = 0x0005004full;
 static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_2_FSI = 0x00002842ull;
 static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_2_FSI_BYTE = 0x00002908ull;
 static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_2_RW = 0x00050042ull;
+
+static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_2_MDA_M1A_DATA_AREA_2 = 0;
+static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_2_MDA_M1A_DATA_AREA_2_LEN = 32;
 // perv/reg00002.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
@@ -260,6 +270,9 @@ static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_2_RW = 0x00050042ull;
 static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_8_FSI = 0x00002888ull;
 static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_8_FSI_BYTE = 0x00002a20ull;
 static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_8_RW = 0x00050088ull;
+
+static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_8_MDA_M1B_DATA_AREA_8 = 0;
+static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_8_MDA_M1B_DATA_AREA_8_LEN = 32;
 // perv/reg00002.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
@@ -267,6 +280,9 @@ static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_8_RW = 0x00050088ull;
 static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_11_FSI = 0x000028cbull;
 static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_11_FSI_BYTE = 0x00002b2cull;
 static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_11_RW = 0x000500cbull;
+
+static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_11_MDA_M2A_DATA_AREA_11 = 0;
+static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_11_MDA_M2A_DATA_AREA_11_LEN = 32;
 // perv/reg00002.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
@@ -274,6 +290,9 @@ static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_11_RW = 0x000500cbull;
 static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_4_FSI = 0x00002904ull;
 static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_4_FSI_BYTE = 0x00002c10ull;
 static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_4_RW = 0x00050104ull;
+
+static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_4_MDA_M2B_DATA_AREA_4 = 0;
+static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_4_MDA_M2B_DATA_AREA_4_LEN = 32;
 // perv/reg00002.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
@@ -418,6 +437,8 @@ static const uint32_t OTPC_M_MEASURE_REG2_SEEPROM_MEASUREMENT2_DATA_LEN = 64;
 // perv/reg00002.H
 
 static const uint64_t RECOV_INTERRUPT_REG = 0x000f001bull;
+
+static const uint32_t RECOV_INTERRUPT_REG_RECOV = 0;
 // perv/reg00002.H
 
 static const uint64_t REC_ERR_MST4_REG1 = 0x000f0051ull;
@@ -479,6 +500,9 @@ static const uint32_t SCAN32_SCAN32_REG_LEN = 32;
 // perv/reg00002.H
 
 static const uint64_t SCAN64 = 0x0003e000ull;
+
+static const uint32_t SCAN64_SCAN64_REG = 0;
+static const uint32_t SCAN64_SCAN64_REG_LEN = 64;
 // perv/reg00002.H
 
 static const uint64_t SINGLE_OTP_ROM_OTPROM_REG1 = 0x00018001ull;

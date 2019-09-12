@@ -134,6 +134,8 @@ static const uint32_t LOCAL_XSTOP_IN15 = 15;
 // pauc/reg00003.H
 
 static const uint64_t LXSTOP_INTERRUPT_REG = 0x100f002aull;
+
+static const uint32_t LXSTOP_INTERRUPT_REG_LXSTOP = 0;
 // pauc/reg00003.H
 
 static const uint64_t MULTICAST_GROUP_1 = 0x100f0001ull;
@@ -297,6 +299,7 @@ static const uint32_t PB_FM0123_ERR_3_TTAG_PERR = 59;
 static const uint32_t PB_FM0123_ERR_3_VC0_CREDITERR = 60;
 static const uint32_t PB_FM0123_ERR_3_VC1_CREDITERR = 61;
 static const uint32_t PB_FM0123_ERR_3_RTAG_PTYERR = 62;
+static const uint32_t PB_FM0123_ERR_3_RTAG_MISC_PTY = 63;
 // pauc/reg00003.H
 
 static const uint64_t PB_MAILBOX_DATA_REG = 0x1001182full;
@@ -310,6 +313,8 @@ static const uint32_t PB_PMU0_CNPM_COUNTER_1 = 16;
 static const uint32_t PB_PMU0_CNPM_COUNTER_1_LEN = 16;
 static const uint32_t PB_PMU0_CNPM_COUNTER_2 = 32;
 static const uint32_t PB_PMU0_CNPM_COUNTER_2_LEN = 16;
+static const uint32_t PB_PMU0_CNPM_COUNTER_3 = 48;
+static const uint32_t PB_PMU0_CNPM_COUNTER_3_LEN = 16;
 // pauc/reg00003.H
 
 static const uint64_t PB_TL_LINK_DATA_01_CFG_REG = 0x10011810ull;
@@ -359,6 +364,9 @@ static const uint32_t PHY_PPE_WRAP_SCOM_WORK_REG1_SCOM_PPE_WORK1_LEN = 32;
 // pauc/reg00003.H
 
 static const uint64_t PLL_LOCK_REG = 0x100f0019ull;
+
+static const uint32_t PLL_LOCK_REG_LOCK = 0;
+static const uint32_t PLL_LOCK_REG_LOCK_LEN = 8;
 // pauc/reg00003.H
 
 static const uint64_t SPATTN_MASK_RW = 0x10040042ull;

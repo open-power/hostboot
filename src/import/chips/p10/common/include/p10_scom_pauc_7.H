@@ -68,6 +68,7 @@ static const uint32_t EPS_THERM_WSUB_CONTROL_REG_FORCE_RESET_THRES_L2RESULTS = 8
 static const uint32_t EPS_THERM_WSUB_CONTROL_REG_FORCE_RESET_THRES_L3RESULTS = 9;
 static const uint32_t EPS_THERM_WSUB_CONTROL_REG_FORCE_MEASURE_VOLT_INTERRUPTIBLE = 10;
 static const uint32_t EPS_THERM_WSUB_CONTROL_REG_FORCE_RESET_MEASURE_VOLT = 11;
+static const uint32_t EPS_THERM_WSUB_CONTROL_REG_FORCE_SHIFT_SENSOR = 12;
 // pauc/reg00007.H
 
 static const uint64_t EPS_THERM_WSUB_SKITTER_CLKSRC_REG = 0x10050016ull;
@@ -128,6 +129,8 @@ static const uint32_t HANG_PULSE_6_REG_SUPPRESS_HANG_6 = 6;
 // pauc/reg00007.H
 
 static const uint64_t HOSTATTN_INTERRUPT_REG = 0x100f002bull;
+
+static const uint32_t HOSTATTN_INTERRUPT_REG_TYPE4 = 0;
 // pauc/reg00007.H
 
 static const uint64_t OPCG_CAPT2 = 0x10030011ull;
@@ -166,6 +169,8 @@ static const uint32_t PB_PMU1_TLPM_COUNTER_1 = 16;
 static const uint32_t PB_PMU1_TLPM_COUNTER_1_LEN = 16;
 static const uint32_t PB_PMU1_TLPM_COUNTER_2 = 32;
 static const uint32_t PB_PMU1_TLPM_COUNTER_2_LEN = 16;
+static const uint32_t PB_PMU1_TLPM_COUNTER_3 = 48;
+static const uint32_t PB_PMU1_TLPM_COUNTER_3_LEN = 16;
 // pauc/reg00007.H
 
 static const uint64_t RECOV_UNMASKED = 0x10040011ull;

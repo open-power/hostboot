@@ -120,6 +120,8 @@ static const uint32_t LOCAL_XSTOP_IN15 = 15;
 // mc/reg00003.H
 
 static const uint64_t LXSTOP_INTERRUPT_REG = 0x0c0f002aull;
+
+static const uint32_t LXSTOP_INTERRUPT_REG_LXSTOP = 0;
 // mc/reg00003.H
 
 static const uint64_t MBA_SCOMFIR_DBG0_SCOM1Q = 0x0c010f95ull;
@@ -184,6 +186,9 @@ static const uint32_t PHASE_COUNTER_RESET_PHASECOUNTER_RESET = 0;
 // mc/reg00003.H
 
 static const uint64_t PLL_LOCK_REG = 0x0c0f0019ull;
+
+static const uint32_t PLL_LOCK_REG_LOCK = 0;
+static const uint32_t PLL_LOCK_REG_LOCK_LEN = 8;
 // mc/reg00003.H
 
 static const uint64_t SCOMFIR_MCERPT0 = 0x0c010c1eull;

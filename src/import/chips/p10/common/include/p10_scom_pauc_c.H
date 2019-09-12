@@ -166,6 +166,8 @@ static const uint32_t PB_PMU2_TLPM_COUNTER_1 = 16;
 static const uint32_t PB_PMU2_TLPM_COUNTER_1_LEN = 16;
 static const uint32_t PB_PMU2_TLPM_COUNTER_2 = 32;
 static const uint32_t PB_PMU2_TLPM_COUNTER_2_LEN = 16;
+static const uint32_t PB_PMU2_TLPM_COUNTER_3 = 48;
+static const uint32_t PB_PMU2_TLPM_COUNTER_3_LEN = 16;
 // pauc/reg00012.H
 
 static const uint64_t PB_PR0123_ERR = 0x10011829ull;
@@ -266,6 +268,9 @@ static const uint32_t PRE_COUNTER_REG_PRE_COUNTER_LEN = 8;
 // pauc/reg00012.H
 
 static const uint64_t SCAN64CONTSCAN = 0x1003f000ull;
+
+static const uint32_t SCAN64CONTSCAN_SCAN64CONTSCAN_REG = 0;
+static const uint32_t SCAN64CONTSCAN_SCAN64CONTSCAN_REG_LEN = 64;
 // pauc/reg00012.H
 
 static const uint64_t TRA0_TR1_TRACE_LO_DATA_REG = 0x10010441ull;
@@ -312,9 +317,12 @@ static const uint32_t TRA1_TR0_CONFIG_9_ERROR_CMP_PATTERN = 33;
 static const uint32_t TRA1_TR0_CONFIG_9_TRIG0_ERR_CMP = 34;
 static const uint32_t TRA1_TR0_CONFIG_9_TRIG1_ERR_CMP = 35;
 static const uint32_t TRA1_TR0_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
+static const uint32_t TRA1_TR0_CONFIG_9_SPARE_LT = 37;
 // pauc/reg00012.H
 
 static const uint64_t XSTOP_INTERRUPT_REG = 0x100f001cull;
+
+static const uint32_t XSTOP_INTERRUPT_REG_XSTOP = 0;
 // pauc/reg00012.H
 
 #ifndef __PPE_HCODE__

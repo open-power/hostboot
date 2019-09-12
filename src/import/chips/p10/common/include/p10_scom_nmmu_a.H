@@ -100,6 +100,8 @@ static const uint32_t NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_SNGL_SHOT_EN = 3;
 static const uint32_t NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_OVERLAP_EN = 4;
 static const uint32_t NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_MULT_SEL = 5;
 static const uint32_t NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_MULT_SEL_LEN = 3;
+static const uint32_t NMMU_ERR_LOG_RESERVED_08_63 = 8;
+static const uint32_t NMMU_ERR_LOG_RESERVED_08_63_LEN = 56;
 // nmmu/reg00010.H
 
 #ifndef __PPE_HCODE__

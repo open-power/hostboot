@@ -153,6 +153,8 @@ static const uint32_t COMP_P_0_STAT_RDDAT_ERRES_M_HOT_PLUG_EVENT = 26;
 static const uint32_t COMP_P_0_STAT_RDDAT_ERRES_M_CONTROL_REGISTER_PARITY_INTERRUPT = 27;
 static const uint32_t COMP_P_0_STAT_RDDAT_ERRES_M_ANY_INTR_1_REMOTE_SLAVE_INTERRUPT = 28;
 static const uint32_t COMP_P_0_STAT_RDDAT_ERRES_M_ANY_INTR_2_REMOTE_SLAVE_INTERRUPT = 29;
+static const uint32_t COMP_P_0_STAT_RDDAT_ERRES_READ_DATA = 32;
+static const uint32_t COMP_P_0_STAT_RDDAT_ERRES_READ_DATA_LEN = 32;
 // perv/reg00010.H
 
 static const uint64_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1 = 0x00040081ull;
@@ -246,6 +248,9 @@ static const uint32_t ERROR_STATUS_OPCG_STOPPED_BY_PCB_ERR = 27;
 static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_1_FSI = 0x00002881ull;
 static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_1_FSI_BYTE = 0x00002a04ull;
 static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_1_RW = 0x00050081ull;
+
+static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_1_MDA_M1B_DATA_AREA_1 = 0;
+static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_1_MDA_M1B_DATA_AREA_1_LEN = 32;
 // perv/reg00010.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
@@ -253,6 +258,9 @@ static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_1_RW = 0x00050081ull;
 static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_10_FSI = 0x0000288aull;
 static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_10_FSI_BYTE = 0x00002a28ull;
 static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_10_RW = 0x0005008aull;
+
+static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_10_MDA_M1B_DATA_AREA_10 = 0;
+static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_10_MDA_M1B_DATA_AREA_10_LEN = 32;
 // perv/reg00010.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
@@ -260,6 +268,9 @@ static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_10_RW = 0x0005008aull;
 static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_7_FSI = 0x000028c7ull;
 static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_7_FSI_BYTE = 0x00002b1cull;
 static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_7_RW = 0x000500c7ull;
+
+static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_7_MDA_M2A_DATA_AREA_7 = 0;
+static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_7_MDA_M2A_DATA_AREA_7_LEN = 32;
 // perv/reg00010.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
@@ -267,6 +278,9 @@ static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_7_RW = 0x000500c7ull;
 static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_14_FSI = 0x0000290eull;
 static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_14_FSI_BYTE = 0x00002c38ull;
 static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_14_RW = 0x0005010eull;
+
+static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_14_MDA_M2B_DATA_AREA_14 = 0;
+static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_14_MDA_M2B_DATA_AREA_14_LEN = 32;
 // perv/reg00010.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
@@ -316,6 +330,9 @@ static const uint32_t FSXCOMP_FSXLOG_MAILBOX_SLAVE_B_DOORBELL_ERROR_STATUS_MSBDE
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL7_COPY_FSI = 0x00002917ull;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL7_COPY_FSI_BYTE = 0x00002c5cull;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL7_COPY_RW = 0x00050117ull;
+
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL7_COPY_ROOT_CTRL7_COPY_REG = 0;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL7_COPY_ROOT_CTRL7_COPY_REG_LEN = 32;
 // perv/reg00010.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
@@ -364,30 +381,32 @@ static const uint64_t NET_CTRL1_RW = 0x000f0044ull;
 static const uint64_t NET_CTRL1_RW_WAND = 0x000f0045ull;
 static const uint64_t NET_CTRL1_RW_WOR = 0x000f0046ull;
 
-static const uint32_t NET_CTRL1_ACHE0_CLK_DCC_BYPASS = 0;
-static const uint32_t NET_CTRL1_ACHE1_CLK_DCC_BYPASS = 1;
-static const uint32_t NET_CTRL1_ACHE2_CLK_DCC_BYPASS = 2;
-static const uint32_t NET_CTRL1_ACHE3_CLK_DCC_BYPASS = 3;
-static const uint32_t NET_CTRL1_ORE0_CLK_DCC_BYPASS = 4;
-static const uint32_t NET_CTRL1_ORE1_CLK_DCC_BYPASS = 5;
-static const uint32_t NET_CTRL1_ORE2_CLK_DCC_BYPASS = 6;
-static const uint32_t NET_CTRL1_ORE3_CLK_DCC_BYPASS = 7;
-static const uint32_t NET_CTRL1_ACHE0_CLK_PDLY_BYPASS = 8;
-static const uint32_t NET_CTRL1_ACHE1_CLK_PDLY_BYPASS = 9;
-static const uint32_t NET_CTRL1_ACHE2_CLK_PDLY_BYPASS = 10;
-static const uint32_t NET_CTRL1_ACHE3_CLK_PDLY_BYPASS = 11;
-static const uint32_t NET_CTRL1_ORE0_CLK_PDLY_BYPASS = 12;
-static const uint32_t NET_CTRL1_ORE1_CLK_PDLY_BYPASS = 13;
-static const uint32_t NET_CTRL1_ORE2_CLK_PDLY_BYPASS = 14;
-static const uint32_t NET_CTRL1_ORE3_CLK_PDLY_BYPASS = 15;
-static const uint32_t NET_CTRL1_ACHE0_CLK_SKEWADJUST_RESET_DC = 16;
-static const uint32_t NET_CTRL1_ACHE1_CLK_SKEWADJUST_RESET_DC = 17;
-static const uint32_t NET_CTRL1_ACHE2_CLK_SKEWADJUST_RESET_DC = 18;
-static const uint32_t NET_CTRL1_ACHE3_CLK_SKEWADJUST_RESET_DC = 19;
-static const uint32_t NET_CTRL1_ORE0_CLK_DCADJUST_RESET_DC = 20;
-static const uint32_t NET_CTRL1_ORE1_CLK_DCADJUST_RESET_DC = 21;
-static const uint32_t NET_CTRL1_ORE2_CLK_DCADJUST_RESET_DC = 22;
-static const uint32_t NET_CTRL1_ORE3_CLK_DCADJUST_RESET_DC = 23;
+static const uint32_t NET_CTRL1_CACHE0_CLK_DCC_BYPASS = 0;
+static const uint32_t NET_CTRL1_CACHE1_CLK_DCC_BYPASS = 1;
+static const uint32_t NET_CTRL1_CACHE2_CLK_DCC_BYPASS = 2;
+static const uint32_t NET_CTRL1_CACHE3_CLK_DCC_BYPASS = 3;
+static const uint32_t NET_CTRL1_CORE0_CLK_DCC_BYPASS = 4;
+static const uint32_t NET_CTRL1_CORE1_CLK_DCC_BYPASS = 5;
+static const uint32_t NET_CTRL1_CORE2_CLK_DCC_BYPASS = 6;
+static const uint32_t NET_CTRL1_CORE3_CLK_DCC_BYPASS = 7;
+static const uint32_t NET_CTRL1_CACHE0_CLK_PDLY_BYPASS = 8;
+static const uint32_t NET_CTRL1_CACHE1_CLK_PDLY_BYPASS = 9;
+static const uint32_t NET_CTRL1_CACHE2_CLK_PDLY_BYPASS = 10;
+static const uint32_t NET_CTRL1_CACHE3_CLK_PDLY_BYPASS = 11;
+static const uint32_t NET_CTRL1_CORE0_CLK_PDLY_BYPASS = 12;
+static const uint32_t NET_CTRL1_CORE1_CLK_PDLY_BYPASS = 13;
+static const uint32_t NET_CTRL1_CORE2_CLK_PDLY_BYPASS = 14;
+static const uint32_t NET_CTRL1_CORE3_CLK_PDLY_BYPASS = 15;
+static const uint32_t NET_CTRL1_CACHE0_CLK_SKEWADJUST_RESET_DC = 16;
+static const uint32_t NET_CTRL1_CACHE1_CLK_SKEWADJUST_RESET_DC = 17;
+static const uint32_t NET_CTRL1_CACHE2_CLK_SKEWADJUST_RESET_DC = 18;
+static const uint32_t NET_CTRL1_CACHE3_CLK_SKEWADJUST_RESET_DC = 19;
+static const uint32_t NET_CTRL1_CORE0_CLK_DCADJUST_RESET_DC = 20;
+static const uint32_t NET_CTRL1_CORE1_CLK_DCADJUST_RESET_DC = 21;
+static const uint32_t NET_CTRL1_CORE2_CLK_DCADJUST_RESET_DC = 22;
+static const uint32_t NET_CTRL1_CORE3_CLK_DCADJUST_RESET_DC = 23;
+static const uint32_t NET_CTRL1_PCB_ACCESS = 24;
+static const uint32_t NET_CTRL1_PCB_ACCESS_LEN = 8;
 // perv/reg00010.H
 
 static const uint64_t OTPC_M_MEASURE_REG10 = 0x0001001aull;

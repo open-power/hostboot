@@ -97,14 +97,15 @@ static const uint32_t CPMS_FDIR_INJECT_DPT_SUSPEND = 31;
 
 static const uint64_t EC_PC_COMMON_SPR_CTRL = 0x20020485ull;
 
-static const uint32_t EC_PC_COMMON_SPR_CTRL_0_RUN_Q = 48;
-static const uint32_t EC_PC_COMMON_SPR_CTRL_1_RUN_Q = 49;
-static const uint32_t EC_PC_COMMON_SPR_CTRL_2_RUN_Q = 50;
-static const uint32_t EC_PC_COMMON_SPR_CTRL_3_RUN_Q = 51;
-static const uint32_t EC_PC_COMMON_SPR_CTRL_4_RUN_Q = 52;
-static const uint32_t EC_PC_COMMON_SPR_CTRL_5_RUN_Q = 53;
-static const uint32_t EC_PC_COMMON_SPR_CTRL_6_RUN_Q = 54;
-static const uint32_t EC_PC_COMMON_SPR_CTRL_7_RUN_Q = 55;
+static const uint32_t EC_PC_COMMON_SPR_CTRL_CTRL_T0_RUN_Q = 48;
+static const uint32_t EC_PC_COMMON_SPR_CTRL_CTRL_T1_RUN_Q = 49;
+static const uint32_t EC_PC_COMMON_SPR_CTRL_CTRL_T2_RUN_Q = 50;
+static const uint32_t EC_PC_COMMON_SPR_CTRL_CTRL_T3_RUN_Q = 51;
+static const uint32_t EC_PC_COMMON_SPR_CTRL_CTRL_T4_RUN_Q = 52;
+static const uint32_t EC_PC_COMMON_SPR_CTRL_CTRL_T5_RUN_Q = 53;
+static const uint32_t EC_PC_COMMON_SPR_CTRL_CTRL_T6_RUN_Q = 54;
+static const uint32_t EC_PC_COMMON_SPR_CTRL_CTRL_T7_RUN_Q = 55;
+static const uint32_t EC_PC_COMMON_SPR_CTRL_RUN_LATCH = 63;
 // c/reg00009.H
 
 static const uint64_t EC_PC_IMA_TRACE = 0x20020401ull;

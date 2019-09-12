@@ -1062,6 +1062,51 @@ fapi_try_exit:
 }
 
 
+static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SHIFT_STATUS_STATUS__REGISTER(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPVSB_FSI_W_SHIFT_STATUS_FSI, TP_TPVSB_FSI_W_SHIFT_STATUS_FSI_BYTE));
+#endif
+    return o_data.insertFromRight<TP_TPVSB_FSI_W_SHIFT_STATUS_STATUS__REGISTER,
+           TP_TPVSB_FSI_W_SHIFT_STATUS_STATUS__REGISTER_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SHIFT_STATUS_STATUS__REGISTER chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SHIFT_STATUS_STATUS__REGISTER(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPVSB_FSI_W_SHIFT_STATUS_FSI, TP_TPVSB_FSI_W_SHIFT_STATUS_FSI_BYTE));
+#endif
+    return o_data.insertFromRight<TP_TPVSB_FSI_W_SHIFT_STATUS_STATUS__REGISTER,
+           TP_TPVSB_FSI_W_SHIFT_STATUS_STATUS__REGISTER_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SHIFT_STATUS_STATUS__REGISTER chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SHIFT_STATUS_STATUS__REGISTER(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPVSB_FSI_W_SHIFT_STATUS_FSI, TP_TPVSB_FSI_W_SHIFT_STATUS_FSI_BYTE));
+#endif
+    return i_data.extractToRight<TP_TPVSB_FSI_W_SHIFT_STATUS_STATUS__REGISTER,
+           TP_TPVSB_FSI_W_SHIFT_STATUS_STATUS__REGISTER_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SHIFT_STATUS_STATUS__REGISTER chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_TP_TPVSB_FSI_W_SLAVE_CMFSI_INCLUDE_MFSI_A_PIB2OPB_COMP_P_0_LSTAT(
     const fapi2::Target<K, M, V>& i_target)

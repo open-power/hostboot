@@ -78,6 +78,8 @@ static const uint32_t CFG_NMMU_CTL_SM_MM_CFG_NMMU_CTL_TW_RDX_PWC_VA_HASH = 56;
 static const uint32_t CFG_NMMU_CTL_SM_MM_CFG_NMMU_CTL_NCU_SNP_TLBIE_OVERLAP_EN = 57;
 static const uint32_t CFG_NMMU_CTL_SM_MM_CFG_NMMU_CTL_TW_PTE_UPD_INTR_EN = 58;
 static const uint32_t CFG_NMMU_CTL_SM_MM_CFG_NMMU_CTL_NCU_SNP_TLBIE_PACING_CNT_EN = 59;
+// ERROR Duplicate Dial         static const uint32_t CFG_NMMU_CTL_SM_MM_CFG_NMMU_CTL_DYN_ST_FREQ_MULT = 60;
+// ERROR Duplicate Dial         static const uint32_t CFG_NMMU_CTL_SM_MM_CFG_NMMU_CTL_DYN_ST_FREQ_MULT_LEN = 4;
 // nmmu/reg00004.H
 
 static const uint64_t FBC_CQ_WRAP_NXCQ_SCOM_MMCQ_LCO_CONFIG_REG = 0x02010c16ull;

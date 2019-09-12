@@ -82,6 +82,8 @@ static const uint32_t CLK_ADJ_01_DCADJ_WRAP_STATUS_BITS_COMP_CYCLE = 19;
 static const uint32_t CLK_ADJ_01_DCADJ_WRAP_STATUS_BITS_COMP_CYCLE_LEN = 3;
 static const uint32_t CLK_ADJ_01_DCADJ_WRAP_STATUS_BITS_INVERT_SENSE = 22;
 static const uint32_t CLK_ADJ_01_DCADJ_WRAP_STATUS_BITS_ADJUSTMENT_DIR = 23;
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_STATUS_BITS_DCC_CONFIG = 24;
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_STATUS_BITS_DCC_CONFIG_LEN = 8;
 // perv/reg00018.H
 
 static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_ADJUST_MODE = 0x00014322ull;
@@ -136,6 +138,8 @@ static const uint32_t CLK_ADJ_03_DCADJ_WRAP_STATUS_BITS_COMP_CYCLE = 19;
 static const uint32_t CLK_ADJ_03_DCADJ_WRAP_STATUS_BITS_COMP_CYCLE_LEN = 3;
 static const uint32_t CLK_ADJ_03_DCADJ_WRAP_STATUS_BITS_INVERT_SENSE = 22;
 static const uint32_t CLK_ADJ_03_DCADJ_WRAP_STATUS_BITS_ADJUSTMENT_DIR = 23;
+static const uint32_t CLK_ADJ_03_DCADJ_WRAP_STATUS_BITS_DCC_CONFIG = 24;
+static const uint32_t CLK_ADJ_03_DCADJ_WRAP_STATUS_BITS_DCC_CONFIG_LEN = 8;
 // perv/reg00018.H
 
 static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_PDLYS = 0x0001132dull;
@@ -220,13 +224,15 @@ static const uint32_t FSXCOMP_FSXLOG_CBS_ENVSTAT_FSI = 0x00002804ull;
 static const uint32_t FSXCOMP_FSXLOG_CBS_ENVSTAT_FSI_BYTE = 0x00002810ull;
 static const uint32_t FSXCOMP_FSXLOG_CBS_ENVSTAT_RO = 0x00050004ull;
 
-static const uint32_t FSXCOMP_FSXLOG_CBS_ENVSTAT_TEST_ENABLE = 0;
-static const uint32_t FSXCOMP_FSXLOG_CBS_ENVSTAT_CARD_TEST_BSC = 1;
-static const uint32_t FSXCOMP_FSXLOG_CBS_ENVSTAT_VDN_GPOOD = 2;
-static const uint32_t FSXCOMP_FSXLOG_CBS_ENVSTAT_FSI_IN_ENA = 3;
-static const uint32_t FSXCOMP_FSXLOG_CBS_ENVSTAT_CHIP_MASTER = 4;
-static const uint32_t FSXCOMP_FSXLOG_CBS_ENVSTAT_SMD = 5;
-static const uint32_t FSXCOMP_FSXLOG_CBS_ENVSTAT_JTAG_TMS = 6;
+static const uint32_t FSXCOMP_FSXLOG_CBS_ENVSTAT_CBS_ENVSTAT_C4_TEST_ENABLE = 0;
+static const uint32_t FSXCOMP_FSXLOG_CBS_ENVSTAT_CBS_ENVSTAT_C4_CARD_TEST_BSC = 1;
+static const uint32_t FSXCOMP_FSXLOG_CBS_ENVSTAT_CBS_ENVSTAT_C4_VDN_GPOOD = 2;
+static const uint32_t FSXCOMP_FSXLOG_CBS_ENVSTAT_CBS_ENVSTAT_C4_FSI_IN_ENA = 3;
+static const uint32_t FSXCOMP_FSXLOG_CBS_ENVSTAT_CBS_ENVSTAT_C4_CHIP_MASTER = 4;
+static const uint32_t FSXCOMP_FSXLOG_CBS_ENVSTAT_CBS_ENVSTAT_C4_SMD = 5;
+static const uint32_t FSXCOMP_FSXLOG_CBS_ENVSTAT_CBS_ENVSTAT_C4_JTAG_TMS = 6;
+static const uint32_t FSXCOMP_FSXLOG_CBS_ENVSTAT_CBS_ENVSTAT_REMAINDER = 7;
+static const uint32_t FSXCOMP_FSXLOG_CBS_ENVSTAT_CBS_ENVSTAT_REMAINDER_LEN = 25;
 // perv/reg00018.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
@@ -234,6 +240,9 @@ static const uint32_t FSXCOMP_FSXLOG_CBS_ENVSTAT_JTAG_TMS = 6;
 static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_9_FSI = 0x00002849ull;
 static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_9_FSI_BYTE = 0x00002924ull;
 static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_9_RW = 0x00050049ull;
+
+static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_9_MDA_M1A_DATA_AREA_9 = 0;
+static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_9_MDA_M1A_DATA_AREA_9_LEN = 32;
 // perv/reg00018.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
@@ -241,6 +250,9 @@ static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_9_RW = 0x00050049ull;
 static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_12_FSI = 0x0000288cull;
 static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_12_FSI_BYTE = 0x00002a30ull;
 static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_12_RW = 0x0005008cull;
+
+static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_12_MDA_M1B_DATA_AREA_12 = 0;
+static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_12_MDA_M1B_DATA_AREA_12_LEN = 32;
 // perv/reg00018.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
@@ -248,6 +260,9 @@ static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_12_RW = 0x0005008cull;
 static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_3_FSI = 0x00002883ull;
 static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_3_FSI_BYTE = 0x00002a0cull;
 static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_3_RW = 0x00050083ull;
+
+static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_3_MDA_M1B_DATA_AREA_3 = 0;
+static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_3_MDA_M1B_DATA_AREA_3_LEN = 32;
 // perv/reg00018.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
@@ -255,6 +270,9 @@ static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_3_RW = 0x00050083ull;
 static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_5_FSI = 0x000028c5ull;
 static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_5_FSI_BYTE = 0x00002b14ull;
 static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_5_RW = 0x000500c5ull;
+
+static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_5_MDA_M2A_DATA_AREA_5 = 0;
+static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_5_MDA_M2A_DATA_AREA_5_LEN = 32;
 // perv/reg00018.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
@@ -276,6 +294,9 @@ static const uint32_t FSXCOMP_FSXLOG_MAILBOX_SLAVE_A_DOORBELL_INTERRUPT_PIB_SLAV
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL1_COPY_FSI = 0x0000291bull;
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL1_COPY_FSI_BYTE = 0x00002c6cull;
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL1_COPY_RW = 0x0005011bull;
+
+static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL1_COPY_PERV_CTRL1_COPY_REG = 0;
+static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL1_COPY_PERV_CTRL1_COPY_REG_LEN = 32;
 // perv/reg00018.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
@@ -372,6 +393,7 @@ static const uint32_t L3TRA0_TR1_CONFIG_9_ERROR_CMP_PATTERN = 33;
 static const uint32_t L3TRA0_TR1_CONFIG_9_TRIG0_ERR_CMP = 34;
 static const uint32_t L3TRA0_TR1_CONFIG_9_TRIG1_ERR_CMP = 35;
 static const uint32_t L3TRA0_TR1_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
+static const uint32_t L3TRA0_TR1_CONFIG_9_SPARE_LT = 37;
 // perv/reg00018.H
 
 static const uint64_t L3TRA2_TR1_CONFIG_1 = 0x000182a4ull;
@@ -655,6 +677,7 @@ static const uint32_t TRA0_TR1_CONFIG_9_ERROR_CMP_PATTERN = 33;
 static const uint32_t TRA0_TR1_CONFIG_9_TRIG0_ERR_CMP = 34;
 static const uint32_t TRA0_TR1_CONFIG_9_TRIG1_ERR_CMP = 35;
 static const uint32_t TRA0_TR1_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
+static const uint32_t TRA0_TR1_CONFIG_9_SPARE_LT = 37;
 // perv/reg00018.H
 
 static const uint64_t TRA2_TR1_CONFIG_1 = 0x00010544ull;
@@ -707,6 +730,7 @@ static const uint32_t TRA5_TR0_CONFIG_9_ERROR_CMP_PATTERN = 33;
 static const uint32_t TRA5_TR0_CONFIG_9_TRIG0_ERR_CMP = 34;
 static const uint32_t TRA5_TR0_CONFIG_9_TRIG1_ERR_CMP = 35;
 static const uint32_t TRA5_TR0_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
+static const uint32_t TRA5_TR0_CONFIG_9_SPARE_LT = 37;
 // perv/reg00019.H
 
 static const uint64_t TRA5_TR1_CONFIG_0 = 0x000106c3ull;
