@@ -95,6 +95,8 @@ fapi2::ReturnCode p9a_mi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MI>& TGT0,
 
             l_scom_buffer.insert<15, 10, 54, uint64_t>(literal_0b1111000000 );
             l_scom_buffer.insert<25, 7, 57, uint64_t>(literal_0b0111111 );
+            constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_FORCE_COMMANDLIST_VALID_ON = 0x1;
+            l_scom_buffer.insert<5, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_FORCE_COMMANDLIST_VALID_ON );
             FAPI_TRY(fapi2::putScom(TGT0, 0x5010811ull, l_scom_buffer));
         }
         {
