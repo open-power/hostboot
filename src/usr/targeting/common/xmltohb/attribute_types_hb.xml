@@ -325,6 +325,78 @@
     <hbOnly/>
   </attribute>
 
+  <attribute>
+    <id>GPIO_INFO_PHYS_PRES</id>
+    <description>Information needed to address GPIO device that corresponds
+                 to the Physical Presence Detect circuit</description>
+    <complexType>
+      <description>Structure to define the addessing for an I2C
+                     slave device.</description>
+      <field>
+        <name>i2cMasterPath</name>
+        <description>Entity path to the chip that contains the I2C
+                     master</description>
+        <type>EntityPath</type>
+        <default>physical:sys-0/node-0/proc-0</default>
+      </field>
+      <field>
+        <name>port</name>
+        <description>Port from the I2C Master device. This is a 6-bit
+                     value.</description>
+        <type>uint8_t</type>
+        <default>0</default>
+      </field>
+      <field>
+        <name>devAddr</name>
+        <description>Device address on the I2C bus. This is a 7-bit value,
+                     but then shifted 1 bit left.</description>
+        <type>uint8_t</type>
+        <default>0xC0</default>
+      </field>
+      <field>
+        <name>engine</name>
+        <description>I2C master engine. This is a 2-bit
+                     value.</description>
+        <type>uint8_t</type>
+        <default>2</default>
+      </field>
+      <field>
+        <name>windowOpenPin</name>
+        <description>Logical GPIO pin number used to open or close the physcial
+                     presence window</description>
+        <type>uint8_t</type>
+        <default>0</default>
+      </field>
+      <field>
+        <name>physicalPresencePin</name>
+        <description>Logical GPIO pin number used to determine if physical
+                     presence was asserted</description>
+        <type>uint8_t</type>
+        <default>1</default>
+      </field>
+      <!-- i2c Mux Bus Selector Definition -->
+      <field>
+        <default>0xFF</default>
+        <description>Determines which of the N selectable buses the mux
+                     will connect to. OxFF indicates no mux present
+                     or N/A.</description>
+        <name>i2cMuxBusSelector</name>
+        <type>uint8_t</type>
+      </field>
+      <!-- i2c Mux Path Definition -->
+      <field>
+        <!-- NOTE: physical:sys-0 implies that there is no mux in
+                   the bus path for this part.                     -->
+        <default>physical:sys-0</default>
+        <description>Entity path to the I2C mux for this device.</description>
+        <name>i2cMuxPath</name>
+        <type>EntityPath</type>
+      </field>
+    </complexType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
   <!-- TODO RTC 122856 When support for HB only volatile attributes with non-zero
      default is implemented, update default value to match the description,
      Until that happens, code must set the appropriate default if needed. -->

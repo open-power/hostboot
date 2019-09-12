@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -40,10 +40,13 @@ namespace GPIO
         GPIO_READ           = 0x01,
         GPIO_WRITE          = 0x02,
         GPIO_READATTRIBUTES = 0x03,
+
+        // Use 0x10-0x1F range for PCA9551 functions
+        GPIO_PCA9551_SET_LED = 0x10,
     };
 
     /**
-     * @enum grioReasonCode
+     * @enum gpioReasonCode
      */
     enum gpioReasonCode
     {
@@ -51,6 +54,9 @@ namespace GPIO
         GPIO_ATTR_INFO_NOT_FOUND        = GPIO_COMP_ID | 0x01,
         GPIO_I2C_TARGET_NOT_FOUND       = GPIO_COMP_ID | 0x02,
         GPIO_INVALID_OP                 = GPIO_COMP_ID | 0x03,
+
+        // Use 0x10-0x1F range for PCA9551 functions
+        GPIO_PCA9551_DATA_MISMATCH      = GPIO_COMP_ID | 0x10,
     };
 
 };
