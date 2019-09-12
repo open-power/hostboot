@@ -137,14 +137,11 @@ namespace PARTIAL_GOOD
 
     // Used when a target type has no applicable partial good checking logic.
     // Instead of omitting that target type from the map of rules, it will have:
-    //      pgMask == PG_MASK_NA
-    //      agMask == PG_MASK_NA
+    //      agMask == ALL_OFF_AG_MASK
     //      pgIndex == PG_INDEX_NA
-    // This will ensure that the algorithm in isDescFunctional() will execute
-    // successfully and serve to enforce that all targets be defined in the
-    // rules map.
+    // This lets us error out when there are no rules defined for a target.
     const pg_mask_t PG_MASK_NA                   = 0x00000000;
-    const pg_idx_t PG_INDEX_NA                   = 0x00;
+    const pg_idx_t PG_INDEX_NA                   = 0xFE;
 
     // This enumeration provides a mask for each processor model we want to
     // support to have their own special PG rules (models in p9 were nimbus,
@@ -296,9 +293,10 @@ namespace PARTIAL_GOOD
     ) const
     {
         bool l_functional = true;
-        const size_t l_pgIndex = getRealPgIndex(i_desc);
+        const pg_idx_t l_pgIndex = getRealPgIndex(i_desc);
 
-        if ((i_pgData[l_pgIndex] & iv_pgMask) != iv_agMask)
+        if (l_pgIndex != PG_INDEX_NA
+            && (i_pgData[l_pgIndex] & iv_pgMask) != iv_agMask)
         {
             l_functional = false;
         }
@@ -317,13 +315,39 @@ namespace PARTIAL_GOOD
         const size_t bufsize
     ) const
     {
-        snprintf(buffer, bufsize,
-                 "(pgData[%d] = 0x%08x) & 0x%08X: actual 0x%08X, expected 0x%08X",
-                 getRealPgIndex(i_desc),
-                 i_pgData[getRealPgIndex(i_desc)],
-                 iv_pgMask,
-                 i_pgData[getRealPgIndex(i_desc)] & iv_pgMask,
-                 iv_agMask);
+        if (getRealPgIndex(i_desc) == PG_INDEX_NA)
+        {
+            snprintf(buffer, bufsize,
+                     "PG data not applicable; "
+                     "special rule = ");
+        }
+        else
+        {
+            snprintf(buffer, bufsize,
+                     "(pgData[%d] = 0x%08x) & 0x%08X: "
+                     "actual 0x%08X, expected 0x%08X; "
+                     "special rule = ",
+                     getRealPgIndex(i_desc),
+                     i_pgData[getRealPgIndex(i_desc)],
+                     iv_pgMask,
+                     i_pgData[getRealPgIndex(i_desc)] & iv_pgMask,
+                     iv_agMask);
+        }
+
+        const size_t l_filled = bufsize ? strlen(buffer) : 0;
+
+        if (iv_specialRule)
+        {
+            snprintf(buffer + l_filled,
+                     bufsize - l_filled,
+                     "%d",
+                     iv_specialRule(i_desc, i_pgData));
+        }
+        else
+        {
+            strncat(buffer, "NA", bufsize - l_filled - 1);
+        }
+
     }
 
     // The special rule for the PERV targets checks the "vital" bit (not the
@@ -338,12 +362,10 @@ namespace PARTIAL_GOOD
         // The chip unit number of the perv target is the index into the PG data
         const auto indexPERV = i_desc->getAttr<TARGETING::ATTR_CHIP_UNIT>();
 
-        // Set the local attribute copy of this data
         const pg_entry_t l_pg = i_pgData[indexPERV];
 
-        // TODO RTC 208782: Uncomment this when PG_MVPD is marked as writable in
-        // the ekb XML
-        //i_desc->setAttr<TARGETING::ATTR_PG_MVPD>(l_pg);
+        // Store the original PG VPD entry in the PERV's PG_MVPD attribute
+        i_desc->setAttr<TARGETING::ATTR_PG_MVPD>(l_pg);
 
         return !(l_pg & PERV_BIT_PG_MASK);
     }
@@ -434,7 +456,9 @@ namespace PARTIAL_GOOD
         // PERV is always-good
         { TARGETING::TYPE_PERV,
           MODEL_MASK_ALL,
-          PG_MASK_NA,
+          PERV_BIT_PG_MASK, // We still put this here because this data
+                            // structure is also used to forcibly set ATTR_PG
+                            // bits to "bad"
           ALL_OFF_AG_MASK,
           PG_INDEX_NA, // This is unused; the PERV targets use their chip unit
                        // to index into the PG data to check the "vital" (*not*
@@ -516,7 +540,7 @@ namespace PARTIAL_GOOD
     template<typename It>
     static constexpr bool is_sorted(const It begin, const It end)
     {
-        // Unfortunately pre-c++11 constexpr functions had to consist of exactly
+        // Unfortunately pre-c++14 constexpr functions had to consist of exactly
         // one return statement, hence the nested ternary here.
         return (begin == end || begin + 1 == end
                 ? true

@@ -155,10 +155,14 @@ void enableHwasState(Target *i_target,
     {   // record the EID as a reason that we're marking non-functional
         hwasState.deconfiguredByEid = i_errlEid;
     }
+
     hwasState.poweredOn     = true;
     hwasState.present       = i_present;
     hwasState.functional    = i_functional;
+
     i_target->setAttr<ATTR_HWAS_STATE>( hwasState );
+
+    updateDeconfigureMask(*i_target, hwasState);
 }
 
 /**
@@ -961,6 +965,25 @@ errlHndl_t discoverTargets()
         // targets that need to be deconfigured
         invokePresentByAssoc();
 
+        // NMMU1 is power-gated if PAU0, PAU4, and PAU5 are deconfigured, so we
+        // handle that case here after all the PAUs have been deconfigured by PG
+        // rules
+        {
+            TargetHandleList l_chips;
+            getAllChips(l_chips, TYPE_PROC);
+
+            for (const Target* const l_chip : l_chips)
+            {
+                if (Target* const l_nmmu1 = shouldPowerGateNMMU1(*l_chip))
+                {
+                    enableHwasState(l_nmmu1,
+                                    true, // NMMU 1 will always be present
+                                    false,
+                                    DeconfigGard::DECONFIGURED_BY_INACTIVE_PAU);
+                }
+            }
+        }
+
 #ifdef __HOSTBOOT_MODULE
         if (INITSERVICE::isSMPWrapConfig())
         {
@@ -992,6 +1015,56 @@ errlHndl_t discoverTargets()
     }
     return errl;
 } // discoverTargets
+
+Target* shouldPowerGateNMMU1(const Target& i_proc)
+{
+    HWAS_ASSERT(i_proc.getAttr<ATTR_TYPE>() == TYPE_PROC,
+                "shouldPowerGateNMMU1: Expecting PROC");
+
+    const CHIPLET_ID_ATTR NEST1_CHIPLET_ID = 3;
+
+    TargetHandleList l_pauHandleList { };
+    getChildChiplets(l_pauHandleList, &i_proc, TYPE_PAU);
+
+    bool l_haveFunctionalPAU = false;
+
+    // Check all the functional PAUs to see whether any of them in the set
+    // { 0, 4, 5 } are functional
+    for (Target* const l_pauTarget : l_pauHandleList)
+    {
+        const auto l_chipUnit = l_pauTarget->getAttr<ATTR_CHIP_UNIT>();
+
+        if (   l_chipUnit == 0
+            || l_chipUnit == 4
+            || l_chipUnit == 5)
+        {
+            l_haveFunctionalPAU = true;
+            break;
+        }
+    }
+
+    Target* l_nmmu1 = nullptr;
+
+    // If we have no functional PAUs in the set { 0, 4, 5 } then return a
+    // reference to NMMU1 so the caller can deconfigure it.
+    if (!l_haveFunctionalPAU)
+    {
+        TargetHandleList l_nmmuHandleList { };
+        getChildChiplets(l_nmmuHandleList, &i_proc, TYPE_NMMU);
+
+        for (Target* const l_nmmuTarget : l_nmmuHandleList)
+        {
+            if (l_nmmuTarget->getAttr<ATTR_CHIPLET_ID>()
+                == NEST1_CHIPLET_ID)
+            {
+                l_nmmu1 = l_nmmuTarget;
+                break;
+            }
+        }
+    }
+
+    return l_nmmu1;
+} // shouldPowerGateNMMU1
 
 bool isChipFunctional(const TARGETING::TargetHandle_t &i_target,
                       const partialGoodVector& i_pgData)

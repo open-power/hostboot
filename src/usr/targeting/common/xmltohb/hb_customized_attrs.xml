@@ -56,6 +56,12 @@
      Start of customizations
      ================================================================= -->
      <attribute>
+          <id>ATTR_PG_MVPD</id>
+          <default>0xFFFFFFFF</default>
+          <writeable/>
+     </attribute>
+
+     <attribute>
           <id>ATTR_DUMMY_SCRATCH_PLAT_INIT_UINT8</id>
           <default>5</default>
      </attribute>

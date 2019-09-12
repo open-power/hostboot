@@ -74,6 +74,18 @@ errlHndl_t collectGard(const TARGETING::PredicateBase *i_pPredicate = NULL);
 errlHndl_t clearGardByType(const GARD_ErrorType i_type);
 
 /**
+ * @brief  updateDeconfigureMask
+ *
+ *                          Common HWAS function to set the PG attribute of a
+ *                          target according to a given HWAS state.
+ *
+ * @param  i_target         The target to update.
+ * @param  i_hwasState      The HWAS state to translate.
+ */
+void updateDeconfigureMask(TARGETING::Target& i_target,
+                           const TARGETING::ATTR_HWAS_STATE_type i_hwasState);
+
+/**
  * @brief Returns a reference to the DeconfigGard singleton.
  */
 class DeconfigGard;
@@ -176,7 +188,7 @@ public:
         CONFIGURED_BY_RESOURCE_RECOVERY,        // BASE | 0x0E
         //
         DECONFIGURED_BY_EQ_DECONFIG,            // BASE | 0x0F
-        DECONFIGURED_BY_EX_DECONFIG,            // BASE | 0x10
+        DECONFIGURED_BY_FC_DECONFIG,            // BASE | 0x10
         DECONFIGURED_BY_CORE_DECONFIG,          // BASE | 0x11
         DECONFIGURED_BY_PHB_DECONFIG,           // BASE | 0x12
         DECONFIGURED_BY_PEC_DECONFIG,           // BASE | 0x13
@@ -200,6 +212,7 @@ public:
         DECONFIGURED_BY_NO_CHILD_OCMB_CHIP,     // BASE | 0x21
         DECONFIGURED_BY_NO_PARENT_OCMB_CHIP,    // BASE | 0x22
         DECONFIGURED_BY_NO_PARENT_OMIC,         // BASE | 0x23
+        DECONFIGURED_BY_INACTIVE_PAU,           // BASE | 0x24
 
         // mask - these bits mean it's a PLID and not an enum
         DECONFIGURED_BY_PLID_MASK                = 0xFFFF0000,

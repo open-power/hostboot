@@ -2492,6 +2492,10 @@
     <id>unit-fc-power10</id>
     <parent>unit</parent>
     <attribute>
+      <default>1</default>
+      <id>DECONFIG_GARDABLE</id>
+    </attribute>
+    <attribute>
       <default>FC</default>
       <id>TYPE</id>
     </attribute>
@@ -2500,6 +2504,10 @@
   <targetType>
     <id>unit-iohs-power10</id>
     <parent>unit</parent>
+    <attribute>
+      <default>1</default>
+      <id>DECONFIG_GARDABLE</id>
+    </attribute>
     <attribute>
       <id>PARENT_PERVASIVE</id>
     </attribute>
@@ -2619,6 +2627,10 @@
   <targetType>
     <id>unit-mc-power10</id>
     <parent>unit</parent>
+    <attribute>
+      <id>DECONFIG_GARDABLE</id>
+      <default>1</default>
+    </attribute>
     <attribute>
       <id>PARENT_PERVASIVE</id>
     </attribute>
@@ -3128,6 +3140,10 @@
   <targetType>
     <id>unit-nmmu-power10</id>
     <parent>unit</parent>
+    <attribute>
+      <id>DECONFIG_GARDABLE</id>
+      <default>1</default>
+    </attribute>
     <attribute>
       <id>PARENT_PERVASIVE</id>
     </attribute>
@@ -3678,6 +3694,10 @@
     <id>unit-pau-power10</id>
     <parent>unit</parent>
     <attribute>
+      <default>1</default>
+      <id>DECONFIG_GARDABLE</id>
+    </attribute>
+    <attribute>
       <id>PARENT_PERVASIVE</id>
     </attribute>
     <attribute>
@@ -3689,6 +3709,10 @@
   <targetType>
     <id>unit-pauc-power10</id>
     <parent>unit</parent>
+    <attribute>
+      <default>1</default>
+      <id>DECONFIG_GARDABLE</id>
+    </attribute>
     <attribute>
       <id>PARENT_PERVASIVE</id>
     </attribute>
@@ -3710,6 +3734,10 @@
   <targetType>
     <id>unit-pec-power10</id>
     <parent>unit-pec</parent>
+    <attribute>
+      <default>1</default>
+      <id>DECONFIG_GARDABLE</id>
+    </attribute>
     <attribute>
       <id>PARENT_PERVASIVE</id>
     </attribute>
@@ -3851,6 +3879,9 @@
   <targetType>
     <id>unit-perv-power10</id>
     <parent>unit-perv</parent>
+    <attribute>
+      <id>PG_SAVED</id>
+    </attribute>
   </targetType>
 
   <!-- PERV

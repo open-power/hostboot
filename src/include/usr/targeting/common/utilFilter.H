@@ -216,6 +216,20 @@ void getPervasiveChildTargetsByState (
           ResourceState                i_state );
 
 /**
+ * @brief  getTargetWithPGAttr
+ *
+ *                          Common HWAS function to find the target that
+ *                          contains the PG attribute for the input target
+ *                          (if such a target exists).
+ *
+ * @param[in] i_target      The target to obtain a PERV for.
+ *
+ * @return Target*          A pointer to the target with the PG attribute for the
+ *                          input target, or nullptr if there is no such target.
+ */
+TARGETING::Target* getTargetWithPGAttr(TARGETING::Target& i_target);
+
+/**
  * @brief Populate the o_vector with target object pointers which are
  *        affinity children of the input target
  *

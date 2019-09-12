@@ -27,7 +27,7 @@ ROOTPATH = ../../../..
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 
 MODULE = testhwas
-TESTS = hwas1test.H
+TESTS = hwas1test.H hwasGardTest.H
 
 OBJS += attributestrings.o
 

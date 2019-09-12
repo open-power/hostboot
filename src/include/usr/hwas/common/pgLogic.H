@@ -186,6 +186,16 @@ namespace PARTIAL_GOOD
             return iv_type;
         }
 
+        /**
+         * @brief Returns the partial-good mask for this rule
+         *
+         * @return pg_mask_t The PG mask for this rule
+         */
+        constexpr pg_mask_t partialGoodMask() const
+        {
+            return iv_pgMask;
+        }
+
     private:
 
         /**

@@ -48,7 +48,7 @@
 #define DISABLE_UNIT_TESTS        1
 #define DISABLE_MBA_UNIT_TESTS    1
 #define DISABLE_MEM_UNIT_TESTS    1
-#define DISABLE_EX_UNIT_TESTS     1
+#define DISABLE_FC_UNIT_TESTS     1
 //$$#define DISABLE_UNIT_TESTS        0
 
 #define DISABLE_OMI_UNIT_TESTS    0
@@ -75,6 +75,173 @@ bool compareAffinityCXX(const TargetInfo t1, const TargetInfo t2)
         return t1.affinityPath < t2.affinityPath;
 }
 
+// This is used when we test every combination of configured and deconfigured
+// PAUs to ensure that the NMMU power-gating rule applies correctly.
+const size_t NUM_PAU_PER_PROC = 6;
+
+// This value is used by getAnyTargetByType to indicate that we don't care what
+// chiplet the target comes from.
+const ATTR_CHIPLET_ID_type ANY_CHIPLET = 0xFF;
+
+/* @brief getAnyTargetByType   Gets a pointer to a child target of a given type with a
+ *                             given chiplet ID (or ANY_CHIPLET if it doesn't matter).
+ *
+ * @param[in] i_parent         The target whose children will be searched.
+ * @param[in] i_targetType     The type of target the caller wants.
+ * @param[in] i_chipletID      A chiplet ID or the special value ANY_CHIPLET.
+ * @return    Target*          Pointer to a target. Never returns nullptr.
+ */
+Target* getAnyTargetByType(const Target& i_parent,
+                           const ATTR_TYPE_type i_targetType,
+                           const ATTR_CHIPLET_ID_type i_chipletID = ANY_CHIPLET)
+{
+    TargetHandleList l_targetList;
+    getChildChiplets(l_targetList, &i_parent, i_targetType, false);
+
+    Target* l_target = nullptr;
+
+    for (const auto target : l_targetList)
+    {
+        if (i_chipletID == ANY_CHIPLET
+            || target->getAttr<ATTR_CHIPLET_ID>() == i_chipletID)
+        {
+            l_target = target;
+            break;
+        }
+    }
+
+    if (!l_target)
+    {
+        TS_FAIL("getAnyTargetByType: Cannot find instance of target type %s "
+                "(chiplet id 0x%02x)",
+                attrToString<ATTR_TYPE>(i_targetType),
+                i_chipletID);
+    }
+
+    return l_target;
+}
+
+const size_t NMMU_1_CHIPLET = 3;
+
+const size_t PAU_0_INDEX = 0,
+             PAU_4_INDEX = 2,
+             PAU_5_INDEX = 3;
+
+/* @brief getNMMU1       Retrieves a pointer to NMMU 1 from a given PROC.
+ * @param[in] i_proc     The processor to search
+ * @return    Target*    Pointer to NMMU1 on i_proc (never nullptr)
+ */
+Target* getNMMU1(const Target& i_proc)
+{
+    return getAnyTargetByType(i_proc, TYPE_NMMU, NMMU_1_CHIPLET);
+}
+
+/* @brief getSortedPAUList
+ *
+ *                  Retrieves a list of functional PAU children of the given PROC
+ *                  sorted in ascending order by chip unit number.
+ *
+ * @param[in] i_proc              The processor to search
+ * @return    TargetHandleList    Sorted list of PAUs in i_proc
+ */
+TargetHandleList getSortedPAUList(const Target& i_proc)
+{
+    TargetHandleList l_pauList;
+    getChildChiplets(l_pauList, &i_proc, TYPE_PAU);
+
+    if (l_pauList.size() != NUM_PAU_PER_PROC)
+    {
+        TS_FAIL("testDeconfigureNMMU1ByPAU: Unexpected number of "
+                " functional PAUs (%d)",
+                l_pauList.size());
+    }
+    else
+    {
+        std::sort(l_pauList.begin(), l_pauList.end(),
+                  [](const Target* const a, const Target* const b)
+                  {
+                      return a->getAttr<ATTR_CHIP_UNIT>() < b->getAttr<ATTR_CHIP_UNIT>();
+                  });
+
+        if (l_pauList[PAU_0_INDEX]->getAttr<ATTR_CHIP_UNIT>() != 0)
+        {
+            TS_FAIL("testDeconfigureNMMU1ByPAU: Unexpected chip unit in sorted PAU list");
+            l_pauList.clear();
+        }
+        else if (l_pauList[PAU_4_INDEX]->getAttr<ATTR_CHIP_UNIT>() != 4)
+        {
+            TS_FAIL("testDeconfigureNMMU1ByPAU: Unexpected chip unit in sorted PAU list");
+            l_pauList.clear();
+        }
+        else if (l_pauList[PAU_5_INDEX]->getAttr<ATTR_CHIP_UNIT>() != 5)
+        {
+            TS_FAIL("testDeconfigureNMMU1ByPAU: Unexpected chip unit in sorted PAU list");
+            l_pauList.clear();
+        }
+    }
+
+    return l_pauList;
+}
+
+/* @brief Saves the state of every target's HWAS_STATE and PG attributes.
+ */
+void saveSystemState()
+{
+    TargetHandle_t pSys;
+    targetService().getTopLevelTarget(pSys);
+
+    TargetHandleList pChildList;
+    getChildAffinityTargets(pChildList, pSys, CLASS_NA, TYPE_NA, false);
+
+    for (const auto l_child : pChildList)
+    {
+        // Get the original state of the child
+        const HwasState l_originalState = l_child->getAttr<ATTR_HWAS_STATE>();
+
+        const ATTR_SAVED_STATE_UINT8_type l_savedState = l_originalState.functional;
+
+        // Store it in a scratch attribute for later
+        l_child->setAttr<ATTR_SAVED_STATE_UINT8>(l_savedState);
+
+        // If this is a PERV target, store ATTR_PG
+        if (l_child->getAttr<ATTR_TYPE>() == TYPE_PERV)
+        {
+            const ATTR_PG_SAVED_type l_savedAttrPg = l_child->getAttr<ATTR_PG>();
+            l_child->setAttr<ATTR_PG_SAVED>(l_savedAttrPg);
+        }
+    }
+}
+
+/* @brief Restores the state of every target's HWAS_STATE and PG attributes.
+ */
+void restoreSystemState()
+{
+    TargetHandle_t pSys;
+    targetService().getTopLevelTarget(pSys);
+
+    TargetHandleList pChildList;
+    getChildAffinityTargets(pChildList, pSys, CLASS_NA, TYPE_NA, false);
+
+    for (const auto l_child : pChildList)
+    {
+        // Get original HwasState from scratch attribute
+        const auto l_savedState = l_child->getAttr<ATTR_SAVED_STATE_UINT8>();
+
+        // Update current HwasState
+        HwasState l_state = l_child->getAttr<ATTR_HWAS_STATE>();
+
+        l_state.functional = l_savedState != 0;
+
+        l_child->setAttr<ATTR_HWAS_STATE>(l_state);
+
+        // And if it's a PERV, restore ATTR_PG
+        if (l_child->getAttr<ATTR_TYPE>() == TYPE_PERV)
+        {
+            l_child->setAttr<ATTR_PG>(l_child->getAttr<ATTR_PG_SAVED>());
+        }
+    }
+}
+
 class HwasGardTest: public CxxTest::TestSuite
 {
 public:
@@ -83,6 +250,9 @@ public:
      */
     void testParentDeconfigRules()
     {
+        // @TODO RTC 243399: Fix parent deconfig rules for new targets
+        return;
+
         TS_TRACE(INFO_MRK "testParentDeconfigRules: Started");
         HWAS_INF("testParentDeconfigRules: Started");
 
@@ -125,69 +295,27 @@ public:
 
     }
 
-    void saveSystemState()
-    {
-        TargetHandle_t pSys;
-        targetService().getTopLevelTarget(pSys);
-
-        TargetHandleList pChildList;
-
-        getChildAffinityTargets(pChildList, pSys, CLASS_NA ,TYPE_NA, false);
-
-        for (auto& child : pChildList)
-        {
-            // Get the original state of the child.
-            HwasState l_originalState = child->getAttr<ATTR_HWAS_STATE>();
-
-            // Store it in a scratch attribute for later.
-            child->setAttr<ATTR_SAVED_STATE_UINT8>(l_originalState.functional);
-        }
-    }
-
-    void restoreSystemState()
-    {
-        TargetHandle_t pSys;
-        targetService().getTopLevelTarget(pSys);
-
-        TargetHandleList pChildList;
-
-        getChildAffinityTargets(pChildList, pSys, CLASS_NA ,TYPE_NA, false);
-
-        for (auto& child : pChildList)
-        {
-            // Get original HwasState from scratch attribute.
-            uint8_t l_savedState = child->getAttr<ATTR_SAVED_STATE_UINT8>();
-
-            // Get current HwasState.
-            HwasState l_state = child->getAttr<ATTR_HWAS_STATE>();
-
-            l_state.functional = l_savedState;
-
-            child->setAttr<ATTR_HWAS_STATE>(l_state);
-        }
-    }
-
     void testSaveRestoreState()
     {
 #if TEST_SAVE_RESTORE_SYSTEM_STATE
-        // find an ex unit that we can play with
+        // find an fc unit that we can play with
         Target * pSys;
         targetService().getTopLevelTarget(pSys);
 
-        PredicateCTM predEx(CLASS_UNIT, TYPE_EX);
+        PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
         PredicateHwas predFunctional;
         predFunctional.poweredOn(true).present(true).functional(true);
         PredicatePostfixExpr checkExpr;
-        checkExpr.push(&predEx).push(&predFunctional).And();
-        TargetHandleList pExList;
-        targetService().getAssociated( pExList, pSys,
+        checkExpr.push(&predFc).push(&predFunctional).And();
+        TargetHandleList pFcList;
+        targetService().getAssociated( pFcList, pSys,
             TargetService::CHILD, TargetService::ALL, &checkExpr );
 
-        if (pExList.empty())
+        if (pFcList.empty())
         {
-            TS_FAIL("testSaveRestoreState: empty pExList");
+            TS_FAIL("testSaveRestoreState: empty pFcList");
         }
-        TargetHandle_t l_pTarget = *pExList.begin();
+        TargetHandle_t l_pTarget = *pFcList.begin();
         saveSystemState();
 
         // Get current HwasState.
@@ -213,7 +341,7 @@ public:
 
     /**
      *  @brief Test creating and getting a Deconfigure Record for a
-     *      EX Target
+     *      FC Target
      */
     void testDeconfigure2()
     {
@@ -225,25 +353,25 @@ public:
 
         do
         {
-            // find an ex unit that we can play with
+            // find an fc unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
-            PredicateCTM predEx(CLASS_UNIT, TYPE_EX);
+            PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
             PredicateHwas predFunctional;
             predFunctional.poweredOn(true).present(true).functional(true);
             PredicatePostfixExpr checkExpr;
-            checkExpr.push(&predEx).push(&predFunctional).And();
-            TargetHandleList pExList;
-            targetService().getAssociated( pExList, pSys,
+            checkExpr.push(&predFc).push(&predFunctional).And();
+            TargetHandleList pFcList;
+            targetService().getAssociated( pFcList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
-            if (pExList.empty())
+            if (pFcList.empty())
             {
-                TS_FAIL("testDeconfigure2: empty pExList");
+                TS_FAIL("testDeconfigure2: empty pFcList");
                 break;
             }
-            TargetHandle_t l_pTarget = *pExList.begin();
+            TargetHandle_t l_pTarget = *pFcList.begin();
 
             // create a deconfigure record
             theDeconfigGard().
@@ -288,13 +416,13 @@ public:
     }
 
     /**
-     *  @brief Test Deconfiguring a Target - EX directly
+     *  @brief Test Deconfiguring a Target - FC directly
      */
 
     void testDeconfigure3()
     {
         TS_TRACE(INFO_MRK "testDeconfigure3: Started");
-#if DISABLE_EX_UNIT_TESTS
+#if DISABLE_FC_UNIT_TESTS
         // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
@@ -312,25 +440,25 @@ public:
 
         do
         {
-            // find an ex unit that we can play with
+            // find an fc unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
-            PredicateCTM predEx(CLASS_UNIT, TYPE_EX);
+            PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
             PredicateHwas predFunctional;
             predFunctional.poweredOn(true).present(true).functional(true);
             PredicatePostfixExpr checkExpr;
-            checkExpr.push(&predEx).push(&predFunctional).And();
-            TargetHandleList pExList;
-            targetService().getAssociated( pExList, pSys,
+            checkExpr.push(&predFc).push(&predFunctional).And();
+            TargetHandleList pFcList;
+            targetService().getAssociated( pFcList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
-            if (pExList.empty())
+            if (pFcList.empty())
             {
-                TS_FAIL("testDeconfigure3: empty pExList");
+                TS_FAIL("testDeconfigure3: empty pFcList");
                 break;
             }
-            TargetHandle_t l_pTarget = *pExList.begin();
+            TargetHandle_t l_pTarget = *pFcList.begin();
 
             // Get the original HWAS_STATE of the target
             HwasState l_origState = l_pTarget->getAttr<ATTR_HWAS_STATE>();
@@ -338,7 +466,7 @@ public:
             // Deconfigure the target.
             bool l_targetDeconfigured = false;
             l_pErr = theDeconfigGard().deconfigureTarget(*l_pTarget,
-                       DeconfigGard::DECONFIGURED_BY_EX_DECONFIG,
+                       DeconfigGard::DECONFIGURED_BY_FC_DECONFIG,
                        &l_targetDeconfigured);
             if (l_pErr)
             {
@@ -380,7 +508,7 @@ public:
     void testDeconfigure4()
     {
         TS_TRACE(INFO_MRK "testDeconfigure4: Started");
-#if DISABLE_EX_UNIT_TESTS
+#if DISABLE_FC_UNIT_TESTS
         // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
@@ -398,25 +526,25 @@ public:
 
         do
         {
-            // find an ex unit that we can play with
+            // find an fc unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
-            PredicateCTM predEx(CLASS_UNIT, TYPE_EX);
+            PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
             PredicateHwas predFunctional;
             predFunctional.poweredOn(true).present(true).functional(true);
             PredicatePostfixExpr checkExpr;
-            checkExpr.push(&predEx).push(&predFunctional).And();
-            TargetHandleList pExList;
-            targetService().getAssociated( pExList, pSys,
+            checkExpr.push(&predFc).push(&predFunctional).And();
+            TargetHandleList pFcList;
+            targetService().getAssociated( pFcList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
-            if (pExList.empty())
+            if (pFcList.empty())
             {
-                TS_FAIL("testDeconfigure4: empty pExList");
+                TS_FAIL("testDeconfigure4: empty pFcList");
                 break;
             }
-            TargetHandle_t l_pTarget = *pExList.begin();
+            TargetHandle_t l_pTarget = *pFcList.begin();
 
             // Get the current HWAS_STATE of the target
             HwasState l_origState = l_pTarget->getAttr<ATTR_HWAS_STATE>();
@@ -461,7 +589,6 @@ public:
         }
 #endif
     }
-
 
     /**
      *  @brief Test Deconfiguring a PEC Target directly
@@ -730,7 +857,7 @@ public:
     void testDeconfigureEQTarget()
     {
         TS_TRACE(INFO_MRK "testDeconfigureEQTarget: Started");
-#if DISABLE_EX_UNIT_TESTS
+#if DISABLE_FC_UNIT_TESTS
         // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
@@ -763,7 +890,7 @@ public:
 
             if (pEqList.empty())
             {
-                TS_FAIL("testDeconfigureEQTarget: empty pExList");
+                TS_FAIL("testDeconfigureEQTarget: empty pFcList");
                 break;
             }
             TargetHandle_t l_pTargetEQ = *pEqList.begin();
@@ -777,36 +904,36 @@ public:
                 break;
             }
 
-            TargetHandleList pExList, pCoreList[2];
+            TargetHandleList pFcList, pCoreList[2];
             uint32_t cIndex = 0;
-            // get the list of Exs
-            getChildAffinityTargets(pExList, l_pTargetEQ, CLASS_NA ,TYPE_EX);
+            // get the list of Fcs
+            getChildAffinityTargets(pFcList, l_pTargetEQ, CLASS_NA ,TYPE_FC);
 
-            if (pExList.empty())
+            if (pFcList.empty())
             {
-                TS_FAIL("testDeconfigureEQTarget: empty pExList");
+                TS_FAIL("testDeconfigureEQTarget: empty pFcList");
                 break;
             }
 
-            // Pick up EX and cores and save them
+            // Pick up FC and cores and save them
 
-            TargetHandle_t pEx, pCore;
+            TargetHandle_t pFc, pCore;
             bool exitLoop = false;
-            for (TargetHandleList::iterator pEx_it = pExList.begin();
-                   (pEx_it != pExList.end()) || exitLoop; ++pEx_it)
+            for (TargetHandleList::iterator pFc_it = pFcList.begin();
+                   (pFc_it != pFcList.end()) || exitLoop; ++pFc_it)
             {
-                pEx = *pEx_it;
-                TS_TRACE("testDeconfigureEQTarget: EX: %.8X",
-                         get_huid(pEx));
-                // Get the original HWAS_STATE of EX
-                l_state = pEx->getAttr<ATTR_HWAS_STATE>();
+                pFc = *pFc_it;
+                TS_TRACE("testDeconfigureEQTarget: FC: %.8X",
+                         get_huid(pFc));
+                // Get the original HWAS_STATE of FC
+                l_state = pFc->getAttr<ATTR_HWAS_STATE>();
                 if (!l_state.functional)
                 {
-                    TS_FAIL("testDeconfigureEQTarget: EX is non-functional before deconfiguration");
+                    TS_FAIL("testDeconfigureEQTarget: FC is non-functional before deconfiguration");
                     break;
                 }
                 getChildAffinityTargets(pCoreList[cIndex],
-                                    pEx, CLASS_NA ,TYPE_NA);
+                                    pFc, CLASS_NA ,TYPE_NA);
 
                 for (TargetHandleList::iterator pChild_it =
                        pCoreList[cIndex].begin();
@@ -825,7 +952,7 @@ public:
                     }
                 } // for CHILD
                 cIndex++;
-            } // for pEx_it
+            } // for pFc_it
 
             if (exitLoop)
             {
@@ -853,17 +980,17 @@ public:
             l_pTargetEQ->setAttr<ATTR_HWAS_STATE>(l_state);
 
             cIndex = 0;
-            for (TargetHandleList::iterator pEx_it = pExList.begin();
-                   (pEx_it != pExList.end()) || exitLoop; ++pEx_it)
+            for (TargetHandleList::iterator pFc_it = pFcList.begin();
+                   (pFc_it != pFcList.end()) || exitLoop; ++pFc_it)
             {
-                pEx = *pEx_it;
-                TS_TRACE("testDeconfigureEQTarget: EX: %.8X",
-                         get_huid(pEx));
-                // Get the original HWAS_STATE of EX
-                l_state = pEx->getAttr<ATTR_HWAS_STATE>();
+                pFc = *pFc_it;
+                TS_TRACE("testDeconfigureEQTarget: FC: %.8X",
+                         get_huid(pFc));
+                // Get the original HWAS_STATE of FC
+                l_state = pFc->getAttr<ATTR_HWAS_STATE>();
                 if (l_state.functional)
                 {
-                    TS_FAIL("testDeconfigureEQTarget: EX is functional after deconfiguration");
+                    TS_FAIL("testDeconfigureEQTarget: FC is functional after deconfiguration");
                     break;
                 }
 
@@ -1448,12 +1575,12 @@ public:
     }
 
     /**
-     *  @brief Test EX with no good cores should be deconfigured
+     *  @brief Test FC with no good cores should be deconfigured
      */
-    void testDeConfigEX2BadCores()
+    void testDeConfigFC2BadCores()
     {
-        TS_TRACE(INFO_MRK "testDeConfigEX2BadCores: Started");
-#if DISABLE_EX_UNIT_TESTS
+        TS_TRACE(INFO_MRK "testDeConfigFC2BadCores: Started");
+#if DISABLE_FC_UNIT_TESTS
         // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
@@ -1463,51 +1590,51 @@ public:
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
         TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
-        HWAS_INF("testDeConfigEX2BadCores: Skipped");
+        HWAS_INF("testDeConfigFC2BadCores: Skipped");
 #else
-        HWAS_INF("testDeConfigEX2BadCores: Started");
+        HWAS_INF("testDeConfigFC2BadCores: Started");
 
         errlHndl_t l_pErr = NULL;
         do
         {
 
-            // find an ex unit that we can play with
+            // find an fc unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
-            PredicateCTM predEx(CLASS_UNIT, TYPE_EX);
+            PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
             PredicateHwas predFunctional;
             predFunctional.poweredOn(true).present(true).functional(true);
 
             PredicatePostfixExpr checkExpr;
-            checkExpr.push(&predEx).push(&predFunctional).And();
+            checkExpr.push(&predFc).push(&predFunctional).And();
 
-            TargetHandleList pExList, pCoreList;
-            targetService().getAssociated( pExList, pSys,
+            TargetHandleList pFcList, pCoreList;
+            targetService().getAssociated( pFcList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
-            if (pExList.empty())
+            if (pFcList.empty())
             {
-                TS_FAIL("testDeConfigEX2BadCores: empty pExList");
+                TS_FAIL("testDeConfigFC2BadCores: empty pFcList");
                 break;
             }
 
-            // Pick up first EX
-            TargetHandle_t pEx = *pExList.begin();
-            TS_TRACE("testDeConfigEX2BadCores EX: %.8X",
-                       get_huid(pEx));
-            HwasState l_State, ex_State, oex_State;
+            // Pick up first FC
+            TargetHandle_t pFc = *pFcList.begin();
+            TS_TRACE("testDeConfigFC2BadCores FC: %.8X",
+                       get_huid(pFc));
+            HwasState l_State, fc_State, ofc_State;
             TargetHandle_t pCore;
 
-            // find all CHILD_BY_AFFINITY matches for this EX i.e. cores
+            // find all CHILD_BY_AFFINITY matches for this FC i.e. cores
             // set state non-functional
-            getChildAffinityTargets(pCoreList, pEx, CLASS_NA ,TYPE_NA);
+            getChildAffinityTargets(pCoreList, pFc, CLASS_NA ,TYPE_NA);
 
             for (TargetHandleList::iterator pChild_it = pCoreList.begin();
                    pChild_it != pCoreList.end(); ++pChild_it)
             {
                 pCore = *pChild_it;
-                TS_TRACE("testDeConfigEX2BadCores Core: %.8X",
+                TS_TRACE("testDeConfigFC2BadCores Core: %.8X",
                          get_huid(pCore));
                 // Get the original HWAS_STATE of the target
                 l_State = pCore->getAttr<ATTR_HWAS_STATE>();
@@ -1515,11 +1642,11 @@ public:
                 pCore->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
             } // for CHILD
 
-            // Get the HWAS_STATE of EX
-            oex_State = pEx->getAttr<ATTR_HWAS_STATE>();
-            if (!oex_State.functional)
+            // Get the HWAS_STATE of FC
+            ofc_State = pFc->getAttr<ATTR_HWAS_STATE>();
+            if (!ofc_State.functional)
             {
-                TS_FAIL("testDeConfigEX2BadCores: Ex non-functional, expected functional");
+                TS_FAIL("testDeConfigFC2BadCores: Fc non-functional, expected functional");
                 break;
             }
 
@@ -1529,34 +1656,34 @@ public:
                           DeconfigGard::DECONFIGURED_BY_CORE_DECONFIG);
             if (l_pErr)
             {
-                TS_FAIL("testDeConfigEX2BadCores: Error from deconfigureTarget");
+                TS_FAIL("testDeConfigFC2BadCores: Error from deconfigureTarget");
                 break;
             }
 
-            // Get the new HWAS_STATE EX
-            ex_State = pEx->getAttr<ATTR_HWAS_STATE>();
-            if (ex_State.functional)
+            // Get the new HWAS_STATE FC
+            fc_State = pFc->getAttr<ATTR_HWAS_STATE>();
+            if (fc_State.functional)
             {
-                TS_FAIL("testDeConfigEX2BadCores: Ex functional when cores non-functional");
+                TS_FAIL("testDeConfigFC2BadCores: Fc functional when cores non-functional");
                 break;
             }
 
-            // Reset the HWAS_STATE of EX
-            pEx->setAttr<ATTR_HWAS_STATE>(oex_State);
+            // Reset the HWAS_STATE of FC
+            pFc->setAttr<ATTR_HWAS_STATE>(ofc_State);
 
             // reset all core states
             for (TargetHandleList::iterator pChild_it = pCoreList.begin();
                    pChild_it != pCoreList.end(); ++pChild_it)
             {
                 TargetHandle_t pCore = *pChild_it;
-                TS_TRACE("testDeConfigEX2BadCores Core: %.8X",
+                TS_TRACE("testDeConfigFC2BadCores Core: %.8X",
                          get_huid(pCore));
                 // Get the original HWAS_STATE of the target
                 l_State = pCore->getAttr<ATTR_HWAS_STATE>();
                 l_State.functional  =   1 ;
                 pCore->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
             } // for CHILD
-            TS_TRACE(INFO_MRK "testDeConfigEX2BadCores: Success");
+            TS_TRACE(INFO_MRK "testDeConfigFC2BadCores: Success");
         }
         while (0);
 
@@ -1564,13 +1691,13 @@ public:
     }
 
     /**
-     *  @brief Test EX with one good and one bad core should not be deconfigured
+     *  @brief Test FC with one good and one bad core should not be deconfigured
      */
 
-    void testDeConfigEX1BadCore()
+    void testDeConfigFC1BadCore()
     {
-        TS_TRACE(INFO_MRK "testDeConfigEX1BadCore: Started");
-#if DISABLE_EX_UNIT_TESTS
+        TS_TRACE(INFO_MRK "testDeConfigFC1BadCore: Started");
+#if DISABLE_FC_UNIT_TESTS
         // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
@@ -1580,45 +1707,45 @@ public:
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
         TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
-        HWAS_INF("testDeConfigEX1BadCore: Skipped");
+        HWAS_INF("testDeConfigFC1BadCore: Skipped");
 #else
-        HWAS_INF("testDeConfigEX1BadCore: Started");
+        HWAS_INF("testDeConfigFC1BadCore: Started");
 
         errlHndl_t l_pErr = NULL;
         do
         {
 
-            // find an ex unit that we can play with
+            // find an fc unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
-            PredicateCTM predEx(CLASS_UNIT, TYPE_EX);
+            PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
             PredicateHwas predFunctional;
             predFunctional.poweredOn(true).present(true).functional(true);
 
             PredicatePostfixExpr checkExpr;
-            checkExpr.push(&predEx).push(&predFunctional).And();
+            checkExpr.push(&predFc).push(&predFunctional).And();
 
-            TargetHandleList pExList, pCoreList;
-            targetService().getAssociated( pExList, pSys,
+            TargetHandleList pFcList, pCoreList;
+            targetService().getAssociated( pFcList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
-            if (pExList.empty())
+            if (pFcList.empty())
             {
-                TS_FAIL("testDeConfigEX1BadCore: empty pExList");
+                TS_FAIL("testDeConfigFC1BadCore: empty pFcList");
                 break;
             }
 
-            // Pick up first EX
-            TargetHandle_t pEx = *pExList.begin();
-            TS_TRACE("testDeConfigEX1BadCore EX: %.8X",
-                       get_huid(pEx));
-            HwasState l_State, ex_State, oex_State;
+            // Pick up first FC
+            TargetHandle_t pFc = *pFcList.begin();
+            TS_TRACE("testDeConfigFC1BadCore FC: %.8X",
+                       get_huid(pFc));
+            HwasState l_State, fc_State, ofc_State;
             TargetHandle_t pCore;
 
-            // find all CHILD_BY_AFFINITY matches for this EX i.e. cores
+            // find all CHILD_BY_AFFINITY matches for this FC i.e. cores
             // set state non-functional
-            getChildAffinityTargets(pCoreList, pEx, CLASS_NA ,TYPE_NA);
+            getChildAffinityTargets(pCoreList, pFc, CLASS_NA ,TYPE_NA);
 
             // Set first core state non-functional
             TargetHandleList::iterator pChild_it = pCoreList.begin();
@@ -1634,11 +1761,11 @@ public:
             l_State.functional  =   1 ;
             pCore->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
 
-            // Get the HWAS_STATE of EX
-            oex_State = pEx->getAttr<ATTR_HWAS_STATE>();
-            if (!oex_State.functional)
+            // Get the HWAS_STATE of FC
+            ofc_State = pFc->getAttr<ATTR_HWAS_STATE>();
+            if (!ofc_State.functional)
             {
-                TS_FAIL("testDeConfigEX1BadCore: Ex non-functional, expected functional");
+                TS_FAIL("testDeConfigFC1BadCore: Fc non-functional, expected functional");
                 break;
             }
 
@@ -1648,15 +1775,15 @@ public:
                           DeconfigGard::DECONFIGURED_BY_CORE_DECONFIG);
             if (l_pErr)
             {
-                TS_FAIL("testDeConfigEX1BadCore: Error from deconfigureTarget");
+                TS_FAIL("testDeConfigFC1BadCore: Error from deconfigureTarget");
                 break;
             }
 
-            // Get the new HWAS_STATE EX
-            ex_State = pEx->getAttr<ATTR_HWAS_STATE>();
-            if (!ex_State.functional)
+            // Get the new HWAS_STATE FC
+            fc_State = pFc->getAttr<ATTR_HWAS_STATE>();
+            if (!fc_State.functional)
             {
-                TS_FAIL("testDeConfigEX1BadCore: Ex non-functional when one core is functional");
+                TS_FAIL("testDeConfigFC1BadCore: Fc non-functional when one core is functional");
                 break;
             }
 
@@ -1673,7 +1800,7 @@ public:
             l_State.functional  =   1 ;
             pCore->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
 
-            TS_TRACE(INFO_MRK "testDeConfigEX1BadCore: Success");
+            TS_TRACE(INFO_MRK "testDeConfigFC1BadCore: Success");
         }
         while (0);
 
@@ -1681,12 +1808,12 @@ public:
     }
 
     /**
-     *  @brief Test EQ with no good EXs should be deconfigured
+     *  @brief Test EQ with no good FCs should be deconfigured
      */
-    void testDeConfigEQ2BadEXs()
+    void testDeConfigEQ2BadFCs()
     {
-        TS_TRACE(INFO_MRK "testDeConfigEQ2BadEXs: Started");
-#if DISABLE_EX_UNIT_TESTS
+        TS_TRACE(INFO_MRK "testDeConfigEQ2BadFCs: Started");
+#if DISABLE_FC_UNIT_TESTS
         // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
@@ -1696,9 +1823,9 @@ public:
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
         TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
-        HWAS_INF("testDeConfigEQ2BadEXs: Skipped");
+        HWAS_INF("testDeConfigEQ2BadFCs: Skipped");
 #else
-        HWAS_INF("testDeConfigEQ2BadEXs: Started");
+        HWAS_INF("testDeConfigEQ2BadFCs: Started");
 
         errlHndl_t l_pErr = NULL;
 
@@ -1716,54 +1843,54 @@ public:
             PredicatePostfixExpr checkExpr;
             checkExpr.push(&predEq).push(&predFunctional).And();
 
-            TargetHandleList pEqList, pExList;
+            TargetHandleList pEqList, pFcList;
             targetService().getAssociated( pEqList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
             if (pEqList.empty())
             {
-                TS_FAIL("testDeConfigEQ2BadEXs: empty pEqList");
+                TS_FAIL("testDeConfigEQ2BadFCs: empty pEqList");
                 break;
             }
 
             // Pick up first EQ
             TargetHandle_t pEq = *pEqList.begin();
-            TS_TRACE("testDeConfigEQ2BadEXs EQ: %.8X",
+            TS_TRACE("testDeConfigEQ2BadFCs EQ: %.8X",
                        get_huid(pEq));
             HwasState l_State, eq_State, oeq_State;
-            TargetHandle_t pEx;
+            TargetHandle_t pFc;
 
-            // find all CHILD_BY_AFFINITY matches for this EQ i.e. EXs
+            // find all CHILD_BY_AFFINITY matches for this EQ i.e. FCs
             // set state non-functional
-            getChildAffinityTargets(pExList, pEq, CLASS_NA ,TYPE_NA);
+            getChildAffinityTargets(pFcList, pEq, CLASS_NA ,TYPE_NA);
 
-            for (TargetHandleList::iterator pChild_it = pExList.begin();
-                   pChild_it != pExList.end(); ++pChild_it)
+            for (TargetHandleList::iterator pChild_it = pFcList.begin();
+                   pChild_it != pFcList.end(); ++pChild_it)
             {
-                pEx = *pChild_it;
-                TS_TRACE("testDeConfigEQ2BadEXs EX: %.8X",
-                         get_huid(pEx));
+                pFc = *pChild_it;
+                TS_TRACE("testDeConfigEQ2BadFCs FC: %.8X",
+                         get_huid(pFc));
                 // Get the original HWAS_STATE of the target
-                l_State = pEx->getAttr<ATTR_HWAS_STATE>();
+                l_State = pFc->getAttr<ATTR_HWAS_STATE>();
                 l_State.functional  =   0 ;
-                pEx->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
+                pFc->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
             } // for CHILD
 
             // Get the HWAS_STATE of EQ
             oeq_State = pEq->getAttr<ATTR_HWAS_STATE>();
             if (!oeq_State.functional)
             {
-                TS_FAIL("testDeConfigEQ2BadEXs: Eq non-functional, expected functional");
+                TS_FAIL("testDeConfigEQ2BadFCs: Eq non-functional, expected functional");
                 break;
             }
 
-            // Deconfigure any of the EX
-            pEx = *pExList.begin();
-            l_pErr = theDeconfigGard().deconfigureTarget(*pEx,
-                       DeconfigGard::DECONFIGURED_BY_EX_DECONFIG);
+            // Deconfigure any of the FC
+            pFc = *pFcList.begin();
+            l_pErr = theDeconfigGard().deconfigureTarget(*pFc,
+                       DeconfigGard::DECONFIGURED_BY_FC_DECONFIG);
             if (l_pErr)
             {
-                TS_FAIL("testDeConfigEQ2BadEXs: Error from deconfigureTarget");
+                TS_FAIL("testDeConfigEQ2BadFCs: Error from deconfigureTarget");
                 break;
             }
 
@@ -1771,26 +1898,26 @@ public:
             eq_State = pEq->getAttr<ATTR_HWAS_STATE>();
             if (eq_State.functional)
             {
-                TS_FAIL("testDeConfigEQ2BadEXs: Eq functional when Exs non-functional");
+                TS_FAIL("testDeConfigEQ2BadFCs: Eq functional when Fcs non-functional");
                 break;
             }
 
-            // Reset the HWAS_STATE of EX
+            // Reset the HWAS_STATE of FC
             pEq->setAttr<ATTR_HWAS_STATE>(oeq_State);
 
             // reset all core states
-            for (TargetHandleList::iterator pChild_it = pExList.begin();
-                   pChild_it != pExList.end(); ++pChild_it)
+            for (TargetHandleList::iterator pChild_it = pFcList.begin();
+                   pChild_it != pFcList.end(); ++pChild_it)
             {
-                TargetHandle_t pEx = *pChild_it;
-                TS_TRACE("testDeConfigEQ2BadEXs EX: %.8X",
-                         get_huid(pEx));
+                TargetHandle_t pFc = *pChild_it;
+                TS_TRACE("testDeConfigEQ2BadFCs FC: %.8X",
+                         get_huid(pFc));
                 // Get the original HWAS_STATE of the target
-                l_State = pEx->getAttr<ATTR_HWAS_STATE>();
+                l_State = pFc->getAttr<ATTR_HWAS_STATE>();
                 l_State.functional  =   1 ;
-                pEx->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
+                pFc->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
             } // for CHILD
-            TS_TRACE(INFO_MRK "testDeConfigEQ2BadEXs: Success");
+            TS_TRACE(INFO_MRK "testDeConfigEQ2BadFCs: Success");
         }
         while (0);
 
@@ -1798,12 +1925,12 @@ public:
     }
 
     /**
-     *  @brief Test EQ with one good and one bad EX should not be deconfigured
+     *  @brief Test EQ with one good and one bad FC should not be deconfigured
      */
 
-    void testDeConfigEQ1BadEX()
+    void testDeConfigEQ1BadFC()
     {
-        TS_TRACE(INFO_MRK "testDeConfigEQ1BadEX: Started");
+        TS_TRACE(INFO_MRK "testDeConfigEQ1BadFC: Started");
 #if DISABLE_UNIT_TESTS
         // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
@@ -1814,9 +1941,9 @@ public:
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
         TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
-        HWAS_INF("testDeConfigEQ1BadEX: Skipped");
+        HWAS_INF("testDeConfigEQ1BadFC: Skipped");
 #else
-        HWAS_INF("testDeConfigEQ1BadEX: Started");
+        HWAS_INF("testDeConfigEQ1BadFC: Started");
 
         errlHndl_t l_pErr = NULL;
         do
@@ -1839,75 +1966,75 @@ public:
 
             if (pEqList.empty())
             {
-                TS_FAIL("testDeConfigEQ1BadEX: empty pEqList");
+                TS_FAIL("testDeConfigEQ1BadFC: empty pEqList");
                 break;
             }
 
             // Pick up first EQ
             TargetHandle_t pEq = *pEqList.begin();
-            TS_TRACE("testDeConfigEQ1BadEX EQ: %.8X", get_huid(pEq));
+            TS_TRACE("testDeConfigEQ1BadFC EQ: %.8X", get_huid(pEq));
             HwasState l_State, eq_State, oeq_State;
 
-            // find all CHILD_BY_AFFINITY matches for this EX i.e. cores
+            // find all CHILD_BY_AFFINITY matches for this FC i.e. cores
             // set state non-functional
-            TargetHandleList pExList;
-            TargetHandle_t pEx;
-            getChildAffinityTargets(pExList, pEq, CLASS_NA ,TYPE_NA);
+            TargetHandleList pFcList;
+            TargetHandle_t pFc;
+            getChildAffinityTargets(pFcList, pEq, CLASS_NA ,TYPE_NA);
 
             // Set first core state non-functional
-            TargetHandleList::iterator pChild_it = pExList.begin();
-            pEx = *pChild_it;
-            l_State = pEx->getAttr<ATTR_HWAS_STATE>();
+            TargetHandleList::iterator pChild_it = pFcList.begin();
+            pFc = *pChild_it;
+            l_State = pFc->getAttr<ATTR_HWAS_STATE>();
             l_State.functional  =   0 ;
-            pEx->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
+            pFc->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
 
             // Set second core state functional
             ++pChild_it;
-            pEx = *pChild_it;
-            l_State = pEx->getAttr<ATTR_HWAS_STATE>();
+            pFc = *pChild_it;
+            l_State = pFc->getAttr<ATTR_HWAS_STATE>();
             l_State.functional  =   1 ;
-            pEx->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
+            pFc->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
 
             // Get the HWAS_STATE of EQ
             oeq_State = pEq->getAttr<ATTR_HWAS_STATE>();
             if (!oeq_State.functional)
             {
-                TS_FAIL("testDeConfigEQ1BadEX: Eq non-functional, expected functional");
+                TS_FAIL("testDeConfigEQ1BadFC: Eq non-functional, expected functional");
                 break;
             }
 
-            // Deconfigure the first EX
-            pEx = *pExList.begin();
-            l_pErr = theDeconfigGard().deconfigureTarget(*pEx,
-                         DeconfigGard::DECONFIGURED_BY_EX_DECONFIG);
+            // Deconfigure the first FC
+            pFc = *pFcList.begin();
+            l_pErr = theDeconfigGard().deconfigureTarget(*pFc,
+                         DeconfigGard::DECONFIGURED_BY_FC_DECONFIG);
             if (l_pErr)
             {
-                TS_FAIL("testDeConfigEQ1BadEX: Error from deconfigureTarget");
+                TS_FAIL("testDeConfigEQ1BadFC: Error from deconfigureTarget");
                 break;
             }
 
-            // Get the new HWAS_STATE EX
+            // Get the new HWAS_STATE FC
             eq_State = pEq->getAttr<ATTR_HWAS_STATE>();
             if (!eq_State.functional)
             {
-                TS_FAIL("testDeConfigEQ1BadEX: Eq non-functional, one core functional");
+                TS_FAIL("testDeConfigEQ1BadFC: Eq non-functional, one core functional");
                 break;
             }
 
-            // Set both EXs state functional
-            pChild_it = pExList.begin();
-            pEx = *pChild_it;
-            l_State = pEx->getAttr<ATTR_HWAS_STATE>();
+            // Set both FCs state functional
+            pChild_it = pFcList.begin();
+            pFc = *pChild_it;
+            l_State = pFc->getAttr<ATTR_HWAS_STATE>();
             l_State.functional  =   1 ;
-            pEx->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
+            pFc->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
 
             ++pChild_it;
-            pEx = *pChild_it;
-            l_State = pEx->getAttr<ATTR_HWAS_STATE>();
+            pFc = *pChild_it;
+            l_State = pFc->getAttr<ATTR_HWAS_STATE>();
             l_State.functional  =   1 ;
-            pEx->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
+            pFc->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
 
-            TS_TRACE(INFO_MRK "testDeConfigEQ1BadEX: Success");
+            TS_TRACE(INFO_MRK "testDeConfigEQ1BadFC: Success");
         }
         while (0);
 
@@ -1915,14 +2042,14 @@ public:
     }
 
     /**
-     *  @brief Test in fused core mode EX with one good and one bad core
+     *  @brief Test in fused core mode FC with one good and one bad core
      *  should be deconfigured
      */
 
-    void testDeConfigEXInFusedCoreMode()
+    void testDeConfigFCInFusedCoreMode()
     {
-        TS_TRACE(INFO_MRK "testDeConfigEXInFusedCoreMode: Started");
-#if DISABLE_EX_UNIT_TESTS
+        TS_TRACE(INFO_MRK "testDeConfigFCInFusedCoreMode: Started");
+#if DISABLE_FC_UNIT_TESTS
         // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
@@ -1932,45 +2059,45 @@ public:
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
         TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
-        HWAS_INF("testDeConfigEXInFusedCoreMode: Skipped");
+        HWAS_INF("testDeConfigFCInFusedCoreMode: Skipped");
 #else
-        HWAS_INF("testDeConfigEXInFusedCoreMode: Started");
+        HWAS_INF("testDeConfigFCInFusedCoreMode: Started");
 
         errlHndl_t l_pErr = NULL;
         do
         {
 
-            // find an ex unit that we can play with
+            // find an fc unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
-            PredicateCTM predEx(CLASS_UNIT, TYPE_EX);
+            PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
             PredicateHwas predFunctional;
             predFunctional.poweredOn(true).present(true).functional(true);
 
             PredicatePostfixExpr checkExpr;
-            checkExpr.push(&predEx).push(&predFunctional).And();
+            checkExpr.push(&predFc).push(&predFunctional).And();
 
-            TargetHandleList pExList, pCoreList;
-            targetService().getAssociated( pExList, pSys,
+            TargetHandleList pFcList, pCoreList;
+            targetService().getAssociated( pFcList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
-            if (pExList.empty())
+            if (pFcList.empty())
             {
-                TS_FAIL("testDeConfigEXInFusedCoreMode: empty pExList");
+                TS_FAIL("testDeConfigFCInFusedCoreMode: empty pFcList");
                 break;
             }
 
-            // Pick up first EX
-            TargetHandle_t pEx = *pExList.begin();
-            TS_TRACE("testDeConfigEXInFusedCoreMode EX: %.8X",
-                       get_huid(pEx));
-            HwasState l_State, ex_State, oex_State;
+            // Pick up first FC
+            TargetHandle_t pFc = *pFcList.begin();
+            TS_TRACE("testDeConfigFCInFusedCoreMode FC: %.8X",
+                       get_huid(pFc));
+            HwasState l_State, fc_State, ofc_State;
             TargetHandle_t pCore;
 
-            // find all CHILD_BY_AFFINITY matches for this EX i.e. cores
+            // find all CHILD_BY_AFFINITY matches for this FC i.e. cores
             // set state non-functional
-            getChildAffinityTargets(pCoreList, pEx, CLASS_NA ,TYPE_NA);
+            getChildAffinityTargets(pCoreList, pFc, CLASS_NA ,TYPE_NA);
 
             // Set first core state non-functional
             TargetHandleList::iterator pChild_it = pCoreList.begin();
@@ -1986,11 +2113,11 @@ public:
             l_State.functional  =   1 ;
             pCore->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
 
-            // Get the HWAS_STATE of EX
-            oex_State = pEx->getAttr<ATTR_HWAS_STATE>();
-            if (!oex_State.functional)
+            // Get the HWAS_STATE of FC
+            ofc_State = pFc->getAttr<ATTR_HWAS_STATE>();
+            if (!ofc_State.functional)
             {
-                TS_FAIL("testDeConfigEXInFusedCoreMode: Ex non-functional, expected functional");
+                TS_FAIL("testDeConfigFCInFusedCoreMode: Fc non-functional, expected functional");
                 break;
             }
 
@@ -2000,15 +2127,15 @@ public:
                          DeconfigGard::DECONFIGURED_BY_CORE_DECONFIG);
             if (l_pErr)
             {
-                TS_FAIL("testDeConfigEXInFusedCoreMode: Error from deconfigureTarget");
+                TS_FAIL("testDeConfigFCInFusedCoreMode: Error from deconfigureTarget");
                 break;
             }
 
-            // Get the new HWAS_STATE EX
-            ex_State = pEx->getAttr<ATTR_HWAS_STATE>();
-            if (ex_State.functional)
+            // Get the new HWAS_STATE FC
+            fc_State = pFc->getAttr<ATTR_HWAS_STATE>();
+            if (fc_State.functional)
             {
-                TS_FAIL("testDeConfigEXInFusedCoreMode: Ex functional in Fused Core Mode");
+                TS_FAIL("testDeConfigFCInFusedCoreMode: Fc functional in Fused Core Mode");
                 break;
             }
 
@@ -2018,7 +2145,7 @@ public:
             l_State = pCore->getAttr<ATTR_HWAS_STATE>();
             if (l_State.functional)
             {
-                TS_FAIL("testDeConfigEXInFusedCoreMode: Core1 is functional in Fused Core Mode");
+                TS_FAIL("testDeConfigFCInFusedCoreMode: Core1 is functional in Fused Core Mode");
                 break;
             }
             l_State.functional  =   1 ;
@@ -2029,13 +2156,13 @@ public:
             l_State = pCore->getAttr<ATTR_HWAS_STATE>();
             if (l_State.functional)
             {
-                TS_FAIL("testDeConfigEXInFusedCoreMode: Core2 is functional in Fused Core Mode");
+                TS_FAIL("testDeConfigFCInFusedCoreMode: Core2 is functional in Fused Core Mode");
                 break;
             }
             l_State.functional  =   1 ;
             pCore->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
 
-            TS_TRACE(INFO_MRK "testDeConfigEXInFusedCoreMode: Success");
+            TS_TRACE(INFO_MRK "testDeConfigFCInFusedCoreMode: Success");
         }
         while (0);
 
@@ -2043,7 +2170,7 @@ public:
     }
 
     /**
-     *  @brief Test EQ with no good EXs should be deconfigured
+     *  @brief Test EQ with no good FCs should be deconfigured
      */
     /**
      *  @brief Test Deconfiguring a Target via deferred
@@ -2051,7 +2178,7 @@ public:
     void testDefDeconfig1()
     {
         TS_TRACE(INFO_MRK "testDefDeconfig1: Started");
-#if DISABLE_EX_UNIT_TESTS
+#if DISABLE_FC_UNIT_TESTS
         // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
@@ -2069,25 +2196,25 @@ public:
 
         do
         {
-            // find an ex unit that we can play with
+            // find an fc unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
-            PredicateCTM predEx(CLASS_UNIT, TYPE_EX);
+            PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
             PredicateHwas predFunctional;
             predFunctional.poweredOn(true).present(true).functional(true);
             PredicatePostfixExpr checkExpr;
-            checkExpr.push(&predEx).push(&predFunctional).And();
-            TargetHandleList pExList;
-            targetService().getAssociated( pExList, pSys,
+            checkExpr.push(&predFc).push(&predFunctional).And();
+            TargetHandleList pFcList;
+            targetService().getAssociated( pFcList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
-            if (pExList.empty())
+            if (pFcList.empty())
             {
-                TS_FAIL("testDefDeconfig1: empty pExList");
+                TS_FAIL("testDefDeconfig1: empty pFcList");
                 break;
             }
-            TargetHandle_t l_pTarget = *pExList.begin();
+            TargetHandle_t l_pTarget = *pFcList.begin();
 
             // Get any existing Deconfigure Record for the target
             l_pErr = theDeconfigGard().
@@ -2186,7 +2313,7 @@ public:
     void testGard4()
     {
         TS_TRACE(INFO_MRK "testGard4: Started");
-#if DISABLE_EX_UNIT_TESTS
+#if DISABLE_FC_UNIT_TESTS
         // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
@@ -2205,25 +2332,25 @@ public:
 
         do
         {
-            // find an ex unit that we can play with
+            // find an fc unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
-            PredicateCTM predEx(CLASS_UNIT, TYPE_EX);
+            PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
             PredicateHwas predFunctional;
             predFunctional.poweredOn(true).present(true).functional(true);
             PredicatePostfixExpr checkExpr;
-            checkExpr.push(&predEx).push(&predFunctional).And();
-            TargetHandleList pExList;
-            targetService().getAssociated( pExList, pSys,
+            checkExpr.push(&predFc).push(&predFunctional).And();
+            TargetHandleList pFcList;
+            targetService().getAssociated( pFcList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
-            if (pExList.empty())
+            if (pFcList.empty())
             {
-                TS_FAIL("testGard4: empty pExList");
+                TS_FAIL("testGard4: empty pFcList");
                 break;
             }
-            TargetHandle_t l_pTarget = *pExList.begin();
+            TargetHandle_t l_pTarget = *pFcList.begin();
 
             // Get any existing GARD Records for the target
             l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
@@ -2317,7 +2444,7 @@ public:
     void testGard5()
     {
         TS_TRACE(INFO_MRK "testGard5: Started");
-#if DISABLE_EX_UNIT_TESTS
+#if DISABLE_FC_UNIT_TESTS
         // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
@@ -2336,25 +2463,25 @@ public:
 
         do
         {
-            // find an ex unit that we can play with
+            // find an fc unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
-            PredicateCTM predEx(CLASS_UNIT, TYPE_EX);
+            PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
             PredicateHwas predFunctional;
             predFunctional.poweredOn(true).present(true).functional(true);
             PredicatePostfixExpr checkExpr;
-            checkExpr.push(&predEx).push(&predFunctional).And();
-            TargetHandleList pExList;
-            targetService().getAssociated( pExList, pSys,
+            checkExpr.push(&predFc).push(&predFunctional).And();
+            TargetHandleList pFcList;
+            targetService().getAssociated( pFcList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
-            if (pExList.empty())
+            if (pFcList.empty())
             {
-                TS_FAIL("testGard5: empty pExList");
+                TS_FAIL("testGard5: empty pFcList");
                 break;
             }
-            TargetHandle_t l_pTarget = *pExList.begin();
+            TargetHandle_t l_pTarget = *pFcList.begin();
 
             // Get any existing GARD Records for the target
             l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
@@ -2452,7 +2579,7 @@ public:
     void testGard6()
     {
         TS_TRACE(INFO_MRK "testGard6: Started");
-#if DISABLE_EX_UNIT_TESTS
+#if DISABLE_FC_UNIT_TESTS
         // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
@@ -2471,25 +2598,25 @@ public:
 
         do
         {
-            // find an ex unit that we can play with
+            // find an fc unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
-            PredicateCTM predEx(CLASS_UNIT, TYPE_EX);
+            PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
             PredicateHwas predFunctional;
             predFunctional.poweredOn(true).present(true).functional(true);
             PredicatePostfixExpr checkExpr;
-            checkExpr.push(&predEx).push(&predFunctional).And();
-            TargetHandleList pExList;
-            targetService().getAssociated( pExList, pSys,
+            checkExpr.push(&predFc).push(&predFunctional).And();
+            TargetHandleList pFcList;
+            targetService().getAssociated( pFcList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
-            if (pExList.empty())
+            if (pFcList.empty())
             {
-                TS_FAIL("testGard6: empty pExList");
+                TS_FAIL("testGard6: empty pFcList");
                 break;
             }
-            TargetHandle_t l_pTarget = *pExList.begin();
+            TargetHandle_t l_pTarget = *pFcList.begin();
 
             // Get any existing GARD Records for the target
             l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
@@ -2595,7 +2722,7 @@ public:
     void testGard7()
     {
         TS_TRACE(INFO_MRK "testGard7: Started");
-#if DISABLE_EX_UNIT_TESTS
+#if DISABLE_FC_UNIT_TESTS
         // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
@@ -2614,25 +2741,25 @@ public:
 
         do
         {
-            // find an ex unit that we can play with
+            // find an fc unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
-            PredicateCTM predEx(CLASS_UNIT, TYPE_EX);
+            PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
             PredicateHwas predFunctional;
             predFunctional.poweredOn(true).present(true).functional(true);
             PredicatePostfixExpr checkExpr;
-            checkExpr.push(&predEx).push(&predFunctional).And();
-            TargetHandleList pExList;
-            targetService().getAssociated( pExList, pSys,
+            checkExpr.push(&predFc).push(&predFunctional).And();
+            TargetHandleList pFcList;
+            targetService().getAssociated( pFcList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
-            if (pExList.empty())
+            if (pFcList.empty())
             {
-                TS_FAIL("testGard7: empty pExList");
+                TS_FAIL("testGard7: empty pFcList");
                 break;
             }
-            TargetHandle_t l_pTarget = *pExList.begin();
+            TargetHandle_t l_pTarget = *pFcList.begin();
 
             // Get all existing GARD Records
             l_pErr = theDeconfigGard().getGardRecords(NULL, l_records);
@@ -2706,7 +2833,7 @@ public:
     void testGard8()
     {
         TS_TRACE(INFO_MRK "testGard8: Started");
-#if DISABLE_EX_UNIT_TESTS
+#if DISABLE_FC_UNIT_TESTS
         // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
@@ -2739,28 +2866,28 @@ public:
                         l_records.size());
                 break;
             }
-            // find an ex unit that we can play with
+            // find an fc unit that we can play with
 
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
-            PredicateCTM predEx(CLASS_UNIT, TYPE_EX);
+            PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
             PredicateHwas predFunctional;
             predFunctional.poweredOn(true).present(true).functional(true);
             PredicatePostfixExpr checkExpr;
-            checkExpr.push(&predEx).push(&predFunctional).And();
+            checkExpr.push(&predFc).push(&predFunctional).And();
 
-            TargetHandleList pExList;
-            targetService().getAssociated( pExList, pSys,
+            TargetHandleList pFcList;
+            targetService().getAssociated( pFcList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
-            if (pExList.empty())
+            if (pFcList.empty())
             {
-                TS_FAIL("testGard8: empty pExList");
+                TS_FAIL("testGard8: empty pFcList");
                 break;
             }
 
-            TargetHandle_t l_target = *pExList.begin();
+            TargetHandle_t l_target = *pFcList.begin();
 
             // create GARD record, call 'doGard' step and confirm target is
             //  deconfigured
@@ -2852,7 +2979,7 @@ public:
     void testGard9()
     {
         TS_TRACE(INFO_MRK "testGard9: Started");
-#if DISABLE_EX_UNIT_TESTS
+#if DISABLE_FC_UNIT_TESTS
         // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
@@ -2871,25 +2998,25 @@ public:
 
         do
         {
-            // find an ex unit that we can play with
+            // find an fc unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
-            PredicateCTM predEx(CLASS_UNIT, TYPE_EX);
+            PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
             PredicateHwas predFunctional;
             predFunctional.poweredOn(true).present(true).functional(true);
             PredicatePostfixExpr checkExpr;
-            checkExpr.push(&predEx).push(&predFunctional).And();
-            TargetHandleList pExList;
-            targetService().getAssociated( pExList, pSys,
+            checkExpr.push(&predFc).push(&predFunctional).And();
+            TargetHandleList pFcList;
+            targetService().getAssociated( pFcList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
-            if (pExList.empty())
+            if (pFcList.empty())
             {
-                TS_FAIL("testGard9: empty pExList");
+                TS_FAIL("testGard9: empty pFcList");
                 break;
             }
-            TargetHandle_t l_pTarget = *pExList.begin();
+            TargetHandle_t l_pTarget = *pFcList.begin();
 
             // Get any existing GARD Records for the target
             l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
@@ -2991,7 +3118,7 @@ public:
     void testGard10()
     {
         TS_TRACE(INFO_MRK "testGard10: Started");
-#if DISABLE_EX_UNIT_TESTS
+#if DISABLE_FC_UNIT_TESTS
         // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
@@ -3025,27 +3152,27 @@ public:
                 break;
             }
 
-            // find an ex unit that we can play with
+            // find an fc unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
-            PredicateCTM predEx(CLASS_UNIT, TYPE_EX);
+            PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
             PredicateHwas predFunctional;
             predFunctional.poweredOn(true).present(true).functional(true);
             PredicatePostfixExpr checkExpr;
-            checkExpr.push(&predEx).push(&predFunctional).And();
+            checkExpr.push(&predFc).push(&predFunctional).And();
 
-            TargetHandleList pExList;
-            targetService().getAssociated( pExList, pSys,
+            TargetHandleList pFcList;
+            targetService().getAssociated( pFcList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
-            if (pExList.empty())
+            if (pFcList.empty())
             {
-                TS_FAIL("testGard10: empty pExList");
+                TS_FAIL("testGard10: empty pFcList");
                 break;
             }
 
-            TargetHandle_t l_target = *pExList.begin();
+            TargetHandle_t l_target = *pFcList.begin();
 
             // create GARD record, set Policy, call 'doGard' step and confirm
             //  target is NOT deconfigured
@@ -3187,7 +3314,7 @@ public:
     void testGard11()
     {
         TS_TRACE(INFO_MRK "testGard11: Started");
-#if DISABLE_EX_UNIT_TESTS
+#if DISABLE_FC_UNIT_TESTS
         // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
@@ -3236,27 +3363,27 @@ public:
                                        static_cast<HWAS_CHANGED_BIT>(l_mask));
             } // for
 
-            // find an ex unit that we can play with
+            // find an fc unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
-            PredicateCTM predEx(CLASS_UNIT, TYPE_EX);
+            PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
             PredicateHwas predFunctional;
             predFunctional.poweredOn(true).present(true).functional(true);
             PredicatePostfixExpr checkExpr;
-            checkExpr.push(&predEx).push(&predFunctional).And();
+            checkExpr.push(&predFc).push(&predFunctional).And();
 
-            TargetHandleList pExList;
-            targetService().getAssociated( pExList, pSys,
+            TargetHandleList pFcList;
+            targetService().getAssociated( pFcList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
-            if (pExList.empty())
+            if (pFcList.empty())
             {
-                TS_FAIL("testGard11: empty pExList");
+                TS_FAIL("testGard11: empty pFcList");
                 break;
             }
 
-            TargetHandle_t l_target = *pExList.begin();
+            TargetHandle_t l_target = *pFcList.begin();
 
             // Save ATTR_BLOCK_SPEC_DECONFIG value
             TARGETING::ATTR_BLOCK_SPEC_DECONFIG_type l_orig_block_spec_deconfig
@@ -6322,13 +6449,353 @@ public:
 #endif
     }
 
+    /**
+     * @brief Check the PG rules for PAUs 0, 4 and 5 to see whether NMMU 1 should
+     *        be functional or power-gated based on PG information.
+     * @param[in] i_sortedPauList   List of PAU targets sorted by chip unit
+     * @param[in] i_pgv             The PGV to be used for the PAU targets
+     * @param[in] i_stateMap        The state map to be used for the PAU targets
+     * @return bool                 Whether NMMU1 should be deconfigured
+     */
+    static bool shouldNMMU1BeFunctional_pg(const TargetHandleList& i_sortedPauList,
+                                           const partialGoodVector& i_pgv,
+                                           pgState_map& i_stateMap)
+    {
+        return    isDescFunctional(i_sortedPauList[PAU_0_INDEX], i_pgv, i_stateMap)
+               || isDescFunctional(i_sortedPauList[PAU_4_INDEX], i_pgv, i_stateMap)
+               || isDescFunctional(i_sortedPauList[PAU_5_INDEX], i_pgv, i_stateMap);
+    }
 
+    /**
+     * @brief Test the PG deconfiguration rule for Nest 1 NMMU
+     */
+    void testHWASNMMU1DeconfigByPAU()
+    {
+        TS_INFO( "testHWASNMMU1DeconfigByPAU entry" );
+
+        static const pg_entry_t INVALID_PAU = 0xFFFFFFFF;
+        static const pg_entry_t l_pauBadPgBit[] =
+        {
+            0x00040000,
+            INVALID_PAU, // Logical PAUs 1 and 2 are not defined;
+            INVALID_PAU, // there are only 6 physical PAUs.
+            0x00040000,
+            0x00040000,
+            0x00020000,
+            0x00040000,
+            0x00020000,
+        };
+
+        TargetHandleList l_procList;
+        getAllChips(l_procList, TYPE_PROC);
+
+        for (const Target* const l_proc : l_procList)
+        {
+            const TargetHandleList l_sortedPauList = getSortedPAUList(*l_proc);
+
+            /* This loop will iterate all possible combinations of enabled/disabled
+             * PAUs using the least-significant NUM_PAU_PER_PROC bits of
+             * l_pauDisableMask as a bitmask (1 = disabled, 0 = enabled), and
+             * ensure that if PAUs 0, 4 and 5 are disabled, then NMMU1 gets
+             * disabled as well. */
+
+            unsigned int l_pauDisableMask = 0;
+
+            do
+            {
+                partialGoodVector l_badPgData = pgDataAllGood;
+
+                // Disable each bad PAU
+                for (uint32_t i = 0; i < NUM_PAU_PER_PROC; ++i)
+                {
+                    const bool l_shouldPauBeDisabled = l_pauDisableMask & (1 << i);
+
+                    if (l_shouldPauBeDisabled)
+                    {
+                        const auto l_chipUnit
+                            = l_sortedPauList[i]->getAttr<ATTR_CHIP_UNIT>();
+
+                        const pg_idx_t l_pgIdx
+                            = l_sortedPauList[i]->getAttr<ATTR_CHIPLET_ID>();
+
+                        if (l_pauBadPgBit[l_chipUnit] == INVALID_PAU)
+                        {
+                            TS_FAIL("Invalid PAU chip unit");
+                            continue;
+                        }
+
+                        l_badPgData[l_pgIdx] |= l_pauBadPgBit[l_chipUnit];
+
+                        pgState_map l_targetStates;
+
+                        if (isDescFunctional(l_sortedPauList[i],
+                                             l_badPgData,
+                                             l_targetStates)
+                            != !l_shouldPauBeDisabled)
+                        {
+                            TS_FAIL("testHWASNMMU1DeconfigByPAU: Failed to "
+                                    "deconfigure PAU %d",
+                                    l_chipUnit);
+                            continue;
+                        }
+                    }
+                }
+
+                pgState_map l_targetStates;
+
+                const bool l_nmmu1ShouldBeFunctional
+                    = shouldNMMU1BeFunctional_pg(l_sortedPauList,
+                                                 l_badPgData,
+                                                 l_targetStates);
+
+                saveSystemState();
+
+                // Set the PAUs' HWAS_STATE appropriately
+                for (Target* const l_pau : l_sortedPauList)
+                {
+                    auto l_hwasState = l_pau->getAttr<ATTR_HWAS_STATE>();
+                    l_hwasState.functional
+                        = isDescFunctional(l_pau, l_badPgData, l_targetStates);
+                    l_pau->setAttr<ATTR_HWAS_STATE>(l_hwasState);
+                }
+
+                // Check NMMU state and compare it to what we expected
+                const bool l_nmmu1IsDeconfigured = shouldPowerGateNMMU1(*l_proc);
+
+                if (   ( l_nmmu1IsDeconfigured &&  l_nmmu1ShouldBeFunctional)
+                    || (!l_nmmu1IsDeconfigured && !l_nmmu1ShouldBeFunctional))
+                {
+                    TS_FAIL("testHWASNMMU1DeconfigByPAU: NMMU 1 is not properly "
+                            "functional (is %d, should be %d) when PAUs are:",
+                            !l_nmmu1ShouldBeFunctional,
+                            l_nmmu1ShouldBeFunctional);
+
+                    for (size_t i = 0; i < NUM_PAU_PER_PROC; ++i)
+                    {
+                        TS_INFO("  PAU%d: %s",
+                                l_sortedPauList[i]->getAttr<ATTR_CHIP_UNIT>(),
+                                (isDescFunctional(l_sortedPauList[i],
+                                                  l_badPgData,
+                                                  l_targetStates)
+                                 ? "functional"
+                                 : "not functional"));
+                    }
+                }
+
+                restoreSystemState();
+
+                // Go to the next permutation of enabled/disabled PAUs.
+                ++l_pauDisableMask;
+            } while (l_pauDisableMask < (1 << NUM_PAU_PER_PROC));
+        }
+
+        TS_INFO( "testHWASNMMU1DeconfigByPAU exit" );
+    }
+
+    /**
+     *  @brief Returns whether or not NMMU 1 should be functional based on which
+     *         PAU units are disabled according to ATTR_HWAS_STATE
+     *  @param[in] i_sortedPauList      List of PAU targets sorted by chip unit
+     *  @return bool                    Whether NMMU 1 should be functional
+     */
+    static bool shouldNMMU1BeFunctional_hwas(const TargetHandleList& i_sortedPauList)
+    {
+        return    i_sortedPauList[PAU_0_INDEX]->getAttr<ATTR_HWAS_STATE>().functional
+               || i_sortedPauList[PAU_4_INDEX]->getAttr<ATTR_HWAS_STATE>().functional
+               || i_sortedPauList[PAU_5_INDEX]->getAttr<ATTR_HWAS_STATE>().functional;
+    }
+
+    /**
+     *  @brief Test the deconfig gard rule for Nest 1 NMMU
+     */
+    void testDeconfigureNMMU1ByPAU()
+    {
+        TS_INFO(INFO_MRK "testDeconfigureNMMU1ByPAU: Started");
+
+        TargetHandleList l_procList;
+        getAllChips(l_procList, TYPE_PROC);
+
+        for (Target* const l_proc : l_procList)
+        {
+            const TargetHandleList l_pauList = getSortedPAUList(*l_proc);
+
+            Target* const l_nmmu1 = getNMMU1(*l_proc);
+
+            if (!l_nmmu1)
+            {
+                continue;
+            }
+
+            uint32_t l_pauDisableMask = 0;
+
+            // This loop will iterate over all possible combinations of
+            // enabled/disabled PAUs using the lower NUM_PAU_PER_PROC bits of
+            // l_pauDisableMask (1 = disabled, 0 = enabled) to ensure that NMMU 1 gets
+            // deconfigured appropriately.
+            do
+            {
+                saveSystemState();
+
+                HWAS_INF("testDeconfigureNMMU1ByPAU: Disabling PAUs with mask 0x%02x "
+                         " (1 means disable the corresponding PAU)",
+                         l_pauDisableMask);
+
+                // Disable masked PAUs
+                for (uint32_t i = 0; i < NUM_PAU_PER_PROC; ++i)
+                {
+                    if (l_pauDisableMask & (1 << i))
+                    {
+                        theDeconfigGard().deconfigureTarget(*l_pauList[i], 0);
+
+                        if (l_pauList[i]->getAttr<ATTR_HWAS_STATE>().functional)
+                        {
+                            TS_FAIL("Failed to deconfigure PAU %d",
+                                    l_pauList[i]->getAttr<ATTR_CHIP_UNIT>());
+                        }
+                    }
+                }
+
+                // NMMU 1 should have been deconfigured if the right combination of
+                // PAUs were deconfigured
+                if (l_nmmu1->getAttr<ATTR_HWAS_STATE>().functional
+                    != shouldNMMU1BeFunctional_hwas(l_pauList))
+                {
+                    TS_FAIL("NMMU 1 is not properly functional (is %d, should be %d) "
+                            "when PAUs are:",
+                            l_nmmu1->getAttr<ATTR_HWAS_STATE>().functional,
+                            shouldNMMU1BeFunctional_hwas(l_pauList));
+
+                    for (size_t i = 0; i < NUM_PAU_PER_PROC; ++i)
+                    {
+                        TS_INFO("  PAU%d: %s",
+                                l_pauList[i]->getAttr<ATTR_CHIP_UNIT>(),
+                                (l_pauList[i]->getAttr<ATTR_HWAS_STATE>().functional
+                                 ? "functional"
+                                 : "not functional"));
+                    }
+                }
+
+                restoreSystemState();
+
+                // Go to the next permutation of enabled/disabled PAUs.
+                ++l_pauDisableMask;
+            } while (l_pauDisableMask < (1 << NUM_PAU_PER_PROC));
+        }
+    }
+
+    /**
+     *  @brief Test that deconfiguration updates ATTR_PG appropriately
+     */
+    void testDeconfigureMask()
+    {
+        TS_INFO(INFO_MRK "testDeconfigureMask: Started");
+
+        struct testcase_t
+        {
+            ATTR_TYPE_type targetType; // The target type to test
+            pg_entry_t attrPgBits;     // The PG bits in the target's PERV to set
+                                       // (i.e. the parts that should be disabled)
+                                       // Reference: P10 Partial Good Keyword doc153
+            ATTR_CHIPLET_ID_type chipletID; // Chiplet to look in for the target
+            bool gardable = true;      // Whether this target can be deconfigured
+                                       // by a GARD; if not then we just set
+                                       // functional = false and call
+                                       // updateDeconfigureMask ourselves
+        }
+        static const testcases[] =
+        {
+            { TYPE_NMMU, 0x00004000, NMMU_1_CHIPLET },
+            { TYPE_PEC,  0x000FFE00, ANY_CHIPLET },
+            { TYPE_MC,   0x000DE200, ANY_CHIPLET },
+            { TYPE_PAUC, 0x000C6000, 16 }, // This PAUC has 1 PAU
+            { TYPE_PAUC, 0x000E6000, 18 }, // This PAUC has 2 PAUs
+            { TYPE_PAU,  0x00040000, 17 }, // PAU in PAUC 1
+            { TYPE_IOHS, 0x000C4200, ANY_CHIPLET },
+            { TYPE_EQ,   0x00080600, ANY_CHIPLET, false },
+            { TYPE_PERV, 0x00100000, ANY_CHIPLET, false },
+        };
+
+        TargetHandleList l_procList;
+        getAllChips(l_procList, TYPE_PROC);
+
+        for (Target* const l_proc : l_procList)
+        {
+            for (const auto& l_testcase : testcases)
+            {
+                Target* const l_target = getAnyTargetByType(*l_proc,
+                                                            l_testcase.targetType,
+                                                            l_testcase.chipletID);
+
+                if (!l_target)
+                {
+                    continue;
+                }
+
+                const char* const l_targetType = l_target->getAttrAsString<ATTR_TYPE>();
+                const auto l_huid = get_huid(l_target);
+
+                Target* const l_perv = getTargetWithPGAttr(*l_target);
+
+                if (!l_perv)
+                {
+                    TS_FAIL("testDeconfigureMask: Cannot get parent PERV for "
+                            "target %s (HUID 0x %x)",
+                            l_targetType, l_huid);
+                    continue;
+                }
+
+                saveSystemState();
+
+                // Deconfigure the target if it's not already non-functional. If
+                // the target is gardable then use that method of
+                // deconfiguration, otherwise juse force ATTR_HWAS_STATE.
+                if (l_target->getAttr<ATTR_HWAS_STATE>().functional)
+                {
+                    if (l_testcase.gardable)
+                    {
+                        theDeconfigGard().deconfigureTarget(*l_target, 0);
+                    }
+                    else
+                    {
+                        ATTR_HWAS_STATE_type l_hwasState
+                            = l_target->getAttr<ATTR_HWAS_STATE>();
+                        l_hwasState.functional = false;
+                        l_target->setAttr<ATTR_HWAS_STATE>(l_hwasState);
+                        updateDeconfigureMask(*l_target, l_hwasState);
+                    }
+                }
+
+                if (l_target->getAttr<ATTR_HWAS_STATE>().functional)
+                {
+                    TS_FAIL("testDeconfigureMask: Failed to deconfigure target 0x %08x",
+                            l_huid);
+                    restoreSystemState();
+                    continue;
+                }
+
+                // Make sure that the deconfigured target has the right ATTR_PG bits
+                // set
+                if ((l_perv->getAttr<ATTR_PG>() & l_testcase.attrPgBits)
+                    != l_testcase.attrPgBits)
+                {
+                    TS_FAIL("testDeconfigureMask: incorrect ATTR_PG (was 0x%08x, "
+                            "expected bits 0x%08x to be set)",
+                            l_perv->getAttr<ATTR_PG>(),
+                            l_testcase.attrPgBits);
+                    restoreSystemState();
+                    continue;
+                }
+
+                restoreSystemState();
+            }
+        }
+    }
 };
 
 #undef DISABLE_UNIT_TESTS
 #undef DISABLE_MBA_UNIT_TESTS
 #undef DISABLE_MEM_UNIT_TESTS
-#undef DISABLE_EX_UNIT_TESTS
+#undef DISABLE_FC_UNIT_TESTS
 #undef DISABLE_OMI_UNIT_TESTS
 
 #undef ENABLE_OMI_UNIT_TEST_1

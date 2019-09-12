@@ -450,6 +450,42 @@ void getParentPervasiveTargetsByState(
                        TargetService::PARENT_PERVASIVE);
 }
 
+Target* getTargetWithPGAttr(Target& i_target)
+{
+    /* The input target's parent PERV target contains the PG attribute for that
+     * target, and if the target itself is a PERV then it contains its own PG
+     * bits. */
+
+    Target* l_pgPerv = NULL;
+
+    const ATTR_TYPE_type l_type = i_target.getAttr<ATTR_TYPE>();
+
+    if (l_type == TYPE_PERV)
+    {
+        l_pgPerv = &i_target;
+    }
+    else
+    {
+        TargetHandleList l_pervs;
+        getParentPervasiveTargetsByState(l_pervs,
+                                         &i_target,
+                                         CLASS_NA,
+                                         TYPE_PERV,
+                                         UTIL_FILTER_ALL);
+
+        TARG_ASSERT(l_pervs.size() <= 1,
+                    "getTargetWithPGAttr: Cannot have more than one parent "
+                    "pervasive target");
+
+        if (!l_pervs.empty())
+        {
+            l_pgPerv = l_pervs[0];
+        }
+    }
+
+    return l_pgPerv;
+}
+
 void getParentOmicTargetsByState(
           TARGETING::TargetHandleList& o_vector,
     const Target*                      i_target,

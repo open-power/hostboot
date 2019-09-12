@@ -5872,6 +5872,22 @@
   </attribute>
 
   <attribute>
+    <description>
+      uint32_t attribute to be used for storing PG state of a PERV
+      target during test cases. A 1 bit means the corresponding part
+      is deconfigured; a 0 means it is not deconfigured.
+    </description>
+    <id>PG_SAVED</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <simpleType>
+      <uint32_t/>
+    </simpleType>
+    <writeable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <description>Base Address of PHB Register Space</description>
     <id>PHB_BASE_ADDRS</id>
     <persistency>non-volatile</persistency>

@@ -30,11 +30,13 @@
 #include <stdint.h>
 #include <algorithm>
 #include <vector>
+#include <iterator>
 
 #include <hwas/common/hwas.H>
 #include <hwas/common/hwasCommon.H>
 #include <hwas/common/deconfigGard.H>
 #include <hwas/common/hwas_reasoncodes.H>
+#include <hwas/common/vpdConstants.H>
 #include <targeting/common/utilFilter.H>
 
 #include <targeting/common/commontargeting.H>
@@ -142,6 +144,106 @@ DeconfigGard::~DeconfigGard()
     HWAS_MUTEX_DESTROY(iv_mutex);
     free(iv_platDeconfigGard);
 }
+
+void updateDeconfigureMask(Target& i_target,
+                           const ATTR_HWAS_STATE_type i_hwasState)
+{
+    using namespace PARTIAL_GOOD;
+
+    // This structure holds a deconfiguration rule that applies a mask to a the
+    // ATTR_PG bits of the given target type when the target is not functional
+    // or present.
+    struct target_deconfig_rule
+    {
+        TYPE targetType;
+        pg_entry_t deconfigureMask;
+    };
+
+    // Bits used by ATTR_PG to indicate deconfigured targets (reference: P10
+    // Partial Good Keyword document)
+    const pg_mask_t N1_S_NMMU_BIT = 0x00004000; // NMMU bit in N1_S chiplet
+
+    // The list of rules that are not already contained in the partial-good
+    // logic. When there are multiple rules that apply to the same target type,
+    // they should be adjacent in this array.
+    static const target_deconfig_rule l_deconfigRules[] =
+    {
+        { TYPE_PAUC, VPD_CP00_PG_PAUC_ALWAYS_GOOD_MASK },
+        { TYPE_NMMU, N1_S_NMMU_BIT },
+        { TYPE_EQ,   VPD_CP00_PG_EQ_ALWAYS_GOOD_MASK },
+    };
+
+    const auto l_targetType = i_target.getAttr<ATTR_TYPE>();
+
+    auto l_deconfigRule
+        = std::find_if(std::begin(l_deconfigRules),
+                       std::end(l_deconfigRules),
+                       [l_targetType](const target_deconfig_rule& rule)
+                       {
+                           return l_targetType == rule.targetType;
+                       });
+
+    Target* const l_perv = getTargetWithPGAttr(i_target);
+
+    if (l_perv)
+    {
+        const pg_entry_t l_old_ATTR_PG_mask = l_perv->getAttr<ATTR_PG>();
+
+        // We will build this mask up from the rules in the array above, along
+        // with the rules specified in the partial-good logic (pgLogic.C)
+        pg_entry_t l_new_ATTR_PG_mask = 0;
+
+        const auto l_chipUnit = i_target.getAttr<ATTR_CHIP_UNIT>();
+
+        // Loop through l_deconfigRules and apply all the relevant ones
+        while ((l_deconfigRule != std::end(l_deconfigRules))
+               && (l_deconfigRule->targetType == l_targetType))
+        {
+            l_new_ATTR_PG_mask |= l_deconfigRule->deconfigureMask;
+
+            ++l_deconfigRule;
+        }
+
+        // Now iterate the relevant partial-good rules and accumulate our mask
+
+        size_t l_numPgRules = 0;
+        const PartialGoodRule* l_pgRule_it = nullptr;
+
+        auto l_errl = findRulesForTarget(&i_target, l_pgRule_it, l_numPgRules);
+
+        if (l_errl)
+        {
+            l_errl->collectTrace(HWAS_COMP_NAME);
+            errlCommit(l_errl, HWAS_COMP_ID);
+        }
+        else
+        {
+            while (l_numPgRules-- != 0)
+            {
+                if (l_pgRule_it->isApplicableToCurrentModel()
+                    && l_pgRule_it->isApplicableToChipUnit(l_chipUnit))
+                {
+                    l_new_ATTR_PG_mask |= l_pgRule_it->partialGoodMask();
+                }
+
+                ++l_pgRule_it;
+            }
+        }
+
+        // Apply the mask, either straight-way or else inverted depending on
+        // whether this target is being enabled or disabled.
+
+        if (!i_hwasState.functional || !i_hwasState.present)
+        {
+            l_perv->setAttr<ATTR_PG>(l_old_ATTR_PG_mask | l_new_ATTR_PG_mask);
+        }
+        else
+        {
+            l_perv->setAttr<ATTR_PG>(l_old_ATTR_PG_mask & ~l_new_ATTR_PG_mask);
+        }
+    }
+}
+
 
 #ifndef __HOSTBOOT_RUNTIME
 //******************************************************************************
@@ -2064,6 +2166,7 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
 
                 break;
             } // TYPE_NPU
+
             case TYPE_SMPGROUP:
             {
                 // Deconfigure peer SMPGROUP target
@@ -2099,6 +2202,7 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
 
                 break;
             } // TYPE_SMPGROUP
+
             case TYPE_OMI:
             {
                 TargetHandleList pOmicParentList;
@@ -2118,7 +2222,25 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
                 }
 
                 break;
-            }
+            } // TYPE_OMI
+
+            case TYPE_PAU:
+            {
+                // If PAU 0, 4, and 5 are all deconfigured then nest 1's NMMU is
+                // power-gated and we deconfigure it here.
+
+                const Target* const l_chip = getParentChip(&i_target);
+
+                Target* const l_nmmu1 = shouldPowerGateNMMU1(*l_chip);
+                if (l_nmmu1)
+                {
+                    _deconfigureTarget(*l_nmmu1,
+                                       i_errlEid,
+                                       nullptr,
+                                       i_deconfigRule);
+                }
+            } // TYPE_PAU
+
             default:
             {
               // TYPE_MEMBUF, TYPE_MCA, TYPE_MCS, TYPE_MC, TYPE_MI, TYPE_DMI,
@@ -2193,11 +2315,15 @@ void DeconfigGard::_deconfigureTarget(
             HWAS_INF(
                     "Setting Target HWAS_STATE: functional=0, deconfiguredByEid=0x%X",
                     i_errlEid);
+
             l_state.functional = 0;
             l_state.specdeconfig = 0;
-
             l_state.deconfiguredByEid = i_errlEid;
+
             i_target.setAttr<ATTR_HWAS_STATE>(l_state);
+
+            updateDeconfigureMask(i_target, l_state);
+
             if (o_targetDeconfigured)
             {
                 *o_targetDeconfigured = true;
@@ -3237,4 +3363,3 @@ errlHndl_t
 } // clearBlockSpecDeconfigForUngardedTargets
 
 } // namespace HWAS
-

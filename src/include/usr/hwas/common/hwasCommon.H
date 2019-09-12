@@ -234,6 +234,18 @@ void markChildrenNonFunctional(const TARGETING::TargetHandle_t &i_parent,
                                pgState_map &io_targetStates);
 
 /**
+ * @brief Check whether NMMU 1 should be deconfigured because PAU 0, 4, and 5
+ *        are all nonfunctional.
+ *
+ * @param[in]  i_proc      The proc to examine.
+ *
+ * @return     Target*     A pointer to NMMU 1 for the given proc if it is
+ *                         functional and should be deconfigured; otherwise
+ *                         returns nullptr.
+ */
+TARGETING::Target* shouldPowerGateNMMU1(const TARGETING::Target& i_pProc);
+
+/**
  * @deprecated
  * @brief platform specific code to determine the PR vector of the input
  *  target. The platform specific code is responsible for returning the
