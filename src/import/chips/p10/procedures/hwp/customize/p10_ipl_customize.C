@@ -1600,7 +1600,7 @@ fapi_try_exit:
 //  void*           i_ringBuf2
 //  void*           i_ringBuf3
 //  std::map<Rs4Selector_t, Rs4Selector_t> i_idxFeatureMap
-//  std::map<Rs4Selector_t, Rs4Selector_t> i_featureAppMap
+//  std::map<RingId_t, uint64_t> io_ringIdFeatureVecMap
 //  Rs4Selector_t   i_numberOfFeatures
 //  RingId_t&       i_ringId
 //  uint32_t        i_ddlevel
@@ -1618,7 +1618,7 @@ fapi2::ReturnCode process_base_and_dynamic_rings(
     void*           i_ringBuf2,
     void*           i_ringBuf3,
     std::map<Rs4Selector_t, Rs4Selector_t> i_idxFeatureMap,
-    std::map<Rs4Selector_t, Rs4Selector_t>& io_featureAppMap,
+    std::map<RingId_t, uint64_t>& io_ringIdFeatureVecMap,
     Rs4Selector_t   i_numberOfFeatures,
     RingId_t        i_ringId,
     uint32_t        i_ddlevel )
@@ -1657,7 +1657,6 @@ fapi2::ReturnCode process_base_and_dynamic_rings(
     memset(dataDyn, 0, maxRingBufSize);
     memset(dataDynAcc, 0, maxRingBufSize);
 
-    //TODO need to change this trace
     FAPI_DBG("Entering process_base_and_dynamic_rings i_numberOfFeatures is %d and i_ringId is 0x%x", i_numberOfFeatures,
              i_ringId);
 
@@ -1678,7 +1677,6 @@ fapi2::ReturnCode process_base_and_dynamic_rings(
         if(l_rc == TOR_SUCCESS)
         {
             bDynRingFound = true;
-
             featureVecAcc |= 0x8000000000000000 >> nextFeature;
 
             dynTypeField = ((CompressedScanData*)dynRs4)->iv_type;
@@ -1723,7 +1721,9 @@ fapi2::ReturnCode process_base_and_dynamic_rings(
                                                  fapi2::XIPC_BITS_MISMATCH_DYNAMIC_RING().
                                                  set_CHIP_TARGET(i_procTarget).
                                                  set_RING_ID(i_ringId).
-                                                 set_BIT(i).
+                                                 set_DYNBIT(8 * i + j).
+                                                 set_FEATURE_VEC_ACC(featureVecAcc).
+                                                 set_NEXT_FEATURE(nextFeature).
                                                  set_DATA_DYNACC(dataDynAcc[i]).
                                                  set_DATA_DYN(dataDyn[i]).
                                                  set_OCCURRENCE(1),
@@ -1775,7 +1775,9 @@ fapi2::ReturnCode process_base_and_dynamic_rings(
                                                  fapi2::XIPC_BITS_MISMATCH_DYNAMIC_RING().
                                                  set_CHIP_TARGET(i_procTarget).
                                                  set_RING_ID(i_ringId).
-                                                 set_BIT(i).
+                                                 set_DYNBIT(8 * i + j).
+                                                 set_FEATURE_VEC_ACC(featureVecAcc).
+                                                 set_NEXT_FEATURE(nextFeature).
                                                  set_DATA_DYNACC(dataDynAcc[i]).
                                                  set_DATA_DYN(dataDyn[i]).
                                                  set_OCCURRENCE(2),
@@ -1815,6 +1817,11 @@ fapi2::ReturnCode process_base_and_dynamic_rings(
                          "Failed to fetch dynamic ring for ringID 0x%0x w/rc = %i",
                          i_ringId, l_rc);
         }
+    }
+
+    if(bDynRingFound)
+    {
+        io_ringIdFeatureVecMap.insert({i_ringId, featureVecAcc});
     }
 
     //
@@ -1992,10 +1999,10 @@ ReturnCode p10_ipl_customize (
     uint32_t        l_sizeMvpdCIField = 0;
     uint8_t*        l_fullCIData = nullptr;
 
-    uint64_t        dynamicVector = 0;
+    uint64_t        featureVec = 0;
     RingId_t        ringId = UNDEFINED_RING_ID;
     std::map< Rs4Selector_t,  Rs4Selector_t> idxFeatureMap;
-    std::map< Rs4Selector_t,  Rs4Selector_t> featureAppMap;
+    std::map<RingId_t, uint64_t> ringIdFeatureVecMap;
     Rs4Selector_t   numberOfFeatures = 0;
     void*           baseRingSection = NULL;
     void*           dynamicRingSection = NULL;
@@ -2126,7 +2133,7 @@ ReturnCode p10_ipl_customize (
     FAPI_ASSERT( l_fapiRc == fapi2::FAPI2_RC_SUCCESS,
                  fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
                  set_CHIP_TARGET(i_procTarget).
-                 set_OCCURRENCE(1),
+                 set_OCCURRENCE(2),
                  "FAPI_ATTR_GET(ATTR_NAME) failed." );
 
     FAPI_DBG("Platform chip name = 0x%x", l_chipName);
@@ -2519,7 +2526,7 @@ ReturnCode p10_ipl_customize (
         FAPI_ASSERT( l_fapiRc2 == fapi2::FAPI2_RC_SUCCESS,
                      fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
                      set_CHIP_TARGET(i_procTarget).
-                     set_OCCURRENCE(2),
+                     set_OCCURRENCE(3),
                      "FAPI_ATTR_GET(ATTR_MAX_SBE_SEEPROM_SIZE) failed."
                      " Unable to determine ATTR_MAX_SBE_SEEPROM_SIZE,"
                      " so don't know what what max image size." );
@@ -2590,7 +2597,7 @@ ReturnCode p10_ipl_customize (
     FAPI_ASSERT( l_fapiRc == fapi2::FAPI2_RC_SUCCESS,
                  fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
                  set_CHIP_TARGET(i_procTarget).
-                 set_OCCURRENCE(1),
+                 set_OCCURRENCE(4),
                  "FAPI_ATTR_GET(ATTR_EC) failed." );
 
     FAPI_DBG("attrDdLevel = 0x%x", attrDdLevel);
@@ -2728,17 +2735,15 @@ ReturnCode p10_ipl_customize (
     //            ring becomes the de facto Base ring.
     //////////////////////////////////////////////////////////////////////////
 
-    // TODO / FIXME: The mapping from bit position in the vector to features
-    //               should be encapsulated in an enum constructed at ekb build
-    //               time.
     l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_DYNAMIC_INIT_FEATURE_VEC, FAPI_SYSTEM,
-                              dynamicVector);
+                              featureVec);
 
     FAPI_ASSERT( l_fapiRc2 == fapi2::FAPI2_RC_SUCCESS,
-                 fapi2::XIPC_XIP_API_MISC_ERROR().
+                 fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
                  set_CHIP_TARGET(i_procTarget).
-                 set_OCCURRENCE(2),
-                 "Failed to retrieve the dynamic init feature vector attribute" );
+                 set_OCCURRENCE(5),
+                 "FAPI_ATTR_GET(ATTR_DYNAMIC_INIT_FEATURE_VEC) failed."
+                 " Unable to determine featureVector." );
 
     l_rc = p9_xip_get_section(i_hwImage, P9_XIP_SECTION_HW_DYNAMIC, &iplImgSection, attrDdLevel);
 
@@ -2757,12 +2762,11 @@ ReturnCode p10_ipl_customize (
 
     for(Rs4Selector_t feature = 0; feature < 64; feature++)
     {
-        bFeature = dynamicVector & (0x8000000000000000 >> feature);
+        bFeature = featureVec & (0x8000000000000000 >> feature);
 
         if(bFeature)
         {
             idxFeatureMap.insert({numberOfFeatures, feature});
-            featureAppMap.insert({feature, 0});
             numberOfFeatures++;
             bFeature = false;
         }
@@ -2789,7 +2793,7 @@ ReturnCode p10_ipl_customize (
                    i_ringBuf2,
                    i_ringBuf3,
                    idxFeatureMap,
-                   featureAppMap,
+                   ringIdFeatureVecMap,
                    numberOfFeatures,
                    ringId,
                    attrDdLevel );
@@ -2829,6 +2833,12 @@ ReturnCode p10_ipl_customize (
             FAPI_DBG("No Rings found");//Will remove later
             continue;
         }
+    }
+
+    for(std::map<RingId_t, uint64_t>::iterator it = ringIdFeatureVecMap.begin(); it != ringIdFeatureVecMap.end();
+        it++)
+    {
+        FAPI_DBG("For RingID 0x%0x featureVector applied is 0x%0llx\n", it->first, it->second);
     }
 
     // Make a copy of the supplied max ring section buffer size before over writing it

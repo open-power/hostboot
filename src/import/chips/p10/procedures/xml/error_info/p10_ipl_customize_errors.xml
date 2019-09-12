@@ -612,7 +612,9 @@
     <description>Bit conflict found while processing dynamic rings</description>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>RING_ID</ffdc>
-    <ffdc>BIT</ffdc>
+    <ffdc>DYNBIT</ffdc>
+    <ffdc>FEATURE_VEC_ACC</ffdc>
+    <ffdc>NEXT_FEATURE</ffdc>
     <ffdc>DATA_DYNACC</ffdc>
     <ffdc>DATA_DYN</ffdc>
     <ffdc>OCCURRENCE</ffdc>
