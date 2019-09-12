@@ -62,6 +62,9 @@
       <id>FSI_SCOM_MUTEX</id>
     </attribute>
     <attribute>
+      <id>GPIO_INFO_PHYS_PRES</id>
+    </attribute>
+    <attribute>
       <id>HBRT_HYP_ID</id>
     </attribute>
     <attribute>
