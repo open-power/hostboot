@@ -9,3 +9,17 @@ config TPM_NVIDX_VALIDATE
     depends on TPMDD
     help
         Validate TPM MFG NV Index Provisioning during IPL
+
+config PHYS_PRES_PWR_BUTTON
+    default n
+    depends on !PHYS_PRES_JUMPER
+    help
+        Support asserting Physical Presence via pushing the Power Button
+        on the system
+
+config PHYS_PRES_JUMPER
+    default n
+    depends on !PHYS_PRES_PRW_BUTTON
+    help
+        Support asserting Physical Presence via a jumper on the TPM Card
+        Currently not supported.

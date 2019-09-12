@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,6 +31,8 @@
 #include <trustedbootif.H>
 #include <initservice/isteps_trace.H>
 #include <secureboot/service.H>
+#include <secureboot/phys_presence_if.H>
+#include <config.h>
 
 namespace ISTEP_06
 {
@@ -39,7 +41,7 @@ void* call_host_update_master_tpm( void *io_pArgs )
 {
     ISTEP_ERROR::IStepError l_stepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_update_master_tpm entry" );
 
     errlHndl_t l_err = nullptr;
@@ -67,10 +69,28 @@ void* call_host_update_master_tpm( void *io_pArgs )
         ERRORLOG::errlCommit( l_err, SECURE_COMP_ID );
     }
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_update_master_tpm exit" );
+    // Check for Physical Presence
+#ifdef CONFIG_PHYS_PRES_PWR_BUTTON
+    l_err = SECUREBOOT::detectPhysPresence();
+    if (l_err)
+    {
+        // @TODO RTC 210301 - Handle Error Log Correctly, but for now
+        // just delete it
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "call_host_update_master_tpm: Error back from "
+                   "SECUREBOOT::detectPhysPresence: rc=0x%X, plid=0x%X. "
+                   "Deleting error for now",
+                   ERRL_GETRC_SAFE(l_err), ERRL_GETPLID_SAFE(l_err));
+        delete l_err;
+        l_err = nullptr;
+    }
+#endif
 
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_host_update_master_tpm exit" );
     return l_stepError.getErrorHandle();
+
+
 }
 
 };

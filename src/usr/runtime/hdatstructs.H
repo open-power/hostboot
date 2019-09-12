@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -453,7 +453,10 @@ typedef struct sysSecSets
     // NOTE: This bit is labeled "Platform Security Overrides Allowed"
     // in the section 6.1.1 of HDAT spec.
     uint16_t sbeSecBackdoor : 1;
-    uint16_t reserved : 13;
+
+    // bit 3: "System Physical Presence has been asserted"
+    uint16_t physicalPresenceAsserted : 1;
+    uint16_t reserved : 12;
 } SysSecSets;
 
 #endif

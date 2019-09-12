@@ -1124,6 +1124,56 @@
   </attribute>
 
   <attribute>
+    <description>Designates if the Physical Presence Window was Asserted:
+                 0 - Physiscal Presence was NOT Asserted
+                 1 - Physical Presence was Asserted
+    </description>
+    <id>PHYS_PRES_ASSERTED</id>
+    <simpleType>
+      <uint8_t>
+        <default>0x0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <description>Designates if the assertion of Physical Presence should
+                 be faked:
+                 0 - Do NOT Fake Physical Presence
+                 1 - Fake Physical Presence
+    </description>
+    <id>PHYS_PRES_FAKE_ASSERT</id>
+    <simpleType>
+      <uint8_t>
+        <default>0x0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <description>Designates if there is a request to open the Physical Presence
+                 Window:
+                 0 - No Request to Open Window (ie, do NOT open window)
+                 1 - Request to Open Window
+    </description>
+    <id>PHYS_PRES_REQUEST_OPEN_WINDOW</id>
+    <simpleType>
+      <uint8_t>
+        <default>0x0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
     <id>SBE_COMM_ADDR</id>
     <description>
         Virtual address where SBE Communications are placed in mainstore.

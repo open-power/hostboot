@@ -30,6 +30,7 @@ SUBDIRS +=
 #PERV_HWP_PATH = $(ROOTPATH)/src/import/chips/p9/procedures/hwp/perv
 
 #OBJS += $(if $(CONFIG_SECUREBOOT), service_ext.o)
+OBJS += $(if $(CONFIG_PHYS_PRES_PWR_BUTTON), phys_presence.o)
 
 #VPATH += $(PERV_HWP_PATH)
 

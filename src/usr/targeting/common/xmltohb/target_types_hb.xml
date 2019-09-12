@@ -245,6 +245,15 @@
     <attribute>
       <id>OCC_COMMON_AREA_PHYS_ADDR</id>
     </attribute>
+    <attribute>
+      <id>PHYS_PRES_ASSERTED</id>
+    </attribute>
+    <attribute>
+      <id>PHYS_PRES_FAKE_ASSERT</id>
+    </attribute>
+    <attribute>
+      <id>PHYS_PRES_REQUEST_OPEN_WINDOW</id>
+    </attribute>
   </targetTypeExtension>
 
   <targetTypeExtension>
