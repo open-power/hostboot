@@ -406,7 +406,7 @@ errlHndl_t compareCksum(TARGETING::Target* i_nvdimm,
  *
  * @param[in] i_nvdimm - nvdimm target
  *
- * @param[inout] io_err - error log to add FFDC data
+ * @param[inout] io_err - error log to add FFDC data.  Must not be nullptr
  *
  */
 void nvdimmAddVendorLog(TARGETING::Target *i_nvdimm, errlHndl_t& io_err);
@@ -419,7 +419,7 @@ void nvdimmAddVendorLog(TARGETING::Target *i_nvdimm, errlHndl_t& io_err);
  *
  * @param[in] i_nvdimm - nvdimm target
  *
- * @param[in] io_err - error log to add FFDC data
+ * @param[in] io_err - error log to add FFDC data. Must not be nullptr
  *
  */
 void nvdimmAddUpdateRegs(TARGETING::Target *i_nvdimm, errlHndl_t& io_err);
@@ -440,7 +440,7 @@ void nvdimmAddUpdateRegs(TARGETING::Target *i_nvdimm, errlHndl_t& io_err);
  *
  * @param[in] i_nvdimm - nvdimm target
  *
- * @param[inout] io_err - error log to add FFDC data
+ * @param[inout] io_err - error log to add FFDC data. Must not be nullptr
  *
  */
 void nvdimmAddPage4Regs(TARGETING::Target *i_nvdimm, errlHndl_t& io_err);

@@ -4191,6 +4191,16 @@ void nvdimmAddVendorLog( TARGETING::Target* i_nvdimm, errlHndl_t& io_err )
             break;
         }
 
+        if (io_err == nullptr)
+        {
+            // A nullptr was given when it should not have been. Emit a trace
+            // and break out of this function.
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK
+                    "nvdimmAddVendorLog() io_err was nullptr!! Skip adding additional FFDC.");
+            break;
+        }
+
+
         // Set the vendor log attribute so we don't recursively
         // execute the nvdimmAddVendorLog function
         l_vendorLog = 0x1;
@@ -4313,6 +4323,80 @@ void nvdimmAddVendorLog( TARGETING::Target* i_nvdimm, errlHndl_t& io_err )
 
 
 /*
+ * @brief Add NVDIMM Update regs to FFDC for errors encountered
+ *        during NVDIMM update process
+ */
+void nvdimmAddUpdateRegs( TARGETING::Target* i_nvdimm, errlHndl_t& io_err )
+{
+    errlHndl_t l_err = nullptr;
+
+    do {
+
+        if (io_err == nullptr)
+        {
+            // A nullptr was given when it should not have been. Emit a trace
+            // and break out of this function.
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK
+                    "nvdimmAddUpdateRegs() io_err was nullptr!! Skip adding additional FFDC.");
+            break;
+        }
+
+        ERRORLOG::ErrlUserDetailsLogRegister l_regUD(i_nvdimm);
+        const uint32_t l_regList[] = {
+            NVDIMM_READY,
+            FIRMWARE_OPS_STATUS,
+            NVDIMM_CMD_STATUS0,
+            FIRMWARE_OPS_TIMEOUT0,
+            FIRMWARE_OPS_TIMEOUT1,
+            FW_REGION_CRC0,
+            FW_REGION_CRC1,
+            MODULE_HEALTH,
+            MODULE_HEALTH_STATUS0,
+            MODULE_HEALTH_STATUS1,
+            ERROR_THRESHOLD_STATUS,
+            ENCRYPTION_CONFIG_STATUS,
+            FW_SLOT_INFO,
+            SLOT0_ES_FWREV0,
+            SLOT0_ES_FWREV1,
+            SLOT1_ES_FWREV0,
+            SLOT1_ES_FWREV1,
+            SLOT1_SUBFWREV,
+            CSAVE_INFO,
+            CSAVE_FAIL_INFO1,
+            RESTORE_STATUS,
+            RESTORE_FAIL_INFO,
+        };
+        uint8_t l_readData = 0;
+
+        for (auto l_reg : l_regList)
+        {
+            l_err = nvdimmReadReg(i_nvdimm,
+                                  l_reg,
+                                  l_readData);
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_nvdimm, ERR_MRK
+                          "nvdimmAddUpdateRegs() nvdimm[%X] error reading 0x%X",
+                          get_huid(i_nvdimm), l_reg);
+
+                // Don't commit, just delete the error and continue
+                delete l_err;
+                l_err = nullptr;
+                continue;
+            }
+
+            l_regUD.addDataBuffer(&l_readData,
+                                  sizeof(l_readData),
+                                  DEVICE_NVDIMM_ADDRESS(l_reg));
+        }
+
+        l_regUD.addToLog(io_err);
+
+    } while(0);
+}
+
+
+/*
  * @brief Add Page 4 regs to FFDC
  *        Added to all NVDIMM HW errors
  */
@@ -4322,6 +4406,16 @@ void nvdimmAddPage4Regs( TARGETING::Target* i_nvdimm, errlHndl_t& io_err )
 
     do
     {
+        if (io_err == nullptr)
+        {
+            // A nullptr was given when it should not have been. Emit a trace
+            // and break out of this function.
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK
+                    "nvdimmAddPage4Regs() io_err was nullptr!! Skip adding additional FFDC.");
+            break;
+        }
+
+
         // Get the page4 attribute, if set we are already
         // reading the page4 regs, exit
         auto l_page4 = i_nvdimm->getAttr<ATTR_NVDIMM_READING_PAGE4>();
@@ -4353,7 +4447,7 @@ void nvdimmAddPage4Regs( TARGETING::Target* i_nvdimm, errlHndl_t& io_err )
         for (auto l_reg : l_regList)
         {
             l_err = nvdimmReadReg(i_nvdimm,
-                                l_regList[l_reg],
+                                l_reg,
                                 l_readData);
             if (l_err)
             {
@@ -4380,68 +4474,6 @@ void nvdimmAddPage4Regs( TARGETING::Target* i_nvdimm, errlHndl_t& io_err )
 
     } while(0);
 }
-
-
-/*
- * @brief Add NVDIMM Update regs to FFDC for errors encountered
- *        during NVDIMM update process
- */
-void nvdimmAddUpdateRegs( TARGETING::Target* i_nvdimm, errlHndl_t& io_err )
-{
-    errlHndl_t l_err = nullptr;
-
-    ERRORLOG::ErrlUserDetailsLogRegister l_regUD(i_nvdimm);
-    const uint32_t l_regList[] = {
-        NVDIMM_READY,
-        FIRMWARE_OPS_STATUS,
-        NVDIMM_CMD_STATUS0,
-        FIRMWARE_OPS_TIMEOUT0,
-        FIRMWARE_OPS_TIMEOUT1,
-        FW_REGION_CRC0,
-        FW_REGION_CRC1,
-        MODULE_HEALTH,
-        MODULE_HEALTH_STATUS0,
-        MODULE_HEALTH_STATUS1,
-        ERROR_THRESHOLD_STATUS,
-        ENCRYPTION_CONFIG_STATUS,
-        FW_SLOT_INFO,
-        SLOT0_ES_FWREV0,
-        SLOT0_ES_FWREV1,
-        SLOT1_ES_FWREV0,
-        SLOT1_ES_FWREV1,
-        SLOT1_SUBFWREV,
-        CSAVE_INFO,
-        CSAVE_FAIL_INFO1,
-        RESTORE_STATUS,
-        RESTORE_FAIL_INFO,
-    };
-    uint8_t l_readData = 0;
-
-    for (auto l_reg : l_regList)
-    {
-        l_err = nvdimmReadReg(i_nvdimm,
-                              l_regList[l_reg],
-                              l_readData);
-        if (l_err)
-        {
-            TRACFCOMP(g_trac_nvdimm, ERR_MRK
-                      "nvdimmAddUpdateRegs() nvdimm[%X] error reading 0x%X",
-                      get_huid(i_nvdimm), l_reg);
-
-            // Don't commit, just delete the error and continue
-            delete l_err;
-            l_err = nullptr;
-            continue;
-        }
-
-        l_regUD.addDataBuffer(&l_readData,
-                              sizeof(l_readData),
-                              DEVICE_NVDIMM_ADDRESS(l_reg));
-    }
-
-    l_regUD.addToLog(io_err);
-}
-
 
 /*
  * @brief Utility function to send the value of

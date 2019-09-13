@@ -1255,8 +1255,8 @@ errlHndl_t Bpm::enterUpdateMode()
                                             BPM_RC::BPM_ENTER_UPDATE_MODE,
                                             TARGETING::get_huid(iv_nvdimm));
         infoErrl->collectTrace(BPM_COMP_NAME);
-        nvdimmAddPage4Regs(iv_nvdimm,errl);
-        nvdimmAddVendorLog(iv_nvdimm, errl);
+        nvdimmAddVendorLog(iv_nvdimm, infoErrl);
+        nvdimmAddPage4Regs(iv_nvdimm, infoErrl);
         ERRORLOG::errlCommit(infoErrl, BPM_COMP_ID);
 
     } while(0);
@@ -1350,8 +1350,8 @@ errlHndl_t Bpm::exitUpdateMode()
                              HWAS::BPM_PART_TYPE,
                              HWAS::SRCI_PRIORITY_HIGH);
         infoErrl->collectTrace(BPM_COMP_NAME);
-        nvdimmAddPage4Regs(iv_nvdimm,errl);
-        nvdimmAddVendorLog(iv_nvdimm, errl);
+        nvdimmAddVendorLog(iv_nvdimm, infoErrl);
+        nvdimmAddPage4Regs(iv_nvdimm, infoErrl);
         ERRORLOG::errlCommit(infoErrl, BPM_COMP_ID);
 
     } while(0);
