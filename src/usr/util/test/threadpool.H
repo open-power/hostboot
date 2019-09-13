@@ -31,6 +31,7 @@
 #include <errl/errlmanager.H>
 #include <util/util_reasoncodes.H>
 #include <hbotcompid.H>
+#include <kernel/console.H>
 
 // Thread pool constructor flags
 #define DISABLE_CHILD_RC_CHECKING false
@@ -256,6 +257,7 @@ class ThreadPoolTest: public CxxTest::TestSuite
             errlHndl_t l_errl = nullptr;
 
             do {
+            printk("testChildRCCrashedTask: Expect to see uncaught exception\n");
             l_threadPool.insert(new __ThreadPoolTest::CrashedTask());
             l_threadPool.start();
             l_errl = l_threadPool.shutdown();
@@ -300,6 +302,7 @@ class ThreadPoolTest: public CxxTest::TestSuite
                         l_threadPool(DISABLE_CHILD_RC_CHECKING);
             errlHndl_t l_errl = nullptr;
 
+            printk("testChildNoRCCrashedTask: Expect to see uncaught exception\n");
             l_threadPool.insert(new __ThreadPoolTest::CrashedTask());
             l_threadPool.start();
             l_errl = l_threadPool.shutdown();
