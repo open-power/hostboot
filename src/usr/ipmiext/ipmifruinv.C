@@ -6,6 +6,9 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* [+] Artem Senichev                                                     */
+/* [+] International Business Machines Corp.                              */
+/* [+] Maxim Polyakov                                                     */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -1622,10 +1625,26 @@ errlHndl_t membufIpmiFruInv::buildBoardInfoArea(
         //Set formatting data that goes at the beginning of the record
         preFormatProcessing(io_data, true);
 
-        //Set MFG Date/Time - Blank
-        io_data.push_back(0);
-        io_data.push_back(0);
-        io_data.push_back(0);
+        // Set Mfg Build date
+        // Grab VPD data into seperate data vector
+        std::vector<uint8_t> mfgDateData;
+        l_errl = addVpdData(mfgDateData, CVPD::OPFR, CVPD::MB, false, false);
+        if (l_errl)
+        {
+            // The MB keyword was optional on older cards so just ignore
+            //  any errors and insert zeros
+            delete l_errl;
+            l_errl = NULL;
+
+            io_data.push_back(0);
+            io_data.push_back(0);
+            io_data.push_back(0);
+        }
+        else
+        {
+            // Pass that to the function that sets the Build date
+            setMfgData(io_data, mfgDateData);
+        }
 
         uint8_t l_fru_id = 0xFF;
         // if the centaur_ecid_fru_id is not valid then the centaur is on a
