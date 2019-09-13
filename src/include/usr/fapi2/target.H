@@ -267,8 +267,20 @@ inline TARGETING::TYPE convertFapi2TypeToTargeting(fapi2::TargetType i_T)
         case fapi2::TARGET_TYPE_MEM_PORT:
             o_targetingType = TARGETING::TYPE_MEM_PORT;
             break;
+        case fapi2::TARGET_TYPE_PAU:
+            o_targetingType = TARGETING::TYPE_PAU;
+            break;
+        case fapi2::TARGET_TYPE_IOHS:
+            o_targetingType = TARGETING::TYPE_IOHS;
+            break;
+        case fapi2::TARGET_TYPE_FC:
+            o_targetingType = TARGETING::TYPE_FC;
+            break;
         case fapi2::TARGET_TYPE_PMIC:
             o_targetingType = TARGETING::TYPE_PMIC;
+            break;
+        case fapi2::TARGET_TYPE_PAUC:
+            o_targetingType = TARGETING::TYPE_PAUC;
             break;
         default:
             FAPI_ERR("convertFapi2TypeToTargeting:: Chiplet type not supported 0x%.8X!", i_T);

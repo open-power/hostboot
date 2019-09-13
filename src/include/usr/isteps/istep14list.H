@@ -39,8 +39,8 @@
  *       :  Configure the PHBs
  * 14.4  mss_power_cleanup
  *       :  Clean up any MCS/Centaurs
- * 14.5  proc_setup_bars
- *       :  Setup Memory BARs
+ * 14.5  proc_setup_mmio_bars
+ *       :  Program unit MMIO BARs
  * 14.6  proc_exit_cache_contained
  *       :  Execution from memory
  * 14.7  proc_htm_setup
@@ -102,14 +102,14 @@ void*    call_proc_pcie_config( void    *io_pArgs );
 void*    call_mss_power_cleanup( void    *io_pArgs );
 
 /**
- *  @brief   proc_setup_bars
+ *  @brief   proc_setup_mmio_bars
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
  *  return  any errlogs to istep
  *
  */
-void*    call_proc_setup_bars( void    *io_pArgs );
+void*    call_proc_setup_mmio_bars( void    *io_pArgs );
 
 /**
  *  @brief   proc_htm_setup
@@ -148,57 +148,60 @@ namespace   INITSERVICE
     const   TaskInfo    g_istep14[]  =   {
         {
                 "",         // dummy, index 0
-                NULL,
+                nullptr,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
-/*
         {
                 ISTEPNAME(14,01,"mss_memdiag"),
-                ISTEP_14::call_mss_memdiag,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+                nullptr, //ISTEP_14::call_mss_memdiag,
+                //{ START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
                 ISTEPNAME(14,02,"mss_thermal_init"),
-                ISTEP_14::call_mss_thermal_init,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+                nullptr, //ISTEP_14::call_mss_thermal_init,
+                //{ START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
                 ISTEPNAME(14,03,"proc_pcie_config"),
-                ISTEP_14::call_proc_pcie_config,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+                nullptr, //ISTEP_14::call_proc_pcie_config,
+                //{ START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
                 ISTEPNAME(14,04,"mss_power_cleanup"),
-                ISTEP_14::call_mss_power_cleanup,
+                nullptr, //ISTEP_14::call_mss_power_cleanup,
 #ifdef CONFIG_NVDIMM
-                { START_FN, EXT_IMAGE, MPIPL_OP | NORMAL_IPL_OP, true }
+                //{ START_FN, EXT_IMAGE, MPIPL_OP | NORMAL_IPL_OP, true }
 #else
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+                //{ START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
 #endif
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
-                ISTEPNAME(14,05,"proc_setup_bars"),
-                ISTEP_14::call_proc_setup_bars,
+                ISTEPNAME(14,05,"proc_setup_mmio_bars"),
+                ISTEP_14::call_proc_setup_mmio_bars,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
-**/
         {
                 ISTEPNAME(14,06,"proc_exit_cache_contained"),
                 ISTEP_14::call_proc_exit_cache_contained,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
-/*
+        /*
         {
                 ISTEPNAME(14,07,"proc_htm_setup"),
                 ISTEP_14::call_proc_htm_setup,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
+        */
         {
                 ISTEPNAME(14,08,"host_mpipl_service"),
-                ISTEP_14::call_host_mpipl_service,
-                { START_FN, EXT_IMAGE, MPIPL_OP, true }
+                nullptr, //ISTEP_14::call_host_mpipl_service,
+                //{ START_FN, EXT_IMAGE, MPIPL_OP, true }
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
-**/
     };
 
 const DepModInfo g_istep14Dependancies = {
@@ -210,10 +213,9 @@ const DepModInfo g_istep14Dependancies = {
         DEP_LIB(libisteps_mss.so),
         DEP_LIB(libpm.so),
         DEP_LIB(libimageprocs.so),
-        DEP_LIB(libcen.so),
         DEP_LIB(libnestmemutils.so),
 **/
-        NULL
+        nullptr
     }
 };
 
