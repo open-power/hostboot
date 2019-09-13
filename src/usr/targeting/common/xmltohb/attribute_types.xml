@@ -1694,6 +1694,21 @@
   </attribute>
 
   <attribute>
+    <id>FORCE_SRAM_MMIO_OVER_I2C</id>
+    <description>
+    Force inband SRAM access to be over I2C instead of MMIO
+    This is a way to get data when the MMIO path is not working
+    (0x00 = use normal path, 0x01 = force i2c path)
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
     <id>FREQ_CORE_CEILING_MHZ</id>
     <description>
     The maximum core frequency in MHz.

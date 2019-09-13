@@ -1982,6 +1982,9 @@
       <id>ENABLED_THREADS</id>
     </attribute>
     <attribute>
+      <id>FORCE_SRAM_MMIO_OVER_I2C</id>
+    </attribute>
+    <attribute>
       <id>FREQ_CORE_CEILING_MHZ</id>
     </attribute>
     <attribute>
