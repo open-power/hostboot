@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -34,6 +34,8 @@
       for a completed transition.
     </description>
 
+    <ffdc>EX</ffdc>
+
     <collectFfdc>p9_eq_clear_atomic_lock,EQ</collectFfdc>
 
     <collectRegisterFfdc>
@@ -45,11 +47,6 @@
         <id>CHECK_MASTER_STOP15_FFDC_REGS_EQ</id>
         <target>EQ</target>
         <targetType>TARGET_TYPE_EQ</targetType>
-    </collectRegisterFfdc>
-    <collectRegisterFfdc>
-        <id>CHECK_MASTER_STOP15_FFDC_REGS_EX</id>
-        <target>EX</target>
-        <targetType>TARGET_TYPE_EX</targetType>
     </collectRegisterFfdc>
     <collectRegisterFfdc>
         <id>CHECK_MASTER_STOP15_FFDC_REGS_EC</id>
@@ -77,6 +74,8 @@
       but the achieved level is not appropriate.
     </description>
 
+    <ffdc>EX</ffdc>
+
     <collectFfdc>p9_eq_clear_atomic_lock,EQ</collectFfdc>
 
     <collectRegisterFfdc>
@@ -88,11 +87,6 @@
         <id>CHECK_MASTER_STOP15_FFDC_REGS_EQ</id>
         <target>EQ</target>
         <targetType>TARGET_TYPE_EQ</targetType>
-    </collectRegisterFfdc>
-    <collectRegisterFfdc>
-        <id>CHECK_MASTER_STOP15_FFDC_REGS_EX</id>
-        <target>EX</target>
-        <targetType>TARGET_TYPE_EX</targetType>
     </collectRegisterFfdc>
     <collectRegisterFfdc>
         <id>CHECK_MASTER_STOP15_FFDC_REGS_EC</id>
