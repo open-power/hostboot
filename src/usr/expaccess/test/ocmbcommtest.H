@@ -131,11 +131,13 @@ class OCMBCommTest: public CxxTest::TestSuite
     }
 
     /**
-     *  @brief Test the Explorer inband command/response path
+     *  @brief Send and check get_properties Explorer inband command
+     *  @return Number of failures
      */
-    void  testOcmbInbandCmdRsp( void )
+    int sendOcmbInbandCmdRsp(bool setScomI2c)
     {
         errlHndl_t l_errl = nullptr;
+        uint8_t failures = 0;
 
         // Create a vector of TARGETING::Target pointers
         TARGETING::TargetHandleList l_chipList;
@@ -150,19 +152,22 @@ class OCMBCommTest: public CxxTest::TestSuite
         // Create a non-destructive get_properties command
         buildPropertiesGetCmd(l_cmd);
 
-        if (!iv_serializeTestMutex)
+        for (auto & l_ocmb: l_chipList)
         {
-            TS_FAIL("iv_serializedTestMutex is not setup, unable to continue");
-        }
-        else
-        {
-            // Inband operations can't be run at the same time
-            // atomic section >>
-            mutex_lock(iv_serializeTestMutex);
-
-            for (auto & l_ocmb: l_chipList)
+            do
             {
-                FAPI_INF("testOcmbInbandCmdRsp: testing 0x%.8X OCMB", TARGETING::get_huid(l_ocmb));
+                if (setScomI2c)
+                {
+                    FAPI_INF("sendOcmbInbandCmdRsp: testing 0x%.8X OCMB using I2C", TARGETING::get_huid(l_ocmb));
+                    // disable inband and use i2c when possible
+                    exptest::disableInbandScomsOcmb(l_ocmb);
+                }
+                else
+                {
+                    FAPI_INF("sendOcmbInbandCmdRsp: testing 0x%.8X OCMB using MMIO", TARGETING::get_huid(l_ocmb));
+                    // just incase some other test disabled inband scoms
+                    exptest::enableInbandScomsOcmb(l_ocmb);
+                }
 
                 fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>l_fapi2_target( l_ocmb );
 
@@ -175,10 +180,11 @@ class OCMBCommTest: public CxxTest::TestSuite
                 {
                     TS_FAIL("Error from putCMD for 0x%.8X target",
                         TARGETING::get_huid(l_ocmb));
+                    failures++;
                     break;
                 }
 
-                FAPI_INF("testOcmbInbandCmdRsp: reading response");
+                FAPI_INF("sendOcmbInbandCmdRsp: reading response");
 
                 // grab the response
                 FAPI_INVOKE_HWP(l_errl, mss::exp::ib::getRSP, l_fapi2_target,
@@ -188,6 +194,7 @@ class OCMBCommTest: public CxxTest::TestSuite
                     TS_FAIL("Error from getRSP for 0x%.8X target, plid=0x%X rc=0x%X",
                         TARGETING::get_huid(l_ocmb),
                         ERRL_GETPLID_SAFE(l_errl), ERRL_GETRC_SAFE(l_errl));
+                    failures++;
                     break;
                 }
 
@@ -199,6 +206,7 @@ class OCMBCommTest: public CxxTest::TestSuite
                 {
                     TS_FAIL("Unexpected response length 0x%.8X (expected 0x%.8X)",
                       l_rsp.response_length, sizeof(FW_ADAPTER_PROPERTIES_type));
+                    failures++;
                     break;
                 }
 
@@ -213,19 +221,119 @@ class OCMBCommTest: public CxxTest::TestSuite
                 {
                     TS_FAIL("Expected chip_version to start with 0x88, found 0x%02X",
                         l_fw_adapter_data.chip_version[0]);
+                    failures++;
                 }
-            }
-
-            // << atomic section
-            mutex_unlock(iv_serializeTestMutex);
+            } while (0);
 
             if (l_errl)
             {
+                // Commit the error as this is NOT expected and
+                // needs to be investigated
                 errlCommit( l_errl, TARG_COMP_ID );
             }
+
+            if (setScomI2c)
+            {
+                // Default the ocmb back to inband communication
+                exptest::enableInbandScomsOcmb(l_ocmb);
+            }
         }
-        FAPI_INF("testOcmbInbandCmdRsp: exiting");
+
+        FAPI_INF("sendOcmbInbandCmdRsp: exiting");
+        return failures;
     };
+
+    /**
+     *  @brief Test the Explorer inband command/response path over MMIO
+     */
+    void  testOcmbInbandCmdRspOverMMIO( void )
+    {
+        if (!iv_serializeTestMutex)
+        {
+            TS_FAIL("iv_serializedTestMutex is not setup, unable to continue");
+        }
+        else
+        {
+            // Inband operations can't be run at the same time
+            // atomic section >>
+            mutex_lock(iv_serializeTestMutex);
+
+            int failures = sendOcmbInbandCmdRsp(false);
+            if (failures)
+            {
+                TS_FAIL("testOcmbInbandCmdRspOverMMIO() failed: %d", failures);
+            }
+            mutex_unlock(iv_serializeTestMutex);
+        }
+    }
+
+    /**
+     *  @brief Test the Explorer inband command/response path over I2C
+     *         using ATTR_FORCE_SRAM_MMIO_OVER_I2C
+     */
+    void  testOcmbInbandCmdRspOverI2c_via_force( void )
+    {
+        FAPI_INF("testOcmbInbandCmdRspOverI2c_via_force: entering");
+        if (!iv_serializeTestMutex)
+        {
+            TS_FAIL("iv_serializedTestMutex is not setup, unable to continue");
+        }
+        else
+        {
+            // Inband operations can't be run at the same time
+            // atomic section >>
+            mutex_lock(iv_serializeTestMutex);
+
+            // Set FORCE_SRAM_MMIO_OVER_I2C to change to use I2C instead of MMIO
+            TARGETING::Target * l_sys = nullptr;
+            TARGETING::targetService().getTopLevelTarget(l_sys);
+            crit_assert(l_sys != nullptr);
+
+            l_sys->setAttr<TARGETING::ATTR_FORCE_SRAM_MMIO_OVER_I2C>(0x01);
+
+            int failures = sendOcmbInbandCmdRsp(false);
+            if (failures)
+            {
+                TS_FAIL("testOcmbInbandCmdRspOverI2c_via_force() failed: %d", failures);
+            }
+
+            // Restore using MMIO instead of I2C
+            l_sys->setAttr<TARGETING::ATTR_FORCE_SRAM_MMIO_OVER_I2C>(0x00);
+
+            mutex_unlock(iv_serializeTestMutex);
+        }
+        FAPI_INF("testOcmbInbandCmdRspOverI2c_via_force: exiting");
+    }
+
+    /**
+     *  @brief Test the Explorer inband command/response path over I2C
+     *         using scom setting to i2c
+     */
+    void  testOcmbInbandCmdRspOverI2c_via_scom_switch( void )
+    {
+        FAPI_INF("testOcmbInbandCmdRspOverI2c_via_scom_switch: entering");
+        if (!iv_serializeTestMutex)
+        {
+            TS_FAIL("iv_serializedTestMutex is not setup, unable to continue");
+        }
+        else
+        {
+            // Inband operations can't be run at the same time
+            // atomic section >>
+            mutex_lock(iv_serializeTestMutex);
+
+            // Set SCOM_SWITCHES to use i2c instead of MMMIO when
+            // running the inband cmd/rsp operations
+            int failures = sendOcmbInbandCmdRsp(true);
+            if (failures)
+            {
+                TS_FAIL("testOcmbInbandCmdRspOverI2c_via_scom_switch() failed: %d", failures);
+            }
+
+            mutex_unlock(iv_serializeTestMutex);
+        }
+        FAPI_INF("testOcmbInbandCmdRspOverI2c_via_scom_switch: exiting");
+    }
 
     /**
      * @brief Constructor

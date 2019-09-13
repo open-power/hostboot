@@ -103,4 +103,34 @@ namespace exptest
         mutex_unlock(l_mutex);
     };
 
+    void disableInbandScomsOcmb(const TARGETING::TargetHandle_t i_ocmbTarget)
+    {
+        mutex_t* l_mutex = nullptr;
+
+        assert((i_ocmbTarget != nullptr),
+                "disableInbandScomsOcmb: target is NULL!");
+
+        // Verify that the target is of type OCMB_CHIP
+        TARGETING::ATTR_TYPE_type l_targetType =
+                    i_ocmbTarget->getAttr<TARGETING::ATTR_TYPE>();
+        assert((l_targetType == TARGETING::TYPE_OCMB_CHIP),
+                "disableInbandScomsOcmb: target is not an OCMB chip!");
+
+        TS_INFO("disableInbandScomsOcmb: switching to use i2c on OCMB 0x%08x",
+                   TARGETING::get_huid(i_ocmbTarget));
+
+        //don't mess with attributes without the mutex (just to be safe)
+        l_mutex = i_ocmbTarget->getHbMutexAttr<TARGETING::ATTR_IBSCOM_MUTEX>();
+        mutex_lock(l_mutex);
+
+        TARGETING::ScomSwitches l_switches =
+            i_ocmbTarget->getAttr<TARGETING::ATTR_SCOM_SWITCHES>();
+        l_switches.useInbandScom = 0;
+        l_switches.useI2cScom = 1;
+
+        // Modify attribute
+        i_ocmbTarget->setAttr<TARGETING::ATTR_SCOM_SWITCHES>(l_switches);
+        mutex_unlock(l_mutex);
+    };
+
 }

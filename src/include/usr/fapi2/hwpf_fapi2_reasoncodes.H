@@ -73,6 +73,8 @@ namespace fapi2
         MOD_FAPI2_PLAT_GET_FREQ_MCA_MHZ             = 0x1E,
         MOD_GET_OMI_FREQ_AND_VCO                    = 0x1F,
         MOD_FAPI2_SPD_ACCESS                        = 0x20,
+        MOD_FAPI2_EXPLR_IB_I2C_READ                 = 0x21,
+        MOD_FAPI2_EXPLR_IB_I2C_WRITE                = 0x22,
     };
 
     /**
@@ -134,6 +136,7 @@ namespace fapi2
         RC_FAILED_TO_GET_RING_LIST     = FAPI2_COMP_ID | 0x40,
         RC_ATTR_OVERRIDE_DISALLOWED    = FAPI2_COMP_ID | 0x41,
         RC_UNKNOWN_OCMB_CHIP_TYPE      = FAPI2_COMP_ID | 0x42,
+        RC_INVALID_BUFFER_SIZE         = FAPI2_COMP_ID | 0x43,
 
         // HWP generated errors
         RC_HWP_GENERATED_ERROR         = HWPF_COMP_ID | 0x0f,

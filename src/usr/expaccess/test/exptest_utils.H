@@ -53,6 +53,12 @@ TARGETING::HB_MUTEX_SERIALIZE_TEST_LOCK_ATTR getTestMutex(void);
  * @param[in] i_ocmbTarget The target OCMB chip
  */
 void enableInbandScomsOcmb(const TARGETING::TargetHandle_t i_ocmbTarget);
+
+/**
+ * @brief Disable inband scoms on an OCMB target (use i2c instead)
+ * @param[in] i_ocmbTarget The target OCMB chip
+ */
+void disableInbandScomsOcmb(const TARGETING::TargetHandle_t i_ocmbTarget);
 }
 
 #endif
