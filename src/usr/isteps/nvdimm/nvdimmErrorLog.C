@@ -1082,7 +1082,7 @@ errlHndl_t nvdimmHealthStatusCheck(Target *i_nvdimm, uint8_t i_step, bool& o_con
     do
     {
         // If function calling is SAVE, ignore NOT_ENOUGH_ENERGY_FOR_CSAVE
-        if (i_step == HEALTH_SAVE)
+        if (i_step != HEALTH_SAVE)
         {
             // Check MODULE_HEALTH_STATUS1[0]
             if ((l_RegInfo.Module_Health_Status1 & NOT_ENOUGH_ENERGY_FOR_CSAVE) == NOT_ENOUGH_ENERGY_FOR_CSAVE)
