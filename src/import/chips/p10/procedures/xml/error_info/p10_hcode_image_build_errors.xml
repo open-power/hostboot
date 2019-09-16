@@ -170,7 +170,7 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_XPMR_HDR_BUILD_FAILURE</rc>
+    <rc>RC_XPMR_HDR_BUILD_FAIL</rc>
     <description>Failed to update XPMR Header region of HOMER.
     Note: 0xFFFFFFFF in field MAX_ALLOWED_SIZE is an invalid size suggesting that image
     section is not found</description>
@@ -185,7 +185,7 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_XGPE_BOOT_COPIER_BUILD_FAILURE</rc>
+    <rc>RC_XGPE_BOOT_COPIER_BUILD_FAIL</rc>
     <description>Failed to update XGPE boot copier region of HOMER.
     Note: 0xFFFFFFFF in field MAX_ALLOWED_SIZE is an invalid size suggesting that image
     section is not found</description>
@@ -200,7 +200,7 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_XGPE_BOOT_LOADER_BUILD_FAILURE</rc>
+    <rc>RC_XGPE_BOOT_LOADER_BUILD_FAIL</rc>
     <description>Failed to update XGPE boot loader region of HOMER.
     Note: 0xFFFFFFFF in field MAX_ALLOWED_SIZE is an invalid size suggesting that image
     section is not found</description>
@@ -215,7 +215,7 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_XGPE_HCODE_BUILD_FAILURE</rc>
+    <rc>RC_XGPE_HCODE_BUILD_FAIL</rc>
     <description>Failed to update XGPE Hcode region of HOMER.
     Note: 0xFFFFFFFF in field MAX_ALLOWED_SIZE is an invalid size suggesting that image
     section is not found</description>

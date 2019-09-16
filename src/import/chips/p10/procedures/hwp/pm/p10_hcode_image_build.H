@@ -86,7 +86,7 @@ extern "C"
         uint32_t qmeHcodeBuild: 1;              // for qme hcode inclusion
         uint32_t qmeCommonRingBuild: 1;         // for core ring inclusion
         uint32_t qmeCoreSpecificRingBuild: 1;   // for core specific scan ring inclusion
-        uint32_t xgpeHcodeBuild: 1;             // for xgpe inclusion
+        uint32_t xgpeImageBuild: 1;             // for xgpe inclusion
         uint32_t xgpeCommonRingBuild: 1;        // for xgpe common scan ring inclusion
         uint32_t xgpeCacheSpecificRingBuild: 1; // for cache specific ring inclusion
         uint32_t pgpeImageBuild: 1;             // pgpe platform inclusion in image build
@@ -103,7 +103,7 @@ extern "C"
             this->qmeHcodeBuild                 |=      0x01;
             this->qmeCommonRingBuild            |=      0x01;
             this->qmeCoreSpecificRingBuild      |=      0x01;
-            this->xgpeHcodeBuild                |=      0x01;
+            this->xgpeImageBuild                |=      0x01;
             this->xgpeCommonRingBuild           |=      0x01;
             this->xgpeCacheSpecificRingBuild    |=      0x01;
             this->pgpeImageBuild                |=      0x01;
@@ -121,7 +121,7 @@ extern "C"
                  ( this->qmeHcodeBuild )            ||
                  ( this->qmeCommonRingBuild )       ||
                  ( this->qmeCoreSpecificRingBuild ) ||
-                 ( this->xgpeHcodeBuild )           ||
+                 ( this->xgpeImageBuild )           ||
                  ( this->xgpeCommonRingBuild )      ||
                  ( this->xgpeCacheSpecificRingBuild ) ||
                  ( this->pgpeImageBuild )           ||

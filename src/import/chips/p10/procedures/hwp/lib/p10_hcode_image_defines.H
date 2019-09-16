@@ -247,7 +247,7 @@ HCD_HDR_UINT32( g_pgpe_deepOpTraceLength,     0);
 typedef struct
 {
 #endif
-HCD_HDR_UINT64( iv_magicWord,           XPMR_MAGIC_NUMBER);
+HCD_HDR_UINT64( iv_xpmrMagicWord,           XPMR_MAGIC_NUMBER);
 HCD_HDR_UINT32( iv_bootCopierOffset,    0);
 HCD_HDR_UINT32( iv_reserve1,            0);
 HCD_HDR_UINT32( iv_bootLoaderOffset,    0);
@@ -275,26 +275,26 @@ HCD_HDR_PAD(XPMR_HEADER_SIZE);
 typedef struct
 {
 #endif
-HCD_HDR_UINT64( g_magicWord,                XGPE_MAGIC_NUMBER);
-HCD_HDR_UINT32( g_sysResetAddress,          0 ); //FIXME need to add correct address
-HCD_HDR_UINT32( g_sharedSramAddress,        0 ); //FIXME need to add correct address
-HCD_HDR_UINT32( g_ivprAddress,              0 ); //FIXME need to add correct address
-HCD_HDR_UINT32( g_sharedSramLength,         0 );
-HCD_HDR_UINT32( g_buildDate,                0 );
-HCD_HDR_UINT32( g_buildVer,                 0 );
-HCD_HDR_UINT16( g_xgpeFlags,                0 );
-HCD_HDR_UINT16( g_reserve1,                 0 );
-HCD_HDR_UINT32( g_timeBaseHz,               0 );
-HCD_HDR_UINT32( g_gpspbSramAddress,         0 );
-HCD_HDR_UINT32( g_xgpeHcodeLength,          0 );
-HCD_HDR_UINT32( g_reserve2,                 0 );
-HCD_HDR_UINT32( g_gpspbLength,              0 );
-HCD_HDR_UINT32( g_coreThrottleAssertCnt,    0 );
-HCD_HDR_UINT32( g_coreThrottleDeAssertCnt,  0 );
-HCD_HDR_UINT32( g_charactControls,          0 );
-HCD_HDR_UINT32( g_xgpeOpTracePointer,       0 );
-HCD_HDR_UINT32( g_xgpeDeepOpTraceMemAddr,   0 );
-HCD_HDR_UINT32( g_xgpeDeepOpTraceLength, 0 );
+HCD_HDR_UINT64( g_xgpe_magicWord,                XGPE_MAGIC_NUMBER);
+HCD_HDR_UINT32( g_xgpe_sysResetAddress,          0 ); //FIXME need to add correct address
+HCD_HDR_UINT32( g_xgpe_sharedSramAddress,        0 ); //FIXME need to add correct address
+HCD_HDR_UINT32( g_xgpe_ivprAddress,              0 ); //FIXME need to add correct address
+HCD_HDR_UINT32( g_xgpe_sharedSramLength,         0 );
+HCD_HDR_UINT32( g_xgpe_buildDate,                0 );
+HCD_HDR_UINT32( g_xgpe_buildVer,                 0 );
+HCD_HDR_UINT16( g_xgpe_xgpeFlags,                0 );
+HCD_HDR_UINT16( g_xgpe_reserve1,                 0 );
+HCD_HDR_UINT32( g_xgpe_timeBaseHz,               0 );
+HCD_HDR_UINT32( g_xgpe_gpspbSramAddress,         0 );
+HCD_HDR_UINT32( g_xgpe_hcodeLength,              0 );
+HCD_HDR_UINT32( g_xgpe_reserve2,                 0 );
+HCD_HDR_UINT32( g_xgpe_gpspbLength,              0 );
+HCD_HDR_UINT32( g_xgpe_coreThrottleAssertCnt,    0 );
+HCD_HDR_UINT32( g_xgpe_coreThrottleDeAssertCnt,  0 );
+HCD_HDR_UINT32( g_xgpe_charactControls,          0 );
+HCD_HDR_UINT32( g_xgpe_xgpeOpTracePointer,       0 );
+HCD_HDR_UINT32( g_xgpe_xgpeDeepOpTraceMemAddr,   0 );
+HCD_HDR_UINT32( g_xgpe_xgpeDeepOpTraceLength, 0 );
 HCD_HDR_PAD(IMG_HDR_ALIGN_SIZE);
 #ifdef __ASSEMBLER__
 .endm
@@ -426,8 +426,11 @@ typedef struct
  */
 typedef struct
 {
-    //FIXME Will be replaced with actual region layout later.
-    uint8_t iv_xpmrRegion[ONE_MB];
+    uint8_t iv_xpmrHeader[XPMR_HEADER_SIZE];
+    uint8_t iv_bootCopier[XGPE_BOOT_COPIER_LENGTH];
+    uint8_t iv_bootLoader[XGPE_BOOT_LOADER_LENGTH];
+    uint8_t iv_xgpeSramRegion[XGPE_SRAM_SIZE];
+    uint8_t iv_xpmrReserve[ONE_MB - (XPMR_BOOT_REGION + XGPE_SRAM_SIZE)];
 } XPMRLayout_t;
 
 /**

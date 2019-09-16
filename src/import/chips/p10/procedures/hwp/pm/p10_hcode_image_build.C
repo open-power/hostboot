@@ -151,6 +151,10 @@ class ImageBuildRecord
     {
         memset( iv_platName, 0, PLAT_NAME_SIZE );
         memcpy( iv_platName, i_name, PLAT_NAME_SIZE );
+        iv_maxSizeList["XPMR Header"]       =   XPMR_HEADER_SIZE;
+        iv_maxSizeList["XGPE Boot Copier"]  =   XGPE_BOOT_COPIER_SIZE;
+        iv_maxSizeList["XGPE Boot Loader"]  =   XGPE_BOOT_LOADER_LENGTH;
+        iv_maxSizeList["XGPE Hcode"]        =   XGPE_HCODE_SIZE;
         iv_maxSizeList["QME Hcode"]         =   QME_HCODE_SIZE;
         iv_maxSizeList["QME Ring Blob"]     =   QME_RING_SECTION_SIZE;
         iv_maxSizeList["QME SRAM Size"]     =   QME_SRAM_SIZE;
@@ -437,6 +441,317 @@ fapi_try_exit:
 //------------------------------------------------------------------------------
 
 /**
+ * @brief   extracts image section specific to a given EC level.
+ * @param[in]   i_srcPtr        points to hardware image.
+ * @param[in]   i_mainSecId     top level section of hw image( usually a XIP image of PPE )
+ * @param[in]   i_secId         sub-section within a top level HW Image section
+ * @return      IMG_BUILD_SUCCESS in case of success, error code otherwise
+ */
+
+uint32_t getXipImageSectn( uint8_t * i_srcPtr, uint8_t i_mainSecId, uint8_t i_secId, uint8_t i_ecLevel,
+                           P9XipSection&  o_ppeSection )
+{
+    FAPI_DBG( ">> getXipImageSectn" );
+
+    uint32_t rc = IMG_BUILD_SUCCESS;
+    do
+    {
+        MyBool_t ecLvlSupported = UNDEFINED_BOOLEAN;
+
+        rc = p9_xip_dd_section_support( i_srcPtr, i_mainSecId, i_secId, &ecLvlSupported );
+
+        if( rc )
+        {
+            break;
+        }
+
+        if( ecLvlSupported )
+        {
+            FAPI_DBG(" Calling p9_xip_get_section 0x%08x EC 0x%08x", i_mainSecId, i_ecLevel );
+            rc = p9_xip_get_section( i_srcPtr, i_mainSecId, &o_ppeSection, i_ecLevel );
+        }
+        else
+        {
+            rc = p9_xip_get_section( i_srcPtr, i_mainSecId, &o_ppeSection );
+        }
+
+        FAPI_INF("Multiple EC Level Support  : %s For Sec Id 0x%02x EC : 0x%02x",
+                  ecLvlSupported ? "Yes" :"No", i_secId, i_ecLevel );
+    }while(0);
+
+    FAPI_DBG( "<< getXipImageSectn" );
+    return rc;
+}
+
+//--------------------------------------------------------------------------------------------------------
+
+/**
+ * @brief   Copies section of hardware image to HOMER
+ * @param[in]   i_destPtr       a location in HOMER
+ * @param[in]   i_srcPtr        a location in HW Image.
+ * @param[in]   i_buildRecord   an instance of ImgSectnSumm
+ * @param[in]   i_secId         XIP Section id to be copied.
+ * @param[in]   i_ecLevel       ec level of chip
+ * @param[out]  o_ppeSection    contains section details.
+ * @return  IMG_BUILD_SUCCESS if successful, error code otherwise.
+ */
+uint32_t copySectionToHomer( uint8_t* i_destPtr, uint8_t* i_srcPtr, ImageBuildRecord & i_buildRecord, uint8_t i_secId ,
+                             uint8_t i_ecLevel, P9XipSection&   o_ppeSection )
+{
+    FAPI_DBG( ">> copySectionToHomer" );
+    uint32_t retCode = IMG_BUILD_SUCCESS;
+
+    do
+    {
+        o_ppeSection.iv_offset      =   0;
+        o_ppeSection.iv_size        =   0;
+
+        uint32_t rcTemp = getXipImageSectn( i_srcPtr, i_secId, UNDEFINED_IPL_IMAGE_SID, i_ecLevel, o_ppeSection );
+
+        if( rcTemp )
+        {
+            FAPI_ERR( "Failed To Get Section 0x%08X Of XIP RC 0x%08x", i_secId, rcTemp );
+            retCode = BUILD_FAIL_INVALID_SECTN;
+            break;
+        }
+
+        FAPI_DBG("o_ppeSection.iv_offset = %X, "
+                 "o_ppeSection.iv_size = %X, "
+                 "i_secId %d",
+                 o_ppeSection.iv_offset,
+                 o_ppeSection.iv_size,
+                 i_secId);
+
+        retCode    =   i_buildRecord.checkSize( o_ppeSection.iv_size );
+
+        if( retCode )
+        {
+            break;
+        }
+
+        memcpy( i_destPtr, i_srcPtr + o_ppeSection.iv_offset, o_ppeSection.iv_size );
+    }
+    while(0);
+
+    FAPI_DBG( "<< copySectionToHomer" );
+    return retCode;
+}
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief   builds XPMR header in the HOMER.
+ * @param[in]   i_pChipHomer        models P10's HOMER.
+ * @param[in]   i_ppmrBuildRecord   XPMR region image build metadata
+ * @return      fapi2 return code.
+ */
+fapi2::ReturnCode buildXpmrHeader( Homerlayout_t* i_pChipHomer, ImageBuildRecord & i_xpmrBuildRecord )
+{
+    ImgSectnSumm   l_sectn;
+    XpmrHeader_t * l_pXpmrHdr   =
+            (XpmrHeader_t *) i_pChipHomer->iv_xpmrRegion.iv_xpmrHeader;
+
+    //XGPE Boot Copier
+    i_xpmrBuildRecord.getSection( "XGPE Boot Copier", l_sectn );
+    l_pXpmrHdr->iv_bootCopierOffset = l_sectn.iv_sectnOffset;
+
+    //XGPE Boot Loader
+    i_xpmrBuildRecord.getSection( "XGPE Boot Loader", l_sectn );
+    l_pXpmrHdr->iv_bootLoaderOffset =   l_sectn.iv_sectnOffset;
+    l_pXpmrHdr->iv_bootLoaderLength =   XGPE_BOOT_LOADER_LENGTH;
+
+    //XGPE Hcode
+    i_xpmrBuildRecord.getSection( "XGPE Hcode", l_sectn );
+    l_pXpmrHdr->iv_xgpeHcodeOffset  =   l_sectn.iv_sectnOffset;
+    l_pXpmrHdr->iv_xgpeHcodeLength  =   l_sectn.iv_sectnLength;
+
+    //XGPE SRAM
+    i_xpmrBuildRecord.getSection( "XGPE SRAM", l_sectn );
+    l_pXpmrHdr->iv_xgpeSramSize     =   l_sectn.iv_sectnLength;
+
+#ifndef __HOSTBOOT_MODULE
+    l_pXpmrHdr->iv_bootCopierOffset     =   htobe32(l_pXpmrHdr->iv_bootCopierOffset);
+    l_pXpmrHdr->iv_bootLoaderOffset     =   htobe32(l_pXpmrHdr->iv_bootLoaderOffset);
+    l_pXpmrHdr->iv_bootLoaderLength     =   htobe32(l_pXpmrHdr->iv_bootLoaderLength);
+    l_pXpmrHdr->iv_xgpeHcodeOffset      =   htobe32(l_pXpmrHdr->iv_xgpeHcodeOffset);
+    l_pXpmrHdr->iv_xgpeHcodeLength      =   htobe32(l_pXpmrHdr->iv_xgpeHcodeLength);
+    l_pXpmrHdr->iv_xgpeSramSize         =   htobe32(l_pXpmrHdr->iv_xgpeSramSize);
+
+    FAPI_DBG( "====================== XPMR Header =======================" );
+    FAPI_DBG( "XPMR BC Offset             0x%08x", htobe32(l_pXpmrHdr->iv_bootCopierOffset));
+    FAPI_DBG( "XPMR BL Offset             0x%08x", htobe32(l_pXpmrHdr->iv_bootLoaderOffset));
+    FAPI_DBG( "XPMR BL Length             0x%08x", htobe32(l_pXpmrHdr->iv_bootLoaderLength));
+    FAPI_DBG( "XPMR Hcode Offset          0x%08x", htobe32(l_pXpmrHdr->iv_xgpeHcodeOffset));
+    FAPI_DBG( "XPMR Hcode Length          0x%08x", htobe32(l_pXpmrHdr->iv_xgpeHcodeLength));
+    FAPI_DBG( "==========================================================" );
+#endif
+
+    return fapi2::current_err;
+}
+
+//-------------------------------------------------------------------------------------------------------
+
+/**
+ * @brief   populates few fields of XGPE image  header in HOMER.
+ * @param[in]   i_pChipHomer    models P10's HOMER.
+ * @param[in]   i_xpmrBuildRecord     XPMR region image build metadata
+ * @return      fapi2 return code.
+ */
+fapi2::ReturnCode buildXgpeHeader( Homerlayout_t* i_pChipHomer, ImageBuildRecord & i_xpmrBuildRecord )
+{
+    ImgSectnSumm   l_sectn;
+    i_xpmrBuildRecord.getSection( "XGPE Hcode", l_sectn );
+    XgpeHeader_t * pXgpeHeader   =
+            ( XgpeHeader_t *) &i_pChipHomer->iv_xpmrRegion.iv_xgpeSramRegion[XGPE_INT_VECTOR_SIZE];
+
+    pXgpeHeader->g_xgpe_hcodeLength         =   l_sectn.iv_sectnLength;
+    pXgpeHeader->g_xgpe_sysResetAddress     =   XGPE_SRAM_BASE_ADDR + PPE_RESET_VECTOR;
+    pXgpeHeader->g_xgpe_ivprAddress         =   XGPE_SRAM_BASE_ADDR;
+
+#ifndef __HOSTBOOT_MODULE
+    pXgpeHeader->g_xgpe_hcodeLength         =   htobe32( pXgpeHeader->g_xgpe_hcodeLength );
+    pXgpeHeader->g_xgpe_sysResetAddress     =   htobe32( pXgpeHeader->g_xgpe_sysResetAddress );
+    pXgpeHeader->g_xgpe_ivprAddress         =   htobe32( pXgpeHeader->g_xgpe_ivprAddress );
+
+    FAPI_DBG( "====================== XGPE Header =======================" );
+    FAPI_INF( "XGPE Hcode Length        0x%08x", htobe32( pXgpeHeader->g_xgpe_hcodeLength ) );
+    FAPI_INF( "XGPE Sys Reset Address   0x%08x", htobe32( pXgpeHeader->g_xgpe_sysResetAddress ) );
+    FAPI_INF( "XGPE IVPR Address        0x%08x", htobe32( pXgpeHeader->g_xgpe_ivprAddress ) );
+
+    FAPI_DBG( "==========================================================" );
+#endif
+
+    return fapi2::current_err;
+}
+
+//-------------------------------------------------------------------------------------------------------
+
+/**
+ * @brief   builds XPMR region
+ * @param[in]   i_procTgt       fapi2 target for P10 chip
+ * @param[in]   i_pImageIn      points to hardware reference image
+ * @param[in]   i_pChipHomer    models HOMER
+ * @param[in]   i_phase         IPL or Runtime
+ * @param[in]   i_imgType       image type to be built
+ * @param[in]   i_chipFuncModel P10 chip configuration
+ * @param[in]   i_ringData      buffers to extract and process rings.
+ * @return      fapi2 return code.
+ */
+fapi2::ReturnCode buildXpmrImage( CONST_FAPI2_PROC& i_procTgt,
+                                  void* const     i_pImageIn,
+                                  Homerlayout_t   *i_pChipHomer,
+                                  SysPhase_t      i_phase,
+                                  ImageType_t     i_imgType,
+                                  P10FuncModel    &i_chipFuncModel )
+{
+    FAPI_INF( ">> buildXpmrImage" );
+    uint32_t rcTemp     =   IMG_BUILD_SUCCESS;
+    fapi2::current_err  =   fapi2::FAPI2_RC_SUCCESS;
+    //Let us find XIP Header for XGPE
+    P9XipSection ppeSection;
+    uint8_t* pXgpeImg   =   NULL;
+    ImageBuildRecord    l_xgpeBuildRecord( (uint8_t *)(&i_pChipHomer->iv_occHostRegion), "XGPE" );
+
+    if( i_imgType.xgpeImageBuild )
+    {
+        //Init XGPE region with zero
+        memset( i_pChipHomer->iv_xpmrRegion.iv_xpmrHeader, 0x00, ONE_MB );
+
+        rcTemp = p9_xip_get_section( i_pImageIn, P9_XIP_SECTION_HW_XGPE, &ppeSection );
+
+        FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rcTemp ),
+                     fapi2::XGPE_IMG_NOT_FOUND_IN_HW_IMG()
+                     .set_XIP_FAILURE_CODE( rcTemp )
+                     .set_EC_LEVEL( i_chipFuncModel.getChipLevel() ),
+                     "Failed To Find XGPE Sub-Image In HW Image" );
+
+        pXgpeImg = ppeSection.iv_offset + (uint8_t*) (i_pImageIn );
+        FAPI_DBG("HW image XGPE Offset = 0x%08X", ppeSection.iv_offset);
+
+        FAPI_INF("XPMR Header");
+        rcTemp = copySectionToHomer( i_pChipHomer->iv_xpmrRegion.iv_xpmrHeader,
+                                     pXgpeImg,
+                                     l_xgpeBuildRecord,
+                                     P9_XIP_SECTION_XGPE_XPMR_HDR,
+                                     i_chipFuncModel.getChipLevel(),
+                                     ppeSection );
+
+        FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rcTemp ),
+                     fapi2::XPMR_HDR_BUILD_FAIL()
+                     .set_EC_LEVEL( i_chipFuncModel.getChipLevel() )
+                     .set_MAX_ALLOWED_SIZE( rcTemp )
+                     .set_ACTUAL_SIZE( ppeSection.iv_size ),
+                     "Failed To Update XPMR Region Of HOMER" );
+
+        l_xgpeBuildRecord.setSection( "XPMR Header", 0, XPMR_HEADER_SIZE );
+
+        rcTemp = copySectionToHomer( i_pChipHomer->iv_xpmrRegion.iv_bootCopier,
+                                     pXgpeImg,
+                                     l_xgpeBuildRecord,
+                                     P9_XIP_SECTION_XGPE_LVL1_BL,
+                                     i_chipFuncModel.getChipLevel(),
+                                     ppeSection );
+
+        FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rcTemp ),
+                     fapi2::XGPE_BOOT_COPIER_BUILD_FAIL()
+                     .set_EC_LEVEL( i_chipFuncModel.getChipLevel() )
+                     .set_MAX_ALLOWED_SIZE( rcTemp )
+                     .set_ACTUAL_SIZE( ppeSection.iv_size ),
+                     "Failed To Update XGPE Boot Copier Region Of HOMER" );
+
+        l_xgpeBuildRecord.setSection( "XGPE Boot Copier", XGPE_BOOT_COPIER_OFFSET, ppeSection.iv_size );
+
+        rcTemp = copySectionToHomer( i_pChipHomer->iv_xpmrRegion.iv_bootLoader,
+                                     pXgpeImg,
+                                     l_xgpeBuildRecord,
+                                     P9_XIP_SECTION_XGPE_LVL2_BL,
+                                     i_chipFuncModel.getChipLevel(),
+                                     ppeSection );
+
+        FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rcTemp ),
+                     fapi2::XGPE_BOOT_LOADER_BUILD_FAIL()
+                     .set_EC_LEVEL( i_chipFuncModel.getChipLevel() )
+                     .set_MAX_ALLOWED_SIZE( rcTemp )
+                     .set_ACTUAL_SIZE( ppeSection.iv_size ),
+                     "Failed To Update XGPE Boot Loader Region Of HOMER" );
+
+        l_xgpeBuildRecord.setSection( "XGPE Boot Loader", XGPE_BOOT_LOADER_OFFSET, ppeSection.iv_size );
+        rcTemp = copySectionToHomer( i_pChipHomer->iv_xpmrRegion.iv_xgpeSramRegion,
+                                     pXgpeImg,
+                                     l_xgpeBuildRecord,
+                                     P9_XIP_SECTION_XGPE_HCODE,
+                                     i_chipFuncModel.getChipLevel(),
+                                     ppeSection );
+
+        FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rcTemp ),
+                     fapi2::XGPE_HCODE_BUILD_FAIL()
+                     .set_EC_LEVEL( i_chipFuncModel.getChipLevel() )
+                     .set_MAX_ALLOWED_SIZE( rcTemp )
+                     .set_ACTUAL_SIZE( ppeSection.iv_size ),
+                     "Failed To Update XGPE Hcode Region Of HOMER" );
+
+        l_xgpeBuildRecord.setSection( "XGPE Hcode", XGPE_IMAGE_XPMR_OFFSET, ppeSection.iv_size );
+
+        FAPI_DBG( "XGPE Hcode       0x%08x",    ppeSection.iv_size );
+
+        l_xgpeBuildRecord.setSection( "XGPE SRAM Size", XGPE_IMAGE_XPMR_OFFSET, ppeSection.iv_size );
+
+        FAPI_TRY( buildXpmrHeader( i_pChipHomer, l_xgpeBuildRecord ),
+                  "Failed To Build XPMR Header" );
+
+        FAPI_TRY( buildXgpeHeader( i_pChipHomer, l_xgpeBuildRecord ),
+                  "Failed To Build XGPE Header" );
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+    FAPI_INF( " << buildXpmrImage" );
+}
+
+//------------------------------------------------------------------------------------------------------
+
+/**
  * @brief   initializes self-save restore region of HOMER.
  * @param[in]   i_pChipHomer  a struct modelling chip's HOMER region.
  * @return  fapi2 return code in case of error, FAPI2_RC_SUCCESS otherwise.
@@ -534,105 +849,7 @@ fapi2::ReturnCode   initSelfSaveRestoreEntries( Homerlayout_t* i_pChipHomer,
 
 //------------------------------------------------------------------------------
 
-/**
- * @brief   extracts image section specific to a given EC level.
- * @param[in]   i_srcPtr        points to hardware image.
- * @param[in]   i_mainSecId     top level section of hw image( usually a XIP image of PPE )
- * @param[in]   i_secId         sub-section within a top level HW Image section
- * @return      IMG_BUILD_SUCCESS in case of success, error code otherwise
- */
 
-uint32_t getXipImageSectn( uint8_t * i_srcPtr, uint8_t i_mainSecId, uint8_t i_secId, uint8_t i_ecLevel,
-                           P9XipSection&  o_ppeSection )
-{
-    FAPI_DBG( ">> getXipImageSectn" );
-
-    uint32_t rc = IMG_BUILD_SUCCESS;
-    do
-    {
-        MyBool_t ecLvlSupported = UNDEFINED_BOOLEAN;
-
-        rc = p9_xip_dd_section_support( i_srcPtr, i_mainSecId, i_secId, &ecLvlSupported );
-
-        if( rc )
-        {
-            break;
-        }
-
-        if( ecLvlSupported )
-        {
-            FAPI_DBG(" Calling p9_xip_get_section 0x%08x EC 0x%08x", i_mainSecId, i_ecLevel );
-            rc = p9_xip_get_section( i_srcPtr, i_mainSecId, &o_ppeSection, i_ecLevel );
-        }
-        else
-        {
-            rc = p9_xip_get_section( i_srcPtr, i_mainSecId, &o_ppeSection );
-        }
-
-        FAPI_INF("Multiple EC Level Support  : %s For Sec Id 0x%02x EC : 0x%02x",
-                  ecLvlSupported ? "Yes" :"No", i_secId, i_ecLevel );
-    }while(0);
-
-    FAPI_DBG( "<< getXipImageSectn" );
-    return rc;
-}
-
-//------------------------------------------------------------------------------
-
-/**
- * @brief   Copies section of hardware image to HOMER
- * @param[in]   i_destPtr       a location in HOMER
- * @param[in]   i_srcPtr        a location in HW Image.
- * @param[in]   i_buildRecord   an instance of ImgSectnSumm
- * @param[in]   i_secId         XIP Section id to be copied.
- * @param[in]   i_ecLevel       ec level of chip
- * @param[out]  o_ppeSection    contains section details.
- * @return  IMG_BUILD_SUCCESS if successful, error code otherwise.
- */
-uint32_t copySectionToHomer( uint8_t* i_destPtr, uint8_t* i_srcPtr, ImageBuildRecord & i_buildRecord, uint8_t i_secId ,
-                             uint8_t i_ecLevel, P9XipSection&   o_ppeSection )
-{
-    FAPI_DBG( ">> copySectionToHomer" );
-    uint32_t retCode = IMG_BUILD_SUCCESS;
-
-    do
-    {
-        o_ppeSection.iv_offset      =   0;
-        o_ppeSection.iv_size        =   0;
-
-        uint32_t rcTemp = getXipImageSectn( i_srcPtr, i_secId, UNDEFINED_IPL_IMAGE_SID, i_ecLevel, o_ppeSection );
-
-        if( rcTemp )
-        {
-            FAPI_ERR( "Failed To Get Section 0x%08X Of XIP RC 0x%08x", i_secId, rcTemp );
-            retCode = BUILD_FAIL_INVALID_SECTN;
-            break;
-        }
-
-        FAPI_DBG("o_ppeSection.iv_offset = %X, "
-                 "o_ppeSection.iv_size = %X, "
-                 "i_secId %d",
-                 o_ppeSection.iv_offset,
-                 o_ppeSection.iv_size,
-                 i_secId);
-
-        retCode    =   i_buildRecord.checkSize( o_ppeSection.iv_size );
-
-        if( retCode )
-        {
-            break;
-        }
-
-        memcpy( i_destPtr, i_srcPtr + o_ppeSection.iv_offset, o_ppeSection.iv_size );
-    }
-    while(0);
-
-    FAPI_DBG( "<< copySectionToHomer" );
-    return retCode;
-}
-
-
-//--------------------------------------------------------------------------------------------------------
 
 /**
  * @brief       copies core self restore section from hardware image to HOMER.
@@ -1101,6 +1318,8 @@ fapi_try_exit:
  */
 fapi2::ReturnCode populateMagicWord( Homerlayout_t   *i_pChipHomer )
 {
+    //FIXME Needs to review use of this function because image edit infra is
+    //available.
     FAPI_INF( ">> populateMagicWord" );
     //Populate CPMR Header's Magic Word
     CpmrHeader_t* pCpmrHdr      =
@@ -1111,11 +1330,17 @@ fapi2::ReturnCode populateMagicWord( Homerlayout_t   *i_pChipHomer )
             ( PgpeHeader_t *) &i_pChipHomer->iv_ppmrRegion.iv_pgpeSramRegion[PGPE_INT_VECTOR_SIZE];
     PpmrHeader_t * l_pPpmrHdr   =
             (PpmrHeader_t *) i_pChipHomer->iv_ppmrRegion.iv_ppmrHeader;
+    XpmrHeader_t * l_pXpmrHdr   =
+            (XpmrHeader_t *) i_pChipHomer->iv_xpmrRegion.iv_xpmrHeader;
+    XgpeHeader_t * pXgpeHeader  =
+            ( XgpeHeader_t *) &i_pChipHomer->iv_xpmrRegion.iv_xgpeSramRegion[XGPE_INT_VECTOR_SIZE];
 
     pCpmrHdr->iv_cpmrMagicWord      =   htobe64(CPMR_MAGIC_NUMBER);
     pQmeImgHdr->g_qme_magic_number  =   htobe64(QME_MAGIC_NUMBER);
     l_pPpmrHdr->iv_ppmrMagicWord    =   htobe64(PPMR_MAGIC_NUMBER);
     pPgpeHeader->g_pgpe_magicWord   =   htobe64(PGPE_MAGIC_NUMBER);
+    l_pXpmrHdr->iv_xpmrMagicWord    =   htobe64(XPMR_MAGIC_NUMBER);
+    pXgpeHeader->g_xgpe_magicWord   =   htobe64(XGPE_MAGIC_NUMBER);
 
     FAPI_INF( "<< populateMagicWord" );
     return fapi2::current_err;
@@ -1412,7 +1637,7 @@ fapi2::ReturnCode updateGpeAttributes( Homerlayout_t* i_pChipHomer,
     FAPI_INF(">> updateGpeAttributes");
 
     PpmrHeader_t* pPpmrHdr = (PpmrHeader_t*) i_pChipHomer->iv_ppmrRegion.iv_ppmrHeader;
-//    XpmrHeader_t* pxpmrHdr = (xpmrHeader_t*)i_pChipHomer->xpmrRegion.xgpeRegion.xpmrHeader;
+    XpmrHeader_t * l_pXpmrHdr   = (XpmrHeader_t *) i_pChipHomer->iv_xpmrRegion.iv_xpmrHeader;
 
     uint32_t attrVal = htobe32(pPpmrHdr->iv_bootCopierOffset);
     attrVal |= (0x80000000 | PPMR_HOMER_OFFSET);
@@ -1424,15 +1649,15 @@ fapi2::ReturnCode updateGpeAttributes( Homerlayout_t* i_pChipHomer,
 
     FAPI_DBG("Set ATTR_PGPE_BOOT_COPIER_IVPR_OFFSET to 0x%08X", attrVal );
 
-//     attrVal = htobe32(pXpmrHdr->iv_bootCopierOffset);
-//     attrVal |= (0x80000000 | ONE_MB);
-//
-//     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_XGPE_BOOT_COPIER_IVPR_OFFSET,
-//                            i_procTgt,
-//                            attrVal ),
-//              "Error from FAPI_ATTR_SET for attribute ATTR_XGPE_BOOT_COPIER_IVPR_OFFSET");
-//
-//     FAPI_DBG("Set ATTR_XGPE_BOOT_COPIER_IVPR_OFFSET to 0x%08X", attrVal );
+    attrVal = htobe32(l_pXpmrHdr->iv_bootCopierOffset);
+    attrVal |= (0x80000000 | ONE_MB);
+
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_XGPE_BOOT_COPIER_IVPR_OFFSET,
+                            i_procTgt,
+                            attrVal ),
+              "Error from FAPI_ATTR_SET for attribute ATTR_XGPE_BOOT_COPIER_IVPR_OFFSET");
+
+    FAPI_DBG("Set ATTR_XGPE_BOOT_COPIER_IVPR_OFFSET to 0x%08X", attrVal );
 
 fapi_try_exit:
     FAPI_INF("<< updateGpeAttributes");
@@ -1498,6 +1723,10 @@ fapi2::ReturnCode p10_hcode_image_build(    CONST_FAPI2_PROC& i_procTgt,
     {
         i_imgType.configBuildPhase();
     }
+
+    FAPI_TRY( buildXpmrImage(  i_procTgt, i_pImageIn, pChipHomer, i_phase,
+                               i_imgType, l_chipFuncModel ),
+              "Failed To Build XPMR Region of HOMER " );
 
     FAPI_TRY( buildCpmrImage( i_procTgt, i_pImageIn, pChipHomer, i_phase,
                               i_imgType, l_chipFuncModel, l_ringData ),
