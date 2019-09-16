@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -342,6 +342,9 @@ class VcmEvent : public TdEntry
 #ifdef __HOSTBOOT_RUNTIME
 template<>
 uint32_t VcmEvent<TARGETING::TYPE_MCA>::cleanup(STEP_CODE_DATA_STRUCT & io_sc);
+template<>
+uint32_t VcmEvent<TARGETING::TYPE_OCMB_CHIP>::cleanup(
+    STEP_CODE_DATA_STRUCT & io_sc);
 #endif
 
 template<>
