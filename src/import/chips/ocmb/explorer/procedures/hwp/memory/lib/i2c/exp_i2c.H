@@ -295,11 +295,39 @@ inline fapi2::ReturnCode boot_config(const fapi2::Target<fapi2::TARGET_TYPE_OCMB
     // The command takes ~300ms and we poll for around 100ms, so wait 250ms here
     FAPI_TRY( fapi2::delay( (mss::DELAY_1MS * 250), 200) );
 
-    // Poll for status response
-    // Note: the EXP_FW_BOOT_CONFIG command trains the OMI, which takes a
-    // significant amount of time. We're waiting 1ms between polls, and poll for 100 loops,
-    // which totals at least 100ms
-    FAPI_TRY(fw_status(i_target, DELAY_1MS, 100));
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Check that the FW status code returns a busy status (expected for exp_omi_train)
+///
+/// @param[in] i_target OCMB
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff busy and no error code, else, error code
+///
+inline fapi2::ReturnCode check_fw_status_busy(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+{
+    uint8_t l_status = ~(0);
+
+    std::vector<uint8_t> l_data;
+    FAPI_TRY(get_fw_status(i_target, l_data));
+
+    FAPI_TRY(status::get_status_code(i_target, l_data, l_status));
+
+    // Post bootconfig1, we should see a busy status until p9a_omi_train is kicked off (setting axone to AUTO_TRAIN)
+    // explorer will return busy status until then. if we have another status, then we may not have executed bootconfig1
+    // or some previous command correctly, so we should check it here
+    // After p9a_omi_train, exp_omi_train_check will check fw_status for success (in addition to checking training completion)
+    // to make sure things went smoothly
+    FAPI_ASSERT( l_status == status_codes::FW_BUSY,
+                 fapi2::MSS_EXP_I2C_FW_BOOT_CONFIG_STATUS_CODE_INVALID().
+                 set_TARGET(i_target).
+                 set_STATUS_CODE(l_status).
+                 set_CMD_ID(FW_STATUS),
+                 "Status code did not return BUSY (%d) as expected post BOOT_CONFIG1, received (%d) for " TARGIDFORMAT ,
+                 status_codes::FW_BUSY, l_status, TARGID );
+
+    return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     return fapi2::current_err;

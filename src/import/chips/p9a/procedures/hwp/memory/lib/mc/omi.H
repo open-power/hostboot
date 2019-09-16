@@ -252,13 +252,13 @@ fapi2::ReturnCode setup_mc_config0(
 
     l_val.template
     insertFromRight<TT::MC_REG2_DL0_CONFIG0_CFG_PHY_CNTR_LIMIT, TT::MC_REG2_DL0_CONFIG0_CFG_PHY_CNTR_LIMIT_LEN>(
-        mss::omi::phy_ctr_mode::PHY_CTR_MODE_50US);
+        mss::omi::phy_ctr_mode::PHY_CTR_MODE_60MS);
 
     // CFG_DL0_RUNLANE_OVRD_ENABLE: When enabled, the dl0 will drive run lane to the PHY for all training states.
     l_val.writeBit<TT::MC_REG2_DL0_CONFIG0_CFG_TX_EP_MODE>(0);
 
     // CFG_DL0_PWRMGT_ENABLE: dl0 power management enabled
-    l_val.writeBit<TT::MC_REG2_DL0_CONFIG0_CFG_PWRMGT_ENABLE>(1);
+    l_val.writeBit<TT::MC_REG2_DL0_CONFIG0_CFG_PWRMGT_ENABLE>(0);
 
     // CFG_DL0_QUARTER_WIDTH_BACKOFF_ENABLE: dl0 x1 backoff enabled
     l_val.writeBit<TT::MC_REG2_DL0_CONFIG0_CFG_X1_BACKOFF_ENABLE>(0);
@@ -282,6 +282,9 @@ fapi2::ReturnCode setup_mc_config0(
 
     // CFG_DL0_RESET: dl0 reset - Reset dl0 back to traning state 0
     l_val.writeBit<TT::MC_REG2_DL0_CONFIG0_CFG_RESET>(0);
+
+    FAPI_DBG("Writing 0x%16llx to MC_REG2_DL0_CONFIG0 (0x%16llx) of %s",
+             l_val, TT::MC_REG2_DL0_CONFIG0, mss::c_str(i_target));
 
     FAPI_TRY( mss::putScom(i_target, TT::MC_REG2_DL0_CONFIG0, l_val) );
 

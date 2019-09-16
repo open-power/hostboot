@@ -48,26 +48,22 @@ namespace omi
 {
 
 ///
-/// @brief Determine if OCMB PRBS workaround needs to be performed
-///
-/// @param[in] i_ocmb_chip OCMB target
-/// @param[out] o_required workaround needs to be performed
-/// @return FAPI2_RC_SUCCESS iff success
-///
-fapi2::ReturnCode is_prbs_ocmb_required(
-    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> i_ocmb_chip,
-    bool& o_required);
-
-///
-/// @brief Performs OCMB PRBS workaround
+/// @brief Determine if the OCMB is an explorer
 ///
 /// @param[in] i_ocmb_chip OCMB chip
-/// @param[in] i_dl_x4_backoff_en backoff enable
+/// @param[out] o_explorer true/false is explorer
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+/// @note Used for exp_omi_train procedure to differentiate fw_status behavior with gemini
+///
+fapi2::ReturnCode ocmb_is_explorer(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_chip, bool& o_explorer);
+
+///
+/// @brief Set configurable delay based on the PRBS ATTR and SIM mode
+///
+/// @param[in] i_ocmb_chip OCMB target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 ///
-fapi2::ReturnCode prbs_ocmb(
-    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> i_ocmb_chip,
-    const uint8_t i_dl_x4_backoff_en);
+fapi2::ReturnCode prbs_delay(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_chip);
 
 ///
 /// @brief Determine if we need to bypass MENTERP register reads/writes
@@ -85,6 +81,22 @@ fapi2::ReturnCode gem_menterp(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> 
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error
 ///
 fapi2::ReturnCode gem_setup_config(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+
+///
+/// @brief Workaround for exp_omi_train to perform dlx_config0 setup
+///
+/// @param[in] i_target OCMB chip
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode training_prbs(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+
+///
+/// @brief Workaround for exp_omi_setup to perform dlx_config0 setup
+///
+/// @param[in] i_target OCMB chip
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode pre_training_prbs(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
 
 } // omi
 } // workarounds

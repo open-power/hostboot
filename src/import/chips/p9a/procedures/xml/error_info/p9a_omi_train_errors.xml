@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -28,22 +28,28 @@
   <hwpError>
     <rc>RC_P9A_OMI_TRAIN_ERR</rc>
     <description>
-      Procedure: p9a_omi_train failure
+      p9a_omi_train_check did not see expected trained status from OMI DL0 status register
     </description>
-    <ffdc>TARGET</ffdc>
+    <ffdc>OMI_TARGET</ffdc>
     <ffdc>EXPECTED_SM_STATE</ffdc>
     <ffdc>ACTUAL_SM_STATE</ffdc>
     <ffdc>DL0_STATUS</ffdc>
     <ffdc>DL0_TRAINING_STATUS</ffdc>
+    <ffdc>DL0_CONFIG1</ffdc>
+    <ffdc>OMI_FREQ</ffdc>
     <callout>
-        <target>TARGET</target>
+        <target>OMI_TARGET</target>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
+        <bus>OMI_TARGET, OCMB_TARGET</bus>
         <priority>HIGH</priority>
     </callout>
     <deconfigure>
-        <target>TARGET</target>
+        <target>OMI_TARGET</target>
     </deconfigure>
     <gard>
-        <target>TARGET</target>
+        <target>OMI_TARGET</target>
     </gard>
   </hwpError>
   <!-- ******************************************************************** -->

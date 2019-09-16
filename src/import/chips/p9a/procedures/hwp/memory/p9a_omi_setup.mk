@@ -22,3 +22,8 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+-include 00p9a_common.mk
+
+PROCEDURE=p9a_omi_setup
+$(eval $(call ADD_P9A_MEMORY_INCDIRS,$(PROCEDURE)))
+$(call BUILD_PROCEDURE)

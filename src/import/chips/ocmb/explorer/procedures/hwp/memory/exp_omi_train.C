@@ -37,8 +37,12 @@
 #include <generic/memory/lib/utils/c_str.H>
 #include <lib/omi/exp_omi_utils.H>
 #include <lib/i2c/exp_i2c.H>
+#include <lib/exp_attribute_accessors_manual.H>
+#include <lib/workarounds/exp_omi_workarounds.H>
 #include <exp_omi_train.H>
 #include <generic/memory/mss_git_data_helper.H>
+#include <generic/memory/lib/mss_generic_attribute_getters.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 extern "C"
 {
@@ -52,18 +56,41 @@ extern "C"
     {
         mss::display_git_commit_info("exp_omi_train");
 
-        std::vector<uint8_t> l_data;
-        uint8_t l_dl_layer_boot_mode = fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_DL_LAYER_BOOT_MODE_ONLY_DL_TRAINING;
+        // Perform p9a workaround
+        // Train mode 1 (PATTERN_A)
+        FAPI_TRY(mss::exp::workarounds::omi::training_prbs(i_target));
 
-        // Gets the data setup
-        FAPI_TRY(mss::exp::omi::train::setup_fw_boot_config(i_target, l_data));
+        // BOOT CONFIG 1
+        {
+            bool l_ocmb_is_explorer = false;
 
-        // Sets DL_TRAIN field
-        FAPI_TRY(mss::exp::i2c::boot_cfg::set_dl_layer_boot_mode( i_target, l_data, l_dl_layer_boot_mode ));
+            std::vector<uint8_t> l_data;
+            uint8_t l_dl_layer_boot_mode = fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_DL_LAYER_BOOT_MODE_ONLY_DL_TRAINING;
 
-        // Issues the command and checks for completion
-        // Note: the status check also checks for the OMI training completion, so after we run this command, we're good to go
-        FAPI_TRY(mss::exp::i2c::boot_config(i_target, l_data));
+            // Gets the data setup
+            FAPI_TRY(mss::exp::omi::train::setup_fw_boot_config(i_target, l_data));
+
+            // Sets DL_TRAIN field
+            FAPI_TRY(mss::exp::i2c::boot_cfg::set_dl_layer_boot_mode( i_target, l_data, l_dl_layer_boot_mode ));
+
+            // Issues the command and checks for completion
+            FAPI_TRY(mss::exp::i2c::boot_config(i_target, l_data));
+
+            // Check for expected busy status (this won't work for gemini)
+            FAPI_TRY(mss::exp::workarounds::omi::ocmb_is_explorer(i_target, l_ocmb_is_explorer));
+
+            if (l_ocmb_is_explorer)
+            {
+                // Explorer & P9A environment should see a busy status until auto train is kicked off from both sides
+                FAPI_TRY(mss::exp::i2c::check_fw_status_busy(i_target));
+            }
+            else
+            {
+                // Gemini should return success code
+                FAPI_TRY(mss::exp::i2c::fw_status(i_target, mss::DELAY_1MS, 100));
+            }
+
+        }
 
     fapi_try_exit:
         return fapi2::current_err;

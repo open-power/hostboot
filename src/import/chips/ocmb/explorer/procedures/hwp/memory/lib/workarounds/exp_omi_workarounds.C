@@ -51,46 +51,33 @@ namespace workarounds
 {
 namespace omi
 {
-///
-/// @brief Determine if OCMB PRBS workaround needs to be performed
-///
-/// @param[in] i_ocmb_chip OCMB target
-/// @param[out] o_required workaround needs to be performed
-/// @return FAPI2_RC_SUCCESS iff success
-///
-fapi2::ReturnCode is_prbs_ocmb_required(
-    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> i_ocmb_chip,
-    bool& o_required)
-{
-    // Check chip type
-    uint8_t l_proc_type = 0;
-    const auto& l_proc_chip = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_ocmb_chip);
-    FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, l_proc_chip, l_proc_type),
-             "Error getting ATTR_NAME of %s", mss::c_str(l_proc_chip));
 
-    // OCMB Workaround Logic:
-    // Axone: OCMB workaround off
-    // Non-axone (Apollo): OCMB workaround on
-    // P10 - No workaround required (no enum for this yet, so we must revisit this when the time comes)
-    o_required = l_proc_type != fapi2::ENUM_ATTR_NAME_AXONE;
+///
+/// @brief Determine if the OCMB is an explorer
+///
+/// @param[in] i_ocmb_chip OCMB chip
+/// @param[out] o_explorer true/false is explorer
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+/// @note Used for exp_omi_train procedure to differentiate fw_status behavior with gemini
+///
+fapi2::ReturnCode ocmb_is_explorer(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_chip, bool& o_explorer)
+{
+    uint8_t l_name = 0;
+    FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, i_ocmb_chip, l_name));
+
+    o_explorer = (l_name == fapi2::ENUM_ATTR_NAME_EXPLORER);
 
 fapi_try_exit:
     return fapi2::current_err;
 }
-
 ///
-/// @brief Performs OCMB PRBS workaround
+/// @brief Set configurable delay based on the PRBS ATTR and SIM mode
 ///
-/// @param[in] i_ocmb_chip OCMB chip
-/// @param[in] i_dl_x4_backoff_en backoff enable
+/// @param[in] i_ocmb_chip OCMB target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 ///
-fapi2::ReturnCode prbs_ocmb(
-    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> i_ocmb_chip,
-    const uint8_t i_dl_x4_backoff_en)
+fapi2::ReturnCode prbs_delay(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_chip)
 {
-    FAPI_DBG("Performing PRBS OCMB workaround on %s", mss::c_str(i_ocmb_chip));
-
     uint8_t l_sim = 0;
     uint32_t l_prbs_time = 0;
     uint64_t l_prbs_time_scaled = 0;
@@ -101,22 +88,9 @@ fapi2::ReturnCode prbs_ocmb(
              "Error from FAPI_ATTR_GET (ATTR_OMI_DL_PREIPL_PRBS_TIME)");
     l_prbs_time_scaled = l_prbs_time * mss::common_timings::DELAY_1MS;
 
-    // State 6
-    FAPI_TRY(mss::exp::omi::setup_omi_dl0_config0(i_ocmb_chip,
-             mss::omi::train_mode::TX_TRAINING_STATE3,
-             i_dl_x4_backoff_en));
-
-    // Set configurable delay based on the PRBS ATTR and SIM mode
     FAPI_TRY(fapi2::delay(l_prbs_time_scaled, mss::common_timings::DELAY_1US));
     FAPI_DBG("OMI Training Pre-ipl PRBS Time = %dns",
              (l_sim ? mss::common_timings::DELAY_1US : l_prbs_time_scaled));
-
-    // Enable training state 1 to send Pattern A
-    FAPI_TRY(mss::exp::omi::setup_omi_dl0_config0(i_ocmb_chip,
-             mss::omi::train_mode::TX_PATTERN_A,
-             i_dl_x4_backoff_en));
-
-    // Not calling with ENABLE_AUTO_TRAINING for explorer
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -169,6 +143,53 @@ fapi2::ReturnCode gem_setup_config(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
         l_value.setBit<EXPLR_OC_OTTCFG_MSB_TEMPLATE_5>();
         FAPI_TRY(mss::exp::ib::putOCCfg(i_target, EXPLR_OC_OTTCFG_MSB, l_value));
     }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Workaround for exp_omi_train to perform dlx_config0 setup
+///
+/// @param[in] i_target OCMB chip
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode training_prbs(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+{
+    uint8_t l_dl_x4_backoff_en = 0;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_OMI_DL_X4_BACKOFF_ENABLE, i_target, l_dl_x4_backoff_en),
+             "Error getting ATTR_CHIP_EC_FEATURE_OMI_DL_X4_BACKOFF_ENABLE");
+
+    // Train mode 1 (PATTERN_A)
+    FAPI_TRY(mss::exp::omi::setup_omi_dl0_config0(i_target,
+             mss::omi::train_mode::TX_PATTERN_A,
+             l_dl_x4_backoff_en));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Workaround for exp_omi_setup to perform dlx_config0 setup
+///
+/// @param[in] i_target OCMB chip
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode pre_training_prbs(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+{
+    uint8_t l_dl_x4_backoff_en = 0;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_OMI_DL_X4_BACKOFF_ENABLE, i_target, l_dl_x4_backoff_en),
+             "Error getting ATTR_CHIP_EC_FEATURE_OMI_DL_X4_BACKOFF_ENABLE");
+
+    // State 6
+    FAPI_TRY(mss::exp::omi::setup_omi_dl0_config0(i_target,
+             mss::omi::train_mode::TX_TRAINING_STATE3,
+             l_dl_x4_backoff_en));
+
+    // Set configurable delay based on the PRBS ATTR and SIM mode
+    FAPI_TRY(prbs_delay(i_target));
 
 fapi_try_exit:
     return fapi2::current_err;

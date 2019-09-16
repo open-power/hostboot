@@ -62,14 +62,7 @@ fapi2::ReturnCode p9a_omi_train( const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_
 
     FAPI_INF("%s Start p9a_omi_train", mss::c_str(i_target));
 
-    const auto& l_mc = mss::find_target<fapi2::TARGET_TYPE_MC>(i_target);
     const auto& l_ocmbs = mss::find_targets<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
-
-    FAPI_TRY(mss::mc::setup_mc_mcn_config(l_mc));
-    FAPI_TRY(mss::mc::setup_mc_config1(i_target));
-    FAPI_TRY(mss::mc::setup_mc_cya_bits(i_target));
-    FAPI_TRY(mss::mc::setup_mc_error_action(i_target));
-    FAPI_TRY(mss::mc::setup_mc_rmt_config(i_target));
 
     if(l_ocmbs.empty())
     {
@@ -82,18 +75,32 @@ fapi2::ReturnCode p9a_omi_train( const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_
         const auto& l_ocmb = l_ocmbs[0];
         const auto& l_proc = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(l_ocmb);
         uint8_t l_dl_x4_backoff_en = 0;
-        bool l_workaround_required = false;
+        bool l_gem_or_non_axone_workaround = false;
+        bool l_axone_workarounds_required = false;
+        uint8_t l_proc_type = 0;
+        uint8_t l_ocmb_type = 0;
 
         // Get BACKOFF_ENABLE CHIP_EC attribute
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_OMI_DL_X4_BACKOFF_ENABLE, l_ocmb, l_dl_x4_backoff_en),
                  "Error getting ATTR_CHIP_EC_FEATURE_OMI_DL_X4_BACKOFF_ENABLE");
 
-        // Determine if workaround will be performed, if so, perform it
-        FAPI_TRY(mss::workarounds::mc::is_prbs_omi_required(l_ocmb, l_proc, l_workaround_required));
+        // Determine if workarounds will be performed, if so, perform them
+        FAPI_TRY(mss::workarounds::mc::get_ocmb_proc_types(l_ocmb, l_proc, l_ocmb_type, l_proc_type));
+        l_gem_or_non_axone_workaround = mss::workarounds::mc::is_prbs_omi_required(l_ocmb_type, l_proc_type);
+        l_axone_workarounds_required = mss::workarounds::mc::is_prbs_omi_axone_required(l_ocmb_type, l_proc_type);
 
-        if (l_workaround_required)
+        if (l_axone_workarounds_required)
         {
-            FAPI_TRY(mss::workarounds::mc::prbs_omi(i_target, l_dl_x4_backoff_en));
+            // TX_PATTERN_A
+            FAPI_TRY(mss::workarounds::mc::omi_training_prbs(i_target, l_dl_x4_backoff_en));
+        }
+        else if (l_gem_or_non_axone_workaround)
+        {
+            // TX_TRAINING_STATE_3, TX_PATTERN_A
+            FAPI_TRY(mss::workarounds::mc::omi_training_prbs_gem(i_target, l_dl_x4_backoff_en));
+
+            // 2 second delay for gemini
+            FAPI_TRY(fapi2::delay(2 * mss::common_timings::DELAY_1S, mss::common_timings::DELAY_1MS));
         }
 
         // Enable auto training

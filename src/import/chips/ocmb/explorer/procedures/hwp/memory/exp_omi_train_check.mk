@@ -22,3 +22,8 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+-include 00exp_common.mk
+
+PROCEDURE=exp_omi_train_check
+$(eval $(call ADD_EXP_MEMORY_INCDIRS,$(PROCEDURE)))
+$(call BUILD_PROCEDURE)

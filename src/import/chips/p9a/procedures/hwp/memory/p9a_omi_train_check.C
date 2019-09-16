@@ -59,41 +59,86 @@ fapi2::ReturnCode p9a_omi_train_check( const fapi2::Target<fapi2::TARGET_TYPE_OM
 
     // Const
     constexpr uint8_t STATE_MACHINE_SUCCESS = 0b111;  // This value is from Lonny Lambrecht
-    constexpr uint8_t MAX_LOOP_COUNT = 20;  // Retry times
+    constexpr uint8_t MAX_LOOP_COUNT = 10;  // Retry times
 
     // Declares variables
     fapi2::buffer<uint64_t> l_omi_status;
     fapi2::buffer<uint64_t> l_omi_training_status;
+    fapi2::buffer<uint64_t> l_dl0_error_hold;
+    fapi2::buffer<uint64_t> l_expected_dl0_error_hold;
+    fapi2::buffer<uint64_t> l_dl0_config1;
     uint8_t l_state_machine_state = 0;
     uint8_t l_tries = 0;
+    uint32_t l_omi_freq = 0;
+
+    const auto& l_ocmbs = mss::find_targets<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
+
+    // Sanity check for no empty vector
+    if (l_ocmbs.empty())
+    {
+        // No training could have occurred
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    const auto& l_proc = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(l_ocmbs[0]);
 
     FAPI_TRY(mss::mc::omi_train_status(i_target, l_state_machine_state, l_omi_status));
 
-    while (l_tries < MAX_LOOP_COUNT && l_state_machine_state != STATE_MACHINE_SUCCESS)
+    do
     {
         // Delay
-        fapi2::delay(mss::DELAY_100US, 10 * mss::DELAY_1MS);
+        fapi2::delay(500 * mss::DELAY_1MS, 10 * mss::DELAY_1MS);
 
         // Check OMI training status
         FAPI_TRY(mss::mc::omi_train_status(i_target, l_state_machine_state, l_omi_status));
-        // Note: this is very useful debug information while trying to debug training during polling
-        FAPI_TRY(mss::getScom(i_target, P9A_MC_REG2_DL0_TRAINING_STATUS, l_omi_training_status));
         l_tries++;
-    }
 
+    }
+    while (l_tries < MAX_LOOP_COUNT && l_state_machine_state != STATE_MACHINE_SUCCESS);
+
+    // Note: this is very useful debug information while trying to debug training during polling
     FAPI_TRY(mss::getScom(i_target, P9A_MC_REG2_DL0_TRAINING_STATUS, l_omi_training_status));
+    FAPI_TRY(fapi2::getScom(i_target, P9A_MC_REG2_DL0_CONFIG1, l_dl0_config1));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_OMI_MHZ, l_proc, l_omi_freq));
+
     FAPI_ASSERT(l_state_machine_state == STATE_MACHINE_SUCCESS,
                 fapi2::P9A_OMI_TRAIN_ERR()
-                .set_TARGET(i_target)
+                .set_OMI_TARGET(i_target)
+                .set_OCMB_TARGET(l_ocmbs[0])
                 .set_EXPECTED_SM_STATE(STATE_MACHINE_SUCCESS)
                 .set_ACTUAL_SM_STATE(l_state_machine_state)
                 .set_DL0_STATUS(l_omi_status)
-                .set_DL0_TRAINING_STATUS(l_omi_training_status),
-                "%s OMI Training Failure, expected state:%d/actual state:%d",
+                .set_DL0_TRAINING_STATUS(l_omi_training_status)
+                .set_DL0_CONFIG1(l_dl0_config1)
+                .set_OMI_FREQ(l_omi_freq),
+                "%s P9A OMI Training Failure, expected state:%d/actual state:%d",
                 mss::c_str(i_target),
                 STATE_MACHINE_SUCCESS,
                 l_state_machine_state
                );
+
+    // Check errors in ERROR_HOLD until we get a proper FIR API setup
+    FAPI_TRY(mss::getScom(i_target, P9A_MC_REG2_DL0_ERROR_HOLD, l_dl0_error_hold));
+
+    // Training completion bit set
+    l_expected_dl0_error_hold.setBit<P9A_OMI_REG0_DL0_ERROR_HOLD_CERR_39>();
+
+    // Lost block bit set: this results in p9a only, from the
+    // necessary pre-training workarounds, and is expected to be set
+    // TK - We will need to the proper FIR unmasking later
+    l_expected_dl0_error_hold.setBit<P9A_OMI_REG0_DL0_ERROR_HOLD_CERR_33>();
+
+    if (l_dl0_error_hold != l_expected_dl0_error_hold)
+    {
+        // To get to this point, we had to have completed training, so these errors are not catastrophic
+        // We don't need to assert out, but let's make sure we print them out
+        FAPI_INF("%s P9A_MC_REG2_DL0_ERROR_HOLD REG 0x%016llx "
+                 "did not match expected value. REG contents: 0x%016llx Expected: 0x%016llx",
+                 mss::c_str(i_target),
+                 P9A_MC_REG2_DL0_ERROR_HOLD,
+                 l_dl0_error_hold,
+                 l_expected_dl0_error_hold);
+    }
 
     FAPI_INF("%s End p9a_omi_train_check, expected state:%d/actual state:%d, DL0_STATUS:0x%016llx, DL0_TRAINING_STATUS:0x%016llx",
              mss::c_str(i_target),
@@ -101,6 +146,7 @@ fapi2::ReturnCode p9a_omi_train_check( const fapi2::Target<fapi2::TARGET_TYPE_OM
              l_state_machine_state,
              l_omi_status,
              l_omi_training_status);
+
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:

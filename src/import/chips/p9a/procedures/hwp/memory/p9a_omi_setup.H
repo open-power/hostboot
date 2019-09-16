@@ -22,3 +22,32 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file p9a_omi_setup.H
+/// @brief Setup the OMI
+///
+// *HWP HWP Owner: Mark Pizzutillo <Mark.Pizzutillo@ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: FSP:HB
+
+#ifndef P9A_OMI_SETUP_H_
+#define P9A_OMI_SETUP_H_
+
+#include <fapi2.H>
+
+typedef fapi2::ReturnCode (*p9a_omi_setup_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_OMI>&);
+
+extern "C"
+{
+    ///
+    /// @brief Setup OMI for axone
+    /// @param[in] i_target the axone OMI target to operate on
+    /// @return FAPI2_RC_SUCCESS iff ok
+    ///
+    fapi2::ReturnCode p9a_omi_setup( const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_target );
+}
+
+#endif

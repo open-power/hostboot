@@ -22,3 +22,32 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+/// @file exp_omi_train_check.C
+/// @brief Check that omi training was successful from explorer side
+///
+/// *HWP HWP Owner: Mark Pizzutillo <Mark.Pizzutillo@ibm.com>
+/// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
+/// *HWP Team: Memory
+/// *HWP Level: 2
+/// *HWP Consumed by: HB
+
+#ifndef _EXP_OMI_TRAIN_CHECK_H_
+#define _EXP_OMI_TRAIN_CHECK_H_
+
+#include <fapi2.H>
+
+typedef fapi2::ReturnCode (*exp_omi_train_check_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&);
+
+extern "C"
+{
+
+    ///
+    /// @brief Check that the OCMB's omi state machine is in its expected state after OMI training
+    /// @param[in] i_target the OCMB target to check
+    /// @return FAPI2_RC_SUCCESS iff ok
+    ///
+    fapi2::ReturnCode exp_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+}
+
+#endif
