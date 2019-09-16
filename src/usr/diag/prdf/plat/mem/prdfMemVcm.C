@@ -38,7 +38,55 @@ using namespace PlatServices;
 
 //##############################################################################
 //
-//                          Specializations for MCA
+//                           Generic Specializations
+//
+//##############################################################################
+
+template<TARGETING::TYPE T>
+uint32_t VcmEvent<T>::handlePhaseComplete( const uint32_t & i_eccAttns,
+                                           STEP_CODE_DATA_STRUCT & io_sc,
+                                           bool & o_done )
+{
+    #define PRDF_FUNC "[VcmEvent<T>::handlePhaseComplete] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        if ( TD_PHASE_2 == iv_phase )
+        {
+            // Determine if the chip mark has been verified.
+            o_rc = (i_eccAttns & MAINT_MCE) ? verified(io_sc)
+                                            : falseAlarm(io_sc);
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "verified()/falseAlarm() failed" );
+                break;
+            }
+
+            o_done = true; // Procedure is complete.
+        }
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+template
+uint32_t VcmEvent<TYPE_MCA>::handlePhaseComplete( const uint32_t & i_eccAttns,
+                                                  STEP_CODE_DATA_STRUCT & io_sc,
+                                                  bool & o_done );
+template
+uint32_t VcmEvent<TYPE_OCMB_CHIP>::handlePhaseComplete(
+                                                  const uint32_t & i_eccAttns,
+                                                  STEP_CODE_DATA_STRUCT & io_sc,
+                                                  bool & o_done );
+
+//##############################################################################
+//
+//                           Specializations for MCA
 //
 //##############################################################################
 
@@ -65,6 +113,12 @@ uint32_t VcmEvent<TYPE_MCA>::startCmd()
     #undef PRDF_FUNC
 }
 
+//##############################################################################
+//
+//                           Specializations for OCMB
+//
+//##############################################################################
+
 template<>
 uint32_t VcmEvent<TYPE_OCMB_CHIP>::startCmd()
 {
@@ -72,89 +126,17 @@ uint32_t VcmEvent<TYPE_OCMB_CHIP>::startCmd()
 
     uint32_t o_rc = SUCCESS;
 
-    PRDF_ERR( PRDF_FUNC "Function not supported yet" );
-    /* TODO RTC 208262
     // No stop conditions.
-    mss::mcbist::stop_conditions stopCond;
+    mss::mcbist::stop_conditions<> stopCond;
 
     // Start the time based scrub procedure on this master rank.
-    o_rc = startTdScrub<TYPE_MCA>( iv_chip, iv_rank, MASTER_RANK, stopCond );
+    o_rc = startTdScrub<TYPE_OCMB_CHIP>( iv_chip, iv_rank, MASTER_RANK,
+                                         stopCond );
     if ( SUCCESS != o_rc )
     {
         PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x) failed",
                   iv_chip->getHuid(), getKey() );
     }
-    */
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-uint32_t VcmEvent<TYPE_MCA>::handlePhaseComplete( const uint32_t & i_eccAttns,
-                                                  STEP_CODE_DATA_STRUCT & io_sc,
-                                                  bool & o_done )
-{
-    #define PRDF_FUNC "[VcmEvent<TYPE_MCA>::handlePhaseComplete] "
-
-    uint32_t o_rc = SUCCESS;
-
-    do
-    {
-        if ( TD_PHASE_2 == iv_phase )
-        {
-            // Determine if the chip mark has been verified.
-            o_rc = (i_eccAttns & MAINT_MCE) ? verified(io_sc)
-                                            : falseAlarm(io_sc);
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "verified()/falseAlarm() failed" );
-                break;
-            }
-
-            o_done = true; // Procedure is complete.
-        }
-
-    } while (0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-template<>
-uint32_t VcmEvent<TYPE_OCMB_CHIP>::handlePhaseComplete(
-                                                  const uint32_t & i_eccAttns,
-                                                  STEP_CODE_DATA_STRUCT & io_sc,
-                                                  bool & o_done )
-{
-    #define PRDF_FUNC "[VcmEvent<TYPE_OCMB_CHIP>::handlePhaseComplete] "
-
-    uint32_t o_rc = SUCCESS;
-
-    PRDF_ERR( PRDF_FUNC "Function not supported yet" );
-    /* TODO RTC 208262
-    do
-    {
-        if ( TD_PHASE_2 == iv_phase )
-        {
-            // Determine if the chip mark has been verified.
-            o_rc = (i_eccAttns & MAINT_MCE) ? verified(io_sc)
-                                            : falseAlarm(io_sc);
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "verified()/falseAlarm() failed" );
-                break;
-            }
-
-            o_done = true; // Procedure is complete.
-        }
-
-    } while (0);
-    */
 
     return o_rc;
 
