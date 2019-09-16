@@ -55,11 +55,13 @@ namespace bupg
 ///
 /// @brief Checks explorer response argument for a successful command
 /// @param[in] i_target OCMB target
-/// @param[in] i_rsp response command
+/// @param[in] i_rsp response from command
+/// @param[in] i_cmd original command
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 fapi2::ReturnCode check_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                                 const host_fw_response_struct& i_rsp)
+                                 const host_fw_response_struct& i_rsp,
+                                 const host_fw_command_struct& i_cmd)
 {
     std::vector<uint8_t> resp_arg;
     uint8_t  success_flag = 0;
@@ -76,16 +78,16 @@ fapi2::ReturnCode check_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
     FAPI_TRY(mss::exp::ib::readCrctEndian(resp_arg, index, err_code));
 
     // Check if cmd was successful
-    FAPI_ASSERT(success_flag == omi::response_arg::SUCCESS,
+    FAPI_ASSERT(success_flag == omi::response_arg::SUCCESS &&
+                i_rsp.request_identifier == i_cmd.request_identifier,
                 fapi2::EXP_UPDATE_CMD_FAILED().
                 set_TARGET(i_target).
                 set_RSP_ID(i_rsp.response_id).
                 set_REQ_ID(i_rsp.request_identifier).
                 set_ERROR_CODE(err_code).
                 set_RSP_DATA(i_rsp),
-                "Recieved failure response for firmware update command on %s,"
-                " with success_flag = 0x%01x and error_code = 0x%02x",
-                mss::c_str(i_target), success_flag, err_code);
+                "Recieved failure response for firmware update command on %s",
+                mss::c_str(i_target));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -101,7 +103,8 @@ fapi_try_exit:
 /// @param[out] o_cmd the command packet to update
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode setup_flash_write_cmd(const uint32_t i_binary_size,
+fapi2::ReturnCode setup_flash_write_cmd(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                        const uint32_t i_binary_size,
                                         const uint16_t i_seq_number,
                                         const uint32_t i_cmd_data_crc,
                                         host_fw_command_struct& o_cmd)
@@ -118,7 +121,9 @@ fapi2::ReturnCode setup_flash_write_cmd(const uint32_t i_binary_size,
     o_cmd.cmd_flags = mss::exp::omi::ADDITIONAL_DATA;
 
     // Host generated id number (returned in response packet)
-    o_cmd.request_identifier = 0xfed1;
+    uint32_t l_counter = 0;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OCMB_COUNTER, i_target, l_counter));
+    o_cmd.request_identifier = l_counter;
 
     //always send a block of data
     o_cmd.cmd_length = FLASH_WRITE_BLOCK_SIZE;
@@ -171,9 +176,12 @@ fapi_try_exit:
 /// @brief Sets the command_argument fields for flash_commit sub-command
 ///        in the correct endianness.
 ///
+/// @param[in] i_target OCMB target that will be acted upon with this command
 /// @param[out] o_cmd the command packet to update
 ///
-void setup_flash_commit_cmd(host_fw_command_struct& o_cmd)
+fapi2::ReturnCode setup_flash_commit_cmd(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    host_fw_command_struct& o_cmd)
 {
     memset(&o_cmd, 0, sizeof(host_fw_command_struct));
 
@@ -181,10 +189,10 @@ void setup_flash_commit_cmd(host_fw_command_struct& o_cmd)
     o_cmd.cmd_id = mss::exp::omi::EXP_FW_BINARY_UPGRADE;
     o_cmd.cmd_flags = 0;
 
-    // Host generated id number (returned in response packet)
-    // NOTE: This is arbitrarily chosen until it is decided how we want to
-    //       use this field.
-    o_cmd.request_identifier = 0xfcfc;
+    // Retrieve a unique sequence id for this transaction
+    uint32_t l_counter = 0;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OCMB_COUNTER, i_target, l_counter));
+    o_cmd.request_identifier = l_counter;
     o_cmd.cmd_length = 0;
 
     o_cmd.cmd_crc = 0xffffffff;
@@ -194,6 +202,9 @@ void setup_flash_commit_cmd(host_fw_command_struct& o_cmd)
 
     // Set the sub-command ID in the command argument field to FLASH_COMMIT
     o_cmd.command_argument[0] = bupg::SUB_CMD_COMMIT;
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 }//exp
@@ -261,11 +272,11 @@ extern "C"
                                     buffer));
 
             // Issue flash_write sub-command through EXP-FW request buffer
+            host_fw_command_struct flash_write_cmd;
             {
-                host_fw_command_struct flash_write_cmd;
-
                 // Set up the command packet
                 FAPI_TRY(mss::exp::setup_flash_write_cmd(
+                             i_target,
                              i_image_sz,
                              seq_num,
                              block_crc,
@@ -300,7 +311,7 @@ extern "C"
                              mss::c_str(i_target), seq_num);
 
                     // Check status in response packet
-                    FAPI_TRY(mss::exp::bupg::check_response(i_target, response),
+                    FAPI_TRY(mss::exp::bupg::check_response(i_target, response, flash_write_cmd),
                              "exp_fw_update: error response for flash_write "
                              "on %s! seq_num[%u]",
                              mss::c_str(i_target), seq_num);
@@ -322,10 +333,11 @@ extern "C"
             seq_num++;
         }
 
+        host_fw_command_struct flash_commit_cmd;
         // Issue the flash_commit sub-command through EXP-FW request buffer
         {
-            host_fw_command_struct flash_commit_cmd;
-            mss::exp::setup_flash_commit_cmd(flash_commit_cmd);
+            FAPI_TRY(mss::exp::setup_flash_commit_cmd(i_target,
+                     flash_commit_cmd));
             FAPI_TRY(mss::exp::ib::putCMD(i_target, flash_commit_cmd),
                      "exp_fw_update: putCMD() failed for flash_commit on %s!",
                      mss::c_str(i_target));
@@ -353,7 +365,7 @@ extern "C"
                      mss::c_str(i_target) );
 
             // Check if cmd was successful
-            FAPI_TRY(mss::exp::bupg::check_response(i_target, response),
+            FAPI_TRY(mss::exp::bupg::check_response(i_target, response, flash_commit_cmd),
                      "exp_fw_update: error response for flash_commit on %s!",
                      mss::c_str(i_target) );
         }

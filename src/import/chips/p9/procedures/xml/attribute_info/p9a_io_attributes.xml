@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -31,7 +31,7 @@
     </targetType>
     <description>
        An OMI target's relative logical postion to its OMIC parent target.
-      
+
        pos | DL_GROUP_POS
       -----+--------------
          4 | 0
@@ -48,7 +48,7 @@
         15 | 0
         10 | 1
         11 | 2
-         8 | 0 
+         8 | 0
          9 | 1
 
     </description>
@@ -63,7 +63,7 @@
       TARGET_TYPE_OMI
     </targetType>
     <description>
-      An OMI target's logical DL number 
+      An OMI target's logical DL number
 
        pos | DL_NUM
       -----+--------------
@@ -90,4 +90,17 @@
     <default>0xFF</default><!-- Ensures platform explicitly puts a valid number in here -->
   </attribute>
   <!-- ******************************************************************************** -->
+  <attribute>
+    <id>ATTR_OCMB_COUNTER</id>
+    <targetType>
+      TARGET_TYPE_OCMB_CHIP
+    </targetType>
+    <description>
+        Tracks the sequence id for OCMB command transactions. The platform is
+        expected to guarantee a unique value on each read.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <default>0</default>
+  </attribute>
 </attributes>

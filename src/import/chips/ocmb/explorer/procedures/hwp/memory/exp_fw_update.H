@@ -85,22 +85,26 @@ typedef enum sub_cmd_id
 /// @brief Checks explorer response argument for a successful command
 /// @param[in] i_target OCMB target
 /// @param[in] i_rsp response command
+/// @param[in] i_cmd original command
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 fapi2::ReturnCode check_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                                 const host_fw_response_struct& i_rsp);
+                                 const host_fw_response_struct& i_rsp,
+                                 const host_fw_command_struct& i_cmd);
 
 }// ns bupg
 
 ///
 /// @brief host_fw_command_struct structure setup for flash_write
+/// @param[in] i_target OCMB target that will be acted upon with this command
 /// @param[in] i_binary_size the total size of the binary image
 /// @param[in] i_seq_number the sequence number of this command
 /// @param[in] i_cmd_data_crc the command data CRC
 /// @param[out] o_cmd the command packet to update
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode setup_flash_write_cmd(const uint32_t i_binary_size,
+fapi2::ReturnCode setup_flash_write_cmd(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                        const uint32_t i_binary_size,
                                         const uint16_t i_seq_number,
                                         const uint32_t i_cmd_data_crc,
                                         host_fw_command_struct& o_cmd);
@@ -109,9 +113,12 @@ fapi2::ReturnCode setup_flash_write_cmd(const uint32_t i_binary_size,
 /// @brief Sets the command_argument fields for flash_commit sub-command
 ///        in the correct endianness.
 ///
+/// @param[in] i_target OCMB target that will be acted upon with this command
 /// @param[out] o_cmd the command packet to update
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
-void setup_flash_commit_cmd(host_fw_command_struct& o_cmd);
+fapi2::ReturnCode setup_flash_commit_cmd(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        host_fw_command_struct& o_cmd);
 
 }// ns exp
 }// ns mss

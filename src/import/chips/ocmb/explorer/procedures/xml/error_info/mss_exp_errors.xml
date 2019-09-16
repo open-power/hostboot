@@ -460,6 +460,8 @@
     </description>
     <ffdc>RSP_ID</ffdc>
     <ffdc>ERROR_CODE</ffdc>
+    <ffdc>EXPECTED_REQID</ffdc>
+    <ffdc>ACTUAL_REQID</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
