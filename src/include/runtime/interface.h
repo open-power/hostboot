@@ -150,17 +150,17 @@ enum MemoryError_t
 /**
  *  Reserved memory labels - used by get_reserved_mem
  */
-#define HBRT_RSVD_MEM__CODE               "ibm,hbrt-code-image"
-#define HBRT_RSVD_MEM__PRIMARY            "ibm,hb-rsv-mem"
-#define HBRT_RSVD_MEM__HOMER              "ibm,homer-image"
-#define HBRT_RSVD_MEM__OCC_COMMON         "ibm,occ-common-area"
-#define HBRT_RSVD_MEM__SBE_COMM           "ibm,sbe-comm"
-#define HBRT_RSVD_MEM__SBE_FFDC           "ibm,sbe-ffdc"
-#define HBRT_RSVD_MEM__SECUREBOOT         "ibm,secure-crypt-algo-code"
-#define HBRT_RSVD_MEM__DATA               "ibm,hbrt-data"
-#define HBRT_RSVD_MEM__ARCH_REG           "ibm,arch-reg-data"
-#define HBRT_RSVD_MEM__UNSEC_HOMER        "ibm,unsecure-homer"
-#define HBRT_RSVD_MEM__UVBWLIST           "ibm,uvbwlist"
+#define HBRT_RSVD_MEM__CODE               "hbrt-code-image"
+#define HBRT_RSVD_MEM__PRIMARY            "hb-rsv-mem"
+#define HBRT_RSVD_MEM__HOMER              "homer-image"
+#define HBRT_RSVD_MEM__OCC_COMMON         "occ-common-area"
+#define HBRT_RSVD_MEM__SBE_COMM           "sbe-comm"
+#define HBRT_RSVD_MEM__SBE_FFDC           "sbe-ffdc"
+#define HBRT_RSVD_MEM__SECUREBOOT         "secure-crypt-algo-code"
+#define HBRT_RSVD_MEM__DATA               "hbrt-data"
+#define HBRT_RSVD_MEM__ARCH_REG           "arch-reg-data"
+#define HBRT_RSVD_MEM__UNSEC_HOMER        "unsecure-homer"
+#define HBRT_RSVD_MEM__UVBWLIST           "uvbwlist"
 
 /* Aligned reserved memory size for Opal */
 #define HBRT_RSVD_MEM_OPAL_ALIGN  64*KILOBYTE
@@ -308,7 +308,7 @@ typedef struct hostInterfaces
 
     /**
      *  @brief Get the address of a reserved memory region by its name
-     *  @param[in] i_name     memory region name (ex. "ibm,hbrt-vpd-image")
+     *  @param[in] i_name     memory region name (ex. "hbrt-vpd-image")
      *  @param[in] i_instance instance number
      *  @return physical address of region or NULL
      *  @platform FSP, OpenPOWER
