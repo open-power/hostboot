@@ -112,7 +112,7 @@
     </attribute>
     <attribute>
         <id>EARLY_TESTCASES_ISTEP</id>
-        <default>0x1401</default> <!-- Istep 20, Substep 1 (host_load_payload) -->
+        <default>0x1402</default> <!-- Istep 20, Substep 2 (host_load_hdat) -->
     </attribute>
     <attribute>
         <id>PAYLOAD_BASE</id>
@@ -123,6 +123,10 @@
         <id>PAYLOAD_ENTRY</id>
                     <!-- Value of 0x0 for standalone systems, no payload to start -->
         <default>0x0</default>
+    </attribute>
+    <attribute>
+        <id>PAYLOAD_KIND</id>
+        <default>NONE</default>
     </attribute>
     <attribute>
       <default>0</default>

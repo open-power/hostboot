@@ -84,13 +84,10 @@
 #include <secureboot/smf_utils.H>
 #include <secureboot/smf.H>
 
-// TODO RTC: 210975 these two symbols normally live inside the RUNTIME namespace
-// and were moved out to help with linking errors.
-trace_desc_t *g_trac_runtime = nullptr;
-TRAC_INIT(&g_trac_runtime, RUNTIME_COMP_NAME, KILOBYTE);
-
 namespace RUNTIME
 {
+
+
 
 mutex_t g_rhbMutex = MUTEX_INITIALIZER;
 
@@ -108,8 +105,8 @@ const uint64_t HB_RES_MEM_UPPER_LIMIT = 256*MEGABYTE;
 // any memory below this limit.
 const uint64_t HB_RES_MEM_LOWER_LIMIT = VMM_MEMORY_SIZE + VMM_HRMOR_OFFSET;
 
-//trace_desc_t *g_trac_runtime = nullptr;
-//TRAC_INIT(&g_trac_runtime, RUNTIME_COMP_NAME, KILOBYTE);
+trace_desc_t *g_trac_runtime = nullptr;
+TRAC_INIT(&g_trac_runtime, RUNTIME_COMP_NAME, KILOBYTE);
 
 //
 uint16_t calculateNodeInstance(const uint8_t i_node,

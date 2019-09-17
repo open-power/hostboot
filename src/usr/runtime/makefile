@@ -36,14 +36,13 @@ VPATH += ${ROOTPATH}/src/usr/hdat
 VPATH += common
 
 OBJS += populate_hbruntime.o
-# FIXME RTC: 210975
-#OBJS += hdatservice.o
-#OBJS += fakepayload.o
-#OBJS += errlud_hdat.o
-#OBJS += customize_attrs_for_payload.o
-#OBJS += hdatcommonutil.o
+OBJS += hdatservice.o
+OBJS += fakepayload.o
+OBJS += errlud_hdat.o
+OBJS += customize_attrs_for_payload.o
+OBJS += hdatcommonutil.o
 OBJS += preverifiedlidmgr.o
-#OBJS += ${RUNTIME_COMMON_OBJS}
+OBJS += ${RUNTIME_COMMON_OBJS}
 
 SUBDIRS += test.d
 

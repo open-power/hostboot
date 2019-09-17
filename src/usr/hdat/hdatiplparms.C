@@ -672,6 +672,8 @@ void HdatIplParms::hdatGetSystemParamters()
              (l_pSysTarget->getAttr<TARGETING::ATTR_PHYP_SYSTEM_TYPE>());
 
     //Get ABC Bus Speed
+    this->iv_hdatIPLParams->iv_sysParms.hdatABCBusSpeed = 24;
+/* TODO RTC:216061 Re-enable when attr exists
     TARGETING::ATTR_FREQ_A_MHZ_type l_ABCBusSpeed;
     if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_FREQ_A_MHZ>(l_ABCBusSpeed))
     {
@@ -681,6 +683,7 @@ void HdatIplParms::hdatGetSystemParamters()
     {
         HDAT_ERR(" Error in getting attribute FREQ_A_MHZ");
     }
+**/
 
     //Get XYZ Bus Speed
     TARGETING::ATTR_FREQ_X_MHZ_type l_WXYZBusSpeed;

@@ -27,30 +27,28 @@ ROOTPATH = ../../..
 MODULE = hdat
 
 EXTRAINCDIR += ../vpd
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include
 
-# FIXME RTC: 210975
-
-#OBJS += hdatutil.o
-#OBJS += hdatpcia.o
-#OBJS += hdatiplparms.o
-#OBJS += hdathostslcadata.o
-#OBJS += hdathdif.o
-#OBJS += hdatvpd.o
-#OBJS += hdatnaca.o
-#OBJS += hdatiohub.o
-#OBJS += hdatmsvpd.o
-#OBJS += hdatmsarea.o
-#OBJS += hdatram.o
-#OBJS += hdatspsubsys.o
-#OBJS += hdatpcrd.o
-#OBJS += hdatbldda.o
-#OBJS += hdatnodedata.o
-#OBJS += hdathostservices.o
-#OBJS += hdathbrt.o
-#OBJS += hdattpmdata.o
-#OBJS += hdatspiraS.o
-#OBJS += hdatspiraH.o
-#OBJS += hdatipmi.o
+OBJS += hdatutil.o
+OBJS += hdatpcia.o
+OBJS += hdatiplparms.o
+OBJS += hdathostslcadata.o
+OBJS += hdathdif.o
+OBJS += hdatvpd.o
+OBJS += hdatnaca.o
+OBJS += hdatiohub.o
+OBJS += hdatmsvpd.o
+OBJS += hdatmsarea.o
+OBJS += hdatram.o
+OBJS += hdatspsubsys.o
+OBJS += hdatpcrd.o
+OBJS += hdatbldda.o
+OBJS += hdatnodedata.o
+OBJS += hdathostservices.o
+OBJS += hdathbrt.o
+OBJS += hdattpmdata.o
+OBJS += hdatspiraS.o
+OBJS += hdatspiraH.o
+OBJS += hdatipmi.o
 
 include ${ROOTPATH}/config.mk

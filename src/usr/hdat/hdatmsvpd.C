@@ -2098,6 +2098,7 @@ errlHndl_t HdatMsVpd::hdatScanDimms(const TARGETING::Target *i_pTarget,
             break;
         }
 
+        /*TODO RTC:216061 Re-enable when attr exists
         TARGETING::ATTR_EFF_DIMM_SIZE_type l_dimSizes = {{0}};
         //Get configured memory size
         if(!i_pMcsTarget->
@@ -2105,6 +2106,7 @@ errlHndl_t HdatMsVpd::hdatScanDimms(const TARGETING::Target *i_pTarget,
         {
             HDAT_ERR("DIMM size should be available with MCS");
         }
+        **/
 
         uint8_t l_mcaPort = 0;
         if(!i_pTarget->
@@ -2143,13 +2145,13 @@ errlHndl_t HdatMsVpd::hdatScanDimms(const TARGETING::Target *i_pTarget,
             uint32_t l_dimmfru = 0;
             l_dimmfru = l_pDimmTarget->getAttr<TARGETING::ATTR_FRU_ID>();
 
-            uint8_t l_mcaDimm = 0;
+            //TODO RTC:216061 Re-enable when attr exists uint8_t l_mcaDimm = 0;
             TARGETING::ATTR_REL_POS_type l_dimmRelPos = 0;
 
             if(l_pDimmTarget->
                tryGetAttr<TARGETING::ATTR_REL_POS>(l_dimmRelPos))
             {
-                l_mcaDimm = l_dimmRelPos%2; //2 DIMMs per MCA
+                //TODO RTC:216061 Re-enable when attr exists uint8_t l_mcaDimm = l_dimmRelPos%2; //2 DIMMs per MCA
                 l_dimmRelPos = 0;
                 if(!i_pTarget->
                     tryGetAttr<TARGETING::ATTR_REL_POS>(l_dimmRelPos))
@@ -2165,8 +2167,10 @@ errlHndl_t HdatMsVpd::hdatScanDimms(const TARGETING::Target *i_pTarget,
             }
 
             //Convert GB to MB
-            uint32_t l_dimmSizeInMB =
+            uint32_t l_dimmSizeInMB = 24 * HDAT_MB_PER_GB;
+/*TODO RTC:216061 Re-enable when attr exists
                      l_dimSizes[l_mcaPort][l_mcaDimm] * HDAT_MB_PER_GB;
+**/
             uint32_t l_huid = TARGETING::get_huid(l_pDimmTarget);
 
             bool foundArea = false;

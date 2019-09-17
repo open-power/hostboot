@@ -919,6 +919,7 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
             // DD1 workaround for Nimbus
             if((l_procEcLevel & HDAT_PROC_EC_DD1) && (l_model == TARGETING::MODEL_NIMBUS))
             {
+                 /*TODO RTC:216061 Re-enable when attr exists
                 if(l_pSysTarget->getAttr<ATTR_DD1_SLOW_PCI_REF_CLOCK>())
                 {
                     l_hub->hdatMaxPCIeLinkSpeed = HDAT_PCIE_MAX_SPEED_GEN4;
@@ -927,6 +928,8 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
                 {
                     l_hub->hdatMaxPCIeLinkSpeed = HDAT_PCIE_MAX_SPEED_GEN2;
                 }
+                **/
+                l_hub->hdatMaxPCIeLinkSpeed = HDAT_PCIE_MAX_SPEED_GEN2;
             }
             else
             {

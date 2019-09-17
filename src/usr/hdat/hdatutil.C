@@ -27,7 +27,7 @@
 #include <i2c/eepromif.H>
 #include <stdio.h>
 #include <string.h>
-#include <p9_frequency_buckets.H>
+//*TODO RTC:216061 Re-enable when attr exists #include <p9_frequency_buckets.H>
 #include <util/utilcommonattr.H>
 
 #define UINT16_IN_LITTLE_ENDIAN(x) (((x) >> 8) | ((x) << 8))
@@ -1910,7 +1910,9 @@ errlHndl_t hdatUpdateSMPLinkInfoData(hdatHDIFDataArray_t * i_SMPInfoFullPcrdHdrP
                 break;
             }
 
-            if(l_obusPllFreqBucket > OBUS_PLL_FREQ_BUCKETS)
+
+//TODO RTC:216061 Re-enable when attr exists            if(l_obusPllFreqBucket > OBUS_PLL_FREQ_BUCKETS)
+            if(l_obusPllFreqBucket > 24)
             {
                     HDAT_ERR(" Invalid obus Freq bucket ");
 
@@ -1929,6 +1931,7 @@ errlHndl_t hdatUpdateSMPLinkInfoData(hdatHDIFDataArray_t * i_SMPInfoFullPcrdHdrP
                     break;
             }
 
+/*TODO RTC:216061 Re-enable when attr exists
             uint32_t *l_freqList = NULL;
             TARGETING::ATTR_MODEL_type l_chipModel = i_pProcTarget->getAttr<TARGETING::ATTR_MODEL>();
             uint32_t l_chipECLevel = i_pProcTarget->getAttr<TARGETING::ATTR_HDAT_EC>();
@@ -1951,18 +1954,16 @@ errlHndl_t hdatUpdateSMPLinkInfoData(hdatHDIFDataArray_t * i_SMPInfoFullPcrdHdrP
                     case 0x13:{l_freqList = const_cast<uint32_t *>(OBUS_PLL_FREQ_LIST_P9C_13); break; }
                 }
             }
+
             if(l_freqList == NULL)
             {
                 HDAT_ERR("Invalid proc model and ec 0x%x, 0x%x", l_chipModel , l_chipECLevel);
-                    /*@
                     * @errortype
                     * @moduleid         HDAT::MOD_UTIL_SMP_LINK_INFO
                     * @reasoncode       HDAT::RC_UNDEFINED_PROC_MODEL_EC
                     * @devdesc          Undefined Proc model and ec
                     * @custdesc         Firmware encountered an internal
                     *                   error while finding proc model and ec
-                    */
-                    hdatBldErrLog(l_errl,
                              MOD_UTIL_SMP_LINK_INFO,
                             RC_UNDEFINED_PROC_MODEL_EC,
                             0,0,0,0);
@@ -1980,21 +1981,20 @@ errlHndl_t hdatUpdateSMPLinkInfoData(hdatHDIFDataArray_t * i_SMPInfoFullPcrdHdrP
                         HDAT_ERR("Invalid obus pll freq value for obus chiplet %d,"
                                 "of proc with HUID 0x%8X: 0x%d", l_obusChipletPos,
                                 i_pProcTarget->getAttr<ATTR_HUID>(), l_pllfreq);
-                        /*@
                         * @errortype
                         * @moduleid         HDAT::MOD_UTIL_SMP_LINK_INFO
                         * @reasoncode       HDAT::RC_INVALID_OBUS_PLL_FREQ
                         * @devdesc          Invalid OBUS PLL frequency value
                         * @custdesc         Firmware encountered an internal
                         *                   error while retrieving obus pll frequency values
-                        */
-                        hdatBldErrLog(l_errl,
                                 MOD_UTIL_SMP_LINK_INFO,
                                 RC_INVALID_OBUS_PLL_FREQ,
                                 0,0,0,0);
                         break;
                   }
             }
+            **/
+            l_SMPInfoEle.hdatSMPLinkSpeed = HDAT_OBUS_FREQ_25GBPS;
             if(l_errl != NULL){break;};
         }
     }while(0);
@@ -2009,6 +2009,7 @@ uint32_t getMemBusFreq(const TARGETING::Target* i_pTarget)
 {
 
     HDAT_ENTER();
+    /*TODO RTC:216061 Re-enable when attr exists
     TARGETING::ATTR_MSS_FREQ_type l_MemBusFreqInMHz = 0;
 
     TARGETING::ATTR_CLASS_type l_class = GETCLASS(i_pTarget);
@@ -2063,6 +2064,9 @@ uint32_t getMemBusFreq(const TARGETING::Target* i_pTarget)
  
     HDAT_EXIT();
     return l_MemBusFreqInMHz;
+    **/
+    HDAT_EXIT();
+    return 24;
 }
 
 } //namespace HDAT
