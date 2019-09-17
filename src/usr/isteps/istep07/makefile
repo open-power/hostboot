@@ -47,6 +47,7 @@ OBJS += host_mss_attr_cleanup.o
 #OBJS+=p9_mss_eff_grouping.o
 
 #Add all the extra include paths
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/plat
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/sbe/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/

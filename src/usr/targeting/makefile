@@ -35,6 +35,8 @@ MODULE = targeting
 
 TARGETING_REL_PATH = .
 
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/plat
+
 include ${TARGETING_REL_PATH}/hostboot_common.mk
 
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs

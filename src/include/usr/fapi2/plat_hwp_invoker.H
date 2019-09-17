@@ -41,7 +41,7 @@
 
 #include <return_code.H>
 #include <hw_access_def.H>
-#include <plat_utils.H>
+#include "plat_utils.H"
 #include <xscom/piberror.H>
 
 namespace fapi2 {

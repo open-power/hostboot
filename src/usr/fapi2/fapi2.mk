@@ -32,6 +32,8 @@ GENPATH?=$(ROOTPATH)/obj/genfiles
 HWP_PATH_1   += ${ROOTPATH}/src/import/chips/p10/procedures
 HWP_PATH += ${HWP_PATH_1}/
 
+
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/plat
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/

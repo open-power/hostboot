@@ -27,6 +27,7 @@ ROOTPATH = ../../../../..
 MODULE = thread_activate
 
 ##      support for fapi2
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/plat
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 

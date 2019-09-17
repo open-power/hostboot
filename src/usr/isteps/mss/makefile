@@ -29,6 +29,7 @@ PROCEDURES_PATH          = ${IMPORT_PATH}/chips/p10/procedures
 EXPLORER_PROCEDURES_PATH = ${IMPORT_PATH}/chips/ocmb/explorer/procedures
 
 #Add all the extra include paths
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/plat
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/
@@ -226,5 +227,3 @@ SUBDIRS += runtime
 #HWP build tool
 include ${ROOTPATH}/procedure.rules.mk
 include ${ROOTPATH}/config.mk
-
-

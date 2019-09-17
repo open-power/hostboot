@@ -35,7 +35,7 @@
 #include <target.H>
 #include <target_types.H>
 #include <hw_access_def.H>
-#include <plat_utils.H>
+#include <fapi2/plat_utils.H>
 #include <hwpf_fapi2_reasoncodes.H>
 #include <scom/scomreasoncodes.H>
 #include <fapi2/plat_hw_access.H>

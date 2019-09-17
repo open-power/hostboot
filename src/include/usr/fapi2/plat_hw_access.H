@@ -44,7 +44,7 @@
 #include <common_ringId.H>
 
 #include <devicefw/userif.H>
-#include <plat_utils.H>
+#include "plat_utils.H"
 
 
 namespace fapi2

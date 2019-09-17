@@ -50,7 +50,7 @@
 #include <fapi2AttrSyncData.H>
 #include <fapi2_attribute_service.H>
 #include <util/utilmbox_scratch.H>
-#include <plat_utils.H>
+#include <fapi2/plat_utils.H>
 #include <secureboot/service.H>
 
 namespace fapi2
