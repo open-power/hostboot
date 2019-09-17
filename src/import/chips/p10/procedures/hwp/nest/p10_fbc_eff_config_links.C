@@ -317,16 +317,15 @@ fapi2::ReturnCode p10_fbc_eff_config_links(
     for (auto& l_iohs_target : l_iohs_targets)
     {
         fapi2::ATTR_IOHS_CONFIG_MODE_Type l_iohs_config_mode;
-        fapi2::ATTR_IOHS_DRAWER_INTERCONNECT_Type l_iohs_drawer_interconnect;
+        fapi2::ATTR_IOHS_DRAWER_INTERCONNECT_Type l_drawer_interconnect;
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_CONFIG_MODE, l_iohs_target, l_iohs_config_mode),
                  "Error from FAPI_ATTR_GET (ATTR_IOHS_CONFIG_MODE)");
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_DRAWER_INTERCONNECT, l_iohs_target, l_iohs_drawer_interconnect),
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_DRAWER_INTERCONNECT, l_iohs_target, l_drawer_interconnect),
                  "Error from FAPI_ATTR_GET (ATTR_IOHS_DRAWER_INTERCONNECT)");
 
-        if (((i_op == SMP_ACTIVATE_PHASE1) && (l_iohs_drawer_interconnect != fapi2::ENUM_ATTR_IOHS_DRAWER_INTERCONNECT_FALSE))
-            ||
-            ((i_op == SMP_ACTIVATE_PHASE2) && (l_iohs_drawer_interconnect != fapi2::ENUM_ATTR_IOHS_DRAWER_INTERCONNECT_TRUE)))
+        if (((i_op == SMP_ACTIVATE_PHASE1) && (l_drawer_interconnect != fapi2::ENUM_ATTR_IOHS_DRAWER_INTERCONNECT_FALSE)) ||
+            ((i_op == SMP_ACTIVATE_PHASE2) && (l_drawer_interconnect != fapi2::ENUM_ATTR_IOHS_DRAWER_INTERCONNECT_TRUE)))
         {
             continue;
         }

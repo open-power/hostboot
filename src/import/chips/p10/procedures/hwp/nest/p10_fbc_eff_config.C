@@ -35,6 +35,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <p10_fbc_eff_config.H>
+#include <p10_fbc_utils.H>
 
 //------------------------------------------------------------------------------
 // Constant definitions
@@ -352,15 +353,12 @@ fapi2::ReturnCode p10_fbc_eff_config_freq_attrs(void)
     fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ_Type l_freq_floor;
     fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ_Type l_freq_ceiling;
     fapi2::ATTR_PROC_FABRIC_CORE_FREQ_RATIO_Type l_freq_ratio;
-    fapi2::ATTR_PROC_FABRIC_ASYNC_MODE_Type l_async_perf_mode = fapi2::ENUM_ATTR_PROC_FABRIC_ASYNC_MODE_PERF_MODE;
 
-    // get core floor/ceiling frequency attributes
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ, FAPI_SYSTEM, l_freq_floor),
              "Error from FAPI_ATTR_GET (ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ)");
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ, FAPI_SYSTEM, l_freq_ceiling),
              "Error from FAPI_ATTR_GET (ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ)");
 
-    // verify the floor/ceiling frequencies are valid
     FAPI_ASSERT(l_freq_ceiling >= l_freq_floor,
                 fapi2::P10_FBC_EFF_CONFIG_CORE_FREQ_RANGE_ERR()
                 .set_FREQ_CORE_FLOOR(l_freq_floor)
@@ -405,11 +403,8 @@ fapi2::ReturnCode p10_fbc_eff_config_freq_attrs(void)
                     l_freq_floor, l_freq_ceiling);
     }
 
-    // write attributes
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_CORE_FREQ_RATIO, FAPI_SYSTEM, l_freq_ratio),
              "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_CORE_FREQ_RATIO)");
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_ASYNC_MODE, FAPI_SYSTEM, l_async_perf_mode),
-             "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_ASYNC_MODE)");
 
 fapi_try_exit:
     FAPI_DBG("End");
@@ -417,24 +412,68 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Reset attributes related to link usage
+/// @brief Initialize attributes related to link usage
 /// @return fapi2::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
 ///
-fapi2::ReturnCode p10_fbc_eff_config_reset_attrs(void)
+fapi2::ReturnCode p10_fbc_eff_config_link_attrs(void)
 {
     FAPI_DBG("Start");
 
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+
+    fapi2::ATTR_CHIP_UNIT_POS_Type l_iohs_pos;
+    fapi2::ATTR_FREQ_PROC_IOHS_MHZ_Type l_freq_proc_iohs_mhz;
     fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE_Type l_link_inactive = fapi2::ENUM_ATTR_PROC_FABRIC_LINK_ACTIVE_FALSE;
+    fapi2::ATTR_PROC_FABRIC_ASYNC_MODE_Type l_async_perf_mode = fapi2::ENUM_ATTR_PROC_FABRIC_ASYNC_MODE_PERF_MODE;
+    fapi2::ATTR_PROC_FABRIC_BROADCAST_MODE_Type l_broadcast_mode;
+    fapi2::ATTR_PROC_FABRIC_PRESENT_GROUPS_Type l_present_groups;
+    fapi2::ATTR_PROC_FABRIC_A_INDIRECT_Type l_a_indirect;
+    uint8_t l_num_groups = 0;
 
     for (auto l_proc_target : FAPI_SYSTEM.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>())
     {
         for (auto l_iohs_target : l_proc_target.getChildren<fapi2::TARGET_TYPE_IOHS>())
         {
+            // reset fabric link active for concurrent repairs
             FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE, l_iohs_target, l_link_inactive),
                      "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_LINK_ACTIVE");
+
+            // shadow iohs frequency to proc scope for fabric initfiles
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_iohs_target, l_iohs_pos),
+                     "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_IOHS_MHZ, l_iohs_target, l_freq_proc_iohs_mhz[l_iohs_pos]),
+                     "Error from FAPI_ATTR_GET (ATTR_FREQ_IOHS_MHZ)");
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_PROC_IOHS_MHZ, l_proc_target, l_freq_proc_iohs_mhz),
+                     "Error form FAPI_ATTR_GET (ATTR_FREQ_PROC_IOHS_MHZ)");
         }
     }
+
+    // set async mode
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_ASYNC_MODE, FAPI_SYSTEM, l_async_perf_mode),
+             "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_ASYNC_MODE)");
+
+    // set indirect data routing for alinks (chip_is_group pump and >= 4 groups)
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_BROADCAST_MODE, FAPI_SYSTEM, l_broadcast_mode),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_BROADCAST_MODE)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_PRESENT_GROUPS, FAPI_SYSTEM, l_present_groups),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_PRESENT_GROUPS)");
+
+    for (uint8_t ii = 0; ii < P10_FBC_UTILS_MAX_CHIPS; ii++)
+    {
+        if(l_present_groups & 0x01)
+        {
+            l_num_groups++;
+        }
+
+        l_present_groups >>= 1;
+    }
+
+    l_a_indirect = ((l_num_groups >= 4)
+                    && (l_broadcast_mode == fapi2::ENUM_ATTR_PROC_FABRIC_BROADCAST_MODE_1HOP_CHIP_IS_GROUP)) ?
+                   (fapi2::ENUM_ATTR_PROC_FABRIC_A_INDIRECT_ON) : (fapi2::ENUM_ATTR_PROC_FABRIC_A_INDIRECT_OFF);
+
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_A_INDIRECT, FAPI_SYSTEM, l_a_indirect),
+             "Error form FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_INDIRECT)");
 
 fapi_try_exit:
     FAPI_DBG("End");
@@ -446,9 +485,12 @@ fapi2::ReturnCode p10_fbc_eff_config(void)
 {
     FAPI_DBG("Start");
 
-    FAPI_TRY(p10_fbc_eff_config_freq_attrs(), "Error from p10_fbc_eff_config_freq_attrs");
-    FAPI_TRY(p10_fbc_eff_config_calc_epsilons(), "Error from p10_fbc_eff_config_calc_epsilons");
-    FAPI_TRY(p10_fbc_eff_config_reset_attrs(), "Error from p10_fbc_eff_config_reset_attrs");
+    FAPI_TRY(p10_fbc_eff_config_freq_attrs(),
+             "Error from p10_fbc_eff_config_freq_attrs");
+    FAPI_TRY(p10_fbc_eff_config_calc_epsilons(),
+             "Error from p10_fbc_eff_config_calc_epsilons");
+    FAPI_TRY(p10_fbc_eff_config_link_attrs(),
+             "Error from p10_fbc_eff_config_link_attrs");
 
 fapi_try_exit:
     FAPI_DBG("End");
