@@ -43,10 +43,6 @@
 // Constant definitions
 //------------------------------------------------------------------------------
 
-// @TODO FIXME RTC215796 Missing TL Y1 link delay field in scom headerss
-const uint32_t PB_TL_LINK_DLY_0123_REG_Y1_LINK_DELAY = 52;
-const uint32_t PB_TL_LINK_DLY_0123_REG_Y1_LINK_DELAY_LEN = 12;
-
 // DL training state machine status
 enum dl_training_states
 {
