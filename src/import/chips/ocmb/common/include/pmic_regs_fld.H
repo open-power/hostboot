@@ -69,6 +69,31 @@ struct pmicFields<mss::pmic::product::JEDEC_COMPLIANT>
     static constexpr uint8_t SEQUENCE_SWC_ENABLE            = 0x04;
     static constexpr uint8_t SEQUENCE_SWD_ENABLE            = 0x03;
 
+    // R04
+    static constexpr uint8_t R04_GLOBAL_ERROR_COUNT                     = 0x07;
+    static constexpr uint8_t R04_GLOBAL_ERROR_LOG_BUCK_OV_OR_UV         = 0x06;
+    static constexpr uint8_t R04_GLOBAL_ERROR_LOG_VIN_BULK_OVER_VOLTAGE = 0x05;
+    static constexpr uint8_t R04_GLOBAL_ERROR_LOG_CRITICAL_TEMPERATURE  = 0x04;
+
+    // R05
+    static constexpr uint8_t R05_SWA_POWER_GOOD      = 0x06;
+    static constexpr uint8_t R05_SWB_POWER_GOOD      = 0x05;
+    static constexpr uint8_t R05_SWC_POWER_GOOD      = 0x04;
+    static constexpr uint8_t R05_SWD_POWER_GOOD      = 0x03;
+    static constexpr uint8_t R05_PMIC_ERROR_LOG      = 0x02; // TK ARRAY
+
+    // R06
+    static constexpr uint8_t R06_SWA_UNDER_VOLTAGE_LOCKOUT  = 0x07;
+    static constexpr uint8_t R06_SWB_UNDER_VOLTAGE_LOCKOUT  = 0x06;
+    static constexpr uint8_t R06_SWC_UNDER_VOLTAGE_LOCKOUT  = 0x05;
+    static constexpr uint8_t R06_SWD_UNDER_VOLTAGE_LOCKOUT  = 0x04;
+    static constexpr uint8_t R06_SWA_OVER_VOLTAGE           = 0x03;
+    static constexpr uint8_t R06_SWB_OVER_VOLTAGE           = 0x02;
+    static constexpr uint8_t R06_SWC_OVER_VOLTAGE           = 0x01;
+    static constexpr uint8_t R06_SWD_OVER_VOLTAGE           = 0x00;
+
+    // R07 all reserved
+
     // R08
     static constexpr uint8_t R08_VIN_BULK_INPUT_PWR_GOOD_STATUS = 0x07;
     static constexpr uint8_t R08_CRITICAL_TEMP_SHUTDOWN_STATUS  = 0x06;

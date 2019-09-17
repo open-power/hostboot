@@ -151,4 +151,59 @@
     </callout>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_PMIC_NOT_ENABLED</rc>
+    <description>
+       After running pmic_enable, the PMIC VR Enable bit did not remain set.
+       Therefore, the PMIC did not enable successfully.
+    </description>
+    <ffdc>PMIC_TARGET</ffdc>
+    <ffdc>OCMB_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>PMIC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>OCMB_TARGET</target>
+    </gard>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_PMIC_STATUS_ERRORS</rc>
+    <description>
+       After running pmic_enable, one or more error status bits were set on the PMICs of this OCMB.
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>PMIC_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>PMIC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>OCMB_TARGET</target>
+    </gard>
+  </hwpError>
+
 </hwpErrors>

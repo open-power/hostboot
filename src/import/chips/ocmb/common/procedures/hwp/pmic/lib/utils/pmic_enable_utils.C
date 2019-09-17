@@ -44,6 +44,7 @@
 #include <generic/memory/lib/utils/index.H>
 #include <generic/memory/lib/utils/find.H>
 #include <mss_pmic_attribute_getters.H>
+#include <mss_generic_attribute_getters.H>
 
 namespace mss
 {
@@ -441,8 +442,9 @@ fapi_try_exit:
 ///
 /// @brief Enable pmics using manual mode (direct VR enable, no SPD fields)
 /// @param[in] i_pmics vector of PMICs to enable
+/// @return FAPI2_RC_SUCCESS iff success, else error
 ///
-fapi2::ReturnCode enable_manual(const std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>> i_pmics)
+fapi2::ReturnCode enable_manual(const std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& i_pmics)
 {
     using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
     using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
@@ -479,8 +481,8 @@ fapi_try_exit:
 /// @param[in] i_vendor_id - the vendor ID of the PMIC to bias
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS if successful
 ///
-fapi2::ReturnCode enable_chip_1U_2U(const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
-                                    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_DIMM>& i_dimm_target,
+fapi2::ReturnCode enable_chip_1U_2U(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
+                                    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm_target,
                                     const uint16_t i_vendor_id)
 {
     FAPI_INF("Setting PMIC %s settings from SPD", mss::c_str(i_pmic_target));
@@ -518,5 +520,64 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Enable PMIC for SPD mode
+///
+/// @param[in] i_pmics vector of PMICs sorted by mss::index
+/// @param[in] i_dimms const vector of DIMMs sorted by mss::index
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode pmic_enable_SPD(
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& i_pmics,
+    const std::vector<fapi2::Target<fapi2::TARGET_TYPE_DIMM>>& i_dimms)
+{
+    uint8_t l_module_height = 0;
+    FAPI_TRY(mss::attr::get_dram_module_height(i_dimms[0], l_module_height));
+
+    FAPI_ASSERT(l_module_height == fapi2::ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_1U ||
+                l_module_height == fapi2::ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_2U,
+                fapi2::PMIC_DIMM_SPD_UNSUPPORTED_MODULE_HEIGHT()
+                .set_TARGET(i_dimms[0])
+                .set_VALUE(l_module_height),
+                "DIMM %s module height attribute not identified as 1U or 2U. "
+                "ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT of %u . Not supported yet.",
+                mss::c_str(i_dimms[0]), l_module_height);
+
+    // Now we know there are 2 pmics per dimm (for DDIMM only... TK will change with future refactor)
+    static constexpr uint8_t PMICS_PER_DIMM = 2;
+
+    for (uint8_t l_dimm_index = 0; l_dimm_index < i_dimms.size(); ++l_dimm_index)
+    {
+        // The PMICs are in sorted order
+        const auto& l_dimm = i_dimms[l_dimm_index];
+        FAPI_TRY(mss::pmic::order_pmics_by_sequence(l_dimm, l_dimm_index, PMICS_PER_DIMM, i_pmics));
+
+        // Now the PMICs are in the right order of DIMM and the right order by their defined SPD sequence within each dimm
+        // Let's kick off the enables
+        for (const auto& l_pmic : i_pmics)
+        {
+            // Get the corresponding DIMM target to feed to the helpers
+            const auto& l_dimm = i_dimms[mss::index(l_pmic) / PMICS_PER_DIMM];
+            uint16_t l_vendor_id = 0;
+
+            // Get vendor ID
+            FAPI_TRY(mss::pmic::get_mfg_id[mss::index(l_pmic)](l_dimm, l_vendor_id));
+
+            // Poll to make sure PBULK reports good, then we can enable the chip and write/read registers
+            FAPI_TRY(mss::pmic::poll_for_pbulk_good(l_pmic),
+                     "pmic_enable: poll for pbulk good either failed, or returned not good status on PMIC %s",
+                     mss::c_str(l_pmic));
+
+            // Call the enable procedure
+            FAPI_TRY((mss::pmic::enable_chip_1U_2U(l_pmic, l_dimm, l_vendor_id)),
+                     "pmic_enable: Error enabling PMIC %s", mss::c_str(l_pmic));
+        }
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 } // pmic
 } // mss

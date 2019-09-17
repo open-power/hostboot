@@ -145,5 +145,202 @@ fapi_try_exit:
     return ((i_rc == fapi2::FAPI2_RC_SUCCESS) ? fapi2::current_err : i_rc);
 }
 
+///
+/// @brief Check if PMIC is IDT vendor
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[out] o_is_idt true/false
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+/// @note Can't unit test this properly as R3D is hardcoded in simics
+///
+fapi2::ReturnCode pmic_is_idt(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target, bool& o_is_idt)
+{
+    o_is_idt = false;
+    using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
+    fapi2::buffer<uint8_t> l_reg_contents;
+
+    FAPI_TRY(mss::pmic::i2c::reg_read(i_pmic_target, REGS::R3D_VENDOR_ID_BYTE_1, l_reg_contents));
+
+    o_is_idt = (l_reg_contents == mss::pmic::vendor::IDT_SHORT);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+namespace status
+{
+
+///
+/// @brief Checks that the PMIC is enabled via VR Enable bit
+///
+/// @param[in] i_ocmb_target OCMB target
+/// @param[in] i_pmic_target PMIC target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode check_for_vr_enable(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target)
+{
+    fapi2::buffer<uint8_t> l_vr_enable_buffer;
+
+    FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(i_pmic_target, REGS::R32, l_vr_enable_buffer),
+             "start_vr_enable: Could not read address 0x%02hhX of %s to check for VR Enable",
+             REGS::R32,
+             mss::c_str(i_pmic_target));
+
+    // Make sure we are enabled
+    FAPI_ASSERT(l_vr_enable_buffer.getBit<FIELDS::R32_VR_ENABLE>(),
+                fapi2::PMIC_NOT_ENABLED()
+                .set_PMIC_TARGET(i_pmic_target)
+                .set_OCMB_TARGET(i_ocmb_target),
+                "PMIC %s was not identified as enabled by checking VR Enable bit",
+                mss::c_str(i_pmic_target));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Check the statuses of all PMICs present on the given OCMB chip
+///
+/// @param[in] i_ocmb_target OCMB target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code
+/// @note the returned target is only valid if o_errors returns as true. Else, the target is an uninitialized blank target!
+///
+fapi2::ReturnCode check_all_pmics(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target)
+{
+    const char* l_ocmb_c_str = mss::c_str(i_ocmb_target);
+
+    // Initialize returnable PMIC with a blank target. This blank target won't be used if there's no error.
+    // If there is an error, this will be overwritten with a valid erroneous PMIC
+    bool l_pmic_error = false;
+
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    // Start success so we can't log and return the same error in loop logic
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+
+    // Check that the PMICs are enabled and without errors
+    for (const auto& l_pmic : mss::find_targets<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target))
+    {
+        FAPI_TRY(check_for_vr_enable(i_ocmb_target, l_pmic),
+                 "PMIC %s did not return enabled status", mss::c_str(l_pmic));
+
+        FAPI_TRY(mss::pmic::status::check_pmic(l_pmic, l_pmic_error));
+
+        FAPI_ASSERT_NOEXIT(!l_pmic_error,
+                           fapi2::PMIC_STATUS_ERRORS()
+                           .set_OCMB_TARGET(i_ocmb_target)
+                           .set_PMIC_TARGET(l_pmic),
+                           "PMIC on OCMB %s had one or more status bits set after running pmic_enable(). "
+                           "One of possibly several bad PMICs: %s",
+                           l_ocmb_c_str, mss::c_str(l_pmic));
+
+        if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+        {
+            fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE);
+        }
+
+        // Reset for next loop
+        l_rc = fapi2::current_err;
+        l_pmic_error = false;
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Else, exit on whatever RC we had
+    FAPI_TRY(l_rc);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Check the PMIC's status codes and report back if an error occurred
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[out] o_error true/false
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error
+///
+fapi2::ReturnCode check_pmic(
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
+    bool& o_error)
+{
+    o_error = false;
+    bool l_pmic_is_idt = false;
+
+    FAPI_TRY(pmic_is_idt(i_pmic_target, l_pmic_is_idt));
+
+    if (l_pmic_is_idt)
+    {
+        // These registers reflect the previous power down cycle of the PMIC. Therefore, they may
+        // not necessarily cause issues on this life. So, we do not need to worry about keeping track if
+        // these failed with l_status_error, but the check_fields() function will still print them out.
+        bool l_status_error = false;
+
+        // if we exit from this try, there were i2c errors
+        FAPI_TRY(mss::pmic::status::check_fields(i_pmic_target, mss::pmic::status::IDT_SPECIFIC_STATUS_FIELDS, l_status_error));
+    }
+
+    {
+        bool l_status_error = false;
+
+        // if we exit from this try, there were i2c errors
+        FAPI_TRY(mss::pmic::status::check_fields(i_pmic_target, mss::pmic::status::STATUS_FIELDS, l_status_error));
+        o_error = l_status_error;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Check an individual set of PMIC status codes
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[in] i_statuses STATUS object to check
+/// @param[out] o_error At least one error bit was found to be set
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error in case of an I2C read error
+///
+fapi2::ReturnCode check_fields(
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
+    const std::vector<std::pair<uint8_t, std::vector<status_field>>>& i_statuses,
+    bool& o_error)
+{
+    o_error = false;
+
+    for (const auto& l_reg_bit_pair : i_statuses)
+    {
+        fapi2::buffer<uint8_t> l_reg_contents;
+        FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(i_pmic_target, l_reg_bit_pair.first, l_reg_contents));
+
+        for (const auto& l_status : l_reg_bit_pair.second)
+        {
+            if (l_reg_contents.getBit(l_status.l_reg_field))
+            {
+                // Print it out
+                FAPI_ERR("%s :: REG 0x%02x bit %u was set on %s",
+                         l_status.l_error_description,
+                         l_reg_bit_pair.first,
+                         l_status.l_reg_field,
+                         mss::c_str(i_pmic_target));
+                // We don't want to exit out here, errors can be independent of each other and we should check them all.
+                // Since there's no easy way to FFDC each individual error, we will report them here and then worry about
+                // return codes in the caller of this function
+                o_error = true;
+            }
+        }
+
+        l_reg_contents.flush<0>();
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+} // status
 } // pmic
 } // mss

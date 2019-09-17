@@ -159,6 +159,161 @@ fapi2::ReturnCode unlock_vendor_region(const fapi2::Target<fapi2::TargetType::TA
 fapi2::ReturnCode lock_vendor_region(const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
                                      const fapi2::ReturnCode i_rc = fapi2::FAPI2_RC_SUCCESS);
 
+///
+/// @brief Check if PMIC is IDT vendor
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[out] o_is_idt true/false
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode pmic_is_idt(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target, bool& o_is_idt);
+
+namespace status
+{
+
+///
+/// @brief Information for each field that we can iterate through
+///
+struct status_field
+{
+    uint8_t l_reg_field;
+    const char* l_error_description;
+};
+
+static const std::vector<std::pair<uint8_t, std::vector<status_field>>> IDT_SPECIFIC_STATUS_FIELDS =
+{
+    {
+        REGS::R04,
+        {   {FIELDS::R04_GLOBAL_ERROR_COUNT, "GLOBAL_ERROR_COUNT: >1 error count since last erase operation"},
+            {FIELDS::R04_GLOBAL_ERROR_LOG_BUCK_OV_OR_UV, "GLOBAL_ERROR_LOG: BUCK OV/UV: Error occurred"},
+            {FIELDS::R04_GLOBAL_ERROR_LOG_VIN_BULK_OVER_VOLTAGE, "GLOBAL_ERROR_LOG: VIN_BULK_OVER_VOLTAGE"},
+            {FIELDS::R04_GLOBAL_ERROR_LOG_CRITICAL_TEMPERATURE, "GLOBAL_ERROR_LOG: CRITICAL_TEMPERATURE"}
+        }
+    },
+
+    {
+        REGS::R05,
+        {   {FIELDS::R05_SWA_POWER_GOOD, "PMIC POWER ON: SWA_PWR_NOT_GOOD"},
+            {FIELDS::R05_SWB_POWER_GOOD, "PMIC POWER ON: SWB_PWR_NOT_GOOD"},
+            {FIELDS::R05_SWC_POWER_GOOD, "PMIC POWER ON: SWC_PWR_NOT_GOOD"},
+            {FIELDS::R05_SWD_POWER_GOOD, "PMIC POWER ON: SWD_PWR_NOT_GOOD"}
+        }
+    },
+
+    {
+        REGS::R06,
+        {   {FIELDS::R06_SWA_UNDER_VOLTAGE_LOCKOUT, "SWA_UNDER_VOLTAGE_LOCKOUT"},
+            {FIELDS::R06_SWB_UNDER_VOLTAGE_LOCKOUT, "SWB_UNDER_VOLTAGE_LOCKOUT"},
+            {FIELDS::R06_SWC_UNDER_VOLTAGE_LOCKOUT, "SWC_UNDER_VOLTAGE_LOCKOUT"},
+            {FIELDS::R06_SWD_UNDER_VOLTAGE_LOCKOUT, "SWD_UNDER_VOLTAGE_LOCKOUT"},
+            {FIELDS::R06_SWA_OVER_VOLTAGE, "SWA_OVER_VOLTAGE"},
+            {FIELDS::R06_SWB_OVER_VOLTAGE, "SWB_OVER_VOLTAGE"},
+            {FIELDS::R06_SWC_OVER_VOLTAGE, "SWC_OVER_VOLTAGE"},
+            {FIELDS::R06_SWD_OVER_VOLTAGE, "SWD_OVER_VOLTAGE"}
+        }
+    }
+};
+
+///
+/// @brief const vector of statuses to check
+///
+static const std::vector<std::pair<uint8_t, std::vector<status_field>>> STATUS_FIELDS =
+{
+    {
+        REGS::R08,
+        {   {FIELDS::R08_VIN_BULK_INPUT_PWR_GOOD_STATUS, "VIN_BULK_INPUT_PWR_NOT_GOOD"},
+            {FIELDS::R08_CRITICAL_TEMP_SHUTDOWN_STATUS,  "CRITICAL_TEMP_SHUTDOWN"},
+            {FIELDS::R08_SWA_PWR_GOOD_STATUS,            "SWA_PWR_NOT_GOOD"},
+            {FIELDS::R08_SWB_PWR_GOOD_STATUS,            "SWB_PWR_NOT_GOOD"},
+            {FIELDS::R08_SWC_PWR_GOOD_STATUS,            "SWC_PWR_NOT_GOOD"},
+            {FIELDS::R08_SWD_PWR_GOOD_STATUS,            "SWD_PWR_NOT_GOOD"},
+            {FIELDS::R08_VIN_MGMT_INPUT_OVER_VOLTAGE,    "VIN_MGMT_INPUT_OVER_VOLTAGE"},
+            {FIELDS::R08_VIN_BULK_INPUT_OVER_VOLTAGE,    "VIN_BULK_INPUT_OVER_VOLTAGE"}
+        }
+    },
+
+    {
+        REGS::R09,
+        {   {FIELDS::R09_PMIC_HIGH_TEMP_WARNING_STATUS,                      "PMIC Temperature exceeded warning threshold"},
+            {FIELDS::R09_VBIAS_PWR_GOOD_STATUS,                              "VBIAS_PWR_NOT_GOOD"},
+            {FIELDS::R09_VOUT_1_8_V_PWR_GOOD_STATUS,                         "VOUT_1.8V_PWR_NOT_GOOD"},
+            {FIELDS::R09_VIN_MGMT_TO_VIN_BULK_SWITCHOVER_STATUS,             "VIN_MGMT is removed (using VIN_Bulk)"},
+            {FIELDS::R09_SWA_HIGH_OUTPUT_CURRENT_CONSUMPTION_WARNING_STATUS, "SWA_HIGH_OUTPUT_CURRENT_CONSUMPTION_WARNING"},
+            {FIELDS::R09_SWB_HIGH_OUTPUT_CURRENT_CONSUMPTION_WARNING_STATUS, "SWB_HIGH_OUTPUT_CURRENT_CONSUMPTION_WARNING"},
+            {FIELDS::R09_SWC_HIGH_OUTPUT_CURRENT_CONSUMPTION_WARNING_STATUS, "SWC_HIGH_OUTPUT_CURRENT_CONSUMPTION_WARNING"},
+            {FIELDS::R09_SWD_HIGH_OUTPUT_CURRENT_CONSUMPTION_WARNING_STATUS, "SWD_HIGH_OUTPUT_CURRENT_CONSUMPTION_WARNING"}
+        }
+    },
+
+    {
+        REGS::R0A,
+        {   {FIELDS::R0A_SWA_OUTPUT_OVER_VOLTAGE_STATUS, "SWA_OUTPUT_OVER_VOLTAGE"},
+            {FIELDS::R0A_SWB_OUTPUT_OVER_VOLTAGE_STATUS, "SWB_OUTPUT_OVER_VOLTAGE"},
+            {FIELDS::R0A_SWC_OUTPUT_OVER_VOLTAGE_STATUS, "SWC_OUTPUT_OVER_VOLTAGE"},
+            {FIELDS::R0A_SWD_OUTPUT_OVER_VOLTAGE_STATUS, "SWD_OUTPUT_OVER_VOLTAGE"},
+            {FIELDS::R0A_PEC_ERROR_STATUS,               "PEC_ERROR"},
+            {FIELDS::R0A_PARITY_ERROR_STATUS,            "PARITY_ERROR"},
+            {FIELDS::R0A_IBI_STATUS,                     "PENDING_IBI"}
+        }
+    },
+
+    {
+        REGS::R0B,
+        {   {FIELDS::R0B_SWA_OUTPUT_CURRENT_LIMITER_WARNING_STATUS, "SWA_OUTPUT_CURRENT_LIMITER_EVENT"},
+            {FIELDS::R0B_SWB_OUTPUT_CURRENT_LIMITER_WARNING_STATUS, "SWB_OUTPUT_CURRENT_LIMITER_EVENT"},
+            {FIELDS::R0B_SWC_OUTPUT_CURRENT_LIMITER_WARNING_STATUS, "SWC_OUTPUT_CURRENT_LIMITER_EVENT"},
+            {FIELDS::R0B_SWD_OUTPUT_CURRENT_LIMITER_WARNING_STATUS, "SWD_OUTPUT_CURRENT_LIMITER_EVENT"},
+            {FIELDS::R0B_SWA_OUTPUT_UNDER_VOLTAGE_LOCKOUT_STATUS  , "SWA_OUTPUT_UNDER_VOLTAGE_LOCKOUT"},
+            {FIELDS::R0B_SWB_OUTPUT_UNDER_VOLTAGE_LOCKOUT_STATUS  , "SWB_OUTPUT_UNDER_VOLTAGE_LOCKOUT"},
+            {FIELDS::R0B_SWC_OUTPUT_UNDER_VOLTAGE_LOCKOUT_STATUS  , "SWC_OUTPUT_UNDER_VOLTAGE_LOCKOUT"},
+            {FIELDS::R0B_SWD_OUTPUT_UNDER_VOLTAGE_LOCKOUT_STATUS  , "SWD_OUTPUT_UNDER_VOLTAGE_LOCKOUT"}
+        }
+    }
+};
+
+///
+/// @brief Checks that the PMIC is enabled via VR Enable bit
+///
+/// @param[in] i_ocmb_target OCMB target
+/// @param[in] i_pmic_target PMIC target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode check_for_vr_enable(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target);
+
+///
+/// @brief Check the statuses of all PMICs present on the given OCMB chip
+///
+/// @param[in] i_ocmb_target OCMB target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code
+/// @note the returned target is only valid if o_errors returns as true. Else, the target is an uninitialized blank target!
+///
+fapi2::ReturnCode check_all_pmics(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target);
+
+///
+/// @brief Check the PMIC's status codes and report back if an error occurred
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[out] o_error true/false
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error
+///
+fapi2::ReturnCode check_pmic(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target, bool& o_error);
+
+///
+/// @brief Check the IDT specific status codes
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[in] i_statuses STATUS object to check
+/// @param[out] o_error At least one error bit was found to be set
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error in case of an I2C read error
+///
+fapi2::ReturnCode check_fields(
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
+    const std::vector<std::pair<uint8_t, std::vector<status_field>>>& i_statuses,
+    bool& o_error);
+
+} // status
 } // pmic
 } // mss
 

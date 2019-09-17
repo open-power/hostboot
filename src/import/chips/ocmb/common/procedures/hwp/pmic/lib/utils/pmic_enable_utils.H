@@ -750,7 +750,7 @@ fapi_try_exit:
 /// @brief Enable pmics using manual mode (direct VR enable, no SPD fields)
 /// @param[in] i_pmics vector of PMICs to enable
 ///
-fapi2::ReturnCode enable_manual(const std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>> i_pmics);
+fapi2::ReturnCode enable_manual(const std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& i_pmics);
 
 ///
 /// @brief Function to enable 1U and 2U pmics
@@ -760,10 +760,20 @@ fapi2::ReturnCode enable_manual(const std::vector<fapi2::Target<fapi2::TARGET_TY
 /// @param[in] i_vendor_id - the vendor ID of the PMIC to bias
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS if successful
 ///
-fapi2::ReturnCode enable_chip_1U_2U(const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
-                                    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_DIMM>& i_dimm_target,
+fapi2::ReturnCode enable_chip_1U_2U(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
+                                    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm_target,
                                     const uint16_t i_vendor_id);
 
+///
+/// @brief Enable PMIC for SPD mode
+///
+/// @param[in] i_pmics vector of PMICs sorted by mss::index
+/// @param[in] i_dimms const vector of DIMMs sorted by mss::index
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode pmic_enable_SPD(
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& i_pmics,
+    const std::vector<fapi2::Target<fapi2::TARGET_TYPE_DIMM>>& i_dimms);
 }
 } // mss
 
