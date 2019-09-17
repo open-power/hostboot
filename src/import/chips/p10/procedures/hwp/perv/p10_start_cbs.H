@@ -42,18 +42,20 @@
 
 
 typedef fapi2::ReturnCode (*p10_start_cbs_FP_t)(const
-        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
+        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&, const bool);
 
 /// @brief --check/wait for VDN_PGOOD = 1
 /// --start CBS(CBS runs thru default path)
 ///
 ///
 /// @param[in]     i_target_chip   Reference to TARGET_TYPE_PROC_CHIP target
+/// @param[in]     i_sbe_start     setting of PreventSbeStart
 /// @return  FAPI2_RC_SUCCESS if success, else error code.
 extern "C"
 {
     fapi2::ReturnCode p10_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-                                    & i_target_chip);
+                                    & i_target_chip,
+                                    const bool i_sbe_start = 0);
 }
 
 #endif

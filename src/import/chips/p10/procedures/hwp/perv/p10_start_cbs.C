@@ -34,12 +34,10 @@
 
 
 #include "p10_start_cbs.H"
-#include "p9_const_common.H"
-
-#include <p9_perv_scom_addresses.H>
-#include <p9_perv_scom_addresses_fld.H>
-#include <p9_perv_scom_addresses_fixes.H>
-#include <p9_perv_scom_addresses_fld_fixes.H>
+#include "p10_scom_proc_0.H"
+#include "p10_scom_proc_1.H"
+#include "p10_scom_proc_6.H"
+#include "p10_scom_proc_f.H"
 
 enum P10_START_CBS_Private_Constants
 {
@@ -52,8 +50,12 @@ enum P10_START_CBS_Private_Constants
 };
 
 fapi2::ReturnCode p10_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-                                & i_target_chip)
+                                & i_target_chip,
+                                const bool i_sbe_start)
 {
+    using namespace scomt;
+    using namespace scomt::proc;
+
     bool l_read_vdn_pgood_status = false;
     fapi2::buffer<uint32_t> l_data32;
     fapi2::buffer<uint32_t> l_data32_cbs_cs;
@@ -62,24 +64,17 @@ fapi2::ReturnCode p10_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
     FAPI_INF("p10_start_cbs: Entering ...");
 
     FAPI_DBG("Clearing  Selfboot message register before every boot ");
-    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_SB_MSG_FSI, 0));
-
-    FAPI_DBG("Configuring Prevent SBE start option");
-    FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_CBS_CS_FSI,
-                                    l_data32_cbs_cs));
-    l_data32_cbs_cs.setBit<PERV_CBS_CS_OPTION_PREVENT_SBE_START>();
-    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_CBS_CS_FSI,
-                                    l_data32_cbs_cs));
+    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SB_MSG_FSI, 0));
 
     FAPI_DBG("Setting up hreset to 0");
-    FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_SB_CS_FSI, l_data32));
-    l_data32.clearBit<PERV_SB_CS_START_RESTART_VECTOR0>();
-    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_SB_CS_FSI, l_data32));
+    FAPI_TRY(fapi2::getCfamRegister(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SB_CS_FSI, l_data32));
+    l_data32.clearBit<TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SB_CS_START_RESTART_VECTOR0>();
+    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SB_CS_FSI, l_data32));
 
     FAPI_DBG("check for VDN_PGOOD");
-    FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_CBS_ENVSTAT_FSI,
+    FAPI_TRY(fapi2::getCfamRegister(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_ENVSTAT_FSI,
                                     l_data32));
-    l_read_vdn_pgood_status = l_data32.getBit<PERV_CBS_ENVSTAT_C4_VDN_GPOOD>();
+    l_read_vdn_pgood_status = l_data32.getBit<TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_ENVSTAT_CBS_ENVSTAT_C4_VDN_GPOOD>();
 
     FAPI_ASSERT(l_read_vdn_pgood_status,
                 fapi2::VDN_PGOOD_NOT_SET()
@@ -87,20 +82,21 @@ fapi2::ReturnCode p10_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
                 "ERROR:VDN_PGOOD OFF, CBS_ENVSTAT BIT 2 NOT SET");
 
     FAPI_DBG("Reset SBE FIFO");
-    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_FSB_FSB_DOWNFIFO_RESET_FSI, FIFO_RESET));
+    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, TP_TPVSB_FSI_W_SBE_FIFO_FSB_DOWNFIFO_RESET_FSI, FIFO_RESET));
 
-    FAPI_DBG("Resetting CFAM Boot Sequencer (CBS) to flush value");
-    FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_CBS_CS_FSI,
+    FAPI_DBG("Resetting CFAM Boot Sequencer (CBS) to flush value and configuring Prevent SBE start option");
+    FAPI_TRY(fapi2::getCfamRegister(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_CS_FSI,
                                     l_data32_cbs_cs));
-    l_data32_cbs_cs.clearBit<PERV_CBS_CS_START_BOOT_SEQUENCER>();
-    l_data32_cbs_cs.clearBit<PERV_CBS_CS_OPTION_SKIP_SCAN0_CLOCKSTART>();
-    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_CBS_CS_FSI,
+    l_data32_cbs_cs.clearBit<TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_CS_START_BOOT_SEQUENCER>();
+    l_data32_cbs_cs.clearBit<TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_CS_OPTION_SKIP_SCAN0_CLOCKSTART>();
+    l_data32_cbs_cs.writeBit<TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_CS_OPTION_PREVENT_SBE_START>(!i_sbe_start);
+    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_CS_FSI,
                                     l_data32_cbs_cs));
 
 
     FAPI_DBG("Triggering CFAM Boot Sequencer (CBS) to start");
-    l_data32_cbs_cs.setBit<PERV_CBS_CS_START_BOOT_SEQUENCER>();
-    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_CBS_CS_FSI,
+    l_data32_cbs_cs.setBit<TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_CS_START_BOOT_SEQUENCER>();
+    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_CS_FSI,
                                     l_data32_cbs_cs));
 
     FAPI_DBG("Check cbs_cs_internal_state_vector");
@@ -109,10 +105,11 @@ fapi2::ReturnCode p10_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
     //UNTIL CBS_CS.CBS_CS_INTERNAL_STATE_VECTOR == CBS_IDLE_VALUE
     while (l_timeout != 0)
     {
-        FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_CBS_CS_FSI,
+        FAPI_TRY(fapi2::getCfamRegister(i_target_chip, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_CS_FSI,
                                         l_data32_cbs_cs));
         uint32_t l_poll_data = 0;
-        l_data32_cbs_cs.extractToRight<PERV_CBS_CS_INTERNAL_STATE_VECTOR, PERV_CBS_CS_INTERNAL_STATE_VECTOR_LEN>(l_poll_data);
+        l_data32_cbs_cs.extractToRight<TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_CS_INTERNAL_STATE_VECTOR,
+                                       TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_CS_INTERNAL_STATE_VECTOR_LEN>(l_poll_data);
 
         if (l_poll_data == CBS_IDLE_VALUE)
         {
