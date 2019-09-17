@@ -43,7 +43,6 @@
 // Constant definitions
 //------------------------------------------------------------------------------
 
-// DL training state machine status
 enum dl_training_states
 {
     DL_STATE_INACTIVE       = 0,
@@ -64,10 +63,8 @@ enum dl_training_states
     DL_STATE_LINKUP         = 15,
 };
 
-// DL training lane sparing constants
 const uint32_t DL_NUM_LANES_PER_HALF_LINK = 9;
 
-// Polling constants for DL training completion
 const uint32_t DL_MAX_POLL_LOOPS   = 100;
 const uint32_t DL_POLL_SIM_CYCLES  = 10000000;
 const uint32_t DL_POLL_HW_DELAY_NS = 1000000;
@@ -706,14 +703,14 @@ fapi_try_exit:
 ///
 /// @brief Validate DL/TL link layers are trained
 ///
-/// @param[in] i_iohs_target            Reference to IOHS target
-/// @param[in] i_link_id                Link ID for given IOHS target
-/// @param[in] i_update_intranode       True if IOHS link is used as intranode connection
-/// @param[out] o_retrain               Indication that DL link training should be re-attempted
-/// @param[out] o_rcs                   Vector of return code objects, to append
-///                                     in case of reported DL training failure
+/// @param[in] i_iohs_target        Reference to IOHS target
+/// @param[in] i_link_id            Link ID for given IOHS target
+/// @param[in] i_update_intranode   True if IOHS link is used as intranode connection
+/// @param[out] o_retrain           Indication that DL link training should be re-attempted
+/// @param[out] o_rcs               Vector of return code objects, to append
+///                                 in case of reported DL training failure
 ///
-/// @return fapi2::ReturnCode           FAPI2_RC_SUCCESS if success, else error code.
+/// @return fapi2::ReturnCode       FAPI2_RC_SUCCESS if success, else error code.
 ///
 fapi2::ReturnCode p10_fabric_iovalid_link_validate_wrap(
     const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_iohs_target,
@@ -778,7 +775,6 @@ fapi2::ReturnCode p10_fabric_iovalid_get_link_delay(
 
     l_is_even_iohs = ((l_iohs_pos % 2) == 0);
 
-    // read link delay register, extract hi/lo delay values & return their average
     FAPI_TRY(GET_PB_TL_LINK_DLY_0123_REG(l_pauc_target, l_link_delay_reg),
              "Error from getScom (PB_TL_LINK_DLY_0123_REG)");
 
@@ -790,10 +786,7 @@ fapi2::ReturnCode p10_fabric_iovalid_get_link_delay(
     else
     {
         GET_PB_TL_LINK_DLY_0123_REG_Y0_LINK_DELAY(l_link_delay_reg, l_sublink_delay_evn);
-        // @TODO FIXME RTC215796 Missing TL Y1 link delay field in scom headers
-        //GET_PB_TL_LINK_DLY_0123_REG_Y1_LINK_DELAY(l_link_delay_reg, l_sublink_delay_odd);
-        l_link_delay_reg.extractToRight<PB_TL_LINK_DLY_0123_REG_Y1_LINK_DELAY, PB_TL_LINK_DLY_0123_REG_Y1_LINK_DELAY_LEN>
-        (l_sublink_delay_odd);
+        GET_PB_TL_LINK_DLY_0123_REG_Y1_LINK_DELAY(l_link_delay_reg, l_sublink_delay_odd);
     }
 
     switch(i_link_train)
@@ -937,7 +930,6 @@ fapi2::ReturnCode p10_fabric_iovalid(
     fapi2::ATTR_PROC_FABRIC_X_LINK_DELAY_Type l_x_agg_link_delay;
     fapi2::ATTR_PROC_FABRIC_A_LINK_DELAY_Type l_a_agg_link_delay;
 
-    // seed arrays with attribute values
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG, i_target, l_x_en),
              "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG");
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_LINK_ID, i_target, l_x_rem_link_id),
@@ -1000,6 +992,11 @@ fapi2::ReturnCode p10_fabric_iovalid(
                              l_iohs,
                              l_x_en[l_link] ? (l_x_agg_link_delay[l_link]) : (l_a_agg_link_delay[l_link])),
                          "Error from p10_fabric_iovalid_get_link_delays");
+
+                FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_X_LINK_DELAY, i_target, l_x_agg_link_delay),
+                         "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_LINK_DELAY");
+                FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_A_LINK_DELAY, i_target, l_a_agg_link_delay),
+                         "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_LINK_DELAY");
             }
         }
         else
@@ -1015,12 +1012,6 @@ fapi2::ReturnCode p10_fabric_iovalid(
             FAPI_DBG("  a_enable:               %d", l_a_en[l_link]);
         }
     }
-
-    // update link delay attributes
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_X_LINK_DELAY, i_target, l_x_agg_link_delay),
-             "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_LINK_DELAY");
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_A_LINK_DELAY, i_target, l_a_agg_link_delay),
-             "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_LINK_DELAY");
 
 fapi_try_exit:
     FAPI_DBG("End");
