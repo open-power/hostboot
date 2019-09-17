@@ -1072,9 +1072,6 @@ uint32_t __analyzeWarningThrStatusReg(STEP_CODE_DATA_STRUCT & io_sc,
         // BIT 2: ES_TEMP_WARNING
         if ( bitList.count(2) )
         {
-            // Make the log predictive and mask the FIR.
-            io_sc.service_data->SetThresholdMaskId(0);
-
             // Read the ES_TEMP and ES_TEMP_WARNING_HIGH_THRESHOLD values
             uint16_t msbEsTempReg = NVDIMM::i2cReg::ES_TEMP1;
             uint16_t lsbEsTempReg = NVDIMM::i2cReg::ES_TEMP0;
@@ -1116,6 +1113,9 @@ uint32_t __analyzeWarningThrStatusReg(STEP_CODE_DATA_STRUCT & io_sc,
             // Callout NVDIMM low, no gard
             io_sc.service_data->SetCallout( i_dimm, MRU_LOW, NO_GARD );
 
+            // Make the log predictive and mask the FIR.
+            io_sc.service_data->SetThresholdMaskId(0);
+
             // Send message to PHYP that save/restore may work
             o_rc = PlatServices::nvdimmNotifyProtChange( i_dimm,
                 NVDIMM::NVDIMM_RISKY_HW_ERROR );
@@ -1126,9 +1126,6 @@ uint32_t __analyzeWarningThrStatusReg(STEP_CODE_DATA_STRUCT & io_sc,
         // BIT 0: NVM_LIFETIME_WARNING
         if ( bitList.count(0) )
         {
-            // Make the log predictive, but do not mask the FIR
-            io_sc.service_data->setServiceCall();
-
             // Adjust warning threshold.
             uint16_t warnThReg = NVDIMM::i2cReg::NVM_LIFETIME_WARNING_THRESHOLD;
             uint16_t errThReg  = NVDIMM::i2cReg::NVM_LIFETIME_ERROR_THRESHOLD;
@@ -1137,6 +1134,9 @@ uint32_t __analyzeWarningThrStatusReg(STEP_CODE_DATA_STRUCT & io_sc,
             o_rc = __adjustThreshold( io_sc, i_dimm, warnThReg, errThReg,
                                       firstWarn, statusErr );
             if ( SUCCESS != o_rc ) break;
+
+            // Make the log predictive, but do not mask the FIR
+            io_sc.service_data->setServiceCall();
 
             // If we got a set event notification status error, add the
             // signature for that before adding the signature for the warning.
@@ -1174,9 +1174,6 @@ uint32_t __analyzeWarningThrStatusReg(STEP_CODE_DATA_STRUCT & io_sc,
         // BIT 1: ES_LIFETIME_WARNING
         if ( bitList.count(1) )
         {
-            // Make the log predictive, but do not mask the FIR
-            io_sc.service_data->setServiceCall();
-
             // Adjust warning threshold.
             uint16_t warnThReg = NVDIMM::i2cReg::ES_LIFETIME_WARNING_THRESHOLD;
             uint16_t errThReg  = NVDIMM::i2cReg::ES_LIFETIME_ERROR_THRESHOLD;
@@ -1185,6 +1182,9 @@ uint32_t __analyzeWarningThrStatusReg(STEP_CODE_DATA_STRUCT & io_sc,
             o_rc = __adjustThreshold( io_sc, i_dimm, warnThReg, errThReg,
                                       firstWarn, statusErr );
             if ( SUCCESS != o_rc ) break;
+
+            // Make the log predictive, but do not mask the FIR
+            io_sc.service_data->setServiceCall();
 
             // If we got a set event notification status error, add the
             // signature for that before adding the signature for the warning.
@@ -1342,6 +1342,25 @@ int32_t AnalyzeNvdimmHealthStatRegs( ExtensibleChip * i_chip,
         // BIT 0: Persistency Lost
         if ( bitList.count(0) )
         {
+            // Analyze Health Status0 Reg, Health Status1 Reg,
+            // and Error Theshold Status Reg
+            l_rc = __analyzeHealthStatus0Reg( io_sc, dimm, errFound );
+            if ( SUCCESS != l_rc ) continue;
+            l_rc = __analyzeHealthStatus1Reg( io_sc, dimm, errFound );
+            if ( SUCCESS != l_rc ) continue;
+            l_rc = __analyzeErrorThrStatusReg( io_sc, dimm, errFound );
+            if ( SUCCESS != l_rc ) continue;
+
+            // If we didn't find any error, then keep the log hidden.
+            if ( !errFound )
+            {
+                io_sc.service_data->setSignature( i_chip->getHuid(),
+                    PRDFSIG_FirEvntGone );
+                // Callout NVDIMM
+                io_sc.service_data->SetCallout( dimm, MRU_MED, NO_GARD );
+                continue;
+            }
+
             // EVENT_N cannot be retriggered on a new PERSISTENCY_LOST_ERROR
             // if a previous PERSISTENCY_LOST_ERROR still exists. Meaning, we
             // cannot detect/report multiple errors that happen at different
@@ -1351,23 +1370,24 @@ int32_t AnalyzeNvdimmHealthStatRegs( ExtensibleChip * i_chip,
 
             // Send message to PHYP that save/restore may work
             l_rc = PlatServices::nvdimmNotifyProtChange( dimm,
-                    NVDIMM::NVDIMM_RISKY_HW_ERROR );
+                NVDIMM::NVDIMM_RISKY_HW_ERROR );
             if ( SUCCESS != l_rc ) continue;
 
-            // Analyze Health Status0 Reg, Health Status1 Reg,
-            // and Error Theshold Status Reg
-            l_rc = __analyzeHealthStatus0Reg( io_sc, dimm, errFound );
-            if ( SUCCESS != l_rc ) continue;
-            l_rc = __analyzeHealthStatus1Reg( io_sc, dimm, errFound );
-            if ( SUCCESS != l_rc ) continue;
-            l_rc = __analyzeErrorThrStatusReg( io_sc, dimm, errFound );
-            if ( SUCCESS != l_rc ) continue;
         }
         // BIT 1: Warning Threshold Exceeded
         else if ( bitList.count(1) )
         {
             l_rc = __analyzeWarningThrStatusReg( io_sc, dimm, errFound );
             if ( SUCCESS != l_rc ) continue;
+
+            if ( !errFound )
+            {
+                io_sc.service_data->setSignature( i_chip->getHuid(),
+                    PRDFSIG_FirEvntGone );
+                // Callout NVDIMM
+                io_sc.service_data->SetCallout( dimm, MRU_MED, NO_GARD );
+                continue;
+            }
         }
         // BIT 2: Persistency Restored
         else if ( bitList.count(2) )
