@@ -57,22 +57,21 @@
 // HWAS
 #include    <hwas/common/hwas.H>
 
-/* FIXME RTC: 210975
 // fapi2 support
 #include <fapi2.H>
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
-*/
 
 #include <config.h>
 
 // HWP
-//#include <p9_mss_attr_update.H>
+#include <p10_mss_attr_update.H>
 
 //HRMOR
 #include <sys/misc.h>
 
 #include <isteps/mem_utils.H>
+#include <arch/memorymap.H>
 
 namespace   ISTEP_07
 {
@@ -85,13 +84,10 @@ using   namespace   TARGETING;
 
 typedef struct procIds
 {
-    Target* proc;                                  // Proc
-    ATTR_FABRIC_GROUP_ID_type groupIdDflt;         // Default Group ID
-    ATTR_PROC_EFF_FABRIC_GROUP_ID_type groupIdEff; // Effective Group ID
-    ATTR_FABRIC_GROUP_ID_type groupId;             // Desired Group ID
-    ATTR_FABRIC_CHIP_ID_type chipIdDflt;           // Default Chip ID
-    ATTR_PROC_EFF_FABRIC_CHIP_ID_type chipIdEff;   // Effective Chip ID
-    ATTR_FABRIC_CHIP_ID_type chipId;               // Desired Chip ID
+    Target* proc;                                    // Proc
+    ATTR_PROC_FABRIC_TOPOLOGY_ID_type topoIdDflt;    // Default Topo ID
+    ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID_type topoIdEff; // Effective Topo ID
+    ATTR_PROC_FABRIC_TOPOLOGY_ID_type topoId;        // Desired Topo ID
 } procIds_t;
 
 const uint8_t INVALID_PROC = 0xFF;
@@ -100,16 +96,16 @@ const uint8_t INVALID_PROC = 0xFF;
 /**
  * @brief   check_proc0_memory_config   Check memory config for proc0
  *
- *  Loops through all processors gathering group ID and chip ID information for
- *  each one and determining which is proc0 based on having the smallest group
- *  ID / chip Id.
+ *  Loops through all processors gathering topology ID information for
+ *  each one and determining which is proc0 based on having the smallest
+ *  topology ID.
  *
  *  Checks that proc0 has associated functional dimms.  If it does not have any
  *  functional dimms behind it, look for a proc that does have functional dimms
  *  and swap IDs for these processors.
  *
- *  Loops through all processors again making sure that the effective group and
- *  chip IDs are the desired IDs.  If the IDs are not as desired, update the
+ *  Loops through all processors again making sure that the effective topology
+ *  IDs are the desired IDs.  If the IDs are not as desired, update the
  *  effective ID attributes and flag that an SBE Update is needed.
  *
  *  If SBE Update is needed, sync all attributes to the FSP and perform update.
@@ -117,7 +113,7 @@ const uint8_t INVALID_PROC = 0xFF;
  * @param[in/out] io_istepErr  Error for this istep
  *
  * @return errlHndl_t       valid errlHndl_t handle if there was an error
- *                          NULL if no errors;
+ *                          nullptr if no errors;
  */
 errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
 {
@@ -140,19 +136,12 @@ errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
     {
         l_procIds[i].proc = l_procChip;
 
-        // Get Group IDs
-        l_procIds[i].groupIdDflt =
-            l_procChip->getAttr<ATTR_FABRIC_GROUP_ID>();
-        l_procIds[i].groupIdEff =
-            l_procChip->getAttr<ATTR_PROC_EFF_FABRIC_GROUP_ID>();
-        l_procIds[i].groupId = l_procIds[i].groupIdDflt;
-
-        // Get Chip IDs
-        l_procIds[i].chipIdDflt =
-            l_procChip->getAttr<ATTR_FABRIC_CHIP_ID>();
-        l_procIds[i].chipIdEff =
-            l_procChip->getAttr<ATTR_PROC_EFF_FABRIC_CHIP_ID>();
-        l_procIds[i].chipId = l_procIds[i].chipIdDflt;
+        // Get Topology IDs
+        l_procIds[i].topoIdDflt =
+            l_procChip->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_ID>();
+        l_procIds[i].topoIdEff =
+            l_procChip->getAttr<ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID>();
+        l_procIds[i].topoId = l_procIds[i].topoIdDflt;
 
         // Check if this proc should be tracked as proc0
         if(l_proc0 == INVALID_PROC)
@@ -160,27 +149,19 @@ errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
             // No proc0, make initial assignment
             l_proc0 = i;
         }
-        else if ( PIR_t::createChipId(l_procIds[i].groupId,
-                                      l_procIds[i].chipId) <
-                  PIR_t::createChipId(l_procIds[l_proc0].groupId,
-                                      l_procIds[l_proc0].chipId) )
+        else if(l_procIds[i].topoId < l_procIds[l_proc0].topoId)
         {
-            // Smaller group ID / chip ID, replace assignment
+            // Smaller topo ID, replace assignment
             l_proc0 = i;
         }
 
         TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "check_proc0_memory_config: Initial settings for "
-                  "Proc %.8X\n"
-                  "  groupIdDflt = %d, groupIdEff = %d, groupId = %d\n"
-                  "  chipIdDflt = %d, chipIdEff = %d, chipId = %d",
+                  "Proc %.8X: topoIdDflt = %d, topoIdEff = %d, topoId = %d\n",
                   get_huid(l_procIds[i].proc),
-                  l_procIds[i].groupIdDflt,
-                  l_procIds[i].groupIdEff,
-                  l_procIds[i].groupId,
-                  l_procIds[i].chipIdDflt,
-                  l_procIds[i].chipIdEff,
-                  l_procIds[i].chipId);
+                  l_procIds[i].topoIdDflt,
+                  l_procIds[i].topoIdEff,
+                  l_procIds[i].topoId);
 
         // Increment index
         i++;
@@ -242,24 +223,20 @@ errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
             l_victim = i;
 
             // Set the desired proc0 IDs from swapped proc's default IDs
-            l_procIds[l_proc0].groupId = l_procIds[l_victim].groupIdDflt;
-            l_procIds[l_proc0].chipId = l_procIds[l_victim].chipIdDflt;
+            l_procIds[l_proc0].topoId = l_procIds[l_victim].topoIdDflt;
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "check_proc0_memory_config: proc0 %.8X is set to use "
-                      "groupId %d and chipId %d",
+                      "topoId %d",
                       get_huid(l_procIds[l_proc0].proc),
-                      l_procIds[l_proc0].groupId,
-                      l_procIds[l_proc0].chipId);
+                      l_procIds[l_proc0].topoId);
 
             // Set the desired IDs for the swapped proc from proc0 defaults
-            l_procIds[l_victim].groupId = l_procIds[l_proc0].groupIdDflt;
-            l_procIds[l_victim].chipId = l_procIds[l_proc0].chipIdDflt;
+            l_procIds[l_victim].topoId = l_procIds[l_proc0].topoIdDflt;
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "check_proc0_memory_config: Proc %.8X is set to use "
-                      "groupId %d and chipId %d",
+                      "topoId %d",
                       get_huid(l_procIds[l_victim].proc),
-                      l_procIds[l_victim].groupId,
-                      l_procIds[l_victim].chipId);
+                      l_procIds[l_victim].topoId);
 
             // Leave loop after swapping memory
             break;
@@ -272,23 +249,16 @@ errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
     {
         TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
               "check_proc0_memory_config: Compare settings for "
-              "Proc %.8X\n"
-              "  groupIdEff = %d, groupId = %d\n"
-              "  chipIdEff = %d, chipId = %d",
+              "Proc %.8X: topoIdEff = %d, topoId = %d",
               get_huid(l_procIds[i].proc),
-              l_procIds[i].groupIdEff,
-              l_procIds[i].groupId,
-              l_procIds[i].chipIdEff,
-              l_procIds[i].chipId);
+              l_procIds[i].topoIdEff,
+              l_procIds[i].topoId);
 
-        if((l_procIds[i].groupId != l_procIds[i].groupIdEff) ||
-           (l_procIds[i].chipId != l_procIds[i].chipIdEff) )
+        if(l_procIds[i].topoId != l_procIds[i].topoIdEff)
         {
             // Update attributes
             (l_procIds[i].proc)->
-              setAttr<ATTR_PROC_EFF_FABRIC_GROUP_ID>(l_procIds[i].groupId);
-            (l_procIds[i].proc)->
-              setAttr<ATTR_PROC_EFF_FABRIC_CHIP_ID>(l_procIds[i].chipId);
+              setAttr<ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID>(l_procIds[i].topoId);
 
             l_updateNeeded = true;
         }
@@ -296,17 +266,12 @@ errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
         TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
               "check_proc0_memory_config: Current attribute "
               "settings for Proc %.8X\n"
-              "  ATTR_PROC_EFF_FABRIC_GROUP_ID = %d\n"
-              "  ATTR_FABRIC_GROUP_ID = %d\n"
-              "  ATTR_PROC_EFF_FABRIC_CHIP_ID = %d\n"
-              "  ATTR_FABRIC_CHIP_ID = %d",
+              "  ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID = %d\n"
+              "  ATTR_PROC_FABRIC_TOPOLOGY_ID = %d\n",
               get_huid(l_procIds[i].proc),
               (l_procIds[i].proc)->
-                  getAttr<ATTR_PROC_EFF_FABRIC_GROUP_ID>(),
-              (l_procIds[i].proc)->getAttr<ATTR_FABRIC_GROUP_ID>(),
-              (l_procIds[i].proc)->
-                  getAttr<ATTR_PROC_EFF_FABRIC_CHIP_ID>(),
-              (l_procIds[i].proc)->getAttr<ATTR_FABRIC_CHIP_ID>());
+                  getAttr<ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID>(),
+              (l_procIds[i].proc)->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_ID>());
     }
 
     if(l_updateNeeded)
@@ -314,17 +279,16 @@ errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
         do
         {
             // Sync all attributes to the FSP
-            l_err = TARGETING::AttrRP::syncAllAttributesToFsp();
+            l_err = AttrRP::syncAllAttributesToFsp();
             if( l_err )
             {
                 // Something failed on the sync.  Commit the error here
                 // and continue with the Re-IPL Request
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                           ERR_MRK"check_proc0_memory_config() - Error "
-                          "syncing attributes to FSP, RC=0x%X, PLID=0x%lX",
-                          ERRL_GETRC_SAFE(l_err),
-                          ERRL_GETPLID_SAFE(l_err));
-
+                          "syncing attributes to FSP. "
+                          TRACE_ERR_FMT,
+                          TRACE_ERR_ARGS(l_err));
                 io_istepErr.addErrorDetails(l_err);
                 errlCommit(l_err, HWPF_COMP_ID);
             }
@@ -336,15 +300,16 @@ errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
             }
 
             // Rebuild SBE image and trigger reconfig loop
-            l_err = SBE::updateProcessorSbeSeeproms();
+            // TODO RTC 208838 -- P10 SBE Update
+            //l_err = SBE::updateProcessorSbeSeeproms();
 
             if( l_err )
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                           ERR_MRK"check_proc0_memory_config() - Error calling "
-                          "updateProcessorSbeSeeproms, RC=0x%X, PLID=0x%lX",
-                          ERRL_GETRC_SAFE(l_err),
-                          ERRL_GETPLID_SAFE(l_err));
+                          "updateProcessorSbeSeeproms. "
+                          TRACE_ERR_FMT,
+                          TRACE_ERR_ARGS(l_err));
 
                 break;
             }
@@ -359,6 +324,7 @@ void check_hrmor_within_range (ATTR_PROC_MEM_TO_USE_type i_proc_mem_to_use,
 {
     errlHndl_t l_err {nullptr};
 
+    // TODO RTC 212966 - Support for topology id
     //extract group and chip id from PROC_MEM_TO_USE attribute
     uint8_t l_grp  {0};
     uint8_t l_chip {0};
@@ -375,8 +341,14 @@ void check_hrmor_within_range (ATTR_PROC_MEM_TO_USE_type i_proc_mem_to_use,
     TargetHandle_t l_procTgtMemUsed {nullptr};
     for (auto & l_proc : l_procs)
     {
-        auto l_proc_grp  = l_proc->getAttr<ATTR_FABRIC_GROUP_ID>();
-        auto l_proc_chip = l_proc->getAttr<ATTR_FABRIC_CHIP_ID>();
+        auto l_proc_topo = l_proc->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_ID>();
+        auto l_topo_mode = l_proc->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_MODE>();
+        MEMMAP::groupId_t l_proc_grp = 0;
+        MEMMAP::chipId_t l_proc_chip = 0;
+        MEMMAP::extractGroupAndChip(l_topo_mode,
+                                    l_proc_topo,
+                                    l_proc_grp,
+                                    l_proc_chip);
 
         if ((l_proc_grp == l_grp) && (l_proc_chip == l_chip))
         {
@@ -386,7 +358,7 @@ void check_hrmor_within_range (ATTR_PROC_MEM_TO_USE_type i_proc_mem_to_use,
     }
 
 
-    //if we find it, then we check that the hrmor in within
+    //if we find it, then we check that the hrmor is within
     //range of configured mem.
     //
     //Otherwise, we want to go down the sbe upate and TI path
@@ -415,7 +387,8 @@ void check_hrmor_within_range (ATTR_PROC_MEM_TO_USE_type i_proc_mem_to_use,
             "check_hrmor_within_range: sbe is downleveled - update required");
 
         // Rebuild SBE image and trigger reconfig loop
-        l_err = SBE::updateProcessorSbeSeeproms();
+        // TODO RTC 208838 -- P10 SBE Update
+        //l_err = SBE::updateProcessorSbeSeeproms();
         if( l_err )
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -439,11 +412,11 @@ void*    call_mss_attr_update( void *io_pArgs )
     IStepError l_StepError;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_attr_update entry");
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
 
     do
     {
-        bool l_isPhyp = TARGETING::is_phyp_load();
+        bool l_isPhyp = is_phyp_load();
         bool l_spEnabled = INITSERVICE::spBaseServicesEnabled();
 
         // Check the memory on master proc chip
@@ -457,11 +430,11 @@ void*    call_mss_attr_update( void *io_pArgs )
             if (l_err)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "ERROR 0x%.8X:  check_proc0_memory_config",
-                           l_err->reasonCode());
+                           "ERROR in check_proc0_memory_config. "
+                           TRACE_ERR_FMT,
+                           TRACE_ERR_ARGS(l_err));
 
-                // Ensure istep error created and has same plid as this error
-                l_StepError.addErrorDetails( l_err );
+                l_StepError.addErrorDetails(l_err);
                 errlCommit( l_err, HWPF_COMP_ID );
                 break;
             }
@@ -504,6 +477,9 @@ void*    call_mss_attr_update( void *io_pArgs )
                 break;
             }
 
+            // TODO RTC 212966 - Support for topology ID
+            // NOTE: ATTR_PROC_MEM_TO_USE contains group/chip id instead of
+            // topology id.
             auto l_proc_mem_to_use = l_mProc->getAttr<ATTR_PROC_MEM_TO_USE>();
             check_hrmor_within_range(l_proc_mem_to_use, l_StepError);
 
@@ -526,25 +502,25 @@ void*    call_mss_attr_update( void *io_pArgs )
             }
 
             // Need to handle some code upgrade scenarios where the
-            //  Nimbus-style swap values aren't getting cleared out
-            //  correctly.  We will force the EFF attributes to match.
+            // swap values aren't getting updated on the SP.
+            // We will force the EFF attributes to match.
             bool l_mismatch = false;
-            TARGETING::TargetHandleList l_procTargetList;
+            TargetHandleList l_procTargetList;
             getAllChips(l_procTargetList, TYPE_PROC);
             for (const auto & l_proc: l_procTargetList)
             {
-                auto l_chipid =
-                  l_proc->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
-                auto l_effid =
-                  l_proc->getAttr<TARGETING::ATTR_PROC_EFF_FABRIC_CHIP_ID>();
-                if( l_chipid != l_effid )
+                auto l_topoId =
+                  l_proc->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_ID>();
+                auto l_effTopoId =
+                  l_proc->getAttr<ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID>();
+                if( l_topoId != l_effTopoId )
                 {
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              "Mismatch on proc %.8X : chipid=%.8X, effid=%.8X",
-                              get_huid(l_proc), l_chipid, l_effid);
+                              "Mismatch on proc %.8X : topoId=%.8X, effTopoId=%.8X",
+                              get_huid(l_proc), l_topoId, l_effTopoId);
                     l_mismatch = true;
-                    l_proc->setAttr<TARGETING::ATTR_PROC_EFF_FABRIC_CHIP_ID>
-                      (l_chipid);
+                    l_proc->setAttr<ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID>
+                      (l_topoId);
                 }
             }
 
@@ -553,7 +529,8 @@ void*    call_mss_attr_update( void *io_pArgs )
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                           "Forcing SBE update to fix old memory swap");
-                l_err = SBE::updateProcessorSbeSeeproms();
+                // TODO RTC 208838 -- P10 SBE Update
+                //l_err = SBE::updateProcessorSbeSeeproms();
                 if( l_err )
                 {
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -566,31 +543,32 @@ void*    call_mss_attr_update( void *io_pArgs )
             }
         }
 
-/* FIXME RTC:210975
-        // Get all functional MCS chiplets
-        TARGETING::TargetHandleList l_mcsTargetList;
-        getAllChiplets(l_mcsTargetList, TYPE_MCS);
+        // Get all functional MI chiplets and call p10_mss_attr_update
+        // on each
+        TargetHandleList l_miTargetList;
+        getAllChiplets(l_miTargetList, TYPE_MI);
 
-        for (const auto & l_mcsTarget: l_mcsTargetList)
+        for (const auto & l_miTarget: l_miTargetList)
         {
-            const fapi2::Target<fapi2::TARGET_TYPE_MCS>
-                l_fapi2_mcs_target(l_mcsTarget);
+            const fapi2::Target<fapi2::TARGET_TYPE_MI>
+                l_fapi2_mi_target(l_miTarget);
 
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "Running p9_mss_attr_update HWP on "
-                "MCS target HUID %.8X", TARGETING::get_huid(l_mcsTarget));
-            FAPI_INVOKE_HWP(l_err, p9_mss_attr_update, l_fapi2_mcs_target);
+                "Running p10_mss_attr_update HWP on "
+                "MI target HUID %.8X", get_huid(l_miTarget));
+            FAPI_INVOKE_HWP(l_err, p10_mss_attr_update, l_fapi2_mi_target);
             if(l_err)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR 0x%.8X : p9_mss_attr_update HWP returned "
-                    "error for HUID %.8x",
-                    l_err->reasonCode(), TARGETING::get_huid(l_mcsTarget));
+                    "ERROR in p10_mss_attr_update HWP "
+                    "for HUID %.8x. "
+                    TRACE_ERR_FMT,
+                    get_huid(l_miTarget),
+                    TRACE_ERR_ARGS(l_err));
                 l_StepError.addErrorDetails(l_err);
                 errlCommit( l_err, HWPF_COMP_ID );
             }
         }
-*/
     } while (0);
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_attr_update exit" );
 
