@@ -111,6 +111,7 @@ PRDR_ERROR_SIGNATURE(EsTmpWarnLow,  0xffff0098, "", "NVDIMM Energy Source Temper
 PRDR_ERROR_SIGNATURE(BelowWarnTh,   0xffff0099, "", "NVDIMM Below Warning Threshold");
 PRDR_ERROR_SIGNATURE(IntNvdimmErr,  0xffff009A, "", "NVDIMM Intermittent error");
 PRDR_ERROR_SIGNATURE(NotifStatErr,  0xffff009B, "", "NVDIMM Set Event Notification Status Error");
+PRDR_ERROR_SIGNATURE(FirEvntGone,   0xffff009C, "", "NVDIMM Event Triggering the FIR no longer present");
 
 #endif // __prdfMemExtraSig_H
 
