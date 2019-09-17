@@ -112,13 +112,9 @@ void p10_build_smp_append_ffdc(
     }
 
     // extract FFDC data
-    for (auto n_iter = i_smp.groups.begin();
-         n_iter != i_smp.groups.end();
-         n_iter++)
+    for (auto n_iter = i_smp.groups.begin(); n_iter != i_smp.groups.end(); n_iter++)
     {
-        for (auto p_iter = n_iter->second.chips.begin();
-             p_iter != n_iter->second.chips.end();
-             p_iter++)
+        for (auto p_iter = n_iter->second.chips.begin(); p_iter != n_iter->second.chips.end(); p_iter++)
         {
             // mark valid
             (void) l_chip_data_valid.set<uint8_t>(l_idx, 0x1);
@@ -255,13 +251,9 @@ fapi2::ReturnCode p10_build_smp_sequence_adu(
     // loop through all chips, set switch operation
     FAPI_DBG("Setting switch controls");
 
-    for (auto g_iter = i_smp.groups.begin();
-         g_iter != i_smp.groups.end();
-         ++g_iter)
+    for (auto g_iter = i_smp.groups.begin(); g_iter != i_smp.groups.end(); ++g_iter)
     {
-        for (auto p_iter = g_iter->second.chips.begin();
-             p_iter != g_iter->second.chips.end();
-             ++p_iter)
+        for (auto p_iter = g_iter->second.chips.begin(); p_iter != g_iter->second.chips.end(); ++p_iter)
         {
             // Condition for hotplug switch operation
             // all chips which were not quiesced prior to switch AB will
@@ -279,13 +271,9 @@ fapi2::ReturnCode p10_build_smp_sequence_adu(
     // perform action on specified chips
     FAPI_DBG("Performing action = %d", i_action);
 
-    for (auto g_iter = i_smp.groups.begin();
-         g_iter != i_smp.groups.end();
-         ++g_iter)
+    for (auto g_iter = i_smp.groups.begin(); g_iter != i_smp.groups.end(); ++g_iter)
     {
-        for (auto p_iter = g_iter->second.chips.begin();
-             p_iter != g_iter->second.chips.end();
-             ++p_iter)
+        for (auto p_iter = g_iter->second.chips.begin(); p_iter != g_iter->second.chips.end(); ++p_iter)
         {
             if (((i_action == QUIESCE) && (p_iter->second.issue_quiesce_next)) ||
                 ((i_action == SWITCH_AB) && (p_iter->second.master_chip_sys_next)))
@@ -313,13 +301,9 @@ fapi2::ReturnCode p10_build_smp_sequence_adu(
     // loop through all chips, reset switch controls
     FAPI_DBG("Operation complete, resetting switch controls");
 
-    for (auto g_iter = i_smp.groups.begin();
-         g_iter != i_smp.groups.end();
-         ++g_iter)
+    for (auto g_iter = i_smp.groups.begin(); g_iter != i_smp.groups.end(); ++g_iter)
     {
-        for (auto p_iter = g_iter->second.chips.begin();
-             p_iter != g_iter->second.chips.end();
-             ++p_iter)
+        for (auto p_iter = g_iter->second.chips.begin(); p_iter != g_iter->second.chips.end(); ++p_iter)
         {
             // reset switch controls
             if (i_action != QUIESCE)
