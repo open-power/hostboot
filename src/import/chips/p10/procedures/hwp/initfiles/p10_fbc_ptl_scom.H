@@ -32,15 +32,13 @@
 
 
 typedef fapi2::ReturnCode (*p10_fbc_ptl_scom_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_PAUC>&,
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&, const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>&,
-        const fapi2::Target<fapi2::TARGET_TYPE_IOHS>&);
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&, const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>&);
 
 extern "C"
 {
 
     fapi2::ReturnCode p10_fbc_ptl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PAUC>& TGT0,
-                                       const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT2,
-                                       const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& TGT3);
+                                       const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT2);
 
 }
 

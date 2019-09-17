@@ -587,7 +587,7 @@ fapi2::ReturnCode p10_smp_link_firs(
     }
 
     // Verify that the IOHS target is configured as an SMP
-    if(i_iohs_target.isFunctional())
+    if(i_iohs_target.isFunctional() && (i_action != action_t::INACTIVE))
     {
         FAPI_TRY(GET_PB_COM_SCOM_ES3_STATION_HP_MODE2_CURR(l_proc_target, l_pb_hp_mode2),
                  "Error from getScom (PB_COM_SCOM_ES3_STATION_HP_MODE2_CURR)");
