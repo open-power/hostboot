@@ -33,9 +33,10 @@
 //------------------------------------------------------------------------------
 
 #include "p10_clock_test.H"
-
-#include "p9_perv_scom_addresses.H"
-#include "p9_perv_scom_addresses_fld.H"
+#include "p10_scom_perv_0.H"
+#include "p10_scom_perv_2.H"
+#include "p10_scom_perv_d.H"
+#include "p10_scom_perv_f.H"
 
 enum P10_CLOCK_TEST_Private_Constants
 {
@@ -51,19 +52,22 @@ static fapi2::ReturnCode p10_clock_test_latches(
 fapi2::ReturnCode p10_clock_test(const
                                  fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip)
 {
+    using namespace scomt;
+    using namespace scomt::perv;
+
     fapi2::buffer<uint32_t> l_data32;
 
     FAPI_INF("p10_clock_test: Entering ...");
 
     FAPI_DBG("unfence input wires to register 2810");
-    FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_ROOT_CTRL0_FSI, l_data32));
-    l_data32.clearBit<PERV_ROOT_CTRL0_FENCE0_DC>();
-    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_ROOT_CTRL0_FSI, l_data32));
+    FAPI_TRY(fapi2::getCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL0_FSI, l_data32));
+    l_data32.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL0_CFAM_PROTECTION_0_DC>();
+    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL0_FSI, l_data32));
 
     FAPI_DBG("unfence input wires to register 2910");
-    FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_ROOT_CTRL0_COPY_FSI, l_data32));
-    l_data32.clearBit<PERV_ROOT_CTRL0_FENCE0_DC>();
-    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_ROOT_CTRL0_COPY_FSI, l_data32));
+    FAPI_TRY(fapi2::getCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL0_COPY_FSI, l_data32));
+    l_data32.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL0_CFAM_PROTECTION_0_DC>();
+    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL0_COPY_FSI, l_data32));
 
 
     for(int i = 0; i < POLL_COUNT; i++)
@@ -91,6 +95,9 @@ static fapi2::ReturnCode p10_clock_test_latches(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
     bool set_rcs_clock_test_in)
 {
+    using namespace scomt;
+    using namespace scomt::perv;
+
     fapi2::buffer<uint32_t> l_data32;
     uint8_t l_cp_refclck_select;
     bool check_clockA;
@@ -101,13 +108,14 @@ static fapi2::ReturnCode p10_clock_test_latches(
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CP_REFCLOCK_SELECT, i_target_chip, l_cp_refclck_select),
              "Error from FAPI_ATTR_GET (ATTR_CP_REFCLOCK_SELECT)");
 
-    l_data32.flush<0>().setBit<3>();
+    l_data32.flush<0>().setBit<FSXCOMP_FSXLOG_ROOT_CTRL5_CLK_TEST_IN_DC>();
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip,
-                                    set_rcs_clock_test_in ? PERV_ROOT_CTRL5_SET_FSI : PERV_ROOT_CTRL5_CLEAR_FSI, l_data32));
+                                    set_rcs_clock_test_in ? FSXCOMP_FSXLOG_ROOT_CTRL5_SET_FSI : FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_FSI,
+                                    l_data32));
 
     fapi2::delay(HW_NS_DELAY, SIM_CYCLE_DELAY);
 
-    FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_SNS1LTH_FSI,
+    FAPI_TRY(fapi2::getCfamRegister(i_target_chip, FSXCOMP_FSXLOG_SNS1LTH_FSI,
                                     l_data32));
 
     check_clockA = set_rcs_clock_test_in ? (l_data32.getBit<4>() == 1) : (l_data32.getBit<4>() == 0) ;
