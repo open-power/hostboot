@@ -23,6 +23,4 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p10_setup_ref_clock
-$(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/common/include)
-$(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/common/include)
 $(call BUILD_PROCEDURE)
