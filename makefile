@@ -92,6 +92,7 @@ cppcheck:
 	${BUILDCPPCHECK}
 	export CXX_CHECK="$(CPPCHECK) $(filter -D%, $(CXXFLAGS)) $(INCFLAGS)" && \
 	export C_CHECK="$(CPPCHECK) $(filter -D%, $(CFLAGS)) $(INCFLAGS)" && \
+	export DOCPPCHECK=1 && \
 	${MAKE}
 
 .PHONY: gcda_clean
