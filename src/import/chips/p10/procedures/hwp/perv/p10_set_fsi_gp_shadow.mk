@@ -23,6 +23,4 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p10_set_fsi_gp_shadow
-$(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/common/include)
-$(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/common/include)
 $(call BUILD_PROCEDURE)

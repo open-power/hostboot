@@ -35,21 +35,35 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <p10_set_fsi_gp_shadow.H>
-#include <p9_perv_scom_addresses.H>
+#include "p10_scom_perv_0.H"
+#include "p10_scom_perv_1.H"
+#include "p10_scom_perv_2.H"
+#include "p10_scom_perv_3.H"
+#include "p10_scom_perv_4.H"
+#include "p10_scom_perv_5.H"
+#include "p10_scom_perv_6.H"
+#include "p10_scom_perv_8.H"
+#include "p10_scom_perv_9.H"
+#include "p10_scom_perv_c.H"
+#include "p10_scom_perv_d.H"
+#include "p10_scom_perv_e.H"
+
+using namespace scomt;
+using namespace scomt::perv;
 
 struct
 {
     uint32_t reg_addr, reg_copy_addr, value;
 } P10_SET_FSI_GP_SHADOW_GPREG_INITVALUES[] =
 {
-    { PERV_ROOT_CTRL0_FSI, PERV_ROOT_CTRL0_COPY_FSI, 0x80FF6003},
-    { PERV_ROOT_CTRL1_FSI, PERV_ROOT_CTRL1_COPY_FSI, 0x00180000},
-    { PERV_ROOT_CTRL2_FSI, PERV_ROOT_CTRL2_COPY_FSI, 0x04000000},
-    { PERV_ROOT_CTRL3_FSI, PERV_ROOT_CTRL3_COPY_FSI, 0xEEEEEEFF},
-    { PERV_ROOT_CTRL7_FSI, PERV_ROOT_CTRL7_COPY_FSI, 0x00000000},
-    { PERV_ROOT_CTRL8_FSI, PERV_ROOT_CTRL8_COPY_FSI, 0x00000000},
-    { PERV_PERV_CTRL0_FSI, PERV_PERV_CTRL0_COPY_FSI, 0x7C022020},
-    { PERV_PERV_CTRL1_FSI, PERV_PERV_CTRL1_COPY_FSI, 0x60000000}
+    { FSXCOMP_FSXLOG_ROOT_CTRL0_FSI, FSXCOMP_FSXLOG_ROOT_CTRL0_COPY_FSI, 0x80FF6003},
+    { FSXCOMP_FSXLOG_ROOT_CTRL1_FSI, FSXCOMP_FSXLOG_ROOT_CTRL1_COPY_FSI, 0x00180000},
+    { FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_COPY_FSI, 0x04000000},
+    { FSXCOMP_FSXLOG_ROOT_CTRL3_FSI, FSXCOMP_FSXLOG_ROOT_CTRL3_COPY_FSI, 0xEEEEEEFF},
+    { FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_COPY_FSI, 0x00000000},
+    { FSXCOMP_FSXLOG_ROOT_CTRL8_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_COPY_FSI, 0x00000000},
+    { FSXCOMP_FSXLOG_PERV_CTRL0_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_COPY_FSI, 0x7C022020},
+    { FSXCOMP_FSXLOG_PERV_CTRL1_FSI, FSXCOMP_FSXLOG_PERV_CTRL1_COPY_FSI, 0x60000000}
 };
 
 //------------------------------------------------------------------------------
