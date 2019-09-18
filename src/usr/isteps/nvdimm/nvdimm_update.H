@@ -229,6 +229,15 @@ class NvdimmInstalledImage
     }
 
     /**
+     * @brief Accessor to grab the amount of retries it took to write regions
+     * @return Cumulative total region write retries
+     */
+    uint8_t getRegionWriteRetries(void)
+    {
+        return iv_region_write_retries;
+    }
+
+    /**
      * @brief Update the current NV Controller
      * @param Update using this image
      * @return error pointer if failure to update, else nullptr
@@ -257,6 +266,10 @@ class NvdimmInstalledImage
 
       // set to true when doing update
       bool iv_fw_update_mode_enabled;
+
+      // retry attempts for all regions
+      uint8_t iv_region_write_retries;
+
 
       // Helper functions for updating the installed lid
       /**

@@ -146,8 +146,10 @@ typedef union {
 } nvdimm_cmd_status0_t;
 
 // A code update block is composed of this many bytes
-const uint8_t BYTES_PER_BLOCK = 32;
+constexpr uint8_t BYTES_PER_BLOCK = 32;
 
+// Maximum allowed region write retries
+constexpr uint8_t MAX_REGION_WRITE_RETRY_ATTEMPTS = 3;
 
 ///////////////////////////////////////////////////////////////////////////////
 // NVDIMM LID Image
@@ -267,7 +269,8 @@ NvdimmInstalledImage::NvdimmInstalledImage(TARGETING::Target * i_nvDimm) :
     iv_manufacturer_id(INVALID_ID), iv_product_id(INVALID_ID),
     iv_timeout(INVALID_TIMEOUT),
     iv_max_blocks_per_region(INVALID_REGION_BLOCK_SIZE),
-    iv_fw_update_mode_enabled(false)
+    iv_fw_update_mode_enabled(false),
+    iv_region_write_retries(0)
 {
     // initialize to invalid values
 }
@@ -819,6 +822,7 @@ errlHndl_t NvdimmInstalledImage::updateImageData(NvdimmLidImage * i_lidImage)
             break;
         }
 
+        uint8_t l_region_write_retries = 0; // local region write retry count
         uint16_t region = 0;
         while (region < fw_img_total_regions)
         {
@@ -924,15 +928,17 @@ errlHndl_t NvdimmInstalledImage::updateImageData(NvdimmLidImage * i_lidImage)
             if (hostCksm != nvCksm)
             {
                 TRACFCOMP(g_trac_nvdimm_upd, ERR_MRK"updateImageData: "
-                    "Region %d of NVDIMM 0x%.8X: data checksums mismatch "
+                    "Region %d out of %d on NVDIMM 0x%.8X: data checksums mismatch "
                     "(calc host: 0x%X and nv: 0x%X)",
-                    region, TARGETING::get_huid(iv_dimm), hostCksm, nvCksm);
+                    region, fw_img_total_regions,
+                    TARGETING::get_huid(iv_dimm), hostCksm, nvCksm);
 
                 /*@
                  *@errortype
                  *@moduleid         UPDATE_IMAGE_DATA
                  *@reasoncode       NVDIMM_CHECKSUM_ERROR
-                 *@userdata1        NVDIMM Target Huid
+                 *@userdata1[0:31]  NVDIMM Target Huid
+                 *@userdata1[32:63] Retry count for this region
                  *@userdata2[0:15]  Host checksum calculated
                  *@userdata2[16:31] NV checksum returned
                  *@userdata2[32:47] size of data for checksum
@@ -944,12 +950,13 @@ errlHndl_t NvdimmInstalledImage::updateImageData(NvdimmLidImage * i_lidImage)
                                        ERRORLOG::ERRL_SEV_PREDICTIVE,
                                        UPDATE_IMAGE_DATA,
                                        NVDIMM_CHECKSUM_ERROR,
-                                       TARGETING::get_huid(iv_dimm),
+                                       TWO_UINT32_TO_UINT64(
+                                          TARGETING::get_huid(iv_dimm),
+                                          l_region_write_retries),
                                        FOUR_UINT16_TO_UINT64(
                                           hostCksm, nvCksm,
                                           region, data_len),
                                        ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
-                l_err->collectTrace( NVDIMM_COMP_NAME, 256 );
                 nvdimmAddVendorLog(iv_dimm, l_err);
                 l_err->addPartCallout( iv_dimm,
                                        HWAS::NV_CONTROLLER_PART_TYPE,
@@ -959,6 +966,28 @@ errlHndl_t NvdimmInstalledImage::updateImageData(NvdimmLidImage * i_lidImage)
                 nvdimmAddPage4Regs(iv_dimm,l_err);
                 nvdimmAddUpdateRegs(iv_dimm,l_err);
 
+                // Under the total retry attempts per region?
+                if (l_region_write_retries < MAX_REGION_WRITE_RETRY_ATTEMPTS)
+                {
+                    TRACFCOMP(g_trac_nvdimm_upd, ERR_MRK"updateImageData: "
+                      "Region %d on NVDIMM 0x%.8X failed, retry %d",
+                      region, TARGETING::get_huid(iv_dimm),l_region_write_retries);
+                    l_err->collectTrace(NVDIMM_UPD, 512);
+
+                    // Change PREDICTIVE to INFORMATIONAL as this might be recoverable
+                    l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+
+                    // Commit this log and retry region write
+                    ERRORLOG::errlCommit(l_err, NVDIMM_COMP_ID);
+                    l_err = nullptr;
+
+                    // Update total for this region
+                    l_region_write_retries++;
+
+                    // update total retries for entire NVDIMM
+                    iv_region_write_retries++;
+                    continue;
+                }
                 break;
             }
 
@@ -1997,7 +2026,8 @@ bool NvdimmsUpdate::runUpdateUsingLid(NvdimmLidImage * i_lidImage,
                  *@errortype        INFORMATIONAL
                  *@reasoncode       NVDIMM_UPDATE_COMPLETE
                  *@moduleid         NVDIMM_RUN_UPDATE_USING_LID
-                 *@userdata1        NVDIMM Target Huid
+                 *@userdata1[0:31]  NVDIMM Target Huid
+                 *@userdata1[32:63] Total region write retries
                  *@userdata2[0:15]  Previous level
                  *@userdata2[16:31] Current updated level
                  *@userdata2[32:63] Installed type (manufacturer and product)
@@ -2005,14 +2035,16 @@ bool NvdimmsUpdate::runUpdateUsingLid(NvdimmLidImage * i_lidImage,
                  *@custdesc         NVDIMM was successfully updated
                  */
                 l_err = new ERRORLOG::ErrlEntry(
-                                       ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                       NVDIMM_RUN_UPDATE_USING_LID,
-                                       NVDIMM_UPDATE_COMPLETE,
-                                       l_nvdimm_huid,
-                                       TWO_UINT16_ONE_UINT32_TO_UINT64(
-                                       l_oldVersion, curVersion,
-                                       l_installed_type),
-                                       ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+                             ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                             NVDIMM_RUN_UPDATE_USING_LID,
+                             NVDIMM_UPDATE_COMPLETE,
+                             TWO_UINT32_TO_UINT64(
+                               l_nvdimm_huid,
+                               pInstalledImage->getRegionWriteRetries()),
+                             TWO_UINT16_ONE_UINT32_TO_UINT64(
+                               l_oldVersion, curVersion,
+                               l_installed_type),
+                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
                 l_err->collectTrace(NVDIMM_UPD, 512);
                 ERRORLOG::errlCommit(l_err, NVDIMM_COMP_ID);
             }
