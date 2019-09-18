@@ -35,9 +35,17 @@
 
 #include <return_code.H>
 #include <common_ringId.H>
+#include <plat_types.H>
 
 namespace fapi2
 {
+
+/// EKB code requires this to be defined by platform code.
+/// This allows code to use the is_platform<>() template function
+/// to replace any #ifdefs that might have been used to conditionally
+/// compile platform specific code.  See plat_types.H for a list
+/// of possible platforms.
+static const PlatformType PLATFORM = PLAT_HOSTBOOT;
 
 ///
 ///  @brief This function answers the question, is scand tracing turned on?
