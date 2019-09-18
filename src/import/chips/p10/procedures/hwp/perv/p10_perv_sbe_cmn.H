@@ -67,7 +67,7 @@ struct hang_pulse_t
     uint16_t stop_on_xstop : 1; ///< Hang pulse should stop when a checkstop comes in
     uint16_t               : 2;
     uint16_t last          : 1; ///< Set to 1 for the last entry in an array of this struct
-} __attribute__((packed));
+};
 
 enum mc_hw_group_t : uint8_t
 {

@@ -33,12 +33,17 @@
 //------------------------------------------------------------------------------
 //
 #include <p10_perv_sbe_cmn.H>
+#include <p10_scom_perv_0.H>
+#include <p10_scom_perv_2.H>
 #include <p10_scom_perv_3.H>
-#include <p9_const_common.H>
-
-#include <p9_perv_scom_addresses.H>
-#include <p9_perv_scom_addresses_fld.H>
-#include <p9_quad_scom_addresses_fld.H>
+#include <p10_scom_perv_4.H>
+#include <p10_scom_perv_6.H>
+#include <p10_scom_perv_7.H>
+#include <p10_scom_perv_8.H>
+#include <p10_scom_perv_a.H>
+#include <p10_scom_perv_c.H>
+#include <p10_scom_perv_e.H>
+#include <p10_scom_perv_f.H>
 #include <multicast_group_defs.H>
 #include <target_filters.H>
 #include <p10_ringId.H>
@@ -92,6 +97,10 @@ fapi2::ReturnCode p10_perv_sbe_cmn_array_init_module(const
         const fapi2::buffer<uint64_t> i_loop_counter,
         const fapi2::buffer<uint64_t> i_start_abist_match_value)
 {
+
+    using namespace scomt;
+    using namespace scomt::perv;
+
     fapi2::buffer<uint16_t> l_scan_count;
     fapi2::buffer<uint16_t> l_misr_a_value;
     fapi2::buffer<uint16_t> l_misr_b_value;
@@ -110,16 +119,16 @@ fapi2::ReturnCode p10_perv_sbe_cmn_array_init_module(const
     FAPI_DBG("Setup ABISTMUX_SEL");
     //Setting CPLT_CTRL0 register value
     l_data64.flush<0>()
-    .setBit<PERV_1_CPLT_CTRL0_CTRL_CC_ABSTCLK_MUXSEL_DC>();
-    FAPI_TRY(fapi2::putScom(i_mcast_target, PERV_CPLT_CTRL0_OR, l_data64));
+    .setBit<CPLT_CTRL0_CTRL_CC_ABSTCLK_MUXSEL_DC>();
+    FAPI_TRY(fapi2::putScom(i_mcast_target, CPLT_CTRL0_WO_OR, l_data64));
 
     FAPI_DBG("setup ABIST modes , BIST REGIONS:%#018lX", i_regions);
     //Setting BIST register value
     l_data64.flush<0>()
     .clearBit<0>()
-    .setBit<PERV_1_BIST_TC_SRAM_ABIST_MODE_DC>()
+    .setBit<BIST_TC_SRAM_ABIST_MODE_DC>()
     .insertFromRight<4, 15>(l_regions);
-    FAPI_TRY(fapi2::putScom(i_mcast_target, PERV_BIST, l_data64));
+    FAPI_TRY(fapi2::putScom(i_mcast_target, BIST, l_data64));
     FAPI_DBG("l_data64 value:%#018lX", l_data64);
 
     FAPI_DBG("Setup all Clock Domains and Clock Types");
@@ -127,13 +136,13 @@ fapi2::ReturnCode p10_perv_sbe_cmn_array_init_module(const
     l_data64.flush<0>()
     .insertFromRight<4, 15>(l_regions)
     .setBit<48, 3>();
-    FAPI_TRY(fapi2::putScom(i_mcast_target, PERV_CLK_REGION, l_data64));
+    FAPI_TRY(fapi2::putScom(i_mcast_target, CLK_REGION, l_data64));
 
     FAPI_DBG("Drop Region fences");
     //Setting CPLT_CTRL1 register value
     l_data64.flush<0>()
     .insertFromRight<4, 15>(l_regions);
-    FAPI_TRY(fapi2::putScom(i_mcast_target, PERV_CPLT_CTRL1_CLEAR, l_data64));
+    FAPI_TRY(fapi2::putScom(i_mcast_target, CPLT_CTRL1_WO_CLEAR, l_data64));
 
     i_start_abist_match_value.extractToRight<0, 12>(l_scan_count);
     i_start_abist_match_value.extractToRight<12, 12>(l_misr_a_value);
@@ -141,35 +150,30 @@ fapi2::ReturnCode p10_perv_sbe_cmn_array_init_module(const
 
     FAPI_DBG("Setup IDLE count");
     //Setting OPCG_REG1 register value
-    FAPI_TRY(fapi2::getScom(i_mcast_target, PERV_OPCG_REG1, l_data64));
-    l_data64.insertFromRight<PERV_1_OPCG_REG1_SCAN_COUNT, PERV_1_OPCG_REG1_SCAN_COUNT_LEN>
-    (l_scan_count);
-    l_data64.insertFromRight<PERV_1_OPCG_REG1_MISR_A_VAL, PERV_1_OPCG_REG1_MISR_A_VAL_LEN>
-    (l_misr_a_value);
-    l_data64.insertFromRight<PERV_1_OPCG_REG1_MISR_B_VAL, PERV_1_OPCG_REG1_MISR_B_VAL_LEN>
-    (l_misr_b_value);
-    FAPI_TRY(fapi2::putScom(i_mcast_target, PERV_OPCG_REG1, l_data64));
+    FAPI_TRY(fapi2::getScom(i_mcast_target, OPCG_REG1, l_data64));
+    l_data64.insertFromRight<OPCG_REG1_SCAN_COUNT, OPCG_REG1_SCAN_COUNT_LEN>(l_scan_count);
+    l_data64.insertFromRight<OPCG_REG1_MISR_A_VAL, OPCG_REG1_MISR_A_VAL_LEN>(l_misr_a_value);
+    l_data64.insertFromRight<OPCG_REG1_MISR_B_VAL, OPCG_REG1_MISR_B_VAL_LEN>(l_misr_b_value);
+    FAPI_TRY(fapi2::putScom(i_mcast_target, OPCG_REG1, l_data64));
 
     FAPI_DBG("Setup: loopcount , OPCG engine start ABIST, run-N mode, OPCG Go");
     //Setting OPCG_REG0 register value
     l_data64.flush<0>()
-    .setBit<PERV_1_OPCG_REG0_RUNN_MODE>()
-    .setBit<14>()   //OPCG_REG0.OPCG_STARTS_BIST = 1
-    .insertFromRight<PERV_1_OPCG_REG0_LOOP_COUNT, PERV_1_OPCG_REG0_LOOP_COUNT_LEN>((
-                uint64_t)(i_loop_counter))
-    .setBit<1>();  //OPCG_REG0.OPCG_GO = 1
-    FAPI_TRY(fapi2::putScom(i_mcast_target, PERV_OPCG_REG0, l_data64));
+    .setBit<OPCG_REG0_RUNN_MODE>()
+    .setBit<OPCG_REG0_OPCG_STARTS_BIST>()
+    .insertFromRight<OPCG_REG0_LOOP_COUNT, OPCG_REG0_LOOP_COUNT_LEN>((uint64_t)(i_loop_counter))
+    .setBit<OPCG_REG0_OPCG_GO>();
+    FAPI_TRY(fapi2::putScom(i_mcast_target, OPCG_REG0, l_data64));
 
     FAPI_DBG("Poll OPCG done bit to check for run-N completeness");
     l_timeout = P10_OPCG_DONE_ARRAYINIT_POLL_COUNT;
 
-    //UNTIL CPLT_STAT0.CC_CTRL_OPCG_DONE_DC == 1
     while (l_timeout != 0)
     {
         //Getting CPLT_STAT0 register value
-        FAPI_TRY(fapi2::getScom(i_mcast_target, PERV_CPLT_STAT0, l_data64));
+        FAPI_TRY(fapi2::getScom(i_mcast_target, CPLT_STAT0, l_data64));
         bool l_poll_data =
-            l_data64.getBit<PERV_1_CPLT_STAT0_CC_CTRL_OPCG_DONE_DC>();  //bool l_poll_data = CPLT_STAT0.CC_CTRL_OPCG_DONE_DC
+            l_data64.getBit<CPLT_STAT0_CC_CTRL_OPCG_DONE_DC>();
 
         if (l_poll_data == 1)
         {
@@ -191,10 +195,10 @@ fapi2::ReturnCode p10_perv_sbe_cmn_array_init_module(const
                 "ERROR:OPCG DONE BIT NOT SET");
 
     //Getting CPLT_STAT0 register value
-    FAPI_TRY(fapi2::getScom(i_mcast_target, PERV_CPLT_STAT0, l_read_reg));
+    FAPI_TRY(fapi2::getScom(i_mcast_target, CPLT_STAT0, l_read_reg));
 
     FAPI_DBG("Checking sram abist done");
-    FAPI_ASSERT(l_read_reg.getBit<0>() == 1,
+    FAPI_ASSERT(l_read_reg.getBit<CPLT_STAT0_ABIST_DONE_DC>() == 1,
                 fapi2::SRAM_ABIST_DONE_BIT_ERR()
                 .set_PERV_CPLT_STAT(l_read_reg)
                 .set_SELECT_SRAM(true)
@@ -203,21 +207,21 @@ fapi2::ReturnCode p10_perv_sbe_cmn_array_init_module(const
 
     FAPI_DBG("Clear OPCG Reg0");
     //Setting OPCG_REG0 register value
-    FAPI_TRY(fapi2::putScom(i_mcast_target, PERV_OPCG_REG0, 0));
+    FAPI_TRY(fapi2::putScom(i_mcast_target, OPCG_REG0, 0));
 
     FAPI_DBG("clear all clock REGIONS and type");
     //Setting CLK_REGION register value
-    FAPI_TRY(fapi2::putScom(i_mcast_target, PERV_CLK_REGION,  0));
+    FAPI_TRY(fapi2::putScom(i_mcast_target, CLK_REGION,  0));
 
     FAPI_DBG("clear ABISTCLK_MUXSEL");
     //Setting CPLT_CTRL0 register value
     l_data64.flush<0>();
-    l_data64.setBit<PERV_1_CPLT_CTRL0_CTRL_CC_ABSTCLK_MUXSEL_DC>();
-    FAPI_TRY(fapi2::putScom(i_mcast_target, PERV_CPLT_CTRL0_CLEAR, l_data64));
+    l_data64.setBit<CPLT_CTRL0_CTRL_CC_ABSTCLK_MUXSEL_DC>();
+    FAPI_TRY(fapi2::putScom(i_mcast_target, CPLT_CTRL0_WO_CLEAR, l_data64));
 
     FAPI_DBG("clear BIST REGISTER");
     //Setting BIST register value
-    FAPI_TRY(fapi2::putScom(i_mcast_target, PERV_BIST, 0));
+    FAPI_TRY(fapi2::putScom(i_mcast_target, BIST, 0));
 
     FAPI_INF("p10_perv_sbe_cmn_array_init_module: Exiting ...");
 
@@ -245,6 +249,9 @@ fapi2::ReturnCode p10_perv_sbe_cmn_scan0_module(const
         const fapi2::buffer<uint16_t> i_regions,
         const fapi2::buffer<uint16_t> i_scan_types)
 {
+    using namespace scomt;
+    using namespace scomt::perv;
+
     fapi2::buffer<uint16_t> l_regions;
     fapi2::buffer<uint16_t> l_scan_types;
     fapi2::buffer<uint64_t> l_data64;
@@ -260,28 +267,28 @@ fapi2::ReturnCode p10_perv_sbe_cmn_scan0_module(const
     FAPI_DBG("Raise region fences for all regions");
     //Setting CPLT_CTRL1 register value
     l_data64.insertFromRight<4, 15>(l_regions);
-    FAPI_TRY(fapi2::putScom(i_mcast_target, PERV_CPLT_CTRL1_OR, l_data64));
+    FAPI_TRY(fapi2::putScom(i_mcast_target, CPLT_CTRL1_WO_OR, l_data64));
 
     FAPI_DBG("Setup all Clock Domains and Clock Types");
     //Setting CLK_REGION register value
     l_data64.flush<0>()
     .insertFromRight<4, 15>(l_regions)
     .setBit<48, 3>();
-    FAPI_TRY(fapi2::putScom(i_mcast_target, PERV_CLK_REGION, l_data64));
+    FAPI_TRY(fapi2::putScom(i_mcast_target, CLK_REGION, l_data64));
 
     FAPI_DBG("Write scan select register");
     //Setting SCAN_REGION_TYPE register value
     l_data64.flush<0>()
     .insertFromRight<4, 15>(l_regions)
     .insertFromRight<48, 12>(l_scan_types);
-    FAPI_TRY(fapi2::putScom(i_mcast_target, PERV_SCAN_REGION_TYPE, l_data64));
+    FAPI_TRY(fapi2::putScom(i_mcast_target, SCAN_REGION_TYPE, l_data64));
 
     FAPI_DBG("set OPCG_REG0 register bit 0='0' and Trigger Scan0");
     //Setting OPCG_REG0 register value
     l_data64.flush<0>()
-    .clearBit<PERV_1_OPCG_REG0_RUNN_MODE>()
-    .setBit<PERV_1_OPCG_REG0_RUN_SCAN0>();
-    FAPI_TRY(fapi2::putScom(i_mcast_target, PERV_OPCG_REG0, l_data64));
+    .clearBit<OPCG_REG0_RUNN_MODE>()
+    .setBit<OPCG_REG0_RUN_SCAN0>();
+    FAPI_TRY(fapi2::putScom(i_mcast_target, OPCG_REG0, l_data64));
 
     FAPI_DBG("Poll OPCG done bit to check for run-N completeness");
     l_timeout = P10_OPCG_DONE_SCAN0_POLL_COUNT;
@@ -290,9 +297,9 @@ fapi2::ReturnCode p10_perv_sbe_cmn_scan0_module(const
     while (l_timeout != 0)
     {
         //Getting CPLT_STAT0 register value
-        FAPI_TRY(fapi2::getScom(i_mcast_target, PERV_CPLT_STAT0, l_data64));
+        FAPI_TRY(fapi2::getScom(i_mcast_target, CPLT_STAT0, l_data64));
         bool l_poll_data =
-            l_data64.getBit<PERV_1_CPLT_STAT0_CC_CTRL_OPCG_DONE_DC>();
+            l_data64.getBit<CPLT_STAT0_CC_CTRL_OPCG_DONE_DC>();
 
         if (l_poll_data == 1)
         {
@@ -315,10 +322,10 @@ fapi2::ReturnCode p10_perv_sbe_cmn_scan0_module(const
 
 
     FAPI_DBG("clear all clock REGIONS and type");
-    FAPI_TRY(fapi2::putScom(i_mcast_target, PERV_CLK_REGION, 0));
+    FAPI_TRY(fapi2::putScom(i_mcast_target, CLK_REGION, 0));
 
     FAPI_DBG("Clear Scan Select Register");
-    FAPI_TRY(fapi2::putScom(i_mcast_target, PERV_SCAN_REGION_TYPE, 0));
+    FAPI_TRY(fapi2::putScom(i_mcast_target, SCAN_REGION_TYPE, 0));
 
     FAPI_INF("p10_perv_sbe_cmn_scan0_module: Exiting ...");
 
@@ -347,6 +354,9 @@ fapi2::ReturnCode p10_perv_sbe_cmn_clock_start_stop(const
         const fapi2::buffer<uint64_t> i_regions,
         const fapi2::buffer<uint8_t> i_clock_types)
 {
+    using namespace scomt;
+    using namespace scomt::perv;
+
     fapi2::buffer<uint64_t> l_sl_clock_status;
     fapi2::buffer<uint64_t> l_nsl_clock_status;
     fapi2::buffer<uint64_t> l_ary_clock_status;
@@ -376,25 +386,24 @@ fapi2::ReturnCode p10_perv_sbe_cmn_clock_start_stop(const
     FAPI_DBG("Exit flush (set flushmode inhibit)");
     //Setting CPLT_CTRL0 register value
     l_data64.flush<0>();
-    l_data64.setBit<PERV_1_CPLT_CTRL0_CTRL_CC_FLUSHMODE_INH_DC>();
-    FAPI_TRY(fapi2::putScom(i_mcast_target, PERV_CPLT_CTRL0_OR, l_data64));
+    l_data64.setBit<CPLT_CTRL0_CTRL_CC_FLUSHMODE_INH>();
+    FAPI_TRY(fapi2::putScom(i_mcast_target, CPLT_CTRL0_WO_OR, l_data64));
 
     FAPI_DBG("Clear Scan region type register");
     //Setting SCAN_REGION_TYPE register value
-    FAPI_TRY(fapi2::putScom(i_mcast_target, PERV_SCAN_REGION_TYPE, 0));
+    FAPI_TRY(fapi2::putScom(i_mcast_target, SCAN_REGION_TYPE, 0));
 
     i_clock_cmd.extractToRight<6, 2>(l_clk_cmd);
 
     FAPI_DBG("Setup all Clock Domains and Clock Types");
     //Setting CLK_REGION register value
     l_data64.flush<0>()
-    .insertFromRight<PERV_1_CLK_REGION_CLOCK_CMD, PERV_1_CLK_REGION_CLOCK_CMD_LEN>
-    (l_clk_cmd)  //CLK_REGION.CLOCK_CMD = l_clk_cmd
-    .writeBit<PERV_1_CLK_REGION_SLAVE_MODE>(i_startslave)    //CLK_REGION.SLAVE_MODE = i_startslave
-    .writeBit<PERV_1_CLK_REGION_MASTER_MODE>(i_startmaster) //CLK_REGION.MASTER_MODE = i_startmaster
-    .insertFromRight<4, 15>(l_regions) //CLK_REGION.CLOCK_REGION_ALL_UNITS = l_regions
-    .insertFromRight<48, 3>(l_reg_all); //CLK_REGION.SEL_THOLD_ALL = l_reg_all
-    FAPI_TRY(fapi2::putScom(i_mcast_target, PERV_CLK_REGION, l_data64));
+    .insertFromRight<CLK_REGION_CLOCK_CMD, CLK_REGION_CLOCK_CMD_LEN>(l_clk_cmd)
+    .writeBit<CLK_REGION_SLAVE_MODE>(i_startslave)
+    .writeBit<CLK_REGION_MASTER_MODE>(i_startmaster)
+    .insertFromRight<4, 15>(l_regions)
+    .insertFromRight<48, 3>(l_reg_all);
+    FAPI_TRY(fapi2::putScom(i_mcast_target, CLK_REGION, l_data64));
 
     // To wait until OPCG Done - CPLT_STAT0.cc_cplt_opcg_done_dc = 1
     FAPI_DBG("Poll OPCG done bit to check for completeness");
@@ -404,8 +413,8 @@ fapi2::ReturnCode p10_perv_sbe_cmn_clock_start_stop(const
     while (l_timeout != 0)
     {
         //Getting CPLT_STAT0 register value
-        FAPI_TRY(fapi2::getScom(l_mcast_and_target, PERV_CPLT_STAT0, l_data64));
-        bool l_poll_data = l_data64.getBit<PERV_1_CPLT_STAT0_CC_CTRL_OPCG_DONE_DC>();
+        FAPI_TRY(fapi2::getScom(l_mcast_and_target, CPLT_STAT0, l_data64));
+        bool l_poll_data = l_data64.getBit<CPLT_STAT0_CC_CTRL_OPCG_DONE_DC>();
 
         if (l_poll_data == 1)
         {
@@ -434,13 +443,13 @@ fapi2::ReturnCode p10_perv_sbe_cmn_clock_start_stop(const
         {
             FAPI_DBG("Check for clocks running SL");
             //Getting CLOCK_STAT_SL register value uisng MULTICAST_OR target for clock start
-            FAPI_TRY(fapi2::getScom(i_mcast_target, PERV_CLOCK_STAT_SL, l_sl_clock_status));
+            FAPI_TRY(fapi2::getScom(i_mcast_target, CLOCK_STAT_SL, l_sl_clock_status));
             FAPI_DBG("regions value:  %#018lX, sl status: %#018lX", l_data64, l_sl_clock_status);
 
             FAPI_ASSERT(((l_data64 & l_sl_clock_status) == 0),
                         fapi2::THOLD_ERR()
                         .set_CLOCK_CMD(i_clock_cmd)
-                        .set_CLOCK_TYPE(PERV_CLOCK_STAT_SL)
+                        .set_CLOCK_TYPE(CLOCK_STAT_SL)
                         .set_REGIONS(l_data64)
                         .set_READ_CLK(l_sl_clock_status),
                         "CLOCK RUNNING STATUS FOR SL TYPE NOT MATCHING WITH EXPECTED REGIONS VALUE");
@@ -450,13 +459,13 @@ fapi2::ReturnCode p10_perv_sbe_cmn_clock_start_stop(const
         {
             FAPI_DBG("Check for clocks running NSL");
             //Getting CLOCK_STAT_NSL register value uisng MULTICAST_OR target for clock start
-            FAPI_TRY(fapi2::getScom(i_mcast_target, PERV_CLOCK_STAT_NSL, l_nsl_clock_status));
+            FAPI_TRY(fapi2::getScom(i_mcast_target, CLOCK_STAT_NSL, l_nsl_clock_status));
             FAPI_DBG("regions value:  %#018lX, nsl status: %#018lX", l_data64, l_nsl_clock_status);
 
             FAPI_ASSERT(((l_data64 & l_nsl_clock_status) == 0),
                         fapi2::THOLD_ERR()
                         .set_CLOCK_CMD(i_clock_cmd)
-                        .set_CLOCK_TYPE(PERV_CLOCK_STAT_NSL)
+                        .set_CLOCK_TYPE(CLOCK_STAT_NSL)
                         .set_REGIONS(l_data64)
                         .set_READ_CLK(l_nsl_clock_status),
                         "CLOCK RUNNING STATUS FOR NSL TYPE NOT MATCHING WITH EXPECTED REGIONS VALUE");
@@ -466,13 +475,13 @@ fapi2::ReturnCode p10_perv_sbe_cmn_clock_start_stop(const
         {
             FAPI_DBG("Check for clocks running ARY");
             //Getting CLOCK_STAT_ARY register value uisng MULTICAST_OR target for clock start
-            FAPI_TRY(fapi2::getScom(i_mcast_target, PERV_CLOCK_STAT_ARY, l_ary_clock_status));
+            FAPI_TRY(fapi2::getScom(i_mcast_target, CLOCK_STAT_ARY, l_ary_clock_status));
             FAPI_DBG("regions value:  %#018lX, ary status: %#018lX", l_data64, l_ary_clock_status);
 
             FAPI_ASSERT(((l_data64 & l_ary_clock_status) == 0),
                         fapi2::THOLD_ERR()
                         .set_CLOCK_CMD(i_clock_cmd)
-                        .set_CLOCK_TYPE(PERV_CLOCK_STAT_ARY)
+                        .set_CLOCK_TYPE(CLOCK_STAT_ARY)
                         .set_REGIONS(l_data64)
                         .set_READ_CLK(l_ary_clock_status),
                         "CLOCK RUNNING STATUS FOR ARY TYPE NOT MATCHING WITH EXPECTED REGIONS VALUE");
@@ -482,13 +491,13 @@ fapi2::ReturnCode p10_perv_sbe_cmn_clock_start_stop(const
         {
             FAPI_DBG("Check for clocks stop SL");
             //Getting CLOCK_STAT_SL register value uisng MULTICAST_AND target for clock stop
-            FAPI_TRY(fapi2::getScom(l_mcast_and_target, PERV_CLOCK_STAT_SL, l_sl_clock_status));
+            FAPI_TRY(fapi2::getScom(l_mcast_and_target, CLOCK_STAT_SL, l_sl_clock_status));
             FAPI_DBG("regions value:  %#018lX, sl status: %#018lX", l_data64, l_sl_clock_status);
 
             FAPI_ASSERT(((l_data64 & l_sl_clock_status) == l_data64),
                         fapi2::THOLD_ERR()
                         .set_CLOCK_CMD(i_clock_cmd)
-                        .set_CLOCK_TYPE(PERV_CLOCK_STAT_SL)
+                        .set_CLOCK_TYPE(CLOCK_STAT_SL)
                         .set_REGIONS(l_data64)
                         .set_READ_CLK(l_sl_clock_status),
                         "CLOCK STOP STATUS FOR SL TYPE NOT MATCHING WITH EXPECTED REGIONS VALUE");
@@ -498,13 +507,13 @@ fapi2::ReturnCode p10_perv_sbe_cmn_clock_start_stop(const
         {
             FAPI_DBG("Check for clocks stop NSL");
             //Getting CLOCK_STAT_NSL register value uisng MULTICAST_AND target for clock stop
-            FAPI_TRY(fapi2::getScom(l_mcast_and_target, PERV_CLOCK_STAT_NSL, l_nsl_clock_status));
+            FAPI_TRY(fapi2::getScom(l_mcast_and_target, CLOCK_STAT_NSL, l_nsl_clock_status));
             FAPI_DBG("regions value:  %#018lX, nsl status: %#018lX", l_data64, l_nsl_clock_status);
 
             FAPI_ASSERT(((l_data64 & l_nsl_clock_status) == l_data64),
                         fapi2::THOLD_ERR()
                         .set_CLOCK_CMD(i_clock_cmd)
-                        .set_CLOCK_TYPE(PERV_CLOCK_STAT_NSL)
+                        .set_CLOCK_TYPE(CLOCK_STAT_NSL)
                         .set_REGIONS(l_data64)
                         .set_READ_CLK(l_nsl_clock_status),
                         "CLOCK STOP STATUS FOR NSL TYPE NOT MATCHING WITH EXPECTED REGIONS VALUE");
@@ -514,13 +523,13 @@ fapi2::ReturnCode p10_perv_sbe_cmn_clock_start_stop(const
         {
             FAPI_DBG("Check for clocks stop ARY");
             //Getting CLOCK_STAT_ARY register value uisng MULTICAST_AND target for clock stop
-            FAPI_TRY(fapi2::getScom(l_mcast_and_target, PERV_CLOCK_STAT_ARY, l_ary_clock_status));
+            FAPI_TRY(fapi2::getScom(l_mcast_and_target, CLOCK_STAT_ARY, l_ary_clock_status));
             FAPI_DBG("regions value:  %#018lX, ary status: %#018lX", l_data64, l_ary_clock_status);
 
             FAPI_ASSERT(((l_data64 & l_ary_clock_status) == l_data64),
                         fapi2::THOLD_ERR()
                         .set_CLOCK_CMD(i_clock_cmd)
-                        .set_CLOCK_TYPE(PERV_CLOCK_STAT_ARY)
+                        .set_CLOCK_TYPE(CLOCK_STAT_ARY)
                         .set_REGIONS(l_data64)
                         .set_READ_CLK(l_ary_clock_status),
                         "CLOCK STOP STATUS FOR ARY TYPE NOT MATCHING WITH EXPECTED REGIONS VALUE");
@@ -529,13 +538,13 @@ fapi2::ReturnCode p10_perv_sbe_cmn_clock_start_stop(const
     }
 
     FAPI_DBG("Clear clock region");
-    FAPI_TRY(fapi2::putScom(i_mcast_target, PERV_CLK_REGION, 0));
+    FAPI_TRY(fapi2::putScom(i_mcast_target, CLK_REGION, 0));
 
     FAPI_DBG("Enter flush (clear flushmode inhibit)");
     //Setting CPLT_CTRL0 register value
     l_data64.flush<0>();
-    l_data64.setBit<PERV_1_CPLT_CTRL0_CTRL_CC_FLUSHMODE_INH_DC>();
-    FAPI_TRY(fapi2::putScom(i_mcast_target, PERV_CPLT_CTRL0_CLEAR, l_data64));
+    l_data64.setBit<CPLT_CTRL0_CTRL_CC_FLUSHMODE_INH>();
+    FAPI_TRY(fapi2::putScom(i_mcast_target, CPLT_CTRL0_WO_CLEAR, l_data64));
 
     FAPI_INF("p10_perv_sbe_cmn_clock_start_stop: Exiting ...");
 
@@ -623,6 +632,8 @@ fapi2::ReturnCode p10_perv_sbe_cmn_setup_multicast_groups(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
     const mc_setup_t* i_setup_table)
 {
+    using namespace scomt;
+    using namespace scomt::perv;
 
     fapi2::buffer<uint64_t> present_chiplets, functional_chiplets, eqs_with_good_cores;
     fapi2::buffer<uint64_t> ignore_pgood_cplt_status_mask, honor_pgood_cplt_status_mask,
@@ -648,7 +659,7 @@ fapi2::ReturnCode p10_perv_sbe_cmn_setup_multicast_groups(
 
     for (int i = 0; i < 7; i++)
     {
-        FAPI_TRY(fapi2::putScom(i_target_chip , PERV_PIB_MCAST_GRP_0_SLAVES_REG + i, 0x0));
+        FAPI_TRY(fapi2::putScom(i_target_chip , MCAST_GRP_0_SLAVES_REG + i, 0x0));
     }
 
     FAPI_TRY(p10_perv_sbe_cmn_cplt_status(i_target_chip, fapi2::TARGET_STATE_PRESENT, present_chiplets));
@@ -702,7 +713,7 @@ fapi2::ReturnCode p10_perv_sbe_cmn_setup_multicast_groups(
                             "Error: Chiplet is being added into more than 4 groups");
 
                 // Setting chiplet multicast group registers
-                uint32_t mc_address = (chiplet_id << 24) | (PERV_MULTICAST_GROUP_1 + offset);
+                uint32_t mc_address = (chiplet_id << 24) | (MULTICAST_GROUP_1 + offset);
                 mc_data.insertFromRight<  3, 3 > (l_group->hw_group);
                 mc_data.insertFromRight< 19, 3 > (0xF);
                 FAPI_TRY(fapi2::putScom(i_target_chip , mc_address, mc_data));
@@ -810,6 +821,9 @@ fapi_try_exit:
 fapi2::ReturnCode p10_perv_sbe_cmn_align_chiplets(const
         fapi2::Target < fapi2::TARGET_TYPE_PERV | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_COMPARE > & i_mcast_target)
 {
+    using namespace scomt;
+    using namespace scomt::perv;
+
     fapi2::buffer<uint64_t> l_data64;
     fapi2::buffer<uint64_t> l_data64_sync_cnfg;
     int l_timeout = 0;
@@ -820,22 +834,22 @@ fapi2::ReturnCode p10_perv_sbe_cmn_align_chiplets(const
 
     FAPI_DBG("For all chiplets: exit flush");
     l_data64.flush<0>();
-    l_data64.setBit<PERV_1_CPLT_CTRL0_CTRL_CC_FLUSHMODE_INH_DC>();
-    FAPI_TRY(fapi2::putScom(i_mcast_target, PERV_CPLT_CTRL0_OR, l_data64));
+    l_data64.setBit<CPLT_CTRL0_CTRL_CC_FLUSHMODE_INH>();
+    FAPI_TRY(fapi2::putScom(i_mcast_target, CPLT_CTRL0_WO_OR, l_data64));
 
     FAPI_DBG("For all chiplets: enable alignement");
     l_data64.flush<0>();
-    l_data64.setBit<PERV_1_CPLT_CTRL0_CTRL_CC_FORCE_ALIGN_DC>();
-    FAPI_TRY(fapi2::putScom(i_mcast_target, PERV_CPLT_CTRL0_OR, l_data64));
+    l_data64.setBit<CPLT_CTRL0_CTRL_CC_FORCE_ALIGN>();
+    FAPI_TRY(fapi2::putScom(i_mcast_target, CPLT_CTRL0_WO_OR, l_data64));
 
     FAPI_DBG("Clear chiplet is aligned");
-    FAPI_TRY(fapi2::getScom(i_mcast_target, PERV_SYNC_CONFIG, l_data64_sync_cnfg));
-    l_data64_sync_cnfg.setBit<PERV_1_SYNC_CONFIG_CLEAR_CHIPLET_IS_ALIGNED>();
-    FAPI_TRY(fapi2::putScom(i_mcast_target, PERV_SYNC_CONFIG, l_data64_sync_cnfg));
+    FAPI_TRY(fapi2::getScom(i_mcast_target, SYNC_CONFIG, l_data64_sync_cnfg));
+    l_data64_sync_cnfg.setBit<SYNC_CONFIG_CLEAR_CHIPLET_IS_ALIGNED>();
+    FAPI_TRY(fapi2::putScom(i_mcast_target, SYNC_CONFIG, l_data64_sync_cnfg));
 
     FAPI_DBG("Unset Clear chiplet is aligned");
-    l_data64_sync_cnfg.clearBit<PERV_1_SYNC_CONFIG_CLEAR_CHIPLET_IS_ALIGNED>();
-    FAPI_TRY(fapi2::putScom(i_mcast_target, PERV_SYNC_CONFIG, l_data64_sync_cnfg));
+    l_data64_sync_cnfg.clearBit<SYNC_CONFIG_CLEAR_CHIPLET_IS_ALIGNED>();
+    FAPI_TRY(fapi2::putScom(i_mcast_target, SYNC_CONFIG, l_data64_sync_cnfg));
 
     fapi2::delay(NS_DELAY, SIM_CYCLE_DELAY);
 
@@ -845,9 +859,9 @@ fapi2::ReturnCode p10_perv_sbe_cmn_align_chiplets(const
     while (l_timeout != 0)
     {
         //Getting CPLT_STAT0 register value
-        FAPI_TRY(fapi2::getScom(l_mcast_and_target, PERV_CPLT_STAT0, l_data64));
+        FAPI_TRY(fapi2::getScom(l_mcast_and_target, CPLT_STAT0, l_data64));
         bool l_poll_data =
-            l_data64.getBit<PERV_1_CPLT_STAT0_CC_CTRL_CHIPLET_IS_ALIGNED_DC>();
+            l_data64.getBit<CPLT_STAT0_CC_CTRL_CHIPLET_IS_ALIGNED_DC>();
 
         if (l_poll_data == 1)
         {
@@ -869,8 +883,8 @@ fapi2::ReturnCode p10_perv_sbe_cmn_align_chiplets(const
 
     FAPI_DBG("For all chiplets: disable alignement");
     l_data64.flush<0>();
-    l_data64.setBit<PERV_1_CPLT_CTRL0_CTRL_CC_FORCE_ALIGN_DC>();
-    FAPI_TRY(fapi2::putScom(i_mcast_target, PERV_CPLT_CTRL0_CLEAR, l_data64));
+    l_data64.setBit<CPLT_CTRL0_CTRL_CC_FORCE_ALIGN>();
+    FAPI_TRY(fapi2::putScom(i_mcast_target, CPLT_CTRL0_WO_CLEAR, l_data64));
 
     FAPI_INF("p10_perv_sbe_cmn_align_chiplets: Exiting ...");
 
@@ -921,6 +935,8 @@ fapi2::ReturnCode p10_perv_sbe_cmn_setup_putring(
     const ring_setup_t* i_ring_table,
     bool  i_tp_chiplet)
 {
+    using namespace scomt;
+    using namespace scomt::perv;
 
     const ring_setup_t* ring;
     fapi2::buffer<uint64_t> l_data64;
@@ -942,7 +958,7 @@ fapi2::ReturnCode p10_perv_sbe_cmn_setup_putring(
     for (auto& l_cplt_target : l_chiplet_targets)
     {
         uint32_t l_chipletID = l_cplt_target.getChipletNumber();
-        FAPI_TRY(fapi2::getScom(l_cplt_target, 0x00000002, l_data64));
+        FAPI_TRY(fapi2::getScom(l_cplt_target, CPLT_CTRL2_RW, l_data64));
 
         ring = i_ring_table;
 
