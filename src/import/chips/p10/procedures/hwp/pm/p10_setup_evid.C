@@ -48,9 +48,17 @@
 #include <p10_pstate_parameter_block.H>
 #include <p10_avsbus_lib.H>
 #include <p10_avsbus_scom.H>
+#include <p10_scom_mc.H>
+#include <p10_scom_pauc.H>
+#include <p10_scom_iohs.H>
+#include <p10_scom_pec.H>
+#include <multicast_group_defs.H>
 
 using namespace pm_pstate_parameter_block;
+using namespace scomt;
 
+fapi2::ReturnCode
+p10_update_net_ctrl(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 //-----------------------------------------------------------------------------
 // Procedure
 //-----------------------------------------------------------------------------
@@ -187,6 +195,12 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                                                      l_present_boot_voltage[VDN],
                                                      VDN_SETUP),
                          "error from VDN setup function");
+
+                if (attrs.attr_array_write_assist_set)
+                {
+                    FAPI_TRY(p10_update_net_ctrl(i_target));
+
+                }
             }
         }
 
@@ -591,6 +605,41 @@ p10_read_dpll_value (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
     while (0);
 
 fapi_try_exit:
+    return fapi2::current_err;
+}
+
+/////////////////////////////////////////////////////////////////
+//////p10_update_net_ctrl
+////////////////////////////////////////////////////////////////
+fapi2::ReturnCode
+p10_update_net_ctrl(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+
+{
+    FAPI_INF(">>>>>>>>> p10_update_net_ctrl");
+    fapi2::buffer<uint64_t> l_data64;
+
+    do
+    {
+        //Static domain VDN
+        l_data64.setBit<mc::NET_CTRL0_ARRAY_WRITE_ASSIST_EN>();
+        auto l_mc_mctrl = i_target.getMulticast<fapi2::TARGET_TYPE_PERV>(fapi2::MCGROUP_GOOD_MC);
+        FAPI_TRY(mc::PUT_NET_CTRL0_RW_WOR(l_mc_mctrl, l_data64));
+
+        auto l_mc_pau   = i_target.getMulticast<fapi2::TARGET_TYPE_PERV>(fapi2::MCGROUP_GOOD_PAU);
+        FAPI_TRY(pauc::PUT_NET_CTRL0_RW_WOR(l_mc_pau, l_data64));
+
+        auto l_mc_iohs  = i_target.getMulticast<fapi2::TARGET_TYPE_PERV>(fapi2::MCGROUP_GOOD_IOHS);
+        FAPI_TRY(iohs::PUT_NET_CTRL0_RW_WOR(l_mc_iohs, l_data64));
+
+        auto l_mc_pci = i_target.getMulticast<fapi2::TARGET_TYPE_PERV>(fapi2::MCGROUP_GOOD_PCI);
+        FAPI_TRY(pec::PUT_NET_CTRL0_RW_WOR(l_mc_pci, l_data64));
+
+
+    }
+    while (0);
+
+fapi_try_exit:
+    FAPI_INF("<<<<<<<<< p10_update_net_ctrl");
     return fapi2::current_err;
 }
 

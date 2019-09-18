@@ -170,6 +170,8 @@ typedef struct
     uint8_t attr_wov_overv_step_incr_pct;
     uint8_t attr_wov_overv_step_decr_pct;
     uint8_t attr_wov_overv_max_pct;
+    uint32_t attr_sram_write_assist_mv;
+    uint32_t attr_array_write_assist_set;
 
 } AttributeList;
 
@@ -247,6 +249,13 @@ class PlatPmPPB
         /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode get_mvpd_poundV();
+
+        /// -----------------------------------------------------------------------
+        /// @brief Read AW data from module vpd
+        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// -----------------------------------------------------------------------
+        fapi2::ReturnCode get_mvpd_poundAW();
+
 
         /// -----------------------------------------------------------------------
         /// @brief Read #W data from module vpd
@@ -571,6 +580,8 @@ class PlatPmPPB
         uint8_t                   iv_wov_overv_enabled;
         bool                      iv_optional_pdv_pts_value_zero;
         bool                      iv_poundV_fmax_enable;
+        uint16_t                  iv_array_vdn_mv;
+        uint16_t                  iv_array_vdd_mv;
 
 
         PoundVOpPoint_t           iv_raw_vpd_pts[NUM_PV_POINTS];

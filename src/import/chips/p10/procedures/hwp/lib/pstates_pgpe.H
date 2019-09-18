@@ -360,6 +360,8 @@ typedef struct
     uint32_t l3_on_ratio_vcs;
     uint32_t vdd_vratio_weight;
     uint32_t vcs_vratio_weight;
+    uint16_t array_write_vdn_mv;
+    uint16_t array_write_vdd_mv;
 
     // Biased Compare VID operating points
     // @todo RTC 201083 Add DDS GPPB values

@@ -44,6 +44,7 @@
 #include <fapi2.H>
 #include <p10_pstate_parameter_block.H>
 #include <p10_pm_utils.H>
+#include <mvpd_access_defs.H>
 
 using namespace pm_pstate_parameter_block;
 
@@ -721,6 +722,11 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         io_globalppb->vdd_sysparm = iv_vdd_sysparam;
         io_globalppb->vcs_sysparm = iv_vcs_sysparam;
         io_globalppb->vdn_sysparm = iv_vdn_sysparam;
+
+        io_globalppb->array_write_vdn_mv = iv_array_vdn_mv;
+        io_globalppb->array_write_vdd_mv = iv_array_vdd_mv;
+
+
 
         //Avs bus topology
         io_globalppb->avs_bus_topology.vdd_avsbus_num  = iv_attrs.attr_avs_bus_num[VDD];
@@ -1495,6 +1501,11 @@ fapi2::ReturnCode PlatPmPPB::compute_boot_safe(
                             iv_vdn_sysparam.distoffset_uv);
 
                     iv_attrs.attr_boot_voltage_mv[VDN]= (l_ext_vdn_mv);
+
+                    if (iv_attrs.attr_boot_voltage_mv[VDN] >= iv_array_vdn_mv)
+                    {
+                        iv_attrs.attr_array_write_assist_set = 1;
+                    }
                 }
 
                 if (iv_attrs.attr_boot_voltage_mv[VIO])
@@ -1606,6 +1617,9 @@ fapi2::ReturnCode PlatPmPPB::vpd_init( void )
         FAPI_IMP("Apply Biasing to #V");
         FAPI_TRY(apply_biased_values(),"apply_biased_values function failed");
 
+        //Read #AW data
+        FAPI_TRY(get_mvpd_poundAW(),
+                 "get_mvpd_poundAW function failed to retrieve pound AW data");
         //Read #W data
 
         // ----------------
@@ -1668,6 +1682,66 @@ fapi_try_exit:
     return fapi2::current_err;
 
 }
+
+///////////////////////////////////////////////////////////
+////////   get_mvpd_poundAW
+///////////////////////////////////////////////////////////
+fapi2::ReturnCode PlatPmPPB::get_mvpd_poundAW()
+{
+    FAPI_INF(">>>>>>>>> get_mvpd_poundAW");
+    uint8_t* l_fullVpdData = NULL;
+    uint32_t l_vpdSize = 0;
+
+    do
+    {
+        //First read is to get size of vpd record, note the o_buffer is NULL
+        FAPI_TRY( getMvpdField(fapi2::MVPD_RECORD_CP00,
+                    fapi2::MVPD_KEYWORD_AW,
+                    iv_procChip,
+                    NULL,
+                    l_vpdSize) );
+
+
+        //save off the actual vpd size
+        l_vpdSize = l_vpdSize;
+        //Allocate memory for vpd data
+        l_fullVpdData = reinterpret_cast<uint8_t*>(malloc(l_vpdSize));
+
+
+        //Second read is to get data of vpd record
+        FAPI_TRY( getMvpdField(fapi2::MVPD_RECORD_CP00,
+                    fapi2::MVPD_KEYWORD_AW,
+                    iv_procChip,
+                    l_fullVpdData,
+                    l_vpdSize) );
+
+        //save off the actual vpd size
+        l_vpdSize = l_vpdSize;
+        //Allocate memory for vpd data
+        l_fullVpdData = reinterpret_cast<uint8_t*>(malloc(l_vpdSize));
+
+
+        //Second read is to get data of vpd record
+        FAPI_TRY( getMvpdField(fapi2::MVPD_RECORD_CP00,
+                    fapi2::MVPD_KEYWORD_AW,
+                    iv_procChip,
+                    l_fullVpdData,
+                    l_vpdSize) );
+
+        memcpy(&iv_array_vdn_mv,l_fullVpdData,sizeof(iv_array_vdn_mv));
+        memcpy(&iv_array_vdd_mv,(l_fullVpdData + 2),sizeof(iv_array_vdd_mv));
+
+    }
+    while(0);
+
+
+fapi_try_exit:
+    FAPI_INF("<<<<<<<<< get_mvpd_poundAW");
+
+    return fapi2::current_err;
+
+}
+
 ///////////////////////////////////////////////////////////
 ////////   get_mvpd_poundV
 ///////////////////////////////////////////////////////////
