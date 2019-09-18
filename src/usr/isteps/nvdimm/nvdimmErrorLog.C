@@ -493,7 +493,7 @@ bool nvdimmBPMCableCallout(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
             {
                 // Callout dimm, deconfig and gard
                 o_err->addHwCallout( i_nvdimm,
-                                       HWAS::SRCI_PRIORITY_HIGH,
+                                       HWAS::SRCI_PRIORITY_LOW,
                                        HWAS::DECONFIG,
                                        HWAS::GARD_Fatal);
             }

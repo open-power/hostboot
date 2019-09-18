@@ -1768,7 +1768,7 @@ void nvdimm_restore(TargetHandleList &i_nvdimmList)
 
     errlHndl_t l_err = nullptr;
     bool l_valid = false;
-    bool l_exit = false;
+    bool l_continue = true;
     TARGETING::Target* l_sys = nullptr;
     TARGETING::targetService().getTopLevelTarget( l_sys );
     assert(l_sys, "nvdimm_restore: no TopLevelTarget");
@@ -1865,13 +1865,15 @@ void nvdimm_restore(TargetHandleList &i_nvdimmList)
         // Check health status registers and exit if required
         for (const auto & l_nvdimm : i_nvdimmList)
         {
-            l_err = nvdimmHealthStatusCheck( l_nvdimm, HEALTH_RESTORE, l_exit );
+            // Post restore health check. l_continue gets set per the health check logic
+            // and used later to determine if boot shall continue on error condition
+            l_err = nvdimmHealthStatusCheck( l_nvdimm, HEALTH_RESTORE, l_continue );
 
             if (l_err)
             {
                 TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_restore() nvdimm[%X] failed during health status check", get_huid(l_nvdimm));
                 errlCommit( l_err, NVDIMM_COMP_ID );
-                if (!l_exit)
+                if (!l_continue)
                 {
                     break;
                 }
