@@ -781,6 +781,7 @@ fapi2::ReturnCode p10_adu_utils_busy_bit_poll(
 
     fapi2::buffer<uint64_t> l_statusReg(0);
     bool l_expectedState = false;
+    bool l_actBusyState = false;
 
     // Check for a successful status max_wait_poll times
     for (uint32_t i = 0; i < PROC_ADU_UTILS_ADU_STATUS_MAX_WAIT_POLLS; i++)
@@ -789,9 +790,10 @@ fapi2::ReturnCode p10_adu_utils_busy_bit_poll(
         FAPI_TRY(GET_TP_TPBR_AD_ALTD_STATUS_REG(i_target, l_statusReg),
                  "Error reading from ALTD_STATUS Register");
 
+        l_actBusyState = GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_BUSY(l_statusReg);
+
         // Form condition to determine whether busy bit is in the correct state
-        l_expectedState = (i_expBusyState && l_statusReg.getBit<PU_ALTD_STATUS_REG_FBC_ALTD_BUSY>()) ||
-                          (!i_expBusyState && !l_statusReg.getBit<PU_ALTD_STATUS_REG_FBC_ALTD_BUSY>());
+        l_expectedState = (i_expBusyState && l_actBusyState) || (!i_expBusyState && !l_actBusyState);
 
         // Break from poll if state of busy bit is as expected
         if (l_expectedState)
@@ -810,7 +812,7 @@ fapi2::ReturnCode p10_adu_utils_busy_bit_poll(
                 fapi2::P10_ADU_STATUS_REG_BAD_BUSY_STATE()
                 .set_TARGET(i_target)
                 .set_EXPBUSYBIT(i_expBusyState)
-                .set_ACTBUSYBIT(l_statusReg.getBit<PU_ALTD_STATUS_REG_FBC_ALTD_BUSY>()),
+                .set_ACTBUSYBIT(l_actBusyState),
                 "State of the adu busy bit remained in an unexpected state");
 
 fapi_try_exit:
@@ -843,23 +845,29 @@ fapi2::ReturnCode p10_adu_utils_status_errors_check(
 
         // Check for errors in status register
         l_statusError =
-            ( l_statusError ||
-              GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_WAIT_CMD_ARBIT(l_statusReg)  ||
-              !GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_ADDR_DONE(l_statusReg)
-              || //Address portion of the operation is not complete
-              GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_WAIT_RESP(l_statusReg)       || //Waiting for a clean combined response (cresp)
-              GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_OVERRUN_ERROR(l_statusReg)
-              || //New data written before old was used/read w/o new data
-              GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_AUTOINC_ERROR(l_statusReg)
-              || //Internal address counter rolled over the 0.5M boundary
-              GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_COMMAND_ERROR(l_statusReg)
-              || //New command was issued before previous one finished
-              GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_ADDRESS_ERROR(l_statusReg)
-              || //Invalid address; pb responded with addr_err cresp
-              l_statusReg.getBit<PU_ALTD_STATUS_REG_FBC_PBINIT_MISSING>() || //Attempt to start a command without pb_init active
-              GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_ECC_CE(l_statusReg)          || //ECC Correctable error
-              GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_ECC_UE(l_statusReg)          || //ECC Uncorrectable error
-              GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_ECC_SUE(l_statusReg)            //ECC Special Uncorrectable error
+            ( l_statusError
+              //Command arbiter did not complete
+              || GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_WAIT_CMD_ARBIT(l_statusReg)
+              //Address portion of the operation is not complete
+              || !GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_ADDR_DONE(l_statusReg)
+              //Waiting for a clean combined response (cresp)
+              || GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_WAIT_RESP(l_statusReg)
+              //New data written before old was used/read w/o new data
+              || GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_OVERRUN_ERROR(l_statusReg)
+              //Internal address counter rolled over the 0.5M boundary
+              || GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_AUTOINC_ERROR(l_statusReg)
+              //New command was issued before previous one finished
+              || GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_COMMAND_ERROR(l_statusReg)
+              //Invalid address; pb responded with addr_err cresp
+              || GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_ADDRESS_ERROR(l_statusReg)
+              //Attempt to start a command without pb_init active
+              || GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_PBINIT_MISSING(l_statusReg)
+              //ECC Correctable error
+              || GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_ECC_CE(l_statusReg)
+              //ECC Uncorrectable error
+              || GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_ECC_UE(l_statusReg)
+              //ECC Special Uncorrectable error
+              || GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_ECC_SUE(l_statusReg)
             );
 
         // If address only operation, do not check for PU_ALTD_STATUS_REG_FBC_DATA_DONE otherwise it should be set
@@ -1025,7 +1033,7 @@ fapi2::ReturnCode p10_adu_utils_manage_lock(
                     if (i_lock_pick && i_lock && lock_pick_first_time)
                     {
                         FAPI_DBG("Out of lock attempts, going to try a lock pick as desired");
-                        lock_control.setBit(PU_ALTD_CMD_REG_FBC_LOCK_PICK);
+                        SET_TP_TPBR_AD_ALTD_CMD_REG_FBC_LOCK_PICK(lock_control);
                         attempt_count--;
                         lock_pick_first_time = false;
                     }

@@ -40,14 +40,6 @@
 #include <fapi2.H>
 #include <p10_adu_constants.H>
 
-// @TODO FIXME HW500942 RTC207930 Replace with P10 definitions
-//------------------------------------------------------------------------------
-// Constant definitions
-//------------------------------------------------------------------------------
-#define PU_ALTD_CMD_REG_FBC_LOCK_PICK          10
-#define PU_ALTD_STATUS_REG_FBC_ALTD_BUSY        0
-#define PU_ALTD_STATUS_REG_FBC_PBINIT_MISSING  18
-
 extern"C"
 {
 
