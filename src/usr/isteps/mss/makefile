@@ -79,6 +79,7 @@ MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/fir/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/mcbist/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/phy/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/ecc/
+MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/inband/
 
 
 EXTRAINCDIR += ${MSS_LIB}

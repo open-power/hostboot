@@ -75,7 +75,7 @@ OBJS += plat_vpd_access.o
 #OBJS += dimmBadDqBitmapFuncs.o
 #OBJS += rowRepairsFuncs.o
 #OBJS += plat_i2c_access.o
-#OBJS += plat_mmio_access.o
+OBJS += plat_mmio_access.o
 
 
 #Required include before all the procedure.mk are included
