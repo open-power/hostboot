@@ -92,6 +92,7 @@ BASE_IMAGES := ${BOOTLDR_IMG} ${HB_SECROM_IMG} ${HBB_IMG} ${HBI_IMG} ${HBRT_IMG}
 HBBL_IMG := hbbl.bin
 HBB_ECC_IMG := hostboot.bin.ecc
 OCMBFW_IMG = fwhdr.ocmbfw.bin
+VERSION_IMG := version.txt
 
 # # Input fake images
 HBD_FAKE = ${BASEIMAGESDIR}/vbu_P10_targeting.bin
@@ -113,6 +114,7 @@ PAYLOAD_FINAL_IMG := PAYLOAD.bin
 RINGOVD_FINAL_IMG := RINGOVD.bin
 SBKT_FINAL_IMG := SBKT.bin
 FIRDATA_FINAL_IMG := FIRDATA.bin
+VERSION_FINAL_IMG := VERSION.bin
 EECACHE_FINAL_IMG := EECACHE.bin
 OCMBFW_FINAL_IMG := OCMBFW.bin
 HBD_FINAL_IMG := HBD.bin
@@ -145,7 +147,7 @@ endif
 DEF_GEN_BIN_FILES := HBBL=${HBBL_IMG},HBB=${HBB_IMG},HBI=${HBI_IMG},\
 	HBRT=${HBRT_IMG},HBEL=EMPTY,GUARD=EMPTY,MVPD=EMPTY,RINGOVD=EMPTY,\
 	SBKT=EMPTY,TEST=EMPTY,TESTRO=EMPTY,TESTLOAD=EMPTY,PAYLOAD=EMPTY,\
-	FIRDATA=EMPTY
+	FIRDATA=EMPTY,VERSION=${VERSION_IMG}
 
 ## Set up for img. assembling and building a PNOR image
 
@@ -178,7 +180,7 @@ ifeq (${FAKEPNOR},)
     	HBEL=${HBEL_FINAL_IMG} GUARD=${GUARD_FINAL_IMG} \
     	PAYLOAD=${PAYLOAD_FINAL_IMG} MVPD=${MVPD_FINAL_IMG} \
     	RINGOVD=${RINGOVD_FINAL_IMG} SBKT=${SBKT_FINAL_IMG} \
-    	FIRDATA=${FIRDATA_FINAL_IMG}
+    	FIRDATA=${FIRDATA_FINAL_IMG} VERSION=${VERSION_FINAL_IMG}
     SECT := HBD=${HBD_FINAL_IMG} SBE=${SBE_FINAL_IMG} HCODE=${HCODE_FINAL_IMG} \
     	OCC=${OCC_FINAL_IMG} WOFDATA=${WOFDATA_FINAL_IMG} \
     	EECACHE=${EECACHE_FINAL_IMG} FIRDATA=${FIRDATA_FINAL_IMG} \
@@ -309,6 +311,10 @@ gen_default_images: copy_hb_bins
 # Append Hostboot securerom code after its size
 	cat ${HB_SECROM_IMG} >> ${HBBL_IMG}
 # result [hbbl][pad:8:if-applicable][securerom-size:8][securerom]
+
+# Create VERSION txt for standalone
+	echo "=== HOSTBOOT_STANDALONE_VERSION ===" > ${VERSION_IMG}
+	echo "${USER}-`git rev-parse HEAD`" >> ${VERSION_IMG}
 
 # Call script to generate final bin files for default images
 	export LD_PRELOAD=${SIGNING_LIBS} && echo "Fetching OpenSSL version(1):" && openssl version && ${GEN_PNOR_IMAGE_SCRIPT} ${DEFAULT_PARAMS} ${BUILD_TYPE_PARAMS} ${KEY_TRANSITION_MODE_PARAMS} ${SIGN_MODE_ARG}
