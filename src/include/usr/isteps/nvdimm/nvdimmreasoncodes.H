@@ -109,6 +109,7 @@ enum nvdimmModuleId
     NVDIMM_CHECK_FW_SLOT                    = 0x3B,
     NVDIMM_ARM_PRE_CHECK                    = 0x3C,
     NVDIMM_ARM                              = 0x3D,
+    CLEAR_FW_OPS_STATUS                     = 0x3E,
 };
 
 /**
@@ -204,6 +205,7 @@ enum nvdimmReasonCode
     NVDIMM_ARM_PRE_CHECK_FAILED                = NVDIMM_COMP_ID | 0x52,
     NVDIMM_ARM_ENCRYPTION_UNLOCK_FAILED        = NVDIMM_COMP_ID | 0x53,
     NVDIMM_ARM_RETRY                           = NVDIMM_COMP_ID | 0x54,
+    NVDIMM_CLEAR_FW_OPS_STATUS_TIMEOUT         = NVDIMM_COMP_ID | 0x55,   // Failed to clear FW_OPS_STATUS
 };
 
 enum UserDetailsTypes

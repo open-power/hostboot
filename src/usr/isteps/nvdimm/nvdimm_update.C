@@ -266,7 +266,8 @@ NvdimmInstalledImage::NvdimmInstalledImage(TARGETING::Target * i_nvDimm) :
     iv_dimm(i_nvDimm), iv_version(INVALID_VERSION),
     iv_manufacturer_id(INVALID_ID), iv_product_id(INVALID_ID),
     iv_timeout(INVALID_TIMEOUT),
-    iv_max_blocks_per_region(INVALID_REGION_BLOCK_SIZE)
+    iv_max_blocks_per_region(INVALID_REGION_BLOCK_SIZE),
+    iv_fw_update_mode_enabled(false)
 {
     // initialize to invalid values
 }
@@ -356,8 +357,7 @@ errlHndl_t NvdimmInstalledImage::getVersion(uint16_t & o_version,
 errlHndl_t NvdimmInstalledImage::updateImage(NvdimmLidImage * i_lidImage)
 {
     errlHndl_t l_err = nullptr;
-    // need to always disable this after it gets enabled
-    bool l_fw_update_mode_enabled = false;
+
     do {
         INITSERVICE::sendProgressCode();
         ////////////////////////////////////////////////////////////////////////
@@ -432,8 +432,6 @@ errlHndl_t NvdimmInstalledImage::updateImage(NvdimmLidImage * i_lidImage)
                 TARGETING::get_huid(iv_dimm));
             break;
         }
-        // Set this flag so we will disable the update mode on error
-        l_fw_update_mode_enabled = true;
 
         // 5. Clear the Firmware Operation status
         TRACUCOMP(g_trac_nvdimm_upd, "updateImage: step 5");
@@ -649,7 +647,6 @@ errlHndl_t NvdimmInstalledImage::updateImage(NvdimmLidImage * i_lidImage)
 
         // 12. Disable firmware update mode
         TRACUCOMP(g_trac_nvdimm_upd, "updateImage: step 12");
-        l_fw_update_mode_enabled = false;  // don't retry the disable on error
         l_err = changeFwUpdateMode(FW_UPDATE_MODE_DISABLED);
         if (l_err)
         {
@@ -709,7 +706,7 @@ errlHndl_t NvdimmInstalledImage::updateImage(NvdimmLidImage * i_lidImage)
     } while (0);
 
     // If update operation is aborted, we need to disable update mode
-    if (l_fw_update_mode_enabled)
+    if (iv_fw_update_mode_enabled)
     {
         TRACFCOMP(g_trac_nvdimm_upd, "updateImage: update was aborted, so disable FW_UPDATE_MODE");
         errlHndl_t l_err2 = changeFwUpdateMode(FW_UPDATE_MODE_DISABLED);
@@ -1034,6 +1031,17 @@ errlHndl_t NvdimmInstalledImage::changeFwUpdateMode(fw_update_mode i_mode)
                     nvdimmAddPage4Regs(iv_dimm,l_err);
                     nvdimmAddUpdateRegs(iv_dimm,l_err);
                 }
+                else
+                {
+                    if (opStatus.fw_ops_update_mode == 1)
+                    {
+                        iv_fw_update_mode_enabled = true;
+                    }
+                    else
+                    {
+                        iv_fw_update_mode_enabled = false;
+                    }
+                }
             }
         }
     }
@@ -1259,6 +1267,103 @@ errlHndl_t NvdimmInstalledImage::clearFwOpsStatus()
             "NVDIMM 0x%.8X clear FIRMWARE_OPS_STATUS register failed",
             TARGETING::get_huid(iv_dimm));
     }
+    else
+    {
+        // Verify expected bits cleared
+
+        // Setup expected cleared status byte
+        fw_ops_status_t l_cleared_ops_status;
+        l_cleared_ops_status.whole = 0x00;
+        if (iv_fw_update_mode_enabled)
+        {
+            // set BIT 2 -- this should not be cleared by the command
+            l_cleared_ops_status.fw_ops_update_mode = 1;
+        }
+
+        // Set some timeout so this doesn't cause endless loop
+        uint16_t timeout_val = INVALID_TIMEOUT;
+        l_err = getFwOpsTimeout(timeout_val);
+        // Note: potential error will just exit the while loop and be returned
+
+        // convert seconds to ms value
+        // double the timeout to ensure enough time has elapsed for the clear
+        // note: doubling here instead of just doubling timeout_val since that
+        // variable is only a bit16 vs bit32
+        uint32_t timeout_ms_val = timeout_val * 1000 * 2;
+
+        fw_ops_status_t l_ops_status;
+
+        while (!l_err)
+        {
+            l_err = nvdimmReadReg(iv_dimm, FIRMWARE_OPS_STATUS, l_ops_status.whole);
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_nvdimm_upd, ERR_MRK"clearFwOpsStatus: "
+                    "NVDIMM 0x%.8X read FIRMWARE_OPS_STATUS register failed "
+                    " (0x%02X)",
+                    TARGETING::get_huid(iv_dimm), l_ops_status.whole);
+                break;
+            }
+
+            // Exit if expected cleared status is found
+            if (l_ops_status.whole == l_cleared_ops_status.whole)
+            {
+                break;
+            }
+
+            // wait 1 millisecond between checking status
+            if (timeout_ms_val > 0)
+            {
+                timeout_ms_val -= 1;
+                nanosleep(0, NS_PER_MSEC);
+            }
+            else
+            {
+                // timeout hit
+                TRACFCOMP(g_trac_nvdimm_upd, ERR_MRK"clearFwOpsStatus: "
+                    "NVDIMM 0x%.8X FIRMWARE_OPS_STATUS register reads 0x%02X "
+                    "instead of cleared value of 0x%02X after %lld seconds",
+                    TARGETING::get_huid(iv_dimm), l_ops_status.whole,
+                    l_cleared_ops_status.whole, timeout_val*2);
+
+                /*@
+                 *@errortype
+                 *@moduleid         CLEAR_FW_OPS_STATUS
+                 *@reasoncode       NVDIMM_CLEAR_FW_OPS_STATUS_TIMEOUT
+                 *@userdata1        NVDIMM Target Huid
+                 *@userdata2[0:7]   Last FIRMWARE_OPS_STATUS read
+                 *@userdata2[8:15]  Expected cleared status
+                 *@userdata2[16:31] Reserved
+                 *@userdata2[32:63] Timeout (seconds)
+                 *@devdesc          FIRMWARE_OPS_STATUS not cleared
+                 *@custdesc         NVDIMM not updated
+                 */
+                l_err = new ERRORLOG::ErrlEntry(
+                                       ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                       CLEAR_FW_OPS_STATUS,
+                                       NVDIMM_CLEAR_FW_OPS_STATUS_TIMEOUT,
+                                       TARGETING::get_huid(iv_dimm),
+                                       TWO_UINT16_ONE_UINT32_TO_UINT64
+                                       (
+                                          TWO_UINT8_TO_UINT16(
+                                          l_ops_status.whole,
+                                          l_cleared_ops_status.whole),
+                                          0x0000,
+                                          timeout_val * 2
+                                       ),
+                                       ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
+                l_err->collectTrace(NVDIMM_COMP_NAME, 256);
+                l_err->addPartCallout( iv_dimm,
+                                       HWAS::NV_CONTROLLER_PART_TYPE,
+                                       HWAS::SRCI_PRIORITY_HIGH );
+                l_err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
+                                            HWAS::SRCI_PRIORITY_LOW );
+
+                break;
+            }
+        } // end of while (!l_err) loop
+    }  // end of Verify expected bits cleared
+
     return l_err;
 }
 

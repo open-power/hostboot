@@ -255,6 +255,9 @@ class NvdimmInstalledImage
       // maximum blocks allowed per region (REGION_BLOCK_SIZE)
       uint8_t iv_max_blocks_per_region;
 
+      // set to true when doing update
+      bool iv_fw_update_mode_enabled;
+
       // Helper functions for updating the installed lid
       /**
        * @brief Transfer a region of bytes in multiple 32-byte blocks
