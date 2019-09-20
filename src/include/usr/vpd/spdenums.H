@@ -356,9 +356,15 @@ enum
     LRMM_CRC                         = SPD_FIRST_MOD_SPEC | 0xb4,
     SPD_LAST_MOD_SPEC                = SPD_FIRST_MOD_SPEC | 0xb5,
 
+    // Latest DDR SPD specifcations have standard SPD
+    // in the front followed by extendable function
+    // descriptors (EFDs). ENTIRE_SPD will grab everything
+    // ENTIRE_SPD_WITHOUT_EFD will skip getting the EFD info
+    ENTIRE_SPD_WITHOUT_EFD              = 0xFFFD,
+     //read entire SPD contents
+    ENTIRE_SPD                          = 0xFFFE,
     // This keyword should be last in the list
     // Invalid Keyword
-    ENTIRE_SPD                          = 0xFFFE,  //read entire SPD
     INVALID_SPD_KEYWORD                 = 0xFFFF,
 };
 

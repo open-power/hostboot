@@ -152,25 +152,16 @@ errlHndl_t ocmbGetSPD(T::TargetHandle_t        i_target,
             }
         }
 
-        // For ENTIRE_SPD, we must read OCMB SPD and EFD combined size.
-        size_t dataSize = entry->length;
-        if (i_keyword == ENTIRE_SPD)
-        {
-            assert(((io_buflen >= OCMB_SPD_EFD_COMBINED_SIZE)
-                    || (io_buffer == nullptr)),
-                   "Buffer must be at least 2 KB in ocmbGetSPD for ENTIRE_SPD");
-            dataSize = OCMB_SPD_EFD_COMBINED_SIZE;
-        }
-
         // Support passing in nullptr buffer to return VPD field size.
         if (io_buffer == nullptr)
         {
-            io_buflen = dataSize;
+            io_buflen = entry->length;
             break;
         }
 
+
         l_errl = spdCheckSize(io_buflen,
-                              dataSize,
+                              entry->length,
                               i_keyword);
 
         if (l_errl != nullptr)
@@ -180,7 +171,7 @@ errlHndl_t ocmbGetSPD(T::TargetHandle_t        i_target,
 
         l_errl = ocmbFetchData(i_target,
                                entry->offset,
-                               dataSize,
+                               entry->length,
                                io_buffer,
                                i_location);
 
@@ -190,7 +181,7 @@ errlHndl_t ocmbGetSPD(T::TargetHandle_t        i_target,
         }
 
         // Return the size read.
-        io_buflen = dataSize;
+        io_buflen = entry->length;
 
     } while(0);
 
