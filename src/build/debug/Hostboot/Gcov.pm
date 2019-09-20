@@ -51,6 +51,7 @@ our @EXPORT_OK = ('init', 'main', 'parseGcovInfo');
 # code you are hereby warned of the potential.  Proceed at your own choice.
 
 use constant GCOV_EXTENDED_IMAGE_ADDRESS => (1024 * 1024 * 1024);
+use constant GCOV_EXTENDED_IMAGE_FILE_PADDING => 0x5400;
 use constant GCOV_INFO_HEAD_SYMBOLNAME => "_gcov_info_head";
 use constant GCOV_INFO_MAGIC_SYMBOLNAME => "_gcov_info_magic";
 use constant GCOV_MAGIC_IDENTIFIER => 0xbeefb055;
@@ -155,6 +156,31 @@ BEGIN
     $debug_mode = 0;
 }
 
+sub open_hbicore
+{
+    my $file_name = shift;
+    my $file;
+
+    # First we try opening hbicore_extended.bin, then we try
+    # hbicore_test_extended.bin. They shouldn't both exist
+    # simultaneously so this lets us figure out whether we're running
+    # testcases or not.
+
+    if (open($file, "<$file_name"))
+    {
+        return ($file, $file_name);
+    }
+
+    $file_name =~ s/hbicore/hbicore_test/;
+
+    if (open($file, "<$file_name"))
+    {
+        return ($file, $file_name);
+    }
+
+    return;
+}
+
 sub init
 {
     # TODO: We need to figure out how to handle reading data from
@@ -163,14 +189,17 @@ sub init
     # because HBB/HBI/HBRT are not necessarily laid out in memory as
     # they are in PNOR or anywhere else.
 
-    my $hbicore_extended_bin_fname = "$ENV{HBICORE_EXTENDED_PATH}";
+    my @hbicore = open_hbicore("$ENV{HBICORE_EXTENDED_PATH}");
 
-    userDebug("Opening " . $hbicore_extended_bin_fname . " for HBI\n");
-
-    unless (open($hbicore_extended_bin_file, "< $hbicore_extended_bin_fname")) {
-        ::userDisplay "Failed to open $hbicore_extended_bin_fname, exiting\n";
+    if (!@hbicore)
+    {
+        ::userDisplay "Failed to open hbicore_extended binary, exiting\n";
         return 0;
     }
+
+    ($hbicore_extended_bin_file, my $hbicore_extended_bin_fname) = @hbicore;
+
+    userDebug("Opened " . $hbicore_extended_bin_fname . " for HBI\n");
 
     binmode($hbicore_extended_bin_file);
 
@@ -364,13 +393,15 @@ sub parseGcovFuncs
             next;
         }
 
-        my $counters = readData($ctrs_ptr, SIZEOF_UINT64 * $num_ctrs);
-
         userDebug("Ident = ".(sprintf "0x%x", $ident)."\n");
         userDebug("lineno Chksum = ".(sprintf "0x%x", $lineno_chksum)."\n");
         userDebug("cfg Chksum = ".(sprintf "0x%x", $cfg_chksum)."\n");
         userDebug("Num counters = ".(sprintf "%d", $num_ctrs)."\n");
         userDebug("ctrs_ptr = ".(sprintf "0x%x", $ctrs_ptr)."\n");
+
+        userDebug((sprintf "Reading %d * %d counters\n", SIZEOF_UINT64, $num_ctrs));
+
+        my $counters = readData($ctrs_ptr, SIZEOF_UINT64 * $num_ctrs);
 
         if (($counters eq NotFound) || ($counters eq NotPresent))
         {
@@ -502,6 +533,10 @@ sub readExtImage
     my $addr = shift;
     my $amount = shift;
 
+    $addr = $addr - GCOV_EXTENDED_IMAGE_FILE_PADDING;
+
+    userDebug((sprintf "Reading from ext image %x\n", $addr));
+
     if ($addr + $amount >= $hbicore_extended_bin_file_size) {
         return NotFound;
     }
@@ -513,8 +548,9 @@ sub readExtImage
     return $contents;
 }
 
-# Utility to read a block of data from eithr memory or using the extended
-# image file as a fallback if not present in memory.
+# Utility to read a block of data from a virtual address in main
+# memory. If the address is not paged in, returns null bytes in the
+# requested size.
 use constant PAGESIZE => 4096;
 sub readData
 {
@@ -534,19 +570,22 @@ sub readData
                 $amount = PAGESIZE - ($addr % PAGESIZE);
             }
 
+            userDebug("readData " . (sprintf "0x%x\n", $addr));
+
             my $paddr = getPhysicalAddr($addr);
+
             if ((NotFound eq $paddr) || (NotPresent eq $paddr))
             {
-                my $tmpdata = readExtImage($addr - GCOV_EXTENDED_IMAGE_ADDRESS, $amount);
+                userDebug((sprintf "0x%x", $addr). " not translatable 20\n");
 
-                if ($tmpdata eq NotFound) {
-                    return NotFound;
-                }
+                my $tmpdata = "\x00" x $amount;
 
                 $result = $result . $tmpdata;
             }
             else
             {
+                userDebug("readData phys " . (sprintf "0x%x\n", $paddr));
+
                 $result = $result.::readData($paddr, $amount);
             }
 
@@ -578,8 +617,12 @@ sub read64
                 return NotFound;
             }
 
+            userDebug((sprintf "0x%x", $old_addr). " reading extended image\n");
+
             $addr = $old_addr - GCOV_EXTENDED_IMAGE_ADDRESS;
             my $result = readExtImage($addr, 8);
+
+            userDebug((sprintf "0x%x", $old_addr). " done\n");
 
             if ($result eq NotFound) {
                 return NotFound;
