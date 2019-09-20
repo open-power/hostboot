@@ -80,6 +80,9 @@ class ScomRegister : public SCAN_COMM_REGISTER_CLASS
         iv_operationType( ACCESS_NONE )
     {}
 
+    /** @brief Destructor. */
+    virtual ~ScomRegister() = default;
+
     /**
      * @brief     Returns the pointer to bit string
      * @param     i_type               attention type
