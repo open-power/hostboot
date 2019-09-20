@@ -241,9 +241,7 @@ void* call_mss_eff_config (void *io_pArgs)
                       "call exp_mss_eff_config_thermal HWP on %d OCMB targets",
                       l_fapi2_ocmb_targets.size());
 
-            // TODO RTC 214474 - Andre Marin is debugging why this is failing
-            //FAPI_INVOKE_HWP(l_err, exp_mss_eff_config_thermal, l_fapi2_ocmb_targets);
-
+            FAPI_INVOKE_HWP(l_err, exp_mss_eff_config_thermal, l_fapi2_ocmb_targets);
             if (l_err)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
