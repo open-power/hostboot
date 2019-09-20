@@ -384,11 +384,11 @@ bool nvdimmCalloutDimm(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
             }
             else if (((l_data & ARM_SUCCESS) != ARM_SUCCESS) || ((l_data & RESET_N_ARMED) != RESET_N_ARMED))
             {
-                l_continue = true;
+                l_continue = false;
             }
 
             // Check arm status and set dimm status accordingly
-            if(!l_continue)
+            if(l_continue)
             {
                 // Set ATTR_NV_STATUS_FLAG to partially working as data may still persist
                 notifyNvdimmProtectionChange(i_nvdimm,NVDIMM_RISKY_HW_ERROR);
@@ -549,7 +549,7 @@ bool nvdimmBPMCableCallout(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
             }
             else if (((l_data & ARM_SUCCESS) != ARM_SUCCESS) || ((l_data & RESET_N_ARMED) != RESET_N_ARMED))
             {
-                l_continue = true;
+                l_continue = false;
             }
 
             // Callout BPM and Cable but cannot deconfig or gard
@@ -561,31 +561,17 @@ bool nvdimmBPMCableCallout(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
                                    HWAS::SRCI_PRIORITY_HIGH);
 
             // Check arm status and set dimm status accordingly
-            if(!l_continue)
+            if(l_continue)
             {
                 // Set ATTR_NV_STATUS_FLAG to partially working as data may still persist
                 notifyNvdimmProtectionChange(i_nvdimm,NVDIMM_RISKY_HW_ERROR);
+            }
 
-                // Callout dimm but do not deconfig or gard
-                o_err->addHwCallout( i_nvdimm,
-                                       HWAS::SRCI_PRIORITY_LOW,
-                                       HWAS::NO_DECONFIG,
-                                       HWAS::GARD_NULL);
-            }
-            else
-            {
-                // Set ATTR_NV_STATUS_FLAG to dimm diarmed
-                l_err = notifyNvdimmProtectionChange(i_nvdimm, NVDIMM_DISARMED);
-                if (l_err)
-                {
-                    errlCommit( l_err, NVDIMM_COMP_ID );
-                }
-                // Callout dimm, deconfig and gard
-                o_err->addHwCallout( i_nvdimm,
-                                       HWAS::SRCI_PRIORITY_HIGH,
-                                       HWAS::DECONFIG,
-                                       HWAS::GARD_Fatal);
-            }
+            // Callout dimm but do not deconfig or gard
+            o_err->addHwCallout( i_nvdimm,
+                                   HWAS::SRCI_PRIORITY_LOW,
+                                   HWAS::NO_DECONFIG,
+                                   HWAS::GARD_NULL);
             break;
         }
 
@@ -687,7 +673,7 @@ bool nvdimmBPMCallout(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
             }
             else if (((l_data & ARM_SUCCESS) != ARM_SUCCESS) || ((l_data & RESET_N_ARMED) != RESET_N_ARMED))
             {
-                l_continue = true;
+                l_continue = false;
             }
 
             // Callout BPM on high
@@ -702,7 +688,7 @@ bool nvdimmBPMCallout(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
                                    HWAS::GARD_NULL);
 
             // Check arm status and set dimm status accordingly
-            if(!l_continue)
+            if(l_continue)
             {
                 // Set ATTR_NV_STATUS_FLAG to partially working as data may still persist
                 notifyNvdimmProtectionChange(i_nvdimm,NVDIMM_RISKY_HW_ERROR);
@@ -1303,7 +1289,7 @@ errlHndl_t nvdimmHealthStatusCheck(Target *i_nvdimm, uint8_t i_step, bool& o_con
                                                TARGETING::get_huid(i_nvdimm),
                                                0x0,
                                                ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
-            o_continue = true;
+            o_continue = false;
             // Callout dimm but no deconfig and gard
             l_err_t->addHwCallout( i_nvdimm,
                                    HWAS::SRCI_PRIORITY_LOW,

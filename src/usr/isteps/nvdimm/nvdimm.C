@@ -71,12 +71,6 @@ TRAC_INIT(&g_trac_nvdimm, NVDIMM_COMP_NAME, 2*KILOBYTE);
 namespace NVDIMM
 {
 #define NUM_OFFSET 2
-#define NVDIMM_SET_USER_DATA_1(left_32_ops_id, right_32_huid) \
-            TWO_UINT32_TO_UINT64(left_32_ops_id, right_32_huid)
-
-#define NVDIMM_SET_USER_DATA_2_TIMEOUT(left_32_polled, right_32_timeout) \
-            NVDIMM_SET_USER_DATA_1(left_32_polled, right_32_timeout)
-
 
 typedef struct ops_timeoutInfo{
     const char * desc;

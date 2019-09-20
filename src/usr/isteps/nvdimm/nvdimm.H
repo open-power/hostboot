@@ -41,6 +41,12 @@ extern trace_desc_t* g_trac_nvdimm;
 
 namespace NVDIMM
 {
+#define NVDIMM_SET_USER_DATA_1(left_32_ops_id, right_32_huid) \
+            TWO_UINT32_TO_UINT64(left_32_ops_id, right_32_huid)
+
+#define NVDIMM_SET_USER_DATA_2_TIMEOUT(left_32_polled, right_32_timeout) \
+            NVDIMM_SET_USER_DATA_1(left_32_polled, right_32_timeout)
+
 
 // I2C registers for page 0-3, extracted from JEDEC BAEBI spec
 // Refer to BAEBI spec for details
@@ -369,7 +375,7 @@ enum i2c_out_values : uint8_t
     RSTR_ERROR                  = 0x02,
     SAVE_ERROR                  = 0x02,
     ERASE_ERROR                 = 0x02,
-    ARM_CLEAR_ALL               = 0x3C,
+    CLEAR_ALL_STATUS            = 0x3C, //Clears CAVE, RESTORE, ERASE, and ARM status regs
 };
 
 // Timeout-related enum

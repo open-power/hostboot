@@ -158,20 +158,130 @@ errlHndl_t nvdimmCheckArmSuccess(Target *i_nvdimm, bool i_arm_timeout)
     return l_err;
 }
 
+/**
+ * @brief This function performs arm precheck.
+ *
+ * @param[in] i_nvdimm - nvdimm target with NV controller
+ *
+ * @return errlHndl_t - Null if successful, otherwise a pointer to
+ *      the error log.
+ */
+errlHndl_t nvdimmArmPreCheck(Target* i_nvdimm)
+{
+    TRACUCOMP(g_trac_nvdimm, ENTER_MRK"nvdimmArmPreCheck() nvdimm[%X]",
+                get_huid(i_nvdimm));
+
+    errlHndl_t l_err = nullptr;
+    uint8_t l_ready = 0;
+    uint8_t l_fwupdate = 0;
+    uint8_t l_module_health = 0;
+    uint8_t l_continue = true;
+    auto l_RegInfo = nvdimm_reg_t();
+
+    do
+    {
+        // Read out the Module Health status register
+        l_err = nvdimmReadReg(i_nvdimm, MODULE_HEALTH_STATUS0, l_module_health);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmArmPreCheck() nvdimm[%X] - failed to read Module Health Status",
+                      get_huid(i_nvdimm));
+            errlCommit( l_err, NVDIMM_COMP_ID );
+            l_continue = false;
+            break;
+        }
+
+        // Read out the NVDimm Ready register
+        l_err = nvdimmReadReg(i_nvdimm, NVDIMM_READY, l_ready);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmArmPreCheck() nvdimm[%X] - failed to read NVDimm Ready register",
+                      get_huid(i_nvdimm));
+            errlCommit( l_err, NVDIMM_COMP_ID );
+            l_continue = false;
+            break;
+        }
+
+        // Read out the FW OPs Status register
+        l_err = nvdimmReadReg(i_nvdimm, FIRMWARE_OPS_STATUS, l_fwupdate);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmArmPreCheck() nvdimm[%X] - failed to read Firmware OPs Status register",
+                      get_huid(i_nvdimm));
+            errlCommit( l_err, NVDIMM_COMP_ID );
+            l_continue = false;
+        }
+
+    }while(0);
+
+    // Check ARM pre-requisites
+    // All nvdimms in i_nvdimmTargetList must pass the pre-req checks
+    // before continuing with arm.
+    if ((!l_continue) || (l_module_health & NVM_LIFETIME_ERROR)
+                      || (l_ready != NV_READY)
+                      || (l_fwupdate & FW_OPS_UPDATE))
+    {
+        TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmArmPreCheck() nvdimm[%X] - failed NVDimm Arm prechecks",
+                  get_huid(i_nvdimm));
+       /*@
+        *@errortype
+        *@reasoncode        NVDIMM_ARM_PRE_CHECK_FAILED
+        *@severity          ERRORLOG_SEV_PREDICTIVE
+        *@moduleid          NVDIMM_ARM_PRE_CHECK
+        *@userdata1[0:31]   Target Huid
+        *@userdata1[32:39]  l_continue
+        *@userdata1[40:47]  l_module_health
+        *@userdata1[48:56]  l_ready
+        *@userdata1[57:63]  l_fwuupdate
+        *@userdata2         <UNUSED>
+        *@devdesc           NVDIMM threw an error or failed to set event
+        *                   notifications during arming
+        *@custdesc          NVDIMM failed to enable event notificaitons
+        */
+        l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                         NVDIMM_ARM_PRE_CHECK,
+                                         NVDIMM_ARM_PRE_CHECK_FAILED,
+                                         NVDIMM_SET_USER_DATA_1(TARGETING::get_huid(i_nvdimm),
+                                         FOUR_UINT8_TO_UINT32(l_continue, l_module_health, l_ready, l_fwupdate)),
+                                         0x0,
+                                         ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
+
+        l_err->collectTrace( NVDIMM_COMP_NAME );
+
+        // Callout the dimm
+        l_err->addHwCallout( i_nvdimm,
+                               HWAS::SRCI_PRIORITY_LOW,
+                               HWAS::NO_DECONFIG,
+                               HWAS::GARD_NULL);
+
+        // Read relevant regs for trace data
+        nvdimmTraceRegs(i_nvdimm, l_RegInfo);
+        nvdimmAddPage4Regs(i_nvdimm,l_err);
+        nvdimmAddVendorLog(i_nvdimm, l_err);
+
+        // Add reg traces to the error log
+        NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
+
+    }
+
+    TRACUCOMP(g_trac_nvdimm, EXIT_MRK"nvdimmArmPreCheck() nvdimm[%X]",
+                get_huid(i_nvdimm));
+
+    return l_err;
+}
+
 bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
 {
     bool o_arm_successful = true;
     bool l_continue = true;
     bool l_arm_timeout = false;
     uint8_t l_data;
-    uint8_t l_ready;
-    uint8_t l_fwupdate;
     auto l_RegInfo = nvdimm_reg_t();
     uint64_t l_writeData;
     uint32_t l_writeAddress;
     size_t l_writeSize = sizeof(l_writeData);
 
-    TRACFCOMP(g_trac_nvdimm, ENTER_MRK"nvdimmArm() %d",
+    TRACFCOMP(g_trac_nvdimm, ENTER_MRK"nvdimmArm() numNvdimm[%d]",
         i_nvdimmTargetList.size());
 
     errlHndl_t l_err = nullptr;
@@ -180,57 +290,13 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
     // Prerequisite Arm Checks
     for (auto const l_nvdimm : i_nvdimmTargetList)
     {
-        do
+        l_err = nvdimmArmPreCheck(l_nvdimm);
+
+        // If we are failing the precheck, commit the error then exit
+        if (l_err)
         {
-            // Read out the Module Health status register
-            l_err = nvdimmReadReg(l_nvdimm, MODULE_HEALTH_STATUS0, l_data);
-            if (l_err)
-            {
-                TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmArm() nvdimm[%X] - failed to read Module Health Status",
-                          get_huid(l_nvdimm));
-                errlCommit( l_err, NVDIMM_COMP_ID );
-                l_continue = false;
-                break;
-            }
-            // Read out the NVDimm Ready register
-            l_err = nvdimmReadReg(l_nvdimm, NVDIMM_READY, l_ready);
-            if (l_err)
-            {
-                TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmArm() nvdimm[%X] - failed to read NVDimm Ready register",
-                          get_huid(l_nvdimm));
-                errlCommit( l_err, NVDIMM_COMP_ID );
-                l_continue = false;
-                break;
-            }
-            // Read out the FW OPs Status register
-            l_err = nvdimmReadReg(l_nvdimm, FIRMWARE_OPS_STATUS, l_fwupdate);
-            if (l_err)
-            {
-                TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmArm() nvdimm[%X] - failed to read Firmware OPs Status register",
-                          get_huid(l_nvdimm));
-                errlCommit( l_err, NVDIMM_COMP_ID );
-                l_continue = false;
-            }
-
-        }while(0);
-
-        // Check ARM pre-requisites
-        if ((!l_continue) || (l_data & NVM_LIFETIME_ERROR)
-                          || (l_ready != NV_READY)
-                          || (l_fwupdate & FW_OPS_UPDATE))
-        {
-            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmArm() nvdimm[%X] - failed NVDimm Arm prechecks",
-                      get_huid(l_nvdimm));
-
-            // Disarming all dimms due to error
-            nvdimmDisarm(i_nvdimmTargetList);
-
-            l_err = notifyNvdimmProtectionChange(l_nvdimm, NVDIMM_DISARMED);
-            if (l_err)
-            {
-                errlCommit( l_err, NVDIMM_COMP_ID );
-            }
-
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmArm() failed arm precheck, exiting");
+            errlCommit(l_err, NVDIMM_COMP_ID);
             return false;
         }
     }
@@ -277,11 +343,6 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
             o_arm_successful = false;
 
             nvdimmDisarm(i_nvdimmTargetList);
-            l_err_t = notifyNvdimmProtectionChange(l_nvdimm, NVDIMM_DISARMED);
-            if (l_err_t)
-            {
-                errlCommit( l_err_t, NVDIMM_COMP_ID );
-            }
 
             // Committing the error as we don't want this to interrupt
             // the boot. This will notify the user that action is needed
@@ -296,11 +357,12 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
                                    HWAS::GARD_Fatal);
 
             errlCommit( l_err, NVDIMM_COMP_ID );
+
             break;
         }
 
-        // Clear all CMD error status registers
-        l_err = nvdimmWriteReg(l_nvdimm, NVDIMM_MGT_CMD0, ARM_CLEAR_ALL);
+        // Clear all status registers in case of leftover bits
+        l_err = nvdimmWriteReg(l_nvdimm, NVDIMM_MGT_CMD0, CLEAR_ALL_STATUS);
         if (l_err)
         {
             TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmArm() nvdimm[%X] - error clearing all status registers",
@@ -317,11 +379,7 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
         {
             TRACFCOMP(g_trac_nvdimm, "nvdimmArm() nvdimm[%X] failed to trigger arm", get_huid(l_nvdimm));
 
-            l_err_t = notifyNvdimmProtectionChange(l_nvdimm, NVDIMM_DISARMED);
-            if (l_err_t)
-            {
-                errlCommit( l_err_t, NVDIMM_COMP_ID );
-            }
+            nvdimmDisarm(i_nvdimmTargetList);
 
             // Committing the error as we don't want this to interrupt
             // the boot. This will notify the user that action is needed
@@ -357,19 +415,22 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
             o_arm_successful = false;
         }
 
+        // Pass l_arm_timeout value in for health status check
+        l_continue = l_arm_timeout;
+
         // Check health status registers and exit if required
-        l_err = nvdimmHealthStatusCheck( l_nvdimm, HEALTH_PRE_ARM, l_arm_timeout );
+        l_err = nvdimmHealthStatusCheck( l_nvdimm, HEALTH_PRE_ARM, l_continue );
 
         // Check for health status failure
         if (l_err)
         {
             TRACFCOMP(g_trac_nvdimm, "nvdimmArm() nvdimm[%X] failed first health status check", get_huid(l_nvdimm));
-          
+
             // The arm timeout variable is used here as the continue variable for the
             // health status check. This was done to include the timeout for use in the check
             // If true either the arm timed out with a health status fail or the
             // health status check failed with another disarm and exit condition
-            if (l_arm_timeout)
+            if (!l_continue)
             {
                 errlCommit( l_err, NVDIMM_COMP_ID );
 
@@ -429,12 +490,6 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
             // Disarming all dimms due to error
             nvdimmDisarm(i_nvdimmTargetList);
 
-            l_err_t = notifyNvdimmProtectionChange(l_nvdimm, NVDIMM_DISARMED);
-            if (l_err_t)
-            {
-                errlCommit( l_err_t, NVDIMM_COMP_ID );
-            }
-
             // Committing the error as we don't want this to interrupt
             // the boot. This will notify the user that action is needed
             // on this module
@@ -442,17 +497,6 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
             l_err->collectTrace(NVDIMM_COMP_NAME);
             errlCommit( l_err, NVDIMM_COMP_ID );
             o_arm_successful = false;
-
-            // If the erase failed let's disarm the trigger
-            l_err = nvdimmChangeArmState(l_nvdimm, DISARM_TRIGGER);
-            if (l_err)
-            {
-                TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmArm() nvdimm[%X], error disarming the nvdimm!",
-                          get_huid(l_nvdimm));
-                l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
-                l_err->collectTrace(NVDIMM_COMP_NAME);
-                errlCommit(l_err, NVDIMM_COMP_ID);
-            }
             break;
         }
 
@@ -525,7 +569,10 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
             NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
 
             errlCommit( l_err, NVDIMM_COMP_ID );
-            break;
+
+            // We are after the arm step now, so on any error cases let's log it
+            // then move to the next nvdimm
+            continue;
         }
 
         // Re-check health status registers
@@ -537,8 +584,7 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
             TRACFCOMP(g_trac_nvdimm, "nvdimmArm() nvdimm[%X] failed final health status check", get_huid(l_nvdimm));
 
             errlCommit( l_err, NVDIMM_COMP_ID );
-            o_arm_successful = false;
-            break;
+            continue;
         }
 
     }
