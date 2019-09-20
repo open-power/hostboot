@@ -1366,14 +1366,17 @@ errlHndl_t nvdimmRestore(TargetHandleList& i_nvdimmList, uint8_t &i_mpipl)
  * @brief This function checks the status and success of an erase
  *
  * @param[in] i_nvdimm - nvdimm target with NV controller
+ * @param[in] i_statusOnly - check just the status register (not the image)
  *
  * @return errlHndl_t - Null if successful, otherwise a pointer to
  *      the error log.
  */
-errlHndl_t nvdimmEraseCheck(Target *i_nvdimm)
+errlHndl_t nvdimmEraseCheck(Target *i_nvdimm, bool i_statusOnly)
 {
     errlHndl_t l_err = nullptr;
     nvdimm_reg_t l_RegInfo;
+    uint8_t l_data = 0;
+    bool l_valid = false;
 
     // Erase happens one module at a time. No need to set any offset on the counter
     uint32_t l_poll = 0;
@@ -1396,6 +1399,87 @@ errlHndl_t nvdimmEraseCheck(Target *i_nvdimm)
 
         // Add reg traces to the error log
         NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
+    }
+    else
+    {
+        do
+        {
+            // Read Erase Status register
+            l_err = nvdimmReadReg ( i_nvdimm, ERASE_STATUS, l_data);
+            if (l_err)
+            {
+                nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR);
+                TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm[%X], failed to read erase status",
+                          get_huid(i_nvdimm));
+                break;
+            }
+
+            if (i_statusOnly)
+            {
+                // assume image is cleared, do not check
+                TRACFCOMP(g_trac_nvdimm, "nvdimmEraseCheck() - skipping image check for nvdimm[%X]",
+                    get_huid(i_nvdimm));
+                l_valid = false;
+            }
+            else
+            {
+                // Check for a valid image
+                l_err  = nvdimmValidImage( i_nvdimm, l_valid );
+                if (l_err)
+                {
+                    nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR);
+                    TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm[%X] Failed to detect valid image",
+                              get_huid(i_nvdimm));
+                    break;
+                }
+            }
+
+            if ( (l_data & ERASE_ERROR) || l_valid )
+            {
+                nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR);
+                TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm[%X] NVDimm Erase failed due to error (ERASE_STATUS: 0x%02X, Image %s)",
+                          get_huid(i_nvdimm), l_data, l_valid?"not erased":"erased");
+                /*@
+                 *@errortype
+                 *@reasoncode       NVDIMM_ERASE_ERROR
+                 *@severity         ERRORLOG_SEV_PREDICTIVE
+                 *@moduleid         NVDIMM_CHECK_ERASE
+                 *@userdata1[0:31]  ERASE_STATUS register
+                 *@userdata1[32:63] Target Huid
+                 *@userdata2        ERASE_ERROR status bit
+                 *@userdata2        Image validity
+                 *@devdesc          Encountered error during image erase function
+                 *                   on NVDIMM. Check error register trace for details
+                 *@custdesc         NVDIMM error during nvdimm erase
+                 */
+                l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                                 NVDIMM_CHECK_ERASE,
+                                                 NVDIMM_ERASE_ERROR,
+                                                 NVDIMM_SET_USER_DATA_1(l_data, get_huid(i_nvdimm)),
+                                                 NVDIMM_SET_USER_DATA_1(ERASE_ERROR, l_valid),
+                                                 ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
+
+                l_err->collectTrace( NVDIMM_COMP_NAME );
+                break;
+            }
+
+        } while(0);
+
+        if(l_err)
+        {
+           // Callout nvdimm on high, gard and deconfig
+           l_err->addHwCallout( i_nvdimm,
+                                HWAS::SRCI_PRIORITY_HIGH,
+                                HWAS::DECONFIG,
+                                HWAS::GARD_Fatal);
+
+           // Collect register data for FFDC Traces
+           nvdimmTraceRegs ( i_nvdimm, l_RegInfo );
+           nvdimmAddPage4Regs(i_nvdimm,l_err);
+
+           // Add reg traces to the error log
+           NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
+        }
     }
 
     return l_err;
@@ -1426,8 +1510,8 @@ errlHndl_t nvdimmEraseNF(Target *i_nvdimm)
             break;
         }
 
-        // Poll for success and check status
-        l_err = nvdimmEraseCheck(i_nvdimm);
+        // Poll for success, then check the status and image
+        l_err = nvdimmEraseCheck(i_nvdimm, false);
 
     }while(0);
 
@@ -2038,10 +2122,12 @@ void nvdimm_init(Target *i_nvdimm)
             break;
         }
 
-        // Check for Erase in progress and its status
-        l_err = nvdimmEraseCheck(i_nvdimm);
+        // Check for Erase in progress and verify good status
+        l_err = nvdimmEraseCheck(i_nvdimm, true);
         if (l_err)
         {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_init() nvdimm[%X], error checking erase status",
+                      get_huid(i_nvdimm));
             break;
         }
 
@@ -2213,6 +2299,7 @@ void nvdimm_init(Target *i_nvdimm)
 
     if (l_err)
     {
+        l_err->collectTrace( NVDIMM_COMP_NAME );
         errlCommit(l_err, NVDIMM_COMP_ID);
     }
 }

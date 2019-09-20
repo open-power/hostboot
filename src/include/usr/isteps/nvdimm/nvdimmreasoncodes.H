@@ -198,6 +198,7 @@ enum nvdimmReasonCode
     NVDIMM_VENDOR_LOG_TIMEOUT                  = NVDIMM_COMP_ID | 0x4E,   // Vendor log for FFDC timeout
     NVDIMM_VENDOR_LOG_CKSUM_FAILED             = NVDIMM_COMP_ID | 0x4F,   // Vendor log for FFDC checksum fail
     NVDIMM_INVALID_FW_SLOT                     = NVDIMM_COMP_ID | 0x50,
+    NVDIMM_ERASE_ERROR                         = NVDIMM_COMP_ID | 0x51,
 };
 
 enum UserDetailsTypes
