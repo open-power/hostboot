@@ -108,7 +108,10 @@ fapi2::ReturnCode getSPD(
 
                     if( l_memModule == SPD::MEM_DDIMM )
                     {
-                        o_size = SPD::DDIMM_DDR4_SPD_SIZE;
+                        // currently getSPD only supports the ENTIRE_SPD
+                        // keyword. In the DDIMM case this include the EFD
+                        // data so be sure to reflect that in the size we return.
+                        o_size = SPD::OCMB_SPD_EFD_COMBINED_SIZE;
                     }
                     else
                     {

@@ -127,7 +127,8 @@ const KeywordData ddr4DDIMMData[] =
     { TCKMAX_FINE_OFFSET,               0x7c,   0x01,   0x00,   0x00, false, false, ALL },
     { BASE_CONFIG_CRC,                  0x7f,   0x02,   0x00,   0x00, true,  false, ALL },
     // Module Specific fields supported on DDR4 only
-    { ENTIRE_SPD,                       0x00,   0x280,  0x00,   0x00, false, false, ALL },
+    { ENTIRE_SPD_WITHOUT_EFD,           0x00,   0x280,  0x00,   0x00, false, false, ALL },
+    { ENTIRE_SPD,                       0x00,   0x800,  0x00,   0x00, false, false, ALL },
     //---------------------------------------------------------------------------------------
 };
 

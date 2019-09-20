@@ -573,7 +573,7 @@ errlHndl_t ocmbIdecPhase1(const TARGETING::TargetHandle_t& i_target)
     errlHndl_t l_errl = nullptr;
 
     // Allocate buffer to hold SPD and init to 0
-    size_t l_spdBufferSize = SPD::OCMB_SPD_EFD_COMBINED_SIZE;
+    size_t l_spdBufferSize = SPD::DDIMM_DDR4_SPD_SIZE;
     uint8_t* l_spdBuffer = new uint8_t[l_spdBufferSize];
     memset(l_spdBuffer, 0, l_spdBufferSize);
     uint16_t l_chipId = 0;
@@ -581,11 +581,11 @@ errlHndl_t ocmbIdecPhase1(const TARGETING::TargetHandle_t& i_target)
 
     do {
 
-        // Read the full SPD.
+        // Read the SPD off the ocmb but skip reading the EFD to save time.
         l_errl = deviceRead(i_target,
                            l_spdBuffer,
                            l_spdBufferSize,
-                           DEVICE_SPD_ADDRESS(SPD::ENTIRE_SPD));
+                           DEVICE_SPD_ADDRESS(SPD::ENTIRE_SPD_WITHOUT_EFD));
 
         // If unable to retrieve the SPD buffer then can't
         // extract the IDEC data, so return error.
@@ -598,11 +598,11 @@ errlHndl_t ocmbIdecPhase1(const TARGETING::TargetHandle_t& i_target)
         }
 
         // Make sure we got back the size we were expecting.
-        assert(l_spdBufferSize == SPD::OCMB_SPD_EFD_COMBINED_SIZE,
+        assert(l_spdBufferSize == SPD::DDIMM_DDR4_SPD_SIZE,
                "ocmbIdecPhase1> OCMB SPD read size %d "
                "doesn't match the expected size %d",
                l_spdBufferSize,
-               SPD::OCMB_SPD_EFD_COMBINED_SIZE);
+               SPD::DDIMM_DDR4_SPD_SIZE);
 
         l_errl = getOcmbIdecFromSpd(i_target,
                                     l_spdBuffer,
