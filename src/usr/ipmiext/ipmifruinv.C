@@ -594,6 +594,25 @@ errlHndl_t IpmiFruInv::formatMfgData(std::vector<uint8_t> i_mfgDateData,
         uint8_t hour = bcd2_to_int(i_mfgDateData.at(5));
         uint8_t minute = bcd2_to_int(i_mfgDateData.at(6));
 
+	// add by Lixg
+	// ips PVPD hold a MB data 01 00 00 00 00 00 00 00
+	// it cuse some error
+	// e... the machine has been sold, no shutdown please
+        if (century < 20
+         || month < 1  || month  > 12
+         || day   < 1  || day    > 31
+         || hour  > 23 || minute > 59) {
+		o_mfgDate = 0xFFFFFFFF;
+		TRACFCOMP(g_trac_ipmi,"MfgDate error: %02X %02X %02X %02X %02X %02X %02X ", i_mfgDateData.at(0), \
+											    i_mfgDateData.at(1), \
+											    i_mfgDateData.at(2), \
+											    i_mfgDateData.at(3), \
+											    i_mfgDateData.at(4), \
+											    i_mfgDateData.at(5), \
+											    i_mfgDateData.at(6));
+		return l_errl;
+         }
+
         // Subtract year
         uint8_t numOfYears = (century*100 + year) - 1996;
         // Subtract month
@@ -612,6 +631,7 @@ errlHndl_t IpmiFruInv::formatMfgData(std::vector<uint8_t> i_mfgDateData,
 
         // Add a day for every leap year
         // Check if we need to consider the current year
+        // Year is related to century, anybody familiar with this may fix it
         if (month <= 2)
         {
             // We don't need to consider this year for a leap year, as it
