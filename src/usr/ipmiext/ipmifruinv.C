@@ -9,6 +9,7 @@
 /* [+] International Business Machines Corp.                              */
 /* [+] Super Micro Computer, Inc.                                         */
 /* [+] YADRO                                                              */
+/* [+] lixg                                                               */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -546,42 +547,43 @@ errlHndl_t IpmiFruInv::formatMfgData(std::vector<uint8_t> i_mfgDateData,
 {
     errlHndl_t l_errl = NULL;
 
-    // MB keyword size is 8 hex bytes, throw an error if it is smaller so we
-    // don't do an invalid access.
-    if (i_mfgDateData.size() != 8)
+    do
     {
-        /*@
-         *  @errortype
-         *  @moduleid       IPMI::MOD_IPMIFRU_INV
-         *  @reasoncode     IPMI::RC_INVALID_VPD_DATA
-         *  @userdata1      Size of vpd data
-         *
-         *  @devdesc        VPD data is invalid size
-         */
-        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                          IPMI::MOD_IPMIFRU_INV,
-                                          IPMI::RC_INVALID_VPD_DATA,
-                                          i_mfgDateData.size());
+        // MB keyword size is 8 hex bytes, throw an error if it is smaller so we
+        // don't do an invalid access.
+        if (i_mfgDateData.size() != 8)
+        {
+            /*@
+             *  @errortype
+             *  @moduleid       IPMI::MOD_IPMIFRU_INV
+             *  @reasoncode     IPMI::RC_INVALID_VPD_DATA
+             *  @userdata1      Size of vpd data
+             *
+             *  @devdesc        VPD data is invalid size
+             */
+            l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                             IPMI::MOD_IPMIFRU_INV,
+                                             IPMI::RC_INVALID_VPD_DATA,
+                                             i_mfgDateData.size());
 
-        TARGETING::Target* nodeTarget = NULL;
-        TARGETING::PredicateCTM nodeFilter(TARGETING::CLASS_ENC,
-                                           TARGETING::TYPE_NODE);
-        TARGETING::TargetRangeFilter nodeItr(
-            TARGETING::targetService().begin(),
-            TARGETING::targetService().end(),
-            &nodeFilter);
+            TARGETING::Target* nodeTarget = NULL;
+            TARGETING::PredicateCTM nodeFilter(TARGETING::CLASS_ENC,
+                                               TARGETING::TYPE_NODE);
+            TARGETING::TargetRangeFilter nodeItr(
+                          TARGETING::targetService().begin(),
+                          TARGETING::targetService().end(),
+                          &nodeFilter);
 
-        nodeTarget = *nodeItr;
+            nodeTarget = *nodeItr;
 
-        // Callout out node since that is where the VPD lives
-        l_errl->addHwCallout(nodeTarget,
-                             HWAS::SRCI_PRIORITY_HIGH,
-                             HWAS::NO_DECONFIG,
-                             HWAS::GARD_NULL );
+            // Callout out node since that is where the VPD lives
+            l_errl->addHwCallout(nodeTarget,
+                                 HWAS::SRCI_PRIORITY_HIGH,
+                                 HWAS::NO_DECONFIG,
+                                 HWAS::GARD_NULL );
+            break;
+        }
 
-    }
-    else
-    {
         // Convert Centuries / Years / months / day / hour / minute / second
         // into a uint64 representing number of minute since 1/1/96
 
@@ -593,6 +595,25 @@ errlHndl_t IpmiFruInv::formatMfgData(std::vector<uint8_t> i_mfgDateData,
         uint8_t day = bcd2_to_int(i_mfgDateData.at(4));
         uint8_t hour = bcd2_to_int(i_mfgDateData.at(5));
         uint8_t minute = bcd2_to_int(i_mfgDateData.at(6));
+
+        // Do some sanity checking on the data so the math below doesn't
+        //  go crazy and cause a crash
+        if ( (century < 20)
+         || (month < 1)  || (month  > 12)
+         || (day   < 1)  || (day    > 31)
+         || (hour  > 23) || (minute > 59) )
+        {
+            o_mfgDate = 0xFFFFFFFF;
+            TRACFCOMP(g_trac_ipmi,"MfgDate error: %02X %02X %02X %02X %02X %02X %02X ",
+                      i_mfgDateData.at(0),
+                      i_mfgDateData.at(1),
+                      i_mfgDateData.at(2),
+                      i_mfgDateData.at(3),
+                      i_mfgDateData.at(4),
+                      i_mfgDateData.at(5),
+                      i_mfgDateData.at(6));
+            break;
+        }
 
         // Subtract year
         uint8_t numOfYears = (century*100 + year) - 1996;
@@ -612,6 +633,7 @@ errlHndl_t IpmiFruInv::formatMfgData(std::vector<uint8_t> i_mfgDateData,
 
         // Add a day for every leap year
         // Check if we need to consider the current year
+        // Year is related to century, anybody familiar with this may fix it
         if (month <= 2)
         {
             // We don't need to consider this year for a leap year, as it
@@ -638,7 +660,7 @@ errlHndl_t IpmiFruInv::formatMfgData(std::vector<uint8_t> i_mfgDateData,
         // Convert into minutes
         o_mfgDate = (((numOfDays*24)*60) + (hour*60) + minute);
 
-    }
+    } while(0);
 
     return l_errl;
 }
