@@ -57,6 +57,12 @@
 #include <fapi2_spd_access.H>
 #include <prdfParserUtils.H>
 #include <mcbist/gen_mss_mcbist_settings.H>
+#include <p9c_mss_rowRepairFuncs.H>
+#include <errl/errludlogregister.H>
+
+#ifdef CONFIG_NVDIMM
+#include <nvdimm.H>
+#endif
 
 using namespace TARGETING;
 
@@ -620,10 +626,75 @@ uint32_t nvdimmNotifyProtChange( TARGETING::TargetHandle_t i_target,
 
 }
 
-void nvdimmAddPage4Ffdc( TARGETING::TargetHandle_t i_nvdimm,
-                         errlHndl_t & io_errl  )
+void nvdimmAddFfdc( TARGETING::TargetHandle_t i_nvdimm, errlHndl_t & io_errl  )
 {
+    #define PRDF_FUNC "[PlatServices::nvdimmAddFfdc] "
+    // Add Page 4 Regs and Vendor Log using external Hostboot interfaces.
     NVDIMM::nvdimmAddPage4Regs( i_nvdimm, io_errl );
+    NVDIMM::nvdimmAddVendorLog( i_nvdimm, io_errl );
+
+    // Add PRD specific registers relevant to runtime NVDIMM analysis.
+    const uint16_t regList[] =
+    {
+        // Module health registers
+        NVDIMM::i2cReg::MODULE_HEALTH,
+        NVDIMM::i2cReg::MODULE_HEALTH_STATUS0,
+        NVDIMM::i2cReg::MODULE_HEALTH_STATUS1,
+
+        // Threshold status registers
+        NVDIMM::i2cReg::ERROR_THRESHOLD_STATUS,
+        NVDIMM::i2cReg::WARNING_THRESHOLD_STATUS,
+
+        // ES_TEMP registers
+        NVDIMM::i2cReg::ES_TEMP0,
+        NVDIMM::i2cReg::ES_TEMP1,
+        NVDIMM::i2cReg::ES_TEMP_WARNING_HIGH_THRESHOLD0,
+        NVDIMM::i2cReg::ES_TEMP_WARNING_HIGH_THRESHOLD1,
+        NVDIMM::i2cReg::ES_TEMP_WARNING_LOW_THRESHOLD0,
+        NVDIMM::i2cReg::ES_TEMP_WARNING_LOW_THRESHOLD1,
+
+        // NVM Lifetime registers
+        NVDIMM::i2cReg::NVM_LIFETIME,
+        NVDIMM::i2cReg::NVM_LIFETIME_ERROR_THRESHOLD,
+        NVDIMM::i2cReg::NVM_LIFETIME_WARNING_THRESHOLD,
+
+        // ES Lifetime registers
+        NVDIMM::i2cReg::ES_LIFETIME,
+        NVDIMM::i2cReg::ES_LIFETIME_ERROR_THRESHOLD,
+        NVDIMM::i2cReg::ES_LIFETIME_WARNING_THRESHOLD,
+
+        // Status registers
+        NVDIMM::i2cReg::ERASE_STATUS,
+        NVDIMM::i2cReg::ARM_STATUS,
+        NVDIMM::i2cReg::SET_EVENT_NOTIFICATION_STATUS,
+    };
+
+    ERRORLOG::ErrlUserDetailsLogRegister regUd( i_nvdimm );
+    for ( auto const & reg : regList )
+    {
+        // NVDIMM register size = 1 byte
+        size_t NVDIMM_SIZE = 1;
+
+        uint8_t data = 0;
+        errlHndl_t errl = deviceRead( i_nvdimm, &data, NVDIMM_SIZE,
+                                      DEVICE_NVDIMM_ADDRESS(reg) );
+        if ( errl )
+        {
+            PRDF_ERR( PRDF_FUNC "Failed to read register 0x%X on "
+                      "NVDIMM HUID: 0x%08x", reg, getHuid(i_nvdimm) );
+            // Don't commit, just delete the error and continue
+            delete errl; errl = nullptr;
+            continue;
+        }
+        // Only add registers that have non-zero data.
+        if ( 0 == data ) continue;
+
+        regUd.addDataBuffer( &data, sizeof(data), DEVICE_NVDIMM_ADDRESS(reg) );
+    }
+
+    regUd.addToLog( io_errl );
+
+    #undef PRDF_FUNC
 }
 
 #endif

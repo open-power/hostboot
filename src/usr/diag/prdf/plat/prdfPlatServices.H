@@ -188,8 +188,7 @@ uint32_t nvdimmNotifyProtChange( TARGETING::TargetHandle_t i_target,
  * @param i_nvdimm An nvdimm target
  * @param io_errl  Error log to add the FFDC to
  */
-void nvdimmAddPage4Ffdc( TARGETING::TargetHandle_t i_nvdimm,
-                         errlHndl_t & io_errl  );
+void nvdimmAddFfdc( TARGETING::TargetHandle_t i_nvdimm, errlHndl_t & io_errl  );
 
 #endif
 
