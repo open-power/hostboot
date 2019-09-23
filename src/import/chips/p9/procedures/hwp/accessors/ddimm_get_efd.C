@@ -222,7 +222,7 @@ bool check_valid_mfg_id(const uint16_t i_mfg_id)
 /// @param[in] i_dmb_revision DMB revision
 /// @return expected DMB revision for ID
 ///
-uint16_t check_valid_dmb_revision(const uint16_t i_mfg_id, const uint16_t i_dmb_revision)
+bool check_valid_dmb_revision(const uint16_t i_mfg_id, const uint8_t i_dmb_revision)
 {
     if (i_mfg_id == SPD_DDR4_DMB_MFG_ID_IBM)
     {
@@ -459,7 +459,7 @@ extern "C"
         uint16_t l_efdCount{0};         // The number of EFDs
         size_t l_efdSize{0};            // The size of an EFD, not EFD meta data
         uint16_t l_dmbMfgId{0};         // The DMB manufacture ID
-        uint16_t l_dmb_revision{0};
+        uint8_t l_dmb_revision{0};
         uint16_t l_freqMask{0};         // The frequency mask as found in EFD
         uint8_t l_rankMask{0};          // The rank mask as found in EFD
         size_t ii{0};                   // A loop index
@@ -670,9 +670,7 @@ extern "C"
         FAPI_DBG ( "ddr4_get_efd: SPD DMB manufacturer ID = 0x%.4X",
                    io_vpdInfo.iv_dmb_mfg_id);
 
-        l_dmb_revision = *reinterpret_cast<const uint16_t*>(&i_spdBuffer[SPD_DMB_REVISION_ADDR]);
-        // Swap endianess to host format.
-        l_dmb_revision = le16toh(l_dmb_revision);
+        l_dmb_revision = *reinterpret_cast<const uint8_t*>(&i_spdBuffer[SPD_DMB_REVISION_ADDR]);
 
         // Confirm that the DMB revision is what is expected
         FAPI_ASSERT( check_valid_dmb_revision(l_dmbMfgId, l_dmb_revision),
