@@ -494,8 +494,8 @@ errlHndl_t nvdimmReady(Target *i_nvdimm)
             break;
         }
 
-        // Convert to ms for polling
-        uint32_t l_nvm_init_time_ms = l_nvm_init_time * MS_PER_SEC;
+        // Convert to ms for polling and double the value to avoid edge condition
+        uint32_t l_nvm_init_time_ms = l_nvm_init_time * MS_PER_SEC * 2;
         uint32_t l_poll = 0;
 
         do
