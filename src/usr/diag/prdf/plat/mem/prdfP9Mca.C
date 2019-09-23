@@ -1359,7 +1359,7 @@ int32_t AnalyzeNvdimmHealthStatRegs( ExtensibleChip * i_chip,
             PRDF_ERR( PRDF_FUNC "Failed to get the global error log." );
             continue;
         }
-        PlatServices::nvdimmAddPage4Ffdc( dimm, mainErrl );
+        PlatServices::nvdimmAddFfdc( dimm, mainErrl );
 
         // De-assert the EVENT_N pin by setting bit 2 in NVDIMM_MGT_CMD1
         l_rc = __deassertEventN( dimm );
