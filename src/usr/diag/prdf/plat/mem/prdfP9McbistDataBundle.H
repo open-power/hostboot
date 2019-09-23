@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -81,6 +81,17 @@ class McbistDataBundle : public DataBundle
 
     /** The Targeted Diagnostics controller. */
     MemTdCtlr<TARGETING::TYPE_MCBIST> * iv_tdCtlr = nullptr;
+
+  public: // instance variables
+    #ifdef __HOSTBOOT_RUNTIME
+
+    // These are used to limit the number of times a scrub command will stop
+    // on a UE or CE on a rank. This is to prevent potential flooding of
+    // maintenance UEs or CEs. The threshold will be 16 per rank for each.
+    ScrubResumeCounter iv_ueScrubStopCounter;
+    ScrubResumeCounter iv_ceScrubStopCounter;
+
+    #endif
 };
 
 /**
