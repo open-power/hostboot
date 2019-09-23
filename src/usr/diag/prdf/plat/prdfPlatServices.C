@@ -39,6 +39,7 @@
 #include <prdfAssert.h>
 #include <prdfRegisterCache.H>
 
+#include <prdfP9McbistDataBundle.H>
 #include <prdfMemScrubUtils.H>
 
 #include <iipServiceDataCollector.h>
@@ -645,6 +646,12 @@ uint32_t startBgScrub<TYPE_MCA>( ExtensibleChip * i_mcaChip,
     // Get the MCBIST fapi target
     ExtensibleChip * mcbChip = getConnectedParent( i_mcaChip, TYPE_MCBIST );
     fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiTrgt ( mcbChip->getTrgt() );
+
+    #ifdef __HOSTBOOT_RUNTIME
+    // Starting a new command. Clear the UE and CE scrub stop counters
+    getMcbistDataBundle( mcbChip )->iv_ueScrubStopCounter.reset();
+    getMcbistDataBundle( mcbChip )->iv_ceScrubStopCounter.reset();
+    #endif
 
     // Get the stop conditions.
     // NOTE: If HBRT_PRD is not configured, we want to use the defaults so that

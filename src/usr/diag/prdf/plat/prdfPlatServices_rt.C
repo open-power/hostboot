@@ -36,6 +36,7 @@
 #include <prdfTrace.H>
 
 // Platform includes
+#include <prdfP9McbistDataBundle.H>
 #include <prdfMemScrubUtils.H>
 #include <prdfPlatServices.H>
 
@@ -172,9 +173,45 @@ uint32_t resumeBgScrub<TYPE_MCBIST>( ExtensibleChip * i_chip )
             break;
         }
 
+        // Check UE and CE stop counters to determine stop conditions
+        mss::mcbist::stop_conditions<> stopCond;
+        if ( getMcbistDataBundle(i_chip)->iv_ueScrubStopCounter.atTh() )
+        {
+            // If we've reached the limit of UEs we're allowed to stop on
+            // per rank, only set the stop on mpe stop condition.
+            stopCond.set_pause_on_mpe(mss::ON);
+        }
+        else if ( getMcbistDataBundle(i_chip)->iv_ceScrubStopCounter.atTh() )
+        {
+            // If we've reached the limit of CEs we're allowed to stop on
+            // per rank, set all the normal stop conditions except stop on CE
+            stopCond.set_pause_on_aue(mss::ON);
+
+            #ifdef CONFIG_HBRT_PRD
+
+            stopCond.set_pause_on_mpe(mss::ON)
+                    .set_pause_on_ue(mss::ON);
+
+            // In MNFG mode, stop on RCE_ETE to get an accurate callout for IUEs
+            if ( mfgMode() ) stopCond.set_thresh_rce(1);
+
+            #endif
+        }
+        else
+        {
+            // If we haven't reached threshold on the number of UEs or CEs we
+            // have stopped on, do not change the stop conditions.
+            stopCond = mss::mcbist::stop_conditions<>(
+                mss::mcbist::stop_conditions<>::DONT_CHANGE );
+        }
+
         // Resume the command on the next address.
+        // Note: we have to limit the number of times a command has been stopped
+        // because of a UE/CE. Therefore, we must always resume the command to
+        // the end of the current slave rank so we can reset the UE/CE counts.
         errlHndl_t errl;
-        FAPI_INVOKE_HWP( errl, mss::memdiags::continue_cmd, fapiTrgt );
+        FAPI_INVOKE_HWP( errl, mss::memdiags::continue_cmd, fapiTrgt,
+            mss::mcbist::STOP_AFTER_SLAVE_RANK, stopCond );
 
         if ( nullptr != errl )
         {
