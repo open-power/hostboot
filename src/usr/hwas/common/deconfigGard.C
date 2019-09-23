@@ -1844,8 +1844,7 @@ void DeconfigGard::_deconfigureByAssoc(
 
     if ((i_deconfigRule == NOT_AT_RUNTIME) ||
         (i_deconfigRule == SPEC_DECONFIG)  ||
-        (l_targetType == TYPE_EQ)          ||
-        (l_targetType == TYPE_EX)          ||
+        (l_targetType == TYPE_FC)          ||
         (l_targetType == TYPE_CORE))
     {
         // Allow any affinity deconfigure if NOT at runtime
@@ -1854,7 +1853,7 @@ void DeconfigGard::_deconfigureByAssoc(
         //
         // Allow all speculative deconfigures, irregardless of runtime status
         //
-        // Allow affinity deconfig of EQ, EX, and CORE targets,
+        // Allow affinity deconfig of FC and CORE targets,
         // regardless of the runtime status
 
         // Work deconfigure down to its children
@@ -1903,8 +1902,7 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
 
     if ((i_deconfigRule == NOT_AT_RUNTIME) ||
         (i_deconfigRule == SPEC_DECONFIG)  ||
-        (l_targetType == TYPE_EQ)          ||
-        (l_targetType == TYPE_EX)          ||
+        (l_targetType == TYPE_FC)          ||
         (l_targetType == TYPE_CORE))
     {
         // Allow any affinity deconfigure if NOT at runtime
@@ -1913,12 +1911,12 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
         //
         // Allow all speculative deconfigures, irregardless of runtime status
         //
-        // Allow affinity deconfig of EQ, EX, and CORE targets,
+        // Allow affinity deconfig of FC and CORE targets,
         // regardless of the runtime status
 
         // Handles bus endpoint (TYPE_XBUS, TYPE_ABUS, TYPE_PSI) and
         // memory (TYPE_MEMBUF, TYPE_MBA, TYPE_DIMM)
-        // chip  (TYPE_EQ, TYPE_EX, TYPE_CORE)
+        // chip  (TYPE_FC, TYPE_CORE)
         // obus specific (TYPE_OBUS, TYPE_NPU, TYPE_SMPGROUP, TYPE_OBUS_BRICK)
         // deconfigureByAssociation rules
         switch (l_targetType)
@@ -1930,96 +1928,59 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
                 // in pairs
                 //
                 // In Normal Core Mode if both cores are non-functional
-                // EX should be deconfigured
+                // FC should be deconfigured
                 //
-                // First get parent i.e EX
+                // First get parent i.e FC
                 // Other errors may have affected parent state so use
                 // UTIL_FILTER_ALL
-                TargetHandleList pParentExList;
-                getParentAffinityTargetsByState(pParentExList, &i_target,
-                        CLASS_UNIT, TYPE_EX, UTIL_FILTER_ALL);
-                HWAS_ASSERT((pParentExList.size() == 1),
-                    "HWAS _deconfigParentAssoc: pParentExList != 1");
-                Target *l_parentEX = pParentExList[0];
+                TargetHandleList pParentFcList;
+                getParentAffinityTargetsByState(pParentFcList, &i_target,
+                        CLASS_UNIT, TYPE_FC, UTIL_FILTER_ALL);
+                HWAS_ASSERT((pParentFcList.size() == 1),
+                    "HWAS _deconfigParentAssoc: pParentFcList != 1");
+                Target *l_parentFC = pParentFcList[0];
 
                 // General predicate to determine if target is functional
                 PredicateIsFunctional isFunctional;
 
-                if (isFunctional(l_parentEX))
+                if (isFunctional(l_parentFC))
                 {
                     // Fused Core Mode
                     if (is_fused_mode())
                     {
                         // If parent is functional, deconfigure it
-                        _deconfigureTarget(*l_parentEX,
+                        _deconfigureTarget(*l_parentFC,
                            i_errlEid, NULL,i_deconfigRule);
-                        _deconfigureByAssoc(*l_parentEX,
+                        _deconfigureByAssoc(*l_parentFC,
                           i_errlEid,i_deconfigRule);
-                        // After deconfiguring EX the other EX of EQ
-                        // is non-functional, case TYPE_EX takes care
+                        // After deconfiguring FC the other FC of EQ
+                        // is non-functional, case TYPE_FC takes care
                     }
                     // Normal Core Mode
-                    // if both cores of EX non-functional, de-config EX
-                    else if (!anyChildFunctional(*l_parentEX))
+                    // if both cores of FC non-functional, de-config FC
+                    else if (!anyChildFunctional(*l_parentFC))
                     {
                        uint32_t l_errlEidOverride = i_errlEid;
 
                        // If any sibling is not functional due to FCO, override
                        // the deconfig by Eid reason of its parent to FCO
-                       if (anyChildFCO(*l_parentEX))
+                       if (anyChildFCO(*l_parentFC))
                        {
-                           HWAS_INF("Override EX %.8X deconfigByEid %.8X->FCO",
-                                    get_huid(l_parentEX), i_errlEid);
+                           HWAS_INF("Override FC %.8X deconfigByEid %.8X->FCO",
+                                    get_huid(l_parentFC), i_errlEid);
                            l_errlEidOverride =
                                     DECONFIGURED_BY_FIELD_CORE_OVERRIDE;
                        }
 
                        // If parent is functional, deconfigure it
-                       _deconfigureTarget(*l_parentEX,
+                       _deconfigureTarget(*l_parentFC,
                           l_errlEidOverride, NULL, i_deconfigRule);
-                       _deconfigureByAssoc(*l_parentEX,
+                       _deconfigureByAssoc(*l_parentFC,
                           l_errlEidOverride, i_deconfigRule);
                     } // is_fused
                 } // isFunctional
                 break;
             } // TYPE_CORE
-
-            case TYPE_EX:
-            {
-                //
-                // EQ with no good EX should be de-configured
-                //
-                // Other errors may have affected parent state so use
-                // UTIL_FILTER_ALL
-                TargetHandleList pEqList;
-                getParentAffinityTargetsByState(pEqList,
-                        &i_target, CLASS_UNIT, TYPE_EQ,
-                        UTIL_FILTER_ALL);
-
-                HWAS_ASSERT((pEqList.size() == 1),
-                    "HWAS _deconfigParentAssoc: pEqList != 1");
-                Target *l_targetEq = pEqList[0];
-
-                if (!anyChildFunctional(*l_targetEq))
-                {
-                    uint32_t l_errlEidOverride = i_errlEid;
-
-                    // If any sibling is not functional due to FCO, override
-                    // the deconfig by Eid reason of its parent to FCO
-                    if (anyChildFCO(*l_targetEq))
-                    {
-                        HWAS_INF("Override EQ %.8X deconfigByEid %.8X->FCO",
-                                 get_huid(l_targetEq), i_errlEid);
-                        l_errlEidOverride =
-                                 DECONFIGURED_BY_FIELD_CORE_OVERRIDE;
-                    }
-
-                    _deconfigureTarget(*l_targetEq, l_errlEidOverride, NULL,
-                                    i_deconfigRule);
-                }
-
-                break;
-            } // TYPE_EX
 
             case TYPE_DIMM:
             {

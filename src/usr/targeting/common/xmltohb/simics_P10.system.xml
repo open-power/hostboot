@@ -751,7 +751,7 @@
 -->
     <attribute>
         <id>HUID</id>
-        <default>0x00520000</default>
+        <default>0x00530000</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -795,7 +795,7 @@
 -->
     <attribute>
         <id>HUID</id>
-        <default>0x00520001</default>
+        <default>0x00530001</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -839,7 +839,7 @@
 -->
     <attribute>
         <id>HUID</id>
-        <default>0x00520002</default>
+        <default>0x00530002</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -883,7 +883,7 @@
 -->
     <attribute>
         <id>HUID</id>
-        <default>0x00520003</default>
+        <default>0x00530003</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -927,7 +927,7 @@
 -->
     <attribute>
         <id>HUID</id>
-        <default>0x00520004</default>
+        <default>0x00530004</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -971,7 +971,7 @@
 -->
     <attribute>
         <id>HUID</id>
-        <default>0x00520005</default>
+        <default>0x00530005</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1015,7 +1015,7 @@
 -->
     <attribute>
         <id>HUID</id>
-        <default>0x00520006</default>
+        <default>0x00530006</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1059,7 +1059,7 @@
 -->
     <attribute>
         <id>HUID</id>
-        <default>0x00520007</default>
+        <default>0x00530007</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1103,7 +1103,7 @@
 -->
     <attribute>
         <id>HUID</id>
-        <default>0x00520008</default>
+        <default>0x00530008</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1147,7 +1147,7 @@
 -->
     <attribute>
         <id>HUID</id>
-        <default>0x00520009</default>
+        <default>0x00530009</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1191,7 +1191,7 @@
 -->
     <attribute>
         <id>HUID</id>
-        <default>0x0052000a</default>
+        <default>0x0053000a</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1235,7 +1235,7 @@
 -->
     <attribute>
         <id>HUID</id>
-        <default>0x0052000b</default>
+        <default>0x0053000b</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1279,7 +1279,7 @@
 -->
     <attribute>
         <id>HUID</id>
-        <default>0x0052000c</default>
+        <default>0x0053000c</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1323,7 +1323,7 @@
 -->
     <attribute>
         <id>HUID</id>
-        <default>0x0052000d</default>
+        <default>0x0053000d</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1367,7 +1367,7 @@
 -->
     <attribute>
         <id>HUID</id>
-        <default>0x0052000e</default>
+        <default>0x0053000e</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1411,7 +1411,7 @@
 -->
     <attribute>
         <id>HUID</id>
-        <default>0x0052000f</default>
+        <default>0x0053000f</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>

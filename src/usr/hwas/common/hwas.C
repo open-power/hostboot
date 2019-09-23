@@ -68,8 +68,8 @@ using PARTIAL_GOOD::pg_entry_t;
 using PARTIAL_GOOD::pg_mask_t;
 
 // trace setup; used by HWAS_DBG and HWAS_ERR macros
-HWAS_TD_t g_trac_dbg_hwas   = NULL; // debug - fast
-HWAS_TD_t g_trac_imp_hwas   = NULL; // important - slow
+HWAS_TD_t g_trac_dbg_hwas   = nullptr; // debug - fast
+HWAS_TD_t g_trac_imp_hwas   = nullptr; // important - slow
 
 #ifdef __HOSTBOOT_MODULE
 TRAC_INIT(&g_trac_dbg_hwas, "HWAS",     KILOBYTE );
@@ -611,7 +611,7 @@ static partialGoodVector parsePgData(const std::array<uint8_t, VPD_CP00_PG_DATA_
 errlHndl_t discoverTargets()
 {
     HWAS_DBG("discoverTargets entry");
-    errlHndl_t errl = NULL;
+    errlHndl_t errl = nullptr;
 
     //  loop through all the targets and set HWAS_STATE to a known default
     for (TargetIterator target = targetService().begin();
@@ -670,7 +670,7 @@ errlHndl_t discoverTargets()
         // in the future.
         errl = discoverMuxTargetsAndEnable(*pSys);
 
-        if (errl != NULL)
+        if (errl != nullptr)
         {
             break; // break out of the do/while so that we can return
         }
@@ -698,7 +698,7 @@ errlHndl_t discoverTargets()
         errl = platPresenceDetect(pCheckPres);
         HWAS_DBG("pCheckPres size: %d", pCheckPres.size());
 
-        if (errl != NULL)
+        if (errl != nullptr)
         {
             break; // break out of the do/while so that we can return
         }
@@ -793,7 +793,7 @@ errlHndl_t discoverTargets()
 
                     // commit the error but keep going
                     errlCommit(errl, HWAS_COMP_ID);
-                    // errl is now NULL
+                    // errl is now nullptr
                 }
                 else if (l_targetType == TYPE_PROC)
                 {
@@ -809,7 +809,7 @@ errlHndl_t discoverTargets()
 
                         // commit the error but keep going
                         errlCommit(errl, HWAS_COMP_ID);
-                        // errl is now NULL
+                        // errl is now nullptr
                     }
                     else
                     {
@@ -1502,39 +1502,28 @@ errlHndl_t checkPartialGoodForDescendants(
 
 }
 
-void forceEcExEqDeconfig(const TARGETING::TargetHandle_t i_core,
-                         const bool i_present,
-                         const uint32_t i_deconfigReason)
+void forceEcFcDeconfig(const TARGETING::TargetHandle_t i_core,
+                       const bool i_present,
+                       const uint32_t i_deconfigReason)
 {
     TargetHandleList pECList;
-    TargetHandleList pEXList;
+    TargetHandleList pFCList;
 
     //Deconfig the EC
     enableHwasState(i_core, i_present, false, i_deconfigReason);
     HWAS_INF("pEC   %.8X - marked %spresent, NOT functional",
              i_core->getAttr<ATTR_HUID>(), i_present ? "" : "NOT ");
 
-    //Get parent EX and see if any other cores, if none, deconfig
-    auto exType = TARGETING::TYPE_EX;
-    auto eqType = TARGETING::TYPE_EQ;
+    //Get parent FC and see if any other cores, if none, deconfig
+    auto fcType = TARGETING::TYPE_FC;
 
-    TARGETING::Target* l_ex = getParent(i_core, exType);
-    getChildChiplets(pECList, l_ex, TYPE_CORE, true);
+    TARGETING::Target* l_fc = getParent(i_core, fcType);
+    getChildChiplets(pECList, l_fc, TYPE_CORE, true);
     if(pECList.size() == 0)
     {
-        enableHwasState(l_ex, i_present, false, i_deconfigReason);
-        HWAS_INF("pEX   %.8X - marked %spresent, NOT functional",
-                 l_ex->getAttr<ATTR_HUID>(), i_present ? "" : "NOT ");
-
-        //Now get the parent EQ and check to see if it should be deconfigured
-        TARGETING::Target* l_eq = getParent(l_ex, eqType);
-        getChildChiplets(pEXList, l_eq, TYPE_EX, true);
-        if(pEXList.size() == 0)
-        {
-            enableHwasState(l_eq, i_present, false, i_deconfigReason);
-            HWAS_INF("pEQ   %.8X - marked %spresent, NOT functional",
-                     l_eq->getAttr<ATTR_HUID>(), i_present ? "" : "NOT ");
-        }
+        enableHwasState(l_fc, i_present, false, i_deconfigReason);
+        HWAS_INF("pFC   %.8X - marked %spresent, NOT functional",
+                 l_fc->getAttr<ATTR_HUID>(), i_present ? "" : "NOT ");
     }
 
 }
@@ -1581,11 +1570,11 @@ errlHndl_t restrictECunits(
         HWAS_INF("procRestrictList[%d] - maxECs 0x%X, procs %d, group %d",
                 procIdx, maxECs, procs, thisGroup);
 
-        // exs, ecs, and iters for each proc in this vpd set
-        TargetHandleList pEXList[procs];
-        TargetHandleList::const_iterator pEX_it[procs];
-        TargetHandleList pECList[procs][NUM_EX_PER_CHIP];
-        TargetHandleList::const_iterator pEC_it[procs][NUM_EX_PER_CHIP];
+        // fcs, ecs, and iters for each proc in this vpd set
+        TargetHandleList pFCList[procs];
+        TargetHandleList::const_iterator pFC_it[procs];
+        TargetHandleList pECList[procs][NUM_FC_PER_CHIP];
+        TargetHandleList::const_iterator pEC_it[procs][NUM_FC_PER_CHIP];
 
         // find the proc's that we think are in this group
         uint32_t currentPairedECs = 0;
@@ -1616,28 +1605,28 @@ errlHndl_t restrictECunits(
                 l_masterProc = i;
             }
 
-            // get this proc's (CHILD) EX units
+            // get this proc's (CHILD) FC units
             // Need to get all so we init the pEC_it array
-            getChildChiplets(pEXList[i], pProc, TYPE_EX, false);
+            getChildChiplets(pFCList[i], pProc, TYPE_FC, false);
 
-            if (!pEXList[i].empty())
+            if (!pFCList[i].empty())
             {
                 // sort the list by ATTR_HUID to ensure that we
                 //  start at the same place each time
-                std::sort(pEXList[i].begin(), pEXList[i].end(),
+                std::sort(pFCList[i].begin(), pFCList[i].end(),
                           compareTargetHuid);
 
                 // keep a pointer into that list
-                pEX_it[i] = pEXList[i].begin();
+                pFC_it[i] = pFCList[i].begin();
 
                 for (uint32_t j = 0;
-                     (j < NUM_EX_PER_CHIP) && (pEX_it[i] != pEXList[i].end());
+                     (j < NUM_FC_PER_CHIP) && (pFC_it[i] != pFCList[i].end());
                      j++)
                 {
-                    TargetHandle_t pEX = *(pEX_it[i]);
+                    TargetHandle_t pFC = *(pFC_it[i]);
 
-                    // get this EX's (CHILD) functional EC/core units
-                    getChildChiplets(pECList[i][j], pEX,
+                    // get this FC's (CHILD) functional EC/core units
+                    getChildChiplets(pECList[i][j], pFC,
                                      TYPE_CORE, true);
 
                     // keep a pointer into that list
@@ -1663,9 +1652,9 @@ errlHndl_t restrictECunits(
                         }
                     }
 
-                    // go to next EX
-                    (pEX_it[i])++;
-                } // for j < NUM_EX_PER_CHIP
+                    // go to next FC
+                    (pFC_it[i])++;
+                } // for j < NUM_FC_PER_CHIP
 
                 // go to next proc
                 i++;
@@ -1702,7 +1691,7 @@ errlHndl_t restrictECunits(
                 (currentPairedECs + currentSingleECs), maxECs);
 
         // now need to find EC units that stay functional, going
-        //  across the list of units for each proc and EX we have,
+        //  across the list of units for each proc and FC we have,
         //  until we get to the max or run out of ECs, giving
         //  preference to paired ECs and if we are in fused mode
         //  excluding single, non-paired ECs.
@@ -1721,66 +1710,66 @@ errlHndl_t restrictECunits(
         // in order to avoid the situation of master not having any cores.
         bool l_allocatedToMaster = false;
 
-        // Each pECList has ECs for a given EX and proc.  Check each EC list to
+        // Each pECList has ECs for a given FC and proc.  Check each EC list to
         //  determine if it has an EC pair or a single EC and if the remaining
         //  count indicates the given EC from that list is to stay functional.
 
-        // Cycle through the first EX of each proc, then the second EX of each
+        // Cycle through the first FC of each proc, then the second FC of each
         // proc and so on as we decrement remaining ECs. We put procs as the
-        // inner loop and EXs as the outer to distribute the functional ECs
+        // inner loop and FCs as the outer to distribute the functional ECs
         // evenly between procs. After we run out of ECs, we deconfigure the
         // remaining ones.
 
         // Mark the ECs that have been accounted for
-        uint8_t EC_checkedList[procs][NUM_EX_PER_CHIP];
+        uint8_t EC_checkedList[procs][NUM_FC_PER_CHIP];
         memset(EC_checkedList, 0, sizeof(EC_checkedList));
 
-        for (uint32_t l_EX = 0; l_EX < NUM_EX_PER_CHIP; l_EX++)
+        for (uint32_t l_FC = 0; l_FC < NUM_FC_PER_CHIP; l_FC++)
         {
             for (int l_proc = 0; l_proc < procs; l_proc++)
             {
-                // Save l_EX value to current EX, this is to be restored later
-                uint32_t currrentEX = l_EX;
+                // Save l_FC value to current FC, this is to be restored later
+                uint32_t currrentFC = l_FC;
 
                 // If core doesn't exist or already checked, find the
                 // next available core on this proc in order to balance
                 // the core distribution.
-                uint8_t nextEXwithCore = 0;
-                if ( (!pECList[l_proc][l_EX].size()) ||
-                     (EC_checkedList[l_proc][l_EX]) )
+                uint8_t nextFCwithCore = 0;
+                if ( (!pECList[l_proc][l_FC].size()) ||
+                     (EC_checkedList[l_proc][l_FC]) )
                 {
-                    HWAS_INF("Current EX = %d, PROC %d: Need to find next "
-                             "avail EX with cores.", l_EX, l_proc);
-                    for (nextEXwithCore = l_EX+1;
-                         nextEXwithCore < NUM_EX_PER_CHIP;
-                         nextEXwithCore++)
+                    HWAS_INF("Current FC = %d, PROC %d: Need to find next "
+                             "avail FC with cores.", l_FC, l_proc);
+                    for (nextFCwithCore = l_FC+1;
+                         nextFCwithCore < NUM_FC_PER_CHIP;
+                         nextFCwithCore++)
                     {
-                         if ( (pECList[l_proc][nextEXwithCore].size()) &&
-                              (!(EC_checkedList[l_proc][nextEXwithCore]) ) )
+                         if ( (pECList[l_proc][nextFCwithCore].size()) &&
+                              (!(EC_checkedList[l_proc][nextFCwithCore]) ) )
                          {
-                             l_EX = nextEXwithCore;
-                             HWAS_INF("Next avail EX with cores = %d",
-                                      nextEXwithCore);
+                             l_FC = nextFCwithCore;
+                             HWAS_INF("Next avail FC with cores = %d",
+                                      nextFCwithCore);
                              break;
                          }
                     }
                     // No more core in this proc
-                    if (nextEXwithCore == NUM_EX_PER_CHIP)
+                    if (nextFCwithCore == NUM_FC_PER_CHIP)
                     {
-                        HWAS_INF("No more EX with cores in proc %d", l_proc);
-                        l_EX = currrentEX;
+                        HWAS_INF("No more FC with cores in proc %d", l_proc);
+                        l_FC = currrentFC;
                         continue;
                     }
                 }
 
                 // Mark this core has been checked.
-                EC_checkedList[l_proc][l_EX] = 1;
+                EC_checkedList[l_proc][l_FC] = 1;
 
-                // Walk through the EC list from this EX
-                while (pEC_it[l_proc][l_EX] != pECList[l_proc][l_EX].end())
+                // Walk through the EC list from this FC
+                while (pEC_it[l_proc][l_FC] != pECList[l_proc][l_FC].end())
                 {
-                    // Check if EC pair for this EX
-                    if ((pECList[l_proc][l_EX].size() == 2) &&
+                    // Check if EC pair for this FC
+                    if ((pECList[l_proc][l_FC].size() == 2) &&
                         (pairedECs_remaining != 0)  &&
                          (l_proc==l_masterProc || // is master or
                           l_allocatedToMaster || // was allocated to master
@@ -1789,17 +1778,17 @@ errlHndl_t restrictECunits(
                         // got a functional EC that is part of a pair
                         goodECs++;
                         pairedECs_remaining--;
-                        HWAS_DBG("pEC   0x%.8X - is good %d! (paired) pi:%d EXi:%d pairedECs_remaining %d",
-                                 (*(pEC_it[l_proc][l_EX]))->getAttr<ATTR_HUID>(),
-                                 goodECs, l_proc, l_EX, pairedECs_remaining);
+                        HWAS_DBG("pEC   0x%.8X - is good %d! (paired) pi:%d FCi:%d pairedECs_remaining %d",
+                                 (*(pEC_it[l_proc][l_FC]))->getAttr<ATTR_HUID>(),
+                                 goodECs, l_proc, l_FC, pairedECs_remaining);
                         if (l_proc == l_masterProc)
                         {
                             HWAS_DBG("Allocated to master");
                             l_allocatedToMaster = true;
                         }
                     }
-                    // Check if single EC for this EX
-                    else if ((pECList[l_proc][l_EX].size() == 1) &&
+                    // Check if single EC for this FC
+                    else if ((pECList[l_proc][l_FC].size() == 1) &&
                              (singleECs_remaining != 0) &&
                               (l_proc==l_masterProc || // is master or
                                l_allocatedToMaster || // was allocated to master
@@ -1809,9 +1798,9 @@ errlHndl_t restrictECunits(
                         // got a functional EC without a pair
                         goodECs++;
                         singleECs_remaining--;
-                        HWAS_DBG("pEC   0x%.8X - is good %d! (single) pi:%d EXi:%d singleECs_remaining %d",
-                                 (*(pEC_it[l_proc][l_EX]))->getAttr<ATTR_HUID>(),
-                                 goodECs, l_proc, l_EX, singleECs_remaining);
+                        HWAS_DBG("pEC   0x%.8X - is good %d! (single) pi:%d FCi:%d singleECs_remaining %d",
+                                 (*(pEC_it[l_proc][l_FC]))->getAttr<ATTR_HUID>(),
+                                 goodECs, l_proc, l_FC, singleECs_remaining);
                         if (l_proc == l_masterProc)
                         {
                             HWAS_DBG("Allocated to master");
@@ -1822,24 +1811,24 @@ errlHndl_t restrictECunits(
                     else
                     {
                         // got an EC to be restricted and marked not functional
-                        TargetHandle_t l_pEC = *(pEC_it[l_proc][l_EX]);
-                        forceEcExEqDeconfig(l_pEC, i_present, i_deconfigReason);
-                        HWAS_DBG("pEC   0x%.8X - deconfigured! (%s) pi:%d EXi:%d",
-                            (*(pEC_it[l_proc][l_EX]))->getAttr<ATTR_HUID>(),
-                            (pECList[l_proc][l_EX].size() == 1)? "single": "paired",
-                            l_proc, l_EX);
+                        TargetHandle_t l_pEC = *(pEC_it[l_proc][l_FC]);
+                        forceEcFcDeconfig(l_pEC, i_present, i_deconfigReason);
+                        HWAS_DBG("pEC   0x%.8X - deconfigured! (%s) pi:%d FCi:%d",
+                            (*(pEC_it[l_proc][l_FC]))->getAttr<ATTR_HUID>(),
+                            (pECList[l_proc][l_FC].size() == 1)? "single": "paired",
+                            l_proc, l_FC);
                     }
 
-                    (pEC_it[l_proc][l_EX])++; // next ec in this ex's list
+                    (pEC_it[l_proc][l_FC])++; // next ec in this fc's list
 
-                } // while pEC_it[l_proc][l_EX] != pECList[l_proc][l_EX].end()
+                } // while pEC_it[l_proc][l_FC] != pECList[l_proc][l_FC].end()
 
-                // Restore current EX
-                l_EX = currrentEX;
+                // Restore current FC
+                l_FC = currrentFC;
 
             } // for l_proc < procs
 
-        } // for l_EX < NUM_EX_PER_CHIP
+        } // for l_FC < NUM_FC_PER_CHIP
 
     } // for procIdx < l_ProcCount
 
@@ -1860,7 +1849,7 @@ errlHndl_t restrictECunits(
 void checkCriticalResources(uint32_t & io_commonPlid,
                                   const Target * i_pTop)
 {
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = nullptr;
     PredicatePostfixExpr l_customPredicate;
     PredicateIsFunctional l_isFunctional;
 
@@ -1930,7 +1919,7 @@ void checkCriticalResources(uint32_t & io_commonPlid,
         //  if not, set the common plid
         hwasErrorUpdatePlid(l_errl, io_commonPlid);
         errlCommit(l_errl, HWAS_COMP_ID);
-        // errl is now NULL
+        // errl is now nullptr
     }
 }
 
@@ -1940,7 +1929,7 @@ void checkCriticalResources(uint32_t & io_commonPlid,
 errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys,
         bool *o_bootable)
 {
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = nullptr;
     HWAS_INF("checkMinimumHardware entry");
     uint32_t l_commonPlid = 0;
 
@@ -1970,7 +1959,7 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
 
         // top 'starting' point - use first node if no i_node given (hostboot)
         Target *pTop;
-        if (i_nodeOrSys == NULL)
+        if (i_nodeOrSys == nullptr)
         {
             Target *pSys;
             targetService().getTopLevelTarget(pSys);
@@ -2014,14 +2003,14 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
                 //  if not, set the common plid
                 hwasErrorUpdatePlid(l_errl, l_commonPlid);
                 errlCommit(l_errl, HWAS_COMP_ID);
-                // errl is now NULL
+                // errl is now nullptr
                 break;
             }
 
             // top level has at least 1 node - and it's our node.
             pTop = l_nodes[0];
 
-            HWAS_INF("checkMinimumHardware: i_nodeOrSys = NULL, using %.8X",
+            HWAS_INF("checkMinimumHardware: i_nodeOrSys = nullptr, using %.8X",
                     get_huid(pTop));
         }
         else
@@ -2032,7 +2021,7 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
         }
 
         // check for functional Master Proc on this node
-        Target* l_pMasterProc = NULL;
+        Target* l_pMasterProc = nullptr;
 
         //Get master proc at system level or node level based on target type
         if(pTop->getAttr<ATTR_TYPE>() == TYPE_SYS)
@@ -2045,7 +2034,7 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
                                                           pTop);
         }
 
-        if ((l_pMasterProc == NULL) || (!l_functional(l_pMasterProc)))
+        if ((l_pMasterProc == nullptr) || (!l_functional(l_pMasterProc)))
         {
             HWAS_ERR("Insufficient HW to continue IPL: (no master proc)");
 
@@ -2104,7 +2093,7 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
             //  if not, set the common plid
             hwasErrorUpdatePlid(l_errl, l_commonPlid);
             errlCommit(l_errl, HWAS_COMP_ID);
-            // errl is now NULL
+            // errl is now nullptr
         }
         else
         {
@@ -2131,15 +2120,15 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
                     break;
                 }
                 // determine some numbers to help figure out what's up..
-                PredicateCTM l_ex(CLASS_UNIT, TYPE_EX);
+                PredicateCTM l_ec(CLASS_UNIT, TYPE_CORE);
                 TargetHandleList l_plist;
 
                 PredicatePostfixExpr l_checkExprPresent;
-                l_checkExprPresent.push(&l_ex).push(&l_present).And();
+                l_checkExprPresent.push(&l_ec).push(&l_present).And();
                 targetService().getAssociated(l_plist, l_pMasterProc,
-                        TargetService::CHILD, TargetService::IMMEDIATE,
+                        TargetService::CHILD, TargetService::ALL,
                         &l_checkExprPresent);
-                uint32_t exs_present = l_plist.size();
+                uint32_t ecs_present = l_plist.size();
 
                 /*@
                  * @errortype
@@ -2159,7 +2148,7 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
                     (static_cast<uint64_t>(get_huid(pTop)) << 32) |
                     get_huid(l_pMasterProc);
                 const uint64_t userdata2 =
-                    (static_cast<uint64_t>(exs_present) << 32);
+                    (static_cast<uint64_t>(ecs_present) << 32);
                 l_errl = hwasError(ERRL_SEV_UNRECOVERABLE,
                                     MOD_CHECK_MIN_HW,
                                     RC_SYSAVAIL_NO_CORES_FUNC,
@@ -2174,7 +2163,7 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
                 //  if not, set the common plid
                 hwasErrorUpdatePlid( l_errl, l_commonPlid );
                 errlCommit(l_errl, HWAS_COMP_ID);
-                // errl is now NULL
+                // errl is now nullptr
             } // if no cores
         }
 
@@ -2237,7 +2226,7 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
             //  if not, set the common plid
             hwasErrorUpdatePlid( l_errl, l_commonPlid );
             errlCommit(l_errl, HWAS_COMP_ID);
-            // errl is now NULL
+            // errl is now nullptr
         } // if no dimms
 
         // check for functional NX chiplets
@@ -2318,7 +2307,7 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
     //  ---------------------------------------------------------------
     // if the common plid got set anywhere above, we have an error.
     //  ---------------------------------------------------------------
-    if ((l_commonPlid)&&(o_bootable == NULL))
+    if ((l_commonPlid)&&(o_bootable == nullptr))
     {
         /*@
          * @errortype
@@ -2340,9 +2329,9 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
     }
 
     HWAS_INF("checkMinimumHardware exit - minimum hardware %s",
-            ((l_errl != NULL)||((o_bootable!=NULL)&&(!*o_bootable))) ?
+            ((l_errl != nullptr)||((o_bootable!=nullptr)&&(!*o_bootable))) ?
                     "NOT available" : "available");
-    if((l_errl != NULL)||((o_bootable!=NULL)&&(!*o_bootable)))
+    if((l_errl != nullptr)||((o_bootable!=nullptr)&&(!*o_bootable)))
     {
         // Minimum hardware not available, block speculative deconfigs
         Target *pSys;
@@ -2728,7 +2717,7 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
 
         // Check if there is a next target and set it
         // Don't need to check next target with a DIMM
-        TargetInfo* l_nextTargetInfo = NULL;
+        TargetInfo* l_nextTargetInfo = nullptr;
         if ( ((i + 1) < io_funcTargets.size()) &&
              (l_curTargetInfo.type != TYPE_DIMM) )
         {
@@ -2741,7 +2730,7 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
         {
             // No Child MCSs
             // If next is not a MCS sharing the same MCAs, deconfig MCBIST
-            if ( (l_nextTargetInfo == NULL) ||
+            if ( (l_nextTargetInfo == nullptr) ||
                 (l_nextTargetInfo->type != TYPE_MCS) ||
                 !isSameSubPath(l_curTargetInfo, *l_nextTargetInfo) )
             {
@@ -2773,7 +2762,7 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
         {
             // No Child MCAs
             // If next is not an MCA sharing the same MCS, deconfig MCS
-            if ( (l_nextTargetInfo == NULL) ||
+            if ( (l_nextTargetInfo == nullptr) ||
                  (l_nextTargetInfo->type != TYPE_MCA) ||
                  !isSameSubPath(l_curTargetInfo, *l_nextTargetInfo) )
             {
@@ -2859,7 +2848,7 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
             // Note: LHS (Non-Axone) && RHS (Axone)
             //       For Non-Axone, RHS is always true and for Axone LHS is
             //       always true.
-            if (((l_nextTargetInfo == NULL)
+            if (((l_nextTargetInfo == nullptr)
                     || (l_nextTargetInfo->type != TYPE_MI)
                     || !isSameSubPath(l_curTargetInfo, *l_nextTargetInfo))
                 && ((searchIt == io_funcTargets.end())
@@ -2897,7 +2886,7 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
         {
             // No Child DMIs (for CUMULUS) or MCCs (for AXONE)
             // If next is not a DMI/MCC sharing the same MI, deconfig MI
-            if ( (l_nextTargetInfo == NULL)
+            if ( (l_nextTargetInfo == nullptr)
                 || ((l_nextTargetInfo->type != TYPE_DMI) &&
                    (l_nextTargetInfo->type != TYPE_MCC))
                 || !isSameSubPath(l_curTargetInfo, *l_nextTargetInfo))
@@ -3024,7 +3013,7 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
         {
             // No Child MEMBUFs
             // If next is not a MEMBUF sharing the same DMI, deconfig DMI
-            if ( (l_nextTargetInfo == NULL) ||
+            if ( (l_nextTargetInfo == nullptr) ||
                  ( l_nextTargetInfo->type != TYPE_MEMBUF) ||
                  !isSameSubPath(l_curTargetInfo, *l_nextTargetInfo) )
             {
@@ -3078,7 +3067,7 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
         {
             // No Child OMIs
             // If next is not a OMI sharing the same MCC, deconfig MCC
-            if ( (l_nextTargetInfo == NULL) ||
+            if ( (l_nextTargetInfo == nullptr) ||
                  ( l_nextTargetInfo->type != TYPE_OMI) ||
                  !isSameSubPath(l_curTargetInfo, *l_nextTargetInfo) )
             {
@@ -3132,7 +3121,7 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
         {
             // No Child OCMBs
             // If next is not a OCMB sharing the same OMI, deconfig OMI
-            if ( (l_nextTargetInfo == NULL) ||
+            if ( (l_nextTargetInfo == nullptr) ||
                  ( l_nextTargetInfo->type != TYPE_OCMB_CHIP) ||
                  !isSameSubPath(l_curTargetInfo, *l_nextTargetInfo) )
             {
@@ -3237,7 +3226,7 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
         {
             // No Child MEMPORTs
             // If next is not a MEMPORT sharing the same OCMB, deconfig OCMB
-            if ( (l_nextTargetInfo == NULL) ||
+            if ( (l_nextTargetInfo == nullptr) ||
                  (l_nextTargetInfo->type != TYPE_MEM_PORT) ||
                  !isSameSubPath(l_curTargetInfo, *l_nextTargetInfo))
             {
@@ -3303,7 +3292,7 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
         {
             // No Child DIMMs
             // If next is not a DIMM sharing the same MEMPORT, deconfig MEMPORT
-            if ( (l_nextTargetInfo == NULL) ||
+            if ( (l_nextTargetInfo == nullptr) ||
                  (l_nextTargetInfo->type != TYPE_DIMM) ||
                  !isSameSubPath(l_curTargetInfo, *l_nextTargetInfo))
             {
@@ -3376,7 +3365,7 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
         {
             // No Child MBAs
             // If next is not a MBA sharing the same MEMBUF, deconfig MEMBUF
-            if ( (l_nextTargetInfo == NULL) ||
+            if ( (l_nextTargetInfo == nullptr) ||
                  (l_nextTargetInfo->type != TYPE_MBA) ||
                  !isSameSubPath(l_curTargetInfo, *l_nextTargetInfo) )
             {
@@ -3436,7 +3425,7 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
         {
             // No Child DIMMs
             // If next is not a DIMM sharing the same MBA, deconfig MBA
-            if ( (l_nextTargetInfo == NULL) ||
+            if ( (l_nextTargetInfo == nullptr) ||
                  (l_nextTargetInfo->type != TYPE_DIMM) ||
                  !isSameSubPath(l_curTargetInfo, *l_nextTargetInfo) )
             {
@@ -3499,7 +3488,7 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
         {
             // No Child DIMMs
             // If next is not a DIMM sharing the same MCA, deconfig MCS
-            if ( (l_nextTargetInfo == NULL) ||
+            if ( (l_nextTargetInfo == nullptr) ||
                  (l_nextTargetInfo->type != TYPE_DIMM) ||
                  !isSameSubPath(l_curTargetInfo, *l_nextTargetInfo) )
             {
@@ -4122,7 +4111,7 @@ errlHndl_t validateProcessorEcLevels()
     TARGETING::ATTR_EC_type l_ecToCompare  = 0;
     TARGETING::ATTR_HUID_type l_masterHuid = 0;
     TARGETING::TargetHandleList l_procChips;
-    Target* l_pMasterProc = NULL;
+    Target* l_pMasterProc = nullptr;
     TARGETING::ATTR_MODEL_type l_model;
 
     do
@@ -4132,7 +4121,7 @@ errlHndl_t validateProcessorEcLevels()
 
         // check for functional Master Proc on this node
         l_err = targetService().queryMasterProcChipTargetHandle(l_pMasterProc,
-                                                                NULL, true);
+                                                                nullptr, true);
 
         //queryMasterProcChipTargetHandle will check for null, make sure
         //there was no problem finding the master proc

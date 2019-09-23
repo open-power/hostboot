@@ -322,6 +322,7 @@
       <id>FRU_ID</id>
     </attribute>
     <attribute>
+      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
       <default>0x00000033</default>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
@@ -510,6 +511,7 @@
       <id>FRU_ID</id>
     </attribute>
     <attribute>
+      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
       <default>0x00000033</default>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
@@ -632,6 +634,7 @@
       <id>HOT_PLUG_POWER_CONTROLLER_INFO</id>
     </attribute>
     <attribute>
+      <!-- GARD_APPLIED, RESRC_RECOV, GARD -->
       <default>0x00000031</default>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
@@ -1389,6 +1392,7 @@
       <id>HDAT_RSV_MEM_NUM_SECTIONS</id>
     </attribute>
     <attribute>
+      <!-- GARD_APPLIED, RESRC_RECOV, HOSTSVC_HBEL, GARD -->
       <default>0x00000039</default>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
@@ -1648,6 +1652,7 @@
       <id>FRU_ID</id>
     </attribute>
     <attribute>
+      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
       <default>0x00000033</default>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
@@ -1865,6 +1870,7 @@
     </attribute>
     <attribute>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+      <!-- GARD_APPLIED, RESRC_RECOV, GARD -->
       <default>0x00000031</default>
     </attribute>
     <attribute>
@@ -2249,6 +2255,7 @@
       <id>DECONFIG_GARDABLE</id>
     </attribute>
     <attribute>
+      <!-- GARD_APPLIED, RESRC_RECOV, GARD -->
       <default>0x00000031</default>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
@@ -2291,6 +2298,32 @@
     <id>unit-core-power10</id>
     <parent>unit-core</parent>
     <attribute>
+      <default>1</default>
+      <id>DECONFIG_GARDABLE</id>
+    </attribute>
+    <attribute>
+      <!-- GARD_APPLIED, RESRC_RECOV, GARD -->
+      <default>0x00000031</default>
+      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+    </attribute>
+    <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
+    </attribute>
+    <attribute>
       <id>PARENT_PERVASIVE</id>
     </attribute>
   </targetType>
@@ -2309,6 +2342,7 @@
       <id>DECONFIG_GARDABLE</id>
     </attribute>
     <attribute>
+      <!-- GARD_APPLIED, RESRC_RECOV, GARD -->
       <default>0x00000031</default>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
@@ -2361,6 +2395,7 @@
       <id>DECONFIG_GARDABLE</id>
     </attribute>
     <attribute>
+      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
       <default>0x00000033</default>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
@@ -2403,6 +2438,23 @@
     <id>unit-eq-power10</id>
     <parent>unit-eq</parent>
     <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
+    </attribute>
+    <attribute>
       <id>PARENT_PERVASIVE</id>
     </attribute>
   </targetType>
@@ -2422,6 +2474,7 @@
       <id>DECONFIG_GARDABLE</id>
     </attribute>
     <attribute>
+      <!-- GARD_APPLIED, RESRC_RECOV, GARD -->
       <default>0x00000031</default>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
@@ -2462,6 +2515,7 @@
       <id>DECONFIG_GARDABLE</id>
     </attribute>
     <attribute>
+      <!-- GARD_APPLIED, RESRC_RECOV, GARD -->
       <default>0x00000031</default>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
@@ -2494,6 +2548,28 @@
     <attribute>
       <default>1</default>
       <id>DECONFIG_GARDABLE</id>
+    </attribute>
+    <attribute>
+      <!-- GARD_APPLIED, RESRC_RECOV, GARD -->
+      <default>0x00000031</default>
+      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+    </attribute>
+    <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
       <default>FC</default>
@@ -2556,6 +2632,7 @@
     </attribute>
     <attribute>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
       <default>0x00000033</default>
     </attribute>
     <attribute>
@@ -2578,6 +2655,7 @@
     </attribute>
     <attribute>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
       <default>0x00000033</default>
     </attribute>
     <attribute>
@@ -2656,6 +2734,7 @@
       <default>1</default>
     </attribute>
     <attribute>
+      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
       <default>0x00000033</default>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
@@ -2710,6 +2789,7 @@
       <id>DECONFIG_GARDABLE</id>
     </attribute>
     <attribute>
+      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
       <default>0x00000033</default>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
@@ -2769,6 +2849,7 @@
       <id>DECONFIG_GARDABLE</id>
     </attribute>
     <attribute>
+      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
       <default>0x00000033</default>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
@@ -2876,6 +2957,7 @@
       <id>DECONFIG_GARDABLE</id>
     </attribute>
     <attribute>
+      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
       <default>0x00000033</default>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
@@ -2987,6 +3069,7 @@
       <id>EI_BUS_TX_MSBSWAP</id>
     </attribute>
     <attribute>
+      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
       <default>0x00000033</default>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
@@ -3036,6 +3119,7 @@
     </attribute>
     <attribute>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
       <default>0x00000033</default>
     </attribute>
     <attribute>
@@ -3112,6 +3196,7 @@
       <id>DECONFIG_GARDABLE</id>
     </attribute>
     <attribute>
+      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
       <default>0x00000033</default>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
@@ -3238,6 +3323,7 @@
       <id>DECONFIG_GARDABLE</id>
     </attribute>
     <attribute>
+      <!-- GARD_APPLIED, RESRC_RECOV, GARD -->
       <default>0x00000031</default>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
@@ -3319,6 +3405,7 @@
     </attribute>
     <attribute>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+      <!-- GARD -->
       <default>0x00000001</default>
     </attribute>
     <attribute>
@@ -3386,6 +3473,7 @@
       <id>DECONFIG_GARDABLE</id>
     </attribute>
     <attribute>
+      <!-- GARD_APPLIED, RESRC_RECOV, GARD -->
       <default>0x00000031</default>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
@@ -3441,6 +3529,7 @@
     </attribute>
     <attribute>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+      <!-- GARD -->
       <default>0x00000001</default>
     </attribute>
     <attribute>
@@ -3595,6 +3684,7 @@
       <id>DECONFIG_GARDABLE</id>
     </attribute>
     <attribute>
+      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
       <default>0x00000033</default>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
@@ -3665,6 +3755,7 @@
       <id>DECONFIG_GARDABLE</id>
     </attribute>
     <attribute>
+      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
       <default>0x00000033</default>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
@@ -3739,6 +3830,23 @@
       <id>DECONFIG_GARDABLE</id>
     </attribute>
     <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
+    </attribute>
+    <attribute>
       <id>PARENT_PERVASIVE</id>
     </attribute>
   </targetType>
@@ -3758,6 +3866,7 @@
       <id>DECONFIG_GARDABLE</id>
     </attribute>
     <attribute>
+      <!-- GARD_APPLIED, RESRC_RECOV, GARD -->
       <default>0x00000031</default>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
@@ -3960,6 +4069,27 @@
     <id>unit-phb-power10</id>
     <parent>unit-phb</parent>
     <attribute>
+      <default>1</default>
+      <id>DECONFIG_GARDABLE</id>
+    </attribute>
+    <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
+    </attribute>
+    <attribute>
       <id>PARENT_PERVASIVE</id>
     </attribute>
   </targetType>
@@ -3979,6 +4109,7 @@
       <id>DECONFIG_GARDABLE</id>
     </attribute>
     <attribute>
+      <!-- GARD_APPLIED, RESRC_RECOV, GARD -->
       <default>0x00000031</default>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
@@ -4173,6 +4304,7 @@
       <id>DECONFIG_GARDABLE</id>
     </attribute>
     <attribute>
+      <!-- GARD_APPLIED, RESRC_RECOV, GARD -->
       <default>0x00000031</default>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>

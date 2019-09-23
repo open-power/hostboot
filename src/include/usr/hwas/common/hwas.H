@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,7 +57,7 @@ namespace HWAS
  * @param  none
  *
  * @return errlHndl_t       valid errlHndl_t handle if there was an error
- *                          NULL if no errors;
+ *                          nullptr if no errors;
  */
 errlHndl_t initHardware();
 
@@ -76,7 +76,7 @@ errlHndl_t initHardware();
  * @param  none
  *
  * @return errlHndl_t       valid errlHndl_t handle if there was an error
- *                          NULL if no errors;
+ *                          nullptr if no errors;
  */
 errlHndl_t discoverTargets();
 
@@ -94,13 +94,17 @@ errlHndl_t discoverTargets();
  * @param[in] i_deconfigReason   DECONFIGURED_BY_ enum or 0
  *
  * @return errlHndl_t       valid errlHndl_t handle if there was an error
- *                          NULL if no errors;
+ *                          nullptr if no errors;
  */
 
 // Maximum number of EXs per proc
 #define NUM_EX_PER_EQ     2
-#define NUM_EQ_PER_CHIP   6
+#define NUM_EQ_PER_CHIP   8
 #define NUM_EX_PER_CHIP   (NUM_EX_PER_EQ * NUM_EQ_PER_CHIP)
+
+// Maximum number of FCs per proc
+#define NUM_FC_PER_EQ     2
+#define NUM_FC_PER_CHIP   (NUM_FC_PER_EQ * NUM_EQ_PER_CHIP)
 
 // structure used to store proc information for EC restrict processing
 typedef struct {
@@ -128,14 +132,14 @@ errlHndl_t restrictECunits(
  * @param[in] i_nodeOrSys Level of HW check node or system
  * @param[out] o_bootable Indicate whether the system is
  *             is bootable with current configuration.
- *             if o_bootable is not NULL an error for
+ *             if o_bootable is not nullptr an error for
  *             system unavailability will not be logged
  *
  * @return error log handle
  */
 errlHndl_t checkMinimumHardware(
-    const TARGETING::ConstTargetHandle_t i_nodeOrSys = NULL,
-    bool *o_bootable = NULL);
+    const TARGETING::ConstTargetHandle_t i_nodeOrSys = nullptr,
+    bool *o_bootable = nullptr);
 
 /**
 *  @brief  Loop through processors, make sure all have the same EC level
