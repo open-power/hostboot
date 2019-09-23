@@ -92,6 +92,18 @@ fapi2::ReturnCode p10_omi_setup_bars(
                      (uint64_t)fapi2::current_err);
 
             l_scom_data.flush<0>();
+
+            if (l_mcc_pos % 2 == 0)
+            {
+                FAPI_TRY(GET_SCOMFIR_MCFGP0(l_mi, l_scom_data));
+                FAPI_INF("Read MCFGP0 Value 0x%.16llX", l_scom_data);
+            }
+            else
+            {
+                FAPI_TRY(GET_SCOMFIR_MCFGP1(l_mi, l_scom_data));
+                FAPI_INF("Read MCFGP1 Value 0x%.16llX", l_scom_data);
+            }
+
             // 2GB cfg and MMIO
             FAPI_TRY(PREP_SCOMFIR_MCFGP0(l_mi));
             SET_SCOMFIR_MCFGP0_R0_CONFIGURATION_GROUP_SIZE(mss::exp::ib::EXPLR_IB_BAR_SIZE, l_scom_data);
@@ -179,8 +191,17 @@ fapi2::ReturnCode p10_omi_setup_bars(
                          (64 - SCOMFIR_MCFGPR0_MMIO_GROUP_BASE_ADDRESS_LEN);
             FAPI_DBG("l_mmio_bar: 0x%llx", l_mmio_bar);
 
-            // Write the channel cfg reg
             l_scom_data.flush<0>();
+
+            if(l_mcc_pos % 2 == 0)
+            {
+                FAPI_TRY(GET_SCOMFIR_MCFGPR0(l_mi, l_scom_data));
+            }
+            else
+            {
+                FAPI_TRY(GET_SCOMFIR_MCFGPR1(l_mi, l_scom_data));
+            }
+
             FAPI_TRY(PREP_SCOMFIR_MCFGPR0(l_mi));
             SET_SCOMFIR_MCFGPR0_CONFIGURATION_VALID(l_scom_data);
             SET_SCOMFIR_MCFGPR0_MMIO_VALID(l_scom_data);
