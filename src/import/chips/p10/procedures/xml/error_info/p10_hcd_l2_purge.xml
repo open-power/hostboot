@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -58,9 +58,9 @@
   <!-- ********************************************************************* -->
   <hwpError>
     <sbeError/>
-    <rc>RC_PMSR_SHIFT_ACTIVE_TIMEOUT</rc>
-    <description>poll for drop of PMSR_SHIFT_ACTIVE Timeout.</description>
-    <ffdc>PMSR_SHIFT_ACTIVE_POLL_TIMEOUT_HW_NS</ffdc>
+    <rc>RC_PMSR_SHIFT_INACTIVE_TIMEOUT</rc>
+    <description>poll for drop of PMSR_SHIFT_INACTIVE Timeout.</description>
+    <ffdc>PMSR_SHIFT_INACTIVE_POLL_TIMEOUT_HW_NS</ffdc>
     <ffdc>QME_SCSR</ffdc>
     <ffdc>CORE_TARGET</ffdc>
     <callout>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -111,9 +111,7 @@ p10_hcd_core_shadows_disable(
                 .set_SHADOW_DIS_CORE_SHADOW_STATE_POLL_TIMEOUT_HW_NS(HCD_SHADOW_DIS_CORE_SHADOW_STATE_POLL_TIMEOUT_HW_NS)
                 .set_CPMS_CUCR(l_mmioData)
                 .set_CORE_TARGET(i_target),
-                "Shadow Disable FTC/PP/DPT Shadow State Timeout");
-
-#ifndef XFER_SENT_DONE_DISABLE
+                "ERROR: Shadow Disable FTC/PP/DPT Shadow State Timeout");
 
     FAPI_DBG("Wait on XFER_RECEIVE_DONE via PCR_TFCSR[32]");
     l_timeout = HCD_SHADOW_DIS_XFER_RECEIVE_DONE_POLL_TIMEOUT_HW_NS /
@@ -139,15 +137,16 @@ p10_hcd_core_shadows_disable(
                 .set_SHADOW_DIS_XFER_RECEIVE_DONE_POLL_TIMEOUT_HW_NS(HCD_SHADOW_DIS_XFER_RECEIVE_DONE_POLL_TIMEOUT_HW_NS)
                 .set_QME_TFCSR(l_mmioData)
                 .set_CORE_TARGET(i_target),
-                "Shadow Disable Xfer Receive Done Timeout");
+                "ERROR: Shadow Disable Xfer Receive Done Timeout");
 
     FAPI_DBG("Drop XFER_RECEIVE_DONE via PCR_TFCSR[32]");
-    FAPI_TRY( HCD_GETMMIO_C( i_target, MMIO_LOWADDR(QME_TFCSR_WO_CLEAR), MMIO_1BIT( MMIO_LOWBIT(32) ) ) );
-
-#endif
+    FAPI_TRY( HCD_PUTMMIO_C( i_target, MMIO_LOWADDR(QME_TFCSR_WO_CLEAR), MMIO_1BIT( MMIO_LOWBIT(32) ) ) );
 
     FAPI_DBG("Assert CTFS_WKUP_ENABLE via PCR_SCSR[27]");
     FAPI_TRY( HCD_PUTMMIO_C( i_target, QME_SCSR_WO_OR, MMIO_1BIT(27) ) );
+
+    FAPI_DBG("Disable Droop Detection via FDCR[0]");
+    FAPI_TRY( HCD_PUTMMIO_C( i_target, CPMS_FDCR_WO_OR, MMIO_LOAD32H(BIT32(0)) ) );
 
 fapi_try_exit:
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -93,6 +93,12 @@ p10_hcd_corecache_clock_control(
     FAPI_DBG("Exit Flush (set flushmode inhibit) via CPLT_CTRL4[REGIONS]");
     FAPI_TRY( HCD_PUTSCOM_Q( i_target, CPLT_CTRL4_WO_OR, SCOM_LOAD32H(i_regions) ) );
 
+    FAPI_DBG("Enable Alignment via CPLT_CTRL0[3:CTRL_CC_FORCE_ALIGN]");
+    FAPI_TRY( HCD_PUTSCOM_Q( i_target, CPLT_CTRL0_WO_OR, SCOM_1BIT(3) ) );
+
+    FAPI_DBG("Disable Alignment via CPLT_CTRL0[3:CTRL_CC_FORCE_ALIGN]");
+    FAPI_TRY( HCD_PUTSCOM_Q( i_target, CPLT_CTRL0_WO_CLEAR, SCOM_1BIT(3) ) );
+
     FAPI_DBG("Clear SCAN_REGION_TYPE Register");
     FAPI_TRY( HCD_PUTSCOM_Q( i_target, SCAN_REGION_TYPE, 0 ) );
 
@@ -125,7 +131,7 @@ p10_hcd_corecache_clock_control(
                 .set_CLK_COMMAND(i_command)
                 .set_CLK_REGIONS(i_regions)
                 .set_QUAD_TARGET(i_target),
-                "Core/Cache Clock Control Timeout");
+                "ERROR: Core/Cache Clock Control Timeout");
 
 #ifndef EQ_CLOCK_STAT_DISABLE
     // IF clocks are stopped, check for stat bits ON, use MC_AND target

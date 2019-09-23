@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,7 +64,7 @@ enum P10_HCD_CORECACHE_POWER_CONTROL_CONSTANTS
 
 const uint32_t HCD_PFET_OVERRIDES[2] =
 {
-    (BITS32(4, 2) | BIT32(8)),     //VDD.val/sel/regulation_finger
+    BITS32(4, 2),                 //VDD.val/sel
     BITS32(6, 2)                  //VCS.val/sel
 };
 
@@ -121,14 +121,18 @@ p10_hcd_corecache_power_control(
     fapi2::buffer<buffer_t> l_mmioData        = 0;
     uint32_t                l_pfet_seq_states = 0;
     uint32_t                l_isL3            = (i_command & HCD_PFET_MMA_MASK) >> 1;
-
-    if (l_isL3 != 2)
-    {
-        l_isL3            = (i_command & HCD_PFET_L3_MASK)  >> 1;
-    }
-
     uint32_t                l_isON            = (i_command & HCD_PFET_ON_MASK);
     uint32_t                l_isVCS           = l_isON;
+
+    if (l_isL3 != 2) // if not MMA then figure out if L3 or CL2
+    {
+        l_isL3 = (i_command & HCD_PFET_L3_MASK)  >> 1;
+    }
+    else
+    {
+        l_isVCS = 1; // if MMA only perform VDD, see common bit flip below
+    }
+
 #ifndef PFET_SENSE_POLL_DISABLE
     uint32_t                l_timeout         = 0;
     uint32_t                l_pfet_senses     = 0;
@@ -165,7 +169,7 @@ p10_hcd_corecache_power_control(
                     .set_CORE_TARGET(i_target),
                     "PFET_SEQ_STATE not 0");
 
-        FAPI_DBG("Clear L3/CL2[%x] PFET stage select and value override bits via PFETCNTL[4,5/6,7/8]", l_isL3);
+        FAPI_DBG("Clear L3/CL2[%x] PFET stage select and value override bits via PFETCNTL[4,5/6,7]", l_isL3);
         FAPI_TRY( HCD_PUTMMIO_C( i_target, HCD_CPMS_PFETCNTL_CLR[l_isL3], MMIO_LOAD32H( HCD_PFET_OVERRIDES[l_isVCS] ) ) );
 
         FAPI_DBG("Turn L3/CL2[%x] VCS/VDD[%x] ON/OFF[%x]", l_isL3, l_isVCS, l_isON);
@@ -208,7 +212,7 @@ p10_hcd_corecache_power_control(
                      .set_POW_HEADERS(l_isVCS)
                      .set_POW_DOMAINS(l_isL3)
                      .set_CORE_TARGET(i_target),
-                     "Core/Cache PFET Control Timeout");
+                     "ERROR: Core/Cache PFET Control Timeout");
 
 #endif
 
@@ -222,6 +226,10 @@ p10_hcd_corecache_power_control(
         MMIO_EXTRACT(0, 4, l_pfet_seq_states);
         FAPI_DBG("Current PFET Sequencer State is %x, clear value is %x", l_pfet_seq_states, HCD_PFET_SEQ_STATES[1][l_isVCS]);
 
+        if (l_isL3 == 2) // if MMA only perform VDD
+        {
+            break;
+        }
     }
     while( l_isON ^ l_isVCS );
 

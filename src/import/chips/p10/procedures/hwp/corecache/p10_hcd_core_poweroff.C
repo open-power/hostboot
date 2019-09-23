@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,8 +41,22 @@
 //------------------------------------------------------------------------------
 
 #include "p10_hcd_core_poweroff.H"
+#include "p10_hcd_mma_poweroff.H"
+#include "p10_hcd_mma_stopclocks.H"
 #include "p10_hcd_corecache_power_control.H"
 #include "p10_hcd_common.H"
+
+#ifdef __PPE_QME
+    #include "p10_scom_eq.H"
+    #include "p10_ppe_c.H"
+    using namespace scomt::eq;
+    using namespace scomt::ppe_c;
+#else
+    #include "p10_scom_eq.H"
+    #include "p10_scom_c.H"
+    using namespace scomt::eq;
+    using namespace scomt::c;
+#endif
 
 //------------------------------------------------------------------------------
 // Constant Definitions
@@ -58,7 +72,31 @@ fapi2::ReturnCode
 p10_hcd_core_poweroff(
     const fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > & i_target)
 {
+    fapi2::buffer<buffer_t> l_mmioData = 0;
+
     FAPI_INF(">>p10_hcd_core_poweroff");
+
+    // not stop mma clock as part of stop2 but only for stop11
+    // thus not called in core_stopclocks
+    FAPI_TRY( p10_hcd_mma_stopclocks( i_target ) );
+
+    //The MMA shares the Core-L2 grid which is sync'd with the L3
+    // Therefore not stop grid as part of stop2
+    FAPI_DBG("Switch glsmux to refclk to save clock grid power via CPMS_CGCSR[11]");
+    FAPI_TRY( HCD_PUTMMIO_C( i_target, CPMS_CGCSR_WO_CLEAR, MMIO_1BIT(11) ) );
+
+    // MMA PFET Power On/Off sequence requires CL2 PFET[ON] + CL2 RegulationFinger[ON]
+    // Stop11: Set RF -> MMA PFET[OFF] -> Drop RF -> CL2 PFET[OFF]
+    // Exit11:                                       CL2 PFET[ON] -> Set RF -> MMA PFET[ON] (keep RF on)
+    FAPI_DBG("Assert VDD_PFET_REGULATION_FINGER_EN via CPMS_CL2_PFETCNTL[8]");
+    FAPI_TRY( HCD_PUTMMIO_C( i_target, CPMS_CL2_PFETCNTL_WO_OR, MMIO_1BIT(8) ) );
+
+    // Only VDD for MMA
+    FAPI_TRY( p10_hcd_mma_poweroff( i_target ) );
+
+    // Clear Regulation Finger for CL2 power off below, only MMA/Vmin require it to be on.
+    FAPI_DBG("Drop VDD_PFET_REGULATION_FINGER_EN via CPMS_CL2_PFETCNTL[8]");
+    FAPI_TRY( HCD_PUTMMIO_C( i_target, CPMS_CL2_PFETCNTL_WO_CLEAR, MMIO_1BIT(8) ) );
 
     // VCS off first, VDD off after
     FAPI_TRY( p10_hcd_corecache_power_control( i_target, HCD_POWER_CL2_OFF ) );

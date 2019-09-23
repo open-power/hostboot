@@ -40,7 +40,9 @@
 
 #ifndef __PPE_QME
 
-    //TODO HW487147 these 2 address needs to swaped.
+    #define CPMS_FDCR_WO_CLEAR           CPMS_FDCR_SCOM1
+    #define CPMS_FDCR_WO_OR              CPMS_FDCR_SCOM2
+
     #define CPMS_CUCR_WO_CLEAR           CPMS_CUCR_SCOM1
     #define CPMS_CUCR_WO_OR              CPMS_CUCR_SCOM2
 
@@ -53,7 +55,9 @@
 #else
     #ifndef QME_IMAGE_SOURCE
 
-        //TODO HW487147 these 2 address needs to swaped.
+        #define CPMS_FDCR_WO_CLEAR           CPMS_FDCR_PPE1
+        #define CPMS_FDCR_WO_OR              CPMS_FDCR_PPE2
+
         #define CPMS_CUCR_WO_CLEAR           CPMS_CUCR_PPE1
         #define CPMS_CUCR_WO_OR              CPMS_CUCR_PPE2
 

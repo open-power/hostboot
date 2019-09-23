@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -109,7 +109,7 @@ p10_hcd_l3_purge(
                 .set_L3_PURGE_DONE_POLL_TIMEOUT_HW_NS(HCD_L3_PURGE_DONE_POLL_TIMEOUT_HW_NS)
                 .set_PM_PURGE_REG(l_scomData)
                 .set_CORE_TARGET(i_target),
-                "L3 Purge Done Timeout");
+                "ERROR: L3 Purge Done Timeout");
 
 fapi_try_exit:
 

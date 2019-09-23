@@ -43,6 +43,13 @@
 #include "p10_hcd_corecache_power_control.H"
 #include "p10_hcd_common.H"
 
+#ifdef __PPE_QME
+    #include "p10_ppe_c.H"
+    using namespace scomt::ppe_c;
+#else
+    #include "p10_scom_c.H"
+    using namespace scomt::c;
+#endif
 
 //------------------------------------------------------------------------------
 // Constant Definitions
@@ -60,7 +67,10 @@ p10_hcd_mma_poweroff(
 {
     FAPI_INF(">>p10_hcd_mma_poweroff");
 
-    // VCS off first, VDD off after
+    // MMA PFET Power On/Off sequence requires CL2 PFET[ON] + CL2 RegulationFinger[ON]
+    // Due to Stop3 requires RegulationFinger to be ON while OFF for stop11,
+    // handle it outside of this procedure.
+    // Also note MMA only has VDD
     FAPI_TRY( p10_hcd_corecache_power_control( i_target, HCD_POWER_MMA_OFF ) );
 
 fapi_try_exit:

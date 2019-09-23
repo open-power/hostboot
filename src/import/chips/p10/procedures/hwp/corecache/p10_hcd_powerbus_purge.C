@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -113,7 +113,7 @@ p10_hcd_powerbus_purge(
                 .set_POWERBUS_PURGE_DONE_POLL_TIMEOUT_HW_NS(HCD_POWERBUS_PURGE_DONE_POLL_TIMEOUT_HW_NS)
                 .set_QME_SCSR(l_mmioData)
                 .set_CORE_TARGET(i_target),
-                "PowerBus Purge Done Timeout");
+                "ERROR: PowerBus Purge Done Timeout");
 
     // Note: Do not drop Powerbus Purge until L3 becomes available again.
 

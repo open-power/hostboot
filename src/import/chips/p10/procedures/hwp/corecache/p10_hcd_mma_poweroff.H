@@ -22,6 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
 #ifndef _P10_HCD_MMA_POWEROFF_H_
 #define _P10_HCD_MMA_POWEROFF_H_
 

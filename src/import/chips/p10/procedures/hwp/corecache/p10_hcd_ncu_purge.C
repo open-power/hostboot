@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -118,7 +118,7 @@ p10_hcd_ncu_purge(
                 .set_NCU_PURGE_DONE_POLL_TIMEOUT_HW_NS(HCD_NCU_PURGE_DONE_POLL_TIMEOUT_HW_NS)
                 .set_QME_SCSR(l_mmioData)
                 .set_CORE_TARGET(i_target),
-                "NCU Purge Done Timeout");
+                "ERROR: NCU Purge Done Timeout");
 
     FAPI_DBG("Drop NCU_PURGE_REQ/ABORT via PCR_SCSR[9,10]");
     FAPI_TRY( HCD_PUTMMIO_C( i_target, QME_SCSR_WO_CLEAR, MMIO_LOAD32H( BITS32(9, 2) ) ) );

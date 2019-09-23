@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -68,12 +68,12 @@
 
 enum P10_HCD_L2_PURGE_CONSTANTS
 {
-    HCD_L2_PURGE_DONE_POLL_TIMEOUT_HW_NS        = 100000, // 10^5ns = 100us timeout
-    HCD_L2_PURGE_DONE_POLL_DELAY_HW_NS          = 1000,   // 1us poll loop delay
-    HCD_L2_PURGE_DONE_POLL_DELAY_SIM_CYCLE      = 32000,  // 32k sim cycle delay
-    HCD_PMSR_SHIFT_ACTIVE_POLL_TIMEOUT_HW_NS    = 100000, // 10^5ns = 100us timeout
-    HCD_PMSR_SHIFT_ACTIVE_POLL_DELAY_HW_NS      = 1000,   // 1us poll loop delay
-    HCD_PMSR_SHIFT_ACTIVE_POLL_DELAY_SIM_CYCLE  = 32000,  // 32k sim cycle delay
+    HCD_L2_PURGE_DONE_POLL_TIMEOUT_HW_NS          = 100000, // 10^5ns = 100us timeout
+    HCD_L2_PURGE_DONE_POLL_DELAY_HW_NS            = 1000,   // 1us poll loop delay
+    HCD_L2_PURGE_DONE_POLL_DELAY_SIM_CYCLE        = 32000,  // 32k sim cycle delay
+    HCD_PMSR_SHIFT_INACTIVE_POLL_TIMEOUT_HW_NS    = 100000, // 10^5ns = 100us timeout
+    HCD_PMSR_SHIFT_INACTIVE_POLL_DELAY_HW_NS      = 1000,   // 1us poll loop delay
+    HCD_PMSR_SHIFT_INACTIVE_POLL_DELAY_SIM_CYCLE  = 32000,  // 32k sim cycle delay
 };
 
 //------------------------------------------------------------------------------
@@ -84,7 +84,7 @@ fapi2::ReturnCode
 p10_hcd_l2_purge(
     const fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > & i_target)
 {
-    fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_OR > l_target_or = i_target;
+    fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > l_target  = i_target;
     fapi2::buffer<buffer_t> l_mmioData = 0;
     uint32_t                l_timeout  = 0;
     uint32_t                l_l2_purge_done = 0;
@@ -109,35 +109,35 @@ p10_hcd_l2_purge(
 
         qme_l2_purge_catchup_detect(l_core_select);
 
+        FAPI_INF("catchup0 l_core_select %x", l_core_select);
+
         if (!l_core_select)
         {
-            l_core_select = i_target.getCoreSelect();
+            l_core_select = l_target.getCoreSelect();
         }
 
-        fapi2::Target < fapi2::TARGET_TYPE_CORE |
-        fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > l_target =
-            l_chip.getMulticast<fapi2::MULTICAST_AND>(fapi2::MCGROUP_GOOD_EQ,
-                    static_cast<fapi2::MulticastCoreSelect>(l_core_select));
+        FAPI_INF("catchup1 l_core_select %x", l_core_select);
+
+        l_target = l_chip.getMulticast<fapi2::MULTICAST_AND>(fapi2::MCGROUP_GOOD_EQ,
+                   static_cast<fapi2::MulticastCoreSelect>(l_core_select));
 
         qme_l2_purge_abort_detect();
 
         FAPI_TRY( HCD_GETMMIO_C( l_target, MMIO_LOWADDR(QME_SCSR), l_mmioData ) );
 
+        FAPI_INF("catchup2 l_mmioData %x", l_mmioData);
 #else
 
-        FAPI_TRY( HCD_GETMMIO_C( i_target, MMIO_LOWADDR(QME_SCSR), l_mmioData ) );
+        FAPI_TRY( HCD_GETMMIO_C( l_target, MMIO_LOWADDR(QME_SCSR), l_mmioData ) );
 
 #endif
 
         // use multicastAND to check 1
         MMIO_GET32L(l_l2_purge_done);
 
-#ifndef HBUS_INACTIVE_DISABLE
+        FAPI_INF("catchup3 l_l2_purge_done %x", l_l2_purge_done);
 
         if( ( l_l2_purge_done & BITS64SH(36, 2) ) == BITS64SH(36, 2) )
-#else
-        if( ( l_l2_purge_done & BIT64SH(37) ) == BIT64SH(37) )
-#endif
         {
             break;
         }
@@ -152,40 +152,36 @@ p10_hcd_l2_purge(
                 .set_L2_PURGE_DONE_POLL_TIMEOUT_HW_NS(HCD_L2_PURGE_DONE_POLL_TIMEOUT_HW_NS)
                 .set_QME_SCSR(l_mmioData)
                 .set_CORE_TARGET(i_target),
-                "L2 Purge Done Timeout");
+                "ERROR: L2 Purge Done Timeout");
 
-    FAPI_DBG("Wait for PMSR_SHIFT_ACTIVE to drop via PCR_SCSR[56]");
-    l_timeout = HCD_PMSR_SHIFT_ACTIVE_POLL_TIMEOUT_HW_NS /
-                HCD_PMSR_SHIFT_ACTIVE_POLL_DELAY_HW_NS;
+    FAPI_DBG("Wait for PMSR_SHIFT_INACTIVE to assert via PCR_SCSR[56]");
+    l_timeout = HCD_PMSR_SHIFT_INACTIVE_POLL_TIMEOUT_HW_NS /
+                HCD_PMSR_SHIFT_INACTIVE_POLL_DELAY_HW_NS;
 
     do
     {
-        FAPI_TRY( HCD_GETMMIO_C( l_target_or, MMIO_LOWADDR(QME_SCSR), l_mmioData ) );
+        FAPI_TRY( HCD_GETMMIO_C( l_target, MMIO_LOWADDR(QME_SCSR), l_mmioData ) );
 
         // use multicastOR to check 0
-        if( MMIO_GET(MMIO_LOWBIT(56)) == 0 )
+        if( MMIO_GET(MMIO_LOWBIT(56)) == 1 )
         {
             break;
         }
 
-        fapi2::delay(HCD_PMSR_SHIFT_ACTIVE_POLL_DELAY_HW_NS,
-                     HCD_PMSR_SHIFT_ACTIVE_POLL_DELAY_SIM_CYCLE);
+        fapi2::delay(HCD_PMSR_SHIFT_INACTIVE_POLL_DELAY_HW_NS,
+                     HCD_PMSR_SHIFT_INACTIVE_POLL_DELAY_SIM_CYCLE);
     }
     while( (--l_timeout) != 0 );
 
-#ifndef PMSR_SHIFT_ACTIVE_DISABLE
-
     FAPI_ASSERT((l_timeout != 0),
-                fapi2::PMSR_SHIFT_ACTIVE_TIMEOUT()
-                .set_PMSR_SHIFT_ACTIVE_POLL_TIMEOUT_HW_NS(HCD_PMSR_SHIFT_ACTIVE_POLL_TIMEOUT_HW_NS)
+                fapi2::PMSR_SHIFT_INACTIVE_TIMEOUT()
+                .set_PMSR_SHIFT_INACTIVE_POLL_TIMEOUT_HW_NS(HCD_PMSR_SHIFT_INACTIVE_POLL_TIMEOUT_HW_NS)
                 .set_QME_SCSR(l_mmioData)
                 .set_CORE_TARGET(i_target),
-                "PMSR_SHIFT_ACTIVE Timeout");
-
-#endif
+                "ERROR: PMSR_SHIFT_INACTIVE Timeout");
 
     FAPI_DBG("Drop L2_PURGE_REQ/ABORT via PCR_SCSR[5, 6]");
-    FAPI_TRY( HCD_PUTMMIO_C( i_target, QME_SCSR_WO_CLEAR, MMIO_LOAD32H( BITS32(5, 2) ) ) );
+    FAPI_TRY( HCD_PUTMMIO_C( l_target, QME_SCSR_WO_CLEAR, MMIO_LOAD32H( BITS32(5, 2) ) ) );
 
 fapi_try_exit:
 

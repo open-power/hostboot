@@ -23,6 +23,8 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p10_hcd_core_poweroff
+OBJS += p10_hcd_mma_poweroff.o
+OBJS += p10_hcd_mma_stopclocks.o
 OBJS += p10_hcd_corecache_power_control.o
 lib$(PROCEDURE)_COMMONFLAGS += -DPFET_SENSE_POLL_DISABLE
 $(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/common/include)

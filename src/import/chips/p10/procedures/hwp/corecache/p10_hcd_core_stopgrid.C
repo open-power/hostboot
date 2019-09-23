@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -113,12 +113,12 @@ p10_hcd_core_stopgrid(
                  .set_ECL2_CLK_SYNC_DROP_POLL_TIMEOUT_HW_NS(HCD_ECL2_CLK_SYNC_DROP_POLL_TIMEOUT_HW_NS)
                  .set_CPMS_CGCSR(l_mmioData)
                  .set_CORE_TARGET(i_target),
-                 "ECL2 Clock Sync Drop Timeout");
+                 "ERROR: ECL2 Clock Sync Drop Timeout");
 
 #endif
 
-    FAPI_DBG("Switch glsmux to refclk to save clock grid power via CPMS_CGCSR[11]");
-    FAPI_TRY( HCD_PUTMMIO_C( i_target, CPMS_CGCSR_WO_CLEAR, MMIO_1BIT(11) ) );
+    //The MMA shares the Core-L2 grid which is sync'd with the L3
+    // Therefore not stop grid as part of stop2
 
 fapi_try_exit:
 

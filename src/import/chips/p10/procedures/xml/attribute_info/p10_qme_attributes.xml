@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -84,7 +84,7 @@
   </entry>
   <!-- needed for qme sim -->
   <entry>
-          <name>ATTR_QME_BROADSIDE_SCAN</name>
+          <name>ATTR_QME_RUNTIME_MODE</name>
           <value>0x0</value>
   </entry>
   <!-- ********************************************************************* -->
