@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -512,6 +512,14 @@ enum mbacal_bitmask_values : uint64_t
     MBACALFIR_EVENTN_OR_BIT  = 0x0080000000000000,
     MBACALFIR_UNMASK_BIT     = 0xff7fffffffffffff,
 };
+
+
+/**
+ * @brief Mask MCBACALFIR Event N to prevent PRD from handling event
+ *
+ * @param[in] - i_nvdimm - nvdimm target for operation on its parent MCA
+ */
+void maskMbacalfir_eventn(TARGETING::Target* i_nvdimm);
 
 /**
  * @brief Wrapper to call deviceOp to read the NV controller via I2C
