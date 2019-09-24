@@ -111,15 +111,6 @@ errlHndl_t broadcastShutdown ( uint64_t i_hbInstance );
 errlHndl_t enableCoreCheckstops();
 
 /**
- * @brief This function will clear the PORE BARs.  Needs to be done
- *      depending on payload type
- *
- * @return errlHndl_t - nullptr if successful, otherwise a pointer to the error
- *      log.
- */
-errlHndl_t clearPoreBars ( void );
-
-/**
  * @brief This function will check the Istep mode and send the appropriate
  *      mailbox message to the Fsp to indicate what we're doing.
  *
@@ -452,19 +443,6 @@ errlHndl_t callShutdown ( uint64_t i_masterInstance,
             break;
         }
 
-        if(is_phyp_load())
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "calling clearPoreBars() in node");
-
-            //If PHYP then clear out the PORE BARs
-            err = clearPoreBars();
-            if( err )
-            {
-                break;
-            }
-        }
-
         // Get Target Service, and the system target.
         TargetService& tS = targetService();
         TARGETING::Target* sys = nullptr;
@@ -765,77 +743,6 @@ errlHndl_t enableCoreCheckstops()
         }
     }
 */
-    return l_errl;
-}
-
-/**
- * @brief This function will clear the PORE BARs.  Needs to be done
- *      depending on payload type
- *
- * @return errlHndl_t - nullptr if successful, otherwise a pointer to the error
- *      log.
- */
-errlHndl_t clearPoreBars ( void )
-{
-    errlHndl_t l_errl = nullptr;
-
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "set PORE bars back to 0" );
-
-    TARGETING::TargetHandleList l_procTargetList;
-    getAllChips(l_procTargetList, TYPE_PROC);
-
-    // loop thru all the cpus and reset the pore bars.
-    for (TargetHandleList::const_iterator
-         l_proc_iter = l_procTargetList.begin();
-         l_proc_iter != l_procTargetList.end();
-         ++l_proc_iter)
-    {
-        //  make a local copy of the CPU target
-        const TARGETING::Target* l_proc_target = *l_proc_iter;
-
-        //  trace HUID
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "target HUID %.8X", TARGETING::get_huid(l_proc_target));
-
-        //@TODO RTC:133848 cast OUR type of target to a FAPI type of target.
-#if 0
-        fapi::Target l_fapi_proc_target( TARGET_TYPE_PROC_CHIP,
-                                         (const_cast<TARGETING::Target*>(
-                                                         l_proc_target)) );
-
-        //  reset pore bar notes:
-        //  A mem_size of 0 means to ignore the image address
-        //  This image should have been moved to memory after winkle
-
-        //  call the HWP with each fapi::Target
-        FAPI_INVOKE_HWP( l_errl,
-                         p8_set_pore_bar,
-                         l_fapi_proc_target,
-                         0,
-                         0,
-                         0,
-                         SLW_MEMORY
-                         );
-#endif
-        if ( l_errl )
-        {
-            // capture the target data in the elog
-            ERRORLOG::ErrlUserDetailsTarget(l_proc_target).addToLog( l_errl );
-
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR : p8_set_pore_bar, PLID=0x%x",
-                      l_errl->plid()  );
-            break;
-        }
-        else
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "SUCCESS : p8_set_pore_bar" );
-        }
-
-    }   // end for
-
     return l_errl;
 }
 
