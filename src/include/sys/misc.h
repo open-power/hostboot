@@ -197,6 +197,16 @@ enum CpuSprNames
     CPU_SPR_HID,
 };
 
+/**
+ * @enum CpuSprNames
+ *
+ * Values for SPR registers for cpu_spr_value().
+ */
+enum CpuSprValues
+{
+    CPU_SPR_HID_EN_ATTN = 3,
+};
+
 /** @fn cpu_spr_value
  *  @brief Reads the kernel-desired value for an SPR.
  *

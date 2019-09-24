@@ -260,6 +260,9 @@
       <id>EARLY_TESTCASES_ISTEP</id>
     </attribute>
     <attribute>
+      <id>HB_EXISTING_IMAGE</id>
+    </attribute>
+    <attribute>
       <id>HIDDEN_ERRLOGS_ENABLE</id>
     </attribute>
     <attribute>

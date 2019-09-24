@@ -715,6 +715,8 @@ void* call_host_runtime_setup (void *io_pArgs)
         NVDIMM_UPDATE::call_nvdimm_update();
 #endif
 
+/* TODO RTC:214350 re-enable PM Complex Functionality
+
 #ifdef CONFIG_START_OCC_DURING_BOOT
         bool l_activatePM = TARGETING::is_sapphire_load();
 #else
@@ -755,7 +757,9 @@ void* call_host_runtime_setup (void *io_pArgs)
                 }
             }
 #endif
+
         }
+
         // No support for OCC
         else if( !Util::isSimicsRunning() )
         {
@@ -821,6 +825,7 @@ void* call_host_runtime_setup (void *io_pArgs)
         }
 #endif
 
+**/
 
 #if 0 //@TODO-RTC:164022-Support max pstate without OCC
 #ifdef CONFIG_SET_NOMINAL_PSTATE

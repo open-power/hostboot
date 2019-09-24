@@ -143,7 +143,7 @@ void msgHandler(msg_q_t i_msgQ)
             case MSG_PRE_SHUTDOWN_INITS:
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"Pre-Shutdown Inits event received");
-/* FIXME RTC: 210975
+/* FIXME RTC: 243744
                 errlHndl_t l_errl = nullptr;
                 TARGETING::TargetHandleList l_cpuTargetList;
                 getAllChips(l_cpuTargetList, TYPE_PROC);
@@ -162,9 +162,8 @@ void msgHandler(msg_q_t i_msgQ)
                         errlCommit(l_errl, ISTEP_COMP_ID );
                     }
                 }
-
-                msg_respond(i_msgQ, msg);
 */
+                msg_respond(i_msgQ, msg);
                 break;
             }
             default:
@@ -351,7 +350,6 @@ void* call_host_start_payload (void *io_pArgs)
             break;
         }
 
-
         // calculate lowest addressable memory location to be used as COMM base
         uint64_t l_commBase = cpu_spr_value(CPU_SPR_HRMOR) - VMM_HRMOR_OFFSET;
 
@@ -377,7 +375,6 @@ void* call_host_start_payload (void *io_pArgs)
 
         // Commit Error
         errlCommit(l_errl, ISTEP_COMP_ID);
-
     }
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -526,7 +523,7 @@ errlHndl_t callShutdown ( uint64_t i_masterInstance,
         {
             // opal load, Set the ATTN enable bit in the HID register
             uint64_t  l_enblAttnMask =
-                    0x8000000000000000ull /* FIXME RTC: 210975 >> P9N2_C_HID_EN_ATTN*/;
+                    0x8000000000000000ull >> CPU_SPR_HID_EN_ATTN;
 
             uint64_t l_curHidVal =  cpu_spr_value( CPU_SPR_HID );
             uint64_t l_newHidVal = l_curHidVal | l_enblAttnMask;
@@ -716,7 +713,7 @@ errlHndl_t enableCoreCheckstops()
 {
     errlHndl_t l_errl = nullptr;
 
-/* FIXME RTC: 210975
+/* FIXME RTC: 210975 OR TODO RTC:214350 (Requires PM Complex enabled)
     // If we're running on a PHYP system, we need
     // to switch back to running unit checkstops
     if(! is_sapphire_load() )

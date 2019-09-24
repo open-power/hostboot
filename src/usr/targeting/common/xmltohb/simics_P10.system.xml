@@ -111,10 +111,6 @@
         <default>physical:sys-0</default>
     </attribute>
     <attribute>
-        <id>EARLY_TESTCASES_ISTEP</id>
-        <default>0x1402</default> <!-- Istep 20, Substep 2 (host_load_hdat) -->
-    </attribute>
-    <attribute>
         <id>PAYLOAD_BASE</id>
                      <!-- Value of 0x0 for standalone systems, no payload to start -->
         <default>0x0</default>

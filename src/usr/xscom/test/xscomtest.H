@@ -394,10 +394,13 @@ public:
     void testXscom4(void)
     {
 
+//TODO RTC:203303 -- Enable testcase validating xscom multicast functionality
+#if 0
         TARGETING::TargetService& l_targetService = TARGETING::targetService();
         TARGETING::Target* l_testTarget = NULL;
         l_targetService.masterProcChipTargetHandle( l_testTarget );
         assert(l_testTarget != NULL);
+
 
         size_t l_size = sizeof(uint64_t);
 
@@ -405,10 +408,8 @@ public:
         uint32_t l_num;
 
         do {
-#if defined(CONFIG_EARLY_TESTCASES)
             TS_INFO("testXscom4: Skipping test, multicast groups not setup yet");
             break;
-#endif
 
             // Loop thru write table
             for( l_num=0; l_num < g_xscomMultiWriteTableSz; l_num++)
@@ -483,7 +484,6 @@ public:
                     break;
                 }
             }
-
         } while(0);
 
         if (l_err)
@@ -495,9 +495,9 @@ public:
         {
             TS_TRACE("testXscom4 runs successfully!");
         }
+#endif
         return;
   }
-
 
 };
 
