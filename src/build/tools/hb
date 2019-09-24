@@ -390,17 +390,31 @@ hb_simsetup()
 
     if [[ $HB_STANDALONE -eq 1 ]] && [[ $PNOR_LAYOUT_SELECTED != "FSP" ]]; then
 
-        STANDALONE=${PROJECT_ROOT}/standalone
-        STANDALONE_SIMICS=${STANDALONE}/simics
+        STANDALONE_SIMICS=${PROJECT_ROOT}/standalone/simics
 
-        if [[ ! -d ${STANDALONE} ]];then
-            mkdir -p ${STANDALONE}
+        if [[ -d ${STANDALONE_SIMICS} ]];then
+            # standalone dir exists, ask Dev to clear it out and reinstall
+            echo
+            echo "Simics is already set up for a Standalone environment."
+            echo "Would you like to clear it out and reinstall? [y/n]"
+
+            read SHOULD_REINSTALL
+
+            if [[ ${SHOULD_REINSTALL} != "y" ]]; then
+                echo "Stopping 'hb simsetup', Simics was not reinstalled."
+                exit 0
+            fi
+
+            # Will need to prime again.
+            echo "Don't forget to run 'hb prime' after simsetup is done."
+            echo
+
+            # remove Simics
+            echo "rm -rf ${STANDALONE_SIMICS}"
+            rm -rf "${STANDALONE_SIMICS}"
         fi
 
-        if [[ ! -d ${STANDALONE_SIMICS} ]];then
-            mkdir -p ${STANDALONE_SIMICS}/hbfw
-        fi
-
+        mkdir -p ${STANDALONE_SIMICS}/hbfw
         echo tar -xf ${SIMICS_LEVEL} -C ${STANDALONE_SIMICS}
         tar -xf ${SIMICS_LEVEL} -C ${STANDALONE_SIMICS}
         echo "cd ${STANDALONE_SIMICS} && ./INSTALL.sh"
