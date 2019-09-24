@@ -334,9 +334,7 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
         // for sapphire as a single (working) node will return 0 for
         // bottom_mem_addr.
         else {
-            //TODO RTC:215806 re-enable this function call:
-            //payloadBase += get_bottom_mem_addr()/MEGABYTE;
-            payloadBase = 0;
+            payloadBase += get_bottom_mem_addr()/MEGABYTE;
         }
     }
 
@@ -352,12 +350,8 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
         }
 
         // Make sure we actually have memory before we try to use it
-        //TODO RTC:215806 re-enable this function call:
-        //uint64_t l_bottom = get_bottom_mem_addr();
-        uint64_t l_bottom = 0x000000000;
-        //TODO RTC:215806 re-enable this function call:
-        //uint64_t l_top = get_top_mem_addr();
-        uint64_t l_top = 0x800000000;
+        uint64_t l_bottom = get_bottom_mem_addr();
+        uint64_t l_top = get_top_mem_addr();
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Memory range : %.lX-%.lx", l_bottom, l_top );
         if( (l_top == 0) || (l_top == l_bottom) )
         {
