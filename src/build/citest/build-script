@@ -67,26 +67,30 @@ echo "#--------------------------------"
 create-environment > create-sandbox.log 2>&1 &
 CREATESANDBOX_PID=$!
 
+# normal build is empty quotes
+build_opt=""
+# code coverage
+if [[ ! -z "${HOSTBOOT_PROFILE}" ]]; then
+    build_opt="gcov"
+# static analysis
+elif [[ ! -z "${HOSTBOOT_CPPCHECK}" ]]; then
+    build_opt="cppcheck"
+    COMPILE_ONLY=1
+fi
 # Build Hostboot
 my_date=$(date)
-# Build Hostboot.
-if [[ -z "${HOSTBOOT_PROFILE}" ]]; then
-    echo "#--------------------------------"
-    printf "\n\n$(date): STARTED running \"make -j32\"\n\n"
-    echo "#--------------------------------"
-    make -j32 || exit -1
-    echo "#--------------------------------"
-    printf "\n\nrc=$?: $(date): FINISHED running (\"make -j32\" was started at $my_date)\n\n"
-    echo "#--------------------------------"
-else
-    # Build with code coverage when HOSTBOOT_PROFILE=1
-    echo "#--------------------------------"
-    printf "\n\n$(date): STARTED running \"make -j32 gcov\"\n\n"
-    echo "#--------------------------------"
-    make -j32 gcov || exit -1
-    echo "#--------------------------------"
-    printf "\n\nrc=$?: $(date): FINISHED running (\"make -j32 gcov\" was started at $my_date)\n\n"
-    echo "#--------------------------------"
+echo "#--------------------------------"
+printf "\n\n$(date): STARTED running \"make -j32 $build_opt\"\n\n"
+echo "#--------------------------------"
+make -j32 $build_opt || exit -1
+make_rc=$?
+echo "#--------------------------------"
+printf "\n\nrc=$make_rc: $(date): FINISHED running (\"make -j32 $build_opt\" was started at $my_date)\n\n"
+echo "#--------------------------------"
+
+if [[ ! -z "${COMPILE_ONLY}" ]]; then
+    echo "Compile only"
+    exit $make_rc
 fi
 
 # Check sandbox create completion.
@@ -112,36 +116,35 @@ echo "#--------------------------------"
 printf "\n\nrc=$?: $(date): FINISHED running (\"populate-environment\" was started at $my_date)\n\n"
 echo "#--------------------------------"
 
-if [ "$CHIP" == "FSPBUILD" ];
-then
-        # Start errl parser building.
-        my_date=$(date)
-        printf "\n\n$(date): STARTED running \"build-errl-parsers\"\n\n"
-        build-errl-parsers > errl-parsers.log 2>&1 &
-        ERRLPARSERS_PID=$!
+if [ "$CHIP" == "FSPBUILD" ]; then
+    # Start errl parser building.
+    my_date=$(date)
+    printf "\n\n$(date): STARTED running \"build-errl-parsers\"\n\n"
+    build-errl-parsers > errl-parsers.log 2>&1 &
+    ERRLPARSERS_PID=$!
 
-        # Check errl parser completion.
-        wait $ERRLPARSERS_PID
-        if [ $? -ne 0 ]; then
-            echo "----Error parsers failed."
-            cat errl-parsers.log
-            exit -1
-        else
-            printf "\n\n$(date): FINISHED running (\"build-errl-parsers\" was started at $my_date)\n\n"
-        fi
+    # Check errl parser completion.
+    wait $ERRLPARSERS_PID
+    if [ $? -ne 0 ]; then
+        echo "----Error parsers failed."
+        cat errl-parsers.log
+        exit -1
+    else
+        printf "\n\n$(date): FINISHED running (\"build-errl-parsers\" was started at $my_date)\n\n"
+    fi
 else
-        printf "2) CHIP=$CHIP"
-        echo "CHIP=$CHIP"
+    printf "2) CHIP=$CHIP"
+    echo "CHIP=$CHIP"
 
-        # Start CxxTest Simics execution.
-        my_date=$(date)
-        echo "#--------------------------------"
-        printf "\n\n$(date): STARTED running \"cxxtest-start.sh\"....\n\n"
-        echo "#--------------------------------"
-        cxxtest-start.sh || exit -1
-        echo "#--------------------------------"
-        printf "\n\nrc=$?: $(date): FINISHED running (\"cxxtest-start.sh\" was started at  $my_date)\n\n"
-        echo "#--------------------------------"
+    # Start CxxTest Simics execution.
+    my_date=$(date)
+    echo "#--------------------------------"
+    printf "\n\n$(date): STARTED running \"cxxtest-start.sh\"....\n\n"
+    echo "#--------------------------------"
+    cxxtest-start.sh || exit -1
+    echo "#--------------------------------"
+    printf "\n\nrc=$?: $(date): FINISHED running (\"cxxtest-start.sh\" was started at  $my_date)\n\n"
+    echo "#--------------------------------"
 fi
 
 if [[ ! -z "${HOSTBOOT_PROFILE}" ]]; then
