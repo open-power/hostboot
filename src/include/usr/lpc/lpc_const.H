@@ -47,8 +47,113 @@ namespace LPC
         FW_WINDOW_SIZE =  0x10000000, //Size of FW Window
 
         OPB_ERROR_MASK = 0x20000FC3, /**< OPBM Error Bits MASK */
-
     };
 }
+
+
+    /**
+      * @brief More general constants not tied to LPC namespace
+      *
+      */
+    enum {
+        /** Start of LPC Addr within the memory mapped space*/
+        LPC_ADDR_START = 0xC0000000,
+
+        /** Size that LPC takes up (0xC0000000 to 0xFFFFFFFF)*/
+        LPC_SPACE_SIZE = 0x40000000,
+
+        /**< OPB LPCM Sync FIR Reg WOX_AND - used to clear the FIR */
+        OPB_LPCM_FIR_WOX_AND_REG = 0x01010C01,
+
+        /**< OPB LPCM Sync FIR Mask Reg WO_OR - used to set the mask */
+        OPB_LPCM_FIR_MASK_WO_OR_REG = 0x01010C05,
+
+        // LPCHC reset-related registers
+        OPB_MASTER_LS_CONTROL_REG = 0x008, /**<OPBM LS Control Reg */
+
+        LPCHC_SYNC_CYCLE_COUNTER_INFINITE = 0xFF000000,
+
+        /** OPB Master Accumulated Status Register - used to check error bits*/
+        OPBM_ACCUM_STATUS_REG = 0x0,
+
+        /** OPB Master Actual Status Register */
+        OPBM_STATUS_REG = 0x004C,
+
+        /** LPC Host Controller Status Register - used to check error bits*/
+        LPCHC_REG = 0x2038,
+
+        /** LPC Host Controller Error Addr Register - used to check error bits*/
+        LPCHC_ERROR_ADDR_REG = 0x2040,
+
+        /** LPC Host Controller Reset Register */
+        LPCHC_LPC_BUS_ABORT_REG = 0x20F8,
+
+        /** LPC Host Controller Reset Register */
+        LPCHC_RESET_REG = 0x20FC,
+
+        LPCHC_ERROR_MASK = 0x000004FC /**< LPCHC Error Bits MASK */
+
+    };
+
+    /**
+     * @brief  OPB Master Status Register Layout
+     */
+    union OpbmErrReg_t
+    {
+        uint32_t data32;
+        struct
+        {
+            uint32_t reserved : 2;    // 0:1 reserved
+            uint32_t rxctgtel : 1;    // 2 - OPB master timeout
+            uint32_t rxfwrdcv : 1;    // 3 - FW read cache valid(status only)
+            uint32_t reserved1 : 16;  // 4:19 reserved
+            uint32_t rxits : 1;      // 20 - Invalid Transfer Size
+            uint32_t rxicmd : 1;     // 21 - Invalid Command
+            uint32_t rxiaa : 1;      // 22 - Invalid address alignment
+            uint32_t rxiaddr : 1;    // 23 - Invalid address
+            uint32_t rxopbe : 1;     // 24 - OPB error acknowledge
+            uint32_t rxopbt : 1;     // 25 - OPB timeout
+            uint32_t reserved2 : 4;  // 26:29 reserved
+            uint32_t rxicmdb : 1;    // 30 - Command buffer parity error
+            uint32_t rxidatab : 1;   // 31 - Data buffer parity error
+
+        };
+        OpbmErrReg_t() : data32(0) {};
+    };
+
+    /**
+     * @brief  LPCHC Status Register Layout
+     */
+    union LpchcErrReg_t
+    {
+        uint32_t data32;
+        struct
+        {
+            uint32_t reserved : 17;    // 0:16 IRQSER status - not used
+            uint32_t reserved1 : 4;    // 17:20 reserved
+            uint32_t lreset : 1;       // 21 - Lreset Event
+            uint32_t reserved2 : 2;    // 22:23 reserved
+            uint32_t syncab : 1;       // 24 - Sync Abnormal
+            uint32_t syncnr : 1;       // 25 - Sync no response
+            uint32_t syncne : 1;       // 26 - Sync normal error
+            uint32_t syncto : 1;       // 27 - Sync timeout
+            uint32_t tctar : 1;        // 28 - Target cycle TAR error
+            uint32_t mctar : 1;        // 29 - LPC bus master cycle TAR error
+            uint32_t mzeror : 1;       // 30 - LPC bus master 0 request
+            uint32_t moner : 1;        // 31 - LPC bus master 1 request
+        };
+        LpchcErrReg_t() : data32(0) {};
+    };
+
+    /**
+      * @brief Enums for different levels of resetting PNOR communication levels
+      */
+    enum ResetLevels
+    {
+        RESET_CLEAR          = 0x00000000, /**< Clear Reset Level */
+        RESET_OPB_LPCHC_SOFT = 0x00000001, /**< OPB LPCHC Clear Errors */
+        RESET_OPB_LPCHC_HARD = 0x00000002, /**< OPB LPCHC Reset Logic */
+        RESET_INIT           = 0x00000004, /**< Initial HW setup */
+    };
 
 #endif

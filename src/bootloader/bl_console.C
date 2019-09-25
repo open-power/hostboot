@@ -40,6 +40,7 @@
 #include <uart.H>
 #include <uartconfig.C>
 #include <p10_sbe_hb_structures.H>
+#include <util/align.H>
 
 using namespace CONSOLE;
 using namespace UARTREGS;
@@ -47,7 +48,113 @@ using namespace UARTREGS;
 bool bl_console::console_fail = false;
 const auto blConfigData = reinterpret_cast<BootloaderConfigData_t *>(SBE_HB_COMM_ADDR);
 
-// TODO: addon commit to handle nanosleep functions
+void computeOpbmErrSev(OpbmErrReg_t i_opbmErrData,
+                       ResetLevels &o_resetLevel)
+{
+    o_resetLevel = RESET_CLEAR;
+
+    // First check the soft errors
+    if (i_opbmErrData.rxits || i_opbmErrData.rxicmd || i_opbmErrData.rxiaa ||
+        i_opbmErrData.rxopbe || i_opbmErrData.rxicmdb || i_opbmErrData.rxidatab)
+    {
+        o_resetLevel = RESET_OPB_LPCHC_SOFT;
+    }
+
+    // Now look for hard errors that will override soft errors reset level
+    if (i_opbmErrData.rxopbt || i_opbmErrData.rxiaddr || i_opbmErrData.rxctgtel)
+    {
+        o_resetLevel = RESET_OPB_LPCHC_HARD;
+    }
+}
+
+void computeLpchcErrSev(LpchcErrReg_t i_lpchcErrData,
+                        ResetLevels &o_resetLevel)
+{
+    o_resetLevel = RESET_CLEAR;
+
+    // First check the soft errors
+    // All of these errors are set from bad LPC end points. Setting all to soft
+    if (i_lpchcErrData.lreset || i_lpchcErrData.syncab ||
+        i_lpchcErrData.syncnr || i_lpchcErrData.syncne ||
+        i_lpchcErrData.syncto || i_lpchcErrData.tctar || i_lpchcErrData.mctar)
+    {
+        o_resetLevel = RESET_OPB_LPCHC_SOFT;
+    }
+}
+
+bool checkForLpcErrors()
+{
+    uint32_t opbm_buffer = 0;
+    uint32_t lpchc_buffer = 0;
+    OpbmErrReg_t opbm_err_union;
+    opbm_err_union.data32 = 0x0;
+    LpchcErrReg_t lpchc_err_union;
+    lpchc_err_union.data32 = 0x0;
+    ResetLevels l_opbmResetLevel = RESET_CLEAR;
+    ResetLevels l_lpchcResetLevel = RESET_CLEAR;
+
+    uint64_t l_pnorEnd = g_blData->blToHbData.lpcBAR + LPC::LPCHC_FW_SPACE +
+        PNOR::LPC_TOP_OF_FLASH_OFFSET;
+
+    uint64_t l_mmioAddr = l_pnorEnd - PNOR::TOC_OFFSET_FROM_TOP_OF_FLASH;
+    l_mmioAddr = ALIGN_PAGE_DOWN(l_mmioAddr);
+
+    // First do a dummy LPC access (if an LPC error condition exists,
+    // an access can be necessary to get the error indicated in the
+    // status register. This read will force the error condition to
+    // properly be shown in the LPC error status reg
+    Bootloader::handleMMIO(l_mmioAddr,
+                           reinterpret_cast<uintptr_t>(&opbm_buffer) +
+                           getHRMOR(),
+                           Bootloader::WORDSIZE,
+                           Bootloader::WORDSIZE,
+                           Bootloader::READ);
+
+    uint32_t l_opb_status_addr = OPBM_ACCUM_STATUS_REG;
+    uint64_t src_addr = g_blData->blToHbData.lpcBAR + LPC::LPCHC_ERR_SPACE +
+        l_opb_status_addr;
+    Bootloader::handleMMIO(src_addr,
+                           reinterpret_cast<uintptr_t>(&opbm_buffer) +
+                           getHRMOR(),
+                           Bootloader::WORDSIZE, Bootloader::WORDSIZE,
+                           Bootloader::READ);
+
+    uint32_t l_lpchc_addr = LPCHC_REG;
+    src_addr = g_blData->blToHbData.lpcBAR + LPC::LPCHC_ERR_SPACE + l_lpchc_addr;
+    Bootloader::handleMMIO(src_addr,
+                           reinterpret_cast<uintptr_t>(&lpchc_buffer) +
+                           getHRMOR(),
+                           Bootloader::WORDSIZE, Bootloader::WORDSIZE,
+                           Bootloader::READ);
+
+    // Mask error bits
+    opbm_err_union.data32 = (opbm_buffer & LPC::OPB_ERROR_MASK);
+    lpchc_err_union.data32 = (lpchc_buffer & LPCHC_ERROR_MASK);
+
+    if (opbm_err_union.data32 != 0)
+    {
+        computeOpbmErrSev(opbm_err_union, l_opbmResetLevel);
+
+        if (l_opbmResetLevel != RESET_CLEAR)
+        {
+            bl_console::console_fail = true;
+        }
+    }
+
+    if (lpchc_err_union.data32 != 0)
+    {
+        computeLpchcErrSev(lpchc_err_union, l_lpchcResetLevel);
+
+        if (l_lpchcResetLevel != RESET_CLEAR)
+        {
+            bl_console::console_fail = true;
+        }
+    }
+
+    return bl_console::console_fail;
+}
+
+// TODO: RTC 209583 addon commit to handle nanosleep functions
 static bool simple_delay(const uint64_t i_sec, const uint64_t i_nsec)
 {
     //bool result = false;
@@ -65,7 +172,7 @@ void nanosleep(const uint64_t i_sec, const uint64_t i_nsec)
     simple_delay(l_sec, l_nsec);
 }
 
-// TODO: addon commit to handle error path
+// TODO: RTC 209583 addon commit to handle error path
 static bool readUartReg(const uint8_t i_addr, uint8_t &o_data)
 {
     uint64_t src_addr = g_blData->blToHbData.lpcBAR + LPC::LPCHC_IO_SPACE + g_uartBase + i_addr;
@@ -74,7 +181,7 @@ static bool readUartReg(const uint8_t i_addr, uint8_t &o_data)
                            sizeof(o_data), Bootloader::BYTESIZE,
                            Bootloader::READ);
 
-    return false;
+    return checkForLpcErrors();
 }
 
 static bool writeUartReg(const uint8_t i_addr, const uint8_t i_data)
@@ -85,7 +192,7 @@ static bool writeUartReg(const uint8_t i_addr, const uint8_t i_data)
                            sizeof(i_data), Bootloader::BYTESIZE,
                            Bootloader::WRITE);
 
-    return false;
+    return checkForLpcErrors();
 }
 
 void bl_console::putString(const char* i_s)
@@ -97,35 +204,35 @@ void bl_console::putString(const char* i_s)
     }
 }
 
-// TODO: revisit when SBE works
+// Everything in this function is taken from uart.C, but ideally will all be
+// removed when SBE works
 void bl_console::init()
 {
     uint64_t divisor = (g_uartClock / 16) / g_uartBaud;
-
-    writeUartReg(LCR, 0x00);
-
-    writeUartReg(SCR, 'w');
-
     uint8_t output = 0;
-    readUartReg(SCR, output);
 
-    writeUartReg(IER, 0);
-
-    writeUartReg(LCR, LCR_DLAB);
-
-    writeUartReg(DLL, divisor & 0xff);
-
-    writeUartReg(DLM, divisor >> 8);
-
-    writeUartReg(LCR, LCR_DWL8 | LCR_NOP | LCR_STP1);
-
-    writeUartReg(MCR, MCR_RTS | MCR_DTR);
-
-    writeUartReg(FCR, FCR_ENF | FCR_CLFR | FCR_CLFT);
+    if (!writeUartReg(LCR, 0x00) ||
+        !writeUartReg(SCR, 'w') ||
+        !readUartReg(SCR, output) ||
+        !writeUartReg(IER, 0) ||
+        !writeUartReg(LCR, LCR_DLAB) ||
+        !writeUartReg(DLL, divisor & 0xff) ||
+        !writeUartReg(DLM, divisor >> 8) ||
+        !writeUartReg(LCR, LCR_DWL8 | LCR_NOP | LCR_STP1) ||
+        !writeUartReg(MCR, MCR_RTS | MCR_DTR) ||
+        !writeUartReg(FCR, FCR_ENF | FCR_CLFR | FCR_CLFT))
+    {
+        // Error already handled
+    }
 }
 
 void displayNibble(const unsigned char i_nibble)
 {
+    // Optimization to take advantage of how ascii tables are constructed
+    // Between 0-9 and A-F ascii characters, there are 7 other characters
+    // 0xA is 10 in decimal, so being less than 10 would put you in the range
+    // of 0-9, being greater than or equal to 10 would put you in the range of
+    // A-F
     char hex_nibble = (i_nibble < 0xA) ? '0' + i_nibble : '7' + i_nibble;
     bl_console::putChar(hex_nibble);
 }
@@ -137,10 +244,16 @@ void bl_console::displayHex(const unsigned char* i_start_addr, const size_t i_si
     {
         if (count_size != 0)
         {
+            // Code to format the console output to look more readable
+            // Sample output:
+            // XXXX XXXX XXXX XXXX
+            // XXXX XXXX XXXX XXXX
+            // 16 represents the end of line
             if (count_size % 16 == 0)
             {
                 putString("\r\n");
             }
+            // 4 represents the end of a block
             else if (count_size % 4 == 0)
             {
                 putChar('\t');
@@ -157,9 +270,9 @@ void bl_console::displayHex(const unsigned char* i_start_addr, const size_t i_si
 // Writes a character to console
 void bl_console::putChar(const char i_c)
 {
+    bool error = false;
     // Wait for transmit FIFO to have space
     bool console_enable = blConfigData->lpcConsoleEnable == 1;
-    bool error = false;
     do
     {
         if (bl_console::console_fail || !console_enable)
@@ -193,7 +306,6 @@ void bl_console::putChar(const char i_c)
 
         if (error)
         {
-            bl_console::console_fail = true;
             break;
         }
         else if (data == LSR_BAD)
@@ -208,11 +320,6 @@ void bl_console::putChar(const char i_c)
         }
 
         // Write character to FIFO
-        error = writeUartReg(THR, i_c);
+        writeUartReg(THR, i_c);
     } while (0);
-
-    if (error)
-    {
-        bl_console::console_fail = true;
-    }
 }

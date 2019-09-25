@@ -61,7 +61,13 @@ void bl_terminate(uint8_t  i_moduleID,
         (HBB_WORKING_ADDR | Bootloader::IGNORE_HRMOR_MASK) + 0x2008);
     *TI_DataAreaPtr = g_blData->bl_TIDataArea;
 
-    bl_console::putString("Fatal Error SRC: 0xBC8A");
+    // 0xBC = hostboot first byte
+    // 0x8A = general hostboot firmware
+    bl_console::putString("Fatal Error SRC: ");
+    long unsigned int type = TI_DataAreaPtr->type;
+    const unsigned char* error_src = reinterpret_cast<unsigned char*>(&type);
+    bl_console::displayHex(error_src, sizeof(type));
+
     // convert int reasoncode to hex
     const unsigned char* start_addr = reinterpret_cast<unsigned char*>(&i_reasoncode);
     bl_console::displayHex(start_addr, sizeof(i_reasoncode));

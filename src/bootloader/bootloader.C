@@ -652,10 +652,14 @@ namespace Bootloader{
                 }
                 else
                 {
+                    // Load byte from src address to GPR
+                    // lbzx     BOP1,Ref_G0,BOP2
                     asm volatile("lbzx %0, 0, %1"
                                 : "=r" (l_targetGPR)
                                 : "r" (l_srcAddr));
 
+                    // Cache-inhibited store byte from hypervisor state
+                    // stbcix   BOP1,Ref_G0,BOP2
                     asm volatile("stbcix %0, 0, %1"
                                 :: "r" (l_targetGPR), "r" (l_destAddr));
                 }
